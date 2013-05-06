@@ -641,6 +641,68 @@
             ]
         },
         {
+            "name": "GenVectorWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing a vector of asynchronous operations",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given vector of dependencies",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given vector of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A Vector of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenVectorWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "SetResultToRefWaitHandle",
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle proxy that sets result to a given reference",

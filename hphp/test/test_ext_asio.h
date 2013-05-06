@@ -39,6 +39,7 @@ class TestExtAsio : public TestCppExt {
   bool test_BlockableWaitHandle();
   bool test_ContinuationWaitHandle();
   bool test_GenArrayWaitHandle();
+  bool test_GenVectorWaitHandle();
   bool test_SetResultToRefWaitHandle();
 };
 

@@ -46,6 +46,7 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  *     BlockableWaitHandle        - wait handle that can be blocked by other WH
  *       ContinuationWaitHandle   - Continuation-powered asynchronous execution
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
+ *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
  *
@@ -342,6 +343,44 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   Object m_exception;
   Array m_deps;
   ssize_t m_iterPos;
+};
+//
+///////////////////////////////////////////////////////////////////////////////
+// class GenVectorWaitHandle
+
+/**
+ * A wait handle that waits for a vector of wait handles. The wait handle
+ * finishes once all wait handles in the vector are finished. The result value
+ * preserves order of the original vector. If one of the wait handles failed,
+ * the exception is propagated by failure.
+ */
+FORWARD_DECLARE_CLASS_BUILTIN(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(Vector);
+class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS(GenVectorWaitHandle, GenVectorWaitHandle, BlockableWaitHandle)
+
+  // need to implement
+  public: c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::s_cls);
+  public: ~c_GenVectorWaitHandle();
+  public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CVarRef dependencies);
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(CObjRef exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child);
+
+  Object m_exception;
+  p_Vector m_deps;
+  int64_t m_iterPos;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

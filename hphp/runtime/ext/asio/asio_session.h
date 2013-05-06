@@ -30,6 +30,7 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
@@ -131,6 +132,14 @@ class AsioSession {
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
     void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies);
 
+    // GenVectorWaitHandle callbacks:
+    void setOnGenVectorCreateCallback(ObjectData* on_create) {
+      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      m_onGenVectorCreateCallback = on_create;
+    }
+    bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
+    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef dependencies);
+
     // SetResultToRefWaitHandle callbacks:
     void setOnSetResultToRefCreateCallback(ObjectData* on_create) {
       assert(!on_create || on_create->instanceof(c_Closure::s_cls));
@@ -158,6 +167,7 @@ class AsioSession {
     Object m_onContinuationSuccessCallback;
     Object m_onContinuationFailCallback;
     Object m_onGenArrayCreateCallback;
+    Object m_onGenVectorCreateCallback;
     Object m_onSetResultToRefCreateCallback;
     Object m_onJoinCallback;
 

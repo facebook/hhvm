@@ -32,6 +32,7 @@ bool TestExtAsio::RunTests(const std::string &which) {
   RUN_TEST(test_BlockableWaitHandle);
   RUN_TEST(test_ContinuationWaitHandle);
   RUN_TEST(test_GenArrayWaitHandle);
+  RUN_TEST(test_GenVectorWaitHandle);
   RUN_TEST(test_SetResultToRefWaitHandle);
 
   return ret;
@@ -72,6 +73,10 @@ bool TestExtAsio::test_ContinuationWaitHandle() {
 }
 
 bool TestExtAsio::test_GenArrayWaitHandle() {
+  return Count(true);
+}
+
+bool TestExtAsio::test_GenVectorWaitHandle() {
   return Count(true);
 }
 

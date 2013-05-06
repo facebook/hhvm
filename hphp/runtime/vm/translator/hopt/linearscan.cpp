@@ -608,6 +608,7 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
 void LinearScan::collectInfo(BlockList::iterator it, Trace* trace) {
   m_natives.clear();
   m_jmps.reset();
+
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
       for (auto& dst : inst.getDsts()) {

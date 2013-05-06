@@ -24,6 +24,7 @@
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 #include "runtime/vm/translator/hopt/codegen.h"
+#include "runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP { namespace VM { namespace JIT {
 

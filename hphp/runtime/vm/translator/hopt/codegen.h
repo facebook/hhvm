@@ -21,7 +21,8 @@
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/targetcache.h"
-#include <runtime/vm/translator/translator-x64.h>
+#include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
 namespace VM {

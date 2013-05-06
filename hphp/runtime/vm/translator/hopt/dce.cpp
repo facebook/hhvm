@@ -14,12 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
+#include <boost/range/adaptors.hpp>
+
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/opt.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
-#include <boost/range/adaptors.hpp>
+#include "runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
 namespace VM {

@@ -23,6 +23,7 @@
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
+#include "runtime/vm/translator/hopt/state_vector.h"
 
 #include "folly/ScopeGuard.h"
 

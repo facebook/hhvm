@@ -62,16 +62,17 @@ void c_ExternalThreadEventWaitHandle::t___construct() {
   throw e;
 }
 
-c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExternalThreadEvent* event) {
+c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExternalThreadEvent* event, ObjectData* priv_data) {
   c_ExternalThreadEventWaitHandle* wh = NEWOBJ(c_ExternalThreadEventWaitHandle);
-  wh->initialize(event);
+  wh->initialize(event, priv_data);
   return wh;
 }
 
-void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event) {
+void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event, ObjectData* priv_data) {
   // this wait handle is owned by existence of unprocessed event
   incRefCount();
   m_event = event;
+  m_privData = priv_data;
 
   setState(STATE_WAITING);
   if (isInContext()) {
@@ -114,6 +115,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   // event is processed, destroy it, unregister sweepable and decref ownership
   m_event->release();
   m_event = nullptr;
+  m_privData = nullptr;
   unregister();
   decRefObj(this);
 }

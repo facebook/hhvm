@@ -439,10 +439,11 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
   public: void t___construct();
 
  public:
-  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event);
+  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* getNextToProcess() { assert(getState() == STATE_WAITING); return m_nextToProcess; }
   void setNextToProcess(c_ExternalThreadEventWaitHandle* next) { assert(getState() == STATE_WAITING); m_nextToProcess = next; }
+  ObjectData* getPrivData() { return m_privData.get(); }
   void setIndex(uint32_t ete_idx) { assert(getState() == STATE_WAITING); m_index = ete_idx; }
 
   void abandon(bool sweeping);
@@ -452,10 +453,11 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
   void exitContext(context_idx_t ctx_idx);
 
  private:
-  void initialize(AsioExternalThreadEvent* event);
+  void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;
+  Object m_privData;
   uint32_t m_index;
 
   static const uint8_t STATE_WAITING  = 3;

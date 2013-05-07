@@ -23,10 +23,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-AsioExternalThreadEvent::AsioExternalThreadEvent()
+AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
     : m_session(AsioSession::Get()),
       m_state(Waiting) {
-  m_waitHandle = c_ExternalThreadEventWaitHandle::Create(this);
+  m_waitHandle = c_ExternalThreadEventWaitHandle::Create(this, priv_data);
 }
 
 void AsioExternalThreadEvent::abandon() {

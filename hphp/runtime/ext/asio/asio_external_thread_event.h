@@ -195,7 +195,15 @@ class AsioExternalThreadEvent {
     virtual void unserialize(TypedValue* result) const = 0;
 
   protected:
-    AsioExternalThreadEvent();
+    /**
+     * Construct AsioExternalThreadEvent
+     *
+     * Subclass may optionally pass a PHP object (usually defined by extension)
+     * that can be accessed during unserialize() via getPrivData(). A reference
+     * to the object will be held while associated ExternalThreadEventWaitHandle
+     * object is in WAITING state.
+     */
+    explicit AsioExternalThreadEvent(ObjectData* priv_data = nullptr);
 
     /**
      * Destruct AsioExternalThreadEvent
@@ -221,6 +229,17 @@ class AsioExternalThreadEvent {
      * operations on this object.
      */
     void markAsFinished();
+
+    /**
+     * Get private PHP data needed for unserialization.
+     *
+     * This function obtains private data stored by constructor. It may be
+     * called only from the unserialize() implementation.
+     */
+    ObjectData* getPrivData() const {
+      assert(m_state.load() == Finished);
+      return m_waitHandle->getPrivData();
+    }
 
   private:
     enum state_t : uint32_t {

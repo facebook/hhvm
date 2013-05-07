@@ -20,6 +20,7 @@
 
 #include <atomic>
 #include <runtime/base/base_includes.h>
+#include <runtime/ext/ext_asio.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

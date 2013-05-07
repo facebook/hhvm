@@ -1389,7 +1389,7 @@ TranslatorX64::createTranslation(SrcKey sk, bool align,
 
   TCA astart = a.code.frontier;
   TCA stubstart = astubs.code.frontier;
-  TCA req = emitServiceReq(SRFlags::SRNone, REQ_RETRANSLATE,
+  TCA req = emitServiceReq(SRFlags::None, REQ_RETRANSLATE,
                            1, uint64_t(sk.offset()));
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           curUnit(), sk.offset(), req);
@@ -2499,7 +2499,7 @@ TranslatorX64::emitBindCallHelper(SrcKey srcKey,
 
   astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
   emitPopRetIntoActRec(astubs);
-  emitServiceReq(SRFlags::SRInline, REQ_BIND_CALL, 1ull, req);
+  emitServiceReq(SRFlags::Persistent, REQ_BIND_CALL, 1ull, req);
 
   TRACE(1, "will bind static call: tca %p, this %p, funcd %p, astubs %p\n",
         toSmash, this, funcd, astubs.code.frontier);
@@ -2531,7 +2531,7 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
   //   emitServiceReq because that only supports constants/immediates, so
   //   compute the last argument via setcc.
   astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
-  emitServiceReq(SRFlags::SRInline, REQ_BIND_JMPCC_FIRST, 4ull,
+  emitServiceReq(SRFlags::Persistent, REQ_BIND_JMPCC_FIRST, 4ull,
                  old,
                  uint64_t(skTaken.offset()),
                  uint64_t(skNotTaken.offset()),
@@ -2609,7 +2609,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   // yet.
   if (taken) cc = ccNegate(cc);
   TCA stub =
-    emitServiceReq(SRFlags::SRNone, REQ_BIND_JMPCC_SECOND, 3,
+    emitServiceReq(SRFlags::None, REQ_BIND_JMPCC_SECOND, 3,
                    toSmash, uint64_t(offWillDefer), uint64_t(cc));
 
   Asm& as = getAsmFor(toSmash);
@@ -2688,7 +2688,7 @@ TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
     emitJmpOrJcc(_a, cc, toSmash);
   }
 
-  TCA sr = emitServiceReq(SRFlags::SRNone, req, 2,
+  TCA sr = emitServiceReq(SRFlags::None, req, 2,
                           toSmash, uint64_t(dest.offset()));
 
   if (&_a == &astubs) {
@@ -2996,7 +2996,7 @@ TranslatorX64::emitRetFromInterpretedFrame() {
   // Marshall our own args by hand here.
   astubs.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   astubs.   movq (rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags(SRInline | SRJmpInsteadOfRet),
+  (void) emitServiceReq(SRFlags::Persistent | SRFlags::JmpInsteadOfRet,
                         REQ_POST_INTERP_RET, 0ull);
   return stub;
 }
@@ -3016,7 +3016,7 @@ TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
   astubs.    loadq (rVmFp[AROFF(m_this)], rContAR);
   astubs.    loadq (rContAR[CONTOFF(m_arPtr)], rContAR);
   astubs.    movq  (rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags(SRInline | SRJmpInsteadOfRet),
+  (void) emitServiceReq(SRFlags::Persistent | SRFlags::JmpInsteadOfRet,
                         REQ_POST_INTERP_RET, 0ull);
   return stub;
 }
@@ -3417,11 +3417,7 @@ TranslatorX64::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA
-TranslatorX64::getFreeStub(bool inLine) {
-  if (inLine) {
-    return astubs.code.frontier;
-  }
+TCA TranslatorX64::getFreeStub() {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
@@ -3474,11 +3470,13 @@ class ConditionalCodeCursor {
 TCA
 TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
                                 va_list args) {
-  bool emitInA = bool(flags & SRFlags::SREmitInA);
-  bool align   = bool(flags & SRFlags::SRAlign) && !emitInA;
-  bool inLine  = bool(flags & SRFlags::SRInline);
+  bool emitInA     = flags & SRFlags::EmitInA;
+  bool align       = (flags & SRFlags::Align) && !emitInA;
+  bool notReusable = flags & SRFlags::Persistent;
   Asm&   as = emitInA ? a : astubs;
-  TCA start = emitInA ? a.code.frontier : getFreeStub(inLine);
+  TCA start = emitInA ? a.code.frontier :
+              notReusable ? astubs.code.frontier :
+              getFreeStub();
   ConditionalCodeCursor cg(as, start);
   /* max space for moving to align, saving VM regs plus emitting args */
   static const int kVMRegSpace = 0x14;
@@ -3501,18 +3499,21 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
     TRACE(3, "%p,", (void*)argVal);
     emitImmReg(as, argVal, serviceReqArgRegs[i]);
   }
-  if (!inLine) {
-    /* make sure that the stub has enough space that it can be
-     * reused for other service requests, with different number of
-     * arguments, alignment, etc.
+
+  if (notReusable) {
+    emitImmReg(as, 0, rScratch);
+  } else {
+    /*
+     * Make sure that the stub has enough space so it can be reused
+     * for other service requests, with different number of arguments,
+     * alignment, etc.
      */
     as.emitNop(start + kMaxStubSpace - as.code.frontier);
     emitImmReg(as, (uint64_t)start, rScratch);
-  } else {
-    emitImmReg(as, 0, rScratch);
   }
   TRACE(3, ")\n");
   emitImmReg(as, req, rdi);
+
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
    *
@@ -3521,7 +3522,7 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
    * something other than enterTCHelper.  In that case
    * SRJmpInsteadOfRet indicates to fake the return.
    */
-  if (flags & SRFlags::SRJmpInsteadOfRet) {
+  if (flags & SRFlags::JmpInsteadOfRet) {
     as.pop(rax);
     as.jmp(rax);
   } else {
@@ -3536,7 +3537,7 @@ TCA
 TranslatorX64::emitServiceReq(ServiceRequest req, int numArgs, ...) {
   va_list args;
   va_start(args, numArgs);
-  TCA retval = emitServiceReqVA(SRFlags::SRAlign, req, numArgs, args);
+  TCA retval = emitServiceReqVA(SRFlags::Align, req, numArgs, args);
   va_end(args);
   return retval;
 }
@@ -6349,7 +6350,7 @@ TranslatorX64::translateSwitch(const Tracelet& t,
 
   for (int idx = 0; idx < jmptabSize; ++idx) {
     SrcKey sk(curFunc(), i.offset() + iv.vec32()[idx]);
-    jmptab[idx] = emitServiceReq(SRFlags::SRNone, REQ_BIND_ADDR, 2ull,
+    jmptab[idx] = emitServiceReq(SRFlags::None, REQ_BIND_ADDR, 2ull,
                                  &jmptab[idx], uint64_t(sk.offset()));
   }
 }
@@ -6411,7 +6412,7 @@ TranslatorX64::translateSSwitch(const Tracelet& t,
 
   auto bindAddr = [&](TCA& dest, Offset o) {
     SrcKey sk(curFunc(), ni.offset() + o);
-    dest = emitServiceReq(SRFlags::SRNone, REQ_BIND_ADDR, 2ull,
+    dest = emitServiceReq(SRFlags::None, REQ_BIND_ADDR, 2ull,
                           &dest, uint64_t(sk.offset()));
   };
   if (fastPath) {
@@ -8502,7 +8503,7 @@ TranslatorX64::translateReqLit(const Tracelet& t,
   emitCall(a, (TCA)reqLitHelper, true);
 
   args->m_efile = efile;
-  args->m_pseudoMain = emitServiceReq(SRFlags::SRNone, REQ_BIND_REQUIRE, 3,
+  args->m_pseudoMain = emitServiceReq(SRFlags::None, REQ_BIND_REQUIRE, 3,
                                       uint64_t(args),
                                       uint64_t(func), uint64_t(func->base()));
   args->m_pcOff = after;
@@ -11284,6 +11285,10 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
       hhirTraceStart(sk.offset());
       SKTRACE(1, sk, "retrying irTranslateTracelet\n");
       result = irTranslateTracelet(t, start, stubStart, &bcMapping);
+      if (result == Retry) {
+        assert(a.code.frontier == start);
+        assert(astubs.code.frontier == stubStart);
+      }
     } while (result == Retry);
     m_useHHIR = false;
     if (result == Success) {
@@ -11647,7 +11652,7 @@ TranslatorX64::TranslatorX64()
 
   // Call to exit with whatever value the program leaves on
   // the return stack.
-  m_callToExit = emitServiceReq(SRFlags(SRAlign | SRJmpInsteadOfRet),
+  m_callToExit = emitServiceReq(SRFlags::Align | SRFlags::JmpInsteadOfRet,
                                 REQ_EXIT, 0ull);
 
   /*
@@ -11674,7 +11679,7 @@ TranslatorX64::TranslatorX64()
                                        rVmFp);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
                                        Stack::topOfStackOffset(), rVmSp);
-  emitServiceReq(SRFlags::SRInline, REQ_RESUME, 0ull);
+  emitServiceReq(SRFlags::Persistent, REQ_RESUME, 0ull);
 
   // Helper for DefCls, in astubs.
   {
@@ -11743,7 +11748,7 @@ TranslatorX64::TranslatorX64()
   astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
   astubs.    add_reg32_reg32(rax, rdi);
   emitEagerVMRegSave(astubs, SaveFP | SavePC);
-  emitServiceReq(SRFlags::SRInline, REQ_STACK_OVERFLOW, 0ull);
+  emitServiceReq(SRFlags::Persistent, REQ_STACK_OVERFLOW, 0ull);
 }
 
 // do gdb specific initialization. This has to happen after

@@ -2153,7 +2153,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::emitReqBindAddr(const Func* func,
                                     TCA& dest,
                                     Offset offset) {
-  dest = m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRNone,
+  dest = m_tx64->emitServiceReq(SRFlags::None,
                                 REQ_BIND_ADDR,
                                 2ull,
                                 &dest,
@@ -2496,7 +2496,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
         uint64_t  notTaken = notTakenPC->getValInt();
 
         m_astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
-        m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+        m_tx64->emitServiceReq(SRFlags::Persistent,
                                REQ_BIND_JMPCC_FIRST,
                                4ull,
                                smashAddr,
@@ -2516,7 +2516,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
           if (smashAddr != kIRDirectJccJmpActive) {
             // kIRDirectJccJmpActive only needs NormalCc exit in astubs
 
-            m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+            m_tx64->emitServiceReq(SRFlags::Persistent,
                                    REQ_BIND_JMP, 2,
                                    smashAddr,
                                    uint64_t(destSK.offset()));
@@ -2551,7 +2551,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
       if (RuntimeOption::EvalHHIRDisableTx64) {
         // Emit a service request to interpret a single instruction before
         // creating a new translation
-        m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+        m_tx64->emitServiceReq(SRFlags::Persistent,
                                REQ_INTERPRET,
                                2ull, uint64_t(destSK.offset()), 1);
       } else {
@@ -4834,7 +4834,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
                  Stack::topOfStackOffset()], rVmSp);
 
-  m_tx64->emitServiceReq(TranslatorX64::SRFlags::SREmitInA, REQ_RESUME, 0ull);
+  m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME, 0ull);
 }
 
 void CodeGenerator::cgDefFunc(IRInstruction* inst) {

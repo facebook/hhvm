@@ -813,7 +813,7 @@ public:
 
   FreeStubList m_freeStubs;
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(bool inLine);
+  TCA getFreeStub();
 private:
   TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
@@ -931,13 +931,6 @@ private:
                               int           offset,
                               SrcRec&       fail);
 
-  enum SRFlags {
-    SRNone            = 0,
-    SRAlign           = 1,
-    SRInline          = 2,
-    SRJmpInsteadOfRet = 4,
-    SREmitInA         = 8,
-  };
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
   TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,

@@ -1,0 +1,2 @@
+Hi
+HipHop Fatal error: Argument 1 passed to main() must be an instance of Foo, int given in %s on line 9

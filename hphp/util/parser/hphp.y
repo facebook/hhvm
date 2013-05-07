@@ -2338,8 +2338,10 @@ class_constant:
  */
 
 sm_typedef_statement:
-    T_TYPE ident '=' sm_type ';'       { only_in_strict_mode(_p);
-                                         _p->onTypedef($$, $2, $4); }
+    T_TYPE sm_name_with_typevar
+    '=' sm_type ';'                    { only_in_strict_mode(_p);
+                                         _p->onTypedef($$, $2, $4);
+                                         _p->popTypeScope(); }
 ;
 
 sm_name_with_type:  /* foo -> int foo */

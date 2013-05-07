@@ -49,6 +49,7 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_proc_open);
   RUN_TEST(test_proc_terminate);
   RUN_TEST(test_proc_close);
+  RUN_TEST(test_proc_open_env_inh);
   RUN_TEST(test_proc_get_status);
   RUN_TEST(test_proc_nice);
   RUN_TEST(test_escapeshellarg);
@@ -79,6 +80,7 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_proc_open);
   RUN_TEST(test_proc_terminate);
   RUN_TEST(test_proc_close);
+  RUN_TEST(test_proc_open_env_inh);
   RUN_TEST(test_proc_get_status);
   RUN_TEST(test_proc_nice);
   LightProcess::Close();
@@ -281,6 +283,31 @@ bool TestExtProcess::test_system() {
   f_chdir("/tmp/");
   VS(f_system("/bin/pwd"), "/tmp");
   f_chdir(String(cur_cwd));
+  return Count(true);
+}
+
+bool TestExtProcess::test_proc_open_env_inh() {
+  Array descriptorspec =
+    CREATE_MAP3(0, CREATE_VECTOR2("pipe", "r"),
+                1, CREATE_VECTOR2("pipe", "w"),
+                2, CREATE_VECTOR3("file", "/tmp/error-output.txt", "a"));
+
+  Variant pipes;
+  g_context->setenv("inherit_me", "please");
+  Variant process = f_proc_open("echo $inherit_me", descriptorspec, ref(pipes));
+  VERIFY(!same(process, false));
+
+  {
+    File *f = pipes[1].toObject().getTyped<File>();
+    VERIFY(f->valid());
+    StringBuffer sbuf;
+    sbuf.read(f);
+    f->close();
+    VS(sbuf.detach(), "please\n");
+  }
+
+  VS(f_proc_close(process.toObject()), 0);
+
   return Count(true);
 }
 

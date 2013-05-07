@@ -322,6 +322,8 @@ public:
    */
   String getenv(CStrRef name) const;
   void setenv(CStrRef name, CStrRef value);
+  Array getEnvs() const { return m_envs; }
+
   String getTimeZone() const { return m_timezone;}
   void setTimeZone(CStrRef timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}

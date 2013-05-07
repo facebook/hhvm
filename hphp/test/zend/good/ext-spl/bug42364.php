@@ -1,5 +1,5 @@
 <?php
-$it = new DirectoryIterator(dirname(__FILE__));
+$it = new DirectoryIterator(__DIR__."/../../../sample_dir/");
 
 $count = 0;
 

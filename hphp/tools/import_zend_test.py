@@ -519,6 +519,10 @@ def walk(filename, source):
         test = test.replace('temp.txt.gz', 'gzread_variation1.gz')
     if '/ext-zlib/gzwrite_basic.php' in full_dest_filename:
         test = test.replace('temp.txt.gz', 'gzwrite_basic.gz')
+    if '/ext-spl/bug42364.php' in full_dest_filename:
+        test = test.replace('dirname(__FILE__)', '__DIR__."/../../../sample_dir/"')
+    if '/ext-standard-file/lchgrp_basic.php' in full_dest_filename:
+        test = test.replace('symlink.txt', 'lchgrp_basic_symlink.txt')
 
     file(full_dest_filename, 'w').write(test)
 

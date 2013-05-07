@@ -130,20 +130,20 @@ function map_convenience_filename($file) {
     );
   }
 
-  $mappage = Map {
+  $mappage = array(
     'quick'    => 'hphp/test/quick',
     'slow'     => 'hphp/test/slow',
     'zend'     => 'hphp/test/zend/good',
     'zend_bad' => 'hphp/test/zend/bad',
-  };
+  );
 
   $m = null;
   if (!preg_match('/([^\/]*)(.*)/', $file, $m) ||
-      !$mappage->containsKey($m[1])) {
+      !isset($mappage[$m[1]])) {
     error("Not valid file or directory: '$file'");
   }
   if (!isset($m[2])) $m[2] = '';
-  return hphp_home().'/'.$mappage->get($m[1]).$m[2];
+  return hphp_home().'/'.$mappage[$m[1]].$m[2];
 }
 
 function find_tests($files) {
@@ -179,7 +179,8 @@ function find_config($tests, $name) {
       implode(' ', $configs).""
     );
   }
-  return array_values($configs)[0];
+  $ret = array_values($configs);
+  return $ret[0];
 }
 
 function find_config_for_dir($dir, $name) {
@@ -285,8 +286,10 @@ $verify = array(
   hphp_home().'/hphp/test/verify',
   '--command="'.implode(' ', command_arg($options, $tests)).'"',
   implode(' ', verify_args($options)),
-  '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
 );
+if (isset($options['repo'])) {
+  $verify[] = '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"';
+}
 
 $return_value = run(implode(' ', $verify), $tests);
 

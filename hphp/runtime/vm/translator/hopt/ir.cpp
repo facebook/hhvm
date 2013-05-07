@@ -525,6 +525,24 @@ Range<const SSATmp*> IRInstruction::getDsts() const {
   return Range<const SSATmp*>(m_dst, m_numDsts);
 }
 
+const StringData* findClassName(SSATmp* cls) {
+  assert(cls->isA(Type::Cls));
+
+  if (cls->isConst()) {
+    return cls->getValClass()->preClass()->name();
+  }
+  // Try to get the class name from a LdCls
+  IRInstruction* clsInst = cls->inst();
+  if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
+    SSATmp* clsName = clsInst->getSrc(0);
+    assert(clsName->isA(Type::Str));
+    if (clsName->isConst()) {
+      return clsName->getValStr();
+    }
+  }
+  return nullptr;
+}
+
 Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
 

@@ -1917,6 +1917,12 @@ typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
         InstructionList;
 
 /*
+ * Given an SSATmp of type Cls, try to find the name of the class.
+ * Returns nullptr if can't find it.
+ */
+const StringData* findClassName(SSATmp* cls);
+
+/*
  * Return the output type from a given IRInstruction.
  *
  * The destination type is always predictable from the types of the inputs, any

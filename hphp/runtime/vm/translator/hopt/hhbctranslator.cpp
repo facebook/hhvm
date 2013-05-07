@@ -1123,8 +1123,28 @@ SSATmp* HhbcTranslator::getStrName(const StringData* knownName) {
   return name;
 }
 
+SSATmp* HhbcTranslator::emitLdClsPropAddrCached(const StringData* propName,
+                                                Block* block) {
+  SSATmp* cls = popA();
+  const StringData* clsName = findClassName(cls);
+  assert(clsName);
+
+  SSATmp* prop = getStrName(propName);
+  SSATmp* addr = gen(LdClsPropAddrCached,
+                     block,
+                     cls,
+                     prop,
+                     cns(clsName),
+                     cns(getCurClass()));
+  return addr;
+}
+
 SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(const StringData* propName,
                                                 Block* block) {
+  if (canUseSPropCache(m_evalStack.top(), propName, getCurClass())) {
+    return emitLdClsPropAddrCached(propName, block);
+  }
+
   if (!block) exceptionBarrier();
 
   SSATmp* clsTmp = popA();
@@ -1522,7 +1542,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
 
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
-  bool persistentCls = classIsPersistent(cls);
+  bool persistentCls = TargetCache::classIsPersistent(cls);
   bool canInstantiate = canInstantiateClass(cls);
   bool fastAlloc = !RuntimeOption::EnableObjDestructCall &&
     persistentCls && canInstantiate;

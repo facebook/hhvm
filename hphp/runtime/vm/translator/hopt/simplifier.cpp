@@ -19,7 +19,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include <runtime/base/type_conversions.h>
+#include "runtime/base/type_conversions.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 #include "runtime/vm/runtime.h"
 
@@ -176,6 +176,42 @@ void copyProp(IRInstruction* inst) {
   for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
     copyPropSrc(inst, i);
   }
+}
+
+/*
+ * Checks if property propName of class clsTmp, called from context class ctx,
+ * can be accessed via the static property cache.
+ * Right now, this returns true for two cases:
+ *   (a) the property is accessed from within the class containing it
+ *   (b) the property belongs to a persistent class and it's accessible from ctx
+ */
+bool canUseSPropCache(SSATmp* clsTmp,
+                      const StringData* propName,
+                      const Class* ctx) {
+  if (propName == nullptr) return false;
+
+  const StringData* clsName = findClassName(clsTmp);
+  if (ctx) {
+    const StringData* ctxName = ctx->preClass()->name();;
+    if (clsName && ctxName && clsName->isame(ctxName)) return true;
+  }
+
+  if (!clsTmp->isConst()) return false;
+
+  const Class* cls = clsTmp->getValClass();
+
+  if (!Transl::TargetCache::classIsPersistent(cls)) return false;
+
+  // If the class requires initialization, it might not have been
+  // initialized yet.  getSProp() below will trigger initialization,
+  // but that's only valid to do earlier if it doesn't require any
+  // property initializer ([sp]init methods).
+  if (cls->needInitialization()) return false;
+
+  bool visible, accessible;
+  cls->getSProp(const_cast<Class*>(ctx), propName, visible, accessible);
+
+  return visible && accessible;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1391,41 +1427,25 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
-  SSATmp* propName  = inst->getSrc(1);
+  SSATmp* propName = inst->getSrc(1);
   if (!propName->isConst()) return nullptr;
 
-  SSATmp* cls   = inst->getSrc(0);
-  const StringData* clsNameString  = cls->isConst()
-                                     ? cls->getValClass()->preClass()->name()
-                                     : nullptr;
-  if (!clsNameString) {
-    // see if you can get the class name from a LdCls
-    IRInstruction* clsInst = cls->inst();
-    if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
-      SSATmp* clsName = clsInst->getSrc(0);
-      assert(clsName->isA(Type::Str));
-      if (clsName->isConst()) {
-        clsNameString = clsName->getValStr();
-      }
-    }
-  }
-  if (!clsNameString) return nullptr;
+  SSATmp* cls = inst->getSrc(0);
+  auto ctxCls = inst->getSrc(2)->getValClass();
 
-  // We known both the class name and the property name statically so
-  // we can use the caching version of LdClsPropAddr.  To avoid doing
-  // accessibility checks, we only do this if the context class is the
-  // same as the actual class the property is on.
-  auto const ctxCls = inst->getSrc(2)->getValClass();
-  if (!ctxCls || !clsNameString->isame(ctxCls->preClass()->name())) {
-    return nullptr;
+  if (canUseSPropCache(cls, propName->getValStr(), ctxCls)) {
+
+    const StringData* clsNameStr = findClassName(cls);
+
+    return gen(LdClsPropAddrCached,
+               inst->getTaken(),
+               cls,
+               propName,
+               cns(clsNameStr),
+               inst->getSrc(2));
   }
 
-  return gen(LdClsPropAddrCached,
-                   inst->getTaken(),
-                   cls,
-                   propName,
-                   cns(clsNameString),
-                   inst->getSrc(2));
+  return nullptr;
 }
 
 /*

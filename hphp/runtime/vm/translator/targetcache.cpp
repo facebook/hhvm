@@ -234,6 +234,12 @@ bool isPersistentHandle(Handle handle) {
   return handle >= (unsigned)s_persistent_start;
 }
 
+bool classIsPersistent(const Class* cls) {
+  return (RuntimeOption::RepoAuthoritative &&
+          cls &&
+          isPersistentHandle(cls->m_cachedOffset));
+}
+
 static Handle allocLocked(bool persistent, int numBytes, int align) {
   s_handleMutex.assertOwnedBySelf();
   align = Util::roundUpToPowerOfTwo(align);

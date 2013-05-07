@@ -105,6 +105,7 @@ bool testBit(size_t bit);
 bool testAndSetBit(CacheHandle handle, uint32_t mask);
 bool testAndSetBit(size_t bit);
 bool isPersistentHandle(CacheHandle handle);
+bool classIsPersistent(const Class* cls);
 
 CacheHandle ptrToHandle(const void*);
 

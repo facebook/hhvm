@@ -174,6 +174,14 @@ StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
  */
 void copyProp(IRInstruction*);
 
+/*
+ * Checks if property propName of class clsTmp, called from context class ctx,
+ * can be accessed via the static property cache.
+ */
+bool canUseSPropCache(SSATmp* clsTmp,
+                      const StringData* propName,
+                      const Class* ctx);
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

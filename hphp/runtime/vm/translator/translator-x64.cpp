@@ -259,13 +259,6 @@ struct IfCountNotStatic {
 };
 
 bool
-classIsPersistent(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    TargetCache::isPersistentHandle(cls->m_cachedOffset);
-}
-
-bool
 classIsUnique(const Class* cls) {
   return RuntimeOption::RepoAuthoritative &&
     cls &&

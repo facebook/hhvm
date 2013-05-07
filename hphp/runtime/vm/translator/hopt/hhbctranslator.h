@@ -533,6 +533,8 @@ private:
   SSATmp* emitLdClsPropAddr(const StringData* propName) {
     return emitLdClsPropAddrOrExit(propName, nullptr);
   }
+  SSATmp* emitLdClsPropAddrCached(const StringData* propName,
+                                  Block* block);
   SSATmp* getStrName(const StringData* propName = nullptr);
   SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
   SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);

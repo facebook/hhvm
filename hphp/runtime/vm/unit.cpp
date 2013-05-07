@@ -1576,66 +1576,6 @@ std::string Unit::toString() const {
   return ss.str();
 }
 
-void Unit::enableIntercepts() {
-  TranslatorX64* tx64 = TranslatorX64::Get();
-  // Its ok to set maybeIntercepted(), because
-  // we are protected by s_mutex in intercept.cpp
-  for (MutableFuncRange fr(nonMainFuncs()); !fr.empty(); ) {
-    Func *func = fr.popFront();
-    if (func->isPseudoMain()) {
-      // pseudomain's can't be intercepted
-      continue;
-    }
-    tx64->interceptPrologues(func);
-  }
-  {
-    Lock lock(s_classesMutex);
-    for (int i = m_preClasses.size(); i--; ) {
-      PreClass* pcls = m_preClasses[i].get();
-      Class* cls = pcls->namedEntity()->clsList();
-      while (cls) {
-        /*
-         * verify that this class corresponds to the
-         * preclass we're looking at. This avoids
-         * redundantly iterating over the same class
-         * multiple times, but also avoids a hard to
-         * repro crash, if the unit owning cls is being
-         * destroyed at the time we pick up cls from the
-         * list (which is possible). Note that cls
-         * itself will be destroyed by treadmill, so
-         * it is safe to call preClass()
-         */
-        if (cls->preClass() == pcls) {
-          size_t numFuncs = cls->numMethods();
-          Func* const* funcs = cls->methods();
-          for (unsigned i = 0; i < numFuncs; i++) {
-            if (funcs[i]->cls() != cls) {
-              /*
-               * This func is defined by a base
-               * class. We can skip it now, because
-               * we'll hit it when we process
-               * the base class. More importantly,
-               * the base class's unit may have been
-               * destroyed; in which case we have to
-               * skip it here, or we'll likely crash.
-               *
-               * Note that Classes are ref counted,
-               * so the the funcs[i]'s Class cant have
-               * been freed yet, so the comparison is
-               * safe; although we do seem to have a
-               * class leak here (sandbox mode only)
-               */
-              continue;
-            }
-            tx64->interceptPrologues(funcs[i]);
-          }
-        }
-        cls = cls->m_nextClass;
-      }
-    }
-  }
-}
-
 Func* Unit::lookupFunc(const NamedEntity* ne, const StringData* name) {
   Func* func = ne->getCachedFunc();
   return func;

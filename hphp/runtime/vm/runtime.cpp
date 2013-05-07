@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/runtime.h"
 #include "runtime/base/execution_context.h"
 #include "runtime/base/complex_types.h"
 #include "runtime/base/zend/zend_string.h"
@@ -25,7 +26,6 @@
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/repo.h"
 #include "util/trace.h"
-#include "runtime.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
 
@@ -98,7 +98,7 @@ NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
 NEW_COLLECTION_HELPER(Set)
-  
+
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();
   obj->incRefCount();
@@ -358,32 +358,6 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   magicArgs->append(ar->getInvName(), false);
   magicArgs->append(argArray, false);
   return magicArgs;
-}
-
-bool run_intercept_handler_for_invokefunc(TypedValue* retval,
-                                          const Func* f,
-                                          CArrRef params,
-                                          ObjectData* this_,
-                                          StringData* invName,
-                                          Variant* ihandler) {
-  using namespace HPHP::VM::Transl;
-  assert(ihandler);
-  assert(retval);
-  Variant doneFlag = true;
-  Array args = params;
-  if (invName) {
-    // This is a magic call, so we need to shuffle the args
-    HphpArray* magicArgs = NEW(HphpArray)(2);
-    magicArgs->append(invName, false);
-    magicArgs->append(params, false);
-    args = magicArgs;
-  }
-  Array intArgs =
-    CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : uninit_null()),
-                   args, ihandler->asCArrRef()[1], ref(doneFlag));
-  call_intercept_handler<false>(retval, intArgs, nullptr, ihandler);
-  // $done is true, meaning don't enter the intercepted function.
-  return !doneFlag.toBoolean();
 }
 
 HphpArray* get_static_locals(const ActRec* ar) {

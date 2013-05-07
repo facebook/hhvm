@@ -176,7 +176,6 @@ class TranslatorX64 : public Translator
   TCA                    m_dtorGenericStub;
   TCA                    m_dtorGenericStubRegs;
   TCA                    m_dtorStubs[kDestrTableSize];
-  TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
 
@@ -214,7 +213,6 @@ class TranslatorX64 : public Translator
 
   RegAlloc                   m_regMap;
   std::stack<SavedRegState>  m_savedRegMaps;
-  volatile bool              m_interceptsEnabled;
   FixupMap                   m_fixupMap;
   UnwindRegMap               m_unwindRegMap;
   UnwindInfoHandle           m_unwindRegistrar;
@@ -720,9 +718,6 @@ PSEUDOINSTRS
     return m_unwindRegMap.find(ip);
   }
 
-  void enableIntercepts() {m_interceptsEnabled = true;}
-  bool interceptsEnabled() {return m_interceptsEnabled;}
-
   static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
 
   // public for syncing gdb state
@@ -796,7 +791,6 @@ public:
   void dropWriteLease() {
     s_writeLease.drop();
   }
-  void interceptPrologues(Func* func);
 
   void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
     const RefDeps&, SrcRec&);
@@ -815,7 +809,6 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
 private:
-  TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
   void translateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
   void irInterpretInstr(const NormalizedInstruction& i);
@@ -968,7 +961,6 @@ private:
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-  TCA emitInterceptPrologue(Func* func);
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);
   void emitBindJmp(Asm& a, SrcKey dest,
@@ -1139,6 +1131,7 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
+void functionEnterHelper(const ActRec* ar);
 
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);

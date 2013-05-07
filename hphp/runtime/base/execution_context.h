@@ -187,8 +187,6 @@ public:
   Stack m_stack;
   ActRec* m_fp;
   PC m_pc;
-  uint32_t m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */
-  HPHP::VM::EventHook* m_eventHook;
   int64_t m_currentThreadIdx;
 public:
   enum ShutdownType {
@@ -570,6 +568,8 @@ public:
                            const StringData* cns);
 
   ActRec* arGetSfp(const ActRec* ar);
+  // Get the next outermost VM frame, even accross re-entry
+  ActRec* getOuterVMFrame(const ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;
   static void DumpStack();
@@ -666,7 +666,6 @@ public:
   bool m_interpreting;
   bool m_dbgNoBreak;
   int switchMode(bool unwindBuiltin);
-  template <bool handle_throw>
   void doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   CVarRef getEvaledArg(const StringData* val);
@@ -684,7 +683,7 @@ private:
   template <bool forwarding>
   void pushClsMethodImpl(VM::Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  template <bool reenter, bool handle_throw>
+  template <bool reenter>
   bool prepareFuncEntry(ActRec* ar,
                         PC& pc,
                         ExtraArgs* extraArgs);

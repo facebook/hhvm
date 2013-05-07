@@ -389,7 +389,8 @@ public:
   static const ssize_t SignaledFlag         = 1 << 2;
   static const ssize_t EventHookFlag        = 1 << 3;
   static const ssize_t PendingExceptionFlag = 1 << 4;
-  static const ssize_t LastFlag             = PendingExceptionFlag;
+  static const ssize_t InterceptFlag        = 1 << 5;
+  static const ssize_t LastFlag             = InterceptFlag;
 
   RequestInjectionData()
     : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
@@ -426,6 +427,8 @@ public:
   void clearEventHookFlag();
   void setPendingExceptionFlag();
   void clearPendingExceptionFlag();
+  void setInterceptFlag();
+  void clearInterceptFlag();
   ssize_t fetchAndClearFlags();
 
   void onSessionInit();
@@ -535,7 +538,7 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin_functions.cpp
-extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
+extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);

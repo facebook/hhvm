@@ -127,8 +127,6 @@ bool TranslatorX64::replace() {
   severFuncReferences(tx64);
   TranslatorX64* n00b = new TranslatorX64();
   n00b->initGdb();
-  // m_interceptsEnabled should persist across TC spaces.
-  n00b->m_interceptsEnabled = m_interceptsEnabled;
   TRACE(0, "Tx64: replace %p a.code %p -> %p a.code %p complete\n",
         this, a.code.base, n00b, n00b->a.code.base);
   // Here is the changing of the guard.

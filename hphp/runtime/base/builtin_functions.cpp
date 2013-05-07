@@ -504,7 +504,7 @@ void pause_forever() {
   for (;;) sleep(300);
 }
 
-void check_request_surprise(ThreadInfo *info) {
+ssize_t check_request_surprise(ThreadInfo *info) {
   RequestInjectionData &p = info->m_reqInjectionData;
   bool do_timedout, do_memExceeded, do_signaled;
 
@@ -528,6 +528,7 @@ void check_request_surprise(ThreadInfo *info) {
   if (pendingException) {
     pendingException->throwException();
   }
+  return flags;
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,

@@ -41,8 +41,6 @@ namespace Eval {
 
 std::set<string> FileRepository::s_names;
 
-static volatile bool s_interceptsEnabled = false;
-
 PhpFile::PhpFile(const string &fileName, const string &srcRoot,
                  const string &relPath, const string &md5,
                  HPHP::VM::Unit* unit)
@@ -163,7 +161,6 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   }
 
   TRACE(1, "FR fast path miss: %s\n", rname->data());
-  bool interceptsEnabled = s_interceptsEnabled;
   const StringData *n = StringData::GetStaticString(name.get());
   ParsedFilesMap::accessor acc;
   bool isNew = s_files.insert(acc, n);
@@ -231,16 +228,6 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
 
   if (md5Enabled()) {
     WriteLock lock(s_md5Lock);
-    // make sure intercepts are enabled for the functions within the
-    // new units
-    // Since we have the write lock on s_md5lock, s_interceptsEnabled
-    // can't change, and we are serialized wrt enableIntercepts
-    // (i.e., this will execute either before or after
-    // enableIntercepts).
-    if (interceptsEnabled != s_interceptsEnabled) {
-      // intercepts were enabled since the time we created the unit
-      ret->unit()->enableIntercepts();
-    }
     s_md5Files[ret->getMd5()] = ret;
   }
   ret->incRef();
@@ -443,16 +430,6 @@ PhpFile *FileRepository::parseFile(const std::string &name,
 
 bool FileRepository::fileStat(const string &name, struct stat *s) {
   return StatCache::stat(name, s) == 0;
-}
-
-void FileRepository::enableIntercepts() {
-  ReadLock lock(s_md5Lock);
-  s_interceptsEnabled = true; // write protected by s_mutex in intercept
-
-  for (hphp_hash_map<string, PhpFile*, string_hash>::const_iterator it =
-       s_md5Files.begin(); it != s_md5Files.end(); it++) {
-    it->second->unit()->enableIntercepts();
-  }
 }
 
 struct ResolveIncludeContext {

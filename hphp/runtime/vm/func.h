@@ -300,13 +300,7 @@ struct Func {
   static size_t sharedBaseOffset() {
     return offsetof(SharedData, m_base);
   }
-  static void enableIntercept();
   char &maybeIntercepted() const { return m_maybeIntercepted; }
-  bool checkInterceptable() const {
-    if (!m_maybeIntercepted) return false;
-    return m_maybeIntercepted > 0 ||
-    get_intercept_handler(fullNameRef(), &m_maybeIntercepted);
-  }
   int numParams() const { return m_numParams; }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
@@ -495,9 +489,6 @@ private:
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
   const Func* findCachedClone(Class* cls) const;
-
-private:
-  static bool s_interceptsEnabled;
 
 private:
   Unit* m_unit;

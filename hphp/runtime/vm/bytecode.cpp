@@ -1191,6 +1191,17 @@ ActRec* VMExecutionContext::arGetSfp(const ActRec* ar) {
   return const_cast<ActRec*>(ar);
 }
 
+ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
+  ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
+  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
+             Util::s_stackSize)) {
+    if (LIKELY(prevFrame != nullptr)) return prevFrame;
+  }
+
+  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().m_savedState.fp;
+  return nullptr;
+}
+
 TypedValue* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
                                              const StringData* cls,
                                              const StringData* cns) {
@@ -1688,22 +1699,14 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-template <bool reenter, bool handle_throw>
+template <bool reenter>
 bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
                                           PC& pc,
                                           ExtraArgs* extraArgs) {
   const Func* func = ar->m_func;
   if (!reenter) {
-    // For the reenter case, intercept and magic shuffling are handled
-    // in invokeFunc() before calling prepareFuncEntry(), so we only
-    // need to perform these checks for the non-reenter case.
-    if (UNLIKELY(func->maybeIntercepted())) {
-      Variant *h = get_intercept_handler(func->fullNameRef(),
-                                         &func->maybeIntercepted());
-      if (h && !run_intercept_handler<handle_throw>(ar, h)) {
-        return false;
-      }
-    }
+    // For the reenter case, magic shuffling are handled
+    // in invokeFunc() before calling prepareFuncEntry().
     if (UNLIKELY(ar->hasInvName())) {
       shuffleMagicArgs(ar);
     }
@@ -1846,7 +1849,7 @@ void VMExecutionContext::syncGdbState() {
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   TCA start = nullptr;
   if (enterFnAr) {
-    EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc);
+    if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
     INST_HOOK_FENTRY(enterFnAr->m_func->fullName());
     start = enterFnAr->m_func->getFuncBody();
   }
@@ -1948,7 +1951,7 @@ short_jump:
   try {
     switch (jumpCode) {
     case EXCEPTION_START:
-      if (prepareFuncEntry<true,true>(ar, m_pc, extraArgs)) {
+      if (prepareFuncEntry<true>(ar, m_pc, extraArgs)) {
         enterVMWork(ar);
       }
       break;
@@ -2064,20 +2067,6 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   assert(!varEnv || params.empty());
 
   VMRegAnchor _;
-
-  // Check if we need to run an intercept handler
-  if (UNLIKELY(f->maybeIntercepted())) {
-    Variant *h = get_intercept_handler(f->fullNameRef(),
-                                       &f->maybeIntercepted());
-    if (h) {
-      if (!run_intercept_handler_for_invokefunc(retval, f, params, this_,
-                                                invName, h)) {
-        return;
-      }
-      // Discard the handler's return value
-      tvRefcountedDecRef(retval);
-    }
-  }
 
   bool isMagicCall = (invName != nullptr);
 
@@ -2816,8 +2805,9 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   m_fp = ar;
   pc = func->getEntry();
   SYNC();
-  EventHook::FunctionEnter(m_fp, funcType);
-  return true;
+  bool ret = EventHook::FunctionEnter(m_fp, funcType);
+  pc = m_pc;
+  return ret;
 }
 
 CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
@@ -5937,7 +5927,6 @@ void VMExecutionContext::iopFPassM(PC& pc) {
   }
 }
 
-template <bool handle_throw>
 void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(ar->m_savedRbp == (uint64_t)m_fp);
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
@@ -5948,13 +5937,14 @@ void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   assert(pcOff() > m_fp->m_func->base());
-  prepareFuncEntry<false, handle_throw>(ar, pc, 0);
+  prepareFuncEntry<false>(ar, pc, 0);
   SYNC();
-  EventHook::FunctionEnter(ar, EventHook::NormalFunc);
-  INST_HOOK_FENTRY(ar->m_func->fullName());
+  if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) {
+    INST_HOOK_FENTRY(ar->m_func->fullName());
+  } else {
+    pc = m_pc;
+  }
 }
-
-template void VMExecutionContext::doFCall<true>(ActRec *ar, PC& pc);
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
@@ -5962,7 +5952,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
-  doFCall<false>(ar, pc);
+  doFCall(ar, pc);
 }
 
 // Return a function pointer type for calling a builtin with a given
@@ -6216,35 +6206,17 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 
-    StringData* invName = ar->hasInvName() ? ar->getInvName() : nullptr;
     if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return false;
-    if (UNLIKELY(func->maybeIntercepted())) {
-      Variant *h = get_intercept_handler(func->fullNameRef(),
-                                         &func->maybeIntercepted());
-      if (h) {
-        try {
-          TypedValue retval;
-          if (!run_intercept_handler_for_invokefunc(
-                &retval, func, args,
-                ar->hasThis() ? ar->getThis() : nullptr,
-                invName, h)) {
-            cleanupParamsAndActRec(m_stack, ar, extraArgs);
-            *m_stack.allocTV() = retval;
-            return false;
-          }
-        } catch (...) {
-          cleanupParamsAndActRec(m_stack, ar, extraArgs);
-          m_stack.pushNull();
-          SYNC();
-          throw;
-        }
-      }
-    }
   }
 
-  prepareFuncEntry<true, false>(ar, pc, extraArgs);
+  if (UNLIKELY(!(prepareFuncEntry<true>(ar, pc, extraArgs)))) {
+    return false;
+  }
   SYNC();
-  EventHook::FunctionEnter(ar, EventHook::NormalFunc);
+  if (UNLIKELY(!EventHook::FunctionEnter(ar, EventHook::NormalFunc))) {
+    pc = m_pc;
+    return false;
+  }
   INST_HOOK_FENTRY(func->fullName());
   return true;
 }
@@ -6937,8 +6909,11 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   pc = contAR->m_func->getEntry();
   SYNC();
 
-  EventHook::FunctionEnter(contAR, EventHook::NormalFunc);
-  INST_HOOK_FENTRY(contAR->m_func->fullName());
+  if (LIKELY(EventHook::FunctionEnter(contAR, EventHook::NormalFunc))) {
+    INST_HOOK_FENTRY(contAR->m_func->fullName());
+  } else {
+    pc = m_pc;
+  }
 }
 
 void VMExecutionContext::iopContExit(PC& pc) {

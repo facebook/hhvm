@@ -21,6 +21,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/unit.h>
+#include <runtime/vm/event_hook.h>
 
 #include <util/parser/parser.h>
 #include <util/lock.h>
@@ -96,6 +97,8 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
     return true;
   }
 
+  VM::EventHook::EnableIntercept();
+
   Array handler = CREATE_VECTOR2(callback, data);
 
   if (name.empty()) {
@@ -106,18 +109,6 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
   }
 
   Lock lock(s_mutex);
-  VM::Func::enableIntercept();
-  TranslatorX64* tx64 = TranslatorX64::Get();
-  if (!tx64->interceptsEnabled()) {
-    tx64->acquireWriteLease(true);
-    if (!tx64->interceptsEnabled()) {
-      tx64->enableIntercepts();
-      // redirect all existing generated prologues so that they first
-      // call the intercept helper
-      Eval::FileRepository::enableIntercepts();
-    }
-    tx64->dropWriteLease();
-  }
   if (name.empty()) {
     for (RegisteredFlagsMap::iterator iter =
            s_registered_flags.begin();

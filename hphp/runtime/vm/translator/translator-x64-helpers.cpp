@@ -118,7 +118,7 @@ static TCA callAndResume(ActRec *ar) {
      */
     VMRegAnchor _(ar);
     uint64_t rip = ar->m_savedRip;
-    g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
+    g_vmContext->doFCall(ar, g_vmContext->m_pc);
     ar->m_savedRip = rip;
     return Translator::Get()->getResumeHelperRet();
   }
@@ -253,6 +253,22 @@ void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
   // smash our return and frame pointer chain
   framePtr->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
   framePtr->m_savedRbp = (uint64_t)ec->m_fp;
+}
+
+void functionEnterHelper(const ActRec* ar) {
+  DECLARE_FRAME_POINTER(framePtr);
+
+  uint64_t savedRip = ar->m_savedRip;
+  uint64_t savedRbp = ar->m_savedRbp;
+  if (LIKELY(EventHook::onFunctionEnter(ar, EventHook::NormalFunc))) return;
+  /* We need to skip the function.
+     FunctionEnter already cleaned up ar, and pushed the return value,
+     so all we need to do is return to where ar would have returned to,
+     with rbp set to ar's outer frame.
+  */
+  framePtr->m_savedRip = savedRip;
+  framePtr->m_savedRbp = savedRbp;
+  sp = g_vmContext->m_stack.top();
 }
 
 } } } // HPHP::VM::Transl

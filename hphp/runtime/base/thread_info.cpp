@@ -169,17 +169,20 @@ void RequestInjectionData::clearPendingExceptionFlag() {
                        ~RequestInjectionData::PendingExceptionFlag);
 }
 
+void RequestInjectionData::setInterceptFlag() {
+  __sync_fetch_and_or(getConditionFlags(),
+                      RequestInjectionData::InterceptFlag);
+}
+
+void RequestInjectionData::clearInterceptFlag() {
+  __sync_fetch_and_and(getConditionFlags(),
+                       ~RequestInjectionData::InterceptFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
-  ssize_t flags;
-  for (;;) {
-    flags = atomic_acquire_load(getConditionFlags());
-    const ssize_t newFlags =
-      flags & RequestInjectionData::EventHookFlag;
-    if (__sync_bool_compare_and_swap(getConditionFlags(), flags, newFlags)) {
-      break;
-    }
-  }
-  return flags;
+  return __sync_fetch_and_and(getConditionFlags(),
+                              (RequestInjectionData::EventHookFlag |
+                               RequestInjectionData::InterceptFlag));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

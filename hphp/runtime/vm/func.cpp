@@ -37,7 +37,6 @@ namespace HPHP {
 namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::bcinterp;
-bool Func::s_interceptsEnabled = false;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");
@@ -129,7 +128,7 @@ void Func::initPrologues(int numParams, bool isGenerator) {
 
 void Func::init(int numParams, bool isGenerator) {
   // For methods, we defer setting the full name until m_cls is initialized
-  m_maybeIntercepted = s_interceptsEnabled ? -1 : 0;
+  m_maybeIntercepted = -1;
   if (!preClass()) {
     setNewFuncId();
     setFullName();
@@ -223,7 +222,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
 }
 
 Func::~Func() {
-  if (m_fullName != nullptr && s_interceptsEnabled && m_maybeIntercepted != -1) {
+  if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameRef(), &m_maybeIntercepted);
   }
 #ifdef DEBUG
@@ -645,13 +644,6 @@ Func::SharedData::~SharedData() {
 
 void Func::SharedData::atomicRelease() {
   delete this;
-}
-
-void Func::enableIntercept() {
-  // we are protected by s_mutex in intercept.cpp
-  if (!s_interceptsEnabled) {
-    s_interceptsEnabled = true;
-  }
 }
 
 Func** Func::getCachedAddr() {

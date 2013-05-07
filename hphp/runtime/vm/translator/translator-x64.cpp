@@ -1579,13 +1579,10 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup) {
     UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
     if (false) { // typecheck
       const ActRec* ar = nullptr;
-      EventHook::FunctionEnter(ar, 0);
+      functionEnterHelper(ar);
     }
     astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    static_assert(EventHook::NormalFunc == 0,
-                  "EventHook::NormalFunc should be the first enum element");
-    astubs.xor_reg32_reg32(argNumToRegName[1], argNumToRegName[1]);
-    emitCall(astubs, (TCA)&EventHook::FunctionEnter);
+    emitCall(astubs, (TCA)&functionEnterHelper);
     if (inTracelet) {
       recordSyncPoint(astubs, fixup.m_pcOffset, fixup.m_spOffset);
     } else {
@@ -1650,8 +1647,8 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
  * HHBC instructions, and that source HHBC instructions are in turn
  * uniquely associated with SP->FP deltas.
  *
- * run_intercept_helper/trimExtraArgs is called from the prologue of
- * the callee. The prologue is 1) still in the caller frame for now,
+ * trimExtraArgs is called from the prologue of the callee.
+ * The prologue is 1) still in the caller frame for now,
  * and 2) shared across multiple call sites. 1 means that we have the
  * fp from the caller's frame, and 2 means that this fp is not enough
  * to figure out sp.
@@ -1670,19 +1667,6 @@ static void sync_regstate_to_caller(ActRec* preLive) {
     }
   }
   tl_regState = REGSTATE_CLEAN;
-}
-
-static uint64_t run_intercept_helper(ActRec* ar, Variant* ihandler) {
-  sync_regstate_to_caller(ar);
-  bool ret = run_intercept_handler<true>(ar, ihandler);
-  /*
-   * Restore tl_regState manually in the no-exception case only.  (The
-   * VM regs are clean here---we only need to set them dirty if we are
-   * stopping to execute in the TC again, which we won't be doing if
-   * an exception is propagating.)
-   */
-  tl_regState = REGSTATE_DIRTY;
-  return ret;
 }
 
 void
@@ -1717,68 +1701,6 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
   // Only go back to dirty in a non-exception case.  (Same reason as
   // above.)
   tl_regState = REGSTATE_DIRTY;
-}
-
-TCA
-TranslatorX64::getInterceptHelper() {
-  if (false) {  // typecheck
-    Variant *h = get_intercept_handler(CStrRef((StringData*)nullptr),
-                                       (char*)nullptr);
-    bool c UNUSED = run_intercept_helper((ActRec*)nullptr, h);
-  }
-  if (!m_interceptHelper) {
-    m_interceptHelper = TCA(astubs.code.frontier);
-    astubs.    loadq  (rStashedAR[AROFF(m_func)], rax);
-    astubs.    lea    (rax[Func::fullNameOff()], argNumToRegName[0]);
-    astubs.    lea    (rax[Func::maybeInterceptedOff()], argNumToRegName[1]);
-
-    astubs.    sub_imm32_reg64(8, rsp); // Stack parity {
-    astubs.    call(TCA(get_intercept_handler));
-    astubs.    add_imm32_reg64(8, rsp);  // }
-    astubs.    test_reg64_reg64(rax, rax);
-    {
-      JccBlock<CC_NZ> ifNotIntercepted(astubs);
-      astubs.  ret();
-    }
-
-    // we might re-enter, so align the stack
-    astubs.    sub_imm32_reg64(8, rsp);
-    // Copy the old rbp into the savedRbp pointer.
-    astubs.    store_reg64_disp_reg64(rbp, 0, rStashedAR);
-
-    PhysReg rSavedRip = r13; // XXX ideally don't hardcode r13 ... but
-                             // we need callee-saved and don't have
-                             // any scratch ones.
-
-    // Fish out the saved rip. We may need to jump there, and the helper will
-    // have wiped out the ActRec.
-    astubs.    load_reg64_disp_reg64(rStashedAR, AROFF(m_savedRip),
-                                     rSavedRip);
-    astubs.    mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
-    astubs.    mov_reg64_reg64(rax, argNumToRegName[1]);
-    astubs.    call(TCA(run_intercept_helper));
-
-    // Normally we'd like to recordReentrantCall here, but the vmreg sync'ing
-    // for run_intercept_handler is a special little snowflake. See
-    // run_intercept_handler for details.
-    astubs.    test_reg64_reg64(rax, rax);
-    {
-      // If the helper returned false, don't execute this function. The helper
-      // will have cleaned up the interceptee's arguments and AR, and pushed
-      // the handler's return value; we now need to get out.
-      //
-      // We don't need to touch rVmFp; it's still pointing to the caller of
-      // the interceptee. We need to adjust rVmSp. Then we need to jump to the
-      // saved rip from the interceptee's ActRec.
-      JccBlock<CC_NZ> ifDontEnterFunction(astubs);
-      astubs.  add_imm32_reg64(16, rsp);
-      astubs.  lea_reg64_disp_reg64(rStashedAR, AROFF(m_r), rVmSp);
-      astubs.  jmp(rSavedRip);
-    }
-    astubs.    add_imm32_reg64(8, rsp);
-    astubs.    ret();
-  }
-  return m_interceptHelper;
 }
 
 TCA
@@ -1913,17 +1835,6 @@ funcPrologHasGuard(TCA prolog, const Func* func) {
     return *funcPrologToGuardImm<int32_t>(prolog) == iptr;
   }
   return *funcPrologToGuardImm<int64_t>(prolog) == iptr;
-}
-
-static void
-disableFuncGuard(TCA prolog, Func* func) {
-  assert(funcPrologHasGuard(prolog, func));
-  if (deltaFits((intptr_t)func, sz::dword)) {
-    *funcPrologToGuardImm<int32_t>(prolog) = 0;
-  } else {
-    *funcPrologToGuardImm<int64_t>(prolog) = 0;
-  }
-  assert(!funcPrologHasGuard(prolog, func));
 }
 
 static TCA
@@ -2192,61 +2103,6 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   return start;
 }
 
-TCA
-TranslatorX64::emitInterceptPrologue(Func* func) {
-  TCA start = a.code.frontier;
-  emitImmReg(a, int64_t(func), rax);
-  a.    cmpb (0, rax[Func::maybeInterceptedOff()]);
-  semiLikelyIfBlock(CC_NE, a, [&]{
-    // Prologues are not really sites for function entry yet; we can get
-    // here via an optimistic bindCall. Check that the func is as expected.
-    a.  cmpq (rax, rStashedAR[AROFF(m_func)]);
-    {
-      JccBlock<CC_NZ> skip(a);
-      a.call(getInterceptHelper());
-    }
-  });
-  return start;
-}
-
-void
-TranslatorX64::interceptPrologues(Func* func) {
-  if (!RuntimeOption::EvalJitEnableRenameFunction &&
-      !(func->attrs() & AttrDynamicInvoke)) {
-    return;
-  }
-  if (func->maybeIntercepted() == -1) {
-    return;
-  }
-  func->maybeIntercepted() = -1;
-  assert(s_writeLease.amOwner());
-  int maxNumPrologues = func->numPrologues();
-  for (int i = 0; i < maxNumPrologues; i++) {
-    TCA prologue = func->getPrologue(i);
-    if (prologue == (unsigned char*)fcallHelperThunk)
-      continue;
-    assert(funcPrologHasGuard(prologue, func));
-    // There might already be calls hard-coded to this via FCall.
-    // blow away immediate comparison, so that we always use the Func*'s
-    // prologue table. We use 0 (== NULL on our architecture) as the bit
-    // pattern for an impossible Func.
-    //
-    // Note that we're modifying reachable code.
-    disableFuncGuard(prologue, func);
-
-    // There's a prologue already generated; redirect it to first
-    // call the intercept helper. First, reset it (leaking the old
-    // prologue), so funcPrologue will re-emit it.
-    func->setPrologue(i, (TCA)fcallHelperThunk);
-    TCA addr = funcPrologue(func, i);
-    assert(funcPrologHasGuard(addr, func));
-    assert(addr);
-    func->setPrologue(i, addr);
-    TRACE(1, "interceptPrologues %s prologue[%d]=%p\n",
-          func->fullName()->data(), i, (void*)addr);
-  }
-}
-
 static void raiseMissingArgument(const char* name, int expected, int got) {
   if (expected == 1) {
     raise_warning(Strings::MISSING_ARGUMENT, name, got);
@@ -2259,15 +2115,6 @@ SrcKey
 TranslatorX64::emitPrologue(Func* func, int nPassed) {
   int numParams = func->numParams();
   const Func::ParamInfoVec& paramInfo = func->params();
-  assert(IMPLIES(func->maybeIntercepted() == -1,
-                 m_interceptsEnabled));
-  if (m_interceptsEnabled &&
-      !func->isPseudoMain() &&
-      !func->isGenerator() &&
-      (RuntimeOption::EvalJitEnableRenameFunction ||
-       func->attrs() & AttrDynamicInvoke)) {
-    emitInterceptPrologue(func);
-  }
 
   Offset dvInitializer = InvalidAbsoluteOffset;
 
@@ -6793,7 +6640,7 @@ asm_label(a, varEnvReturn);
                     rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), r(s));
     }
     astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
+    emitCall(astubs, (TCA)&EventHook::onFunctionExit, true);
     recordReentrantStubCall(*m_curNI);
   }
 
@@ -7409,7 +7256,7 @@ void TranslatorX64::emitContExit() {
   {
     UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
     astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
+    emitCall(astubs, (TCA)&EventHook::onFunctionExit, true);
     recordReentrantStubCall(*m_curNI);
   }
   a.    push  (rVmFp[AROFF(m_savedRip)]);
@@ -11549,14 +11396,12 @@ TranslatorX64::TranslatorX64()
 : m_numNativeTrampolines(0),
   m_trampolineSize(0),
   m_spillFillCode(&a),
-  m_interceptHelper(0),
   m_defClsHelper(0),
   m_funcPrologueRedispatch(0),
   m_irAUsage(0),
   m_irAstubsUsage(0),
   m_numHHIRTrans(0),
   m_regMap(kCallerSaved, kCalleeSaved, this),
-  m_interceptsEnabled(false),
   m_unwindRegMap(128),
   m_curTrace(0),
   m_curNI(0),

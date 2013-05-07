@@ -100,13 +100,6 @@ void ProcessInit() {
   // ensure that nextTx64 and tx64 are set
   (void)VM::Transl::Translator::Get();
 
-  if (!RuntimeOption::RepoAuthoritative &&
-      RuntimeOption::EvalJitEnableRenameFunction &&
-      RuntimeOption::EvalJit) {
-    VM::Func::enableIntercept();
-    VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
-    tx64->enableIntercepts();
-  }
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
   // normal repo.

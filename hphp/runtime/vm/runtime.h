@@ -112,12 +112,17 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 }
 
 inline void ALWAYS_INLINE
-frame_free_locals_inl(ActRec* fp, int numLocals) {
+frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
     decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
+}
+
+inline void ALWAYS_INLINE
+frame_free_locals_inl(ActRec* fp, int numLocals) {
+  frame_free_locals_inl_no_hook(fp, numLocals);
   VM::EventHook::FunctionExit(fp);
 }
 
@@ -149,93 +154,6 @@ VM::Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                   ssize_t numBuiltinClasses);
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
-
-template <bool handle_throw>
-void call_intercept_handler(TypedValue* retval,
-                            CArrRef intArgs,
-                            ActRec* ar,
-                            Variant* ihandler) {
-  if (handle_throw) { assert(ar); }
-  ObjectData* intThis = nullptr;
-  VM::Class* intCls = nullptr;
-  StringData* intInvName = nullptr;
-  const VM::Func* handler = vm_decode_function(ihandler->asCArrRef()[0],
-                                               g_vmContext->getFP(),
-                                               false, intThis, intCls,
-                                               intInvName);
-  if (handle_throw) {
-    // It's possible for the intercept handler could throw an exception.
-    // If run_intercept_handler() was called from the translator and the
-    // handler throws, we need to do some cleanup here before allowing
-    // the exception to propagate.
-    try {
-      g_vmContext->invokeFunc(retval, handler, intArgs,
-                              intThis, intCls, nullptr, intInvName);
-    } catch (...) {
-      Stack& stack = g_vmContext->getStack();
-      assert((TypedValue*)ar - stack.top() == ar->numArgs());
-      while (uintptr_t(stack.top()) < uintptr_t(ar)) {
-        stack.popTV();
-      }
-      stack.popAR();
-      throw;
-    }
-  } else {
-    g_vmContext->invokeFunc(retval, handler, intArgs,
-                            intThis, intCls, nullptr, intInvName);
-  }
-}
-
-/**
- * run_intercept_handler is used for functions invoked via FCall, whereas
- * run_intercept_handler_for_invokefunc is used for functions invoked by
- * the runtime via invokeFunc(). The run_intercept_handler* functions will
- * return true if and only if the original function should be executed.
- *
- * run_intercept_handler is called when the ActRec for the original function
- * is in the "pre-live" state. run_intercept_handler_for_invokefunc is called
- * before the ActRec for the original function has been materialized.
- */
-
-template <bool handle_throw>
-bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
-  using namespace HPHP::VM::Transl;
-  assert(ihandler);
-  TypedValue retval;
-  tvWriteNull(&retval);
-  Variant doneFlag = true;
-  Array intArgs =
-    CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                   (ar->hasThis() ? Variant(Object(ar->getThis())) : uninit_null()),
-                   Array(pack_args_into_array(ar, ar->numArgs())),
-                   ihandler->asCArrRef()[1],
-                   ref(doneFlag));
-  call_intercept_handler<handle_throw>(&retval, intArgs, ar, ihandler);
-  if (doneFlag.toBoolean()) {
-    // $done is true, meaning don't enter the intercepted function. Clean up
-    // the pre-live ActRec and the args, move the intercept handler's return
-    // value to the right place, and get out.
-    Stack& stack = g_vmContext->getStack();
-    assert((TypedValue*)ar - stack.top() == ar->numArgs());
-    while (uintptr_t(stack.top()) < uintptr_t(ar)) {
-      stack.popTV();
-    }
-    stack.popAR();
-    stack.allocTV();
-    memcpy(stack.top(), &retval, sizeof(TypedValue));
-    return false;
-  }
-  // Discard the handler's return value
-  tvRefcountedDecRef(&retval);
-  return true;
-}
-
-bool run_intercept_handler_for_invokefunc(TypedValue* retval,
-                                          const VM::Func* f,
-                                          CArrRef params,
-                                          ObjectData* this_,
-                                          StringData* invName,
-                                          Variant* ihandler);
 
 static inline VM::Instance*
 newInstance(VM::Class* cls) {

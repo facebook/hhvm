@@ -636,7 +636,6 @@ public:
   }
 
   const Func* getFunc(Offset pc) const;
-  void enableIntercepts();
   void setCacheId(unsigned id) {
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);

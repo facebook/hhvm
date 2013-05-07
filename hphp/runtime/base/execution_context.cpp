@@ -53,7 +53,7 @@ Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
 BaseExecutionContext::BaseExecutionContext() :
-    m_fp(nullptr), m_pc(nullptr), m_isValid(1), m_eventHook(nullptr),
+    m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
@@ -86,10 +86,6 @@ VMExecutionContext::VMExecutionContext() :
                 "m_fp offset too large");
   static_assert(offsetof(ExecutionContext, m_pc) <= 0xff,
                 "m_pc offset too large");
-  static_assert(offsetof(ExecutionContext, m_isValid) <= 0xff,
-                "m_isValid offset too large");
-  static_assert(offsetof(ExecutionContext, m_eventHook) <= 0xff,
-                "m_eventHook offset too large");
   static_assert(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff,
                 "m_currentThreadIdx offset too large");
 
@@ -101,7 +97,6 @@ VMExecutionContext::VMExecutionContext() :
       s_threadIdxMap[tid] = m_currentThreadIdx;
     }
   }
-  m_eventHook = new HPHP::VM::EventHook();
 }
 
 BaseExecutionContext::~BaseExecutionContext() {
@@ -137,7 +132,6 @@ VMExecutionContext::~VMExecutionContext() {
     delete *it;
   }
 
-  delete m_eventHook;
   delete m_injTables;
   delete m_breakPointFilter;
   delete m_lastLocFilter;

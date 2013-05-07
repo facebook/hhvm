@@ -156,7 +156,6 @@ public:
   static PhpFile *readHhbc(const std::string &name, const FileInfo &fileInfo);
   static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);
   static String translateFileName(StringData *file);
-  static void enableIntercepts();
   static void onDelete(PhpFile *f);
   static void forEachUnit(VM::UnitVisitor& uit);
   static size_t getLoadedFiles();

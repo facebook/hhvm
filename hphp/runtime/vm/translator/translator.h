@@ -892,12 +892,6 @@ public:
   virtual void unprotectCode() = 0;
   virtual bool isValidCodeAddress(TCA) const = 0;
 
-  enum FuncPrologueFlags {
-    FuncPrologueNormal      = 0,
-    FuncPrologueMagicCall   = 1,
-    FuncPrologueIntercepted = 2,
-  };
-
   const TransDB& getTransDB() const {
     return m_transDB;
   }

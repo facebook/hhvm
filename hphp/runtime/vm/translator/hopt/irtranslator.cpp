@@ -37,6 +37,7 @@
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/codegen.h"
 #include "runtime/vm/translator/hopt/hhbctranslator.h"
+#include "runtime/vm/translator/hopt/print.h"
 
 // Include last to localize effects to this file
 #include "util/assert_throw.h"

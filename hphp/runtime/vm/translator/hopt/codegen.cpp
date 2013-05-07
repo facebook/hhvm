@@ -44,6 +44,7 @@
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/nativecalls.h"
+#include "runtime/vm/translator/hopt/print.h"
 
 using HPHP::VM::Transl::TCA;
 using namespace HPHP::VM::Transl::TargetCache;
@@ -5142,7 +5143,7 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
 }
 
 void CodeGenerator::print() const {
-  m_curTrace->print(std::cout, m_state.asmInfo);
+  JIT::print(std::cout, m_curTrace, m_state.asmInfo);
 }
 
 // select instructions for the trace and its exits

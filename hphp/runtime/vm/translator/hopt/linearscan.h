@@ -17,16 +17,10 @@
 #ifndef incl_HPHP_VM_LINEAR_SCAN_H_
 #define incl_HPHP_VM_LINEAR_SCAN_H_
 
-#include <boost/noncopyable.hpp>
-
-#include "runtime/vm/translator/physreg.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
-#include "runtime/vm/translator/hopt/codegen.h"
-#include "runtime/vm/translator/hopt/state_vector.h"
-
 namespace HPHP { namespace VM { namespace JIT {
+
+class Trace;
+class IRFactory;
 
 /*
  * The main entry point for register allocation.  Called prior to code

@@ -886,6 +886,8 @@ template<class T> void assert_opcode_extra(Opcode opc) {
 #undef O
 }
 
+std::string showExtra(Opcode opc, const IRExtraData* data);
+
 //////////////////////////////////////////////////////////////////////
 
 inline bool isCmpOp(Opcode opc) {
@@ -1731,6 +1733,11 @@ struct IRInstruction {
   void setExtra(IRExtraData* data) { assert(!m_extra); m_extra = data; }
 
   /*
+   * Return the raw extradata pointer, for pretty-printing.
+   */
+  const IRExtraData* rawExtra() const { return m_extra; }
+
+  /*
    * Clear the extra data pointer in a IRInstruction.  Used during
    * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
    * memory.
@@ -1867,8 +1874,6 @@ struct IRInstruction {
   bool cseEquals(IRInstruction* inst) const;
   size_t cseHash() const;
 
-  void print(std::ostream& ostream) const;
-  void print() const;
   std::string toString() const;
 
   /*
@@ -1902,11 +1907,6 @@ struct IRInstruction {
   // hasMainDst provides raw access to the HasDest flag, for instructions with
   // ModifiesStack set.
   bool hasMainDst() const;
-
-  void printDst(std::ostream& ostream) const;
-  void printSrc(std::ostream& ostream, uint32_t srcIndex) const;
-  void printOpcode(std::ostream& ostream) const;
-  void printSrcs(std::ostream& ostream) const;
 
 private:
   bool mayReenterHelper() const;
@@ -1986,13 +1986,11 @@ public:
   void              setUseCount(uint32_t count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32_t          decUseCount() { return --m_useCount; }
+  bool              isSpilled() const { return m_isSpilled; }
   bool              isBoxed() const { return type().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
   std::string       toString() const;
-  void              print(std::ostream& ostream,
-                          bool printLastUse = false) const;
-  void              print() const;
 
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.
@@ -2277,8 +2275,6 @@ struct Block : boost::noncopyable {
   unsigned postId() const { return m_postid; }
   void setPostId(unsigned id) { m_postid = id; }
 
-  void printLabel(std::ostream& ostream) const;
-
   // insert inst after this block's label, return an iterator to the
   // newly inserted instruction.
   iterator prepend(IRInstruction* inst) {
@@ -2385,6 +2381,7 @@ public:
   }
 
   std::list<Block*>& getBlocks() { return m_blocks; }
+  const std::list<Block*>& getBlocks() const { return m_blocks; }
   Block* front() { return *m_blocks.begin(); }
   Block* back() { auto it = m_blocks.end(); return *(--it); }
   const Block* front() const { return *m_blocks.begin(); }
@@ -2423,9 +2420,8 @@ public:
   typedef std::list<Trace*>::iterator ExitIterator;
 
   ExitList& getExitTraces() { return m_exitTraces; }
+  const ExitList& getExitTraces() const { return m_exitTraces; }
   std::string toString() const;
-  void print(std::ostream& ostream, const AsmInfo* asmInfo = nullptr) const;
-  void print() const;
 
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't
@@ -2606,19 +2602,6 @@ void forEachTraceInst(Trace* main, Body body) {
     forEachInst(t, body);
   });
 }
-
-/*
- * Some utilities related to dumping. Rather than file-by-file control, we control
- * most IR logging via the hhir trace module.
- */
-static inline bool dumpIREnabled(int level = 1) {
-  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::hhir, level);
-}
-
-void dumpTraceImpl(const Trace* trace, std::ostream& out,
-                   const AsmInfo* asmInfo = nullptr);
-void dumpTrace(int level, const Trace* trace, const char* caption,
-               AsmInfo* ai = nullptr);
 
 }}}
 

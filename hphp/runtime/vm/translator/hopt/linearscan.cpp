@@ -18,6 +18,14 @@
 
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/nativecalls.h"
+#include "runtime/vm/translator/hopt/print.h"
+#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/tracebuilder.h"
+#include "runtime/vm/translator/hopt/codegen.h"
+#include "runtime/vm/translator/hopt/state_vector.h"
+#include "runtime/vm/translator/physreg.h"
+#include "runtime/vm/translator/abi-x64.h"
+#include <boost/noncopyable.hpp>
 
 namespace HPHP {
 namespace VM {
@@ -278,7 +286,7 @@ template<typename Inner, int DumpVal=4>
 static inline void dumpIR(const Inner* in, const char* msg) {
   if (dumpIREnabled(DumpVal)) {
     std::ostringstream str;
-    in->print(str);
+    print(str, in);
     HPHP::Trace::traceRelease("--- %s: %s\n", msg, str.str().c_str());
   }
 }

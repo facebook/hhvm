@@ -193,13 +193,10 @@ private:
   template<class OpndType>
   ConditionCode emitTypeTest(Type type, OpndType src, bool negate);
 
-  template<class OpndType>
-  ConditionCode emitTypeTest(IRInstruction* inst, OpndType src, bool negate);
-
-  template<class OpndType>
-  void emitGuardType(OpndType src, IRInstruction* instr);
-
-  void cgGuardTypeCell(PhysReg baseReg,int64_t offset,IRInstruction* instr);
+  template<class MemLoc>
+  void emitTypeCheck(Type type, MemLoc src, Block* taken);
+  template<class MemLoc>
+  void emitTypeGuard(Type type, MemLoc mem);
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
@@ -242,8 +239,8 @@ private:
 
   void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 
-  void cgNegate(IRInstruction* inst); // helper
-  void cgJcc(IRInstruction* inst); // helper
+  void cgJcc(IRInstruction* inst);        // helper
+  void cgReqBindJcc(IRInstruction* inst); // helper
   void cgOpCmpHelper(
             IRInstruction* inst,
             void (Asm::*setter)(Reg8),
@@ -253,7 +250,13 @@ private:
             int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
             int64_t (*obj_cmp_int)(ObjectData*, int64_t),
             int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
-  void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
+
+  template<class MemLoc>
+  void emitSideExitGuard(Type type, MemLoc mem, Offset taken);
+  void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
+
+  void emitCompare(SSATmp*, SSATmp*);
+  void emitTestZero(SSATmp*);
   bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
                         void(Asm::*emitFunc)(Reg64));
   bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
@@ -307,12 +310,6 @@ private:
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
   Address emitFwdJmp(Block* target);
-  Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
-                                   IRInstruction* toSmash);
-  void emitJccDirectExit(IRInstruction*, ConditionCode);
-  Address emitSmashableFwdJcc(ConditionCode cc, Block* target,
-                              IRInstruction* toSmash);
-  void emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurFunc() const;
   Class*      getCurClass() const { return getCurFunc()->cls(); }

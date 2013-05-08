@@ -326,15 +326,21 @@ Instruction set
 
 1. Checks and Asserts
 
-D:T = GuardType<T> S0:Gen -> L
+D:T = CheckType<T> S0:Gen -> L
 
   Check that the type of the src S0 is T, and if so copy it to D.  If
-  S0 is not type T, branch to the exit trace label L.
+  S0 is not type T, branch to the label L.
 
-GuardLoc<T,localId> S0:FramePtr -> L
+GuardLoc<T,localId> S0:FramePtr
+
+  Guard that type of the given localId on the frame S0 is a subtype of
+  the type T; if not, make a fallback jump.  (A jump to a service
+  request that chains to a retranslation for this tracelet.)
+
+CheckLoc<T,localId> S0:FramePtr
 
   Check that type of the given localId on the frame S0 is T; if not,
-  branch to the exit trace label L.
+  branch to the label L.
 
 AssertLoc<T,localId> S0:FramePtr
 
@@ -348,10 +354,20 @@ OverrideLoc<T,localId> S0:FramePtr
   Overrides tracked information about the type of a local in frame S0.
   This is used to fix tracked state after InterpOne instructions.
 
-D:StkPtr = GuardStk<T,offset> S0:StkPtr -> L
+D:StkPtr = GuardStk<T,offset> S0:StkPtr
+
+  Guard that the type of the cell on the stack pointed to by S0 at
+  offset (in cells) is T.  If not, make a fallback jump.  (A jump to a
+  service request that chains to a retranslation for this tracelet.)
+
+  Returns a new StkPtr that represents the same stack but with the
+  knowledge that the slot at the index S1 has type T.
+
+D:StkPtr = CheckStk<T,offset> S0:StkPtr -> L
 
   Check that the type of the cell on the stack pointed to by S0 at
-  offset (in cells) is T; if not, branch to the exit trace label L.
+  offset (in cells) is T; if not, branch to the label L.
+
   Returns a new StkPtr that represents the same stack but with the
   knowledge that the slot at the index S1 has type T.
 
@@ -377,6 +393,9 @@ CheckInitMem S0:PtrToGen S1:ConstInt -> L
 
 GuardRefs
 
+  Perform reffiness guard checks.  If any fail, make a fallback jump.
+  (Jump to a service request that will chain to a retranslation of
+  this tracelet.)
 
 2. Arithmetic
 
@@ -1034,36 +1053,61 @@ D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
 
 11. Trace exits
 
-ExitTrace<toSmash> S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
+SyncABIRegs S0:FramePtr S1:StkPtr
 
-  Unconditional exit to bytecode offset S1 in function S0.  S2 and
-  S3 are the VM stack and frame pointers, respectively.  If given,
-  toSmash points to a jump or branch instruction to patch later.
+  Ensures the cross-tracelet ABI registers are in a consistent state
+  in preparation for an instruction that may leave the trace.
 
-ExitTraceCc<toSmash> S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
-                     S4:ConstInt
+  In practice this instruction currently doesn't do anything except
+  act as an essential instruction that prevents the current stack from
+  being dce'd.
 
-  Exit conditionally to bytecode offset S1 or S4 in function S0.
-  S4 is bytecode address to exit to if the condition is false.
-  S2 and S3 are the VM stack and frame pointer, respectively.
+ReqBindJmp<bcOff>
 
-ExitGuardFailure S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
+  Emit a jump to a REQ_BIND_JMP service request to the target offset
+  bcOff.
 
-  A start-of-trace guard failed before the trace began executing.
-  Runtime may retranslate the bytecode using HHIR.  S1 is the
-  bytecode offset, S2 and S3 are the VM stack and frame pointer.
+ReqBindJmpNoIR<bcOff>
 
-ExitSlow S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
+  Emit a jump to a REQ_BIND_JMP_NO_IR service request to the target
+  offset bcOff.  This is used for unsupported situations, where we
+  need to leave the trace and want the "retranslation" to occur
+  without using HHIR (i.e. interp).
 
-  Like ExitTrace, but with a runtime hint to not use HHIR at this func/pc
-  position in the future.  Runtime may start a new trace using Tx64 or
-  interpreter.
+ReqRetranslate
 
-ExitSlowNoProgress S0:ConstFunc, S1:ConstInt, S2:StkPtr, S3:StkPtr
+  Emit a jump to a service request that will chain to a retranslation
+  of this tracelet.
 
-  Like ExitGuardFailure, with the "slow" hint from ExitSlow.
-  In this case we can retranslate or interprete the whole tracelet since
-  it didn't make any progress.
+  This instruction is used in exit traces for a type prediction that
+  occurs at the first bytecode offset of a tracelet.
+
+ReqBindJmpGt
+ReqBindJmpGte
+ReqBindJmpLt
+ReqBindJmpLte
+ReqBindJmpEq
+ReqBindJmpNeq
+ReqBindJmpSame
+ReqBindJmpNSame
+ReqBindJmpInstanceOfBitmask
+ReqBindJmpNInstanceOfBitmask
+ReqBindJmpZero
+ReqBindJmpNZero
+
+  Test the condition based on the Jmp* op of similar name, and then
+  emit a pair of smashable jumps to a REQ_BIND_JMPCC_FIRST service
+  request.
+
+SideExitGuardLoc<T,locId,takenOff> S0:FramePtr
+
+  Test the type of a local, and if it fails jump to a side exit
+  service request.
+
+D:StkPtr = SideExitGuardStk<T,stackOff,takenOff> S0:StkPtr
+
+  Test the type of a stack cell, and if it fails jump to a side exit
+  service request.
 
 
 12. Refcounting and copies

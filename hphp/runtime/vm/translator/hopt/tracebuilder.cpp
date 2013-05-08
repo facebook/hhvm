@@ -88,115 +88,6 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
   }
 }
 
-/*
- * Code generation support for side exits.
- * There are 3 types of side exits as defined by the ExitType enum:
- * (1) Normal: Conditional or unconditional program branches
- *     that take you out of the trace.
- * (2) Slow: branches to slow paths to handle rare and slow cases
- *     such as null check failures, warnings, fatals, or type guard
- *     failures in the middle of a trace.
- * (3) GuardFailure: branches due to guard failures at the beginning
- *     of a trace.
- */
-
-Trace* TraceBuilder::genExitGuardFailure(uint32_t bcOff) {
-  Trace* trace = makeExitTrace(bcOff);
-
-  MarkerData marker;
-  marker.bcOff    = bcOff;
-  marker.stackOff = m_spOffset;
-  marker.func     = m_curFunc->getValFunc();
-  gen(Marker, marker); // goes on main trace
-
-  SSATmp* pc = cns((int64_t)bcOff);
-  // TODO change exit trace to a control flow instruction that
-  // takes sp, fp, and a Marker as the target label instruction
-  trace->back()->push_back(
-    m_irFactory.gen(getExitOpcode(TraceExitType::GuardFailure),
-                    m_curFunc,
-                    pc,
-                    m_spValue,
-                    m_fpValue));
-  return trace;
-}
-
-/*
- * getExitSlowTrace generates a target exit trace for
- * TraceExitType::Slow branches.
- */
-Trace* TraceBuilder::getExitSlowTrace(uint32_t bcOff,
-                                      int32_t stackDeficit,
-                                      uint32_t numOpnds,
-                                      SSATmp** opnds) {
-  // this is a newly created check with no label
-  TraceExitType::ExitType exitType =
-    bcOff == m_initialBcOff ? TraceExitType::SlowNoProgress
-                            : TraceExitType::Slow;
-  return genExitTrace(bcOff, stackDeficit, numOpnds, opnds, exitType);
-
-}
-
-void TraceBuilder::genTraceEnd(uint32_t nextPc,
-                               TraceExitType::ExitType exitType /* = Normal */) {
-  gen(getExitOpcode(TraceExitType::Normal),
-      m_curFunc,
-      cns(nextPc),
-      m_spValue,
-      m_fpValue);
-}
-
-Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
-                                  int32_t    stackDeficit,
-                                  uint32_t   numOpnds,
-                                  SSATmp* const* opnds,
-                                  TraceExitType::ExitType exitType,
-                                  uint32_t   notTakenBcOff,
-                                  std::function<void(IRFactory*, Trace*)>
-                                    beforeExit) {
-  Trace* exitTrace = makeExitTrace(bcOff);
-
-  MarkerData marker;
-  marker.bcOff    = bcOff;
-  marker.stackOff = m_spOffset + numOpnds - stackDeficit;
-  marker.func     = m_curFunc->getValFunc();
-  exitTrace->back()->push_back(m_irFactory.gen(Marker, marker));
-
-  if (beforeExit) {
-    beforeExit(&m_irFactory, exitTrace);
-  }
-  SSATmp* sp = m_spValue;
-  if (numOpnds != 0 || stackDeficit != 0) {
-    SSATmp* srcs[numOpnds + 2];
-    srcs[0] = m_spValue;
-    srcs[1] = cns(stackDeficit);
-    std::copy(opnds, opnds + numOpnds, srcs + 2);
-
-    SSATmp** decayedPtr = srcs;
-    auto* spillInst = m_irFactory.gen(
-      SpillStack,
-      std::make_pair(numOpnds + 2, decayedPtr)
-    );
-    sp = spillInst->getDst();
-    exitTrace->back()->push_back(spillInst);
-  }
-  SSATmp* pc = cns(int64_t(bcOff));
-  if (exitType == TraceExitType::NormalCc) {
-    assert(notTakenBcOff != 0);
-    SSATmp* notTakenPC = cns(notTakenBcOff);
-    genFor(exitTrace, getExitOpcode(exitType),
-           m_curFunc,
-           pc, sp, m_fpValue,
-           notTakenPC);
-  } else {
-    assert(notTakenBcOff == 0);
-    genFor(exitTrace, getExitOpcode(exitType),
-           m_curFunc,
-           pc, sp, m_fpValue);
-  }
-  return exitTrace;
-}
-
 SSATmp* TraceBuilder::genDefUninit() {
   return gen(DefConst, Type::Uninit, ConstData(0));
 }
@@ -318,6 +209,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case AssertStk:
   case CastStk:
+  case CheckStk:
   case GuardStk:
   case ExceptionBarrier:
     m_spValue = inst->getDst();
@@ -625,19 +517,21 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* TraceBuilder::preOptimizeGuardLoc(IRInstruction* inst) {
-  auto const locId = inst->getExtra<GuardLoc>()->locId;
+SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
+  auto const locId = inst->getExtra<CheckLoc>()->locId;
 
   if (auto const prevValue = getLocalValue(locId)) {
+    always_assert(false && "WTF");
     return gen(
-      GuardType, inst->getTypeParam(), inst->getTaken(), prevValue
+      CheckType, inst->getTypeParam(), inst->getTaken(), prevValue
     );
   }
 
   auto const prevType = getLocalType(locId);
   if (prevType != Type::None) {
-    // It doesn't make sense to be guarding on something that's deemed
-    // to fail.
+    always_assert(false && "WTF2");
+    // It doesn't make sense to be checking something that's deemed to
+    // fail.
     assert(prevType == inst->getTypeParam());
     inst->convertToNop();
   }
@@ -802,7 +696,7 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
 SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
-    X(GuardLoc);
+    X(CheckLoc);
     X(AssertLoc);
     X(LdThis);
     X(LdCtx);

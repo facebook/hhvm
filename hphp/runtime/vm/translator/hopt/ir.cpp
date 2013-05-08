@@ -300,7 +300,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_dst(nullptr)
   , m_taken(nullptr)
   , m_block(nullptr)
-  , m_tca(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
@@ -360,11 +359,11 @@ bool IRInstruction::hasMemEffects() const {
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(op(), CanCSE);
   // Make sure that instructions that are CSE'able can't produce a reference
-  // count or consume reference counts. GuardType is special because it can
+  // count or consume reference counts. CheckType is special because it can
   // refine a maybeCounted type to a notCounted type, so it logically consumes
   // and produces a reference without doing any work.
-  assert(!canCSE || !producesReference() || m_op == GuardType);
-  assert(!canCSE || !consumesReferences() || m_op == GuardType);
+  assert(!canCSE || !producesReference() || m_op == CheckType);
+  assert(!canCSE || !consumesReferences() || m_op == CheckType);
   return canCSE && !mayReenterHelper();
 }
 
@@ -376,9 +375,9 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
   }
-  // GuardType consumes a reference if we're guarding from a maybeCounted type
+  // CheckType consumes a reference if we're guarding from a maybeCounted type
   // to a notCounted type.
-  if (m_op == GuardType) {
+  if (m_op == CheckType) {
     assert(srcNo == 0);
     return getSrc(0)->type().maybeCounted() && getTypeParam().notCounted();
   }
@@ -454,7 +453,7 @@ bool IRInstruction::isPassthrough() const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef || m_op == GuardType || m_op == Mov);
+  assert(m_op == IncRef || m_op == CheckType || m_op == Mov);
   return getSrc(0);
 }
 
@@ -548,9 +547,122 @@ const StringData* findClassName(SSATmp* cls) {
   return nullptr;
 }
 
+bool isQueryOp(Opcode opc) {
+  switch (opc) {
+  case OpGt:
+  case OpGte:
+  case OpLt:
+  case OpLte:
+  case OpEq:
+  case OpNeq:
+  case OpSame:
+  case OpNSame:
+  case InstanceOfBitmask:
+  case NInstanceOfBitmask:
+  case IsType:
+  case IsNType:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isCmpOp(Opcode opc) {
+  switch (opc) {
+  case OpGt:
+  case OpGte:
+  case OpLt:
+  case OpLte:
+  case OpEq:
+  case OpNeq:
+  case OpSame:
+  case OpNSame:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isQueryJmpOp(Opcode opc) {
+  switch (opc) {
+  case JmpGt:
+  case JmpGte:
+  case JmpLt:
+  case JmpLte:
+  case JmpEq:
+  case JmpNeq:
+  case JmpSame:
+  case JmpNSame:
+  case JmpInstanceOfBitmask:
+  case JmpNInstanceOfBitmask:
+  case JmpIsType:
+  case JmpIsNType:
+  case JmpZero:
+  case JmpNZero:
+    return true;
+  default:
+    return false;
+  }
+}
+
+Opcode queryToJmpOp(Opcode opc) {
+  assert(isQueryOp(opc));
+  switch (opc) {
+  case OpGt:               return JmpGt;
+  case OpGte:              return JmpGte;
+  case OpLt:               return JmpLt;
+  case OpLte:              return JmpLte;
+  case OpEq:               return JmpEq;
+  case OpNeq:              return JmpNeq;
+  case OpSame:             return JmpSame;
+  case OpNSame:            return JmpNSame;
+  case InstanceOfBitmask:  return JmpInstanceOfBitmask;
+  case NInstanceOfBitmask: return JmpNInstanceOfBitmask;
+  case IsType:             return JmpIsType;
+  case IsNType:            return JmpIsNType;
+  default:                 always_assert(0);
+  }
+}
+
+Opcode queryJmpToQueryOp(Opcode opc) {
+  assert(isQueryJmpOp(opc));
+  switch (opc) {
+  case JmpGt:                 return OpGt;
+  case JmpGte:                return OpGte;
+  case JmpLt:                 return OpLt;
+  case JmpLte:                return OpLte;
+  case JmpEq:                 return OpEq;
+  case JmpNeq:                return OpNeq;
+  case JmpSame:               return OpSame;
+  case JmpNSame:              return OpNSame;
+  case JmpInstanceOfBitmask:  return InstanceOfBitmask;
+  case JmpNInstanceOfBitmask: return NInstanceOfBitmask;
+  case JmpIsType:             return IsType;
+  case JmpIsNType:            return IsNType;
+  default:                    always_assert(0);
+  }
+}
+
+Opcode jmpToReqBindJmp(Opcode opc) {
+  switch (opc) {
+  case JmpGt:                 return ReqBindJmpGt;
+  case JmpGte:                return ReqBindJmpGte;
+  case JmpLt:                 return ReqBindJmpLt;
+  case JmpLte:                return ReqBindJmpLte;
+  case JmpEq:                 return ReqBindJmpEq;
+  case JmpNeq:                return ReqBindJmpNeq;
+  case JmpSame:               return ReqBindJmpSame;
+  case JmpNSame:              return ReqBindJmpNSame;
+  case JmpInstanceOfBitmask:  return ReqBindJmpInstanceOfBitmask;
+  case JmpNInstanceOfBitmask: return ReqBindJmpNInstanceOfBitmask;
+  case JmpZero:               return ReqBindJmpZero;
+  case JmpNZero:              return ReqBindJmpNZero;
+  default:                    always_assert(0);
+  }
+}
+
 Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
-
   switch (opc) {
   case OpGt:                return OpLte;
   case OpGte:               return OpLt;
@@ -568,16 +680,20 @@ Opcode negateQueryOp(Opcode opc) {
   }
 }
 
-Opcode queryCommuteTable[] = {
-  OpLt,         // OpGt
-  OpLte,        // OpGte
-  OpGt,         // OpLt
-  OpGte,        // OpLte
-  OpEq,         // OpEq
-  OpNeq,        // OpNeq
-  OpSame,       // OpSame
-  OpNSame       // OpNSame
-};
+Opcode commuteQueryOp(Opcode opc) {
+  assert(isQueryOp(opc));
+  switch (opc) {
+  case OpGt:    return OpLt;
+  case OpGte:   return OpLte;
+  case OpLt:    return OpGt;
+  case OpLte:   return OpGte;
+  case OpEq:    return OpEq;
+  case OpNeq:   return OpNeq;
+  case OpSame:  return OpSame;
+  case OpNSame: return OpNSame;
+  default:      always_assert(0);
+  }
+}
 
 // Objects compared with strings may involve calling a user-defined
 // __toString function.
@@ -587,15 +703,6 @@ bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
   return (t0 == Type::Cell || t1 == Type::Cell) ||
     ((t0 == Type::Obj || t1 == Type::Obj) &&
      (t0.isString() || t1.isString()));
-}
-
-TraceExitType::ExitType getExitType(Opcode opc) {
-  assert(opc >= ExitTrace && opc <= ExitGuardFailure);
-  return TraceExitType::ExitType(opc - ExitTrace);
-}
-
-Opcode getExitOpcode(TraceExitType::ExitType type) {
-  return (Opcode)(ExitTrace + type);
 }
 
 bool isRefCounted(SSATmp* tmp) {
@@ -620,7 +727,6 @@ void IRInstruction::convertToNop() {
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
   m_taken = nullptr;
-  m_tca = nop.m_tca;
   m_extra = nullptr;
 }
 
@@ -654,7 +760,6 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_taken = other->m_taken;
-  m_tca = other->m_tca;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
@@ -871,10 +976,6 @@ TCA SSATmp::getValTCA() const {
   return m_inst->getExtra<ConstData>()->as<TCA>();
 }
 
-std::string ExitData::show() const {
-  return folly::to<std::string>(toSmash->getId());
-}
-
 std::string SSATmp::toString() const {
   std::ostringstream out;
   print(out, this);
@@ -893,18 +994,46 @@ int32_t spillValueCells(IRInstruction* spillStack) {
   return numSrcs - 2;
 }
 
-/**
- * Return a list of blocks in reverse postorder
- */
 BlockList sortCfg(Trace* trace, const IRFactory& factory) {
   assert(trace->isMain());
   BlockList blocks;
   unsigned next_id = 0;
-  postorderWalk([&](Block* block) {
+  postorderWalk(
+    [&](Block* block) {
       block->setPostId(next_id++);
       blocks.push_front(block);
-    }, factory.numBlocks(), trace->front());
+    },
+    factory.numBlocks(),
+    trace->front()
+  );
+  assert(blocks.size() <= factory.numBlocks());
+  assert(next_id <= factory.numBlocks());
   return blocks;
+}
+
+bool isRPOSorted(const BlockList& blocks) {
+  int id = 0;
+  for (auto it = blocks.rbegin(); it != blocks.rend(); ++it) {
+    if ((*it)->postId() != id++) return false;
+  }
+  return true;
+}
+
+PredVector computePredecessors(const BlockList& blocks) {
+  assert(isRPOSorted(blocks));
+
+  PredVector ret(blocks.size());
+
+  for (auto& block : blocks) {
+    if (auto succ = block->getNext()) {
+      ret[succ->postId()].push_back(block);
+    }
+    if (auto succ = block->getTaken()) {
+      ret[succ->postId()].push_back(block);
+    }
+  }
+
+  return ret;
 }
 
 /*
@@ -913,17 +1042,11 @@ BlockList sortCfg(Trace* trace, const IRFactory& factory) {
  * of postorder ids, indexed by postorder id.
  */
 IdomVector findDominators(const BlockList& blocks) {
-  // compute predecessors of each block
-  int num_blocks = blocks.size();
-  std::forward_list<int> preds[num_blocks];
-  for (Block* block : blocks) {
-    if (Block* succ = block->getNext()) {
-      preds[succ->postId()].push_front(block->postId());
-    }
-    if (Block* succ = block->getTaken()) {
-      preds[succ->postId()].push_front(block->postId());
-    }
-  }
+  assert(isRPOSorted(blocks));
+
+  auto const num_blocks = blocks.size();
+  auto const preds = computePredecessors(blocks);
+
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
@@ -940,10 +1063,11 @@ IdomVector findDominators(const BlockList& blocks) {
       int b = (*it)->postId();
       // new_idom = any already-processed predecessor
       auto pred_it = preds[b].begin();
-      int new_idom = *pred_it;
-      while (idom[new_idom] == -1) new_idom = *(++pred_it);
+      int new_idom = (*pred_it)->postId();
+      while (idom[new_idom] == -1) new_idom = (*++pred_it)->postId();
       // for all other already-processed predecessors p of b
-      for (int p : preds[b]) {
+      for (auto pred : preds[b]) {
+        auto p = pred->postId();
         if (p != new_idom && idom[p] != -1) {
           // find earliest common predecessor of p and new_idom
           // (higher postIds are earlier in flow and in dom-tree).

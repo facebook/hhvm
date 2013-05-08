@@ -106,33 +106,34 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  if (RuntimeOption::EvalHHIRMemOpt) {
+  auto dcePass = [&](const char* which) {
+    if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
+    eliminateDeadCode(trace, irFactory);
+    finishPass(folly::format("after {} DCE", which).str().c_str());
+  };
+
+  if (false && RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
     finishPass("after MemeLim");
   }
 
-  if (RuntimeOption::EvalHHIRDeadCodeElim) {
-    eliminateDeadCode(trace, irFactory);
-    finishPass("after DCE");
-  }
+  dcePass("initial");
 
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
     traceBuilder->reoptimize();
-    finishPass("after CSE/Simplification");
+    finishPass("after reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary
-    if (RuntimeOption::EvalHHIRDeadCodeElim) {
-      eliminateDeadCode(trace, irFactory);
-      finishPass("after DCE");
-    }
+    dcePass("reoptimize");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {
     optimizeJumps(trace, irFactory);
     finishPass("jump opts");
+    dcePass("jump opts");
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

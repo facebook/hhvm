@@ -69,16 +69,6 @@ class FailedIRGen : public std::exception {
       file(_file), line(_line), func(_func) { }
 };
 
-// Flags to identify if a branch should go to a patchable jmp in astubs
-// happens when instructions have been moved off the main trace to the exit path.
-static const TCA kIRDirectJmpInactive = nullptr;
-// Fixup Jcc;Jmp branches out of trace using REQ_BIND_JMPCC_FIRST/SECOND
-static const TCA kIRDirectJccJmpActive = (TCA)0x01;
-// Optimize Jcc exit from trace when fall through path stays in trace
-static const TCA kIRDirectJccActive = (TCA)0x02;
-// Optimize guard exit from beginning of trace
-static const TCA kIRDirectGuardActive = (TCA)0x03;
-
 #define SPUNT(instr) do {                           \
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
@@ -164,9 +154,11 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
+O(CheckLoc,                         ND, S(FramePtr),                       E) \
+O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
@@ -223,8 +215,7 @@ O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
-                                                                              \
-  /* TODO(#2058842): order currently matters for the 'query ops' here */      \
+/*    name                      dstinfo srcinfo                      flags */ \
 O(OpGt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpGte,                       D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpLt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
@@ -250,12 +241,25 @@ O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                       E) \
 O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                       E) \
 O(JmpIsType,                   D(None), SUnk,                              E) \
 O(JmpIsNType,                  D(None), SUnk,                              E) \
-  /* TODO(#2058842) keep preceeding conditional branches contiguous */        \
-                                                                              \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
 O(Jmp_,                        D(None), SUnk,                            T|E) \
+O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
+O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
+O(ReqBindJmpZero,                   ND, SNum,                            T|E) \
+O(ReqBindJmpNZero,                  ND, SNum,                            T|E) \
+O(SideExitGuardLoc,                 ND, S(FramePtr),                       E) \
+O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
+/*    name                      dstinfo srcinfo                      flags */ \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
@@ -358,12 +362,11 @@ O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(Func,FuncCls,FuncCtx,Null)        \
                                           S(Ctx,Cls,InitNull),           CRc) \
 O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
-O(ExitTrace,                        ND, SUnk,                            T|E) \
-O(ExitTraceCc,                      ND, SUnk,                            T|E) \
-O(ExitSlow,                         ND, SUnk,                            T|E) \
-O(ExitSlowNoProgress,               ND, SUnk,                            T|E) \
-O(ExitGuardFailure,                 ND, SUnk,                            T|E) \
-O(SyncVMRegs,                       ND, S(FramePtr) S(StkPtr),             E) \
+O(ReqBindJmp,                       ND, NA,                              T|E) \
+O(ReqBindJmpNoIR,                   ND, NA,                              T|E) \
+O(ReqRetranslateNoIR,               ND, NA,                              T|E) \
+O(ReqRetranslate,                   ND, NA,                              T|E) \
+O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
@@ -743,14 +746,29 @@ struct EdgeData : IRExtraData {
 };
 
 /*
- * ExitData contains the address of a jmp instruction we can smash later
- * if we start a new tracelet at this exit point.
+ * Information for the REQ_BIND_JMPCC stubs we create when a tracelet
+ * ends with conditional jumps.
  */
-struct ExitData : IRExtraData {
-  explicit ExitData(IRInstruction* toSmash) : toSmash(toSmash) {}
-  IRInstruction* toSmash;
+struct ReqBindJccData : IRExtraData {
+  Offset taken;
+  Offset notTaken;
 
-  std::string show() const;
+  std::string show() const {
+    return folly::to<std::string>(taken, ',', notTaken);
+  }
+};
+
+/*
+ * Information for a conditional side exit based on a type check of a
+ * local or stack cell.
+ */
+struct SideExitGuardData : IRExtraData {
+  uint32_t checkedSlot;
+  Offset taken;
+
+  std::string show() const {
+    return folly::to<std::string>(checkedSlot, ',', taken);
+  }
 };
 
 /*
@@ -777,6 +795,15 @@ struct StackOffset : IRExtraData {
   size_t cseHash() const { return std::hash<int32_t>()(offset); }
 
   int32_t offset;
+};
+
+/*
+ * Bytecode offsets.
+ */
+struct BCOffset : IRExtraData {
+  explicit BCOffset(Offset offset) : offset(offset) {}
+  std::string show() const { return folly::to<std::string>(offset); }
+  Offset offset;
 };
 
 /*
@@ -808,7 +835,6 @@ struct CallArrayData : IRExtraData {
   Offset pc, after;
 };
 
-
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -817,37 +843,54 @@ struct CallArrayData : IRExtraData {
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
-X(JmpSwitchDest,      JmpSwitchData);
-X(LdSSwitchDestFast,  LdSSwitchData);
-X(LdSSwitchDestSlow,  LdSSwitchData);
-X(Marker,             MarkerData);
-X(RaiseUninitLoc,     LocalId);
-X(GuardLoc,           LocalId);
-X(AssertLoc,          LocalId);
-X(OverrideLoc,        LocalId);
-X(LdLocAddr,          LocalId);
-X(DecRefLoc,          LocalId);
-X(LdLoc,              LocalId);
-X(StLoc,              LocalId);
-X(StLocNT,            LocalId);
-X(DefConst,           ConstData);
-X(LdConst,            ConstData);
-X(Jmp_,               EdgeData);
-X(ExitTrace,          ExitData);
-X(ExitTraceCc,        ExitData);
-X(SpillFrame,         ActRecInfo);
-X(GuardStk,           StackOffset);
-X(CastStk,            StackOffset);
-X(AssertStk,          StackOffset);
-X(ReDefSP,            StackOffset);
-X(ReDefGeneratorSP,   StackOffset);
-X(DefSP,              StackOffset);
-X(LdStack,            StackOffset);
-X(LdStackAddr,        StackOffset);
-X(DecRefStack,        StackOffset);
-X(DefInlineFP,        DefInlineFPData);
-X(InlineCreateCont,   CreateContData);
-X(CallArray,          CallArrayData);
+X(JmpSwitchDest,                JmpSwitchData);
+X(LdSSwitchDestFast,            LdSSwitchData);
+X(LdSSwitchDestSlow,            LdSSwitchData);
+X(Marker,                       MarkerData);
+X(RaiseUninitLoc,               LocalId);
+X(GuardLoc,                     LocalId);
+X(CheckLoc,                     LocalId);
+X(AssertLoc,                    LocalId);
+X(OverrideLoc,                  LocalId);
+X(LdLocAddr,                    LocalId);
+X(DecRefLoc,                    LocalId);
+X(LdLoc,                        LocalId);
+X(StLoc,                        LocalId);
+X(StLocNT,                      LocalId);
+X(DefConst,                     ConstData);
+X(LdConst,                      ConstData);
+X(Jmp_,                         EdgeData);
+X(SpillFrame,                   ActRecInfo);
+X(GuardStk,                     StackOffset);
+X(CheckStk,                     StackOffset);
+X(CastStk,                      StackOffset);
+X(AssertStk,                    StackOffset);
+X(ReDefSP,                      StackOffset);
+X(ReDefGeneratorSP,             StackOffset);
+X(DefSP,                        StackOffset);
+X(LdStack,                      StackOffset);
+X(LdStackAddr,                  StackOffset);
+X(DecRefStack,                  StackOffset);
+X(DefInlineFP,                  DefInlineFPData);
+X(ReqBindJmp,                   BCOffset);
+X(ReqBindJmpNoIR,               BCOffset);
+X(ReqRetranslateNoIR,           BCOffset);
+X(InlineCreateCont,             CreateContData);
+X(CallArray,                    CallArrayData);
+X(ReqBindJmpGt,                 ReqBindJccData);
+X(ReqBindJmpGte,                ReqBindJccData);
+X(ReqBindJmpLt,                 ReqBindJccData);
+X(ReqBindJmpLte,                ReqBindJccData);
+X(ReqBindJmpEq,                 ReqBindJccData);
+X(ReqBindJmpNeq,                ReqBindJccData);
+X(ReqBindJmpSame,               ReqBindJccData);
+X(ReqBindJmpNSame,              ReqBindJccData);
+X(ReqBindJmpInstanceOfBitmask,  ReqBindJccData);
+X(ReqBindJmpNInstanceOfBitmask, ReqBindJccData);
+X(ReqBindJmpZero,               ReqBindJccData);
+X(ReqBindJmpNZero,              ReqBindJccData);
+X(SideExitGuardLoc,             SideExitGuardData);
+X(SideExitGuardStk,             SideExitGuardData);
 
 #undef X
 
@@ -885,103 +928,57 @@ std::string showExtra(Opcode opc, const IRExtraData* data);
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool isCmpOp(Opcode opc) {
-  return (opc >= OpGt && opc <= OpNSame);
-}
+/*
+ * A "query op" is any instruction returning Type::Bool that is both
+ * branch-fusable and negateable.
+ */
+bool isQueryOp(Opcode opc);
 
-// A "query op" is any instruction returning Type::Bool that is both
-// branch-fusable and negateable.
-inline bool isQueryOp(Opcode opc) {
-  return (opc >= OpGt && opc <= IsNType);
-}
+/*
+ * A "cmp ops" is query op that takes exactly two arguments of type
+ * Gen.
+ */
+bool isCmpOp(Opcode opc);
 
-inline Opcode queryToJmpOp(Opcode opc) {
-  assert(isQueryOp(opc));
-  return (Opcode)(JmpGt + (opc - OpGt));
-}
+/*
+ * A "query jump op" is a conditional jump instruction that
+ * corresponds to one of the query op instructions.
+ */
+bool isQueryJmpOp(Opcode opc);
 
-inline bool isQueryJmpOp(Opcode opc) {
-  switch (opc) {
-    case JmpGt:
-    case JmpGte:
-    case JmpLt:
-    case JmpLte:
-    case JmpEq:
-    case JmpNeq:
-    case JmpSame:
-    case JmpNSame:
-    case JmpInstanceOfBitmask:
-    case JmpNInstanceOfBitmask:
-    case JmpIsType:
-    case JmpIsNType:
-    case JmpZero:
-    case JmpNZero:
-      return true;
-    default:
-      return false;
-  }
-}
+/*
+ * Translate a query op into a conditional jump that does the same
+ * test (a "query jump op").
+ *
+ * Pre: isQueryOp(opc)
+ */
+Opcode queryToJmpOp(Opcode opc);
 
-inline Opcode queryJmpToQueryOp(Opcode opc) {
-  assert(isQueryJmpOp(opc));
-  assert(opc != JmpZero && opc != JmpNZero);
-  return Opcode(OpGt + (opc - JmpGt));
-}
+/*
+ * Translate a "query jump op" to a query op.
+ *
+ * Pre: isQueryJmpOp(opc);
+ */
+Opcode queryJmpToQueryOp(Opcode opc);
 
-inline ConditionCode queryJmpToCC(Opcode opc) {
-  assert(isQueryJmpOp(opc));
-
-  using namespace HPHP::Transl;
-
-  switch (opc) {
-    case JmpGt:                 return CC_G;
-    case JmpGte:                return CC_GE;
-    case JmpLt:                 return CC_L;
-    case JmpLte:                return CC_LE;
-    case JmpEq:                 return CC_E;
-    case JmpNeq:                return CC_NE;
-    case JmpSame:               return CC_E;
-    case JmpNSame:              return CC_NE;
-    case JmpInstanceOfBitmask:  return CC_NZ;
-    case JmpNInstanceOfBitmask: return CC_Z;
-    case JmpIsType:             return CC_NZ;
-    case JmpIsNType:            return CC_Z;
-    case JmpZero:               return CC_Z;
-    case JmpNZero:              return CC_NZ;
-    default:
-      not_reached();
-  }
-}
+/*
+ * Convert a jump operation to its corresponding conditional
+ * ReqBindJmp.
+ *
+ * Pre: opc is a conditional jump.
+ */
+Opcode jmpToReqBindJmp(Opcode opc);
 
 /*
  * Return the opcode that corresponds to negation of opc.
  */
 Opcode negateQueryOp(Opcode opc);
 
-extern Opcode queryCommuteTable[];
-
-inline Opcode commuteQueryOp(Opcode opc) {
-  assert(opc >= OpGt && opc <= OpNSame);
-  return queryCommuteTable[opc - OpGt];
-}
-
-namespace TraceExitType {
-// Must update in sync with ExitTrace entries in OPC table above
-enum ExitType {
-  Normal,
-  NormalCc,
-  Slow,
-  SlowNoProgress,
-  GuardFailure,
-};
-}
-
-TraceExitType::ExitType getExitType(Opcode opc);
-Opcode getExitOpcode(TraceExitType::ExitType);
-
-inline bool isExitSlow(TraceExitType::ExitType t) {
-  return t == TraceExitType::Slow || t == TraceExitType::SlowNoProgress;
-}
+/*
+ * Return the opcode that corresponds to commuting the arguments of
+ * opc.
+ */
+Opcode commuteQueryOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
 
@@ -1655,7 +1652,6 @@ struct IRInstruction {
     , m_dst(nullptr)
     , m_taken(nullptr)
     , m_block(nullptr)
-    , m_tca(nullptr)
     , m_extra(nullptr)
   {}
 
@@ -1824,9 +1820,6 @@ struct IRInstruction {
     m_dst = newDsts;
   }
 
-  TCA getTCA() const { return m_tca; }
-  void setTCA(TCA newTCA) { m_tca = newTCA; }
-
   /*
    * Instruction id is stable and useful as an array index.
    */
@@ -1906,7 +1899,6 @@ private:
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_taken;   // for branches, guards, and jmp
   Block*            m_block;   // block that owns this instruction
-  TCA               m_tca;
   IRExtraData*      m_extra;
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList
@@ -2090,7 +2082,7 @@ private:
 
 typedef folly::Range<TCA> TcaRange;
 
-/**
+/*
  * A Block refers to a basic block: single-entry, single-exit, list of
  * instructions.  The instruction list is an intrusive list, so each
  * instruction can only be in one block at a time.  Likewise, a block
@@ -2108,8 +2100,13 @@ struct Block : boost::noncopyable {
   enum Hint { Neither, Likely, Unlikely };
 
   Block(unsigned id, const Func* func, IRInstruction* label)
-    : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id)
-    , m_preds(nullptr), m_hint(Neither) {
+    : m_trace(nullptr)
+    , m_func(func)
+    , m_next(nullptr)
+    , m_id(id)
+    , m_preds(nullptr)
+    , m_hint(Neither)
+  {
     push_back(label);
   }
 

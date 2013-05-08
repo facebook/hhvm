@@ -1350,29 +1350,25 @@ void HhbcTranslator::emitJmp(int32_t offset,
 }
 
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
-                                         bool negate,
-                                         SSATmp* src) {
-  Trace* target = nullptr;
-  if (m_lastBcOff) {
-    // Spill everything on main trace if all paths will exit
-    spillStack();
-    target = getExitTrace(offset, getBcOffNextTrace());
-  } else {
-    target = getExitTrace(offset);
-  }
+                                          bool negate,
+                                          SSATmp* src) {
+  // Spill everything on main trace if all paths will exit.
+  if (m_lastBcOff) spillStack();
+
+  auto const target  = getExitTrace(offset);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpZ(int32_t offset) {
-  SSATmp* src = popC();
-  emitJmpCondHelper(offset, true, src);
+void HhbcTranslator::emitJmpZ(Offset taken) {
+  auto const src = popC();
+  emitJmpCondHelper(taken, true, src);
 }
 
-void HhbcTranslator::emitJmpNZ(int32_t offset) {
-  SSATmp* src = popC();
-  emitJmpCondHelper(offset, false, src);
+void HhbcTranslator::emitJmpNZ(Offset taken) {
+  auto const src = popC();
+  emitJmpCondHelper(taken, false, src);
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {
@@ -1584,8 +1580,7 @@ void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   emitFPushCtorCommon(cls, obj, nullptr, numParams);
 }
 
-bool
-canInstantiateClass(const Class* cls) {
+static bool canInstantiateClass(const Class* cls) {
   return cls &&
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
@@ -2188,7 +2183,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   data.targets     = &targets[0];
 
   auto const stack = spillStack();
-  gen(SyncVMRegs, m_tb->getFp(), stack);
+  gen(SyncABIRegs, m_tb->getFp(), stack);
 
   gen(JmpSwitchDest, data, index);
   m_hasExit = true;
@@ -2215,8 +2210,7 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   // The slow path can throw exceptions and reenter the VM.
   if (!fastPath) exceptionBarrier();
 
-  SSATmp* const testVal = popC();
-  assert(bcOff() != -1);
+  auto const testVal = popC();
 
   std::vector<LdSSwitchData::Elm> cases(numCases);
   for (int i = 0; i < numCases; ++i) {
@@ -2237,7 +2231,7 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
                            testVal);
   gen(DecRef, testVal);
   auto const stack = spillStack();
-  gen(SyncVMRegs, m_tb->getFp(), stack);
+  gen(SyncABIRegs, m_tb->getFp(), stack);
   gen(JmpIndirect, dest);
   m_hasExit = true;
 }
@@ -2255,11 +2249,11 @@ void HhbcTranslator::setThisAvailable() {
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
-  checkTypeLocal(locId, type);
+  gen(GuardLoc, type, LocalId(locId), m_tb->getFp());
 }
 
 void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type) {
-  gen(GuardLoc, type, getExitTrace(), LocalId(locId), m_tb->getFp());
+  gen(CheckLoc, type, LocalId(locId), getExitTrace(), m_tb->getFp());
 }
 
 void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
@@ -2270,35 +2264,28 @@ void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
   gen(OverrideLoc, type, LocalId(locId), m_tb->getFp());
 }
 
-Trace* HhbcTranslator::guardTypeStack(uint32_t stackIndex,
-                                      Type type,
-                                      Trace* nextTrace) {
+void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
+  // Should not generate guards for class; instead assert their type
   if (type.subtypeOf(Type::Cls)) {
-    // Should not generate guards for class; instead assert their type
     assertTypeStack(stackIndex, type);
-    return nextTrace;
+    return;
   }
-  if (nextTrace == nullptr) {
-    nextTrace = getGuardExit();
-  }
-  gen(GuardStk, type, nextTrace, StackOffset(stackIndex), m_tb->getSp());
 
-  return nextTrace;
+  gen(GuardStk, type, StackOffset(stackIndex), m_tb->getSp());
 }
 
-void HhbcTranslator::checkTypeTopOfStack(Type type,
-                                         Offset nextByteCode) {
+void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
   Trace* exitTrace = getExitTrace(nextByteCode);
   SSATmp* tmp = m_evalStack.top();
   if (!tmp) {
     FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", type.toString());
-    gen(GuardStk, type, exitTrace, StackOffset(0), m_tb->getSp());
+    gen(CheckStk, type, exitTrace, StackOffset(0), m_tb->getSp());
     push(pop(type));
   } else {
-    FTRACE(1, "checkTypeTopOfStack: generating GuardType for {}\n",
+    FTRACE(1, "checkTypeTopOfStack: generating CheckType for {}\n",
            type.toString());
     m_evalStack.pop();
-    tmp = gen(GuardType, type, exitTrace, tmp);
+    tmp = gen(CheckType, type, exitTrace, tmp);
     push(tmp);
   }
 }
@@ -2319,14 +2306,9 @@ void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
   refineType(tmp, type);
 }
 
-Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,
-                                 const vector<bool>& mask,
-                                 const vector<bool>& vals,
-                                 Trace*              exitTrace) {
-  if (exitTrace == nullptr) {
-    exitTrace = getGuardExit();
-  }
-
+void HhbcTranslator::guardRefs(int64_t entryArDelta,
+                               const vector<bool>& mask,
+                               const vector<bool>& vals) {
   int32_t actRecOff = cellsToBytes(entryArDelta);
   SSATmp* funcPtr = gen(LdARFuncPtr, m_tb->getSp(), cns(actRecOff));
   SSATmp* nParams = gen(
@@ -2347,7 +2329,6 @@ Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,
 
     gen(
       GuardRefs,
-      exitTrace,
       funcPtr,
       nParams,
       bitsPtr,
@@ -2356,8 +2337,6 @@ Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,
       m_tb->genLdConst(vals64)
     );
   }
-
-  return exitTrace;
 }
 
 void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
@@ -2936,23 +2915,15 @@ void HhbcTranslator::emitMod() {
   // Exit path spills an additional false
   auto exitSpillValues = getSpillValues();
   exitSpillValues.push_back(cns(false));
-  // Generate an exit for the rare case that r is zero
-  auto exit =
-    m_tb->ifThenExit(
-      getCurFunc(),
-      m_stackDeficit,
-      exitSpillValues,
-      [&](IRFactory* irf, Trace* t) {
-        // Dividing by zero. Interpreting will raise a notice and
-        // produce the boolean false. Punch out here and resume after
-        // the Mod instruction; this should be rare.
-        m_tb->genFor(t, RaiseWarning,
-                     cns(StringData::GetStaticString(
-                         Strings::DIVISION_BY_ZERO)));
-      },
-      getNextSrcKey().offset() /* exitBcOff */,
-      bcOff()
-    );
+
+  // Generate an exit for the rare case that r is zero.  Interpreting
+  // will raise a notice and produce the boolean false.  Punch out
+  // here and resume after the Mod instruction; this should be rare.
+  auto const exit = getExitTraceWarn(
+    getNextSrcKey().offset(),
+    exitSpillValues,
+    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+  );
   gen(JmpZero, exit, r);
   push(gen(OpMod, l, r));
 }
@@ -3031,14 +3002,6 @@ void HhbcTranslator::emitInterpOneOrPunt(Type type, int numPopped,
   }
 }
 
-Trace* HhbcTranslator::getGuardExit() {
-  assert(bcOff() == -1 || bcOff() == m_startBcOff);
-  assert(!isInlining());
-  // stack better be empty since we're at the start of the trace
-  assert((m_evalStack.numCells() - m_stackDeficit) == 0);
-  return m_exitGuardFailureTrace;
-}
-
 /*
  * Get SSATmps representing all the information on the virtual eval
  * stack in preparation for a spill or exit trace.
@@ -3055,56 +3018,82 @@ std::vector<SSATmp*> HhbcTranslator::getSpillValues() const {
   return ret;
 }
 
+Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
+  auto spillValues = getSpillValues();
+  return getExitTrace(targetBcOff, spillValues);
+}
+
+Trace* HhbcTranslator::getExitTrace(Offset targetBcOff,
+                                    std::vector<SSATmp*>& spillValues) {
+  if (targetBcOff == -1) targetBcOff = bcOff();
+  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues, nullptr);
+}
+
+Trace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
+                                        std::vector<SSATmp*>& spillValues,
+                                        const StringData* warning) {
+  assert(targetBcOff != -1);
+  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues, warning);
+}
+
 /*
  * Generates an exit trace which will continue execution without HHIR.
  * This should be used in situations that HHIR cannot handle -- ideally
  * only in slow paths.
  */
 Trace* HhbcTranslator::getExitSlowTrace() {
-  auto stackValues = getSpillValues();
-  return m_tb->getExitSlowTrace(bcOff(),
-                                m_stackDeficit,
-                                stackValues.size(),
-                                stackValues.size() ? &stackValues[0] : 0);
+  auto spillValues = getSpillValues();
+  return getExitTraceImpl(bcOff(), ExitFlag::NoIR, spillValues, nullptr);
 }
 
-/*
- * Generates an exit trace for the given targetBcOff
- * (defaults to the current offset).
- * The exit trace returned will be linked to a translation starting at
- * targetBcOff, which will be a retranslation of the same tracelet if this
- * exit is taken before executing any bytecode instruction of the current
- * tracelet.
- */
-Trace* HhbcTranslator::getExitTrace(Offset targetBcOff,
-                                    const std::vector<SSATmp*>& stackValues) {
-  if (targetBcOff == -1) {
-    targetBcOff = bcOff() != -1 ? bcOff() : m_startBcOff;
-  }
-  if (targetBcOff == m_startBcOff) {
-    return m_exitGuardFailureTrace;
+Trace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
+                                        ExitFlag flag,
+                                        std::vector<SSATmp*>& stackValues,
+                                        const StringData* warning) {
+  auto const exit = m_tb->makeExitTrace(targetBcOff);
+
+  MarkerData exitMarker;
+  exitMarker.bcOff    = targetBcOff;
+  exitMarker.stackOff = m_tb->getSpOffset() +
+                          stackValues.size() - m_stackDeficit;
+  exitMarker.func     = getCurFunc();
+  genFor(exit, Marker, exitMarker);
+
+  if (warning) {
+    genFor(exit, RaiseWarning, cns(warning));
   }
 
-  return m_tb->genExitTrace(targetBcOff,
-                            m_stackDeficit,
-                            stackValues.size(),
-                            stackValues.size() ? &stackValues[0] : nullptr,
-                            TraceExitType::Normal);
-}
+  auto const stack = [&]{
+    // TODO(#2404447) move this conditional to the simplifier?
+    if (m_stackDeficit != 0 || !stackValues.empty()) {
+      stackValues.insert(
+        stackValues.begin(),
+        { m_tb->getSp(), cns(int64_t(m_stackDeficit)) }
+      );
+      return genFor(exit,
+        SpillStack, std::make_pair(stackValues.size(), &stackValues[0])
+      );
+    }
+    return m_tb->getSp();
+  }();
 
-/*
- * Generates a trace exit that can be the target of a conditional
- * control flow instruction at the current bytecode offset.
- */
-Trace* HhbcTranslator::getExitTrace(uint32_t targetBcOff,
-                                    uint32_t notTakenBcOff) {
-  std::vector<SSATmp*> stackValues = getSpillValues();
-  return m_tb->genExitTrace(targetBcOff,
-                           m_stackDeficit,
-                           stackValues.size(),
-                           stackValues.size() ? &stackValues[0] : nullptr,
-                           TraceExitType::NormalCc,
-                           notTakenBcOff);
+  genFor(exit, SyncABIRegs, m_tb->getFp(), stack);
+
+  if (flag == ExitFlag::NoIR) {
+    genFor(exit,
+      targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
+      BCOffset(targetBcOff)
+    );
+    return exit;
+  }
+
+  if (bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+    genFor(exit, ReqRetranslate);
+  } else {
+    genFor(exit, ReqBindJmp, BCOffset(targetBcOff));
+  }
+
+  return exit;
 }
 
 SSATmp* HhbcTranslator::spillStack() {
@@ -3239,9 +3228,10 @@ SSATmp* HhbcTranslator::stLocNRC(uint32_t id, Trace* exit, SSATmp* newVal) {
   return stLocImpl(id, exit, newVal, doRefCount);
 }
 
-void HhbcTranslator::end(int nextPc) {
+void HhbcTranslator::end() {
   if (m_hasExit) return;
 
+  auto const nextPc = m_nextTraceBcOff;
   if (nextPc >= getCurFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional
@@ -3254,12 +3244,14 @@ void HhbcTranslator::end(int nextPc) {
     return;
   }
   setBcOff(nextPc, true);
-  spillStack();
-  m_tb->genTraceEnd(nextPc);
+  auto const sp = spillStack();
+  gen(SyncABIRegs, m_tb->getFp(), sp);
+  gen(ReqBindJmp, BCOffset(nextPc));
 }
 
+
 void HhbcTranslator::checkStrictlyInteger(
-  SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+    SSATmp*& key, KeyType& keyType, bool& checkForInt) {
   checkForInt = false;
   if (key->isA(Type::Int)) {
     keyType = IntKey;

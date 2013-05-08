@@ -49,9 +49,14 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case ExceptionBarrier:
     return getStackValue(inst->getSrc(0), index);
 
+  case SideExitGuardStk:
+    always_assert(0 && "simplifier is not tested for running after jumpopts");
+
   case AssertStk:
     // fallthrough
   case CastStk:
+    // fallthrough
+  case CheckStk:
     // fallthrough
   case GuardStk:
     // We don't have a value, but we may know the type due to guarding
@@ -305,7 +310,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
-  case GuardType:    return simplifyGuardType(inst);
+  case CheckType:    return simplifyCheckType(inst);
 
   case LdCls:        return simplifyLdCls(inst);
   case LdThis:       return simplifyLdThis(inst);
@@ -500,7 +505,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   Type type    = inst->getTypeParam();
   SSATmp* src  = inst->getSrc(0);
   Type srcType = src->type();
@@ -1595,9 +1600,9 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
-        srcInst->getTypeParam(), // if it had a type param
-        inst->getTaken(),
-        std::make_pair(ssas.size(), ssas.begin())
+      srcInst->getTypeParam(), // if it had a type param
+      inst->getTaken(),
+      std::make_pair(ssas.size(), ssas.begin())
     );
   }
 

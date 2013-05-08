@@ -490,39 +490,8 @@ Address CodeGenerator::emitFwdJmp(Block* target) {
   return emitFwdJmp(m_as, target);
 }
 
-// Patch with service request REQ_BIND_JMPCC_FIRST/SECOND
-Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
-                                                IRInstruction* toSmash) {
-  Address start = m_as.code.frontier;
-  if (toSmash) {
-    m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen +
-                                  TranslatorX64::kJmpccLen);
-    Address tcaJcc = emitFwdJcc(cc, target);
-    emitFwdJmp(target);
-    toSmash->setTCA(tcaJcc);
-  } else {
-    emitFwdJcc(cc, target);
-  }
-  return start;
-}
-
-void CodeGenerator::emitJccDirectExit(IRInstruction* inst,
-                                      ConditionCode cc) {
-  if (cc == CC_None) return;
-  auto* toSmash = inst->getTCA() == kIRDirectJccJmpActive ? inst : nullptr;
-  emitSmashableFwdJccAtEnd(cc, inst->getTaken(), toSmash);
-}
-
-// Patch with service request REQ_BIND_JCC
-Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc, Block* target,
-                                           IRInstruction* toSmash) {
-  Address start = m_as.code.frontier;
-  assert(toSmash);
-
-  m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
-  Address tcaJcc = emitFwdJcc(cc, target);
-  toSmash->setTCA(tcaJcc);
-  return start;
+void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg) {
+  as.emitImmReg(val, dstReg);
 }
 
 static void
@@ -697,13 +666,44 @@ void CodeGenerator::doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1) {
   asm_label(a, notPF);
 }
 
-void CodeGenerator::cgJcc(IRInstruction* inst) {
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-  Opcode opc = inst->op();
-  ConditionCode cc = queryJmpToCC(opc);
-  Type src1Type = src1->type();
-  Type src2Type = src2->type();
+static ConditionCode opToConditionCode(Opcode opc) {
+  using namespace HPHP::Transl;
+
+  switch (opc) {
+  case JmpGt:                 return CC_G;
+  case JmpGte:                return CC_GE;
+  case JmpLt:                 return CC_L;
+  case JmpLte:                return CC_LE;
+  case JmpEq:                 return CC_E;
+  case JmpNeq:                return CC_NE;
+  case JmpSame:               return CC_E;
+  case JmpNSame:              return CC_NE;
+  case JmpInstanceOfBitmask:  return CC_NZ;
+  case JmpNInstanceOfBitmask: return CC_Z;
+  case JmpIsType:             return CC_NZ;
+  case JmpIsNType:            return CC_Z;
+  case JmpZero:               return CC_Z;
+  case JmpNZero:              return CC_NZ;
+  case ReqBindJmpGt:                 return CC_G;
+  case ReqBindJmpGte:                return CC_GE;
+  case ReqBindJmpLt:                 return CC_L;
+  case ReqBindJmpLte:                return CC_LE;
+  case ReqBindJmpEq:                 return CC_E;
+  case ReqBindJmpNeq:                return CC_NE;
+  case ReqBindJmpSame:               return CC_E;
+  case ReqBindJmpNSame:              return CC_NE;
+  case ReqBindJmpInstanceOfBitmask:  return CC_NZ;
+  case ReqBindJmpNInstanceOfBitmask: return CC_Z;
+  case ReqBindJmpZero:               return CC_Z;
+  case ReqBindJmpNZero:              return CC_NZ;
+  default:
+    always_assert(0);
+  }
+}
+
+void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
+  auto const src1Type = src1->type();
+  auto const src2Type = src2->type();
 
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
@@ -713,7 +713,7 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
          (src2Type == Type::Int || src2Type == Type::Dbl)) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
         (src1Type == Type::Cls && src2Type == Type::Cls))) {
-    CG_PUNT(cgJcc);
+    CG_PUNT(emitCompare);
   }
   if (src1Type == Type::Dbl || src2Type == Type::Dbl) {
     PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, rXMMScratch0);
@@ -721,9 +721,6 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
     assert(srcReg1 != rXMMScratch1 && srcReg2 != rXMMScratch0);
     doubleCmp(m_as, srcReg1, srcReg2);
   } else {
-    if (src1Type == Type::Cls && src2Type == Type::Cls) {
-      assert(opc == JmpSame || opc == JmpNSame);
-    }
     auto srcReg1 = m_regs[src1].getReg();
     auto srcReg2 = m_regs[src2].getReg();
 
@@ -751,18 +748,65 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
       }
     }
   }
-
-  emitJccDirectExit(inst, cc);
 }
 
-void CodeGenerator::cgJmpGt   (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpGte  (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpLt   (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpLte  (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpEq   (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpNeq  (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpSame (IRInstruction* inst) { cgJcc(inst); }
-void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
+void CodeGenerator::emitReqBindJcc(ConditionCode cc,
+                                   const ReqBindJccData* extra) {
+  auto& a = m_as;
+  assert(&m_as != &m_astubs &&
+         "ReqBindJcc only makes sense outside of astubs");
+
+  prepareForTestAndSmash(a, 0, kAlignJccAndJmp);
+  auto const patchAddr = a.code.frontier;
+
+  auto const jccStub = m_astubs.code.frontier;
+  {
+    auto& a = m_astubs;
+    // TODO(#2404398): move the setcc into the generic stub code so we
+    // don't need SRFlags::Persistent.
+    a.    setcc  (cc, rbyte(serviceReqArgRegs[4]));
+    m_tx64->emitServiceReq(
+      SRFlags::Persistent,
+      REQ_BIND_JMPCC_FIRST,
+      4ull,
+      patchAddr,
+      uint64_t(extra->taken),
+      uint64_t(extra->notTaken),
+      uint64_t(cc)
+    );
+  }
+
+  a.    jcc    (cc, jccStub);
+  a.    jmp    (jccStub);
+}
+
+void CodeGenerator::cgJcc(IRInstruction* inst) {
+  emitCompare(inst->getSrc(0), inst->getSrc(1));
+  emitFwdJcc(opToConditionCode(inst->op()), inst->getTaken());
+}
+
+void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
+  // TODO(#2404427): prepareForTestAndSmash?
+  emitCompare(inst->getSrc(0), inst->getSrc(1));
+  emitReqBindJcc(opToConditionCode(inst->op()),
+                 inst->getExtra<ReqBindJccData>());
+}
+
+#define X(x)                                                              \
+  void CodeGenerator::cgReqBind##x(IRInstruction* i) { cgReqBindJcc(i); } \
+  void CodeGenerator::cg##x       (IRInstruction* i) { cgJcc(i);        }
+
+X(JmpGt);
+X(JmpGte);
+X(JmpLt);
+X(JmpLte);
+X(JmpEq);
+X(JmpNeq);
+X(JmpSame);
+X(JmpNSame);
+
+#undef X
+
 
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges to
@@ -1636,17 +1680,6 @@ ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
   return negate ? ccNegate(cc) : cc;
 }
 
-template<class OpndType>
-ConditionCode CodeGenerator::emitTypeTest(IRInstruction* inst, OpndType src,
-                                          bool negate) {
-  return emitTypeTest(inst->getTypeParam(), src, negate);
-}
-
-void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
-  if (cc == CC_None) return;
-  m_as.setcc(cc, rbyte(m_regs[inst->getDst()].getReg()));
-}
-
 ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
   auto const src = inst->getSrc(0);
 
@@ -1677,7 +1710,7 @@ ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
 
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = m_regs[src].getReg();
-    return emitTypeTest(inst, base[TVOFF(m_type)], negate);
+    return emitTypeTest(inst->getTypeParam(), base[TVOFF(m_type)], negate);
   }
   assert(src->isA(Type::Gen));
   assert(!src->isConst());
@@ -1686,18 +1719,31 @@ ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
   if (srcReg == InvalidReg) {
     CG_PUNT(IsType-KnownType);
   }
-  return emitTypeTest(inst, srcReg, negate);
+  return emitTypeTest(inst->getTypeParam(), srcReg, negate);
 }
 
-template<class OpndType>
-void CodeGenerator::emitGuardType(OpndType src, IRInstruction* inst) {
-  emitGuardOrFwdJcc(inst, emitTypeTest(inst, src, true));
+template<class MemLoc>
+void CodeGenerator::emitTypeCheck(Type type, MemLoc mem, Block* taken) {
+  auto const negate = true;
+  auto const cc = emitTypeTest(type, mem, negate);
+  if (cc == CC_None) return;
+  emitFwdJcc(cc, taken);
 }
 
-void CodeGenerator::cgGuardTypeCell(PhysReg           baseReg,
-                                    int64_t           offset,
-                                    IRInstruction*    inst) {
-  emitGuardType(baseReg[offset + TVOFF(m_type)], inst);
+template<class MemLoc>
+void CodeGenerator::emitTypeGuard(Type type, MemLoc mem) {
+  auto const negate = true;
+  auto const cc = emitTypeTest(type, mem, negate);
+  if (cc == CC_None) return;
+
+  auto const destSK = SrcKey(getCurFunc(), m_curTrace->getBcOff());
+  auto const destSR = m_tx64->getSrcRec(destSK);
+  m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
+}
+
+void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
+  if (cc == CC_None) return;
+  m_as.setcc(cc, rbyte(m_regs[inst->getDst()].getReg()));
 }
 
 void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
@@ -1709,7 +1755,7 @@ void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
 }
 
 void CodeGenerator::cgJmpIsTypeCommon(IRInstruction* inst, bool negate) {
-  emitJccDirectExit(inst, emitIsTypeTest(inst, negate));
+  emitFwdJcc(emitIsTypeTest(inst, negate), inst->getTaken());
 }
 
 void CodeGenerator::cgIsType(IRInstruction* inst) {
@@ -1719,6 +1765,8 @@ void CodeGenerator::cgIsType(IRInstruction* inst) {
 void CodeGenerator::cgIsNType(IRInstruction* inst) {
   cgIsTypeCommon(inst, true);
 }
+
+// TODO(#2404341): remove JmpIs{N,}Type
 
 void CodeGenerator::cgJmpIsType(IRInstruction* inst) {
   cgJmpIsTypeCommon(inst, false);
@@ -1787,12 +1835,24 @@ void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpInstanceOfBitmask(IRInstruction* inst) {
   emitInstanceBitmaskCheck(inst);
-  emitJccDirectExit(inst, CC_NZ);
+  emitFwdJcc(CC_NZ, inst->getTaken());
 }
 
 void CodeGenerator::cgJmpNInstanceOfBitmask(IRInstruction* inst) {
   emitInstanceBitmaskCheck(inst);
-  emitJccDirectExit(inst, CC_Z);
+  emitFwdJcc(CC_Z, inst->getTaken());
+}
+
+void CodeGenerator::cgReqBindJmpInstanceOfBitmask(IRInstruction* inst) {
+  emitInstanceBitmaskCheck(inst);
+  emitReqBindJcc(opToConditionCode(inst->op()),
+                 inst->getExtra<ReqBindJccData>());
+}
+
+void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
+  emitInstanceBitmaskCheck(inst);
+  emitReqBindJcc(opToConditionCode(inst->op()),
+                 inst->getExtra<ReqBindJccData>());
 }
 
 /*
@@ -2228,14 +2288,14 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
         m_as.  subq(data->base, indexReg);
       }
       m_as.    cmpq(data->cases - 2, indexReg);
-      m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
+      prepareForSmash(m_as, kJmpccLen);
       TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND, 3,
                                    m_as.code.frontier, data->defaultOff, CC_AE);
       m_as.    jae(def);
     }
 
     TCA* table = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA), data->cases);
-    TCA afterLea = m_as.code.frontier + TranslatorX64::kLeaRipLen;
+    TCA afterLea = m_as.code.frontier + kLeaRipLen;
     ptrdiff_t diff = (TCA)table - afterLea;
     assert(deltaFits(diff, sz::dword));
     m_as.   lea(rip[diff], m_rScratch);
@@ -2471,151 +2531,60 @@ void CodeGenerator::cgStLocNT(IRInstruction* inst) {
           false /* store type */);
 }
 
-void CodeGenerator::cgSyncVMRegs(IRInstruction* inst) {
+void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
   emitMovRegReg(m_as, m_regs[inst->getSrc(0)].getReg(), rVmFp);
   emitMovRegReg(m_as, m_regs[inst->getSrc(1)].getReg(), rVmSp);
 }
 
-void CodeGenerator::cgExitTrace(IRInstruction* inst) {
-  SSATmp* func = inst->getSrc(0);
-  SSATmp* pc   = inst->getSrc(1);
-  SSATmp* sp   = inst->getSrc(2);
-  SSATmp* fp   = inst->getSrc(3);
-  SSATmp* notTakenPC = nullptr;
-  IRInstruction* toSmash = nullptr;
-  assert(pc->isConst() && inst->getNumSrcs() <= 6);
+void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
+  m_tx64->emitBindJmp(
+    m_as,
+    SrcKey(getCurFunc(), inst->getExtra<ReqBindJmp>()->offset)
+  );
+}
 
-  TraceExitType::ExitType exitType = getExitType(inst->op());
-  if (exitType == TraceExitType::Normal && inst->getExtra<ExitTrace>()) {
-    // Unconditional trace exit
-    toSmash = inst->getExtra<ExitTrace>()->toSmash;
-    assert(toSmash);
-  } else if (exitType == TraceExitType::NormalCc) {
-    // Exit at trace end which is the target of a conditional branch
-    notTakenPC = inst->getSrc(4);
-    assert(notTakenPC->isConst());
-    if (inst->getExtra<ExitTraceCc>()) {
-      toSmash = inst->getExtra<ExitTraceCc>()->toSmash;
-      assert(toSmash);
-    }
+static void emitExitNoIRStats(Asm& a,
+                              TranslatorX64* tx64,
+                              const Func* func,
+                              SrcKey dest) {
+  if (RuntimeOption::EnableInstructionCounts ||
+      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
+    Stats::emitInc(a,
+                   Stats::opcodeToIRPreStatCounter(
+                     Op(*func->unit()->at(dest.m_offset))),
+                   -1,
+                   Transl::CC_None,
+                   true);
   }
-  using namespace HPHP::Transl;
 
-  Asm& a = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
-  // unless exit trace was moved to end of main trace
-
-  emitMovRegReg(a, m_regs[sp].getReg(), rVmSp);
-  emitMovRegReg(a, m_regs[fp].getReg(), rVmFp);
-
-  // Get the SrcKey for the dest
-  SrcKey destSK(func->getValFunc(), pc->getValInt());
-
-  switch (exitType) {
-    case TraceExitType::NormalCc:
-      if (toSmash) {
-        TCA smashAddr = toSmash->getTCA();
-        if (smashAddr == kIRDirectJmpInactive) {
-          // The jump in the main trace has been optimized away
-          // this exit trace is no longer needed
-          break;
-        }
-        // Patch the original jcc;jmp, don't emit another
-        IRInstruction* jcc = toSmash;
-        Opcode         opc = jcc->op();
-        ConditionCode   cc = queryJmpToCC(opc);
-        uint64_t     taken = pc->getValInt();
-        uint64_t  notTaken = notTakenPC->getValInt();
-
-        m_astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
-        m_tx64->emitServiceReq(SRFlags::Persistent,
-                               REQ_BIND_JMPCC_FIRST,
-                               4ull,
-                               smashAddr,
-                               taken,
-                               notTaken,
-                               uint64_t(cc));
-      } else {
-        // NormalCc exit but not optimized to jcc directly to destination
-        m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP);
-      }
-      break;
-    case TraceExitType::Normal:
-      {
-        TCA smashAddr = toSmash ? toSmash->getTCA() : nullptr;
-        if (smashAddr) {
-          assert(smashAddr != kIRDirectJmpInactive);
-          if (smashAddr != kIRDirectJccJmpActive) {
-            // kIRDirectJccJmpActive only needs NormalCc exit in astubs
-
-            m_tx64->emitServiceReq(SRFlags::Persistent,
-                                   REQ_BIND_JMP, 2,
-                                   smashAddr,
-                                   uint64_t(destSK.offset()));
-
-          }
-        } else {
-          assert(smashAddr == kIRDirectJmpInactive);
-          m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP);
-        }
-      }
-      break;
-    case TraceExitType::Slow:
-    case TraceExitType::SlowNoProgress:
-      if (RuntimeOption::EnableInstructionCounts ||
-          HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
-        Stats::emitInc(m_as,
-                       Stats::opcodeToIRPostStatCounter(
-                         Op(*getCurFunc()->unit()->at(destSK.m_offset))),
-                       -1,
-                       Transl::CC_None,
-                       true);
-      }
-
-      if (HPHP::Trace::moduleEnabled(HPHP::Trace::punt, 1)) {
-        Op op = (Op)*func->getValFunc()->unit()->at(destSK.m_offset);
-        std::string name = folly::format(
-          "exitSlow{}-{}",
-          exitType == TraceExitType::SlowNoProgress ? "-np" : "",
-          opcodeToName(op)).str();
-        m_tx64->emitRecordPunt(a, name);
-      }
-      if (RuntimeOption::EvalHHIRDisableTx64) {
-        // Emit a service request to interpret a single instruction before
-        // creating a new translation
-        m_tx64->emitServiceReq(SRFlags::Persistent,
-                               REQ_INTERPRET,
-                               2ull, uint64_t(destSK.offset()), 1);
-      } else {
-        if (exitType == TraceExitType::Slow) {
-          m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP_NO_IR);
-        } else { // SlowNoProgress
-          m_tx64->emitReqRetransNoIR(a, destSK);
-        }
-      }
-      break;
-
-    case TraceExitType::GuardFailure: {
-      SrcRec* destSR = m_tx64->getSrcRec(destSK);
-      m_tx64->emitFallbackUncondJmp(a, *destSR);
-      break;
-    }
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::punt, 1)) {
+    auto const op = Op(*func->unit()->at(dest.m_offset));
+    auto const name = folly::format(
+      "exitSlow-{}",
+      opcodeToName(op)
+    ).str();
+    tx64->emitRecordPunt(a, name);
   }
 }
 
-void CodeGenerator::cgExitTraceCc(IRInstruction* inst) {
-  cgExitTrace(inst);
+void CodeGenerator::cgReqBindJmpNoIR(IRInstruction* inst) {
+  auto const dest = SrcKey(getCurFunc(),
+                           inst->getExtra<ReqBindJmpNoIR>()->offset);
+  emitExitNoIRStats(m_as, m_tx64, getCurFunc(), dest);
+  m_tx64->emitBindJmp(m_as, dest, REQ_BIND_JMP_NO_IR);
 }
 
-void CodeGenerator::cgExitSlow(IRInstruction* inst) {
-  cgExitTrace(inst);
+void CodeGenerator::cgReqRetranslateNoIR(IRInstruction* inst) {
+  auto const dest = SrcKey(getCurFunc(),
+                           inst->getExtra<ReqRetranslateNoIR>()->offset);
+  emitExitNoIRStats(m_as, m_tx64, getCurFunc(), dest);
+  m_tx64->emitReqRetransNoIR(m_as, dest);
 }
 
-void CodeGenerator::cgExitSlowNoProgress(IRInstruction* inst) {
-  cgExitTrace(inst);
-}
-
-void CodeGenerator::cgExitGuardFailure(IRInstruction* inst) {
-  cgExitTrace(inst);
+void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
+  auto const destSK = SrcKey(getCurFunc(), m_curTrace->getBcOff());
+  auto const destSR = m_tx64->getSrcRec(destSK);
+  m_tx64->emitFallbackUncondJmp(m_as, *destSR);
 }
 
 static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
@@ -3834,12 +3803,12 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   if (typeDstReg != InvalidReg) {
     emitLoadTVType(m_as, base[off + TVOFF(m_type)], typeDstReg);
     if (label) {
-      // Check type needed
-      emitGuardType(typeDstReg, inst);
+      emitTypeCheck(inst->getTypeParam(), typeDstReg, inst->getTaken());
     }
   } else if (label) {
-    // Check type needed
-    cgGuardTypeCell(base, off, inst);
+    emitTypeCheck(inst->getTypeParam(),
+                  base[off + TVOFF(m_type)],
+                  inst->getTaken());
   }
 
   // Load value if it's not dead
@@ -3892,23 +3861,6 @@ void CodeGenerator::cgStore(PhysReg base,
   }
 }
 
-void CodeGenerator::emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc) {
-  if (cc == CC_None) return;
-  Block* label = inst->getTaken();
-  if (inst && inst->getTCA() == kIRDirectGuardActive) {
-    if (dumpIREnabled(kCodeGenLevel)) {
-      m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
-      inst->setTCA(m_as.code.frontier);
-    }
-    // Get the SrcKey for the dest
-    SrcKey  destSK(getCurFunc(), m_curTrace->getBcOff());
-    SrcRec* destSR = m_tx64->getSrcRec(destSK);
-    m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
-  } else {
-    emitFwdJcc(cc, label);
-  }
-}
-
 void CodeGenerator::cgLoad(PhysReg base,
                            int64_t off,
                            IRInstruction* inst) {
@@ -3918,7 +3870,9 @@ void CodeGenerator::cgLoad(PhysReg base,
   }
   Block* label = inst->getTaken();
   if (label != NULL) {
-    cgGuardTypeCell(base, off, inst);
+    emitTypeCheck(inst->getTypeParam(),
+                  base[off + TVOFF(m_type)],
+                  inst->getTaken());
   }
   if (type.isNull()) return; // these are constants
   auto dstReg = m_regs[inst->getDst()].getReg();
@@ -4000,15 +3954,55 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  cgGuardTypeCell(m_regs[inst->getSrc(0)].getReg(),
-                  cellsToBytes(inst->getExtra<GuardStk>()->offset),
-                  inst);
+  auto const rSP = m_regs[inst->getSrc(0)].getReg();
+  auto const off = cellsToBytes(inst->getExtra<GuardStk>()->offset) +
+                     TVOFF(m_type);
+  emitTypeGuard(inst->getTypeParam(), rSP[off]);
+}
+
+void CodeGenerator::cgCheckStk(IRInstruction* inst) {
+  auto const rbase = m_regs[inst->getSrc(0)].getReg();
+  auto const off   = cellsToBytes(inst->getExtra<CheckStk>()->offset) +
+                       TVOFF(m_type);
+  emitTypeCheck(inst->getTypeParam(), rbase[off], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  cgGuardTypeCell(m_regs[inst->getSrc(0)].getReg(),
-                  getLocalOffset(inst->getExtra<GuardLoc>()->locId),
-                  inst);
+  auto const rFP = m_regs[inst->getSrc(0)].getReg();
+  auto const off = getLocalOffset(inst->getExtra<GuardLoc>()->locId) +
+                     TVOFF(m_type);
+  emitTypeGuard(inst->getTypeParam(), rFP[off]);
+}
+
+void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
+  auto const rbase = m_regs[inst->getSrc(0)].getReg();
+  auto const off   = getLocalOffset(inst->getExtra<CheckLoc>()->locId) +
+                       TVOFF(m_type);
+  emitTypeCheck(inst->getTypeParam(), rbase[off], inst->getTaken());
+}
+
+template<class MemLoc>
+void CodeGenerator::emitSideExitGuard(Type type, MemLoc mem, Offset taken) {
+  auto const cc = emitTypeTest(type, mem, true /* negate */);
+  auto const sk = SrcKey(getCurFunc(), taken);
+  if (cc == CC_None) return;
+  m_tx64->emitBindJcc(m_as, cc, sk, REQ_BIND_SIDE_EXIT);
+}
+
+void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
+  auto const fp    = m_regs[inst->getSrc(0)].getReg();
+  auto const extra = inst->getExtra<SideExitGuardLoc>();
+  emitSideExitGuard(inst->getTypeParam(),
+                    fp[getLocalOffset(extra->checkedSlot) + TVOFF(m_type)],
+                    extra->taken);
+}
+
+void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
+  auto const sp    = m_regs[inst->getSrc(0)].getReg();
+  auto const extra = inst->getExtra<SideExitGuardStk>();
+  emitSideExitGuard(inst->getTypeParam(),
+                    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
+                    extra->taken);
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
@@ -4016,17 +4010,16 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
   assert(m_regs[inst->getDst()].getReg() == rsp);
 }
 
-void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  Type type       = inst->getTypeParam();
-  SSATmp* src     = inst->getSrc(0);
-  auto srcTypeReg = m_regs[src].getReg(1);
-  assert(srcTypeReg != InvalidReg);
+void CodeGenerator::cgCheckType(IRInstruction* inst) {
+  auto const src   = inst->getSrc(0);
+  auto const rType = m_regs[src].getReg(1);
 
-  ConditionCode cc;
-  cc = emitTypeTest(type, srcTypeReg, true);
+  auto const cc = emitTypeTest(inst->getTypeParam(), rType, true);
+  if (cc == CC_None) return;
+
   emitFwdJcc(cc, inst->getTaken());
 
-  auto dstReg = m_regs[inst->getDst()].getReg();
+  auto const dstReg = m_regs[inst->getDst()].getReg();
   if (dstReg != InvalidReg) {
     emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
   }
@@ -4041,7 +4034,6 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   SSATmp* firstBitNumTmp = inst->getSrc(3);
   SSATmp* mask64Tmp  = inst->getSrc(4);
   SSATmp* vals64Tmp  = inst->getSrc(5);
-  Block* exitLabel   = inst->getTaken();
 
   // Get values in place
   assert(funcPtrTmp->type() == Type::Func);
@@ -4071,6 +4063,9 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(vals64Reg != InvalidReg);
   int64_t vals64 = vals64Tmp->getValInt();
 
+  auto const destSK = SrcKey(getCurFunc(), m_curTrace->getBcOff());
+  auto const destSR = m_tx64->getSrcRec(destSK);
+
   auto thenBody = [&] {
     auto bitsValReg = m_rScratch;
     //   Load the bit values in bitValReg:
@@ -4082,7 +4077,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
 
     //   If bitsValReg != vals64Reg, then goto Exit
     m_as.cmp_reg64_reg64(bitsValReg, vals64Reg);
-    emitFwdJcc(CC_NE, exitLabel);
+    m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_NE);
   };
 
   // If few enough args...
@@ -4090,18 +4085,18 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   if (vals64 == 0 && mask64 == 0) {
     ifThen(m_as, CC_NL, thenBody);
   } else if (vals64 != 0 && vals64 != mask64) {
-    emitFwdJcc(CC_L, exitLabel);
+    m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_L);
     thenBody();
   } else if (vals64 != 0) {
     ifThenElse(CC_NL, thenBody, /* else */ [&] {
       //   If not special builtin...
       m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-      emitFwdJcc(CC_Z, exitLabel);
+      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_Z);
     });
   } else {
     ifThenElse(CC_NL, thenBody, /* else */ [&] {
       m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-      emitFwdJcc(CC_NZ, exitLabel);
+      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_NZ);
     });
   }
 }
@@ -4632,45 +4627,48 @@ void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
                ArgGroup(m_regs).ssa(inst->getSrc(0)));
 }
 
-void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
-                                    ConditionCode cc) {
-  SSATmp* src   = inst->getSrc(0);
+void CodeGenerator::emitTestZero(SSATmp* src) {
+  auto& a = m_as;
+  auto reg = m_regs[src].getReg();
 
-  auto srcReg = m_regs[src].getReg();
-  if (src->isConst()) {
-    bool valIsZero = src->getValRawInt() == 0;
-    if ((cc == CC_Z  && valIsZero) ||
-        (cc == CC_NZ && !valIsZero)) {
-      // assert(false) here after new simplifier pass, t2019643
-      // For now, materialize the test condition and use a Jcc
-      m_as.xor_reg64_reg64(m_rScratch, m_rScratch);
-      m_as.test_reg64_reg64(m_rScratch, m_rScratch);
-      cc = CC_Z;
-      // Update the instr opcode since cgExitTrace uses it
-      // to determine correct cc for service request.
-      inst->setOpcode(JmpZero);
-    } else {
-      // Fall through to next bytecode, disable DirectJmp
-      inst->setTCA(kIRDirectJmpInactive);
-      return;
-    }
-  } else {
-    if (src->type() == Type::Bool) {
-      m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
-    } else {
-      m_as.test_reg64_reg64(srcReg, srcReg);
-    }
+  /*
+   * If src is const, normally a earlier optimization pass should have
+   * converted the thing testing this condition into something
+   * unconditional.  So rather than supporting constants efficiently
+   * here, we just materialize the value into a register.
+   */
+  if (reg == InvalidReg) {
+    reg = m_rScratch;
+    a.    movq   (src->getValBits(), reg);
   }
 
-  emitJccDirectExit(inst, cc);
+  if (src->isA(Type::Bool)) {
+    a.    testb  (rbyte(reg), rbyte(reg));
+  } else {
+    a.    testq  (reg, reg);
+  }
 }
 
 void CodeGenerator::cgJmpZero(IRInstruction* inst) {
-  cgJmpZeroHelper(inst, CC_Z);
+  emitTestZero(inst->getSrc(0));
+  emitFwdJcc(CC_Z, inst->getTaken());
 }
 
 void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
-  cgJmpZeroHelper(inst, CC_NZ);
+  emitTestZero(inst->getSrc(0));
+  emitFwdJcc(CC_NZ, inst->getTaken());
+}
+
+void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
+  // TODO(#2404427): prepareForTestAndSmash?
+  emitTestZero(inst->getSrc(0));
+  emitReqBindJcc(CC_Z, inst->getExtra<ReqBindJmpZero>());
+}
+
+void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
+  // TODO(#2404427): prepareForTestAndSmash?
+  emitTestZero(inst->getSrc(0));
+  emitReqBindJcc(CC_NZ, inst->getExtra<ReqBindJmpNZero>());
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
@@ -4784,7 +4782,7 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto base    = m_regs[addr].getReg();
   auto dstReg  = m_regs[dst].getReg();
   emitMovRegReg(m_as, base, dstReg);
-  ConditionCode cc = emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], true);
+  auto const cc = emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], true);
   ifThen(m_as, cc, [&] {
     cgCallHelper(m_as, (TCA)tvBox, dstReg, kNoSyncPoint,
                  ArgGroup(m_regs).ssa(addr));

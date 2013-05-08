@@ -405,9 +405,11 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == RetAdjustStack ||
                opc == InterpOne ||
                opc == GenericRetDecRefs ||
+               opc == CheckStk ||
                opc == GuardStk ||
                opc == AssertStk ||
                opc == CastStk ||
+               opc == SideExitGuardStk  ||
                VectorEffects::supported(opc));
         allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
         continue;

@@ -101,6 +101,32 @@ struct Label;
 
 static const int kNumFreeLocalsHelpers = 9;
 
+typedef X64Assembler Asm;
+
+constexpr size_t kJmpTargetAlign = 16;
+constexpr size_t kNonFallthroughAlign = 64;
+constexpr int kJmpLen = 5;
+constexpr int kCallLen = 5;
+constexpr int kJmpccLen = 6;
+constexpr int kJmpImmBytes = 4;
+constexpr int kJcc8Len = 3;
+constexpr int kLeaRipLen = 7;
+constexpr int kTestRegRegLen = 3;
+constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
+// Cache alignment is required for mutable instructions to make sure
+// mutations don't "tear" on remote cpus.
+constexpr size_t kX64CacheLineSize = 64;
+constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
+
+enum TestAndSmashFlags {
+  kAlignJccImmediate,
+  kAlignJcc,
+  kAlignJccAndJmp
+};
+void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
+void prepareForSmash(Asm&, int nBytes, int offset = 0);
+bool isSmashable(Address frontier, int nBytes, int offset = 0);
+
 class TranslatorX64 : public Translator
                     , SpillFill
                     , boost::noncopyable {
@@ -195,9 +221,9 @@ class TranslatorX64 : public Translator
   std::string            m_lastHHIRPunt;
   std::string            m_lastHHIRDump;
 
-  void hhirTraceStart(Offset bcStartOffset);
+  void hhirTraceStart(Offset bcStartOffset, Offset nextTraceOffset);
   void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);
-  void hhirTraceEnd(Offset bcSuccOffset);
+  void hhirTraceEnd();
   void hhirTraceFree();
 
 
@@ -857,33 +883,9 @@ private:
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 
- public:
-  static const size_t kJmpTargetAlign = 16;
-  static const size_t kNonFallthroughAlign = 64;
-  static const int kJmpLen = 5;
-  static const int kCallLen = 5;
-  static const int kJmpccLen = 6;
-  static const int kJmpImmBytes = 4;
-  static const int kJcc8Len = 3;
-  static const int kLeaRipLen = 7;
-  static const int kTestRegRegLen = 3;
-  static const int kTestImmRegLen = 5;  // only for rax -- special encoding
-  // Cache alignment is required for mutable instructions to make sure
-  // mutations don't "tear" on remote cpus.
-  static const size_t kX64CacheLineSize = 64;
-  static const size_t kX64CacheLineMask = kX64CacheLineSize - 1;
  private:
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                    const bool unreachable = true);
-  enum TestAndSmashFlags {
-    kAlignJccImmediate,
-    kAlignJcc,
-    kAlignJccAndJmp
-  };
-  void prepareForTestAndSmash(int testBytes, TestAndSmashFlags flags);
-  void prepareForSmash(Asm &a, int nBytes, int offset = 0);
-  void prepareForSmash(int nBytes, int offset = 0);
-  static bool isSmashable(Address frontier, int nBytes, int offset = 0);
   static void smash(Asm &a, TCA src, TCA dest, bool isCall);
   static void smashJmp(Asm &a, TCA src, TCA dest) {
     smash(a, src, dest, false);
@@ -1077,11 +1079,9 @@ private:
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
-private: // Only for HackIR
-  void emitReqRetransNoIR(Asm& as, SrcKey& sk);
-  void emitRecordPunt(Asm& as, const std::string& name);
-
 public: // Only for HackIR
+  void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
+  void emitRecordPunt(Asm& as, const std::string& name);
 #define DECLARE_FUNC(nm) \
   void irTranslate ## nm(const Tracelet& t,               \
                          const NormalizedInstruction& i);

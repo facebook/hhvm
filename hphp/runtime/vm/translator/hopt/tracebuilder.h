@@ -103,10 +103,6 @@ struct TraceBuilder {
   SSATmp* getSp() const { return m_spValue; }
   SSATmp* getFp() const { return m_fpValue; }
 
-  Trace* makeExitTrace(uint32_t bcOff) {
-    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
-                                           bcOff));
-  }
   bool isThisAvailable() const {
     return m_thisIsAvailable;
   }
@@ -136,12 +132,16 @@ struct TraceBuilder {
   /*
    * Create an IRInstruction, similar to gen(), except link it into
    * the Trace t instead of the current main trace.
+   *
+   * Also does not run optimization passes.
+   *
+   * TODO(#2404447): run simplifier?
    */
   template<class... Args>
-  IRInstruction* genFor(Trace* t, Args... args) {
+  SSATmp* genFor(Trace* t, Args... args) {
     auto instr = m_irFactory.gen(args...);
     t->back()->push_back(instr);
-    return instr;
+    return instr->getDst();
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -175,8 +175,6 @@ struct TraceBuilder {
 
   //////////////////////////////////////////////////////////////////////
   // control flow
-
-  typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;
 
   // hint the execution frequency of the current block
   void hint(Block::Hint h) const {
@@ -226,22 +224,6 @@ struct TraceBuilder {
   }
 
   /*
-   * ifThenExit produces a conditional exit with user-supplied logic
-   * if the exit is taken.
-   */
-  Trace* ifThenExit(const Func* func,
-                    int stackDeficit,
-                    const std::vector<SSATmp*> &stackValues,
-                    ExitTraceCallback exit,
-                    Offset exitBcOff,
-                    Offset bcOff) {
-    return genExitTrace(exitBcOff, stackDeficit,
-                        stackValues.size(),
-                        stackValues.size() ? &stackValues[0] : nullptr,
-                        TraceExitType::NormalCc, bcOff /* notTakenOff */, exit);
-  }
-
-  /*
    * ifElse generates if-then-else blocks with an empty 'then' block
    * that do not produce values. Code emitted in the next lambda will
    * be executed iff the branch emitted in the branch lambda is not
@@ -257,37 +239,15 @@ struct TraceBuilder {
     appendBlock(done_block);
   }
 
-  Trace* getExitSlowTrace(uint32_t bcOff,
-                          int32_t stackDeficit,
-                          uint32_t numOpnds,
-                          SSATmp** opnds);
-
   /*
-   * Generates a trace exit that can be the target of a conditional
-   * or unconditional control flow instruction from the main trace.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
+   * Create a new "exit trace".  This is a Trace that is assumed to be
+   * a cold path, which always exits the tracelet without control flow
+   * rejoining the main line.
    */
-  Trace* genExitTrace(uint32_t bcOff,
-                      int32_t  stackDeficit,
-                      uint32_t numOpnds,
-                      SSATmp* const* opnds,
-                      TraceExitType::ExitType,
-                      uint32_t notTakenBcOff = 0,
-                      ExitTraceCallback beforeExit = ExitTraceCallback());
-
-  /*
-   * Generates a target exit trace for GuardFailure exits.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
-   */
-  Trace* genExitGuardFailure(uint32_t off);
-
-  // generates the ExitTrace instruction at the end of a trace
-  void genTraceEnd(uint32_t nextPc,
-                   TraceExitType::ExitType exitType = TraceExitType::Normal);
+  Trace* makeExitTrace(uint32_t bcOff) {
+    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
+                                           bcOff));
+  }
 
 private:
   // RAII disable of CSE; only restores if it used to be on.  Used for
@@ -323,7 +283,7 @@ private:
   };
 
 private:
-  SSATmp*   preOptimizeGuardLoc(IRInstruction*);
+  SSATmp*   preOptimizeCheckLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);

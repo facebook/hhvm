@@ -482,7 +482,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
 // Assuming that the 'consumer' instruction consumes 'src', trace back through
 // src's instruction to the real origin of the value. Currently this traces
-// through GuardType and DefLabel.
+// through CheckType and DefLabel.
 void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
                    DceState& state, SSACache& ssas, SSASet visitedSrcs) {
   assert(!visitedSrcs.count(src) && "Cycle detected in dataflow graph");
@@ -497,11 +497,11 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
   const IRInstruction* srcInst = src->inst();
   visitedSrcs.insert(src);
-  if (srcInst->op() == GuardType &&
+  if (srcInst->op() == CheckType &&
       srcInst->getTypeParam().maybeCounted()) {
-    // srcInst is a GuardType that guards to a refcounted type. We need to
-    // trace through to its source. If the GuardType guards to a non-refcounted
-    // type then the reference is consumed by GuardType itself.
+    // srcInst is a CheckType that guards to a refcounted type. We need to
+    // trace through to its source. If the CheckType guards to a non-refcounted
+    // type then the reference is consumed by CheckType itself.
     consumeIncRef(consumer, srcInst->getSrc(0), state, ssas, visitedSrcs);
   } else if (srcInst->op() == DefLabel) {
     // srcInst is a DefLabel that may be a join node. We need to find

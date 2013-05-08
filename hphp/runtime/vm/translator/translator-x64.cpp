@@ -1479,8 +1479,7 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
  * Returns true if the given current frontier can have an nBytes-long
  * instruction written without any risk of cache-tearing.
  */
-bool
-TranslatorX64::isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
+bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
   assert(nBytes <= int(kX64CacheLineSize));
   uintptr_t iFrontier = uintptr_t(frontier) + offset;
   uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
@@ -1491,42 +1490,37 @@ TranslatorX64::isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
  * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
  * writing a testBytes-long instruction, the frontier will be smashable.
  */
-void
-TranslatorX64::prepareForTestAndSmash(int testBytes, TestAndSmashFlags flags) {
-  if (flags == kAlignJcc) {
-    prepareForSmash(testBytes + kJmpccLen, testBytes);
+void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
+  switch (flags) {
+  case kAlignJcc:
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
     assert(isSmashable(a.code.frontier + testBytes, kJmpccLen));
-  } else if (flags == kAlignJccImmediate) {
-    prepareForSmash(testBytes + kJmpccLen,
+    break;
+  case kAlignJccImmediate:
+    prepareForSmash(a,
+                    testBytes + kJmpccLen,
                     testBytes + kJmpccLen - kJmpImmBytes);
     assert(isSmashable(a.code.frontier + testBytes, kJmpccLen,
                        kJmpccLen - kJmpImmBytes));
-  } else if (flags == kAlignJccAndJmp) {
+    break;
+  case kAlignJccAndJmp:
     // Ensure that the entire jcc, and the entire jmp are smashable
     // (but we dont need them both to be in the same cache line)
-    prepareForSmash(testBytes + kJmpccLen, testBytes);
-    prepareForSmash(testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
+    prepareForSmash(a, testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
     assert(isSmashable(a.code.frontier + testBytes, kJmpccLen));
     assert(isSmashable(a.code.frontier + testBytes + kJmpccLen, kJmpLen));
-  } else {
-    not_reached();
+    break;
   }
 }
 
-void
-TranslatorX64::prepareForSmash(X64Assembler& a, int nBytes,
-                               int offset /* = 0 */) {
+void prepareForSmash(X64Assembler& a, int nBytes, int offset /* = 0 */) {
   if (!isSmashable(a.code.frontier, nBytes, offset)) {
     int gapSize = (~(uintptr_t(a.code.frontier) + offset) &
                    kX64CacheLineMask) + 1;
     a.emitNop(gapSize);
     assert(isSmashable(a.code.frontier, nBytes, offset));
   }
-}
-
-void
-TranslatorX64::prepareForSmash(int nBytes, int offset /* = 0 */) {
-  prepareForSmash(a, nBytes, offset);
 }
 
 void
@@ -1847,7 +1841,7 @@ funcPrologToGuardImm(TCA prolog) {
                              kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
   assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
-          ~(TranslatorX64::kX64CacheLineSize - 1)) == 0);
+          ~(kX64CacheLineSize - 1)) == 0);
 
   return retval;
 }
@@ -2364,7 +2358,7 @@ TranslatorX64::emitBindCallHelper(SrcKey srcKey,
   // Func we encounter as a decent prediction. Make space to burn in a
   // TCA.
   ReqBindCall* req = m_globalData.alloc<ReqBindCall>();
-  prepareForSmash(kCallLen);
+  prepareForSmash(a, kCallLen);
   TCA toSmash = a.code.frontier;
   a.    call(astubs.code.frontier);
 
@@ -2391,7 +2385,7 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
 
   // reserve space for a smashable jnz/jmp pair; both initially point
   // to our stub.
-  prepareForTestAndSmash(0, kAlignJccAndJmp);
+  prepareForTestAndSmash(a, 0, kAlignJccAndJmp);
   TCA old = a.code.frontier;
   TCA stub = astubs.code.frontier;
 
@@ -2705,7 +2699,7 @@ TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
   dest.emitFallbackJump(as.code.frontier, cc);
 }
 
-void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
+void TranslatorX64::emitReqRetransNoIR(Asm& as, const SrcKey& sk) {
   prepareForSmash(as, kJmpLen);
   TCA toSmash = as.code.frontier;
   if (&as == &astubs) {
@@ -2835,7 +2829,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
 
           // Other than these builtins, we need to have all by value
           // args in this case.
-          prepareForTestAndSmash(kTestRegRegLen, kAlignJccImmediate);
+          prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccImmediate);
           a.  test_reg64_reg64(r(rExpectedBits), r(rExpectedBits));
           emitFallbackJmp(fail);
 
@@ -4175,7 +4169,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     }
     if (i.changesPC) {
       fuseBranchSync(t, i);
-      prepareForTestAndSmash(kTestImmRegLen, kAlignJccAndJmp);
+      prepareForTestAndSmash(a, kTestImmRegLen, kAlignJccAndJmp);
       a.   testb (1, al);
       fuseBranchAfterBool(t, i, ccNegate(ccBranch));
       return;
@@ -4196,7 +4190,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     fuseBranchSync(t, i);
   }
   if (IS_NULL_TYPE(leftType) || IS_NULL_TYPE(rightType)) {
-    prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
+    prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccAndJmp);
     if (IS_NULL_TYPE(leftType)) {
       a.   test_reg64_reg64(srcdest, srcdest);
     } else {
@@ -4560,7 +4554,7 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
     emitBindJmp(isZ ? taken : notTaken);
     return;
   }
-  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
+  prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccAndJmp);
   a.    test_reg64_reg64(src, src);
   branchWithFlagsSet(t, i, isZ ? CC_Z : CC_NZ);
 }
@@ -7623,7 +7617,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
     if (i.changesPC) {
       fuseBranchSync(t, i);
     }
-    prepareForTestAndSmash(kTestImmRegLen, kAlignJccAndJmp);
+    prepareForTestAndSmash(a, kTestImmRegLen, kAlignJccAndJmp);
     a.    test_imm32_reg32(isClass ? attrNotClass : typeAttr, r(scratch));
     ConditionCode cc = isClass ? CC_Z : CC_NZ;
     if (i.changesPC) {
@@ -8233,7 +8227,7 @@ TranslatorX64::translateAKExists(const Tracelet& t,
     ScratchReg res(m_regMap, rax);
     if (ni.changesPC) {
       fuseBranchSync(t, ni);
-      prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
+      prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccAndJmp);
       a.    test_reg64_reg64(r(res), r(res));
       fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
     } else {
@@ -10567,7 +10561,7 @@ void TranslatorX64::translateBasicIterInit(const Tracelet& t,
   // the input. If a new iterator is not created, new_iter_* will decRef the
   // input for us.  new_iter_* returns 0 if an iterator was not created,
   // otherwise it returns 1.
-  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
+  prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccAndJmp);
   a.    test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_Z);
 }
@@ -10630,7 +10624,7 @@ TranslatorX64::translateBasicIterNext(const Tracelet& t,
   SrcKey taken, notTaken;
   branchDests(t, i, &taken, &notTaken, 1 /* destImmIdx */);
 
-  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
+  prepareForTestAndSmash(a, kTestRegRegLen, kAlignJccAndJmp);
   a.   test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_NZ);
 }
@@ -11191,7 +11185,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   if (m_useHHIR) {
     TranslateTraceletResult result;
     do {
-      hhirTraceStart(sk.offset());
+      hhirTraceStart(sk.offset(), t.m_nextSk.offset());
       SKTRACE(1, sk, "retrying irTranslateTracelet\n");
       result = irTranslateTracelet(t, start, stubStart, &bcMapping);
       if (result == Retry) {
@@ -12088,7 +12082,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   }
   // Emit a jump to the actual code
   TCA realCode = srcRec.getTopTranslation();
-  prepareForSmash(kJmpLen);
+  prepareForSmash(a, kJmpLen);
   TCA dbgBranchGuardSrc = a.code.frontier;
   a.   jmp(realCode);
   // Add it to srcRec

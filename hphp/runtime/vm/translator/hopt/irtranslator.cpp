@@ -122,22 +122,26 @@ TranslatorX64::irCheckType(X64Assembler& a,
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue()) return;
 
-  if (l.space == Location::Stack) {
-    // tx64LocPhysicalOffset returns:
-    // negative offsets for locals accessed via rVmFp
-    // positive offsets for stack values, relative to rVmSp
-    uint32_t stackOffset = tx64LocPhysicalOffset(l);
-    m_hhbcTrans->guardTypeStack(stackOffset, JIT::Type::fromRuntimeType(rtt));
-  } else if (l.space == Location::Local){
-    // Convert negative offset to a positive offset for convenience
-    m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
-  } else if (l.space == Location::Iter) {
-    assert(false); // should not happen
-  } else {
-    HHIR_UNIMPLEMENTED(Invalid_space);
-  }
+  switch (l.space) {
+  case Location::Stack:
+    {
+      uint32_t stackOffset = tx64LocPhysicalOffset(l);
+      m_hhbcTrans->guardTypeStack(stackOffset,
+                                  JIT::Type::fromRuntimeType(rtt));
+    }
+    break;
 
-  return;
+  case Location::Local:
+    m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
+    break;
+
+  case Location::Iter:
+  case Location::Invalid:
+  case Location::Litstr:
+  case Location::Litint:
+  case Location::This:
+    assert(false); // should not happen
+  }
 }
 
 void
@@ -228,6 +232,8 @@ TranslatorX64::irTranslateBranchOp(const Tracelet& t,
                                    const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpJmpZ || op == OpJmpNZ);
+  assert(!i.next);
+
   if (op == OpJmpZ) {
     HHIR_EMIT(JmpZ,  i.offset() + i.imm[0].u_BA);
   } else {
@@ -1758,7 +1764,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);
-    m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
 
     // Profiling on function entry.
     if (m_curTrace->m_sk.offset() == curFunc()->base()) {
@@ -1820,7 +1825,7 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       if (ni->breaksTracelet) break;
     }
 
-    hhirTraceEnd(t.m_nextSk.offset());
+    hhirTraceEnd();
     if (transResult != Retry) {
       try {
         transResult = Success;
@@ -1892,7 +1897,8 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
   return transResult;
 }
 
-void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
+void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
+                                   Offset nextTraceletOffset) {
   assert(!m_irFactory);
   assert(m_useHHIR);
 
@@ -1908,12 +1914,12 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
   m_useHHIR      = true;
   m_irFactory.reset(new JIT::IRFactory());
   m_hhbcTrans.reset(new JIT::HhbcTranslator(
-    *m_irFactory, bcStartOffset, fp - vmsp(), curFunc()));
+    *m_irFactory, bcStartOffset, nextTraceletOffset, fp - vmsp(), curFunc()));
 }
 
-void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
+void TranslatorX64::hhirTraceEnd() {
   assert(m_useHHIR);
-  m_hhbcTrans->end(bcSuccOffset);
+  m_hhbcTrans->end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
          "",

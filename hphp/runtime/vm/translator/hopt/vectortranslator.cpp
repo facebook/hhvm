@@ -2014,7 +2014,7 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
     assert(spillValues.back() == m_predictedResult);
     spillValues.back() = m_result;
 
-    gen(GuardType,
+    gen(CheckType,
         m_predictedResult->type(),
         m_ht.getExitTrace(m_ht.getNextSrcKey().offset(), spillValues),
         m_result);

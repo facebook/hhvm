@@ -153,22 +153,6 @@ void print(std::ostream& ostream, const IRInstruction* inst,
     ostream << punc(" -> ");
     printLabel(ostream, taken);
   }
-
-  if (TCA tca = inst->getTCA()) {
-    ostream << punc(", ");
-    if (tca == kIRDirectJccJmpActive) {
-      ostream << "JccJmp_Exit ";
-    }
-    else if (tca == kIRDirectJccActive) {
-      ostream << "Jcc_Exit ";
-    }
-    else if (tca == kIRDirectGuardActive) {
-      ostream << "Guard_Exit ";
-    }
-    else {
-      ostream << (void*)tca;
-    }
-  }
 }
 
 void print(const IRInstruction* inst) {

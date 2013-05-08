@@ -106,7 +106,7 @@ private:
   SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
-  SSATmp* simplifyGuardType(IRInstruction* inst);
+  SSATmp* simplifyCheckType(IRInstruction* inst);
   SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);

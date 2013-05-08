@@ -101,26 +101,49 @@ private:
  */
 struct HhbcTranslator {
   HhbcTranslator(IRFactory& irFactory,
-                 Offset bcStartOffset,
+                 Offset startOffset,
+                 Offset nextTraceOffset,
                  uint32_t initialSpOffsetFromFp,
                  const Func* func)
     : m_irFactory(irFactory)
-    , m_tb(new TraceBuilder(bcStartOffset,
+    , m_tb(new TraceBuilder(startOffset,
                             initialSpOffsetFromFp,
                             m_irFactory,
                             func))
-    , m_bcStateStack {BcState(-1, func)}
-    , m_startBcOff(bcStartOffset)
+    , m_bcStateStack {BcState(startOffset, func)}
+    , m_startBcOff(startOffset)
+    , m_nextTraceBcOff(nextTraceOffset)
     , m_lastBcOff(false)
     , m_hasExit(false)
     , m_stackDeficit(0)
-    , m_exitGuardFailureTrace(m_tb->genExitGuardFailure(bcStartOffset))
-  {}
+  {
+    emitMarker();
+  }
 
-  void end(int nextBcOff);
+  // Accessors.
   Trace* getTrace() const { return m_tb->getTrace(); }
   TraceBuilder* getTraceBuilder() const { return m_tb.get(); }
 
+  // In between each emit* call, irtranslator indicates the new
+  // bytecode offset (or whether we're finished) using this API.
+  void setBcOff(Offset newOff, bool lastBcOff);
+  void end();
+
+  // Tracelet guards.
+  void guardTypeStack(uint32_t stackIndex, Type type);
+  void guardTypeLocal(uint32_t locId, Type type);
+  void guardRefs(int64_t entryArDelta,
+                 const vector<bool>& mask,
+                 const vector<bool>& vals);
+
+  // Interface to irtranslator for predicted and inferred types.
+  void assertTypeLocal(uint32_t localIndex, Type type);
+  void assertTypeStack(uint32_t stackIndex, Type type);
+  void checkTypeLocal(uint32_t localIndex, Type type);
+  void checkTypeTopOfStack(Type type, Offset nextByteCode);
+  void overrideTypeLocal(uint32_t localIndex, Type type);
+
+  // Inlining-related functions.
   void beginInlining(unsigned numArgs,
                      const Func* target,
                      Offset returnBcOffset);
@@ -131,9 +154,14 @@ struct HhbcTranslator {
   void profileSmallFunctionShape(const std::string& str);
   void profileFailedInlShape(const std::string& str);
 
-  void setBcOff(Offset newOff, bool lastBcOff);
-  void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
-  uint32_t getBcOffNextTrace() { return m_bcOffNextTrace; }
+  // Other public functions for irtranslator.
+  void setThisAvailable();
+  void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
+  void emitInterpOneCF(int numPopped);
+
+  /*
+   * An emit* function for each HHBC opcode.
+   */
 
   void emitPrint();
   void emitThis();
@@ -207,8 +235,8 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  void emitJmpZ(int32_t offset);
-  void emitJmpNZ(int32_t offset);
+  void emitJmpZ(Offset taken);
+  void emitJmpNZ(Offset taken);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
   void emitGt()    { emitCmp(OpGt);    }
   void emitGte()   { emitCmp(OpGte);   }
@@ -352,29 +380,6 @@ struct HhbcTranslator {
   void emitIncTransCounter();
   void emitArrayIdx();
 
-  // tracelet guards
-  Trace* guardTypeStack(uint32_t stackIndex,
-                        Type type,
-                        Trace* nextTrace = nullptr);
-  void   guardTypeLocal(uint32_t locId, Type type);
-  Trace* guardRefs(int64_t               entryArDelta,
-                   const vector<bool>& mask,
-                   const vector<bool>& vals,
-                   Trace*              exitTrace = nullptr);
-
-  // Interface to irtranslator for predicted and inferred types.
-  void assertTypeLocal(uint32_t localIndex, Type type);
-  void assertTypeStack(uint32_t stackIndex, Type type);
-  void checkTypeLocal(uint32_t localIndex, Type type);
-  void checkTypeTopOfStack(Type type, Offset nextByteCode);
-  void overrideTypeLocal(uint32_t localIndex, Type type);
-  void setThisAvailable();
-  void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
-  void emitInterpOneCF(int numPopped);
-
-  void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                            bool& checkForInt);
-
 private:
   /*
    * VectorTranslator is responsible for translating one of the vector
@@ -502,6 +507,11 @@ private: // tracebuilder forwarding utilities
     return m_tb->gen(std::forward<Args>(args)...);
   }
 
+  template<class... Args>
+  SSATmp* genFor(Trace* trace, Args&&... args) {
+    return m_tb->genFor(trace, std::forward<Args>(args)...);
+  }
+
 private:
   /*
    * Emit helpers.
@@ -536,6 +546,8 @@ private:
   bool checkSupportedGblName(const StringData* gblName,
                              HPHP::JIT::Type resultType,
                              int stkIndex);
+  void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
+                            bool& checkForInt);
   SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Block* block);
   SSATmp* emitLdClsPropAddr(const StringData* propName) {
     return emitLdClsPropAddrOrExit(propName, nullptr);
@@ -556,31 +568,45 @@ private:
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  Trace* getExitTrace(Offset targetBcOff,
-                      const std::vector<SSATmp*>& spillValues);
-  Trace* getExitTrace(Offset targetBcOff = -1) {
-    return getExitTrace(targetBcOff, getSpillValues());
-  }
-  Trace* getExitTrace(uint32_t targetBcOff, uint32_t notTakenBcOff);
-  Trace* getExitSlowTrace();
-  Trace* getGuardExit();
   void emitInterpOneOrPunt(Type type, int numPopped, int numExtraPushed = 0);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
   void emitMarker();
 
+  // Exit trace creation routines.
+  Trace* getExitTrace(Offset targetBcOff = -1);
+  Trace* getExitTrace(Offset targetBcOff,
+                      std::vector<SSATmp*>& spillValues);
+  Trace* getExitTraceWarn(Offset targetBcOff,
+                          std::vector<SSATmp*>& spillValues,
+                          const StringData* warning);
+  Trace* getExitSlowTrace();
+
+  enum class ExitFlag {
+    None,
+    NoIR,
+  };
+  Trace* getExitTraceImpl(Offset targetBcOff,
+                          ExitFlag noIRExit,
+                          std::vector<SSATmp*>& spillValues,
+                          const StringData* warning);
+
   /*
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* getCurFunc()  const { return m_bcStateStack.back().func; }
-  Class*      getCurClass() const { return getCurFunc()->cls(); }
-  Unit*       getCurUnit()  const { return getCurFunc()->unit(); }
-  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
+  const Func* getCurFunc()   const { return m_bcStateStack.back().func; }
+  Class*      getCurClass()  const { return getCurFunc()->cls(); }
+  Unit*       getCurUnit()   const { return getCurFunc()->unit(); }
+  Offset      bcOff()        const { return m_bcStateStack.back().bcOff; }
+  SrcKey      getCurSrcKey() const { return SrcKey(getCurFunc(), bcOff()); }
 
-  SrcKey      getCurSrcKey()  const { return SrcKey(getCurFunc(), bcOff()); }
-  SrcKey      getNextSrcKey() const {
+  /*
+   * Return the SrcKey for the next HHBC (whether it is in this
+   * tracelet or not).
+   */
+  SrcKey getNextSrcKey() const {
     SrcKey srcKey(getCurFunc(), bcOff());
     srcKey.advance(getCurFunc()->unit());
     return srcKey;
@@ -645,15 +671,24 @@ private:
   };
 
 private:
-  IRFactory&        m_irFactory;
-  std::unique_ptr<TraceBuilder>
-                    m_tb;
-  std::vector<BcState>
-                    m_bcStateStack;
-  Offset            m_startBcOff;
-  Offset            m_bcOffNextTrace;
-  bool              m_lastBcOff;
-  bool              m_hasExit;
+  IRFactory& m_irFactory;
+  std::unique_ptr<TraceBuilder> const m_tb;
+
+  std::vector<BcState> m_bcStateStack;
+
+  // The first HHBC offset for this tracelet, and the offset for the
+  // next Traclet.
+  const Offset m_startBcOff;
+  const Offset m_nextTraceBcOff;
+
+  // True if we're on the last HHBC opcode that will be emitted for
+  // this tracelet.
+  bool m_lastBcOff;
+
+  // True if we've emitted an instruction that already handled
+  // end-of-tracelet duties.  (E.g. emitRetC, etc.)  If it's not true,
+  // we'll create a generic ReqBindJmp instruction after we're done.
+  bool m_hasExit;
 
   /*
    * Tracking of the state of the virtual execution stack:
@@ -668,18 +703,15 @@ private:
    *   m_stackDeficit represents the number of cells we've popped off
    *   the virtual stack since the last sync.
    */
-  uint32_t          m_stackDeficit;
-  EvalStack         m_evalStack;
+  uint32_t m_stackDeficit;
+  EvalStack m_evalStack;
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an
    * FCall, we look in here to find a definition of the StkPtr,offset
    * that can be used after the inlined callee "returns".
    */
-  std::stack<std::pair<SSATmp*,int32_t>>
-                    m_fpiStack;
-
-  Trace* const      m_exitGuardFailureTrace;
+  std::stack<std::pair<SSATmp*,int32_t>> m_fpiStack;
 };
 
 //////////////////////////////////////////////////////////////////////

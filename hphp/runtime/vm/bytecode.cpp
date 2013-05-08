@@ -2309,12 +2309,10 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   // the backtrace
   if (parserFrame) {
     bt.append(
-      Array(
-        ArrayInit(2)
-          .set(s_file, parserFrame->filename, true)
-          .set(s_line, parserFrame->lineNumber, true)
-          .create()
-      )
+      ArrayInit(2)
+        .set(s_file, parserFrame->filename, true)
+        .set(s_line, parserFrame->lineNumber, true)
+        .toVariant()
     );
   }
 
@@ -2360,7 +2358,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
           frame.set(s_function, s_include, true);
           frame.set(s_args, Array::Create(parserFrame->filename), true);
         }
-        bt.append(Array(frame.create()));
+        bt.append(frame.toVariant());
         depth++;
       }
     }
@@ -2479,7 +2477,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       frame.set(s_args, args, true);
     }
 
-    bt.append(Array(frame.create()));
+    bt.append(frame.toVariant());
     depth++;
   }
   return bt;

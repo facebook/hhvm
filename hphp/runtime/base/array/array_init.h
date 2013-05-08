@@ -276,10 +276,24 @@ public:
     return *this;
   }
 
+  // Prefer toArray() in new code---it can save a null check when the
+  // compiler can't prove m_data hasn't changed.
   ArrayData *create() {
     ArrayData *ret = m_data;
     m_data = nullptr;
     return ret;
+  }
+
+  Array toArray() {
+    auto ptr = m_data;
+    m_data = nullptr;
+    return Array(ptr, Array::ArrayInitCtor::Tag);
+  }
+
+  Variant toVariant() {
+    auto ptr = m_data;
+    m_data = nullptr;
+    return Variant(ptr, Variant::ArrayInitCtor::Tag);
   }
 
   static ArrayData *CreateParams(int count, ...);

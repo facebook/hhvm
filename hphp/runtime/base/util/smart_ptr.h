@@ -53,6 +53,12 @@ public:
     if (m_px) m_px->incRefCount();
   }
 
+  enum class NonNull { Tag };
+  explicit SmartPtr(T* px, NonNull) : m_px(px) {
+    assert(px);
+    m_px->incRefCount();
+  }
+
   // Move ctor
   SmartPtr(SmartPtr&& src) : m_px(src.get()) {
     src.m_px = nullptr;

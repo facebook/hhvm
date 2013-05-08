@@ -82,6 +82,15 @@ class Array : protected SmartPtr<ArrayData> {
   /* implicit */ Array(ArrayData *data) : ArrayBase(data) { }
   /* implicit */ Array(CArrRef arr) : ArrayBase(arr.m_px) { }
 
+  /*
+   * Special constructor for use from ArrayInit that creates an Array
+   * without a null check.
+   */
+  enum class ArrayInitCtor { Tag };
+  explicit Array(ArrayData* ad, ArrayInitCtor)
+    : ArrayBase(ad, ArrayBase::NonNull::Tag)
+  {}
+
   // Move ctor
   Array(Array&& src) : ArrayBase(std::move(src)) {
     static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");

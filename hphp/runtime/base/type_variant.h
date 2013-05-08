@@ -188,6 +188,16 @@ class Variant : private TypedValue {
   Variant(const Variant *v) = delete;
   Variant(Variant *v) = delete;
 
+  /*
+   * Creation constructor from ArrayInit that avoids a null check.
+   */
+  enum class ArrayInitCtor { Tag };
+  explicit Variant(ArrayData* ad, ArrayInitCtor) {
+    m_type = KindOfArray;
+    m_data.parr = ad;
+    ad->incRefCount();
+  }
+
 #ifdef INLINE_VARIANT_HELPER
   inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
   inline ALWAYS_INLINE

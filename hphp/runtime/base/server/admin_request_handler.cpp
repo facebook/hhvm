@@ -14,9 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sstream>
-#include <iomanip>
-
 #include "hphp/runtime/base/server/admin_request_handler.h"
 #include "hphp/runtime/eval/runtime/file_repository.h"
 #include "hphp/runtime/base/server/http_server.h"
@@ -45,6 +42,9 @@
 #include "hphp/util/repo_schema.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_apc.h"
+
+#include <sstream>
+#include <iomanip>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include "google/profiler.h"
@@ -214,6 +214,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/tc_dump_astub\n"
         "/vm-preconsts:    show information about preconsts\n"
         "/vm-tcreset:      throw away translations and start over\n"
+        "/vm-namedentities:show size of the NamedEntityTable\n"
         ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
@@ -960,6 +961,12 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
     transport->sendString(Transl::Translator::Get()->getUsage());
+    return true;
+  }
+  if (cmd == "vm-namedentities") {
+    std::ostringstream result;
+    result << Unit::GetNamedEntityTableSize();
+    transport->sendString(result.str());
     return true;
   }
   if (cmd == "vm-preconsts") {

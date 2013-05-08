@@ -35,12 +35,19 @@ namespace HPHP {
 
 IMPLEMENT_SMART_ALLOCATION_HOT(StringData);
 ///////////////////////////////////////////////////////////////////////////////
-// constructor and destructor
+
+// equality checker for AtomicHashMap
+struct ahm_string_data_same {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    // ahm uses -1, -2, -3 as magic values
+    return int64_t(s1) > 0 && s1->same(s2);
+  }
+};
 
 // The uint32_t is used to hold TargetCache offsets for constants
-typedef tbb::concurrent_unordered_map<const StringData *, uint32_t,
-                                      string_data_hash,
-                                      string_data_same> StringDataMap;
+typedef folly::AtomicHashMap<const StringData *, uint32_t,
+                             string_data_hash,
+                             ahm_string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
 const StringData* StringData::convert_double_helper(double n) {
@@ -71,7 +78,13 @@ size_t StringData::GetStaticStringCount() {
 }
 
 StringData *StringData::GetStaticString(const StringData *str) {
-  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
+  if (UNLIKELY(!s_stringDataMap)) {
+    StringDataMap::Config config;
+    config.growthFactor = 1;
+    s_stringDataMap =
+      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                        config);
+  }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(it->first);
@@ -81,8 +94,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
   StringData *sd = (StringData*)Util::low_malloc(sizeof(StringData));
   new (sd) StringData(str->data(), str->size(), CopyMalloc);
   sd->setStatic();
-  auto pair = s_stringDataMap->insert(
-    std::pair<const StringData*,uint32_t>(sd, 0));
+  auto pair = s_stringDataMap->insert(sd, 0);
   if (!pair.second) {
     sd->~StringData();
     Util::low_free(sd);
@@ -97,7 +109,13 @@ StringData* StringData::GetStaticString(const String& str) {
 }
 
 StringData* StringData::FindStaticString(const StringData* str) {
-  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
+  if (UNLIKELY(!s_stringDataMap)) {
+    StringDataMap::Config config;
+    config.growthFactor = 1;
+    s_stringDataMap =
+      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                        config);
+  }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(it->first);

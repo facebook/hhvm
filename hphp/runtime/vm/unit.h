@@ -449,6 +449,7 @@ struct Unit {
 
   static NamedEntity* GetNamedEntity(const StringData *)
     __attribute__((__flatten__));
+  static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();

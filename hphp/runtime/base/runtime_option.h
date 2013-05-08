@@ -444,6 +444,8 @@ public:
   F(bool, MapTCHuge,                   true)                            \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
+  F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
+  F(uint32_t, InitialStaticStringTableSize, 100000)                     \
   /* */                                                                 \
 
 #define F(type, name, unused) \

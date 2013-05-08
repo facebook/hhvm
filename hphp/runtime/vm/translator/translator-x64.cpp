@@ -7400,14 +7400,12 @@ void TranslatorX64::translateContHandle(const Tracelet& t,
 void TranslatorX64::analyzeStrlen(Tracelet& t,
                                   NormalizedInstruction& i) {
   switch (i.inputs[0]->rtt.valueType()) {
-    NULLCASE() :
-    case KindOfBoolean:
-      i.m_txFlags = Native;
-      break;
     STRINGCASE() :
       // May have to destroy a StringData, but can't reenter
       i.m_txFlags = Simple;
       break;
+    NULLCASE() :
+    case KindOfBoolean:
     case KindOfArray:
     case KindOfInt64:
     case KindOfDouble:

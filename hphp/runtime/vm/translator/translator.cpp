@@ -423,6 +423,7 @@ enum OutTypeConstraints {
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
+  OutStrlen,            // OpStrLen
   OutClassRef,          // KindOfClass
   OutNone
 };
@@ -915,6 +916,11 @@ getDynLocType(const vector<DynLocation*>& inputs,
                          KindOfInt64 : KindOfInvalid);
     }
 
+    case OutStrlen: {
+      auto const& rtt = ni->inputs[0]->rtt;
+      return RuntimeType(rtt.isString() ? KindOfInt64 : KindOfInvalid);
+    }
+
     case OutCInput: {
       assert(inputs.size() >= 1);
       const DynLocation* in = inputs[inputs.size() - 1];
@@ -1275,7 +1281,7 @@ static const struct {
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
-  { OpStrlen,      {Stack1,           Stack1,       OutInt64,          0 }},
+  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
   { OpIncStat,     {None,             None,         OutNone,           0 }},
 };
 
@@ -2111,6 +2117,7 @@ bool outputDependsOnInput(const Opcode instr) {
     case OutClassRef:
     case OutPred:
     case OutCns:
+    case OutStrlen:
     case OutNone:
       return false;
     case OutFDesc:

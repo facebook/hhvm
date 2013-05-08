@@ -405,6 +405,10 @@ def walk(filename, source):
         file(full_dest_filename+'.expectregex', 'w').write(exp)
     elif sections.has_key('EXPECTF'):
         exp = sections['EXPECTF']
+
+        if '/ext-standard-file/tempnam_variation5.php' in full_dest_filename:
+            exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
+
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:
         print "Malformed test, no --EXPECT*--: ", filename
@@ -525,6 +529,9 @@ def walk(filename, source):
         test = test.replace('dirname(__FILE__)', '__DIR__."/../../../sample_dir/"')
     if '/ext-standard-file/lchgrp_basic.php' in full_dest_filename:
         test = test.replace('symlink.txt', 'lchgrp_basic_symlink.txt')
+    if '/ext-standard-file/tempnam_variation5.php' in full_dest_filename:
+        test = test.replace('tempnam_variation6', 'tempnam_variation5')
+
 
     file(full_dest_filename, 'w').write(test)
 

@@ -1,9 +1,9 @@
 *** Test tempnam() function: by passing an existing filename as prefix ***
 -- Iteration 1 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 -- Iteration 2 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 -- Iteration 3 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 
 *** Done ***

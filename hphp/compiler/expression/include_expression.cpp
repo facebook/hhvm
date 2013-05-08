@@ -162,7 +162,11 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 
   if (var == "__DIR__") {
     var = "";
-    lit = Util::safe_dirname(container) + lit;
+    // get_include_file_path will check relative to the current file's dir
+    // as long as the first char isn't a /
+    if (lit[0] == '/') {
+      lit = lit.substr(1);
+    }
   }
 
   string included = get_include_file_path(container, var, lit, documentRoot);

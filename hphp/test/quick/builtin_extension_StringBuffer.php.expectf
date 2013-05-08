@@ -1,0 +1,58 @@
+StringBuffer
+object(StringBuffer)#1 (0) {
+}
+string(24) "O:12:"StringBuffer":0:{}"
+object(StringBuffer)#2 (0) {
+}
+array(3) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(6) "append"
+  [2]=>
+  string(6) "detach"
+}
+================
+A_StringBuffer
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_StringBuffer)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(39) "O:14:"A_StringBuffer":1:{s:4:"___x";N;}"
+object(A_StringBuffer)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}
+================
+object(StringBuffer)#3 (1) {
+  ["foo"]=>
+  int(123)
+}
+int(123)
+================
+object(Foo)#4 (3) {
+  ["foo"]=>
+  int(42)
+  ["bar"]=>
+  string(5) "seven"
+  ["biz"]=>
+  array(0) {
+  }
+}
+int(42)
+string(5) "seven"
+array(0) {
+}

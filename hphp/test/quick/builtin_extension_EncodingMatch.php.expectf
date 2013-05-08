@@ -1,0 +1,44 @@
+EncodingMatch
+object(EncodingMatch)#1 (0) {
+}
+string(25) "O:13:"EncodingMatch":0:{}"
+object(EncodingMatch)#2 (0) {
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "isValid"
+  [2]=>
+  string(11) "getEncoding"
+  [3]=>
+  string(13) "getConfidence"
+  [4]=>
+  string(11) "getLanguage"
+  [5]=>
+  string(7) "getUTF8"
+}
+================
+A_EncodingMatch
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_EncodingMatch)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(40) "O:15:"A_EncodingMatch":1:{s:4:"___x";N;}"
+object(A_EncodingMatch)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

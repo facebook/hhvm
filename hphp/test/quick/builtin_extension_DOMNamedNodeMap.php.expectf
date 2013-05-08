@@ -1,0 +1,48 @@
+DOMNamedNodeMap
+object(DOMNamedNodeMap)#1 (0) {
+}
+string(27) "O:15:"DOMNamedNodeMap":0:{}"
+object(DOMNamedNodeMap)#2 (0) {
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getNamedItem"
+  [2]=>
+  string(14) "getNamedItemNS"
+  [3]=>
+  string(4) "item"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "__set"
+  [6]=>
+  string(7) "__isset"
+  [7]=>
+  string(11) "getIterator"
+}
+================
+A_DOMNamedNodeMap
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_DOMNamedNodeMap)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(42) "O:17:"A_DOMNamedNodeMap":1:{s:4:"___x";N;}"
+object(A_DOMNamedNodeMap)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

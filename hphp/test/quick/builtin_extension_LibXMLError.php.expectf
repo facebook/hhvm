@@ -1,0 +1,34 @@
+LibXMLError
+object(LibXMLError)#1 (0) {
+}
+string(23) "O:11:"LibXMLError":0:{}"
+object(LibXMLError)#2 (0) {
+}
+array(1) {
+  [0]=>
+  string(11) "__construct"
+}
+================
+A_LibXMLError
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_LibXMLError)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_LibXMLError":1:{s:4:"___x";N;}"
+object(A_LibXMLError)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

@@ -1,0 +1,111 @@
+DOMElement
+HipHop Warning: DOMElement::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+object(DOMElement)#1 (0) {
+}
+string(22) "O:10:"DOMElement":0:{}"
+object(DOMElement)#2 (0) {
+}
+array(39) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getAttribute"
+  [2]=>
+  string(16) "getAttributeNode"
+  [3]=>
+  string(18) "getAttributeNodeNS"
+  [4]=>
+  string(14) "getAttributeNS"
+  [5]=>
+  string(20) "getElementsByTagName"
+  [6]=>
+  string(22) "getElementsByTagNameNS"
+  [7]=>
+  string(12) "hasAttribute"
+  [8]=>
+  string(14) "hasAttributeNS"
+  [9]=>
+  string(15) "removeAttribute"
+  [10]=>
+  string(19) "removeAttributeNode"
+  [11]=>
+  string(17) "removeAttributeNS"
+  [12]=>
+  string(12) "setAttribute"
+  [13]=>
+  string(16) "setAttributeNode"
+  [14]=>
+  string(18) "setAttributeNodeNS"
+  [15]=>
+  string(14) "setAttributeNS"
+  [16]=>
+  string(14) "setIDAttribute"
+  [17]=>
+  string(18) "setIDAttributeNode"
+  [18]=>
+  string(16) "setIDAttributeNS"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(5) "__set"
+  [21]=>
+  string(7) "__isset"
+  [22]=>
+  string(11) "appendChild"
+  [23]=>
+  string(9) "cloneNode"
+  [24]=>
+  string(9) "getLineNo"
+  [25]=>
+  string(13) "hasAttributes"
+  [26]=>
+  string(13) "hasChildNodes"
+  [27]=>
+  string(12) "insertBefore"
+  [28]=>
+  string(18) "isDefaultNamespace"
+  [29]=>
+  string(10) "isSameNode"
+  [30]=>
+  string(11) "isSupported"
+  [31]=>
+  string(18) "lookupNamespaceUri"
+  [32]=>
+  string(12) "lookupPrefix"
+  [33]=>
+  string(9) "normalize"
+  [34]=>
+  string(11) "removeChild"
+  [35]=>
+  string(12) "replaceChild"
+  [36]=>
+  string(4) "c14n"
+  [37]=>
+  string(8) "c14nfile"
+  [38]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMElement
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_DOMElement)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"
+object(A_DOMElement)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

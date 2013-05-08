@@ -1,0 +1,108 @@
+Memcached
+object(Memcached)#1 (0) {
+}
+string(20) "O:9:"Memcached":0:{}"
+object(Memcached)#2 (0) {
+}
+array(38) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(3) "add"
+  [2]=>
+  string(8) "addByKey"
+  [3]=>
+  string(9) "addServer"
+  [4]=>
+  string(10) "addServers"
+  [5]=>
+  string(6) "append"
+  [6]=>
+  string(11) "appendByKey"
+  [7]=>
+  string(3) "cas"
+  [8]=>
+  string(8) "casByKey"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(6) "delete"
+  [11]=>
+  string(11) "deleteByKey"
+  [12]=>
+  string(5) "fetch"
+  [13]=>
+  string(8) "fetchAll"
+  [14]=>
+  string(5) "flush"
+  [15]=>
+  string(3) "get"
+  [16]=>
+  string(8) "getByKey"
+  [17]=>
+  string(10) "getDelayed"
+  [18]=>
+  string(15) "getDelayedByKey"
+  [19]=>
+  string(8) "getMulti"
+  [20]=>
+  string(13) "getMultiByKey"
+  [21]=>
+  string(9) "getOption"
+  [22]=>
+  string(13) "getResultCode"
+  [23]=>
+  string(16) "getResultMessage"
+  [24]=>
+  string(14) "getServerByKey"
+  [25]=>
+  string(13) "getServerList"
+  [26]=>
+  string(8) "getStats"
+  [27]=>
+  string(10) "getVersion"
+  [28]=>
+  string(9) "increment"
+  [29]=>
+  string(7) "prepend"
+  [30]=>
+  string(12) "prependByKey"
+  [31]=>
+  string(7) "replace"
+  [32]=>
+  string(12) "replaceByKey"
+  [33]=>
+  string(3) "set"
+  [34]=>
+  string(8) "setByKey"
+  [35]=>
+  string(8) "setMulti"
+  [36]=>
+  string(13) "setMultiByKey"
+  [37]=>
+  string(9) "setOption"
+}
+================
+A_Memcached
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_Memcached)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(36) "O:11:"A_Memcached":1:{s:4:"___x";N;}"
+object(A_Memcached)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

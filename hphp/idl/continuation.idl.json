@@ -216,6 +216,16 @@
                     ]
                 },
                 {
+                    "name": "getCalledClass",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
                     "name": "__clone",
                     "return": {
                         "type": "Variant"

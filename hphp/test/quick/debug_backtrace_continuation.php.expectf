@@ -1,10 +1,6 @@
 array(3) {
   [0]=>
-  array(4) {
-    ["file"]=>
-    string(0) ""
-    ["line"]=>
-    int(-1)
+  array(2) {
     ["function"]=>
     string(12) "my_generator"
     ["args"]=>
@@ -40,9 +36,59 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(13)
+    int(26)
     ["function"]=>
     string(10) "my_wrapper"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+array(3) {
+  [0]=>
+  array(4) {
+    ["function"]=>
+    string(19) "my_member_generator"
+    ["class"]=>
+    string(8) "my_class"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(Continuation)#1 (0) {
+      }
+    }
+  }
+  [1]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(23)
+    ["function"]=>
+    string(4) "send"
+    ["class"]=>
+    string(12) "Continuation"
+    ["object"]=>
+    object(Continuation)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      NULL
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(27)
+    ["function"]=>
+    string(16) "my_class_wrapper"
     ["args"]=>
     array(0) {
     }

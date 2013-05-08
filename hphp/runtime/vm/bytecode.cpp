@@ -2396,8 +2396,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const curOp = *reinterpret_cast<const Opcode*>(curUnit->at(pc));
     auto const isReturning = curOp == OpRetC || curOp == OpRetV;
 
-    // Builtins don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin()) {
+    // Builtins and generators don't have a file and line number
+    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
       auto const prevUnit = prevFp->m_func->unit();
       frame.set(s_file,
                 const_cast<StringData*>(prevUnit->filepath()),
@@ -6749,7 +6749,7 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
 
   static auto const closureName = StringData::GetStaticString("{closure}");
   auto const origName = origFunc->isClosureBody() ? closureName
-                                                  : origFunc->fullName();
+                                                  : origFunc->name();
 
   cont->init(genFunc, origName, thisPtr, args);
 
@@ -6873,11 +6873,15 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   return cont;
 }
 
-// Explicitly instantiate for hhbctranslator.o
+// Explicitly instantiate for hhbctranslator.o and codegen.o
 template c_Continuation* VMExecutionContext::createContinuation<true>(
   ActRec*, bool, const Func*, const Func*);
 template c_Continuation* VMExecutionContext::createContinuation<false>(
   ActRec*, bool, const Func*, const Func*);
+template c_Continuation* VMExecutionContext::createContinuationHelper<true>(
+  const Func*, const Func*, ObjectData*, ArrayData*, Class*);
+template c_Continuation* VMExecutionContext::createContinuationHelper<false>(
+  const Func*, const Func*, ObjectData*, ArrayData*, Class*);
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();

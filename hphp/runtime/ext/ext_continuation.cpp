@@ -146,28 +146,21 @@ void c_Continuation::t_raised() {
 }
 
 String c_Continuation::t_getorigfuncname() {
+  return String(const_cast<StringData*>(m_origFuncName));
+}
+
+String c_Continuation::t_getcalledclass() {
   String called_class;
-  String origFunc(const_cast<StringData*>(m_origFuncName));
 
   if (actRec()->hasThis()) {
     called_class = actRec()->getThis()->getVMClass()->name()->data();
   } else if (actRec()->hasClass()) {
     called_class = actRec()->getClass()->name()->data();
-  }
-  if (called_class.size() == 0) {
-    return origFunc;
+  } else {
+    called_class = empty_string;
   }
 
-  /*
-    Replace the class name in m_origFuncName with the LSB class.  This
-    produces more useful traces.
-   */
-  size_t method_pos = origFunc.find("::");
-  if (method_pos != std::string::npos) {
-    return concat3(called_class, "::", origFunc.substr(method_pos+2));
-  } else {
-    return origFunc;
-  }
+  return called_class;
 }
 
 Variant c_Continuation::t___clone() {

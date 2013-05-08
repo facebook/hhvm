@@ -238,7 +238,13 @@ String c_ContinuationWaitHandle::getName() {
     case STATE_BLOCKED:
     case STATE_SCHEDULED:
     case STATE_RUNNING:
-      return m_continuation->t_getorigfuncname();
+      if (m_continuation->t_getcalledclass().empty()) {
+        return m_continuation->t_getorigfuncname();
+      } else {
+        return concat3(m_continuation->t_getcalledclass(),
+                       "::",
+                       m_continuation->t_getorigfuncname());
+      }
 
     default:
       throw FatalErrorException(

@@ -80,6 +80,7 @@ public:
   void t_raise(CVarRef v);
   void t_raised();
   String t_getorigfuncname();
+  String t_getcalledclass();
   Variant t___clone();
 
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {

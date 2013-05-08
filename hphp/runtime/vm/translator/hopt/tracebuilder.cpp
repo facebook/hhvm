@@ -289,12 +289,6 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       m_spOffset += kNumActRecCells;
       break;
 
-    case NewObj:
-      m_spValue = inst->getDst();
-      // new obj leaves the new object and an actrec on the stack
-      m_spOffset += kNumActRecCells + 1;
-      break;
-
     case InterpOne: {
       m_spValue = inst->getDst();
       int64_t stackAdjustment = inst->getSrc(3)->getValInt();

@@ -1487,11 +1487,27 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   assert(m_stackDeficit == 0);
 }
 
+void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
+                                         const Func* func,
+                                         int32_t numParams) {
+  SSATmp* obj = gen(IncRef, gen(AllocObj, cls));
+  push(obj);
+
+  SSATmp* fn = nullptr;
+  if (func) {
+    fn = cns(func);
+  } else {
+    fn = gen(LdClsCtor, cls);
+  }
+  SSATmp* obj2 = gen(IncRef, obj);
+  int32_t numArgsAndCtorFlag = numParams | (1 << 31);
+  emitFPushActRec(fn, obj2, numArgsAndCtorFlag, nullptr);
+}
+
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   SSATmp* cls = popA();
   exceptionBarrier();
-  gen(NewObj, cls, cns(numParams), m_tb->getSp(), m_tb->getFp());
-  m_fpiStack.emplace(nullptr, 0);
+  emitFPushCtorCommon(cls, nullptr, numParams);
 }
 
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
@@ -1521,19 +1537,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   } else {
     clss = gen(LdClsCached, cns(className));
   }
-  SSATmp* obj = gen(IncRef, gen(AllocObj, clss));
-  push(obj);
-
-  SSATmp* fn = nullptr;
-  if (func) {
-    fn = cns(func);
-  } else {
-    fn = gen(LdClsCtor, clss);
-  }
-
-  SSATmp* obj2 = gen(IncRef, obj);
-  int32_t numArgsAndCtorFlag = numParams | (1 << 31);
-  emitFPushActRec(fn, obj2, numArgsAndCtorFlag, nullptr);
+  emitFPushCtorCommon(clss, func, numParams);
 }
 
 /*

@@ -144,6 +144,7 @@ void annotate(NormalizedInstruction* i) {
     case OpFPushClsMethodD:
     case OpFPushClsMethodF:
     case OpFPushCtorD:
+    case OpFPushCtor:
     case OpFPushFuncD: {
       // When we push predictable action records, we can use a simpler
       // translation for their corresponding FCall.
@@ -170,10 +171,14 @@ void annotate(NormalizedInstruction* i) {
       } else if (i->op() == OpFPushClsMethodD) {
         funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
         className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
-      } else {
-        assert(i->op() == OpFPushCtorD);
+      } else if (i->op() == OpFPushCtorD) {
         className = curUnit()->lookupLitstrId(i->imm[1].u_SA);
         const Class* cls = Unit::lookupUniqueClass(className);
+        if (!cls) break;
+        funcName = cls->getCtor()->name();
+      } else {
+        assert(i->op() == OpFPushCtor);
+        const Class* cls = i->inputs[0]->rtt.valueClass();
         if (!cls) break;
         funcName = cls->getCtor()->name();
       }

@@ -3004,7 +3004,7 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
   // methods, which will need to be updated when we support
   // OpFPushClsMethod here.
   if (pushOp != OpFPushFuncD && pushOp != OpFPushObjMethodD
-      && pushOp != OpFPushCtorD) {
+      && pushOp != OpFPushCtorD && pushOp != OpFPushCtor) {
     FTRACE(1, "analyzeCallee: push op ({}) was not supported\n",
            opcodeToName(pushOp));
     return false;

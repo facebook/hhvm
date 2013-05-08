@@ -528,11 +528,6 @@ private:
 
 const Func* loadClassCtor(Class* cls);
 
-ActRec* irNewInstanceHelper(Class* cls,
-                            int numArgs,
-                            Cell* sp,
-                            ActRec* prevAr);
-
 Instance* createClHelper(Class*, int, ActRec*, TypedValue*);
 
 void genCodeForTrace(Trace*                  trace,

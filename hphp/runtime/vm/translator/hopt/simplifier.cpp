@@ -130,17 +130,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
                          // pushes an ActRec
                          index - kNumActRecCells);
 
-  case NewObj:
-    if (index == kNumActRecCells) {
-      // newly allocated object, which we unfortunately don't have any
-      // kind of handle to :-(
-      return StackValueInfo { Type::Obj };
-    }
-
-    return getStackValue(sp->inst()->getSrc(2),
-                         // NewObj pushes an object and an ActRec
-                         index - (1 + kNumActRecCells));
-
   default:
     {
       // Assume it's a vector instruction.  This will assert in

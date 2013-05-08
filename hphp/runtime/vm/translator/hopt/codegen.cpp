@@ -351,7 +351,7 @@ CALL_OPCODE(CreateCont)
 CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
-CALL_OPCODE(NewObj)
+CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor);
 CALL_OPCODE(CreateCl)
 CALL_OPCODE(PrintStr)
@@ -3253,51 +3253,10 @@ const Func* loadClassCtor(Class* cls) {
   return f;
 }
 
-HOT_FUNC_VM ActRec*
-irNewInstanceHelper(Class* cls,
-                    int numArgs,
-                    Cell* sp,
-                    ActRec* prevAr) {
-  Cell* obj = sp - 1; // this is where the newly allocated object will go
-  ActRec* ar = (ActRec*)(uintptr_t(obj) - sizeof(ActRec));
-
-  Instance* newObj = newInstanceHelper(cls, numArgs, ar, prevAr);
-  // store obj into the stack
-  obj->m_data.pobj = newObj;
-  obj->m_type = KindOfObject;
-  return ar;
-}
-
-static inline ALWAYS_INLINE Class* getKnownClass(Class** classCache,
-                                                 const StringData* clsName) {
-  Class* cls = *classCache;
-  if (UNLIKELY(cls == nullptr)) {
-    // lookupKnownClass does its own VMRegAnchor'ing.
-    cls = TargetCache::lookupKnownClass<false>(classCache, clsName, true);
-    assert(*classCache && *classCache == cls);
-  }
-  assert(cls);
-  return cls;
-}
-
 Instance* createClHelper(Class* cls, int numArgs, ActRec* ar, TypedValue* sp) {
   Instance* newObj = newInstance(cls);
   newObj->incRefCount();
   return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
-}
-
-void CodeGenerator::cgAllocObj(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* cls = inst->getSrc(0);
-
-  Instance* (*helper)(Class*) = newInstance;
-  ArgGroup args;
-  args.ssa(cls);
-  cgCallHelper(m_as,
-               (TCA)helper,
-               dst,
-               kSyncPoint,
-               args);
 }
 
 void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {

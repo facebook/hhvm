@@ -817,18 +817,9 @@ D:BoxedCell = LdStaticLocCached S0:ConstCacheHandle -> L
 
 8. Allocation
 
-D:StkPtr = NewObj S0:ConstInt S1:Cls S2:StkPtr S3:FramePtr
-
-  Allocate a new object.  Push a Cell pointing to the object and an
-  ActRec for the constructor onto the stack and return the new SP.
-  S0 is the number of parameters for the constructor
-  S1 is the class of the object
-  S2 is the current stack pointer
-  S3 is the frame pointer of the current ActRec
-
 D:Obj = AllocObj S1:Cls
 
-  Allocate a new object of class S1.
+  Allocates a new object of class S1.
 
 NewArray
 NewTuple

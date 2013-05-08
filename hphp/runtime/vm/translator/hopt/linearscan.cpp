@@ -376,7 +376,6 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == SpillFrame ||
                opc == ExceptionBarrier ||
                opc == RetAdjustStack ||
-               opc == NewObj ||
                opc == InterpOne ||
                opc == GenericRetDecRefs ||
                opc == GuardStk ||

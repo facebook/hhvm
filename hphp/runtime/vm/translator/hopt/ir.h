@@ -311,10 +311,6 @@ O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
 O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
-O(NewObj,                    D(StkPtr), S(Cls)                                \
-                                          C(Int)                              \
-                                          S(StkPtr)                           \
-                                          S(FramePtr),   E|Mem|N|Refs|PRc|Er) \
 O(AllocObj,                     D(Obj), S(Cls),                            N) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(CreateCl,                     D(Obj), C(Cls)                                \

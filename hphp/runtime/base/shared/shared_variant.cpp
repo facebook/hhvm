@@ -277,9 +277,12 @@ ArrayData* SharedVariant::loadElems(const SharedMap &sharedMap,
   assert(is(KindOfArray));
   uint count = arrSize();
   bool isVector = getIsVector();
-  ArrayInit ai = mapInit ? ArrayInit(count, ArrayInit::mapInit) :
-                 isVector ? ArrayInit(count, ArrayInit::vectorInit) :
-                 ArrayInit(count);
+
+  auto ai =
+    mapInit ? ArrayInit(count, ArrayInit::mapInit) :
+    isVector ? ArrayInit(count, ArrayInit::vectorInit) :
+    ArrayInit(count);
+
   if (isVector) {
     for (uint i = 0; i < count; i++) {
       ai.set(sharedMap.getValueRef(i));

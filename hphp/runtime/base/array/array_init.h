@@ -69,15 +69,27 @@ class ArrayInit {
 public:
   enum VectorInit { vectorInit };
   enum MapInit { mapInit };
+
   explicit ArrayInit(ssize_t n);
+
   ArrayInit(ssize_t n, VectorInit) {
     m_data = CreateVector(n);
   }
+
   ArrayInit(ssize_t n, MapInit) {
     m_data = CreateMap(n);
   }
+
+  ArrayInit(ArrayInit&& other) : m_data(other.m_data) {
+    other.m_data = nullptr;
+  }
+
+  ArrayInit(const ArrayInit&) = delete;
+  ArrayInit& operator=(const ArrayInit&) = delete;
+
   static ArrayData *CreateVector(ssize_t n);
   static ArrayData *CreateMap(ssize_t n);
+
   ~ArrayInit() {
     // In case an exception interrupts the initialization.
     if (m_data) m_data->release();
@@ -269,11 +281,9 @@ public:
     m_data = nullptr;
     return ret;
   }
-  operator ArrayData *() { return create(); }
+
   static ArrayData *CreateParams(int count, ...);
-  // this consructor should never be called directly, it is only called from
-  // generated code.
-  ArrayInit (ArrayData *data) : m_data(data) {}
+
 private:
   ArrayData *m_data;
 };

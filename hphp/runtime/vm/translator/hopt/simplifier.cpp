@@ -1178,20 +1178,26 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
   assert(type.isKnownUnboxedDataType() && type != Type::StaticStr);
-  if (type != Type::Obj) {
-    if (srcType.subtypeOf(type) || (type.isString() && srcType.isString())) {
-      return cns(trueSense);
-    }
-    if (srcType != Type::Cell) {
-      return cns(!trueSense);
-    }
+
+  // CountedStr and StaticStr are disjoint, but compatible for this purpose.
+  if (type.isString() && srcType.isString()) {
+    return cns(trueSense);
   }
-  if (srcType != Type::Obj) {
-    // Note: for IsObject*, we need to emit a call to ObjectData::isResource
-    // (or equivalent), so we can't fold away the case where we know we are
-    // checking an object.
+
+  // The types are disjoint; the result must be false.
+  if ((srcType & type).equals(Type::Bottom)) {
     return cns(!trueSense);
   }
+
+  // The src type is a subtype of the tested type. You'd think the result would
+  // always be true, but it's not for is_object.
+  if (!type.subtypeOf(Type::Obj) && srcType.subtypeOf(type)) {
+    return cns(trueSense);
+  }
+
+  // At this point, either the tested type is a subtype of the src type, or they
+  // are non-disjoint but neither is a subtype of the other. (Or it's the weird
+  // Obj case.) We can't simplify this away.
   return nullptr;
 }
 

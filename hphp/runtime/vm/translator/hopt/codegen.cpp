@@ -1596,20 +1596,44 @@ void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
 }
 
 ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
-  if (inst->getTypeParam().subtypeOf(Type::Obj)) {
-    // Task #2094715: Handle isType tests for Type::Obj, which
-    // requires checking that checked object is not a resource
-    CG_PUNT(cgIsTypeObject);
+  auto const src = inst->getSrc(0);
+
+  if (inst->getTypeParam().equals(Type::Obj)) {
+    auto const srcReg = m_regs[src].getReg();
+    if (src->isA(Type::PtrToGen)) {
+      emitTestTVType(m_as, KindOfObject, srcReg[TVOFF(m_type)]);
+      TCA toPatch = m_as.code.frontier;
+      m_as.   jne8(toPatch);  // 1
+
+      // Get the ObjectData*
+      emitDeref(m_as, srcReg, rScratch);
+      m_as.   cmpq(SystemLib::s_resourceClass,
+                   rScratch[ObjectData::getVMClassOffset()]);
+      // 1:
+      m_as.patchJcc8(toPatch, m_as.code.frontier);
+    } else {
+      // Cases where src isn't an Obj should have been simplified away
+      if (!src->isA(Type::Obj)) {
+        CG_PUNT(IsType-KnownWrongType);
+      }
+      m_as.   cmpq(SystemLib::s_resourceClass,
+                   srcReg[ObjectData::getVMClassOffset()]);
+    }
+    // At this point, the flags say "equal" if is_object is false.
+    return negate ? CC_E : CC_NE;
   }
 
-  SSATmp*  src = inst->getSrc(0);
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = m_regs[src].getReg();
     return emitTypeTest(inst, base[TVOFF(m_type)], negate);
   }
   assert(src->isA(Type::Gen));
   assert(!src->isConst());
+
   PhysReg srcReg = m_regs[src].getReg(1); // type register
+  if (srcReg == InvalidReg) {
+    CG_PUNT(IsType-KnownType);
+  }
   return emitTypeTest(inst, srcReg, negate);
 }
 

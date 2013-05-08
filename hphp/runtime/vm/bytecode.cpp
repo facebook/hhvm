@@ -2323,10 +2323,14 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   // If there is a parser frame, put it at the beginning of
   // the backtrace
   if (parserFrame) {
-    Array frame = Array::Create();
-    frame.set(String(s_file), parserFrame->filename, true);
-    frame.set(String(s_line), parserFrame->lineNumber, true);
-    bt.append(frame);
+    bt.append(
+      Array(
+        ArrayInit(2)
+          .set(s_file, parserFrame->filename, true)
+          .set(s_line, parserFrame->lineNumber, true)
+          .create()
+      )
+    );
   }
 
   Transl::VMRegAnchor _;
@@ -2363,14 +2367,15 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         const char* filename = unit->filepath()->data();
         assert(filename);
         Offset off = pc;
-        Array frame = Array::Create();
+
+        ArrayInit frame(parserFrame ? 4 : 2);
         frame.set(s_file, filename, true);
         frame.set(s_line, unit->getLineNumber(off), true);
         if (parserFrame) {
           frame.set(s_function, s_include, true);
           frame.set(s_args, Array::Create(parserFrame->filename), true);
         }
-        bt.append(frame);
+        bt.append(Array(frame.create()));
         depth++;
       }
     }
@@ -2380,12 +2385,12 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   Offset prevPc = 0;
   for (ActRec* prevFp = getPrevVMState(fp, &prevPc); fp != nullptr;
        fp = prevFp, pc = prevPc, prevFp = getPrevVMState(fp, &prevPc)) {
-    Array frame = Array::Create();
-
     // do not capture frame for HPHP only functions
     if (fp->m_func->isNoInjection()) {
       continue;
     }
+
+    ArrayInit frame(7);
 
     auto const curUnit = fp->m_func->unit();
     auto const curOp = *reinterpret_cast<const Opcode*>(curUnit->at(pc));
@@ -2489,7 +2494,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       frame.set(s_args, args, true);
     }
 
-    bt.append(frame);
+    bt.append(Array(frame.create()));
     depth++;
   }
   return bt;

@@ -268,14 +268,14 @@ bool isset(CArrRef v, CObjRef offset);
 bool isset(CArrRef v, CVarRef offset);
 bool isset(CArrRef v, CStrRef offset, bool isString = false);
 
-inline Variant unset(Variant &v)               { v.unset();   return uninit_null();}
-inline Variant unset(CVarRef v)                {              return uninit_null();}
-inline Variant setNull(Variant &v)             { v.setNull(); return uninit_null();}
-inline Object setNull(Object &v)               { v.reset();   return Object();}
-inline Array setNull(Array &v)                 { v.reset();   return Array();}
-inline String setNull(String &v)               { v.reset();   return String();}
-inline Variant unset(Object &v)                { v.reset();   return uninit_null();}
-inline Variant unset(Array &v)                 { v.reset();   return uninit_null();}
+inline Variant unset(Variant &v)   { v.unset();   return uninit_null();}
+inline Variant unset(CVarRef v)    {              return uninit_null();}
+inline Variant setNull(Variant &v) { v.setNull(); return uninit_null();}
+inline Object setNull(Object &v)   { v.reset();   return Object();}
+inline Array setNull(Array &v)     { v.reset();   return Array();}
+inline String setNull(String &v)   { v.reset();   return String();}
+inline Variant unset(Object &v)    { v.reset();   return uninit_null();}
+inline Variant unset(Array &v)     { v.reset();   return uninit_null();}
 
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
@@ -287,7 +287,11 @@ inline bool is_double(CVarRef v) { return v.is(KindOfDouble);}
 inline bool is_string(CVarRef v) { return v.isString();}
 inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
 inline bool is_object(CVarRef var) {
-  return var.is(KindOfObject) && !var.isResource();
+  // NB: just doing !var.isResource() is not right. isResource can have custom
+  // implementations in extension classes, and even if that returns false,
+  // is_object is still supposed to return false. Because PHP.
+  return var.is(KindOfObject) &&
+    var.getObjectData()->getVMClass() != SystemLib::s_resourceClass;
 }
 inline bool is_empty_string(CVarRef v) {
   return v.isString() && v.getStringData()->empty();

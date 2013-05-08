@@ -142,7 +142,7 @@ class ObjectData : public CountableNF {
   CStrRef o_getClassName() const;
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
-  virtual bool isResource() const { return false;}
+  virtual bool isResource() const { return false; }
   int o_getId() const { return o_id;}
 
   // overridable casting

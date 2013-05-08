@@ -43,7 +43,6 @@
 #include <util/debug.h>
 #include <runtime/base/stat_cache.h>
 
-#include <runtime/vm/instrumentation_hook.h>
 #include <runtime/vm/php_debug.h>
 #include <runtime/vm/debugger_hook.h>
 #include <runtime/vm/runtime.h>
@@ -1850,7 +1849,6 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
-    INST_HOOK_FENTRY(enterFnAr->m_func->fullName());
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
@@ -5933,9 +5931,7 @@ void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(pcOff() > m_fp->m_func->base());
   prepareFuncEntry<false>(ar, pc, 0);
   SYNC();
-  if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) {
-    INST_HOOK_FENTRY(ar->m_func->fullName());
-  } else {
+  if (!EventHook::FunctionEnter(ar, EventHook::NormalFunc)) {
     pc = m_pc;
   }
 }
@@ -6211,7 +6207,6 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     pc = m_pc;
     return false;
   }
-  INST_HOOK_FENTRY(func->fullName());
   return true;
 }
 
@@ -6903,9 +6898,7 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   pc = contAR->m_func->getEntry();
   SYNC();
 
-  if (LIKELY(EventHook::FunctionEnter(contAR, EventHook::NormalFunc))) {
-    INST_HOOK_FENTRY(contAR->m_func->fullName());
-  } else {
+  if (UNLIKELY(!EventHook::FunctionEnter(contAR, EventHook::NormalFunc))) {
     pc = m_pc;
   }
 }
@@ -7205,12 +7198,6 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
     OPCODES
 #undef O
   };
-  static const void *optabInst[] __attribute__((unused)) = {
-#define O(name, imm, push, pop, flags) \
-    &&LabelInst##name,
-    OPCODES
-#undef O
-  };
   static const void *optabCover[] = {
 #define O(name, imm, push, pop, flags) \
     &&LabelCover##name,
@@ -7220,13 +7207,9 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
   assert(sizeof(optabDirect) / sizeof(const void *) == Op_count);
   assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
-  InjectionTableInt64* injTable = g_vmContext->m_injTables ?
-    g_vmContext->m_injTables->getInt64Table(InstHookTypeBCPC) : nullptr;
   bool collectCoverage = ThreadInfo::s_threadInfo->
     m_reqInjectionData.getCoverage();
-  if (injTable) {
-    optab = optabInst;
-  } else if (collectCoverage) {
+  if (collectCoverage) {
     optab = optabCover;
   }
   DEBUGGER_ATTACHED_ONLY(optab = optabDbg);
@@ -7272,8 +7255,6 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
 #define O(name, imm, pusph, pop, flags)                       \
   LabelDbg##name:                                             \
     phpDebuggerOpcodeHook(pc);                                \
-  LabelInst##name:                                            \
-    INST_HOOK_PC(injTable, pc);                               \
   LabelCover##name:                                           \
     if (collectCoverage) {                                    \
       recordCodeCoverage(pc);                                 \

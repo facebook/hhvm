@@ -148,19 +148,6 @@ private:
   std::vector<InjectionTableSD*> m_sdTables;
 };
 
-class InstHelpers {
-public:
-  static void InstCustomStringCallback(const StringData* hook,
-                                       Injection::Callback callback,
-                                       void *arg, const StringData* desc);
-
-  static void PushInstToGlobal();
-  static void PullInstFromGlobal();
-
-  static int CountGlobalInst();
-  static void ClearGlobalInst();
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 } }    // HPHP::VM

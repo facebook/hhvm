@@ -1570,7 +1570,6 @@ do {                                         \
   // give gdb users some love
   if (m_command == "bt") NEW_CMD_NAME("where", CmdWhere);
   if (m_command == "set") NEW_CMD_NAME("config", CmdConfig);
-  if (m_command == "inst") NEW_CMD_NAME("instrument", CmdInstrument);
   if (m_command == "complete") NEW_CMD_NAME("complete", CmdComplete);
 
   switch (tolower(m_command[0])) {

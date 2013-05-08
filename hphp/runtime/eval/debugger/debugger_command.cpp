@@ -121,8 +121,6 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
     case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
 
-    case KindOfInstrument: cmd = DebuggerCommandPtr(new CmdInstrument()); break;
-
     case KindOfExtended: {
       assert(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);

@@ -137,7 +137,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     hphp_invoke_simple(options.extension);
   }
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_reqInjectionData.debugger = true;
+  ti->m_reqInjectionData.setDebugger(true);
   if (!restart) {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionStarted(file.c_str());
@@ -154,7 +154,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
 void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   TRACE(2, "Debugger::InterruptSessionStarted\n");
-  ThreadInfo::s_threadInfo->m_reqInjectionData.debugger = true;
+  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebugger(true);
   Interrupt(SessionStarted, file, nullptr, error);
 }
 
@@ -165,14 +165,14 @@ void Debugger::InterruptSessionEnded(const char *file) {
 
 void Debugger::InterruptRequestStarted(const char *url) {
   TRACE(2, "Debugger::InterruptRequestStarted\n");
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.debugger) {
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
     Interrupt(RequestStarted, url);
   }
 }
 
 void Debugger::InterruptRequestEnded(const char *url) {
   TRACE(2, "Debugger::InterruptRequestEnded: url=%s\n", url);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.debugger) {
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
     Interrupt(RequestEnded, url);
   }
   CStrRef sandboxId = g_context->getSandboxId();
@@ -181,7 +181,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
 
 void Debugger::InterruptPSPEnded(const char *url) {
   TRACE(2, "Debugger::InterruptPSPEnded\n");
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.debugger) {
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
     Interrupt(PSPEnded, url);
   }
 }
@@ -193,7 +193,7 @@ bool Debugger::InterruptException(CVarRef e) {
   TRACE(2, "Debugger::InterruptException\n");
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-    if (ti->m_reqInjectionData.debugger) {
+    if (ti->m_reqInjectionData.getDebugger()) {
       HPHP::VM::Transl::VMRegAnchor _;
       InterruptVMHook(ExceptionThrown, e);
     }
@@ -232,7 +232,7 @@ void Debugger::Interrupt(int type, const char *program,
     // Some cmds require us to interpret all instructions until the cmd
     // completes. Setting this will ensure we stay out of JIT code and in the
     // interpreter so phpDebuggerOpcodeHook has a chance to work.
-    rjdata.debuggerIntr = proxy->needVMInterrupts();
+    rjdata.setDebuggerIntr(proxy->needVMInterrupts());
   } else {
     TRACE(3, "proxy == null\n");
     // Debugger clients are disconnected abnormally, or this sandbox is not
@@ -300,7 +300,7 @@ bool Debugger::isThreadDebugging(int64_t tid) {
   ThreadInfoMap::const_accessor acc;
   if (m_threadInfos.find(acc, tid)) {
     ThreadInfo* ti = acc->second;
-    return (ti->m_reqInjectionData.debugger);
+    return (ti->m_reqInjectionData.getDebugger());
   }
   return false;
 }
@@ -358,7 +358,7 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   // find out whether this sandbox is being debugged
   DebuggerProxyPtr proxy = findProxy(sid);
   if (proxy) {
-    ti->m_reqInjectionData.debugger = true;
+    ti->m_reqInjectionData.setDebugger(true);
     proxy->writeInjTablesToThread();
   }
 }
@@ -392,19 +392,19 @@ void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::requestInterrupt\n");
   const StringData* sid = StringData::GetStaticString(proxy->getSandboxId());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
-  ti->m_reqInjectionData.debuggerIntr = true;
+    ti->m_reqInjectionData.setDebuggerIntr(true);
   FOREACH_SANDBOX_THREAD_END()
 
   sid = StringData::GetStaticString(proxy->getDummyInfo().id());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
-  ti->m_reqInjectionData.debuggerIntr = true;
+    ti->m_reqInjectionData.setDebuggerIntr(true);
   FOREACH_SANDBOX_THREAD_END()
 }
 
 void Debugger::setDebuggerFlag(const StringData* sandboxId, bool flag) {
   TRACE(2, "Debugger::setDebuggerFlag\n");
   FOREACH_SANDBOX_THREAD_BEGIN(sandboxId, ti)
-  ti->m_reqInjectionData.debugger = flag;
+    ti->m_reqInjectionData.setDebugger(flag);
   FOREACH_SANDBOX_THREAD_END()
 }
 

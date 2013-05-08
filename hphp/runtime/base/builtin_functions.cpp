@@ -509,7 +509,8 @@ ssize_t check_request_surprise(ThreadInfo *info) {
   bool do_timedout, do_memExceeded, do_signaled;
 
   ssize_t flags = p.fetchAndClearFlags();
-  do_timedout = (flags & RequestInjectionData::TimedOutFlag) && !p.debugger;
+  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebugger();
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
 

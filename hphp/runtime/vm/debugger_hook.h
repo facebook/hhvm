@@ -55,7 +55,8 @@ void phpRemoveBreakPoint(const Unit* unit, Offset offset);
 
 // Is this thread being debugged?
 static inline bool isDebuggerAttached() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debugger;
+  return ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getDebugger();
 }
 
 #define DEBUGGER_ATTACHED_ONLY(code) do {                             \
@@ -71,7 +72,7 @@ bool isDebuggerAttachedProcess();
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR  \
-  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debuggerIntr)
+  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.getDebuggerIntr())
 
 // Map which holds a set of PCs and supports reasonably fast addition and
 // lookup. Used by the debugger to decide if a given PC falls within an

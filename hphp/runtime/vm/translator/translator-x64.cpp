@@ -12009,7 +12009,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   // Emit the checks for debugger attach
   emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rScratch);
   static COff dbgOff = offsetof(ThreadInfo, m_reqInjectionData) +
-                       offsetof(RequestInjectionData, debugger);
+    RequestInjectionData::debuggerReadOnlyOffset();
   a.   load_reg64_disp_reg32(rScratch, dbgOff, rScratch);
   a.   testb((int8_t)0xff, rbyte(rScratch));
   // Branch to a special REQ_INTERPRET if attached

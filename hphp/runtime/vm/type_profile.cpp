@@ -13,19 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/type_profile.h"
+#include "runtime/base/runtime_option.h"
+#include "runtime/base/stats.h"
+#include "runtime/vm/translator/translator.h"
+#include "util/trace.h"
+
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-#include "util/trace.h"
-#include "runtime/base/types.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/type_profile.h"
 
 namespace HPHP {
 namespace VM {
@@ -173,7 +172,13 @@ static inline bool profileThisRequest() {
 
 void
 profileRequestStart() {
-  profileOn = profileThisRequest();
+  bool p = profileThisRequest();
+  if (p != profileOn) {
+    profileOn = p;
+    if (!ThreadInfo::s_threadInfo.isNull()) {
+      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
+    }
+  }
 }
 
 void profileRequestEnd() {

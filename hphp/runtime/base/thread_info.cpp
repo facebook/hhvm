@@ -128,10 +128,19 @@ void RequestInjectionData::onSessionInit() {
 
 void RequestInjectionData::reset() {
   __sync_fetch_and_and(getConditionFlags(), 0);
-  coverage = RuntimeOption::RecordCodeCoverage;
-  debugger = false;
-  debuggerIntr = false;
+  m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_debugger = false;
+  m_debuggerIntr = false;
+  updateJit();
   while (!interrupts.empty()) interrupts.pop();
+}
+
+void RequestInjectionData::updateJit() {
+  m_jit = RuntimeOption::EvalJit &&
+    !(RuntimeOption::EvalJitDisabledByHphpd && m_debugger) &&
+    !m_debuggerIntr &&
+    !m_coverage &&
+    !VM::shouldProfile();
 }
 
 void RequestInjectionData::setMemExceededFlag() {

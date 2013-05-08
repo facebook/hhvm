@@ -1528,7 +1528,7 @@ Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
 
 Variant f_fb_get_code_coverage(bool flush) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.coverage) {
+  if (ti->m_reqInjectionData.getCoverage()) {
     Array ret = ti->m_coverage->Report();
     if (flush) {
       ti->m_coverage->Reset();
@@ -1541,7 +1541,7 @@ Variant f_fb_get_code_coverage(bool flush) {
 void f_fb_enable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_coverage->Reset();
-  ti->m_reqInjectionData.coverage = true;
+  ti->m_reqInjectionData.setCoverage(true);;
   if (g_vmContext->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
@@ -1551,7 +1551,7 @@ void f_fb_enable_code_coverage() {
 
 Variant f_fb_disable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_reqInjectionData.coverage = false;
+  ti->m_reqInjectionData.setCoverage(false);
   Array ret = ti->m_coverage->Report();
   ti->m_coverage->Reset();
   return ret;

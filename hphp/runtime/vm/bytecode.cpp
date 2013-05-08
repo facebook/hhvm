@@ -174,7 +174,7 @@ const StaticString s_include("include");
   DECODE_JMP(type, var);                                                      \
   pc += sizeof(type)
 #define DECODE_IVA(var)                                                       \
-  int32_t var UNUSED = decodeVariableSizeImm(&pc);                              \
+  int32_t var UNUSED = decodeVariableSizeImm(&pc);                            \
   ONTRACE(2,                                                                  \
           Trace::trace("decode:     Immediate int32 %" PRIi64"\n",            \
                        (int64_t)var));
@@ -1854,11 +1854,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
-  if (RuntimeOption::EvalJit &&
-      !shouldProfile() &&
-      !ThreadInfo::s_threadInfo->m_reqInjectionData.coverage &&
-      !(RuntimeOption::EvalJitDisabledByHphpd && isDebuggerAttached()) &&
-      LIKELY(!DEBUGGER_FORCE_INTR)) {
+  if (LIKELY(ThreadInfo::s_threadInfo->m_reqInjectionData.getJit())) {
     Transl::SrcKey sk(curFunc(), m_pc);
     (void) curUnit()->offsetOf(m_pc); /* assert */
     tx64->enterTC(sk, start);
@@ -7228,7 +7224,8 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
   const void **optab = optabDirect;
   InjectionTableInt64* injTable = g_vmContext->m_injTables ?
     g_vmContext->m_injTables->getInt64Table(InstHookTypeBCPC) : nullptr;
-  bool collectCoverage = ThreadInfo::s_threadInfo->m_reqInjectionData.coverage;
+  bool collectCoverage = ThreadInfo::s_threadInfo->
+    m_reqInjectionData.getCoverage();
   if (injTable) {
     optab = optabInst;
   } else if (collectCoverage) {

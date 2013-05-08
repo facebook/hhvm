@@ -58,7 +58,7 @@ void DummySandbox::stop() {
   TRACE(2, "DummySandbox::stop\n");
   m_stopped = true;
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.dummySandbox) {
+  if (ti->m_reqInjectionData.getDummySandbox()) {
     // called from dummy sandbox thread itself, schedule retirement
     Debugger::RetireDummySandboxThread(this);
   } else {
@@ -82,7 +82,7 @@ struct CLISession : boost::noncopyable {
     TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
     ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.debugger = false;
+      m_reqInjectionData.setDebugger(false);
     execute_command_line_end(0, false, nullptr);
     Eval::DebuggerClient::Shutdown();
   }
@@ -94,7 +94,7 @@ void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   Debugger::RegisterThread();
-  ti->m_reqInjectionData.dummySandbox = true;
+  ti->m_reqInjectionData.setDummySandbox(true);
   while (!m_stopped) {
     try {
       CLISession hphpSession;
@@ -136,7 +136,7 @@ void DummySandbox::run() {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      ti->m_reqInjectionData.debugger = true;
+      ti->m_reqInjectionData.setDebugger(true);
       {
         DebuggerDummyEnv dde;
         Debugger::InterruptSessionStarted(nullptr, msg.c_str());

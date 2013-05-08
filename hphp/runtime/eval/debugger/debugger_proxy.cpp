@@ -662,7 +662,7 @@ BreakPointInfoPtr DebuggerProxy::getBreakPointAtCmd(CmdInterrupt& cmd) {
 void DebuggerProxy::readInjTablesFromThread() {
   TRACE(2, "DebuggerProxy::readInjTablesFromThread\n");
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.dummySandbox) {
+  if (ti->m_reqInjectionData.getDummySandbox()) {
     return;
   }
   if (m_injTables) {

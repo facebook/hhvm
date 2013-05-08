@@ -16,7 +16,13 @@
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
+#include "runtime/base/types.h"
+#include "runtime/vm/hhbc.h"
+
 namespace HPHP {
+
+class StringData;
+
 namespace VM {
 
 struct TypeProfileKey {

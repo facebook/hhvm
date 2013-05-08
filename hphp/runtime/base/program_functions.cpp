@@ -503,7 +503,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
   hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();
-  if (coverage && ti->m_reqInjectionData.coverage &&
+  if (coverage && ti->m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti->m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }

@@ -21,6 +21,7 @@
 #include "runtime/base/program_functions.h"
 #include "runtime/base/execution_context.h"
 #include "runtime/ext/ext_error.h"
+#include "runtime/eval/debugger/debugger.h"
 
 namespace HPHP {
 
@@ -77,6 +78,10 @@ static void bt_handler(int sig) {
   // Do it last just in case
 
   Logger::Error("Core dumped: %s", strsignal(sig));
+
+  // Give the debugger a chance to do extra logging if there are any attached
+  // debugger clients.
+  Eval::Debugger::LogShutdown(Eval::Debugger::ShutdownKind::Abnormal);
 
   if (!g_context.isNull()) {
     // sync up gdb Dwarf info so that gdb can do a full backtrace

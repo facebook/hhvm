@@ -24,6 +24,11 @@
 #include <tbb/concurrent_queue.h>
 
 namespace HPHP { namespace Eval {
+
+// Tag used on server log messages to highlight that they are likely useful to
+// show to users.
+#define DEBUGGER_LOG_TAG "[DBGINFO] "
+
 ///////////////////////////////////////////////////////////////////////////////
 // The Debugger generally manages proxies, sandboxes, and is the inital handler
 // of interrupts from the VM. It associates VM threads with sandboxes, and
@@ -32,23 +37,17 @@ namespace HPHP { namespace Eval {
 
 class Debugger {
 public:
-  /**
-   * Start/stop Debugger for remote debugging.
-   */
+  // Start/stop Debugger for remote debugging.
   static bool StartServer();
   static DebuggerProxyPtr StartClient(const DebuggerClientOptions &options);
   static void Stop();
 
-  /**
-   * Add a new sandbox a debugger can connect to.
-   */
+  // Add a new sandbox a debugger can connect to.
   static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void UnregisterSandbox(CStrRef id);
   static void RegisterThread();
 
-  /**
-   * Add/remove/change DebuggerProxy.
-   */
+  //  Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
   static bool SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
@@ -69,9 +68,7 @@ public:
   static void DebuggerSession(const DebuggerClientOptions& options,
                               const std::string& file, bool restart);
 
-  /**
-   * Called from differnt time point of execution thread.
-   */
+  // Called from differnt time point of execution thread.
   static void InterruptSessionStarted(const char *file,
                                       const char *error = nullptr);
   static void InterruptSessionEnded(const char *file);
@@ -79,23 +76,25 @@ public:
   static void InterruptRequestEnded(const char *url);
   static void InterruptPSPEnded(const char *url);
 
-  /**
-   * Called when a user handler fails to handle an exception.
-   */
+  // Called when a user handler fails to handle an exception.
   static bool InterruptException(CVarRef e);
 
-  /**
-   * Interrupt from VM
-   */
+  // Interrupt from VM
   static void InterruptVMHook(int type = BreakPointReached,
                               CVarRef e = null_variant);
 
-  /**
-   * Surround text with color, if set.
-   */
+  // Surround text with color, if set.
   static void SetTextColors();
   static String ColorStdout(CStrRef s);
   static String ColorStderr(CStrRef s);
+
+  // Log debugging state when we're shutting the server down.
+  enum ShutdownKind {
+    Normal,
+    Abnormal
+  };
+
+  static void LogShutdown(ShutdownKind shutdownKind);
 
 private:
   static Debugger s_debugger;

@@ -50,6 +50,7 @@ DebuggerProxyPtr Debugger::StartClient(const DebuggerClientOptions &options) {
 
 void Debugger::Stop() {
   TRACE(2, "Debugger::Stop\n");
+  LogShutdown(ShutdownKind::Normal);
   s_debugger.m_proxyMap.clear();
   DebuggerServer::Stop();
   if (s_clientStarted) {
@@ -146,6 +147,29 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
   {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionEnded(file.c_str());
+  }
+}
+
+void Debugger::LogShutdown(ShutdownKind shutdownKind) {
+  int proxyCount = s_debugger.countConnectedProxy();
+  if (proxyCount > 0) {
+    Logger::Warning(DEBUGGER_LOG_TAG "%s with connected debuggers!",
+                    shutdownKind == ShutdownKind::Normal ?
+                      "Normal shutdown" : "Unexpected crash",
+                    proxyCount);
+
+    for (const auto& proxyEntry: s_debugger.m_proxyMap) {
+      auto sid = proxyEntry.first;
+      auto proxy = proxyEntry.second;
+      auto dummySid = StringData::GetStaticString(proxy->getDummyInfo().id());
+      if (sid != dummySid) {
+        auto sandbox = proxy->getSandbox();
+        if (sandbox.valid()) {
+          Logger::Warning(DEBUGGER_LOG_TAG "Debugging %s\n",
+                          sandbox.desc().c_str());
+        }
+      }
+    }
   }
 }
 
@@ -552,6 +576,8 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 DebuggerDummyEnv::DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::DebuggerDummyEnv\n");
   g_vmContext->enterDebuggerDummyEnv();
@@ -561,6 +587,8 @@ DebuggerDummyEnv::~DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::~DebuggerDummyEnv\n");
   g_vmContext->exitDebuggerDummyEnv();
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 EvalBreakControl::EvalBreakControl(bool noBreak) {
   TRACE(2, "EvalBreakControl::EvalBreakControl\n");

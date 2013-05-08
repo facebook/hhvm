@@ -33,8 +33,7 @@ bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
     sendImpl(thrift);
     thrift.flush();
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::send(): a socket error has happened");
-    thrift.close();
+    Logger::Error("DebuggerCommand::send(): a socket error has happened");
     return false;
   }
   return true;
@@ -45,8 +44,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
   try {
     recvImpl(thrift);
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::recv(): a socket error has happened");
-    thrift.close();
+    Logger::Error("DebuggerCommand::recv(): a socket error has happened");
     return false;
   }
   return true;
@@ -89,7 +87,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {
-    Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
+    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
     return true;
   }
 
@@ -139,7 +137,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
       return true;
   }
   if (!cmd->recv(thrift)) {
-    Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
+    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
     cmd.reset();
   }
   return true;

@@ -97,9 +97,15 @@ public:
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
+
+  // Client-side work for a command. Returning false indicates a failure to
+  // communicate with the server (for commands that do so).
   virtual bool onClient(DebuggerClient *client);
   bool onClientD(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
+
+  // Server-side work for a command. Returning false indicates a failure to
+  // communicate with the client (for commands that do so).
   virtual bool onServer(DebuggerProxy *proxy);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

@@ -1536,6 +1536,9 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
     case OpFPassV:
       irTranslateFPassV(t, i);
       break;
+    case OpBindS:
+      irTranslateBindS(t, i);
+      break;
     default:
       // GO: if you hit this, check opNames[op] and add support for it
       HHIR_UNIMPLEMENTED_OP(opNames[op]);

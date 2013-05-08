@@ -276,7 +276,7 @@ void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo) {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                                 .printEncoding(dumpIREnabled(6))
+                                 .printEncoding(dumpIREnabled(kExtraLevel))
                                  .color(color(ANSI_COLOR_BROWN)));
 
   // Print unlikely blocks at the end
@@ -401,7 +401,7 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
                const LifetimeInfo* lifetime, AsmInfo* ai) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
-    auto bannerFmt = "{:-^40}\n";
+    auto bannerFmt = "{:-^80}\n";
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
@@ -411,7 +411,7 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)
         ;
-    HPHP::Trace::traceRelease("%s", str.str().c_str());
+    HPHP::Trace::traceRelease("%s\n", str.str().c_str());
   }
 }
 

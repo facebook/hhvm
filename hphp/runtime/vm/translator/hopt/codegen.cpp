@@ -60,7 +60,7 @@ namespace {
 using namespace Util;
 using namespace Transl::reg;
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
+TRACE_SET_MOD(hhir);
 
 /*
  * It's not normally ok to directly use tracelet abi registers in
@@ -3829,7 +3829,7 @@ void CodeGenerator::emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc) {
   if (cc == CC_None) return;
   Block* label = inst->getTaken();
   if (inst && inst->getTCA() == kIRDirectGuardActive) {
-    if (dumpIREnabled()) {
+    if (dumpIREnabled(kCodeGenLevel)) {
       m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
       inst->setTCA(m_as.code.frontier);
     }

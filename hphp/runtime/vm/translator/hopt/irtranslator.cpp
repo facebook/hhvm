@@ -1907,38 +1907,40 @@ void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
 }
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
+  using namespace JIT;
   assert(m_useHHIR);
 
-  JIT::Trace* trace = m_hhbcTrans->getTrace();
+  Trace* trace = m_hhbcTrans->getTrace();
   auto finishPass = [&](const char* msg,
-                        const JIT::LifetimeInfo* lifetime = nullptr) {
-    dumpTrace(1, trace, msg, lifetime);
-    assert(JIT::checkCfg(trace, *m_irFactory));
+                        int level,
+                        const LifetimeInfo* lifetime = nullptr) {
+    assert(checkCfg(trace, *m_irFactory));
+    dumpTrace(level, trace, msg, lifetime);
   };
 
-  finishPass(" after initial translation ");
-  JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
-  finishPass(" after optimizing ");
+  finishPass(" after initial translation ", kIRLevel);
+  optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
+  finishPass(" after optimizing ", kOptLevel);
 
   auto* factory = m_irFactory.get();
-  if (JIT::dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
-    JIT::LifetimeInfo lifetime(m_irFactory.get());
-    JIT::allocRegsForTrace(trace, m_irFactory.get(), &lifetime);
-    finishPass(" after reg alloc ", &lifetime);
-    JIT::AsmInfo ai(factory);
-    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this,
+  if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
+    LifetimeInfo lifetime(m_irFactory.get());
+    allocRegsForTrace(trace, m_irFactory.get(), &lifetime);
+    AsmInfo ai(factory);
+    genCodeForTrace(trace, a, astubs, factory, bcMap, this,
                          &lifetime, &ai);
+    finishPass(" after reg alloc ", kRegAllocLevel, &lifetime);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
       dumpTraceImpl(trace, out, &lifetime, &ai);
       m_lastHHIRDump = out.str();
     } else {
-      dumpTrace(1, trace, " after code gen ", &lifetime, &ai);
+      dumpTrace(kCodeGenLevel, trace, " after code gen ", &lifetime, &ai);
     }
   } else {
-    JIT::allocRegsForTrace(trace, m_irFactory.get());
-    finishPass(" after reg alloc ");
-    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this);
+    allocRegsForTrace(trace, m_irFactory.get());
+    genCodeForTrace(trace, a, astubs, factory, bcMap, this);
+    finishPass(" after reg alloc ", kRegAllocLevel);
   }
 
   m_numHHIRTrans++;

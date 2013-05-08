@@ -280,7 +280,7 @@ LinearScan::LinearScan(IRFactory* irFactory)
 
 void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   IRInstruction* inst = &*it;
-  dumpIR<IRInstruction, 4>(inst, "allocating to instruction");
+  dumpIR<IRInstruction, kExtraLevel>(inst, "allocating to instruction");
 
   // Reload all source operands if necessary.
   // Mark registers as unpinned.
@@ -331,7 +331,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       }
       // Remember this reload tmp in case we can reuse it in later blocks.
       m_slots[slotId].latestReload = reloadTmp;
-      dumpIR<IRInstruction, 5>(reload, "created reload");
+      dumpIR<IRInstruction, kExtraLevel>(reload, "created reload");
     }
   }
 
@@ -1045,7 +1045,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
     }
     for (auto it = block->begin(), end = block->end(); it != end; ++it) {
       allocRegToInstruction(it);
-      dumpIR<IRInstruction, 4>(&*it, "allocated to instruction");
+      dumpIR<IRInstruction, kExtraLevel>(&*it, "allocated to instruction");
     }
     if (isMain) {
       assert(block->getTrace()->isMain());
@@ -1104,10 +1104,8 @@ void LinearScan::allocRegsToTrace() {
 
 void LinearScan::rematerialize() {
   numberInstructions(m_blocks);
-  if (dumpIREnabled(6)) {
-    dumpTrace(6, m_blocks.front()->getTrace(), "before rematerialization",
-              &m_lifetime);
-  }
+  dumpTrace(kExtraLevel, m_blocks.front()->getTrace(),
+            " before rematerialization ", &m_lifetime);
   rematerializeAux();
   numberInstructions(m_blocks);
   // We only replaced Reloads in rematerializeAux().
@@ -1403,7 +1401,7 @@ LinearScan::RegState* LinearScan::popFreeReg(smart::list<RegState*>& freeList) {
 }
 
 void LinearScan::spill(SSATmp* tmp) {
-  dumpIR<SSATmp, 5>(tmp, "spilling");
+  dumpIR<SSATmp, kExtraLevel>(tmp, "spilling");
   // If we're spilling, we better actually have registers allocated.
   assert(tmp->numAllocatedRegs() > 0);
   assert(tmp->numAllocatedRegs() == tmp->numNeededRegs());

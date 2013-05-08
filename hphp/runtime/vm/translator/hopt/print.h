@@ -55,8 +55,14 @@ void print(const Trace*);
  * control most IR logging via the hhir trace module.
  */
 static inline bool dumpIREnabled(int level = 1) {
-  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::hhir, level);
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level);
 }
+
+static const int kIRLevel = 1;
+static const int kCodeGenLevel = 2;
+static const int kRegAllocLevel = 3;
+static const int kOptLevel = 4;
+static const int kExtraLevel = 6;
 
 void dumpTraceImpl(const Trace* trace, std::ostream& out,
                    const LifetimeInfo*, const AsmInfo*);

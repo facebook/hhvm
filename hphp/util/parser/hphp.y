@@ -902,10 +902,12 @@ class_namespace_string_typeargs:
 ;
 constant_declaration:
     constant_declaration ','
-    sm_name_with_type '=' static_scalar { $3.setText(_p->nsDecl($3.text()));
-                                          on_constant(_p,$$,&$1,$3,$5);}
-  | T_CONST sm_name_with_type '=' static_scalar { $2.setText(_p->nsDecl($2.text()));
-                                          on_constant(_p,$$,  0,$2,$4);}
+    sm_name_with_type 
+    '=' static_scalar                  { $3.setText(_p->nsDecl($3.text()));
+                                         on_constant(_p,$$,&$1,$3,$5);}
+  | T_CONST sm_name_with_type '=' 
+    static_scalar                      { $2.setText(_p->nsDecl($2.text()));
+                                         on_constant(_p,$$,  0,$2,$4);}
 ;
 
 inner_statement_list:

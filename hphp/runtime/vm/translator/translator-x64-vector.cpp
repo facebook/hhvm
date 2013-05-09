@@ -577,7 +577,6 @@ void TranslatorX64::emitBaseG(const Tracelet& t,
   rBase.alloc(rax);
 }
 
-HOT_FUNC_VM
 static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
                          MInstrState* mis) {
   TypedValue* base;
@@ -595,7 +594,6 @@ static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
   return base;
 }
 
-HOT_FUNC_VM
 static TypedValue* baseSClsRef(Class* ctx, TypedValue* key,
                                TypedValue* clsRef,
                                MInstrState* mis) {
@@ -711,7 +709,7 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
   m(elemCWD,   ,            AnyKey,  false,   WarnDefine)             \
   m(elemCWDR,  ,            AnyKey,  false,   WarnDefineReffy)        \
   m(elemI,     ,            IntKey,  false,   None)                   \
-  m(elemID,    HOT_FUNC_VM, IntKey,  false,   Define)                 \
+  m(elemID,    ,            IntKey,  false,   Define)                 \
   m(elemIDR,   ,            IntKey,  false,   DefineReffy)            \
   m(elemIU,    ,            IntKey,  false,   Unset)                  \
   m(elemIW,    ,            IntKey,  false,   Warn)                   \
@@ -738,11 +736,11 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
   m(elemLSW,   ,            StrKey,  true,    Warn)                   \
   m(elemLSWD,  ,            StrKey,  true,    WarnDefine)             \
   m(elemLSWDR, ,            StrKey,  true,    WarnDefineReffy)        \
-  m(elemS,     HOT_FUNC_VM, StrKey,  false,   None)                   \
-  m(elemSD,    HOT_FUNC_VM, StrKey,  false,   Define)                 \
+  m(elemS,     ,            StrKey,  false,   None)                   \
+  m(elemSD,    ,            StrKey,  false,   Define)                 \
   m(elemSDR,   ,            StrKey,  false,   DefineReffy)            \
   m(elemSU,    ,            StrKey,  false,   Unset)                  \
-  m(elemSW,    HOT_FUNC_VM, StrKey,  false,   Warn)                   \
+  m(elemSW,    ,            StrKey,  false,   Warn)                   \
   m(elemSWD,   ,            StrKey,  false,   WarnDefine)             \
   m(elemSWDR,  ,            StrKey,  false,   WarnDefineReffy)
 
@@ -1231,7 +1229,7 @@ static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
   m(cGetPropLS,   ,            StrKey,  true, false)          \
   m(cGetPropLSO,  ,            StrKey,  true,  true)          \
   m(cGetPropS,    ,            StrKey, false, false)          \
-  m(cGetPropSO,   HOT_FUNC_VM, StrKey, false,  true)
+  m(cGetPropSO,   ,            StrKey, false,  true)
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
@@ -1317,7 +1315,7 @@ static inline void vGetElemImpl(TypedValue* base, TypedValue* key,
 #define HELPER_TABLE(m)                                           \
   /* name          hot        keyType unboxKey */                 \
   m(vGetElemC,   ,            AnyKey,   false)                    \
-  m(vGetElemI,   HOT_FUNC_VM, IntKey,   false)                    \
+  m(vGetElemI,   ,            IntKey,   false)                    \
   m(vGetElemL,   ,            AnyKey,    true)                    \
   m(vGetElemLI,  ,            IntKey,    true)                    \
   m(vGetElemLS,  ,            StrKey,    true)                    \
@@ -1379,7 +1377,7 @@ static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
   m(vGetPropLS,  ,            StrKey,  true, false)    \
   m(vGetPropLSO, ,            StrKey,  true,  true)    \
   m(vGetPropS,   ,            StrKey, false, false)    \
-  m(vGetPropSO,  HOT_FUNC_VM, StrKey, false,  true)
+  m(vGetPropSO,  ,            StrKey, false,  true)
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
@@ -1427,7 +1425,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
   /* name          hot        keyType unboxKey useEmpty */   \
   m(issetElemC,   ,            AnyKey, false,  false)        \
   m(issetElemCE,  ,            AnyKey, false,   true)        \
-  m(issetElemI,   HOT_FUNC_VM, IntKey, false,  false)        \
+  m(issetElemI,   ,            IntKey, false,  false)        \
   m(issetElemIE,  ,            IntKey, false,   true)        \
   m(issetElemL,   ,            AnyKey,  true,  false)        \
   m(issetElemLE,  ,            AnyKey,  true,   true)        \
@@ -1435,8 +1433,8 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
   m(issetElemLIE, ,            IntKey,  true,   true)        \
   m(issetElemLS,  ,            StrKey,  true,  false)        \
   m(issetElemLSE, ,            StrKey,  true,   true)        \
-  m(issetElemS,   HOT_FUNC_VM, StrKey, false,  false)        \
-  m(issetElemSE,  HOT_FUNC_VM, StrKey, false,   true)
+  m(issetElemS,   ,            StrKey, false,  false)        \
+  m(issetElemSE,  ,            StrKey, false,   true)
 
 #define ISSET(nm, hot, ...)                                     \
 hot                                                             \
@@ -1512,7 +1510,7 @@ static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
   m(issetPropS,    ,            StrKey, false, false,   false)          \
   m(issetPropSE,   ,            StrKey, false,  true,   false)          \
   m(issetPropSEO,  ,            StrKey, false,  true,    true)          \
-  m(issetPropSO,   HOT_FUNC_VM, StrKey, false, false,    true)
+  m(issetPropSO,   ,            StrKey, false, false,    true)
 
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
@@ -1587,7 +1585,7 @@ static inline void setElemImpl(TypedValue* base, TypedValue* key, Cell* val) {
   m(setElemLIR, ,            IntKey,  true,  true)             \
   m(setElemLS,  ,            StrKey,  true, false)             \
   m(setElemLSR, ,            StrKey,  true,  true)             \
-  m(setElemS,   HOT_FUNC_VM, StrKey, false, false)             \
+  m(setElemS,   ,            StrKey, false, false)             \
   m(setElemSR,  ,            StrKey, false,  true)
 
 #define ELEM(nm, hot, ...)                                              \
@@ -2120,11 +2118,11 @@ static inline void unsetElemImpl(TypedValue* base, TypedValue* key) {
 #define HELPER_TABLE(m)                                       \
   /* name           hot       keyType unboxKey */             \
   m(unsetElemC,   ,            AnyKey,  false)                \
-  m(unsetElemI,   HOT_FUNC_VM, IntKey,  false)                \
+  m(unsetElemI,   ,            IntKey,  false)                \
   m(unsetElemL,   ,            AnyKey,   true)                \
   m(unsetElemLI,  ,            IntKey,   true)                \
   m(unsetElemLS,  ,            StrKey,   true)                \
-  m(unsetElemS,   HOT_FUNC_VM, StrKey,  false)
+  m(unsetElemS,   ,            StrKey,  false)
 
 #define ELEM(nm, hot, ...)                                      \
 hot                                                             \
@@ -2231,7 +2229,6 @@ static void setNewElemR(TypedValue* base, Cell* val) {
   SetNewElem<true>(base, val);
 }
 
-HOT_FUNC_VM
 static void setNewElemNR(TypedValue* base, Cell* val) {
   SetNewElem<false>(base, val);
 }
@@ -2674,10 +2671,10 @@ static inline void cGetElemImpl(TypedValue* base, TypedValue* key,
   /* name         hot         key   unboxKey */                  \
   m(cGetElemC,  ,            AnyKey,   false)                    \
   m(cGetElemI,  ,            IntKey,   false)                    \
-  m(cGetElemL,  HOT_FUNC_VM, AnyKey,    true)                    \
-  m(cGetElemLI, HOT_FUNC_VM, IntKey,    true)                    \
+  m(cGetElemL,  ,            AnyKey,    true)                    \
+  m(cGetElemLI, ,            IntKey,    true)                    \
   m(cGetElemLS, ,            StrKey,    true)                    \
-  m(cGetElemS,  HOT_FUNC_VM, StrKey,   false)
+  m(cGetElemS,  ,            StrKey,   false)
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \

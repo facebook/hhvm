@@ -1576,15 +1576,13 @@ std::string Unit::toString() const {
   return ss.str();
 }
 
-Func* Unit::lookupFunc(const NamedEntity* ne, const StringData* name) {
-  Func* func = ne->getCachedFunc();
-  return func;
+Func* Unit::lookupFunc(const NamedEntity* ne) {
+  return ne->getCachedFunc();
 }
 
 Func* Unit::lookupFunc(const StringData* funcName) {
   const NamedEntity* ne = GetNamedEntity(funcName);
-  Func* func = ne->getCachedFunc();
-  return func;
+  return ne->getCachedFunc();
 }
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {

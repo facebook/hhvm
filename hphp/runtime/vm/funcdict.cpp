@@ -38,7 +38,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   NamedEntity *oldNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(old));
   NamedEntity *newNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(n3w));
 
-  Func* func = Unit::lookupFunc(oldNe, old);
+  Func* func = Unit::lookupFunc(oldNe);
   if (!func) {
       // It's the caller's responsibility to ensure that the old function
       // exists.
@@ -54,7 +54,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
     }
   }
 
-  Func *fnew = Unit::lookupFunc(newNe, n3w);
+  Func *fnew = Unit::lookupFunc(newNe);
   if (fnew && fnew != func) {
     // To match hphpc, we silently ignore functions defined in user code that
     // have the same name as a function defined in a separable extension

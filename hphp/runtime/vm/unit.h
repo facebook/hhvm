@@ -484,7 +484,7 @@ struct Unit {
     return const_cast<ArrayData*>(m_arrays.at(id));
   }
 
-  static Func *lookupFunc(const NamedEntity *ne, const StringData* name);
+  static Func *lookupFunc(const NamedEntity *ne);
   static Func *lookupFunc(const StringData *funcName);
   static Func *loadFunc(const NamedEntity *ne, const StringData* name);
   static Func *loadFunc(const StringData* name);

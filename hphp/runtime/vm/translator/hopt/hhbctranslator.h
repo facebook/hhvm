@@ -583,6 +583,7 @@ private:
   Func*       lookupFuncId(int funcId);
   PreClass*   lookupPreClassId(int preClassId);
   const NamedEntityPair& lookupNamedEntityPairId(int id);
+  const NamedEntity* lookupNamedEntityId(int id);
 
   /*
    * Eval stack helpers.

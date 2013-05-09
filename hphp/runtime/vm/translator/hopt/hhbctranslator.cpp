@@ -56,6 +56,10 @@ const NamedEntityPair& HhbcTranslator::lookupNamedEntityPairId(int id) {
   return getCurUnit()->lookupNamedEntityPairId(id);
 }
 
+const NamedEntity* HhbcTranslator::lookupNamedEntityId(int id) {
+  return getCurUnit()->lookupNamedEntityId(id);
+}
+
 SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   assert(tmp);
   m_evalStack.push(tmp);
@@ -1605,7 +1609,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
 void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
   const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
   const StringData* name = nep.first;
-  const Func* func       = Unit::lookupFunc(nep.second, name);
+  const Func* func       = Unit::lookupFunc(nep.second);
   if (!func) {
     // function lookup failed so just do the same as FPushFunc
     emitFPushFunc(numParams, cns(name));
@@ -1847,9 +1851,8 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
 void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                                       uint32_t numNonDefault,
                                       int32_t funcId) {
-  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
-  const StringData* name = nep.first;
-  const Func* callee = Unit::lookupFunc(nep.second, name);
+  const NamedEntity* ne = lookupNamedEntityId(funcId);
+  const Func* callee = Unit::lookupFunc(ne);
 
   callee->validate();
 

@@ -6026,8 +6026,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   DECODE_IA(numArgs);
   DECODE_IA(numNonDefault);
   DECODE(Id, id);
-  const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
-  Func* func = Unit::lookupFunc(nep.second, nep.first);
+  const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
+  Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
     raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());

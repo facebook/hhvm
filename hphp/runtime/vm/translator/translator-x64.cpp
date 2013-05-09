@@ -9261,8 +9261,8 @@ TranslatorX64::translateInitThisLoc(const Tracelet& t,
 void
 TranslatorX64::analyzeFPushFuncD(Tracelet& t, NormalizedInstruction& i) {
   Id funcId = i.imm[1].u_SA;
-  const NamedEntityPair nep = curUnit()->lookupNamedEntityPairId(funcId);
-  const Func* func = Unit::lookupFunc(nep.second, nep.first);
+  const NamedEntity* ne = curUnit()->lookupNamedEntityId(funcId);
+  const Func* func = Unit::lookupFunc(ne);
   i.m_txFlags = supportedPlan(func != nullptr);
 }
 
@@ -9274,7 +9274,7 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
   Id funcId = i.imm[1].u_SA;
   const NamedEntityPair& nep = curUnit()->lookupNamedEntityPairId(funcId);
   const StringData* name = nep.first;
-  const Func* func       = Unit::lookupFunc(nep.second, name);
+  const Func* func      = Unit::lookupFunc(nep.second);
 
   // Translation is only supported if function lookup succeeds
   func->validate();
@@ -9723,8 +9723,8 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
 void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
                                         NormalizedInstruction& i) {
   Id funcId = i.imm[2].u_SA;
-  const NamedEntityPair nep = curUnit()->lookupNamedEntityPairId(funcId);
-  const Func* func = Unit::lookupFunc(nep.second, nep.first);
+  const NamedEntity* ne = curUnit()->lookupNamedEntityId(funcId);
+  const Func* func = Unit::lookupFunc(ne);
   i.m_txFlags = supportedPlan(func != nullptr);
 }
 
@@ -9733,9 +9733,8 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   int numArgs = ni.imm[0].u_IVA;
   int numNonDefault = ni.imm[1].u_IA;
   Id funcId = ni.imm[2].u_SA;
-  const NamedEntityPair& nep = curUnit()->lookupNamedEntityPairId(funcId);
-  const StringData* name = nep.first;
-  const Func* func = Unit::lookupFunc(nep.second, name);
+  const NamedEntity* ne = curUnit()->lookupNamedEntityId(funcId);
+  const Func* func = Unit::lookupFunc(ne);
   PhysReg base;
   int disp;
   assert(ni.outStack);

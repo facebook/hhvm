@@ -485,6 +485,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   friend class c_Vector;
   friend class c_StableMap;
   friend class ArrayIter;
+  friend class c_GenMapWaitHandle;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

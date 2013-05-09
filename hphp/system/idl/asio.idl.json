@@ -641,6 +641,68 @@
             ]
         },
         {
+            "name": "GenMapWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing a map of asynchronous operations",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given map of dependencies",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given map of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A map of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenMapWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "GenVectorWaitHandle",
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",

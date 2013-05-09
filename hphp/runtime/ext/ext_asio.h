@@ -46,6 +46,7 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  *     BlockableWaitHandle        - wait handle that can be blocked by other WH
  *       ContinuationWaitHandle   - Continuation-powered asynchronous execution
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
+ *       GenMapWaitHandle         - wait handle representing an Map of WHs
  *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
@@ -344,7 +345,45 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   Array m_deps;
   ssize_t m_iterPos;
 };
-//
+
+///////////////////////////////////////////////////////////////////////////////
+// class GenMapWaitHandle
+
+/**
+ * A wait handle that waits for a map of wait handles. The wait handle
+ * finishes once all wait handles in the map are finished. The result value
+ * preserves the keys of the original map. If one of the wait handles failed,
+ * the exception is propagated by failure.
+ */
+FORWARD_DECLARE_CLASS_BUILTIN(GenMapWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(Map);
+class c_GenMapWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS(GenMapWaitHandle, GenMapWaitHandle, BlockableWaitHandle)
+
+  // need to implement
+  public: c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::s_cls);
+  public: ~c_GenMapWaitHandle();
+  public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CVarRef dependencies);
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(CObjRef exception, c_Map* deps, int64_t iter_pos, c_WaitableWaitHandle* child);
+
+  Object m_exception;
+  p_Map m_deps;
+  ssize_t m_iterPos;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // class GenVectorWaitHandle
 

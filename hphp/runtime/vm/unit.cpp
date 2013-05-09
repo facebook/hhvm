@@ -633,10 +633,11 @@ void Unit::defTypedef(Id id) {
   assert(id < m_typedefs.size());
   auto thisType = &m_typedefs[id];
   auto nameList = GetNamedEntity(thisType->m_name);
+  const StringData* typeName = thisType->m_value;
 
   auto checkExistingClass = [&] (Class* cls) {
     if (thisType->m_kind != KindOfObject ||
-        !cls->name()->isame(thisType->m_value)) {
+        !cls->name()->isame(typeName)) {
       raise_error("The type %s is already defined to a different class (%s)",
                   thisType->m_name->data(),
                   cls->name()->data());
@@ -655,7 +656,7 @@ void Unit::defTypedef(Id id) {
     Typedef* td = current.asTypedef();
     assert(td);
     if (thisType->m_kind != td->m_kind ||
-        !td->m_value->isame(thisType->m_value)) {
+        !td->m_value->isame(typeName)) {
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->m_name->data());
     }
@@ -688,19 +689,28 @@ void Unit::defTypedef(Id id) {
     nameList->setCachedNameDef(NameDef(thisType));
     return;
   }
-  if (auto klass = Unit::loadClass(thisType->m_value)) {
+  if (auto klass = Unit::loadClass(typeName)) {
     nameList->setCachedNameDef(NameDef(klass));
     return;
   }
 
-  auto targetNameList = GetNamedEntity(thisType->m_value);
+  auto targetNameList = GetNamedEntity(typeName);
   NameDef target = targetNameList->getCachedNameDef();
   if (!target) {
-    AutoloadHandler::s_instance->autoloadType(thisType->m_value->data());
-    target = targetNameList->getCachedNameDef();
+    String normName = normalizeNS(typeName);
+    if (normName) {
+      typeName = normName.get();
+      targetNameList = GetNamedEntity(typeName);
+      target = targetNameList->getCachedNameDef();
+    }
+
     if (!target) {
-      raise_error("Unknown type or class %s", thisType->m_value->data());
-      return;
+      AutoloadHandler::s_instance->autoloadType(typeName->data());
+      target = targetNameList->getCachedNameDef();
+      if (!target) {
+        raise_error("Unknown type or class %s", typeName->data());
+        return;
+      }
     }
   }
   assert(target);
@@ -734,6 +744,16 @@ Class* Unit::loadClass(const NamedEntity* ne,
     return cls;
   }
   VMRegAnchor _;
+
+  String normName = normalizeNS(name);
+  if (normName) {
+    name = normName.get();
+    ne = GetNamedEntity(name);
+    if ((cls = ne->getCachedClass()) != nullptr) {
+      return cls;
+    }
+  }
+
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -749,8 +769,20 @@ Class* Unit::loadMissingClass(const NamedEntity* ne,
 Class* Unit::getClass(const NamedEntity* ne,
                       const StringData *name, bool tryAutoload) {
   Class *cls = lookupClass(ne);
-  if (UNLIKELY(!cls && tryAutoload)) {
-    return loadMissingClass(ne, name);
+  if (UNLIKELY(!cls)) {
+
+    String normName = normalizeNS(name);
+    if (normName) {
+      name = normName.get();
+      ne = GetNamedEntity(name);
+      if ((cls = lookupClass(ne)) != nullptr) {
+        return cls;
+      }
+    }
+
+    if (tryAutoload) {
+      return loadMissingClass(ne, name);
+    }
   }
   return cls;
 }
@@ -910,6 +942,14 @@ TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
 TypedValue* Unit::loadCns(const StringData* cnsName) {
   TypedValue* tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
+
+  String normName = normalizeNS(cnsName);
+  if (normName) {
+    cnsName = normName.get();
+    tv = lookupCns(cnsName);
+    if (tv != nullptr) return tv;
+  }
+
   if (!AutoloadHandler::s_instance->autoloadConstant(
         const_cast<StringData*>(cnsName))) {
     return nullptr;
@@ -1598,11 +1638,19 @@ Func* Unit::lookupFunc(const StringData* funcName) {
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
   Func* func = ne->getCachedFunc();
-  if (UNLIKELY(!func)) {
-    if (AutoloadHandler::s_instance->autoloadFunc(
-          const_cast<StringData*>(funcName))) {
-      func = ne->getCachedFunc();
-    }
+  if (LIKELY(func != nullptr)) return func;
+
+  String normName = normalizeNS(funcName);
+  if (normName) {
+    funcName = normName.get();
+    ne = GetNamedEntity(funcName);
+    func = ne->getCachedFunc();
+    if (func) return func;
+  }
+
+  if (AutoloadHandler::s_instance->autoloadFunc(
+        const_cast<StringData*>(funcName))) {
+    func = ne->getCachedFunc();
   }
   return func;
 }

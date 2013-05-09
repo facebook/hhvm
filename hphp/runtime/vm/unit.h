@@ -1092,5 +1092,17 @@ public:
   Class* popFront();
 };
 
- } // HPHP::VM
+/**
+ * If name starts with '\\', returns a new String with the leading
+ * slash stripped. Otherwise returns a null string.
+ */
+inline const String normalizeNS(const StringData* name) {
+  assert(name->data()[name->size()] == 0);
+  if (name->data()[0] == '\\') {
+    return String(name->data() + 1);
+  }
+  return null_string;
+}
+
+}
 #endif

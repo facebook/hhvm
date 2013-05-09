@@ -739,6 +739,8 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
 
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
+  assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
+
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
@@ -772,17 +774,30 @@ ClassCache::lookup(Handle handle, StringData *name,
                    const void* unused) {
   ClassCache* thiz = cacheAtHandle(handle);
   Pair *pair = thiz->keyToPair(name);
+  String normName;
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, name)) {
     TRACE(1, "ClassCache miss: %s\n", name->data());
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      c = Unit::loadMissingClass(ne, name);
+      normName = normalizeNS(name);
+      if (normName) {
+        name = normName.get();
+        ne = Unit::GetNamedEntity(name);
+        c = Unit::lookupClass(ne);
+        if (!c) {
+          c = Unit::loadMissingClass(ne, name);
+        }
+      } else {
+        c = Unit::loadMissingClass(ne, name);
+      }
+
       if (UNLIKELY(!c)) {
         undefinedError(Strings::UNKNOWN_CLASS, name->data());
       }
     }
+
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;
     name->incRefCount();

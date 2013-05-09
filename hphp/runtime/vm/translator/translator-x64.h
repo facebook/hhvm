@@ -343,9 +343,6 @@ private:
                                   const DynLocation& propInput,
                                   PhysReg scr);
 
-  inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
-  }
   template<int Arity> TCA emitNAryStub(Asm& a, Call c);
   TCA emitUnaryStub(Asm& a, Call c);
   TCA genericRefCountStub(Asm& a);
@@ -753,6 +750,10 @@ PSEUDOINSTRS
 
   TCA getRetFromInterpretedGeneratorFrame() {
     return m_genRetHelper;
+  }
+
+  inline bool isValidCodeAddress(TCA tca) const {
+    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
   }
 
   // If we were to shove every little helper function into this class

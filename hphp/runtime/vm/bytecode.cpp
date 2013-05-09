@@ -3058,18 +3058,26 @@ bool VMExecutionContext::isReturnHelper(uintptr_t address) {
 }
 
 // Walk the stack and find any return address to jitted code and bash it to
-// the RetFromInterpretedFrame helper. This ensures that we don't return into
-// jitted code and gives the system the proper chance to interpret blacklisted
-// tracelets.
+// the appropriate RetFromInterpreted*Frame helper. This ensures that we don't
+// return into jitted code and gives the system the proper chance to interpret
+// blacklisted tracelets.
 void VMExecutionContext::preventReturnsToTC() {
   assert(isDebuggerAttached());
   if (RuntimeOption::EvalJit) {
     ActRec *ar = getFP();
     while (ar) {
-      if (!isReturnHelper(ar->m_savedRip)) {
+      if (!isReturnHelper(ar->m_savedRip) &&
+          (tx64->isValidCodeAddress((TCA)ar->m_savedRip))) {
         TRACE(2, "Replace RIP with RetFromInterpretedFrame helper in fp %p"
-              ", savedRip 0x%lx\n", ar, ar->m_savedRip);
-        ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+              ", savedRip 0x%lx, func %s\n", ar, ar->m_savedRip,
+              ar->m_func->fullName()->data());
+        if (ar->m_func->isGenerator()) {
+          ar->m_savedRip =
+            (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
+        } else {
+          ar->m_savedRip =
+            (uintptr_t)tx64->getRetFromInterpretedFrame();
+        }
         assert(isReturnHelper(ar->m_savedRip));
       }
       ar = getPrevVMState(ar);

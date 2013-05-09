@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright 2004-2013 Facebook. All Rights Reserved.
 
 function toto(mixed $x, ...): int {
   return (int)$x;

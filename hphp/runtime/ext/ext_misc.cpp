@@ -93,6 +93,15 @@ Variant f_constant(CStrRef name) {
   if (!name.get()) return uninit_null();
   const char *data = name.data();
   int len = name.length();
+
+  // slice off starting backslash
+  bool hadInitialBackslash = false;
+  if (len > 0 && data[0] == '\\') {
+    data += 1;
+    len -= 1;
+    hadInitialBackslash = true;
+  }
+
   char *colon;
   if ((colon = (char*)memchr(data, ':', len)) && colon[1] == ':') {
     // class constant
@@ -107,12 +116,18 @@ Variant f_constant(CStrRef name) {
       }
     }
     raise_warning("Couldn't find constant %s", data);
-    return uninit_null();
   } else {
-    TypedValue* cns = Unit::loadCns(name.get());
+    TypedValue* cns;
+    if (hadInitialBackslash) {
+      String s(data, len, CopyString);
+      cns = VM::Unit::loadCns(s.get());
+    } else {
+      cns = VM::Unit::loadCns(name.get());
+    }
     if (cns) return tvAsVariant(cns);
-    return uninit_null();
   }
+
+  return uninit_null();
 }
 
 bool f_define(CStrRef name, CVarRef value,
@@ -127,6 +142,15 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
   if (!name.get()) return false;
   const char *data = name.data();
   int len = name.length();
+
+  // slice off starting backslash
+  bool hadInitialBackslash = false;
+  if (len > 0 && data[0] == '\\') {
+    data += 1;
+    len -= 1;
+    hadInitialBackslash = true;
+  }
+
   char *colon;
   if ((colon = (char*)memchr(data, ':', len)) && colon[1] == ':') {
     // class constant
@@ -139,9 +163,13 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     }
     return false;
   } else {
-    return autoload ?
-      Unit::loadCns(name.get()) :
-      Unit::lookupCns(name.get());
+    auto* cb = autoload ?  VM::Unit::loadCns : VM::Unit::lookupCns;
+    if (hadInitialBackslash) {
+      String s(data, len, CopyString);
+      return cb(s.get());
+    } else {
+      return cb(name.get());
+    }
   }
 }
 

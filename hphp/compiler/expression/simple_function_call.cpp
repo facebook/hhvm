@@ -862,6 +862,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
               return CONSTANT("true");
             }
             ConstantTableConstPtr constants = ar->getConstants();
+            if (symbol[0] == '\\') symbol = symbol.substr(1);
             // system constant
             if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
               return CONSTANT("true");

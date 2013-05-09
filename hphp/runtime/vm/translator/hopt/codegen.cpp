@@ -4651,27 +4651,40 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                ArgGroup(m_regs).ssa(key).ssa(arr));
 }
 
-HOT_FUNC_VM static TypedValue* ldGblAddrHelper(StringData* name) {
-  return g_vmContext->m_globalVarEnv->lookup(name);
-}
-
-HOT_FUNC_VM static TypedValue* ldGblAddrDefHelper(StringData* name) {
-  TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
-  decRefStr(name);
-  return r;
-}
-
 void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
   auto dstReg = m_regs[inst->getDst()].getReg();
-  cgCallHelper(m_as, (TCA)ldGblAddrHelper, dstReg, kNoSyncPoint,
-               ArgGroup(m_regs).ssa(inst->getSrc(0)));
+  auto rEC = rScratch;
+  // TODO(#2384005): If we create separate opcodes for loading the VM
+  // context and the global variable environment we may find some CSE
+  // opportunities that aren't currently exploited.
+  emitGetGContext(m_as, rEC);
+  m_as.loadq(rEC[offsetof(VMExecutionContext, m_globalVarEnv)], rEC);
+  ArgGroup args = ArgGroup(m_regs)
+    .reg(rEC)
+    .ssa(inst->getSrc(0));
+  cgCallHelper(m_as,
+               (TCA)getMethodPtr(&VarEnv::lookup),
+               dstReg,
+               kNoSyncPoint,
+               args);
   m_as.testq(dstReg, dstReg);
   emitFwdJcc(CC_Z, inst->getTaken());
 }
 
 void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
-  cgCallHelper(m_as, (TCA)ldGblAddrDefHelper, inst->getDst(), kNoSyncPoint,
-               ArgGroup(m_regs).ssa(inst->getSrc(0)));
+  auto dstReg = m_regs[inst->getDst()].getReg();
+  auto rEC = rScratch;
+  // TODO(#2384005): see LdGblAddr
+  emitGetGContext(m_as, rEC);
+  m_as.loadq(rEC[offsetof(VMExecutionContext, m_globalVarEnv)], rEC);
+  ArgGroup args = ArgGroup(m_regs)
+    .reg(rEC)
+    .ssa(inst->getSrc(0));
+  cgCallHelper(m_as,
+               (TCA)getMethodPtr(&VarEnv::lookupAdd),
+               dstReg,
+               kNoSyncPoint,
+               args);
 }
 
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,

@@ -1200,7 +1200,10 @@ SSATmp* HhbcTranslator::emitLdGblAddr(const StringData* gblName, Block* block) {
 }
 
 SSATmp* HhbcTranslator::emitLdGblAddrDef(const StringData* gblName) {
-  return gen(LdGblAddrDef, getStrName(gblName));
+  SSATmp* name = getStrName(gblName);
+  SSATmp* addr = gen(LdGblAddrDef, name);
+  gen(DecRef, name);
+  return addr;
 }
 
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {

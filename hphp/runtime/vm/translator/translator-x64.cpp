@@ -891,7 +891,7 @@ void TranslatorX64::emitIncRefGeneric(PhysReg base, int disp) {
   emitIncRefGenericRegSafe(base, disp, r(tmpReg));
 }
 
-static void emitGetGContext(X64Assembler& a, PhysReg dest) {
+void emitGetGContext(X64Assembler& a, PhysReg dest) {
   emitTLSLoad<ExecutionContext>(a, g_context, dest);
 }
 

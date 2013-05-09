@@ -1186,6 +1186,8 @@ bool classIsUnique(const Class* cls);
 bool classIsUniqueOrCtxParent(const Class* cls);
 bool classIsUniqueNormalClass(const Class* cls);
 
+void emitGetGContext(X64Assembler& a, PhysReg dest);
+
 // SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
 // RAII logger for TC space consumption.
 struct SpaceRecorder {

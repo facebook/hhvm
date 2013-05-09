@@ -535,8 +535,9 @@ def walk(filename, source):
         test = test.replace('tempnam_variation6', 'tempnam_variation5')
     if '/ext-standard-general_functions/bug41445_1.php' in full_dest_filename:
         test = test.replace('bug41445.ini', 'bug41445_1.ini')
-
-
+    if '/ext-standard-file/bug24482.php' in full_dest_filename:
+        test = test.replace('"*"', '__DIR__."/../../../sample_dir/("')
+        test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../sample_dir/")')
 
     file(full_dest_filename, 'w').write(test)
 

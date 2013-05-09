@@ -1,8 +1,8 @@
 <?php
-$globdirs = glob("*", GLOB_ONLYDIR);
+$globdirs = glob(__DIR__."/../../../sample_dir/(", GLOB_ONLYDIR);
 
 $dirs = array();
-$dh = opendir(".");
+$dh = opendir(__DIR__."/../../../sample_dir/");
 while (is_string($file = readdir($dh))) {
 	if ($file[0] === ".") continue;
 	if (!is_dir($file)) continue;

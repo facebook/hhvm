@@ -2392,14 +2392,18 @@ sm_opt_return_type:
 ;
 
 sm_typevar_list:
-    ident ',' sm_typevar_list       { _p->addTypeVar($1.text()); }
- |  ident                           { _p->addTypeVar($1.text()); }
- |  ident T_AS sm_shape_type
-    sm_typevar_list
- |  ident T_AS ident ','
-    sm_typevar_list                 { _p->addTypeVar($1.text()); }
- |  ident T_AS ident                { _p->addTypeVar($1.text()); }
- |  ident T_AS sm_shape_type
+    namespace_string ',' 
+    sm_typevar_list                    { _p->addTypeVar($1.text()); }
+ |  namespace_string                   { _p->addTypeVar($1.text()); }
+ |  namespace_string T_AS 
+    sm_shape_type sm_typevar_list
+ |  namespace_string T_AS 
+    namespace_string ','
+    sm_typevar_list                    { _p->addTypeVar($1.text()); }
+ |  namespace_string T_AS 
+    namespace_string                   { _p->addTypeVar($1.text()); }
+ |  namespace_string T_AS
+    sm_shape_type
 ;
 
 sm_shape_member_type:
@@ -2436,7 +2440,7 @@ sm_type:
   | '@' sm_type                        { only_in_strict_mode(_p);
                                          _p->onTypeSpecialization($2, '@');
                                          $$ = $2; }
-  | ident sm_typeargs_opt              { _p->onTypeAnnotation($$, $1, $2); }
+  | namespace_string sm_typeargs_opt   { _p->onTypeAnnotation($$, $1, $2); }
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }

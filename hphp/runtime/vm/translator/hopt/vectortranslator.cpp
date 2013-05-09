@@ -1091,18 +1091,16 @@ void HhbcTranslator::VectorTranslator::emitFinalMOp() {
 template <KeyType keyType, bool isObj>
 static inline TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue keyVal, MInstrState* mis) {
-  TypedValue result;
   TypedValue* key = keyPtr<keyType>(keyVal);
-  base = Prop<true, false, false, isObj, keyType>(
-    result, mis->tvRef, ctx, base, key);
-  if (base != &result) {
-    // Grab a reference to the result.
-    tvDup(base, &result);
+  TypedValue scratch;
+  TypedValue* result = Prop<true, false, false, isObj, keyType>(
+    scratch, mis->tvRef, ctx, base, key);
+
+  if (result->m_type == KindOfRef) {
+    result = result->m_data.pref->tv();
   }
-  if (result.m_type == KindOfRef) {
-    tvUnbox(&result);
-  }
-  return result;
+  tvRefcountedIncRef(result);
+  return *result;
 }
 
 #define HELPER_TABLE(m)                                \
@@ -1147,23 +1145,18 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
 #undef HELPER_TABLE
 
 template <KeyType keyType, bool isObj>
-static inline TypedValue vGetPropImpl(Class* ctx, TypedValue* base,
-                                      TypedValue keyVal, MInstrState* mis) {
+static inline RefData* vGetPropImpl(Class* ctx, TypedValue* base,
+                                    TypedValue keyVal, MInstrState* mis) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  base = VM::Prop<false, true, false, isObj, keyType>(
+  TypedValue* result = VM::Prop<false, true, false, isObj, keyType>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
 
-  if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
-    // Error (no result was set).
-    return tv(KindOfRef, NEW(RefData)(RefData::nullinit));
-  } else {
-    if (base->m_type != KindOfRef) {
-      tvBox(base);
-    }
-    assert(base->m_type == KindOfRef);
-    base->m_data.pref->incRefCount();
-    return *base;
+  if (result->m_type != KindOfRef) {
+    tvBox(result);
   }
+  RefData* ref = result->m_data.pref;
+  ref->incRefCount();
+  return ref;
 }
 
 #define HELPER_TABLE(m)                         \
@@ -1175,7 +1168,7 @@ static inline TypedValue vGetPropImpl(Class* ctx, TypedValue* base,
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
-TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
+RefData* nm(Class* ctx, TypedValue* base, TypedValue key,               \
                      MInstrState* mis) {                                \
   return vGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
 }
@@ -1186,7 +1179,7 @@ HELPER_TABLE(PROP)
 
 void HhbcTranslator::VectorTranslator::emitVGetProp() {
   SSATmp* key = getKey();
-  typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
+  typedef RefData* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
   m_result = genStk(VGetProp, cns((TCA)opFunc), CTX(),
@@ -1397,7 +1390,7 @@ HELPER_TABLE(PROP)
 void HhbcTranslator::VectorTranslator::emitBindProp() {
   SSATmp* key = getKey();
   SSATmp* box = getValue();
-  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, RefData*,
+  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, RefData*,
                          MInstrState*);
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
@@ -1510,17 +1503,15 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
 template <KeyType keyType>
 static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
                                       MInstrState* mis) {
-  TypedValue result;
   TypedValue* key = keyPtr<keyType>(keyVal);
-  base = Elem<true, keyType>(result, mis->tvRef, base, key);
-  if (base != &result) {
-    // Save a copy of the result.
-    tvDup(base, &result);
+  TypedValue scratch;
+  TypedValue* result = Elem<true, keyType>(scratch, mis->tvRef, base, key);
+
+  if (result->m_type == KindOfRef) {
+    result = result->m_data.pref->tv();
   }
-  if (result.m_type == KindOfRef) {
-    tvUnbox(&result);
-  }
-  return result;
+  tvRefcountedIncRef(result);
+  return *result;
 }
 
 #define HELPER_TABLE(m)                                 \
@@ -1556,23 +1547,18 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
 #undef HELPER_TABLE
 
 template <KeyType keyType>
-static inline TypedValue vGetElemImpl(TypedValue* base, TypedValue keyVal,
-                                      MInstrState* mis) {
+static inline RefData* vGetElemImpl(TypedValue* base, TypedValue keyVal,
+                                    MInstrState* mis) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  base = VM::ElemD<false, true, keyType>(mis->tvScratch, mis->tvRef, base, key);
+  TypedValue* result = VM::ElemD<false, true, keyType>(
+    mis->tvScratch, mis->tvRef, base, key);
 
-  TypedValue result;
-  if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
-    // Error (no result was set).
-    tvWriteNull(&result);
-    tvBox(&result);
-  } else {
-    if (base->m_type != KindOfRef) {
-      tvBox(base);
-    }
-    tvDupVar(base, &result);
+  if (result->m_type != KindOfRef) {
+    tvBox(result);
   }
-  return result;
+  RefData* ref = result->m_data.pref;
+  ref->incRefCount();
+  return ref;
 }
 
 #define HELPER_TABLE(m)                      \
@@ -1582,7 +1568,7 @@ static inline TypedValue vGetElemImpl(TypedValue* base, TypedValue keyVal,
   m(vGetElemS,    StrKey)
 
 #define ELEM(nm, ...)                                                   \
-TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
+RefData* nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
   return vGetElemImpl<__VA_ARGS__>(base, key,  mis);                    \
 }
 namespace VectorHelpers {
@@ -1592,7 +1578,7 @@ HELPER_TABLE(ELEM)
 
 void HhbcTranslator::VectorTranslator::emitVGetElem() {
   SSATmp* key = getKey();
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
+  typedef RefData* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB(getKeyTypeIS(key));
   m_ht.exceptionBarrier();
   m_result = genStk(VGetElem, cns((TCA)opFunc), m_base, key, genMisPtr());

@@ -194,8 +194,7 @@ inline TypedValue* ElemArray(ArrayData* base,
 // $result = $base[$key];
 template <bool warn, KeyType keyType = AnyKey>
 inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                               TypedValue* base,
-                               TypedValue* key) {
+                        TypedValue* base, TypedValue* key) {
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -1326,7 +1325,7 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
           KeyType keyType = AnyKey>
 inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
-                               Class* ctx, TypedValue* base, TypedValue* key) {
+                        Class* ctx, TypedValue* base, TypedValue* key) {
   static_assert(keyType != IntKey, "Integer property keys are not supported");
   assert(!warn || !unset);
   TypedValue* result = nullptr;

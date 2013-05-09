@@ -558,6 +558,106 @@ static uint32_t get_random()
 static const int kTooPolyPred = 2;
 static const int kTooPolyRet = 6;
 
+bool
+isNormalPropertyAccess(const NormalizedInstruction& i,
+                       int propInput,
+                       int objInput) {
+  const LocationCode lcode = i.immVec.locationCode();
+  return
+    i.immVecM.size() == 1 &&
+    (lcode == LC || lcode == LL || lcode == LR || lcode == LH) &&
+    mcodeMaybePropName(i.immVecM[0]) &&
+    i.inputs[propInput]->isString() &&
+    i.inputs[objInput]->valueType() == KindOfObject;
+}
+
+bool
+mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
+  const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
+  unsigned mi = 0;
+  unsigned ii = mii.valCount() + 1;
+  for (; mi < ni.immVecM.size(); ++mi) {
+    MemberCode mc = ni.immVecM[mi];
+    if (mcodeMaybePropName(mc)) {
+      const Class* cls = nullptr;
+      if (getPropertyOffset(ni, context, cls, mii, mi, ii).offset == -1) {
+        return true;
+      }
+      ++ii;
+    } else {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* ctx,
+                           const Class*& baseClass,
+                           const MInstrInfo& mii,
+                           unsigned mInd, unsigned iInd) {
+  if (mInd == 0) {
+    auto const baseIndex = mii.valCount();
+    baseClass = ni.inputs[baseIndex]->rtt.isObject()
+      ? ni.inputs[baseIndex]->rtt.valueClass()
+      : nullptr;
+  } else {
+    baseClass = ni.immVecClasses[mInd - 1];
+  }
+  if (!baseClass) return PropInfo();
+
+  if (!ni.inputs[iInd]->rtt.isString()) {
+    return PropInfo();
+  }
+  auto* const name = ni.inputs[iInd]->rtt.valueString();
+  if (!name) return PropInfo();
+
+  bool accessible;
+  // If we are not in repo-authoriative mode, we need to check that
+  // baseClass cannot change in between requests
+  if (!RuntimeOption::RepoAuthoritative ||
+      !(baseClass->preClass()->attrs() & AttrUnique)) {
+    if (!ctx) return PropInfo();
+    if (!ctx->classof(baseClass)) {
+      if (baseClass->classof(ctx)) {
+        // baseClass can change on us in between requests, but since
+        // ctx is an ancestor of baseClass we can make the weaker
+        // assumption that the object is an instance of ctx
+        baseClass = ctx;
+      } else {
+        // baseClass can change on us in between requests and it is
+        // not related to ctx, so bail out
+        return PropInfo();
+      }
+    }
+  }
+  // Lookup the index of the property based on ctx and baseClass
+  Slot idx = baseClass->getDeclPropIndex(ctx, name, accessible);
+  // If we couldn't find a property that is accessible in the current
+  // context, bail out
+  if (idx == kInvalidSlot || !accessible) {
+    return PropInfo();
+  }
+  // If it's a declared property we're good to go: even if a subclass
+  // redefines an accessible property with the same name it's guaranteed
+  // to be at the same offset
+  return PropInfo(
+    baseClass->declPropOffset(idx),
+    baseClass->declPropHphpcType(idx)
+  );
+}
+
+PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
+                                Class* context,
+                                const MInstrInfo& mii) {
+  unsigned mInd = ni.immVecM.size() - 1;
+  unsigned iInd = mii.valCount() + 1 + mInd;
+
+  const Class* cls = nullptr;
+  return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
+}
+
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,

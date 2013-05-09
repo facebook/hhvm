@@ -7443,12 +7443,6 @@ void TranslatorX64::translateContStopped(const Tracelet& t,
   a.    store_imm8_disp_reg(0x0, CONTOFF(m_running), r(rCont));
 }
 
-void TranslatorX64::translateContHandle(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
-  // Always interpreted
-  not_reached();
-}
-
 void TranslatorX64::analyzeStrlen(Tracelet& t,
                                   NormalizedInstruction& i) {
   switch (i.inputs[0]->rtt.valueType()) {
@@ -7507,11 +7501,6 @@ void TranslatorX64::translateIncStat(const Tracelet& t,
   int32_t counter = i.imm[0].u_IVA;
   int32_t value = i.imm[1].u_IVA;
   Stats::emitInc(a, Stats::StatCounter(counter), value);
-}
-
-void TranslatorX64::translateArrayIdx(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
-  not_reached();
 }
 
 static void analyzeClassExistsImpl(NormalizedInstruction& i) {
@@ -11311,8 +11300,7 @@ TranslatorX64::TranslatorX64()
   m_curNI(0),
   m_curFile(nullptr),
   m_curLine(0),
-  m_curFunc(nullptr),
-  m_vecState(nullptr)
+  m_curFunc(nullptr)
 {
   static const size_t kRoundUp = 2 << 20;
   const size_t kAHotSize = RuntimeOption::VMTranslAHotSize;
@@ -12034,7 +12022,11 @@ bool TranslatorX64::dumpTCData() {
 #define NATIVE_OP(X) PLAN(X, Native)
 #define SUPPORTED_OP(X) PLAN(X, Supported)
 #define SIMPLE_OP(X) PLAN(X, Simple)
-#define INTERP_OP(X) PLAN(X, Interp)
+#define INTERP_OP(X) PLAN(X, Interp)                               \
+  void TranslatorX64::translate##X(const Tracelet&,                \
+                                   const NormalizedInstruction&) { \
+    not_reached();                                                 \
+  }
 
 #define SUPPORTED_OPS() \
   /*
@@ -12094,6 +12086,16 @@ bool TranslatorX64::dumpTCData() {
    */ \
   INTERP_OP(ContHandle) \
   INTERP_OP(ArrayIdx) \
+  INTERP_OP(CGetM) \
+  INTERP_OP(FPassM) \
+  INTERP_OP(VGetM) \
+  INTERP_OP(IssetM) \
+  INTERP_OP(EmptyM) \
+  INTERP_OP(SetM) \
+  INTERP_OP(SetOpM) \
+  INTERP_OP(IncDecM) \
+  INTERP_OP(BindM) \
+  INTERP_OP(UnsetM)
 
 
 // Define the trivial analyze methods

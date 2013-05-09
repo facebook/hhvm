@@ -426,117 +426,9 @@ private:
                           const int* args);
 
  private:
-
-  MVecTransState* m_vecState;
   void invalidateOutStack(const NormalizedInstruction& ni);
   void cleanOutLocal(const NormalizedInstruction& ni);
   void invalidateOutLocal(const NormalizedInstruction& ni);
-  int mResultStackOffset(const NormalizedInstruction& ni) const;
-  bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii) const;
-  int firstDecrefInput(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii) const;
-  bool inputIsLiveForFinalOp(const NormalizedInstruction& ni, unsigned i,
-                           const MInstrInfo& mii) const;
-  bool logicalTeleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                           const MInstrInfo& mii) const;
-  bool teleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii) const;
-  bool useTvResult(const Tracelet& t, const NormalizedInstruction& ni,
-                   const MInstrInfo& mii) const;
-  bool forceMValIncDec(const NormalizedInstruction& ni, const DynLocation& base,
-                       const DynLocation& val) const;
-  bool forceMValIncDec(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii) const;
-  void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
-                   const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseH(unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseN(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseS(const Tracelet& t, const NormalizedInstruction& ni,
-                 unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
-                  const MInstrInfo& mii, unsigned iInd,
-                  LazyScratchReg& rBase);
-  void emitHphpArrayGetIntKey(const NormalizedInstruction& i,
-                              PhysReg rBase,
-                              const DynLocation& keyLoc,
-                              Location outLoc,
-                              void* fallbackFunc);
-  void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                LazyScratchReg& rBase);
-  void emitProp(const MInstrInfo& mii, unsigned mInd,
-                unsigned iInd, LazyScratchReg& rBase);
-  void emitPropGeneric(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd,
-                       unsigned iInd, LazyScratchReg& rBase);
-  void emitPropSpecialized(MInstrAttr, const Class*,
-                           int propOffset, unsigned mInd, unsigned iInd,
-                           LazyScratchReg& rBase);
-  void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                   unsigned mInd, LazyScratchReg& rBase);
-  void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd,
-                          unsigned& iInd, LazyScratchReg& rBase);
-  bool needFirstRatchet(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii) const;
-  bool needFinalRatchet(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii) const;
-  unsigned nLogicalRatchets(const Tracelet& t, const NormalizedInstruction& ni,
-                            const MInstrInfo& mii) const;
-  int ratchetInd(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned mInd) const;
-  void emitRatchetRefs(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd,
-                       PhysReg rBase);
-  template <bool useEmpty>
-  void emitIssetEmptyElem(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                          PhysReg rBase);
-  template <bool useEmpty>
-  void emitIssetEmptyProp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd,
-                          unsigned iInd, PhysReg rBase);
-  void emitVGetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                       PhysReg rBase);
-  void emitSetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                      const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                      PhysReg rBase);
-  void emitSetOpNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                        PhysReg rBase);
-  void emitIncDecNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                         const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                         PhysReg rBase);
-  void emitBindNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                       PhysReg rBase);
-  void emitNotSuppNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                          PhysReg rBase);
-  bool needMInstrCtx(const Tracelet& t, const NormalizedInstruction& ni) const;
-  void emitMPre(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, unsigned& mInd,
-                unsigned& iInd, LazyScratchReg& rBase);
-  void emitMPost(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii);
-  void translateMInstr(Op op);
-  void emitFinalMOp(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                    LazyScratchReg& rBase);
-#define MII(instr, attrs, bS, iS, vC, fN) \
-  void emit##instr##Elem(const Tracelet& t, const NormalizedInstruction& ni, \
-                         const MInstrInfo& mii, unsigned mInd, unsigned iInd, \
-                         PhysReg rBase); \
-  void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
-                         const MInstrInfo& mii, unsigned mInd, \
-                         unsigned iInd, LazyScratchReg& rBase);
-MINSTRS
-#undef MII
 
 #define INSTRS \
   CASE(PopC) \
@@ -1195,8 +1087,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
                                 Class* contextClass,
                                 const MInstrInfo&);
 
-bool isSupportedCGetM_LE(const NormalizedInstruction& i);
-bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);

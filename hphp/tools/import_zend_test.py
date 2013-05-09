@@ -235,7 +235,6 @@ other_files = (
     '/ext-standard-file/test2.csv',
     '/ext-standard-file/test3.csv',
     '/ext-standard-file/fopen_include_path.inc',
-    '/ext-standard-general_functions/bug41445.ini',
     '/ext-standard-image/bug13213.jpg',
     '/ext-standard-image/246x247.png',
     '/ext-standard-image/384x385.png',
@@ -534,6 +533,9 @@ def walk(filename, source):
         test = test.replace('symlink.txt', 'lchgrp_basic_symlink.txt')
     if '/ext-standard-file/tempnam_variation5.php' in full_dest_filename:
         test = test.replace('tempnam_variation6', 'tempnam_variation5')
+    if '/ext-standard-general_functions/bug41445_1.php' in full_dest_filename:
+        test = test.replace('bug41445.ini', 'bug41445_1.ini')
+
 
 
     file(full_dest_filename, 'w').write(test)

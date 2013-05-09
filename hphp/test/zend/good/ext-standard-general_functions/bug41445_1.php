@@ -1,6 +1,6 @@
 <?php
 
-$file = dirname(__FILE__)."/bug41445.ini";
+$file = dirname(__FILE__)."/bug41445_1.ini";
 
 $data = <<<DATA
 [2454.33]

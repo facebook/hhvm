@@ -322,21 +322,7 @@ public:
   /**
    * Comparisons.
    */
-  bool equal(const StringData *s) const {
-    assert(s);
-    if (s == this) return true;
-    int ret;
-
-    if (!(m_hash < 0 || s->m_hash < 0)) {
-      ret = numericCompare(s);
-      if (ret >= -1) {
-        return ret == 0;
-      }
-    }
-    if (m_len != s->m_len) return false;
-    ret = memcmp(rawdata(), s->rawdata(), m_len);
-    return ret == 0;
-  }
+  bool equal(const StringData *s) const;
 
   bool same(const StringData *s) const {
     assert(s);

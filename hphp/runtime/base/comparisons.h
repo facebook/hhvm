@@ -390,7 +390,7 @@ inline bool equal(const StringData *v1, const StringData *v2) {
   if (v1 == v2) return true;
   if (v1 == nullptr) return v2->empty();
   if (v2 == nullptr) return v1->empty();
-  return v1->compare(v2) == 0;
+  return v1->equal(v2);
 }
 inline bool equal(const StringData *v1, CStrRef v2) {
   return equal(v1, v2.get());

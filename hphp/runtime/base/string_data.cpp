@@ -856,6 +856,23 @@ DataType StringData::toNumeric(int64_t &lval, double &dval) const {
 // comparisons
 
 HOT_FUNC
+bool StringData::equal(const StringData *s) const {
+  assert(s);
+  if (s == this) return true;
+  int ret;
+
+  if (!(m_hash < 0 || s->m_hash < 0)) {
+    ret = numericCompare(s);
+    if (ret >= -1) {
+      return ret == 0;
+    }
+  }
+  if (m_len != s->m_len) return false;
+  ret = memcmp(rawdata(), s->rawdata(), m_len);
+  return ret == 0;
+}
+
+HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {
   assert(v2);
 

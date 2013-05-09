@@ -387,9 +387,6 @@ bool TestParserExpr::TestClosure() {
 }
 
 bool TestParserExpr::TestXHP() {
-  //HPHP::Option::ScannerType |= HPHP::Scanner::PreprocessXHP;
-  //HPHP::RuntimeOption::ScannerType |= HPHP::Scanner::PreprocessXHP;
-
   // basics
   V("<?php $x = <thing />;",
     "$x = new xhp_thing(array(), array());\n");

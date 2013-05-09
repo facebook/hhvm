@@ -120,8 +120,15 @@ bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = true;
 bool Option::EnableFinallyStatement = false;
-int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
+
+int Option::GetScannerType() {
+  int type = 0;
+  if (EnableShortTags) type |= Scanner::AllowShortTags;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
+  if (EnableAspTags) type |= Scanner::AllowAspTags;
+  return type;
+}
 
 int Option::InvokeFewArgsCount = 6;
 bool Option::InvokeWithSpecificArgs = true;
@@ -277,17 +284,8 @@ void Option::Load(Hdf &config) {
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);
-  if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
-  else ScannerType &= ~Scanner::AllowShortTags;
-  if (EnableHipHopExperimentalSyntax) {
-    ScannerType |= Scanner::EnableHipHopKeywords;
-  } else {
-    ScannerType &= ~Scanner::EnableHipHopKeywords;
-  }
 
   EnableAspTags = config["EnableAspTags"].getBool();
-  if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
-  else ScannerType &= ~Scanner::AllowAspTags;
 
   EnableXHP = config["EnableXHP"].getBool(true);
 

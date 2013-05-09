@@ -141,7 +141,7 @@ StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
   if (!fileName || !*fileName) fileName = "string";
 
   int len = input.size();
-  Scanner scanner(input.data(), len, Option::ScannerType, fileName, true);
+  Scanner scanner(input.data(), len, Option::GetScannerType(), fileName, true);
   Parser parser(scanner, fileName, ar, len);
   parser.m_lambdaMode = lambdaMode;
   if (parser.parse()) {
@@ -207,10 +207,6 @@ string Parser::errString() {
 
 bool Parser::enableXHP() {
   return Option::EnableXHP;
-}
-
-bool Parser::enableHipHopSyntax() {
-  return Option::EnableHipHopSyntax;
 }
 
 bool Parser::enableFinallyStatement() {
@@ -686,7 +682,7 @@ void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
 }
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
-  if (op != T_ARRAY && !Option::EnableHipHopSyntax) {
+  if (op != T_ARRAY && !m_scanner.hipHopSyntaxEnabled()) {
     PARSE_ERROR("Typed collection is not enabled");
     return;
   }
@@ -922,16 +918,18 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
-  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation, var->text(),
+  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
+                              m_scanner.hipHopSyntaxEnabled(), var->text(),
                               ref, defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
   out->exp = expList;
 }
 
 void Parser::onClassStart(int type, Token &name) {
+  const Type::TypePtrMap& typeHintTypes =
+    Type::GetTypeHintTypes(m_scanner.hipHopSyntaxEnabled());
   if (name.text() == "self" || name.text() == "parent" ||
-      Type::GetTypeHintTypes().find(name.text()) !=
-      Type::GetTypeHintTypes().end()) {
+      typeHintTypes.find(name.text()) != typeHintTypes.end()) {
     PARSE_ERROR("Cannot use '%s' as class name as it is reserved",
                 name.text().c_str());
   }
@@ -1589,8 +1587,8 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
     expList = NEW_EXP0(ExpressionList);
   }
   expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
-                              param->text(), ref,
-                              ExpressionPtr(), ExpressionPtr()));
+                              m_scanner.hipHopSyntaxEnabled(), param->text(),
+                              ref, ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
 
@@ -1778,7 +1776,7 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
-    if (!Option::EnableHipHopSyntax && !m_scanner.isHackMode()) {
+    if (!m_scanner.hipHopSyntaxEnabled()) {
       PARSE_ERROR("Type hint is not enabled");
       return false;
     }

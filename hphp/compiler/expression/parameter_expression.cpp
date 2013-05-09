@@ -32,10 +32,10 @@ using namespace HPHP;
 
 ParameterExpression::ParameterExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- TypeAnnotationPtr type, const std::string &name, bool ref,
+ TypeAnnotationPtr type, bool hhType, const std::string &name, bool ref,
  ExpressionPtr defaultValue, ExpressionPtr attributeList)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
-    m_originalType(type), m_name(name), m_ref(ref),
+    m_originalType(type), m_name(name), m_hhType(hhType), m_ref(ref),
     m_defaultValue(defaultValue), m_attributeList(attributeList) {
   m_type = Util::toLower(type ? type->simpleName() : "");
   if (m_defaultValue) {
@@ -150,7 +150,7 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
 
 TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
                                          bool forInference) {
-  const Type::TypePtrMap &types = Type::GetTypeHintTypes();
+  const Type::TypePtrMap &types = Type::GetTypeHintTypes(m_hhType);
   Type::TypePtrMap::const_iterator iter;
 
   TypePtr ret;
@@ -231,7 +231,7 @@ void ParameterExpression::compatibleDefault() {
 
   const char* msg = "Default value for parameter %s with type %s "
                     "needs to have the same type as the type hint %s";
-  if (Option::EnableHipHopSyntax) {
+  if (m_hhType) {
     // Normally a named type like 'int' is compatable with Int but not integer
     // Since the default value's type is inferred from the value itself it is
     // ok to compare against the lower case version of the type hint in hint

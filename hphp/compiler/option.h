@@ -235,8 +235,9 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static bool EnableFinallyStatement;
-  static int ScannerType;
   static int ParserThreadCount;
+
+  static int GetScannerType();
 
   /**
    * "Dynamic" means a function or a method can be invoked dynamically.

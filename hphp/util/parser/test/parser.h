@@ -139,7 +139,6 @@ struct Parser : ParserBase {
   void* extractStatement(ScannerToken*) { X(); return nullptr; }
 
   bool enableFinallyStatement() { return true; }
-  bool enableHipHopSyntax() { return true; }
   bool enableXHP() { return true; }
 
   IMPLEMENT_XHP_ATTRIBUTES;

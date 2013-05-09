@@ -248,7 +248,7 @@ void create_generator(Parser *_p, Token &out, Token &params,
 ///////////////////////////////////////////////////////////////////////////////
 
 static void user_attribute_check(Parser *_p) {
-  if (!_p->enableHipHopSyntax()) {
+  if (!_p->scanner().hipHopSyntaxEnabled()) {
     HPHP_PARSER_ERROR("User attributes are not enabled", _p);
   }
 }
@@ -646,17 +646,10 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
 }
 
-/* This is called from hack productions (hh_*) to throw an
- * error if we're not in hack mode */
-static void only_in_hack_mode(Parser *_p) {
-  if (!_p->scanner().isHackMode()) {
-    HPHP_PARSER_ERROR("Syntax only allowed in hack mode", _p);
-  }
-}
-
-static void only_in_hphp_syntax(Parser *_p) {
-  if (!_p->enableHipHopSyntax()) {
-    HPHP_PARSER_ERROR("Syntax only allowed with -v Eval.EnableHipHopSyntax=true", _p);
+static void only_in_hh_syntax(Parser *_p) {
+  if (!_p->scanner().hipHopSyntaxEnabled()) {
+    HPHP_PARSER_ERROR(
+      "Syntax only allowed with -v Eval.EnableHipHopSyntax=true", _p);
   }
 }
 
@@ -1238,10 +1231,10 @@ new_else_single:
 
 parameter_list:
     non_empty_parameter_list ',' T_VARARG
-                                       { only_in_hack_mode(_p); $$ = $1; }
+                                       { only_in_hh_syntax(_p); $$ = $1; }
   | non_empty_parameter_list
     possible_comma_in_hphp_syntax      { $$ = $1;}
-  | T_VARARG                           { only_in_hack_mode(_p); $$.reset(); }
+  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
   |                                    { $$.reset();}
 ;
 
@@ -1680,7 +1673,7 @@ static_shape_pair_list:
 ;
 
 shape_literal:
-    T_SHAPE '(' shape_pair_list ')'   { only_in_hack_mode(_p);
+    T_SHAPE '(' shape_pair_list ')'   { only_in_hh_syntax(_p);
                                         _p->onArray($$, $3, T_ARRAY); }
 ;
 
@@ -1939,7 +1932,7 @@ static_scalar:
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | T_SHAPE '('
-    static_shape_pair_list ')'         { only_in_hack_mode(_p);
+    static_shape_pair_list ')'         { only_in_hh_syntax(_p);
                                          _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
@@ -1976,7 +1969,7 @@ possible_comma:
   |                                    { $$.reset();}
 ;
 possible_comma_in_hphp_syntax:
-    ','                                { only_in_hphp_syntax(_p); $$.reset();}
+    ','                                { only_in_hh_syntax(_p); $$.reset();}
   |                                    { $$.reset();}
 ;
 
@@ -2016,7 +2009,7 @@ static_scalar_ae:
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
-    static_shape_pair_list_ae ')'      { only_in_hack_mode(_p);
+    static_shape_pair_list_ae ')'      { only_in_hh_syntax(_p);
                                          _p->onArray($$,$3,T_ARRAY); }
 ;
 
@@ -2342,14 +2335,14 @@ class_constant:
 
 hh_typedef_statement:
     T_TYPE hh_name_with_typevar
-    '=' hh_type ';'                    { only_in_hack_mode(_p);
+    '=' hh_type ';'                    { only_in_hh_syntax(_p);
                                          _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
 ;
 
 hh_name_with_type:  /* foo -> int foo */
     ident                              { $$ = $1; }
-  | hh_type ident                      { only_in_hack_mode(_p); $$ = $2; }
+  | hh_type ident                      { only_in_hh_syntax(_p); $$ = $2; }
 ;
 
 hh_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
@@ -2360,13 +2353,13 @@ hh_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
     T_TYPELIST_LT
     hh_typevar_list
     T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1;
-                                         only_in_hack_mode(_p); }
+                                         only_in_hh_syntax(_p); }
 ;
 
 hh_typeargs_opt:
     T_TYPELIST_LT
     hh_type_list
-    T_TYPELIST_GT                      { only_in_hack_mode(_p); $$ = $2; }
+    T_TYPELIST_GT                      { only_in_hh_syntax(_p); $$ = $2; }
   |                                    { $$.reset(); }
 ;
 
@@ -2387,7 +2380,7 @@ hh_func_type_list:
 
 hh_opt_return_type:
                                        { $$.reset(); }
-  | ':' hh_type                        { only_in_hack_mode(_p); $$ = $2; }
+  | ':' hh_type                        { only_in_hh_syntax(_p); $$ = $2; }
 ;
 
 hh_typevar_list:
@@ -2425,7 +2418,7 @@ hh_shape_member_list:
 
 hh_shape_type:
     T_SHAPE
-     '(' hh_shape_member_list ')'      { only_in_hack_mode(_p);
+     '(' hh_shape_member_list ')'      { only_in_hh_syntax(_p);
                                          $$.setText("array"); }
 ;
 
@@ -2433,10 +2426,10 @@ hh_shape_type:
 hh_type:
     /* double-optional types will be rejected by the typechecker; we
      * already allow plenty of nonsense types anyway */
-    '?' hh_type                        { only_in_hack_mode(_p);
+    '?' hh_type                        { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization($2, '?');
                                          $$ = $2; }
-  | '@' hh_type                        { only_in_hack_mode(_p);
+  | '@' hh_type                        { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization($2, '@');
                                          $$ = $2; }
   | namespace_string hh_typeargs_opt   { _p->onTypeAnnotation($$, $1, $2); }
@@ -2445,11 +2438,11 @@ hh_type:
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT hh_type
-    T_TYPELIST_GT                      { only_in_hack_mode(_p);
+    T_TYPELIST_GT                      { only_in_hh_syntax(_p);
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_ARRAY T_TYPELIST_LT hh_type ','
-    hh_type T_TYPELIST_GT              { only_in_hack_mode(_p);
+    hh_type T_TYPELIST_GT              { only_in_hh_syntax(_p);
                                          _p->onTypeList($3, $5);
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
@@ -2459,11 +2452,11 @@ hh_type:
                                          _p->onTypeSpecialization($$, 'x'); }
   | '(' T_FUNCTION
     '(' hh_func_type_list ')'
-    ':' hh_type ')'                   { only_in_hack_mode(_p);
+    ':' hh_type ')'                   { only_in_hh_syntax(_p);
                                         _p->onTypeList($7, $4);
                                         _p->onTypeAnnotation($$, $2, $7);
                                         _p->onTypeSpecialization($$, 'f'); }
-  | '(' hh_type_list ',' hh_type ')'  { only_in_hack_mode(_p);
+  | '(' hh_type_list ',' hh_type ')'  { only_in_hh_syntax(_p);
                                         _p->onTypeList($2, $4);
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation($$, t, $2);

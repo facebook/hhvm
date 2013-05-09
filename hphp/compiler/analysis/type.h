@@ -102,7 +102,7 @@ public:
   static TypePtr Some;
 
   typedef hphp_string_imap<TypePtr> TypePtrMap;
-  static const TypePtrMap &GetTypeHintTypes();
+  static const TypePtrMap &GetTypeHintTypes(bool hhType);
 
   /**
    * Uncertain types: types that are ambiguous yet.
@@ -267,6 +267,7 @@ private:
   static void ResetTypeHintTypes();
 
   static TypePtrMap s_TypeHintTypes;
+  static TypePtrMap s_HHTypeHintTypes;
 
   const KindOf m_kindOf;
   const std::string m_name;

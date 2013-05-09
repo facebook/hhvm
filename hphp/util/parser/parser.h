@@ -114,11 +114,6 @@ public:
   virtual bool enableXHP() = 0;
 
   /**
-   * Check if HipHop syntax is enabled.
-   */
-  virtual bool enableHipHopSyntax() = 0;
-
-  /**
    * Public accessors.
    */
   const char *file() const { return m_fileName;}

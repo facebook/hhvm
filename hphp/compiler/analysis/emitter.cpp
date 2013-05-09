@@ -5245,9 +5245,10 @@ void EmitterVisitor::emitPostponedMeths() {
           dynamic_pointer_cast<ConstantExpression>(par->defaultValue());
         bool nullable = ce && ce->isNull();
         TypeConstraint tc =
-          TypeConstraint(StringData::GetStaticString(
-                                     par->getOriginalTypeHint()),
-                                     nullable);
+          TypeConstraint(
+            StringData::GetStaticString(par->getOriginalTypeHint()),
+            nullable,
+            par->hhType());
         pi.setTypeConstraint(tc);
         TRACE(1, "Added constraint to %s\n", fe->name()->data());
       }
@@ -7375,7 +7376,7 @@ static void emitSystemLib() {
 
   AnalysisResultPtr ar(new AnalysisResult());
   Scanner scanner(slib.c_str(), slib.size(),
-                  RuntimeOption::ScannerType, "/:systemlib.php");
+                  RuntimeOption::GetScannerType(), "/:systemlib.php");
   Parser parser(scanner, "/:systemlib.php", ar, slib.size());
   parser.parse();
   FileScopePtr fsp = parser.getFileScope();
@@ -7509,7 +7510,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
 
     AnalysisResultPtr ar(new AnalysisResult());
-    Scanner scanner(code, codeLen, RuntimeOption::ScannerType, filename);
+    Scanner scanner(code, codeLen, RuntimeOption::GetScannerType(), filename);
     Parser parser(scanner, filename, ar, codeLen);
     parser.parse();
     FileScopePtr fsp = parser.getFileScope();

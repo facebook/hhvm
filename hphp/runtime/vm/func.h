@@ -49,22 +49,21 @@ struct Func {
 
     template<class SerDe>
     void serde(SerDe& sd) {
-      const StringData* tcName = m_typeConstraint.typeName();
-      bool tcNullable          = m_typeConstraint.nullable();
+      const StringData* tcName      = m_typeConstraint.typeName();
+      TypeConstraint::Flags tcFlags = m_typeConstraint.flags();
 
       sd(m_builtinType)
         (m_funcletOff)
         (m_defVal)
         (m_phpCode)
         (tcName)
-        (tcNullable)
+        (tcFlags)
         (m_userAttributes)
         (m_userType)
         ;
 
       if (SerDe::deserializing) {
-        setTypeConstraint(TypeConstraint(tcName,
-                                         tcNullable));
+        setTypeConstraint(TypeConstraint(tcName, tcFlags));
       }
     }
 

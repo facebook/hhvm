@@ -171,7 +171,7 @@ public:
     AllowShortTags       = 0x01, // allow <?
     AllowAspTags         = 0x02, // allow <% %>
     ReturnAllTokens      = 0x08, // return comments and whitespaces
-    EnableHipHopKeywords = 0x10, // allow hip-hop specific reserved words
+    AllowHipHopSyntax = 0x10, // allow hip-hop specific reserved words
   };
 
 public:
@@ -285,11 +285,8 @@ public:
     return m_isHackMode;
   }
 
-  /*
-   * Returns: whether HipHop-extension keywords are enabled.
-   */
-  bool hipHopKeywordsEnabled() const {
-    return m_type & EnableHipHopKeywords;
+  bool hipHopSyntaxEnabled() const {
+    return (m_type & AllowHipHopSyntax) || m_isHackMode;
   }
 
   int getLookaheadLtDepth() {

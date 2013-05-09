@@ -32,7 +32,7 @@
 
 #define HH_ONLY_KEYWORD(tok) do {                             \
   SETTOKEN;                                                   \
-  return _scanner->hipHopKeywordsEnabled() ? tok : T_STRING;  \
+  return _scanner->hipHopSyntaxEnabled() ? tok : T_STRING;    \
 } while (0)
 
 #define IS_LABEL_START(c) \
@@ -435,7 +435,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   }
   yyless(1);
   STEPPOS;
-  if (_scanner->isHackMode() && (ntt & NextTokenType::TypeListMaybe)) {
+  if (_scanner->hipHopSyntaxEnabled() && (ntt & NextTokenType::TypeListMaybe)) {
     // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
     // to resolve this.
     return T_UNRESOLVED_LT;
@@ -445,7 +445,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING>"<" {
   STEPPOS;
-  if (_scanner->isHackMode()) {
+  if (_scanner->hipHopSyntaxEnabled()) {
     int ntt = getNextTokenType(_scanner->lastToken());
     if (ntt & NextTokenType::TypeListMaybe) {
       // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens

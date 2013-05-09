@@ -31,7 +31,8 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
 class ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      TypeAnnotationPtr type, const std::string &name,
+                      TypeAnnotationPtr type, bool hhType,
+                      const std::string &name,
                       bool ref, ExpressionPtr defaultValue,
                       ExpressionPtr attributeList);
 
@@ -56,12 +57,14 @@ public:
   void parseHandler(ClassScopePtr cls);
   void compatibleDefault();
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
+  bool hhType() { return m_hhType; }
 private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 
   std::string m_type;
   TypeAnnotationPtr m_originalType;
   std::string m_name;
+  bool m_hhType;
   bool m_ref;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;

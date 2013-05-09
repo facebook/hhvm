@@ -366,10 +366,17 @@ bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = false;
-int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+
+int RuntimeOption::GetScannerType() {
+  int type = 0;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
+  if (EnableShortTags) type |= Scanner::AllowShortTags;
+  if (EnableAspTags) type |= Scanner::AllowAspTags;
+  return type;
+}
 
 // Initializers for Eval flags.
 static inline bool evalJitDefault() {
@@ -1113,13 +1120,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
-
-    if (EnableHipHopSyntax) ScannerType |= Scanner::EnableHipHopKeywords;
-    else ScannerType &= ~Scanner::EnableHipHopKeywords;
-    if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
-    else ScannerType &= ~Scanner::AllowShortTags;
-    if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
-    else ScannerType &= ~Scanner::AllowAspTags;
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 

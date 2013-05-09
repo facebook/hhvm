@@ -702,7 +702,7 @@ int lintTarget(const CompilerOptions &po) {
   for (unsigned int i = 0; i < po.inputs.size(); i++) {
     string filename = po.inputDir + "/" + po.inputs[i];
     try {
-      Scanner scanner(filename.c_str(), Option::ScannerType);
+      Scanner scanner(filename.c_str(), Option::GetScannerType());
       Compiler::Parser parser(scanner, filename.c_str(),
                               AnalysisResultPtr(new AnalysisResult()));
       if (!parser.parse()) {

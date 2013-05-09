@@ -334,7 +334,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     string slib = get_systemlib();
 
     Scanner scanner(slib.c_str(), slib.size(),
-                    Option::ScannerType, "systemlib.php");
+                    Option::GetScannerType(), "systemlib.php");
     Compiler::Parser parser(scanner, "systemlib.php", ar);
     if (!parser.parse()) {
       Logger::Error("Unable to parse systemlib.php: %s",
@@ -406,7 +406,7 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
   fileName = s_strings.add(phpFileName.c_str());
 
   try {
-    Scanner scanner(fileName, Option::ScannerType);
+    Scanner scanner(fileName, Option::GetScannerType());
     Compiler::Parser parser(scanner, baseName, ar);
     if (!parser.parse()) {
       assert(false);

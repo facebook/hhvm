@@ -113,7 +113,6 @@ public:
   bool parse();
   virtual void error(const char* fmt, ...);
   virtual bool enableXHP();
-  virtual bool enableHipHopSyntax();
   virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 

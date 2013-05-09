@@ -303,7 +303,7 @@ Array f_sys_getloadavg() {
 
 Array f_token_get_all(CStrRef source) {
   Scanner scanner(source.data(), source.size(),
-                  Scanner::AllowShortTags | Scanner::ReturnAllTokens);
+                  RuntimeOption::GetScannerType() | Scanner::ReturnAllTokens);
   ScannerToken tok;
   Location loc;
   int tokid;

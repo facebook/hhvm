@@ -32,9 +32,9 @@ TRACE_SET_MOD(runtime);
 
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
 
-TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
-                               bool nullable /* = false */)
-    : m_nullable(nullable), m_typeName(typeName), m_namedEntity(0) {
+void TypeConstraint::init() {
+  const StringData* typeName = m_typeName;
+
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
     const struct Pair {
       const StringData* name;
@@ -71,7 +71,7 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
 
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, typeName->data(), nullable);
+        this, typeName->data(), nullable());
   if (!mapGet(s_typeNamesToTypes, typeName, &dtype)) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, typeName->data());
@@ -80,8 +80,8 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
     TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;
   }
-  if (RuntimeOption::EnableHipHopSyntax || dtype.m_dt == KindOfArray ||
-      dtype.isParent() || dtype.isSelf()) {
+  if (hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
+      dtype.isSelf()) {
     m_type = dtype;
   } else {
     m_type = { KindOfObject, Precise };
@@ -140,7 +140,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (m_nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (nullable() && IS_NULL_TYPE(tv->m_type)) return true;
 
   if (tv->m_type == KindOfObject) {
     if (!isObjectOrTypedef()) return false;
@@ -185,7 +185,7 @@ bool
 TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.m_dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (m_nullable && IS_NULL_TYPE(dt)) return true;
+  if (nullable() && IS_NULL_TYPE(dt)) return true;
   return equivDataTypes(m_type.m_dt, dt);
 }
 

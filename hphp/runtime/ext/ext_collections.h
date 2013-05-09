@@ -134,6 +134,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   int getVersion() {
     return m_version;
   }
+  int64_t size() {
+    return m_size;
+  }
+
 
   Array toArrayImpl() const;
 

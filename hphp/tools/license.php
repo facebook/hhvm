@@ -1,6 +1,6 @@
 <?php
 
-chdir(preg_replace('#/hphp/tools/license.php$#', '/src', realpath(__FILE__)));
+chdir(preg_replace('#/tools/license.php$#', '', realpath(__FILE__)));
 
 // parse all these files
 $inputs = 'find . -regex ".*\.cpp" -or -regex ".*\.c"   -or -regex ".*\.h"';
@@ -56,12 +56,14 @@ $generated_files = array(
 $external_licenses = array();
 $external_licenses['hyves'] = 'Copyright (c) 2010 Hyves (http://www.hyves.nl)';
 
+$cyr = date_create()->format('Y');
+
 $license_zend = <<<LICENSE
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -80,7 +82,7 @@ $license_hiphop = <<<LICENSE
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,7 +100,7 @@ $license_php = <<<LICENSE
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -118,7 +120,7 @@ $license_external = <<<LICENSE
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
 <external>
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |

@@ -1416,10 +1416,10 @@ bool f_fb_intercept(CStrRef name, CVarRef handler,
 Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
                                        CArrRef params, CVarRef data,
                                        VRefParam done) {
-  if (obj.isNull()) {
-    return vm_call_user_func(data, params);
+  if (obj.isObject()) {
+    return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
   }
-  return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
+  return vm_call_user_func(data, params);
 }
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,

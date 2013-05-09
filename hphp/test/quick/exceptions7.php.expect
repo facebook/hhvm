@@ -42,7 +42,7 @@ array(5) {
 caught magic call 1
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -51,7 +51,7 @@ bool(true)
 caught static call 1
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -63,7 +63,7 @@ array(5) {
   [0]=>
   string(12) "Blark::sfrap"
   [1]=>
-  NULL
+  string(5) "Blark"
   [2]=>
   array(0) {
   }

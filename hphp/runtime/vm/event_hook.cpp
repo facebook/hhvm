@@ -147,11 +147,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   try {
     Variant doneFlag = true;
-    Variant obj = ar->hasThis() ?
-      Variant(Object(ar->getThis())) : uninit_null();
+    Variant called_on;
+
+    if (ar->hasThis()) {
+      called_on = Variant(ar->getThis());
+    } else if (ar->hasClass()) {
+      // For static methods, give handler the name of called class
+      called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
+    }
     Array intArgs =
       CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                     obj,
+                     called_on,
                      get_frame_args_with_ref(ar),
                      h->asCArrRef()[1],
                      ref(doneFlag));

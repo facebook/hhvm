@@ -68,7 +68,7 @@ static frap SubBlark2
 static frap SubBlark2
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -76,7 +76,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -84,7 +84,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(8) "SubBlark"
 array(0) {
 }
 NULL
@@ -92,7 +92,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(8) "SubBlark"
 array(0) {
 }
 NULL
@@ -100,7 +100,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(9) "SubBlark2"
 array(0) {
 }
 NULL
@@ -108,7 +108,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(9) "SubBlark2"
 array(0) {
 }
 NULL
@@ -116,7 +116,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -125,7 +125,7 @@ bool(true)
 static frap Blark
 ----HANDLER----
 string(12) "Blark::sfrap"
-NULL
+string(5) "Blark"
 array(0) {
 }
 NULL
@@ -137,7 +137,7 @@ array(5) {
   [0]=>
   string(12) "Blark::sfrap"
   [1]=>
-  NULL
+  string(5) "Blark"
   [2]=>
   array(0) {
   }
@@ -152,7 +152,7 @@ array(5) {
   [0]=>
   string(12) "Blark::sfrap"
   [1]=>
-  NULL
+  string(5) "Blark"
   [2]=>
   array(0) {
   }

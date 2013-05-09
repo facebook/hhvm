@@ -168,7 +168,10 @@ bad_tests = (
     '/ext-standard-array/array_diff_assoc_variation6.php',
     '/zend/bug35239.php',
     '/zend/bug54265.php',
+
+    # broken in contbuild
     '/ext-standard-strings/setlocale_variation1.php',
+    '/ext-standard-strings/setlocale_basic3.php',
 
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',

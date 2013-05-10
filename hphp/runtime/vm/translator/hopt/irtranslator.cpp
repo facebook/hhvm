@@ -1827,11 +1827,30 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
 
     hhirTraceEnd(t.m_nextSk.offset());
     if (transResult != Retry) {
-      transResult = Success;
-      hhirTraceCodeGen(bcMap);
-
-      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
-            getCurrentTransID());
+      try {
+        transResult = Success;
+        hhirTraceCodeGen(bcMap);
+      } catch (JIT::FailedCodeGen& fcg) {
+        // Code-gen failed. Search for the bytecode instruction that caused the
+        // problem, flag it to be interpreted, and retranslate the tracelet.
+        NormalizedInstruction *ni;
+        for (ni = t.m_instrStream.first; ni; ni = ni->next) {
+          if (ni->source.offset() == fcg.bcOff) break;
+        }
+        if (ni && !ni->interp) {
+          ni->interp = true;
+          transResult = Retry;
+          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
+                "after failing to code-gen \n\n",
+                getCurrentTransID(), ni->toString().c_str());
+        } else {
+          throw fcg;
+        }
+      }
+      if (transResult == Success) {
+        TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
+              getCurrentTransID());
+      }
     }
   } catch (JIT::FailedCodeGen& fcg) {
     transResult = Failure;

@@ -31,11 +31,13 @@ namespace JIT {
 
 class FailedCodeGen : public std::exception {
  public:
-  const char* file;
-  const int   line;
-  const char* func;
-  FailedCodeGen(const char* _file, int _line, const char* _func) :
-      file(_file), line(_line), func(_func) { }
+  const char*    file;
+  const int      line;
+  const char*    func;
+  const uint32_t bcOff;
+  FailedCodeGen(const char* _file, int _line, const char* _func,
+                uint32_t _bcOff) :
+      file(_file), line(_line), func(_func), bcOff(_bcOff) { }
 };
 
 struct ArgGroup;
@@ -117,7 +119,8 @@ struct CodeGenerator {
   CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
                 CodegenState& state)
     : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state),
-      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace) {
+      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace),
+      m_curBcOff(-1){
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -354,13 +357,15 @@ private:
   void print() const;
 
 private:
-  Asm& m_as;                // current "main" assembler
-  Asm& m_astubs;            // assembler for stubs and other cold code.
-  TranslatorX64* m_tx64;
-  CodegenState& m_state;
+  Asm&                m_as;       // current "main" assembler
+  Asm&                m_astubs;   // assembler for stubs and other cold code.
+  TranslatorX64*      m_tx64;
+  CodegenState&       m_state;
   const RegAllocInfo& m_regs;
-  IRInstruction* m_curInst; // current instruction being generated
-  Trace* m_curTrace;
+  IRInstruction*      m_curInst;  // current instruction being generated
+  Trace*              m_curTrace;
+  uint32_t            m_curBcOff; // offset of bytecode instr that produced
+                                  // m_curInst
 };
 
 class ArgDesc {

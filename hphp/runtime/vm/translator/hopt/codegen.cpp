@@ -85,14 +85,15 @@ int64_t spillSlotsToSize(int n) {
   return n * sizeof(int64_t);
 }
 
-void cgPunt(const char* file, int line, const char* func) {
+void cgPunt(const char* file, int line, const char* func, uint32_t bcOff) {
   if (dumpIREnabled()) {
-    HPHP::Trace::trace("--------- CG_PUNT %s %d %s\n", file, line, func);
+    HPHP::Trace::trace("--------- CG_PUNT %s %d %s  bcOff: %d \n",
+                       file, line, func, bcOff);
   }
-  throw FailedCodeGen(file, line, func);
+  throw FailedCodeGen(file, line, func, bcOff);
 }
 
-#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr)
+#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr, m_curBcOff)
 
 struct CycleInfo {
   int node;
@@ -304,7 +305,6 @@ PUNT_OPCODE(DefCls)
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
-NOOP_OPCODE(Marker)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(OverrideLoc)
 NOOP_OPCODE(AssertStk)
@@ -907,6 +907,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
     // void return type, no registers have values
     assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
   }
+}
+
+/*
+ * This doesn't really produce any code; it just keeps track of the current
+ * bytecode offset.
+ */
+void CodeGenerator::cgMarker(IRInstruction* inst) {
+  m_curBcOff = inst->getExtra<MarkerData>()->bcOff;
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {

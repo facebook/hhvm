@@ -38,7 +38,9 @@ public:
   ~HttpServer();
 
   void run();
-  void stop();
+
+  // Stop may be called from a signal handler.
+  void stop(const char* reason = nullptr);
 
   bool isStopped() const { return m_stopped;}
 
@@ -51,6 +53,7 @@ public:
 
 private:
   bool m_stopped;
+  const char* m_stopReason;
   void *m_sslCTX;
 
   ServerPtr m_pageServer;

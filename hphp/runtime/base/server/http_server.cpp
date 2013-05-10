@@ -50,7 +50,7 @@ const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer(void *sslCTX /* = NULL */)
-  : m_stopped(false), m_sslCTX(sslCTX),
+  : m_stopped(false), m_stopReason(nullptr), m_sslCTX(sslCTX),
     m_watchDog(this, &HttpServer::watchDog) {
 
   // enabling mutex profiling, but it's not turned on
@@ -284,6 +284,9 @@ void HttpServer::run() {
     while (!m_stopped) {
       wait();
     }
+    if (m_stopReason) {
+      Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
+    }
     removePid();
     Logger::Info("page server stopped");
   }
@@ -325,7 +328,7 @@ static void exit_on_timeout(int sig) {
   exit(0);
 }
 
-void HttpServer::stop() {
+void HttpServer::stop(const char* stopReason) {
   if (RuntimeOption::ServerGracefulShutdownWait) {
     signal(SIGALRM, exit_on_timeout);
     alarm(RuntimeOption::ServerGracefulShutdownWait);
@@ -333,6 +336,7 @@ void HttpServer::stop() {
 
   Lock lock(this);
   m_stopped = true;
+  m_stopReason = stopReason;
   notify();
 }
 

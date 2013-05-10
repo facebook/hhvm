@@ -245,11 +245,18 @@ bool TestDebugger::TestWebRequest() {
   // wait for "web_request.php" to connect and wait
   if (!recvFromTests(flag) || flag != '1') {
     printf("failed to receive from test\n");
-  } else if (!getResponse("web_request_t.php", result, -1, sandboxHost) ||
-      result != "request done") {
-    printf("failed on web_request_t.php\n");
   } else {
-    ret = true;
+    // First try to make sure that the client in web_requests enters the mode
+    // where it can respond to a breakpoint being reached.
+    sleep(10);
+    // Now get web_request_t.php running so that web_requests.php
+    // can debug it.
+    if (!getResponse("web_request_t.php", result, -1, sandboxHost) ||
+        result != "request done") {
+      printf("failed on web_request_t.php\n");
+    } else {
+      ret = true;
+    }
   }
 
   func.waitForEnd();

@@ -197,6 +197,7 @@ private:
 
   void parseExceptionThrown(const std::string &exp);
   void parseBreakPointReached(const std::string &exp, const std::string &file);
+  int32_t parseFileLocation(const std::string &str, int32_t offset);
   bool parseLines(const std::string &token);
 
   bool checkException(CVarRef e);

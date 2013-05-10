@@ -302,7 +302,7 @@ bool BreakPointInfo::valid() {
             return false;
           }
         } else {
-          if (m_file.empty() || m_line1 == 0) {
+          if (m_file.empty() || m_line1 == 0 || m_line2 != m_line1) {
             return false;
           }
         }
@@ -529,149 +529,241 @@ std::string BreakPointInfo::desc() const {
   return ret;
 }
 
-bool BreakPointInfo::parseLines(const std::string &token) {
-  TRACE(2, "BreakPointInfo::parseLines\n");
-  if (token.empty()) return false;
-
-  for (unsigned int i = 0; i < token.size(); i++) {
-    char ch = token[i];
-    if ((ch < '0' || ch > '9') && ch != '-') {
-      return false;
+void mangleXhpName(const std::string &source, std::string &target) {
+  auto oldLen = source.length();
+  size_t newLen = 0;
+  size_t index = 0;
+  for (; index < oldLen; index++) {
+    auto ch = source[index];
+    if (ch != ':' && ch != '-') continue;
+    newLen = 4+index;
+    break;
+  }
+  if (newLen == 0) {
+    target = source;
+    return;
+  }
+  for (; index < oldLen; index++) {
+    if (source[index] == ':') newLen += 2; else newLen +=1;
+  }
+  target.clear();
+  target.reserve(newLen);
+  target.append("xhp_");
+  for (index = 0; index < oldLen; index++) {
+    auto ch = source[index];
+    if (ch == '-') {
+      target.push_back('_');
+    } else if (ch == ':') {
+      if (index > 0) {
+        target.push_back('_');
+        target.push_back('_');
+      }
+    } else {
+      target.push_back(ch);
     }
   }
-
-  if (m_line1 || m_line2) {
-    m_valid = false; // lines are specified twice
-    return true;
-  }
-
-  vector<string> lines;
-  Util::split('-', token.c_str(), lines);
-  if (lines.empty() || lines.size() > 2 ||
-      (lines.size() == 2 && lines[0].empty() && lines[1].empty())) {
-    m_valid = false;
-    return true;
-  }
-
-  if (lines[0].empty()) {
-    m_line1 = 1;
-  } else {
-    m_line1 = atoi(lines[0].c_str());
-    if (m_line1 <= 0) {
-      m_valid = false;
-      return true;
-    }
-  }
-  if (lines.size() == 1) {
-    m_line2 = m_line1;
-    return true;
-  }
-
-  if (lines[1].empty()) {
-    m_line2 = -1;
-  } else {
-    m_line2 = atoi(lines[1].c_str());
-    if (m_line2 <= 0) {
-      m_valid = false;
-      return true;
-    }
-    if (m_line2 < m_line1) {
-      int32_t tmp = m_line1;
-      m_line1 = m_line2;
-      m_line2 = tmp;
-    }
-  }
-
-  return true;
 }
 
+int32_t scanName(const std::string &str, int32_t offset) {
+  auto len = str.length();
+  assert(0 <= offset && offset < len);
+  while (offset < len) {
+    char ch = str[offset];
+    if (ch == ':' || ch == '\\' || ch == ',' || ch == '(' || ch == '=' ||
+        ch == '@') {
+      if (offset+1 >= len) return offset;
+      char ch1 = str[offset+1];
+      if (ch == ':') {
+        if (ch1 == ':' || ('0' <= ch1 && ch1 <= '9')) return offset;
+      } else if (ch == '(') {
+        if (ch1 == ')') return offset;
+      } else if (ch == '=') {
+        if (ch1 == '>') return offset;
+      } else {
+        assert (ch == '\\' || ch == ',' || ch == '@');
+        return offset;
+      }
+    }
+    offset++;
+  }
+  return offset;
+}
+
+int32_t scanNumber(const std::string &str, int32_t offset, int32_t& value) {
+  value = 0;
+  auto len = str.length();
+  assert(0 <= offset && offset < len);
+  while (offset < len) {
+    char ch = str[offset];
+    if (ch < '0' || ch > '9') return offset;
+    value = value*10 + (ch - '0');
+    offset++;
+  }
+  return offset;
+}
+
+int32_t BreakPointInfo::parseFileLocation(const std::string &str,
+                                          int32_t offset) {
+  auto len = str.length();
+  assert(0 <= offset && offset < len);
+  auto offset1 = scanNumber(str, offset, m_line1);
+  if (offset1 == offset) return offset; //Did not find a number
+  m_line2 = m_line1; //so that we always have a range
+  if (offset1 >= len) return len; //Nothing follows the number
+  auto ch = str[offset1];
+  if (ch == '-') {
+    if (offset1+1 >= len) return offset; //Invalid file location
+    auto offset2 = scanNumber(str, offset1+1, m_line2);
+    if (offset1+1 == offset2) return offset; //Invalid file location
+    return offset2;
+  }
+  return offset1;
+}
+
+/* The parser accepts the following syntax, which harks back to pre VM days
+   (all components are optional, as long as there is at least one component):
+
+   {file location},{call}=>{call}()@{url}
+   {call}=>{call}(),{file location}@{url}
+
+   file location: {file}:{line1}-{line2}
+   call: \{namespace}\{cls}::{func}
+
+   Currently semantic checks will disallow expressions that specify
+   both file locations and calls.
+*/
 void BreakPointInfo::parseBreakPointReached(const std::string &exp,
                                             const std::string &file) {
   TRACE(2, "BreakPointInfo::parseBreakPointReached\n");
-  string input = exp;
 
-  // everything after @ is URL
-  size_t pos = input.find('@');
-  if (pos != string::npos) {
-    m_url = input.substr(pos + 1);
-    if (pos == 0) return;
-    input = input.substr(0, pos);
+  string name;
+  auto len = exp.length();
+  auto offset0 = 0;
+  // Skip over a leading backslash
+  if (len > 0 && exp[0] == '\\') offset0++;
+  auto offset1 = scanName(exp, offset0);
+  // check that exp starts with a file or method name
+  if (offset1 == offset0) goto returnInvalid;
+  name = exp.substr(offset0, offset1-offset0);
+
+  if (offset0 == 0) {
+    // parse {file location} if appropriate
+    if (offset1 < len && exp[offset1] == ',') {
+      m_file = name;
+      name.clear();
+      offset1 += 1;
+    } else if (offset1 < len-1 && exp[offset1] == ':' &&
+               exp[offset1+1] != ':') {
+      m_file = name;
+      name.clear();
+      offset1 += 1;
+      auto offset2 = parseFileLocation(exp, offset1);
+      // check for {file}:{something that is not a number}
+      if (offset2 == offset1) goto returnInvalid;
+      offset1 = offset2;
+      if (offset1 >= len) return; // file location without anything else
+      if (exp[offset1] == '@') goto parseUrl; // file location followed by url
+      // check for {file}{ something other than @ or :}
+      if (exp[offset1] != ',') goto returnInvalid;
+      offset1 += 1;
+    }
   }
 
-  vector<string> tokens;
-  bool seenClass = false;
-  bool seenFile = false;
-  Util::replaceAll(input, "=>", "=>:");
-  Util::split(':', input.c_str(), tokens);
-  for (unsigned int i = 0; i < tokens.size(); i++) {
-    const std::string &token = tokens[i];
-    if (parseLines(token)) continue;
-
-    // if i'm ended with "::"
-    if (i+1 < tokens.size() && tokens[i+1].empty()) {
-      if (seenClass) {
-        m_valid = false;
-        return;
+  // parse {func}() or {func}=>{func}() or {func}=>{func}=>{func}() and so on
+  while (true) {
+    if (name.empty()) {
+      if (len > offset1 && exp[offset1] == '\\') offset1++;
+      auto offset2 = scanName(exp, offset1);
+      // check for {something other than a name}
+      if (offset2 == offset1) goto returnInvalid;
+      name = exp.substr(offset1, offset2-offset1);
+    }
+    if (offset1 < len && exp[offset1] == '\\') {
+      m_namespace = name;
+      offset1 += 1;
+      auto offset2 = scanName(exp, offset1);
+      // check for {namespace}\{something that is not a name}
+      if (offset2 == offset1) goto returnInvalid;
+      name = exp.substr(offset1, offset2-offset1);
+      offset1 = offset2;
+    }
+    if (offset1 < len-1 && exp[offset1] == ':' && exp[offset1+1] == ':') {
+      m_class = name;
+      offset1 += 2;
+      auto offset2 = scanName(exp, offset1);
+      // check for {namespace}\{class}::{something that is not a name}
+      if (offset2 == offset1) goto returnInvalid;
+      name = exp.substr(offset1, offset2-offset1);
+      offset1 = offset2;
+    }
+    // Now we have a namespace, class and func name.
+    // The namespace only or the namespace and class might be empty.
+    DFunctionInfoPtr pfunc(new DFunctionInfo());
+    if (m_class.empty()) {
+      if (m_namespace.empty())
+        pfunc->m_function = name;
+      else {
+        // Yes this does seem beyond strange, but that is what the PHP parser
+        // does when it sees a function declared inside a namespace, so we
+        // too have to pretend there is no namespace here. At some point
+        // the parser hack may have to go away. At that stage, this code
+        // will have to change, as well as other parts of the debugger.
+        pfunc->m_function = m_namespace + "\\" + name;
       }
-      seenClass = true;
-      if (i+3 < tokens.size() && tokens[i+3].empty()) {
-        i += 2;
-        m_namespace = token;
-        m_class = tokens[i];
-      } else {
-        m_class = token;
+    } else {
+      mangleXhpName(m_class, pfunc->m_class);
+      if (!m_namespace.empty()) {
+        // Emulate parser hack. See longer comment above.
+        pfunc->m_class = m_namespace + "\\" + pfunc->m_class;
       }
-
-      i++;
+      pfunc->m_function = name;
+    }
+    m_funcs.insert(m_funcs.begin(), pfunc);
+    m_namespace.clear();
+    m_class.clear();
+    name.clear();
+    // If we are now at () we skip over it and terminate the loop
+    if (offset1 < len && exp[offset1] == '(') {
+      // check for {func}{(}{not )}
+      if (offset1+1 >= len || exp[offset1+1] != ')') goto returnInvalid;
+      offset1 += 2;
+      break; // parsed the last (perhaps only) call in a function call chain
+    }
+    // If we are now at => we need to carry on with the loop
+    if (offset1 < len-1 && exp[offset1] == '=' && exp[offset1+1] == '>') {
+      offset1 += 2;
       continue;
     }
-
-    string ending;
-    if (token.size() >= 2) {
-      ending = token.substr(token.size() - 2);
-    }
-    if (token.size() >= 2 && (ending == "=>" || ending == "()")) {
-      string func = token.substr(0, token.size() - 2);
-      if (ending == "=>" &&
-          func.size() >= 2 && func.substr(func.size() - 2) == "()") {
-        func = func.substr(0, func.size() - 2);
+    goto returnInvalid; // {func calls}{not () or =>}
+  }
+  if (m_file.empty()) {
+    if (offset1 < len && exp[offset1] == ',') {
+      auto offset2 = scanName(exp, ++offset1);
+      // check for {func calls}:{not a filename}
+      if (offset2 == offset1) goto returnInvalid;
+      m_file = exp.substr(offset1, offset2-offset1);
+      offset1 = offset2;
+      if (offset1 < len && exp[offset1] == ':') {
+        offset2 = parseFileLocation(exp, offset1+1);
+        // check for {file}:{something that is not a number}
+        if (offset2 == offset2+1) goto returnInvalid;
+        offset1 = offset2;
       }
-      if (token.empty()) {
-        m_valid = false;
-        return;
-      }
-      DFunctionInfoPtr pfunc(new DFunctionInfo());
-      pfunc->m_namespace = m_namespace;
-      pfunc->m_class = m_class;
-      pfunc->m_function = func;
-      m_funcs.insert(m_funcs.begin(), pfunc);
-      m_namespace.clear();
-      m_class.clear();
-      seenClass = false;
-    } else {
-      if (!m_file.empty()) {
-        m_valid = false;
-        return;
-      }
-      if (seenFile) {
-        m_valid = false;
-        return;
-      }
-      seenFile = true;
-      m_file = token;
     }
   }
-
-  if (!m_namespace.empty() || !m_class.empty()) {
-    DFunctionInfoPtr func(new DFunctionInfo());
-    func->m_namespace = m_namespace;
-    func->m_class = m_class;
-    m_funcs.insert(m_funcs.begin(), func);
+parseUrl:
+  if (offset1 < len-2 && exp[offset1] == '@') {
+    offset1++;
+    m_url = exp.substr(offset1, len-offset1);
+  } else {
+    // check for unparsed characters at end of exp
+    if (offset1 != len) goto returnInvalid;
   }
+  return;
 
-  if (m_line1 && m_file.empty()) {
-    m_file = file; // default to current file
-  }
+returnInvalid:
+  m_valid = false;
+  return;
 }
 
 void BreakPointInfo::parseExceptionThrown(const std::string &exp) {

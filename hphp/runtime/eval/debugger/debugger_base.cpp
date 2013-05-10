@@ -135,7 +135,7 @@ std::string DFunctionInfo::site(std::string &preposition) const {
   preposition = "at ";
   if (!m_class.empty()) {
     if (!m_namespace.empty()) {
-      ret = m_namespace + "::";
+      ret = m_namespace + "\\";
     }
     ret += m_class;
     if (!m_function.empty()) {
@@ -164,7 +164,7 @@ std::string DFunctionInfo::desc(const BreakPointInfo *bpi) const {
   if (!m_class.empty()) {
     string cls;
     if (!m_namespace.empty()) {
-      cls = bpi->regex(m_namespace) + "::";
+      cls = bpi->regex(m_namespace) + "\\";
     }
     cls += bpi->regex(m_class);
     if (!m_function.empty()) {

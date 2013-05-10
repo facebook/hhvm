@@ -11,113 +11,51 @@ continuation prompt like ">>>>".
 
     --------------------------- Break Command ---------------------------
 
-    [b]reak              breaks at current line of code
-    [b]reak {exp}        breaks at matching location
-    [b]reak [s]tart      breaks at start of web request
-      {url}
-    [b]reak [e]nd        breaks at end of web request
-      {url}
-    [b]reak [p]sp        breaks at end of psp
-      {url}
+    [b]reak                               breaks at current line of code
+    [b]reak {exp}                         breaks at matching location
 
-    [b]reak [r]egex      breaks at matching regex pattern
-      {above}
-    [b]reak [o]nce       breaks just once then disables it
-      {above}
+    [b]reak [o]nce  {above}               breaks just once then disables it
 
-    [b]reak {above}      breaks if condition meets
-      if {php}
-    [b]reak {above}      breaks and evaluates an expression
-      && {php}
+    [b]reak {above} if {php}              breaks if condition meets
+    [b]reak {above} && {php}              breaks and evaluates an expression
 
-    [b]reak [l]ist       lists all breakpoints
-    [b]reak [c]lear      clears the n-th breakpoint on list
-      {index}
-    [b]reak [c]lear      clears all breakpoints
-      [a]ll
-    [b]reak [c]lear      clears current breakpoint
-    [b]reak [t]oggle     toggles the n-th breakpoint on list
-      {index}
-    [b]reak [t]oggle     toggles all breakpoints
-      [a]ll
-    [b]reak [t]oggle     toggles current breakpoint
+    [b]reak [l]ist                        lists all breakpoints
+    [b]reak [c]lear {index}               clears the n-th breakpoint on list
+    [b]reak [c]lear [a]ll                 clears all breakpoints
+    [b]reak [c]lear                       clears current breakpoint
+    [b]reak [t]oggle {index}              toggles the n-th breakpoint on list
+    [b]reak [t]oggle [a]ll                toggles all breakpoints
+    [b]reak [t]oggle                      toggles current breakpoint
+    [b]reak [e]nable {index}              enables the n-th breakpoint on list
+    [b]reak [e]nable [a]ll                enables all breakpoints
+    [b]reak [e]nable                      enables current breakpoint
+    [b]reak [d]isable {index}             disables the n-th breakpoint on list
+    [b]reak [d]isable [a]ll               disables all breakpoints
+    [b]reak [d]isable                     disables current breakpoint
 
 
     -------------------------- Where to break? --------------------------
 
-There are many ways to specify a source file location to set a
-breakpoint, but it's ONE single string without whitespaces. The complete
-format, though every field is optional, looks like this,
+There are many ways to specify a source file location to set a breakpoint,
+but it's ONE single string without whitespaces. The format looks like this,
 
-	{file location}:{call}=>{call}()@{url}
-	{call}=>{call}():{file location}@{url}
-
-	file location: {file}:{line1}-{line2}
-	function call: {namespace}::{cls}::{func}
-	url matching:  @{url}
-
-1) Url has to be specified at end.
-
-2) Function calls can be 1, 2 or more, matching a call chain. If more
-than one function are specified, they don't have to be direct callers to
-match. It will match any caller on the stack.
-
-3) Pay attention to those delimiters, and they are required to tell what
-a field should be interpreted as, unless it is a number, then it must be
-line numbers. Otherwise, use them to indicate what the names are:
-
-	{file}:                filename
-	{line1}-{line2}        any line between them (inclusive)
-	{line}                 single line, if without dashes around
-	{line}:                needs colon if anything after
-	{namespace}::{cls}::   a class in specified namespace
-	{cls}::                a class in any namespace
-	{func}()               function or method
-	{func}=>{func}()       function called by specified function
-	{cls}::{method}()      class method (static or instance)
-	@{url}                 breaks only when this URL is visited
+	file location: {file}:{line}
+	function call: {func}()
+	method invoke: {cls}::{method}()
 
 For examples,
 
 	b mypage.php:123
-	b 456
 	b foo()
 	b MyClass::foo()
-	b mypage.php:foo()
-	b html/mypage.php:MyClass::foo()
-	b mypage.php:123@index.php
-
-4) You may also use regular expressions to match any of these names,
-except line numbers. For examples,
-
-	b r Feed.*::on.*()
-
-This may match FeedStory::onLoad(), FeedFilter::onclick(), etc.. Note
-that it uses PCRE format, not shell format. So you will have to use ".*"
-instead of just "*" for wildcard match.
-
-    ------------------------ Special Breakpoints ------------------------
-
-There are special breakpoints that can only be set by names:
-
-	start
-	end
-	psp
-
-They represent different time points of a web request. "start" is at
-beginning of a web request, when no PHP file is invoked yet, but query
-strings and server variables are already prepared. "end" is at end of a
-web request, but BEFORE post-send processing (psp). "psp" is at END of
-psp, not beginning. To set a breakpoint at beginning of psp, use "end",
-because end of a request is the same as beginning of psp.
 
     -------------- Conditional Breakpoints and Watchpoints --------------
 
-Every breakpoint can specify a condition, which is an arbitrary PHP
-expression that will be evaulated to TRUE or FALSE. When TRUE, it will
-break. When FALSE, it will continue without break. "&&" is similar to
-"if", except it will always break, regardless what the expression
-returns. This is useful to watch variables at breakpoints. For example,
+Every breakpoint can specify a condition, which is an arbitrary PHP expression 
+that will be evaluated to TRUE or FALSE. When TRUE, it will break. When FALSE, 
+it will continue without break. "&&" is similar to "if", except it will always
+break, regardless what the expression returns. This is useful to watch
+variables at breakpoints. For example,
 
 	b mypage.php:123 && print $a
 
@@ -125,24 +63,22 @@ So every time it breaks at mypage.php line 123, it will print out $a.
 
     --------------------- Breakpoint States and List ---------------------
 
-Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword
-"once", a breakpoint is in ALWAYS state. ONCE breakpoints will turn into
-DISABLED after it's hit once. DISABLED breakpoints will not break, but
-they are kept in the list, so one can run 'b l' command and 'b t'
-command to toggle their states.
+Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword "once",
+a breakpoint is in ALWAYS state. ONCE breakpoints will turn into DISABLED after
+it's hit once. DISABLED breakpoints will not break, but they are kept in the
+list, so one can run 'b l' command and 'b t' command to toggle their states.
 
-Use '[b]reak [l]ist' command to view indices of different breakpoints.
-Then use those indices to clear or toggle their states. This list of
-breakpoints and their states will remain the same when switching to
-different machines, sandboxes and threads.
+Use '[b]reak [l]ist' command to view indices of different breakpoints. Then use
+those indices to clear or toggle their states. This list of breakpoints and
+their states will remain the same when switching to different machines,
+sandboxes and threads.
 
     -------------------------- Hard Breakpoints --------------------------
 
-From within PHP code, you can place a function call hphpd_break() to
-embed a breakpoint. You may also specify a condition as the function's
-parameter, so it breaks when the condition is met. Please read about
-this function for more details with '[i]nfo hphpd_break'.
-
+From within PHP code, you can place a function call hphpd_break() to embed a
+breakpoint. You may also specify a condition as the function's parameter, so it
+breaks when the condition is met. Please read about this function for more
+details with '[i]nfo hphpd_break'.
 
     -------------------------- Continue Command --------------------------
 
@@ -168,7 +104,7 @@ to move down several levels a time.
 
     [e]xception {cls}    breaks if class of exception throws
     [e]xception          breaks if class of exception throws
-      {ns}::{cls}
+      {ns}\{cls}
     [e]xception error    breaks on errors, warnings and notices
     [e]xception          breaks only if url also matches
       {above}@{url}

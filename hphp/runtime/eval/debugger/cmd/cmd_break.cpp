@@ -93,7 +93,7 @@ bool CmdBreak::help(DebuggerClient *client) {
   client->helpTitle("Where to break?");
   client->helpSection(
     "There are many ways to specify a source file location to set a "
-    "breakpoint, but it's ONE single string without whitespaces. The"
+    "breakpoint, but it's ONE single string without whitespaces. The "
     "format looks like this,\n"
     "\n"
     "\tfile location: {file}:{line}\n"
@@ -110,7 +110,7 @@ bool CmdBreak::help(DebuggerClient *client) {
   client->helpTitle("Conditional Breakpoints and Watchpoints");
   client->helpSection(
     "Every breakpoint can specify a condition, which is an arbitrary PHP "
-    "expression that will be evaulated to TRUE or FALSE. When TRUE, it will "
+    "expression that will be evaluated to TRUE or FALSE. When TRUE, it will "
     "break. When FALSE, it will continue without break. \"&&\" is similar to "
     "\"if\", except it will always break, regardless what the expression "
     "returns. This is useful to watch variables at breakpoints. For example,\n"

@@ -396,6 +396,7 @@ def walk(filename, source):
 
             # PHP puts a newline in that we don't
             exp = exp.replace('\n\nFatal error:', '\nFatal error:')
+            exp = exp.replace('\n\nCatchable fatal error:', '\nCatchable fatal error:')
             exp = exp.replace('\n\nWarning:', '\nWarning:')
             exp = exp.replace('\n\nNotice:', '\nNotice:')
 

@@ -239,7 +239,9 @@ public:
   static bool AlwaysUseRelativePath;
 
   static bool MySQLReadOnly;
+#ifdef FACEBOOK
   static bool MySQLLocalize;  // whether to localize MySQL query results
+#endif
   static int  MySQLConnectTimeout;
   static int  MySQLReadTimeout;
   static int  MySQLWaitTimeout;

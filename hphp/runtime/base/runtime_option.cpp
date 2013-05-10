@@ -240,7 +240,9 @@ std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
 
 bool RuntimeOption::MySQLReadOnly = false;
+#ifdef FACEBOOK
 bool RuntimeOption::MySQLLocalize = false;
+#endif
 int RuntimeOption::MySQLConnectTimeout = 1000;
 int RuntimeOption::MySQLReadTimeout = 1000;
 int RuntimeOption::MySQLWaitTimeout = -1;
@@ -988,7 +990,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   {
     Hdf mysql = config["MySQL"];
     MySQLReadOnly = mysql["ReadOnly"].getBool();
+#ifdef FACEBOOK
     MySQLLocalize = mysql["Localize"].getBool();
+#endif
     MySQLConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
     MySQLReadTimeout = mysql["ReadTimeout"].getInt32(1000);
     MySQLWaitTimeout = mysql["WaitTimeout"].getInt32(-1);

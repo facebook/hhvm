@@ -830,6 +830,7 @@ Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
   return data;
 }
 
+#ifdef FACEBOOK
 extern "C" {
 struct MEM_ROOT;
 unsigned long cli_safe_read(MYSQL *);
@@ -904,6 +905,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
   return result;
 }
+#endif // FACEBOOK
 
 static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
@@ -1039,9 +1041,17 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
 
   MYSQL_RES *mysql_result;
   if (use_store) {
+#ifdef FACEBOOK
+    // Facebook specific optimization which depends
+    // on versions of MySQL which allow access to the
+    // grotty internals of libmysqlclient
+    //
+    // If php_mysql_localize_result ever gets rewritten
+    // to use standard APIs, this can be opened up to everyone.
     if (RuntimeOption::MySQLLocalize) {
       return php_mysql_localize_result(conn);
     }
+#endif
     mysql_result = mysql_store_result(conn);
   } else {
     mysql_result = mysql_use_result(conn);

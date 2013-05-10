@@ -965,6 +965,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   }
   m_clsName.clear();
   m_inTrait = false;
+  registerAlias(name.text());
 }
 
 void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt,
@@ -1687,11 +1688,6 @@ void Parser::onNamespaceEnd() {
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {
-  if (m_aliases.find(as) != m_aliases.end()) {
-    error("Cannot use %s as %s because the name is already in use: %s",
-          ns.c_str(), as.c_str(), getMessage().c_str());
-    return;
-  }
   string key = as;
   if (key.empty()) {
     size_t pos = ns.rfind(NAMESPACE_SEP);
@@ -1700,6 +1696,11 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
     } else {
       key = ns.substr(pos + 1);
     }
+  }
+  if (m_aliases.find(key) != m_aliases.end() && m_aliases[key] != ns) {
+    error("Cannot use %s as %s because the name is already in use: %s",
+          ns.c_str(), key.c_str(), getMessage().c_str());
+    return;
   }
   m_aliases[key] = ns;
 }
@@ -1785,6 +1786,14 @@ bool Parser::hasType(Token &type) {
     return true;
   }
   return false;
+}
+
+void Parser::registerAlias(std::string name) {
+  size_t pos = name.rfind(NAMESPACE_SEP);
+  if (pos != string::npos) {
+    string key = name.substr(pos + 1);
+    m_aliases[key] = name;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

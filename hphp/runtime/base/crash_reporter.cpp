@@ -41,6 +41,15 @@ static void bt_handler(int sig) {
     // leave running for SIGTERM SIGFPE SIGABRT
   }
 
+  if (RuntimeOption::EvalSpinOnCrash) {
+    char buf[128];
+    snprintf(buf, 127,
+             "Crashed. Waiting for debugger to attach pid %d\n", getpid());
+    buf[127] = 0;
+    write(STDERR_FILENO, buf, strlen(buf));
+    for (;;) sleep(1);
+  }
+
   // Turn on stack traces for coredumps
   StackTrace::Enabled = true;
   StackTraceNoHeap st;

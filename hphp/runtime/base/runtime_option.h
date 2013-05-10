@@ -396,6 +396,7 @@ public:
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      false)                           \
   F(bool, JitNoGdb,                    true)                            \
+  F(bool, SpinOnCrash,                 false)                           \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \

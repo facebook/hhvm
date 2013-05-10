@@ -307,6 +307,7 @@ void ParserBase::onNamespaceStart(const std::string &ns,
   }
   m_nsState = InsideNamespace;
   m_nsFileScope = file_scope;
+  m_aliases.clear();
 
   m_namespace = ns;
 }

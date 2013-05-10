@@ -33,11 +33,12 @@ public:
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   Array fetchStackTrace(DebuggerClient *client); // client side
   void processStackTrace(); // server side
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   Array m_stacktrace;

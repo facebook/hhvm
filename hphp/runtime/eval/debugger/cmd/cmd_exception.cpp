@@ -85,7 +85,7 @@ bool CmdException::onClient(DebuggerClient *client) {
 
   BreakPointInfoPtr bpi(new BreakPointInfo(regex, state, ExceptionThrown,
                                            client->argValue(index), ""));
-  if (!validate(client, bpi, index)) {
+  if (!addToBreakpointListAndUpdateServer(client, bpi, index)) {
     client->tutorial(
       "This is the order of different arguments:\n"
       "\n"

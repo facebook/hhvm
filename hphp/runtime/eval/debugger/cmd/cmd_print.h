@@ -39,13 +39,14 @@ public:
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   Variant processWatch(DebuggerClient *client, const char *format,
                     const std::string &php);
 
   virtual void handleReply(DebuggerClient *client);
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   Variant m_ret;

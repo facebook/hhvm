@@ -33,7 +33,7 @@ public:
   CmdUser() {
     m_type = KindOfUser;
   }
-  CmdUser(Object cmd) : m_cmd(cmd) {
+  explicit CmdUser(Object cmd) : m_cmd(cmd) {
     m_type = KindOfUser;
   }
 
@@ -43,13 +43,14 @@ public:
   virtual bool help(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   virtual const ExtendedCommandMap &getCommandMap();
   virtual void invokeList(DebuggerClient *client, const std::string &cls);
   virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   static Mutex s_mutex;

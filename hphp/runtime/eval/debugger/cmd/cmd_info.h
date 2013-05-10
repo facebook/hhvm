@@ -38,13 +38,14 @@ public:
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   bool parseZeroArg(DebuggerClient *client);
   void parseOneArg(DebuggerClient *client, std::string &subsymbol);
   Array getInfo() { return m_info; }
   static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   enum SymbolType {

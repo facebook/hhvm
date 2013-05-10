@@ -48,13 +48,14 @@ public:
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   bool shouldBreak(const BreakPointInfoPtrVec &bps);
   std::string getFileLine() const;
 
   InterruptSite *getSite() { return m_site;}
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   int16_t m_interrupt;

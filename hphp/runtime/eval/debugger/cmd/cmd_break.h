@@ -34,26 +34,30 @@ public:
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-  /**
-   * Sync breakpoints from client to server.
-   */
-  bool update(DebuggerClient *client);
+  static bool SendClientBreakpointListToServer(DebuggerClient *client);
 
 protected:
-  bool validate(DebuggerClient *client, BreakPointInfoPtr bpi, int index);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  bool addToBreakpointListAndUpdateServer(
+      DebuggerClient *client, BreakPointInfoPtr bpi, int index);
 
 private:
+  // Either points to the breakpoint collection of a debugger client
+  // or points to m_bps. In the former case the client frees the
+  // memory. In the latter case the destructor for CmdBreak frees
+  // the memory. (The base class destructor is only invoked for instances
+  // that point to the collection in the client.)
   BreakPointInfoPtrVec *m_breakpoints;
+
+  // Holds the breakpoint collection of a CmdBreak received via Thrift.
   BreakPointInfoPtrVec m_bps;
 
-  bool updateImpl(DebuggerClient *client);
+  bool updateServer(DebuggerClient *client);
   bool processList(DebuggerClient *client);
-  bool processUpdate(DebuggerClient *client);
+  bool processStatusChange(DebuggerClient *client);
 
-  bool hasUpdateArg(DebuggerClient *client);
+  bool hasStatusChangeArg(DebuggerClient *client);
   bool hasEnableArg(DebuggerClient *client);
   bool hasDisableArg(DebuggerClient *client);
   bool hasClearArg(DebuggerClient *client);

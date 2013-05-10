@@ -637,7 +637,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   if (!NoPrompt) {
     info("Welcome to HipHop Debugger!");
     info("Type \"help\" or \"?\" for a complete list of commands.\n");
-  }
+   }
 
   if (!options.host.empty()) {
     connectRemote(options.host, options.port);
@@ -691,7 +691,7 @@ void DebuggerClient::run() {
     }
     break;
   }
-  // We are about to exit from client and idealy we should cleanup,
+  // We are about to exit from client and ideally we should cleanup,
   // but we the reset() where will try to cleanup Socket under DMachineInfo,
   // which is created by another thread. If it's cleaned up here, later we'll
   // have a SEGV when trying to sweep the object from the other thread.
@@ -950,7 +950,7 @@ bool DebuggerClient::initializeMachine() {
     // upload breakpoints
     if (!m_breakpoints.empty()) {
       info("Updating breakpoints...");
-      CmdBreak().update(this);
+      CmdBreak::SendClientBreakpointListToServer(this);
     }
 
     // attaching to default sandbox

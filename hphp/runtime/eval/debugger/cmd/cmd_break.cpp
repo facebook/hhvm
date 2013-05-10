@@ -18,18 +18,27 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+TRACE_SET_MOD(debugger);
 
+// Serializes this command into the given Thrift buffer.
 void CmdBreak::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
+  // m_breakpoints is initially set to the breakpoints collection of the
+  // client (in validate, which indirectly calls sendImpl). When received
+  // via Thrift, m_breakpoints points to a copy that is placed in m_bps.
   assert(m_breakpoints);
+  DebuggerCommand::sendImpl(thrift);
   BreakPointInfo::SendImpl(*m_breakpoints, thrift);
 }
 
+// Deserializes a CmdBreak from the given Thrift buffer.
 void CmdBreak::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   BreakPointInfo::RecvImpl(m_bps, thrift);
 }
 
+// Informs the client of all strings that may follow a break command.
+// Used for auto completion. The client uses the prefix of the argument
+// following the command to narrow down the list displayed to the user.
 void CmdBreak::list(DebuggerClient *client) {
   if (client->argCount() == 0 ||
       (client->argCount() == 1 &&
@@ -53,7 +62,7 @@ void CmdBreak::list(DebuggerClient *client) {
     client->addCompletion(DebuggerClient::AutoCompleteClasses);
     client->addCompletion(DebuggerClient::AutoCompleteClassMethods);
   } else if (client->argCount() == 1) {
-    if (hasUpdateArg(client)) {
+    if (hasStatusChangeArg(client)) {
       client->addCompletion("all");
     } else if (!client->arg(1, "list")) {
       client->addCompletion(DebuggerClient::AutoCompleteFileNames);
@@ -63,6 +72,7 @@ void CmdBreak::list(DebuggerClient *client) {
   }
 }
 
+// The text to display when the debugger client processes "help break".
 bool CmdBreak::help(DebuggerClient *client) {
   client->helpTitle("Break Command");
   client->helpCmds(
@@ -146,6 +156,7 @@ bool CmdBreak::help(DebuggerClient *client) {
   return true;
 }
 
+// Carries out the "break list" command.
 bool CmdBreak::processList(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
@@ -166,7 +177,8 @@ bool CmdBreak::processList(DebuggerClient *client) {
   return true;
 }
 
-bool CmdBreak::processUpdate(DebuggerClient *client) {
+// Carries out commands that change the status of a breakpoint.
+bool CmdBreak::processStatusChange(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   if (m_breakpoints->empty()) {
     client->error("There is no breakpoint to clear or toggle.");
@@ -212,7 +224,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
       }
     }
     if (found) {
-      updateImpl(client);
+      updateServer(client);
       return true;
     }
 
@@ -223,7 +235,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   if (client->arg(2, "all")) {
     if (hasClearArg(client)) {
       m_breakpoints->clear();
-      updateImpl(client);
+      updateServer(client);
       client->info("All breakpoints are cleared.");
       return true;
     }
@@ -242,7 +254,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
       }
     }
 
-    updateImpl(client);
+    updateServer(client);
     return processList(client);
   }
 
@@ -274,23 +286,23 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   BreakPointInfoPtr bpi = (*m_breakpoints)[index];
   if (hasClearArg(client)) {
     m_breakpoints->erase(m_breakpoints->begin() + index);
-    updateImpl(client);
+    updateServer(client);
     client->info("Breakpoint %d cleared %s", bpi->index(),
                  bpi->desc().c_str());
   } else if (hasEnableArg(client)) {
     bpi->setState(BreakPointInfo::Always);
-    updateImpl(client);
+    updateServer(client);
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   } else if (hasDisableArg(client)) {
     bpi->setState(BreakPointInfo::Disabled);
-    updateImpl(client);
+    updateServer(client);
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   } else {
     assert(hasToggleArg(client));
     bpi->toggle();
-    updateImpl(client);
+    updateServer(client);
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   }
@@ -298,19 +310,30 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   return true;
 }
 
-bool CmdBreak::updateImpl(DebuggerClient *client) {
+// Uses the client to send this command to the server, which
+// will update its breakpoint list with the one in this command.
+// The client will block until the server echoes
+// this command back to it. The echoed command is discarded.
+bool CmdBreak::updateServer(DebuggerClient *client) {
   m_body = "update";
   client->xend<CmdBreak>(this);
   return true;
 }
 
-bool CmdBreak::update(DebuggerClient *client) {
-  m_breakpoints = client->getBreakPoints();
-  return updateImpl(client);
+// Creates a new CmdBreak instance, sets its breakpoints to the client's
+// list, sends the command to the server and waits for a response.
+bool CmdBreak::SendClientBreakpointListToServer(DebuggerClient *client) {
+  auto cmd = CmdBreak();
+  cmd.m_breakpoints = client->getBreakPoints();
+  return cmd.updateServer(client);
 }
 
-bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
-                        int index) {
+// Adds conditional or watch clause to the breakpoint info if needed.
+// Then adds the breakpoint to client's list and sends this command
+// to the server so that it too can update it's list.
+// Returns false if the breakpoint is not well formed.
+bool CmdBreak::addToBreakpointListAndUpdateServer(
+    DebuggerClient *client, BreakPointInfoPtr bpi, int index) {
   ++index;
   if (client->arg(index, "if")) {
     bpi->setClause(client->lineRest(++index), true);
@@ -327,11 +350,15 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
       }
     }
     m_breakpoints->push_back(bpi);
-    updateImpl(client);
+    updateServer(client);
     client->info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
     return true;
   }
 
+  // TODO: keep more detailed error information in the BreakPointInfo
+  // and emit that information here. Well, first factor out this code
+  // into a separate check and report method and report from there.
+  // See task 2368334.
   if (!bpi->m_url.empty()) {
     client->error("@{url} cannot be specified alone.");
   } else {
@@ -340,6 +367,9 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
   return false;
 }
 
+// Carries out the Break command. This always involves an action on the
+// client and usually, but not always, involves the server by sending
+// this command to the server and waiting for its response.
 bool CmdBreak::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
 
@@ -355,8 +385,8 @@ bool CmdBreak::onClient(DebuggerClient *client) {
     index++;
   } else if (client->arg(1, "list")) {
     return processList(client);
-  } else if (hasUpdateArg(client)) {
-    return processUpdate(client);
+  } else if (hasStatusChangeArg(client)) {
+    return processStatusChange(client);
   }
 
   string currentFile;
@@ -400,7 +430,7 @@ bool CmdBreak::onClient(DebuggerClient *client) {
     bpi = BreakPointInfoPtr(new BreakPointInfo(regex, state, interrupt, url));
   }
 
-  if (!validate(client, bpi, index)) {
+  if (!addToBreakpointListAndUpdateServer(client, bpi, index)) {
     client->tutorial(
       "This is the order of different arguments:\n"
       "\n"
@@ -434,6 +464,9 @@ static const StaticString s_if("if");
 static const StaticString s_ampamp("ampamp");
 static const StaticString s_desc("desc");
 
+// Updates the client with information about the execution of this command.
+// This information is not used by the command line client, but can be accessed
+// via the debugger client API exposed to PHP programs.
 void CmdBreak::setClientOutput(DebuggerClient *client) {
   // Output an array of current breakpoints including exceptions
   client->setOutputType(DebuggerClient::OTValues);
@@ -466,6 +499,10 @@ void CmdBreak::setClientOutput(DebuggerClient *client) {
   client->setOTValues(values);
 }
 
+// Updates the breakpoint list in the proxy with the new list
+// received from the client. Then sends the command back to the
+// client as confirmation. Returns false if the confirmation message
+// send failed.
 bool CmdBreak::onServer(DebuggerProxy *proxy) {
   if (m_body == "update") {
     proxy->setBreakPoints(m_bps);
@@ -475,24 +512,35 @@ bool CmdBreak::onServer(DebuggerProxy *proxy) {
   return false;
 }
 
-bool CmdBreak::hasUpdateArg(DebuggerClient *client) {
+// Returns true if the last command parsed by the client has
+// an argument that changes the status of a breakpoint.
+// I.e. clear, enable, disable or toggle.
+bool CmdBreak::hasStatusChangeArg(DebuggerClient *client) {
   return
     hasClearArg(client) || hasEnableArg(client) ||
     hasDisableArg(client) || hasToggleArg(client);
 }
 
+// Returns true if the last command parsed by the client has
+// the string "enable" in its first argument position.
 bool CmdBreak::hasEnableArg(DebuggerClient *client) {
   return client->arg(1, "enable");
 }
 
+// Returns true if the last command parsed by the client has
+// the string "disable" in its first argument position.
 bool CmdBreak::hasDisableArg(DebuggerClient *client) {
   return client->arg(1, "disable");
 }
 
+// Returns true if the last command parsed by the client has
+// the string "clear" in its first argument position.
 bool CmdBreak::hasClearArg(DebuggerClient *client) {
   return client->arg(1, "clear");
 }
 
+// Returns true if the last command parsed by the client has
+// the string "toggle" in its first argument position.
 bool CmdBreak::hasToggleArg(DebuggerClient *client) {
   return client->arg(1, "toggle");
 }

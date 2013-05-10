@@ -27,7 +27,7 @@ class PhpFile;
 
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
-// the debugger about various events. Some of the implemenatitons also interact
+// the debugger about various events. Some of the implementations also interact
 // with the VM to setup further notifications, though this is not the only place
 // the debugger interacts directly with the VM.
 
@@ -36,7 +36,7 @@ namespace VM {
 
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
-// execution indefinetly within one of these hooks.
+// execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const uchar* pc);
 void phpDebuggerExceptionHook(ObjectData* e);
 void phpDebuggerEvalHook(const Func* f);

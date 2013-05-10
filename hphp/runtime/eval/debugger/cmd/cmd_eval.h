@@ -31,10 +31,11 @@ public:
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
+  virtual void handleReply(DebuggerClient *client);
+
+protected:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-  virtual void handleReply(DebuggerClient *client);
 
 private:
   String m_output;

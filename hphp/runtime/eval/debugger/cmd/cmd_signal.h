@@ -31,7 +31,7 @@ public:
   };
 
 public:
-  CmdSignal(Signal sig = SignalNone)
+  explicit CmdSignal(Signal sig = SignalNone)
       : DebuggerCommand(KindOfSignal), m_signum(sig) {}
 
   Signal getSignal() const { return (Signal)m_signum;}
@@ -39,6 +39,7 @@ public:
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
+protected:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

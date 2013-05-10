@@ -85,7 +85,7 @@ bool isDebuggerAttachedProcess() {
 }
 
 // Ensure we interpret all code at the given offsets. This sets up a guard for
-// each piece of tranlated code to ensure we punt ot the interpreter when the
+// each piece of translated code to ensure we punt to the interpreter when the
 // debugger is attached.
 static void blacklistRangesInJit(const Unit* unit,
                                  const OffsetRangeVec& offsets) {

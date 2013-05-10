@@ -216,7 +216,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
         }
       }
       if (toggled) {
-        CmdBreak().update(client);
+        CmdBreak::SendClientBreakpointListToServer(client);
       }
       if (!found) {
         if (m_interrupt == HardBreakPoint) {

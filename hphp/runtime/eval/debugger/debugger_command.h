@@ -107,8 +107,6 @@ public:
   // Server-side work for a command. Returning false indicates a failure to
   // communicate with the client (for commands that do so).
   virtual bool onServer(DebuggerProxy *proxy);
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   virtual void handleReply(DebuggerClient *client) { assert(false); }
 
@@ -120,6 +118,14 @@ public:
   String getWireError() const { return m_wireError; }
 
 protected:
+  // Always called from send and must implement the subclass specific
+  // logic for serializing a command to send via Thrift.
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+
+  // Always called from recv and must implement the subclass specific
+  // logic for deserializing a command received via Thrift.
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
   Type m_type;
   std::string m_class; // for CmdExtended
   std::string m_body;

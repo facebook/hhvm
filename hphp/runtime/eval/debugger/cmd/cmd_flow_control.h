@@ -47,9 +47,6 @@ public:
       m_count(1) { }
   virtual ~CmdFlowControl();
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
@@ -67,6 +64,9 @@ public:
   bool needsVMInterrupt() { return m_needsVMInterrupt; }
 
 protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
   int decCount() { assert(m_count > 0); return --m_count;}
   int getCount() const { assert(m_count > 0); return m_count;}
   void installLocationFilterForLine(InterruptSite *site);

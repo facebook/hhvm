@@ -1,0 +1,16 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Array
+(
+    [S(a)] => 1,3,6,10,14
+    [S(b)] => -1,-3,-6,-10,-14
+)
+Closing database
+bool(true)
+Done

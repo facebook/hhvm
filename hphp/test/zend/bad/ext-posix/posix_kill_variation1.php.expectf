@@ -82,4 +82,4 @@ bool(false)
 Arg value  
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in hphp/test/zend/bad/ext-posix/posix_kill_variation1.php on line %d
+HipHop Fatal error: %a

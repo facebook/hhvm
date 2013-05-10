@@ -4,15 +4,8 @@
 	if (!$server) {
 		die('Unable to create AF_INET socket [server]');
 	}
-	$bound = false;
-	for($port = 31337; $port < 31357; ++$port) {
-		if (socket_bind($server, '127.0.0.1', $port)) {
-			$bound = true;
-			break;
-		}
-	}
-	if (!$bound) {
-		die("Unable to bind to 127.0.0.1");
+	if (!socket_bind($server, '127.0.0.1', 31337)) {
+		die('Unable to bind to 127.0.0.1:31337');
 	}
 	if (!socket_listen($server, 2)) {
 		die('Unable to listen on socket');
@@ -23,7 +16,7 @@
 	if (!$client) {
 		die('Unable to create AF_INET socket [client]');
 	}
-	if (!socket_connect($client, '127.0.0.1', $port)) {
+	if (!socket_connect($client, '127.0.0.1', 31337)) {
 		die('Unable to connect to server socket');
 	}
 

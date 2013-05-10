@@ -5,4 +5,4 @@ HipHop Warning: %a
 NULL
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %sbug38261.php on line %d
+HipHop Fatal error: %a

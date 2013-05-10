@@ -160,6 +160,7 @@ bad_tests = (
     '/zend/objects_029.php',
     '/zend/objects_030.php',
     '/ext-standard-strings/bug44242.php',
+    '/ext-sqlite3/sqlite3_29_createfunction.php',
 
     # line number is inconsistent on stack overflow
     '/zend/bug41633_3.php',
@@ -176,6 +177,14 @@ bad_tests = (
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',
     '/ext-posix/posix_getgroups_basic.php',
+
+    # concurrency issues
+    '/ext-mysql/001.php',
+    '/ext-mysql/bug47438.php',
+    '/ext-mysql/mysql_client_encoding.php',
+    '/ext-mysql/mysql_select_db.php',
+    '/ext-sqlite3/sqlite3_08_udf.php',
+    '/ext-sqlite3/sqlite3_25_create_aggregate.php',
 )
 
 # Random other files that zend wants
@@ -388,6 +397,8 @@ def walk(filename, source):
                 match_rest_of_line = '.+'
 
             exp = re.sub(r'Fatal\\? error\\?:.*',
+                    'HipHop Fatal error: '+match_rest_of_line, exp)
+            exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
                     'HipHop Fatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Warning\\?:.*',
                     'HipHop Warning: '+match_rest_of_line, exp)

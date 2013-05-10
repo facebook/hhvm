@@ -5,27 +5,27 @@ int(%i)
 
 -- int 12345 --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- int -12345 --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- float 10.5 --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(-205165755)
 
 -- float -10.5 --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- float .5 --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(-205162155)
 
 -- empty array --
@@ -46,32 +46,32 @@ bool(false)
 
 -- uppercase NULL --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- lowercase null --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- lowercase true --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- lowercase false --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- uppercase TRUE --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- uppercase FALSE --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- empty string DQ --
@@ -108,12 +108,12 @@ bool(false)
 
 -- undefined var --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- unset var --
 
-Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.php on line %d
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_variation7.phpt on line %d
 int(%i)
 
 -- resource --

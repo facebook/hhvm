@@ -5,4 +5,4 @@ HipHop Warning: %a
 HipHop Warning: %a
 
 
-Catchable fatal error: Argument 1 passed to transliterator_get_error_message() must be an instance of Transliterator, array given in hphp/test/zend/bad/ext-intl/transliterator_get_error_message_error.php on line %d
+HipHop Fatal error: %a

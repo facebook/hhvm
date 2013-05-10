@@ -1488,11 +1488,10 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
 }
 
 void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
+                                         SSATmp* obj,
                                          const Func* func,
                                          int32_t numParams) {
-  SSATmp* obj = gen(IncRef, gen(AllocObj, cls));
   push(obj);
-
   SSATmp* fn = nullptr;
   if (func) {
     fn = cns(func);
@@ -1507,7 +1506,14 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   SSATmp* cls = popA();
   exceptionBarrier();
-  emitFPushCtorCommon(cls, nullptr, numParams);
+  SSATmp* obj = gen(IncRef, gen(AllocObj, cls));
+  emitFPushCtorCommon(cls, obj, nullptr, numParams);
+}
+
+bool
+canInstantiateClass(const Class* cls) {
+  return cls &&
+    !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
 
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
@@ -1517,6 +1523,9 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
   bool persistentCls = classIsPersistent(cls);
+  bool canInstantiate = canInstantiateClass(cls);
+  bool fastAlloc = !RuntimeOption::EnableObjDestructCall &&
+    persistentCls && canInstantiate;
 
   const Func* func = uniqueCls ? cls->getCtor() : nullptr;
   if (func && !(func->attrs() & AttrPublic)) {
@@ -1537,7 +1546,15 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   } else {
     clss = gen(LdClsCached, cns(className));
   }
-  emitFPushCtorCommon(clss, func, numParams);
+
+  SSATmp* obj = nullptr;
+  if (fastAlloc) {
+    obj = gen(IncRef, gen(AllocObjFast, clss));
+  } else {
+    obj = gen(IncRef, gen(AllocObj, clss));
+  }
+
+  emitFPushCtorCommon(clss, obj, func, numParams);
 }
 
 /*

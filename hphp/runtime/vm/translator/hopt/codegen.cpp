@@ -3286,6 +3286,123 @@ Instance* createClHelper(Class* cls, int numArgs, ActRec* ar, TypedValue* sp) {
   return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
 }
 
+void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
+  const Class* cls = inst->getSrc(0)->getValClass();
+  auto dstReg = m_regs[inst->getDst()].getReg();
+
+  // First, make sure our property init vectors are all set up
+  bool props = cls->pinitVec().size() > 0;
+  bool sprops = cls->numStaticProperties() > 0;
+  assert((props || sprops) == cls->needInitialization());
+  if (cls->needInitialization()) {
+    if (props) {
+      cls->initPropHandle();
+      m_as.testq(-1, rVmTl[cls->propHandle()]);
+      unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+          cgCallHelper(a,
+                       (TCA)getMethodPtr(&Class::initProps),
+                       InvalidReg,
+                       kSyncPoint,
+                       ArgGroup(m_regs).imm((uint64_t)cls));
+      });
+    }
+    if (sprops) {
+      cls->initSPropHandle();
+      m_as.testq(-1, rVmTl[cls->sPropHandle()]);
+      unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+          cgCallHelper(a,
+                       (TCA)getMethodPtr(&Class::initSProps),
+                       InvalidReg,
+                       kSyncPoint,
+                       ArgGroup(m_regs).imm((uint64_t)cls));
+      });
+    }
+  }
+
+  // Next, allocate the object
+  if (cls->instanceCtor()) {
+    cgCallHelper(m_as,
+                 (TCA)cls->instanceCtor(),
+                 dstReg,
+                 kSyncPoint,
+                 ArgGroup(m_regs).imm((uint64_t)cls));
+  } else {
+    size_t size = Instance::sizeForNProps(cls->numDeclProperties());
+    int allocator = object_alloc_size_to_index(size);
+    assert(allocator != -1);
+    cgCallHelper(m_as,
+                 (TCA)getMethodPtr(&Instance::newInstanceRaw),
+                 dstReg,
+                 kSyncPoint,
+                 ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
+  }
+
+  // Set the attributes, if any
+  int odAttrs = cls->getODAttrs();
+  if (odAttrs) {
+    // o_attribute is 16 bits but the fact that we're or-ing a mask makes it ok
+    assert(!(odAttrs & 0xffff0000));
+    m_as.orq(odAttrs, dstReg[ObjectData::attributeOff()]);
+  }
+
+  // Initialize the properties
+  size_t nProps = cls->numDeclProperties();
+  if (nProps > 0) {
+    m_as.push(dstReg);
+    m_as.subq(8, reg::rsp);
+    if (cls->pinitVec().size() == 0) {
+      // Fast case: copy from a known address in the Class
+      ArgGroup args = ArgGroup(m_regs)
+        .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+        .imm(int64_t(&cls->declPropInit()[0]))
+        .imm(cellsToBytes(nProps));
+      cgCallHelper(m_as,
+                   (TCA)memcpy,
+                   InvalidReg,
+                   kNoSyncPoint,
+                   args);
+    } else {
+      // Slower case: we have to load the src address from the targetcache
+      auto rPropData = rScratch;
+      // Load the Class's propInitVec from the targetcache
+      m_as.loadq(rVmTl[cls->propHandle()], rPropData);
+      // propData holds the PropInitVec. We want &(*propData)[0]
+      m_as.loadq(rPropData[Class::PropInitVec::dataOff()], rPropData);
+      if (!cls->hasDeepInitProps()) {
+        ArgGroup args = ArgGroup(m_regs)
+          .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+          .reg(rPropData)
+          .imm(cellsToBytes(nProps));
+        cgCallHelper(m_as,
+                     (TCA)memcpy,
+                     InvalidReg,
+                     kNoSyncPoint,
+                     args);
+      } else {
+        ArgGroup args = ArgGroup(m_regs)
+          .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+          .reg(rPropData)
+          .imm(nProps);
+        cgCallHelper(m_as,
+                     (TCA)deepInitHelper,
+                     InvalidReg,
+                     kNoSyncPoint,
+                     args);
+      }
+    }
+    m_as.addq(8, reg::rsp);
+    m_as.pop(dstReg);
+  }
+  if (cls->callsCustomInstanceInit()) {
+    // callCustomInstanceInit returns the instance in rax
+    cgCallHelper(m_as,
+                 (TCA)getMethodPtr(&Instance::callCustomInstanceInit),
+                 dstReg,
+                 kSyncPoint,
+                 ArgGroup(m_regs).reg(dstReg));
+  }
+}
+
 void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
   auto const& data = *inst->getExtra<InlineCreateCont>();
   auto const helper = data.origFunc->isMethod()

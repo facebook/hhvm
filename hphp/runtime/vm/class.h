@@ -320,7 +320,7 @@ class PreClass : public AtomicCountable {
   }
 
   BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
-  int builtinPropSize() { return m_builtinPropSize; }
+  int builtinPropSize() const { return m_builtinPropSize; }
 
   void prettyPrint(std::ostream& out) const;
 
@@ -734,8 +734,8 @@ public:
   // ObjectData attributes, to be set during Instance initialization.
   int getODAttrs() const { return m_ODAttrs; }
 
-  int builtinPropSize() { return m_builtinPropSize; }
-  BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
+  int builtinPropSize() const { return m_builtinPropSize; }
+  BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
 
   // Interfaces this class declares in its "implements" clause.
   const std::vector<ClassPtr>& declInterfaces() const {

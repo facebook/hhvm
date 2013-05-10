@@ -821,6 +821,12 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
+D:Obj = AllocObjFast S1:ConstCls
+
+  Allocate a new object of class S1 where S1 is persistent and able to
+  be instantiated (i.e., S1 is not an abstract class, interface, or
+  trait).
+
 NewArray
 NewTuple
 

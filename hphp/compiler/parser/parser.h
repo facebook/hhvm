@@ -254,6 +254,14 @@ public:
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
 
+  // for namespace support
+  void onNamespaceStart(const std::string &ns, bool file_scope = false);
+  void onNamespaceEnd();
+  void onUse(const std::string &ns, const std::string &as);
+  void nns(int token = 0);
+  std::string nsDecl(const std::string &name);
+  std::string resolve(const std::string &ns, bool cls);
+
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
 
@@ -325,6 +333,18 @@ private:
   void checkAssignThis(Token &var);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
+
+  // for namespace support
+  enum NamespaceState {
+    SeenNothing,
+    SeenNonNamespaceStatement,
+    SeenNamespaceStatement,
+    InsideNamespace,
+  };
+  NamespaceState m_nsState;
+  bool m_nsFileScope;
+  std::string m_namespace; // current namespace
+  hphp_string_imap<std::string> m_aliases;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

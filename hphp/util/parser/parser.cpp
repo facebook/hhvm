@@ -73,7 +73,7 @@ void ParserBase::Reset() {
 ///////////////////////////////////////////////////////////////////////////////
 
 ParserBase::ParserBase(Scanner &scanner, const char *fileName)
-    : m_scanner(scanner), m_fileName(fileName), m_nsState(SeenNothing) {
+    : m_scanner(scanner), m_fileName(fileName) {
   if (m_fileName == nullptr) m_fileName = "";
 
   // global scope
@@ -282,112 +282,6 @@ void ParserBase::popLabelInfo() {
   }
 
   m_labelInfos.pop_back();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// namespace support
-
-void ParserBase::nns(int token) {
-  if (m_nsState == SeenNamespaceStatement && token != ';') {
-    error("No code may exist outside of namespace {}: %d %s",
-          token, getMessage().c_str());
-    return;
-  }
-  if (m_nsState == SeenNothing && token != T_DECLARE) {
-    m_nsState = SeenNonNamespaceStatement;
-  }
-}
-
-void ParserBase::onNamespaceStart(const std::string &ns,
-                                  bool file_scope /* =false */) {
-  if (m_nsState == SeenNonNamespaceStatement) {
-    error("Namespace declaration statement has to be the very first "
-          "statement in the script: %s", getMessage().c_str());
-    return;
-  }
-  if (m_nsState != SeenNothing && file_scope != m_nsFileScope) {
-    error("Cannot mix bracketed namespace declarations with unbracketed "
-          "namespace declarations");
-  }
-
-  m_nsState = InsideNamespace;
-  m_nsFileScope = file_scope;
-  m_aliases.clear();
-
-  m_namespace = ns;
-}
-
-void ParserBase::onNamespaceEnd() {
-  m_nsState = SeenNamespaceStatement;
-}
-
-void ParserBase::onUse(const std::string &ns, const std::string &as) {
-  if (m_aliases.find(as) != m_aliases.end()) {
-    error("Cannot use %s as %s because the name is already in use: %s",
-          ns.c_str(), as.c_str(), getMessage().c_str());
-    return;
-  }
-  string key = as;
-  if (key.empty()) {
-    size_t pos = ns.rfind(NAMESPACE_SEP);
-    if (pos == string::npos) {
-      key = ns;
-    } else {
-      key = ns.substr(pos + 1);
-    }
-  }
-  m_aliases[key] = ns;
-}
-
-std::string ParserBase::nsDecl(const std::string &name) {
-  if (m_namespace.empty()) {
-    return name;
-  }
-  return m_namespace + NAMESPACE_SEP + name;
-}
-
-std::string ParserBase::resolve(const std::string &ns, bool cls) {
-  // try import rules first
-  string alias = ns;
-  size_t pos = ns.find(NAMESPACE_SEP);
-  if (pos != string::npos) {
-    alias = ns.substr(0, pos);
-  }
-  hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
-  if (iter != m_aliases.end()) {
-    if (pos != string::npos) {
-      return iter->second + ns.substr(pos);
-    }
-    return iter->second;
-  }
-
-  // Classes are special. They don't fallback to the global namespace.
-  if (cls) {
-    if (!strcasecmp("self", ns.c_str()) ||
-        !strcasecmp("parent", ns.c_str())) {
-      return ns;
-    }
-    // Don't prefix with \ because that isn't the real classname and we don't
-    // need a flag to signal fallback.
-    return nsDecl(ns);
-  }
-
-  // if qualified name, prepend current namespace
-  if (pos != string::npos) {
-    return nsDecl(ns);
-  }
-
-  // unqualified name in global namespace
-  if (m_namespace.empty()) {
-    return ns;
-  }
-
-  if (!strcasecmp("true", ns.c_str()) ||
-      !strcasecmp("false", ns.c_str()) ||
-      !strcasecmp("null", ns.c_str())) {
-    return ns;
-  }
-  return nsDecl(ns);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -515,6 +515,26 @@ struct Parser : ParserBase {
   void onTypeSpecialization(const Token& type, char specialization) {
     X(type, specialization);
   }
+
+  // for namespace support
+  void onNamespaceStart(const std::string &ns, bool file_scope = false) {
+    X(ns, file_scope);
+  }
+  void onNamespaceEnd() {}
+  void onUse(const std::string &ns, const std::string &as) {
+    X(ns, as);
+  }
+  void nns(bool declare = false) {
+    X(declare);
+  }
+  std::string nsDecl(const std::string &name) {
+    X(name);
+    return name;
+  }
+  std::string resolve(const std::string &ns, bool cls) {
+    X(ns, cls);
+    return ns;
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

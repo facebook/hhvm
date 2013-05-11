@@ -168,14 +168,6 @@ public:
                ScannerToken *stmt);
   void popLabelInfo();
 
-  // for namespace support
-  void onNamespaceStart(const std::string &ns, bool file_scope = false);
-  void onNamespaceEnd();
-  void onUse(const std::string &ns, const std::string &as);
-  void nns(int token = 0);
-  std::string nsDecl(const std::string &name);
-  std::string resolve(const std::string &ns, bool cls);
-
   enum GotoError {
     UndefLabel = 1,
     InvalidBlock,
@@ -227,18 +219,6 @@ protected:
     std::vector<GotoInfo> gotos;
   };
   std::vector<LabelInfo> m_labelInfos; // stack by function
-
-  // for namespace support
-  enum NamespaceState {
-    SeenNothing,
-    SeenNonNamespaceStatement,
-    SeenNamespaceStatement,
-    InsideNamespace,
-  };
-  NamespaceState m_nsState;
-  bool m_nsFileScope;
-  std::string m_namespace; // current namespace
-  hphp_string_imap<std::string> m_aliases;
 
   // for closure hidden name
   static Mutex s_mutex;

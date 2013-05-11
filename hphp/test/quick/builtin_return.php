@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright 2004-2013 Facebook. All Rights Reserved.
 
 function foo(array $data) {
   $duplicate_click = idx($data, 'duplicate_click');

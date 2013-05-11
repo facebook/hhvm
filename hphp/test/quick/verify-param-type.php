@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright 2004-2013 Facebook. All Rights Reserved.
 
 // Make sure we're tolerant of code that swallows typehint failures
 function error_handler() {

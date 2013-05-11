@@ -1837,7 +1837,7 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
         for (ni = t.m_instrStream.first; ni; ni = ni->next) {
           if (ni->source.offset() == fcg.bcOff) break;
         }
-        if (ni && !ni->interp) {
+        if (ni && !ni->interp && supportedInterpOne(ni)) {
           ni->interp = true;
           transResult = Retry;
           TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "

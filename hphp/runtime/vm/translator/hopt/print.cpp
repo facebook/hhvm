@@ -138,9 +138,9 @@ void print(std::ostream& ostream, const IRInstruction* inst,
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
     if (!lifetime || !lifetime->linear[inst]) {
-      ostream << folly::format("({:02d}) ", inst->getIId());
+      ostream << folly::format("({:02d}) ", inst->getId());
     } else {
-      ostream << folly::format("({:02d}@{:02d}) ", inst->getIId(),
+      ostream << folly::format("({:02d}@{:02d}) ", inst->getId(),
                                lifetime->linear[inst]);
     }
     ostream << color(ANSI_COLOR_END);
@@ -333,7 +333,7 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
         // print phi pseudo-instructions
         for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
           os << std::string(kIndent +
-                            folly::format("({}) ", inst.getIId()).str().size(),
+                            folly::format("({}) ", inst.getId()).str().size(),
                             ' ');
           JIT::print(os, inst.getDst(i), regs, lifetime, false);
           os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "

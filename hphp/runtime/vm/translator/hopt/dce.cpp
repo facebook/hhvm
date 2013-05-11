@@ -111,7 +111,7 @@ private:
 };
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
-// DCE state indexed by instr->getIId.
+// DCE state indexed by instr->getId().
 typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef hphp_hash_set<const SSATmp*, pointer_hash<SSATmp>> SSASet;
 typedef StateVector<SSATmp, SSASet> SSACache;
@@ -385,8 +385,8 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
           if (spInst->op() == SpillFrame &&
               spInst->getSrc(3)->type().subtypeOfAny(Type::Obj, Type::Null)) {
             FTRACE(5, "CreateCont ({}): weak use of frame {}\n",
-                   inst->getIId(),
-                   frameInst->getIId());
+                   inst->getId(),
+                   frameInst->getId());
             state[frameInst].incWeakUse();
           }
         }
@@ -402,7 +402,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
           // We haven't counted this InlineReturn as a weak use yet,
           // which is where this '1' comes from.
           if (frameUses - weakUses == 1) {
-            FTRACE(5, "killing frame {}\n", srcInst->getIId());
+            FTRACE(5, "killing frame {}\n", srcInst->getId());
             killedFrames = true;
             state[srcInst].setDead();
           }
@@ -429,7 +429,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       {
         auto const fp = inst->getSrc(1);
         if (state[fp->inst()].isDead()) {
-          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->getIId());
+          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->getId());
 
           CreateContData data;
           data.origFunc = inst->getSrc(3)->getValFunc();
@@ -451,7 +451,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       {
         auto const fp = inst->getSrc(0);
         if (state[fp->inst()].isDead()) {
-          FTRACE(5, "InlineReturn ({}) setDead\n", inst->getIId());
+          FTRACE(5, "InlineReturn ({}) setDead\n", inst->getId());
           state[inst].setDead();
         }
       }
@@ -459,7 +459,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
     case DefInlineFP:
       FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-             inst->getIId(),
+             inst->getId(),
              state[inst].weakUseCount(),
              uses[inst->getDst()]);
       break;
@@ -546,8 +546,8 @@ void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
     auto cur = it; ++it;
     Block* block = *cur;
     block->remove_if([&] (const IRInstruction& inst) {
-      assert(inst.getIId() < live.size());
-      return !live.test(inst.getIId());
+      assert(inst.getId() < live.size());
+      return !live.test(inst.getId());
     });
     if (block->empty()) blocks.erase(cur);
   }

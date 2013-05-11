@@ -289,12 +289,12 @@ std::string showExtra(Opcode opc, const IRExtraData* data) {
 
 //////////////////////////////////////////////////////////////////////
 
-IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
+IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   : m_op(inst->m_op)
   , m_typeParam(inst->m_typeParam)
   , m_numSrcs(inst->m_numSrcs)
   , m_numDsts(inst->m_numDsts)
-  , m_iid(iid)
+  , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
   , m_taken(nullptr)
@@ -607,7 +607,7 @@ bool isRefCounted(SSATmp* tmp) {
 
 void IRInstruction::convertToNop() {
   IRInstruction nop(Nop);
-  // copy all but m_iid, m_block, m_taken, m_listNode
+  // copy all but m_id, m_block, m_taken, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
@@ -644,7 +644,7 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   assert(!canCSE());
   auto& arena = factory->arena();
 
-  // Copy all but m_iid, m_block, m_listNode, and don't clone
+  // Copy all but m_id, m_block, m_listNode, and don't clone
   // dests---the whole point of become() is things still point to us.
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
@@ -863,7 +863,7 @@ TCA SSATmp::getValTCA() const {
 }
 
 std::string ExitData::show() const {
-  return folly::to<std::string>(toSmash->getIId());
+  return folly::to<std::string>(toSmash->getId());
 }
 
 std::string SSATmp::toString() const {

@@ -27,7 +27,7 @@ namespace HPHP { namespace VM { namespace JIT {
 
 /*
  * Utility to keep a vector of state about each key, indexed by
- * factoryId(key), where key can be an IRInstruction, Block, or SSATmp.
+ * key->getId(), where key can be an IRInstruction, Block, or SSATmp.
  *
  * Takes an `init' element, which everything is defaulted to.  Calls
  * to reset() restore all entries to this state.
@@ -42,7 +42,7 @@ struct StateVector {
 
   StateVector(const IRFactory* factory, Info init)
     : m_factory(factory)
-    , m_info(count(factory, (Key*)nullptr), init)
+    , m_info(numIds(factory, (Key*)nullptr), init)
     , m_init(init) {
   }
 
@@ -53,7 +53,7 @@ struct StateVector {
 
   reference operator[](const Key& k) { return (*this)[&k]; }
   reference operator[](const Key* k) {
-    auto id = factoryId(k);
+    auto id = k->getId();
     if (id >= m_info.size()) grow();
     assert(id < m_info.size());
     return m_info[id];
@@ -61,8 +61,8 @@ struct StateVector {
 
   const_reference operator[](const Key& k) const { return (*this)[&k]; }
   const_reference operator[](const Key* k) const {
-    assert(factoryId(k) < count(m_factory, (Key*)nullptr));
-    auto id = factoryId(k);
+    assert(k->getId() < numIds(m_factory, (Key*)nullptr));
+    auto id = k->getId();
     return id < m_info.size() ? m_info[id] : m_init;
   }
 
@@ -74,25 +74,19 @@ struct StateVector {
   const_iterator cend()   const { return m_info.cend(); }
 
 private:
-  static unsigned factoryId(const IRInstruction* inst) {
-    return inst->getIId();
-  }
-  static unsigned factoryId(const Block* block) { return block->getId(); }
-  static unsigned factoryId(const SSATmp* tmp) { return tmp->getId(); }
-
-  static unsigned count(const IRFactory* factory, IRInstruction*) {
+  static unsigned numIds(const IRFactory* factory, IRInstruction*) {
     return factory->numInsts();
   }
-  static unsigned count(const IRFactory* factory, SSATmp*) {
+  static unsigned numIds(const IRFactory* factory, SSATmp*) {
     return factory->numTmps();
   }
-  static unsigned count(const IRFactory* factory, Block*) {
+  static unsigned numIds(const IRFactory* factory, Block*) {
     return factory->numBlocks();
   }
 
 private:
   void grow() {
-    m_info.resize(count(m_factory, static_cast<Key*>(nullptr)),
+    m_info.resize(numIds(m_factory, static_cast<Key*>(nullptr)),
                   m_init);
   }
 

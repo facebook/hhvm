@@ -268,13 +268,13 @@ private:
   }
 
   bool isLive(IRInstruction* inst) const {
-    assert(inst->getIId() < m_liveInsts.size());
-    return m_liveInsts.test(inst->getIId());
+    assert(inst->getId() < m_liveInsts.size());
+    return m_liveInsts.test(inst->getId());
   }
 
   void setLive(IRInstruction& inst, bool live) {
-    assert(inst.getIId() < m_liveInsts.size());
-    m_liveInsts.set(inst.getIId(), live);
+    assert(inst.getId() < m_liveInsts.size());
+    m_liveInsts.set(inst.getId(), live);
   }
 
 private:

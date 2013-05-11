@@ -1632,7 +1632,7 @@ typedef Range<SSATmp*> DstRange;
  * (Destructors are not called when they come from IRFactory.)
  */
 struct IRInstruction {
-  enum IId { kTransient = 0xffffffff };
+  enum Id { kTransient = 0xffffffff };
 
   /*
    * Create an IRInstruction for the opcode `op'.
@@ -1647,7 +1647,7 @@ struct IRInstruction {
     , m_typeParam(Type::None)
     , m_numSrcs(numSrcs)
     , m_numDsts(0)
-    , m_iid(kTransient)
+    , m_id(kTransient)
     , m_srcs(srcs)
     , m_dst(nullptr)
     , m_taken(nullptr)
@@ -1663,7 +1663,7 @@ struct IRInstruction {
    * Construct an IRInstruction as a deep copy of `inst', using
    * arena to allocate memory for its srcs/dests.
    */
-  explicit IRInstruction(Arena& arena, const IRInstruction* inst, IId iid);
+  explicit IRInstruction(Arena& arena, const IRInstruction* inst, Id id);
 
   /*
    * Initialize the source list for this IRInstruction.  We must not
@@ -1760,7 +1760,7 @@ struct IRInstruction {
 
   /*
    * Turns this instruction into the target instruction, without
-   * changing stable fields (IId, current block, list fields).  The
+   * changing stable fields (id, current block, list fields).  The
    * existing destination SSATmp(s) will continue to think they came
    * from this instruction.
    *
@@ -1825,11 +1825,11 @@ struct IRInstruction {
   void setTCA(TCA newTCA) { m_tca = newTCA; }
 
   /*
-   * Instruction id (iid) is stable and useful as an array index.
+   * Instruction id is stable and useful as an array index.
    */
-  uint32_t getIId() const {
-    assert(m_iid != kTransient);
-    return m_iid;
+  uint32_t getId() const {
+    assert(m_id != kTransient);
+    return m_id;
   }
 
   /*
@@ -1837,7 +1837,7 @@ struct IRInstruction {
    * is, it's allocated on the stack and we haven't yet committed to
    * inserting it in any blocks.
    */
-  bool       isTransient() const       { return m_iid == kTransient; }
+  bool       isTransient() const       { return m_id == kTransient; }
 
   Block*     getBlock() const          { return m_block; }
   void       setBlock(Block* b)        { m_block = b; }
@@ -1898,7 +1898,7 @@ private:
   Type              m_typeParam;
   uint16_t          m_numSrcs;
   uint16_t          m_numDsts;
-  const IId         m_iid;
+  const Id          m_id;
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_taken;   // for branches, guards, and jmp

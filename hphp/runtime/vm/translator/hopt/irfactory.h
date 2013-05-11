@@ -183,7 +183,7 @@ public:
    * Replace an existing IRInstruction with a new one.
    *
    * This may involve making more allocations in the arena, but the
-   * actual IRInstruction* itself, its IId, etc, will stay unchanged.
+   * actual IRInstruction* itself, its Id, etc, will stay unchanged.
    *
    * This function takes arguments in the same format as gen().
    */
@@ -200,7 +200,7 @@ public:
    */
   IRInstruction* cloneInstruction(const IRInstruction* inst) {
     auto newInst = new (m_arena) IRInstruction(
-      m_arena, inst, IRInstruction::IId(m_nextInstId++));
+      m_arena, inst, IRInstruction::Id(m_nextInstId++));
     if (newInst->modifiesStack()) {
       assert(newInst->naryDst());
       // The instruction is an opcode that modifies the stack, returning a new

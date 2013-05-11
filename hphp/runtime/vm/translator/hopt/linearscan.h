@@ -26,6 +26,11 @@ namespace HPHP { namespace VM { namespace JIT {
 class Trace;
 class IRFactory;
 
+// This value must be consistent with the number of pre-allocated
+// bytes for spill locations in __enterTCHelper in translator-x64.cpp.
+// Be careful when changing this value.
+const int NumPreAllocatedSpillLocs = 16;
+
 struct UseInfo {
   UseInfo() : lastUse(0), count(0) {}
   uint32_t lastUse; // linear id of last use
@@ -58,10 +63,19 @@ struct SpillInfo {
     assert(isValid());
   }
 
-  // return offset in 8-byte-words from stack pointer
-  uint32_t mem() const { return m_val; }
+  // Return logical slot number
+  uint32_t slot() const {
+    assert(isValid());
+    return m_val;
+  }
 
-  bool isValid() const { return int(m_val) != int(Transl::InvalidReg); }
+  bool isValid() const {
+    return int(m_val) != int(Transl::InvalidReg);
+  }
+
+  // return the offset from RSP for this slot; takes into account
+  // the native stack layout.
+  int offset() const;
 
 private:
   uint32_t m_val;
@@ -162,7 +176,7 @@ private:
 };
 
 inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
-  os << "spill[" << si.mem() << "]";
+  os << "spill[" << si.slot() << "]";
   return os;
 }
 
@@ -171,6 +185,35 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
  * generation.
  */
 RegAllocInfo allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* = nullptr);
+
+// Native stack layout:
+// |               |
+// +---------------+
+// |               |  <-- spill[5..]
+// | pre allocated |  <-- spill[4]
+// |  (16 slots)   |  <-- spill[3]
+// +---------------+
+// |  return addr  |
+// +---------------+
+// |    extra      |  <-- spill[2]
+// |    spill      |  <-- spill[1]
+// |  locations    |  <-- spill[0]
+// +---------------+  <-- %rsp
+// If a spill location falls into the pre-allocated region, we
+// need to increase its index by 1 to avoid overwriting the
+// return address.
+
+/*
+ * compute the offset from RSP for a logical spill slot.  Given a logical
+ * slot number, return a byte offset from RSP, taking into account the layout
+ * above.  LinearScan punts if any extra spill locations would be required,
+ * so all we really need to do is adjust for the return address and scale
+ * by the machine word size.
+ */
+inline int SpillInfo::offset() const {
+  assert(m_val < NumPreAllocatedSpillLocs);
+  return (m_val + 1) * sizeof(uint64_t);
+}
 
 }}}
 

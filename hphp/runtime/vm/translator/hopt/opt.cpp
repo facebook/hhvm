@@ -18,6 +18,7 @@
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/print.h"
+#include "runtime/vm/translator/hopt/check.h"
 
 namespace HPHP {
 namespace VM {

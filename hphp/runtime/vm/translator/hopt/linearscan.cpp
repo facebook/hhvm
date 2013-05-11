@@ -146,7 +146,6 @@ private:
   uint32_t createSpillSlot(SSATmp* tmp);
   static SSATmp* getSpilledTmp(SSATmp* tmp);
   static SSATmp* getOrigTmp(SSATmp* tmp);
-  void preAllocSpillLoc(uint32_t numSpillLocs);
   uint32_t assignSpillLoc();
   void insertAllocFreeSpill(Trace* trace, uint32_t numExtraSpillLocs);
   void insertAllocFreeSpillAux(Trace* trace, uint32_t numExtraSpillLocs);
@@ -212,10 +211,6 @@ private:
   RegAllocInfo m_allocInfo; // final allocation for each SSATmp
 };
 
-// This value must be consistent with the number of pre-allocated
-// bytes for spill locations in __enterTCHelper in translator-x64.cpp.
-// Be careful when changing this value.
-static const int NumPreAllocatedSpillLocs = 16;
 static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*),
               "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");
@@ -871,38 +866,6 @@ void LinearScan::coalesce(Trace* trace) {
   });
 }
 
-void LinearScan::preAllocSpillLoc(uint32_t numSpillLocs) {
-  for (Block* block : m_blocks) {
-    for (IRInstruction& inst : *block) {
-      if (inst.op() != Spill) continue;
-      SSATmp* dst = inst.getDst();
-      for (int index = 0; index < dst->numNeededRegs(); ++index) {
-        assert(!m_allocInfo[dst].hasReg(index));
-        uint32_t spillLoc = m_allocInfo[dst].getSpillInfo(index).mem();
-        // Native stack layout:
-        // |               |
-        // +---------------+
-        // |               |  <-- spill[5..]
-        // | pre allocated |  <-- spill[4]
-        // |  (16 slots)   |  <-- spill[3]
-        // +---------------+
-        // |  return addr  |
-        // +---------------+
-        // |    extra      |  <-- spill[2]
-        // |    spill      |  <-- spill[1]
-        // |  locations    |  <-- spill[0]
-        // +---------------+  <-- %rsp
-        // If a spill location falls into the pre-allocated region, we
-        // need to increase its index by 1 to avoid overwriting the
-        // return address.
-        if (spillLoc + NumPreAllocatedSpillLocs >= numSpillLocs) {
-          m_allocInfo[dst].setSpillInfo(index, SpillInfo(spillLoc + 1));
-        }
-      }
-    }
-  }
-}
-
 // Assign ids to each instruction in linear order.
 void LinearScan::numberInstructions(const BlockList& blocks) {
   m_spillSlots.reset();
@@ -1001,25 +964,22 @@ RegAllocInfo LinearScan::allocRegs(Trace* trace, LifetimeInfo* lifetime) {
   // Make sure rsp is 16-aligned.
   uint32_t numSpillLocs = assignSpillLoc();
   if (numSpillLocs % 2) {
+    static_assert(NumPreAllocatedSpillLocs % 2 == 0, "");
     ++numSpillLocs;
   }
-  assert(NumPreAllocatedSpillLocs % 2 == 0);
-  if (numSpillLocs > 0) {
-    preAllocSpillLoc(numSpillLocs);
-    if (numSpillLocs > (uint32_t)NumPreAllocatedSpillLocs) {
-      /*
-       * We only insert AllocSpill and FreeSpill when the pre-allocated
-       * spill locations are not enough.
-       *
-       * AllocSpill and FreeSpill take the number of extra spill locations
-       * besides the pre-allocated ones.
-       *
-       * TODO(#2044051) AllocSpill/FreeSpill are currently disabled
-       * due to bugs.
-       */
-      PUNT(LinearScan_AllocSpill);
-      insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
-    }
+  if (numSpillLocs > (uint32_t)NumPreAllocatedSpillLocs) {
+    /*
+     * We only insert AllocSpill and FreeSpill when the pre-allocated
+     * spill locations are not enough.
+     *
+     * AllocSpill and FreeSpill take the number of extra spill locations
+     * besides the pre-allocated ones.
+     *
+     * TODO(#2044051) AllocSpill/FreeSpill are currently disabled
+     * due to bugs.
+     */
+    PUNT(LinearScan_AllocSpill);
+    insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
   }
 
   if (m_slots.size()) genSpillStats(trace, numSpillLocs);

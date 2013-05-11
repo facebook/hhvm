@@ -38,6 +38,7 @@
 #include "runtime/vm/translator/hopt/codegen.h"
 #include "runtime/vm/translator/hopt/hhbctranslator.h"
 #include "runtime/vm/translator/hopt/print.h"
+#include "runtime/vm/translator/hopt/check.h"
 
 // Include last to localize effects to this file
 #include "util/assert_throw.h"
@@ -1945,10 +1946,11 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
     LifetimeInfo lifetime(factory);
     RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
+    finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
+    assert(checkRegisters(trace, *factory, regs));
     AsmInfo ai(factory);
     genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs,
                     &lifetime, &ai);
-    finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
       dumpTraceImpl(trace, out, &regs, &lifetime, &ai);
@@ -1959,8 +1961,9 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     }
   } else {
     RegAllocInfo regs = allocRegsForTrace(trace, factory);
-    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs);
     finishPass(" after reg alloc ", kRegAllocLevel);
+    assert(checkRegisters(trace, *factory, regs));
+    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs);
   }
 
   m_numHHIRTrans++;

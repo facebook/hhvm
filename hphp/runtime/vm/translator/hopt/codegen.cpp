@@ -2385,11 +2385,10 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
 
   assert(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
-    auto srcReg = m_regs[src].getReg(locIndex);
-
     // We do not need to mask booleans, since the IR will reload the spill
+    auto srcReg = m_regs[src].getReg(locIndex);
     auto sinfo = m_regs[dst].getSpillInfo(locIndex);
-    m_as.    storeq(srcReg, reg::rsp[sizeof(uint64_t) * sinfo.mem()]);
+    m_as.    storeq(srcReg, reg::rsp[sinfo.offset()]);
   }
 }
 
@@ -2400,9 +2399,8 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
   assert(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
     auto dstReg = m_regs[dst].getReg(locIndex);
-
     auto sinfo = m_regs[src].getSpillInfo(locIndex);
-    m_as.    loadq(reg::rsp[sizeof(uint64_t) * sinfo.mem()], dstReg);
+    m_as.    loadq(reg::rsp[sinfo.offset()], dstReg);
   }
 }
 

@@ -2366,6 +2366,20 @@ void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
 typedef std::vector<int> IdomVector;
 IdomVector findDominators(const BlockList& blocks);
 
+typedef std::forward_list<Block*> BlockPtrList;
+
+/*
+ * A vector of children lists, indexed by block->postId()
+ */
+typedef std::vector<BlockPtrList> DomChildren;
+
+/*
+ * compute the dominator tree, then populate a list of dominator children
+ * for each block.  Note that DomChildren is indexed by block->postId(),
+ * not block->id(); that's why we don't use StateVector here.
+ */
+DomChildren findDomChildren(const BlockList& blocks);
+
 /*
  * return true if b1 == b2 or if b1 dominates b2.
  */
@@ -2376,12 +2390,6 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
  * the first block in trace.
  */
 BlockList sortCfg(Trace*, const IRFactory&);
-
-/*
- * Ensure valid SSA properties; each SSATmp must be defined exactly once,
- * only used in positions dominated by the definition.
- */
-bool checkCfg(Trace*, const IRFactory&);
 
 /*
  * Return true if trace has internal control flow (IE it has a branch
@@ -2421,7 +2429,7 @@ inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
  * as each block is processed.
  */
 template <class State, class Body>
-void forPreorderDoms(Block* block, std::forward_list<Block*> children[],
+void forPreorderDoms(Block* block, const std::vector<BlockPtrList>& children,
                      State state, Body body) {
   body(block, state);
   for (Block* child : children[block->postId()]) {

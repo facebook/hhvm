@@ -965,81 +965,14 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
   return false;
 }
 
-/*
- * Check one block for being well formed.  It must:
- * 1. have exactly one DefLabel as the first instruction
- * 2. if any instruction is isBlockEnd(), it must be last
- * 3. if the last instruction isTerminal(), block->next must be null.
- */
-bool checkBlock(Block* b) {
-  assert(!b->empty());
-  assert(b->front()->op() == DefLabel);
-  if (b->back()->isTerminal()) assert(!b->getNext());
-  if (b->getTaken()) {
-    // only Jmp_ can branch to a join block expecting values.
-    assert(b->back()->op() == Jmp_ ||
-           b->getTaken()->front()->getNumDsts() == 0);
-  }
-  if (b->getNext()) {
-    // cannot fall-through to join block expecting values
-    assert(b->getNext()->front()->getNumDsts() == 0);
-  }
-  auto i = b->begin(), e = b->end();
-  ++i;
-  if (b->back()->isBlockEnd()) --e;
-  for (UNUSED IRInstruction& inst : folly::makeRange(i, e)) {
-    assert(inst.op() != DefLabel);
-    assert(!inst.isBlockEnd());
-  }
-  return true;
-}
-
-/*
- * Build the CFG, then the dominator tree, then use it to validate SSA.
- * 1. Each src must be defined by some other instruction, and each dst must
- *    be defined by the current instruction.
- * 2. Each src must be defined earlier in the same block or in a dominator.
- * 3. Each dst must not be previously defined.
- * 4. Treat tmps defined by DefConst as always defined.
- */
-bool checkCfg(Trace* trace, const IRFactory& factory) {
-  forEachTraceBlock(trace, [&](Block* b) {
-    checkBlock(b);
-  });
-  BlockList blocks = sortCfg(trace, factory);
+DomChildren findDomChildren(const BlockList& blocks) {
   IdomVector idom = findDominators(blocks);
-  // build dominator-children lists
-  std::forward_list<Block*> children[blocks.size()];
+  DomChildren children(blocks.size(), BlockPtrList());
   for (Block* block : blocks) {
     int idom_id = idom[block->postId()];
     if (idom_id != -1) children[idom_id].push_front(block);
   }
-
-  // visit dom tree in preorder, checking all tmps
-  boost::dynamic_bitset<> defined0(factory.numTmps());
-  forPreorderDoms(blocks.front(), children, defined0,
-                  [] (Block* block, boost::dynamic_bitset<>& defined) {
-    for (IRInstruction& inst : *block) {
-      for (SSATmp* UNUSED src : inst.getSrcs()) {
-        assert(src->inst() != &inst);
-        assert_log(src->inst()->op() == DefConst ||
-                   defined[src->getId()],
-                   [&]{ return folly::format(
-                       "src '{}' in '{}' came from '{}', which is not a "
-                       "DefConst and is not defined at this use site",
-                       src->toString(), inst.toString(),
-                       src->inst()->toString()).str();
-                   });
-      }
-      for (SSATmp& dst : inst.getDsts()) {
-        assert(dst.inst() == &inst &&
-               inst.op() != DefConst);
-        assert(!defined[dst.getId()]);
-        defined[dst.getId()] = 1;
-      }
-    }
-  });
-  return true;
+  return children;
 }
 
 bool hasInternalFlow(Trace* trace) {

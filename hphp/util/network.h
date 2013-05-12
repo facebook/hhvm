@@ -49,11 +49,6 @@ std::string safe_inet_ntoa(struct in_addr &in);
  */
 std::string GetPrimaryIP();
 
-/**
- * Get network bytes per second.
- */
-bool GetNetworkStats(const char *iface, int &in_bps, int &out_bps);
-
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

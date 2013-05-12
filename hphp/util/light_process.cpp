@@ -319,18 +319,6 @@ void LightProcess::Initialize(const std::string &prefix, int count,
     return;
   }
 
-  if (!s_handlerInited) {
-    struct sigaction sa;
-    struct sigaction old_sa;
-    sa.sa_sigaction = &LightProcess::SigChldHandler;
-    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
-    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
-      Logger::Error("Couldn't install SIGCHLD handler");
-      abort();
-    }
-    s_handlerInited = true;
-  }
-
   g_procs.reset(new LightProcess[count]);
   g_procsCount = count;
 
@@ -343,6 +331,18 @@ void LightProcess::Initialize(const std::string &prefix, int count,
       g_procsCount = 0;
       break;
     }
+  }
+
+  if (!s_handlerInited) {
+    struct sigaction sa;
+    struct sigaction old_sa;
+    sa.sa_sigaction = &LightProcess::SigChldHandler;
+    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
+    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+      Logger::Error("Couldn't install SIGCHLD handler");
+      abort();
+    }
+    s_handlerInited = true;
   }
 }
 
@@ -503,7 +503,7 @@ void LightProcess::runShadow(int fdin, int fdout) {
   fclose(fout);
   ::close(m_afdt_fd);
   remove(m_afdtFilename.c_str());
-  exit(0);
+  _Exit(0);
 }
 
 int LightProcess::GetId() {

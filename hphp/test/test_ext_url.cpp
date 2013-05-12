@@ -96,12 +96,12 @@ bool TestExtUrl::test_http_build_query() {
   }
   {
     Array data = Array(ArrayInit(6).
-                       set("foo").
-                       set("bar").
-                       set("baz").
-                       set("boom").
-                       set("cow", "milk").
-                       set("php", "hypertext processor").
+                       set(String("foo")).
+                       set(String("bar")).
+                       set(String("baz")).
+                       set(String("boom")).
+                       set(String("cow"), "milk").
+                       set(String("php"), "hypertext processor").
                        create());
     VS(f_http_build_query(data),
        "0=foo&1=bar&2=baz&3=boom&cow=milk&php=hypertext+processor");
@@ -111,14 +111,14 @@ bool TestExtUrl::test_http_build_query() {
   }
   {
     Array data = Array(ArrayInit(4).
-      set("user",
+      set(String("user"),
           CREATE_MAP4("name", "Bob Smith",
                       "age", 47,
                       "sex", "M",
                       "dob", "5/12/1956")).
-      set("pastimes",
+      set(String("pastimes"),
           CREATE_VECTOR4("golf", "opera", "poker", "rap")).
-      set("children",
+      set(String("children"),
           CREATE_MAP2("bobby", CREATE_MAP2("age",12,"sex","M"),
                       "sally", CREATE_MAP2("age", 8,"sex","F"))).
       set("CEO").

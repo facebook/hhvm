@@ -61,8 +61,8 @@ static const StaticString s_value("value");
 void CmdEval::setClientOutput(DebuggerClient &client) {
   client.setOutputType(DebuggerClient::OTValues);
   ArrayInit values(2);
-  values.set("body", m_body);
-  values.set("value", m_output);
+  values.set(s_body, m_body);
+  values.set(s_value, m_output);
   client.setOTValues(values.create());
 }
 

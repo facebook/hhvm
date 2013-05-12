@@ -147,22 +147,23 @@ void CmdConfig::onClientImpl(DebuggerClient &client) {
   listVars(client);
 }
 
-static const StaticString s_BypassAccessCheck("BypassAccessCheck");
-static const StaticString s_LogFile("LogFile");
-static const StaticString s_PrintLevel("PrintLevel");
-static const StaticString s_SmallStep("SmallStep");
-static const StaticString s_StackArgs("StackArgs");
-static const StaticString s_ApiModeSerialize("ApiModeSerialize");
+static const StaticString
+  s_BypassAccessCheck("BypassAccessCheck"),
+  s_LogFile("LogFile"),
+  s_PrintLevel("PrintLevel"),
+  s_SmallStep("SmallStep"),
+  s_StackArgs("StackArgs"),
+  s_ApiModeSerialize("ApiModeSerialize");
 
 void CmdConfig::setClientOutput(DebuggerClient &client) {
   client.setOutputType(DebuggerClient::OTValues);
   ArrayInit values(6);
-  values.set("BypassAccessCheck", client.getDebuggerBypassCheck());
-  values.set("LogFile", client.getLogFile());
-  values.set("PrintLevel", client.getDebuggerPrintLevel());
-  values.set("SmallStep", client.getDebuggerSmallStep());
-  values.set("StackArgs", client.getDebuggerStackArgs());
-  values.set("ApiModeSerialize", client.getDebuggerClientApiModeSerialize());
+  values.set(s_BypassAccessCheck, client.getDebuggerBypassCheck());
+  values.set(s_LogFile, client.getLogFile());
+  values.set(s_PrintLevel, client.getDebuggerPrintLevel());
+  values.set(s_SmallStep, client.getDebuggerSmallStep());
+  values.set(s_StackArgs, client.getDebuggerStackArgs());
+  values.set(s_ApiModeSerialize, client.getDebuggerClientApiModeSerialize());
   client.setOTValues(values.create());
 }
 

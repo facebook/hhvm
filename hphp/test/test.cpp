@@ -86,7 +86,7 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
 
   char summary[100];
   sprintf(summary, "PASSED (%d)", pass);
-  std::string status  = "passed";
+  const char* status = "passed";
 
   if (skip > 0) {
     sprintf(summary, "SKIPPED (%d)", skip);
@@ -98,14 +98,14 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   }
 
   ArrayInit data(8);
-  data.set("type",         "hphp");
-  data.set("name",         name);
-  data.set("contacts",     null_array);
-  data.set("endedTime",    time(nullptr));
-  data.set("durationSecs", mseconds / 1000.0);
-  data.set("status",       status);
-  data.set("summary",      std::string(summary));
-  data.set("details",      details);
+  data.set(String("type"),         "hphp");
+  data.set(String("name"),         name);
+  data.set(String("contacts"),     null_array);
+  data.set(String("endedTime"),    time(nullptr));
+  data.set(String("durationSecs"), mseconds / 1000.0);
+  data.set(String("status"),       status);
+  data.set(String("summary"),      std::string(summary));
+  data.set(String("details"),      details);
 
   if (!logger.logTest(Array(data.create()))) {
     printf("WARNING: Logging %s failed\n", name.c_str());

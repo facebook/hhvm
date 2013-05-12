@@ -39,19 +39,37 @@ namespace HPHP {
   Array(ArrayInit(6, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
                                             set(e4).set(e5).set(e6).create())
 
-#define CREATE_MAP1(n, e) Array(ArrayInit(1).set(n, e).create())
-#define CREATE_MAP2(n1, e1, n2, e2)                                       \
-  Array(ArrayInit(2).set(n1, e1).set(n2, e2).create())
-#define CREATE_MAP3(n1, e1, n2, e2, n3, e3)                               \
-  Array(ArrayInit(3).set(n1, e1).set(n2, e2).set(n3, e3).create())
-#define CREATE_MAP4(n1, e1, n2, e2, n3, e3, n4, e4)                       \
-  Array(ArrayInit(4).set(n1, e1).set(n2, e2).set(n3, e3).set(n4, e4).create())
-#define CREATE_MAP5(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5)               \
-  Array(ArrayInit(5).set(n1, e1).set(n2, e2).set(n3, e3).                 \
-                                 set(n4, e4).set(n5, e5).create())
-#define CREATE_MAP6(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5, n6, e6)       \
-  Array(ArrayInit(6).set(n1, e1).set(n2, e2).set(n3, e3).set(n4, e4).     \
-                                 set(n5, e5).set(n6, e6).create())
+inline String initkey(const char* s) { return String(s); }
+inline int64_t initkey(int k) { return k; }
+inline int64_t initkey(int64_t k) { return k; }
+inline CStrRef initkey(CStrRef k) { return k; }
+
+#define CREATE_MAP1(n, e) Array(ArrayInit(1).set(initkey(n), e).create())
+#define CREATE_MAP2(n1, e1, n2, e2)\
+  Array(ArrayInit(2).set(initkey(n1), e1)\
+                    .set(initkey(n2), e2).create())
+#define CREATE_MAP3(n1, e1, n2, e2, n3, e3)\
+  Array(ArrayInit(3).set(initkey(n1), e1)\
+                    .set(initkey(n2), e2)\
+                    .set(initkey(n3), e3).create())
+#define CREATE_MAP4(n1, e1, n2, e2, n3, e3, n4, e4)\
+  Array(ArrayInit(4).set(initkey(n1), e1)\
+                    .set(initkey(n2), e2)\
+                    .set(initkey(n3), e3)\
+                    .set(initkey(n4), e4).create())
+#define CREATE_MAP5(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5)\
+  Array(ArrayInit(5).set(initkey(n1), e1)\
+                    .set(initkey(n2), e2)\
+                    .set(initkey(n3), e3)\
+                    .set(initkey(n4), e4)\
+                    .set(initkey(n5), e5).create())
+#define CREATE_MAP6(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5, n6, e6)\
+  Array(ArrayInit(6).set(initkey(n1), e1)\
+                    .set(initkey(n2), e2)\
+                    .set(initkey(n3), e3)\
+                    .set(initkey(n4), e4)\
+                    .set(initkey(n5), e5)\
+                    .set(initkey(n6), e6).create())
 
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayInit
@@ -120,15 +138,9 @@ public:
     return *this;
   }
 
-  ArrayInit &set(litstr name, CVarRef v, bool keyConverted = false) {
-    String key(name);
-    if (keyConverted) {
-      m_data->set(key, v, false);
-    } else {
-      m_data->set(key.toKey(), v, false);
-    }
-    return *this;
-  }
+  // set(const char*) deprecated.  Use set(CStrRef) with a StaticString,
+  // if you have a literal, or String otherwise.
+  ArrayInit &set(const char*, CVarRef v, bool keyConverted = false) = delete;
 
   ArrayInit &set(CStrRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {

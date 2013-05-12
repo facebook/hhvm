@@ -195,14 +195,15 @@ Variant f_http_build_query(CVarRef formdata,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_scheme("scheme");
-static const StaticString s_host("host");
-static const StaticString s_user("user");
-static const StaticString s_pass("pass");
-static const StaticString s_path("path");
-static const StaticString s_query("query");
-static const StaticString s_fragment("fragment");
-static const StaticString s_port("port");
+static const StaticString
+  s_scheme("scheme"),
+  s_host("host"),
+  s_user("user"),
+  s_pass("pass"),
+  s_path("path"),
+  s_query("query"),
+  s_fragment("fragment"),
+  s_port("port");
 
 #define RETURN_COMPONENT(name)                          \
   if (resource.name != NULL) {                          \
@@ -263,7 +264,7 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   SET_COMPONENT(query);
   SET_COMPONENT(fragment);
   if (resource.port) {
-    ret.set("port", (int64_t)resource.port);
+    ret.set(s_port, (int64_t)resource.port);
   }
   return ret.create();
 }

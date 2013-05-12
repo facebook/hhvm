@@ -370,7 +370,6 @@ public:
     return m_needsInit;
   }
 
-  bool needsEnableDestructor(AnalysisResultConstPtr ar) const;
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
 
@@ -433,7 +432,6 @@ private:
   // for classes with more than 31 bases, bit 31 is set iff
   // bases 32 through n are all known.
   unsigned m_knownBases;
-  mutable unsigned m_needsEnableDestructor:2;
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);

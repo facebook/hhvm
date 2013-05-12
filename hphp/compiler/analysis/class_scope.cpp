@@ -61,8 +61,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
     m_persistent(false), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0),
-    m_needsEnableDestructor(0) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -93,7 +92,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
-    m_needsInit(true), m_knownBases(0), m_needsEnableDestructor(0) {
+    m_needsInit(true), m_knownBases(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -1429,36 +1428,6 @@ bool ClassScope::addFunction(AnalysisResultConstPtr ar,
   func = funcScope;
   m_functionsVec.push_back(funcScope);
   return true;
-}
-
-/*
- * A class without a constructor, but with a destructor may need a special
- * create method to clear the NoDestructor flag - but only if
- * there is a constructor somewhere above us, and if /that/ constructor
- * doesnt need to clear the NoDestructor flag.
- */
-bool ClassScope::needsEnableDestructor(
-  AnalysisResultConstPtr ar) const {
-  if (m_needsEnableDestructor & 2) {
-    return m_needsEnableDestructor & 1;
-  }
-  bool ret =
-    (!derivesFromRedeclaring() &&
-     !getAttribute(HasConstructor) &&
-     !getAttribute(ClassNameConstructor));
-
-  if (ret) {
-    if (!getAttribute(HasDestructor) && !m_parent.empty()) {
-      if (ClassScopePtr parent = getParentScope(ar)) {
-        if (!parent->needsEnableDestructor(ar)) {
-          ret = false;
-        }
-      }
-    }
-  }
-
-  m_needsEnableDestructor = ret ? 3 : 2;
-  return ret;
 }
 
 bool ClassScope::canSkipCreateMethod(AnalysisResultConstPtr ar) const {

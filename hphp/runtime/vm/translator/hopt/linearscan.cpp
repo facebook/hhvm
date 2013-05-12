@@ -54,8 +54,15 @@ RegSet RegisterInfo::getRegs() const {
   return regs;
 }
 
+static PhysReg::Type getRegType(const SSATmp* tmp) {
+  if (RuntimeOption::EvalHHIRAllocXMMRegs && tmp->isA(Type::Dbl)) {
+    return PhysReg::XMM;
+  }
+  return PhysReg::GP;
+}
+
 struct LinearScan : private boost::noncopyable {
-  static const int NumRegs = 16;
+  static const int NumRegs = kNumRegs;
 
   explicit LinearScan(IRFactory*);
   RegAllocInfo allocRegs(Trace*, LifetimeInfo*);
@@ -67,7 +74,7 @@ private:
   public:
     bool isReserved() const { return m_reserved; }
     bool isCallerSaved() const {
-      return kCallerSaved.contains(PhysReg(m_regNo));
+      return kCallerSaved.contains(m_reg);
     }
     bool isCalleeSaved() const { return !isCallerSaved(); }
     bool isAllocated() const { return m_ssaTmp != nullptr; }
@@ -77,6 +84,7 @@ private:
       Type type = m_ssaTmp->type();
       return type == Type::RetAddr;
     }
+    PhysReg::Type type() const { return m_reg.type(); }
 
   private:
     SSATmp*   m_ssaTmp; // non-null when allocated
@@ -86,7 +94,7 @@ private:
     // LinearScan::m_freeCalleeSaved, or LinearScan::m_allocatedRegs.
     // <m_pos> of a reserved reg is undefined.
     smart::list<RegState*>::iterator m_pos;
-    uint16_t  m_regNo;
+    PhysReg   m_reg;
     bool      m_pinned; // do not free this register if pinned
     // We stress test register allocation by reducing the number of
     // free registers.
@@ -112,7 +120,7 @@ private:
     void clear();
     void add(SSATmp* tmp, uint32_t index, int argNum);
   private:
-    // indexed by arg number
+    // indexed by register number
     std::pair<SSATmp*, uint32_t> m_preColoredTmps[LinearScan::NumRegs];
   };
 
@@ -158,7 +166,7 @@ private:
   void pushFreeReg(RegState* reg);
   RegState* popFreeReg(smart::list<RegState*>& freeList);
   void freeReg(RegState* reg);
-  RegState* getFreeReg(bool preferCallerSaved);
+  RegState* getFreeReg(PhysReg::Type type, bool preferCallerSaved);
   RegState* getReg(RegState* reg);
 
   template<typename Inner, int DumpVal=4>
@@ -175,8 +183,8 @@ private:
   IRFactory* const m_irFactory;
   RegState   m_regs[NumRegs];
   // Lists of free caller and callee-saved registers, respectively.
-  smart::list<RegState*> m_freeCallerSaved;
-  smart::list<RegState*> m_freeCalleeSaved;
+  smart::list<RegState*> m_freeCallerSaved[PhysReg::kNumTypes];
+  smart::list<RegState*> m_freeCalleeSaved[PhysReg::kNumTypes];
   // List of assigned registers, sorted high to low by lastUseId.
   smart::list<RegState*> m_allocatedRegs;
 
@@ -237,8 +245,10 @@ void LinearScan::StateSave::save(LinearScan* ls) {
 
 void LinearScan::StateSave::restore(LinearScan* ls) {
   ls->m_allocatedRegs.clear();
-  ls->m_freeCalleeSaved.clear();
-  ls->m_freeCallerSaved.clear();
+  for (int i = 0; i < PhysReg::kNumTypes; i++) {
+    ls->m_freeCalleeSaved[i].clear();
+    ls->m_freeCallerSaved[i].clear();
+  }
 
   for (size_t i = 0; i < NumRegs; i++) {
     ls->m_regs[i] = m_regs[i];
@@ -247,7 +257,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
     if (reg->isAllocated()) {
       SSATmp* tmp = reg->m_ssaTmp;
       for (int r = 0; r < ls->m_allocInfo[tmp].numAllocatedRegs(); r++) {
-        if ((int)ls->m_allocInfo[tmp].getReg(r) == i) {
+        if (ls->m_allocInfo[tmp].getReg(r) == PhysReg(i)) {
           ls->allocRegToTmp(reg, tmp, r);
         }
       }
@@ -266,23 +276,25 @@ LinearScan::LinearScan(IRFactory* irFactory)
   , m_jmps(irFactory, JmpList())
   , m_allocInfo(irFactory)
 {
-  for (int i = 0; i < kNumX64Regs; i++) {
+  for (int i = 0; i < kNumRegs; i++) {
     m_regs[i].m_ssaTmp = nullptr;
-    m_regs[i].m_regNo = i;
+    m_regs[i].m_reg = PhysReg(i);
     m_regs[i].m_pinned = false;
     m_regs[i].m_reserved = false;
   }
 
   // Mark reserved regs.
-  m_regs[int(rVmSp)]   .m_reserved = true;
-  m_regs[int(rsp)]     .m_reserved = true;
-  m_regs[int(rVmFp)]   .m_reserved = true;
-  m_regs[int(rScratch)].m_reserved = true;
-  m_regs[int(rVmTl)]   .m_reserved = true;
+  m_regs[int(PhysReg(rVmSp))]       .m_reserved = true;
+  m_regs[int(PhysReg(rsp))]         .m_reserved = true;
+  m_regs[int(PhysReg(rVmFp))]       .m_reserved = true;
+  m_regs[int(PhysReg(rScratch))]    .m_reserved = true;
+  m_regs[int(PhysReg(rVmTl))]       .m_reserved = true;
+  m_regs[int(PhysReg(rXMMScratch0))].m_reserved = true;
+  m_regs[int(PhysReg(rXMMScratch1))].m_reserved = true;
 
   // Reserve extra regs for testing purpose.
   uint32_t numFreeRegs = RuntimeOption::EvalHHIRNumFreeRegs;
-  for (int i = kNumX64Regs - 1; i >= 0; i--) {
+  for (int i = kNumRegs - 1; i >= 0; i--) {
     if (!m_regs[i].m_reserved) {
       if (numFreeRegs == 0) {
         m_regs[i].m_reserved = true;
@@ -299,7 +311,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
   // Reload all source operands if necessary.
   // Mark registers as unpinned.
-  for (int regNo = 0; regNo < kNumX64Regs; ++regNo) {
+  for (int regNo = 0; regNo < kNumRegs; ++regNo) {
     m_regs[regNo].m_pinned = false;
   }
   smart::vector<bool> needsReloading(inst->getNumSrcs(), true);
@@ -425,6 +437,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
 void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
   bool preferCallerSaved = true;
+  PhysReg::Type regType = getRegType(ssaTmp);
+
   if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
     // Prefer caller-saved registers iff <ssaTmp> doesn't span native.
     preferCallerSaved = (m_uses[ssaTmp].lastUse <= getNextNativeId());
@@ -432,7 +446,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 
   RegState* reg = nullptr;
   if (!preferCallerSaved) {
-    reg = getFreeReg(false);
+    reg = getFreeReg(regType, false);
     if (reg->isCallerSaved()) {
       // If we are out of callee-saved registers, fall into the logic of
       // assigning a caller-saved register.
@@ -471,7 +485,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
   if (reg == nullptr) {
     // No pre-coloring for this tmp.
     // Pick a regular caller-saved reg.
-    reg = getFreeReg(true);
+    reg = getFreeReg(regType, true);
   }
 
   assert(reg);
@@ -495,7 +509,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
   reg->m_ssaTmp = ssaTmp;
   // mark inst as using this register
-  m_allocInfo[ssaTmp].setReg(PhysReg(reg->m_regNo), index);
+  m_allocInfo[ssaTmp].setReg(reg->m_reg, index);
   uint32_t lastUseId = m_uses[ssaTmp].lastUse;
   if (reg->isReserved()) {
     return;
@@ -802,7 +816,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
 // caller-saved regs depends on pre-coloring hints.
 void LinearScan::initFreeList() {
   // reserve extra regs for testing purpose.
-  for (int i = kNumX64Regs - 1; i >= 0; i--) {
+  for (int i = kNumRegs - 1; i >= 0; i--) {
     if (!m_regs[i].m_reserved) {
       pushFreeReg(&m_regs[i]);
     }
@@ -1243,16 +1257,18 @@ LinearScan::RegState* LinearScan::getReg(RegState* reg) {
   if (reg->isReserved() || reg->isAllocated()) {
     return nullptr;
   }
+  auto type = reg->type();
   auto& freeList = (reg->isCallerSaved() ?
-                    m_freeCallerSaved : m_freeCalleeSaved);
+                    m_freeCallerSaved[type] : m_freeCalleeSaved[type]);
   freeList.erase(reg->m_pos);
   // Pin it so that other operands in the same instruction will not reuse it.
   reg->m_pinned = true;
   return reg;
 }
 
-LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
-  if (m_freeCallerSaved.empty() && m_freeCalleeSaved.empty()) {
+LinearScan::RegState* LinearScan::getFreeReg(PhysReg::Type type,
+                                             bool          preferCallerSaved) {
+  if (m_freeCallerSaved[type].empty() && m_freeCalleeSaved[type].empty()) {
     assert(!m_allocatedRegs.empty());
 
     // no free registers --> free a register from the allocatedRegs
@@ -1260,7 +1276,7 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
     // 1. not used for any source operand in the current instruction, and
     // 2. not used for the return address of a function.
     auto canSpill = [&] (RegState* reg) {
-      return !reg->isPinned() && !reg->isRetAddr();
+      return !reg->isPinned() && !reg->isRetAddr() && reg->type() == type;
     };
     auto pos = std::find_if(m_allocatedRegs.begin(), m_allocatedRegs.end(),
                             canSpill);
@@ -1273,11 +1289,11 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
   smart::list<RegState*>* preferred = nullptr;
   smart::list<RegState*>* other = nullptr;
   if (preferCallerSaved) {
-    preferred = &m_freeCallerSaved;
-    other = &m_freeCalleeSaved;
+    preferred = &m_freeCallerSaved[type];
+    other = &m_freeCalleeSaved[type];
   } else {
-    preferred = &m_freeCalleeSaved;
-    other = &m_freeCallerSaved;
+    preferred = &m_freeCalleeSaved[type];
+    other = &m_freeCallerSaved[type];
   }
 
   RegState* theFreeReg = nullptr;
@@ -1304,12 +1320,14 @@ void LinearScan::freeReg(RegState* reg) {
 }
 
 void LinearScan::pushFreeReg(RegState* reg) {
+  PhysReg::Type type = reg->type();
   auto& freeList = (reg->isCallerSaved() ?
-                    m_freeCallerSaved : m_freeCalleeSaved);
+                    m_freeCallerSaved[type] : m_freeCalleeSaved[type]);
   // If next native is going to use <reg>, put <reg> to the back of the
   // queue so that it's unlikely to be misused by irrelevant tmps.
   if (RuntimeOption::EvalHHIREnablePreColoring &&
-      (reg->m_regNo == int(rax) || m_preColoringHint.preColorsTmp(reg))) {
+      type == PhysReg::GP &&
+      (reg->m_reg == PhysReg(rax) || m_preColoringHint.preColorsTmp(reg))) {
     freeList.push_back(reg);
     reg->m_pos = (--freeList.end());
   } else {
@@ -1396,7 +1414,8 @@ SSATmp* LinearScan::getOrigTmp(SSATmp* tmp) {
 }
 
 bool LinearScan::PreColoringHint::preColorsTmp(RegState* reg) const {
-  return m_preColoredTmps[reg->m_regNo].first != nullptr;
+  assert(reg->m_reg.isGP());
+  return m_preColoredTmps[int(reg->m_reg)].first != nullptr;
 }
 
 // Get the pre-coloring register of (<tmp>, <index>).
@@ -1404,9 +1423,10 @@ bool LinearScan::PreColoringHint::preColorsTmp(RegState* reg) const {
 // not a big problem.
 RegNumber LinearScan::PreColoringHint::getPreColoringReg(
     SSATmp* tmp, uint32_t index) const {
-  for (int regNo = 0; regNo < kNumX64Regs; ++regNo) {
+  for (int regNo = 0; regNo < kNumRegs; ++regNo) {
     if (m_preColoredTmps[regNo].first == tmp &&
         m_preColoredTmps[regNo].second == index) {
+      assert(regNo < kNumGPRegs);
       return (RegNumber)regNo;
     }
   }
@@ -1414,7 +1434,7 @@ RegNumber LinearScan::PreColoringHint::getPreColoringReg(
 }
 
 void LinearScan::PreColoringHint::clear() {
-  for (int i = 0; i < kNumX64Regs; ++i) {
+  for (int i = 0; i < kNumRegs; ++i) {
     m_preColoredTmps[i].first = nullptr;
     m_preColoredTmps[i].second = 0;
   }
@@ -1424,8 +1444,8 @@ void LinearScan::PreColoringHint::clear() {
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
   int reg = int(argNumToRegName[argNum]);
-  assert(reg >= 0 && reg < kNumX64Regs);
-  m_preColoredTmps[reg].first = tmp;
+  assert(reg >= 0 && reg < kNumGPRegs);
+  m_preColoredTmps[reg].first  = tmp;
   m_preColoredTmps[reg].second = index;
 }
 

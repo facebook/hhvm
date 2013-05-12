@@ -174,8 +174,8 @@ struct TraceBuilder {
     return gen(DefConst, type, ConstData(val));
   }
 
-  SSATmp* cns(Type t) {
-    return gen(DefConst, t, ConstData(0));
+  SSATmp* cns(Type type) {
+    return gen(DefConst, type, ConstData(0));
   }
 
   template<typename T>

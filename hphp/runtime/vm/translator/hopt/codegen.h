@@ -270,7 +270,6 @@ private:
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
-  void cgConvPrimitiveToDbl(IRInstruction* inst);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,
@@ -311,6 +310,7 @@ private:
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
+  void emitConvBoolOrIntToDbl(IRInstruction* inst);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling

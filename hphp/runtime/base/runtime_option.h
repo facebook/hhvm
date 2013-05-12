@@ -432,6 +432,7 @@ public:
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIREnableRefCountOpt,       true)                            \
   F(bool, HHIREnableSinking,           true)                            \
+  F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDisableTx64,             true)                            \

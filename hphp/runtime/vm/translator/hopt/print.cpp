@@ -249,7 +249,12 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
       if (!info.spilled()) {
         for (int i = 0, sz = info.numAllocatedRegs(); i < sz; ++i) {
           if (i != 0) os << ",";
-          os << reg::regname(Reg64(info.getReg(i)));
+          PhysReg reg = info.getReg(i);
+          if (reg.type() == PhysReg::GP) {
+            os << reg::regname(Reg64(reg));
+          } else {
+            os << reg::regname(RegXMM(reg));
+          }
         }
       } else {
         for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {

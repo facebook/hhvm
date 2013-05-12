@@ -465,7 +465,7 @@ TranslatorX64::emitPushAR(const NormalizedInstruction& i, const Func* func,
 void
 TranslatorX64::emitCallSaveRegs() {
   assert(!m_regMap.frozen());
-  m_regMap.cleanRegs(kCallerSaved);
+  m_regMap.cleanRegs(kGPCallerSaved);
 }
 
 static void UNUSED tc_debug_print(const char* message,
@@ -728,7 +728,7 @@ TranslatorX64::emitCall(X64Assembler& a, TCA dest, bool killRegs) {
   }
   if (killRegs) {
     // All caller-saved regs are now suspect.
-    m_regMap.smashRegs(kCallerSaved);
+    m_regMap.smashRegs(kGPCallerSaved);
   }
 }
 
@@ -743,7 +743,7 @@ TranslatorX64::emitCall(X64Assembler& a, Call call, bool killRegs) {
   a.loadq(*rdi, rax);
   a.call(rax[call.getOffset()]);
   if (killRegs) {
-    m_regMap.smashRegs(kCallerSaved);
+    m_regMap.smashRegs(kGPCallerSaved);
   }
 }
 
@@ -868,7 +868,7 @@ void TranslatorX64::prepareCallSaveRegs() {
   emitCallSaveRegs(); // Clean caller-saved regs.
   m_pendingUnwindRegInfo.clear();
 
-  RegSet rset = kCalleeSaved;
+  RegSet rset = kGPCalleeSaved;
   PhysReg reg;
   while (rset.findFirst(reg)) {
     rset.remove(reg);
@@ -1030,7 +1030,7 @@ void TranslatorX64::emitDecRef(Asm& a,
 
     auto getPushSet = [&] {
       RegSet ret;
-      auto regs = kCallerSaved;
+      auto regs = kGPCallerSaved;
       PhysReg reg;
       while (regs.findFirst(reg)) {
         regs.remove(reg);
@@ -1233,7 +1233,7 @@ void TranslatorX64::emitGenericDecRefHelpers() {
 
 asm_label(a, release);
   {
-    PhysRegSaver prs(a, kCallerSaved - RegSet(rdi));
+    PhysRegSaver prs(a, kGPCallerSaved - RegSet(rdi));
     callDestructor(a, rScratch, rax);
     recordIndirectFixup(a.code.frontier, prs.rspAdjustment());
   }
@@ -3647,17 +3647,17 @@ TranslatorX64::binaryMixedArith(const NormalizedInstruction& i,
                            Opcode op,
                            PhysReg srcReg,
                            PhysReg srcDestReg) {
-  getInputsIntoXMMRegs(i, srcReg, srcDestReg, xmm1, xmm0);
+  getInputsIntoXMMRegs(i, srcReg, srcDestReg, rXMMScratch1, rXMMScratch0);
   switch(op) {
 #define CASEIMM(OpBc, x64op)                                       \
-    case OpBc:    a.  x64op ##sd_xmm_xmm(xmm1, xmm0); break
+    case OpBc:    a.  x64op ##sd_xmm_xmm(rXMMScratch1, rXMMScratch0); break
     CASEIMM(OpAdd, add);
     CASEIMM(OpSub, sub);
     CASEIMM(OpMul, mul);
 #undef CASEIMM
     default: not_reached();
   }
-  a.   mov_xmm_reg64(xmm0, srcDestReg);
+  a.   mov_xmm_reg64(rXMMScratch0, srcDestReg);
 }
 
 void
@@ -4100,9 +4100,9 @@ TranslatorX64::analyzeEqOp(Tracelet& t, NormalizedInstruction& i) {
 void
 TranslatorX64::fpEq(const NormalizedInstruction& ni,
                     PhysReg lr, PhysReg rr) {
-  getInputsIntoXMMRegs(ni, lr, rr, xmm0, xmm1);
+  getInputsIntoXMMRegs(ni, lr, rr, rXMMScratch0, rXMMScratch1);
   m_regMap.allocOutputRegs(ni);
-  a.      ucomisd_xmm_xmm(xmm0, xmm1);
+  a.      ucomisd_xmm_xmm(rXMMScratch0, rXMMScratch1);
   semiLikelyIfBlock(CC_P, a, [&] {
     // PF means unordered; treat it as !eq. Or 1 into anything at all
     // to clear ZF.
@@ -11459,7 +11459,7 @@ TranslatorX64::TranslatorX64()
   m_irAUsage(0),
   m_irAstubsUsage(0),
   m_numHHIRTrans(0),
-  m_regMap(kCallerSaved, kCalleeSaved, this),
+  m_regMap(kGPCallerSaved, kGPCalleeSaved, this),
   m_unwindRegMap(128),
   m_curTrace(0),
   m_curNI(0),
@@ -11739,7 +11739,7 @@ TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
   a.    push (rbp); // {
   a.    movq (rsp, rbp);
   {
-    RegSet s = kCallerSaved - alreadySaved;
+    RegSet s = kGPCallerSaved - alreadySaved;
     PhysRegSaverParity rs(Parity, a, s);
     emitCall(a, c);
   }

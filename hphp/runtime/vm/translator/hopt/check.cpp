@@ -94,7 +94,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
 }
 
 enum Limits : unsigned {
-  kNumRegisters = Transl::kNumX64Regs,
+  kNumRegisters = Transl::kNumRegs,
   kNumSlots = NumPreAllocatedSpillLocs
 };
 

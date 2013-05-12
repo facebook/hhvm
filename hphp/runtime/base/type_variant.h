@@ -802,7 +802,7 @@ class Variant : private TypedValue {
     return rvalAtHelper(offset, flags);
   }
   Variant rvalAt(double offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(CStrRef offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
 
@@ -819,7 +819,7 @@ class Variant : private TypedValue {
     return rvalRefHelper(offset, tmp, flags);
   }
   CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
-  CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
 
@@ -873,14 +873,14 @@ class Variant : private TypedValue {
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
   Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
   Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
   Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
 
@@ -907,9 +907,7 @@ class Variant : private TypedValue {
   CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
   CVarRef set(int64_t   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
-  CVarRef set(litstr  key, CVarRef v, bool isString = false) {
-    return set(String(key), v, isString);
-  }
+  CVarRef set(litstr  key, CVarRef v, bool isString = false) = delete;
   CVarRef set(CStrRef key, CVarRef v, bool isString = false);
   CVarRef set(CVarRef key, CVarRef v);
 
@@ -918,18 +916,14 @@ class Variant : private TypedValue {
   CVarRef setRef(int     key, CVarRef v) { return setRef((int64_t)key, v); }
   CVarRef setRef(int64_t   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v);
-  CVarRef setRef(litstr  key, CVarRef v, bool isString = false) {
-    return setRef(String(key), v, isString);
-  }
+  CVarRef setRef(litstr  key, CVarRef v, bool isString = false) = delete;
   CVarRef setRef(CStrRef key, CVarRef v, bool isString = false);
   CVarRef setRef(CVarRef key, CVarRef v);
 
   CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key, variant(v)); }
-  CVarRef set(litstr  key, RefResult v, bool isString = false) {
-    return setRef(key, variant(v), isString);
-  }
+  CVarRef set(litstr  key, RefResult v, bool isString = false) = delete;
   CVarRef set(CStrRef key, RefResult v, bool isString = false) {
     return setRef(key, variant(v), isString);
   }
@@ -941,9 +935,7 @@ class Variant : private TypedValue {
   void remove(int     key) { removeImpl((int64_t)key);}
   void remove(int64_t   key) { removeImpl(key);}
   void remove(double  key) { removeImpl(key);}
-  void remove(litstr  key, bool isString = false) {
-    remove(String(key), isString);
-  }
+  void remove(litstr  key, bool isString = false) = delete;
   void remove(CStrRef key, bool isString = false) {
     removeImpl(key, isString);
   }
@@ -1129,7 +1121,7 @@ class Variant : private TypedValue {
   CVarRef set(int     v);
   CVarRef set(int64_t   v);
   CVarRef set(double  v);
-  CVarRef set(litstr  v);
+  CVarRef set(litstr  v) = delete;
   CVarRef set(const std::string & v) {
     return set(String(v));
   }
@@ -1449,8 +1441,8 @@ public:
     return asVariant()->isNull();
   }
 private:
-  /* implicit */ VarNR(litstr  v); // not implemented
-  /* implicit */ VarNR(const std::string & v); // not implemented
+  /* implicit */ VarNR(litstr  v) = delete;
+  /* implicit */ VarNR(const std::string & v) = delete;
 
   void init(DataType dt) {
     m_type = dt;

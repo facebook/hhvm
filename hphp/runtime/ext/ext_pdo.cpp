@@ -1670,7 +1670,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
     dest = dest.toString();
   }
   if (dest.isNull() && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
-    dest = "";
+    dest = empty_string;
   }
 }
 

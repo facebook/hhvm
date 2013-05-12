@@ -1115,7 +1115,7 @@ bool TestExtArray::test_array_unshift() {
      ")\n");
 
   q = CREATE_MAP3(0, "orange", 1, "banana", "a", "dummy");
-  q.remove("a");
+  q.remove(String("a"));
   f_array_unshift(3, ref(q), "apple", CREATE_VECTOR1("raspberry"));
   VS(f_print_r(q, true),
      "Array\n"

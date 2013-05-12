@@ -260,7 +260,7 @@ bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
       return false;
     }
   } else {
-    message = (const char *)MSGBUF_MTEXT(buffer);
+    message = String((const char *)MSGBUF_MTEXT(buffer));
   }
 
   return true;

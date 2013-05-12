@@ -128,7 +128,7 @@ static void process_cmd_arguments(int argc, char **argv) {
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
   g->GV(argc) = argc;
   for (int i = 0; i < argc; i++) {
-    g->GV(argv).lvalAt() = argv[i];
+    g->GV(argv).lvalAt() = String(argv[i]);
   }
 }
 
@@ -439,6 +439,21 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
+static const StaticString
+  s_HPHP("HPHP"),
+  s_HHVM("HHVM"),
+  s_HHVM_JIT("HHVM_JIT"),
+  s_REQUEST_START_TIME("REQUEST_START_TIME"),
+  s_REQUEST_TIME("REQUEST_TIME"),
+  s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
+  s_SCRIPT_NAME("SCRIPT_NAME"),
+  s_PHP_SELF("PHP_SELF"),
+  s_argc("argc"),
+  s_argv("argv"),
+  s_PWD("PWD"),
+  s_HOSTNAME("HOSTNAME");
+
 void execute_command_line_begin(int argc, char **argv, int xhprof) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   string args;
@@ -455,10 +470,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
 
   process_env_variables(g->GV(_ENV));
-  g->GV(_ENV).set("HPHP", 1);
-  g->GV(_ENV).set("HHVM", 1);
+  g->GV(_ENV).set(s_HPHP, 1);
+  g->GV(_ENV).set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
-    g->GV(_ENV).set("HHVM_JIT", 1);
+    g->GV(_ENV).set(s_HHVM_JIT, 1);
   }
 
   process_cmd_arguments(argc, argv);
@@ -466,18 +481,18 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
   time_t now = time(nullptr);
-  server.set("REQUEST_START_TIME", now);
-  server.set("REQUEST_TIME", now);
-  server.set("DOCUMENT_ROOT", "");
-  server.set("SCRIPT_FILENAME", argv[0]);
-  server.set("SCRIPT_NAME", argv[0]);
-  server.set("PHP_SELF", argv[0]);
-  server.set("argv", g->GV(argv));
-  server.set("argc", g->GV(argc));
-  server.set("PWD", g_context->getCwd());
+  server.set(s_REQUEST_START_TIME, now);
+  server.set(s_REQUEST_TIME, now);
+  server.set(s_DOCUMENT_ROOT, empty_string);
+  server.set(s_SCRIPT_FILENAME, argv[0]);
+  server.set(s_SCRIPT_NAME, argv[0]);
+  server.set(s_PHP_SELF, argv[0]);
+  server.set(s_argv, g->GV(argv));
+  server.set(s_argc, g->GV(argc));
+  server.set(s_PWD, g_context->getCwd());
   char hostname[1024];
   if (!gethostname(hostname, 1024)) {
-    server.set("HOSTNAME", String(hostname, CopyString));
+    server.set(s_HOSTNAME, String(hostname, CopyString));
   }
 
   for(std::map<string,string>::iterator it =

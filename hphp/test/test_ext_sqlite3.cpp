@@ -80,7 +80,7 @@ bool TestExtSqlite3::test_sqlite3() {
 
     Variant id = "DEF";
     VERIFY(stmt->t_bindvalue(":id", id, SQLITE3_TEXT));
-    id = "ABC";
+    id = String("ABC");
     {
       Object objResult = stmt->t_execute();
       c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
@@ -89,9 +89,9 @@ bool TestExtSqlite3::test_sqlite3() {
 
     VERIFY(stmt->t_clear());
     VERIFY(stmt->t_reset());
-    id = "DEF";
+    id = String("DEF");
     VERIFY(stmt->t_bindparam(":id", ref(id), SQLITE3_TEXT));
-    id = "ABC";
+    id = String("ABC");
     {
       Object objResult = stmt->t_execute();
       c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();

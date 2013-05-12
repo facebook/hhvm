@@ -329,14 +329,12 @@ static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
 
 static inline void add_offset_pair(Variant &result, CStrRef str, int offset,
                                    const char *name) {
-  Array match_pair;
-  match_pair.append(str);
-  match_pair.append(offset);
-
-  if (name) {
-    result.set(name, match_pair);
-  }
-  result.append(match_pair);
+  ArrayInit match_pair(2);
+  match_pair.set(str);
+  match_pair.set(offset);
+  Variant match_pair_v = match_pair.toVariant();
+  if (name) result.set(String(name), match_pair_v);
+  result.append(match_pair_v);
 }
 
 static inline bool pcre_need_log_error(int pcre_code) {
@@ -633,7 +631,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                result_set.set(subpat_names[i], value);
+                result_set.set(String(subpat_names[i]), value);
               }
               result_set.append(value);
             }
@@ -654,7 +652,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
             String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                          CopyString);
             if (subpat_names[i]) {
-              subpats->set(subpat_names[i], value);
+              subpats->set(String(subpat_names[i]), value);
             }
             subpats->append(value);
           }
@@ -698,7 +696,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        subpats->set(subpat_names[i], match_sets[i]);
+        subpats->set(String(subpat_names[i]), match_sets[i]);
       }
       subpats->append(match_sets[i]);
     }

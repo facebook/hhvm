@@ -291,10 +291,6 @@ HOT_FUNC IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
 IMPLEMENT_SET(int, m_type = KindOfInt64; m_data.num = v)
 HOT_FUNC IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
-IMPLEMENT_SET(litstr,
-              m_type = KindOfString;
-              m_data.pstr = NEW(StringData)(v);
-              m_data.pstr->incRefCount())
 IMPLEMENT_SET(const StaticString&,
               StringData* s = v.get();
               assert(s);
@@ -1279,7 +1275,7 @@ Variant &Variant::operator++() {
   case KindOfString:
     {
       if (getStringData()->empty()) {
-        set("1");
+        set(s_1);
       } else {
         int64_t lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);
@@ -1914,11 +1910,6 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
-  String key(offset);
-  return rvalAt(key, flags);
-}
-
 Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
@@ -2066,11 +2057,6 @@ CVarRef Variant::rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
     return m_data.parr->get(ToKey(offset), flags & AccessFlags::Error);
   }
   return rvalRefHelper(offset, tmp, flags);
-}
-
-CVarRef Variant::rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  String key(offset);
-  return rvalRef(key, tmp, flags);
 }
 
 CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
@@ -2252,10 +2238,6 @@ Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalAt(double  key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
-Variant &Variant::lvalAt(litstr  ckey, ACCESSPARAMS_IMPL) {
-  String key(ckey);
-  return lvalAt(key, flags);
-}
 Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CStrRef>(key, flags);
 }
@@ -2271,10 +2253,6 @@ Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
 }
 Variant &Variant::lvalRef(double  key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return LvalAtImpl0(this, key, &tmp, false, flags);
-}
-Variant &Variant::lvalRef(litstr ckey, Variant& tmp, ACCESSPARAMS_IMPL) {
-  String key(ckey);
-  return lvalRef(key, tmp, flags);
 }
 Variant &Variant::lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return Variant::LvalAtImpl0<CStrRef>(this, key, &tmp, false, flags);

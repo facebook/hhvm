@@ -31,7 +31,7 @@ namespace HPHP {
 
 class XboxTransport : public Transport, public Synchronizable {
 public:
-  XboxTransport(CStrRef message, CStrRef reqInitDoc = "")
+  explicit XboxTransport(CStrRef message, CStrRef reqInitDoc = "")
       : m_refCount(0), m_done(false), m_code(0) {
     gettime(CLOCK_MONOTONIC, &m_queueTime);
 
@@ -239,6 +239,11 @@ static bool isLocalHost(CStrRef host) {
   return host.empty() || host == "localhost" || host == "127.0.0.1";
 }
 
+static const StaticString
+  s_code("code"),
+  s_response("response"),
+  s_error("error");
+
 bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
                              CStrRef host /* = "localhost" */) {
   if (isLocalHost(host)) {
@@ -262,11 +267,11 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
     job->decRefCount(); // i'm done with this job
 
     if (code > 0) {
-      ret.set("code", code);
+      ret.set(s_code, code);
       if (code == 200) {
-        ret.set("response", unserialize_from_string(response));
+        ret.set(s_response, unserialize_from_string(response));
       } else {
-        ret.set("error", response);
+        ret.set(s_error, response);
       }
       return true;
     }
@@ -294,17 +299,17 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
-        ret.set("code", code);
+        ret.set(s_code, code);
         if (code == 200) {
-          ret.set("response", unserialize_from_string(sresponse));
+          ret.set(s_response, unserialize_from_string(sresponse));
         } else {
-          ret.set("error", sresponse);
+          ret.set(s_error, sresponse);
         }
         return true;
       }
       // code wasn't correctly set by http client, treat it as not found
-      ret.set("code", 404);
-      ret.set("error", "http client failed");
+      ret.set(s_code, 404);
+      ret.set(s_error, "http client failed");
     }
   }
 

@@ -337,20 +337,20 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(0) = "v1";
-    arr.lvalAt(1) = "v2";
+    arr.lvalAt(0) = String("v1");
+    arr.lvalAt(1) = String("v2");
     VS(arr, CREATE_VECTOR2("v1", "v2"));
   }
   {
     Array arr;
-    arr.lvalAt(s_n1) = "v1";
-    arr.lvalAt(s_n2) = "v2";
+    arr.lvalAt(s_n1) = String("v1");
+    arr.lvalAt(s_n2) = String("v2");
     VS(arr, CREATE_MAP2("n1", "v1", "n2", "v2"));
   }
   {
     Array arr;
     Variant name = "name";
-    arr.lvalAt(name) = "value";
+    arr.lvalAt(name) = String("value");
     VS(arr, CREATE_MAP1("name", "value"));
   }
   {
@@ -400,8 +400,8 @@ bool TestCppBase::TestArray() {
   // membership
   {
     Array arr;
-    arr.lvalAt(0) = "v1";
-    arr.lvalAt(1) = "v2";
+    arr.lvalAt(0) = String("v1");
+    arr.lvalAt(1) = String("v2");
     VERIFY(arr.exists(0));
     arr.remove(0);
     VERIFY(!arr.exists(0));
@@ -412,28 +412,28 @@ bool TestCppBase::TestArray() {
   {
     static const StaticString s_0("0");
     Array arr;
-    arr.lvalAt(0) = "v1";
+    arr.lvalAt(0) = String("v1");
     VERIFY(arr.exists(0));
     arr.remove(String(s_0));
     VERIFY(!arr.exists(0));
   }
   {
     Array arr;
-    arr.lvalAt(0) = "v1";
+    arr.lvalAt(0) = String("v1");
     VERIFY(arr.exists(0));
     arr.remove(Variant("0"));
     VERIFY(!arr.exists(0));
   }
   {
     Array arr;
-    arr.lvalAt(0) = "v1";
+    arr.lvalAt(0) = String("v1");
     VERIFY(arr.exists(0));
     arr.remove(Variant(Variant("0")));
     VERIFY(!arr.exists(0));
   }
   {
     Array arr;
-    arr.lvalAt(0) = "v1";
+    arr.lvalAt(0) = String("v1");
     VERIFY(arr.exists(0));
     arr.remove(Variant(Variant(0.5)));
     VERIFY(!arr.exists(0));
@@ -447,8 +447,8 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(s_n1) = "v1";
-    arr.lvalAt(s_n2) = "v2";
+    arr.lvalAt(s_n1) = String("v1");
+    arr.lvalAt(s_n2) = String("v2");
     VERIFY(arr.exists(s_n1));
     arr.remove(s_n1);
     VERIFY(!arr.exists(s_n1));
@@ -458,17 +458,17 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt() = "test";
+    arr.lvalAt() = String("test");
     VS(arr, CREATE_VECTOR1("test"));
   }
   {
     Array arr;
-    arr.lvalAt(s_name) = "value";
+    arr.lvalAt(s_name) = String("value");
     VERIFY(arr.exists(s_name));
   }
   {
     Array arr;
-    arr.lvalAt(1) = "value";
+    arr.lvalAt(1) = String("value");
     VERIFY(arr.exists(1));
     VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
@@ -478,7 +478,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(s_1) = "value";
+    arr.lvalAt(s_1) = String("value");
     VERIFY(arr.exists(1));
     VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
@@ -488,7 +488,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(1.5) = "value";
+    arr.lvalAt(1.5) = String("value");
     VERIFY(arr.exists(1));
     VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
@@ -498,7 +498,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(Variant(1.5)) = "value";
+    arr.lvalAt(Variant(1.5)) = String("value");
     VERIFY(arr.exists(1));
     VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
@@ -508,7 +508,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr;
-    arr.lvalAt(Variant("1")) = "value";
+    arr.lvalAt(Variant("1")) = String("value");
     VERIFY(arr.exists(1));
     VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
@@ -657,19 +657,19 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v;
-    v.lvalAt(0) = "v0";
-    v.lvalAt(1) = "v1";
+    v.lvalAt(0) = String("v0");
+    v.lvalAt(1) = String("v1");
     VERIFY(v[0] == "v0");
     VERIFY(v[1] == "v1");
   }
   {
     Variant v;
-    v.lvalAt() = "test";
+    v.lvalAt() = String("test");
     VS(v, CREATE_VECTOR1("test"));
   }
   {
     Variant v;
-    v.lvalAt(1) = "test";
+    v.lvalAt(1) = String("test");
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
@@ -678,7 +678,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v;
-    v.lvalAt(Variant(1.5)) = "test";
+    v.lvalAt(Variant(1.5)) = String("test");
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
@@ -687,7 +687,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v;
-    v.lvalAt(s_1) = "test";
+    v.lvalAt(s_1) = String("test");
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
@@ -696,7 +696,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v;
-    v.lvalAt(Variant("1")) = "test";
+    v.lvalAt(Variant("1")) = String("test");
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
@@ -707,8 +707,8 @@ bool TestCppBase::TestVariant() {
   // membership
   {
     Variant v;
-    v.lvalAt(s_n0) = "v0";
-    v.lvalAt(s_n1) = "v1";
+    v.lvalAt(s_n0) = String("v0");
+    v.lvalAt(s_n1) = String("v1");
     v.remove(s_n1);
     VS(v, CREATE_MAP1(s_n0, "v0"));
     v.append("v2");
@@ -716,29 +716,29 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v;
-    v.lvalAt(s_n0) = "v0";
-    v.lvalAt(1) = "v1";
+    v.lvalAt(s_n0) = String("v0");
+    v.lvalAt(1) = String("v1");
     v.remove(Variant(1.5));
     VS(v, CREATE_MAP1("n0", "v0"));
   }
   {
     Variant v;
-    v.lvalAt(s_n0) = "v0";
-    v.lvalAt(1) = "v1";
+    v.lvalAt(s_n0) = String("v0");
+    v.lvalAt(1) = String("v1");
     v.remove(Variant("1"));
     VS(v, CREATE_MAP1("n0", "v0"));
   }
   {
     Variant v;
-    v.lvalAt(s_n0) = "v0";
-    v.lvalAt(1) = "v1";
-    v.remove("1");
+    v.lvalAt(s_n0) = String("v0");
+    v.lvalAt(1) = String("v1");
+    v.remove(String("1"));
     VS(v, CREATE_MAP1("n0", "v0"));
   }
   {
     Variant v;
-    v.lvalAt(s_n0) = "v0";
-    v.lvalAt(empty_string) = "v1";
+    v.lvalAt(s_n0) = String("v0");
+    v.lvalAt(empty_string) = String("v1");
     v.remove(Variant());
     VS(v, CREATE_MAP1("n0", "v0"));
   }
@@ -747,13 +747,13 @@ bool TestCppBase::TestVariant() {
   {
     Variant v1("original");
     Variant v2 = v1;
-    v2 = "changed";
+    v2 = String("changed");
     VERIFY(v1 == "original");
   }
   {
     Variant v1("original");
     Variant v2 = strongBind(v1);
-    v2 = "changed";
+    v2 = String("changed");
     VERIFY(v1 == "changed");
   }
   {
@@ -972,18 +972,18 @@ bool TestCppBase::TestEqualAsStr() {
   var_array[5] = 0.0;
   var_array[6] = 1.0;
   var_array[7] = 42.2;
-  var_array[8] = "0";
-  var_array[9] = "1";
-  var_array[10] = "42";
-  var_array[11] = "x";
+  var_array[8] = String("0");
+  var_array[9] = String("1");
+  var_array[10] = String("42");
+  var_array[11] = String("x");
   var_array[12] = Array::Create();
   Variant v1("original");
   var_array[13] = v1;
   Variant v2("changed");
   var_array[14] = v2;
-  var_array[15] = "";
-  var_array[16] = "Array";
-  var_array[17] = "ARRAY";
+  var_array[15] = empty_string;
+  var_array[16] = String("Array");
+  var_array[17] = String("ARRAY");
   for (int i = 0; i < arr_len; i++) {
     for (int j = 0; j < arr_len; j++) {
       bool eqAsStr = equalAsStr(var_array[i], var_array[j]);

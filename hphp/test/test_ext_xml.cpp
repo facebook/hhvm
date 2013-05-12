@@ -74,9 +74,9 @@ bool TestExtXml::test_xml_parse_into_struct() {
   Variant vals, index;
   f_xml_parse_into_struct(p, simple, ref(vals), ref(index));
   f_xml_parser_free(p);
-  VS(f_print_r(index.rvalAt("PARA"),1),
+  VS(f_print_r(index.rvalAt(String("PARA")),1),
     "Array\n(\n    [0] => 0\n    [1] => 2\n)\n");
-  VS(f_print_r(index.rvalAt("NOTE"),1),
+  VS(f_print_r(index.rvalAt(String("NOTE")),1),
     "Array\n(\n    [0] => 1\n)\n");
   VS(f_print_r(vals.rvalAt(0),1),
     "Array\n(\n    [tag] => PARA\n    [type] => open\n    [level] => 1\n)\n");

@@ -158,7 +158,7 @@ bool TestExtApc::test_apc_fetch() {
   {
     Variant apcdata = f_apc_fetch("apcdata");
     Variant c = apcdata; // bump up ref count to make a MapVariant copy
-    apcdata.set("b", 3); // problem
+    apcdata.set(String("b"), 3); // problem
     VS(apcdata, CREATE_MAP2("a", "test", "b", 3));
   }
   {

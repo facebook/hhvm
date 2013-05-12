@@ -842,6 +842,10 @@ Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   return retval;
 }
 
+static const StaticString
+  s_2colons("::"),
+  s_0_0_0_0("0.0.0.0");
+
 Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
                       VRefParam name, VRefParam port /* = 0 */) {
   if (len <= 0) {
@@ -893,7 +897,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
 
       name = String(Util::safe_inet_ntoa(sin.sin_addr));
       if (name.toString().empty()) {
-        name = "0.0.0.0";
+        name = s_0_0_0_0;
       }
       port = ntohs(sin.sin_port);
     }
@@ -922,7 +926,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
       if (succ) {
         name = String(addr6, CopyString);
       } else {
-        name = "::";
+        name = s_2colons;
       }
       port = ntohs(sin6.sin6_port);
     }

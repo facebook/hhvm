@@ -49,6 +49,10 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
      function_exists(function_name));
 }
 
+static const StaticString
+  s__invoke("__invoke"),
+  s_Closure__invoke("Closure::__invoke");
+
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
   bool ret = true;
@@ -107,13 +111,11 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 
   if (Variant::GetAccessorType(tv_func) == KindOfObject) {
     ObjectData *d = Variant::GetObjectData(tv_func);
-    static const StringData* sd__invoke
-      = StringData::GetStaticString("__invoke");
-    const Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
+    const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
       if (d->instanceof(c_Closure::s_cls)) {
         // Hack to stop the mangled name from showing up
-        name = "Closure::__invoke";
+        name = s_Closure__invoke;
       } else {
         name = d->o_getClassName() + "::__invoke";
       }
@@ -124,7 +126,8 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   return false;
 }
 
-Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+Variant f_call_user_func(int _argc, CVarRef function,
+                         CArrRef _argv /* = null_array */) {
   return vm_call_user_func(function, _argv);
 }
 
@@ -165,9 +168,9 @@ String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
-    out.set("ret", vm_call_user_func(in[s_func], in[s_args]));
+    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args]));
   } catch (Object &e) {
-    out.set("exception", e);
+    out.set(s_exception, e);
   }
   return f_serialize(out);
 }

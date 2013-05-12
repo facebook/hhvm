@@ -1771,6 +1771,11 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                     nullptr);
     auto const actRec = spillStack();
     auto const objCls = gen(LdObjClass, obj);
+
+    // This is special. We need to move the stackpointer incase LdObjMethod
+    // calls a destructor. Otherwise it would clobber the ActRec we just pushed.
+    emitMarker();
+
     gen(LdObjMethod,
               objCls,
               cns(methodName),

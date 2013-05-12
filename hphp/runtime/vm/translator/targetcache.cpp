@@ -539,6 +539,14 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
     ObjectData* arThis = ar->getThis();
     shouldBeObj->m_type = KindOfObject;
     shouldBeObj->m_data.pobj = arThis;
+
+    // There used to be a half-built ActRec on the stack that we need the
+    // unwinder to ignore. We overwrote 1/3 of it with the code above, but
+    // because of the emitMarker() in LdObjMethod we need the other two slots
+    // to not have any TypedValues.
+    tvWriteNull(shouldBeObj-1);
+    tvWriteNull(shouldBeObj-2);
+
     throw;
   }
 }

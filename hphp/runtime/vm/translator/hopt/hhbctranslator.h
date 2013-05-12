@@ -369,7 +369,6 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
   void setThisAvailable();
-  void emitLoadDeps();
   void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
   void emitInterpOneCF(int numPopped);
 
@@ -638,28 +637,6 @@ private:
     const Func* func;
   };
 
-  struct TypeGuard {
-    enum Kind {
-      Local,
-      Stack,
-      Iter
-    };
-
-    TypeGuard(Kind kind, uint32_t index, Type type)
-      : m_kind(kind)
-      , m_index(index)
-      , m_type(type)
-    {}
-
-    Kind      getKind()  const { return m_kind;  }
-    uint32_t  getIndex() const { return m_index; }
-
-  private:
-    Kind      m_kind;
-    uint32_t  m_index;
-    Type      m_type;
-  };
-
 private:
   IRFactory&        m_irFactory;
   std::unique_ptr<TraceBuilder>
@@ -695,7 +672,6 @@ private:
   std::stack<std::pair<SSATmp*,int32_t>>
                     m_fpiStack;
 
-  vector<TypeGuard> m_typeGuards;
   Trace* const      m_exitGuardFailureTrace;
 };
 

@@ -142,13 +142,6 @@ TranslatorX64::irCheckType(X64Assembler& a,
 }
 
 void
-TranslatorX64::irEmitLoadDeps() {
-  assert(m_useHHIR);
-  m_hhbcTrans->emitLoadDeps();
-}
-
-
-void
 TranslatorX64::irTranslateMod(const Tracelet& t,
                               const NormalizedInstruction& i) {
   HHIR_EMIT(Mod);

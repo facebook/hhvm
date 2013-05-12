@@ -11036,10 +11036,6 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     }
   }
 
-  if (m_useHHIR) {
-    irEmitLoadDeps();
-  }
-
   checkRefs(a, sk, refDeps, fail);
 
   if (Trace::moduleEnabled(Trace::stats, 2)) {

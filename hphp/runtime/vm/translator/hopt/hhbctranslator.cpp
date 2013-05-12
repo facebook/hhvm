@@ -2198,7 +2198,6 @@ void HhbcTranslator::setThisAvailable() {
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
   checkTypeLocal(locId, type);
-  m_typeGuards.push_back(TypeGuard(TypeGuard::Local, locId, type));
 }
 
 void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type) {
@@ -2225,7 +2224,6 @@ Trace* HhbcTranslator::guardTypeStack(uint32_t stackIndex,
     nextTrace = getGuardExit();
   }
   gen(GuardStk, type, nextTrace, StackOffset(stackIndex), m_tb->getSp());
-  m_typeGuards.push_back(TypeGuard(TypeGuard::Stack, stackIndex, type));
 
   return nextTrace;
 }
@@ -2261,20 +2259,6 @@ void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
    * (not based on guards).
    */
   refineType(tmp, type);
-}
-
-void HhbcTranslator::emitLoadDeps() {
-  for (auto& guard : m_typeGuards) {
-    switch (guard.getKind()) {
-    case TypeGuard::Local:
-      ldLoc(guard.getIndex());
-      break;
-    case TypeGuard::Stack:
-      break;
-    default:
-      assert(false); // iterator guards should not happen
-    }
-  }
 }
 
 Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,

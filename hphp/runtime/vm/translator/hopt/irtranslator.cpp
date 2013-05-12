@@ -1107,9 +1107,9 @@ TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
-static bool shouldIRInline(const Func* curFunc,
-                           const Func* func,
-                           const Tracelet& callee) {
+bool shouldIRInline(const Func* curFunc,
+                    const Func* func,
+                    const Tracelet& callee) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
   }
@@ -1126,7 +1126,7 @@ static bool shouldIRInline(const Func* curFunc,
   };
 
   if (func->numLocals() != func->numParams()) {
-    return refuse("locals");
+    return refuse("more locals than params (unsupported)");
   }
   if (func->numIterators() != 0) {
     return refuse("iterators");
@@ -1136,11 +1136,7 @@ static bool shouldIRInline(const Func* curFunc,
     return refuse("too many stack cells");
   }
 
-  // Disable anything with locals---specialized RetC generates stores
-  // that zero out the m_type's and depend on the frame.
-  if (func->numLocals() != 0) {
-    return refuse("has locals (would use frame)");
-  }
+  /////////////
 
   // Little pattern recognition helpers:
   const NormalizedInstruction* cursor;
@@ -1162,12 +1158,16 @@ static bool shouldIRInline(const Func* curFunc,
   };
   auto atRet = [&] { return current == OpRetC || current == OpRetV; };
 
-  // Simple operations that just put a Cell on the stack without any
-  // inputs.  For now avoid CreateCont because it depends on the
-  // frame.
+  // Simple operations that just put a Cell on the stack.  There must
+  // either be no inputs, or a single local as an input.  For now
+  // avoid CreateCont because it depends on the frame.
   auto simpleCell = [&]() -> bool {
-    if (cursor->outStack && cursor->inputs.empty() &&
-        current != OpCreateCont) {
+    if (current == OpCreateCont) return false;
+    if (cursor->outStack && cursor->inputs.empty()) {
+      next();
+      return true;
+    }
+    if (current == OpCGetL || current == OpVGetL) {
       next();
       return true;
     }
@@ -1198,14 +1198,9 @@ static bool shouldIRInline(const Func* curFunc,
     return atRet();
   };
 
-  /////////////
-
-  // Identity functions.
   resetCursor();
-  if (current == OpCGetL) {
-    next();
-    if (atRet()) return accept("returns parameter");
-  }
+
+  ////////////
 
   // Simple property accessors.
   resetCursor();
@@ -1246,7 +1241,8 @@ static bool shouldIRInline(const Func* curFunc,
    * Continuation allocation functions that take no arguments.
    */
   resetCursor();
-  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0) {
+  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0 &&
+      !func->numParams()) {
     next();
     if (atRet()) return accept("zero-arg continuation creator");
   }
@@ -1288,8 +1284,9 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
    * the call.
    */
   if (i.calleeTrace) {
-    if (!m_hhbcTrans->isInlining() &&
-        shouldIRInline(curFunc(), i.funcd, *i.calleeTrace)) {
+    if (!m_hhbcTrans->isInlining()) {
+      assert(shouldIRInline(curFunc(), i.funcd, *i.calleeTrace));
+
       m_hhbcTrans->beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&
                                      getenv("HHVM_STATS_INLINESHAPE");

@@ -861,6 +861,8 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
 
 void LinearScan::genSpillStats(Trace* trace, int numSpillLocs) {
   if (!moduleEnabled(HPHP::Trace::statgroups, 1)) return;
+  static bool enabled = getenv("HHVM_STATS_SPILLS");
+  if (!enabled) return;
 
   int numMainSpills = 0;
   int numExitSpills = 0;

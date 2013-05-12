@@ -378,7 +378,7 @@ O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
-O(DefInlineFP,             D(FramePtr), S(StkPtr),                        NF) \
+O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr),              NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
@@ -780,12 +780,20 @@ struct StackOffset : IRExtraData {
 };
 
 /*
- * Bytecode offsets.
+ * DefInlineFP is present when we need to create a frame for inlining.
+ * This instruction also carries some metadata used by tracebuilder to
+ * track state during an inlined call.
  */
-struct BCOffset : IRExtraData {
-  explicit BCOffset(Offset offset) : offset(offset) {}
-  std::string show() const { return folly::to<std::string>(offset); }
-  Offset offset;
+struct DefInlineFPData : IRExtraData {
+  std::string show() const {
+    return folly::to<std::string>(
+      target->fullName()->data(), "(),", retSPOff, ',', retBCOff
+    );
+  }
+
+  const Func* target;
+  Offset retBCOff;
+  Offset retSPOff;
 };
 
 /*
@@ -837,7 +845,7 @@ X(DefSP,              StackOffset);
 X(LdStack,            StackOffset);
 X(LdStackAddr,        StackOffset);
 X(DecRefStack,        StackOffset);
-X(DefInlineFP,        BCOffset);
+X(DefInlineFP,        DefInlineFPData);
 X(InlineCreateCont,   CreateContData);
 X(CallArray,          CallArrayData);
 

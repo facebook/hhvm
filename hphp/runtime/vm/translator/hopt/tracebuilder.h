@@ -94,16 +94,6 @@ struct TraceBuilder {
                const Func* func);
   ~TraceBuilder();
 
-  void beginInlining(const Func* target,
-                     SSATmp* calleeFP,
-                     SSATmp* calleeSP,
-                     SSATmp* prevSP,
-                     int32_t prevSPOff);
-  void endInlining();
-
-  // XXX: Accessible for inlining, for now.
-  void setLocalValue(unsigned id, SSATmp* value);
-
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
@@ -362,11 +352,14 @@ private:
   void      killLocalValue(uint32_t id);
   void      setLocalType(uint32_t id, Type type);
   Type      getLocalType(unsigned id) const;
+  void      setLocalValue(unsigned id, SSATmp* value);
   SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
   bool      callerLocalHasValue(SSATmp*) const;
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
+  void      trackDefInlineFP(IRInstruction* inst);
+  void      trackInlineReturn(IRInstruction* inst);
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
   void      dropLocalRefsInnerTypes();

@@ -179,7 +179,7 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
- *     fp2   = DefInlineFP<returnBc> sp2
+ *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
  *     sp4   = ReDefSP<numLocals> fp2
  *
  *         // ... callee body ...
@@ -206,35 +206,28 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
-  {
-    static const bool enabled = Stats::enabledAny() &&
-                                getenv("HHVM_STATS_INLINEFUNC");
-    if (enabled) {
-      gen(
-        IncStatGrouped,
-        cns(StringData::GetStaticString("HHIRInline")),
-        cns(target->fullName()),
-        cns(1)
-      );
-    }
-  }
-
   SSATmp* params[numParams];
   for (unsigned i = 0; i < numParams; ++i) {
     params[numParams - i - 1] = popF();
   }
 
-  auto prevSP    = m_fpiStack.top().first;
-  auto prevSPOff = m_fpiStack.top().second;
-  auto calleeSP  = spillStack();
-  auto calleeFP  = gen(DefInlineFP, BCOffset(returnBcOffset), calleeSP);
+  auto const prevSP    = m_fpiStack.top().first;
+  auto const prevSPOff = m_fpiStack.top().second;
+  auto const calleeSP  = spillStack();
+
+  DefInlineFPData data;
+  data.target   = target;
+  data.retBCOff = returnBcOffset;
+  data.retSPOff = prevSPOff;
+  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP);
 
   m_bcStateStack.emplace_back(target->base(), target);
-  m_tb->beginInlining(target, calleeFP, calleeSP, prevSP, prevSPOff);
+  gen(ReDefSP, StackOffset(target->numLocals()), m_tb->getFp(), m_tb->getSp());
+
   profileFunctionEntry("Inline");
 
   for (unsigned i = 0; i < numParams; ++i) {
-    m_tb->setLocalValue(i, params[i]);
+    gen(StLoc, LocalId(i), calleeFP, params[i]);
   }
   for (unsigned i = numParams; i < target->numLocals(); ++i) {
     /*
@@ -243,7 +236,7 @@ void HhbcTranslator::beginInlining(unsigned numParams,
      * to leave the trace.
      */
     always_assert(0 && "unimplemented");
-    m_tb->setLocalValue(i, m_tb->genDefUninit());
+    gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
   }
 
   emitMarker();
@@ -2005,14 +1998,32 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
    * important that this does endInlining before pushing the return
    * value so stack offsets are properly tracked.
    */
-  m_tb->endInlining();
-  // after end of inlining, m_stackDeficit should be set to
-  // 0, and eval stack should be empty
-  assert(m_evalStack.numCells() == 0);
-  m_stackDeficit = 0;
-  FTRACE(1, "]]] end inlining: {}\n", getCurFunc()->fullName()->data());
+  gen(InlineReturn, m_tb->getFp());
+
+  // Return to the caller function.  Careful between here and the
+  // emitMarker() below, where the caller state isn't entirely set up.
   m_bcStateStack.pop_back();
   m_fpiStack.pop();
+
+  // See the comment in beginInlining about generator frames.
+  if (getCurFunc()->isGenerator()) {
+    gen(ReDefGeneratorSP, StackOffset(m_tb->getSpOffset()), m_tb->getSp());
+  } else {
+    gen(ReDefSP,
+        StackOffset(m_tb->getSpOffset()), m_tb->getFp(), m_tb->getSp());
+  }
+
+  /*
+   * After the end of inlining, we are restoring to a previously
+   * defined stack that we know is entirely materialized.  TODO:
+   * explain this better.
+   *
+   * The push of the return value below is not yet materialized.
+   */
+  assert(m_evalStack.numCells() == 0);
+  m_stackDeficit = 0;
+
+  FTRACE(1, "]]] end inlining: {}\n", getCurFunc()->fullName()->data());
   push(retVal);
 
   emitMarker();

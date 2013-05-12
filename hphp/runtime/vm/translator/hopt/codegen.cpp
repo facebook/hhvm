@@ -2339,7 +2339,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fp       = m_regs[inst->getSrc(0)].getReg();
   auto const fakeRet  = m_tx64->getRetFromInlinedFrame();
-  auto const retBCOff = inst->getExtra<DefInlineFP>()->offset;
+  auto const retBCOff = inst->getExtra<DefInlineFP>()->retBCOff;
 
   m_as.    storeq (fakeRet, fp[AROFF(m_savedRip)]);
   m_as.    storel (retBCOff, fp[AROFF(m_soff)]);

@@ -864,11 +864,17 @@ D:FramePtr = FreeActRec S0:FramePtr
   Load the saved frame pointer from the activation record pointed to
   by S0 into D.
 
-D:FramePtr = DefInlineFP<returnBcOffset> S0:StkPtr
+D:FramePtr = DefInlineFP<func,retBCOff,retSPOff> S0:StkPtr S1:StkPtr
 
   Defines a frame pointer for an inlined function.  S0 is a StkPtr
   that points to the ActRec for the callee (i.e. after parameters have
-  been popped).
+  been popped).  S1 is a StkPtr that represents what the inlined
+  function will return to (i.e. it points to the stack after the
+  ActRec in S0 is popped).
+
+  `func' is the function being inlined.  `retBCOff' and `retSPOff'
+  represent what the bytecode and stack offsets should be after the
+  FCall instruction in ther caller.
 
   This instruction is primarily used to represent a frame in the IR in
   a way that allows us to eliminate it entirely.  When it cannot be

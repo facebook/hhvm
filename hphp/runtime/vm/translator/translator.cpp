@@ -2929,7 +2929,7 @@ void Translator::reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc) {
 }
 
 
-/**
+/*
  * This method looks at all the uses of the tracelet dependencies in the
  * instruction stream and tries to relax the type associated with each location.
  */
@@ -2949,7 +2949,8 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
     }
   }
 
-  // Process the instruction stream, constraining the relaxed types along the way
+  // Process the instruction stream, constraining the relaxed types
+  // along the way
   for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
        instr = instr->next) {
     for (size_t i = 0; i < instr->inputs.size(); i++) {
@@ -2962,11 +2963,11 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
     }
   }
 
-  // For each dependency, if we found a more relaxed type for it, use such type.
-  for (auto mapIt = locRelxTypeMap.begin(); mapIt != locRelxTypeMap.end();
-       mapIt++) {
-    DynLocation* loc = mapIt->first;
-    const GuardType& relxType = mapIt->second;
+  // For each dependency, if we found a more relaxed type for it, use
+  // such type.
+  for (auto& kv : locRelxTypeMap) {
+    DynLocation* loc = kv.first;
+    const GuardType& relxType = kv.second;
     if (relxType.isRelaxed()) {
       TRACE(1, "relaxDeps: Loc: %s   oldType: %s   =>   newType: %s\n",
             loc->location.pretty().c_str(),
@@ -2986,17 +2987,6 @@ static bool checkTaintFuncs(StringData* name) {
   static const StringData* s_extract =
     StringData::GetStaticString("extract");
   return name->isame(s_extract);
-}
-
-static const NormalizedInstruction*
-findFPushForCall(const FPIEnt* fpi,
-                 const NormalizedInstruction* fcall) {
-  for (auto* ni = fcall->prev; ni; ni = ni->prev) {
-    if (ni->source.offset() == fpi->m_fpushOff) {
-      return ni;
-    }
-  }
-  return nullptr;
 }
 
 /*
@@ -3041,19 +3031,31 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
            numArgs, target->numParams());
     return false;
   }
-  if (numArgs != 0) {
-    FTRACE(1, "analyzeCallee: currently ignoring calls with parameters\n");
+  if (target->numLocals() != target->numParams()) {
+    FTRACE(1, "analyzeCallee: not inlining functions with more locals "
+              "than params\n");
     return false;
   }
 
-  if (!findFPushForCall(fpi, fcall)) {
-    FTRACE(1, "analyzeCallee: push instruction was in a different "
-              "tracelet\n");
-    return false;
+  // Find the fpush and ensure it's in this tracelet---refuse to
+  // inline if there are any calls in order to prepare arguments.
+  for (auto* ni = fcall->prev; ni; ni = ni->prev) {
+    if (ni->source.offset() == fpi->m_fpushOff) {
+      return true;
+    }
+    if (isFCallStar(ni->op()) || ni->op() == OpFCallBuiltin) {
+      FTRACE(1, "analyzeCallee: fpi region contained other calls\n");
+      return false;
+    }
   }
-
-  return true;
+  FTRACE(1, "analyzeCallee: push instruction was in a different "
+            "tracelet\n");
+  return false;
 }
+
+extern bool shouldIRInline(const Func* curFunc,
+                           const Func* func,
+                           const Tracelet& callee);
 
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
@@ -3061,8 +3063,9 @@ void Translator::analyzeCallee(TraceletContext& tas,
   always_assert(m_useHHIR);
   if (!shouldAnalyzeCallee(fcall)) return;
 
-  auto const numArgs = fcall->imm[0].u_IVA;
-  auto const target  = fcall->funcd;
+  auto const numArgs     = fcall->imm[0].u_IVA;
+  auto const target      = fcall->funcd;
+  auto const callerFunc  = curFunc();
 
   /*
    * Prepare a map for all the known information about the argument
@@ -3166,6 +3169,16 @@ void Translator::analyzeCallee(TraceletContext& tas,
   }
 
   /*
+   * If the IR can't inline this, give up now.  Below we're going to
+   * start making changes to the traclet that is making the call
+   * (potentially increasing the specificity of guards), and we don't
+   * want to do that unnecessarily.
+   */
+  if (!shouldIRInline(callerFunc, target, *subTrace)) {
+    return;
+  }
+
+  /*
    * Disabled for now:
    *
    * Propagate the return type to our caller.  If the return type is
@@ -3196,18 +3209,17 @@ void Translator::analyzeCallee(TraceletContext& tas,
   }
 
   /*
-   * In order for relaxDeps not to relax guards on things we may
+   * In order for relaxDeps not to relax guards on some things we may
    * potentially have depended on here, we need to ensure that the
    * call instruction depends on all the inputs we've used.
    *
-   * What we probably want to do is modify getOutputUsage to be aware
-   * of callee-uses of parameters.
-   *
-   * For now this assert is just protecting the known breakage if we
-   * start doing analyzeCallee on things with parameters.
+   * (We could do better by letting relaxDeps look through the
+   * callee.)
    */
   restoreFrame();
-  assert(callerArgLocs.empty());
+  for (auto& loc : callerArgLocs) {
+    fcall->inputs.push_back(tas.recordRead(InputInfo(loc), m_useHHIR));
+  }
 
   FTRACE(1, "analyzeCallee: inline candidate\n");
   fcall->calleeTrace = std::move(subTrace);

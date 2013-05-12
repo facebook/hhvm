@@ -62,9 +62,7 @@ struct DceFlags {
    */
   void incWeakUse() {
     if (m_weakUseCount + 1 > kMaxWeakUseCount) {
-      always_assert(!"currently there's only two instructions "
-                    "using this machinery, so this shouldn't "
-                    "happen ... ");
+      // Too many weak uses for us to know we can optimize it away.
       return;
     }
     ++m_weakUseCount;
@@ -392,6 +390,17 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       }
       break;
 
+    // We don't need to generate stores to a frame if it can be
+    // eliminated.
+    case StLoc:
+      {
+        auto const frameInst = inst->getSrc(0)->inst();
+        if (frameInst->op() == DefInlineFP) {
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
     case InlineReturn:
       {
         auto frameUses = uses[inst->getSrc(0)];
@@ -446,11 +455,13 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       }
       break;
 
-    case InlineReturn:
+    case StLoc: case InlineReturn:
       {
         auto const fp = inst->getSrc(0);
         if (state[fp->inst()].isDead()) {
-          FTRACE(5, "InlineReturn ({}) setDead\n", inst->getId());
+          FTRACE(5, "{} ({}) setDead\n",
+                 opcodeName(inst->op()),
+                 inst->getId());
           state[inst].setDead();
         }
       }

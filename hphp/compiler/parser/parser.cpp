@@ -1712,28 +1712,30 @@ std::string Parser::nsDecl(const std::string &name) {
 }
 
 std::string Parser::resolve(const std::string &ns, bool cls) {
-  // try import rules first
   string alias = ns;
   size_t pos = ns.find(NAMESPACE_SEP);
   if (pos != string::npos) {
     alias = ns.substr(0, pos);
   }
+
   hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
   if (iter != m_aliases.end()) {
+    // Was it a namespace alias?
     if (pos != string::npos) {
       return iter->second + ns.substr(pos);
     }
-    return iter->second;
+    // Only classes can appear directly in "use" statements
+    if (cls) {
+      return iter->second;
+    }
   }
 
-  // Classes are special. They don't fallback to the global namespace.
+  // Classes don't fallback to the global namespace.
   if (cls) {
     if (!strcasecmp("self", ns.c_str()) ||
         !strcasecmp("parent", ns.c_str())) {
       return ns;
     }
-    // Don't prefix with \ because that isn't the real classname and we don't
-    // need a flag to signal fallback.
     return nsDecl(ns);
   }
 

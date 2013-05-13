@@ -555,10 +555,19 @@ public:
    * Same semantics as lval(), except with the precondition that the
    * key doesn't already exist in the array.
    */
+private:
+  template <class K>
+  ArrayShell* addLvalImpl(K k, Variant*& ret, bool copy);
+
+public:
   virtual ArrayShell *addLval(int64_t k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE;
+    FOLLY_OVERRIDE {
+    return addLvalImpl(k, ret, copy);
+  }
   virtual ArrayShell *addLval(StringData* k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE;
+    FOLLY_OVERRIDE {
+    return addLvalImpl(k, ret, copy);
+  }
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first

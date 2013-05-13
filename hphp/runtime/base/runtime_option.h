@@ -96,6 +96,7 @@ public:
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
+  static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
   static bool ServerThreadJobLIFO;

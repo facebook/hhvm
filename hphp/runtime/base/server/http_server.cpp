@@ -45,6 +45,8 @@ namespace HPHP {
 HttpServerPtr HttpServer::Server;
 time_t HttpServer::StartTime;
 
+const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer(void *sslCTX /* = NULL */)
@@ -54,27 +56,48 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
+  bool const useWarmupThrottle =
+    RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
+    RuntimeOption::ServerThreadCount > kNumProcessors;
+
+  auto maybeEnableThrottle = [&] (LibEventServer* s) {
+    if (!useWarmupThrottle) return;
+
+    s->enableWarmupThrottle(RuntimeOption::ServerThreadCount - kNumProcessors,
+                            RuntimeOption::ServerWarmupThrottleRequestCount);
+    Logger::Info("Starting with %d threads for the first %d requests\n",
+                 kNumProcessors,
+                 RuntimeOption::ServerWarmupThrottleRequestCount);
+  };
+
+  int const startingThreadCount = !useWarmupThrottle
+    ? RuntimeOption::ServerThreadCount
+    : kNumProcessors;
+
   if (RuntimeOption::ServerPortFd != -1 || RuntimeOption::SSLPortFd != -1) {
     LibEventServerWithFd* server =
       (new TypedServer<LibEventServerWithFd, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
+        startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds));
+    maybeEnableThrottle(server);
     server->setServerSocketFd(RuntimeOption::ServerPortFd);
     server->setSSLSocketFd(RuntimeOption::SSLPortFd);
     m_pageServer = ServerPtr(server);
   } else if (RuntimeOption::TakeoverFilename.empty()) {
-    m_pageServer = ServerPtr
-      (new TypedServer<LibEventServer, HttpRequestHandler>
+    auto const server = new TypedServer<LibEventServer, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
-        RuntimeOption::RequestTimeoutSeconds));
+        startingThreadCount,
+        RuntimeOption::RequestTimeoutSeconds);
+    maybeEnableThrottle(server);
+    m_pageServer = ServerPtr(server);
   } else {
     LibEventServerWithTakeover* server =
       (new TypedServer<LibEventServerWithTakeover, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
+        startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds));
+    maybeEnableThrottle(server);
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
     server->addTakeoverListener(this);
     m_pageServer = ServerPtr(server);

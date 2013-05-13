@@ -100,6 +100,9 @@ int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 bool RuntimeOption::ServerThreadRoundRobin = false;
+constexpr int kDefaultWarmupThrottleRequestCount = 0;
+int RuntimeOption::ServerWarmupThrottleRequestCount =
+  kDefaultWarmupThrottleRequestCount;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 bool RuntimeOption::ServerThreadJobLIFO = false;
 bool RuntimeOption::ServerThreadDropStack = false;
@@ -664,6 +667,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
     ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
+    ServerWarmupThrottleRequestCount =
+      server["WarmupThrottleRequestCount"].getInt32(
+        kDefaultWarmupThrottleRequestCount
+      );
     ServerThreadDropCacheTimeoutSeconds =
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
     ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();

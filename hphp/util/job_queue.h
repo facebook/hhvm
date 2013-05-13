@@ -353,9 +353,11 @@ public:
   int getActiveWorker() {
     return m_queue.getActiveWorker();
   }
+
   int getQueuedJobs() {
     return m_queue.getQueuedJobs();
   }
+
   int getTargetNumWorkers() {
     if (TWorker::CountActive) {
       int target = getActiveWorker() + getQueuedJobs();
@@ -402,6 +404,17 @@ public:
   void addWorker() {
     Lock lock(m_mutex);
     if (!m_stopped) {
+      addWorkerImpl(true);
+    }
+  }
+
+  /*
+   * Add N new worker threads.
+   */
+  void addWorkers(int n) {
+    Lock lock(m_mutex);
+    if (m_stopped) return;
+    for (int i = 0; i < n; ++i) {
       addWorkerImpl(true);
     }
   }

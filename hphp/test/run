@@ -136,6 +136,7 @@ function map_convenience_filename($file) {
     'slow'     => 'hphp/test/slow',
     'zend'     => 'hphp/test/zend/good',
     'zend_bad' => 'hphp/test/zend/bad',
+    'facebook' => 'hphp/facebook/test',
   );
 
   $m = null;

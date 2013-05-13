@@ -128,8 +128,10 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
     for (IRInstruction& inst : *block) {
       for (SSATmp* src : inst.getSrcs()) {
         auto const &info = regs[src];
-        if (!info.spilled() && info.getReg(0) == Transl::rVmSp) {
-          // hack - ignore rbx
+        if (!info.spilled() &&
+            (info.getReg(0) == Transl::rVmSp ||
+             info.getReg(0) == Transl::rVmFp)) {
+          // hack - ignore rbx and rbp
           continue;
         }
         for (unsigned i = 0, n = info.numAllocatedRegs(); i < n; ++i) {

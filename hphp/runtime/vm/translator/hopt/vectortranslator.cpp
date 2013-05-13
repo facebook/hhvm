@@ -241,6 +241,7 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
     , m_misBase(nullptr)
     , m_base(nullptr)
     , m_result(nullptr)
+    , m_predictedResult(nullptr)
 {
 }
 
@@ -342,32 +343,6 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
       simpleArrayUnset || badUnset ||
       simpleArrayIsset) {
     setNoMIState();
-  }
-
-  /*
-   * If we're planning on RaiseUndefProp generation
-   * (wantPropSpecializedWarnings) then pretty much in any case the
-   * vector translator will do operations that can throw.
-   *
-   * Currently this means we have to have a ExceptionBarrier so the
-   * unwinder can handle it (TODO(#2162354): eventually we'll hook
-   * this into an unwind codepath).
-   *
-   * We also handle one special case where we know a spillStack won't
-   * be needed: in a simple CGetM of a single property where hphpc has
-   * told us it can't be KindOfUninit, even if
-   * wantPropSpecializedWarnings we can't throw.
-   */
-  if (wantPropSpecializedWarnings()) {
-    if (isCGetM && isSingle && simpleProp) {
-      auto info = getFinalPropertyOffset(m_ni, contextClass(), m_mii);
-      assert(info.offset != -1);
-      if (info.hphpcType == KindOfInvalid) {
-        m_ht.exceptionBarrier();
-      }
-    } else {
-      m_ht.exceptionBarrier();
-    }
   }
 }
 
@@ -829,7 +804,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
           // init_null_variant.
       m_tb.hint(Block::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
-        // We did the exceptionBarrier for this back in emitMPre.
+        // We did the exceptionBarrier for this up in emitPropSpecialized.
         gen(RaiseUndefProp, baseAsObj, key);
       }
       if (doDefine) {
@@ -859,6 +834,20 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
   SSATmp* initNull = cns((const TypedValue*)&init_null_variant);
 
   /*
+   * With the exception of single-dim CGetMs where hphpc knows the property
+   * can't be KindOfUninit, one of the conditional branches below may throw.
+   */
+  if (doWarn && wantPropSpecializedWarnings()) {
+    if (m_ni.mInstrOp() == OpCGetM && m_mInd == 0) {
+      if (propInfo.hphpcType == KindOfInvalid) {
+        m_ht.exceptionBarrier();
+      }
+    } else {
+      m_ht.exceptionBarrier();
+    }
+  }
+
+  /*
    * Type-inference from hphpc only tells us that this is either an object of a
    * given class type or null.  If it's not an object, it has to be a null type
    * based on type inference.  (It could be KindOfRef with an object inside,
@@ -884,7 +873,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
             // check for uninit
         return checkInitProp(baseAsObj,
                              gen(LdPropAddr, baseAsObj,
-                                                  cns(propInfo.offset)),
+                                 cns(propInfo.offset)),
                              propInfo,
                              doWarn,
                              doDefine);
@@ -1139,8 +1128,7 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   SSATmp* key = getKey();
   BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
-  m_result = gen(CGetProp, cns((TCA)opFunc), CTX(),
-                      m_base, key, genMisPtr());
+  m_result = gen(CGetProp, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1273,10 +1261,8 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   SSATmp* key = getKey();
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
-  SSATmp* result = genStk(SetProp, cns((TCA)opFunc), CTX(),
-                          m_base, key, value);
-  VectorEffects ve(result->inst());
-  m_result = ve.valTypeChanged ? result : value;
+  m_result = genStk(SetProp, cns((TCA)opFunc), CTX(), m_base, key, value);
+  m_predictedResult = value;
 }
 #undef HELPER_TABLE
 
@@ -1817,9 +1803,8 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
   m_ht.exceptionBarrier();
-  SSATmp* result = genStk(SetElem, cns((TCA)opFunc), m_base, key, value);
-  VectorEffects ve(result->inst());
-  m_result = ve.valTypeChanged ? result : value;
+  m_result = genStk(SetElem, cns((TCA)opFunc), m_base, key, value);
+  m_predictedResult = value;
 }
 #undef HELPER_TABLE
 
@@ -1972,9 +1957,8 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   m_ht.exceptionBarrier();
-  SSATmp* result = gen(SetNewElem, m_base, value);
-  VectorEffects ve(result->inst());
-  m_result = ve.valTypeChanged ? result : value;
+  m_result = gen(SetNewElem, m_base, value);
+  m_predictedResult = value;
 }
 
 void HhbcTranslator::VectorTranslator::emitSetOpNewElem() {
@@ -2026,9 +2010,11 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   // Pop off all stack inputs
   m_ht.discard(nStack);
 
-  // Push result, if one was produced
+  // Push result, if one was produced. If we have a predicted result use that
+  // instead of the real result; its validity will be guarded later in this
+  // function.
   if (m_result) {
-    m_ht.push(m_result);
+    m_ht.push(usePredictedResult() ? m_predictedResult : m_result);
   } else {
     assert(m_ni.mInstrOp() == OpUnsetM);
   }
@@ -2040,6 +2026,39 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   if (nLogicalRatchets() > 0) {
     gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef)));
   }
+
+  // Now that everything else is done, guard the predicted type of the result,
+  // if any.
+  if (usePredictedResult()) {
+    std::vector<SSATmp*> spillValues = m_ht.getSpillValues();
+    assert(spillValues.back() == m_predictedResult);
+    spillValues.back() = m_result;
+
+    gen(GuardType,
+        m_predictedResult->type(),
+        m_ht.getExitTrace(m_ht.getNextSrcKey().offset(), spillValues),
+        m_result);
+  }
+}
+
+bool HhbcTranslator::VectorTranslator::usePredictedResult() {
+  // First check that we have a predicted result.
+  if (!m_predictedResult) return false;
+
+  // Next, check that the predicted result is actually possible. This check
+  // will trigger if we can prove at compile time that the set operation will
+  // fail.
+  if (!m_predictedResult->isA(m_result->type())) return false;
+
+  // We can use the predicted result as long as we didn't do an operation on a
+  // possibly string base with a possibly string value. This is the only case
+  // where the result of a SetM might have the same type as its input without
+  // being the same value.
+  IRInstruction* inst = m_result->inst();
+  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
+  SSATmp* value = inst->getSrc(vectorValIdx(inst));
+  return base->type().strip().not(Type::Str) ||
+    value->type().strip().not(Type::Str);
 }
 
 bool HhbcTranslator::VectorTranslator::needFirstRatchet() const {

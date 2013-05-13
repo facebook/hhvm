@@ -455,6 +455,7 @@ private:
     bool isSimpleArrayOp();
     bool isSimpleBase();
     bool isSingleMember();
+    bool usePredictedResult();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -486,6 +487,7 @@ private:
     SSATmp* m_misBase;
     SSATmp* m_base;
     SSATmp* m_result;
+    SSATmp* m_predictedResult;
   };
 
 private: // tracebuilder forwarding utilities
@@ -553,7 +555,11 @@ private:
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  Trace* getExitTrace(Offset targetBcOff = -1);
+  Trace* getExitTrace(Offset targetBcOff,
+                      const std::vector<SSATmp*>& spillValues);
+  Trace* getExitTrace(Offset targetBcOff = -1) {
+    return getExitTrace(targetBcOff, getSpillValues());
+  }
   Trace* getExitTrace(uint32_t targetBcOff, uint32_t notTakenBcOff);
   Trace* getExitSlowTrace();
   Trace* getGuardExit();

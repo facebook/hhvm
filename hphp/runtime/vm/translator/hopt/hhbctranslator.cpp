@@ -3026,7 +3026,8 @@ Trace* HhbcTranslator::getExitSlowTrace() {
  * exit is taken before executing any bytecode instruction of the current
  * tracelet.
  */
-Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
+Trace* HhbcTranslator::getExitTrace(Offset targetBcOff,
+                                    const std::vector<SSATmp*>& stackValues) {
   if (targetBcOff == -1) {
     targetBcOff = bcOff() != -1 ? bcOff() : m_startBcOff;
   }
@@ -3034,7 +3035,6 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
     return m_exitGuardFailureTrace;
   }
 
-  std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
                             m_stackDeficit,
                             stackValues.size(),

@@ -2997,9 +2997,9 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
       }
       ActRec* prevFp = getPrevVMState(fp);
       if (!prevFp) {
-        // To be safe in case we failed to get prevFp
-        // XXX: it's unclear why this is possible, but it was
-        // causing some crashes.
+        // To be safe in case we failed to get prevFp. This would mean we've
+        // been asked to eval in a frame which is beyond the top of the stack.
+        // This suggests the debugger client has made an error.
         break;
       }
       fp = prevFp;
@@ -3019,13 +3019,21 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     cfpSave = varEnv->getCfp();
   }
   ObjectData *this_ = nullptr;
-  Class *cls = nullptr;
+  // NB: the ActRec and function within the AR may have different classes. The
+  // class in the ActRec is the type used when invoking the function (i.e.,
+  // Derived in Derived::Foo()) while the class obtained from the function is
+  // the type that declared the function Foo, which may be Base. We need both
+  // the class to match any object that this function may have been invoked on,
+  // and we need the class from the function execution is stopped in.
+  Class *frameClass = nullptr;
+  Class *functionClass = nullptr;
   if (fp) {
     if (fp->hasThis()) {
       this_ = fp->getThis();
     } else if (fp->hasClass()) {
-      cls = fp->getClass();
+      frameClass = fp->getClass();
     }
+    functionClass = fp->m_func->cls();
     phpDebuggerEvalHook(fp->m_func);
   }
 
@@ -3034,8 +3042,11 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
   try {
-    invokeFunc(retval, unit->getMain(fp->m_func->cls()), null_array,
-               this_, cls, varEnv, nullptr, InvokePseudoMain);
+    // Invoke the given PHP, possibly specialized to match the type of the
+    // current function on the stack, optionally passing a this pointer or
+    // class used to execute the current function.
+    invokeFunc(retval, unit->getMain(functionClass), null_array,
+               this_, frameClass, varEnv, nullptr, InvokePseudoMain);
   } catch (FatalErrorException &e) {
     g_vmContext->write(s_fatal);
     g_vmContext->write(" : ");

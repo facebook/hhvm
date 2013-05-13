@@ -3472,6 +3472,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   DataType funcReturnType = func->returnType();
   int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
 
+  if (TranslatorX64::eagerRecord(func)) {
+    const uchar* pc = curUnit()->entry() + m_state.lastMarker->bcOff;
+    // we have spilled all args to stack, so spDiff is 0
+    m_tx64->emitEagerSyncPoint(m_as, pc, 0);
+  }
   // RSP points to the MInstrState we need to use.
   // workaround the fact that rsp moves when we spill registers around call
   PhysReg misReg = rScratch;
@@ -3607,9 +3612,13 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
 
   assert(func->isConst());
   assert(func->type() == Type::Func);
+  const Func* fn = func->getValFunc();
 
   BuiltinFunction builtinFuncPtr = func->getValFunc()->builtinFuncPtr();
   emitMovRegReg(m_as, m_regs[fp].getReg(), argNumToRegName[0]);
+  if (TranslatorX64::eagerRecord(fn)) {
+    m_tx64->emitEagerSyncPoint(m_as, fn->getEntry(), 0);
+  }
   m_as.call((TCA)builtinFuncPtr);
   recordSyncPoint(m_as);
 }

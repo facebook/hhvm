@@ -2245,7 +2245,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   assert(f);
   assert(this_);
 
-  VMRegAnchor _;
+  EagerVMRegAnchor _;
 
   this_->incRefCount();
 

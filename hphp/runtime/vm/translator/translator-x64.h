@@ -309,6 +309,7 @@ private:
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
+  void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
   void recordIndirectFixup(CTCA addr, int dwordsPushed);
   template <bool reentrant>
   void recordCallImpl(Asm& a, const NormalizedInstruction& i,
@@ -329,6 +330,7 @@ private:
   void recordStubCall(const NormalizedInstruction& i) {
     recordCall(astubs, i);
   }
+  void recordEagerCall(Asm& a, const NormalizedInstruction& i);
   void emitSideExit(Asm& a, const NormalizedInstruction& dest, bool next);
   void emitStringToClass(const NormalizedInstruction& i);
   void emitKnownClassCheck(const NormalizedInstruction& i,
@@ -960,6 +962,7 @@ private:
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
+  static bool eagerRecord(const Func* func);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);

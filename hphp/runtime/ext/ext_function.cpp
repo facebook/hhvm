@@ -32,6 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using HPHP::Transl::CallerFrame;
+using HPHP::Transl::EagerCallerFrame;
 
 static const StaticString s_internal("internal");
 static const StaticString s_user("user");
@@ -252,7 +253,7 @@ Variant f_forward_static_call(int _argc, CVarRef function,
 }
 
 Variant f_get_called_class() {
-  CallerFrame cf;
+  EagerCallerFrame cf;
   ActRec* ar = cf();
   if (ar == NULL) {
     return Variant(false);
@@ -365,7 +366,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
 }
 
 Variant f_func_get_args() {
-  CallerFrame cf;
+  EagerCallerFrame cf;
   ActRec* ar = cf();
   if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
     raise_warning(
@@ -397,7 +398,7 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
 }
 
 int64_t f_func_num_args() {
-  CallerFrame cf;
+  EagerCallerFrame cf;
   ActRec* ar = cf();
   if (ar == NULL) {
     return -1;

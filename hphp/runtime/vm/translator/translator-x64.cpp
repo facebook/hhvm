@@ -747,6 +747,35 @@ TranslatorX64::emitCall(X64Assembler& a, Call call, bool killRegs) {
   }
 }
 
+static void emitGetGContext(X64Assembler& a, PhysReg dest) {
+  emitTLSLoad<ExecutionContext>(a, g_context, dest);
+}
+
+void
+TranslatorX64::emitEagerSyncPoint(X64Assembler& a, const Opcode* pc,
+                                  const Offset spDiff) {
+  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+    Stack::topOfStackOffset();
+  static COff fpOff = offsetof(VMExecutionContext, m_fp);
+  static COff pcOff = offsetof(VMExecutionContext, m_pc);
+
+  /* we can't use rScratch because the pc store uses it as a
+     temporary */
+  Reg64 rEC = reg::rdi;
+
+  a.   push(rEC);
+  emitGetGContext(a, rEC);
+  a.   storeq(rVmFp, rEC[fpOff]);
+  if (spDiff) {
+    a.   lea(rVmSp[spDiff], rScratch);
+    a.   storeq(rScratch, rEC[spOff]);
+  } else {
+    a.   storeq(rVmSp, rEC[spOff]);
+  }
+  a.   storeq(pc, rEC[pcOff]);
+  a.   pop(rEC);
+}
+
 void
 TranslatorX64::recordSyncPoint(X64Assembler& a, Offset pcOff, Offset spOff) {
   m_pendingFixups.push_back(PendingFixup(a.code.frontier,
@@ -827,6 +856,14 @@ TranslatorX64::recordCallImpl(X64Assembler& a,
   }
 }
 
+void
+TranslatorX64::recordEagerCall(X64Assembler& a,
+                              const NormalizedInstruction& i) {
+  SrcKey sk = i.source;
+  emitEagerSyncPoint(a, curUnit()->entry() + sk.offset(),
+                     -i.stackOff * sizeof(TypedValue));
+}
+
 void TranslatorX64::prepareCallSaveRegs() {
   emitCallSaveRegs(); // Clean caller-saved regs.
   m_pendingUnwindRegInfo.clear();
@@ -888,10 +925,6 @@ TranslatorX64::emitIncRefGenericRegSafe(PhysReg base,
 void TranslatorX64::emitIncRefGeneric(PhysReg base, int disp) {
   ScratchReg tmpReg(m_regMap);
   emitIncRefGenericRegSafe(base, disp, r(tmpReg));
-}
-
-static void emitGetGContext(X64Assembler& a, PhysReg dest) {
-  emitTLSLoad<ExecutionContext>(a, g_context, dest);
 }
 
 // emitEagerVMRegSave --
@@ -6693,6 +6726,30 @@ TranslatorX64::translateRetV(const Tracelet& t,
   translateRetC(t, i);
 }
 
+/* This is somewhat hacky. It decides which helpers/builtins should use
+ * eager vmreganchor based on profile information. Using
+ * eager vmreganchor for all helper calls is a perf regression. */
+bool TranslatorX64::eagerRecord(const Func* func) {
+  const char* list[] = {
+    "func_get_args",
+    "get_called_class",
+    "func_num_args",
+    "array_filter",
+    "array_map",
+  };
+
+  for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
+    if (!strcmp(func->name()->data(), list[i])) {
+      return true;
+    }
+  }
+  if (func->cls() && !strcmp(func->cls()->name()->data(), "WaitHandle")
+      && !strcmp(func->name()->data(), "join")) {
+    return true;
+  }
+  return false;
+}
+
 /*
  * NativeImpl is a special operation in the sense that it must be the
  * only opcode in a function body, and also functions as the return.
@@ -6719,6 +6776,9 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    * will handle it for us.
    */
   a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+  if (eagerRecord(func)) {
+    emitEagerSyncPoint(a, func->getEntry(), 0);
+  }
   emitCall(a, (TCA)builtinFuncPtr, false /* smash regs */);
 
   /*
@@ -9828,6 +9888,9 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   }
   // Call builtin
   BuiltinFunction nativeFuncPtr = func->nativeFuncPtr();
+  if (eagerRecord(func)) {
+    recordEagerCall(a, ni);
+  }
   emitCall(a, (TCA)nativeFuncPtr, true);
   recordReentrantCall(ni);
 

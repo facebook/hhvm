@@ -91,7 +91,7 @@ class ObjectData : public CountableNF {
 
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
-  HPHP::VM::Class* getVMClass() const {
+  VM::Class* getVMClass() const {
     return m_cls;
   }
   static size_t getVMClassOffset() {
@@ -99,8 +99,8 @@ class ObjectData : public CountableNF {
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
-  bool instanceof(const HPHP::VM::Class* c) const;
+  VM::Class* instanceof(const VM::PreClass* pc) const;
+  bool instanceof(const VM::Class* c) const;
 
   bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;
@@ -235,7 +235,7 @@ class ObjectData : public CountableNF {
   } o_subclassData;
 
  protected:
-  HPHP::VM::Class* m_cls;
+  VM::Class* m_cls;
 
  protected:
   ArrNR         o_properties;    // dynamic properties (VM and hphpc)

@@ -287,13 +287,13 @@ void ParserBase::popLabelInfo() {
 ///////////////////////////////////////////////////////////////////////////////
 // namespace support
 
-void ParserBase::nns(bool declare /* = false */) {
-  if (m_nsState == SeenNamespaceStatement) {
-    error("No code may exist outside of namespace {}: %s",
-          getMessage().c_str());
+void ParserBase::nns(int token) {
+  if (m_nsState == SeenNamespaceStatement && token != ';') {
+    error("No code may exist outside of namespace {}: %d %s",
+          token, getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && !declare) {
+  if (m_nsState == SeenNothing && token != T_DECLARE) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }
@@ -305,6 +305,11 @@ void ParserBase::onNamespaceStart(const std::string &ns,
           "statement in the script: %s", getMessage().c_str());
     return;
   }
+  if (m_nsState != SeenNothing && file_scope != m_nsFileScope) {
+    error("Cannot mix bracketed namespace declarations with unbracketed "
+          "namespace declarations");
+  }
+
   m_nsState = InsideNamespace;
   m_nsFileScope = file_scope;
   m_aliases.clear();

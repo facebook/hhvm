@@ -172,7 +172,7 @@ public:
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
   void onUse(const std::string &ns, const std::string &as);
-  void nns(bool declare = false);
+  void nns(int token = 0);
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 

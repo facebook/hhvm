@@ -829,8 +829,7 @@ top_statement_list:
   |                                    { }
 ;
 top_statement:
-    statement                          { _p->nns($1.num() == T_DECLARE);
-                                         $$ = $1;}
+    statement                          { _p->nns($1.num()); $$ = $1;}
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
@@ -960,7 +959,7 @@ statement:
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}
   | T_ECHO expr_list ';'               { _p->onEcho($$, $2, 0);}
   | T_UNSET '(' variable_list ')' ';'  { _p->onUnset($$, $3);}
-  | ';'                                { $$.reset();}
+  | ';'                                { $$.reset(); $$ = ';'}
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable

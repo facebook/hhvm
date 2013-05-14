@@ -185,6 +185,7 @@ bad_tests = (
     '/ext-mysql/mysql_select_db.php',
     '/ext-sqlite3/sqlite3_08_udf.php',
     '/ext-sqlite3/sqlite3_25_create_aggregate.php',
+    '/ext-sockets/socket_connect_params.php',
 )
 
 # Random other files that zend wants

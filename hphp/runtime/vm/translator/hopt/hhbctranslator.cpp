@@ -1199,10 +1199,7 @@ SSATmp* HhbcTranslator::emitLdGblAddr(const StringData* gblName, Block* block) {
 }
 
 SSATmp* HhbcTranslator::emitLdGblAddrDef(const StringData* gblName) {
-  SSATmp* name = getStrName(gblName);
-  SSATmp* addr = gen(LdGblAddrDef, name);
-  gen(DecRef, name);
-  return addr;
+  return gen(LdGblAddrDef, getStrName(gblName));
 }
 
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {

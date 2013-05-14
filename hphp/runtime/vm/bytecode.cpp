@@ -5843,7 +5843,7 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   if (safe) m_stack.topTV()[1] = m_stack.topTV()[0];
   m_stack.ndiscard(1);
   if (f == nullptr) {
-    f = SystemLib::GetNullFunction();
+    f = SystemLib::s_nullFunc;
     if (safe) {
       m_stack.pushFalse();
     }
@@ -7536,10 +7536,18 @@ void VMExecutionContext::requestInit() {
   tx64 = nextTx64;
   tx64->requestInit();
 
-  // Merge the systemlib unit into the ExecutionContext
-  SystemLib::s_unit->merge();
-  SystemLib::s_nativeFuncUnit->merge();
-  SystemLib::s_nativeClassUnit->merge();
+  if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
+    SystemLib::s_unit->merge();
+    SystemLib::s_nativeFuncUnit->merge();
+    SystemLib::s_nativeClassUnit->merge();
+  } else {
+    // System units are always merge only, and
+    // everything is persistent.
+    assert(SystemLib::s_unit->isEmpty());
+    assert(SystemLib::s_nativeFuncUnit->isEmpty());
+    assert(SystemLib::s_nativeClassUnit->isEmpty());
+  }
+
   profileRequestStart();
 
 #ifdef DEBUG

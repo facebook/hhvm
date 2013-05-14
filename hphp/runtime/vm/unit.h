@@ -642,6 +642,7 @@ public:
   }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
+  bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
   void* replaceUnit() const;
 public:
   static Mutex s_classesMutex;

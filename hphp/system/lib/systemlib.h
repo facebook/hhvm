@@ -23,9 +23,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ObjectData;
-  class Unit;
-  class Class;
-  class Func;
+class Unit;
+class Class;
+class Func;
 namespace Eval {
   class PhpFile;
 }
@@ -79,8 +79,7 @@ class SystemLib {
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
-  static HPHP::Func* GetNullFunction();
-
+  static HPHP::Func* s_nullFunc;
 
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();

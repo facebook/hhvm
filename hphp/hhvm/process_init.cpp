@@ -114,7 +114,6 @@ void ProcessInit() {
   Unit* nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
                                                 hhbc_ext_funcs_count);
   SystemLib::s_nativeFuncUnit = nativeFuncUnit;
-
   String currentDir = g_vmContext->getCwd();
 
   if (RuntimeOption::RepoAuthoritative) {
@@ -148,6 +147,8 @@ void ProcessInit() {
 
   // load builtins
   SystemLib::s_nativeFuncUnit->merge();
+  SystemLib::s_nullFunc =
+    Unit::lookupFunc(StringData::GetStaticString("86null"));
 
   // We call a special bytecode emitter function to build the native
   // unit which will contain all of our cppext functions and classes.

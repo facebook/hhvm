@@ -15,37 +15,11 @@
 */
 
 #include "hphp/compiler/analysis/emitter.h"
-
-#include "folly/ScopeGuard.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
-
-#include "hphp/util/logger.h"
-#include "hphp/util/util.h"
-#include "hphp/util/job_queue.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/peephole.h"
-
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -70,7 +44,6 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
-
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -99,10 +72,33 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
-
 #include "hphp/compiler/parser/parser.h"
 
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+
 #include "hphp/system/lib/systemlib.h"
+
+#include "folly/ScopeGuard.h"
+
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
 
 namespace HPHP {
 namespace Compiler {
@@ -6957,18 +6953,19 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   mfe->finish(ue->bcPos(), false);
   ue->recordFunction(mfe);
 
+  TypedValue mainReturn;
+  mainReturn.m_data.num = 1;
+  mainReturn.m_type = KindOfInt64;
+  ue->setMainReturn(&mainReturn);
+  ue->setMergeOnly(true);
+
   /*
     Special function used by FPushCuf* when its argument
     is not callable.
   */
   StringData* name = StringData::GetStaticString("86null");
   FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
-  /*
-    Dont mark it AttrPersistent, because it would be
-    deleted, and we need to be able to find it in the
-    unit's m_mergeInfo
-  */
-  fe->init(0, 0, ue->bcPos(), AttrUnique,
+  fe->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
            true, empty_string.get());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
@@ -7082,7 +7079,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
-  mainReturn.m_type = KindOfBoolean;
+  mainReturn.m_type = KindOfInt64;
   ue->setMainReturn(&mainReturn);
   ue->setMergeOnly(true);
 

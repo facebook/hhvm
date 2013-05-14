@@ -9532,7 +9532,7 @@ int64_t checkClass(TargetCache::CacheHandle ch, StringData* clsName,
   VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(clsName->data());
   if (*(Class**)TargetCache::handleToPtr(ch)) return true;
-  ar->m_func = SystemLib::GetNullFunction();
+  ar->m_func = SystemLib::s_nullFunc;
   if (ar->hasThis()) {
     // cannot hit zero, we just inc'ed it
     ar->getThis()->decRefCount();
@@ -9556,7 +9556,7 @@ static const Func* autoloadMissingFunc(const StringData* funcName,
     throw_invalid_argument("function: method '%s' not found",
                            funcName->data());
   }
-  return SystemLib::GetNullFunction();
+  return SystemLib::s_nullFunc;
 }
 
 void
@@ -9626,7 +9626,7 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
         emitVStackStore(astubs, ni, rax, funcOff);
         if (safe) {
           astubs.xorq(r(flag), r(flag));
-          astubs.cmpq(SystemLib::GetNullFunction(), rax);
+          astubs.cmpq(SystemLib::s_nullFunc, rax);
           astubs.setne(rbyte(flag));
         }
       }

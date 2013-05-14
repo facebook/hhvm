@@ -690,7 +690,8 @@ CacheHandle allocKnownClass(const Class* cls) {
   if (ne->m_cachedClassOffset) return ne->m_cachedClassOffset;
 
   return allocKnownClass(ne,
-                         RuntimeOption::RepoAuthoritative &&
+                         (!SystemLib::s_inited ||
+                          RuntimeOption::RepoAuthoritative) &&
                          cls->verifyPersistent());
 }
 

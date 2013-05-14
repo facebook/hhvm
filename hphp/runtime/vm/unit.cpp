@@ -796,9 +796,9 @@ void Unit::loadFunc(const Func *func) {
   assert(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
-    Transl::TargetCache::allocFixedFunction(ne,
-                                            func->attrs() & AttrPersistent &&
-                                            RuntimeOption::RepoAuthoritative);
+    Transl::TargetCache::allocFixedFunction(
+      ne, func->attrs() & AttrPersistent &&
+      (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
   }
   const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
@@ -819,6 +819,7 @@ void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
   if (LIKELY(m_mergeState == UnitMergeStateUnmerged)) {
     int state = 0;
+    bool needsCompact = false;
     m_mergeState = UnitMergeStateMerging;
 
     bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
@@ -828,9 +829,12 @@ void Unit::initialMerge() {
         allFuncsUnique = (f->attrs() & AttrUnique);
       }
       loadFunc(f);
+      if (TargetCache::isPersistentHandle(f->m_cachedOffset)) {
+        needsCompact = true;
+      }
     }
     if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
-    if (!RuntimeOption::RepoAuthoritative) {
+    if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
       Transl::mergePreConsts(m_preConsts);
     } else {
       /*
@@ -851,7 +855,6 @@ void Unit::initialMerge() {
        * the pointer will be followed by a TypedValue representing
        * the value being defined/assigned.
        */
-      bool needsCompact = false;
       int ix = m_mergeInfo->m_firstHoistablePreClass;
       int end = m_mergeInfo->m_firstMergeablePreClass;
       while (ix < end) {

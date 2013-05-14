@@ -5725,7 +5725,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     } else {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_STRING_NAME);
       m_evalStack.setString(
-        StringData::GetStaticString(node->getClassName()));
+        StringData::GetStaticString(node->getOriginalClassName()));
     }
   } else if (node->isParent() &&
              node->getOriginalClass()->getOriginalParent().empty()) {
@@ -5735,7 +5735,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   } else {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_STRING_NAME);
     m_evalStack.setString(
-      StringData::GetStaticString(node->getClassName()));
+      StringData::GetStaticString(node->getOriginalClassName()));
   }
 }
 

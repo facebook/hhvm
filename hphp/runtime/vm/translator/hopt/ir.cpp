@@ -30,11 +30,12 @@
 #include "hphp/runtime/base/string_data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/translator/hopt/cse.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/linearscan.h"
-#include "hphp/runtime/vm/translator/hopt/cse.h"
-#include "hphp/runtime/vm/translator/hopt/simplifier.h"
 #include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/simplifier.h"
+#include "hphp/runtime/vm/translator/hopt/trace.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"
@@ -318,6 +319,10 @@ Opcode getStackModifyingOpcode(Opcode opc) {
   opc = Opcode(opc + 1);
   assert(opcodeHasFlags(opc, ModifiesStack));
   return opc;
+}
+
+Trace* IRInstruction::getTrace() const {
+  return m_block->getTrace();
 }
 
 bool IRInstruction::hasExtra() const {
@@ -694,6 +699,10 @@ void Block::removeEdge(IRInstruction* jmp) {
   while (*ptr != node) ptr = &(*ptr)->next;
   *ptr = node->next;
   assert((node->next = nullptr, true));
+}
+
+bool Block::isMain() const {
+  return m_trace->isMain();
 }
 
 bool IRInstruction::cseEquals(IRInstruction* inst) const {

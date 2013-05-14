@@ -13,7 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
+
+#include "hphp/runtime/vm/translator/hopt/cfg.h"
 
 namespace HPHP {  namespace JIT {
 

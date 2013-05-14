@@ -2125,7 +2125,7 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
-  inline bool isMain() const;
+  bool isMain() const;
 
   // return the last instruction in the block
   IRInstruction* back() const {
@@ -2236,167 +2236,12 @@ struct Block : boost::noncopyable {
   Hint m_hint;              // execution frequency hint
 };
 typedef std::list<Block*> BlockList;
-
-inline Trace* IRInstruction::getTrace() const {
-  return m_block->getTrace();
-}
-
-/*
- * A Trace is a single-entry, multi-exit, sequence of blocks.  Typically
- * each block falls through to the next block but this is not guaranteed;
- * traces may contain internal forward-only control flow.
- */
-class Trace : boost::noncopyable {
-public:
-  explicit Trace(Block* first, uint32_t bcOff)
-    : m_bcOff(bcOff)
-    , m_main(nullptr)
-  {
-    push_back(first);
-  }
-
-  ~Trace() {
-    std::for_each(m_exitTraces.begin(), m_exitTraces.end(),
-                  boost::checked_deleter<Trace>());
-  }
-
-  std::list<Block*>& getBlocks() { return m_blocks; }
-  const std::list<Block*>& getBlocks() const { return m_blocks; }
-  Block* front() { return *m_blocks.begin(); }
-  Block* back() { auto it = m_blocks.end(); return *(--it); }
-  const Block* front() const { return *m_blocks.begin(); }
-  const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
-
-  Block* push_back(Block* b) {
-    b->setTrace(this);
-    m_blocks.push_back(b);
-    return b;
-  }
-
-  // temporary data field for use by individual passes
-  //
-  // Used by LinearScan as a "fake" instruction id, that comes
-  // between the id of the last instruction that branches to
-  // this exit trace, and the next instruction on the main trace.
-  uint32_t getData() const { return m_data; }
-  void setData(uint32_t d) { m_data = d; }
-
-  uint32_t getBcOff() const { return m_bcOff; }
-  Trace* addExitTrace(Trace* exit) {
-    m_exitTraces.push_back(exit);
-    exit->setMain(this);
-    return exit;
-  }
-  bool isMain() const { return m_main == nullptr; }
-  void setMain(Trace* t) {
-    assert(m_main == nullptr);
-    m_main = t;
-  }
-  Trace* getMain() {
-    return m_main;
-  }
-
-  typedef std::list<Trace*> ExitList;
-  typedef std::list<Trace*>::iterator ExitIterator;
-
-  ExitList& getExitTraces() { return m_exitTraces; }
-  const ExitList& getExitTraces() const { return m_exitTraces; }
-  std::string toString() const;
-
-private:
-  // offset of the first bytecode in this trace; 0 if this trace doesn't
-  // represent a bytecode boundary.
-  uint32_t m_bcOff;
-  uint32_t m_data;
-  std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
-  ExitList m_exitTraces;      // traces to which this trace exits
-  Trace* m_main;              // ptr to parent trace if this is an exit trace
-};
-
-inline bool Block::isMain() const { return m_trace->isMain(); }
-
-/*
- * Some utility micro-passes used from other major passes.
- */
-
-/**
- * PostorderSort encapsulates a depth-first postorder walk
- */
-template <class Visitor>
-struct PostorderSort {
-  PostorderSort(Visitor &visitor, unsigned num_blocks) :
-      m_visited(num_blocks), m_visitor(visitor) {
-  }
-
-  void walk(Block* block) {
-    assert(!block->empty());
-    if (m_visited.test(block->getId())) return;
-    m_visited.set(block->getId());
-    Block* taken = block->getTaken();
-    if (taken && taken->getTrace()->isMain() != block->getTrace()->isMain()) {
-      walk(taken);
-      taken = nullptr;
-    }
-    if (Block* next = block->getNext()) walk(next);
-    if (taken) walk(taken);
-    m_visitor(block);
-  }
-private:
-  boost::dynamic_bitset<> m_visited;
-  Visitor &m_visitor;
-};
-
-/**
- * perform a depth-first postorder walk
- */
-template <class Visitor>
-void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
-  PostorderSort<Visitor> ps(visitor, num_blocks);
-  ps.walk(head);
-}
+typedef std::forward_list<Block*> BlockPtrList;
 
 /*
  * Remove any instruction if live[iid] == false
  */
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
-
-/*
- * Compute the postorder number of each immediate dominator of each block,
- * using the postorder numbers assigned by sortCfg().
- */
-typedef std::vector<int> IdomVector;
-IdomVector findDominators(const BlockList& blocks);
-
-typedef std::forward_list<Block*> BlockPtrList;
-
-/*
- * A vector of children lists, indexed by block->postId()
- */
-typedef std::vector<BlockPtrList> DomChildren;
-
-/*
- * compute the dominator tree, then populate a list of dominator children
- * for each block.  Note that DomChildren is indexed by block->postId(),
- * not block->id(); that's why we don't use StateVector here.
- */
-DomChildren findDomChildren(const BlockList& blocks);
-
-/*
- * return true if b1 == b2 or if b1 dominates b2.
- */
-bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
-
-/*
- * Compute a reverse postorder list of the basic blocks reachable from
- * the first block in trace.
- */
-BlockList sortCfg(Trace*, const IRFactory&);
-
-/*
- * Return true if trace has internal control flow (IE it has a branch
- * to itself somewhere.
- */
-bool hasInternalFlow(Trace*);
 
 /**
  * Run all optimization passes on this trace
@@ -2420,75 +2265,6 @@ inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
     default:
       return false;
   }
-}
-
-/*
- * Visit basic blocks in a preorder traversal over the dominator tree.
- * The state argument is passed by value (copied) as we move down the tree,
- * so each child in the tree gets the state after the parent was processed.
- * The body lambda should take State& (by reference) so it can modify it
- * as each block is processed.
- */
-template <class State, class Body>
-void forPreorderDoms(Block* block, const std::vector<BlockPtrList>& children,
-                     State state, Body body) {
-  body(block, state);
-  for (Block* child : children[block->postId()]) {
-    forPreorderDoms(child, children, state, body);
-  }
-}
-
-/*
- * Visit the main trace followed by exit traces.
- */
-template <class Body>
-void forEachTrace(Trace* main, Body body) {
-  body(main);
-  for (Trace* exit : main->getExitTraces()) {
-    body(exit);
-  }
-}
-
-/*
- * Visit the blocks in the main trace followed by exit trace blocks.
- */
-template <class Body>
-void forEachTraceBlock(Trace* main, Body body) {
-  for (Block* block : main->getBlocks()) {
-    body(block);
-  }
-  for (Trace* exit : main->getExitTraces()) {
-    for (Block* block : exit->getBlocks()) {
-      body(block);
-    }
-  }
-}
-
-/*
- * Visit the instructions in this trace, in block order.
- */
-template <class BlockList, class Body>
-void forEachInst(const BlockList& blocks, Body body) {
-  for (Block* block : blocks) {
-    for (IRInstruction& inst : *block) {
-      body(&inst);
-    }
-  }
-}
-
-template <class Body>
-void forEachInst(Trace* trace, Body body) {
-  forEachInst(trace->getBlocks(), body);
-}
-
-/*
- * Visit each instruction in the main trace, then the exit traces
- */
-template <class Body>
-void forEachTraceInst(Trace* main, Body body) {
-  forEachTrace(main, [=](Trace* t) {
-    forEachInst(t, body);
-  });
 }
 
 }}

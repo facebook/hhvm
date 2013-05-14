@@ -3427,12 +3427,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         e.FCall(numParams);
-        if (Option::WholeProgram) {
+        bool inferred = false;
+        if (Option::WholeProgram && Option::GenerateInferredTypes) {
           FunctionScopePtr fs = ne->getFuncScope();
           if (fs && !fs->getReturnType()) {
-            m_evalStack.setKnownType(KindOfNull, false /* inferred */);
+            m_evalStack.setKnownType(KindOfNull, false /* it's inferred */);
             m_evalStack.setNotRef();
+            inferred = true;
           }
+        }
+        if (!inferred) {
+          m_evalStack.setKnownType(KindOfNull, true /* it's predicted */);
+          m_evalStack.setNotRef();
         }
         e.PopR();
         return true;

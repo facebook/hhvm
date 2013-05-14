@@ -116,6 +116,15 @@ public:
   void start();
 
   /**
+   * Sends a cancellation request to the thread. NB: Do not use this unless
+   * the function is known to support cancellation and known to leave shared
+   * state in a consistent state (alternatively, the caller should proceed to
+   * shut down the process as well). Also, call waitForEnd following this call
+   * before proceeding as if the async func has stopped executing.
+   */
+  void cancel();
+
+  /**
    * Waits until this thread finishes running.
    */
   bool waitForEnd(int seconds = 0);

@@ -23,7 +23,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 // send/recv
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
@@ -154,6 +154,9 @@ bool DebuggerCommand::help(DebuggerClient *client) {
   return true;
 }
 
+// If the first argument of the command is "help" or "?"
+// this displays help text for the command and returns true.
+// Otherwise it returns false.
 bool DebuggerCommand::onClient(DebuggerClient *client) {
   TRACE(2, "DebuggerCommand::onClient\n");
   if (client->arg(1, "help") || client->arg(1, "?")) {

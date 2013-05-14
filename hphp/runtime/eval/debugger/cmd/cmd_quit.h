@@ -27,8 +27,13 @@ class CmdQuit : public DebuggerCommand {
 public:
   CmdQuit() : DebuggerCommand(KindOfQuit) {}
 
+  // The text to display when the debugger client processes "help quit".
   virtual bool help(DebuggerClient *client);
+
+  // Carries out the Quit command by informing the server the client
+  // is going away and then getting the client to quit.
   virtual bool onClient(DebuggerClient *client);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

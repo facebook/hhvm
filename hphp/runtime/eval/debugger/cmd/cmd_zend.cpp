@@ -20,6 +20,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 bool CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
   client->helpCmds(

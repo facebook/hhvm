@@ -19,6 +19,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 void CmdHelp::HelpAll(DebuggerClient *client) {
   client->helpCmds(
     "Session Commands", "",

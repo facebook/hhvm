@@ -28,7 +28,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 Debugger Debugger::s_debugger;
 bool Debugger::s_clientStarted = false;

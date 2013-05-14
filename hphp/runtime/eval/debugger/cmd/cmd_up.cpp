@@ -20,6 +20,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 bool CmdUp::help(DebuggerClient *client) {
   client->helpTitle("Up Command");
   client->helpCmds(

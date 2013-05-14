@@ -23,7 +23,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 const std::string &DSandboxInfo::id() const {
   TRACE(2, "DSandboxInfo::id\n");

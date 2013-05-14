@@ -65,6 +65,10 @@ void AsyncFuncImpl::start() {
   assert(m_threadId);
 }
 
+void AsyncFuncImpl::cancel() {
+  pthread_cancel(m_threadId);
+}
+
 bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
   if (m_threadId == 0) return true;
 

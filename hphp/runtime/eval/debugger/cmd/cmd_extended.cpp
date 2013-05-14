@@ -21,6 +21,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 void CmdExtended::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     const ExtendedCommandMap &cmds = getCommandMap();

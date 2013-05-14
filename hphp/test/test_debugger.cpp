@@ -67,7 +67,12 @@ bool TestDebugger::RunTests(const std::string &which) {
   RUN_TEST(TestWebRequest);
 
   stopServer();
-  func.waitForEnd();
+  if (!func.waitForEnd(10)) {
+    printf("Server did not stop within 10 seconds.\n");
+    func.cancel();
+    func.waitForEnd(1);
+    ret = false;
+  }
 
   return ret;
 }

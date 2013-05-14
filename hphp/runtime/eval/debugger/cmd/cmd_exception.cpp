@@ -19,6 +19,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 void CmdException::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     client->addCompletion(DebuggerClient::AutoCompleteClasses);

@@ -21,6 +21,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 bool CmdDown::help(DebuggerClient *client) {
   client->helpTitle("Down Command");
   client->helpCmds(

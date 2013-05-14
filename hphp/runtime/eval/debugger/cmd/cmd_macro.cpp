@@ -19,6 +19,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 void CmdMacro::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     static const char *keywords[] =

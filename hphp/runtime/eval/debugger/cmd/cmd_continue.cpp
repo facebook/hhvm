@@ -19,6 +19,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 bool CmdContinue::help(DebuggerClient *client) {
   client->helpTitle("Continue Command");
   client->helpCmds(

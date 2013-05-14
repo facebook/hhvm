@@ -25,7 +25,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 DebuggerServer DebuggerServer::s_debugger_server;
 
@@ -59,7 +59,7 @@ DebuggerServer::DebuggerServer()
 }
 
 DebuggerServer::~DebuggerServer() {
-  TRACE(2, "DebuggerServer::~DebuggerServery\n");
+  TRACE(2, "DebuggerServer::~DebuggerServer\n");
   m_stopped = true;
   m_serverThread.waitForEnd();
 }

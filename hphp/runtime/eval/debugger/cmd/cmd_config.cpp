@@ -19,6 +19,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 bool CmdConfig::help(DebuggerClient *client) {
   client->helpTitle("Config Command");
   client->helpCmds("set <var> <value>", "set variable <var> to be <value>",

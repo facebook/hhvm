@@ -27,7 +27,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 int InterruptSite::getFileLen() const {
   TRACE(2, "InterruptSite::getFileLen\n");

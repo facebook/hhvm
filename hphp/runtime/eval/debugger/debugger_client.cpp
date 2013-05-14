@@ -43,7 +43,7 @@ using namespace HPHP::Util::TextArt;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 

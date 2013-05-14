@@ -22,6 +22,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 const char *CmdPrint::Formats[] = {
   "x", "v", "hex", "oct", "dec", "unsigned", "time", nullptr
 };

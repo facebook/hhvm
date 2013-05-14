@@ -21,7 +21,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 const uchar* InstPointInfo::lookupPC() {
   TRACE(2, "InstPointInfo::lookupPC\n");

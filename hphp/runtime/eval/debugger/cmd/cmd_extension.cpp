@@ -23,6 +23,8 @@ using namespace HPHP::Util::TextArt;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
 void CmdExtension::sendImpl(DebuggerThriftBuffer &thrift) {
   CmdExtended::sendImpl(thrift);
   thrift.write(m_args);

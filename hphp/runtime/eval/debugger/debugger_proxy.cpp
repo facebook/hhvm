@@ -27,7 +27,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
     : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
@@ -365,7 +365,9 @@ void DebuggerProxy::pollSignal() {
       }
     }
     if (!res) {
-      Logger::Error("Failed to get CmdSignal back from client, socket error");
+      if (!m_stopped) {
+        Logger::Error("Failed to get CmdSignal back from client, socket error");
+      }
       break;
     }
 
@@ -601,6 +603,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
       if (res->is(DebuggerCommand::KindOfQuit)) {
         Debugger::RemoveProxy(shared_from_this());
+        forceQuit();
         throw DebuggerClientExitException();
       }
     }

@@ -28,7 +28,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,

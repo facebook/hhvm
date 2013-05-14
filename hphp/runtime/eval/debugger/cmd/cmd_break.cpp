@@ -18,6 +18,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
 TRACE_SET_MOD(debugger);
 
 // Serializes this command into the given Thrift buffer.

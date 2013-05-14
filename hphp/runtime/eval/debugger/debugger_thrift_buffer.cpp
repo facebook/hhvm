@@ -20,7 +20,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-static const Trace::Module TRACEMOD = Trace::debugger;
+TRACE_SET_MOD(debugger);
 
 String DebuggerThriftBuffer::readImpl() {
   TRACE(2, "DebuggerThriftBuffer::readImpl\n");

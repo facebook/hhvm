@@ -10129,7 +10129,7 @@ InstanceOfDSlow(const Class* cls, const Class* constraint) {
 static uint64_t
 InstanceOfDSlowInterface(const Class* cls, const Class* parent) {
   Stats::inc(Stats::Tx64_InstanceOfDInterface);
-  return parent && cls->classof(parent->preClass());
+  return parent && cls->classof(parent);
 }
 
 void

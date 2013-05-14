@@ -1700,15 +1700,9 @@ HOT_FUNC_VM static bool instanceOfHelper(const Class* objClass,
   return testClass && objClass->classof(testClass);
 }
 
-HOT_FUNC_VM static bool instanceOfHelperIFace(const Class* objClass,
-                                              const Class* testClass) {
-  return testClass && objClass->classof(testClass->preClass());
-}
-
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  const bool ifaceHint = inst->getSrc(2)->getValBool();
   cgCallHelper(m_as,
-               TCA(ifaceHint ? instanceOfHelperIFace : instanceOfHelper),
+               TCA(instanceOfHelper),
                inst->getDst(),
                kNoSyncPoint,
                ArgGroup(m_regs)

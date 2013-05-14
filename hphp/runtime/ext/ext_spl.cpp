@@ -152,11 +152,9 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
   Array ret(Array::Create());
-  for (auto& elem : cls->allInterfaces()) {
-    // For the case where cls is an interface, we don't want to
-    // include cls in the array we return
-    if (elem == cls) continue;
-    ret.set(elem->nameRef(), elem->nameRef());
+  const Class::InterfaceMap& ifaces = cls->allInterfaces();
+  for (int i = 0, size = ifaces.size(); i < size; i++) {
+    ret.set(ifaces[i]->nameRef(), ifaces[i]->nameRef());
   }
   return ret;
 }

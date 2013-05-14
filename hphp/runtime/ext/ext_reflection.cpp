@@ -493,12 +493,10 @@ Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
   const Func* func = c->lookupMethod(method_name.get());
   if (!func) {
     if (c->attrs() & AttrAbstract) {
-      ClassSet::const_iterator it = c->allInterfaces().begin(),
-        end = c->allInterfaces().end();
-      while (it != end) {
-        func = (*it)->lookupMethod(method_name.get());
+      const Class::InterfaceMap& ifaces = c->allInterfaces();
+      for (int i = 0, size = ifaces.size(); i < size; i++) {
+        func = ifaces[i]->lookupMethod(method_name.get());
         if (func) break;
-        ++it;
       }
     }
     if (!func) return Array();

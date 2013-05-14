@@ -156,8 +156,8 @@ class PreClass : public AtomicCountable {
   struct Const {
     Const() {}
     Const(PreClass* preClass, const StringData* n,
-    	  const StringData* typeConstraint, const TypedValue& val,
-          const StringData* phpCode);
+   	  const StringData* typeConstraint, const TypedValue& val,
+      const StringData* phpCode);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -638,6 +638,8 @@ public:
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
 
+  typedef IndexedStringMap<Class*,true,int> InterfaceMap;
+
 public:
   // Call newClass() instead of directly calling new.
   static ClassPtr newClass(PreClass* preClass, Class* parent);
@@ -649,7 +651,6 @@ public:
   }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
-  Class* classof(const PreClass* preClass) const;
   bool classof(const Class* cls) const {
     /*
       If cls is an interface or trait, we're going to have
@@ -665,7 +666,8 @@ public:
       interfaces/traits).
     */
     if (UNLIKELY(cls->attrs() & (AttrInterface | AttrTrait))) {
-      return (classof(cls->m_preClass.get()) == cls);
+      return m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr)
+        == cls;
     }
     if (m_classVecLen >= cls->m_classVecLen) {
       return (m_classVec[cls->m_classVecLen-1] == cls);
@@ -722,7 +724,7 @@ public:
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
-  const ClassSet& allInterfaces() const { return m_allInterfaces; }
+  const InterfaceMap& allInterfaces() const { return m_interfaces; }
   const std::vector<ClassPtr>& usedTraits() const {
     return m_usedTraits;
   }
@@ -942,8 +944,8 @@ private:
   ClassPtr m_parent;
   std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in
                                           // its "implements" clause
-  ClassSet m_allInterfaces; // all interfaces a non-abstract class deriving
-                            // from this one (including itself) must implement
+  InterfaceMap m_interfaces;
+
   std::vector<ClassPtr> m_usedTraits;
   TraitAliasVec m_traitAliases;
 

@@ -97,7 +97,6 @@ class ObjectData : public CountableNF {
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  Class* instanceof(const PreClass* pc) const;
   bool instanceof(const Class* c) const;
 
   bool isCollection() const {

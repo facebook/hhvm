@@ -54,11 +54,6 @@ ObjectData::~ObjectData() {
   }
 }
 
-HPHP::Class*
-ObjectData::instanceof(const HPHP::PreClass* pc) const {
-  return m_cls->classof(pc);
-}
-
 bool ObjectData::instanceof(const HPHP::Class* c) const {
   return m_cls->classof(c);
 }

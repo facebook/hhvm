@@ -771,29 +771,6 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   return AvailTrue;
 }
 
-// If this Class represents the same class as 'preClass' or a descendent of
-// 'preClass', this function returns the Class* that corresponds to 'preClass'.
-// Otherwise, this function returns NULL.
-Class* Class::classof(const PreClass* preClass) const {
-  Class* class_ = const_cast<Class*>(this);
-  do {
-    if (class_->m_preClass.get() == preClass) {
-      return class_;
-    }
-    std::vector<ClassPtr>& interfaces = class_->m_declInterfaces;
-    for (unsigned i = 0; i < interfaces.size(); ++i) {
-      // Interfaces can extend arbitrarily many interfaces themselves, so
-      // search them recursively
-      Class* iclass = interfaces[i]->classof(preClass);
-      if (iclass) {
-        return iclass;
-      }
-    }
-    class_ = class_->m_parent.get();
-  } while (class_ != nullptr);
-  return nullptr;
-}
-
 void Class::initialize(TypedValue*& sProps) const {
   if (m_pinitVec.size() > 0) {
     if (getPropData() == nullptr) {
@@ -2237,9 +2214,8 @@ void Class::setInitializers() {
 //    compatible (at least as many parameters, additional parameters must have
 //    defaults), and typehints must be compatible
 void Class::checkInterfaceMethods() {
-  for (ClassSet::const_iterator it = m_allInterfaces.begin();
-       it != m_allInterfaces.end(); it++) {
-    const Class* iface = *it;
+  for (int i = 0, size = m_interfaces.size(); i < size; i++) {
+    const Class* iface = m_interfaces[i];
 
     for (size_t m = 0; m < iface->m_methods.size(); m++) {
       Func* imeth = iface->m_methods[m];
@@ -2286,12 +2262,13 @@ void Class::checkInterfaceMethods() {
 }
 
 void Class::setInterfaces() {
-  if (attrs() & AttrInterface) {
-    m_allInterfaces.insert(this);
-  }
+  InterfaceMap::Builder interfacesBuilder;
   if (m_parent.get() != nullptr) {
-    m_allInterfaces.insert(m_parent->m_allInterfaces.begin(),
-                           m_parent->m_allInterfaces.end());
+    int size = m_parent->m_interfaces.size();
+    for (int i = 0; i < size; i++) {
+      Class* interface = m_parent->m_interfaces[i];
+      interfacesBuilder.add(interface->name(), interface);
+    }
   }
   for (PreClass::InterfaceVec::const_iterator it =
          m_preClass->interfaces().begin();
@@ -2305,9 +2282,20 @@ void Class::setInterfaces() {
                   m_preClass->name()->data(), cp->name()->data());
     }
     m_declInterfaces.push_back(cp);
-    m_allInterfaces.insert(cp->m_allInterfaces.begin(),
-                           cp->m_allInterfaces.end());
+    if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
+      interfacesBuilder.add(cp->name(), cp.get());
+    }
+    int size = cp->m_interfaces.size();
+    for (int i = 0; i < size; i++) {
+      Class* interface = cp->m_interfaces[i];
+      interfacesBuilder.find(interface->name());
+      if (interfacesBuilder.find(interface->name()) ==
+          interfacesBuilder.end()) {
+        interfacesBuilder.add(interface->name(), interface);
+      }
+    }
   }
+  m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();
 }
 

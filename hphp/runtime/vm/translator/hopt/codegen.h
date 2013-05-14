@@ -257,12 +257,10 @@ private:
 
 private:
   void emitSetCc(IRInstruction*, ConditionCode);
-  void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
   ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
-  void emitInstanceCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceRet(CodeGenerator::Asm& as);
   Address cgCheckStaticBit(Type type,

@@ -302,7 +302,7 @@ vm_decode_function(CVarRef function,
       }
       // Only forward the current late bound class if it is the same or
       // a descendent of cls
-      if (fwdCls && fwdCls->classof(cls->preClass())) {
+      if (fwdCls && fwdCls->classof(cls)) {
         cls = fwdCls;
       }
     }

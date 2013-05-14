@@ -252,11 +252,9 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
   if (cls->attrs() & AttrAbstract) {
-    const ClassSet& ifaces = cls->allInterfaces();
-    for (ClassSet::const_iterator it = ifaces.begin();
-         it != ifaces.end();
-         ++it) {
-      if ((*it)->lookupMethod(method_name.get())) return true;
+    const Class::InterfaceMap& ifaces = cls->allInterfaces();
+    for (int i = 0, size = ifaces.size(); i < size; i++) {
+      if (ifaces[i]->lookupMethod(method_name.get())) return true;
     }
   }
   return false;

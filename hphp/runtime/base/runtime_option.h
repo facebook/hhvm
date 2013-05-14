@@ -442,6 +442,8 @@ public:
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \
+  F(uint32_t, TCNumHugeHotMB,          16)                              \
+  F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \

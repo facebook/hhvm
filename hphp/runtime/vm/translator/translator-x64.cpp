@@ -11405,6 +11405,7 @@ TranslatorX64::TranslatorX64()
   m_curFunc(nullptr),
   m_vecState(nullptr)
 {
+  static const size_t kRoundUp = 2 << 20;
   const size_t kAHotSize = RuntimeOption::VMTranslAHotSize;
   const size_t kASize = RuntimeOption::VMTranslASize;
   const size_t kAStubsSize = RuntimeOption::VMTranslAStubsSize;
@@ -11436,6 +11437,13 @@ TranslatorX64::TranslatorX64()
     profileUp = true;
   }
 
+  auto enhugen = [&](void* base, int numMB) {
+    if (RuntimeOption::EvalMapTCHuge) {
+      assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
+      hintHuge(base, numMB << 20);
+    }
+  };
+
   // We want to ensure that the block for "a", "astubs",
   // "atrampolines", and "m_globalData" are nearby so that we can
   // short jump/point between them. Thus we allocate one slab and
@@ -11444,7 +11452,6 @@ TranslatorX64::TranslatorX64()
   // Using sbrk to ensure its in the bottom 2G, so we avoid
   // the need for trampolines, and get to use shorter
   // instructions for tc addresses.
-  static const size_t kRoundUp = 2 << 20;
   const size_t allocationSize = m_totalSize + kRoundUp - 1;
   uint8_t *base = (uint8_t*)sbrk(allocationSize);
   if (base == (uint8_t*)-1) {
@@ -11460,9 +11467,7 @@ TranslatorX64::TranslatorX64()
   }
   assert(base);
   base += -(uint64_t)base & (kRoundUp - 1);
-  if (RuntimeOption::EvalMapTCHuge) {
-    hintHuge(base, m_totalSize);
-  }
+  enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
   TRACE(1, "init atrampolines @%p\n", base);
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
@@ -11474,8 +11479,10 @@ TranslatorX64::TranslatorX64()
   TRACE(1, "init a @%p\n", base);
   a.init(base, kASize);
   base += kASize;
+  base += -(uint64_t)base & (kRoundUp - 1);
   TRACE(1, "init astubs @%p\n", base);
   astubs.init(base, kAStubsSize);
+  enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
   base += kAStubsSize;
   TRACE(1, "init gdata @%p\n", base);
   m_globalData.init(base, kGDataSize);

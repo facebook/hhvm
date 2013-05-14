@@ -498,7 +498,9 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 }
 
 // Checks whether the cmd has any breakpoints that match the current Site.
-// Also returns true for cmds that have should always break.
+// Also returns true for cmds that should always break, like SessionStarted,
+// and returns true when we have special modes setup for, say, breaking on
+// RequestEnded, PSPEnded, etc.
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::checkBreakPoints\n");
   ReadLock lock(m_breakMutex);
@@ -539,6 +541,8 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
     }
   }
 
+  // NB: this also checks whether we should be stopping at special interrupt
+  // sites, like SessionStarted, RequestEnded, ExceptionThrown, etc.
   bpShouldBreak = checkBreakPoints(cmd);
 
   // This is done before KindOfContinue testing.

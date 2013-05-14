@@ -82,6 +82,10 @@ bool CmdBreak::help(DebuggerClient *client) {
     "",                         "",
     "[b]reak [o]nce  {above}",  "breaks just once then disables it",
     "",                         "",
+    "[b]reak [s]tart {url}",    "breaks at start of web request",
+    "[b]reak [e]nd {url}",      "breaks at end of web request",
+    "[b]reak [p]sp {url}",      "breaks at end of psp",
+    "",                         "",
     "[b]reak {above} if {php}", "breaks if condition meets",
     "[b]reak {above} && {php}", "breaks and evaluates an expression",
     "",                         "",
@@ -116,6 +120,22 @@ bool CmdBreak::help(DebuggerClient *client) {
     "\tb mypage.php:123\n"
     "\tb foo()\n"
     "\tb MyClass::foo()\n"
+  );
+
+  client->helpTitle("Special Breakpoints");
+  client->helpSection(
+    "There are special breakpoints what can only be set by names:\n"
+    "\n"
+    "\tstart\n"
+    "\tend\n"
+    "\tpsp\n"
+    "\n"
+    "They represent different time points of a web request. 'start' is at the "
+    "beginning of a web request, when no PHP file is invoked yet, but query "
+    "string and server variables are already prepared. 'end' is at the end of "
+    "a web request, but BEFORE post-send processing (psp). 'psp' is at END of "
+    "psp, not beginning. To set a breakpoint at the beginning of psp, use "
+    "'end', because end of a request is the same as beginning of psp."
   );
 
   client->helpTitle("Conditional Breakpoints and Watchpoints");

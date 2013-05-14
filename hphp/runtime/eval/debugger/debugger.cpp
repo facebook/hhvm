@@ -187,17 +187,25 @@ void Debugger::InterruptSessionEnded(const char *file) {
   Interrupt(SessionEnded, file);
 }
 
+void Debugger::InterruptWithUrl(int type, const char *url) {
+  // Build a site to represent the URL. Note it won't have any source info
+  // in it, because this event is raised with no PHP on the stack.
+  InterruptSite site(false, null_variant);
+  site.url() = url ? url : "";
+  Interrupt(type, url, &site);
+}
+
 void Debugger::InterruptRequestStarted(const char *url) {
   TRACE(2, "Debugger::InterruptRequestStarted\n");
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
-    Interrupt(RequestStarted, url);
+    InterruptWithUrl(RequestStarted, url);
   }
 }
 
 void Debugger::InterruptRequestEnded(const char *url) {
   TRACE(2, "Debugger::InterruptRequestEnded: url=%s\n", url);
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
-    Interrupt(RequestEnded, url);
+    InterruptWithUrl(RequestEnded, url);
   }
   CStrRef sandboxId = g_context->getSandboxId();
   s_debugger.unregisterSandbox(sandboxId.get());
@@ -206,7 +214,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
 void Debugger::InterruptPSPEnded(const char *url) {
   TRACE(2, "Debugger::InterruptPSPEnded\n");
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
-    Interrupt(PSPEnded, url);
+    InterruptWithUrl(PSPEnded, url);
   }
 }
 

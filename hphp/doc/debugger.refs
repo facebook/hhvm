@@ -49,10 +49,25 @@ For examples,
 	b foo()
 	b MyClass::foo()
 
+    ------------------------ Special Breakpoints ------------------------
+
+There are special breakpoints what can only be set by names:
+
+      start
+      end
+      psp
+
+They represent different time points of a web request. 'start' is at the
+beginning of a web request, when no PHP file is invoked yet, but query
+string and server variables are already prepared. 'end' is at the end of
+a web request, but BEFORE post-send processing (psp). 'psp' is at END of
+psp, not beginning. To set a breakpoint at the beginning of psp, use
+'end', because end of a request is the same as beginning of psp.
+
     -------------- Conditional Breakpoints and Watchpoints --------------
 
-Every breakpoint can specify a condition, which is an arbitrary PHP expression 
-that will be evaluated to TRUE or FALSE. When TRUE, it will break. When FALSE, 
+Every breakpoint can specify a condition, which is an arbitrary PHP expression
+that will be evaluated to TRUE or FALSE. When TRUE, it will break. When FALSE,
 it will continue without break. "&&" is similar to "if", except it will always
 break, regardless what the expression returns. This is useful to watch
 variables at breakpoints. For example,

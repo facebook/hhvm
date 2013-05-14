@@ -102,6 +102,7 @@ private:
 
   static void Interrupt(int type, const char *program,
                         InterruptSite *site = nullptr, const char *error = nullptr);
+  static void InterruptWithUrl(int type, const char *url);
 
   typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
                                    StringDataHashCompare> ProxyMap;

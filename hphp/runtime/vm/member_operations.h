@@ -650,11 +650,10 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     } else {
       // Convert key to string offset.
       int64_t x;
-      {
-        TypedValue tv;
-        tvDup(key, &tv);
-        tvCastToInt64InPlace(&tv);
-        x = tv.m_data.num;
+      if (LIKELY(key->m_type == KindOfInt64)) {
+        x = key->m_data.num;
+      } else {
+        x = tvCastToInt64(key);
       }
       if (x < 0 || x >= StringData::MaxSize) {
         // Andrei: can't use PRId64 here because of order of inclusion
@@ -673,16 +672,21 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       // Extract the first character of (string)value.
       char y[2];
       {
-        TypedValue tv;
-        tvDup(value, &tv);
-        tvCastToStringInPlace(&tv);
-        if (tv.m_data.pstr->size() > 0) {
-          y[0] = tv.m_data.pstr->data()[0];
+        StringData* valStr;
+        if (LIKELY(IS_STRING_TYPE(value->m_type))) {
+          valStr = value->m_data.pstr;
+          valStr->incRefCount();
+        } else {
+          valStr = tvCastToString(value);
+        }
+
+        if (valStr->size() > 0) {
+          y[0] = valStr->data()[0];
           y[1] = '\0';
         } else {
           y[0] = '\0';
         }
-        tvRefcountedDecRef(&tv);
+        decRefStr(valStr);
       }
       // Create and save the result.
       if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {

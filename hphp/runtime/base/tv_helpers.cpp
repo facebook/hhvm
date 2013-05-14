@@ -85,6 +85,34 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
   tv->m_type = KindOfInt64;
 }
 
+int64_t tvCastToInt64(TypedValue* tv, int base /* = 10 */) {
+  if (tv->m_type == KindOfRef) {
+    tv = tv->m_data.pref->tv();
+  }
+
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    return 0;
+  case KindOfBoolean:
+    assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+    // Fall through
+  case KindOfInt64:
+    return tv->m_data.num;
+  case KindOfDouble:
+    return toInt64(tv->m_data.dbl);
+  case KindOfStaticString:
+  case KindOfString:
+    return tv->m_data.pstr->toInt64(base);
+  case KindOfArray:
+    return tv->m_data.parr->empty() ? 0 : 1;
+  case KindOfObject:
+    return tv->m_data.pobj->o_toInt64();
+  default:
+    not_reached();
+  }
+}
+
 void tvCastToDoubleInPlace(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
@@ -133,11 +161,34 @@ void tvCastToStringInPlace(TypedValue* tv) {
     tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
     return;
   }
-  default:            assert(false); s = buildStringData(""); break;
+  default:            not_reached();
   }
   tv->m_data.pstr = s;
   tv->m_type = KindOfString;
   tv->m_data.pstr->incRefCount();
+}
+
+StringData* tvCastToString(TypedValue* tv) {
+  if (tv->m_type == KindOfRef) {
+    tv = tv->m_data.pref->tv();
+  }
+
+  StringData* s;
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:    s = buildStringData(""); break;
+  case KindOfBoolean: s = buildStringData(tv->m_data.num ? "1" : ""); break;
+  case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
+  case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
+  case KindOfStaticString:
+  case KindOfString:  s = tv->m_data.pstr; break;
+  case KindOfArray:   return StringData::GetStaticString("Array");
+  case KindOfObject:  return tv->m_data.pobj->t___tostring().detach();
+  default:            not_reached();
+  }
+
+  s->incRefCount();
+  return s;
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {

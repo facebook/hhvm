@@ -1273,6 +1273,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_define);
           StringData* name = (StringData*)((char*)obj - (int)k);
           auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          assert(v->m_type != KindOfUninit);
           mergeCns(getDataRef<TypedValue>(tcbase, v->cacheHandle()), v, name);
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);

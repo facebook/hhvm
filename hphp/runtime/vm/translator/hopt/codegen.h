@@ -212,7 +212,7 @@ private:
                   void (Asm::*intRR)(RegType, RegType),
                   void (Asm::*mov)(RegType, RegType),
                   void (Asm::*fpRR)(RegXMM, RegXMM),
-                  void (*extend)(Asm&, const SSATmp*, const RegisterInfo&),
+                  void (*extend)(Asm&, const RegisterInfo&),
                   Oper,
                   RegType (*conv)(PhysReg),
                   Commutativity);
@@ -221,7 +221,7 @@ private:
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
                      void (Asm::*mov)(RegType, RegType),
-                     void (*extend)(Asm&, const SSATmp*, const RegisterInfo&),
+                     void (*extend)(Asm&, const RegisterInfo&),
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);

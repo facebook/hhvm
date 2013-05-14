@@ -593,6 +593,8 @@ enum Opcode : uint16_t {
 #undef O
 
   // Agree with hhbc on the names of these, to ease macro implementations.
+  // TODO(2395841): this is totally bogus. Bitwise and logical ops have vastly
+  // different behavior. We need to give these their own opcodes.
   OpBitAnd = OpAnd,
   OpBitOr = OpOr,
   OpBitXor = OpXor,

@@ -516,8 +516,7 @@ void shuffle2(CodeGenerator::Asm& a,
   }
 }
 
-static void signExtendBool(X64Assembler& as, const SSATmp* tmp,
-                           const RegisterInfo& info) {
+static void signExtendBool(X64Assembler& as, const RegisterInfo& info) {
   auto reg = info.getReg();
   if (reg != InvalidReg) {
     // sign-extend the bool from a byte to a quad
@@ -525,15 +524,19 @@ static void signExtendBool(X64Assembler& as, const SSATmp* tmp,
   }
 }
 
+static void zeroExtendBool(X64Assembler& as, const RegisterInfo& info) {
+  auto reg = info.getReg();
+  if (reg != InvalidReg) {
+    // zero-extend the bool from a byte to a quad
+    // note: movzbl actually extends the value to 64 bits.
+    as.movzbl(rbyte(reg), r32(reg));
+  }
+}
+
 static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src,
                             const RegisterInfo& info) {
   if (src->isA(Type::Bool)) {
-    auto reg = info.getReg();
-    if (reg != InvalidReg) {
-      // zero-extend the bool from a byte to a quad
-      // note: movzbl actually extends the value to 64 bits.
-      as.movzbl(rbyte(reg), r32(reg));
-    }
+    zeroExtendBool(as, info);
   }
 }
 
@@ -979,7 +982,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
               void (Asm::*instrIR)(Immed, RegType),
               void (Asm::*instrRR)(RegType, RegType),
               void (Asm::*movInstr)(RegType, RegType),
-              void (*extendInstr)(Asm&, const SSATmp*, const RegisterInfo&),
+              void (*extendInstr)(Asm&, const RegisterInfo&),
               Oper oper,
               RegType (*convertReg)(PhysReg),
               Commutativity commuteFlag) {
@@ -1014,7 +1017,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
 
   auto signExtendIfNecessary = [&] {
     if (useBoolOps) {
-      extendInstr(m_as, dst, m_regs[dst]);
+      extendInstr(m_as, m_regs[dst]);
     }
   };
 
@@ -1093,7 +1096,7 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
                  void (Asm::*instrRR)(RegType, RegType),
                  void (Asm::*movInstr)(RegType, RegType),
                  void (Asm::*fpInstr)(RegXMM, RegXMM),
-                 void (*extendInstr)(Asm&, const SSATmp*, const RegisterInfo&),
+                 void (*extendInstr)(Asm&, const RegisterInfo&),
                  Oper oper,
                  RegType (*convertReg)(PhysReg),
                  Commutativity commuteFlag) {
@@ -1154,13 +1157,12 @@ void CodeGenerator::cgOpAdd(IRInstruction* inst) {
   // Special cases: x = y + 1
   if (emitInc(dst, src1, src2) || emitInc(dst, src2, src1)) return;
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool))
-  {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::addb,
                &Asm::addb,
                &Asm::movb,
-               &zeroExtendIfBool,
+               &zeroExtendBool,
                std::plus<bool>(),
                &convertToReg8,
                Commutative);
@@ -1189,7 +1191,7 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
     return cgNegateWork(dst, src2);
   }
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::subb,
                &Asm::subb,
@@ -1215,12 +1217,12 @@ void CodeGenerator::cgOpAnd(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::andb,
                &Asm::andb,
                &Asm::movb,
-               &zeroExtendIfBool,
+               &zeroExtendBool,
                [] (bool a, bool b) { return a & b; },
                &convertToReg8,
                Commutative);
@@ -1240,12 +1242,12 @@ void CodeGenerator::cgOpOr(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::orb,
                &Asm::orb,
                &Asm::movb,
-               &zeroExtendIfBool,
+               &zeroExtendBool,
                [] (bool a, bool b) { return a | b; },
                &convertToReg8,
                Commutative);
@@ -1274,12 +1276,12 @@ void CodeGenerator::cgOpXor(IRInstruction* inst) {
     return cgNotWork(dst, src1);
   }
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::xorb,
                &Asm::xorb,
                &Asm::movb,
-               &zeroExtendIfBool,
+               &zeroExtendBool,
                [] (bool a, bool b) { return a ^ b; },
                &convertToReg8,
                Commutative);
@@ -1299,12 +1301,12 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
   SSATmp* src1 = inst->getSrc(0);
   SSATmp* src2 = inst->getSrc(1);
 
-  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+  if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
     cgBinaryIntOp(inst,
                &Asm::andb,
                &Asm::andb,
                &Asm::movb,
-               &zeroExtendIfBool,
+               &zeroExtendBool,
                [] (bool a, bool b) { return a & b; },
                &convertToReg8,
                Commutative);

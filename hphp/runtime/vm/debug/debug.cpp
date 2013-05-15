@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/execution_context.h"
-
-#include "debug.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/runtime/vm/debug/elfwriter.h"
 
-#include "sys/types.h"
+#include "hphp/runtime/base/execution_context.h"
+
+#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -107,7 +107,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
       name = highOpcodeName[op - OpHighStart];
     }
     fprintf(m_perfMap, "%lx %x %s\n",
-	    uintptr_t(range.begin()), range.size(), name);
+            uintptr_t(range.begin()), range.size(), name);
   }
 }
 

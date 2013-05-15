@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_STAT_CACHE_H_
 #define incl_HPHP_STAT_CACHE_H_
 
-#include "sys/inotify.h"
+#include <sys/inotify.h>
 
 #include "tbb/concurrent_hash_map.h"
 
@@ -41,7 +41,7 @@ class StatCache {
     typedef hphp_hash_map<std::string, NodePtr, string_hash> NameNodeMap;
     typedef hphp_hash_map<std::string, void*, string_hash> NameMap;
 
-    Node(StatCache& statCache, int wd=-1);
+    explicit Node(StatCache& statCache, int wd=-1);
     void atomicRelease();
 
     void touch(bool invalidate=true);

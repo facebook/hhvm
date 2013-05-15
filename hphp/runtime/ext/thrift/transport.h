@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/util/logger.h"
 
-#include "sys/types.h"
+#include <sys/types.h>
 #include "netinet/in.h"
 #include <unistd.h>
 #if defined(__FreeBSD__)

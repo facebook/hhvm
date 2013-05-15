@@ -90,7 +90,7 @@ int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
 #endif
 
 #include <stdarg.h>
-#include "sys/types.h"
+#include <sys/types.h>
 
 typedef unsigned int UINT32;
 typedef int INT32;

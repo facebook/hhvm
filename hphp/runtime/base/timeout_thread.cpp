@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "sys/mman.h"
-
 #include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+
+#include <sys/mman.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

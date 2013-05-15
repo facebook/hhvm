@@ -21,7 +21,7 @@
 #include "hphp/util/async_func.h"
 #include "hphp/util/lock.h"
 #include <algorithm>
-#include "sys/time.h"
+#include <sys/time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

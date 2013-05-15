@@ -30,8 +30,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
-#include "sys/types.h"
-#include "sys/stat.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
 

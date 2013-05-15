@@ -15,8 +15,8 @@
 */
 
 #include <unistd.h>
-#include "sys/mman.h"
-#include "sys/types.h"
+#include <sys/mman.h>
+#include <sys/types.h>
 
 #include "hphp/util/kernel_version.h"
 

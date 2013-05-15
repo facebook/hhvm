@@ -25,10 +25,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-#include "sys/mman.h"
-#include "sys/ioctl.h"
+#include <sys/mman.h>
+#include <sys/ioctl.h>
 #include "asm/unistd.h"
-#include "sys/prctl.h"
+#include <sys/prctl.h>
 #include "linux/perf_event.h"
 #include "hphp/runtime/base/string_data.h"
 #include "hphp/runtime/base/zend/zend_url.h"

@@ -34,7 +34,7 @@
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/util/db_conn.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "sys/types.h"
+#include <sys/types.h>
 #include <signal.h>
 #include "hphp/util/ssl_init.h"
 

@@ -26,7 +26,7 @@
 // For sysconf(3).
 #include <unistd.h>
 // For getpwuid_r(3).
-#include "sys/types.h"
+#include <sys/types.h>
 #include <pwd.h>
 
 namespace HPHP {

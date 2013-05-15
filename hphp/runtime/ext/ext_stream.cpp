@@ -30,10 +30,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
-#include "sys/types.h"
-#include "sys/socket.h"
+#include <sys/types.h>
+#include <sys/socket.h>
 #if defined(AF_UNIX)
-#include "sys/un.h"
+#include <sys/un.h>
 #endif
 
 #define PHP_STREAM_BUFFER_NONE  0   /* unbuffered */

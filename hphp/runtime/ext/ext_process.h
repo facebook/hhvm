@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_PROCESS_H_
 
 #include "hphp/runtime/base/base_includes.h"
-#include "sys/wait.h"
+#include <sys/wait.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

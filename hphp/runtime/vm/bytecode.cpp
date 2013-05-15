@@ -14,19 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <boost/format.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
-
-#include <cinttypes>
-
-#include <libgen.h>
-#include "sys/mman.h"
-
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
@@ -68,6 +57,16 @@
 #include "hphp/runtime/vm/request_arena.h"
 #include "hphp/util/arena.h"
 
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <boost/format.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
+
+#include <cinttypes>
+
+#include <libgen.h>
+#include <sys/mman.h>
 
 namespace HPHP {
 

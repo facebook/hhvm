@@ -18,8 +18,8 @@
 #define incl_HPHP_SOCKET_H_
 
 #include "hphp/runtime/base/file/file.h"
-#include "sys/types.h"
-#include "sys/socket.h"
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #define SOCKET_ERROR(sock, msg, errn)                           \
   sock->setError(errn);                                         \

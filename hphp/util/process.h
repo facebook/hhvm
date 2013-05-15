@@ -18,7 +18,7 @@
 #define incl_HPHP_PROCESS_H_
 
 #include "hphp/util/base.h"
-#include "sys/syscall.h"
+#include <sys/syscall.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

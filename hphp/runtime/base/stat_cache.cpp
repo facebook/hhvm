@@ -15,11 +15,11 @@
 */
 #include "hphp/runtime/base/stat_cache.h"
 
-#include "sys/types.h"
-#include "sys/stat.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "sys/param.h"
+#include <sys/param.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/logger.h"

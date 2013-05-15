@@ -15,7 +15,7 @@
 __BEGIN_DECLS
 
 #include <stdarg.h>
-#include "sys/types.h"
+#include <sys/types.h>
 #include "hphp/util/neo/ulist.h"
 
 
@@ -29,7 +29,7 @@ NEOERR *ne_save_file (const char *path, char *str);
 NEOERR *ne_remove_dir (const char *path);
 NEOERR *ne_listdir(const char *path, ULIST **files);
 NEOERR *ne_listdir_match(const char *path, ULIST **files, const char *match);
-NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch, 
+NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
                           void *rock);
 
 __END_DECLS

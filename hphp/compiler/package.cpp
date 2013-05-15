@@ -15,8 +15,8 @@
 */
 
 #include "hphp/compiler/package.h"
-#include "sys/types.h"
-#include "sys/stat.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
 #include "hphp/compiler/analysis/analysis_result.h"

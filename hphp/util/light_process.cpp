@@ -24,7 +24,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <unistd.h>
-#include "sys/wait.h"
+#include <sys/wait.h>
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>

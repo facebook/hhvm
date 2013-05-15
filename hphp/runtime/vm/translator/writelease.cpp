@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "sys/mman.h"
-
+#include "hphp/runtime/vm/translator/writelease.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/writelease.h"
+
+#include <sys/mman.h>
 
 namespace HPHP { namespace Transl {
 TRACE_SET_MOD(txlease);

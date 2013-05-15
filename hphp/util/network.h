@@ -20,7 +20,7 @@
 #include "hphp/util/base.h"
 #include <string>
 #include <netdb.h>
-#include "sys/socket.h"
+#include <sys/socket.h>
 #include <stdlib.h>
 
 /**

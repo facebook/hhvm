@@ -15,7 +15,7 @@
 */
 #include "hphp/util/read_only_arena.h"
 
-#include "sys/mman.h"
+#include <sys/mman.h>
 
 #include "folly/Exception.h"
 

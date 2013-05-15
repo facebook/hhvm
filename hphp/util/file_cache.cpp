@@ -19,7 +19,7 @@
 #include "hphp/util/compression.h"
 #include "util.h"
 #include "hphp/util/logger.h"
-#include "sys/mman.h"
+#include <sys/mman.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

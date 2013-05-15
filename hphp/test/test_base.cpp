@@ -15,7 +15,7 @@
 */
 
 #include "hphp/test/test_base.h"
-#include "sys/param.h"
+#include <sys/param.h>
 #include "hphp/compiler/option.h"
 #include "hphp/test/test.h"
 #include "hphp/runtime/base/complex_types.h"

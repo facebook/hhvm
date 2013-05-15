@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "sys/mman.h"
-
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/execution_context.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
 
 using namespace HPHP;
 

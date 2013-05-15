@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/util/process.h"
-#include "sys/utsname.h"
+#include <sys/utsname.h>
 #include <pwd.h>
 
 #include "hphp/runtime/vm/request_arena.h"

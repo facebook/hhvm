@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_POSIX_H_
 
 #include "hphp/runtime/base/base_includes.h"
-#include "sys/types.h"
+#include <sys/types.h>
 #include <grp.h>
 #include <signal.h>
 

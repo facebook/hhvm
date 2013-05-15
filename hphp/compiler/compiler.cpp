@@ -14,23 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/positional_options.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/program_options/parsers.hpp>
-
+#include "hphp/compiler/compiler.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/analysis/type.h"
-#include "hphp/util/json.h"
-#include "hphp/util/logger.h"
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/builtin_symbols.h"
+#include "hphp/util/json.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/db_conn.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/process.h"
@@ -43,14 +39,19 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread_init_fini.h"
 #include "hphp/runtime/vm/repo.h"
-#include "sys/types.h"
-#include "sys/wait.h"
-#include <dlfcn.h>
 #include "hphp/system/lib/systemlib.h"
-#include "hphp/compiler/compiler.h"
 #include "hphp/util/repo_schema.h"
 
 #include "hphp/hhvm/process_init.h"
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <dlfcn.h>
+
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/positional_options.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
 
 using namespace boost::program_options;
 using std::cout;

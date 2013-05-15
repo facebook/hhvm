@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_WRITELEASE_H_
 #define incl_HPHP_WRITELEASE_H_
 
+#include "hphp/util/base.h"
+
 #include <pthread.h>
 
 namespace HPHP { namespace Transl {

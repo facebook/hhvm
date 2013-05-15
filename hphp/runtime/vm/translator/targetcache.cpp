@@ -13,13 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <string>
-#include <stdio.h>
-#include "sys/mman.h"
-
-#include "hphp/util/trace.h"
-#include "hphp/util/base.h"
-#include "hphp/util/maphuge.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/types.h"
@@ -28,9 +22,15 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/translator/annotation.h"
-#include "hphp/runtime/vm/translator/targetcache.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/base.h"
+#include "hphp/util/maphuge.h"
+
+#include <string>
+#include <stdio.h>
+#include <sys/mman.h>
 
 using namespace HPHP::MethodLookup;
 using namespace HPHP::Util;

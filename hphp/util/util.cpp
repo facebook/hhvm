@@ -21,9 +21,9 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
 
-#include "sys/types.h"
+#include <sys/types.h>
 #include <dirent.h>
-#include "sys/stat.h"
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <libgen.h>
 #include <execinfo.h>

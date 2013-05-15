@@ -18,7 +18,7 @@
 #define incl_HPHP_EVAL_FILE_REPOSITORY_H_
 
 #include <time.h>
-#include "sys/stat.h"
+#include <sys/stat.h>
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/runtime_option.h"

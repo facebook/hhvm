@@ -19,9 +19,9 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/logger.h"
 #include "linux/types.h"
-#include "sys/capability.h"
-#include "sys/prctl.h"
-#include "sys/types.h"
+#include <sys/capability.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
 #include <pwd.h>
 
 namespace HPHP {

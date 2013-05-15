@@ -23,7 +23,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "sys/stat.h"
+#include <sys/stat.h>
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"

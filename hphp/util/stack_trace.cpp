@@ -24,8 +24,8 @@
 #include <execinfo.h>
 #include <bfd.h>
 #include <signal.h>
-#include "sys/types.h"
-#include "sys/stat.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "hphp/util/light_process.h"
 #include "hphp/util/compatibility.h"

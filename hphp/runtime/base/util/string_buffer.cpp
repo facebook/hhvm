@@ -14,17 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "sys/types.h"
-#include "sys/stat.h"
-#include <fcntl.h>
-
-#include <algorithm>
 #include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/util/alloc.h"
 #include "hphp/runtime/base/file/file.h"
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/base/zend/utf8_decode.h"
 #include "hphp/runtime/ext/ext_json.h"
+
+#include "hphp/util/alloc.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,9 +300,9 @@ void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
         }
         break;
       case '%':
-       	if (options & k_JSON_FB_EXTRA_ESCAPES) {
+        if (options & k_JSON_FB_EXTRA_ESCAPES) {
           append("\\u0025", 6);
-       	} else {
+        } else {
           append('%');
         }
         break;

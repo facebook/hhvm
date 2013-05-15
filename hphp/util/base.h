@@ -33,14 +33,14 @@
 #include <signal.h>
 #include <fcntl.h>
 
-#include "sys/time.h"
-#include "sys/stat.h"
-#include "sys/types.h"
-#include "sys/resource.h"
-#include "sys/utsname.h"
-#include "sys/socket.h"
-#include "sys/wait.h"
-#include "sys/poll.h"
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/utsname.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <sys/poll.h>
 
 #include <fstream>
 #include <iostream>

@@ -18,7 +18,7 @@ HipHop bundles in a webserver. So if you want to run on port 80 with document ro
 sudo hhvm -m server /var/www
 ```
 
-For anything more complicated, you'll want to make a [`config.hdf`](https://github.com/facebook/hiphop-php/wiki/Runtime-options) and run `sudo hhvm -m server -c config.hdf`.
+For anything more complicated, you'll want to make a [`config.hdf`](https://github.com/facebook/hiphop-php/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.
 
 ## Contributing
 

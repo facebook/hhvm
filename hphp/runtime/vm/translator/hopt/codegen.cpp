@@ -2714,88 +2714,39 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = m_regs[inst->getSrc(0)].getReg();
-  auto const retVal    = inst->getSrc(1);
-  auto const numLocals = inst->getSrc(2)->getValInt();
+  auto const numLocals = inst->getSrc(1)->getValInt();
   auto const rDest     = m_regs[inst->getDst()].getReg();
   auto& a = m_as;
 
-  RegSet retvalRegs = m_regs[retVal].getRegs();
-  assert(retvalRegs.size() <= 2);
-
-  /*
-   * The generic decref helpers preserve these two registers.
-   *
-   * XXX/TODO: we ideally shouldn't be moving the return value into
-   * these regs and then back; it'd be better to precolor allocation
-   * this way, or failing that remap the return value SSATmp with a
-   * separate instruction.  This scheme also won't work for us once we
-   * want hackIR to support handling surprise flags, because
-   * setprofile will look on the VM stack for the return value.
-   */
-  auto spillRegs = RegSet(r14).add(r15);
-
-  /*
-   * Since we're making a call using a custom ABI to the generic
-   * decref helper, it's important that our src and dest registers are
-   * allocated to the registers we expect, and that no other SSATmp's
-   * are still allocated to registers at this time.
-   */
-  const auto UNUSED expectedLiveRegs = RegSet(rFp).add(rDest) | retvalRegs;
-  assert((m_state.liveRegs[m_curInst] - expectedLiveRegs).empty());
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
   assert(rDest == rVmSp &&
          "free locals helper adjusts rVmSp, which must be our dst reg");
 
-  if (!numLocals) {
-    a.  lea   (rFp[AROFF(m_r)], rDest);
-    return;
-  }
+  if (numLocals == 0) return;
 
-  // Remove overlap so we don't move registers that are already in the
-  // saved set.
-  auto intersectedRegs = spillRegs & retvalRegs;
-  spillRegs -= intersectedRegs;
-  retvalRegs -= intersectedRegs;
+  // The helpers called below use a special ABI, in which r13 is not saved.
+  // So save r13 on the stack if it's live.
+  bool saveR13 = m_state.liveRegs[inst].contains(r13);
 
-  auto grabPair = [&] (std::pair<PhysReg,PhysReg>& out) {
-    assert(!retvalRegs.empty() && !spillRegs.empty());
-    retvalRegs.findFirst(out.first);
-    spillRegs.findFirst(out.second);
-    retvalRegs.remove(out.first);
-    spillRegs.remove(out.second);
-  };
-
-  auto savePairA = std::make_pair(InvalidReg, InvalidReg);
-  auto savePairB = std::make_pair(InvalidReg, InvalidReg);
-  if (!retvalRegs.empty()) {
-    grabPair(savePairA);
-    if (!retvalRegs.empty()) {
-      grabPair(savePairB);
-    }
-  }
-
-  if (savePairA.first != InvalidReg) {
-    a.  movq   (savePairA.first, savePairA.second);
-    if (savePairB.first != InvalidReg) {
-      a.movq   (savePairB.first, savePairB.second);
-    }
+  int stackAdjust = 8;
+  if (saveR13)  {
+    a.push(r13);
+    stackAdjust = 16;
   }
 
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? m_tx64->m_freeManyLocalsHelper
     : m_tx64->m_freeLocalsHelpers[numLocals - 1];
 
-  a.    subq   (0x8, rsp);  // For parity; callee does retq $0x8.
-  a.    lea    (rFp[-numLocals * sizeof(TypedValue)], rVmSp);
-  a.    call   (target);
+  a.subq(stackAdjust, rsp);  // For parity; callee does retq $0x8.
+  a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
+  a.call(target);
   recordSyncPoint(a);
 
-  if (savePairA.first != InvalidReg) {
-    a.  movq   (savePairA.second, savePairA.first);
-    if (savePairB.first != InvalidReg) {
-      a.movq   (savePairB.second, savePairB.first);
-    }
+  if (saveR13) {
+    a.addq(8, rsp);
+    a.pop(r13);
   }
 }
 

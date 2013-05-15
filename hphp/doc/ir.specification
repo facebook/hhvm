@@ -954,21 +954,17 @@ RaiseWarning S0:Str
 
   Raises a warning with the text in S0 as its message.
 
-D:StkPtr = GenericRetDecRefs S0:FramePtr S1:Gen S2:ConstInt
+D:StkPtr = GenericRetDecRefs S0:FramePtr S1:ConstInt
 
   Does decrefs of all the current function's locals, where S0 is a
-  pointer to the relevant activation record, and S2 is the number of
+  pointer to the relevant activation record, and S1 is the number of
   locals in the current function.
-
-  S1 is the return value for the function, which GenericRetDecRefs
-  needs access to currently only to ensure it isn't clobbered.
 
   Returns the adjusted VM stack pointer (pointing at the return value
   location).
 
   Semantically similar to a series of DecRefLoc followed by
-  RetAdjustStack.  Note that this does not store the return value even
-  though it takes it as a source.
+  RetAdjustStack.
 
 
 10. Stores

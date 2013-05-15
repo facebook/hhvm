@@ -2041,9 +2041,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     if (mayHaveThis(curFunc)) {
       gen(DecRefThis, m_tb->getFp());
     }
-    sp = gen(
-      GenericRetDecRefs, m_tb->getFp(), retVal, cns(curFunc->numLocals())
-    );
+    sp = gen(GenericRetDecRefs, m_tb->getFp(), cns(curFunc->numLocals()));
     gen(RetVal, m_tb->getFp(), retVal);
   }
 

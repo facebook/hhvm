@@ -442,8 +442,8 @@ private:
   bool parse(const char *line);
   bool match(const char *cmd);
   int  checkEvalEnd();
-  bool processTakeCode();
-  bool processEval();
+  void processTakeCode();
+  void processEval();
   DebuggerCommand *createCommand();
 
   void updateLiveLists();

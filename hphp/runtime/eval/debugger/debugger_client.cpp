@@ -1608,7 +1608,8 @@ do {                                         \
 #undef NEW_CMD_NAME
 }
 
-// Carries out the current command and returns true if the command completed.
+// Parses the current command string. If invalid return false.
+// Otherwise, carry out the command and return true.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
@@ -1626,17 +1627,25 @@ bool DebuggerClient::process() {
     case '@':
     case '=':
     case '$': {
-      return processTakeCode();
+      processTakeCode();
+      return true;
     }
     case '<': {
-      return match("<?php") && processTakeCode();
+      if (match("<?php")) {
+        processTakeCode();
+        return true;
+      }
     }
     case '?': {
       if (match("?")) {
         usageLog("help", m_line);
-        return CmdHelp().onClient(this);
+        CmdHelp().onClient(this);
+        return true;
       }
-      if (match("?>")) return processEval();
+      if (match("?>")) {
+        processEval();
+        return true;
+      }
       break;
     }
     default: {
@@ -1645,11 +1654,11 @@ bool DebuggerClient::process() {
         usageLog(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
-        return cmd->onClient(this);
+        cmd->onClient(this);
       } else {
-        return processTakeCode();
+        processTakeCode();
       }
-      break;
+      return true;
     }
   }
 
@@ -1886,7 +1895,9 @@ int DebuggerClient::checkEvalEnd() {
   return pos;
 }
 
-bool DebuggerClient::processTakeCode() {
+// Parses the current command line as a code execution command
+// and carries out the command.
+void DebuggerClient::processTakeCode() {
   TRACE(2, "DebuggerClient::processTakeCode\n");
   assert(m_inputState == TakingCommand);
 
@@ -1894,7 +1905,8 @@ bool DebuggerClient::processTakeCode() {
   if (first == '@') {
     usageLog("@", m_line);
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
-    return processEval();
+    processEval();
+    return;
   } else if (first == '=') {
     usageLog("=", m_line);
     while (m_line.at(m_line.size() - 1) == ';') {
@@ -1902,14 +1914,16 @@ bool DebuggerClient::processTakeCode() {
       m_line = m_line.substr(0, m_line.size() - 1);
     }
     m_code = string("<?php $_=(") + m_line.substr(1) + "); " + m_printFunction;
-    return processEval();
+    processEval();
+    return;
   } else if (first != '<') {
     usageLog("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
     m_code = "<?php ";
     m_code += m_line + ";";
-    return processEval();
+    processEval();
+    return;
   }
   usageLog("<?php", m_line);
   m_code = "<?php ";
@@ -1919,18 +1933,16 @@ bool DebuggerClient::processTakeCode() {
   int pos = checkEvalEnd();
   if (pos >= 0) {
     m_code.resize(m_code.size() - m_line.size() + pos - 1);
-    return processEval();
+    processEval();
   }
-  return true;
 }
 
-bool DebuggerClient::processEval() {
+void DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
   CmdEval().onClient(this);
-  return true;
 }
 
 void DebuggerClient::swapHelp() {

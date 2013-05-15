@@ -33,7 +33,7 @@
 extern "C" void __register_frame(void*);
 extern "C" void __deregister_frame(void*);
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -322,4 +322,4 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

@@ -45,10 +45,9 @@
 #include "runtime/vm/runtime.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
-using namespace HPHP::VM;
+using namespace HPHP;
 
 TRACE_SET_MOD(trans)
 
@@ -3918,4 +3917,4 @@ std::string traceletShape(const Tracelet& trace) {
   return ret;
 }
 
-} } }
+} }

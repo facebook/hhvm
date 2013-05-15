@@ -587,7 +587,7 @@ bool Iter::init(TypedValue* c1) {
       if (isIterator) {
         (void) new (&arr()) ArrayIter(obj, ArrayIter::transferOwner);
       } else {
-        VM::Class* ctx = arGetContextClass(g_vmContext->getFP());
+        Class* ctx = arGetContextClass(g_vmContext->getFP());
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.getArrayData();
@@ -637,7 +637,7 @@ bool Iter::minit(TypedValue* v1) {
     if (isIterator) {
       raise_error("An iterator cannot be used with foreach by reference");
     }
-    VM::Class* ctx = arGetContextClass(g_vmContext->getFP());
+    Class* ctx = arGetContextClass(g_vmContext->getFP());
     CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
     Array iterArray = obj->o_toIterArray(ctxStr, true);
     if (iterArray->empty()) {
@@ -881,7 +881,7 @@ class FreeObj {
  * If exceptions are thrown, new_iter_object takes care of decRefing the object.
  */
 HOT_FUNC
-int64_t new_iter_object(Iter* dest, ObjectData* obj, VM::Class* ctx,
+int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                       TypedValue* valOut, TypedValue* keyOut) {
   valOut = tvToCell(valOut);
   if (keyOut) {

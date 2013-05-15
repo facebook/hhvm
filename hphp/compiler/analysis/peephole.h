@@ -43,13 +43,13 @@ class MetaInfoBuilder;
 
 class Peephole {
 public:
-  Peephole(VM::UnitEmitter& ue, MetaInfoBuilder& metaInfo);
+  Peephole(UnitEmitter& ue, MetaInfoBuilder& metaInfo);
 
 private:
-  void buildFuncTargets(VM::FuncEmitter* fe);
+  void buildFuncTargets(FuncEmitter* fe);
   void buildJumpTargets();
 
-  VM::UnitEmitter& m_ue;
+  UnitEmitter& m_ue;
   hphp_hash_set<Offset> m_jumpTargets;
 };
 

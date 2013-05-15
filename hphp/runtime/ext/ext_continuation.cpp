@@ -44,7 +44,7 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation(VM::Class* cb) :
+c_Continuation::c_Continuation(Class* cb) :
     ExtObjectData(cb),
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
@@ -182,12 +182,12 @@ namespace {
 }
 
 void c_Continuation::call_next() {
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_next.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_next.get());
   g_vmContext->invokeContFunc(func, this);
 }
 
 void c_Continuation::call_send(TypedValue* v) {
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_send.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
   g_vmContext->invokeContFunc(func, this, v);
 }
 
@@ -195,7 +195,7 @@ void c_Continuation::call_raise(ObjectData* e) {
   assert(e);
   assert(e->instanceof(SystemLib::s_ExceptionClass));
 
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_raise.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
 
   TypedValue arg;
   arg.m_type = KindOfObject;
@@ -206,7 +206,7 @@ void c_Continuation::call_raise(ObjectData* e) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyContinuation::c_DummyContinuation(VM::Class* cb) :
+c_DummyContinuation::c_DummyContinuation(Class* cb) :
   ExtObjectData(cb) {
 }
 

@@ -23,7 +23,6 @@
 #include <util/lock.h>
 
 namespace HPHP {
-namespace VM {
 
 // Define a set of hooks to be used
 enum InstHookTypeInt64 {
@@ -150,6 +149,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} }    // HPHP::VM
+ }    // HPHP::VM
 
 #endif /* incl_HPHP_INSTRUMENTATION_H_ */

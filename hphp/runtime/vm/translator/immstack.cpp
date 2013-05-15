@@ -17,7 +17,6 @@
 #include <runtime/vm/translator/immstack.h>
 
 namespace HPHP {
-namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ImmStack::processOpcode(const Opcode* opcode) {
@@ -101,5 +100,4 @@ bool ImmStack::isLitstr(int above) {
   return get(above).type == StackItem::StackType_Litstr;
 }
 
-}
 }

@@ -25,7 +25,6 @@
 #include <runtime/vm/type_profile.h>
 
 namespace HPHP {
-namespace VM {
 
 class Func;
 
@@ -156,7 +155,6 @@ private:
   void parentToTypeName(const Func* func, const StringData **typeName) const;
 };
 
-}
 }
 
 

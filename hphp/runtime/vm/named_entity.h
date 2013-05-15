@@ -24,7 +24,7 @@
 
 #include "util/atomic.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 class Class;
 class Typedef;
@@ -122,6 +122,6 @@ typedef std::pair<const StringData*,const NamedEntity*> NamedEntityPair;
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

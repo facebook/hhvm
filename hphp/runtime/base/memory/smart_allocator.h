@@ -257,8 +257,8 @@ void *SmartAllocatorInitSetup() {
       RELEASEOBJ(NS, T, p);                                             \
       return;                                                           \
     }                                                                   \
-    HPHP::VM::Instance* this_ = (HPHP::VM::Instance*)p;                 \
-    HPHP::VM::Class* cls = this_->getVMClass();                         \
+    HPHP::Instance* this_ = (HPHP::Instance*)p;                 \
+    HPHP::Class* cls = this_->getVMClass();                         \
     size_t nProps = cls->numDeclProperties();                           \
     size_t builtinPropSize = cls->builtinPropSize();                    \
     TypedValue* propVec =                                               \
@@ -268,7 +268,7 @@ void *SmartAllocatorInitSetup() {
       TypedValue* prop = &propVec[i];                                   \
       tvRefcountedDecRef(prop);                                         \
     }                                                                   \
-    DELETEOBJSZ(HPHP::VM::Instance::sizeForNProps(nProps) +             \
+    DELETEOBJSZ(HPHP::Instance::sizeForNProps(nProps) +             \
                 builtinPropSize)(this_);                                \
   }
 

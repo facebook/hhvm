@@ -43,7 +43,7 @@ std::set<string> FileRepository::s_names;
 
 PhpFile::PhpFile(const string &fileName, const string &srcRoot,
                  const string &relPath, const string &md5,
-                 HPHP::VM::Unit* unit)
+                 HPHP::Unit* unit)
     : m_refCount(0), m_id(0),
       m_profName(string("run_init::") + string(fileName)),
       m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
@@ -55,7 +55,7 @@ PhpFile::~PhpFile() {
   if (m_unit != nullptr) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
-    VM::PendQ::defer(new VM::DeferredDeleter<VM::Unit>(m_unit));
+    PendQ::defer(new DeferredDeleter<Unit>(m_unit));
     m_unit = nullptr;
   }
 }
@@ -126,7 +126,7 @@ void FileRepository::onDelete(PhpFile *f) {
   delete f;
 }
 
-void FileRepository::forEachUnit(VM::UnitVisitor& uit) {
+void FileRepository::forEachUnit(UnitVisitor& uit) {
   ReadLock lock(s_md5Lock);
   for (Md5FileMap::const_iterator it = s_md5Files.begin();
        it != s_md5Files.end(); ++it) {
@@ -213,7 +213,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
     ret->incRef();
-    ret->setId(VM::Transl::TargetCache::allocBit());
+    ret->setId(Transl::TargetCache::allocBit());
   } else {
     PhpFile *f = acc->second->getPhpFile();
     if (f != ret) {
@@ -246,7 +246,7 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
     const StringData* spath = StringData::GetStaticString(path);
     UnitMd5Map::accessor acc;
     if (s_unitMd5Map.insert(acc, spath)) {
-      bool present = VM::Repo::get().findFile(
+      bool present = Repo::get().findFile(
         path->data(), SourceRootInfo::GetCurrentSourceRoot(), md5);
       acc->second.m_present = present;
       acc->second.m_unitMd5 = md5;
@@ -373,7 +373,7 @@ bool FileRepository::readRepoMd5(const StringData *path,
     UnitMd5Map::accessor acc;
     path = StringData::GetStaticString(path);
     if (s_unitMd5Map.insert(acc, path)) {
-      if (!VM::Repo::get().findFile(path->data(),
+      if (!Repo::get().findFile(path->data(),
                                     SourceRootInfo::GetCurrentSourceRoot(),
                                     md5)) {
         acc->second.m_present = false;
@@ -407,7 +407,7 @@ bool FileRepository::readFile(const StringData *name,
 PhpFile *FileRepository::readHhbc(const std::string &name,
                                   const FileInfo &fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  VM::Unit* u = VM::Repo::get().loadUnit(name, md5);
+  Unit* u = Repo::get().loadUnit(name, md5);
   if (u != nullptr) {
     PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
                              fileInfo.m_md5, u);
@@ -420,7 +420,7 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
 PhpFile *FileRepository::parseFile(const std::string &name,
                                    const FileInfo &fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  VM::Unit* unit = compile_file(fileInfo.m_inputString->data(),
+  Unit* unit = compile_file(fileInfo.m_inputString->data(),
                                 fileInfo.m_inputString->size(),
                                 md5, name.c_str());
   PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,

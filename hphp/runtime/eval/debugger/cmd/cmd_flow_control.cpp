@@ -85,7 +85,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   if (g_vmContext->m_lastLocFilter) {
     g_vmContext->m_lastLocFilter->clear();
   } else {
-    g_vmContext->m_lastLocFilter = new VM::PCFilter();
+    g_vmContext->m_lastLocFilter = new PCFilter();
   }
   auto offsets = site->getCurOffsetRange();
   if (Trace::moduleEnabled(Trace::debugger, 5)) {

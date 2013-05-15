@@ -30,7 +30,7 @@
 #include "util/asm-x64.h"
 #include "runtime/vm/translator/runtime-type.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -79,6 +79,6 @@ UnwindInfoHandle register_unwind_region(unsigned char* address, size_t size);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

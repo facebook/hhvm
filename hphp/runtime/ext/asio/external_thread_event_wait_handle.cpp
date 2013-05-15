@@ -27,7 +27,7 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-c_ExternalThreadEventWaitHandle::c_ExternalThreadEventWaitHandle(VM::Class *cb)
+c_ExternalThreadEventWaitHandle::c_ExternalThreadEventWaitHandle(Class *cb)
     : c_WaitableWaitHandle(cb) {
 }
 

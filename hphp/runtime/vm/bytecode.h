@@ -55,7 +55,7 @@ namespace HPHP {
   }                                                                           \
 } while (0)
 
-namespace VM { class Func; }
+ class Func;
 class ActRec;
 
 // max number of arguments for direct call to builtin
@@ -129,7 +129,7 @@ class VarEnv {
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
   std::vector<TypedValue**> m_restoreLocations;
-  boost::optional<VM::NameValueTable> m_nvTable;
+  boost::optional<NameValueTable> m_nvTable;
 
  private:
   explicit VarEnv();
@@ -228,7 +228,7 @@ struct ActRec {
   union {
     TypedValue _dummyB;
     struct {
-      const VM::Func* m_func;  // Function.
+      const Func* m_func;  // Function.
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
@@ -243,7 +243,7 @@ struct ActRec {
     struct {
       union {
         ObjectData* m_this;    // This.
-        VM::Class* m_cls;      // Late bound class.
+        Class* m_cls;      // Late bound class.
       };
       union {
         VarEnv* m_varEnv;       // Variable environment; only used when the
@@ -292,20 +292,20 @@ struct ActRec {
     initNumArgs(numArgs, isFromFPushCtor());
   }
 
-  static void* encodeThis(ObjectData* obj, VM::Class* cls) {
+  static void* encodeThis(ObjectData* obj, Class* cls) {
     if (obj) return obj;
     if (cls) return (char*)cls + 1;
   }
 
   static void* encodeThis(ObjectData* obj) { return obj; }
-  static void* encodeClass(const VM::Class* cls) {
+  static void* encodeClass(const Class* cls) {
     return cls ? (char*)cls + 1 : nullptr;
   }
   static ObjectData* decodeThis(void* p) {
     return uintptr_t(p) & 1 ? nullptr : (ObjectData*)p;
   }
-  static VM::Class* decodeClass(void* p) {
-    return uintptr_t(p) & 1 ? (VM::Class*)(uintptr_t(p)&~1LL) : nullptr;
+  static Class* decodeClass(void* p) {
+    return uintptr_t(p) & 1 ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
   /**
@@ -377,7 +377,7 @@ struct ActRec {
 
   // Note that reordering these is likely to require changes to the
   // translator.
-  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, VM::Class*, m_cls)
+  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, Class*, m_cls)
   static const int8_t kInvNameBit   = 0x1;
   static const int8_t kExtraArgsBit = 0x2;
   UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
@@ -415,13 +415,13 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   ar->m_savedRbp = (uint64_t)sfp;
 }
 
-template <bool crossBuiltin> VM::Class* arGetContextClassImpl(const ActRec* ar);
-template <> VM::Class* arGetContextClassImpl<true>(const ActRec* ar);
-template <> VM::Class* arGetContextClassImpl<false>(const ActRec* ar);
-inline VM::Class* arGetContextClass(const ActRec* ar) {
+template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
+template <> Class* arGetContextClassImpl<true>(const ActRec* ar);
+template <> Class* arGetContextClassImpl<false>(const ActRec* ar);
+inline Class* arGetContextClass(const ActRec* ar) {
   return arGetContextClassImpl<false>(ar);
 }
-inline VM::Class* arGetContextClassFromBuiltin(const ActRec* ar) {
+inline Class* arGetContextClassFromBuiltin(const ActRec* ar) {
   return arGetContextClassImpl<true>(ar);
 }
 
@@ -429,9 +429,9 @@ inline VM::Class* arGetContextClassFromBuiltin(const ActRec* ar) {
 // figure out the callback context once and call it multiple times. (e.g.
 // array_map, array_filter, ...)
 struct CallCtx {
-  const VM::Func* func;
+  const Func* func;
   ObjectData* this_;
-  VM::Class* cls;
+  Class* cls;
   StringData* invName;
 };
 
@@ -513,7 +513,7 @@ private:
   void toStringFrag(std::ostream& os, const ActRec* fp,
                     const TypedValue* top) const;
   void toStringAR(std::ostream& os, const ActRec* fp,
-                  const VM::FPIEnt *fe, const TypedValue* top) const;
+                  const FPIEnt *fe, const TypedValue* top) const;
   void toStringFragAR(std::ostream& os, const ActRec* fp,
                     int offset, const TypedValue* top) const;
   void toStringFrame(std::ostream& os, const ActRec* fp,
@@ -530,7 +530,7 @@ private:
   // it's impossible to have more than one chain of nested unactivated ActRecs
   // on the stack, this means that after this function returns, everything
   // between the stack pointer and frame pointer is a value, Iter or local.
-  void unwindAR(ActRec* fp, const VM::FPIEnt* fe);
+  void unwindAR(ActRec* fp, const FPIEnt* fe);
 public:
   static const int sSurprisePageSize;
   static const uint sMinStackElms;
@@ -815,7 +815,7 @@ public:
     assert(m_top != m_base);
     return &m_top[ind];
   }
-  inline void ALWAYS_INLINE pushClass(VM::Class* clss) {
+  inline void ALWAYS_INLINE pushClass(Class* clss) {
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pcls = clss;

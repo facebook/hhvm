@@ -26,7 +26,6 @@
 #include "runtime/ext/ext_collections.h"
 
 namespace HPHP {
-namespace VM {
 
 // When MoreWarnings is set to true, the VM will raise more warnings
 // on SetOpM, IncDecM and CGetG, intended to match Zend.
@@ -1755,6 +1754,5 @@ inline void UnsetProp(Class* ctx, TypedValue* base,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }
 #endif // incl_HPHP_VM_MEMBER_OPERATIONS_H_

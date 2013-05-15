@@ -22,7 +22,6 @@
 #include <runtime/base/stats.h>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 inline bool
@@ -271,4 +270,4 @@ void functionEnterHelper(const ActRec* ar) {
   sp = g_vmContext->m_stack.top();
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

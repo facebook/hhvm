@@ -82,7 +82,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Collator, Collator, ObjectData)
 
   // need to implement
-  public: c_Collator(VM::Class* cls = c_Collator::s_cls);
+  public: c_Collator(Class* cls = c_Collator::s_cls);
   public: ~c_Collator();
   public: void t___construct(CStrRef locale);
   public: bool t_asort(VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
@@ -115,7 +115,7 @@ class c_Locale : public ExtObjectData {
   DECLARE_CLASS(Locale, Locale, ObjectData)
 
   // need to implement
-  public: c_Locale(VM::Class* cls = c_Locale::s_cls);
+  public: c_Locale(Class* cls = c_Locale::s_cls);
   public: ~c_Locale();
   public: void t___construct();
 };
@@ -138,7 +138,7 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
 
   // need to implement
-  public: c_Normalizer(VM::Class* cls = c_Normalizer::s_cls);
+  public: c_Normalizer(Class* cls = c_Normalizer::s_cls);
   public: ~c_Normalizer();
   public: void t___construct();
   public: static Variant ti_isnormalized(CStrRef input, int64_t form = q_Normalizer$$FORM_C);

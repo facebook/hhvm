@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define ALLOC_OBJECT_STUB_RETURN(name)                                    \
-  HPHP::VM::Instance::newInstance(SystemLib::s_##name##Class)
+  HPHP::Instance::newInstance(SystemLib::s_##name##Class)
 
 #define ALLOC_OBJECT_STUB(name)                                           \
   ObjectData* SystemLib::Alloc##name##Object() {                          \
@@ -33,26 +33,26 @@ namespace HPHP {
   }
 
 bool SystemLib::s_inited = false;
-HPHP::VM::Unit* SystemLib::s_unit = nullptr;
-HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = nullptr;
-HPHP::VM::Unit* SystemLib::s_nativeClassUnit = nullptr;
+HPHP::Unit* SystemLib::s_unit = nullptr;
+HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
+HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
 
 #define DEFINE_SYSTEMLIB_CLASS(cls)       \
-  HPHP::VM::Class* SystemLib::s_ ## cls ## Class = nullptr;
+  HPHP::Class* SystemLib::s_ ## cls ## Class = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
 ObjectData* SystemLib::AllocStdClassObject() {
-  return HPHP::VM::Instance::newInstance(SystemLib::s_stdclassClass);
+  return HPHP::Instance::newInstance(SystemLib::s_stdclassClass);
 }
 
 ObjectData* SystemLib::AllocPinitSentinel() {
-  return HPHP::VM::Instance::newInstance(SystemLib::s_pinitSentinelClass);
+  return HPHP::Instance::newInstance(SystemLib::s_pinitSentinelClass);
 }
 
 #define CREATE_AND_CONSTRUCT(clsname, params)                               \
-  HPHP::VM::Instance* inst =                                                \
-    HPHP::VM::Instance::newInstance(SystemLib::s_##clsname##Class);         \
+  HPHP::Instance* inst =                                                \
+    HPHP::Instance::newInstance(SystemLib::s_##clsname##Class);         \
   TypedValue ret;                                                           \
   {                                                                         \
     /* Increment refcount across call to ctor, so the object doesn't */     \
@@ -154,9 +154,9 @@ ObjectData* SystemLib::AllocKeyedIterableViewObject(CVarRef iterable) {
 
 #undef CREATE_AND_CONSTRUCT
 
-VM::Func*
+Func*
 SystemLib::GetNullFunction() {
-  VM::Func* f = s_nativeFuncUnit->firstHoistable();
+  Func* f = s_nativeFuncUnit->firstHoistable();
   assert(!strcmp(f->name()->data(), "86null"));
   return f;
 }

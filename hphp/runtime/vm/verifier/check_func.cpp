@@ -24,7 +24,6 @@
 #include <runtime/vm/verifier/pretty.h>
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -1075,4 +1074,4 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
   return true;
 }
 
-}}} // HPHP::VM::Verifier
+}} // HPHP::Verifier

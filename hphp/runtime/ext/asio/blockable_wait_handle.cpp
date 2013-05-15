@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_BlockableWaitHandle::c_BlockableWaitHandle(VM::Class* cb)
+c_BlockableWaitHandle::c_BlockableWaitHandle(Class* cb)
     : c_WaitableWaitHandle(cb), m_nextParent(nullptr) {
 }
 

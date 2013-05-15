@@ -20,7 +20,6 @@
 #include <runtime/base/memory/smart_allocator.h>
 
 namespace HPHP {
-namespace VM {
 
 namespace {
 
@@ -47,4 +46,4 @@ int InitializeAllocators() {
 }
 
 
-}}
+}

@@ -18,7 +18,6 @@
 #define incl_HPHP_OBJECT_ALLOCATOR_SIZES_H_
 
 namespace HPHP {
-namespace VM {
 
 // SmartAllocator (or, to be more specific, ObjectAllocator) is templatized by
 // the size of the chunks it allocates. This works fine when we're only
@@ -32,6 +31,6 @@ namespace VM {
 // end up falling into will have an ObjectAllocator.
 int InitializeAllocators();
 
-}}
+}
 
 #endif

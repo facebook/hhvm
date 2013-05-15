@@ -21,7 +21,6 @@
 #include "runtime/vm/translator/targetcache.h"
 
 namespace HPHP {
-namespace VM {
 
 class EventHook {
  public:
@@ -76,7 +75,6 @@ private:
 
 #undef DECLARE_HOOK
 
-} // namespace VM
 } // namespace HPHP
 
 #endif

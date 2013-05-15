@@ -80,7 +80,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef e)
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
       m_unit(nullptr), m_valid(false), m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
-  VM::Transl::VMRegAnchor _;
+  Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
@@ -113,7 +113,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef e)
 
     if (g_context->getDebuggerSmallStep()) {
       // get offset range for the pc only
-      VM::OffsetRange range;
+      OffsetRange range;
       if (m_unit->getOffsetRange(offset, range)) {
         m_offsetRangeVec.push_back(range);
       }
@@ -835,13 +835,13 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
   }
 
   StackStringData sdBClsName(bcls.c_str());
-  VM::Class* clsB = VM::Unit::lookupClass(&sdBClsName);
+  Class* clsB = Unit::lookupClass(&sdBClsName);
   StackStringData sdFClsName(fcls);
-  VM::Class* clsF = VM::Unit::lookupClass(&sdFClsName);
+  Class* clsF = Unit::lookupClass(&sdFClsName);
   if (!clsB) return false;
   if (clsB == clsF) return true;
   StackStringData sdFuncName(func);
-  VM::Func* f = clsB->lookupMethod(&sdFuncName);
+  Func* f = clsB->lookupMethod(&sdFuncName);
   if (!f) return false;
   return (f->baseCls() == clsF);
 }

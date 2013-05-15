@@ -31,7 +31,7 @@
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/vm/class.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 static const Trace::Module TRACEMOD = Trace::gc;
 
@@ -250,7 +250,7 @@ void traceImpl(const Visitor& visit, ObjectData* obj) {
   }
 
   // Declared properties.  We need to indirect through the TypedValue
-  // before visiting, since these are in-situ in the VM::Instance.
+  // before visiting, since these are in-situ in the Instance.
   void* vpObj = obj;
   unsigned char* address = static_cast<unsigned char*>(vpObj);
 
@@ -604,5 +604,5 @@ void gc_detect_cycles(const std::string& filename) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

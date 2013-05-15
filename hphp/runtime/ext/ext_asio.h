@@ -60,7 +60,7 @@ class c_WaitHandle : public ExtObjectData {
   DECLARE_CLASS(WaitHandle, WaitHandle, ObjectData)
 
   // need to implement
-  public: c_WaitHandle(VM::Class* cls = c_WaitHandle::s_cls);
+  public: c_WaitHandle(Class* cls = c_WaitHandle::s_cls);
   public: ~c_WaitHandle();
   public: void t___construct();
   public: static void ti_setonjoincallback(CVarRef callback);
@@ -113,7 +113,7 @@ class c_StaticWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(StaticWaitHandle, StaticWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_StaticWaitHandle(VM::Class* cls = c_StaticWaitHandle::s_cls);
+  public: c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::s_cls);
   public: ~c_StaticWaitHandle();
   public: void t___construct();
 
@@ -131,7 +131,7 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticResultWaitHandle, StaticResultWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticResultWaitHandle(VM::Class* cls = c_StaticResultWaitHandle::s_cls);
+  public: c_StaticResultWaitHandle(Class* cls = c_StaticResultWaitHandle::s_cls);
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
   public: static Object ti_create(CVarRef result);
@@ -153,7 +153,7 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticExceptionWaitHandle, StaticExceptionWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticExceptionWaitHandle(VM::Class* cls = c_StaticExceptionWaitHandle::s_cls);
+  public: c_StaticExceptionWaitHandle(Class* cls = c_StaticExceptionWaitHandle::s_cls);
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
   public: static Object ti_create(CObjRef exception);
@@ -179,7 +179,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(WaitableWaitHandle, WaitableWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_WaitableWaitHandle(VM::Class* cls = c_WaitableWaitHandle::s_cls);
+  public: c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::s_cls);
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
   public: int t_getcontextidx();
@@ -230,7 +230,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(BlockableWaitHandle, BlockableWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_BlockableWaitHandle(VM::Class* cls = c_BlockableWaitHandle::s_cls);
+  public: c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::s_cls);
   public: ~c_BlockableWaitHandle();
   public: void t___construct();
 
@@ -270,7 +270,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(ContinuationWaitHandle, ContinuationWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_ContinuationWaitHandle(VM::Class* cls = c_ContinuationWaitHandle::s_cls);
+  public: c_ContinuationWaitHandle(Class* cls = c_ContinuationWaitHandle::s_cls);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -321,7 +321,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(GenArrayWaitHandle, GenArrayWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_GenArrayWaitHandle(VM::Class* cls = c_GenArrayWaitHandle::s_cls);
+  public: c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::s_cls);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -357,7 +357,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(SetResultToRefWaitHandle, SetResultToRefWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_SetResultToRefWaitHandle(VM::Class* cls = c_SetResultToRefWaitHandle::s_cls);
+  public: c_SetResultToRefWaitHandle(Class* cls = c_SetResultToRefWaitHandle::s_cls);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -399,7 +399,7 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(RescheduleWaitHandle, RescheduleWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_RescheduleWaitHandle(VM::Class* cls = c_RescheduleWaitHandle::s_cls);
+  public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::s_cls);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
   public: static Object ti_create(int queue, int priority);
@@ -434,7 +434,7 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
   DECLARE_CLASS(ExternalThreadEventWaitHandle, ExternalThreadEventWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_ExternalThreadEventWaitHandle(VM::Class* cls = c_ExternalThreadEventWaitHandle::s_cls);
+  public: c_ExternalThreadEventWaitHandle(Class* cls = c_ExternalThreadEventWaitHandle::s_cls);
   public: ~c_ExternalThreadEventWaitHandle();
   public: void t___construct();
 

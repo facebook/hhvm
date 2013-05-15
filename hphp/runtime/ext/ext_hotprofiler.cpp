@@ -1519,7 +1519,7 @@ public:
     if (!RuntimeOption::EnableHotProfiler) {
       return;
     }
-    HPHP::VM::EventHook::Enable();
+    HPHP::EventHook::Enable();
     if (m_profiler == NULL) {
       switch (level) {
       case Simple:
@@ -1629,9 +1629,9 @@ void f_fb_setprofile(CVarRef callback) {
 #endif
   g_vmContext->m_setprofileCallback = callback;
   if (callback.isNull()) {
-    HPHP::VM::EventHook::Disable();
+    HPHP::EventHook::Disable();
   } else {
-    HPHP::VM::EventHook::Enable();
+    HPHP::EventHook::Enable();
   }
 }
 

@@ -446,7 +446,7 @@ bool Variant::instanceof(CStrRef s) const {
 }
 
 HOT_FUNC
-bool Variant::instanceof(VM::Class* cls) const {
+bool Variant::instanceof(Class* cls) const {
   if (m_type == KindOfObject) {
     assert(m_data.pobj);
     return m_data.pobj->instanceof(cls);
@@ -3035,7 +3035,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         throw Exception("Expected '{' but got '%c'", sep);
       }
 
-      VM::Class* cls = VM::Unit::loadClass(clsName.get());
+      Class* cls = Unit::loadClass(clsName.get());
       Object obj;
       if (RuntimeOption::UnserializationWhitelistCheck &&
           !uns->isWhitelistedClass(clsName)) {
@@ -3050,12 +3050,12 @@ void Variant::unserialize(VariableUnserializer *uns,
         }
       }
       if (cls) {
-        obj = VM::Instance::newInstance(cls);
+        obj = Instance::newInstance(cls);
         if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
           throw Exception("Pair objects must have exactly 2 elements");
         }
       } else {
-        obj = VM::Instance::newInstance(
+        obj = Instance::newInstance(
           SystemLib::s___PHP_Incomplete_ClassClass);
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }

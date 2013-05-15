@@ -23,7 +23,6 @@
 #include "runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
@@ -1086,4 +1085,4 @@ void TraceBuilder::killLocals() {
   }
 }
 
-}}} // namespace HPHP::VM::JIT
+}} // namespace HPHP::JIT

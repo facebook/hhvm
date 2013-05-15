@@ -20,7 +20,7 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/writelease.h>
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 TRACE_SET_MOD(txlease);
 
 bool
@@ -143,4 +143,4 @@ bool LeaseHolderBase::acquire() {
   return m_haveLock = m_acquired = m_lease.acquire();
 }
 
-}}}
+}}

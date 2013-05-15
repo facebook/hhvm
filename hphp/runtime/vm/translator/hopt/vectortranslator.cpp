@@ -24,11 +24,11 @@
 #include "util/assert_throw.h"
 #include "runtime/vm/translator/hopt/vectortranslator-internal.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using HPHP::VM::Transl::Location;
+using HPHP::Transl::Location;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||
@@ -569,7 +569,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
 // Str key?
 bool HhbcTranslator::VectorTranslator::isSimpleArrayOp() {
   SSATmp* base = getInput(m_mii.valCount());
-  HPHP::VM::Op op = m_ni.mInstrOp();
+  HPHP::Op op = m_ni.mInstrOp();
   if ((op == OpSetM || op == OpCGetM || op == OpIssetM) &&
       isSimpleBase() &&
       isSingleMember() &&
@@ -1136,7 +1136,7 @@ template <KeyType keyType, bool isObj>
 static inline RefData* vGetPropImpl(Class* ctx, TypedValue* base,
                                     TypedValue keyVal, MInstrState* mis) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  TypedValue* result = HPHP::VM::Prop<false, true, false, isObj, keyType>(
+  TypedValue* result = HPHP::Prop<false, true, false, isObj, keyType>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
 
   if (result->m_type != KindOfRef) {
@@ -1178,7 +1178,7 @@ void HhbcTranslator::VectorTranslator::emitVGetProp() {
 template <bool useEmpty, bool isObj>
 static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue keyVal) {
-  return HPHP::VM::IssetEmptyProp<useEmpty, isObj>(ctx, base, &keyVal);
+  return HPHP::IssetEmptyProp<useEmpty, isObj>(ctx, base, &keyVal);
 }
 
 #define HELPER_TABLE(m)                                         \
@@ -1219,7 +1219,7 @@ void HhbcTranslator::VectorTranslator::emitEmptyProp() {
 template <bool isObj>
 static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
                                      TypedValue keyVal, Cell val) {
-  HPHP::VM::SetProp<true, isObj>(ctx, base, &keyVal, &val);
+  HPHP::SetProp<true, isObj>(ctx, base, &keyVal, &val);
   return val;
 }
 
@@ -1269,7 +1269,7 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
 template <bool isObj>
 static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
                                        Cell val, MInstrState* mis, SetOpOp op) {
-  TypedValue* result = HPHP::VM::SetOpProp<isObj>(
+  TypedValue* result = HPHP::SetOpProp<isObj>(
     mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, &val);
 
   TypedValue ret;
@@ -1312,7 +1312,7 @@ static inline TypedValue incDecPropImpl(TypedValue* base, TypedValue keyVal,
                                         MInstrState* mis, IncDecOp op) {
   TypedValue result;
   result.m_type = KindOfUninit;
-  HPHP::VM::IncDecProp<true, isObj>(
+  HPHP::IncDecProp<true, isObj>(
     mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, result);
   assert(result.m_type != KindOfRef);
   return result;
@@ -1351,7 +1351,7 @@ void HhbcTranslator::VectorTranslator::emitIncDecProp() {
 template <bool isObj>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue keyVal,
                                 RefData* val, MInstrState* mis) {
-  TypedValue* prop = HPHP::VM::Prop<false, true, false, isObj>(
+  TypedValue* prop = HPHP::Prop<false, true, false, isObj>(
     mis->tvScratch, mis->tvRef, ctx, base, &keyVal);
   if (!(prop == &mis->tvScratch && prop->m_type == KindOfUninit)) {
     tvBindRef(val, prop);
@@ -1388,7 +1388,7 @@ void HhbcTranslator::VectorTranslator::emitBindProp() {
 template <bool isObj>
 static inline void unsetPropImpl(Class* ctx, TypedValue* base,
                                  TypedValue keyVal) {
-  HPHP::VM::UnsetProp<isObj>(ctx, base, &keyVal);
+  HPHP::UnsetProp<isObj>(ctx, base, &keyVal);
 }
 
 #define HELPER_TABLE(m)            \
@@ -1536,7 +1536,7 @@ template <KeyType keyType>
 static inline RefData* vGetElemImpl(TypedValue* base, TypedValue keyVal,
                                     MInstrState* mis) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  TypedValue* result = HPHP::VM::ElemD<false, true, keyType>(
+  TypedValue* result = HPHP::ElemD<false, true, keyType>(
     mis->tvScratch, mis->tvRef, base, key);
 
   if (result->m_type != KindOfRef) {
@@ -1578,7 +1578,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
   // mis == nullptr if we proved that it won't be used. mis->tvScratch and
   // mis->tvRef are ok because those params are passed by
   // reference.
-  return HPHP::VM::IssetEmptyElem<isEmpty, false, keyType>(
+  return HPHP::IssetEmptyElem<isEmpty, false, keyType>(
     mis->tvScratch, mis->tvRef, base, key);
 }
 
@@ -1770,7 +1770,7 @@ template <KeyType keyType>
 static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
                                      Cell val) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  HPHP::VM::SetElem<true, keyType>(base, key, &val);
+  HPHP::SetElem<true, keyType>(base, key, &val);
   return val;
 }
 
@@ -1812,7 +1812,7 @@ template <SetOpOp op>
 static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
                                        Cell val, MInstrState* mis) {
   TypedValue* result =
-    HPHP::VM::SetOpElem(mis->tvScratch, mis->tvRef, op, base, &keyVal, &val);
+    HPHP::SetOpElem(mis->tvScratch, mis->tvRef, op, base, &keyVal, &val);
 
   TypedValue ret;
   tvReadCell(result, &ret);
@@ -1853,7 +1853,7 @@ template <IncDecOp op>
 static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue keyVal,
                                         MInstrState* mis) {
   TypedValue result;
-  HPHP::VM::IncDecElem<true>(
+  HPHP::IncDecElem<true>(
     mis->tvScratch, mis->tvRef, op, base, &keyVal, result);
   assert(result.m_type != KindOfRef);
   return result;
@@ -1886,7 +1886,7 @@ void HhbcTranslator::VectorTranslator::emitIncDecElem() {
 namespace VectorHelpers {
 void bindElemC(TypedValue* base, TypedValue keyVal, RefData* val,
                MInstrState* mis) {
-  base = HPHP::VM::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, &keyVal);
+  base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, &keyVal);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBindRef(val, base);
   }
@@ -1905,7 +1905,7 @@ void HhbcTranslator::VectorTranslator::emitBindElem() {
 template <KeyType keyType>
 static inline void unsetElemImpl(TypedValue* base, TypedValue keyVal) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  HPHP::VM::UnsetElem<keyType>(base, key);
+  HPHP::UnsetElem<keyType>(base, key);
 }
 
 #define HELPER_TABLE(m)                              \
@@ -2127,4 +2127,4 @@ int HhbcTranslator::VectorTranslator::ratchetInd() const {
   return needFirstRatchet() ? int(m_mInd) : int(m_mInd) - 1;
 }
 
-} } }
+} }

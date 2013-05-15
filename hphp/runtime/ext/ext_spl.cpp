@@ -140,9 +140,9 @@ Variant f_hphp_get_this() {
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
-  VM::Class* cls;
+  Class* cls;
   if (obj.isString()) {
-    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    cls = Unit::getClass(obj.getStringData(), autoload);
     if (!cls) {
       return false;
     }
@@ -162,9 +162,9 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
 }
 
 Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
-  VM::Class* cls;
+  Class* cls;
   if (obj.isString()) {
-    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    cls = Unit::getClass(obj.getStringData(), autoload);
     if (!cls) {
       return false;
     }
@@ -182,9 +182,9 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
 }
 
 Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
-  VM::Class* cls;
+  Class* cls;
   if (obj.isString()) {
-    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    cls = Unit::getClass(obj.getStringData(), autoload);
     if (!cls) {
       return false;
     }

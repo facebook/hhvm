@@ -21,9 +21,9 @@
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
@@ -306,5 +306,5 @@ void assertOperandTypes(const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

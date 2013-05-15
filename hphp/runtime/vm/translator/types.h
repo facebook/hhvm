@@ -20,7 +20,6 @@
 #include "util/base.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -44,6 +43,6 @@ struct ctca_identity_hash {
 typedef uint32_t               TransID;
 typedef hphp_hash_set<TransID> TransIDSet;
 
-}}}
+}}
 
 #endif

@@ -43,9 +43,9 @@ static inline const uchar*& vmpc() { return g_vmContext->m_pc; }
 static inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 static inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
-static inline const VM::Func* curFunc() { return curFrame()->m_func; }
-static inline const VM::Unit* curUnit() { return curFunc()->unit(); }
-static inline VM::Class* curClass() {
+static inline const Func* curFunc() { return curFrame()->m_func; }
+static inline const Unit* curUnit() { return curFunc()->unit(); }
+static inline Class* curClass() {
   const auto* func = curFunc();
   auto* cls = func->cls();
   if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
@@ -54,7 +54,6 @@ static inline VM::Class* curClass() {
   return cls;
 }
 
-namespace VM     {
 namespace Transl {
 
 static inline uintptr_t tlsBase() {
@@ -133,8 +132,8 @@ struct CallerFrame : public VMRegAnchor {
 };
 
 #define SYNC_VM_REGS_SCOPED() \
-  HPHP::VM::Transl::VMRegAnchor _anchorUnused
+  HPHP::Transl::VMRegAnchor _anchorUnused
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif

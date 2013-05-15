@@ -136,7 +136,7 @@ uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
   StringDataMap::iterator it = s_stringDataMap->find(cnsName);
   assert(it != s_stringDataMap->end());
   if (!it->second) {
-    VM::Transl::TargetCache::allocConstant(&it->second, persistent);
+    Transl::TargetCache::allocConstant(&it->second, persistent);
   }
   return it->second;
 }
@@ -144,13 +144,13 @@ uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
 Array StringData::GetConstants() {
   // Return an array of all defined constants.
   assert(s_stringDataMap);
-  Array a(VM::Transl::TargetCache::s_constants);
+  Array a(Transl::TargetCache::s_constants);
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
       TypedValue& tv =
-        VM::Transl::TargetCache::handleToRef<TypedValue>(it->second);
+        Transl::TargetCache::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(it->first));
         a.set(key, tvAsVariant(&tv), true);

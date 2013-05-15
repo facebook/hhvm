@@ -23,7 +23,7 @@
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/member_operations.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 #define CTX() cns(contextClass())
 
@@ -143,6 +143,6 @@ static inline TypedValue* keyPtr(TypedValue& key) {
   }
 }
 
-} } }
+} }
 
 #endif

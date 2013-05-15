@@ -40,7 +40,6 @@ using std::string;
  * The targetcache module provides a set of per-request caches.
  */
 namespace HPHP {
-namespace VM {
 
 /*
  * Put this where the compiler has a chance to inline it.
@@ -1147,4 +1146,4 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   return nullptr;
 }
 
-} } } } // HPHP::VM::Transl::TargetCache
+} } } // HPHP::Transl::TargetCache

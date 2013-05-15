@@ -20,7 +20,6 @@
 #include "runtime/vm/unit.h"
 
 namespace HPHP {
-namespace VM {
 
 class Class;
 class Typedef;
@@ -71,6 +70,6 @@ class FreeClassTrigger : public Treadmill::WorkItem {
   virtual void operator()();
 };
 
-}}}
+}}
 
 #endif

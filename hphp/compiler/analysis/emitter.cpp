@@ -7504,7 +7504,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          return VM::assemble_file(filename, md5);
+          return assemble_file(filename, md5);
         }
       }
     }

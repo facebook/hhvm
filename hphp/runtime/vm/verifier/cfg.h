@@ -22,7 +22,6 @@
 #include "util/arena.h"
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -265,6 +264,6 @@ inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
   return fcall + instrLen((Opcode*)fcall) - bc;
 }
 
-}}} // HPHP::VM::Verifier
+}} // HPHP::Verifier
 
 #endif // incl_HPHP_VM_VERIFIER_CFG_H_

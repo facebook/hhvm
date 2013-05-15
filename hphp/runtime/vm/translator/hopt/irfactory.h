@@ -26,7 +26,7 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/base/memory/memory_manager.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -267,6 +267,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

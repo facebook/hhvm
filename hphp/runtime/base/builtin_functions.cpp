@@ -81,17 +81,17 @@ bool array_is_valid_callback(CArrRef arr) {
   return true;
 }
 
-const HPHP::VM::Func*
+const HPHP::Func*
 vm_decode_function(CVarRef function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
-                   HPHP::VM::Class*& cls,
+                   HPHP::Class*& cls,
                    StringData*& invName,
                    bool warn /* = true */) {
   invName = nullptr;
   if (function.isString() || function.isArray()) {
-    HPHP::VM::Class* ctx = nullptr;
+    HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);
     // Decode the 'function' parameter into this_, cls, name, pos, and
     // nameContainsClass.
@@ -160,7 +160,7 @@ vm_decode_function(CVarRef function,
                             "is undefined", sclass->data(), name->data());
             }
           }
-          cls = VM::Unit::loadClass(sclass.get());
+          cls = Unit::loadClass(sclass.get());
         }
         if (!cls) {
           if (warn) {
@@ -175,7 +175,7 @@ vm_decode_function(CVarRef function,
       }
     }
 
-    HPHP::VM::Class* cc = cls;
+    HPHP::Class* cc = cls;
     if (nameContainsClass) {
       String c = name.substr(0, pos);
       name = name.substr(pos + 2);
@@ -206,7 +206,7 @@ vm_decode_function(CVarRef function,
           }
         }
       } else {
-        cc = VM::Unit::loadClass(c.get());
+        cc = Unit::loadClass(c.get());
       }
       if (!cc) {
         if (warn) {
@@ -231,7 +231,7 @@ vm_decode_function(CVarRef function,
       }
     }
     if (!cls) {
-      HPHP::VM::Func* f = HPHP::VM::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
       if (!f) {
         if (warn) {
           throw_invalid_argument("function: method '%s' not found",
@@ -244,7 +244,7 @@ vm_decode_function(CVarRef function,
     }
     assert(cls);
     CallType lookupType = this_ ? ObjMethod : ClsMethod;
-    const HPHP::VM::Func* f =
+    const HPHP::Func* f =
       g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
@@ -293,7 +293,7 @@ vm_decode_function(CVarRef function,
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
     if (!this_ && forwarding && ar) {
-      HPHP::VM::Class* fwdCls = nullptr;
+      HPHP::Class* fwdCls = nullptr;
       ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
       if (obj) {
         fwdCls = obj->getVMClass();
@@ -312,7 +312,7 @@ vm_decode_function(CVarRef function,
     static StringData* invokeStr = StringData::GetStaticString("__invoke");
     this_ = function.asCObjRef().get();
     cls = nullptr;
-    const HPHP::VM::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
+    const HPHP::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
     if (f != nullptr &&
         ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such
@@ -330,10 +330,10 @@ vm_decode_function(CVarRef function,
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
-  HPHP::VM::Class* cls = nullptr;
-  HPHP::VM::Transl::CallerFrame cf;
+  HPHP::Class* cls = nullptr;
+  HPHP::Transl::CallerFrame cf;
   StringData* invName = nullptr;
-  const HPHP::VM::Func* f = vm_decode_function(function, cf(), forwarding,
+  const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
                                                obj, cls, invName);
   if (f == nullptr) {
     return uninit_null();
@@ -346,7 +346,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
-  VM::Func* func = VM::Unit::loadFunc(function.get());
+  Func* func = Unit::loadFunc(function.get());
   if (func) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
@@ -363,12 +363,12 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
 
 Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
                              bool fatal /* = true */) {
-  HPHP::VM::Class* class_ = VM::Unit::lookupClass(s.get());
+  HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
-  const HPHP::VM::Func* f = class_->lookupMethod(method.get());
+  const HPHP::Func* f = class_->lookupMethod(method.get());
   if (f == nullptr || !(f->attrs() & AttrStatic)) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
@@ -1046,7 +1046,7 @@ bool invoke_file_impl(Variant &res, CStrRef path, bool once,
   bool initial;
   HPHP::Eval::PhpFile* efile =
     g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
-  HPHP::VM::Unit* u = nullptr;
+  HPHP::Unit* u = nullptr;
   if (efile) u = efile->unit();
   if (u == nullptr) {
     return false;
@@ -1225,14 +1225,14 @@ class ClassExistsChecker {
  public:
   ClassExistsChecker() {}
   bool operator()(CStrRef name) const {
-    return VM::Unit::lookupClass(name.get()) != nullptr;
+    return Unit::lookupClass(name.get()) != nullptr;
   }
 };
 
 class ConstantExistsChecker {
  public:
   bool operator()(CStrRef name) const {
-    return VM::Unit::lookupCns(name.get()) != nullptr;
+    return Unit::lookupCns(name.get()) != nullptr;
   }
 };
 
@@ -1257,10 +1257,10 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
         }
       }
       try {
-        VM::Transl::VMRegAnchor _;
+        Transl::VMRegAnchor _;
         bool initial;
         VMExecutionContext* ec = g_vmContext;
-        VM::Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
+        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
         if (u) {
           if (initial) {
             TypedValue retval;
@@ -1306,7 +1306,7 @@ bool AutoloadHandler::autoloadType(CStrRef name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_type, true,
       [] (CStrRef name) {
-        return !!VM::Unit::GetNamedEntity(name.get())->getCachedNameDef();
+        return !!Unit::GetNamedEntity(name.get())->getCachedNameDef();
       }
     ) != Failure;
 }
@@ -1362,7 +1362,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
         autoloadException = ex;
       }
     }
-    if (VM::Unit::lookupClass(className.get()) != nullptr) {
+    if (Unit::lookupClass(className.get()) != nullptr) {
       break;
     }
   }
@@ -1429,7 +1429,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 }
 
 bool function_exists(CStrRef function_name) {
-  return HPHP::VM::Unit::lookupFunc(function_name.get()) != nullptr;
+  return HPHP::Unit::lookupFunc(function_name.get()) != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

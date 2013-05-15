@@ -30,7 +30,6 @@
 #include <pwd.h>
 
 namespace HPHP {
-namespace VM {
 
 class Repo : public RepoProxy {
  private:
@@ -172,6 +171,6 @@ class Repo : public RepoProxy {
   FuncRepoProxy m_frp;
 };
 
-}}
+}
 
 #endif

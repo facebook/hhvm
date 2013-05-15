@@ -56,11 +56,11 @@ public:
   std::string &url() const { return m_url; }
   std::string desc() const;
 
-  const VM::SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
-  const VM::OffsetRangeVec& getCurOffsetRange() const {
+  const SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
+  const OffsetRangeVec& getCurOffsetRange() const {
     return m_offsetRangeVec;
   }
-  const VM::Unit* getUnit() const { return m_unit; }
+  const Unit* getUnit() const { return m_unit; }
 
   bool valid() const { return m_valid; }
   bool funcEntry() const { return m_funcEntry; }
@@ -79,9 +79,9 @@ private:
   int32_t m_line1;
   int32_t m_char1;
 
-  VM::SourceLoc m_sourceLoc;
-  VM::OffsetRangeVec m_offsetRangeVec;
-  VM::Unit* m_unit;
+  SourceLoc m_sourceLoc;
+  OffsetRangeVec m_offsetRangeVec;
+  Unit* m_unit;
   bool m_valid;
   bool m_funcEntry;
 };

@@ -34,7 +34,6 @@
 #include "runtime/vm/translator/translator-x64.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -164,4 +163,4 @@ struct Tx64Annihilator {
 
 static Tx64Annihilator boom;
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

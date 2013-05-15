@@ -44,13 +44,11 @@ namespace Eval {
 class PhpFile;
 }
 
-namespace VM {
 class EventHook;
 namespace Transl {
 class Translator;
 }
 class PCFilter;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +128,7 @@ class ClassInfoVM : public ClassInfo,
   UserAttributeVec m_userAttrVec;
 
  public:
-  friend class HPHP::VM::Class;
+  friend class HPHP::Class;
 };
 
 namespace MethodLookup {
@@ -432,21 +430,21 @@ public:
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
   template<bool isMethod>
   static c_Continuation* createContinuationHelper(
-    const VM::Func* origFunc,
-    const VM::Func* genFunc,
+    const Func* origFunc,
+    const Func* genFunc,
     ObjectData* thisPtr,
     ArrayData* args,
-    VM::Class* frameStaticCls);
+    Class* frameStaticCls);
   template<bool isMethod>
   static c_Continuation* createContinuation(ActRec* fp, bool getArgs,
-                                            const VM::Func* origFunc,
-                                            const VM::Func* genFunc);
+                                            const Func* origFunc,
+                                            const Func* genFunc);
   static c_Continuation* fillContinuationVars(
-    ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,
+    ActRec* fp, const Func* origFunc, const Func* genFunc,
     c_Continuation* cont);
   static void unpackContVarEnvLinkage(ActRec* fp);
   static void packContVarEnvLinkage(ActRec* fp);
-  void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
+  void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
 
 private:
   enum VectorLeaveCode {
@@ -459,13 +457,13 @@ private:
                        TypedValue& tvScratch,
                        TypedValue& tvLiteral,
                        TypedValue& tvRef, TypedValue& tvRef2,
-                       VM::MemberCode& mcode, TypedValue*& curMember);
+                       MemberCode& mcode, TypedValue*& curMember);
   template <bool warn, bool saveResult, VectorLeaveCode mleave>
   void getHelperPre(PC& pc, unsigned& ndiscard,
                     TypedValue*& base, TypedValue& tvScratch,
                     TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
-                    VM::MemberCode& mcode, TypedValue*& curMember);
+                    MemberCode& mcode, TypedValue*& curMember);
   template <bool saveResult>
   void getHelperPost(unsigned ndiscard, TypedValue*& tvRet,
                      TypedValue& tvScratch, TypedValue& tvRef,
@@ -474,7 +472,7 @@ private:
                  TypedValue*& base, TypedValue& tvScratch,
                  TypedValue& tvLiteral,
                  TypedValue& tvRef, TypedValue& tvRef2,
-                 VM::MemberCode& mcode, TypedValue*& curMember);
+                 MemberCode& mcode, TypedValue*& curMember);
 
   template <bool warn, bool define, bool unset, bool reffy, unsigned mdepth,
             VectorLeaveCode mleave>
@@ -482,11 +480,11 @@ private:
                     TypedValue& tvScratch,
                     TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
-                    VM::MemberCode& mcode, TypedValue*& curMember);
+                    MemberCode& mcode, TypedValue*& curMember);
   template <unsigned mdepth>
   void setHelperPost(unsigned ndiscard, TypedValue& tvRef,
                      TypedValue& tvRef2);
-  bool cellInstanceOf(TypedValue* c, const HPHP::VM::NamedEntity* s);
+  bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);
   bool initIteratorM(PC& pc, PC& origPc, Iter* it,
@@ -500,49 +498,49 @@ OPCODES
   void contSendImpl();
   void classExistsImpl(PC& pc, Attr typeAttr);
   void fPushObjMethodImpl(
-      VM::Class* cls, StringData* name, ObjectData* obj, int numArgs);
-  ActRec* fPushFuncImpl(const VM::Func* func, int numArgs);
+      Class* cls, StringData* name, ObjectData* obj, int numArgs);
+  ActRec* fPushFuncImpl(const Func* func, int numArgs);
 
 public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
-  typedef hphp_hash_map<const HPHP::VM::Class*, HphpArray*,
-                        pointer_hash<HPHP::VM::Class> > ClsCnsDataMap;
+  typedef hphp_hash_map<const HPHP::Class*, HphpArray*,
+                        pointer_hash<HPHP::Class> > ClsCnsDataMap;
   ClsCnsDataMap m_clsCnsData;
-  typedef hphp_hash_map<const HPHP::VM::Class*, HPHP::VM::Class::PropInitVec*,
-                        pointer_hash<HPHP::VM::Class> > PropDataMap;
+  typedef hphp_hash_map<const HPHP::Class*, HPHP::Class::PropInitVec*,
+                        pointer_hash<HPHP::Class> > PropDataMap;
   PropDataMap m_propData;
-  typedef hphp_hash_map<const HPHP::VM::Class*, HphpArray*,
-                        pointer_hash<HPHP::VM::Class> > SPropDataMap;
+  typedef hphp_hash_map<const HPHP::Class*, HphpArray*,
+                        pointer_hash<HPHP::Class> > SPropDataMap;
   SPropDataMap m_sPropData;
-  typedef hphp_hash_map<const HPHP::VM::Func*, HphpArray*,
-                        pointer_hash<HPHP::VM::Func> > FuncStaticCtxMap;
+  typedef hphp_hash_map<const HPHP::Func*, HphpArray*,
+                        pointer_hash<HPHP::Func> > FuncStaticCtxMap;
   FuncStaticCtxMap m_funcStaticCtx;
 
-  const HPHP::VM::Func* lookupMethodCtx(const HPHP::VM::Class* cls,
+  const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
-                                        HPHP::VM::Class* pctx,
+                                        HPHP::Class* pctx,
                                         MethodLookup::CallType lookupType,
                                         bool raise = false);
-  MethodLookup::LookupResult lookupObjMethod(const HPHP::VM::Func*& f,
-                                             const HPHP::VM::Class* cls,
+  MethodLookup::LookupResult lookupObjMethod(const HPHP::Func*& f,
+                                             const HPHP::Class* cls,
                                              const StringData* methodName,
                                              bool raise = false);
-  MethodLookup::LookupResult lookupClsMethod(const HPHP::VM::Func*& f,
-                                             const HPHP::VM::Class* cls,
+  MethodLookup::LookupResult lookupClsMethod(const HPHP::Func*& f,
+                                             const HPHP::Class* cls,
                                              const StringData* methodName,
                                              ObjectData* this_,
                                              bool raise = false);
-  MethodLookup::LookupResult lookupCtorMethod(const HPHP::VM::Func*& f,
-                                              const HPHP::VM::Class* cls,
+  MethodLookup::LookupResult lookupCtorMethod(const HPHP::Func*& f,
+                                              const HPHP::Class* cls,
                                               bool raise = false);
   HPHP::ObjectData* createObject(StringData* clsName,
                                  CArrRef params,
                                  bool init = true);
   HPHP::ObjectData* createObjectOnly(StringData* clsName);
 
-  HphpArray* getFuncStaticCtx(const HPHP::VM::Func* f) {
+  HphpArray* getFuncStaticCtx(const HPHP::Func* f) {
     FuncStaticCtxMap::iterator it = m_funcStaticCtx.find(f);
     if (it != m_funcStaticCtx.end()) {
       return it->second;
@@ -553,19 +551,19 @@ public:
     return m_funcStaticCtx[f] = array;
   }
 
-  HphpArray* getClsCnsData(const HPHP::VM::Class* class_) const {
+  HphpArray* getClsCnsData(const HPHP::Class* class_) const {
     ClsCnsDataMap::const_iterator it = m_clsCnsData.find(class_);
     if (it == m_clsCnsData.end()) {
       return nullptr;
     }
     return it->second;
   }
-  void setClsCnsData(const HPHP::VM::Class* class_, HphpArray* clsCnsData) {
+  void setClsCnsData(const HPHP::Class* class_, HphpArray* clsCnsData) {
     assert(getClsCnsData(class_) == nullptr);
     m_clsCnsData[class_] = clsCnsData;
   }
 
-  TypedValue* lookupClsCns(const HPHP::VM::NamedEntity* ne,
+  TypedValue* lookupClsCns(const HPHP::NamedEntity* ne,
                            const StringData* cls,
                            const StringData* cns);
 
@@ -583,9 +581,9 @@ public:
   VarEnv* m_globalVarEnv;
   VarEnv* m_topVarEnv;
 
-  HPHP::VM::RenamedFuncDict m_renamedFuncs;
+  HPHP::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;
-  typedef std::vector<HPHP::VM::Unit*> EvaledUnitsVec;
+  typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
   EvaledUnitsVec m_createdFuncs;
 
   /*
@@ -609,8 +607,8 @@ public:
 
   ActRec* getStackFrame();
   ObjectData* getThis();
-  VM::Class* getContextClass();
-  VM::Class* getParentContextClass();
+  Class* getContextClass();
+  Class* getParentContextClass();
   CStrRef getContainingFileName();
   int getLine();
   Array getCallerInfo();
@@ -619,17 +617,17 @@ public:
   void addRenameableFunctions(ArrayData* arr);
   HPHP::Eval::PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
-  HPHP::VM::Unit* evalInclude(StringData* path,
+  HPHP::Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
-  HPHP::VM::Unit* evalIncludeRoot(StringData* path,
+  HPHP::Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
   HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
                                          InclOpFlags flags, bool* initial,
-                                         HPHP::VM::Unit* unit = 0);
-  bool evalUnit(HPHP::VM::Unit* unit, bool local,
+                                         HPHP::Unit* unit = 0);
+  bool evalUnit(HPHP::Unit* unit, bool local,
                 PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, HPHP::VM::Unit* unit);
-  HPHP::VM::Unit* compileEvalString(StringData* code);
+  void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
+  HPHP::Unit* compileEvalString(StringData* code);
   CStrRef createFunction(CStrRef args, CStrRef code);
   void evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
@@ -664,9 +662,9 @@ public:
   VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
-  HPHP::VM::InjectionTables* m_injTables;
-  HPHP::VM::PCFilter* m_breakPointFilter;
-  HPHP::VM::PCFilter* m_lastLocFilter;
+  HPHP::InjectionTables* m_injTables;
+  HPHP::PCFilter* m_breakPointFilter;
+  HPHP::PCFilter* m_lastLocFilter;
   bool m_interpreting;
   bool m_dbgNoBreak;
   int switchMode(bool unwindBuiltin);
@@ -681,14 +679,14 @@ private:
   void doFPushCuf(PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
   template <bool forwarding>
-  void pushClsMethodImpl(VM::Class* cls, StringData* name,
+  void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   bool prepareFuncEntry(ActRec* ar, PC& pc);
   bool prepareArrayArgs(ActRec* ar, ArrayData* args);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   int m_coverPrevLine;
-  HPHP::VM::Unit* m_coverPrevUnit;
+  HPHP::Unit* m_coverPrevUnit;
   Array m_evaledArgs;
 public:
   void resetCoverageCounters();
@@ -700,10 +698,10 @@ public:
     InvokePseudoMain = 2
   };
   void invokeFunc(TypedValue* retval,
-                  const HPHP::VM::Func* f,
+                  const HPHP::Func* f,
                   CArrRef params,
                   ObjectData* this_ = nullptr,
-                  HPHP::VM::Class* class_ = nullptr,
+                  HPHP::Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   InvokeFlags flags = InvokeNormal);
@@ -715,12 +713,12 @@ public:
                ctx.invName, InvokeIgnoreByRefErrors);
   }
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::VM::Func* f,
+                     const HPHP::Func* f,
                      void* thisOrCls,
                      StringData* invName,
                      int argc, TypedValue* argv);
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::VM::Func* f,
+                     const HPHP::Func* f,
                      void* thisOrCls,
                      StringData* invName = nullptr) {
     invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
@@ -733,7 +731,7 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void invokeContFunc(const HPHP::VM::Func* f,
+  void invokeContFunc(const HPHP::Func* f,
                       ObjectData* this_,
                       TypedValue* param = nullptr);
   // VM ClassInfo support
@@ -773,7 +771,7 @@ OPCODES
   void dispatchBB();
 
 private:
-  VM::PreConstVec m_preConsts;
+  PreConstVec m_preConsts;
   static Mutex s_threadIdxLock;
   static hphp_hash_map<pid_t, int64_t> s_threadIdxMap;
 

@@ -51,13 +51,12 @@
 namespace HPHP {
 // forward declaration
 class StringData;
-namespace VM {
 namespace JIT {
 
-using HPHP::VM::Transl::TCA;
-using HPHP::VM::Transl::RegSet;
-using HPHP::VM::Transl::PhysReg;
-using HPHP::VM::Transl::ConditionCode;
+using HPHP::Transl::TCA;
+using HPHP::Transl::RegSet;
+using HPHP::Transl::PhysReg;
+using HPHP::Transl::ConditionCode;
 
 struct IRInstruction;
 
@@ -928,7 +927,7 @@ inline Opcode queryJmpToQueryOp(Opcode opc) {
 inline ConditionCode queryJmpToCC(Opcode opc) {
   assert(isQueryJmpOp(opc));
 
-  using namespace HPHP::VM::Transl;
+  using namespace HPHP::Transl;
 
   switch (opc) {
     case JmpGt:                 return CC_G;
@@ -1594,12 +1593,12 @@ class RawMemSlot {
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
-      Func::prologueTableOff() + sizeof(HPHP::VM::Transl::TCA),
+      Func::prologueTableOff() + sizeof(HPHP::Transl::TCA),
       Transl::sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    using namespace HPHP::VM::Transl;
+    using namespace HPHP::Transl;
     static RawMemSlot m(HHIR_MISOFF(ctx), Transl::sz::qword, Type::Cls);
     return m;
   }
@@ -2490,14 +2489,14 @@ void forEachTraceInst(Trace* main, Body body) {
   });
 }
 
-}}}
+}}
 
 namespace std {
-  template<> struct hash<HPHP::VM::JIT::Opcode> {
-    size_t operator()(HPHP::VM::JIT::Opcode op) const { return op; }
+  template<> struct hash<HPHP::JIT::Opcode> {
+    size_t operator()(HPHP::JIT::Opcode op) const { return op; }
   };
-  template<> struct hash<HPHP::VM::JIT::Type> {
-    size_t operator()(HPHP::VM::JIT::Type t) const { return t.hash(); }
+  template<> struct hash<HPHP::JIT::Type> {
+    size_t operator()(HPHP::JIT::Type t) const { return t.hash(); }
   };
 }
 

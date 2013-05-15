@@ -1635,12 +1635,12 @@ String f_fb_lazy_realpath(CStrRef filename) {
 }
 
 String f_fb_gc_collect_cycles() {
-  std::string s = VM::gc_collect_cycles();
+  std::string s = gc_collect_cycles();
   return String(s);
 }
 
 void f_fb_gc_detect_cycles(CStrRef filename) {
-  VM::gc_detect_cycles(std::string(filename.c_str()));
+  gc_detect_cycles(std::string(filename.c_str()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -56,11 +56,11 @@ constexpr char* g_allIncludes = R"(
 void emitCtorHelper(const fbstring& className, std::ostream& out) {
   out << folly::format(
     R"(
-HPHP::VM::Instance* new_{0:s}_Instance(HPHP::VM::Class* cls) {{
+HPHP::Instance* new_{0:s}_Instance(HPHP::Class* cls) {{
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_{0:s}) - sizeof(ObjectData);
-  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
-  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  size_t size = HPHP::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::Instance *inst = (HPHP::Instance*)ALLOCOBJSZ(size);
   new ((void *)inst) c_{0:s}(cls);
   return inst;
 }})",

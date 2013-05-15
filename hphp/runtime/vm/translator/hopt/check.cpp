@@ -20,7 +20,7 @@
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/physreg.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 /*
  * Check one block for being well formed.  It must:
@@ -149,5 +149,5 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
   return true;
 }
 
-}}}
+}}
 

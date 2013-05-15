@@ -27,11 +27,10 @@
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 
-using HPHP::VM::Transl::SrcKey;
-using HPHP::VM::Transl::NormalizedInstruction;
+using HPHP::Transl::SrcKey;
+using HPHP::Transl::NormalizedInstruction;
 
 namespace HPHP {
-namespace VM {
 namespace Transl { struct PropInfo; }
 namespace JIT {
 
@@ -222,7 +221,7 @@ struct HhbcTranslator {
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
-  void emitFPushCufOp(VM::Op op, Class* cls, StringData* invName,
+  void emitFPushCufOp(Op op, Class* cls, StringData* invName,
                       const Func* func, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName);
@@ -533,7 +532,7 @@ private:
                              Type resultType,
                              int stkIndex);
   bool checkSupportedGblName(const StringData* gblName,
-                             HPHP::VM::JIT::Type resultType,
+                             HPHP::JIT::Type resultType,
                              int stkIndex);
   SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Block* block);
   SSATmp* emitLdClsPropAddr(const StringData* propName) {
@@ -683,6 +682,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}} // namespace HPHP::VM::JIT
+}} // namespace HPHP::JIT
 
 #endif

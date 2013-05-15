@@ -19,7 +19,6 @@
 #include <runtime/vm/pendq.h>
 
 namespace HPHP {
-namespace VM {
 
 static __thread PendQ* tl_q;
 
@@ -41,4 +40,4 @@ void PendQ::drain() {
   }
 }
 
-}}
+}

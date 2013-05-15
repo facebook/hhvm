@@ -29,7 +29,6 @@
 #include <memory>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -3275,4 +3274,4 @@ TranslatorX64::translateFPassM(const Tracelet& t,
   }
 }
 
-}}}
+}}

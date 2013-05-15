@@ -27,7 +27,6 @@
 #include <fcntl.h>
 
 namespace HPHP {
-namespace VM {
 
 TRACE_SET_MOD(typeProfile);
 
@@ -299,5 +298,4 @@ bool isProfileOpcode(const PC& pc) {
   return *pc == OpRetC || *pc == OpCGetM;
 }
 
-}
 }

@@ -28,10 +28,9 @@
 
 #include <runtime/vm/translator/translator-x64.h>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 DebugInfo* DebugInfo::Get() {
@@ -150,6 +149,5 @@ std::string lookupFunction(const Func* f,
   return fname;
 }
 
-}
 }
 }

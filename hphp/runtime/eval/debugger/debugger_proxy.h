@@ -106,8 +106,8 @@ public:
   void forceQuit();
 
   // For instrumentation
-  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
-  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
+  HPHP::InjectionTables* getInjTables() const { return m_injTables; }
+  void setInjTables(HPHP::InjectionTables* tables) { m_injTables = tables;}
   void readInjTablesFromThread();
   void writeInjTablesToThread();
 
@@ -153,7 +153,7 @@ private:
   int m_signum;
 
   // For instrumentation
-  HPHP::VM::InjectionTables* m_injTables;
+  HPHP::InjectionTables* m_injTables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

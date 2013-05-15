@@ -18,7 +18,7 @@
 #include "runtime/vm/translator/hopt/opt.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 // These are the conditional branches supported for direct branch
 // to their target trace at TraceExit, TraceExitType::NormalCc
@@ -192,4 +192,4 @@ void optimizeJumps(Trace* trace, IRFactory* irFactory) {
   }
 }
 
-}}}
+}}

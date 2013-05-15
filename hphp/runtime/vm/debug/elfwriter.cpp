@@ -29,10 +29,9 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/vm/translator/translator-x64.h>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 static const Trace::Module TRACEMOD = Trace::debuginfo;
@@ -609,6 +608,5 @@ ElfWriter::~ElfWriter() {
     dwarf_producer_finish(m_dwarfProducer, 0);
 }
 
-}
 }
 }

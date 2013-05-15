@@ -28,7 +28,7 @@ namespace HPHP {
 
 class ExecutionContext;
 
-namespace VM { namespace Transl {
+ namespace Transl {
 
 /*
  * The Fixup map allows us to reconstruct the state of the VM
@@ -214,6 +214,6 @@ private:
   TreadHashMap<CTCA,FixupEntry,ctca_identity_hash> m_fixups;
 };
 
-}}}
+}}
 
 #endif

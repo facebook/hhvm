@@ -23,7 +23,6 @@
 #include "runtime/base/md5.h"
 
 namespace HPHP {
-namespace VM {
 
 // Forward declaration.
 class Repo;
@@ -207,6 +206,6 @@ class RepoProxy {
   Repo& m_repo;
 };
 
-} }
+ }
 
 #endif

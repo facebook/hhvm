@@ -28,7 +28,6 @@
 #include <boost/noncopyable.hpp>
 
 namespace HPHP {
-namespace VM {
 namespace JIT{
 
 using namespace Transl::reg;
@@ -1491,4 +1490,4 @@ RegAllocInfo allocRegsForTrace(Trace* trace, IRFactory* irFactory,
   return LinearScan(irFactory).allocRegs(trace, lifetime);
 }
 
-}}} // HPHP::VM::JIT
+}} // HPHP::JIT

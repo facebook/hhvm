@@ -20,7 +20,6 @@
 #include "runtime/base/builtin_functions.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
@@ -449,4 +448,4 @@ void RepoTxnQuery::exec() {
   m_txn.exec(*this);
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

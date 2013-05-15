@@ -242,10 +242,10 @@ void ClassInfo::InitializeSystemConstants() {
   for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
     ConstantInfo* ci = it->second;
     if (ci->isDynamic()) {
-      VM::Unit::defDynamicSystemConstant(ci->name.get(), ci);
+      Unit::defDynamicSystemConstant(ci->name.get(), ci);
     } else {
       Variant v = ci->getValue();
-      bool DEBUG_ONLY res = VM::Unit::defCns(ci->name.get(),
+      bool DEBUG_ONLY res = Unit::defCns(ci->name.get(),
                                              v.asTypedValue(), true);
       assert(res);
     }

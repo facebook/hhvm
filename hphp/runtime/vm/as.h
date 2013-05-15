@@ -19,7 +19,7 @@
 
 #include <runtime/base/md5.h>
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 class Unit;
 
@@ -34,6 +34,6 @@ Unit* assemble_file(const char* filename, const MD5&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

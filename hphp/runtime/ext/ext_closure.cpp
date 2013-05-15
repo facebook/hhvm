@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure(VM::Class* cb) : ExtObjectData(cb),
+c_Closure::c_Closure(Class* cb) : ExtObjectData(cb),
   m_thisOrClass(nullptr), m_func(nullptr) {}
 c_Closure::~c_Closure() {
   // same as ar->hasThis()
@@ -41,7 +41,7 @@ void c_Closure::t___construct() {
  */
 c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   static StringData* invokeName = StringData::GetStaticString("__invoke");
-  VM::Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
+  Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
 
   if (invokeFunc->attrs() & AttrStatic) {
     // Only set the class for static closures
@@ -56,7 +56,7 @@ c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 
   // Change my __invoke's m_cls to be the same as my creator's
-  VM::Class* scope = ar->m_func->cls();
+  Class* scope = ar->m_func->cls();
   m_func = invokeFunc->cloneAndSetClass(scope);
 
   // copy the props to instance variables
@@ -94,7 +94,7 @@ HphpArray* c_Closure::getStaticLocals() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyClosure::c_DummyClosure(VM::Class* cb) :
+c_DummyClosure::c_DummyClosure(Class* cb) :
   ExtObjectData(cb) {
 }
 

@@ -30,7 +30,6 @@
 // Invalidation tracking for constants
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 typedef std::vector<const PreConst*> PreConstPtrVec;
 
@@ -82,6 +81,6 @@ void mergePreConst(const PreConst& preConst);
 void mergePreConsts(const PreConstVec& preConsts);
 void unmergePreConsts(const PreConstVec& preConsts, void* owner);
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif // TRANSLATOR_DEPS_H_

@@ -23,7 +23,7 @@
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/translator/physreg.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 // Assumption: the set interfaces are limited to the first 64 registers.
 static const int kMaxRegs = 64;
@@ -469,6 +469,6 @@ private:
   const PhysReg m_reg;
 };
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif /* incl_HPHP_REG_ALLOC_H_ */

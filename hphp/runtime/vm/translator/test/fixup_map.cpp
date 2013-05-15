@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "hhvm/process_init.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -89,4 +89,4 @@ TEST(FixupMap, Concurrent) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

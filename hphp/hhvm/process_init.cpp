@@ -35,7 +35,6 @@
 #include <string>
 
 namespace HPHP {
-namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +97,7 @@ void ProcessInit() {
   ClassInfo::SetHook(&vm_class_info_hook);
 
   // ensure that nextTx64 and tx64 are set
-  (void)VM::Transl::Translator::Get();
+  (void)Transl::Translator::Get();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
@@ -193,5 +192,4 @@ void ProcessInit() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }

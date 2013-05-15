@@ -29,7 +29,7 @@
 #include "util/asm-x64.h"
 #include "runtime/vm/translator/regalloc.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -304,6 +304,6 @@ const size_t kReservedRSPSpillSpace = 0x80;
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

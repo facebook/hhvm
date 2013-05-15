@@ -22,13 +22,12 @@
 
 #include <runtime/vm/translator/abi-x64.h>
 
-using namespace HPHP::VM::Transl::reg;
+using namespace HPHP::Transl::reg;
 using namespace HPHP::Util;
 using namespace HPHP::Trace;
 using std::max;
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static const Trace::Module TRACEMOD = Trace::tx64;
@@ -912,7 +911,7 @@ inline void emitCopyToAligned(X64Assembler& a,
 
 // ArgManager -- support for passing VM-level data to helper functions.
 class ArgManager {
-  typedef HPHP::VM::Transl::X64Assembler& A;
+  typedef HPHP::Transl::X64Assembler& A;
 public:
   ArgManager(TranslatorX64 &tx64, A& a) : m_tx64(tx64), m_a(a) { }
 
@@ -1048,7 +1047,7 @@ struct Deleter : private boost::noncopyable {
   T** p;
 };
 
-}}}
+}}
 
 #endif
 

@@ -22,7 +22,7 @@
 #include "runtime/base/types.h"
 #include "util/trace.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 using std::set;
 using namespace reg;
@@ -1020,4 +1020,4 @@ std::string RegContent::pretty() const {
   return std::string(buf);
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

@@ -15,7 +15,7 @@
 */
 #include "runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 IRInstruction* IRFactory::defLabel() {
   IRInstruction inst(DefLabel);
@@ -56,4 +56,4 @@ SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->getDst());
 }
 
-}}}
+}}

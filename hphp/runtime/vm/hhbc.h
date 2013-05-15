@@ -20,7 +20,6 @@
 #include <runtime/vm/core_types.h>
 
 namespace HPHP {
-namespace VM {
 
 struct Unit;
 
@@ -851,6 +850,6 @@ mcodeMaybeArrayIntKey(MemberCode mcode) {
 }
 
 
-} }
+ }
 
 #endif

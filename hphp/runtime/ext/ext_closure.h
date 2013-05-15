@@ -36,7 +36,7 @@ class c_Closure : public ExtObjectData {
   DECLARE_CLASS(Closure, Closure, ObjectData)
 
   // need to implement
-  public: c_Closure(VM::Class* cls = c_Closure::s_cls);
+  public: c_Closure(Class* cls = c_Closure::s_cls);
   public: ~c_Closure();
   public: void t___construct();
 
@@ -47,7 +47,7 @@ public:
 
   c_Closure* init(int numArgs, ActRec* ar, TypedValue* sp);
   ObjectData* getThisOrClass() { return m_thisOrClass; }
-  const VM::Func* getInvokeFunc() { return m_func; }
+  const Func* getInvokeFunc() { return m_func; }
   HphpArray* getStaticLocals();
   TypedValue* getUseVars() { return propVec(); }
   int getNumUseVars() { return m_cls->numDeclProperties(); }
@@ -60,7 +60,7 @@ protected:
 private:
   SmartPtr<HphpArray> m_VMStatics;
   ObjectData* m_thisOrClass;
-  const VM::Func* m_func;
+  const Func* m_func;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ class c_DummyClosure : public ExtObjectData {
   DECLARE_CLASS(DummyClosure, DummyClosure, ObjectData)
 
   // need to implement
-  public: c_DummyClosure(VM::Class* cls = c_DummyClosure::s_cls);
+  public: c_DummyClosure(Class* cls = c_DummyClosure::s_cls);
   public: ~c_DummyClosure();
   public: void t___construct();
 

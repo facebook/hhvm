@@ -20,7 +20,6 @@
 #include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static inline void
@@ -71,5 +70,5 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
   emitTLSLoad(a, &datum.m_node.m_p, reg);
 }
 
-} } }
+} }
 #endif

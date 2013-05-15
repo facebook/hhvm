@@ -555,9 +555,7 @@ static bool send_status(Transport *transport, ServerStats::Format format,
   return true;
 }
 
-namespace VM {
   extern size_t hhbc_arena_capacity();
-}
 
 bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
@@ -588,8 +586,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    VM::Transl::Translator* tx = VM::Transl::Translator::Get();
-    appendStat("hhbc-roarena-capac", VM::hhbc_arena_capacity());
+    Transl::Translator* tx = Transl::Translator::Get();
+    appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", tx->getTargetCacheSize());
@@ -961,12 +959,12 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(VM::Transl::Translator::Get()->getUsage());
+    transport->sendString(Transl::Translator::Get()->getUsage());
     return true;
   }
   if (cmd == "vm-preconsts") {
     InfoMap counts;
-    using namespace HPHP::VM::Transl;
+    using namespace HPHP::Transl;
     for (PreConstDepMap::iterator i = gPreConsts.begin(); i != gPreConsts.end();
          ++i) {
       PreConstDep& dep = i->second;
@@ -993,7 +991,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::VM::Transl::tc_dump()) {
+    if (HPHP::Transl::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");
@@ -1002,7 +1000,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-tcreset") {
     int64_t start = Timer::GetCurrentTimeMicros();
-    if (HPHP::VM::Transl::tx64->replace()) {
+    if (HPHP::Transl::tx64->replace()) {
       string msg;
       Util::string_printf(msg, "Done %ld ms",
                           (Timer::GetCurrentTimeMicros() - start) / 1000);

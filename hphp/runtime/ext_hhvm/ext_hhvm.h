@@ -24,9 +24,8 @@ namespace HPHP {
 
 struct ActRec;
 
-namespace VM {
   class Instance;
-};
+;
 
 struct HhbcExtFuncInfo {
   const char* m_name;
@@ -41,11 +40,11 @@ struct HhbcExtMethodInfo {
 
 struct HhbcExtClassInfo {
   const char* m_name;
-  HPHP::VM::Instance* (*m_InstanceCtor)(HPHP::VM::Class*);
+  HPHP::Instance* (*m_InstanceCtor)(HPHP::Class*);
   int m_sizeof;
   long long m_methodCount;
   const HhbcExtMethodInfo* m_methods;
-  HPHP::VM::Class** m_clsPtr;
+  HPHP::Class** m_clsPtr;
 };
 
 extern const long long hhbc_ext_funcs_count;

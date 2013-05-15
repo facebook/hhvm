@@ -54,7 +54,7 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_DateTime::c_DateTime(VM::Class* cb) : ExtObjectData(cb) {
+c_DateTime::c_DateTime(Class* cb) : ExtObjectData(cb) {
 }
 
 c_DateTime::~c_DateTime() {
@@ -166,7 +166,7 @@ ObjectData *c_DateTime::clone() {
   return obj;
 }
 
-c_DateTimeZone::c_DateTimeZone(VM::Class* cb) :
+c_DateTimeZone::c_DateTimeZone(Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -216,7 +216,7 @@ ObjectData *c_DateTimeZone::clone() {
   return obj;
 }
 
-c_DateInterval::c_DateInterval(VM::Class* cb) :
+c_DateInterval::c_DateInterval(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>(cb) {
 }
 

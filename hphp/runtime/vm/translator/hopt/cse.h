@@ -24,7 +24,6 @@
 #include "runtime/vm/translator/hopt/ir.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 /*
@@ -89,7 +88,7 @@ private:
   MapType map;
 };
 
-}}}
+}}
 
 #endif
 

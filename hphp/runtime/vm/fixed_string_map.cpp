@@ -19,7 +19,6 @@
 #include "runtime/base/macros.h"
 
 namespace HPHP {
-namespace VM {
 
 TRACE_SET_MOD(runtime);
 
@@ -87,4 +86,4 @@ template class FixedStringMap<unsigned char* /* TCA */, true>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} }
+ }

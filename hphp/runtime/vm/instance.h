@@ -26,7 +26,6 @@
 #include "runtime/vm/unit.h"
 
 namespace HPHP {
-namespace VM {
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
@@ -245,21 +244,21 @@ inline Instance* instanceFromTv(TypedValue* tv) {
   return static_cast<Instance*>(tv->m_data.pobj);
 }
 
-} } // HPHP::VM
+ } // HPHP::VM
 
 namespace HPHP {
 
-class ExtObjectData : public HPHP::VM::Instance {
+class ExtObjectData : public HPHP::Instance {
  public:
-  explicit ExtObjectData(HPHP::VM::Class* cls)
-    : HPHP::VM::Instance(cls, false) {
+  explicit ExtObjectData(HPHP::Class* cls)
+    : HPHP::Instance(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
 };
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
  public:
-  explicit ExtObjectDataFlags(HPHP::VM::Class* cb) : ExtObjectData(cb) {
+  explicit ExtObjectDataFlags(HPHP::Class* cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }
 };

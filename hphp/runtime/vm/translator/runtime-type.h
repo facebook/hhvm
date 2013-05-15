@@ -20,7 +20,6 @@
 #include "runtime/vm/bytecode.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 // Location --
@@ -286,6 +285,6 @@ class RuntimeType {
   std::string pretty() const;
 };
 
-} } }
+} }
 
 #endif // incl_HPHP_RUNTIME_TYPE_H_

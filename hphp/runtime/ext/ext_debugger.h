@@ -41,7 +41,7 @@ class c_DebuggerProxyCmdUser : public ExtObjectData {
   DECLARE_CLASS(DebuggerProxyCmdUser, DebuggerProxyCmdUser, ObjectData)
 
   // need to implement
-  public: c_DebuggerProxyCmdUser(VM::Class* cls = c_DebuggerProxyCmdUser::s_cls);
+  public: c_DebuggerProxyCmdUser(Class* cls = c_DebuggerProxyCmdUser::s_cls);
   public: ~c_DebuggerProxyCmdUser();
   public: void t___construct();
   public: bool t_islocal();
@@ -71,7 +71,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_CLASS(DebuggerClientCmdUser, DebuggerClientCmdUser, ObjectData)
 
   // need to implement
-  public: c_DebuggerClientCmdUser(VM::Class* cls = c_DebuggerClientCmdUser::s_cls);
+  public: c_DebuggerClientCmdUser(Class* cls = c_DebuggerClientCmdUser::s_cls);
   public: ~c_DebuggerClientCmdUser();
   public: void t___construct();
   public: void t_quit();
@@ -122,7 +122,7 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
 
   // need to implement
-  public: c_DebuggerClient(VM::Class* cls = c_DebuggerClient::s_cls);
+  public: c_DebuggerClient(Class* cls = c_DebuggerClient::s_cls);
   public: ~c_DebuggerClient();
   public: void t___construct();
   public: int64_t t_getstate();

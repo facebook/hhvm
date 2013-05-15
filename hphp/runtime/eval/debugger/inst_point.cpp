@@ -33,7 +33,7 @@ const uchar* InstPointInfo::lookupPC() {
       return nullptr;
     }
     PC pc = context->getPC();
-    HPHP::VM::Unit *unit = fp->m_func->unit();
+    HPHP::Unit *unit = fp->m_func->unit();
     if (!unit) {
       return nullptr;
     }

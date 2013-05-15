@@ -20,7 +20,7 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -184,6 +184,6 @@ bool canUseSPropCache(SSATmp* clsTmp,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

@@ -27,9 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace VM {
   class Class;
-}
 
 struct TypedValue;
 
@@ -44,7 +42,7 @@ union Value {
   StringData *pstr; // KindOfString, KindOfStaticString
   ArrayData  *parr; // KindOfArray
   ObjectData *pobj; // KindOfObject
-  VM::Class  *pcls; // only in vm stack, no type tag.
+  Class  *pcls; // only in vm stack, no type tag.
   RefData    *pref; // KindOfRef
   TypedValue *pind; // only for KindOfIndirect
 };

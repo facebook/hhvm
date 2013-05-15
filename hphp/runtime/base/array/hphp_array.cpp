@@ -1679,7 +1679,6 @@ CVarRef HphpArray::endRef() {
 
 //=============================================================================
 // VM runtime support functions.
-namespace VM {
 
 // Helpers for array_setm.
 ArrayData* nvCheckedSet(ArrayData* a, StringData* key, TypedValue* value,
@@ -1891,8 +1890,6 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
   }
   decRefArr(a2);
   return a1;
-}
-
 }
 
 //=============================================================================

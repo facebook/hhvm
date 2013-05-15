@@ -375,9 +375,7 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-namespace VM {
   class Class;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
@@ -460,13 +458,11 @@ public:
   void onSessionInit();
 };
 
-namespace VM {
 class GlobalNameValueTableWrapper;
-}
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);

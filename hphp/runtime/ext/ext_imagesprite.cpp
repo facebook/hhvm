@@ -456,7 +456,7 @@ void ImageFromHTTP::completed() {
 
 // PHP accessible classes/functions
 
-c_ImageSprite::c_ImageSprite(VM::Class* cb) :
+c_ImageSprite::c_ImageSprite(Class* cb) :
     ExtObjectData(cb) {
   m_image_string_buffer = null_string;
   m_image = NULL;

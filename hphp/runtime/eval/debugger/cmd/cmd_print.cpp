@@ -374,8 +374,8 @@ void CmdPrint::setClientOutput(DebuggerClient *client) {
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);

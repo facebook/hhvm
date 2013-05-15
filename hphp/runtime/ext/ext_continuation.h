@@ -42,15 +42,15 @@ class c_Continuation : public ExtObjectData {
                                       this_->m_vmFunc->numIterators()))(this_);
   }
 
-  explicit c_Continuation(VM::Class* cls = c_Continuation::s_cls);
+  explicit c_Continuation(Class* cls = c_Continuation::s_cls);
   ~c_Continuation();
 
 public:
-  void init(const VM::Func* vmFunc,
+  void init(const Func* vmFunc,
             const StringData* origFuncName,
             ObjectData* thisPtr,
             ArrayData* args) noexcept {
-    m_vmFunc = const_cast<VM::Func*>(vmFunc);
+    m_vmFunc = const_cast<Func*>(vmFunc);
     assert(m_vmFunc);
     m_origFuncName = origFuncName;
     assert(m_origFuncName->isStatic());
@@ -83,7 +83,7 @@ public:
   String t_getcalledclass();
   Variant t___clone();
 
-  static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
+  static c_Continuation* alloc(Class* cls, int nLocals, int nIters) {
     c_Continuation* cont =
       (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
     new ((void *)cont) c_Continuation(cls);
@@ -133,7 +133,7 @@ public:
   bool m_should_throw;
 
   int m_localsOffset;
-  VM::Func *m_vmFunc;
+  Func *m_vmFunc;
   int64_t m_label;
   ActRec* m_arPtr;
 
@@ -165,7 +165,7 @@ class c_DummyContinuation : public ExtObjectData {
   DECLARE_CLASS(DummyContinuation, DummyContinuation, ObjectData)
 
   // need to implement
-  public: c_DummyContinuation(VM::Class* cls = c_DummyContinuation::s_cls);
+  public: c_DummyContinuation(Class* cls = c_DummyContinuation::s_cls);
   public: ~c_DummyContinuation();
   public: void t___construct();
   public: Variant t_current();

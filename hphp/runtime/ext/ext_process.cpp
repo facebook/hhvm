@@ -114,7 +114,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
-  if (VM::Repo::prefork()) {
+  if (Repo::prefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;
   }
@@ -152,7 +152,7 @@ int64_t f_pcntl_fork() {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
-  if (VM::Repo::prefork()) {
+  if (Repo::prefork()) {
     raise_error("forking is disallowed in multi-threaded mode");
     return -1;
   }
@@ -160,7 +160,7 @@ int64_t f_pcntl_fork() {
   std::cout.flush();
   std::cerr.flush();
   pid_t pid = fork();
-  VM::Repo::postfork(pid);
+  Repo::postfork(pid);
   return pid;
 }
 

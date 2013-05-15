@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_HHIR_OPT_H_
 #define incl_HPHP_HHIR_OPT_H_
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 class Trace;
 class TraceBuilder;
@@ -35,6 +35,6 @@ void optimizeJumps(Trace*, IRFactory*);
  */
 void optimizeTrace(Trace*, TraceBuilder*);
 
-}}}
+}}
 
 #endif

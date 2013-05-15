@@ -54,12 +54,12 @@ ObjectData::~ObjectData() {
   }
 }
 
-HPHP::VM::Class*
-ObjectData::instanceof(const HPHP::VM::PreClass* pc) const {
+HPHP::Class*
+ObjectData::instanceof(const HPHP::PreClass* pc) const {
   return m_cls->classof(pc);
 }
 
-bool ObjectData::instanceof(const HPHP::VM::Class* c) const {
+bool ObjectData::instanceof(const HPHP::Class* c) const {
   return m_cls->classof(c);
 }
 
@@ -117,7 +117,7 @@ CStrRef ObjectData::o_getClassNameHook() const {
 
 HOT_FUNC
 bool ObjectData::o_instanceof(CStrRef s) const {
-  HPHP::VM::Class* cls = VM::Unit::lookupClass(s.get());
+  HPHP::Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
   return m_cls->classof(cls);
 }
@@ -185,7 +185,7 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
 }
 
 void ObjectData::initProperties(int nProp) {
-  if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
+  if (!o_properties.get()) ((HPHP::Instance*)this)->initDynProps(nProp);
 }
 
 Variant* ObjectData::o_realProp(CStrRef propName, int flags,
@@ -196,12 +196,12 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
    * behavior in cases where the named property is nonexistent or
    * inaccessible.
    */
-  HPHP::VM::Class* ctx = nullptr;
+  HPHP::Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = VM::Unit::lookupClass(context.get());
+    ctx = Unit::lookupClass(context.get());
   }
 
-  HPHP::VM::Instance* thiz = (HPHP::VM::Instance*)(this);  // sigh
+  HPHP::Instance* thiz = (HPHP::Instance*)(this);  // sigh
   bool visible, accessible, unset;
   TypedValue* ret = (flags & RealPropNoDynamic)
                     ? thiz->getDeclProp(ctx, propName.get(), visible,
@@ -316,10 +316,10 @@ Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
 
 HOT_FUNC
 void ObjectData::o_setArray(CArrRef properties) {
-  auto thiz = static_cast<VM::Instance*>(this);
+  auto thiz = static_cast<Instance*>(this);
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
-    VM::Class* ctx = nullptr;
+    Class* ctx = nullptr;
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
     if (!k.empty() && k.charAt(0) == '\0') {
@@ -330,7 +330,7 @@ void ObjectData::o_setArray(CArrRef properties) {
         ctx = m_cls;
       } else {
         // Private.
-        ctx = VM::Unit::lookupClass(cls.get());
+        ctx = Unit::lookupClass(cls.get());
         if (!ctx) continue;
       }
       k = k.substr(subLen);
@@ -354,13 +354,13 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
   std::vector<bool> inserted(m_cls->numDeclProperties(), false);
 
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
-  const VM::Class* cls = m_cls;
-  auto thiz = static_cast<const VM::Instance*>(this);
+  const Class* cls = m_cls;
+  auto thiz = static_cast<const Instance*>(this);
   do {
     thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    const std::vector<VM::ClassPtr> &usedTraits = cls->m_usedTraits;
+    const std::vector<ClassPtr> &usedTraits = cls->m_usedTraits;
     for (unsigned t = 0; t < usedTraits.size(); t++) {
-      const VM::ClassPtr& trait = usedTraits[t];
+      const ClassPtr& trait = usedTraits[t];
       thiz->getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
     }
     cls = cls->m_parent.get();
@@ -395,22 +395,22 @@ Array ObjectData::o_toIterArray(CStrRef context,
   size_t size = m_cls->m_declPropNumAccessible +
                 (o_properties.get() ? o_properties.get()->size() : 0);
   HphpArray* retval = NEW(HphpArray)(size);
-  VM::Class* ctx = nullptr;
+  Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = VM::Unit::lookupClass(context.get());
+    ctx = Unit::lookupClass(context.get());
   }
 
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
-  const VM::Class* klass = m_cls;
+  const Class* klass = m_cls;
   while (klass) {
-    const VM::PreClass::Prop* props = klass->m_preClass->properties();
+    const PreClass::Prop* props = klass->m_preClass->properties();
     const size_t numProps = klass->m_preClass->numProperties();
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       bool visible, accessible, unset;
-      TypedValue* val = ((VM::Instance*)this)->getProp(
+      TypedValue* val = ((Instance*)this)->getProp(
         ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
         if (getRef) {
@@ -616,7 +616,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = (VM::Instance*)(this);
+      auto thiz = (Instance*)(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
       for (ArrayIter iter(props); iter; ++iter) {
@@ -692,7 +692,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData *ObjectData::clone() {
-  HPHP::VM::Instance* instance = static_cast<HPHP::VM::Instance*>(this);
+  HPHP::Instance* instance = static_cast<HPHP::Instance*>(this);
   return instance->cloneImpl();
 }
 
@@ -722,7 +722,7 @@ Variant ObjectData::t___get(Variant v_name) {
 
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
-  const VM::Func* method = m_cls->lookupMethod(s_offsetGet.get());
+  const Func* method = m_cls->lookupMethod(s_offsetGet.get());
   assert(method);
   if (!method) {
     return uninit_null();

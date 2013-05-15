@@ -22,7 +22,7 @@ namespace HPHP {
 
 UserStreamWrapper::UserStreamWrapper(CStrRef name, CStrRef clsname) :
   m_name(name) {
-  m_cls = VM::Unit::loadClass(clsname.get());
+  m_cls = Unit::loadClass(clsname.get());
   if (!m_cls) {
     throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
   }

@@ -32,7 +32,7 @@
 
 namespace HPHP {
 
-using VM::Transl::CallerFrame;
+using Transl::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
@@ -54,8 +54,8 @@ int64_t f_connection_timeout() {
   return f_connection_status() == k_CONNECTION_TIMEOUT;
 }
 
-static VM::Class* getClassByName(const char* name, int len) {
-  VM::Class* cls = nullptr;
+static Class* getClassByName(const char* name, int len) {
+  Class* cls = nullptr;
   // translate "self" or "parent"
   if (len == 4 && !memcmp(name, "self", 4)) {
     cls = g_vmContext->getContextClass();
@@ -84,7 +84,7 @@ static VM::Class* getClassByName(const char* name, int len) {
     }
   } else {
     String className(name, len, CopyString);
-    cls = VM::Unit::loadClass(className.get());
+    cls = Unit::loadClass(className.get());
   }
   return cls;
 }
@@ -98,7 +98,7 @@ Variant f_constant(CStrRef name) {
     // class constant
     int classNameLen = colon - data;
     char *constantName = colon + 2;
-    VM::Class* cls = getClassByName(data, classNameLen);
+    Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
       TypedValue* tv = cls->clsCnsGet(cnsName.get());
@@ -109,7 +109,7 @@ Variant f_constant(CStrRef name) {
     raise_warning("Couldn't find constant %s", data);
     return uninit_null();
   } else {
-    TypedValue* cns = VM::Unit::loadCns(name.get());
+    TypedValue* cns = Unit::loadCns(name.get());
     if (cns) return tvAsVariant(cns);
     return uninit_null();
   }
@@ -120,7 +120,7 @@ bool f_define(CStrRef name, CVarRef value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  return VM::Unit::defCns(name.get(), value.getTypedAccessor());
+  return Unit::defCns(name.get(), value.getTypedAccessor());
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {
@@ -132,7 +132,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     // class constant
     int classNameLen = colon - data;
     char *constantName = colon + 2;
-    VM::Class* cls = getClassByName(data, classNameLen);
+    Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
       return cls->clsCnsGet(cnsName.get());
@@ -140,8 +140,8 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     return false;
   } else {
     return autoload ?
-      VM::Unit::loadCns(name.get()) :
-      VM::Unit::lookupCns(name.get());
+      Unit::loadCns(name.get()) :
+      Unit::lookupCns(name.get());
   }
 }
 
@@ -159,7 +159,7 @@ Variant f_exit(CVarRef status /* = null_variant */) {
 
 Variant f_eval(CStrRef code_str) {
   String prefixedCode = concat("<?php ", code_str);
-  VM::Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
   TypedValue retVal;
   g_vmContext->invokeUnit(&retVal, unit);
   return tvAsVariant(&retVal);

@@ -20,7 +20,6 @@
 #include <runtime/base/execution_context.h>
 
 namespace HPHP {
-namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -220,22 +219,22 @@ void InjectionTables::clear() {
 InjectionTables* InjectionTables::clone() {
   InjectionTables* newTables = new InjectionTables();
   for (int i = 0; i < InstHookTypeInt64Count; i++) {
-    VM::InjectionTableInt64* table = m_int64Tables[i];
+    InjectionTableInt64* table = m_int64Tables[i];
     if (!table) {
       newTables->m_int64Tables[i] = nullptr;
       continue;
     }
-    VM::InjectionTableInt64* newTable = new InjectionTableInt64();
+    InjectionTableInt64* newTable = new InjectionTableInt64();
     newTable->insert(table->begin(), table->end());
     newTables->m_int64Tables[i] = newTable;
   }
   for (int i = 0; i < InstHookTypeSDCount; i++) {
-    VM::InjectionTableSD* table = m_sdTables[i];
+    InjectionTableSD* table = m_sdTables[i];
     if (!table) {
       newTables->m_sdTables[i] = nullptr;
       continue;
     }
-    VM::InjectionTableSD* newTable = new InjectionTableSD();
+    InjectionTableSD* newTable = new InjectionTableSD();
     newTable->insert(table->begin(), table->end());
     newTables->m_sdTables[i] = newTable;
   }
@@ -270,4 +269,4 @@ int InjectionTables::countInjections() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} }    // HPHP::VM
+ }    // HPHP::VM

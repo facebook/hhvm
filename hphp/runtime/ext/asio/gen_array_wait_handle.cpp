@@ -37,7 +37,7 @@ namespace {
   }
 }
 
-c_GenArrayWaitHandle::c_GenArrayWaitHandle(VM::Class* cb)
+c_GenArrayWaitHandle::c_GenArrayWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_exception() {
 }
 

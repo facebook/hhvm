@@ -161,12 +161,12 @@ void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
     return;
   }
   // Bytecode address
-  VM::InjectionTableInt64* tablePC =
-    proxy->getInjTables()->getInt64Table(VM::InstHookTypeBCPC);
+  InjectionTableInt64* tablePC =
+    proxy->getInjTables()->getInt64Table(InstHookTypeBCPC);
   if (tablePC) {
-    for (VM::InjectionTableInt64::const_iterator it = tablePC->begin();
+    for (InjectionTableInt64::const_iterator it = tablePC->begin();
          it != tablePC->end(); ++it) {
-      const VM::Injection* inj = it->second;
+      const Injection* inj = it->second;
       InstPointInfoPtr ipi(new InstPointInfo());
       ipi->m_valid = true;
       if (inj->m_desc) {
@@ -178,12 +178,12 @@ void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
       m_ips.push_back(ipi);
     }
   }
-  VM::InjectionTableSD* tableFEntry =
-    proxy->getInjTables()->getSDTable(VM::InstHookTypeFuncEntry);
+  InjectionTableSD* tableFEntry =
+    proxy->getInjTables()->getSDTable(InstHookTypeFuncEntry);
   if (tableFEntry) {
-    for (VM::InjectionTableSD::const_iterator it = tableFEntry->begin();
+    for (InjectionTableSD::const_iterator it = tableFEntry->begin();
          it != tableFEntry->end(); ++it) {
-      const VM::Injection* inj = it->second;
+      const Injection* inj = it->second;
       InstPointInfoPtr ipi(new InstPointInfo());
       ipi->m_valid = true;
       if (inj->m_desc) {
@@ -198,15 +198,15 @@ void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
 
 void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
   if (!proxy->getInjTables()) {
-    proxy->setInjTables(new VM::InjectionTables());
+    proxy->setInjTables(new InjectionTables());
   }
-  VM::InjectionTableInt64* tablePC = nullptr;
-  VM::InjectionTableSD* tableFEntry = nullptr;
+  InjectionTableInt64* tablePC = nullptr;
+  InjectionTableSD* tableFEntry = nullptr;
 
   for (int i = 0; i < (int)m_ips.size(); i++) {
     InstPointInfoPtr ipi = m_ips[i];
-    const VM::Injection* inj =
-      VM::InjectionCache::GetInjection(ipi->m_code, ipi->m_desc);
+    const Injection* inj =
+      InjectionCache::GetInjection(ipi->m_code, ipi->m_desc);
     if (!inj) { // error in the code
       continue;
     }
@@ -218,24 +218,24 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
         continue;
       }
       if (tablePC == nullptr) {
-        tablePC = new VM::InjectionTableInt64();
+        tablePC = new InjectionTableInt64();
       }
       ipi->m_valid = true;
       (*tablePC)[(int64_t)pc] = inj;
     }
     if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
       StackStringData sd(ipi->m_func.c_str(), ipi->m_func.size(), AttachLiteral);
-      const StringData* sdCache = VM::InjectionCache::GetStringData(&sd);
+      const StringData* sdCache = InjectionCache::GetStringData(&sd);
       if (tableFEntry == nullptr) {
-        tableFEntry = new VM::InjectionTableSD();
+        tableFEntry = new InjectionTableSD();
       }
       ipi->m_valid = true;
       (*tableFEntry)[sdCache] = inj;
     }
   }
 
-  proxy->getInjTables()->setInt64Table(VM::InstHookTypeBCPC, tablePC);
-  proxy->getInjTables()->setSDTable(VM::InstHookTypeFuncEntry, tableFEntry);
+  proxy->getInjTables()->setInt64Table(InstHookTypeBCPC, tablePC);
+  proxy->getInjTables()->setSDTable(InstHookTypeFuncEntry, tableFEntry);
 
   proxy->writeInjTablesToThread();
 }

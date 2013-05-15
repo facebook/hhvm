@@ -22,7 +22,6 @@
 #define incl_HPHP_VM_VERIFIER_CHECK_H_
 
 namespace HPHP {
-namespace VM {
 
 class Unit;
 class Func;
@@ -99,6 +98,6 @@ bool checkUnit(const Unit*, bool verbose = false);
  */
 bool checkFunc(const Func*, bool verbose = false);
 
-}}} // HPHP::VM::Verifier
+}} // HPHP::Verifier
 
 #endif // incl_HPHP_VM_VERIFIER_CHECK_UNIT_H_

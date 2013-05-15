@@ -19,7 +19,7 @@
 #include "runtime/vm/name_value_table.h"
 #include "runtime/base/array/array_data.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -172,6 +172,6 @@ class GlobalNameValueTableWrapper : public NameValueTableWrapper {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

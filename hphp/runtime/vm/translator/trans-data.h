@@ -23,7 +23,6 @@
 #include <vector>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 // Interface for classes maintaining meta-data about translations
@@ -46,6 +45,6 @@ public:
   virtual const TransIDSet& getTransSuccs(TransID transId) const = 0;
 };
 
-} } }
+} }
 
 #endif

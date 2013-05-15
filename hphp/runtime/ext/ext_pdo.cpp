@@ -570,22 +570,22 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
                          "constructor arguments must be passed as an array");
     return Object();
   }
-  VM::Class* cls = VM::Unit::loadClass(name.get());
+  Class* cls = Unit::loadClass(name.get());
   if (!cls) {
     return Object();
   }
-  return HPHP::VM::Instance::newInstance(cls);
+  return HPHP::Instance::newInstance(cls);
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                CStrRef clsname, CVarRef ctor_args) {
-  VM::Class* cls = VM::Unit::loadClass(clsname.get());
+  Class* cls = Unit::loadClass(clsname.get());
   if (!cls) {
     return;
   }
   object->o_set("queryString", stmt->query_string);
   TypedValue ret;
-  VM::Instance* inst = static_cast<VM::Instance*>(object.get());
+  Instance* inst = static_cast<Instance*>(object.get());
   inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
   tvRefcountedDecRef(&ret);
 }
@@ -610,9 +610,9 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get());
+  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
   if (cls) {
-    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    const HPHP::Func* method = cls->getDeclaredCtor();
     if (method && method->isPublic()) {
       pdo_raise_impl_error
         (dbh, NULL, "HY000",
@@ -731,9 +731,9 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
     stmt->fetch.clsname = "stdclass";
   }
   stmt->fetch.constructor = empty_string; //NULL;
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get());
+  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
   if (cls) {
-    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    const HPHP::Func* method = cls->getDeclaredCtor();
     if (method) {
       stmt->fetch.constructor = method->nameRef();
       return true;
@@ -913,7 +913,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
-c_PDO::c_PDO(VM::Class* cb) : ExtObjectData(cb) {
+c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
 }
 
 c_PDO::~c_PDO() {
@@ -2598,7 +2598,7 @@ clean_up:
 ///////////////////////////////////////////////////////////////////////////////
 // PDOStatement
 
-c_PDOStatement::c_PDOStatement(VM::Class* cb) :
+c_PDOStatement::c_PDOStatement(Class* cb) :
     ExtObjectData(cb), m_rowIndex(-1) {
 }
 

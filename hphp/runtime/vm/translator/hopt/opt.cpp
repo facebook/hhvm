@@ -21,7 +21,6 @@
 #include "runtime/vm/translator/hopt/check.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 // insert inst after the point dst is defined
@@ -141,4 +140,4 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   }
 }
 
-} } }
+} }

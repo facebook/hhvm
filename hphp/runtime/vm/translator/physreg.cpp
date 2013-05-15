@@ -16,7 +16,7 @@
 
 #include "runtime/vm/translator/physreg.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
                                        RegSet regs)
@@ -51,4 +51,4 @@ void PhysRegSaverParity::bytesPushed(int64_t bytes) {
   m_adjust += bytes;
 }
 
-} } }
+} }

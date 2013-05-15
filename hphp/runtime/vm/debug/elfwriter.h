@@ -23,10 +23,9 @@
 #include <vector>
 #include <string>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 struct ElfWriter {
@@ -61,7 +60,6 @@ struct ElfWriter {
   int writeTextSection();
 };
 
-}
 }
 }
 

@@ -27,7 +27,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 typedef X64Assembler Asm;
 using namespace reg;
@@ -612,4 +612,4 @@ asm_label(a, loop);
   test_case(127);
 }
 
-}}}
+}}

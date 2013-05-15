@@ -46,11 +46,10 @@
 #include "runtime/vm/translator/hopt/nativecalls.h"
 #include "runtime/vm/translator/hopt/print.h"
 
-using HPHP::VM::Transl::TCA;
-using namespace HPHP::VM::Transl::TargetCache;
+using HPHP::Transl::TCA;
+using namespace HPHP::Transl::TargetCache;
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 namespace {
@@ -2501,7 +2500,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
       assert(toSmash);
     }
   }
-  using namespace HPHP::VM::Transl;
+  using namespace HPHP::Transl;
 
   Asm& a = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
   // unless exit trace was moved to end of main trace
@@ -2574,11 +2573,11 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
       }
 
       if (HPHP::Trace::moduleEnabled(HPHP::Trace::punt, 1)) {
-        VM::Op op = (VM::Op)*func->getValFunc()->unit()->at(destSK.m_offset);
+        Op op = (Op)*func->getValFunc()->unit()->at(destSK.m_offset);
         std::string name = folly::format(
           "exitSlow{}-{}",
           exitType == TraceExitType::SlowNoProgress ? "-np" : "",
-          VM::opcodeToName(op)).str();
+          opcodeToName(op)).str();
         m_tx64->emitRecordPunt(a, name);
       }
       if (RuntimeOption::EvalHHIRDisableTx64) {
@@ -2806,14 +2805,14 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 
 static void
 tv_release_generic(TypedValue* tv) {
-  assert(VM::Transl::tx64->stateIsDirty());
+  assert(Transl::tx64->stateIsDirty());
   assert(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
 static void
 tv_release_typed(RefData* pv, DataType dt) {
-  assert(VM::Transl::tx64->stateIsDirty());
+  assert(Transl::tx64->stateIsDirty());
   assert(dt >= KindOfString && dt <= KindOfRef);
   g_destructors[typeToDestrIndex(dt)](pv);
 }
@@ -5289,4 +5288,4 @@ void genCodeForTrace(Trace* trace,
   }
 }
 
-}}}
+}}

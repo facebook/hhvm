@@ -36,7 +36,7 @@ const int64_t q_SpoofChecker$$INVISIBLE = USPOOF_INVISIBLE;
 const int64_t q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
 
 ///////////////////////////////////////////////////////////////////////////////
-c_SpoofChecker::c_SpoofChecker(VM::Class* cb) :
+c_SpoofChecker::c_SpoofChecker(Class* cb) :
     ExtObjectData(cb) {
   UErrorCode status = U_ZERO_ERROR;
   m_spoof_checker = uspoof_open(&status);

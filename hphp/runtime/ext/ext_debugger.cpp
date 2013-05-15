@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace Eval;
-using HPHP::VM::Transl::CallerFrame;
+using HPHP::Transl::CallerFrame;
 
 const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES =
   DebuggerClient::AutoCompleteFileNames;
@@ -157,7 +157,7 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(Class* cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser() {
@@ -177,7 +177,7 @@ Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(Class* cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser() {
@@ -379,7 +379,7 @@ const int64_t q_DebuggerClient$$STATE_READY_FOR_COMMAND
 const int64_t q_DebuggerClient$$STATE_BUSY
   = DebuggerClient::StateBusy;
 
-c_DebuggerClient::c_DebuggerClient(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerClient::c_DebuggerClient(Class* cb) : ExtObjectData(cb) {
   m_client = NULL;
 }
 

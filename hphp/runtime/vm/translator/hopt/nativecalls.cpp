@@ -22,10 +22,10 @@
 #include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
-namespace HPHP { namespace VM { namespace JIT { namespace NativeCalls {
+namespace HPHP {  namespace JIT { namespace NativeCalls {
 
-using namespace HPHP::VM::Transl;
-using namespace HPHP::VM::Transl::TargetCache;
+using namespace HPHP::Transl;
+using namespace HPHP::Transl::TargetCache;
 
 static const SyncOptions SNone = kNoSyncPoint;
 static const SyncOptions SSync = kSyncPoint;
@@ -270,4 +270,4 @@ const CallInfo& CallMap::getInfo(Opcode op) {
   return it->second;
 }
 
-} } } }
+} } }

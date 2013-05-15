@@ -24,7 +24,6 @@
 #include "runtime/vm/runtime.h"
 
 namespace HPHP {
-namespace VM {
 
 static StaticString s_args("args");
 static StaticString s_enter("enter");
@@ -235,5 +234,4 @@ void EventHook::onFunctionExit(const ActRec* ar) {
   }
 }
 
-} // namespace VM
 } // namespace HPHP

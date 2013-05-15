@@ -31,7 +31,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::VM::Transl::CallerFrame;
+using HPHP::Transl::CallerFrame;
 
 static const StaticString s_internal("internal");
 static const StaticString s_user("user");
@@ -55,9 +55,9 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   if (LIKELY(!syntax)) {
     CallerFrame cf;
     ObjectData* obj = NULL;
-    HPHP::VM::Class* cls = NULL;
+    HPHP::Class* cls = NULL;
     StringData* invName = NULL;
-    const HPHP::VM::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+    const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
                                                  invName, false);
     if (f == NULL) {
       ret = false;
@@ -109,7 +109,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     ObjectData *d = Variant::GetObjectData(tv_func);
     static const StringData* sd__invoke
       = StringData::GetStaticString("__invoke");
-    const VM::Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
+    const Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
     if (name.isReferenced()) {
       if (d->instanceof(c_Closure::s_cls)) {
         // Hack to stop the mangled name from showing up

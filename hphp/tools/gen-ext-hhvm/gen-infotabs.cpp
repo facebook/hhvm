@@ -55,10 +55,8 @@ int main(int argc, const char* argv[]) {
   cpp << "namespace HPHP {\n";
   cpp << "  struct TypedValue;\n";
   cpp << "  struct ActRec;\n";
-  cpp << "  namespace VM { struct Class; }\n";
-  cpp << "}\n\n";
-
-  cpp << "namespace HPHP {\n";
+  cpp << "  struct Class;\n";
+  cpp << "\n\n";
 
   std::unordered_set<fbstring> classesWithCtors;
 
@@ -72,7 +70,7 @@ int main(int argc, const char* argv[]) {
   for (auto const& klass : classes) {
     if (std::find(klass.flags.begin(), klass.flags.end(), "IsCppAbstract")
         == klass.flags.end()) {
-      cpp << "VM::Instance* new_" << klass.name << "_Instance(VM::Class*);\n";
+      cpp << "Instance* new_" << klass.name << "_Instance(Class*);\n";
       classesWithCtors.insert(klass.name);
     }
     for (auto const& func : klass.methods) {

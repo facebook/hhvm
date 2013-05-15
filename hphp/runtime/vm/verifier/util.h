@@ -25,7 +25,6 @@
 #include "util/arena.h"
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -59,6 +58,6 @@ inline bool contains(const C &c, T e) {
   return c.find(e) != c.end();
 }
 
-}}} // namespace HPHP::VM::Verifier
+}} // namespace HPHP::Verifier
 
 #endif // incl_HPHP_VM_VERIFIER_UTIL_H

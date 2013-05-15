@@ -37,7 +37,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   DECLARE_CLASS(Vector, Vector, ObjectData)
 
  public:
-  explicit c_Vector(VM::Class* cls = c_Vector::s_cls);
+  explicit c_Vector(Class* cls = c_Vector::s_cls);
   ~c_Vector();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -187,7 +187,7 @@ class c_VectorIterator : public ExtObjectData {
   DECLARE_CLASS(VectorIterator, VectorIterator, ObjectData)
 
  public:
-  explicit c_VectorIterator(VM::Class* cls = c_VectorIterator::s_cls);
+  explicit c_VectorIterator(Class* cls = c_VectorIterator::s_cls);
   ~c_VectorIterator();
   void t___construct();
   Variant t_current();
@@ -217,7 +217,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   DECLARE_CLASS(Map, Map, ObjectData)
 
  public:
-  explicit c_Map(VM::Class* cls = c_Map::s_cls);
+  explicit c_Map(Class* cls = c_Map::s_cls);
   ~c_Map();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -488,7 +488,7 @@ class c_MapIterator : public ExtObjectData {
   DECLARE_CLASS(MapIterator, MapIterator, ObjectData)
 
  public:
-  explicit c_MapIterator(VM::Class* cls = c_MapIterator::s_cls);
+  explicit c_MapIterator(Class* cls = c_MapIterator::s_cls);
   ~c_MapIterator();
   void t___construct();
   Variant t_current();
@@ -518,7 +518,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
 
  public:
-  explicit c_StableMap(VM::Class* cls = c_StableMap::s_cls);
+  explicit c_StableMap(Class* cls = c_StableMap::s_cls);
   ~c_StableMap();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -750,7 +750,7 @@ class c_StableMapIterator : public ExtObjectData {
   DECLARE_CLASS(StableMapIterator, StableMapIterator, ObjectData)
 
  public:
-  explicit c_StableMapIterator(VM::Class* cls = c_StableMapIterator::s_cls);
+  explicit c_StableMapIterator(Class* cls = c_StableMapIterator::s_cls);
   ~c_StableMapIterator();
   void t___construct();
   Variant t_current();
@@ -782,7 +782,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
  public:
   static const int32_t KindOfTombstone = -1;
 
-  explicit c_Set(VM::Class* cls = c_Set::s_cls);
+  explicit c_Set(Class* cls = c_Set::s_cls);
   ~c_Set();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -973,7 +973,7 @@ class c_SetIterator : public ExtObjectData {
   DECLARE_CLASS(SetIterator, SetIterator, ObjectData)
 
  public:
-  explicit c_SetIterator(VM::Class* cls = c_SetIterator::s_cls);
+  explicit c_SetIterator(Class* cls = c_SetIterator::s_cls);
   ~c_SetIterator();
   void t___construct();
   Variant t_current();
@@ -1003,7 +1003,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   DECLARE_CLASS(Pair, Pair, ObjectData)
 
  public:
-  explicit c_Pair(VM::Class* cls = c_Pair::s_cls);
+  explicit c_Pair(Class* cls = c_Pair::s_cls);
   ~c_Pair();
   void t___construct();
   bool t_isempty();
@@ -1115,7 +1115,7 @@ class c_PairIterator : public ExtObjectData {
   DECLARE_CLASS(PairIterator, PairIterator, ObjectData)
 
  public:
-  explicit c_PairIterator(VM::Class* cls = c_PairIterator::s_cls);
+  explicit c_PairIterator(Class* cls = c_PairIterator::s_cls);
   ~c_PairIterator();
   void t___construct();
   Variant t_current();

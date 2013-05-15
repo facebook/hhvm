@@ -20,7 +20,6 @@
 #include <runtime/vm/func.h>
 
 namespace HPHP {
-namespace VM {
 
 /*
  * Abstraction around the Name -> Function mapping.
@@ -47,7 +46,6 @@ private:
   void addRenameableFunctions(ArrayData* arr);
 };
 
-}
 } // HPHP::VM
 
 #endif

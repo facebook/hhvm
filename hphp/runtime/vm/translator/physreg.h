@@ -19,7 +19,7 @@
 #include "util/asm-x64.h"
 #include "util/bitops.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -255,7 +255,7 @@ struct PhysRegSaver : public PhysRegSaverParity {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif
 

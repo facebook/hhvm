@@ -97,7 +97,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
     return true;
   }
 
-  VM::EventHook::EnableIntercept();
+  EventHook::EnableIntercept();
 
   Array handler = CREATE_VECTOR2(callback, data);
 
@@ -195,7 +195,7 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
 }
 
 String get_renamed_function(CStrRef name) {
-  HPHP::VM::Func* f = HPHP::VM::Unit::lookupFunc(name.get());
+  HPHP::Func* f = HPHP::Unit::lookupFunc(name.get());
   if (f) {
     return f->nameRef();
   }

@@ -23,7 +23,6 @@
 #include <boost/static_assert.hpp>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 namespace TargetCache {
 
@@ -384,6 +383,6 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
                          StringData* name,
                          Class* cls);
 
-} } } }
+} } }
 
 #endif

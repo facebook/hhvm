@@ -129,7 +129,7 @@ void ArrayData::release() {
 // reads
 
 Object ArrayData::toObject() const {
-  return VM::Instance::FromArray(const_cast<ArrayData *>(this));
+  return Instance::FromArray(const_cast<ArrayData *>(this));
 }
 
 bool ArrayData::isVectorData() const {

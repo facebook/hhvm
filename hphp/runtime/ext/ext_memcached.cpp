@@ -179,7 +179,7 @@ public:
 }
 
 
-c_Memcached::c_Memcached(VM::Class* cb) :
+c_Memcached::c_Memcached(Class* cb) :
     ExtObjectData(cb) {
 }
 c_Memcached::~c_Memcached() {

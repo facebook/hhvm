@@ -22,7 +22,6 @@
 #include <runtime/vm/verifier/pretty.h>
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 class UnitChecker {
@@ -215,4 +214,4 @@ bool UnitChecker::checkFuncs() {
   return ok;
 }
 
-}}} // HPHP::VM::Verifier
+}} // HPHP::Verifier

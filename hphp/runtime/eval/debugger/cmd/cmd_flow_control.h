@@ -82,7 +82,7 @@ protected:
   int m_vmDepth;
   std::string m_loc; // last break's source location
   Offset m_stepOutOffset;
-  HPHP::VM::Unit *m_stepOutUnit;
+  HPHP::Unit *m_stepOutUnit;
 
 private:
   int16_t m_count;

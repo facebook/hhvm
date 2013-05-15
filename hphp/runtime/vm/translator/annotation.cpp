@@ -20,7 +20,6 @@
 #include <runtime/vm/translator/annotation.h>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static const Trace::Module TRACEMOD = Trace::trans;
@@ -220,5 +219,5 @@ fcallToFuncName(const NormalizedInstruction* i) {
   return nullptr;
 }
 
-} } }
+} }
 

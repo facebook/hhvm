@@ -23,11 +23,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ObjectData;
-namespace VM {
   class Unit;
   class Class;
   class Func;
-}
 namespace Eval {
   class PhpFile;
 }
@@ -71,17 +69,17 @@ namespace Eval {
 class SystemLib {
  public:
   static bool s_inited;
-  static HPHP::VM::Unit* s_unit;
-  static HPHP::VM::Unit* s_nativeFuncUnit;
-  static HPHP::VM::Unit* s_nativeClassUnit;
+  static HPHP::Unit* s_unit;
+  static HPHP::Unit* s_nativeFuncUnit;
+  static HPHP::Unit* s_nativeClassUnit;
 
 
 #define DECLARE_SYSTEMLIB_CLASS(cls)       \
-  static HPHP::VM::Class* s_ ## cls ## Class;
+  static HPHP::Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
-  static HPHP::VM::Func* GetNullFunction();
+  static HPHP::Func* GetNullFunction();
 
 
   static ObjectData* AllocStdClassObject();

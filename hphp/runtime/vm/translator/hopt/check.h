@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_CHECK_H_
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 class Trace;
@@ -37,6 +36,6 @@ bool checkCfg(Trace*, const IRFactory&);
  */
 bool checkRegisters(Trace*, const IRFactory&, const RegAllocInfo&);
 
-}}}
+}}
 
 #endif

@@ -23,7 +23,6 @@
 #include "runtime/vm/translator/hopt/simplifier.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
@@ -824,4 +823,4 @@ void optimizeMemoryAccesses(Trace* trace, IRFactory* factory) {
   }
 }
 
-} } }
+} }

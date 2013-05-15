@@ -93,7 +93,7 @@ static inline ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Vector::c_Vector(VM::Class* cb) :
+c_Vector::c_Vector(Class* cb) :
     ExtObjectDataFlags<ObjectData::VectorAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -824,7 +824,7 @@ void c_Vector::usort(CVarRef cmp_function) {
   }
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
-  VM::Transl::CallerFrame cf;
+  Transl::CallerFrame cf;
   vm_decode_function(cmp_function, cf(), false, ctx);
   comp.ctx = &ctx;
   HPHP::Sort::sort(m_data, m_data + m_size, comp);
@@ -940,7 +940,7 @@ void c_Vector::Unserialize(ObjectData* obj,
   }
 }
 
-c_VectorIterator::c_VectorIterator(VM::Class* cb) :
+c_VectorIterator::c_VectorIterator(Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -987,7 +987,7 @@ void c_VectorIterator::t_rewind() {
 
 static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
 
-c_Map::c_Map(VM::Class* cb) :
+c_Map::c_Map(Class* cb) :
     ExtObjectDataFlags<ObjectData::MapAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -2089,7 +2089,7 @@ do_unserialize:
   }
 }
 
-c_MapIterator::c_MapIterator(VM::Class* cb) :
+c_MapIterator::c_MapIterator(Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -2160,7 +2160,7 @@ do {                                                                    \
 
 static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
 
-c_StableMap::c_StableMap(VM::Class* cb) :
+c_StableMap::c_StableMap(Class* cb) :
     ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -3164,7 +3164,7 @@ void c_StableMap::ksort(int sort_flags, bool ascending) {
     preSort<acc_type>(buffer, acc_type(), false);                       \
     ElmUCompare<acc_type> comp;                                         \
     CallCtx ctx;                                                        \
-    VM::Transl::CallerFrame cf;                                         \
+    Transl::CallerFrame cf;                                         \
     vm_decode_function(cmp_function, cf(), false, ctx);                 \
     comp.ctx = &ctx;                                                    \
     try {                                                               \
@@ -3371,7 +3371,7 @@ do_unserialize:
 
 #undef CONNECT_TO_GLOBAL_DLLIST
 
-c_StableMapIterator::c_StableMapIterator(VM::Class* cb) :
+c_StableMapIterator::c_StableMapIterator(Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -3427,7 +3427,7 @@ void c_StableMapIterator::t_rewind() {
 
 static const char emptySetSlot[sizeof(c_Set::Bucket)] = { 0 };
 
-c_Set::c_Set(VM::Class* cb) :
+c_Set::c_Set(Class* cb) :
     ExtObjectDataFlags<ObjectData::SetAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -4171,7 +4171,7 @@ void c_Set::Unserialize(ObjectData* obj,
   }
 }
 
-c_SetIterator::c_SetIterator(VM::Class* cb) :
+c_SetIterator::c_SetIterator(Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -4218,7 +4218,7 @@ void c_SetIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Pair::c_Pair(VM::Class* cb) :
+c_Pair::c_Pair(Class* cb) :
     ExtObjectDataFlags<ObjectData::PairAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -4514,7 +4514,7 @@ void c_Pair::Unserialize(ObjectData* obj,
   tvAsVariant(&pair->elm1).unserialize(uns, Uns::ColValueMode);
 }
 
-c_PairIterator::c_PairIterator(VM::Class* cb) :
+c_PairIterator::c_PairIterator(Class* cb) :
     ExtObjectData(cb) {
 }
 

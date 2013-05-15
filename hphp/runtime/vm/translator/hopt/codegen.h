@@ -26,7 +26,6 @@
 #include "runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 class FailedCodeGen : public std::exception {
@@ -552,6 +551,6 @@ void genCodeForTrace(Trace*                  trace,
                      const LifetimeInfo*     lifetime = nullptr,
                      AsmInfo*                asmInfo = nullptr);
 
-}}}
+}}
 
 #endif

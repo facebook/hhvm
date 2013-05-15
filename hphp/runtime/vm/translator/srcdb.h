@@ -25,7 +25,6 @@
 #include "runtime/vm/tread_hash_map.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -242,6 +241,6 @@ public:
   size_t invalidateCode(const Eval::PhpFile* file);
 };
 
-} } }
+} }
 
 #endif

@@ -42,7 +42,6 @@
 
 /* Translator front-end. */
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static const bool trustSigSegv = false;
@@ -1114,6 +1113,6 @@ static inline bool isSmartPtrRef(DataType t) {
          t == KindOfArray || t == KindOfObject;
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif

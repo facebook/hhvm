@@ -33,7 +33,6 @@ namespace HPHP {
 // Forward declarations.
 namespace Compiler { class Peephole; }
 struct ActRec;
-namespace VM {
 
 class Func;
 class FuncEmitter;
@@ -489,7 +488,7 @@ struct Unit {
   static Func *loadFunc(const NamedEntity *ne, const StringData* name);
   static Func *loadFunc(const StringData* name);
 
-  static Class* defClass(const HPHP::VM::PreClass* preClass,
+  static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
   void defTypedef(Id id);
 
@@ -1092,5 +1091,5 @@ public:
   Class* popFront();
 };
 
-} } // HPHP::VM
+ } // HPHP::VM
 #endif

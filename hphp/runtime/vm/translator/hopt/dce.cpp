@@ -24,7 +24,6 @@
 #include "runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 namespace {
 
@@ -618,4 +617,4 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   removeEmptyExitTraces();
 }
 
-} } }
+} }

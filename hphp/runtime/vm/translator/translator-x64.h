@@ -33,15 +33,15 @@
 
 namespace HPHP { class ExecutionContext; }
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 class HhbcTranslator;
 class IRFactory;
 class CSEHash;
 class TraceBuilder;
 class CodeGenerator;
-}}}
+}}
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 class IRTranslator;
 class MVecTransState;
@@ -113,8 +113,8 @@ class TranslatorX64 : public Translator
   friend class RedirectSpillFill;
   friend class Tx64Reaper;
   friend class IRTranslator;
-  friend class HPHP::VM::JIT::CodeGenerator;
-  friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
+  friend class HPHP::JIT::CodeGenerator;
+  friend class HPHP::JIT::HhbcTranslator; // packBitVec()
   friend TCA funcBodyHelper(ActRec* fp);
   template<unsigned, unsigned, ConditionCode, class> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
@@ -1224,6 +1224,6 @@ struct SpaceRecorder {
 
 typedef const int COff; // Const offsets
 
-}}}
+}}
 
 #endif

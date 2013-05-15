@@ -505,7 +505,6 @@ public:
 
 //=============================================================================
 // VM runtime support functions.
-namespace VM {
 
 enum ArrayGetFlags {
   DecRefKey = 1,
@@ -545,7 +544,6 @@ uint64_t array_issetm_i(const void* hphpArray, int64_t key)
   FLATTEN;
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
-}
 //=============================================================================
 
 ///////////////////////////////////////////////////////////////////////////////

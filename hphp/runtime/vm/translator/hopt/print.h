@@ -22,7 +22,6 @@
 #include "runtime/vm/translator/hopt/linearscan.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 struct IRInstruction;
@@ -75,6 +74,6 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
                const LifetimeInfo* lifetime = nullptr,
                AsmInfo* ai = nullptr);
 
-}}}
+}}
 
 #endif

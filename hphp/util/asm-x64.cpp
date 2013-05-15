@@ -29,7 +29,7 @@
 #include "util/maphuge.h"
 #include "runtime/base/runtime_option.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 static void panic(const char *fmt, ...) {
   va_list ap;
@@ -128,4 +128,4 @@ void StoreImmPatcher::patch(uint64_t actual) {
   }
 }
 
-}}}
+}}

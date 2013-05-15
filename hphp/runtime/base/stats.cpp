@@ -21,7 +21,7 @@
 namespace HPHP {
 namespace Stats {
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 TRACE_SET_MOD(stats);
 

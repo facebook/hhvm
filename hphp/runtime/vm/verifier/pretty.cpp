@@ -24,7 +24,6 @@
 #include <runtime/vm/verifier/cfg.h>
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 void printInstr(const Unit* unit, PC pc) {
@@ -153,4 +152,4 @@ void verify_error(const char* fmt, ...) {
   printf("Verification: %s", buf);
 }
 
-}}} // namespace HPHP::VM
+}} // namespace HPHP::VM

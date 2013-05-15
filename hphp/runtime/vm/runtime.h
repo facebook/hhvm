@@ -123,13 +123,13 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
 inline void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook(fp, numLocals);
-  VM::EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp);
 }
 
 inline void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl(fp, numLocals);
-  VM::EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp);
 }
 
 inline void ALWAYS_INLINE
@@ -145,20 +145,20 @@ frame_free_args(TypedValue* args, int count) {
 
 }
 
-VM::Unit*
+Unit*
 compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
-VM::Unit* compile_string(const char* s, size_t sz);
-VM::Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
+Unit* compile_string(const char* s, size_t sz);
+Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                  ssize_t numBuiltinFuncs);
-VM::Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
+Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                   ssize_t numBuiltinClasses);
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
 
-static inline VM::Instance*
-newInstance(VM::Class* cls) {
+static inline Instance*
+newInstance(Class* cls) {
   assert(cls);
-  auto* inst = VM::Instance::newInstance(cls);
+  auto* inst = Instance::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);
   }
@@ -175,9 +175,9 @@ HphpArray* get_static_locals(const ActRec* ar);
  * be set up before you use those parts of the runtime.
  */
 
-typedef VM::Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
-typedef VM::Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
-typedef VM::Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
+typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
+typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
+typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 
 extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;

@@ -26,7 +26,6 @@
 #include <runtime/vm/type_constraint.h>
 
 namespace HPHP {
-namespace VM {
 
 TRACE_SET_MOD(runtime);
 
@@ -241,5 +240,4 @@ void TypeConstraint::parentToTypeName(const Func* func,
   }
 }
 
-}
 } // HPHP::VM

@@ -84,13 +84,7 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using VM::Transl::tx64;
-using VM::Unit;
-using VM::Class;
-using VM::Func;
-using VM::FPIEnt;
-using VM::EHEnt;
-using VM::NameValueTable;
+using Transl::tx64;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -226,7 +220,7 @@ VarEnv::VarEnv()
   TypedValue globalArray;
   globalArray.m_type = KindOfArray;
   globalArray.m_data.parr =
-    new (request_arena()) VM::GlobalNameValueTableWrapper(&*m_nvTable);
+    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
@@ -936,7 +930,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
 
   const bool unwindingGeneratorFrame = func->isGenerator();
   auto const curOp = *reinterpret_cast<const Opcode*>(pc);
-  using namespace VM;
+  using namespace HPHP;
   const bool unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
   TypedValue* evalTop;
   if (UNLIKELY(unwindingGeneratorFrame)) {
@@ -1187,7 +1181,7 @@ __thread VarEnvArenaStorage s_varEnvArenaStorage;
 //=============================================================================
 // ExecutionContext.
 
-using namespace HPHP::VM;
+using namespace HPHP;
 using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
@@ -1569,7 +1563,7 @@ void VMExecutionContext::newPreConst(StringData* name,
   name->incRefCount();
   PreConst pc = { val, this, name };
   m_preConsts.push_back(pc);
-  VM::Transl::mergePreConst(m_preConsts.back());
+  Transl::mergePreConst(m_preConsts.back());
 }
 
 bool VMExecutionContext::renameFunction(const StringData* oldName,
@@ -2764,7 +2758,7 @@ Unit* VMExecutionContext::evalInclude(StringData* path,
   return nullptr;
 }
 
-HPHP::VM::Unit* VMExecutionContext::evalIncludeRoot(
+HPHP::Unit* VMExecutionContext::evalIncludeRoot(
   StringData* path, InclOpFlags flags, bool* initial) {
   HPHP::Eval::PhpFile* efile = lookupIncludeRoot(path, flags, initial);
   return efile ? efile->unit() : 0;
@@ -2825,7 +2819,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
 
   ActRec* ar = m_stack.allocA();
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
-  VM::Class* cls = curClass();
+  Class* cls = curClass();
   if (local) {
     cls = nullptr;
     ar->setThis(nullptr);
@@ -2876,7 +2870,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
     if (&arg != &null_variant) return arg;
   }
   String code = HPHP::concat3("<?php return ", key, ";");
-  VM::Unit* unit = compileEvalString(code.get());
+  Unit* unit = compileEvalString(code.get());
   assert(unit != nullptr);
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
@@ -2920,7 +2914,7 @@ void VMExecutionContext::destructObjects() {
 // where the same code keeps getting eval'ed over and over again; so we
 // keep around units for each eval'ed string, so that the TC space isn't
 // wasted on each eval.
-typedef RankedCHM<StringData*, HPHP::VM::Unit*,
+typedef RankedCHM<StringData*, HPHP::Unit*,
         StringDataHashCompare,
         RankEvaledUnits> EvaledUnitsMap;
 static EvaledUnitsMap s_evaledUnits;
@@ -5828,7 +5822,7 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   TypedValue func = m_stack.topTV()[safe];
 
   ObjectData* obj = nullptr;
-  HPHP::VM::Class* cls = nullptr;
+  HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
 
   const Func* f = vm_decode_function(tvAsVariant(&func), getFP(),

@@ -218,7 +218,7 @@ bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     if (ti->m_reqInjectionData.getDebugger()) {
-      HPHP::VM::Transl::VMRegAnchor _;
+      HPHP::Transl::VMRegAnchor _;
       InterruptVMHook(ExceptionThrown, e);
     }
   }
@@ -490,7 +490,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    VM::Transl::Translator::Get()->clearDbgBL();
+    Transl::Translator::Get()->clearDbgBL();
   }
 }
 

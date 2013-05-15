@@ -487,7 +487,7 @@ class Variant : private TypedValue {
   }
   bool isResource() const;
   bool instanceof(CStrRef s) const;
-  bool instanceof(VM::Class* cls) const;
+  bool instanceof(Class* cls) const;
 
   /**
    * Whether or not there are at least two variables that are strongly bound.

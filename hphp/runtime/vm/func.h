@@ -24,7 +24,6 @@
 #include "runtime/base/intercept.h"
 
 namespace HPHP {
-namespace VM {
 
 static const int kNumFixedPrologues = 6;
 
@@ -720,6 +719,6 @@ FRP_OPS
 #undef FRP_OP
 };
 
-} }
+ }
 
 #endif

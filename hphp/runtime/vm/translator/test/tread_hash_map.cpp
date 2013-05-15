@@ -23,7 +23,7 @@
 
 #include "util/base.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 TEST(TreadHashMap, Iteration) {
   TreadHashMap<int64_t,int64_t,int64_hash> thm(64);
@@ -46,4 +46,4 @@ TEST(TreadHashMap, Iteration) {
   }
 }
 
-}}
+}

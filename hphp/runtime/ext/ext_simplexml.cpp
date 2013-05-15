@@ -246,9 +246,9 @@ Variant f_simplexml_load_string(CStrRef data,
     return uninit_null();
   }
 
-  VM::Class* cls;
+  Class* cls;
   if (!class_name.empty()) {
-    cls = VM::Unit::lookupClass(class_name.get());
+    cls = Unit::lookupClass(class_name.get());
     if (!cls) {
       throw_invalid_argument("class not found: %s", class_name.data());
       return uninit_null();
@@ -285,7 +285,7 @@ Variant f_simplexml_load_file(CStrRef filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_SimpleXMLElement::c_SimpleXMLElement(VM::Class* cb) :
+c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
@@ -978,7 +978,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(VM::Class* cb) :
+c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
     ExtObjectData(cb), m_parent(), m_iter1(NULL), m_iter2(NULL) {
 }
 
@@ -1108,7 +1108,7 @@ Variant c_SimpleXMLElementIterator::t_valid() {
 ///////////////////////////////////////////////////////////////////////////////
 // LibXMLError
 
-c_LibXMLError::c_LibXMLError(VM::Class* cb) :
+c_LibXMLError::c_LibXMLError(Class* cb) :
     ExtObjectData(cb) {
 }
 c_LibXMLError::~c_LibXMLError() {

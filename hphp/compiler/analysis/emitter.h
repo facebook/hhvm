@@ -47,13 +47,6 @@ class HhbcExtClassInfo;
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
-using VM::Func;
-using VM::Class;
-using VM::Unit;
-using VM::InvalidAbsoluteOffset;
-
-using namespace VM;
-
 // Forward declarations.
 class Label;
 class EmitterVisitor;

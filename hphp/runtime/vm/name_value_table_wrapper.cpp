@@ -18,7 +18,7 @@
 #include "runtime/base/array/array_iterator.h"
 #include "runtime/base/array/array_init.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -317,4 +317,4 @@ void NameValueTableWrapper::uasort(CVarRef cmp_function) {}
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

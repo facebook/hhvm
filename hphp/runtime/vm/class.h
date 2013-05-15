@@ -43,7 +43,6 @@ class HphpArray;
 class ObjectData;
 struct HhbcExtClassInfo;
 
-namespace VM {
 
 // Forward declarations.
 class Func;
@@ -1033,6 +1032,6 @@ struct class_same {
   }
 };
 
-} } // HPHP::VM
+ } // HPHP::VM
 
 #endif

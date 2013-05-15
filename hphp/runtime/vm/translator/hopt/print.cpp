@@ -23,7 +23,7 @@
 #include "util/disasm.h"
 #include "util/text_color.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -421,5 +421,5 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
   }
 }
 
-}}}
+}}
 

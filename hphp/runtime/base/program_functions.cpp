@@ -77,7 +77,7 @@ namespace HPHP {
 
 extern InitFiniNode *extra_process_init, *extra_process_exit;
 
-namespace VM { void initialize_repo(); }
+ void initialize_repo();
 
 /*
  * XXX: VM process initialization is handled through a function
@@ -495,7 +495,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
   if (RuntimeOption::EvalJit && RuntimeOption::EvalDumpTC) {
-    HPHP::VM::Transl::tc_dump();
+    HPHP::Transl::tc_dump();
   }
 
   if (xhprof) {
@@ -670,7 +670,7 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
-    VM::initialize_repo();
+    initialize_repo();
     init_thread_locals();
     ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
@@ -963,7 +963,7 @@ static int execute_program_impl(int argc, char **argv) {
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
       }
-      VM::Unit* unit = phpFile->unit();
+      Unit* unit = phpFile->unit();
       const StringData* msg;
       int line;
       if (unit->compileTimeFatal(msg, line)) {
@@ -1004,9 +1004,9 @@ static int execute_program_impl(int argc, char **argv) {
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
     if (!po.file.empty()) {
-      VM::Repo::setCliFile(po.file);
+      Repo::setCliFile(po.file);
     } else if (new_argc >= 2) {
-      VM::Repo::setCliFile(new_argv[1]);
+      Repo::setCliFile(new_argv[1]);
     }
 
     int ret = 0;
@@ -1177,7 +1177,7 @@ void hphp_process_init() {
   apc_load(RuntimeOption::ApcLoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
-  VM::Transl::TargetCache::requestExit();
+  Transl::TargetCache::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();

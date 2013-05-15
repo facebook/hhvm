@@ -23,7 +23,7 @@
 #include "runtime/base/string_data.h"
 #include "runtime/vm/fixed_string_map.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -225,6 +225,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

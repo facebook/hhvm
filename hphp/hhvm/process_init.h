@@ -26,16 +26,14 @@ namespace HPHP {
 extern void (*g_vmProcessInit)();
 void hphp_process_init();
 
-namespace VM {
-  void ProcessInit();
-  void initialize_repo();
-}
+void ProcessInit();
+void initialize_repo();
 
 /*
  * This must be called before execute_program_impl in an hhvm build.
  */
 inline void register_process_init() {
-  g_vmProcessInit = &VM::ProcessInit;
+  g_vmProcessInit = &ProcessInit;
   g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
   g_hphp_build_native_func_unit = &HPHP::Compiler::
     hphp_build_native_func_unit;
@@ -50,7 +48,7 @@ inline void register_process_init() {
  */
 inline void init_for_unit_test() {
   register_process_init();
-  VM::initialize_repo();
+  initialize_repo();
   init_thread_locals();
   Hdf config;
   RuntimeOption::Load(config);

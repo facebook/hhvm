@@ -30,7 +30,7 @@ class UserStreamWrapper : public Stream::Wrapper {
                      int options, CVarRef context);
  private:
   String m_name;
-  VM::Class *m_cls;
+  Class *m_cls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

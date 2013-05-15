@@ -29,12 +29,11 @@
 #include "util/assert_throw.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
   return getCurUnit()->lookupArrayId(arrId);
@@ -1414,7 +1413,7 @@ void HhbcTranslator::emitFPassV() {
   gen(DecRef, tmp);
 }
 
-void HhbcTranslator::emitFPushCufOp(VM::Op op, Class* cls, StringData* invName,
+void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
                                     const Func* callee, int numArgs) {
   const Func* curFunc = getCurFunc();
   const bool safe = op == OpFPushCufSafe;
@@ -1670,7 +1669,7 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                                          const Class* baseClass) {
   const StringData* methodName = lookupStringId(methodNameStrId);
   bool magicCall = false;
-  const Func* func = HPHP::VM::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
@@ -1778,7 +1777,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   const StringData* className = np.first;
   const Class* baseClass = Unit::lookupUniqueClass(np.second);
   bool magicCall = false;
-  const Func* func = HPHP::VM::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
@@ -3208,4 +3207,4 @@ void HhbcTranslator::end(int nextPc) {
   m_tb->genTraceEnd(nextPc);
 }
 
-}}} // namespace HPHP::VM::JIT
+}} // namespace HPHP::JIT

@@ -23,7 +23,6 @@
 #include "runtime/vm/translator/translator.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static inline DataType
@@ -374,4 +373,4 @@ std::string Location::pretty() const {
   return std::string(buf);
 }
 
-} } }
+} }

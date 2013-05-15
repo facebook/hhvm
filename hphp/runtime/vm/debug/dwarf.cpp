@@ -24,10 +24,9 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 
@@ -301,6 +300,5 @@ void DwarfInfo::syncChunks() {
   }
 }
 
-}
 }
 }

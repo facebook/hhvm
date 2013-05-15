@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitHandle::c_WaitHandle(VM::Class* cb)
+c_WaitHandle::c_WaitHandle(Class* cb)
     : ExtObjectData(cb) {
 }
 

@@ -21,7 +21,6 @@
 #include <runtime/base/string_data.h>
 
 namespace HPHP {
-namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename V, bool case_sensitive> class FixedStringMap {
@@ -49,6 +48,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-} }
+ }
 
 #endif // incl_HPHP_FIXED_STRING_MAP_H_

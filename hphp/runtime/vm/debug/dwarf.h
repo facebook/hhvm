@@ -24,10 +24,9 @@
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 typedef enum {
@@ -183,7 +182,6 @@ struct DwarfInfo {
   void syncChunks();
 };
 
-}
 }
 }
 

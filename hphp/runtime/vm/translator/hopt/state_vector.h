@@ -21,7 +21,7 @@
 
 #include "runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -98,6 +98,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

@@ -220,7 +220,7 @@ void HphpArray::asort(int sort_flags, bool ascending) {
     m_pos = ssize_t(0);                                         \
     try {                                                       \
       ElmUCompare<acc_type> comp;                               \
-      VM::Transl::CallerFrame cf;                               \
+      Transl::CallerFrame cf;                               \
       CallCtx ctx;                                              \
       vm_decode_function(cmp_function, cf(), false, ctx);       \
       comp.ctx = &ctx;                                          \

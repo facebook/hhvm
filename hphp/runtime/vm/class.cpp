@@ -41,7 +41,6 @@
 #include <algorithm>
 
 namespace HPHP {
-namespace VM {
 
 static StringData* sd86ctor = StringData::GetStaticString("86ctor");
 static StringData* sd86pinit = StringData::GetStaticString("86pinit");
@@ -2635,4 +2634,4 @@ void Class::setSPropData(TypedValue* sPropData) const {
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

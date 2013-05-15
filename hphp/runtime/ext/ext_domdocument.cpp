@@ -1904,7 +1904,7 @@ static PropertyAccessorMap domnode_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNode::c_DOMNode(VM::Class* cb) :
+c_DOMNode::c_DOMNode(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>(cb),m_node(NULL) {
 }
 
@@ -2462,7 +2462,7 @@ static PropertyAccessorMap domattr_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMAttr::c_DOMAttr(VM::Class* cb) : c_DOMNode(cb) {
+c_DOMAttr::c_DOMAttr(Class* cb) : c_DOMNode(cb) {
 }
 
 c_DOMAttr::~c_DOMAttr() {
@@ -2540,7 +2540,7 @@ static PropertyAccessorMap domcharacterdata_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMCharacterData::c_DOMCharacterData(VM::Class* cb) :
+c_DOMCharacterData::c_DOMCharacterData(Class* cb) :
     c_DOMNode(cb) {
 }
 
@@ -2698,7 +2698,7 @@ String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMComment::c_DOMComment(VM::Class* cb) :
+c_DOMComment::c_DOMComment(Class* cb) :
     c_DOMCharacterData(cb) {
 }
 
@@ -2748,7 +2748,7 @@ static PropertyAccessorMap domtext_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMText::c_DOMText(VM::Class* cb) : c_DOMCharacterData(cb) {
+c_DOMText::c_DOMText(Class* cb) : c_DOMCharacterData(cb) {
 }
 
 c_DOMText::~c_DOMText() {
@@ -2818,7 +2818,7 @@ Variant c_DOMText::t_splittext(int64_t offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMCDATASection::c_DOMCDATASection(VM::Class* cb) :
+c_DOMCDATASection::c_DOMCDATASection(Class* cb) :
     c_DOMText(cb) {
 }
 
@@ -3009,7 +3009,7 @@ static PropertyAccessorMap domdocument_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocument::c_DOMDocument(VM::Class* cb) :
+c_DOMDocument::c_DOMDocument(Class* cb) :
     c_DOMNode(cb),
     m_formatoutput(false),
     m_validateonparse(false),
@@ -3592,7 +3592,7 @@ Variant c_DOMDocument::t_xinclude(int64_t options /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocumentFragment::c_DOMDocumentFragment(VM::Class* cb) :
+c_DOMDocumentFragment::c_DOMDocumentFragment(Class* cb) :
   c_DOMNode(cb) {
 }
 
@@ -3712,7 +3712,7 @@ static PropertyAccessorMap domdocumenttype_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocumentType::c_DOMDocumentType(VM::Class* cb) :
+c_DOMDocumentType::c_DOMDocumentType(Class* cb) :
   c_DOMNode(cb) {
 }
 
@@ -3766,7 +3766,7 @@ static PropertyAccessorMap domelement_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMElement::c_DOMElement(VM::Class* cb) : c_DOMNode(cb) {
+c_DOMElement::c_DOMElement(Class* cb) : c_DOMNode(cb) {
 }
 
 c_DOMElement::~c_DOMElement() {
@@ -4419,7 +4419,7 @@ static PropertyAccessorMap domentity_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMEntity::c_DOMEntity(VM::Class* cb) : c_DOMNode(cb) {
+c_DOMEntity::c_DOMEntity(Class* cb) : c_DOMNode(cb) {
 }
 
 c_DOMEntity::~c_DOMEntity() {
@@ -4443,7 +4443,7 @@ bool c_DOMEntity::t___isset(Variant name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMEntityReference::c_DOMEntityReference(VM::Class* cb) :
+c_DOMEntityReference::c_DOMEntityReference(Class* cb) :
   c_DOMNode(cb) {
 }
 
@@ -4502,7 +4502,7 @@ static PropertyAccessorMap domnotation_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNotation::c_DOMNotation(VM::Class* cb) :
+c_DOMNotation::c_DOMNotation(Class* cb) :
   c_DOMNode(cb) {
 }
 
@@ -4561,7 +4561,7 @@ static PropertyAccessorMap domprocessinginstruction_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMProcessingInstruction::c_DOMProcessingInstruction(VM::Class* cb) :
+c_DOMProcessingInstruction::c_DOMProcessingInstruction(Class* cb) :
   c_DOMNode(cb) {
 }
 
@@ -4632,7 +4632,7 @@ static PropertyAccessorMap domnamednodemap_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNamedNodeMap::c_DOMNamedNodeMap(VM::Class* cb) :
+c_DOMNamedNodeMap::c_DOMNamedNodeMap(Class* cb) :
   ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
     ObjectData::UseIsset>(cb) {
 }
@@ -4825,7 +4825,7 @@ static PropertyAccessorMap domnodelist_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNodeList::c_DOMNodeList(VM::Class* cb) :
+c_DOMNodeList::c_DOMNodeList(Class* cb) :
   ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
     ObjectData::UseIsset>(cb) {
 }
@@ -4906,7 +4906,7 @@ Variant c_DOMNodeList::t_getiterator() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMImplementation::c_DOMImplementation(VM::Class* cb)
+c_DOMImplementation::c_DOMImplementation(Class* cb)
   : ExtObjectData(cb) {
 }
 
@@ -5187,7 +5187,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   dom_xpath_ext_function_php(ctxt, nargs, 2);
 }
 
-c_DOMXPath::c_DOMXPath(VM::Class* cb) :
+c_DOMXPath::c_DOMXPath(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
                        ObjectData::UseIsset>(cb),
     m_node(NULL), m_registerPhpFunctions(0) {
@@ -5276,7 +5276,7 @@ Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNodeIterator::c_DOMNodeIterator(VM::Class* cb) :
+c_DOMNodeIterator::c_DOMNodeIterator(Class* cb) :
     ExtObjectData(cb), m_objmap(NULL), m_iter(NULL), m_index(-1) {
 }
 

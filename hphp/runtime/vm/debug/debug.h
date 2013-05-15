@@ -22,10 +22,9 @@
 #include "dwarf.h"
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 class DebugInfo {
  public:
@@ -69,7 +68,6 @@ std::string lookupFunction(const Func* func,
                            bool inPrologue,
                            bool pseudoWithFileName);
 
-}
 }
 }
 

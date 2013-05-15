@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitableWaitHandle::c_WaitableWaitHandle(VM::Class* cb)
+c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
     : c_WaitHandle(cb)
     , m_creator(AsioSession::Get()->getCurrentWaitHandle())
     , m_firstParent(nullptr) {

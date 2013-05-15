@@ -19,8 +19,6 @@
 
 namespace HPHP { namespace Compiler {
 
-using VM::FuncEmitter;
-using VM::UnitEmitter;
 
 static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
   if (offsetPtr) {

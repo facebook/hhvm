@@ -184,7 +184,7 @@ void StatCache::Node::touchLocked(bool invalidate /* = true */) {
          ++it) {
       if (invalidate && m_valid) {
         TRACE(1, "StatCache: invalidate path '%s'\n", it->first.c_str());
-        HPHP::VM::invalidatePath(it->first);
+        HPHP::invalidatePath(it->first);
       }
       if (removePaths) {
         m_statCache.removePath(it->first, this);
@@ -197,7 +197,7 @@ void StatCache::Node::touchLocked(bool invalidate /* = true */) {
         NameMap::const_iterator it2 = m_paths.find(it->first);
         if (it2 == m_paths.end()) {
           TRACE(1, "StatCache: invalidate link path '%s'\n", it->first.c_str());
-          HPHP::VM::invalidatePath(it->first);
+          HPHP::invalidatePath(it->first);
         }
       }
       if (removePaths) {

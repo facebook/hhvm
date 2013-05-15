@@ -353,12 +353,12 @@ bool array_is_valid_callback(CArrRef arr);
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound = false);
 
-const HPHP::VM::Func*
+const HPHP::Func*
 vm_decode_function(CVarRef function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
-                   HPHP::VM::Class*& cls,
+                   HPHP::Class*& cls,
                    StringData*& invName,
                    bool warn = true);
 

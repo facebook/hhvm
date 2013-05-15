@@ -19,7 +19,6 @@
 #include <util/range.h>
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -303,4 +302,4 @@ void sortRpo(Graph* g) {
   RpoSort _(g);
 }
 
-}}}
+}}

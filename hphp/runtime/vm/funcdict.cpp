@@ -27,7 +27,6 @@
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
-namespace VM {
 
 RenamedFuncDict::RenamedFuncDict() : m_restrictRenameableFunctions(false) { }
 
@@ -72,7 +71,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {
-    VM::Transl::TargetCache::invalidateForRename(old);
+    Transl::TargetCache::invalidateForRename(old);
   }
 
   return true;
@@ -93,4 +92,4 @@ void RenamedFuncDict::addRenameableFunctions(ArrayData* arr) {
   }
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

@@ -35,10 +35,8 @@ class MutableArrayIter;
 
 class HphpArray;
 class TypedValue;
-namespace VM {
-  class PreClass;
-  class Class;
-}
+class PreClass;
+class Class;
 
 extern StaticString ssIterator;
 
@@ -79,7 +77,7 @@ class ObjectData : public CountableNF {
     RealPropExist = 16,    // For property_exists
   };
 
-  ObjectData(bool noId, VM::Class* type)
+  ObjectData(bool noId, Class* type)
       : o_attribute(0), m_cls(type) {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
@@ -91,7 +89,7 @@ class ObjectData : public CountableNF {
 
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
-  VM::Class* getVMClass() const {
+  Class* getVMClass() const {
     return m_cls;
   }
   static size_t getVMClassOffset() {
@@ -99,8 +97,8 @@ class ObjectData : public CountableNF {
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  VM::Class* instanceof(const VM::PreClass* pc) const;
-  bool instanceof(const VM::Class* c) const;
+  Class* instanceof(const PreClass* pc) const;
+  bool instanceof(const Class* c) const;
 
   bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;
@@ -234,7 +232,7 @@ class ObjectData : public CountableNF {
   } o_subclassData;
 
  protected:
-  VM::Class* m_cls;
+  Class* m_cls;
 
  protected:
   ArrNR         o_properties;    // dynamic properties (VM and hphpc)
@@ -260,7 +258,7 @@ class ObjectData : public CountableNF {
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators

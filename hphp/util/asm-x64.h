@@ -48,7 +48,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -2514,6 +2514,6 @@ X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
 #undef logical_const
 #undef CCS
 
-}}}
+}}
 
 #endif

@@ -91,7 +91,7 @@ public:
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
-  bool instanceof(const VM::Class* cls) const {
+  bool instanceof(const Class* cls) const {
     return m_px && m_px->instanceof(cls);
   }
 

@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_FUNC_INLINE_H_
 
 namespace HPHP {
-namespace VM {
 
 inline ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
   assert(offset != 0u);
@@ -38,6 +37,6 @@ inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
 }
 
-} } // HPHP::VM
+ } // HPHP::VM
 
 #endif

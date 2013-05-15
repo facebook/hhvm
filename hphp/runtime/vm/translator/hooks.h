@@ -18,10 +18,9 @@
 #define incl_HPHP_HOOKS_H_
 
 namespace HPHP {
-namespace VM {
 
 extern void invalidatePath(const std::string& path);
 
-}}
+}
 
 #endif

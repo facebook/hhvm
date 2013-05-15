@@ -20,7 +20,7 @@
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/targetcache.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 struct MInstrState {
   // Room for this structure is allocated on the stack before we
@@ -116,6 +116,6 @@ RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val);
 RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
                              TargetCache::CacheHandle ch);
 
-} } }
+} }
 
 #endif

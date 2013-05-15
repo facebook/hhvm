@@ -32,7 +32,6 @@ class PhpFile;
 // the debugger interacts directly with the VM.
 
 namespace HPHP {
-namespace VM {
 
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
@@ -128,6 +127,6 @@ public:
   }
 };
 
-}}      // namespace HPHP::VM
+}      // namespace HPHP::VM
 
 #endif /* incl_HPHP_DEBUGGER_HOOK_H_ */

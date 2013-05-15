@@ -27,7 +27,6 @@
 #include "system/lib/systemlib.h"
 
 namespace HPHP {
-namespace VM {
 
 static StaticString s___get(LITSTR_INIT("__get"));
 static StaticString s___set(LITSTR_INIT("__set"));
@@ -38,8 +37,8 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
 TRACE_SET_MOD(runtime);
 
-int HPHP::VM::Instance::ObjAllocatorSizeClassCount =
-  HPHP::VM::InitializeAllocators();
+int HPHP::Instance::ObjAllocatorSizeClassCount =
+  HPHP::InitializeAllocators();
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -809,4 +808,4 @@ ObjectData* Instance::cloneImpl() {
   return obj;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

@@ -93,7 +93,6 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/vm/translator/translator-x64-internal.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 using namespace reg;
@@ -2981,9 +2980,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sk = SrcKey(curFunc(), newPc);
       start = getTranslation(sk, true);
     }
-    assert(start == (TCA)HPHP::VM::Transl::funcBodyHelperThunk ||
+    assert(start == (TCA)HPHP::Transl::funcBodyHelperThunk ||
            isValidCodeAddress(start) ||
-           (start == (TCA)HPHP::VM::Transl::fcallHelperThunk &&
+           (start == (TCA)HPHP::Transl::fcallHelperThunk &&
             info.saved_rStashedAr == (uintptr_t)data));
     assert(!s_writeLease.amOwner());
     const Func* func = (vmfp() ? (ActRec*)vmfp() : (ActRec*)data)->m_func;
@@ -9348,7 +9347,7 @@ TranslatorX64::findCuf(const NormalizedInstruction& ni,
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
   if (str) {
-    Func* f = HPHP::VM::Unit::lookupFunc(str);
+    Func* f = HPHP::Unit::lookupFunc(str);
     if (f) return f;
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
@@ -9384,7 +9383,7 @@ TranslatorX64::findCuf(const NormalizedInstruction& ni,
   } else if (sclass->isame(s_static.get())) {
     return nullptr;
   } else {
-    cls = VM::Unit::lookupUniqueClass(sclass);
+    cls = Unit::lookupUniqueClass(sclass);
     if (!cls) return nullptr;
   }
 
@@ -12260,7 +12259,7 @@ void TranslatorX64::invalidateOutLocal(const NormalizedInstruction& ni) {
   }
 }
 
-} // HPHP::VM::Transl
+} // HPHP::Transl
 
 static const Trace::Module TRACEMOD = Trace::tx64;
 
@@ -12313,4 +12312,4 @@ void ArgManager::addRegPlus(PhysReg reg, int32_t off) {
 }
 
 
-} } // HPHP::VM
+} // HPHP::VM

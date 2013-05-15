@@ -1817,7 +1817,7 @@ int64_t f__soap_active_version() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-c_SoapServer::c_SoapServer(VM::Class* cb) :
+c_SoapServer::c_SoapServer(Class* cb) :
     ExtObjectData(cb),
     m_type(SOAP_FUNCTIONS),
     m_version(SOAP_1_1),
@@ -2036,7 +2036,7 @@ Variant c_SoapServer::t_getfunctions() {
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
                            CStrRef fn_name) {
-  HPHP::VM::Class* cls;
+  HPHP::Class* cls;
   if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
     cls = server->m_soap_object->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
@@ -2044,7 +2044,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(StringUtil::ToLower(fn_name));
   }
-  HPHP::VM::Func* f = cls->lookupMethod(fn_name.get());
+  HPHP::Func* f = cls->lookupMethod(fn_name.get());
   return (f && f->isPublic());
 }
 
@@ -2297,7 +2297,7 @@ void c_SoapServer::t_addsoapheader(CObjRef fault) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-c_SoapClient::c_SoapClient(VM::Class* cb) :
+c_SoapClient::c_SoapClient(Class* cb) :
     ExtObjectDataFlags<ObjectData::HasCall>(cb),
     m_soap_version(SOAP_1_1),
     m_sdl(NULL),
@@ -2773,7 +2773,7 @@ bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-c_SoapVar::c_SoapVar(VM::Class* cb) : ExtObjectData(cb) {
+c_SoapVar::c_SoapVar(Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapVar::~c_SoapVar() {
@@ -2808,7 +2808,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-c_SoapParam::c_SoapParam(VM::Class* cb) : ExtObjectData(cb) {
+c_SoapParam::c_SoapParam(Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapParam::~c_SoapParam() {
@@ -2826,7 +2826,7 @@ void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-c_SoapHeader::c_SoapHeader(VM::Class* cb) :
+c_SoapHeader::c_SoapHeader(Class* cb) :
     ExtObjectData(cb) {
 }
 

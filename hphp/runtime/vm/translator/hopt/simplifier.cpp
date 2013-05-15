@@ -24,7 +24,6 @@
 #include "runtime/vm/runtime.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 TRACE_SET_MOD(hhir);
@@ -1686,4 +1685,4 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

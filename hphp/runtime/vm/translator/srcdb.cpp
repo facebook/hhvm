@@ -24,7 +24,6 @@
 #include "runtime/vm/translator/translator-x64.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 TRACE_SET_MOD(trans)
@@ -247,4 +246,4 @@ size_t SrcDB::invalidateCode(const Eval::PhpFile* file) {
   return i;
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

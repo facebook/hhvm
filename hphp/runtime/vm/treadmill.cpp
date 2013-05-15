@@ -28,7 +28,7 @@
 #include "treadmill.h"
 #include "runtime/vm/translator/translator-x64.h"
 
-namespace HPHP { namespace VM { namespace Treadmill {
+namespace HPHP {  namespace Treadmill {
 
 TRACE_SET_MOD(treadmill);
 
@@ -153,4 +153,4 @@ void deferredFree(void* p) {
   WorkItem::enqueue(new FreeMemoryTrigger(p));
 }
 
-}}}
+}}

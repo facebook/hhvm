@@ -21,7 +21,7 @@
 #include "runtime/vm/translator/physreg.h"
 #include "runtime/vm/translator/abi-x64.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 class Trace;
 class IRFactory;
@@ -215,6 +215,6 @@ inline int SpillInfo::offset() const {
   return (m_val + 1) * sizeof(uint64_t);
 }
 
-}}}
+}}
 
 #endif

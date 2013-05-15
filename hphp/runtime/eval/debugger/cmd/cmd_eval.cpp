@@ -68,8 +68,8 @@ void CmdEval::setClientOutput(DebuggerClient *client) {
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {
-  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
   g_vmContext->setDebuggerBypassCheck(false);

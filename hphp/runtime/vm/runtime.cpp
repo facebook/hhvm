@@ -34,9 +34,7 @@
 
 namespace HPHP {
 
-using VM::Unit;
-using VM::Func;
-using VM::Transl::tx64;
+using Transl::tx64;
 
 static const Trace::Module TRACEMOD = Trace::runtime;
 
@@ -335,7 +333,7 @@ Unit* compile_string(const char* s, size_t sz) {
   int out_len;
   md5 = MD5(string_md5(s, sz, false, out_len));
 
-  VM::Unit* u = VM::Repo::get().loadUnit("", md5);
+  Unit* u = Repo::get().loadUnit("", md5);
   if (u != nullptr) {
     return u;
   }

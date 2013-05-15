@@ -20,7 +20,6 @@
 #include "util/repo_schema.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
@@ -701,4 +700,4 @@ bool Repo::writable(int repoId) {
   return true;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

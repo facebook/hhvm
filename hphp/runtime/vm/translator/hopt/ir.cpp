@@ -39,9 +39,9 @@
 // Include last to localize effects to this file
 #include "util/assert_throw.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 #define IRT(name, ...) const Type Type::name(Type::k##name);
 IR_TYPES
@@ -984,5 +984,5 @@ bool hasInternalFlow(Trace* trace) {
   return false;
 }
 
-}}}
+}}
 

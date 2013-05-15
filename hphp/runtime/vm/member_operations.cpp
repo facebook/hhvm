@@ -18,7 +18,6 @@
 #include "runtime/ext/ext_collections.h"
 
 namespace HPHP {
-namespace VM {
 
 StringData* prepareAnyKey(TypedValue* tv) {
   if (IS_STRING_TYPE(tv->m_type)) {
@@ -120,5 +119,4 @@ void objOffsetUnset(Instance* base, CVarRef offset) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }

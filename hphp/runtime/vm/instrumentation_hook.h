@@ -21,7 +21,6 @@
 #include <runtime/base/execution_context.h>
 
 namespace HPHP {
-namespace VM {
 
 static inline void instHookInt64Impl(InjectionTableInt64* table, int64_t val) {
   if (!table) return;
@@ -59,6 +58,6 @@ static inline void instHookStr(int type, const char* str) {
 
 #define INST_HOOK_FENTRY(sd)    instHookSD(InstHookTypeFuncEntry, sd)
 
-} }    // HPHP::VM
+ }    // HPHP::VM
 
 #endif /* incl_HPHP_INSTRUMENTATION_HOOK_H_ */

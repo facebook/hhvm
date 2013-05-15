@@ -139,8 +139,8 @@ VMExecutionContext::~VMExecutionContext() {
   delete m_lastLocFilter;
 
   if (UNLIKELY(!m_preConsts.empty())) {
-    VM::Transl::unmergePreConsts(m_preConsts, this);
-    for (VM::PreConstVec::iterator i = m_preConsts.begin();
+    Transl::unmergePreConsts(m_preConsts, this);
+    for (PreConstVec::iterator i = m_preConsts.begin();
          i != m_preConsts.end(); ++i) {
       decRefStr(const_cast<StringData*>(i->name));
     }

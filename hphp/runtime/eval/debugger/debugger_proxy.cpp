@@ -180,7 +180,7 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
       }
     }
   }
-  VM::phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
+  phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
 }
 
 void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {

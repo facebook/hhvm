@@ -53,7 +53,7 @@ ThreadInfo::ThreadInfo()
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
 
-  VM::Transl::TargetCache::threadInit();
+  Transl::TargetCache::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -66,7 +66,7 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  VM::Transl::TargetCache::threadExit();
+  Transl::TargetCache::threadExit();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -116,12 +116,12 @@ void ThreadInfo::setPendingException(Exception* e) {
 
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
-  VM::Transl::TargetCache::requestExit();
+  Transl::TargetCache::requestExit();
 }
 
 void RequestInjectionData::onSessionInit() {
-  VM::Transl::TargetCache::requestInit();
-  cflagsPtr = VM::Transl::TargetCache::conditionFlagsPtr();
+  Transl::TargetCache::requestInit();
+  cflagsPtr = Transl::TargetCache::conditionFlagsPtr();
   reset();
   started = time(0);
 }
@@ -140,7 +140,7 @@ void RequestInjectionData::updateJit() {
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debugger) &&
     !m_debuggerIntr &&
     !m_coverage &&
-    !VM::shouldProfile();
+    !shouldProfile();
 }
 
 void RequestInjectionData::setMemExceededFlag() {

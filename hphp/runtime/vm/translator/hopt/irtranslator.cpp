@@ -44,7 +44,6 @@
 #include "util/assert_throw.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 using namespace reg;
@@ -66,7 +65,7 @@ static const bool debug = false;
  * tx64LocPhysicalOffset --
  *
  *   The translator uses the stack pointer slightly differently from
- *   VM::Stack. Consequently, the translated code accesses slightly
+ *   Stack. Consequently, the translated code accesses slightly
  *   different offsets from rVmSp than the C++ runtime.
  */
 static inline int
@@ -1923,7 +1922,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
   assert(m_useHHIR);
 
-  Trace* trace = m_hhbcTrans->getTrace();
+  HPHP::JIT::Trace* trace = m_hhbcTrans->getTrace();
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs = nullptr,
                         const LifetimeInfo* lifetime = nullptr) {
@@ -1970,4 +1969,4 @@ void TranslatorX64::hhirTraceFree() {
   m_irFactory.reset();
 }
 
-}}}
+}}

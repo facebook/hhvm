@@ -56,7 +56,7 @@ extern const char *g_class_map[];
 /**
  * Returns a thread local global variable class pointer.
  */
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
 extern void init_global_variables();
 extern void free_global_variables();
@@ -65,7 +65,7 @@ extern Array get_global_state();
 /**
  * Returns a thread local global variable table pointer.
  */
-typedef VM::GlobalNameValueTableWrapper SystemGlobals;
+typedef GlobalNameValueTableWrapper SystemGlobals;
 extern SystemGlobals *get_system_globals();
 
 /**

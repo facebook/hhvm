@@ -23,7 +23,7 @@
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/hopt/codegen.h"
 
-namespace HPHP { namespace VM { namespace JIT { namespace NativeCalls {
+namespace HPHP {  namespace JIT { namespace NativeCalls {
 
 // Information about C++ helpers called by translated code, used by
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full
@@ -81,6 +81,6 @@ private:
   CallInfoMap m_map;
 };
 
-} } } }
+} } }
 
 #endif

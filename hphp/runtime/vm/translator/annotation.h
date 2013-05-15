@@ -19,7 +19,6 @@
 #include <runtime/vm/translator/translator.h>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -31,6 +30,6 @@ const StringData* encodeCallAndArgs(const StringData *name, int numArgs);
 const StringData* fcallToFuncName(const NormalizedInstruction* fcall);
 int getMaxEncodedArgs();
 
-} } }
+} }
 
 #endif

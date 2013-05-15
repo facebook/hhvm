@@ -25,7 +25,7 @@
 #include "util/exp_arena.h"
 #include "runtime/base/complex_types.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -504,6 +504,6 @@ inline NameValueTable::~NameValueTable() {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

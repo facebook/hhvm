@@ -34,7 +34,6 @@
 #include "system/lib/systemlib.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::bcinterp;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
@@ -113,7 +112,7 @@ void Func::setFullName() {
 }
 
 void Func::initPrologues(int numParams, bool isGenerator) {
-  m_funcBody = (TCA)HPHP::VM::Transl::funcBodyHelperThunk;
+  m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
@@ -122,7 +121,7 @@ void Func::initPrologues(int numParams, bool isGenerator) {
 
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
-    m_prologueTable[i] = (TCA)HPHP::VM::Transl::fcallHelperThunk;
+    m_prologueTable[i] = (TCA)HPHP::Transl::fcallHelperThunk;
   }
 }
 
@@ -1127,4 +1126,4 @@ void FuncRepoProxy::GetFuncsStmt
   txn.commit();
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

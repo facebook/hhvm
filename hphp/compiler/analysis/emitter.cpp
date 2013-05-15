@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/emitter.h"
+
 #include "folly/ScopeGuard.h"
 
 #include <iostream>
@@ -40,7 +42,6 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/peephole.h"
@@ -4526,8 +4527,12 @@ void EmitterVisitor::emitUnset(Emitter& e) {
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
       case StackSym::CS:
-        throw IncludeTimeFatalException(e.getNode(),
-                                        "Cannot unset a static property");
+        e.String(
+          StringData::GetStaticString("Attempt to unset static property")
+        );
+        e.Fatal(0);
+        break;
+
       default: {
         unexpectedStackSym(sym, "emitUnset");
         break;

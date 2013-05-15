@@ -120,9 +120,9 @@ Variant f_constant(CStrRef name) {
     TypedValue* cns;
     if (hadInitialBackslash) {
       String s(data, len, CopyString);
-      cns = VM::Unit::loadCns(s.get());
+      cns = Unit::loadCns(s.get());
     } else {
-      cns = VM::Unit::loadCns(name.get());
+      cns = Unit::loadCns(name.get());
     }
     if (cns) return tvAsVariant(cns);
   }
@@ -163,7 +163,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     }
     return false;
   } else {
-    auto* cb = autoload ?  VM::Unit::loadCns : VM::Unit::lookupCns;
+    auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
     if (hadInitialBackslash) {
       String s(data, len, CopyString);
       return cb(s.get());

@@ -3138,9 +3138,9 @@ void VMExecutionContext::preventReturnsToTC() {
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
           (tx64->isValidCodeAddress((TCA)ar->m_savedRip))) {
-        TRACE(2, "Replace RIP with RetFromInterpretedFrame helper in fp %p"
-              ", savedRip 0x%lx, func %s\n", ar, ar->m_savedRip,
-              ar->m_func->fullName()->data());
+        TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%lx, "
+                 "func %s\n", ar, ar->m_savedRip,
+                 ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {
           ar->m_savedRip =
             (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();

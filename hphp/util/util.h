@@ -57,12 +57,13 @@ namespace HPHP { namespace Util {
 #define ATTRIBUTE_COLD
 #endif
 
-#define ALWAYS_INLINE  __attribute__((always_inline))
-#define NEVER_INLINE  __attribute__((noinline))
+#define ALWAYS_INLINE      __attribute__((always_inline))
+#define NEVER_INLINE       __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
-#define UNUSED         __attribute__((unused))
-#define FLATTEN        __attribute__((flatten))
-#define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+#define UNUSED             __attribute__((unused))
+#define FLATTEN            __attribute__((flatten))
+#define HOT_FUNC           __attribute__ ((section (".text.hot.builtin")))
+#define EXTERNALLY_VISIBLE __attribute__((externally_visible))
 
 #ifdef DEBUG
 #define DEBUG_ONLY /* nop */
@@ -73,17 +74,20 @@ namespace HPHP { namespace Util {
 #define HOT_FUNC_VM HOT_FUNC
 
 /*
- * we need to keep some unreferenced functions from being removed by
+ * We need to keep some unreferenced functions from being removed by
  * the linker. There is no compile time mechanism for doing this, but
  * by putting them in the same section as some other, referenced function
  * in the same file, we can keep them around.
  *
  * So this macro should be used to mark at least one function that is
  * referenced, and other functions that are not referenced in the same
- * file
+ * file.
+ *
+ * Note: this may not work properly with LTO. We'll revisit when/if we
+ * move to it.
  */
 #define KEEP_SECTION \
-  __attribute__((externally_visible))
+  __attribute__((section(".text.keep")))
 
 /**
  * Split a string into a list of tokens by character delimiter.

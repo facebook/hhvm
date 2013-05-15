@@ -1659,7 +1659,7 @@ void const_load_set(CStrRef key, CVarRef value) {
   const_data.set(key, value, true);
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());

@@ -34,6 +34,7 @@ __thread int  tl_rbPtr;
 __thread char tl_ring[kMaxRBBytes];
 __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
 
+KEEP_SECTION
 void vtraceRingbuffer(const char* fmt, va_list ap) {
   char buf[4096];
   char* bufP = &buf[0];
@@ -190,6 +191,8 @@ void dumpEntry(const RingBufferEntry* e) {
 //
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
+
+KEEP_SECTION
 void dumpRingBufferMasked(int numEntries, uint32_t types) {
   int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
@@ -206,6 +209,7 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   }
 }
 
+KEEP_SECTION
 void dumpRingBuffer(int numEntries) {
   dumpRingBufferMasked(numEntries, -1u);
 }

@@ -243,7 +243,7 @@ void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
   assert(RuntimeOption::EnableDebugger);
-  TRACE(2, "Debugger::Interrupt\n");
+  TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();
   if (proxy) {

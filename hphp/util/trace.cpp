@@ -139,6 +139,13 @@ void traceRelease(const char* fmt, ...) {
   va_end(ap);
 }
 
+void traceRingBufferRelease(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vtraceRingbuffer(fmt, ap);
+  va_end(ap);
+}
+
 void trace(const std::string& s) {
   trace("%s", s.c_str());
 }

@@ -349,7 +349,7 @@ void DebuggerProxy::pollSignal() {
     // Send CmdSignal over to the client and wait for a response.
     CmdSignal cmd;
     if (!cmd.onServer(this)) {
-      Logger::Error("Failed to send CmdSignal to client, socket error");
+      TRACE(1, "Failed to send CmdSignal to client, socket error");
       break;
     }
 
@@ -359,21 +359,21 @@ void DebuggerProxy::pollSignal() {
     while (!DebuggerCommand::Receive(m_thrift, res,
                                      "DebuggerProxy::pollSignal()")) {
       if (m_stopped) {
-        Logger::Warning("DebuggerProxy signal thread asked to stop while "
-                        "waiting for CmdSignal back from the client");
+        TRACE(1, "DebuggerProxy signal thread asked to stop while "
+              "waiting for CmdSignal back from the client");
         break;
       }
     }
     if (!res) {
       if (!m_stopped) {
-        Logger::Error("Failed to get CmdSignal back from client, socket error");
+        TRACE(1, "Failed to get CmdSignal back from client, socket error");
       }
       break;
     }
 
     CmdSignalPtr sig = dynamic_pointer_cast<CmdSignal>(res);
     if (!sig) {
-      Logger::Error("bad response from signal polling: %d", res->getType());
+      TRACE(1, "bad response from signal polling: %d", res->getType());
       break;
     }
 
@@ -385,8 +385,8 @@ void DebuggerProxy::pollSignal() {
     }
   }
   if (!m_stopped) {
-    Logger::Error("DebuggerProxy signal thread has lost communication with the "
-                  "client, stopping proxy.");
+    TRACE(1, "DebuggerProxy signal thread has lost communication with the "
+             "client, stopping proxy.");
     forceQuit();
   }
 }
@@ -621,7 +621,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
           cmdFailure = true;
         }
       } else {
-        Logger::Error("Failed to receive cmd from client, socket error");
+        TRACE(1, "Failed to receive cmd from client, socket error");
         cmdFailure = true;
       }
     } catch (const DebuggerException &e) {

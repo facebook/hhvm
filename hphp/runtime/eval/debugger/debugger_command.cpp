@@ -76,7 +76,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
   if (ret == 0) {
     return false;
   }
-  if (ret == -1 || !(fds[0].revents & POLLIN)) {
+  // Any error bits set indicate that we have nothing to read, so bail early.
+  if ((ret == -1) || (fds[0].revents != POLLIN)) {
     return errno != EINTR; // treat signals as timeouts
   }
 

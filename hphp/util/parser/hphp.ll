@@ -153,7 +153,6 @@ static int getNextTokenType(int t) {
 
 %x ST_IN_HTML
 %x ST_IN_SCRIPTING
-%x ST_AFTER_HASHBANG
 %x ST_DOUBLE_QUOTES
 %x ST_BACKQUOTE
 %x ST_HEREDOC
@@ -594,7 +593,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <INITIAL>"#"[^\n]*"\n" {
         _scanner->setHashBang(yytext, yyleng);
         BEGIN(ST_IN_SCRIPTING);
-        yy_push_state(ST_AFTER_HASHBANG, yyscanner);
+        yy_push_state(ST_IN_HTML, yyscanner);
         return T_INLINE_HTML;
 }
 
@@ -605,13 +604,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_INLINE_HTML;
 }
 
-<ST_IN_HTML,ST_AFTER_HASHBANG>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
+<ST_IN_HTML>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
         SETTOKEN;
-        BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
 }
 
-<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<?"|("<?php"([ \t]|{NEWLINE}))|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
+<INITIAL,ST_IN_HTML>"<?"|("<?php"([ \t]|{NEWLINE}))|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
         SETTOKEN;
         if (_scanner->shortTags() || yyleng > 2) {
           if (YY_START == INITIAL) {
@@ -624,14 +622,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
             yy_push_state(ST_IN_HTML, yyscanner);
-          } else if (YY_START == ST_AFTER_HASHBANG) {
-            BEGIN(ST_IN_HTML);
           }
           return T_INLINE_HTML;
         }
 }
 
-<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%="|"<?=" {
+<INITIAL,ST_IN_HTML>"<%="|"<?=" {
         SETTOKEN;
         if ((yytext[1]=='%' && _scanner->aspTags()) ||
             (yytext[1]=='?' && _scanner->shortTags())) {
@@ -645,14 +641,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
             yy_push_state(ST_IN_HTML, yyscanner);
-          } else if (YY_START == ST_AFTER_HASHBANG) {
-            BEGIN(ST_IN_HTML);
           }
           return T_INLINE_HTML;
         }
 }
 
-<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%" {
+<INITIAL,ST_IN_HTML>"<%" {
         SETTOKEN;
         if (_scanner->aspTags()) {
           if (YY_START == INITIAL) {
@@ -665,23 +659,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
             yy_push_state(ST_IN_HTML, yyscanner);
-          } else if (YY_START == ST_AFTER_HASHBANG) {
-            BEGIN(ST_IN_HTML);
           }
           return T_INLINE_HTML;
         }
 }
 
-<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<?hh"([ \t]|{NEWLINE}) {
-        if (YY_START == INITIAL) {
-          BEGIN(ST_IN_SCRIPTING);
-        } else if (YY_START == ST_AFTER_HASHBANG) {
-          yy_pop_state(yyscanner);
-        } else {
-          _scanner->error("Hack mode: content before <?hh");
-          return T_HACK_ERROR;
+<INITIAL,ST_IN_HTML>"<?hh"([ \t]|{NEWLINE}) {
+        if (YY_START != INITIAL) {
+                _scanner->error("Hack mode: content before <?hh");
+                return T_HACK_ERROR;
         }
         STEPPOS;
+        BEGIN(ST_IN_SCRIPTING);
         _scanner->setHackMode();
         return T_OPEN_TAG;
 }

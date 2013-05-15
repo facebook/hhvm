@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/inst_point.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
+#include "hphp/runtime/eval/debugger/inst_point.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

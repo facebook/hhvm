@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_ctype.h>
-#include <runtime/ext/ext_ctype.h>
+#include "hphp/test/test_ext_ctype.h"
+#include "hphp/runtime/ext/ext_ctype.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

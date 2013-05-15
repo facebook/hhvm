@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_server.h>
-#include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <util/text_color.h>
-#include <util/util.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_server.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/text_color.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

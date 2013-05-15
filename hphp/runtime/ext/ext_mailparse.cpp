@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_mailparse.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/file/temp_file.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/mailparse/mime.h>
-#include <runtime/ext/mailparse/rfc822.h>
+#include "hphp/runtime/ext/ext_mailparse.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/file/temp_file.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/mailparse/mime.h"
+#include "hphp/runtime/ext/mailparse/rfc822.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

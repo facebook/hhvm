@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/asm-x64.h"
+#include "hphp/util/asm-x64.h"
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -22,12 +22,12 @@
 #include <errno.h>
 
 #include <unistd.h>
-#include <sys/mman.h>
-#include <sys/types.h>
+#include "sys/mman.h"
+#include "sys/types.h"
 
-#include "util/assertions.h"
-#include "util/maphuge.h"
-#include "runtime/base/runtime_option.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 namespace HPHP { namespace Transl {
 

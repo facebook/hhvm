@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_PACKAGE_H_
 #define incl_HPHP_PACKAGE_H_
 
-#include <compiler/hphp.h>
-#include <util/string_bag.h>
-#include <util/file_cache.h>
-#include <util/mutex.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/string_bag.h"
+#include "hphp/util/file_cache.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

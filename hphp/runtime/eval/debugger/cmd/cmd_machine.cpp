@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_machine.h>
-#include <runtime/eval/debugger/cmd/cmd_signal.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/intercept.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_machine.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_signal.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

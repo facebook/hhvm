@@ -20,7 +20,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include <runtime/vm/translator/abi-x64.h>
+#include "hphp/runtime/vm/translator/abi-x64.h"
 
 using namespace HPHP::Transl::reg;
 using namespace HPHP::Util;

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/label_statement.h>
+#include "hphp/compiler/statement/label_statement.h"
 
 using namespace HPHP;
 

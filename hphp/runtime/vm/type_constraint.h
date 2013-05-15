@@ -19,10 +19,10 @@
 #include <string>
 #include <tr1/functional>
 
-#include <runtime/base/types.h>
-#include <util/case_insensitive.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/type_profile.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/type_profile.h"
 
 namespace HPHP {
 

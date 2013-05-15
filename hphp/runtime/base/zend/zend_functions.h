@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_ZEND_FUNCTIONS_H_
 #define incl_HPHP_ZEND_FUNCTIONS_H_
 
-#include <runtime/base/types.h>
-#include <util/hash.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

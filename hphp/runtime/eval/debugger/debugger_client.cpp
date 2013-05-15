@@ -14,27 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/eval/debugger/debugger_command.h>
-#include <runtime/eval/debugger/cmd/all.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/preg.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_socket.h>
-#include <runtime/ext/ext_network.h>
-#include <util/text_color.h>
-#include <util/text_art.h>
-#include <util/logger.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/debugger_client.h"
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/cmd/all.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/util/text_color.h"
+#include "hphp/util/text_art.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #define USE_VARARGS
 #define PREFER_STDARG
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "readline/readline.h"
+#include "readline/history.h"
 
 using namespace HPHP::Util::TextArt;
 

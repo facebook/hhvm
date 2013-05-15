@@ -23,7 +23,7 @@
 #include "folly/FBString.h"
 #include "folly/FBVector.h"
 
-#include "idl.h"
+#include "hphp/tools/gen-ext-hhvm/idl.h"
 
 using folly::fbstring;
 using folly::fbvector;

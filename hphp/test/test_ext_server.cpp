@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_server.h>
-#include <runtime/ext/ext_server.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_ext_server.h"
+#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/program_functions.h"
-#include "hhvm/process_init.h"
-#include "compiler/compiler.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/hhvm/process_init.h"
+#include "hphp/compiler/compiler.h"
 
-#include "util/embedded_data.h"
-#include "util/embedded_vfs.h"
-#include "util/util.h"
+#include "hphp/util/embedded_data.h"
+#include "hphp/util/embedded_vfs.h"
+#include "hphp/util/util.h"
 
 int main(int argc, char** argv) {
   if (!argc) return 0;

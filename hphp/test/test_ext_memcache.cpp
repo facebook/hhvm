@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_memcache.h>
-#include <runtime/ext/ext_memcache.h>
+#include "hphp/test/test_ext_memcache.h"
+#include "hphp/runtime/ext/ext_memcache.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Memcache);
 ///////////////////////////////////////////////////////////////////////////////

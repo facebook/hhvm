@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_STEP_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_STEP_H_
 
-#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_flow_control.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

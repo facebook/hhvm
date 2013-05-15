@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_PROGRAM_FUNCTIONS_H_
 #define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
-#include <util/base.h>
-#include <runtime/base/types.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

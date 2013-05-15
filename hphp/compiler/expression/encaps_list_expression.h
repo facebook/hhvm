@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_ENCAPS_LIST_EXPRESSION_H_
 #define incl_HPHP_ENCAPS_LIST_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

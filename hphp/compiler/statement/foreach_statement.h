@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_FOREACH_STATEMENT_H_
 #define incl_HPHP_FOREACH_STATEMENT_H_
 
-#include <compiler/statement/loop_statement.h>
+#include "hphp/compiler/statement/loop_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

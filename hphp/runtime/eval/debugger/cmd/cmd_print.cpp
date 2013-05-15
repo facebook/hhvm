@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_print.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/string_util.h>
-#include <runtime/vm/debugger_hook.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_print.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/vm/debugger_hook.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

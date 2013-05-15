@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "compression.h"
-#include "logger.h"
-#include "exception.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/exception.h"
 
 #define PHP_ZLIB_MODIFIER 1000
 #define GZIP_HEADER_LENGTH 10

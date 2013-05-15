@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
-#include <util/base.h>
-#include <util/compression.h>
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/debuggable.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/util/base.h"
+#include "hphp/util/compression.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

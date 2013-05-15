@@ -16,11 +16,11 @@
 #ifndef incl_HPHP_ACCESS_LOG_H_
 #define incl_HPHP_ACCESS_LOG_H_
 
-#include <runtime/base/base_includes.h>
-#include <util/thread_local.h>
-#include <util/logger.h>
-#include <util/lock.h>
-#include <util/cronolog.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/thread_local.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/cronolog.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

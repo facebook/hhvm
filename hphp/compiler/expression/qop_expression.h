@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_QOP_EXPRESSION_H_
 #define incl_HPHP_QOP_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

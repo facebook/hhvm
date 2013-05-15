@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/soap/soap.h>
-#include <runtime/ext/soap/encoding.h>
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/soap/encoding.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

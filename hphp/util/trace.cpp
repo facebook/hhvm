@@ -22,7 +22,7 @@
 #ifndef USE_TRACE
 #  define USE_TRACE 1
 #endif
-#include "util/trace.h"
+#include "hphp/util/trace.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -30,7 +30,7 @@
 #include <stdarg.h>
 #include <string>
 
-#include "util/ringbuffer.h"
+#include "hphp/util/ringbuffer.h"
 
 namespace HPHP {
 

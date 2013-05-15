@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/goto_statement.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/analysis/function_scope.h"
 
 using namespace HPHP;
 

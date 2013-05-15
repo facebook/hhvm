@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_OBJECT_DATA_H_
 #define incl_HPHP_OBJECT_DATA_H_
 
-#include <runtime/base/util/countable.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/types.h>
-#include <runtime/base/macros.h>
-#include <runtime/base/runtime_error.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/system/lib/systemlib.h"
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>

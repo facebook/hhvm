@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/parser/scanner.h"
-#include "util/util.h"
-#include "util/logger.h"
-#include "util/zend/zend_string.h"
-#include "util/zend/zend_html.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/zend/zend_string.h"
+#include "hphp/util/zend/zend_html.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

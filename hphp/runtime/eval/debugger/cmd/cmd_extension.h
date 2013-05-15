@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXTENSION_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_EXTENSION_H_
 
-#include <runtime/eval/debugger/cmd/cmd_extended.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extended.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

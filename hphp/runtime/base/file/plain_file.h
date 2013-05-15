@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_PLAIN_FILE_H_
 #define incl_HPHP_PLAIN_FILE_H_
 
-#include <runtime/base/file/file.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

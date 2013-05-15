@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_mailparse.h>
-#include <runtime/ext/ext.h>
+#include "hphp/test/test_ext_mailparse.h"
+#include "hphp/runtime/ext/ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

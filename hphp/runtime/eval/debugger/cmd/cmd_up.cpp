@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_up.h>
-#include <runtime/eval/debugger/cmd/cmd_where.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_up.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_where.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

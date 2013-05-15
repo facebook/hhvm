@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_spl.h>
-#include <runtime/ext/ext_spl.h>
+#include "hphp/test/test_ext_spl.h"
+#include "hphp/runtime/ext/ext_spl.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Spl);
 ///////////////////////////////////////////////////////////////////////////////

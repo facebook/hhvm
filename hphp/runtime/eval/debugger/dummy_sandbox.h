@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_EVAL_DUMMY_SANDBOX_H_
 #define incl_HPHP_EVAL_DUMMY_SANDBOX_H_
 
-#include <util/async_func.h>
-#include <util/synchronizable.h>
-#include <runtime/eval/debugger/debugger_base.h>
+#include "hphp/util/async_func.h"
+#include "hphp/util/synchronizable.h"
+#include "hphp/runtime/eval/debugger/debugger_base.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

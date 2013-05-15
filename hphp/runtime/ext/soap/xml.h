@@ -18,8 +18,8 @@
 #ifndef PHP_SOAP_XML_H
 #define PHP_SOAP_XML_H
 
-#include <util/base.h>
-#include <runtime/ext/ext_simplexml_include.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/ext/ext_simplexml_include.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

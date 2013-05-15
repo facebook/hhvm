@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "light_process.h"
-#include "process.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/process.h"
 #include "util.h"
-#include "logger.h"
+#include "hphp/util/logger.h"
 
 #include <afdt.h>
 #include <string>
 #include <vector>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/wait.h>
+#include "sys/wait.h"
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>

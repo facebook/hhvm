@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_ipc.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/base/variable_unserializer.h>
-#include <util/lock.h>
-#include <util/alloc.h>
+#include "hphp/runtime/ext/ext_ipc.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
 
 #include <memory>
 
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
+#include "sys/types.h"
+#include "sys/ipc.h"
+#include "sys/msg.h"
+#include "sys/sem.h"
+#include "sys/shm.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 # include <sys/msgbuf.h>

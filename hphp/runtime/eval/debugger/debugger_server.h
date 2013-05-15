@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_SERVER_H_
 #define incl_HPHP_EVAL_DEBUGGER_SERVER_H_
 
-#include <util/async_func.h>
-#include <runtime/base/file/socket.h>
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/file/socket.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

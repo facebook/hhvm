@@ -26,9 +26,9 @@
  * globals.h that defines GlobalVariables class.
  */
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/ext/ext.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/ext/ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -13,20 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/hopt/hhbctranslator.h"
+#include "hphp/runtime/vm/translator/hopt/hhbctranslator.h"
 
-#include "util/trace.h"
-#include "runtime/ext/ext_closure.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/vm/translator/translator-runtime.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/unit.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
 // Include last to localize effects to this file
-#include "util/assert_throw.h"
+#include "hphp/util/assert_throw.h"
 
 namespace HPHP {
 namespace JIT {

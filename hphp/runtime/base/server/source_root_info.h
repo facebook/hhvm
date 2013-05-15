@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_SOURCE_ROOT_INFO_H_
 #define incl_HPHP_SOURCE_ROOT_INFO_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/eval/debugger/debugger_base.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/eval/debugger/debugger_base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

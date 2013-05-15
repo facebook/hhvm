@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/complex_types.h"
-#include "util/trace.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 

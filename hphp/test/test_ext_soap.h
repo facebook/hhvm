@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TEST_EXT_SOAP_H_
 #define incl_HPHP_TEST_EXT_SOAP_H_
 
-#include <test/test_cpp_ext.h>
-#include <runtime/ext/ext_soap.h>
+#include "hphp/test/test_cpp_ext.h"
+#include "hphp/runtime/ext/ext_soap.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/time/dateinterval.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/time/dateinterval.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 namespace HPHP {
 

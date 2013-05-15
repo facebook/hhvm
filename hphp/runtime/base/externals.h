@@ -25,8 +25,8 @@
  * runtime/base .cpp files.
  */
 
-#include <runtime/base/types.h>
-#include <runtime/vm/name_value_table_wrapper.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

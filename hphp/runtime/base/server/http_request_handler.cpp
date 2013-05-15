@@ -14,24 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/runtime_option.h>
-#include <util/timer.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/server/dynamic_content_cache.h>
-#include <runtime/base/server/server_stats.h>
-#include <util/network.h>
-#include <runtime/base/preg.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/server/request_uri.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <util/alloc.h>
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/timer.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/server/dynamic_content_cache.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/util/network.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

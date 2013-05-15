@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_TYPE_H_
 #define incl_HPHP_TYPE_H_
 
-#include <compiler/hphp.h>
-#include <util/json.h>
-#include <util/case_insensitive.h>
-#include <runtime/base/types.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/json.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/runtime/base/types.h"
 
 
 class TestCodeRun;

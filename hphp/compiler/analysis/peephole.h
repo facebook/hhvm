@@ -34,8 +34,8 @@
 #ifndef incl_HPHP_COMPILER_ANALYSIS_PEEPHOLE_H_
 #define incl_HPHP_COMPILER_ANALYSIS_PEEPHOLE_H_
 
-#include "runtime/vm/unit.h"
-#include "runtime/vm/func.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/func.h"
 
 namespace HPHP { namespace Compiler {
 

@@ -14,34 +14,34 @@
    +----------------------------------------------------------------------+
 */
 #include <stdint.h>
-#include <strings.h>
+#include "hphp/runtime/base/strings.h"
 
 #include "folly/Format.h"
 #include "folly/Conv.h"
-#include "util/trace.h"
-#include "util/stack_trace.h"
-#include "util/util.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/util.h"
 
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/base/stats.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/stats.h"
 
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
-#include "runtime/vm/translator/hopt/codegen.h"
-#include "runtime/vm/translator/hopt/hhbctranslator.h"
-#include "runtime/vm/translator/hopt/print.h"
-#include "runtime/vm/translator/hopt/check.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h"
+#include "hphp/runtime/vm/translator/hopt/hhbctranslator.h"
+#include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/check.h"
 
 // Include last to localize effects to this file
-#include "util/assert_throw.h"
+#include "hphp/util/assert_throw.h"
 
 namespace HPHP {
 namespace Transl {

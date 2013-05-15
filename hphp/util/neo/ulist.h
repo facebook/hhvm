@@ -11,7 +11,7 @@
 #ifndef incl_HPHP_ULIST_H_
 #define incl_HPHP_ULIST_H_ 1
 
-#include "neo_err.h"
+#include "hphp/util/neo/neo_err.h"
 
 typedef struct _ulist
 {

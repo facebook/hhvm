@@ -13,16 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/type_profile.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/translator/translator.h"
-#include "util/trace.h"
+#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/util/trace.h"
 
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
+#include "sys/types.h"
+#include "sys/stat.h"
+#include "sys/mman.h"
 #include <unistd.h>
 #include <fcntl.h>
 

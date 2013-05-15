@@ -27,14 +27,14 @@ SOFTWARE.
 */
 
 
-#include <runtime/ext/JSON_parser.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/utf8_decode.h>
+#include "hphp/runtime/ext/JSON_parser.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/utf8_decode.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";

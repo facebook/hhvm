@@ -14,25 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/package.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "hphp/compiler/package.h"
+#include "sys/types.h"
+#include "sys/stat.h"
 #include <unistd.h>
 #include <dirent.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/parser/parser.h>
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/option.h>
-#include <util/process.h>
-#include <util/util.h>
-#include <util/logger.h>
-#include <util/json.h>
-#include <util/db_conn.h>
-#include <util/db_query.h>
-#include <util/exception.h>
-#include <util/job_queue.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/process.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/json.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/db_query.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/runtime/base/execution_context.h"
 
 using namespace HPHP;
 using std::set;

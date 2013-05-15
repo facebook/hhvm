@@ -21,10 +21,10 @@
 #include <boost/graph/adjacency_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include <compiler/hphp.h>
+#include "hphp/compiler/hphp.h"
 
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/analysis/bit_set_vec.h>
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/bit_set_vec.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

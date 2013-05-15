@@ -13,25 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/complex_types.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/strings.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/instance.h>
-#include <system/lib/systemlib.h>
-#include <runtime/ext/ext_collections.h>
-#include <util/util.h>
-#include <util/logger.h>
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

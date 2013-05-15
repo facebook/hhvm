@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/policy_array.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/sort_helpers.h>
+#include "hphp/runtime/base/array/policy_array.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/array/sort_helpers.h"
 #include "folly/Foreach.h"
 
 TRACE_SET_MOD(runtime);

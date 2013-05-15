@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_LIST_ASSIGNMENT_H_
 #define incl_HPHP_LIST_ASSIGNMENT_H_
 
-#include <compiler/expression/expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/analysis/variable_table.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/analysis/variable_table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

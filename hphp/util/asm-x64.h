@@ -18,10 +18,10 @@
 
 #include <type_traits>
 
-#include "util/util.h"
-#include "util/base.h"
-#include "util/atomic.h"
-#include "util/trace.h"
+#include "hphp/util/util.h"
+#include "hphp/util/base.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/trace.h"
 
 /*
  * An experimental macro assembler for x64, that strives for low coupling to

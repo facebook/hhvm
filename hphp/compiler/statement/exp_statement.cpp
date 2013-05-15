@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/exp_statement.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/include_expression.h>
-#include <compiler/option.h>
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/option.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/expression/function_call.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/file_scope.h>
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/file_scope.h"
 
 using namespace HPHP;
 

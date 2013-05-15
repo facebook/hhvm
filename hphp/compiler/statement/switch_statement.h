@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_SWITCH_STATEMENT_H_
 #define incl_HPHP_SWITCH_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
-#include <compiler/statement/case_statement.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/case_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

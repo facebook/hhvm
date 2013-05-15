@@ -13,31 +13,31 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "compiler/analysis/control_flow.h"
+#include "hphp/compiler/analysis/control_flow.h"
 
 #include <boost/graph/depth_first_search.hpp>
 
-#include "compiler/analysis/ast_walker.h"
-#include "compiler/analysis/data_flow.h"
-#include "compiler/expression/expression.h"
-#include "compiler/expression/binary_op_expression.h"
-#include "compiler/expression/unary_op_expression.h"
-#include "compiler/expression/qop_expression.h"
-#include "compiler/statement/statement.h"
-#include "compiler/statement/method_statement.h"
-#include "compiler/statement/statement_list.h"
-#include "compiler/statement/if_branch_statement.h"
-#include "compiler/statement/for_statement.h"
-#include "compiler/statement/while_statement.h"
-#include "compiler/statement/do_statement.h"
-#include "compiler/statement/foreach_statement.h"
-#include "compiler/statement/switch_statement.h"
-#include "compiler/statement/break_statement.h"
-#include "compiler/statement/try_statement.h"
-#include "compiler/statement/finally_statement.h"
-#include "compiler/statement/label_statement.h"
-#include "compiler/statement/goto_statement.h"
-#include "compiler/statement/case_statement.h"
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/data_flow.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/statement/while_statement.h"
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/finally_statement.h"
+#include "hphp/compiler/statement/label_statement.h"
+#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/statement/case_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

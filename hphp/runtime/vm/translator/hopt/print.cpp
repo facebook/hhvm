@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/print.h"
 
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
-#include "runtime/vm/translator/hopt/codegen.h"
-#include "runtime/base/stats.h"
-#include "util/disasm.h"
-#include "util/text_color.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/util/disasm.h"
+#include "hphp/util/text_color.h"
 
 namespace HPHP {  namespace JIT {
 

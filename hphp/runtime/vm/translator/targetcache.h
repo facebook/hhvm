@@ -16,10 +16,10 @@
 #ifndef INCL_TARGETCACHE_H_
 #define INCL_TARGETCACHE_H_
 
-#include <runtime/vm/func.h>
-#include <util/util.h>
-#include <runtime/vm/translator/types.h>
-#include <util/asm-x64.h>
+#include "hphp/runtime/vm/func.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/util/asm-x64.h"
 #include <boost/static_assert.hpp>
 
 namespace HPHP {

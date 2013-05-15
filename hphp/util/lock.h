@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_LOCK_H_
 #define incl_HPHP_LOCK_H_
 
-#include "mutex.h"
-#include "synchronizable.h"
-#include "synchronizable_multi.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/synchronizable.h"
+#include "hphp/util/synchronizable_multi.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HHVM_AS_H_
 #define incl_HPHP_HHVM_AS_H_
 
-#include <runtime/base/md5.h>
+#include "hphp/runtime/base/md5.h"
 
 namespace HPHP {
 

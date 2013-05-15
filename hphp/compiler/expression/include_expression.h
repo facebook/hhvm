@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_INCLUDE_EXPRESSION_H_
 #define incl_HPHP_INCLUDE_EXPRESSION_H_
 
-#include <compiler/expression/unary_op_expression.h>
+#include "hphp/compiler/expression/unary_op_expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

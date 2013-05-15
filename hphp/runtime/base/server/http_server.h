@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_HTTP_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_H_
 
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/libevent_server_with_takeover.h>
-#include <util/async_func.h>
-#include <runtime/base/server/service_thread.h>
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/server/service_thread.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

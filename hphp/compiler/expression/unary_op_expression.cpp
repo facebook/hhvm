@@ -14,24 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/object_property_expression.h>
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/option.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/encaps_list_expression.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <compiler/parser/parser.h>
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
 

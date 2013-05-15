@@ -20,16 +20,16 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/translator.h>
-#include <util/asm-x64.h>
-#include <runtime/vm/translator/srcdb.h>
-#include <runtime/vm/translator/unwind-x64.h>
-#include <runtime/vm/translator/regalloc.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/ringbuffer.h>
-#include <runtime/vm/debug/debug.h>
-#include "runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/srcdb.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
+#include "hphp/runtime/vm/translator/regalloc.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
 
 namespace HPHP { class ExecutionContext; }
 

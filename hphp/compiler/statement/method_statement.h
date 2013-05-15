@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_METHOD_STATEMENT_H_
 #define incl_HPHP_METHOD_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

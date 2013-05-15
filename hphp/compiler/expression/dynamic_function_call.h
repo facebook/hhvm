@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_DYNAMIC_FUNCTION_CALL_H_
 #define incl_HPHP_DYNAMIC_FUNCTION_CALL_H_
 
-#include <compiler/expression/function_call.h>
+#include "hphp/compiler/expression/function_call.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

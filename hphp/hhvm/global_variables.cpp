@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/hphp.h"
+#include "hphp/runtime/base/hphp.h"
 
 namespace HPHP {
 

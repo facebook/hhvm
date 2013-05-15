@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_EXPRESSION_H_
 #define incl_HPHP_EXPRESSION_H_
 
-#include <compiler/construct.h>
-#include <compiler/analysis/type.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
   BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf

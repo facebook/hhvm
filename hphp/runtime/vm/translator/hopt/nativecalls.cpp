@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/nativecalls.h"
+#include "hphp/runtime/vm/translator/hopt/nativecalls.h"
 
-#include "runtime/vm/runtime.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-runtime.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 

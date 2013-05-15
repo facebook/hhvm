@@ -18,9 +18,9 @@
 #ifndef incl_HPHP_ZEND_COLLATOR_H_
 #define incl_HPHP_ZEND_COLLATOR_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/request_local.h>
-#include <unicode/coll.h> // icu
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "unicode/coll.h" // icu
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

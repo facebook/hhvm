@@ -18,11 +18,11 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "util/asm-x64.h"
-#include "util/trace.h"
-#include "util/mutex.h"
-#include "translator.h"
-#include "runtime/vm/tread_hash_map.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/mutex.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/tread_hash_map.h"
 
 namespace HPHP {
 namespace Transl {

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/hash/hash_crc32.h>
-#include <runtime/ext/hash/php_hash_crc32_tables.h>
+#include "hphp/runtime/ext/hash/hash_crc32.h"
+#include "hphp/runtime/ext/hash/php_hash_crc32_tables.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

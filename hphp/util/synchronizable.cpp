@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/synchronizable.h"
+#include "hphp/util/synchronizable.h"
 
-#include "util/compatibility.h"
-#include "util/rank.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EXCEPTION_H_
 #define incl_HPHP_EXCEPTION_H_
 
-#include "stack_trace.h"
+#include "hphp/util/stack_trace.h"
 #include <stdarg.h>
 
 namespace HPHP {

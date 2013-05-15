@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/case_statement.h>
-#include <compiler/expression/scalar_expression.h>
+#include "hphp/compiler/statement/case_statement.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/option.h>
+#include "hphp/compiler/option.h"
 
 using namespace HPHP;
 

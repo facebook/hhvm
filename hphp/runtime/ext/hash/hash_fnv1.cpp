@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/hash/hash_fnv1.h>
+#include "hphp/runtime/ext/hash/hash_fnv1.h"
 
 #define PHP_FNV1_32_INIT ((uint32_t)0x811c9dc5)
 #define PHP_FNV_32_PRIME ((uint32_t)0x01000193)

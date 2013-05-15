@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_intl.h>
-#include <runtime/ext/ext_array.h> // for throw_bad_array_exception
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/intl_convert.h>
-#include <runtime/base/zend/zend_collator.h>
-#include <runtime/base/zend/zend_qsort.h>
-#include <unicode/uidna.h>
-#include <unicode/ustring.h>
-#include <unicode/ucol.h> // icu
-#include <unicode/uclean.h> // icu
-#include <unicode/putil.h> // icu
-#include <unicode/utypes.h>
-#include <unicode/unorm.h>
+#include "hphp/runtime/ext/ext_intl.h"
+#include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/intl_convert.h"
+#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/zend/zend_qsort.h"
+#include "unicode/uidna.h"
+#include "unicode/ustring.h"
+#include "unicode/ucol.h" // icu
+#include "unicode/uclean.h" // icu
+#include "unicode/putil.h" // icu
+#include "unicode/utypes.h"
+#include "unicode/unorm.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #ifdef UIDNA_INFO_INITIALIZER
 #define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */

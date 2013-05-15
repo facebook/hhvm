@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_mb.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/ext/php_unicode.h>
-#include <runtime/ext/unicode_data.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/ini_setting.h>
+#include "hphp/runtime/ext/ext_mb.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/ext/php_unicode.h"
+#include "hphp/runtime/ext/unicode_data.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/ini_setting.h"
 
 extern "C" {
-#include <mbfl/mbfl_convert.h>
-#include <mbfl/mbfilter.h>
+#include "mbfl/mbfl_convert.h"
+#include "mbfl/mbfilter.h"
 #include <oniguruma.h>
 }
 

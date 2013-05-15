@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_VM_NAMED_ENTITY_H_
 #define incl_HPHP_VM_NAMED_ENTITY_H_
 
-#include <tbb/concurrent_unordered_map.h>
+#include "tbb/concurrent_unordered_map.h"
 #include <boost/operators.hpp>
 
-#include "runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex_types.h"
 
-#include "util/atomic.h"
+#include "hphp/util/atomic.h"
 
 namespace HPHP {
 

@@ -16,8 +16,8 @@
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
-#include "runtime/base/types.h"
-#include "runtime/vm/hhbc.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
 

@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_MYSQLSTATS_H_
 #define incl_HPHP_MYSQLSTATS_H_
 
-#include <util/base.h>
-#include <util/lock.h>
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

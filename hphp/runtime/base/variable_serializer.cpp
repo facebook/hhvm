@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/complex_types.h>
-#include <util/exception.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 #include <math.h>
 #include <cmath>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

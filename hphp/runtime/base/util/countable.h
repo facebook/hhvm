@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_COUNTABLE_H_
 #define incl_HPHP_COUNTABLE_H_
 
-#include <util/base.h>
-#include <util/util.h>
-#include <util/trace.h>
-#include <util/atomic.h>
+#include "hphp/util/base.h"
+#include "hphp/util/util.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/atomic.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

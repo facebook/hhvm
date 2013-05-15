@@ -17,8 +17,8 @@
 #ifndef TRANS_DATA_H_
 #define TRANS_DATA_H_
 
-#include <util/base.h>
-#include <runtime/vm/translator/types.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/types.h"
 
 #include <vector>
 

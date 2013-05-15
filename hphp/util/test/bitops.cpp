@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/bitops.h"
-#include <gtest/gtest.h>
+#include "hphp/util/bitops.h"
+#include "gtest/gtest.h"
 
 namespace HPHP {
 

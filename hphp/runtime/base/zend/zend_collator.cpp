@@ -14,15 +14,15 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/zend/zend_collator.h>
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/zend/intl_convert.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/zend/intl_convert.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
 namespace HPHP {
 

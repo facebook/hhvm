@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_xml.h>
-#include <runtime/ext/ext_xml.h>
+#include "hphp/test/test_ext_xml.h"
+#include "hphp/runtime/ext/ext_xml.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

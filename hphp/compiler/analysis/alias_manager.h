@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ALIAS_MANAGER_H_
 #define incl_HPHP_ALIAS_MANAGER_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

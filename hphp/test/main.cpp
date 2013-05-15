@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test.h>
-#include <util/logger.h>
-#include <runtime/base/program_functions.h>
+#include "hphp/test/test.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/program_functions.h"
 #include <dlfcn.h>
 
-#include "hhvm/process_init.h"
+#include "hphp/hhvm/process_init.h"
 
 using namespace HPHP;
 

@@ -19,8 +19,8 @@
 #ifndef incl_HPHP_EXT_MEMCACHED_H_
 #define incl_HPHP_EXT_MEMCACHED_H_
 
-#include <runtime/base/base_includes.h>
-#include <libmemcached/memcached.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "libmemcached/memcached.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

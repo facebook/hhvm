@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "timer.h"
-#include "logger.h"
-#include <util/trace.h>
+#include "hphp/util/timer.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

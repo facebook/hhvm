@@ -16,7 +16,7 @@
 #ifndef ANNOTATION_H_
 #define ANNOTATION_H_
 
-#include <runtime/vm/translator/translator.h>
+#include "hphp/runtime/vm/translator/translator.h"
 
 namespace HPHP {
 namespace Transl {

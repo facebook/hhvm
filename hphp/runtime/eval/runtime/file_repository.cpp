@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/process.h>
-#include <util/trace.h>
-#include <runtime/base/stat_cache.h>
-#include <runtime/base/server/source_root_info.h>
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/process.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/server/source_root_info.h"
 
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/pendq.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/runtime.h>
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/pendq.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime.h"
 
 using std::endl;
 

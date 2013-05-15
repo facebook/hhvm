@@ -24,23 +24,23 @@
 
 #include <errno.h>
 #include <string.h>
-#include <strings.h>
+#include "hphp/runtime/base/strings.h"
 #include <unistd.h>
 #include <poll.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include "netinet/in.h"
+#include "arpa/inet.h"
 #include <netdb.h>
 #include <signal.h>
 #include <fcntl.h>
 
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/resource.h>
-#include <sys/utsname.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <sys/poll.h>
+#include "sys/time.h"
+#include "sys/stat.h"
+#include "sys/types.h"
+#include "sys/resource.h"
+#include "sys/utsname.h"
+#include "sys/socket.h"
+#include "sys/wait.h"
+#include "sys/poll.h"
 
 #include <fstream>
 #include <iostream>
@@ -65,8 +65,8 @@
 #include <boost/type_traits.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "util/hash.h"
-#include "util/assertions.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/assertions.h"
 
 #ifdef __INTEL_COMPILER
 #define va_copy __builtin_va_copy

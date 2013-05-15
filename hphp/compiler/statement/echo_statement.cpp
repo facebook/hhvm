@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/echo_statement.h>
-#include <compiler/expression/expression_list.h>
+#include "hphp/compiler/statement/echo_statement.h"
+#include "hphp/compiler/expression/expression_list.h"
 
 using namespace HPHP;
 

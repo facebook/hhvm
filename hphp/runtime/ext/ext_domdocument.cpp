@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_domdocument.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"

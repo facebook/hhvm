@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/construct.h>
-#include <compiler/parser/parser.h>
-#include <util/util.h>
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/util/util.h"
 
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/ast_walker.h>
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/ast_walker.h"
 
-#include <compiler/statement/function_statement.h>
+#include "hphp/compiler/statement/function_statement.h"
 
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/closure_expression.h>
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/closure_expression.h"
 #include <iomanip>
 
 using namespace HPHP;

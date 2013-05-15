@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_apc.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/program_functions.h>
+#include "hphp/test/test_ext_apc.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/program_functions.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

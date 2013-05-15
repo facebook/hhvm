@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_curl.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_zlib.h>
-#include <runtime/base/server/libevent_server.h>
+#include "hphp/test/test_ext_curl.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/base/server/libevent_server.h"
 
 #define PORT_MIN 7100
 #define PORT_MAX 7120

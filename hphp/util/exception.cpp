@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "exception.h"
+#include "hphp/util/exception.h"
 #include "util.h"
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

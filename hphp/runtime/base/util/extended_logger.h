@@ -16,10 +16,10 @@
 #ifndef incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
 #define incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
 
-#include <util/logger.h>
-#include <util/exception.h>
-#include <util/stack_trace.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/util/logger.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

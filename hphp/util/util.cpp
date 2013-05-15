@@ -15,15 +15,15 @@
 */
 
 #include "util.h"
-#include "base.h"
-#include "lock.h"
-#include "logger.h"
-#include "exception.h"
-#include "network.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/network.h"
 
-#include <sys/types.h>
+#include "sys/types.h"
 #include <dirent.h>
-#include <sys/stat.h>
+#include "sys/stat.h"
 #include <fcntl.h>
 #include <libgen.h>
 #include <execinfo.h>

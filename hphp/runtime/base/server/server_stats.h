@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_SERVERSTATS_H_
 #define incl_HPHP_SERVERSTATS_H_
 
-#include <util/lock.h>
-#include <util/thread_local.h>
-#include <curl/curl.h>
+#include "hphp/util/lock.h"
+#include "hphp/util/thread_local.h"
+#include "curl/curl.h"
 #include <time.h>
-#include <runtime/base/shared/shared_string.h>
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/shared/shared_string.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

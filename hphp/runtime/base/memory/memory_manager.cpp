@@ -22,16 +22,16 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/http_server.h>
-#include <util/alloc.h>
-#include <util/process.h>
-#include <util/trace.h>
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/process.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

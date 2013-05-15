@@ -33,12 +33,12 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <sys/time.h>
+#include "sys/time.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
-#include <runtime/ext/hash/hash_murmur.h>
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

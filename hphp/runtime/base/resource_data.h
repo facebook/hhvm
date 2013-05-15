@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_RESOURCE_DATA_H_
 #define incl_HPHP_RESOURCE_DATA_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/vm/instance.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/vm/instance.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

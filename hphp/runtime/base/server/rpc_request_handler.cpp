@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/rpc_request_handler.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/server/request_uri.h>
-#include <runtime/ext/ext_json.h>
-#include <util/process.h>
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/util/process.h"
 
 using std::set;
 

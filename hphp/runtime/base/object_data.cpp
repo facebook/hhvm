@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/execution_context.h>
-#include <util/lock.h>
-#include <runtime/base/class_info.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collections.h>
-#include <runtime/vm/class.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

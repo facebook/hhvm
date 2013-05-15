@@ -15,20 +15,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <util/lock.h>
-#include <runtime/base/file/plain_file.h>
-#include <util/light_process.h>
-#include <util/logger.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/vm/repo.h>
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG

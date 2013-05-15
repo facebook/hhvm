@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_pdo.h>
-#include <runtime/ext/pdo_driver.h>
-#include <runtime/ext/pdo_mysql.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/macros.h>
+#include "hphp/runtime/ext/ext_pdo.h"
+#include "hphp/runtime/ext/pdo_driver.h"
+#include "hphp/runtime/ext/pdo_mysql.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/macros.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \

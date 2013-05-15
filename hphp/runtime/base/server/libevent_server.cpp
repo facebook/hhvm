@@ -16,14 +16,14 @@
 
 #include <atomic>
 
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <util/compatibility.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/logger.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler

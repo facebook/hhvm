@@ -18,8 +18,8 @@
 #define HPHP_STREAM_WRAPPER_H
 
 #include <string>
-#include <runtime/base/types.h>
-#include <runtime/base/file/file.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/file/file.h"
 
 #include <boost/noncopyable.hpp>
 

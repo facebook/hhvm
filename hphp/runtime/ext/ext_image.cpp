@@ -14,13 +14,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext/ext_image.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/runtime_option.h>
-#include <util/min_max_macros.h>
+#include "hphp/runtime/ext/ext_image.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/min_max_macros.h"
 
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */

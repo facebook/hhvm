@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/check.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
-#include "runtime/vm/translator/physreg.h"
+#include "hphp/runtime/vm/translator/hopt/check.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/physreg.h"
 
 namespace HPHP {  namespace JIT {
 

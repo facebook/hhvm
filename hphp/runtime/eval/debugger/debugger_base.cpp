@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_base.h>
-#include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/eval/debugger/break_point.h>
-#include <util/parser/scanner.h>
-#include <util/util.h>
+#include "hphp/runtime/eval/debugger/debugger_base.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
+#include "hphp/runtime/eval/debugger/break_point.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/util.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

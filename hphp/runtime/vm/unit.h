@@ -18,16 +18,16 @@
 #define incl_HPHP_VM_UNIT_H_
 
 // Expects that runtime/vm/core_types.h is already included.
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/repo_helpers.h"
-#include "runtime/vm/named_entity.h"
-#include "runtime/base/array/hphp_array.h"
-#include "util/range.h"
-#include "util/parser/location.h"
-#include "runtime/base/md5.h"
-#include "util/tiny_vector.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/vm/named_entity.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/range.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/runtime/base/md5.h"
+#include "hphp/util/tiny_vector.h"
 
 namespace HPHP {
 // Forward declarations.

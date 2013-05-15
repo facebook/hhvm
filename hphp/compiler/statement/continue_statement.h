@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CONTINUE_STATEMENT_H_
 #define incl_HPHP_CONTINUE_STATEMENT_H_
 
-#include <compiler/statement/break_statement.h>
+#include "hphp/compiler/statement/break_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

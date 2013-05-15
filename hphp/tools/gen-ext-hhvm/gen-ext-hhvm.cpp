@@ -27,7 +27,7 @@
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
 
-#include "idl.h"
+#include "hphp/tools/gen-ext-hhvm/idl.h"
 
 using folly::fbstring;
 
@@ -41,12 +41,12 @@ std::unordered_map<fbstring, const PhpClass*> g_classMap;
 bool g_armMode = false;
 
 constexpr char* g_allIncludes = R"(
-#include "runtime/ext_hhvm/ext_hhvm.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/base/array/array_init.h"
-#include "runtime/ext/ext.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/runtime.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/ext/ext.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/runtime.h"
 #include <exception>
 )";
 

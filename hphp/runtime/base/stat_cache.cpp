@@ -13,18 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stat_cache.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "sys/types.h"
+#include "sys/stat.h"
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/param.h>
+#include "sys/param.h"
 
-#include "util/trace.h"
-#include "util/logger.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/translator/hooks.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/translator/hooks.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

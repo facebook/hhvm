@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/runtime_option.h>
-#include <util/logger.h>
-#include <util/trace.h>
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
 
 /*
  * Enabling these will prevent us from allocating out of the free list

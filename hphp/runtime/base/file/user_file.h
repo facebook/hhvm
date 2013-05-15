@@ -17,7 +17,7 @@
 #ifndef HPHP_USER_FILE_H
 #define HPHP_USER_FILE_H
 
-#include <runtime/base/file/file.h>
+#include "hphp/runtime/base/file/file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

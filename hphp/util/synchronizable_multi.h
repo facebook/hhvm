@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 #define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
-#include "util/base.h"
-#include "util/mutex.h"
-#include "util/rank.h"
+#include "hphp/util/base.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

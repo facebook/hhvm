@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_misc.h>
-#include <runtime/ext/ext_misc.h>
-#include <runtime/ext/ext_string.h>
+#include "hphp/test/test_ext_misc.h"
+#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

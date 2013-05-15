@@ -18,11 +18,11 @@
 #ifndef incl_HPHP_THRIFT_TRANSPORT_H_
 #define incl_HPHP_THRIFT_TRANSPORT_H_
 
-#include <runtime/base/base_includes.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/logger.h"
 
-#include <sys/types.h>
-#include <netinet/in.h>
+#include "sys/types.h"
+#include "netinet/in.h"
 #include <unistd.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>

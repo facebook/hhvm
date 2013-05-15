@@ -17,31 +17,31 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/execution_context.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/vm/event_hook.h>
-#include <runtime/ext/ext_string.h>
-#include <util/logger.h>
-#include <util/process.h>
-#include <util/text_color.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/base/server/server_stats.h>
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/text_color.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/base/server/server_stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

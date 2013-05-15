@@ -18,7 +18,7 @@
 #define incl_HPHP_DB_QUERY_H_
 
 #include <stdarg.h>
-#include "db_filter.h"
+#include "hphp/util/db_filter.h"
 
 namespace HPHP {
 

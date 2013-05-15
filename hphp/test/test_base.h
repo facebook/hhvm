@@ -19,9 +19,9 @@
 
 #include <string>
 #include <assert.h>
-#include <compiler/hphp.h>
-#include <runtime/base/types.h>
-#include <test/test.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/test/test.h"
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////

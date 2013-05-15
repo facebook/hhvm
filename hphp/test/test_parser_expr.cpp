@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_parser_expr.h>
-#include <compiler/option.h>
-#include <util/parser/scanner.h>
+#include "hphp/test/test_parser_expr.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/parser/scanner.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

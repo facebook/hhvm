@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_STATEMENT_H_
 #define incl_HPHP_STATEMENT_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETERS                           \
   BlockScopePtr scope, LocationPtr loc, Statement::KindOf kindOf

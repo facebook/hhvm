@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_NETWORK_H_
 #define incl_HPHP_NETWORK_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 #include <string>
 #include <netdb.h>
-#include <sys/socket.h>
+#include "sys/socket.h"
 #include <stdlib.h>
 
 /**

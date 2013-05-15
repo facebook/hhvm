@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_asio.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
-#include <runtime/ext/ext_spl.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_function.h>
+#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_function.h"
 
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/base/stats.h>
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

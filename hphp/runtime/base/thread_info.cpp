@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/types.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <util/lock.h>
-#include <util/alloc.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
 
 using std::map;
 

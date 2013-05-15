@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/backup_gc.h"
+#include "hphp/runtime/vm/backup_gc.h"
 
 #include <fstream>
 #include <algorithm>
@@ -21,15 +21,15 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 
-#include "util/assertions.h"
-#include "util/timer.h"
-#include "util/trace.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/memory/smart_allocator.h"
-#include "runtime/base/memory/memory_manager.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/vm/class.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 

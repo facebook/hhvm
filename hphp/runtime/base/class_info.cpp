@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <util/util.h>
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/util/util.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

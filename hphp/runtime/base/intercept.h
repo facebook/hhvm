@@ -16,9 +16,9 @@
 #ifndef incl_HPHP_INTERCEPT_H_
 #define incl_HPHP_INTERCEPT_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <util/case_insensitive.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/case_insensitive.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

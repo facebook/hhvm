@@ -19,10 +19,10 @@
 
 #include <stdint.h>
 
-#include "exception.h"
+#include "hphp/util/exception.h"
 
 #ifdef USE_TCMALLOC
-#include <google/malloc_extension.h>
+#include "google/malloc_extension.h"
 #endif
 
 #ifndef USE_JEMALLOC
@@ -39,7 +39,7 @@
 # endif
 #endif
 
-#include <util/maphuge.h>
+#include "hphp/util/maphuge.h"
 
 extern "C" {
 #ifdef USE_TCMALLOC

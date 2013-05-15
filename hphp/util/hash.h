@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-#include <util/util.h>
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

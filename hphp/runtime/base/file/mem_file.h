@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_MEM_FILE_H_
 #define incl_HPHP_MEM_FILE_H_
 
-#include <runtime/base/file/file.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

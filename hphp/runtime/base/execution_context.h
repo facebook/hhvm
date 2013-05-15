@@ -17,21 +17,21 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
 
-#include <runtime/base/class_info.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/debuggable.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/instrumentation.h>
-#include <util/base.h>
-#include <util/lock.h>
-#include <util/thread_local.h>
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/instrumentation.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/thread_local.h"
 #include <setjmp.h>
 
 #define PHP_OUTPUT_HANDLER_START  (1<<0)

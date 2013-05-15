@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_BASE_MD5_H_
 #define incl_HPHP_BASE_MD5_H_
 
-#include <runtime/base/zend/zend_string.h>
-#include <util/util.h>
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 /*

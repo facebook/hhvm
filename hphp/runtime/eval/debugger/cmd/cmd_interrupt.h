@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

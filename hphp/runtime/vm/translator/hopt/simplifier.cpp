@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/simplifier.h"
+#include "hphp/runtime/vm/translator/hopt/simplifier.h"
 
 #include <sstream>
 #include <type_traits>
 
-#include "runtime/base/type_conversions.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
-#include "runtime/vm/runtime.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 namespace JIT {

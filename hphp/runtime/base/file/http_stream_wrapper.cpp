@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/http_stream_wrapper.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/file/url_file.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_stream.h>
+#include "hphp/runtime/base/file/http_stream_wrapper.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/file/url_file.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_stream.h"
 #include <memory>
 
 namespace HPHP {

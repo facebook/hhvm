@@ -21,25 +21,25 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/base/util/extended_logger.h>
-#include <runtime/base/util/simple_counter.h>
-#include <util/util.h>
-#include <util/network.h>
-#include <util/logger.h>
-#include <util/stack_trace.h>
-#include <util/process.h>
-#include <util/file_cache.h>
-#include <runtime/base/hardware_counter.h>
-#include <runtime/base/preg.h>
-#include <util/parser/scanner.h>
-#include <runtime/base/server/access_log.h>
-#include "runtime/base/crash_reporter.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/util/util.h"
+#include "hphp/util/network.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/process.h"
+#include "hphp/util/file_cache.h"
+#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/crash_reporter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

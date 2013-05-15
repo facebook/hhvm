@@ -19,8 +19,8 @@
 #include <vector>
 #include <cstdlib>
 
-#include "util/tiny_vector.h"
-#include "util/pointer_list.h"
+#include "hphp/util/tiny_vector.h"
+#include "hphp/util/pointer_list.h"
 
 namespace HPHP {
 

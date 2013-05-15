@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
 
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/nativecalls.h"
-#include "runtime/vm/translator/hopt/print.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
-#include "runtime/vm/translator/hopt/codegen.h"
-#include "runtime/vm/translator/hopt/state_vector.h"
-#include "runtime/vm/translator/physreg.h"
-#include "runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/nativecalls.h"
+#include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h"
+#include "hphp/runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/runtime/vm/translator/physreg.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
 #include <boost/noncopyable.hpp>
 
 namespace HPHP {

@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_IP_BLOCK_MAP_H_
 #define incl_HPHP_IP_BLOCK_MAP_H_
 
-#include <util/hdf.h>
-#include <runtime/base/types.h>
-#include <netinet/in.h>
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/types.h"
+#include "netinet/in.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

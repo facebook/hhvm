@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ASSERT_THROW_H_
 #define incl_HPHP_ASSERT_THROW_H_
 
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 /*
  * This file replaces assert and always_assert with assert_throw and

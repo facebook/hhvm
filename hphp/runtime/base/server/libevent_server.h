@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_
 
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/libevent_transport.h>
-#include <runtime/base/timeout_thread.h>
-#include <runtime/base/server/job_queue_vm_stack.h>
-#include <util/job_queue.h>
-#include <util/process.h>
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/libevent_transport.h"
+#include "hphp/runtime/base/timeout_thread.h"
+#include "hphp/runtime/base/server/job_queue_vm_stack.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

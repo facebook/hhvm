@@ -17,15 +17,15 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/timeout_thread.h>
-#include <runtime/ext/extension.h>
-#include <util/lock.h>
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/timeout_thread.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/util/lock.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defined in zend/zend_ini.tab.cpp

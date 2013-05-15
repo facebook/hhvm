@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EXT_HHBC_H_
 #define incl_HPHP_EXT_HHBC_H_
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

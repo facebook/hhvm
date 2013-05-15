@@ -15,20 +15,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/zend/zend_pack.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/strings.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_math.h>
-#include <runtime/ext/ext_misc.h>
-#include <runtime/vm/bytecode.h>
-#include <util/parser/scanner.h>
-#include <runtime/base/class_info.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/zend/zend_pack.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 

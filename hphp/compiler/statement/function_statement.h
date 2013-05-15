@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_FUNCTION_STATEMENT_H_
 #define incl_HPHP_FUNCTION_STATEMENT_H_
 
-#include <compiler/statement/method_statement.h>
-#include <compiler/expression/unary_op_expression.h>
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

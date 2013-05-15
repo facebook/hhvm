@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "network.h"
-#include "lock.h"
-#include "process.h"
+#include "hphp/util/network.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/process.h"
 #include "util.h"
 
-#include <netinet/in.h>
-#include <arpa/nameser.h>
+#include "netinet/in.h"
+#include "arpa/nameser.h"
 #include <resolv.h>
 
 namespace HPHP {

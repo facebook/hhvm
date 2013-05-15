@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_iterator.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_splfile.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_iterator.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_splfile.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

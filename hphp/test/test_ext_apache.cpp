@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_apache.h>
-#include <runtime/ext/ext_apache.h>
+#include "hphp/test/test_ext_apache.h"
+#include "hphp/runtime/ext/ext_apache.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

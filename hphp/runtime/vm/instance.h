@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_VM_INSTANCE_H_
 #define incl_HPHP_VM_INSTANCE_H_
 
-#include "runtime/base/complex_types.h"
-#include "runtime/base/memory/smart_allocator.h"
-#include "runtime/base/array/array_init.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/unit.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 

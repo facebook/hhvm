@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/request_local.h>
-#include <runtime/ext/thrift/transport.h>
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/ext/ext_thrift.h>
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/ext_thrift.h"
 
 #include <stack>
 #include <utility>

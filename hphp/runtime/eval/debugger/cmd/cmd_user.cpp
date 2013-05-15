@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_user.h>
-#include <runtime/ext/ext_debugger.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_user.h"
+#include "hphp/runtime/ext/ext_debugger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

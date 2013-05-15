@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_HASH_SNEFRU_H_
 #define incl_HPHP_EXT_HASH_SNEFRU_H_
 
-#include <runtime/ext/hash/hash_engine.h>
+#include "hphp/runtime/ext/hash/hash_engine.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

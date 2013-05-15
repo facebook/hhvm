@@ -15,18 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_scanf.h>
-#include <runtime/base/bstring.h>
-#include <runtime/base/util/request_local.h>
-#include <util/lock.h>
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_scanf.h"
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/util/lock.h"
 #include <locale.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/http_protocol.h>
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/http_protocol.h"
 
 namespace HPHP {
 

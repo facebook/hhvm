@@ -1,11 +1,11 @@
 %{
 #ifdef TEST_PARSER
-#include "util/parser/test/parser.h"
+#include "hphp/util/parser/test/parser.h"
 #else
-#include "compiler/parser/parser.h"
+#include "hphp/compiler/parser/parser.h"
 #endif
-#include "util/util.h"
-#include "util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 // macros for bison
 #define YYSTYPE HPHP::HPHP_PARSER_NS::Token

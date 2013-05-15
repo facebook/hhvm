@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_CONFIG_HDF_H_
 #define incl_HPHP_CONFIG_HDF_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 #include <string>
-#include "exception.h"
-#include "case_insensitive.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/case_insensitive.h"
 #include "neo/neo_hdf.h"
 
 namespace HPHP {

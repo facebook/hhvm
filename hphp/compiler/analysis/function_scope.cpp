@@ -14,31 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/function_call.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/parser/parser.h>
-#include <util/logger.h>
-#include <compiler/option.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/analysis/class_scope.h>
-#include <util/atomic.h>
-#include <util/util.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/util/logger.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 
 using namespace HPHP;
 

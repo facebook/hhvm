@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/type.h>
-#include <compiler/code_generator.h>
-#include <compiler/expression/expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/option.h>
-#include <util/util.h>
-#include <util/hash.h>
-#include <compiler/analysis/class_scope.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/util.h"
+#include "hphp/util/hash.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/runtime/base/complex_types.h"
 
 using namespace HPHP;
 

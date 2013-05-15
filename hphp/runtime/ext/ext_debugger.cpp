@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_debugger.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/eval/debugger/cmd/cmd_user.h>
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/logger.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_debugger.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_user.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/logger.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

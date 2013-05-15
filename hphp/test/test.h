@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TEST_H_
 #define incl_HPHP_TEST_H_
 
-#include <compiler/hphp.h>
-#include <test/test_logger.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/test/test_logger.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

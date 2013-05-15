@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 #define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 
-#include <util/base.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/eval/debugger/debugger_client.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

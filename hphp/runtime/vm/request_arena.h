@@ -18,7 +18,7 @@
 
 #include <boost/aligned_storage.hpp>
 
-#include "util/arena.h"
+#include "hphp/util/arena.h"
 
 namespace HPHP {
 

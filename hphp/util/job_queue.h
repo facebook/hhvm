@@ -19,12 +19,12 @@
 
 #include <vector>
 #include <set>
-#include "util/async_func.h"
-#include "util/synchronizable_multi.h"
-#include "util/lock.h"
-#include "util/atomic.h"
-#include "util/alloc.h"
-#include "util/exception.h"
+#include "hphp/util/async_func.h"
+#include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

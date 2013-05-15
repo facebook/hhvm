@@ -17,16 +17,16 @@
 #ifndef incl_HPHP_COMPILER_EMITTER_H_
 #define incl_HPHP_COMPILER_EMITTER_H_
 
-#include <compiler/expression/expression.h>
-#include <compiler/statement/statement.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include "compiler/statement/typedef_statement.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/typedef_statement.h"
 
-#include <runtime/vm/func.h>
-#include <runtime/vm/unit.h>
-#include <util/hash.h>
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 

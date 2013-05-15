@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 #define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 
-#include <util/base.h>
-#include <util/synchronizable.h>
-#include <util/async_func.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/eval/debugger/dummy_sandbox.h>
-#include <runtime/vm/instrumentation.h>
+#include "hphp/util/base.h"
+#include "hphp/util/synchronizable.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/eval/debugger/dummy_sandbox.h"
+#include "hphp/runtime/vm/instrumentation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

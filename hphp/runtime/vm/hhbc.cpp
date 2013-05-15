@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_variable.h>
-#include <runtime/vm/hhbc.h>
-#include <runtime/vm/unit.h>
-#include <runtime/base/stats.h>
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/stats.h"
 #include <sstream>
 
 namespace HPHP {

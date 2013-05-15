@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/member_operations.h"
-#include "runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 

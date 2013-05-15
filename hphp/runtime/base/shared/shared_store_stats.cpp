@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/shared_store_stats.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/runtime/base/shared/shared_store_stats.h"
+#include "hphp/runtime/base/runtime_option.h"
 
-#include <util/json.h>
+#include "hphp/util/json.h"
 #include <pcre.h>
 
 using std::ostream;

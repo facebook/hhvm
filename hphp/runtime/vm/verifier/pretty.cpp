@@ -18,10 +18,10 @@
 #include <iomanip>
 #include <stdio.h>
 
-#include <runtime/vm/repo.h>
-#include <runtime/vm/verifier/util.h>
-#include <runtime/vm/verifier/pretty.h>
-#include <runtime/vm/verifier/cfg.h>
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/verifier/util.h"
+#include "hphp/runtime/vm/verifier/pretty.h"
+#include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP {
 namespace Verifier {

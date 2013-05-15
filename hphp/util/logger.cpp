@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "logger.h"
-#include "base.h"
-#include "stack_trace.h"
-#include "process.h"
-#include "exception.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/base.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/process.h"
+#include "hphp/util/exception.h"
 #include "util.h"
-#include "text_color.h"
+#include "hphp/util/text_color.h"
 #include <syslog.h>
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                               \

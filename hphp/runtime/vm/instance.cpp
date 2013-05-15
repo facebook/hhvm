@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/instance.h"
-#include "runtime/base/base_includes.h"
-#include "runtime/base/variable_serializer.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/object_allocator_sizes.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/ext/ext_collections.h"
-#include "system/lib/systemlib.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/object_allocator_sizes.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

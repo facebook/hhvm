@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_CLASS_STATEMENT_H_
 #define incl_HPHP_CLASS_STATEMENT_H_
 
-#include <compiler/statement/interface_statement.h>
-#include <compiler/expression/modifier_expression.h>
+#include "hphp/compiler/statement/interface_statement.h"
+#include "hphp/compiler/expression/modifier_expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

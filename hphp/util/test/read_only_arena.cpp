@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/read_only_arena.h"
-#include <gtest/gtest.h>
+#include "hphp/util/read_only_arena.h"
+#include "gtest/gtest.h"
 
 #include <vector>
 

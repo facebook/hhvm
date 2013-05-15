@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/emitter.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/fixup.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <system/lib/systemlib.h>
-#include <util/logger.h>
+#include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext/ext.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/fixup.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/logger.h"
 
 #include <libgen.h> // For dirname(3).
 #include <string>

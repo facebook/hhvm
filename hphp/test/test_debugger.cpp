@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_debugger.h>
-#include <test/test_server.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_preg.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/zend/zend_math.h>
-#include <util/async_func.h>
-#include <util/process.h>
+#include "hphp/test/test_debugger.h"
+#include "hphp/test/test_server.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/util/async_func.h"
+#include "hphp/util/process.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

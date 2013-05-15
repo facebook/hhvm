@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/rank.h>
-#include <util/base.h>
-#include <runtime/vm/pendq.h>
+#include "hphp/util/rank.h"
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/pendq.h"
 
 namespace HPHP {
 

@@ -13,22 +13,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/intercept.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/event_hook.h>
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/event_hook.h"
 
-#include <util/parser/parser.h>
-#include <util/lock.h>
+#include "hphp/util/parser/parser.h"
+#include "hphp/util/lock.h"
 
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <util/trace.h>
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;
 

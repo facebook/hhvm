@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_FUNCTION_CONTAINER_H_
 #define incl_HPHP_FUNCTION_CONTAINER_H_
 
-#include <compiler/hphp.h>
+#include "hphp/compiler/hphp.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

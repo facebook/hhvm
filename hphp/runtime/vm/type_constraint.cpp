@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/base.h>
-#include <util/trace.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/vm/hhbc.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/type_constraint.h>
+#include "hphp/util/base.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/type_constraint.h"
 
 namespace HPHP {
 

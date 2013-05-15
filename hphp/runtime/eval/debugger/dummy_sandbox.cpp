@@ -16,15 +16,15 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <runtime/eval/debugger/dummy_sandbox.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/cmd/cmd_signal.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/hphp_system.h>
-#include <util/logger.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/dummy_sandbox.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_signal.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

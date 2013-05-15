@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/instrumentation.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/vm/instrumentation.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 

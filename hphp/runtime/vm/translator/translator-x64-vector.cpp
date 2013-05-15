@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <util/asm-x64.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-runtime.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/member_operations.h>
-#include <runtime/base/stats.h>
-#include <runtime/base/shared/shared_map.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/shared/shared_map.h"
 
-#include <runtime/vm/translator/translator-x64-internal.h>
+#include "hphp/runtime/vm/translator/translator-x64-internal.h"
 
 #include <memory>
 

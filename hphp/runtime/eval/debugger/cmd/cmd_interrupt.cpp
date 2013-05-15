@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/eval/debugger/cmd/cmd_break.h>
-#include <runtime/eval/debugger/cmd/cmd_print.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_break.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_print.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

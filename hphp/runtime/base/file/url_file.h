@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_URL_FILE_H_
 #define incl_HPHP_URL_FILE_H_
 
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/util/string_buffer.h>
+#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

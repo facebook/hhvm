@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_THREAD_INIT_FINI_H_
 #define incl_HPHP_THREAD_INIT_FINI_H_
 
-#include <runtime/base/hphp_system.h>
+#include "hphp/runtime/base/hphp_system.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

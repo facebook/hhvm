@@ -13,24 +13,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/runtime.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/zend/zend_string.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/ext/ext_closure.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/ext/ext_collections.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/repo.h"
-#include "util/trace.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
-#include "runtime/base/zend/zend_functions.h"
-#include "runtime/ext/ext_string.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
 

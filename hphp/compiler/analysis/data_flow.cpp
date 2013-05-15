@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "compiler/analysis/data_flow.h"
+#include "hphp/compiler/analysis/data_flow.h"
 
-#include "compiler/expression/expression.h"
-#include "compiler/expression/simple_variable.h"
-#include "compiler/expression/binary_op_expression.h"
-#include "compiler/expression/list_assignment.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/list_assignment.h"
 
 using namespace HPHP;
 using std::pair;

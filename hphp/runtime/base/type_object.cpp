@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/strings.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

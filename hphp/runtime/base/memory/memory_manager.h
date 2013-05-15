@@ -18,8 +18,8 @@
 #define incl_HPHP_MEMORY_MANAGER_H_
 
 #include <boost/noncopyable.hpp>
-#include <util/thread_local.h>
-#include <runtime/base/memory/memory_usage_stats.h>
+#include "hphp/util/thread_local.h"
+#include "hphp/runtime/base/memory/memory_usage_stats.h"
 
 #include <vector>
 #include <deque>

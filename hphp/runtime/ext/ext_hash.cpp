@@ -15,26 +15,26 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_hash.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/hash/hash_md.h>
-#include <runtime/ext/hash/hash_sha.h>
-#include <runtime/ext/hash/hash_ripemd.h>
-#include <runtime/ext/hash/hash_whirlpool.h>
-#include <runtime/ext/hash/hash_tiger.h>
-#include <runtime/ext/hash/hash_snefru.h>
-#include <runtime/ext/hash/hash_gost.h>
-#include <runtime/ext/hash/hash_adler32.h>
-#include <runtime/ext/hash/hash_crc32.h>
-#include <runtime/ext/hash/hash_haval.h>
-#include <runtime/ext/hash/hash_fnv1.h>
-#include <runtime/ext/hash/hash_furc.h>
-#include <runtime/ext/hash/hash_murmur.h>
+#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/hash/hash_md.h"
+#include "hphp/runtime/ext/hash/hash_sha.h"
+#include "hphp/runtime/ext/hash/hash_ripemd.h"
+#include "hphp/runtime/ext/hash/hash_whirlpool.h"
+#include "hphp/runtime/ext/hash/hash_tiger.h"
+#include "hphp/runtime/ext/hash/hash_snefru.h"
+#include "hphp/runtime/ext/hash/hash_gost.h"
+#include "hphp/runtime/ext/hash/hash_adler32.h"
+#include "hphp/runtime/ext/hash/hash_crc32.h"
+#include "hphp/runtime/ext/hash/hash_haval.h"
+#include "hphp/runtime/ext/hash/hash_fnv1.h"
+#include "hphp/runtime/ext/hash/hash_furc.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
 #else
-#include <memcache/ch/hash.h>
+#include "memcache/ch/hash.h"
 #endif
 
 namespace HPHP {

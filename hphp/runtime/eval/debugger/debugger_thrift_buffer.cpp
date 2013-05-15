@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

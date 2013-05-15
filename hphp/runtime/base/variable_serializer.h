@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/unit.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

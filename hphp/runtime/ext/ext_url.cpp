@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_url.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_preg.h>
-#include <runtime/ext/ext_options.h>
+#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_options.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

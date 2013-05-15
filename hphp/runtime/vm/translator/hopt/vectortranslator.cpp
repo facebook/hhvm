@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/strings.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/hhbctranslator.h"
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/hhbctranslator.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
 // These files do ugly things with macros so include them last
-#include "util/assert_throw.h"
-#include "runtime/vm/translator/hopt/vectortranslator-internal.h"
+#include "hphp/util/assert_throw.h"
+#include "hphp/runtime/vm/translator/hopt/vectortranslator-internal.h"
 
 namespace HPHP { namespace JIT {
 

@@ -18,8 +18,8 @@
 #ifndef PHP_SDL_H
 #define PHP_SDL_H
 
-#include <runtime/ext/soap/encoding.h>
-#include <runtime/base/util/http_client.h>
+#include "hphp/runtime/ext/soap/encoding.h"
+#include "hphp/runtime/base/util/http_client.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

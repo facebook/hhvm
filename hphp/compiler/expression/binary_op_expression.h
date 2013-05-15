@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_BINARY_OP_EXPRESSION_H_
 #define incl_HPHP_BINARY_OP_EXPRESSION_H_
 
-#include <compiler/expression/expression_list.h>
+#include "hphp/compiler/expression/expression_list.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

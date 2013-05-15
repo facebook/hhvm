@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_ipc.h>
-#include <runtime/ext/ext_ipc.h>
-#include <sys/wait.h>
+#include "hphp/test/test_ext_ipc.h"
+#include "hphp/runtime/ext/ext_ipc.h"
+#include "sys/wait.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

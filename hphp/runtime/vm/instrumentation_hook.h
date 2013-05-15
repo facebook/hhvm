@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_INSTRUMENTATION_HOOK_H_
 #define incl_HPHP_INSTRUMENTATION_HOOK_H_
 
-#include <runtime/vm/instrumentation.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/vm/instrumentation.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 

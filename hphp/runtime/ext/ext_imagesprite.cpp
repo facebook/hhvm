@@ -15,17 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_php_config.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_imagesprite.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_url.h>
+#include "hphp/runtime/base/zend/zend_php_config.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_imagesprite.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_url.h"
 #include <list>
 #include <vector>
 #include <queue>
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

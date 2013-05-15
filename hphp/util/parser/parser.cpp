@@ -15,7 +15,7 @@
 */
 
 #include "parser.h"
-#include <util/hash.h>
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

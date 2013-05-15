@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include <compiler/hphp.h>
-#include <util/string_bag.h>
-#include <runtime/base/class_info.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/string_bag.h"
+#include "hphp/runtime/base/class_info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

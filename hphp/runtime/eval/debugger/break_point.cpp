@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/break_point.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/stat_cache.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/eval/debugger/break_point.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

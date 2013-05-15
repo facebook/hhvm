@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_BZIP2_FILE_H_
 #define incl_HPHP_BZIP2_FILE_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/file/plain_file.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/file/plain_file.h"
 #include <stdio.h>
 #include <bzlib.h>
 

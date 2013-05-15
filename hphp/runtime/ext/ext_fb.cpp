@@ -15,25 +15,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_fb.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_mysql.h>
-#include <util/db_conn.h>
-#include <util/logger.h>
-#include <runtime/base/stat_cache.h>
-#include <netinet/in.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/intercept.h>
-#include <runtime/vm/backup_gc.h>
-#include <unicode/uchar.h>
-#include <unicode/utf8.h>
-#include <runtime/eval/runtime/file_repository.h>
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/stat_cache.h"
+#include "netinet/in.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/vm/backup_gc.h"
+#include "unicode/uchar.h"
+#include "unicode/utf8.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
 
-#include <util/parser/parser.h>
+#include "hphp/util/parser/parser.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(fb);

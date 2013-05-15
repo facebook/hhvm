@@ -24,11 +24,11 @@
 
 #include <boost/static_assert.hpp>
 
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/types.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/type_string.h>
-#include <runtime/base/hphp_value.h>
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/type_string.h"
+#include "hphp/runtime/base/hphp_value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

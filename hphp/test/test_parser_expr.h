@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_TEST_PARSER_EXPR_H_
 #define incl_HPHP_TEST_PARSER_EXPR_H_
 
-#include <test/test_parser.h>
+#include "hphp/test/test_parser.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -18,9 +18,9 @@
 #define incl_HPHP_THREAD_LOCAL_H_
 
 #include <pthread.h>
-#include "exception.h"
+#include "hphp/util/exception.h"
 #include <errno.h>
-#include <util/util.h>
+#include "hphp/util/util.h"
 #include <boost/aligned_storage.hpp>
 
 namespace HPHP {

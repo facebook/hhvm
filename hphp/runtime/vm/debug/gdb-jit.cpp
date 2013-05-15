@@ -15,11 +15,11 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+#include "sys/mman.h"
 
-#include "gdb-jit.h"
-#include <util/lock.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/vm/debug/gdb-jit.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/execution_context.h"
 
 using namespace HPHP;
 

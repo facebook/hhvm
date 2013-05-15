@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_LIVE_DICT_H_
 #define incl_HPHP_LIVE_DICT_H_
 
-#include <compiler/analysis/dictionary.h>
+#include "hphp/compiler/analysis/dictionary.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_USER_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_USER_H_
 
-#include <runtime/eval/debugger/cmd/cmd_extended.h>
-#include <util/lock.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extended.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

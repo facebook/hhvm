@@ -20,9 +20,9 @@
 #include <string>
 #include <vector>
 
-#include "util/debug.h"
-#include "util/util.h"
-#include "util/trace.h"
+#include "hphp/util/debug.h"
+#include "hphp/util/util.h"
+#include "hphp/util/trace.h"
 
 #ifndef DEBUG
 /*
@@ -35,7 +35,7 @@
 using std::string;
 using std::vector;
 
-#include "php_debug.h"
+#include "hphp/runtime/vm/php_debug.h"
 
 namespace HPHP {
 

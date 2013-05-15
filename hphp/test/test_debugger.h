@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TEST_DEBUGGER_H_
 #define incl_HPHP_TEST_DEBUGGER_H_
 
-#include <test/test_base.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/test/test_base.h"
+#include "hphp/runtime/base/complex_types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

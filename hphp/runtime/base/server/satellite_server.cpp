@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/rpc_request_handler.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/preg.h>
-#include <util/util.h>
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/util.h"
 
 using std::set;
 

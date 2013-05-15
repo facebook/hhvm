@@ -20,7 +20,7 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
-#include "compiler/statement/statement.h"
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////

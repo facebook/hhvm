@@ -18,8 +18,8 @@
 #define incl_HPHP_UTIL_PARSER_SCANNER_H_
 
 #include <sstream>
-#include <util/exception.h>
-#include <util/parser/location.h>
+#include "hphp/util/exception.h"
+#include "hphp/util/parser/location.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {

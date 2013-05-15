@@ -13,27 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/embedded_vfs.h"
+#include "hphp/util/embedded_vfs.h"
 
 /*
  * based on test_demovfs.c and test_multiplex.c in sqlite3
  */
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "sys/types.h"
+#include "sys/stat.h"
 #include <fcntl.h>
 
 
 #ifndef SQLITE_CORE
   #define SQLITE_CORE 1  /* Disable the API redefinition in sqlite3ext.h */
 #endif
-#include "sqlite3ext.h"
+#include <sqlite3ext.h>
 
 namespace HPHP {
 

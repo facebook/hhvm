@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/server/server_stats.h>
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/server/server_stats.h"
 #include <stdlib.h>
-#include <tbb/concurrent_hash_map.h>
-#include <runtime/base/runtime_option.h>
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/runtime/base/runtime_option.h"
 #ifdef GOOGLE_HEAP_PROFILER
-#include <util/atomic.h>
-#include <google/malloc_hook.h>
+#include "hphp/util/atomic.h"
+#include "google/malloc_hook.h"
 #endif
 
 namespace HPHP {

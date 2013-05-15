@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_hash.h>
-#include <runtime/ext/ext_hash.h>
+#include "hphp/test/test_ext_hash.h"
+#include "hphp/runtime/ext/ext_hash.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

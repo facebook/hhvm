@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_fb.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/zend_math.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/vm/event_hook.h>
-#include <util/alloc.h>
-#include <util/vdso.h>
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/vdso.h"
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>

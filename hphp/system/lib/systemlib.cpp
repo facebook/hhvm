@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <system/lib/systemlib.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/instance.h>
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/instance.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

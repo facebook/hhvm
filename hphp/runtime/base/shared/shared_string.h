@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 #define incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 
-#include <util/base.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/atomic.h>
-#include <util/atomic.h>
-#include <util/hash.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/atomic.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

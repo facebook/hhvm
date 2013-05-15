@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_SERVER_H_
 
-#include <runtime/base/server/transport.h>
-#include <util/exception.h>
-#include <util/lock.h>
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/lock.h"
 
 /**
  * (1) For people who want to quickly come up with an HTTP server handling

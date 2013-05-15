@@ -15,22 +15,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_soap.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/class_info.h>
-#include <runtime/ext/soap/soap.h>
-#include <runtime/ext/soap/packet.h>
-#include <runtime/base/string_util.h>
-#include <runtime/ext/ext_zlib.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_stream.h>
+#include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/soap/packet.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_stream.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

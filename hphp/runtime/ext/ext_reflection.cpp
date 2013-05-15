@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/string_util.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

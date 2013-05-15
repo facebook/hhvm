@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/time/timestamp.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/time/datetime.h>
+#include "hphp/runtime/base/time/timestamp.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/time/datetime.h"
 #include <timelib.h>
 
 namespace HPHP {

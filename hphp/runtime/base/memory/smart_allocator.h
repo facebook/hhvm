@@ -20,14 +20,14 @@
 #include <boost/noncopyable.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
-#include <util/base.h>
-#include <util/thread_local.h>
-#include <util/stack_trace.h>
-#include <util/lock.h>
-#include <runtime/base/types.h>
-#include <runtime/base/util/countable.h>
-#include <runtime/base/memory/memory_usage_stats.h>
-#include <util/trace.h>
+#include "hphp/util/base.h"
+#include "hphp/util/thread_local.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/memory/memory_usage_stats.h"
+#include "hphp/util/trace.h"
 #include <typeinfo>
 
 namespace HPHP {

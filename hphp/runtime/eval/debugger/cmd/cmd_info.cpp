@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_info.h>
-#include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/base/preg.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_info.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_variable.h"
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

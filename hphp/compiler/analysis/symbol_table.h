@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_SYMBOL_TABLE_H_
 #define incl_HPHP_SYMBOL_TABLE_H_
 
-#include <compiler/hphp.h>
-#include <util/json.h>
-#include <util/util.h>
-#include <util/lock.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/json.h"
+#include "hphp/util/util.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

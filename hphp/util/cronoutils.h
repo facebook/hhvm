@@ -90,8 +90,8 @@
 #include <direct.h>
 #endif
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "sys/types.h"
+#include "sys/stat.h"
 
 
 #if TIME_WITH_SYS_TIME

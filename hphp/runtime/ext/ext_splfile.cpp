@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_splfile.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/runtime/ext/ext_splfile.h"
+#include "hphp/runtime/ext/ext_file.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SPL);

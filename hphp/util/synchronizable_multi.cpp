@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "synchronizable_multi.h"
-#include "compatibility.h"
+#include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/compatibility.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

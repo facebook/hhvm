@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_VM_MEMBER_OPERATIONS_H_
 #define incl_HPHP_VM_MEMBER_OPERATIONS_H_
 
-#include "runtime/base/types.h"
-#include "runtime/base/strings.h"
-#include "system/lib/systemlib.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 

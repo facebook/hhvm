@@ -18,10 +18,10 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "util/trace.h"
-#include "util/asm-x64.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/translator/physreg.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/physreg.h"
 
 namespace HPHP { namespace Transl {
 

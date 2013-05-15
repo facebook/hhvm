@@ -18,8 +18,8 @@
 #include "folly/Format.h"
 #include "folly/experimental/Gen.h"
 
-#include "util/trace.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
 
 using namespace HPHP::Transl;
 

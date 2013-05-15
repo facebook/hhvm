@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/util.h"
+#include "hphp/util/util.h"
 
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/eval/debugger/break_point.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/debugger_hook.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/eval/debugger/break_point.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

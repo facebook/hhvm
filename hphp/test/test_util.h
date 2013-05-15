@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TEST_UTIL_H_
 #define incl_HPHP_TEST_UTIL_H_
 
-#include <test/test_base.h>
-#include <util/base.h>
+#include "hphp/test/test_base.h"
+#include "hphp/util/base.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

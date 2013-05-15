@@ -36,17 +36,17 @@
 #include "folly/Range.h"
 #include "folly/Conv.h"
 
-#include "util/asm-x64.h"
-#include "util/trace.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/vm/translator/physreg.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/translator/types.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/translator-runtime.h"
-#include "runtime/base/types.h"
-#include "runtime/vm/func.h"
-#include "runtime/vm/class.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/vm/translator/physreg.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 // forward declaration

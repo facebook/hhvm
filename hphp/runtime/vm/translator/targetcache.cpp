@@ -15,22 +15,22 @@
 */
 #include <string>
 #include <stdio.h>
-#include <sys/mman.h>
+#include "sys/mman.h"
 
-#include <util/trace.h>
-#include <util/base.h>
-#include <util/maphuge.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/types.h>
-#include <runtime/base/strings.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/translator/annotation.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/base/stats.h>
+#include "hphp/util/trace.h"
+#include "hphp/util/base.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/annotation.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/stats.h"
 
 using namespace HPHP::MethodLookup;
 using namespace HPHP::Util;

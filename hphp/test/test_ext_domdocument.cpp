@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_domdocument.h>
-#include <runtime/ext/ext_domdocument.h>
+#include "hphp/test/test_ext_domdocument.h"
+#include "hphp/runtime/ext/ext_domdocument.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

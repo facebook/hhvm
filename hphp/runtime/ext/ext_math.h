@@ -18,9 +18,9 @@
 #ifndef incl_HPHP_EXT_MATH_H_
 #define incl_HPHP_EXT_MATH_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_math.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_math.h"
 #include <math.h>
 
 #if defined(__APPLE__)

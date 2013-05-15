@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_UTIL_TEXT_ART_H_
 #define incl_HPHP_UTIL_TEXT_ART_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP { namespace Util { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////

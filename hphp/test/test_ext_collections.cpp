@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_collections.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/test/test_ext_collections.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Collection);
 ///////////////////////////////////////////////////////////////////////////////

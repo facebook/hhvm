@@ -13,15 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/base/crash_reporter.h"
-#include "util/stack_trace.h"
-#include "util/light_process.h"
-#include "util/logger.h"
+#include "hphp/runtime/base/crash_reporter.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/logger.h"
 
-#include "runtime/base/program_functions.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/ext/ext_error.h"
-#include "runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
 
 namespace HPHP {
 

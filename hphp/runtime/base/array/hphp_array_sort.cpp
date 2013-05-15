@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/array/sort_helpers.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/sort_helpers.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

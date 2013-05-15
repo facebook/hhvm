@@ -19,7 +19,7 @@
 #ifndef incl_HPHP_TEST_EXT_MEMCACHED_H_
 #define incl_HPHP_TEST_EXT_MEMCACHED_H_
 
-#include <test/test_cpp_ext.h>
+#include "hphp/test/test_cpp_ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

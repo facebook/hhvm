@@ -24,9 +24,9 @@
 #include <boost/type_traits/has_trivial_assign.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <algorithm>
-#include "util/alloc.h"
-#include "util/assertions.h"
-#include "util/compact_sized_ptr.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/compact_sized_ptr.h"
 
 namespace HPHP {
 

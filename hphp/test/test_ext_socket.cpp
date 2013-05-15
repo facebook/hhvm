@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_socket.h>
-#include <runtime/ext/ext_socket.h>
-#include <runtime/ext/ext_network.h>
+#include "hphp/test/test_ext_socket.h"
+#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/ext_network.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

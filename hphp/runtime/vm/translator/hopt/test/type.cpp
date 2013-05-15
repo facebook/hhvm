@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
-#include "util/base.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
 
 namespace std { namespace tr1 {
   template<> struct hash<HPHP::JIT::Type> {

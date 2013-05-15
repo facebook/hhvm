@@ -21,8 +21,8 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <utility>
-#include "util/util.h"
-#include "util/atomic.h"
+#include "hphp/util/util.h"
+#include "hphp/util/atomic.h"
 
 namespace HPHP {
 

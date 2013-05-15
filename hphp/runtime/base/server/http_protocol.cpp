@@ -15,21 +15,21 @@
 */
 
 
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/server/request_uri.h>
-#include <runtime/base/server/transport.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <runtime/base/server/upload.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/util/http_client.h>
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/util/http_client.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 

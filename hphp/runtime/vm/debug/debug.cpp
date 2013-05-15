@@ -14,19 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/execution_context.h"
 
 #include "debug.h"
-#include "gdb-jit.h"
-#include "elfwriter.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
+#include "hphp/runtime/vm/debug/elfwriter.h"
 
-#include <sys/types.h>
+#include "sys/types.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
-#include <runtime/vm/translator/translator-x64.h>
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
 using namespace HPHP::Transl;
 

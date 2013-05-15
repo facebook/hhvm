@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/type_annotation.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <util/util.h>
-#include <compiler/option.h>
-#include <compiler/expression/constant_expression.h>
+#include "hphp/compiler/type_annotation.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/util/util.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/constant_expression.h"
 
 using namespace HPHP;
 

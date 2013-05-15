@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

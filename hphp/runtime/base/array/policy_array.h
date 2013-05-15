@@ -17,11 +17,11 @@
 #ifndef HPHP_POLICY_ARRAY_H_
 #define HPHP_POLICY_ARRAY_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/complex_types.h>
-#include <util/trace.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

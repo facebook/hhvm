@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_COMPILER_PARSER_H_
 #define incl_HPHP_COMPILER_PARSER_H_
 
-#include "runtime/base/util/exceptions.h"
-#include "util/parser/parser.h"
-#include "compiler/construct.h"
-#include "compiler/option.h"
-#include "compiler/type_annotation.h"
-#include "compiler/expression/scalar_expression.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/util/parser/parser.h"
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/type_annotation.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS

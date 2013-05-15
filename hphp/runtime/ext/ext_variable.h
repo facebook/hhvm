@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_VARIABLE_H_
 #define incl_HPHP_VARIABLE_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

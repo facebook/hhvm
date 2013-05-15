@@ -19,17 +19,17 @@
 
 #include <boost/optional.hpp>
 
-#include "util/util.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/class_info.h"
-#include "runtime/base/array/array_iterator.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/instance.h"
-#include "runtime/vm/unit.h"
-#include "runtime/vm/name_value_table.h"
-#include "runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/name_value_table.h"
+#include "hphp/runtime/vm/request_arena.h"
 
 namespace HPHP {
 

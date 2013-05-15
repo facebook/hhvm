@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/files_match.h>
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/files_match.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

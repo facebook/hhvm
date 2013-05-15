@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_FUNC_DICT_H_
 #define incl_HPHP_VM_FUNC_DICT_H_
 
-#include <runtime/vm/func.h>
+#include "hphp/runtime/vm/func.h"
 
 namespace HPHP {
 

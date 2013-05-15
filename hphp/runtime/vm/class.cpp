@@ -13,25 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/class.h"
+#include "hphp/runtime/vm/class.h"
 
-#include "runtime/vm/class.h"
-#include "runtime/base/base_includes.h"
-#include "runtime/base/array/hphp_array.h"
-#include "util/util.h"
-#include "util/debug.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/treadmill.h"
-#include "runtime/vm/name_value_table.h"
-#include "runtime/vm/name_value_table_wrapper.h"
-#include "runtime/vm/request_arena.h"
-#include "system/lib/systemlib.h"
-#include "util/logger.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/util.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/name_value_table.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/logger.h"
 
 #include <boost/checked_delete.hpp>
 #include <boost/optional.hpp>

@@ -14,27 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/builtin_symbols.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/type.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/option.h>
-#include <compiler/parser/parser.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/constant_table.h>
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <runtime/base/class_info.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/thread_init_fini.h>
-#include <util/logger.h>
-#include <util/util.h>
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
 #include <dlfcn.h>
 
 using namespace HPHP;

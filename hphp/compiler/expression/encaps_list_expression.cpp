@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/encaps_list_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/analysis/code_error.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 using namespace HPHP;
 

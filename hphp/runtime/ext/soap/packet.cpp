@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_soap.h>
-#include <runtime/ext/soap/packet.h>
+#include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/ext/soap/packet.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

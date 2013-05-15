@@ -24,7 +24,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <runtime/ext/hash/hash_murmur.h>
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 
 namespace HPHP {
 

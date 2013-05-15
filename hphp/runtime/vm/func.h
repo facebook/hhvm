@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/type_constraint.h"
-#include "runtime/vm/repo_helpers.h"
-#include "runtime/vm/indexed_string_map.h"
-#include "runtime/base/intercept.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/base/intercept.h"
 
 namespace HPHP {
 

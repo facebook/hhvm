@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/foreach_statement.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/option.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <util/util.h>
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/util/util.h"
 
 using namespace HPHP;
 

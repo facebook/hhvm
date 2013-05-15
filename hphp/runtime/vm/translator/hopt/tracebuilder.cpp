@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
 
 #include "folly/ScopeGuard.h"
 
-#include "util/trace.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {
 namespace JIT {

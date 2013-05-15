@@ -13,16 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
-#include <runtime/eval/debugger/cmd/cmd_signal.h>
-#include <runtime/eval/debugger/cmd/cmd_machine.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/vm/debugger_hook.h>
-#include <util/process.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_flow_control.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_signal.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_machine.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/util/process.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

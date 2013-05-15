@@ -18,8 +18,8 @@
 #ifndef PHP_ENCODING_H
 #define PHP_ENCODING_H
 
-#include <runtime/ext/soap/xml.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/ext/soap/xml.h"
+#include "hphp/runtime/base/complex_types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

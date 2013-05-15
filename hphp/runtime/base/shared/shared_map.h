@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_SHARED_MAP_H_
 #define incl_HPHP_SHARED_MAP_H_
 
-#include <util/shared_memory_allocator.h>
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/util/shared_memory_allocator.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

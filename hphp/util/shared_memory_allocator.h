@@ -26,7 +26,7 @@
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 

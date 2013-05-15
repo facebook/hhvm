@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_url.h>
-#include <runtime/ext/ext_url.h>
-#include <system/lib/systemlib.h>
+#include "hphp/test/test_ext_url.h"
+#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/system/lib/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

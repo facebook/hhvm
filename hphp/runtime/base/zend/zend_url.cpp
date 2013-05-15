@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

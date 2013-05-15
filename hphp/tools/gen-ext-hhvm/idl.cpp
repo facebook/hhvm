@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "idl.h"
+#include "hphp/tools/gen-ext-hhvm/idl.h"
 
 #include <fstream>
 #include <unordered_map>

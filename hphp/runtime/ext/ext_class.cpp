@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_class.h>
-#include <runtime/base/class_info.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <util/util.h>
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 

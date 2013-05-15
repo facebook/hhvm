@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/php_stream_wrapper.h>
-#include <runtime/base/file/plain_file.h>
-#include <runtime/base/file/temp_file.h>
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/file/output_file.h>
+#include "hphp/runtime/base/file/php_stream_wrapper.h"
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/file/temp_file.h"
+#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/file/output_file.h"
 #include <memory>
 
 namespace HPHP {

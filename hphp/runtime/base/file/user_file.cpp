@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/user_file.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/vm/instance.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/base/file/user_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 

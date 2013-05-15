@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_FIXED_STRING_MAP_H_
 #define incl_HPHP_FIXED_STRING_MAP_H_
 
-#include <util/base.h>
-#include <runtime/base/string_data.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/string_data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

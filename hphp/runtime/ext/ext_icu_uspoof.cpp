@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_icu_uspoof.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/ext/ext_icu_uspoof.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);

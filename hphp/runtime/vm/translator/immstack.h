@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_IMMSTACK_H_
 #define incl_HPHP_IMMSTACK_H_
 
-#include <runtime/vm/bytecode.h>
+#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

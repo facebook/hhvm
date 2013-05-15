@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/do_statement.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 using namespace HPHP;
 

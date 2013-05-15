@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/string_data.h>
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/util/exceptions.h>
-#include <util/alloc.h>
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/util/alloc.h"
 #include <math.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <tbb/concurrent_hash_map.h>
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {
 

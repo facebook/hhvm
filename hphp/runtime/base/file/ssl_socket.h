@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_SSL_SOCKET_H_
 #define incl_HPHP_SSL_SOCKET_H_
 
-#include <runtime/base/file/socket.h>
-#include <util/lock.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/util/lock.h"
+#include "openssl/ssl.h"
+#include "openssl/x509.h"
+#include "openssl/err.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

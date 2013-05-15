@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/cmd/all.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/cmd/all.h"
+#include "hphp/util/logger.h"
 
 #define POLLING_SECONDS 1
 

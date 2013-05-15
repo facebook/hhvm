@@ -21,11 +21,11 @@
 #include <memory>
 #include <stack>
 
-#include "util/assertions.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
 
 using HPHP::Transl::SrcKey;
 using HPHP::Transl::NormalizedInstruction;

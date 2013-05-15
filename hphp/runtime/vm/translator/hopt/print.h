@@ -18,8 +18,8 @@
 #define incl_HPHP_VM_PRINT_H_
 
 #include <iosfwd>
-#include "util/trace.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
 
 namespace HPHP {
 namespace JIT {

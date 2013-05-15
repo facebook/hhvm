@@ -14,28 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/expression.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/parser/parser.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/parser/parser.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <util/util.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/expression/function_call.h>
-#include <compiler/analysis/file_scope.h>
-#include <util/hash.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/util/util.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/util/hash.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
 using namespace HPHP;
 

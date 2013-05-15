@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_XBOX_SERVER_H_
 #define incl_HPHP_XBOX_SERVER_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/satellite_server.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/satellite_server.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

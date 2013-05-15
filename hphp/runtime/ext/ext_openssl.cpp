@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_openssl.h>
-#include <runtime/base/file/ssl_socket.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/runtime/base/file/ssl_socket.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/logger.h"
 
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/crypto.h>
-#include <openssl/pem.h>
-#include <openssl/err.h>
-#include <openssl/conf.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/pkcs12.h>
+#include "openssl/evp.h"
+#include "openssl/x509.h"
+#include "openssl/x509v3.h"
+#include "openssl/crypto.h"
+#include "openssl/pem.h"
+#include "openssl/err.h"
+#include "openssl/conf.h"
+#include "openssl/rand.h"
+#include "openssl/ssl.h"
+#include "openssl/pkcs12.h"
 
 namespace HPHP {
 

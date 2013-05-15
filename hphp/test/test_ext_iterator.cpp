@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_iterator.h>
-#include <runtime/ext/ext_iterator.h>
+#include "hphp/test/test_ext_iterator.h"
+#include "hphp/runtime/ext/ext_iterator.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/arena.h"
-#include "util/util.h"
-#include "util/assertions.h"
-#include "util/malloc_size_class.h"
+#include "hphp/util/arena.h"
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/malloc_size_class.h"
 
 namespace HPHP {
 

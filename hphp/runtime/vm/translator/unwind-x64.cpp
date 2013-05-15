@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/unwind-x64.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
 #include <libunwind.h>
 #include <unwind.h>
 #include <vector>
 #include <memory>
 #include <boost/mpl/identity.hpp>
 
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/runtime.h"
 
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format

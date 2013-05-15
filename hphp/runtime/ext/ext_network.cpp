@@ -15,20 +15,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <util/lock.h>
-#include <runtime/base/file/file.h>
-#include <netinet/in.h>
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/file/file.h"
+#include "netinet/in.h"
 #include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "arpa/nameser.h"
 #include <resolv.h>
-#include <util/network.h>
+#include "hphp/util/network.h"
 
 #if defined(__APPLE__)
 # include <arpa/nameser_compat.h>

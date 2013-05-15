@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_server.h>
-#include <compiler/parser/parser.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/analysis_result.h>
-#include <util/util.h>
-#include <util/process.h>
-#include <compiler/option.h>
-#include <util/async_func.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/test/test_server.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 using namespace HPHP;
 

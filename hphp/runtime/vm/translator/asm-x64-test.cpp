@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "util/asm-x64.h"
+#include "hphp/util/asm-x64.h"
 
 namespace HPHP {
 namespace Transl {

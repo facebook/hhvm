@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_SATELLITE_SERVER_H_
 #define incl_HPHP_SATELLITE_SERVER_H_
 
-#include <util/hdf.h>
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

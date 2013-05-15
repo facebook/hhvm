@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_COMPARISONS_H_
 #define incl_HPHP_COMPARISONS_H_
 
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

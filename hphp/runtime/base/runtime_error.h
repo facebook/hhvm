@@ -20,7 +20,7 @@
 #include <cstdarg>
 #include <string>
 
-#include "util/base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

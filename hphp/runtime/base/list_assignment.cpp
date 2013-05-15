@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/list_assignment.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/list_assignment.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

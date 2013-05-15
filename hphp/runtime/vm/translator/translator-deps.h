@@ -18,14 +18,14 @@
 #define incl_HPHP_TRANSLATOR_DEPS_H
 
 #include <vector>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/string_data.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/translator/translator.h>
-#include <util/mutex.h>
-#include <util/trace.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/trace.h"
 
 // Invalidation tracking for constants
 

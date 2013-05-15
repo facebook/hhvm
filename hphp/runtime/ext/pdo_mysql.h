@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PDO_MYSQL_H_
 #define incl_HPHP_PDO_MYSQL_H_
 
-#include <runtime/ext/pdo_driver.h>
+#include "hphp/runtime/ext/pdo_driver.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,8 +21,8 @@
 #include <mutex>
 #include <boost/noncopyable.hpp>
 
-#include "util/tiny_vector.h"
-#include "util/alloc.h"
+#include "hphp/util/tiny_vector.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 

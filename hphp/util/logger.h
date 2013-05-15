@@ -20,8 +20,8 @@
 #include <atomic>
 #include <string>
 #include <stdarg.h>
-#include <util/thread_local.h>
-#include <util/cronolog.h>
+#include "hphp/util/thread_local.h"
+#include "hphp/util/cronolog.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_VM_LINEAR_SCAN_H_
 #define incl_HPHP_VM_LINEAR_SCAN_H_
 
-#include "runtime/vm/translator/hopt/state_vector.h"
-#include "runtime/vm/translator/physreg.h"
-#include "runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/runtime/vm/translator/physreg.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
 
 namespace HPHP {  namespace JIT {
 

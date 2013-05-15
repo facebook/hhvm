@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_apache.h>
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_note.h>
-#include <runtime/base/server/transport.h>
+#include "hphp/runtime/ext/ext_apache.h"
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_note.h"
+#include "hphp/runtime/base/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_THRIFT_BUFFER_H_
 #define incl_HPHP_THRIFT_BUFFER_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
-#include <arpa/inet.h>
+#include "arpa/inet.h"
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
 # elif defined(__APPLE__)

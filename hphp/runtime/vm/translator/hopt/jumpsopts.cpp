@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {  namespace JIT {
 

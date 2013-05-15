@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_PHP_THRIFT_BUFFER_H_
 #define incl_HPHP_PHP_THRIFT_BUFFER_H_
 
-#include <runtime/base/util/thrift_buffer.h>
+#include "hphp/runtime/base/util/thrift_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

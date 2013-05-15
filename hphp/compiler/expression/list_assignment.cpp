@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/list_assignment.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/binary_op_expression.h>
+#include "hphp/compiler/expression/list_assignment.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;

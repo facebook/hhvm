@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_UTIL_PARSER_PARSER_H_
 #define incl_HPHP_UTIL_PARSER_PARSER_H_
 
-#include <util/parser/scanner.h>
-#include <util/lock.h>
-#include <util/case_insensitive.h>
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/case_insensitive.h"
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \

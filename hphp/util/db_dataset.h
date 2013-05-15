@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_DB_DATASET_H_
 #define incl_HPHP_DB_DATASET_H_
 
-#include "dataset.h"
+#include "hphp/util/dataset.h"
 
 namespace HPHP {
 

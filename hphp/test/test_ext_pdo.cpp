@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_pdo.h>
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/ext/ext_pdo.h>
-#include <runtime/ext/ext_sqlite3.h>
-#include <runtime/ext/ext_file.h>
-#include <hphp/test/test_mysql_info.h>
+#include "hphp/test/test_ext_pdo.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/ext_pdo.h"
+#include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/test/test_mysql_info.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Pdo);
 ///////////////////////////////////////////////////////////////////////////////

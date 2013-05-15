@@ -17,23 +17,23 @@
 #include <sstream>
 #include <cmath>
 #include <limits.h>
-#include <compiler/expression/scalar_expression.h>
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <util/util.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/parser/parser.h>
-#include <util/hash.h>
-#include <runtime/base/string_data.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/ext/ext_variable.h>
-#include <compiler/analysis/file_scope.h>
+#include "hphp/util/util.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/util/hash.h"
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/compiler/analysis/file_scope.h"
 
 using namespace HPHP;
 

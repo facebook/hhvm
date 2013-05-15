@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/file/url_file.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/runtime_error.h>
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/file/url_file.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 namespace HPHP {
 

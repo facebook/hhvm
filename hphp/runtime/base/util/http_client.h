@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_HTTP_CLIENT_H_
 #define incl_HPHP_HTTP_CLIENT_H_
 
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/server/transport.h>
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

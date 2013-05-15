@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/option.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <util/parser/scanner.h>
-#include <util/logger.h>
-#include <util/db_query.h>
-#include <util/util.h>
-#include <util/process.h>
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/db_query.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
 #include <boost/algorithm/string/trim.hpp>
-#include <runtime/base/preg.h>
+#include "hphp/runtime/base/preg.h"
 
 using namespace HPHP;
 

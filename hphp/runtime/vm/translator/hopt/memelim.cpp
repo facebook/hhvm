@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/trace.h"
-#include "util/asm-x64.h"
-#include "runtime/base/util/countable.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/simplifier.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/simplifier.h"
 
 namespace HPHP {
 namespace JIT {

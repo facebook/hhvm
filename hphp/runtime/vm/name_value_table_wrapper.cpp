@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/name_value_table_wrapper.h"
-#include "runtime/base/array/array_iterator.h"
-#include "runtime/base/array/array_init.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/array_init.h"
 
 namespace HPHP {
 

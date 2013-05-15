@@ -16,12 +16,12 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "util/trace.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/simplifier.h"
-#include "runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/simplifier.h"
+#include "hphp/runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
 namespace JIT {

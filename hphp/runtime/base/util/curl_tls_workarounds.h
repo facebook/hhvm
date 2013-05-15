@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CURL_TLS_WORKAROUNDS_H_
 #define incl_HPHP_CURL_TLS_WORKAROUNDS_H_
 
-#include <curl/curl.h>
+#include "curl/curl.h"
 
 namespace HPHP {
 

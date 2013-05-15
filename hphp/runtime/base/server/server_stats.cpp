@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/array/array_init.h>
-#include <util/json.h>
-#include <util/compatibility.h>
-#include <runtime/base/hardware_counter.h>
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/util/json.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/runtime/base/hardware_counter.h"
 
 using std::list;
 using std::set;

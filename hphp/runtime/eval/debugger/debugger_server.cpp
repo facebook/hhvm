@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_server.h>
-#include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/base/runtime_option.h>
-#include <util/network.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger_server.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/network.h"
+#include "hphp/util/logger.h"
 
 #define POLLING_SECONDS 1
 

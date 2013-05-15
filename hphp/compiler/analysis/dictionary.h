@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_DICTIONARY_H_
 #define incl_HPHP_DICTIONARY_H_
 
-#include <compiler/hphp.h>
-#include <compiler/analysis/data_flow.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/compiler/analysis/data_flow.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

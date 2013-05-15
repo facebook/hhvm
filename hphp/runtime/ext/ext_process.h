@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_PROCESS_H_
 #define incl_HPHP_EXT_PROCESS_H_
 
-#include <runtime/base/base_includes.h>
-#include <sys/wait.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "sys/wait.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

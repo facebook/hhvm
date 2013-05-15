@@ -18,26 +18,26 @@
 #ifndef incl_HPHP_EXT_DOMDOCUMENT_INCLUDES_H_
 #define incl_HPHP_EXT_DOMDOCUMENT_INCLUDES_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <libxml/parser.h>
-#include <libxml/parserInternals.h>
-#include <libxml/relaxng.h>
-#include <libxml/tree.h>
-#include <libxml/uri.h>
-#include <libxml/xmlerror.h>
-#include <libxml/xmlschemas.h>
-#include <libxml/xmlwriter.h>
-#include <libxml/xinclude.h>
-#include <libxml/hash.h>
-#include <libxml/c14n.h>
-#include <libxml/HTMLparser.h>
-#include <libxml/HTMLtree.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <libxml/xpointer.h>
+#include "libxml/parser.h"
+#include "libxml/parserInternals.h"
+#include "libxml/relaxng.h"
+#include "libxml/tree.h"
+#include "libxml/uri.h"
+#include "libxml/xmlerror.h"
+#include "libxml/xmlschemas.h"
+#include "libxml/xmlwriter.h"
+#include "libxml/xinclude.h"
+#include "libxml/hash.h"
+#include "libxml/c14n.h"
+#include "libxml/HTMLparser.h"
+#include "libxml/HTMLtree.h"
+#include "libxml/xpath.h"
+#include "libxml/xpathInternals.h"
+#include "libxml/xpointer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

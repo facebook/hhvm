@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_ldap.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/builtin_functions.h>
-#include <util/thread_local.h>
+#include "hphp/runtime/ext/ext_ldap.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/util/thread_local.h"
 #include <lber.h>
 
 #define LDAP_DEPRECATED 1

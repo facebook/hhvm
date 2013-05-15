@@ -17,16 +17,16 @@
 #ifndef incl_HPHP_CLASS_SCOPE_H_
 #define incl_HPHP_CLASS_SCOPE_H_
 
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/function_container.h>
-#include <compiler/statement/class_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include <compiler/expression/user_attribute.h>
-#include <util/json.h>
-#include <util/case_insensitive.h>
-#include <compiler/option.h>
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/util/json.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/compiler/option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,19 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_code_run.h>
-#include <compiler/parser/parser.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/type.h>
-#include <util/util.h>
-#include <util/process.h>
-#include <compiler/option.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/test/test_code_run.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
+#include "hphp/compiler/option.h"
+#include "hphp/runtime/base/runtime_option.h"
 #include <pcre.h>
-#include <hphp/test/test_mysql_info.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_mysql_info.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 using std::istringstream;
 using std::ostringstream;

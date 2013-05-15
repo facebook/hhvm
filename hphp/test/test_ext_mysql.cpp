@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_mysql.h>
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/base/runtime_option.h>
-#include <hphp/test/test_mysql_info.h>
-#include <mysql/errmsg.h>
+#include "hphp/test/test_ext_mysql.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/test/test_mysql_info.h"
+#include "mysql/errmsg.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

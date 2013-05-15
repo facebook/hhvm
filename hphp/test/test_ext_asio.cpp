@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_asio.h>
-#include <runtime/ext/ext_asio.h>
+#include "hphp/test/test_ext_asio.h"
+#include "hphp/runtime/ext/ext_asio.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Asio);
 ///////////////////////////////////////////////////////////////////////////////

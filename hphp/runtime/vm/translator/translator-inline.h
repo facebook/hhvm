@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_TRANSLATOR_INLINE_H_
 #define incl_HPHP_TRANSLATOR_INLINE_H_
 
-#include "translator.h"
+#include "hphp/runtime/vm/translator/translator.h"
 #include <boost/noncopyable.hpp>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/execution_context.h"
 
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)

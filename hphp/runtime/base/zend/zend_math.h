@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_ZEND_MATH_H_
 #define incl_HPHP_ZEND_MATH_H_
 
-#include <util/base.h>
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/disasm.h"
+#include "hphp/util/disasm.h"
 
 #include <iomanip>
 #include <stdlib.h>
@@ -23,8 +23,8 @@
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
 
-#include "util/base.h"
-#include "util/text_color.h"
+#include "hphp/util/base.h"
+#include "hphp/util/text_color.h"
 
 namespace HPHP {
 

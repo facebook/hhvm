@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/ext/ext_collections.h"
-#include "runtime/base/variable_serializer.h"
-#include "runtime/base/array/sort_helpers.h"
-#include "runtime/ext/ext_array.h"
-#include "runtime/ext/ext_math.h"
-#include "runtime/ext/ext_intl.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "system/lib/systemlib.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/array/sort_helpers.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/ext_intl.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

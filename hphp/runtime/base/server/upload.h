@@ -19,7 +19,7 @@
 #define incl_HPHP_UPLOAD_H_
 
 #include <string>
-#include <runtime/base/server/transport.h>
+#include "hphp/runtime/base/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

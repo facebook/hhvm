@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <runtime/eval/debugger/inst_point.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/inst_point.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

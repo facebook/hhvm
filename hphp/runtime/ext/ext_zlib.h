@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_ZLIB_H_
 #define incl_HPHP_EXT_ZLIB_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

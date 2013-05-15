@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TEST_CODE_ERROR_H_
 #define incl_HPHP_TEST_CODE_ERROR_H_
 
-#include <test/test_base.h>
-#include <compiler/analysis/code_error.h>
+#include "hphp/test/test_base.h"
+#include "hphp/compiler/analysis/code_error.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

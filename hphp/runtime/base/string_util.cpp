@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/zend/zend_html.h"
-#include <runtime/base/string_util.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/util/zend/zend_html.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

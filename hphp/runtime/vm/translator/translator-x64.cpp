@@ -13,17 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
 #include <cinttypes>
 #include <stdint.h>
 #include <assert.h>
 #include <unistd.h>
-#include <sys/mman.h>
+#include "sys/mman.h"
 #include <strstream>
 #include <stdio.h>
 #include <stdarg.h>
-#include <strings.h>
+#include "hphp/runtime/base/strings.h"
 #include <string>
 #include <queue>
 #include <unwind.h>
@@ -48,49 +48,49 @@ typedef __sighandler_t *sighandler_t;
 
 #include "folly/Format.h"
 
-#include "util/asm-x64.h"
-#include "util/bitops.h"
-#include "util/debug.h"
-#include "util/disasm.h"
-#include "util/maphuge.h"
-#include "util/rank.h"
-#include "util/ringbuffer.h"
-#include "util/timer.h"
-#include "util/trace.h"
-#include "util/meta.h"
-#include "util/util.h"
-#include "util/repo_schema.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/bitops.h"
+#include "hphp/util/debug.h"
+#include "hphp/util/disasm.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/util/rank.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/meta.h"
+#include "hphp/util/util.h"
+#include "hphp/util/repo_schema.h"
 
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/php_debug.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/strings.h"
-#include "runtime/base/zend/zend_string.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/server/source_root_info.h"
-#include "runtime/ext/ext_closure.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/ext/ext_function.h"
-#include "runtime/vm/debug/debug.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/srcdb.h"
-#include "runtime/vm/translator/x64-util.h"
-#include "runtime/vm/translator/unwind-x64.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/pendq.h"
-#include "runtime/vm/treadmill.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/type_profile.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/vm/translator/hopt/hhbctranslator.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/php_debug.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/srcdb.h"
+#include "hphp/runtime/vm/translator/x64-util.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/pendq.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/hopt/hhbctranslator.h"
 
-#include "runtime/vm/translator/translator-x64-internal.h"
+#include "hphp/runtime/vm/translator/translator-x64-internal.h"
 
 namespace HPHP {
 namespace Transl {

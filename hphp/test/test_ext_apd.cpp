@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_apd.h>
-#include <runtime/ext/ext_apd.h>
+#include "hphp/test/test_ext_apd.h"
+#include "hphp/runtime/ext/ext_apd.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

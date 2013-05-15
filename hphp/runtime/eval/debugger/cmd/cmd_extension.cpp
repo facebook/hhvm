@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_extension.h>
-#include <runtime/ext/ext_array.h>
-#include <util/text_art.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extension.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/util/text_art.h"
 
 using namespace HPHP::Util::TextArt;
 

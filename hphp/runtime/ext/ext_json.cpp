@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/JSON_parser.h>
-#include <runtime/base/zend/utf8_decode.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/JSON_parser.h"
+#include "hphp/runtime/base/zend/utf8_decode.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);

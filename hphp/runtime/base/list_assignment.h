@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_LIST_ASSIGNMENT_H_
 #define incl_HPHP_LIST_ASSIGNMENT_H_
 
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

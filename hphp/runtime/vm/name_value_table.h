@@ -21,9 +21,9 @@
 #include <deque>
 #include <limits>
 
-#include "util/util.h"
-#include "util/exp_arena.h"
-#include "runtime/base/complex_types.h"
+#include "hphp/util/util.h"
+#include "hphp/util/exp_arena.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 

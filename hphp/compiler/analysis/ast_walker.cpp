@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/statement/statement.h"
 
 using namespace HPHP;
 

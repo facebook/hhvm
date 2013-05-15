@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/upload.h>
-#include <runtime/base/server/job_queue_vm_stack.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/ext/ext_server.h>
-#include <util/job_queue.h>
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/server/job_queue_vm_stack.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 
 using std::set;
 using std::deque;

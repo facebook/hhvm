@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
-#include <util/exception.h>
-#include <util/util.h>
-#include <runtime/base/types.h>
+#include "hphp/util/exception.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

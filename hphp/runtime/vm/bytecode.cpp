@@ -23,50 +23,50 @@
 #include <cinttypes>
 
 #include <libgen.h>
-#include <sys/mman.h>
+#include "sys/mman.h"
 
-#include <compiler/builtin_symbols.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/event_hook.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/member_operations.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/base/base_includes.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/strings.h>
-#include <util/util.h>
-#include <util/trace.h>
-#include <util/debug.h>
-#include <runtime/base/stat_cache.h>
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/util/util.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/base/stat_cache.h"
 
-#include <runtime/vm/php_debug.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/type_constraint.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_error.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/base/stats.h>
-#include <runtime/vm/type_profile.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/util/extended_logger.h>
+#include "hphp/runtime/vm/php_debug.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/util/extended_logger.h"
 
-#include <system/lib/systemlib.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
-#include "runtime/vm/name_value_table_wrapper.h"
-#include "runtime/vm/request_arena.h"
-#include "util/arena.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/util/arena.h"
 
 
 namespace HPHP {

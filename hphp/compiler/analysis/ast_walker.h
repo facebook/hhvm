@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_AST_WALKER_H_
 #define incl_HPHP_AST_WALKER_H_
 
-#include <compiler/hphp.h>
-#include <compiler/construct.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/compiler/construct.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

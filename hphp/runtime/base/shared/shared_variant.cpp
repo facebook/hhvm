@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/base/shared/shared_map.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

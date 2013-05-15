@@ -19,8 +19,8 @@
 #define incl_EXT_ASIO_EXTERNAL_THREAD_EVENT_H_
 
 #include <atomic>
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/ext_asio.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/ext_asio.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

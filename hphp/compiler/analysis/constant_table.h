@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_CONSTANT_TABLE_H_
 #define incl_HPHP_CONSTANT_TABLE_H_
 
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

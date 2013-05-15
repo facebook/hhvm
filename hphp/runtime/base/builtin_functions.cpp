@@ -14,31 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/strings.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_collections.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/process.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/event_hook.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/system/lib/systemlib.h"
 
 #include <limits>
 

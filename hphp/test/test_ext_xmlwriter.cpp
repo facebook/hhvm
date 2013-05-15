@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_xmlwriter.h>
-#include <runtime/ext/ext_xmlwriter.h>
+#include "hphp/test/test_ext_xmlwriter.h"
+#include "hphp/runtime/ext/ext_xmlwriter.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_zlib.h>
-#include <runtime/ext/ext_zlib.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_output.h>
+#include "hphp/test/test_ext_zlib.h"
+#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_output.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

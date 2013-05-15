@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/shared/shared_map.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 namespace HPHP {
 

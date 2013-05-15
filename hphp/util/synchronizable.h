@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_SYNCHRONIZABLE_H_
 #define incl_HPHP_SYNCHRONIZABLE_H_
 
-#include "mutex.h"
+#include "hphp/util/mutex.h"
 #include <pthread.h>
 
 namespace HPHP {

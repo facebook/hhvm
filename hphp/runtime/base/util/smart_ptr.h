@@ -18,9 +18,9 @@
 #define incl_HPHP_SMART_PTR_H_
 
 #include <boost/static_assert.hpp>
-#include <util/base.h>
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/util/countable.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/util/countable.h"
 #include <utility>
 
 namespace HPHP {

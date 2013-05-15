@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/statement.h>
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/function_scope.h"
 
 using namespace HPHP;
 

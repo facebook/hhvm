@@ -16,11 +16,11 @@
 #ifndef incl_HPHP_VM_RUNTIME_H_
 #define incl_HPHP_VM_RUNTIME_H_
 
-#include <runtime/vm/event_hook.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 

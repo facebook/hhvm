@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/pdo_sqlite.h>
-#include <runtime/ext/ext_stream.h>
+#include "hphp/runtime/ext/pdo_sqlite.h"
+#include "hphp/runtime/ext/ext_stream.h"
 #include <sqlite3.h>
 
 namespace HPHP {

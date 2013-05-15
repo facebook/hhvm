@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_PARAMETER_EXPRESSION_H_
 #define incl_HPHP_PARAMETER_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
-#include <util/json.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/util/json.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

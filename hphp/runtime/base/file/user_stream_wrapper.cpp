@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/user_stream_wrapper.h>
-#include <runtime/base/file/user_file.h>
+#include "hphp/runtime/base/file/user_stream_wrapper.h"
+#include "hphp/runtime/base/file/user_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

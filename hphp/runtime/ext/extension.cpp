@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/extension.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

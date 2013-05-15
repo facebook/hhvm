@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_where.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_where.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

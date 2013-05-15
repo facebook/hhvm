@@ -16,7 +16,7 @@
 */
 /* JSON_checker.h */
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,
                  bool assoc/*<fb>*/, bool loose/*</fb>*/);

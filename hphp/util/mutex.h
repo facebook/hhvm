@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_MUTEX_H_
 #define incl_HPHP_MUTEX_H_
 
-#include <util/assertions.h>
-#include <util/util.h>
+#include "hphp/util/assertions.h"
+#include "hphp/util/util.h"
 #include <pthread.h>
 #include <time.h>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include "util/rank.h"
+#include "hphp/util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

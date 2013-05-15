@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_STREAM_H_
 #define incl_HPHP_EXT_STREAM_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/eval/runtime/file_repository.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

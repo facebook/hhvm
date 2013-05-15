@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_OUTPUT_FILE_H_
 #define incl_HPHP_OUTPUT_FILE_H_
 
-#include <runtime/base/file/file.h>
+#include "hphp/runtime/base/file/file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

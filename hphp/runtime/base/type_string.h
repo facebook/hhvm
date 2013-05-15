@@ -22,12 +22,12 @@
        Include 'complex_types.h' instead.
 #endif
 
-#include <util/assertions.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/string_data.h>
-#include <runtime/base/string_offset.h>
-#include <runtime/base/types.h>
-#include <runtime/base/hphp_value.h>
+#include "hphp/util/assertions.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string_offset.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp_value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

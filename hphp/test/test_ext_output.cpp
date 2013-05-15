@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_output.h>
-#include <runtime/ext/ext_output.h>
+#include "hphp/test/test_ext_output.h"
+#include "hphp/runtime/ext/ext_output.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Output);
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,9 +16,9 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
-#include "runtime/base/execution_context.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
 
 namespace HPHP {
 

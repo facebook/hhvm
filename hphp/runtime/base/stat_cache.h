@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_STAT_CACHE_H_
 #define incl_HPHP_STAT_CACHE_H_
 
-#include <sys/inotify.h>
+#include "sys/inotify.h"
 
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include "util/base.h"
-#include "util/lock.h"
-#include "runtime/base/util/smart_ptr.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

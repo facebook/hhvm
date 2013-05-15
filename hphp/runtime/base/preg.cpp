@@ -13,19 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/string_util.h>
-#include <runtime/base/util/request_local.h>
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include <pcre.h>
 #include <onigposix.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/thread_init_fini.h>
-#include <tbb/concurrent_hash_map.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "tbb/concurrent_hash_map.h"
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2

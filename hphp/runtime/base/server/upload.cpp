@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/upload.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/ext/ext_apc.h>
-#include <util/logger.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/string_util.h"
 
 using std::set;
 

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
-#include <runtime/vm/debugger_hook.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_flow_control.h"
+#include "hphp/runtime/vm/debugger_hook.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

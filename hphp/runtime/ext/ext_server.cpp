@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_server.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/server/rpc_request_handler.h>
+#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
 
 #define DANGLING_HEADER "HPHP_DANGLING"
 

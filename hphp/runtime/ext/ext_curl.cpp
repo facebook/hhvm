@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <runtime/base/util/curl_tls_workarounds.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/util/curl_tls_workarounds.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914

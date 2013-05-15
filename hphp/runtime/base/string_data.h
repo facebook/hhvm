@@ -17,14 +17,14 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/countable.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/macros.h>
-#include <runtime/base/bstring.h>
-#include <util/hash.h>
-#include <util/alloc.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/alloc.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
 namespace HPHP {
 

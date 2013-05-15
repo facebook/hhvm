@@ -18,9 +18,9 @@
 
 #include <boost/noncopyable.hpp>
 #include <stdint.h>
-#include "util/alloc.h"
-#include "util/util.h"
-#include "util/assertions.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

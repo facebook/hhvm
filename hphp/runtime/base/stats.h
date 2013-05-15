@@ -16,16 +16,16 @@
 #ifndef STATS_H_
 #define STATS_H_
 
-#include <runtime/vm/hhbc.h>
-#include <util/asm-x64.h>
-#include <util/trace.h>
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 
  namespace Transl { class X64Assembler; }
 namespace Stats {
 
-#include "runtime/vm/stats-opcodeDef.h"
+#include "hphp/runtime/vm/stats-opcodeDef.h"
 
 #define STATS \
   STAT(Instr_TC) \

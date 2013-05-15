@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/physreg.h"
+#include "hphp/runtime/vm/translator/physreg.h"
 
 namespace HPHP { namespace Transl {
 

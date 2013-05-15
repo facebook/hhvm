@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_STRING_BAG_H_
 #define incl_HPHP_STRING_BAG_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

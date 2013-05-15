@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_memcache.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/ini_setting.h>
+#include "hphp/runtime/ext/ext_memcache.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/ini_setting.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define MMC_SERIALIZED 1
 #define MMC_COMPRESSED 2

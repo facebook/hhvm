@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/runtime_option.h>
-#include <util/compression.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

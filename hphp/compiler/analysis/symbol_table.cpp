@@ -14,24 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/type.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
 
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/simple_variable.h>
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
 
-#include <runtime/base/class_info.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
-#include <util/logger.h>
+#include "hphp/util/logger.h"
 
 using namespace HPHP;
 

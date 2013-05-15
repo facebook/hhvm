@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/translator/immstack.h>
+#include "hphp/runtime/vm/translator/immstack.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

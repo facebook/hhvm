@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
 #define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
-#include <runtime/base/complex_types.h>
-#include <util/lock.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

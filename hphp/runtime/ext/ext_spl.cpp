@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_spl.h>
-#include <runtime/ext/ext_math.h>
-#include <runtime/ext/ext_class.h>
+#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/ext_class.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

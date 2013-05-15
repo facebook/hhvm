@@ -13,15 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/alloc.h"
+#include "hphp/util/alloc.h"
 
 #include <atomic>
 
-#include <sys/mman.h>
+#include "sys/mman.h"
 #include <stdlib.h>
 #include <errno.h>
-#include "util/util.h"
-#include "util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////

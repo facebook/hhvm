@@ -14,34 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sys/mman.h>
+#include "sys/mman.h"
 
 #include <iostream>
 #include <iomanip>
-#include <tbb/concurrent_unordered_map.h>
+#include "tbb/concurrent_unordered_map.h"
 #include <boost/algorithm/string.hpp>
 
 #include "folly/ScopeGuard.h"
 
-#include "util/lock.h"
-#include "util/util.h"
-#include "util/atomic.h"
-#include "util/read_only_arena.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/util.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/read_only_arena.h"
 
-#include "runtime/ext/ext_variable.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/verifier/check.h"
-#include "runtime/base/strings.h"
-#include "runtime/vm/func_inline.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/base/stats.h"
-#include "runtime/vm/treadmill.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/verifier/check.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/func_inline.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

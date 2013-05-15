@@ -18,7 +18,7 @@
 #define incl_HPHP_STACKTRACE_H_
 
 #include <dlfcn.h>
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

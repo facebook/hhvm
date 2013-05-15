@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/continue_statement.h>
+#include "hphp/compiler/statement/continue_statement.h"
 
 using namespace HPHP;
 

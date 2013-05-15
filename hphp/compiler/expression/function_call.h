@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_FUNCTION_CALL_H_
 #define incl_HPHP_FUNCTION_CALL_H_
 
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/static_class_name.h>
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/static_class_name.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,11 +18,11 @@
 #ifndef incl_HPHP_EXT_DATETIME_H_
 #define incl_HPHP_EXT_DATETIME_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/time/timestamp.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/time/timezone.h>
-#include <runtime/base/time/dateinterval.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/time/timestamp.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/time/timezone.h"
+#include "hphp/runtime/base/time/dateinterval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

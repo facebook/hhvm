@@ -15,18 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <util/exception.h>
-#include <util/util.h>
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_parser_stmt.h>
-#include <compiler/parser/parser.h>
-#include <compiler/code_generator.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/test/test_parser_stmt.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/runtime_option.h>
-#include <util/base.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/base.h"
 
-#include <runtime/base/execution_context.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/unit.h>
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/unit.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

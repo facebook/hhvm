@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/file_scope.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/code_error.h>
-#include <util/hash.h>
-#include <util/util.h>
-#include <compiler/option.h>
-#include <compiler/parser/parser.h>
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/util.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/expression/scalar_expression.h>
-#include <runtime/ext/ext_misc.h>
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/runtime/ext/ext_misc.h"
 
 using namespace HPHP;
 

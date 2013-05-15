@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_CONSTRUCT_H_
 #define incl_HPHP_CONSTRUCT_H_
 
-#include <util/json.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/util/json.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

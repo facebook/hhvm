@@ -20,8 +20,8 @@
 #include <initializer_list>
 #include <vector>
 
-#include "runtime/vm/translator/types.h"
-#include "runtime/vm/translator/hopt/codegen.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 

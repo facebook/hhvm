@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/asm-x64.h"
-#include <gtest/gtest.h>
+#include "hphp/util/asm-x64.h"
+#include "gtest/gtest.h"
 
 #include <vector>
 #include <cstdio>

@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_SHARED_STORE_BASE_H_
 #define incl_HPHP_SHARED_STORE_BASE_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/shared/shared_variant.h>
-#include <util/lock.h>
-#include <util/smalllocks.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/smalllocks.h"
+#include "hphp/runtime/base/complex_types.h"
 
 #define SHARED_STORE_APPLICATION_CACHE 0
 #define SHARED_STORE_DNS_CACHE 1

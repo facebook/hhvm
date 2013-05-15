@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "db_query.h"
-#include "db_conn.h"
-#include "db_dataset.h"
+#include "hphp/util/db_query.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/db_dataset.h"
 #include "util.h"
 
 namespace HPHP {

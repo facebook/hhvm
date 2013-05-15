@@ -13,25 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/func.h"
+#include "hphp/runtime/vm/func.h"
 
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
 
-#include "runtime/base/base_includes.h"
-#include "util/util.h"
-#include "util/trace.h"
-#include "util/debug.h"
-#include "runtime/base/strings.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/func_inline.h"
-#include "system/lib/systemlib.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/util.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/func_inline.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 

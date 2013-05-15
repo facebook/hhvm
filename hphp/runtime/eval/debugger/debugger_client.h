@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_client_settings.h>
-#include <runtime/eval/debugger/inst_point.h>
-#include <runtime/base/debuggable.h>
-#include <util/text_color.h>
-#include <util/hdf.h>
-#include <util/mutex.h>
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_client_settings.h"
+#include "hphp/runtime/eval/debugger/inst_point.h"
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/util/text_color.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 

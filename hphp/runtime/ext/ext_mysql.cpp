@@ -17,21 +17,21 @@
 
 #include "folly/ScopeGuard.h"
 
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/ext/ext_preg.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/mysql_stats.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/util/extended_logger.h>
-#include <util/timer.h>
-#include <util/db_mysql.h>
-#include <netinet/in.h>
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/db_mysql.h"
+#include "netinet/in.h"
 #include <netdb.h>
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@
 
 #include <limits>
 
-#include "runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

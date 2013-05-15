@@ -18,13 +18,13 @@
 #define incl_HPHP_EVAL_FILE_REPOSITORY_H_
 
 #include <time.h>
-#include <sys/stat.h>
-#include <util/lock.h>
+#include "sys/stat.h"
+#include "hphp/util/lock.h"
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/md5.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/md5.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/string_util.h"
 
 namespace HPHP {
 class Unit;

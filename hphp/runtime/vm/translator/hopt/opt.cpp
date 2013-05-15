@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
-#include "util/trace.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/print.h"
-#include "runtime/vm/translator/hopt/check.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/check.h"
 
 namespace HPHP {
 namespace JIT {

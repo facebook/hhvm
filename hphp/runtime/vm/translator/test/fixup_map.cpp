@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/fixup.h"
+#include "hphp/runtime/vm/translator/fixup.h"
 
-#include <gtest/gtest.h>
-#include "hhvm/process_init.h"
+#include "gtest/gtest.h"
+#include "hphp/hhvm/process_init.h"
 
 namespace HPHP { namespace Transl {
 

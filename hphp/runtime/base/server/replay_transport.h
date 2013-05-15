@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_REPLAY_TRANSPORT_H_
 #define incl_HPHP_REPLAY_TRANSPORT_H_
 
-#include <runtime/base/server/transport.h>
-#include <util/hdf.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

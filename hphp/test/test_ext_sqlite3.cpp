@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_sqlite3.h>
-#include <runtime/ext/ext_sqlite3.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_ext_sqlite3.h"
+#include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

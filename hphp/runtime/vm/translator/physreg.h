@@ -16,8 +16,8 @@
 #ifndef incl_HPHP_VM_PHYSREG_H_
 #define incl_HPHP_VM_PHYSREG_H_
 
-#include "util/asm-x64.h"
-#include "util/bitops.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/bitops.h"
 
 namespace HPHP { namespace Transl {
 

@@ -14,27 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/function_call.h>
-#include <util/util.h>
-#include <util/logger.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/statement/statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/unary_op_expression.h>
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;

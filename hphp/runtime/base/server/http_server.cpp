@@ -14,29 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/server/libevent_server_with_fd.h>
-#include <runtime/base/server/libevent_server_with_takeover.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/admin_request_handler.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <util/logger.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <util/db_conn.h>
-#include <runtime/ext/ext_apc.h>
-#include <sys/types.h>
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/server/libevent_server_with_fd.h"
+#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/admin_request_handler.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "sys/types.h"
 #include <signal.h>
-#include <util/ssl_init.h>
+#include "hphp/util/ssl_init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

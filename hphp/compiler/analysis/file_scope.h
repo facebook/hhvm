@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
 
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/function_container.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/code_generator.h>
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/code_generator.h"
 #include <boost/graph/adjacency_list.hpp>
-#include <util/json.h>
-#include <runtime/base/md5.h>
+#include "hphp/util/json.h"
+#include "hphp/runtime/base/md5.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

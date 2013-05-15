@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/base/shared/immutable_obj.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/shared/immutable_obj.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
-#include <util/logger.h>
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_util.h>
-#include <util/logger.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/shared/shared_string.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/test/test_util.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/shared/shared_string.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 
 #define VERIFY_DUMP(map, exp)                                           \
   if (!(exp)) {                                                         \

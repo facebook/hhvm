@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_mcrypt.h>
+#include "hphp/runtime/ext/ext_mcrypt.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "sys/types.h"
+#include "sys/stat.h"
 #include <fcntl.h>
 
 #define NON_FREE

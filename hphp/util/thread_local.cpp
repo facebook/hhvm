@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/thread_local.h>
+#include "hphp/util/thread_local.h"
 
 namespace HPHP {
 

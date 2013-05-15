@@ -24,15 +24,15 @@
 
 #include <type_traits>
 
-#include <util/trace.h>
-#include <runtime/base/types.h>
-#include <runtime/base/hphp_value.h>
-#include <runtime/base/type_string.h>
-#include <runtime/base/type_object.h>
-#include <runtime/base/type_array.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/macros.h>
+#include "hphp/util/trace.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp_value.h"
+#include "hphp/runtime/base/type_string.h"
+#include "hphp/runtime/base/type_object.h"
+#include "hphp/runtime/base/type_array.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/macros.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

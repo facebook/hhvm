@@ -16,22 +16,22 @@
 
 #define INLINE_VARIANT_HELPER 1
 
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/shared/shared_map.h>
-#include <util/hash.h>
-#include <util/lock.h>
-#include <util/alloc.h>
-#include <util/trace.h>
-#include <util/util.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/member_operations.h>
-#include <runtime/base/stats.h>
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/base/stats.h"
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
 // function even as an array approaches 2^31 elements.  In practice this is

@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_cpp_base.h>
-#include <runtime/base/base_includes.h>
-#include <util/logger.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/ip_block_map.h>
-#include <hphp/test/test_mysql_info.h>
-#include <system/lib/systemlib.h>
+#include "hphp/test/test_cpp_base.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/ip_block_map.h"
+#include "hphp/test/test_mysql_info.h"
+#include "hphp/system/lib/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

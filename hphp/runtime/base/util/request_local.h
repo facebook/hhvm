@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_REQUEST_LOCAL_H_
 #define incl_HPHP_REQUEST_LOCAL_H_
 
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

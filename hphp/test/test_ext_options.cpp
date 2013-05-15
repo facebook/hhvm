@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_options.h>
-#include <runtime/ext/ext_options.h>
+#include "hphp/test/test_ext_options.h"
+#include "hphp/runtime/ext/ext_options.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

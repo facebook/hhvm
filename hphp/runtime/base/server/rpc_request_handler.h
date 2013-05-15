@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_RPC_REQUEST_HANDLER_H_
 #define incl_HPHP_RPC_REQUEST_HANDLER_H_
 
-#include <runtime/base/server/server.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 

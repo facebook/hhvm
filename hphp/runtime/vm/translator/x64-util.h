@@ -16,8 +16,8 @@
 #ifndef X64_UTIL_H_
 #define X64_UTIL_H_
 
-#include <util/asm-x64.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 namespace Transl {

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/if_statement.h>
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/statement/block_statement.h>
-#include <compiler/analysis/function_scope.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/statement/if_statement.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/runtime/base/complex_types.h"
 
 using namespace HPHP;
 

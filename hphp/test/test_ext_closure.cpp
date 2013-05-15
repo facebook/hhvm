@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <test/test_ext_closure.h>
-#include <runtime/ext/ext_closure.h>
+#include "hphp/test/test_ext_closure.h"
+#include "hphp/runtime/ext/ext_closure.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Closure);
 ///////////////////////////////////////////////////////////////////////////////

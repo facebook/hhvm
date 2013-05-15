@@ -18,21 +18,21 @@
 #define incl_HPHP_VM_CLASS_H_
 
 #include <bitset>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 #ifdef USE_JEMALLOC
 # include <jemalloc/jemalloc.h>
 #endif
 #include <atomic>
 
-#include <runtime/vm/core_types.h>
-#include <runtime/vm/repo_helpers.h>
-#include <runtime/base/runtime_option.h>
-#include <util/parser/location.h>
-#include <util/fixed_vector.h>
-#include <util/range.h>
-#include <runtime/vm/fixed_string_map.h>
-#include <runtime/vm/indexed_string_map.h>
-#include "runtime/vm/named_entity.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/util/fixed_vector.h"
+#include "hphp/util/range.h"
+#include "hphp/runtime/vm/fixed_string_map.h"
+#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/vm/named_entity.h"
 
 namespace HPHP {
 

@@ -21,10 +21,10 @@
 #include <vector>
 
 #include "folly/ScopeGuard.h"
-#include "util/arena.h"
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/cse.h"
-#include "runtime/base/memory/memory_manager.h"
+#include "hphp/util/arena.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/cse.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
 
 namespace HPHP {  namespace JIT {
 

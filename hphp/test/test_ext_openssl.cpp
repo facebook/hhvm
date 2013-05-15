@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_openssl.h>
-#include <runtime/ext/ext_openssl.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_string.h>
+#include "hphp/test/test_ext_openssl.h"
+#include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

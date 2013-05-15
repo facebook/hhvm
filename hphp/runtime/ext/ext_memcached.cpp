@@ -16,12 +16,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_memcached.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/ext/ext_json.h>
+#include "hphp/runtime/ext/ext_memcached.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/ext_json.h"
 #include <zlib.h>
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

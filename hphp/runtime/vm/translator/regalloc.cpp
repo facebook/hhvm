@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/regalloc.h"
+#include "hphp/runtime/vm/translator/regalloc.h"
 
 #include <set>
 #include <cinttypes>
 
 #include <boost/format.hpp>
-#include "runtime/base/types.h"
-#include "util/trace.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace Transl {
 

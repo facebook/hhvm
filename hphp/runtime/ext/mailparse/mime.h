@@ -18,13 +18,13 @@
 #ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
 #define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/mailparse/rfc822.h>
-#include <runtime/base/util/string_buffer.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/mailparse/rfc822.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
 extern "C" {
-#include <mbfl/mbfl_convert.h>
-#include <mbfl/mbfilter.h>
+#include "mbfl/mbfl_convert.h"
+#include "mbfl/mbfilter.h"
 }
 
 namespace HPHP {

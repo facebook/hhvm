@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/class_constant.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/option.h>
+#include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/option.h"
 
 using namespace HPHP;
 

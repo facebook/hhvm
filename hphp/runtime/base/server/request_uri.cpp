@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/request_uri.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/string_util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

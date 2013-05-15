@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_FILES_MATCH_H_
 #define incl_HPHP_FILES_MATCH_H_
 
-#include <util/hdf.h>
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_DEBUGGER_HOOK_H_
 #define incl_HPHP_DEBUGGER_HOOK_H_
 
-#include <util/base.h>
+#include "hphp/util/base.h"
 
 namespace HPHP {
 namespace Eval{

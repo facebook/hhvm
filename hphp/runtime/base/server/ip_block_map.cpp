@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/ip_block_map.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/server/ip_block_map.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

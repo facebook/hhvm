@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/type_annotation.h>
-#include <util/util.h>
+#include "hphp/compiler/type_annotation.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 

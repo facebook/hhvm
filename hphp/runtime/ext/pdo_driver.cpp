@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/pdo_driver.h>
-#include <runtime/ext/pdo_sqlite.h>
-#include <runtime/ext/pdo_mysql.h>
-#include <runtime/ext/ext_variable.h>
+#include "hphp/runtime/ext/pdo_driver.h"
+#include "hphp/runtime/ext/pdo_sqlite.h"
+#include "hphp/runtime/ext/pdo_mysql.h"
+#include "hphp/runtime/ext/ext_variable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

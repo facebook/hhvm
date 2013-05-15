@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/execution_context.h>
-#include <runtime/base/runtime_option.h>
-#include <util/logger.h>
-#include "runtime_error.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

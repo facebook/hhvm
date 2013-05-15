@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/type.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/expression/expression.h"
 #include <boost/format.hpp>
 
 using namespace HPHP;

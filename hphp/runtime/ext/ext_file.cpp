@@ -15,27 +15,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/zend/zend_scanf.h>
-#include <runtime/base/file/pipe.h>
-#include <system/lib/systemlib.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/process.h>
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/zend/zend_scanf.h"
+#include "hphp/runtime/base/file/pipe.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
 #include <dirent.h>
 #include <glob.h>
-#include <sys/types.h>
-#include <sys/file.h>
+#include "sys/types.h"
+#include "sys/file.h"
 #if defined(__FreeBSD__) || defined(__APPLE__)
 # include <sys/mount.h>
 #else

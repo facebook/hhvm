@@ -18,12 +18,12 @@
 #define incl_HPHP_VM_CG_H_
 
 #include <vector>
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
 namespace JIT {

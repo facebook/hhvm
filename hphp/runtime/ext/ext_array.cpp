@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_iterator.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collections.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/zend_collator.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/sort_flags.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/base/array/hphp_array.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_iterator.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/sort_flags.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/logger.h"
 
 #define SORT_DESC               3
 #define SORT_ASC                4

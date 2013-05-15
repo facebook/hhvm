@@ -17,10 +17,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#include "sys/ipc.h"
+#include "sys/shm.h"
 #include <new>
-#include <util/shm_counter.h>
+#include "hphp/util/shm_counter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

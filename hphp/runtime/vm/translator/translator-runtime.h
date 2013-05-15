@@ -16,9 +16,9 @@
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
-#include "runtime/base/types.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
 
 namespace HPHP { namespace Transl {
 

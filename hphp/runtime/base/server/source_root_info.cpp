@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/eval/debugger/debugger.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
 
 using std::map;
 

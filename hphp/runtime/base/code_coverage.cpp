@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/execution_context.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

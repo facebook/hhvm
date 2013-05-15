@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_JSON_H_
 #define incl_HPHP_JSON_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
   DECLARE_BOOST_TYPES(AnalysisResult);

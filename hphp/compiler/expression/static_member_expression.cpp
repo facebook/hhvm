@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/static_member_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/dynamic_variable.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/function_scope.h>
-#include <util/util.h>
-#include <util/hash.h>
+#include "hphp/compiler/expression/static_member_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/dynamic_variable.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/util/util.h"
+#include "hphp/util/hash.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/option.h>
+#include "hphp/compiler/option.h"
 
 using namespace HPHP;
 

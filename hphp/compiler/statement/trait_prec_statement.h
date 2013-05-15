@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TRAIT_PREC_STATEMENT_H_
 #define incl_HPHP_TRAIT_PREC_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
-#include <compiler/expression/scalar_expression.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

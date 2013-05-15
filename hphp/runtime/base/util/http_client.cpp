@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/util/curl_tls_workarounds.h>
-#include <util/timer.h>
-#include <curl/curl.h>
-#include <curl/easy.h>
-#include <util/logger.h>
-#include <util/ssl_init.h>
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/util/curl_tls_workarounds.h"
+#include "hphp/util/timer.h"
+#include "curl/curl.h"
+#include "curl/easy.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/ssl_init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

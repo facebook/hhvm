@@ -17,19 +17,19 @@
 #ifndef incl_HPHP_ANALYSIS_RESULT_H_
 #define incl_HPHP_ANALYSIS_RESULT_H_
 
-#include <compiler/code_generator.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/option.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/function_container.h>
-#include <compiler/package.h>
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/package.h"
 
-#include <util/string_bag.h>
-#include <util/thread_local.h>
+#include "hphp/util/string_bag.h"
+#include "hphp/util/thread_local.h"
 
 #include <boost/graph/adjacency_list.hpp>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

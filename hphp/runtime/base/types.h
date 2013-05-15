@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_TYPES_H_
 #define incl_HPHP_TYPES_H_
 
-#include <util/base.h>
-#include <util/thread_local.h>
-#include <util/mutex.h>
-#include <util/case_insensitive.h>
+#include "hphp/util/base.h"
+#include "hphp/util/thread_local.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/case_insensitive.h"
 #include <vector>
-#include <runtime/base/macros.h>
-#include <runtime/base/memory/memory_manager.h>
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>

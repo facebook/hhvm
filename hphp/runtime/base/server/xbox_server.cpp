@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/rpc_request_handler.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <runtime/base/server/job_queue_vm_stack.h>
-#include <runtime/ext/ext_json.h>
-#include <util/job_queue.h>
-#include <util/lock.h>
-#include <util/logger.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/server/job_queue_vm_stack.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

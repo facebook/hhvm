@@ -21,7 +21,7 @@
 #include <cstdarg>
 #include "folly/Format.h"
 #include "folly/String.h"
-#include "util/parser/parser.h"
+#include "hphp/util/parser/parser.h"
 
 #define HPHP_PARSER_NS Test
 

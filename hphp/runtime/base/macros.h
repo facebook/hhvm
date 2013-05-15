@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_MACROS_H_
 #define incl_HPHP_MACROS_H_
 
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

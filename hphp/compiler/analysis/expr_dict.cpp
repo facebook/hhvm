@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/expr_dict.h>
+#include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/expr_dict.h"
 
-#include <compiler/expression/expression.h>
-#include <compiler/expression/assignment_expression.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
 
-#include <compiler/statement/statement.h>
-#include <compiler/statement/method_statement.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/method_statement.h"
 
 using namespace HPHP;
 using std::vector;

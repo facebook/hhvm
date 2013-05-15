@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_JIT_STATE_VECTOR_H_
 #define incl_HPHP_JIT_STATE_VECTOR_H_
 
-#include "runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
 
-#include "runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {  namespace JIT {
 

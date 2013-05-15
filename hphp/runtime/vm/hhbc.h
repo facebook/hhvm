@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include <runtime/vm/core_types.h>
+#include "hphp/runtime/vm/core_types.h"
 
 namespace HPHP {
 

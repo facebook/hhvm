@@ -26,8 +26,8 @@
 #ifndef incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 #define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
-#include "util/asm-x64.h"
-#include "runtime/vm/translator/regalloc.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/regalloc.h"
 
 namespace HPHP { namespace Transl {
 

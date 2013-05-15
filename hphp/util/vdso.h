@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_UTIL_VDSO_H
 #define incl_HPHP_UTIL_VDSO_H
 
-#include "base.h"
-#include "util/util.h"
+#include "hphp/util/base.h"
+#include "hphp/util/util.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/types.h>
-#include <runtime/base/comparisons.h>
-#include <util/exception.h>
-#include <runtime/base/shared/shared_map.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_qsort.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_iconv.h>
-#include <unicode/coll.h> // icu
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_qsort.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_iconv.h"
+#include "unicode/coll.h" // icu
 #include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {

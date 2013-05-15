@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/try_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/function_scope.h"
 
 using namespace HPHP;
 

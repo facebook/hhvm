@@ -16,10 +16,10 @@
 
 #include <stdio.h>
 
-#include <runtime/vm/verifier/check.h>
-#include <runtime/vm/verifier/cfg.h>
-#include <runtime/vm/verifier/util.h>
-#include <runtime/vm/verifier/pretty.h>
+#include "hphp/runtime/vm/verifier/check.h"
+#include "hphp/runtime/vm/verifier/cfg.h"
+#include "hphp/runtime/vm/verifier/util.h"
+#include "hphp/runtime/vm/verifier/pretty.h"
 
 namespace HPHP {
 namespace Verifier {

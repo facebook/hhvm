@@ -13,15 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/tread_hash_map.h"
 
 #include <vector>
 #include <algorithm>
 #include <iostream>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
-#include "util/base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 

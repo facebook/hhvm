@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_imagesprite.h>
-#include <runtime/ext/ext_imagesprite.h>
-#include <runtime/ext/ext_url.h>
+#include "hphp/test/test_ext_imagesprite.h"
+#include "hphp/runtime/ext/ext_imagesprite.h"
+#include "hphp/runtime/ext/ext_url.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Imagesprite);
 ///////////////////////////////////////////////////////////////////////////////

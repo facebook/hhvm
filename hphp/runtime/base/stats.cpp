@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <util/base.h>
-#include <runtime/vm/translator/x64-util.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/base/stats.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/x64-util.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 namespace Stats {
@@ -26,7 +26,7 @@ using namespace HPHP::Transl;
 TRACE_SET_MOD(stats);
 
 const char* g_counterNames[] = {
-#include "runtime/vm/stats-opcodeDef.h"
+#include "hphp/runtime/vm/stats-opcodeDef.h"
 #define STAT(s) #s ,
   STATS
 #undef STAT
@@ -85,7 +85,7 @@ void dump() {
   if (!enabledAny()) return;
   auto url = g_context->getRequestUrl(50);
   TRACE(0, "STATS %ld %s\n", epoch, url.c_str());
-#include "runtime/vm/stats-opcodeDef.h"
+#include "hphp/runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
   if (!tl_counters[s]) {} else                                  \
     TRACE(0, "STAT %-50s %15" PRId64 "\n", #s, tl_counters[s]);

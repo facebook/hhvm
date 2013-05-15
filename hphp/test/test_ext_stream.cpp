@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_stream.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/ext/ext_socket.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/ext/ext_array.h>
+#include "hphp/test/test_ext_stream.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_array.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

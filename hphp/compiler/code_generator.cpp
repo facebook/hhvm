@@ -16,15 +16,15 @@
 
 #include <stdarg.h>
 
-#include <compiler/code_generator.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/option.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/variable_table.h>
-#include <util/util.h>
-#include <util/hash.h>
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/util/util.h"
+#include "hphp/util/hash.h"
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
 

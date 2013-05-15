@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_VIRTUAL_HOST_H_
 #define incl_HPHP_VIRTUAL_HOST_H_
 
-#include <util/hdf.h>
-#include <runtime/base/types.h>
-#include <runtime/base/server/ip_block_map.h>
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/server/ip_block_map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

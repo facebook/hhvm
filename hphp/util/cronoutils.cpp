@@ -69,7 +69,7 @@
  *
  */
 
-#include "cronoutils.h"
+#include "hphp/util/cronoutils.h"
 extern char *tzname[2];
 
 #ifndef DIR_MODE
@@ -77,7 +77,7 @@ extern char *tzname[2];
 #endif
 
 #ifdef _WIN32
-#include "strptime.h"
+#include <strptime.h>
 #endif
 
 /* Constants for seconds per minute, hour, day and week */

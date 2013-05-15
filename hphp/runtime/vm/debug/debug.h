@@ -16,10 +16,10 @@
 #ifndef TRANSLATOR_DEBUG_H_
 #define TRANSLATOR_DEBUG_H_
 
-#include <runtime/base/types.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/hhbc.h>
-#include "dwarf.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/debug/dwarf.h"
 
 namespace HPHP {
 namespace Debug {

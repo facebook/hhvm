@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_OPTIONS_H_
 #define incl_HPHP_EXT_OPTIONS_H_
 
-#include <runtime/base/base_includes.h>
-#include <util/process.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_array.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_math.h>
+#include "hphp/test/test_ext_array.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_math.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

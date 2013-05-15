@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
 #define incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
 
-#include <runtime/base/util/string_buffer.h>
-#include <util/mutex.h>
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

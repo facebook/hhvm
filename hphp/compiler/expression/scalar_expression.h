@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_SCALAR_EXPRESSION_H_
 #define incl_HPHP_SCALAR_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

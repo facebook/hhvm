@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/program_functions.h>
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/program_functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

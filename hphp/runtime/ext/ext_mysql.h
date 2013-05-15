@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
-#include <runtime/base/base_includes.h>
-#include <mysql/mysql.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "mysql/mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR

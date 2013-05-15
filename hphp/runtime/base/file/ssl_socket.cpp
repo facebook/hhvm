@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/ssl_socket.h>
-#include <runtime/base/complex_types.h>
-#include <util/util.h>
+#include "hphp/runtime/base/file/ssl_socket.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/util.h"
 #include <poll.h>
 
 namespace HPHP {

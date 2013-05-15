@@ -19,7 +19,7 @@
 
 #include <limits.h>
 #include <stddef.h>
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

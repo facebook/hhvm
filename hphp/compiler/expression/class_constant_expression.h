@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_CLASS_CONSTANT_EXPRESSION_H_
 #define incl_HPHP_CLASS_CONSTANT_EXPRESSION_H_
 
-#include <compiler/expression/static_class_name.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/expression/static_class_name.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

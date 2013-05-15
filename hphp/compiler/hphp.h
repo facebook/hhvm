@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_H_
 #define incl_HPHP_H_
 
-#include <util/base.h>
-#include <util/case_insensitive.h>
+#include "hphp/util/base.h"
+#include "hphp/util/case_insensitive.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@
 #include <cstdlib>
 #include <string.h>
 
-#include "util/parser/test/parser.h"
+#include "hphp/util/parser/test/parser.h"
 
 namespace HPHP { namespace Test {
 

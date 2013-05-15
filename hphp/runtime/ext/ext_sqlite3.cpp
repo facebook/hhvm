@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_sqlite3.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);

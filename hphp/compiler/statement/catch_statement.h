@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_CATCH_STATEMENT_H_
 #define incl_HPHP_CATCH_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/static_class_name.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/static_class_name.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

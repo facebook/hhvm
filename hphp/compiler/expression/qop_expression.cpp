@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/qop_expression.h>
-#include <compiler/analysis/code_error.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/runtime/base/complex_types.h"
 
 using namespace HPHP;
 

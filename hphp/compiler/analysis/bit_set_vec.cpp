@@ -15,8 +15,8 @@
 */
 
 #include <stdlib.h>
-#include <compiler/analysis/bit_set_vec.h>
-#include <compiler/analysis/data_flow.h>
+#include "hphp/compiler/analysis/bit_set_vec.h"
+#include "hphp/compiler/analysis/data_flow.h"
 
 using namespace HPHP;
 

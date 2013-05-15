@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_INSTRUMENTATION_H_
 #define incl_HPHP_INSTRUMENTATION_H_
 
-#include <runtime/vm/core_types.h>
-#include <runtime/vm/unit.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/lock.h>
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/unit.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 

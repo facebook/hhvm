@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_posix.h>
-#include <runtime/ext/ext_posix.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_ext_posix.h"
+#include "hphp/runtime/ext/ext_posix.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

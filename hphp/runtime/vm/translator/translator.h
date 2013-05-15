@@ -28,17 +28,17 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "util/hash.h"
-#include "util/timer.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/translator/immstack.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/fixup.h"
-#include "runtime/vm/translator/writelease.h"
-#include "runtime/vm/translator/trans-data.h"
-#include "runtime/vm/debugger_hook.h"
-#include "runtime/base/md5.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/timer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/immstack.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/fixup.h"
+#include "hphp/runtime/vm/translator/writelease.h"
+#include "hphp/runtime/vm/translator/trans-data.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {

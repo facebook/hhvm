@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator.h"
 
 // Translator front-end: parse instruction stream into basic blocks, decode
 // and normalize instructions. Propagate run-time type info to instructions
@@ -28,21 +28,21 @@
 
 #include "folly/Conv.h"
 
-#include "util/trace.h"
-#include "util/biased_coin.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/biased_coin.h"
 
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/types.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/translator/annotation.h"
-#include "runtime/vm/type_profile.h"
-#include "runtime/vm/runtime.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/annotation.h"
+#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 namespace Transl {

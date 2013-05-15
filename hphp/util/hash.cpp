@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include <string.h>
-#include <util/hash.h>
-#include <util/util.h>
+#include "hphp/util/hash.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 

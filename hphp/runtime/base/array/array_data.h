@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_ARRAY_DATA_H_
 #define incl_HPHP_ARRAY_DATA_H_
 
-#include <runtime/base/util/countable.h>
-#include <runtime/base/types.h>
-#include <runtime/base/macros.h>
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/macros.h"
 #include <climits>
 
 namespace HPHP {

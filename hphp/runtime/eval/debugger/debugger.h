@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_H_
 #define incl_HPHP_EVAL_DEBUGGER_H_
 
-#include <util/lock.h>
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/base/program_functions.h>
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_queue.h>
+#include "hphp/util/lock.h"
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/concurrent_queue.h"
 
 namespace HPHP { namespace Eval {
 

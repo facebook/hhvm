@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_math.h>
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_math.h"
 
-#include <util/lock.h>
+#include "hphp/util/lock.h"
 #include <math.h>
 #include <monetary.h>
 
-#include <runtime/base/bstring.h>
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 #ifdef __APPLE__
 #ifndef isnan

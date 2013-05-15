@@ -19,7 +19,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/int.hpp>
 
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

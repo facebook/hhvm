@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_thread.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/string_util.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_thread.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

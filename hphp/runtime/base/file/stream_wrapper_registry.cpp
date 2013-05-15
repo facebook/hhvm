@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/stream_wrapper_registry.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/file/file_stream_wrapper.h>
-#include <runtime/base/file/php_stream_wrapper.h>
-#include <runtime/base/file/http_stream_wrapper.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/file/file_stream_wrapper.h"
+#include "hphp/runtime/base/file/php_stream_wrapper.h"
+#include "hphp/runtime/base/file/http_stream_wrapper.h"
+#include "hphp/runtime/base/util/request_local.h"
 #include <set>
 #include <map>
 

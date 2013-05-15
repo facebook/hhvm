@@ -16,9 +16,9 @@
 #ifndef HPHP_USER_STREAM_WRAPPER_H
 #define HPHP_USER_STREAM_WRAPPER_H
 
-#include <runtime/base/types.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/file/stream_wrapper.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file/stream_wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

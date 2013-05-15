@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/object_data.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/object_data.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "db_filter.h"
-#include "db_conn.h"
+#include "hphp/util/db_filter.h"
+#include "hphp/util/db_conn.h"
 
 namespace HPHP {
 

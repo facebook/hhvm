@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_mb.h>
-#include <runtime/ext/ext_mb.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_array.h>
+#include "hphp/test/test_ext_mb.h"
+#include "hphp/runtime/ext/ext_mb.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_array.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

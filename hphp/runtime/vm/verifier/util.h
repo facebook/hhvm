@@ -21,8 +21,8 @@
 #include <vector>
 #include <stdint.h>
 #include <boost/iterator/iterator_traits.hpp>
-#include "util/assertions.h"
-#include "util/arena.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/arena.h"
 
 namespace HPHP {
 namespace Verifier {

@@ -14,23 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/class_statement.h>
+#include "hphp/compiler/statement/class_statement.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include <compiler/expression/expression_list.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/class_variable.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/constant_table.h>
-#include <util/util.h>
-#include <compiler/statement/interface_statement.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/option.h>
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/util/util.h"
+#include "hphp/compiler/statement/interface_statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/option.h"
 #include <sstream>
 #include <algorithm>
 

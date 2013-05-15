@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_ARRAY_ITERATOR_H_
 #define incl_HPHP_ARRAY_ITERATOR_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/array/hphp_array.h>
-#include <util/min_max_macros.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/min_max_macros.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

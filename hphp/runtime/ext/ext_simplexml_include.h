@@ -18,15 +18,15 @@
 #ifndef incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_
 #define incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_
 
-#include <libxml/parser.h>
-#include <libxml/parserInternals.h>
-#include <libxml/tree.h>
-#include <libxml/uri.h>
-#include <libxml/xmlerror.h>
-#include <libxml/xinclude.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <libxml/xpointer.h>
-#include <libxml/xmlschemas.h>
+#include "libxml/parser.h"
+#include "libxml/parserInternals.h"
+#include "libxml/tree.h"
+#include "libxml/uri.h"
+#include "libxml/xmlerror.h"
+#include "libxml/xinclude.h"
+#include "libxml/xpath.h"
+#include "libxml/xpathInternals.h"
+#include "libxml/xpointer.h"
+#include "libxml/xmlschemas.h"
 
 #endif // incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_

@@ -15,23 +15,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_session.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/ext/ext_hash.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/zend_math.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/array/array_iterator.h>
-#include <util/lock.h>
-#include <util/logger.h>
-#include <util/compatibility.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "hphp/runtime/ext/ext_session.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/compatibility.h"
+#include "sys/types.h"
+#include "sys/stat.h"
 #include <fcntl.h>
 #include <dirent.h>
 

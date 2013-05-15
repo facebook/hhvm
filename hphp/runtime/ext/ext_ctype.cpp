@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_ctype.h>
+#include "hphp/runtime/ext/ext_ctype.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(ctype);

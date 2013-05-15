@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_error.h>
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/util/string_buffer.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

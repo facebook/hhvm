@@ -19,10 +19,10 @@
 
 #include <queue>
 
-#include <runtime/base/types.h>
-#include <util/base.h>
-#include <util/process.h>
-#include <util/synchronizable.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/base.h"
+#include "hphp/util/process.h"
+#include "hphp/util/synchronizable.h"
 #include <event.h>
 
 namespace HPHP {

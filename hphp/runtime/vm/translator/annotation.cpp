@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/base.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/annotation.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/annotation.h"
 
 namespace HPHP {
 namespace Transl {

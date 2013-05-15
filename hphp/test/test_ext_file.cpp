@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_file.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/runtime_option.h>
-#include <util/light_process.h>
+#include "hphp/test/test_ext_file.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/light_process.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

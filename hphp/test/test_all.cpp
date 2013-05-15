@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test.h>
+#include "hphp/test/test.h"
 #include <test/test_base_suite.inc>
-#include <compiler/option.h>
+#include "hphp/compiler/option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +51,7 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
   }
   if (set == "TestExt") {
   // complete extension tests
-#include "test_ext.inc"
+#include "hphp/test/test_ext.inc"
     return;
   }
 

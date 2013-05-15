@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/pdo_mysql.h>
-#include <runtime/ext/ext_stream.h>
-#include <mysql/mysql.h>
+#include "hphp/runtime/ext/pdo_mysql.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "mysql/mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR

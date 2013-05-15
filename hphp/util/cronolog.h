@@ -19,8 +19,8 @@
 
 #include <atomic>
 #include <string>
-#include <util/cronoutils.h>
-#include <util/lock.h>
+#include "hphp/util/cronoutils.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

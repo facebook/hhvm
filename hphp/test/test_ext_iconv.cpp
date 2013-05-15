@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_iconv.h>
-#include <runtime/ext/ext_iconv.h>
+#include "hphp/test/test_ext_iconv.h"
+#include "hphp/runtime/ext/ext_iconv.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

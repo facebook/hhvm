@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/mailparse/mime.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/runtime_error.h>
+#include "hphp/runtime/ext/mailparse/mime.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 #define MAXLEVELS  20
 #define MAXPARTS  300

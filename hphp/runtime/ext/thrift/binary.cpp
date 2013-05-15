@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/thrift/transport.h>
-#include <runtime/ext/ext_thrift.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/base/base_includes.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/logger.h"
 
-#include <sys/types.h>
-#include <netinet/in.h>
+#include "sys/types.h"
+#include "netinet/in.h"
 #include <unistd.h>
 #include <stdexcept>
 

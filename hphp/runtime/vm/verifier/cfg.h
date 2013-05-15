@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_VM_VERIFIER_CFG_H_
 #define incl_HPHP_VM_VERIFIER_CFG_H_
 
-#include "runtime/vm/repo.h"
-#include "runtime/vm/verifier/util.h"
-#include "util/arena.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/verifier/util.h"
+#include "hphp/util/arena.h"
 
 namespace HPHP {
 namespace Verifier {

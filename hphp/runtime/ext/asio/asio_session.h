@@ -21,9 +21,9 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/ext_closure.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/ext_closure.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

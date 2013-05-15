@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/live_dict.h>
-#include <compiler/analysis/variable_table.h>
+#include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/live_dict.h"
+#include "hphp/compiler/analysis/variable_table.h"
 
-#include <compiler/expression/expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/simple_variable.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
 
-#include <compiler/statement/statement.h>
-#include <compiler/statement/block_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/statement_list.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
 
 using namespace HPHP;
 using std::vector;

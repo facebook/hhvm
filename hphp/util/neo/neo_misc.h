@@ -18,7 +18,7 @@
 
 /* In case they didn't start from ClearSilver.h. */
 #ifndef incl_HPHP_CS_CONFIG_H_
-#include "cs_config.h"
+#include "hphp/util/neo/cs_config.h"
 #endif
 
 /* Fix Up for systems that don't define these standard things */
@@ -90,7 +90,7 @@ int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
 #endif
 
 #include <stdarg.h>
-#include <sys/types.h>
+#include "sys/types.h"
 
 typedef unsigned int UINT32;
 typedef int INT32;

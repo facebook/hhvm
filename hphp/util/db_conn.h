@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_DB_CONN_H_
 #define incl_HPHP_DB_CONN_H_
 
-#include "db_dataset.h"
-#include "exception.h"
-#include "mutex.h"
-#include "async_job.h"
+#include "hphp/util/db_dataset.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/async_job.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

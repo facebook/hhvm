@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/comparisons.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/timeout_thread.h>
-#include <runtime/base/string_util.h>
-#include <util/util.h>
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/timeout_thread.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

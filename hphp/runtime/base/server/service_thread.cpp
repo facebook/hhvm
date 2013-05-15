@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/service_thread.h>
-#include <runtime/base/runtime_option.h>
-#include <util/thread_local.h>
-#include <util/hdf.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/server/http_request_handler.h>
+#include "hphp/runtime/base/server/service_thread.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/thread_local.h"
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

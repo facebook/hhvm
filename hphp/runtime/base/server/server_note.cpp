@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/server/server_note.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/base/server/server_note.h"
+#include "hphp/runtime/base/util/request_local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -56,8 +56,8 @@ private:
                    const std::string& host = "");
   bool recvFromTests(char& c);
 
-  void testWebRequestHelper();
-  void testWebRequestHelperSignal();
+  void testWebRequestHelperPhase1();
+  void testWebRequestHelperPhase2();
   bool m_tempResult;
 };
 

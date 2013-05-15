@@ -181,6 +181,12 @@ static std::string getSandboxHostFormat() {
   return sandboxHost;
 }
 
+// Wait for a notification from a request that it is ready for the test
+// harness to proceed to another step.
+// NB: the notification comes in before the debugging logic running in the
+// server has a chance to continue. Every request that follows a call to this
+// function should likely beging with a call to waitForClientToGetBusy() to
+// ensure the client is ready to receive more interrupts.
 bool TestDebugger::recvFromTests(char& flag) {
   const int TIMEOUT_SEC = 10;
   int fifoFd = open(m_fname.c_str(), O_RDONLY | O_NONBLOCK);
@@ -212,12 +218,12 @@ bool TestDebugger::recvFromTests(char& flag) {
     return false;
   }
   close(fifoFd);
-  // slightly wait here since the server side will send out the flag _before_
-  // going to block, but we should take action _after_ it is blocked.
-  usleep(30000);
   return true;
 }
 
+// The goal of this is to test a real web request, rather than simply evaling
+// snippets of code like the other tests. A single web request is issued and
+// debugged by multiple other requests.
 bool TestDebugger::TestWebRequest() {
   bool ret = false;
 
@@ -226,6 +232,9 @@ bool TestDebugger::TestWebRequest() {
   if (sandboxHost.empty()) {
     return CountSkip();
   }
+
+  // A quick sanity check to ensure the server is still up and accepting
+  // requests.
   string result;
   if (!getResponse("hello.php", result, -1, sandboxHost) ||
       result != "Hello, World!") {
@@ -234,6 +243,9 @@ bool TestDebugger::TestWebRequest() {
     return CountSkip();
   }
 
+  // We need to wait at various times during the test for a request to progress
+  // to a certian point, at which time we can take further action. This is done
+  // via this pipe.
   m_fname = "/tmp/hphpd_test_fifo." +
             boost::lexical_cast<string>(Process::GetProcessId());
   if (mkfifo(m_fname.c_str(), 0666)) {
@@ -243,19 +255,18 @@ bool TestDebugger::TestWebRequest() {
 
   m_tempResult = false;
 
-  AsyncFunc<TestDebugger> func(this, &TestDebugger::testWebRequestHelper);
+  // Kick off a thread to make requests for the debugger portions of this test.
+  AsyncFunc<TestDebugger> func(this, &TestDebugger::testWebRequestHelperPhase1);
   func.start();
 
   char flag;
-  // wait for "web_request.php" to connect and wait
+  // Wait for web_request_phase_1.php, the first debugger portion of the test,
+  // to connect and get ready to debug.
   if (!recvFromTests(flag) || flag != '1') {
     printf("failed to receive from test\n");
   } else {
-    // First try to make sure that the client in web_requests enters the mode
-    // where it can respond to a breakpoint being reached.
-    sleep(10);
     // Now get web_request_t.php running so that web_requests.php
-    // can debug it.
+    // can debug it. Wait here for the entire request to finish.
     if (!getResponse("web_request_t.php", result, -1, sandboxHost) ||
         result != "request done") {
       printf("failed on web_request_t.php\n");
@@ -268,47 +279,64 @@ bool TestDebugger::TestWebRequest() {
 
   unlink(m_fname.c_str());
 
-  // testWebRequestHelper() should flag m_tempResult to true if succeed
+  // testWebRequestHelperPhase1() should flag m_tempResult to true if succeed
   ret = ret && m_tempResult;
   return Count(ret);
 }
 
-void TestDebugger::testWebRequestHelper() {
+// First phase of debugging for TestWebRequest.
+// This thread will issue requests to debug the the request for
+// web_request_t.php. This is done with multiple requests to allow us to test
+// breaking with ctrl-c.
+void TestDebugger::testWebRequestHelperPhase1() {
   string result;
-  if (getResponse("web_request.php", result)) {
+  // Start with the first phase of debugging. This will test request start,
+  // breakpoints and inspection, and a hard breakpoint. web_request_t.php will
+  // be left stopped at a hard breakpoint near the end of test_break().
+  if (getResponse("web_request_phase_1.php", result)) {
     m_tempResult = result == "pass";
   } else {
-    printf("failed to get response for web_request.php\n");
+    printf("failed to get response for web_request_phase_1.php\n");
   }
   if (!m_tempResult) {
     return;
   }
 
   m_tempResult = false;
-  // test interrupt: again starting a new thread first wait on interrupts
+  // Test interrupt: again starting a new thread to continue the next phase of
+  // debugging logic. This will issue a request for web_request_phase_2.php.
   AsyncFunc<TestDebugger> func(this,
-                               &TestDebugger::testWebRequestHelperSignal);
+                               &TestDebugger::testWebRequestHelperPhase2);
   func.start();
 
   char flag;
-  // wait for "web_request_signal.php" to connect and wait
+  // Wait for web_request_phase_2.php to connect and get ready to debug.
   if (!recvFromTests(flag) || flag != '2') {
     printf("failed to receive from test\n");
     return;
   }
 
+  // Issue a reqeust for web_request_interrupt.php. Web_request_phase_2.php has
+  // let the original request for web_request_t.php run, and it should now be
+  // spinning in an infinite loop in test_sleep(). This will issue a ctrl-c
+  // which will break within that loop.
   if (!getResponse("web_request_interrupt.php", result) ||
       result != "interrupt done") {
     printf("failed on web_request_interrupt.php\n");
     return;
   }
 
-  // wait for "web_request_t.php" to finish
+  // Wait for web_request_phase_2.php to finish debugging the original request
+  // for web_request_t.php, which will be left running after the end of PSP.
   if (!recvFromTests(flag) || flag != '3') {
     printf("failed to receive from test\n");
     return;
   }
 
+  // Issue another request for web_request_interrupt.php. The original request
+  // for web_request_t.php should be done by now, so this should interrupt in
+  // the dummy sandbox. This will finally let web_request_phase_2.php complete,
+  // thus completing the debugging portion of this test.
   if (!getResponse("web_request_interrupt.php", result) ||
       result != "interrupt done") {
     printf("failed on web_request_interrupt.php\n");
@@ -318,12 +346,15 @@ void TestDebugger::testWebRequestHelper() {
   func.waitForEnd();
 }
 
-void TestDebugger::testWebRequestHelperSignal() {
+// Second phase of debugging for TestWebRequest.
+// This thread will issue a single request for web_request_phase_2.php, which
+// will complete debugging of the request for web_request_t.php.
+void TestDebugger::testWebRequestHelperPhase2() {
   string result;
-  if (getResponse("web_request_signal.php", result)) {
+  if (getResponse("web_request_phase_2.php", result)) {
     m_tempResult = result == "pass";
   } else {
-    printf("failed to get response for web_request_signal.php\n");
+    printf("failed to get response for web_request_phase_2.php\n");
   }
 }
 

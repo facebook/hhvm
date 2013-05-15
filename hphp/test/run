@@ -90,6 +90,7 @@ function get_options($argv) {
     'm:' => 'mode:',
     '' => 'server',
     'h' => 'help',
+    '' => 'commands',
   );
   $options = array();
   $files = array();
@@ -293,7 +294,7 @@ if (isset($options['repo'])) {
 
 $return_value = run(implode(' ', $verify), $tests);
 
-if ($return_value) {
+if ($return_value || isset($options['commands'])) {
   $command = implode(' ', command_arg($options, $tests));
   $filename = 'FILENAME';
   $extra_help = ' change FILENAME to the test you want';

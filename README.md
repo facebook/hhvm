@@ -8,6 +8,18 @@ HipHop is most commonly run as a standalone server, replacing both Apache and mo
 
 You can install a [prebuilt package](https://github.com/facebook/hiphop-php/wiki#installing-pre-built-packages-for-hhvm) or [compile from source](https://github.com/facebook/hiphop-php/wiki#building-hhvm).
 
+## Running
+
+You can run standalone programs just by passing them to hhvm: `hhvm my_script.php`.
+
+HipHop bundles in a webserver. So if you want to run on port 80 with document root `/var/www`:
+
+```
+sudo hhvm -m server /var/www
+```
+
+For anything more complicated, you'll want to make a [`config.hdf`](https://github.com/facebook/hiphop-php/wiki/Runtime-options) and run `sudo hhvm -m server -c config.hdf`.
+
 ## Contributing
 
 We'd love to have your help in making HipHop better. If you run into problems, please open an [issue](http://github.com/facebook/hiphop-php/), or better yet, fork us and send a pull request.

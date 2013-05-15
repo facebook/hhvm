@@ -1,0 +1,1 @@
+HipHop Fatal error: Attempt to unset static property Foo::$baz in %s on line 5

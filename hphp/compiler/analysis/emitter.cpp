@@ -2491,8 +2491,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ExpressionListPtr exps(
           static_pointer_cast<UnsetStatement>(node)->getExps());
         for (int i = 0, n = exps->getCount(); i < n; i++) {
-          visit((*exps)[i]);
-          emitUnset(e);
+          emitVisitAndUnset(e, (*exps)[i]);
         }
         return false;
       }
@@ -2598,15 +2597,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               static_pointer_cast<ExpressionList>(exp));
             if (exps->getListKind() == ExpressionList::ListKindParam) {
               for (int i = 0, n = exps->getCount(); i < n; i++) {
-                visit((*exps)[i]);
-                emitUnset(e);
+                emitVisitAndUnset(e, (*exps)[i]);
               }
               e.Null();
               return true;
             }
           }
-          visit(exp);
-          emitUnset(e);
+          emitVisitAndUnset(e, exp);
           e.Null();
           return true;
         }
@@ -4509,7 +4506,8 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
   }
 }
 
-void EmitterVisitor::emitUnset(Emitter& e) {
+void EmitterVisitor::emitUnset(Emitter& e,
+                               ExpressionPtr exp /* = ExpressionPtr() */) {
   if (checkIfStackEmpty("Unset*")) return;
 
   emitClsIfSPropBase(e);
@@ -4527,8 +4525,10 @@ void EmitterVisitor::emitUnset(Emitter& e) {
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
       case StackSym::CS:
+        assert(exp);
         e.String(
-          StringData::GetStaticString("Attempt to unset static property")
+          StringData::GetStaticString("Attempt to unset static property " +
+                                      exp->getText())
         );
         e.Fatal(0);
         break;
@@ -4543,6 +4543,11 @@ void EmitterVisitor::emitUnset(Emitter& e) {
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.UnsetM(vectorImm);
   }
+}
+
+void EmitterVisitor::emitVisitAndUnset(Emitter& e, ExpressionPtr exp) {
+  visit(exp);
+  emitUnset(e, exp);
 }
 
 void EmitterVisitor::emitSet(Emitter& e) {

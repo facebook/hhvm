@@ -564,7 +564,8 @@ public:
   void emitIsDouble(Emitter& e);
   void emitIsBool(Emitter& e);
   void emitEmpty(Emitter& e);
-  void emitUnset(Emitter& e);
+  void emitUnset(Emitter& e, ExpressionPtr exp = ExpressionPtr());
+  void emitVisitAndUnset(Emitter& e, ExpressionPtr exp);
   void emitSet(Emitter& e);
   void emitSetOp(Emitter& e, int op);
   void emitBind(Emitter& e);

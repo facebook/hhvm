@@ -8,14 +8,25 @@ try {
     $obj = new $cls;
     try {
       $x = $obj->foo;
+      echo "get: ";
+      var_dump($x);
     } catch (RuntimeException $e) {
-      echo $i;
+      echo "get throws, i = ";
+      var_dump($i);
     }
-    ++$i;
+    try {
+      $x = isset($obj->foo);
+      echo "isset: ";
+      var_dump($x);
+    } catch (RuntimeException $e) {
+      echo "isset throws, i = ";
+      var_dump($i);
+    }
     try {
       $obj->foo = 123;
     } catch (RuntimeException $e) {
-      echo $i;
+      echo "set throws, i = ";
+      var_dump($i);
     }
     ++$i;
   }

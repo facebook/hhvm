@@ -4567,7 +4567,7 @@ void c_PairIterator::t_rewind() {
     throw_collection_property_exception(); \
   } \
   bool c_##cls::t___isset(Variant name) { \
-    throw_collection_property_exception(); \
+    return false; \
   } \
   Variant c_##cls::t___unset(Variant name) { \
     throw_collection_property_exception(); \

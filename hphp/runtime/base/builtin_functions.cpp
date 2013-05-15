@@ -453,7 +453,7 @@ void throw_collection_modified() {
 
 void throw_collection_property_exception() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Cannot access property on a collection"));
+    "Cannot access a property on a collection"));
   throw e;
 }
 

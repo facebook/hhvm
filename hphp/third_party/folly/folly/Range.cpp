@@ -20,7 +20,7 @@
 #include "folly/Range.h"
 
 #include <emmintrin.h>  // __v16qi
-#include "folly/Likely.h"
+#include <iostream>
 
 namespace folly {
 

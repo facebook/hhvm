@@ -113,6 +113,56 @@ String cUnescape(StringPiece str, bool strict = true) {
 }
 
 /**
+ * URI-escape a string.  Appends the result to the output string.
+ *
+ * Alphanumeric characters and other characters marked as "unreserved" in RFC
+ * 3986 ( -_.~ ) are left unchanged.  In PATH mode, the forward slash (/) is
+ * also left unchanged.  In QUERY mode, spaces are replaced by '+'.  All other
+ * characters are percent-encoded.
+ */
+enum class UriEscapeMode : unsigned char {
+  // The values are meaningful, see generate_escape_tables.py
+  ALL = 0,
+  QUERY = 1,
+  PATH = 2
+};
+template <class String>
+void uriEscape(StringPiece str,
+               String& out,
+               UriEscapeMode mode = UriEscapeMode::ALL);
+
+/**
+ * Similar to uriEscape above, but returns the escaped string.
+ */
+template <class String>
+String uriEscape(StringPiece str, UriEscapeMode mode = UriEscapeMode::ALL) {
+  String out;
+  uriEscape(str, out, mode);
+  return out;
+}
+
+/**
+ * URI-unescape a string.  Appends the result to the output string.
+ *
+ * In QUERY mode, '+' are replaced by space.  %XX sequences are decoded if
+ * XX is a valid hex sequence, otherwise we throw invalid_argument.
+ */
+template <class String>
+void uriUnescape(StringPiece str,
+                 String& out,
+                 UriEscapeMode mode = UriEscapeMode::ALL);
+
+/**
+ * Similar to uriUnescape above, but returns the unescaped string.
+ */
+template <class String>
+String uriUnescape(StringPiece str, UriEscapeMode mode = UriEscapeMode::ALL) {
+  String out;
+  uriUnescape(str, out, mode);
+  return out;
+}
+
+/**
  * stringPrintf is much like printf but deposits its result into a
  * string. Two signatures are supported: the first simply returns the
  * resulting string, and the second appends the produced characters to
@@ -343,6 +393,35 @@ void splitTo(const Delim& delimiter,
              const String& input,
              OutputIterator out,
              bool ignoreEmpty = false);
+
+/*
+ * Split a string into a fixed number of pieces by delimiter. Returns 'true' if
+ * the fields were all successfully populated.
+ *
+ * Example:
+ *
+ *  folly::StringPiece name, key, value;
+ *  if (folly::split('\t', line, name, key, value))
+ *    ...
+ *
+ * The 'exact' template paremeter specifies how the function behaves when too
+ * many fields are present in the input string. When 'exact' is set to its
+ * default value of 'true', a call to split will fail if the number of fields in
+ * the input string does not exactly match the number of output parameters
+ * passed. If 'exact' is overridden to 'false', all remaining fields will be
+ * stored, unsplit, in the last field, as shown below:
+ *
+ *  folly::StringPiece x, y.
+ *  if (folly::split<false>(':', "a:b:c", x, y))
+ *    assert(x == "a" && y == "b:c");
+ */
+template<bool exact = true,
+         class Delim,
+         class... StringPieces>
+bool split(const Delim& delimiter,
+           StringPiece input,
+           StringPiece& outHead,
+           StringPieces&... outTail);
 
 /*
  * Join list of tokens.

@@ -20,21 +20,20 @@
 #ifndef FOLLY_RANGE_H_
 #define FOLLY_RANGE_H_
 
-#include "folly/folly-config.h"
+#include "folly/Portability.h"
 #include "folly/FBString.h"
 #include <glog/logging.h>
 #include <algorithm>
 #include <cstring>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <stdexcept>
 #include <type_traits>
 #include <boost/operators.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits.hpp>
 #include <bits/c++config.h>
 #include "folly/CpuId.h"
 #include "folly/Traits.h"
+#include "folly/Likely.h"
 
 namespace folly {
 
@@ -77,9 +76,9 @@ namespace detail {
  * For random-access iterators, the value before is simply i[-1].
  */
 template <class Iter>
-typename boost::enable_if_c<
-  boost::is_same<typename std::iterator_traits<Iter>::iterator_category,
-                 std::random_access_iterator_tag>::value,
+typename std::enable_if<
+  std::is_same<typename std::iterator_traits<Iter>::iterator_category,
+               std::random_access_iterator_tag>::value,
   typename std::iterator_traits<Iter>::reference>::type
 value_before(Iter i) {
   return i[-1];
@@ -89,9 +88,9 @@ value_before(Iter i) {
  * For all other iterators, we need to use the decrement operator.
  */
 template <class Iter>
-typename boost::enable_if_c<
-  !boost::is_same<typename std::iterator_traits<Iter>::iterator_category,
-                  std::random_access_iterator_tag>::value,
+typename std::enable_if<
+  !std::is_same<typename std::iterator_traits<Iter>::iterator_category,
+                std::random_access_iterator_tag>::value,
   typename std::iterator_traits<Iter>::reference>::type
 value_before(Iter i) {
   return *--i;
@@ -116,7 +115,7 @@ public:
   typedef std::size_t size_type;
   typedef Iter iterator;
   typedef Iter const_iterator;
-  typedef typename boost::remove_reference<
+  typedef typename std::remove_reference<
     typename std::iterator_traits<Iter>::reference>::type
   value_type;
   typedef typename std::iterator_traits<Iter>::reference reference;
@@ -145,7 +144,9 @@ public:
       : b_(str.data()), e_(b_ + str.size()) {}
   // Works only for Range<const char*>
   Range(const std::string& str, std::string::size_type startFrom) {
-    CHECK_LE(startFrom, str.size());
+    if (UNLIKELY(startFrom > str.size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ = str.data() + startFrom;
     e_ = str.data() + str.size();
   }
@@ -153,32 +154,52 @@ public:
   Range(const std::string& str,
         std::string::size_type startFrom,
         std::string::size_type size) {
-    CHECK_LE(startFrom + size, str.size());
+    if (UNLIKELY(startFrom > str.size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ = str.data() + startFrom;
-    e_ = b_ + size;
+    if (str.size() - startFrom < size) {
+      e_ = str.data() + str.size();
+    } else {
+      e_ = b_ + size;
+    }
   }
   Range(const Range<Iter>& str,
         size_t startFrom,
         size_t size) {
-    CHECK_LE(startFrom + size, str.size());
+    if (UNLIKELY(startFrom > str.size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ = str.b_ + startFrom;
-    e_ = b_ + size;
+    if (str.size() - startFrom < size) {
+      e_ = str.e_;
+    } else {
+      e_ = b_ + size;
+    }
   }
   // Works only for Range<const char*>
   /* implicit */ Range(const fbstring& str)
     : b_(str.data()), e_(b_ + str.size()) { }
   // Works only for Range<const char*>
   Range(const fbstring& str, fbstring::size_type startFrom) {
-    CHECK_LE(startFrom, str.size());
+    if (UNLIKELY(startFrom > str.size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ = str.data() + startFrom;
     e_ = str.data() + str.size();
   }
   // Works only for Range<const char*>
   Range(const fbstring& str, fbstring::size_type startFrom,
         fbstring::size_type size) {
-    CHECK_LE(startFrom + size, str.size());
+    if (UNLIKELY(startFrom > str.size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ = str.data() + startFrom;
-    e_ = b_ + size;
+    if (str.size() - startFrom < size) {
+      e_ = str.data() + str.size();
+    } else {
+      e_ = b_ + size;
+    }
   }
 
   // Allow implicit conversion from Range<const char*> (aka StringPiece) to
@@ -301,12 +322,16 @@ public:
   }
 
   void advance(size_type n) {
-    CHECK_LE(n, size());
+    if (UNLIKELY(n > size())) {
+      throw std::out_of_range("index out of range");
+    }
     b_ += n;
   }
 
   void subtract(size_type n) {
-    CHECK_LE(n, size());
+    if (UNLIKELY(n > size())) {
+      throw std::out_of_range("index out of range");
+    }
     e_ -= n;
   }
 
@@ -322,7 +347,9 @@ public:
 
   Range subpiece(size_type first,
                  size_type length = std::string::npos) const {
-    CHECK_LE(first, size());
+    if (UNLIKELY(first > size())) {
+      throw std::out_of_range("index out of range");
+    }
     return Range(b_ + first,
                  std::min<std::string::size_type>(length, size() - first));
   }
@@ -452,11 +479,11 @@ template <class A, class B>
 struct ComparableAsStringPiece {
   enum {
     value =
-    (boost::is_convertible<A, StringPiece>::value
-     && boost::is_same<B, StringPiece>::value)
+    (std::is_convertible<A, StringPiece>::value
+     && std::is_same<B, StringPiece>::value)
     ||
-    (boost::is_convertible<B, StringPiece>::value
-     && boost::is_same<A, StringPiece>::value)
+    (std::is_convertible<B, StringPiece>::value
+     && std::is_same<A, StringPiece>::value)
   };
 };
 
@@ -467,7 +494,7 @@ struct ComparableAsStringPiece {
  */
 template <class T, class U>
 typename
-boost::enable_if_c<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator==(const T& lhs, const U& rhs) {
   return StringPiece(lhs) == StringPiece(rhs);
 }
@@ -477,7 +504,7 @@ operator==(const T& lhs, const U& rhs) {
  */
 template <class T, class U>
 typename
-boost::enable_if_c<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator<(const T& lhs, const U& rhs) {
   return StringPiece(lhs) < StringPiece(rhs);
 }
@@ -487,7 +514,7 @@ operator<(const T& lhs, const U& rhs) {
  */
 template <class T, class U>
 typename
-boost::enable_if_c<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator>(const T& lhs, const U& rhs) {
   return StringPiece(lhs) > StringPiece(rhs);
 }
@@ -497,7 +524,7 @@ operator>(const T& lhs, const U& rhs) {
  */
 template <class T, class U>
 typename
-boost::enable_if_c<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator<=(const T& lhs, const U& rhs) {
   return StringPiece(lhs) <= StringPiece(rhs);
 }
@@ -507,7 +534,7 @@ operator<=(const T& lhs, const U& rhs) {
  */
 template <class T, class U>
 typename
-boost::enable_if_c<detail::ComparableAsStringPiece<T, U>::value, bool>::type
+std::enable_if<detail::ComparableAsStringPiece<T, U>::value, bool>::type
 operator>=(const T& lhs, const U& rhs) {
   return StringPiece(lhs) >= StringPiece(rhs);
 }

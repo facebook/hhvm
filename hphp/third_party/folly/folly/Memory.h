@@ -78,9 +78,28 @@ template <class Alloc> class StlAllocator<Alloc, void> {
   typedef void value_type;
   typedef void* pointer;
   typedef const void* const_pointer;
+
+  StlAllocator() : alloc_(nullptr) { }
+  explicit StlAllocator(Alloc* alloc) : alloc_(alloc) { }
+
+  Alloc* alloc() const {
+    return alloc_;
+  }
+
   template <class U> struct rebind {
     typedef StlAllocator<Alloc, U> other;
   };
+
+  bool operator!=(const StlAllocator<Alloc, void>& other) const {
+    return alloc_ != other.alloc_;
+  }
+
+  bool operator==(const StlAllocator<Alloc, void>& other) const {
+    return alloc_ == other.alloc_;
+  }
+
+ private:
+  Alloc* alloc_;
 };
 
 template <class Alloc, class T>
@@ -150,6 +169,18 @@ class StlAllocator {
   Alloc* alloc_;
 };
 
+/**
+ * Helper function to obtain rebound allocators
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
+ */
+template <typename T, typename Allocator>
+typename Allocator::template rebind<T>::other rebind_allocator(
+  Allocator const &allocator
+) {
+  return typename Allocator::template rebind<T>::other(allocator);
+}
+
 /*
  * Helper classes/functions for creating a unique_ptr using a custom allocator
  *
@@ -211,6 +242,18 @@ public:
 };
 
 template <typename T, typename Allocator>
+struct as_stl_allocator {
+  typedef typename std::conditional<
+    is_simple_allocator<T, Allocator>::value,
+    folly::StlAllocator<
+      typename std::remove_reference<Allocator>::type,
+      typename std::remove_reference<T>::type
+    >,
+    typename std::remove_reference<Allocator>::type
+  >::type type;
+};
+
+template <typename T, typename Allocator>
 typename std::enable_if<
   is_simple_allocator<T, Allocator>::value,
   folly::StlAllocator<
@@ -232,6 +275,13 @@ typename std::enable_if<
   return std::move(allocator);
 }
 
+/**
+ * AllocatorUniquePtr: a unique_ptr that supports both STL-style
+ * allocators and SimpleAllocator
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
+ */
+
 template <typename T, typename Allocator>
 struct AllocatorUniquePtr {
   typedef std::unique_ptr<T,
@@ -244,6 +294,13 @@ struct AllocatorUniquePtr {
     >
   > type;
 };
+
+/**
+ * Functions to allocate a unique_ptr / shared_ptr, supporting both
+ * STL-style allocators and SimpleAllocator, analog to std::allocate_shared
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
+ */
 
 template <typename T, typename Allocator, typename ...Args>
 typename AllocatorUniquePtr<T, Allocator>::type allocate_unique(

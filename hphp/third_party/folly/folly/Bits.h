@@ -65,14 +65,17 @@
 #error GCC required
 #endif
 
+#include "folly/folly-config.h"
 #include "folly/detail/BitsDetail.h"
 #include "folly/detail/BitIteratorDetail.h"
 #include "folly/Likely.h"
 
-#include <byteswap.h>
+#if FOLLY_HAVE_BYTESWAP_H
+# include <byteswap.h>
+#endif
+
 #include <cassert>
 #include <cinttypes>
-#include <endian.h>
 #include <iterator>
 #include <limits>
 #include <type_traits>
@@ -230,23 +233,41 @@ struct EndianIntBase {
   static T swap(T x);
 };
 
+/**
+ * If we have the bswap_16 macro from byteswap.h, use it; otherwise, provide our
+ * own definition.
+ */
+#ifdef bswap_16
+# define our_bswap16 bswap_16
+#else
+
+template<class Int16>
+inline constexpr typename std::enable_if<
+  sizeof(Int16) == 2,
+  Int16>::type
+our_bswap16(Int16 x) {
+  return ((x >> 8) & 0xff) | ((x & 0xff) << 8);
+}
+#endif
+
 #define FB_GEN(t, fn) \
 template<> inline t EndianIntBase<t>::swap(t x) { return fn(x); }
 
 // fn(x) expands to (x) if the second argument is empty, which is exactly
-// what we want for [u]int8_t
+// what we want for [u]int8_t. Also, gcc 4.7 on Intel doesn't have
+// __builtin_bswap16 for some reason, so we have to provide our own.
 FB_GEN( int8_t,)
 FB_GEN(uint8_t,)
-FB_GEN( int64_t, bswap_64)
-FB_GEN(uint64_t, bswap_64)
-FB_GEN( int32_t, bswap_32)
-FB_GEN(uint32_t, bswap_32)
-FB_GEN( int16_t, bswap_16)
-FB_GEN(uint16_t, bswap_16)
+FB_GEN( int64_t, __builtin_bswap64)
+FB_GEN(uint64_t, __builtin_bswap64)
+FB_GEN( int32_t, __builtin_bswap32)
+FB_GEN(uint32_t, __builtin_bswap32)
+FB_GEN( int16_t, our_bswap16)
+FB_GEN(uint16_t, our_bswap16)
 
 #undef FB_GEN
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
 template <class T>
 struct EndianInt : public detail::EndianIntBase<T> {
@@ -255,7 +276,7 @@ struct EndianInt : public detail::EndianIntBase<T> {
   static T little(T x) { return x; }
 };
 
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
 template <class T>
 struct EndianInt : public detail::EndianIntBase<T> {
@@ -266,7 +287,7 @@ struct EndianInt : public detail::EndianIntBase<T> {
 
 #else
 # error Your machine uses a weird endianness!
-#endif  /* __BYTE_ORDER */
+#endif  /* __BYTE_ORDER__ */
 
 }  // namespace detail
 
@@ -296,13 +317,13 @@ class Endian {
   };
 
   static constexpr Order order =
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     Order::LITTLE;
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     Order::BIG;
 #else
 # error Your machine uses a weird endianness!
-#endif  /* __BYTE_ORDER */
+#endif  /* __BYTE_ORDER__ */
 
   template <class T> static T swap(T x) {
     return detail::EndianInt<T>::swap(x);

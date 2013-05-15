@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <system_error>
 
-#define FLAGS_mlock_chunk_size (1<<20)
+#define FLAGS_mlock_chunk_size (1 << 20)
 
 namespace folly {
 

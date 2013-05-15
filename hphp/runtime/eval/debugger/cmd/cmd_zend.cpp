@@ -38,8 +38,8 @@ bool CmdZend::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdZend::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdZend::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     const std::string &code = client->getCode();

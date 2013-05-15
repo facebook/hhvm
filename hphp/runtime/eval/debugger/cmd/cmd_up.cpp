@@ -51,8 +51,8 @@ int CmdUp::ParseNumber(DebuggerClient *client) {
   return 1;
 }
 
-bool CmdUp::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdUp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

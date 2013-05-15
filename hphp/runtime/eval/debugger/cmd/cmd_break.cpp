@@ -391,8 +391,8 @@ bool CmdBreak::addToBreakpointListAndUpdateServer(
 // Carries out the Break command. This always involves an action on the
 // client and usually, but not always, involves the server by sending
 // this command to the server and waiting for its response.
-bool CmdBreak::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdBreak::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   bool regex = false;
   BreakPointInfo::State state = BreakPointInfo::Always;

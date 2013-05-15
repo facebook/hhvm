@@ -28,7 +28,9 @@ public:
   CmdAbort() : DebuggerCommand(KindOfAbort) {}
 
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

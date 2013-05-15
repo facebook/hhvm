@@ -49,8 +49,8 @@ bool CmdConstant::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdConstant::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdConstant::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   String text;
   if (client->argCount() == 1) {

@@ -37,7 +37,6 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
   // so CmdUser can override these functions
@@ -47,6 +46,7 @@ public:
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   void helpImpl(DebuggerClient *client, const char *name);
 
 private:

@@ -73,8 +73,8 @@ Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
   return st;
 }
 
-bool CmdWhere::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdWhere::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

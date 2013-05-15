@@ -550,7 +550,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
       raise_warning("not getting a command");
     } else if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      cmdInterrupt->onClientD(m_client);
+      cmdInterrupt->onClient(m_client);
     } else {
       // Previous pending commands
       cmd->handleReply(m_client);

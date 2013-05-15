@@ -44,7 +44,6 @@ public:
   std::string desc() const;
   std::string error() const { return m_errorMsg;}
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
@@ -54,6 +53,7 @@ public:
   InterruptSite *getSite() { return m_site;}
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

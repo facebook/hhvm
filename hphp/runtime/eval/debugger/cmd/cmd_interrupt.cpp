@@ -129,7 +129,7 @@ std::string CmdInterrupt::desc() const {
   return "";
 }
 
-bool CmdInterrupt::onClient(DebuggerClient *client) {
+bool CmdInterrupt::onClientImpl(DebuggerClient *client) {
   client->setCurrentLocation(m_threadId, m_bpi);
   if (!client->getDebuggerSmallStep()) {
     // Adjust line and char if it's not small stepping

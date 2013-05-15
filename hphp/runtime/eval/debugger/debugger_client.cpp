@@ -985,7 +985,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         return DebuggerCommandPtr();
       }
       if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        if (!cmd->onClientD(this)) {
+        if (!cmd->onClient(this)) {
           Logger::Error("Unable to handle signal command.");
           return DebuggerCommandPtr();
         }
@@ -1027,7 +1027,7 @@ void DebuggerClient::runImpl() {
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          if (!cmd->onClientD(this)) {
+          if (!cmd->onClient(this)) {
             Logger::Error("%s: unable to poll signal", func);
             return;
           }
@@ -1040,7 +1040,7 @@ void DebuggerClient::runImpl() {
         m_sigTime = 0;
         usageLogInterrupt(cmd);
         {
-          if (!cmd->onClientD(this)) {
+          if (!cmd->onClient(this)) {
             Logger::Error("%s: unable to process %d", func, cmd->getType());
             return;
           }
@@ -1608,6 +1608,7 @@ do {                                         \
 #undef NEW_CMD_NAME
 }
 
+// Carries out the current command and returns true if the command completed.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
@@ -1633,7 +1634,7 @@ bool DebuggerClient::process() {
     case '?': {
       if (match("?")) {
         usageLog("help", m_line);
-        return CmdHelp().onClientD(this);
+        return CmdHelp().onClient(this);
       }
       if (match("?>")) return processEval();
       break;
@@ -1644,7 +1645,7 @@ bool DebuggerClient::process() {
         usageLog(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
-        return cmd->onClientD(this);
+        return cmd->onClient(this);
       } else {
         return processTakeCode();
       }
@@ -1853,7 +1854,7 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
     }
 
     // eval() can cause more breakpoints
-    if (!res->onClientD(this) || !console()) {
+    if (!res->onClient(this) || !console()) {
       if (m_quitting) {
         throw DebuggerClientExitException();
       } else {
@@ -1928,7 +1929,7 @@ bool DebuggerClient::processEval() {
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClientD(this);
+  CmdEval().onClient(this);
   return true;
 }
 
@@ -1986,6 +1987,11 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
   return DThreadInfoPtr();
 }
 
+// Retrieves a source location that is the current focus of the
+// debugger. The current focus is initially determined by the
+// breakpoint where the debugger is currently stopped and can
+// thereafter be modified by list commands and by switching the
+// the stack frame.
 void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus0, int &charFocus0,
                                      int &lineFocus1, int &charFocus1) {

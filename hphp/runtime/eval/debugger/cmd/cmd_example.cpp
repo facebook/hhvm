@@ -55,8 +55,8 @@ bool CmdExample::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdExample::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdExample::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 1) {
     return help(client);
   }

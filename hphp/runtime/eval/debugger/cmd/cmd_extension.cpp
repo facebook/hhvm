@@ -73,8 +73,8 @@ bool CmdExtension::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdExtension::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdExtension::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   m_args = *client->args();
 

@@ -33,8 +33,8 @@ bool CmdConfig::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdConfig::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdConfig::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     listVars(client);
     return true;

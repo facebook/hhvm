@@ -39,8 +39,8 @@ void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_smallStep);
 }
 
-bool CmdFlowControl::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdFlowControl::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   client->setFrame(0);
 

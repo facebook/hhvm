@@ -287,8 +287,8 @@ void CmdPrint::handleReply(DebuggerClient *client) {
   client->output(m_ret);
 }
 
-bool CmdPrint::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdPrint::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }

@@ -64,8 +64,8 @@ void CmdMacro::processList(DebuggerClient *client) {
   }
 }
 
-bool CmdMacro::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdMacro::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }

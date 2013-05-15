@@ -37,8 +37,8 @@ bool CmdFrame::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdFrame::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdFrame::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() != 1) {
     return help(client);
   }

@@ -67,8 +67,8 @@ bool CmdException::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdException::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdException::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }

@@ -278,8 +278,8 @@ bool CmdHelp::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdHelp::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdHelp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     HelpAll(client);

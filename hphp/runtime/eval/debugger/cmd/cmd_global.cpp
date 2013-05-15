@@ -48,8 +48,8 @@ bool CmdGlobal::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdGlobal::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdGlobal::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   String text;
   if (client->argCount() == 1) {

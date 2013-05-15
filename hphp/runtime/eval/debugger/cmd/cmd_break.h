@@ -27,18 +27,45 @@ class CmdBreak : public DebuggerCommand {
 public:
   CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(nullptr) {}
 
+  // Informs the client of all strings that may follow a break command.
+  // Used for auto completion. The client uses the prefix of the argument
+  // following the command to narrow down the list displayed to the user.
   virtual void list(DebuggerClient *client);
+
+  // The text to display when the debugger client processes "help break".
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
+  // Updates the client with information about the execution of this command.
+  // This information is not used by the command line client, but can
+  // be accessed via the debugger client API exposed to PHP programs.
   virtual void setClientOutput(DebuggerClient *client);
+
+  // Updates the breakpoint list in the proxy with the new list
+  // received from the client. Then sends the command back to the
+  // client as confirmation. Returns false if the confirmation message
+  // send failed.
   virtual bool onServer(DebuggerProxy *proxy);
 
+  // Creates a new CmdBreak instance, sets its breakpoints to the client's
+  // list, sends the command to the server and waits for a response.
   static bool SendClientBreakpointListToServer(DebuggerClient *client);
 
 protected:
+  // Carries out the Break command. This always involves an action on the
+  // client and usually, but not always, involves the server by sending
+  // this command to the server and waiting for its response.
+  virtual bool onClientImpl(DebuggerClient *client);
+
+  // Serializes this command into the given Thrift buffer.
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
+
+  // Deserializes a CmdBreak from the given Thrift buffer.
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
+  // Adds conditional or watch clause to the breakpoint info if needed.
+  // Then adds the breakpoint to client's list and sends this command
+  // to the server so that it too can update it's list.
+  // Returns false if the breakpoint is not well formed.
   bool addToBreakpointListAndUpdateServer(
       DebuggerClient *client, BreakPointInfoPtr bpi, int index);
 
@@ -53,14 +80,37 @@ private:
   // Holds the breakpoint collection of a CmdBreak received via Thrift.
   BreakPointInfoPtrVec m_bps;
 
+  // Uses the client to send this command to the server, which
+  // will update its breakpoint list with the one in this command.
+  // The client will block until the server echoes
+  // this command back to it. The echoed command is discarded.
   bool updateServer(DebuggerClient *client);
+
+  // Carries out the "break list" command.
   bool processList(DebuggerClient *client);
+
+  // Carries out commands that change the status of a breakpoint.
   bool processStatusChange(DebuggerClient *client);
 
+  // Returns true if the last command parsed by the client has
+  // an argument that changes the status of a breakpoint.
+  // I.e. clear, enable, disable or toggle.
   bool hasStatusChangeArg(DebuggerClient *client);
+
+  // Returns true if the last command parsed by the client has
+  // the string "enable" in its first argument position.
   bool hasEnableArg(DebuggerClient *client);
+
+  // Returns true if the last command parsed by the client has
+  // the string "disable" in its first argument position.
   bool hasDisableArg(DebuggerClient *client);
+
+  // Returns true if the last command parsed by the client has
+  // the string "clear" in its first argument position.
   bool hasClearArg(DebuggerClient *client);
+
+  // Returns true if the last command parsed by the client has
+  // the string "toggle" in its first argument position.
   bool hasToggleArg(DebuggerClient *client);
 };
 

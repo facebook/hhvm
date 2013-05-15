@@ -102,7 +102,7 @@ bool CmdExtended::helpCommands(DebuggerClient *client,
   return true;
 }
 
-bool CmdExtended::onClient(DebuggerClient *client) {
+bool CmdExtended::onClientImpl(DebuggerClient *client) {
   if (client->arg(1, "help") || client->arg(1, "?")) {
     if (client->argCount() == 1) {
       return help(client);

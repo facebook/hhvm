@@ -55,8 +55,8 @@ bool CmdRun::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdRun::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdRun::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   m_args = StringVecPtr(client->args(), null_deleter());
   m_smallStep = client->getDebuggerSmallStep();

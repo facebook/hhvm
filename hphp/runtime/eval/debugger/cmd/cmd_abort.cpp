@@ -35,8 +35,8 @@ bool CmdAbort::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdAbort::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdAbort::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     client->tutorial(

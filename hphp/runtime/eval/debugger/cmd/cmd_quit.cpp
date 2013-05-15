@@ -37,9 +37,9 @@ bool CmdQuit::help(DebuggerClient *client) {
 
 // Carries out the Quit command by informing the server the client
 // is going away and then getting the client to quit.
-bool CmdQuit::onClient(DebuggerClient *client) {
-  TRACE(2, "CmdQuit::onClient\n");
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdQuit::onClientImpl(DebuggerClient *client) {
+  TRACE(2, "CmdQuit::onClientImpl\n");
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     client->sendToServer(this);

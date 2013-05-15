@@ -193,8 +193,8 @@ void CmdMachine::UpdateIntercept(DebuggerClient *client,
   client->xend<CmdMachine>(&cmd);
 }
 
-bool CmdMachine::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdMachine::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) return help(client);
 
   bool rpc = client->arg(1, "rpc");

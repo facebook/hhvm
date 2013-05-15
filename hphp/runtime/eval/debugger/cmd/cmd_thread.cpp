@@ -101,8 +101,8 @@ void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
   }
 }
 
-bool CmdThread::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdThread::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

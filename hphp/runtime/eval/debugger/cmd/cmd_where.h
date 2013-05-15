@@ -29,7 +29,6 @@ public:
 
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
@@ -37,6 +36,7 @@ public:
   void processStackTrace(); // server side
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

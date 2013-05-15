@@ -28,8 +28,10 @@ public:
   CmdFrame() : DebuggerCommand(KindOfFrame) {}
 
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

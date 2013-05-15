@@ -111,8 +111,8 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
   }
 }
 
-bool CmdVariable::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdVariable::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   String text;
   if (client->argCount() == 1) {

@@ -37,8 +37,8 @@ bool CmdDown::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdDown::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdDown::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

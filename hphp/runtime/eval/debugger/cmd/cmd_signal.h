@@ -36,10 +36,10 @@ public:
 
   Signal getSignal() const { return (Signal)m_signum;}
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

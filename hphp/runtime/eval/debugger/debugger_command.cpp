@@ -157,17 +157,17 @@ bool DebuggerCommand::help(DebuggerClient *client) {
 // If the first argument of the command is "help" or "?"
 // this displays help text for the command and returns true.
 // Otherwise it returns false.
-bool DebuggerCommand::onClient(DebuggerClient *client) {
-  TRACE(2, "DebuggerCommand::onClient\n");
+bool DebuggerCommand::onClientImpl(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClientImpl\n");
   if (client->arg(1, "help") || client->arg(1, "?")) {
     return help(client);
   }
   return false;
 }
 
-bool DebuggerCommand::onClientD(DebuggerClient *client) {
-  TRACE(2, "DebuggerCommand::onClientD\n");
-  bool ret = onClient(client);
+bool DebuggerCommand::onClient(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClient\n");
+  bool ret = onClientImpl(client);
   if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }

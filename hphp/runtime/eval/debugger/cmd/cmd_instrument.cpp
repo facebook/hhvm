@@ -56,8 +56,8 @@ bool CmdInstrument::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdInstrument::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdInstrument::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 1) {
     if (client->argValue(1) == "list" || client->argValue(1) == "l") {
       listInst(client);

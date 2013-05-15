@@ -125,6 +125,7 @@ public:
    * Main processing functions.
    */
   bool console();
+  // Carries out the current command and returns true if the command completed.
   bool process();
   void quit();
   void onSignal(int sig);
@@ -166,9 +167,8 @@ public:
   void tutorial(const char *text);
   void setTutorial(int mode);
 
-  /**
-   * Input functions.
-   */
+  // Returns the source code string that the debugger is currently
+  // evaluating.
   const std::string &getCode() const { return m_code;}
   void swapHelp();
 
@@ -234,8 +234,15 @@ public:
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64_t threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
+
+  // Retrieves a source location that is the current focus of the
+  // debugger. The current focus is initially determined by the
+  // breakpoint where the debugger is currently stopped and can
+  // thereafter be modified by list commands and by switching the
+  // the stack frame.
   void getListLocation(std::string &file, int &line, int &lineFocus0,
                        int &charFocus0, int &lineFocus1, int &charFocus1);
+
   void setListLocation(const std::string &file, int line, bool center);
   void setSourceRoot(const std::string &sourceRoot);
 
@@ -385,6 +392,7 @@ private:
   bool m_acProtoTypePrompted;
 
   std::string m_line;
+  // The current command to process.
   std::string m_command;
   std::string m_commandCanonical;
   std::string m_prevCmd;

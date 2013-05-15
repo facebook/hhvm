@@ -35,7 +35,6 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
   bool parseZeroArg(DebuggerClient *client);
@@ -44,6 +43,7 @@ public:
   static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

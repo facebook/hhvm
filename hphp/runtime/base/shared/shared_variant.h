@@ -66,12 +66,18 @@ public:
   }
 
   void incRef() {
+    assert(IS_REFCOUNTED_TYPE(m_type));
     atomic_inc(m_count);
   }
 
   void decRef() {
     assert(m_count);
-    if (atomic_dec(m_count) == 0) {
+    if (IS_REFCOUNTED_TYPE(m_type)) {
+      if (atomic_dec(m_count) == 0) {
+        delete this;
+      }
+    } else {
+      assert(m_count == 1);
       delete this;
     }
   }

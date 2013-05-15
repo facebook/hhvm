@@ -48,6 +48,12 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
       break;
     }
   case KindOfStaticString:
+    {
+      if (serialized) goto StringCase;
+      m_data.str = source.getStringData();
+      break;
+    }
+StringCase:
   case KindOfString:
     {
       String s = source.toString();
@@ -56,6 +62,12 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
         // It is priming, and there might not be the right class definitions
         // for unserialization.
         s = apc_reserialize(s);
+      }
+      StringData* st = StringData::LookupStaticString(s.get());
+      if (st) {
+        m_data.str = st;
+        m_type = KindOfStaticString;
+        break;
       }
       m_data.str = s->copy(true);
       break;

@@ -352,6 +352,10 @@ public:
   static StringData *GetStaticString(const String& str);
   static StringData *GetStaticString(const char* str);
   static StringData *GetStaticString(char c);
+
+  /* check if a static string exists that is the same as str
+   * and if so, return it. Else, return nullptr. */
+  static StringData *LookupStaticString(const StringData* str);
   static size_t GetStaticStringCount();
   static uint32_t GetCnsHandle(const StringData* cnsName);
   static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);

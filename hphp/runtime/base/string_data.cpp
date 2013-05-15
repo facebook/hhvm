@@ -103,6 +103,15 @@ StringData *StringData::GetStaticString(const StringData *str) {
   return const_cast<StringData*>(pair.first->first);
 }
 
+StringData *StringData::LookupStaticString(const StringData *str) {
+  if (UNLIKELY(!s_stringDataMap)) return nullptr;
+  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(it->first);
+  }
+  return nullptr;
+}
+
 StringData* StringData::GetStaticString(const String& str) {
   assert(!str.isNull());
   return GetStaticString(str.get());

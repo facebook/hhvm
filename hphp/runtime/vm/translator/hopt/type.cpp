@@ -77,7 +77,14 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
-Type binArithResultType(Type t1, Type t2) {
+Type binArithResultType(Opcode op, Type t1, Type t2) {
+  if (op == OpDiv) {
+    return Type::Int | Type::Dbl | Type::Bool;
+  }
+  if (op == OpMod) {
+    return Type::Int | Type::Bool;
+  }
+  assert(op == OpAdd || op == OpSub || op == OpMul);
   if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
     return Type::Dbl;
   }
@@ -99,7 +106,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
-#define DArith    return binArithResultType(inst->getSrc(0)->type(), \
+#define DArith    return binArithResultType(inst->op(), \
+                                            inst->getSrc(0)->type(),  \
                                             inst->getSrc(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();

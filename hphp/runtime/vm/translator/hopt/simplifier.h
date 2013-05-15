@@ -66,9 +66,10 @@ private:
   SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyAnd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyOr(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitOr(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyLogicXor(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);

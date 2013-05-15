@@ -234,9 +234,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpAdd:       return simplifyAdd(src1, src2);
   case OpSub:       return simplifySub(src1, src2);
   case OpMul:       return simplifyMul(src1, src2);
-  case OpAnd:       return simplifyAnd(src1, src2);
-  case OpOr:        return simplifyOr(src1, src2);
-  case OpXor:       return simplifyXor(src1, src2);
+  case OpBitAnd:    return simplifyBitAnd(src1, src2);
+  case OpBitOr:     return simplifyBitOr(src1, src2);
+  case OpBitXor:    return simplifyBitXor(src1, src2);
+  case OpLogicXor:  return simplifyLogicXor(src1, src2);
 
   case OpGt:
   case OpGte:
@@ -866,13 +867,13 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_DISTRIBUTIVE(&, |, And, Or);
+SSATmp* Simplifier::simplifyBitAnd(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_DISTRIBUTIVE(&, |, BitAnd, BitOr);
   // X & X --> X
   if (src1 == src2) {
     return src1;
   }
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst()) {
     // X & 0 --> 0
     if (src2->getValInt() == 0) {
       return cns(0);
@@ -885,13 +886,13 @@ SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_DISTRIBUTIVE(|, &, Or, And);
+SSATmp* Simplifier::simplifyBitOr(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_DISTRIBUTIVE(|, &, BitOr, BitAnd);
   // X | X --> X
   if (src1 == src2) {
     return src1;
   }
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst()) {
     // X | 0 --> X
     if (src2->getValInt() == 0) {
       return src1;
@@ -904,23 +905,37 @@ SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_COMMUTATIVE(^, Xor);
+SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_COMMUTATIVE(^, BitXor);
   // X ^ X --> 0
   if (src1 == src2)
     return cns(0);
-  // X ^ 0 --> X
-  if (src2->isConst() && src2->type() == Type::Int) {
+  // X ^ 0 --> X; X ^ -1 --> ~X
+  if (src2->isConst()) {
     if (src2->getValInt() == 0) {
       return src1;
     }
+    if (src2->getValInt() == -1) {
+      return gen(OpBitNot, src1);
+    }
   }
-  // Bool(X) ^ 1    --> Int(!X)
-  // Bool(X) ^ true --> Int(!X)
-  if (src1->isA(Type::Bool) && src2->isConst() &&
-      ((src2->isA(Type::Int) && src2->getValInt() == 1) ||
-       (src2->isA(Type::Bool) && src2->getValBool() == true))) {
-    return gen(ConvBoolToInt, gen(OpNot, src1));
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_COMMUTATIVE(^, LogicXor);
+  if (src1 == src2) {
+    return cns(false);
+  }
+
+  // SIMPLIFY_COMMUTATIVE takes care of the both-sides-const case, and
+  // canonicalizes a single const to the right
+  if (src2->isConst()) {
+    if (src2->getValBool()) {
+      return gen(OpNot, src1);
+    } else {
+      return src1;
+    }
   }
   return nullptr;
 }

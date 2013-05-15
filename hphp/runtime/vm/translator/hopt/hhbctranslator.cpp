@@ -716,15 +716,20 @@ void HhbcTranslator::emitIncDecMem(bool pre,
   gen(StMemNT, propAddr, cns(0), res);
 }
 
-static bool isSupportedBinaryArith(Opcode opc, Type t1, Type t2) {
+static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
   switch (opc) {
   case OpAdd:
   case OpSub:
   case OpMul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
                      t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
 
-  default:    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
+  case OpBitAnd:
+  case OpBitOr:
+  case OpBitXor:
+    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
                      t2.subtypeOfAny(Type::Int, Type::Bool);
+  default:
+    not_reached();
   }
 }
 
@@ -745,9 +750,13 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  if (isSupportedBinaryArith(subOpc, loc->type(), topC()->type())) {
+  if (areBinaryArithTypesSupported(subOpc, loc->type(), topC()->type())) {
     auto const val    = popC();
-    auto const result = gen(subOpc, loc, val);
+    auto const result = gen(
+      subOpc,
+      loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
+      val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
+    );
     push(stLoc(id, exitTrace, result));
     return;
   }
@@ -2804,16 +2813,15 @@ void HhbcTranslator::emitCGetS(const StringData* propName,
 }
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {
-  bool isBitOp = (opc == OpAnd || opc == OpOr || opc == OpXor);
+  bool isBitOp = (opc == OpBitAnd || opc == OpBitOr || opc == OpBitXor);
   Type type1 = topC(0)->type();
   Type type2 = topC(1)->type();
-  if (isSupportedBinaryArith(opc, type1, type2)) {
+  if (areBinaryArithTypesSupported(opc, type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
+    tr = (tr->isA(Type::Bool) ? gen(ConvBoolToInt, tr) : tr);
+    tl = (tl->isA(Type::Bool) ? gen(ConvBoolToInt, tl) : tl);
     push(gen(opc, tl, tr));
-  } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
-    // raise fatal
-    emitInterpOne(Type::Cell, 2);
   } else {
     Type type = Type::Int;
     if (isBitOp) {
@@ -2899,13 +2907,9 @@ void HhbcTranslator::emitMod() {
 
 void HhbcTranslator::emitBitNot() {
   Type srcType = topC()->type();
-  if (srcType == Type::Int) {
+  if (srcType.subtypeOf(Type::Int)) {
     SSATmp* src = popC();
-    SSATmp* ones = cns(~uint64_t(0));
-    push(gen(OpXor, src, ones));
-  } else if (srcType.subtypeOf(Type::Null | Type::Bool | Type::Arr | Type::Obj)) {
-    // raise fatal
-    emitInterpOne(Type::Cell, 1);
+    push(gen(OpBitNot, src));
   } else {
     Type resultType = Type::Int;
     if (srcType.isString()) {
@@ -2922,7 +2926,7 @@ void HhbcTranslator::emitXor() {
   SSATmp* btl = popC();
   SSATmp* tr = gen(ConvCellToBool, btr);
   SSATmp* tl = gen(ConvCellToBool, btl);
-  push(gen(ConvCellToBool, gen(OpXor, tl, tr)));
+  push(gen(ConvCellToBool, gen(OpLogicXor, tl, tr)));
   gen(DecRef, btl);
   gen(DecRef, btr);
 }

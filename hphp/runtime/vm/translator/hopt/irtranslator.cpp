@@ -877,9 +877,9 @@ TranslatorX64::irTranslateSetOpL(const Tracelet& t,
     case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
     case SetOpConcatEqual: opc = JIT::Concat;   break;
     case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpAndEqual:    opc = JIT::OpAnd; break;
-    case SetOpOrEqual:     opc = JIT::OpOr;  break;
-    case SetOpXorEqual:    opc = JIT::OpXor; break;
+    case SetOpAndEqual:    opc = JIT::OpBitAnd; break;
+    case SetOpOrEqual:     opc = JIT::OpBitOr;  break;
+    case SetOpXorEqual:    opc = JIT::OpBitXor; break;
     case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     default: not_reached();

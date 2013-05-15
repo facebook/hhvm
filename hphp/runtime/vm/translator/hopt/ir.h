@@ -172,14 +172,16 @@ O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
-O(OpAdd,                        DArith, SNum SNum,                         C) \
-O(OpSub,                        DArith, SNum SNum,                         C) \
-O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
-O(OpOr,                         D(Int), SNum SNum,                         C) \
-O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
-O(OpMul,                        DArith, SNum SNum,                         C) \
-O(OpDiv,                        DArith, SNum SNum,                         C) \
-O(OpMod,                        D(Int), SNumInt SNumInt,                 C|N) \
+O(OpAdd,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpSub,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpMul,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpDiv,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpMod,                        DArith, S(Int,Dbl) S(Int,Dbl),           C|N) \
+O(OpBitAnd,                     D(Int), S(Int) S(Int),                     C) \
+O(OpBitOr,                      D(Int), S(Int) S(Int),                     C) \
+O(OpBitXor,                     D(Int), S(Int) S(Int),                     C) \
+O(OpBitNot,                     D(Int), S(Int),                            C) \
+O(OpLogicXor,                  D(Bool), S(Bool) S(Bool),                   C) \
 O(OpNot,                       D(Bool), S(Bool),                           C) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
@@ -588,13 +590,6 @@ enum Opcode : uint16_t {
 #define O(name, dsts, srcs, flags) name,
   IR_OPCODES
 #undef O
-
-  // Agree with hhbc on the names of these, to ease macro implementations.
-  // TODO(2395841): this is totally bogus. Bitwise and logical ops have vastly
-  // different behavior. We need to give these their own opcodes.
-  OpBitAnd = OpAnd,
-  OpBitOr = OpOr,
-  OpBitXor = OpXor,
 
   IR_NUM_OPCODES
 };

@@ -380,14 +380,14 @@ GuardRefs
 
 2. Arithmetic
 
-D:Int            = OpAdd S0:{Int|Bool} S1:{Int|Bool}
-D:Int            = OpSub S0:{Int|Bool} S1:{Int|Bool}
-D:Int            = OpAnd S0:{Int|Bool} S1:{Int|Bool}
-D:Int            = OpOr  S0:{Int|Bool} S1:{Int|Bool}
-D:Int            = OpXor S0:{Int|Bool} S1:{Int|Bool}
-D:Int            = OpMul S0:{Int|Bool} S1:{Int|Bool}
-D:{Int|Bool}     = OpMod S0:{Int|Bool} S1:{Int|Bool}
-D:{Int|Bool|Dbl} = OpDiv S0:{Int|Bool} S1:{Int|Bool}
+D:{Int|Dbl}      = OpAdd    S0:{Int|Dbl} S1:{Int|Dbl}
+D:{Int|Dbl}      = OpSub    S0:{Int|Dbl} S1:{Int|Dbl}
+D:{Int|Dbl}      = OpMul    S0:{Int|Dbl} S1:{Int|Dbl}
+D:{Int|Bool}     = OpMod    S0:{Int|Dbl} S1:{Int|Dbl}
+D:{Int|Bool|Dbl} = OpDiv    S0:{Int|Dbl} S1:{Int|Dbl}
+D:Int            = OpBitAnd S0:Int S1:Int
+D:Int            = OpBitOr  S0:Int S1:Int
+D:Int            = OpBitXor S0:Int S1:Int
 
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
@@ -395,6 +395,16 @@ D:{Int|Bool|Dbl} = OpDiv S0:{Int|Bool} S1:{Int|Bool}
   Note that OpMod and OpDiv produce boolean false when the divisor is
   zero-like. Ints are not closed under OpDiv, as OpDiv produces doubles
   when there is a non-zero remainder.
+
+D:Bool = OpLogicXor S0:Bool S1:Bool
+
+  Logical XOR of the two sources. (Note that && and || do not have
+  corresponding opcodes because they're handled at the bytecode level,
+  to implement short-circuiting.)
+
+D:Bool = OpNot S0:Bool
+
+  Logical negation of the source.
 
 
 3. Type conversions

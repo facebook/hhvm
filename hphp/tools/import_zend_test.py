@@ -178,6 +178,8 @@ bad_tests = (
     '/ext-standard-file/filetype_variation2.php',
     '/ext-standard-file/filetype_variation3.php',
     '/ext-sockets/ipv4loop.php',
+    '/ext-posix/posix_kill_basic.php',
+    '/ext-standard-file/005_variation-win32.php',
 
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',

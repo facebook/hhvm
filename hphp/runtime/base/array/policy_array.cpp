@@ -590,7 +590,7 @@ CVarRef ArrayShell::endRef() {
 }
 
 HphpArray* ArrayShell::toHphpArray() const {
-  auto result = NEW(HphpArray)(m_size);
+  auto result = ArrayData::Make(m_size);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
       result->add(key(toPos(i)).getStringData(), val(toPos(i)), false);

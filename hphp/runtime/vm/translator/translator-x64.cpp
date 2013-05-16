@@ -1646,7 +1646,7 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
   int nargs = ar->numArgs();
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
-  HphpArray* argArray = NEW(HphpArray)(nargs);
+  HphpArray* argArray = ArrayData::Make(nargs);
   argArray->incRefCount();
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv =

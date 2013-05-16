@@ -109,7 +109,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 static Array get_frame_args_with_ref(const ActRec* ar) {
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = NEW(HphpArray)(numArgs);
+  HphpArray* retval = ArrayData::Make(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {

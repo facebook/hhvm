@@ -929,7 +929,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * static string. Not worth presizing or otherwise
        * optimizing for.
        */
-      TargetCache::s_constants = NEW(HphpArray)(1);
+      TargetCache::s_constants = ArrayData::Make(1);
       TargetCache::s_constants->incRefCount();
     }
     if (TargetCache::s_constants->nvInsert(

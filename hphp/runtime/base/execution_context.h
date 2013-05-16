@@ -546,7 +546,7 @@ public:
       return it->second;
     }
 
-    HphpArray* array = NEW(HphpArray)(f->numStaticLocals());
+    auto array = ArrayData::Make(f->numStaticLocals());
     array->incRefCount();
     return m_funcStaticCtx[f] = array;
   }

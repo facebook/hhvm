@@ -3831,7 +3831,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopArray(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
   // Clever sizing avoids extra work in HphpArray construction.
-  ArrayData* arr = NEW(HphpArray)(size_t(3U) << (HphpArray::MinLgTableSize-2));
+  auto arr = ArrayData::Make(size_t(3U) << (HphpArray::MinLgTableSize-2));
   m_stack.pushArray(arr);
 }
 
@@ -3839,7 +3839,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNewTuple(PC& pc) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  HphpArray* arr = NEW(HphpArray)(n, m_stack.topC());
+  HphpArray* arr = ArrayData::Make(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArray(arr);
 }

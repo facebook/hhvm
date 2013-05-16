@@ -30,18 +30,18 @@ ArrayInit::ArrayInit(ssize_t n) {
     // Force compilation of ArrayShell
     m_data = NEW(ArrayShell)(n);
   } else {
-    m_data = NEW(HphpArray)(n);
+    m_data = ArrayData::Make(n);
   }
 }
 
 HOT_FUNC
 ArrayData *ArrayInit::CreateVector(ssize_t n) {
-  return NEW(HphpArray)(n);
+  return ArrayData::Make(n);
 }
 
 HOT_FUNC
 ArrayData *ArrayInit::CreateMap(ssize_t n) {
-  return NEW(HphpArray)(n);
+  return ArrayData::Make(n);
 }
 
 ArrayData *ArrayInit::CreateParams(int count, ...) {

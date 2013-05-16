@@ -6809,7 +6809,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        auto a = NEW(HphpArray)(0);
+        auto a = ArrayData::Make(0);
         a->incRefCount();
         m_staticArrays.push_back(a);
 

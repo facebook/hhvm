@@ -28,7 +28,7 @@ namespace HPHP {
 class ArrayInit;
 
 class HphpArray : public ArrayData {
-  enum CopyMode { kSmartCopy, kNonSmartCopy };
+  enum class AllocationPolicy { smart, nonSmart };
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
@@ -46,11 +46,11 @@ public:
 
 private:
   // for copy-on-write escalation
-  HphpArray(CopyMode);
+  explicit HphpArray(AllocationPolicy);
 
 public:
   // Create an empty array with enough capacity for nSize elements.
-  HphpArray(uint nSize);
+  explicit HphpArray(uint nSize);
 
   // Create and initialize an array with size elements, populated by
   // moving (without refcounting) and reversing vals.
@@ -474,7 +474,7 @@ private:
 
 private:
   enum EmptyMode { StaticEmptyArray };
-  HphpArray(EmptyMode);
+  explicit HphpArray(EmptyMode);
   // static singleton empty array.  Not a subclass because we want a fast
   // isHphpArray implementation; HphpArray should be effectively final.
   static HphpArray s_theEmptyArray;
@@ -545,6 +545,16 @@ uint64_t array_issetm_i(const void* hphpArray, int64_t key)
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
 //=============================================================================
+
+// inline for performance reasons
+
+inline HphpArray* ArrayData::Make(uint capacity) {
+  return NEW(HphpArray)(capacity);
+}
+
+inline HphpArray* ArrayData::Make(uint size, const TypedValue* data) {
+  return NEW(HphpArray)(size, data);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

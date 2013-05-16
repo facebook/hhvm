@@ -27,6 +27,7 @@ namespace HPHP {
 
 class SharedVariant;
 struct TypedValue;
+class HphpArray;
 
 /**
  * Base class/interface for all types of specialized array data.
@@ -63,6 +64,9 @@ class ArrayData : public Countable {
     m_pos(src->m_pos), m_strongIterators(0), m_kind(src->m_kind),
     m_nonsmart(nonsmart) {
   }
+
+  static HphpArray* Make(uint capacity);
+  static HphpArray* Make(uint size, const TypedValue*);
 
   virtual ~ArrayData() {
     // If there are any strong iterators pointing to this array, they need

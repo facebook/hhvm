@@ -347,7 +347,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = NEW(HphpArray)(numArgs);
+  auto retval = ArrayData::Make(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {

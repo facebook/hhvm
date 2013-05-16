@@ -84,7 +84,7 @@ Array f_get_class_methods(CVarRef class_or_object) {
   if (!cls) return Array();
   VMRegAnchor _;
 
-  HphpArray* retVal = NEW(HphpArray)(cls->numMethods());
+  auto retVal = ArrayData::Make(cls->numMethods());
   cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
                       retVal);
   return Array(retVal).keys();
@@ -93,11 +93,11 @@ Array f_get_class_methods(CVarRef class_or_object) {
 Array vm_get_class_constants(CStrRef className) {
   HPHP::Class* cls = HPHP::Unit::loadClass(className.get());
   if (cls == NULL) {
-    return NEW(HphpArray)(0);
+    return ArrayData::Make(0);
   }
 
   size_t numConstants = cls->numConstants();
-  HphpArray* retVal = NEW(HphpArray)(numConstants);
+  auto retVal = ArrayData::Make(numConstants);
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
@@ -145,7 +145,7 @@ Array vm_get_class_vars(CStrRef className) {
   CallerFrame cf;
   HPHP::Class* ctx = arGetContextClass(cf());
 
-  HphpArray* ret = NEW(HphpArray)(numDeclProps + numSProps);
+  auto ret = ArrayData::Make(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);

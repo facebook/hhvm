@@ -389,7 +389,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
   size_t size = m_cls->m_declPropNumAccessible +
                 (o_properties.get() ? o_properties.get()->size() : 0);
-  HphpArray* retval = NEW(HphpArray)(size);
+  auto retval = ArrayData::Make(size);
   Class* ctx = nullptr;
   if (!context.empty()) {
     ctx = Unit::lookupClass(context.get());

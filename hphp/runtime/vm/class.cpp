@@ -823,7 +823,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
   propArr.incRefCount();
 
   // Insert propArr and sentinel into the args array, transferring ownership.
-  ArrayData* args = NEW(HphpArray)(2);
+  ArrayData* args = ArrayData::Make(2);
   args->incRefCount();
   {
     // the first argument is byRef. Make a reference,
@@ -1023,7 +1023,7 @@ TypedValue* Class::initSPropsImpl() const {
     NameValueTableWrapper nvtWrapper(&*nvt);
     nvtWrapper.incRefCount();
 
-    ArrayData* args = NEW(HphpArray)(1);
+    ArrayData* args = ArrayData::Make(1);
     args->incRefCount();
     try {
       {
@@ -1120,7 +1120,7 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
 
 HphpArray* Class::initClsCnsData() const {
   Slot nConstants = m_constants.size();
-  HphpArray* constants = NEW(HphpArray)(nConstants);
+  HphpArray* constants = ArrayData::Make(nConstants);
   constants->incRefCount();
 
   if (m_parent.get() != nullptr) {

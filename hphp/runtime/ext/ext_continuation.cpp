@@ -171,7 +171,7 @@ Variant c_Continuation::t___clone() {
 
 HphpArray* c_Continuation::getStaticLocals() {
   if (m_VMStatics.get() == NULL) {
-    m_VMStatics = NEW(HphpArray)(1);
+    m_VMStatics = ArrayData::Make(1);
   }
   return m_VMStatics.get();
 }

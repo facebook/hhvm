@@ -154,8 +154,8 @@ HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
 }
 
 // Empty constructor for internal use by nonSmartCopy() and copyImpl()
-HphpArray::HphpArray(CopyMode mode) :
-  ArrayData(kHphpArray, /*nonsmart*/ mode == kNonSmartCopy) {
+HphpArray::HphpArray(AllocationPolicy mode) :
+    ArrayData(kHphpArray, /*nonsmart*/ mode == AllocationPolicy::nonSmart) {
 }
 
 HOT_FUNC_VM
@@ -1446,11 +1446,11 @@ inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
 }
 
 NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
-  return copyImpl(new HphpArray(kNonSmartCopy));
+  return copyImpl(new HphpArray(AllocationPolicy::nonSmart));
 }
 
 NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
-  return copyImpl(NEW(HphpArray)(kSmartCopy));
+  return copyImpl(NEW(HphpArray)(AllocationPolicy::smart));
 }
 
 ArrayData* HphpArray::append(CVarRef v, bool copy) {

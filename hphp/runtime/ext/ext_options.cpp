@@ -704,6 +704,10 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
   return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
 }
 
+Variant f_php_ini_loaded_file() {
+  return false;
+}
+
 String f_php_ini_scanned_files() {
   throw NotSupportedException(__func__, "not using ini");
 }

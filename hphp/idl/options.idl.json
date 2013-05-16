@@ -665,6 +665,19 @@
             ]
         },
         {
+            "name": "php_ini_loaded_file",
+            "desc": "Retrieve a path to the loaded php.ini file.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Check if a php.ini file is loaded, and retrieve its path."
+            },
+            "args": [
+            ]
+        },
+        {
             "name": "php_ini_scanned_files",
             "desc": "php_ini_scanned_files() returns a comma-separated list of configuration files parsed after php.ini. These files are found in a directory defined by the --with-config-file-scan-dir option which is set during compilation.\n\nThe returned configuration files also include the path as declared in the --with-config-file-scan-dir option.",
             "flags": [

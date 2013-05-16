@@ -62,6 +62,7 @@ String f_ini_set(CStrRef varname, CStrRef newvalue);
 int64_t f_memory_get_allocation();
 int64_t f_memory_get_peak_usage(bool real_usage = false);
 int64_t f_memory_get_usage(bool real_usage = false);
+Variant f_php_ini_loaded_file();
 String f_php_ini_scanned_files();
 String f_php_logo_guid();
 String f_php_sapi_name();

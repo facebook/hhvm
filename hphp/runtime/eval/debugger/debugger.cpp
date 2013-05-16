@@ -504,9 +504,11 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
 
 DebuggerProxyPtr Debugger::findProxy(const StringData* sandboxId) {
   TRACE(2, "Debugger::findProxy\n");
-  ProxyMap::const_accessor acc;
-  if (m_proxyMap.find(acc, sandboxId)) {
-    return acc->second;
+  if (sandboxId) {
+    ProxyMap::const_accessor acc;
+    if (m_proxyMap.find(acc, sandboxId)) {
+      return acc->second;
+    }
   }
   return DebuggerProxyPtr();
 }

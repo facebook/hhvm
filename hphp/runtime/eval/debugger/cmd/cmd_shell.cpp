@@ -38,7 +38,7 @@ void CmdShell::list(DebuggerClient *client) {
   client->addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
-bool CmdShell::help(DebuggerClient *client) {
+void CmdShell::help(DebuggerClient *client) {
   client->helpTitle("Shell Command");
   client->help("! {cmd} {arg1} {arg2} ...    remotely executes shell command");
   client->helpBody(
@@ -46,20 +46,17 @@ bool CmdShell::help(DebuggerClient *client) {
     "\n"
     "The space between ! and command is not needed. '!ls' works as well."
   );
-  return true;
 }
 
-bool CmdShell::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdShell::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
-    return help(client);
+    help(client);
+    return;
   }
-
   m_args = *client->args();
-
   CmdShellPtr cmd = client->xend<CmdShell>(this);
   client->print(cmd->m_out);
-  return true;
 }
 
 bool CmdShell::onServer(DebuggerProxy *proxy) {

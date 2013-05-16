@@ -27,10 +27,10 @@ class CmdAbort : public DebuggerCommand {
 public:
   CmdAbort() : DebuggerCommand(KindOfAbort) {}
 
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

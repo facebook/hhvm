@@ -33,7 +33,7 @@ void CmdConstant::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_constants);
 }
 
-bool CmdConstant::help(DebuggerClient *client) {
+void CmdConstant::help(DebuggerClient *client) {
   client->helpTitle("Constant Command");
   client->helpCmds(
     "[k]onstant",           "lists all constants",
@@ -46,17 +46,17 @@ bool CmdConstant::help(DebuggerClient *client) {
     "that contain the text in their names or values. The search is case-"
     "insensitive and string-based."
   );
-  return true;
 }
 
-bool CmdConstant::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdConstant::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
   if (client->argCount() == 1) {
     text = client->argValue(1);
   } else if (client->argCount() != 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   CmdConstantPtr cmd = client->xend<CmdConstant>(this);
@@ -93,8 +93,6 @@ bool CmdConstant::onClientImpl(DebuggerClient *client) {
       client->info("(unable to find specified text in any constants)");
     }
   }
-
-  return true;
 }
 
 void CmdConstant::setClientOutput(DebuggerClient *client) {

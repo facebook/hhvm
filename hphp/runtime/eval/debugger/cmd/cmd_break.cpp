@@ -74,7 +74,7 @@ void CmdBreak::list(DebuggerClient *client) {
 }
 
 // The text to display when the debugger client processes "help break".
-bool CmdBreak::help(DebuggerClient *client) {
+void CmdBreak::help(DebuggerClient *client) {
   client->helpTitle("Break Command");
   client->helpCmds(
     "[b]reak",                  "breaks at current line of code",
@@ -174,11 +174,10 @@ bool CmdBreak::help(DebuggerClient *client) {
   );
 
   client->help("");
-  return true;
 }
 
 // Carries out the "break list" command.
-bool CmdBreak::processList(DebuggerClient *client) {
+void CmdBreak::processList(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
     BreakPointInfoPtr bpi = m_breakpoints->at(i);
@@ -195,18 +194,17 @@ bool CmdBreak::processList(DebuggerClient *client) {
       "Use '[b]reak [t]oggle {index}|[a]ll' to change their states."
     );
   }
-  return true;
 }
 
 // Carries out commands that change the status of a breakpoint.
-bool CmdBreak::processStatusChange(DebuggerClient *client) {
+void CmdBreak::processStatusChange(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   if (m_breakpoints->empty()) {
     client->error("There is no breakpoint to clear or toggle.");
     client->tutorial(
       "Use '[b]reak ?|[h]elp' to read how to set breakpoints. "
     );
-    return true;
+    return;
   }
 
   if (client->argCount() == 1) {
@@ -246,11 +244,11 @@ bool CmdBreak::processStatusChange(DebuggerClient *client) {
     }
     if (found) {
       updateServer(client);
-      return true;
+      return;
     }
 
     client->error("There is no current breakpoint to clear or toggle.");
-    return true;
+    return;
   }
 
   if (client->arg(2, "all")) {
@@ -258,7 +256,7 @@ bool CmdBreak::processStatusChange(DebuggerClient *client) {
       m_breakpoints->clear();
       updateServer(client);
       client->info("All breakpoints are cleared.");
-      return true;
+      return;
     }
 
     for (unsigned int i = 0; i < m_breakpoints->size(); i++) {
@@ -286,7 +284,7 @@ bool CmdBreak::processStatusChange(DebuggerClient *client) {
       "You will have to run '[b]reak [l]ist' first to see a list of valid "
       "numbers or indices to specify."
     );
-    return true;
+    return;
   }
 
   int index = -1;
@@ -301,7 +299,7 @@ bool CmdBreak::processStatusChange(DebuggerClient *client) {
     client->error("\"%s\" is not a valid breakpoint index. Choose one from "
                   "this list:", snum.c_str());
     processList(client);
-    return true;
+    return;
   }
 
   BreakPointInfoPtr bpi = (*m_breakpoints)[index];
@@ -327,8 +325,6 @@ bool CmdBreak::processStatusChange(DebuggerClient *client) {
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   }
-
-  return true;
 }
 
 // Uses the client to send this command to the server, which
@@ -391,8 +387,8 @@ bool CmdBreak::addToBreakpointListAndUpdateServer(
 // Carries out the Break command. This always involves an action on the
 // client and usually, but not always, involves the server by sending
 // this command to the server and waiting for its response.
-bool CmdBreak::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdBreak::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   bool regex = false;
   BreakPointInfo::State state = BreakPointInfo::Always;
@@ -405,9 +401,11 @@ bool CmdBreak::onClientImpl(DebuggerClient *client) {
     state = BreakPointInfo::Once;
     index++;
   } else if (client->arg(1, "list")) {
-    return processList(client);
+    processList(client);
+    return;
   } else if (hasStatusChangeArg(client)) {
-    return processStatusChange(client);
+    processStatusChange(client);
+    return;
   }
 
   string currentFile;
@@ -425,7 +423,7 @@ bool CmdBreak::onClientImpl(DebuggerClient *client) {
     if (currentFile.empty() || currentLine == 0) {
       client->error("There is no current file or line to set breakpoint. "
                     "You will have to specify source file location yourself.");
-      return true;
+      return;
     }
 
     bpi = BreakPointInfoPtr(new BreakPointInfo(regex, state,
@@ -464,7 +462,6 @@ bool CmdBreak::onClientImpl(DebuggerClient *client) {
       "\tmethod invoke: {cls}::{method}()\n"
     );
   }
-  return true;
 }
 
 static const StaticString s_id("id");

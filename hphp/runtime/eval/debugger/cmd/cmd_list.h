@@ -39,7 +39,7 @@ public:
   virtual void list(DebuggerClient *client);
 
   // The text to display when the debugger client processes "help break".
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
   // Puts the specified range of the contents of the source file referenced
   // by this command in m_code and sends a copy of the updated command back
@@ -51,7 +51,7 @@ protected:
   // server to get back the listing, updates the client with the current
   // position in the source file and displays a list of source lines to
   // the console.
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
 
   // Serializes this command into the given Thrift buffer.
   virtual void sendImpl(DebuggerThriftBuffer &thrift);

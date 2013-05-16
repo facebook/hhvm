@@ -38,7 +38,7 @@ void CmdExample::list(DebuggerClient *client) {
   client->addCompletion("hip-hop-roll");
 }
 
-bool CmdExample::help(DebuggerClient *client) {
+void CmdExample::help(DebuggerClient *client) {
   client->helpTitle("Example Command");
   client->helpCmds(
     "xample {string}",      "it will tell you how long it is!",
@@ -52,19 +52,18 @@ bool CmdExample::help(DebuggerClient *client) {
     "Modify command registration code at bottom of runtime/eval/debugger/cmd/"
     "cmd_extended.cpp and modify your new command by following this example."
   );
-  return true;
 }
 
-bool CmdExample::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdExample::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 1) {
-    return help(client);
+    help(client);
+    return;
   }
 
   m_input = client->lineRest(2);
   CmdExamplePtr res = client->xend<CmdExample>(this);
   client->output("%d", res->m_output);
-  return true;
 }
 
 bool CmdExample::onServer(DebuggerProxy *proxy) {

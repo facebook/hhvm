@@ -34,7 +34,7 @@ void CmdException::list(DebuggerClient *client) {
   }
 }
 
-bool CmdException::help(DebuggerClient *client) {
+void CmdException::help(DebuggerClient *client) {
   client->helpTitle("Exception Command");
   client->helpCmds(
     "[e]xception {cls}",            "breaks if class of exception throws",
@@ -64,13 +64,13 @@ bool CmdException::help(DebuggerClient *client) {
     "An exception breakpoint can be listed, cleared or toggled with '[b]reak' "
     "commands."
   );
-  return true;
 }
 
-bool CmdException::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdException::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   bool regex = false;
@@ -100,7 +100,6 @@ bool CmdException::onClientImpl(DebuggerClient *client) {
       "\n"
     );
   }
-  return true;
 }
 
 void CmdException::setClientOutput(DebuggerClient *client) {

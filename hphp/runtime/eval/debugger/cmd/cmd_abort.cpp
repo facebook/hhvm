@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdAbort::help(DebuggerClient *client) {
+void CmdAbort::help(DebuggerClient *client) {
   client->helpTitle("Abort Command");
   client->helpCmds(
     "[a]bort", "aborts current PHP code input",
@@ -32,11 +32,10 @@ bool CmdAbort::help(DebuggerClient *client) {
     "ad-hoc PHP code to evaluate. In other words, it only works when you see "
     "continuation prompt like \">>>>\"."
   );
-  return true;
 }
 
-bool CmdAbort::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdAbort::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client->argCount() == 0) {
     client->tutorial(
@@ -44,10 +43,9 @@ bool CmdAbort::onClientImpl(DebuggerClient *client) {
       "\"<?\" then decided to abort the input. So it only makes sense when "
       "you see continuation prompt like \">>>>\"."
     );
-    return true;
+  } else {
+    help(client);
   }
-
-  return help(client);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

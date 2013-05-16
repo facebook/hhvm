@@ -22,7 +22,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdZend::help(DebuggerClient *client) {
+void CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
   client->helpCmds(
     "[z]end", "running the most recent code snippet in Zend PHP",
@@ -35,21 +35,19 @@ bool CmdZend::help(DebuggerClient *client) {
     "note that only the most recent block of code you manually typed in was "
     "evaluated, not any earlier ones, nor the ones from a PHP file."
   );
-  return true;
 }
 
-bool CmdZend::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdZend::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client->argCount() == 0) {
     const std::string &code = client->getCode();
     string out;
     Process::Exec("php", nullptr, code.c_str(), out, &out, true);
     client->print(out);
-    return true;
+  } else {
+    help(client);
   }
-
-  return help(client);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

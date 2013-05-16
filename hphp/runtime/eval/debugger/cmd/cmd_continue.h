@@ -27,7 +27,7 @@ class CmdContinue : public CmdFlowControl {
 public:
   CmdContinue() : CmdFlowControl(KindOfContinue) {}
 
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
   virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
   virtual void onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt);
 };

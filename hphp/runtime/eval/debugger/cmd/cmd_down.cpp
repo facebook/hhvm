@@ -23,7 +23,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdDown::help(DebuggerClient *client) {
+void CmdDown::help(DebuggerClient *client) {
   client->helpTitle("Down Command");
   client->helpCmds(
     "[d]own {num=1}", "moves to inner frames (callees) on stacktrace",
@@ -34,18 +34,16 @@ bool CmdDown::help(DebuggerClient *client) {
     "current frame. By default it moves down by one level. Specify a number "
     "to move down several levels a time."
   );
-  return true;
 }
 
-bool CmdDown::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdDown::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+  } else {
+    CmdWhere().fetchStackTrace(client);
+    client->moveToFrame(client->getFrame() - CmdUp::ParseNumber(client));
   }
-
-  CmdWhere().fetchStackTrace(client);
-  client->moveToFrame(client->getFrame() - CmdUp::ParseNumber(client));
-  return true;
 }
 
 void CmdDown::setClientOutput(DebuggerClient *client) {

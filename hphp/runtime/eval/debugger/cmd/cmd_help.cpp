@@ -256,7 +256,7 @@ void CmdHelp::list(DebuggerClient *client) {
   }
 }
 
-bool CmdHelp::help(DebuggerClient *client) {
+void CmdHelp::help(DebuggerClient *client) {
   client->helpTitle("Help Command");
   client->helpCmds(
     "[h]elp [s]tart", "displays material for getting started",
@@ -275,35 +275,24 @@ bool CmdHelp::help(DebuggerClient *client) {
     "To get detailed information of a command, type '{cmd} [h]elp' or '{cmd} "
     "?' or 'help {cmd}' or '? {cmd}'."
   );
-  return true;
 }
 
-bool CmdHelp::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-
+void CmdHelp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
     HelpAll(client);
-    return true;
-  }
-
-  if (client->arg(1, "start")) {
+   } else if (client->arg(1, "start")) {
     HelpStarted(client);
-    return true;
-  }
-
-  if (client->arg(1, "tutorial")) {
+  } else if (client->arg(1, "tutorial")) {
     if (!processTutorial(client)) {
-      return help(client);
+      help(client);
     }
-    return true;
+  } else {
+    client->swapHelp();
+    if (!client->process()) {
+      help(client);
+    }
   }
-
-  client->swapHelp();
-  if (client->process()) {
-    return true;
-  }
-
-  return help(client);
 }
 
 bool CmdHelp::processTutorial(DebuggerClient *client) {

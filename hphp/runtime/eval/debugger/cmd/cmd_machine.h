@@ -38,12 +38,12 @@ public:
                  m_force(false), m_succeed(false) {}
 
   virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
   virtual bool onServer(DebuggerProxy *proxy);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

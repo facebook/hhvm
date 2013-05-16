@@ -30,11 +30,11 @@ public:
   }
 
   virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

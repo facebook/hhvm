@@ -38,7 +38,7 @@ void CmdInstrument::recvImpl(DebuggerThriftBuffer &thrift) {
   InstPointInfo::RecvImpl(m_ips, thrift);
 }
 
-bool CmdInstrument::help(DebuggerClient *client) {
+void CmdInstrument::help(DebuggerClient *client) {
   client->helpTitle("Instrument Command");
   // TODO: more functionalities
   client->helpCmds("inst here <file> [desc]",
@@ -53,23 +53,23 @@ bool CmdInstrument::help(DebuggerClient *client) {
   client->helpBody(
     "Use this command to instrument the program"
   );
-  return true;
 }
 
-bool CmdInstrument::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdInstrument::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 1) {
     if (client->argValue(1) == "list" || client->argValue(1) == "l") {
       listInst(client);
-      return true;
+      return;
     }
     if (client->argValue(1) == "clear" || client->argValue(1) == "c") {
       clearInst(client);
-      return true;
+      return;
     }
   }
   if (client->argCount() < 2 || client->argValue(1) == "help") {
-    return help(client);
+    help(client);
+    return;
   }
 
   std::string loc = client->argValue(1);
@@ -81,7 +81,7 @@ bool CmdInstrument::onClientImpl(DebuggerClient *client) {
   Variant code = f_file_get_contents(file.c_str());
   if (code.isNull()) {
     client->error("Unable to read from file %s", file.c_str());
-    return false;
+    return;
   }
   m_instPoints = client->getInstPoints();
   if (loc == "here") {
@@ -98,7 +98,7 @@ bool CmdInstrument::onClientImpl(DebuggerClient *client) {
     m_instPoints->push_back(ipi);
   } else {
     client->error("Not implemented\n");
-    return true;
+    return;
   }
   m_type = ActionWrite;
   CmdInstrumentPtr instCmdPtr = client->xend<CmdInstrument>(this);
@@ -107,7 +107,6 @@ bool CmdInstrument::onClientImpl(DebuggerClient *client) {
   }
   client->setInstPoints(instCmdPtr->m_ips);
   CmdInstrument::PrintInstPoints(client);
-  return true;
 }
 
 static const StaticString s_valid("valid");

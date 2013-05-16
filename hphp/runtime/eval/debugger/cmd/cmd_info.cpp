@@ -97,7 +97,7 @@ void CmdInfo::list(DebuggerClient *client) {
   client->addCompletion(DebuggerClient::AutoCompleteClassConstants);
 }
 
-bool CmdInfo::help(DebuggerClient *client) {
+void CmdInfo::help(DebuggerClient *client) {
   client->helpTitle("Info Command");
   client->helpCmds(
     "info",                   "displays current function's info",
@@ -111,7 +111,6 @@ bool CmdInfo::help(DebuggerClient *client) {
   client->helpBody(
     "Use this command to display declaration of a symbol."
   );
-  return true;
 }
 
 bool CmdInfo::parseZeroArg(DebuggerClient *client) {
@@ -145,8 +144,8 @@ void CmdInfo::parseOneArg(DebuggerClient *client, string &subsymbol) {
   }
 }
 
-bool CmdInfo::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdInfo::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   string subsymbol;
 
@@ -158,12 +157,13 @@ bool CmdInfo::onClientImpl(DebuggerClient *client) {
         "your program and it breaks at a function or a class method. It will "
         "then look up information about that function or method."
       );
-      return true;
+      return;
     }
   } else if (client->argCount() == 1) {
     parseOneArg(client, subsymbol);
   } else {
-    return help(client);
+    help(client);
+    return;
   }
 
   CmdInfoPtr cmd = client->xend<CmdInfo>(this);
@@ -177,7 +177,6 @@ bool CmdInfo::onClientImpl(DebuggerClient *client) {
       client->code(sb.detach());
     }
   }
-  return true;
 }
 
 void CmdInfo::UpdateLiveLists(DebuggerClient *client) {

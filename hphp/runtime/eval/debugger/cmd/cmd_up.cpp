@@ -22,7 +22,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdUp::help(DebuggerClient *client) {
+void CmdUp::help(DebuggerClient *client) {
   client->helpTitle("Up Command");
   client->helpCmds(
     "[u]p {num=1}", "moves to outer frames (callers) on stacktrace",
@@ -33,7 +33,6 @@ bool CmdUp::help(DebuggerClient *client) {
     "current frame. By default it moves up by one level. Specify a number "
     "to move up several levels a time."
   );
-  return true;
 }
 
 int CmdUp::ParseNumber(DebuggerClient *client) {
@@ -51,15 +50,14 @@ int CmdUp::ParseNumber(DebuggerClient *client) {
   return 1;
 }
 
-bool CmdUp::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdUp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+  } else {
+    CmdWhere().fetchStackTrace(client);
+    client->moveToFrame(client->getFrame() + ParseNumber(client));
   }
-
-  CmdWhere().fetchStackTrace(client);
-  client->moveToFrame(client->getFrame() + ParseNumber(client));
-  return true;
 }
 
 void CmdUp::setClientOutput(DebuggerClient *client) {

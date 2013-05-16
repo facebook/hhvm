@@ -42,7 +42,7 @@ void CmdUser::list(DebuggerClient *client) {
   CmdExtended::list(client);
 }
 
-bool CmdUser::help(DebuggerClient *client) {
+void CmdUser::help(DebuggerClient *client) {
   client->helpTitle("User Extended Command");
   helpImpl(client, "y");
   client->helpBody(
@@ -69,7 +69,6 @@ bool CmdUser::help(DebuggerClient *client) {
     "Type '[i]nfo DebuggerProxy' for complete DebuggerProxy interface that "
     "you can use when implementing those $proxy callbacks."
   );
-  return true;
 }
 
 const ExtendedCommandMap &CmdUser::getCommandMap() {

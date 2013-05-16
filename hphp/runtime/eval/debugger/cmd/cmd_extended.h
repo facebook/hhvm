@@ -35,7 +35,7 @@ public:
   CmdExtended() : DebuggerCommand(KindOfExtended) {}
 
   virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
   virtual bool onServer(DebuggerProxy *proxy);
 
@@ -46,12 +46,12 @@ public:
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
   void helpImpl(DebuggerClient *client, const char *name);
 
 private:
   ExtendedCommandMap match(DebuggerClient *client, int argIndex);
-  bool helpCommands(DebuggerClient *client, const ExtendedCommandMap &matches);
+  void helpCommands(DebuggerClient *client, const ExtendedCommandMap &matches);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

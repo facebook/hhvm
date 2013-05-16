@@ -29,7 +29,7 @@ void CmdMacro::list(DebuggerClient *client) {
   }
 }
 
-bool CmdMacro::help(DebuggerClient *client) {
+void CmdMacro::help(DebuggerClient *client) {
   client->helpTitle("Macro Command");
   client->helpCmds(
     "& [s]tart",            "starts recording of default macro",
@@ -52,7 +52,6 @@ bool CmdMacro::help(DebuggerClient *client) {
     "\n"
     "The space between & and command is not needed. '&s' works as well."
   );
-  return true;
 }
 
 void CmdMacro::processList(DebuggerClient *client) {
@@ -64,10 +63,11 @@ void CmdMacro::processList(DebuggerClient *client) {
   }
 }
 
-bool CmdMacro::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdMacro::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   if (client->arg(1, "start")) {
@@ -89,7 +89,7 @@ bool CmdMacro::onClientImpl(DebuggerClient *client) {
         "You will have to run '& [l]ist' first to see a list of valid "
         "numbers or indices to specify."
       );
-      return true;
+      return;
     }
 
     int num = atoi(snum.c_str());
@@ -97,11 +97,9 @@ bool CmdMacro::onClientImpl(DebuggerClient *client) {
       client->error("\"%s\" is not a valid macro index. Choose one from "
                     "this list:", snum.c_str());
       processList(client);
-      return true;
+      return;
     }
   }
-
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

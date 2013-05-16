@@ -104,13 +104,13 @@ public:
 
   // The text to display when the debugger client
   // processes "help <this command name>".
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
-  // Carries out the command and returns true if the command completed.
+  // Carries out the command, possibly by sending it to the server.
   // If the client is controlled via the API, the setClientOuput method
   // is invoked to update the client with the command output for access
   // via the API.
-  bool onClient(DebuggerClient *client);
+  void onClient(DebuggerClient *client);
 
   // Updates the client with information about the execution of this command.
   // This information is not used by the command line client, but can
@@ -135,9 +135,13 @@ public:
   String getWireError() const { return m_wireError; }
 
 protected:
-  // Client-side work for a command. Returns true if the command completed
-  // successfully.
-  virtual bool onClientImpl(DebuggerClient *client);
+  // Carries out the command, possibly by sending it to the server.
+  virtual void onClientImpl(DebuggerClient *client) = 0;
+
+  // If the first argument of the command is "help" or "?"
+  // this displays help text for the command and returns true.
+  // Otherwise it returns false.
+  bool displayedHelp(DebuggerClient *client);
 
   // Always called from send and must implement the subclass specific
   // logic for serializing a command to send via Thrift.

@@ -93,54 +93,50 @@ ExtendedCommandMap CmdExtended::match(DebuggerClient *client, int argIndex) {
   return matches;
 }
 
-bool CmdExtended::helpCommands(DebuggerClient *client,
+void CmdExtended::helpCommands(DebuggerClient *client,
                                const ExtendedCommandMap &matches) {
   for (ExtendedCommandMap::const_iterator iter = matches.begin();
        iter != matches.end(); ++iter) {
     invokeHelp(client, iter->second);
   }
-  return true;
 }
 
-bool CmdExtended::onClientImpl(DebuggerClient *client) {
+void CmdExtended::onClientImpl(DebuggerClient *client) {
   if (client->arg(1, "help") || client->arg(1, "?")) {
     if (client->argCount() == 1) {
-      return help(client);
+      help(client);
+      return;
     }
     ExtendedCommandMap matches = match(client, 2);
     if (matches.empty()) {
-      return help(client);
+      help(client);
+    } else {
+      helpCommands(client, matches);
     }
-    return helpCommands(client, matches);
+    return;
   }
 
   ExtendedCommandMap matches = match(client, 1);
   if (matches.empty()) {
-    return help(client);
-  }
-  if (matches.size() > 1) {
+    help(client);
+  } else if (matches.size() > 1) {
     client->error("Need more letters to tell which one of these:");
     for (ExtendedCommandMap::const_iterator iter = matches.begin();
          iter != matches.end(); ++iter) {
       client->error("\t%s", iter->first.c_str());
     }
-    return true;
-  }
-
-  if (!invokeClient(client, matches.begin()->second)) {
+  } else if (!invokeClient(client, matches.begin()->second)) {
     if (client->arg(2, "help") || client->arg(2, "?")) {
-      return helpCommands(client, matches);
+      helpCommands(client, matches);
     }
   }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool CmdExtended::help(DebuggerClient *client) {
+void CmdExtended::help(DebuggerClient *client) {
   client->helpTitle("Extended Command");
   helpImpl(client, "x");
-  return true;
 }
 
 const ExtendedCommandMap &CmdExtended::getCommandMap() {
@@ -157,7 +153,8 @@ void CmdExtended::invokeList(DebuggerClient *client, const std::string &cls){
 bool CmdExtended::invokeHelp(DebuggerClient *client, const std::string &cls) {
   DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
   if (cmd) {
-    return cmd->help(client);
+    cmd->help(client);
+    return true;
   }
   return false;
 }
@@ -165,7 +162,8 @@ bool CmdExtended::invokeHelp(DebuggerClient *client, const std::string &cls) {
 bool CmdExtended::invokeClient(DebuggerClient *client, const std::string &cls){
   DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
   if (cmd) {
-    return cmd->onClient(client);
+    cmd->onClient(client);
+    return true;
   }
   return false;
 }

@@ -33,7 +33,7 @@ void CmdComplete::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdComplete::list(DebuggerClient *client) {
 }
 
-bool CmdComplete::help(DebuggerClient *client) {
+void CmdComplete::help(DebuggerClient *client) {
   client->helpTitle("Copmplete");
   client->help("complete <cmd>");
   client->helpBody(
@@ -42,17 +42,15 @@ bool CmdComplete::help(DebuggerClient *client) {
     " readline library. This help is primarily for use by programs that"
     " need to access completion functionality."
   );
-  return true;
 }
 
-bool CmdComplete::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdComplete::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   std::string text = client->lineRest(1);
   std::vector<std::string> res = client->getAllCompletions(text);
   for (size_t i = 0; i < res.size(); ++i) {
     client->print(res[i].c_str());
   }
-  return true;
 }
 
 bool CmdComplete::onServer(DebuggerProxy *proxy) {

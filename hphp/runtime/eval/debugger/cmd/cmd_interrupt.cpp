@@ -129,7 +129,7 @@ std::string CmdInterrupt::desc() const {
   return "";
 }
 
-bool CmdInterrupt::onClientImpl(DebuggerClient *client) {
+void CmdInterrupt::onClientImpl(DebuggerClient *client) {
   client->setCurrentLocation(m_threadId, m_bpi);
   if (!client->getDebuggerSmallStep()) {
     // Adjust line and char if it's not small stepping
@@ -252,8 +252,6 @@ bool CmdInterrupt::onClientImpl(DebuggerClient *client) {
       }
     }
   }
-
-  return true;
 }
 
 static const StaticString s_format("format");

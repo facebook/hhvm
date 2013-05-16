@@ -22,7 +22,7 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 // The text to display when the debugger client processes "help quit".
-bool CmdQuit::help(DebuggerClient *client) {
+void CmdQuit::help(DebuggerClient *client) {
   TRACE(2, "CmdQuit::help\n");
   client->helpTitle("Quit Command");
   client->helpCmds(
@@ -32,22 +32,20 @@ bool CmdQuit::help(DebuggerClient *client) {
   client->helpBody(
     "After you type this command, you will not see me anymore."
   );
-  return true;
 }
 
 // Carries out the Quit command by informing the server the client
 // is going away and then getting the client to quit.
-bool CmdQuit::onClientImpl(DebuggerClient *client) {
+void CmdQuit::onClientImpl(DebuggerClient *client) {
   TRACE(2, "CmdQuit::onClientImpl\n");
-  if (DebuggerCommand::onClientImpl(client)) return true;
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client->argCount() == 0) {
     client->sendToServer(this);
     client->quit();
-    return true;
+  } else {
+    help(client);
   }
-
-  return help(client);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

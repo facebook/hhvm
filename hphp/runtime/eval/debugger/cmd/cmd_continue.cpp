@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdContinue::help(DebuggerClient *client) {
+void CmdContinue::help(DebuggerClient *client) {
   client->helpTitle("Continue Command");
   client->helpCmds(
     "[c]ontinue {count=1}", "continues program execution",
@@ -31,7 +31,6 @@ bool CmdContinue::help(DebuggerClient *client) {
     "Use this command at break to resume program execution. Specify a "
     "count to repeat the same command many times."
   );
-  return true;
 }
 
 void CmdContinue::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {

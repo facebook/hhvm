@@ -46,7 +46,7 @@ void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_stackArgs);
 }
 
-bool CmdWhere::help(DebuggerClient *client) {
+void CmdWhere::help(DebuggerClient *client) {
   client->helpTitle("Where Command");
   client->helpCmds(
     "[w]here",           "displays current stacktrace",
@@ -59,7 +59,6 @@ bool CmdWhere::help(DebuggerClient *client) {
     "Use '[f]rame {index}' to jump to one particular frame. At any frame, "
     "use '[v]ariable' command to display all local variables."
   );
-  return true;
 }
 
 Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
@@ -73,10 +72,11 @@ Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
   return st;
 }
 
-bool CmdWhere::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdWhere::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+    return;
   }
 
   Array st = fetchStackTrace(client);
@@ -84,7 +84,7 @@ bool CmdWhere::onClientImpl(DebuggerClient *client) {
     client->info("(no stacktrace to display or in global scope)");
     client->info("if you hit serialization limit, consider do "
                  "\"set sa off\" and then get the stack without args");
-    return true;
+    return;
   }
 
   // so list command can default to current frame
@@ -110,7 +110,7 @@ bool CmdWhere::onClientImpl(DebuggerClient *client) {
     }
     if (!DebuggerClient::IsValidNumber(snum)) {
       client->error("The argument, if specified, has to be numeric.");
-      return true;
+      return;
     }
     if (num > 0) {
       for (int i = 0; i < num && i < st.size(); i++) {
@@ -129,8 +129,6 @@ bool CmdWhere::onClientImpl(DebuggerClient *client) {
       );
     }
   }
-
-  return true;
 }
 
 void CmdWhere::setClientOutput(DebuggerClient *client) {

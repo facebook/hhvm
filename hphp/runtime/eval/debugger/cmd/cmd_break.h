@@ -33,7 +33,7 @@ public:
   virtual void list(DebuggerClient *client);
 
   // The text to display when the debugger client processes "help break".
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
   // Updates the client with information about the execution of this command.
   // This information is not used by the command line client, but can
@@ -54,7 +54,7 @@ protected:
   // Carries out the Break command. This always involves an action on the
   // client and usually, but not always, involves the server by sending
   // this command to the server and waiting for its response.
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
 
   // Serializes this command into the given Thrift buffer.
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
@@ -87,10 +87,10 @@ private:
   bool updateServer(DebuggerClient *client);
 
   // Carries out the "break list" command.
-  bool processList(DebuggerClient *client);
+  void processList(DebuggerClient *client);
 
   // Carries out commands that change the status of a breakpoint.
-  bool processStatusChange(DebuggerClient *client);
+  void processStatusChange(DebuggerClient *client);
 
   // Returns true if the last command parsed by the client has
   // an argument that changes the status of a breakpoint.

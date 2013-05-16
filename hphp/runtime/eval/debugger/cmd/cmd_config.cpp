@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdConfig::help(DebuggerClient *client) {
+void CmdConfig::help(DebuggerClient *client) {
   client->helpTitle("Config Command");
   client->helpCmds("set <var> <value>", "set variable <var> to be <value>",
                    "set", "list current values of variables",
@@ -30,18 +30,18 @@ bool CmdConfig::help(DebuggerClient *client) {
     "Use this command to set up config variable, "
     "e.g. turning on/off a special mode."
   );
-  return true;
 }
 
-bool CmdConfig::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdConfig::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
     listVars(client);
-    return true;
+    return;
   }
   std::string var = client->argValue(1);
   if (var == "help" || client->argCount() < 2) {
-    return help(client);
+    help(client);
+    return;
   }
 
   std::string value = client->argValue(2);
@@ -55,9 +55,9 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
       client->print("BypassAccessCheck(bac) set to off");
       client->setDebuggerBypassCheck(false);
     } else {
-      return help(client);
+      help(client);
     }
-    return true;
+    return;
   }
   if (var == "LogFile" || var == "lf") {
     // Close the current log file handler
@@ -84,17 +84,17 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
     client->print("LogFile(lf) is set to %s", value == "" ? "off"
                                                           : value.c_str());
     client->setLogFile(value);
-    return true;
+    return;
   }
   if (var == "PrintLevel" || var == "pl") {
     int pl = strtol(value.c_str(), nullptr, 10);
     if (pl > 0 && pl < DebuggerClient::MinPrintLevel) {
       client->error("%d is invalid for PrintLevel(pl)", pl);
-      return true;
+      return;
     }
     client->setDebuggerPrintLevel(pl);
     client->print("PrintLevel(pl) is set to %d", pl);
-    return true;
+    return;
   }
   if (var == "SmallStep" || var == "ss") {
     if (value == "on") {
@@ -104,9 +104,9 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
       client->print("SmallStep(ss) set to off");
       client->setDebuggerSmallStep(false);
     } else {
-      return help(client);
+      help(client);
     }
-    return true;
+    return;
   }
   if (var == "StackArgs" || var == "sa") {
     if (value == "on") {
@@ -116,9 +116,9 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
       client->print("StackArgs(sa) set to off");
       client->setDebuggerStackArgs(false);
     } else {
-      return help(client);
+      help(client);
     }
-    return true;
+    return;
   }
   if (var == "ApiModeSerialize") {
     assert(client->isApiMode());
@@ -126,10 +126,8 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
       client->setDebuggerClientApiModeSerialize(true);
     } else if (value == "off") {
       client->setDebuggerClientApiModeSerialize(false);
-    } else {
-      return true;
     }
-    return true;
+    return;
   }
   if (var == "MaxCodeLines" || var == "mcl") {
     // MaxCodeLines: a useful configuration variable for emacs/hphpd-integration
@@ -139,15 +137,14 @@ bool CmdConfig::onClientImpl(DebuggerClient *client) {
     int mcl = strtol(value.c_str(), nullptr, 10);
     if (mcl < -1) {
       client->error("%d is invalid for MaxCodeLines(mcl)", mcl);
-      return true;
+    } else {
+      client->setDebuggerClientMaxCodeLines(mcl);
+      client->print("MaxCodeLines(mcl) is set to %d", mcl);
     }
-    client->setDebuggerClientMaxCodeLines(mcl);
-    client->print("MaxCodeLines(mcl) is set to %d", mcl);
-    return true;
+    return;
   }
 
   listVars(client);
-  return true;
 }
 
 static const StaticString s_BypassAccessCheck("BypassAccessCheck");

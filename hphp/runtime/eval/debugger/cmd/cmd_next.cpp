@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdNext::help(DebuggerClient *client) {
+void CmdNext::help(DebuggerClient *client) {
   client->helpTitle("Next Command");
   client->helpCmds(
     "[n]ext {count=1}", "steps over lines of code",
@@ -31,7 +31,6 @@ bool CmdNext::help(DebuggerClient *client) {
     "Use this command at break to step over lines of code. Specify a "
     "count to step over more than one line of code."
   );
-  return true;
 }
 
 void CmdNext::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {

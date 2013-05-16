@@ -181,7 +181,7 @@ void CmdPrint::list(DebuggerClient *client) {
   }
 }
 
-bool CmdPrint::help(DebuggerClient *client) {
+void CmdPrint::help(DebuggerClient *client) {
   client->helpTitle("Print Command");
   client->helpCmds(
     "[p]rint {php}",              "prints result of PHP code, (print_r)",
@@ -205,10 +205,9 @@ bool CmdPrint::help(DebuggerClient *client) {
     "either at a breakpoint or caused by step commands, these expressions "
     "will be evaluated and printed out."
   );
-  return true;
 }
 
-bool CmdPrint::processList(DebuggerClient *client) {
+void CmdPrint::processList(DebuggerClient *client) {
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
     client->print("  %d %s  %s", i + 1,
@@ -226,10 +225,9 @@ bool CmdPrint::processList(DebuggerClient *client) {
       "Use '[p]rint [c]lear {index}|[a]ll' to remove watch expression(s). "
     );
   }
-  return true;
 }
 
-bool CmdPrint::processClear(DebuggerClient *client) {
+void CmdPrint::processClear(DebuggerClient *client) {
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   if (watches.empty()) {
     client->error("There is no watch expression to clear.");
@@ -237,13 +235,13 @@ bool CmdPrint::processClear(DebuggerClient *client) {
       "Use '[p]rint [a]lways ...' to set new watch expressions. "
       "Use '[p]rint ?|[h]elp' to read how to set them. "
     );
-    return true;
+    return;
   }
 
   if (client->arg(2, "all")) {
     watches.clear();
     client->info("All watch expressions are cleared.");
-    return true;
+    return;
   }
 
   string snum = client->argValue(2);
@@ -253,7 +251,7 @@ bool CmdPrint::processClear(DebuggerClient *client) {
       "You will have to run '[p]rint [l]ist' first to see a list of valid "
       "numbers or indices to specify."
     );
-    return true;
+    return;
   }
 
   int num = atoi(snum.c_str()) - 1;
@@ -261,11 +259,10 @@ bool CmdPrint::processClear(DebuggerClient *client) {
     client->error("\"%s\" is not a valid index. Choose one from this list:",
                   snum.c_str());
     processList(client);
-    return true;
+    return;
   }
 
   watches.erase(watches.begin() + num);
-  return true;
 }
 
 Variant CmdPrint::processWatch(DebuggerClient *client, const char *format,
@@ -287,10 +284,11 @@ void CmdPrint::handleReply(DebuggerClient *client) {
   client->output(m_ret);
 }
 
-bool CmdPrint::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdPrint::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() == 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   int index = 1;
@@ -298,15 +296,17 @@ bool CmdPrint::onClientImpl(DebuggerClient *client) {
     m_isForWatch = true;
     if (client->argCount() == 1) {
       client->error("'[p]rint [a]lways' needs an expression to watch.");
-      return true;
+      return;
     }
     index++;
   } else if (client->arg(1, "list")) {
     m_isForWatch = true;
-    return processList(client);
+    processList(client);
+    return;
   } else if (client->arg(1, "clear")) {
     m_isForWatch = true;
-    return processClear(client);
+    processClear(client);
+    return;
   }
 
   const char *format = nullptr;
@@ -320,7 +320,7 @@ bool CmdPrint::onClientImpl(DebuggerClient *client) {
   m_body = client->lineRest(index);
   if (m_isForWatch) {
     client->addWatch(format, m_body);
-    return true;
+    return;
   }
   m_bypassAccessCheck = client->getDebuggerBypassCheck();
   m_printLevel = client->getDebuggerPrintLevel();
@@ -339,7 +339,6 @@ bool CmdPrint::onClientImpl(DebuggerClient *client) {
     }
     client->output(FormatResult(format, m_ret));
   }
-  return true;
 }
 
 static const StaticString s_format("format");

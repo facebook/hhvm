@@ -33,7 +33,7 @@ public:
                m_isForWatch(false), m_noBreak(false) {}
 
   virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
 
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
@@ -44,7 +44,7 @@ public:
   virtual void handleReply(DebuggerClient *client);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -57,8 +57,8 @@ private:
   bool m_isForWatch;
   bool m_noBreak;
 
-  bool processList(DebuggerClient *client);
-  bool processClear(DebuggerClient *client);
+  void processList(DebuggerClient *client);
+  void processClear(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

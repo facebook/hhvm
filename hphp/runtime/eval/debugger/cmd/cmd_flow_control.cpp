@@ -39,26 +39,27 @@ void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_smallStep);
 }
 
-bool CmdFlowControl::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdFlowControl::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   client->setFrame(0);
 
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+    return;
   }
 
   if (client->argCount() == 1) {
     string snum = client->argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client->error("Count needs to be a number.");
-      return true;
+      return;
     }
 
     m_count = atoi(snum.c_str());
     if (m_count < 1) {
       client->error("Count needs to be a positive number.");
-      return true;
+      return;
     }
   }
   m_smallStep = client->getDebuggerSmallStep();

@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdOut::help(DebuggerClient *client) {
+void CmdOut::help(DebuggerClient *client) {
   client->helpTitle("Out Command");
   client->helpCmds(
     "[o]ut {count=1}", "steps out function calls",
@@ -31,7 +31,6 @@ bool CmdOut::help(DebuggerClient *client) {
     "Use this command at break to step out function calls. Specify a "
     "count to step out more than one level of function calls."
   );
-  return true;
 }
 
 void CmdOut::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {

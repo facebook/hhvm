@@ -44,7 +44,7 @@ void CmdThread::list(DebuggerClient *client) {
   }
 }
 
-bool CmdThread::help(DebuggerClient *client) {
+void CmdThread::help(DebuggerClient *client) {
   client->helpTitle("Thread Command");
   client->helpCmds(
     "[t]hread",                 "displays current thread's information",
@@ -80,7 +80,6 @@ bool CmdThread::help(DebuggerClient *client) {
     "[l]ist' command to display their indices, which can be used to switch "
     "between them with '[t]hread {index}'."
   );
-  return true;
 }
 
 void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
@@ -101,10 +100,11 @@ void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
   }
 }
 
-bool CmdThread::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdThread::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+    return;
   }
 
   if (client->argCount() == 0) {
@@ -139,7 +139,7 @@ bool CmdThread::onClientImpl(DebuggerClient *client) {
         "thread. If that's the only thread on the list, you do not have "
         "another thread at break to switch to."
       );
-      return true;
+      return;
     }
 
     int num = atoi(snum.c_str());
@@ -151,13 +151,13 @@ bool CmdThread::onClientImpl(DebuggerClient *client) {
         client->error("\"%s\" is not a valid thread index. Choose one from "
                       "this list:", snum.c_str());
         processList(client);
-        return true;
+        return;
       }
     }
 
     if (thread->m_id == client->getCurrentThreadId()) {
       client->info("This is your current thread already.");
-      return true;
+      return;
     }
 
     m_body = "switch";
@@ -165,8 +165,6 @@ bool CmdThread::onClientImpl(DebuggerClient *client) {
     client->sendToServer(this);
     throw DebuggerConsoleExitException();
   }
-
-  return true;
 }
 
 void CmdThread::debuggerInfo(InfoVec &info) {

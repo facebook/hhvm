@@ -32,7 +32,7 @@ void CmdGlobal::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_globals);
 }
 
-bool CmdGlobal::help(DebuggerClient *client) {
+void CmdGlobal::help(DebuggerClient *client) {
   client->helpTitle("Global Command");
   client->helpCmds(
     "[g]lobal",           "lists all global variables",
@@ -45,17 +45,17 @@ bool CmdGlobal::help(DebuggerClient *client) {
     "text in their names or values. The search is case-insensitive and "
     "string-based."
   );
-  return true;
 }
 
-bool CmdGlobal::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdGlobal::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
   if (client->argCount() == 1) {
     text = client->argValue(1);
   } else if (client->argCount() != 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   CmdGlobalPtr cmd = client->xend<CmdGlobal>(this);
@@ -65,8 +65,6 @@ bool CmdGlobal::onClientImpl(DebuggerClient *client) {
     m_globals = cmd->m_globals;
     CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
   }
-
-  return true;
 }
 
 void CmdGlobal::setClientOutput(DebuggerClient *client) {

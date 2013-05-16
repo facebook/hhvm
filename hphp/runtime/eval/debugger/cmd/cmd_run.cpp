@@ -36,7 +36,7 @@ void CmdRun::list(DebuggerClient *client) {
   client->addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
-bool CmdRun::help(DebuggerClient *client) {
+void CmdRun::help(DebuggerClient *client) {
   client->helpTitle("Run Command");
   client->helpCmds(
     "[r]un",                             "restarts program",
@@ -52,11 +52,10 @@ bool CmdRun::help(DebuggerClient *client) {
     "In server mode, this command will simply abort current page handling "
     "without restarting anything."
   );
-  return true;
 }
 
-bool CmdRun::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdRun::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   m_args = StringVecPtr(client->args(), null_deleter());
   m_smallStep = client->getDebuggerSmallStep();

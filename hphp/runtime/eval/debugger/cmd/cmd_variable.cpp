@@ -48,7 +48,7 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_global);
 }
 
-bool CmdVariable::help(DebuggerClient *client) {
+void CmdVariable::help(DebuggerClient *client) {
   client->helpTitle("Variable Command");
   client->helpCmds(
     "[v]ariable",           "lists all local variables on stack",
@@ -65,7 +65,6 @@ bool CmdVariable::help(DebuggerClient *client) {
     "either in their names or values. The search is case-insensitive and "
     "string-based."
   );
-  return true;
 }
 
 void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
@@ -111,14 +110,15 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
   }
 }
 
-bool CmdVariable::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdVariable::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
   if (client->argCount() == 1) {
     text = client->argValue(1);
   } else if (client->argCount() != 0) {
-    return help(client);
+    help(client);
+    return;
   }
 
   m_frame = client->getFrame();
@@ -129,8 +129,6 @@ bool CmdVariable::onClientImpl(DebuggerClient *client) {
     m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
-
-  return true;
 }
 
 void CmdVariable::setClientOutput(DebuggerClient *client) {

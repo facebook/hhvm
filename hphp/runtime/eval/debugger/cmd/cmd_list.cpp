@@ -50,7 +50,7 @@ void CmdList::list(DebuggerClient *client) {
 }
 
 // The text to display when the debugger client processes "help break".
-bool CmdList::help(DebuggerClient *client) {
+void CmdList::help(DebuggerClient *client) {
   client->helpTitle("List Command");
   client->helpCmds(
     "list",                   "displays current block of source code",
@@ -81,7 +81,6 @@ bool CmdList::help(DebuggerClient *client) {
     "will not be affected by this setting. This directory will be stored "
     "in configuration file for future sessions as well."
   );
-  return true;
 }
 
 bool CmdList::listCurrent(DebuggerClient *client, int &line,
@@ -173,10 +172,11 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   return false;
 }
 
-bool CmdList::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdList::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   if (client->argCount() > 1) {
-    return help(client);
+    help(client);
+    return;
   }
 
   int line = 0;
@@ -187,7 +187,8 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
       line = atoi(arg.c_str());
       if (line <= 0) {
         client->error("A line number has to be a positive integer.");
-        return help(client);
+        help(client);
+        return;
       }
       m_line1 = line - DebuggerClient::CodeBlockSize/2;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
@@ -195,7 +196,7 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
       if (!listFunctionOrClass(client)) {
         client->error("Unable to read specified method.");
       }
-      return true;
+      return;
     } else {
 
       size_t pos = arg.find(':');
@@ -203,7 +204,8 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
         m_file = arg.substr(0, pos);
         if (m_file.empty()) {
           client->error("File name cannot be empty.");
-          return help(client);
+          help(client);
+          return;
         }
         arg = arg.substr(pos + 1);
       }
@@ -219,7 +221,8 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
             m_line2 = DebuggerClient::CodeBlockSize;
           } else {
             client->error("Line numbers have to be integers.");
-            return help(client);
+            help(client);
+            return;
           }
         } else {
           m_line1 = atoi(line1.c_str());
@@ -232,7 +235,8 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
           }
           if (m_line1 <= 0 || m_line2 <= 0) {
             client->error("Line numbers have to be positive integers.");
-            return help(client);
+            help(client);
+            return;
           }
         }
       } else {
@@ -243,13 +247,15 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
             m_line2 = DebuggerClient::CodeBlockSize;
           } else {
             client->error("A line number has to be an integer.");
-            return help(client);
+            help(client);
+            return;
           }
         } else {
           int line = atoi(arg.c_str());
           if (line <= 0) {
             client->error("A line number has to be a positive integer.");
-            return help(client);
+            help(client);
+            return;
           }
           m_line1 = line - DebuggerClient::CodeBlockSize/2;
           m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
@@ -264,7 +270,7 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
 
   if (m_file.empty()) {
     if (listCurrent(client, line, charFocus0, lineFocus1, charFocus1)) {
-      return true;
+      return;
     }
   } else if (m_file[0] == '/') {
     struct stat sb;
@@ -272,18 +278,17 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
     if ((sb.st_mode & S_IFMT) == S_IFDIR) {
       client->setSourceRoot(m_file);
       client->info("PHP source root directory is set to %s", m_file.c_str());
-      return true;
+      return;
     }
   }
 
   if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
-    return true;
+    return;
   } else if (client->argCount() != 1 || !listFunctionOrClass(client)) {
     client->error(
       "Unable to read specified function, class or source file location.");
-    return true;
+    return;
   }
-  return true;
 }
 
 bool CmdList::onServer(DebuggerProxy *proxy) {

@@ -31,10 +31,9 @@ void CmdSignal::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_signum);
 }
 
-bool CmdSignal::onClientImpl(DebuggerClient *client) {
+void CmdSignal::onClientImpl(DebuggerClient *client) {
   m_signum = client->pollSignal();
   client->sendToServer(this);
-  return true;
 }
 
 bool CmdSignal::onServer(DebuggerProxy *proxy) {

@@ -55,7 +55,7 @@ void CmdExtension::list(DebuggerClient *client) {
   }
 }
 
-bool CmdExtension::help(DebuggerClient *client) {
+void CmdExtension::help(DebuggerClient *client) {
   client->helpTitle("Extension Command");
   client->helpCmds(
     "x [t]ension",                 "lists all extensions",
@@ -70,21 +70,17 @@ bool CmdExtension::help(DebuggerClient *client) {
     "version numbers, current status and cached data and by providing "
     "additional verbs to update runtime states for debugging purposes."
   );
-  return true;
 }
 
-bool CmdExtension::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-
+void CmdExtension::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
   m_args = *client->args();
-
   CmdExtensionPtr cmd = client->xend<CmdExtension>(this);
   if (cmd->m_out.empty()) {
     client->error(cmd->m_err);
   } else {
     client->print(cmd->m_out);
   }
-  return true;
 }
 
 bool CmdExtension::processList(DebuggerProxy *proxy) {

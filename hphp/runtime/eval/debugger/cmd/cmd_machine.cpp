@@ -51,7 +51,7 @@ void CmdMachine::list(DebuggerClient *client) {
   }
 }
 
-bool CmdMachine::help(DebuggerClient *client) {
+void CmdMachine::help(DebuggerClient *client) {
   client->helpTitle("Machine Command");
   client->helpCmds(
     "[m]achine [c]onnect {host}",         "debugging remote server natively",
@@ -97,7 +97,6 @@ bool CmdMachine::help(DebuggerClient *client) {
     "method calls as well, except classes will have to be loaded on client "
     "side by '=include(\"file-containing-the-class.php\")'."
   );
-  return true;
 }
 
 bool CmdMachine::processList(DebuggerClient *client,
@@ -193,14 +192,18 @@ void CmdMachine::UpdateIntercept(DebuggerClient *client,
   client->xend<CmdMachine>(&cmd);
 }
 
-bool CmdMachine::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() == 0) return help(client);
+void CmdMachine::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client->argCount() == 0) {
+    help(client);
+    return;
+  }
 
   bool rpc = client->arg(1, "rpc");
   if (rpc || client->arg(1, "connect")) {
     if (client->argCount() != 2) {
-      return help(client);
+      help(client);
+      return;
     }
     string host = client->argValue(2);
     int port = 0;
@@ -208,7 +211,8 @@ bool CmdMachine::onClientImpl(DebuggerClient *client) {
     if (pos != string::npos) {
       if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
         client->error("Port needs to be a number");
-        return help(client);
+        help(client);
+        return;
       }
       port = atoi(host.substr(pos + 1).c_str());
       host = host.substr(0, pos);
@@ -224,7 +228,7 @@ bool CmdMachine::onClientImpl(DebuggerClient *client) {
       }
     }
     client->initializeMachine();
-    return true;
+    return;
   }
 
   if (client->arg(1, "disconnect")) {
@@ -232,12 +236,12 @@ bool CmdMachine::onClientImpl(DebuggerClient *client) {
       throw DebuggerConsoleExitException();
     }
     client->initializeMachine();
-    return true;
+    return;
   }
 
   if (client->arg(1, "list")) {
     processList(client);
-    return true;
+    return;
   }
 
   if (client->arg(1, "attach")) {
@@ -254,7 +258,7 @@ bool CmdMachine::onClientImpl(DebuggerClient *client) {
           client->error("\"%s\" is not a valid sandbox index. Choose one from "
                         "this list:", snum.c_str());
           processList(client);
-          return true;
+          return;
         }
       }
     } else {
@@ -274,17 +278,18 @@ bool CmdMachine::onClientImpl(DebuggerClient *client) {
         sandbox->m_user = client->argValue(argBase);
         sandbox->m_name = client->argValue(argBase + 1);
       } else {
-        return help(client);
+        help(client);
+        return;
       }
     }
     if (AttachSandbox(client, sandbox, m_force)) {
       // Attach succeed, wait for next interrupt
       throw DebuggerConsoleExitException();
     }
-    return true;
+    return;
   }
 
-  return help(client);
+  help(client);
 }
 
 bool CmdMachine::onServer(DebuggerProxy *proxy) {

@@ -985,10 +985,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         return DebuggerCommandPtr();
       }
       if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        if (!cmd->onClient(this)) {
-          Logger::Error("Unable to handle signal command.");
-          return DebuggerCommandPtr();
-        }
+        cmd->onClient(this);
         continue;
       }
       if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1027,10 +1024,7 @@ void DebuggerClient::runImpl() {
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          if (!cmd->onClient(this)) {
-            Logger::Error("%s: unable to poll signal", func);
-            return;
-          }
+          cmd->onClient(this);
           continue;
         }
         if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1040,10 +1034,7 @@ void DebuggerClient::runImpl() {
         m_sigTime = 0;
         usageLogInterrupt(cmd);
         {
-          if (!cmd->onClient(this)) {
-            Logger::Error("%s: unable to process %d", func, cmd->getType());
-            return;
-          }
+          cmd->onClient(this);
         }
         m_machine->m_interrupting = true;
         setClientState(StateReadyForCommand);
@@ -1863,7 +1854,8 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
     }
 
     // eval() can cause more breakpoints
-    if (!res->onClient(this) || !console()) {
+    res->onClient(this);
+    if (!console()) {
       if (m_quitting) {
         throw DebuggerClientExitException();
       } else {

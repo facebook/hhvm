@@ -27,11 +27,11 @@ class CmdConfig : public DebuggerCommand {
 public:
   CmdConfig() : DebuggerCommand(KindOfConfig) {}
 
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient *client);
 private:
   void listVars(DebuggerClient *client);
 };

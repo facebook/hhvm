@@ -193,13 +193,16 @@ private:
 
   void cgLoad(PhysReg base, int64_t off, IRInstruction* inst);
 
-  template<class OpndType>
-  ConditionCode emitTypeTest(Type type, OpndType src, bool negate);
+  template<class Loc1, class Loc2, class JmpFn>
+  void emitTypeTest(Type type,
+                    Loc1 typeSrc,
+                    Loc2 dataSrc,
+                    JmpFn doJcc);
 
-  template<class MemLoc>
-  void emitTypeCheck(Type type, MemLoc src, Block* taken);
-  template<class MemLoc>
-  void emitTypeGuard(Type type, MemLoc mem);
+  template<class Loc>
+  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);
+  template<class Loc>
+  void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
@@ -254,8 +257,9 @@ private:
             int64_t (*obj_cmp_int)(ObjectData*, int64_t),
             int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  template<class MemLoc>
-  void emitSideExitGuard(Type type, MemLoc mem, Offset taken);
+  template<class Loc>
+  void emitSideExitGuard(Type type, Loc typeLoc,
+                         Loc dataLoc, Offset taken);
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(SSATmp*, SSATmp*);
@@ -273,7 +277,8 @@ private:
                      const RegAllocInfo& allocInfo,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
-  ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
+  template<class JmpFn>
+  void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
   void doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);

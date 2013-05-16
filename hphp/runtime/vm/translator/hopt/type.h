@@ -117,6 +117,12 @@ class Type {
     bits_t m_bits;
     TypeBits m_typedBits;
   };
+  const Class* m_class;
+
+  // private ctor to build a specialized type
+  explicit Type(bits_t bits, const Class* klass)
+    : m_bits(bits), m_class(klass)
+  {}
 
 public:
 # define IRT(name, ...) static const Type name;
@@ -124,15 +130,15 @@ public:
 # undef IRT
 
   explicit Type(bits_t bits = kNone)
-    : m_bits(bits)
+    : m_bits(bits), m_class(nullptr)
   {}
 
   size_t hash() const {
-    return hash_int64(m_bits);
+    return hash_int64_pair(m_bits, reinterpret_cast<uintptr_t>(m_class));
   }
 
   bool operator==(Type other) const {
-    return m_bits == other.m_bits;
+    return equals(other);
   }
 
   bool operator!=(Type other) const {
@@ -140,14 +146,23 @@ public:
   }
 
   Type operator|(Type other) const {
+    assert(m_class == nullptr && other.m_class == nullptr);
     return Type(m_bits | other.m_bits);
   }
 
   Type operator&(Type other) const {
+    if (m_class != nullptr && other.m_class != nullptr) {
+      if (m_class->classof(other.m_class)) {
+        return Type(m_bits & other.m_bits).specialize(other.m_class);
+      } else if (other.m_class->classof(m_class)) {
+        return Type(m_bits & other.m_bits).specialize(m_class);
+      }
+    }
     return Type(m_bits & other.m_bits);
   }
 
   Type operator-(Type other) const {
+    assert(m_class == nullptr && other.m_class == nullptr);
     return Type(m_bits & ~other.m_bits);
   }
 
@@ -253,14 +268,17 @@ public:
   }
 
   /*
-   * Returns true if this is a non-strict subtype of any of the arguments.
+   * Returns true if this is same type or a subtype of any of the arguments.
    */
   bool subtypeOf(Type t2) const {
-    return (m_bits & t2.m_bits) == m_bits;
+    return (m_bits & t2.m_bits) == m_bits
+           && (t2.m_class == nullptr
+               || (m_class != nullptr
+                   && m_class->classof(t2.m_class)));
   }
 
   /*
-   * Returns true if this is a non-strict subtype of any of the arguments.
+   * Returns true if and only if this is the same as or a subtype of t2.
    */
   template<typename... Types>
   bool subtypeOfAny(Type t2, Types... ts) const {
@@ -290,7 +308,7 @@ public:
    * probably mean subtypeOf.
    */
   bool equals(Type t2) const {
-    return m_bits == t2.m_bits;
+    return m_bits == t2.m_bits && m_class == t2.m_class;
   }
 
   /*
@@ -329,6 +347,11 @@ public:
 
   bool isString() const {
     return subtypeOf(Str);
+  }
+
+  const Class* getClass() const {
+    assert(isObj());
+    return m_class;
   }
 
   Type innerType() const {
@@ -397,6 +420,11 @@ public:
     return Type(m_bits << kPtrShift);
   }
 
+  Type specialize(const Class* klass) const {
+    assert(isObj() && m_class == nullptr);
+    return Type(m_bits, klass);
+  }
+
   bool canRunDtor() const {
     return
       (*this & (Obj | CountedArr | BoxedObj | BoxedCountedArr))
@@ -430,7 +458,8 @@ public:
   }
 
   static Type fromDataType(DataType outerType,
-                           DataType innerType = KindOfInvalid) {
+                           DataType innerType = KindOfInvalid,
+                           const Class* klass = nullptr) {
     assert(innerType != KindOfRef);
 
     switch (outerType) {
@@ -443,7 +472,13 @@ public:
       case KindOfStaticString  : return StaticStr;
       case KindOfString        : return Str;
       case KindOfArray         : return Arr;
-      case KindOfObject        : return Obj;
+      case KindOfObject        : {
+        if (klass != nullptr) {
+          return Obj.specialize(klass);
+        } else {
+          return Obj;
+        }
+      }
       case KindOfClass         : return Cls;
       case KindOfUncountedInit : return UncountedInit;
       case KindOfUncounted     : return Uncounted;
@@ -461,7 +496,7 @@ public:
 
   // return true if this corresponds to a type that
   // is passed by value in C++
-  bool isSimpleType() {
+  bool isSimpleType() const {
     return subtypeOf(Type::Bool)
            || subtypeOf(Type::Int)
            || subtypeOf(Type::Dbl)
@@ -470,7 +505,7 @@ public:
 
   // return true if this corresponds to a type that
   // is passed by reference in C++
-  bool isReferenceType() {
+  bool isReferenceType() const {
     return subtypeOf(Type::Str)
            || subtypeOf(Type::Arr)
            || subtypeOf(Type::Obj);
@@ -491,14 +526,14 @@ public:
   }
 
   static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
-    return fromDataType(rtt.outerType(), rtt.innerType());
+    return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
   }
 
   static Type fromDynLocation(const Transl::DynLocation* dynLoc);
 };
 
-static_assert(sizeof(Type) <= sizeof(uint64_t),
-              "JIT::Type should fit in a register");
+static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
+              "JIT::Type should fit in (2 * sizeof(uint64_t))");
 
 }}
 

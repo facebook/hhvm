@@ -42,6 +42,7 @@ RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
   m_value.outerType = normalizeDataType(outer);
   m_value.innerType = normalizeDataType(inner);
   m_value.klass = klass;
+  m_value.knownClass = nullptr;
   consistencyCheck();
 }
 
@@ -50,6 +51,7 @@ RuntimeType::RuntimeType(const StringData* sd)
   m_value.outerType = KindOfString;
   m_value.innerType = KindOfInvalid;
   m_value.string = sd;
+  m_value.knownClass = nullptr;
   consistencyCheck();
 }
 
@@ -58,6 +60,7 @@ RuntimeType::RuntimeType(const ArrayData* ad)
   m_value.outerType = KindOfArray;
   m_value.innerType = KindOfInvalid;
   m_value.array = ad;
+  m_value.knownClass = nullptr;
   consistencyCheck();
 }
 
@@ -68,6 +71,7 @@ RuntimeType::RuntimeType(bool value)
   m_value.klass = nullptr;
   m_value.boolean = value;
   m_value.boolValid = true;
+  m_value.knownClass = nullptr;
   consistencyCheck();
 }
 
@@ -76,6 +80,7 @@ RuntimeType::RuntimeType(int64_t value)
   m_value.outerType = KindOfInt64;
   m_value.innerType = KindOfInvalid;
   m_value.intval = value;
+  m_value.knownClass = nullptr;
   consistencyCheck();
 }
 
@@ -84,11 +89,8 @@ RuntimeType::RuntimeType(const Class* klass)
   m_value.outerType = KindOfClass;
   m_value.innerType = KindOfInvalid;
   m_value.klass = klass;
+  m_value.knownClass = nullptr;
   consistencyCheck();
-}
-
-RuntimeType::RuntimeType(const RuntimeType& source) {
-  *this = source;
 }
 
 RuntimeType::RuntimeType() :
@@ -96,6 +98,7 @@ RuntimeType::RuntimeType() :
   m_value.outerType = KindOfInvalid;
   m_value.innerType = KindOfInvalid;
   m_value.klass = nullptr;
+  m_value.knownClass = nullptr;
 }
 
 RuntimeType::RuntimeType(const Iter* it) :
@@ -195,6 +198,12 @@ RuntimeType::valueGeneric() const {
   return m_value.intval;
 }
 
+const Class*
+RuntimeType::knownClass() const {
+  consistencyCheck();
+  return m_value.knownClass;
+}
+
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
   assert(m_kind == VALUE);
@@ -208,6 +217,18 @@ RuntimeType::setValueType(DataType newInner) const {
   }
   assert(rtt.valueType() == newInner);
   rtt.m_value.klass = nullptr;
+  rtt.consistencyCheck();
+  return rtt;
+}
+
+RuntimeType
+RuntimeType::setKnownClass(const Class* klass) const {
+  assert(isObject());
+  RuntimeType rtt;
+  rtt.m_kind = VALUE;
+  rtt.m_value.outerType = outerType();
+  rtt.m_value.klass = m_value.klass;
+  rtt.m_value.knownClass = klass;
   rtt.consistencyCheck();
   return rtt;
 }
@@ -285,6 +306,10 @@ bool RuntimeType::isClass() const {
   return isValue() && outerType() == KindOfClass;
 }
 
+bool RuntimeType::hasKnownType() const {
+  return isObject() && m_value.knownClass != nullptr;
+}
+
 bool RuntimeType::isArray() const {
   return isValue() && outerType() == KindOfArray;
 }
@@ -305,16 +330,6 @@ bool RuntimeType::operator==(const RuntimeType& r) const {
       assert(false);
       return false;
   }
-}
-
-RuntimeType& RuntimeType::operator=(const RuntimeType& r) {
-  m_kind            = r.m_kind;
-  m_value.innerType = r.m_value.innerType;
-  m_value.outerType = r.m_value.outerType;
-  m_value.klass     = r.m_value.klass;
-  consistencyCheck();
-  assert(*this == r);
-  return *this;
 }
 
 size_t

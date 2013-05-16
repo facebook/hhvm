@@ -125,6 +125,7 @@ StaticStr and CountedStr both appear as type String at the PHP level).
   CountedArr      ArrayData* where isStatic() == false
   Arr             ArrayData* {CountedArr|StaticArr}
   Obj             ObjectData*
+  Obj<Class>      ObjectData* of the specific type Class
   Counted         {CountedStr|CountedArr|Obj|BoxedCell}
   Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
 

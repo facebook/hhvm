@@ -1653,38 +1653,68 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
 // Type check operators
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class OpndType>
-ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
-                                          bool negate) {
+// Overloads to put the ObjectData* into a register so emitTypeTest
+// can cmp to the Class* expected by the specialized Type
+
+// Nothing to do, return the register that contain the ObjectData already
+Reg64 getObjectDataEnregistered(Asm& as, PhysReg dataSrc, Reg64 scratch) {
+  return dataSrc;
+}
+
+// Enregister the meoryRef so it can be used with an offset by the
+// cmp instruction
+Reg64 getObjectDataEnregistered(Asm& as,
+                                MemoryRef dataSrc,
+                                Reg64 scratch) {
+  as.loadq(dataSrc, scratch);
+  return scratch;
+}
+
+template<class Loc1, class Loc2, class JmpFn>
+void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
+                                 JmpFn doJcc) {
   assert(!type.subtypeOf(Type::Cls));
   ConditionCode cc;
   if (type.isString()) {
-    emitTestTVType(m_as, KindOfStringBit, src);
+    emitTestTVType(m_as, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type.equals(Type::UncountedInit)) {
-    emitTestTVType(m_as, KindOfUncountedInitBit, src);
+    emitTestTVType(m_as, KindOfUncountedInitBit, typeSrc);
     cc = CC_NZ;
   } else if (type.equals(Type::Uncounted)) {
-    emitCmpTVType(m_as, KindOfRefCountThreshold, src);
+    emitCmpTVType(m_as, KindOfRefCountThreshold, typeSrc);
     cc = CC_LE;
   } else if (type.equals(Type::Cell)) {
-    emitCmpTVType(m_as, KindOfRef, src);
+    emitCmpTVType(m_as, KindOfRef, typeSrc);
     cc = CC_L;
   } else if (type.equals(Type::Gen)) {
-    return CC_None; // nothing to check
+    // nothing to check
+    return;
   } else {
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfObject));
-    emitCmpTVType(m_as, dataType, src);
+    emitCmpTVType(m_as, dataType, typeSrc);
     cc = CC_E;
   }
-  return negate ? ccNegate(cc) : cc;
+  doJcc(cc);
+  if (type.strictSubtypeOf(Type::Obj)) {
+    // emit the specific class test
+    assert(type.getClass()->attrs() & AttrFinal);
+    auto reg = getObjectDataEnregistered(m_as, dataSrc, m_rScratch);
+    m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
+    doJcc(cc);
+  }
 }
 
-ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
+template<class JmpFn>
+void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   auto const src = inst->getSrc(0);
 
+  // punt if specialized object for now
+  if (inst->getTypeParam().strictSubtypeOf(Type::Obj)) {
+    CG_PUNT(IsType-SpecializedUnsupported);
+  }
   if (inst->getTypeParam().equals(Type::Obj)) {
     auto const srcReg = m_regs[src].getReg();
     if (src->isA(Type::PtrToGen)) {
@@ -1707,57 +1737,79 @@ ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
                    srcReg[ObjectData::getVMClassOffset()]);
     }
     // At this point, the flags say "equal" if is_object is false.
-    return negate ? CC_E : CC_NE;
+    doJcc(CC_NE);
+    return;
   }
 
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = m_regs[src].getReg();
-    return emitTypeTest(inst->getTypeParam(), base[TVOFF(m_type)], negate);
+    emitTypeTest(inst->getTypeParam(), base[TVOFF(m_type)],
+                 base[TVOFF(m_data)],
+      [&](ConditionCode cc) { doJcc(cc); });
+    return;
   }
   assert(src->isA(Type::Gen));
   assert(!src->isConst());
 
-  PhysReg srcReg = m_regs[src].getReg(1); // type register
-  if (srcReg == InvalidReg) {
+  PhysReg typeSrcReg = m_regs[src].getReg(1); // type register
+  if (typeSrcReg == InvalidReg) {
     CG_PUNT(IsType-KnownType);
   }
-  return emitTypeTest(inst->getTypeParam(), srcReg, negate);
+  PhysReg dataSrcReg = m_regs[src].getReg(); // data register
+  emitTypeTest(inst->getTypeParam(), typeSrcReg, dataSrcReg,
+    [&](ConditionCode cc) { doJcc(cc); });
 }
 
-template<class MemLoc>
-void CodeGenerator::emitTypeCheck(Type type, MemLoc mem, Block* taken) {
-  auto const negate = true;
-  auto const cc = emitTypeTest(type, mem, negate);
-  if (cc == CC_None) return;
-  emitFwdJcc(cc, taken);
+template<class Loc>
+void CodeGenerator::emitTypeCheck(Type type,
+                                  Loc typeSrc,
+                                  Loc dataSrc,
+                                  Block* taken) {
+  emitTypeTest(type, typeSrc, dataSrc,
+    [&](ConditionCode cc) {
+      emitFwdJcc(ccNegate(cc), taken);
+    });
 }
 
-template<class MemLoc>
-void CodeGenerator::emitTypeGuard(Type type, MemLoc mem) {
-  auto const negate = true;
-  auto const cc = emitTypeTest(type, mem, negate);
-  if (cc == CC_None) return;
-
-  auto const destSK = SrcKey(getCurFunc(), m_curTrace->getBcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
-  m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
+template<class Loc>
+void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
+  emitTypeTest(type, typeSrc, dataSrc,
+    [&](ConditionCode cc) {
+      auto const destSK = SrcKey(getCurFunc(), m_curTrace->getBcOff());
+      auto const destSR = m_tx64->getSrcRec(destSK);
+      m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(cc));
+    });
 }
 
 void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
-  if (cc == CC_None) return;
   m_as.setcc(cc, rbyte(m_regs[inst->getDst()].getReg()));
 }
 
 void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
-  emitSetCc(inst, emitIsTypeTest(inst, negate));
+  bool called = false; // check emitSetCc is called only once
+  emitIsTypeTest(inst,
+    [&](ConditionCode cc) {
+      assert(!called);
+      emitSetCc(inst, negate ? ccNegate(cc) : cc);
+      called = true;
+    });
 }
 
 void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
-  emitSetCc(inst, emitIsTypeTest(inst, negate));
+  bool called = false; // check emitSetCc is called only once
+  emitIsTypeTest(inst,
+    [&](ConditionCode cc) {
+      assert(!called);
+      emitSetCc(inst, negate ? ccNegate(cc) : cc);
+      called = true;
+    });
 }
 
 void CodeGenerator::cgJmpIsTypeCommon(IRInstruction* inst, bool negate) {
-  emitFwdJcc(emitIsTypeTest(inst, negate), inst->getTaken());
+  emitIsTypeTest(inst,
+    [&](ConditionCode cc) {
+      emitFwdJcc(negate ? ccNegate(cc) : cc,  inst->getTaken());
+    });
 }
 
 void CodeGenerator::cgIsType(IRInstruction* inst) {
@@ -3813,11 +3865,13 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   if (typeDstReg != InvalidReg) {
     emitLoadTVType(m_as, base[off + TVOFF(m_type)], typeDstReg);
     if (label) {
-      emitTypeCheck(inst->getTypeParam(), typeDstReg, inst->getTaken());
+      emitTypeCheck(inst->getTypeParam(), typeDstReg,
+                    valueDstReg, inst->getTaken());
     }
   } else if (label) {
     emitTypeCheck(inst->getTypeParam(),
                   base[off + TVOFF(m_type)],
+                  base[off + TVOFF(m_data)],
                   inst->getTaken());
   }
 
@@ -3891,6 +3945,7 @@ void CodeGenerator::cgLoad(PhysReg base,
   if (label != NULL) {
     emitTypeCheck(inst->getTypeParam(),
                   base[off + TVOFF(m_type)],
+                  base[off + TVOFF(m_data)],
                   inst->getTaken());
   }
   if (type.isNull()) return; // these are constants
@@ -3974,38 +4029,44 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const rSP = m_regs[inst->getSrc(0)].getReg();
-  auto const off = cellsToBytes(inst->getExtra<GuardStk>()->offset) +
-                     TVOFF(m_type);
-  emitTypeGuard(inst->getTypeParam(), rSP[off]);
+  auto const baseOff = cellsToBytes(inst->getExtra<GuardStk>()->offset);
+  emitTypeGuard(inst->getTypeParam(),
+                rSP[baseOff + TVOFF(m_type)],
+                rSP[baseOff + TVOFF(m_data)]);
 }
 
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = m_regs[inst->getSrc(0)].getReg();
-  auto const off   = cellsToBytes(inst->getExtra<CheckStk>()->offset) +
-                       TVOFF(m_type);
-  emitTypeCheck(inst->getTypeParam(), rbase[off], inst->getTaken());
+  auto const baseOff = cellsToBytes(inst->getExtra<CheckStk>()->offset);
+  emitTypeCheck(inst->getTypeParam(), rbase[baseOff + TVOFF(m_type)],
+                rbase[baseOff + TVOFF(m_data)], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto const rFP = m_regs[inst->getSrc(0)].getReg();
-  auto const off = getLocalOffset(inst->getExtra<GuardLoc>()->locId) +
-                     TVOFF(m_type);
-  emitTypeGuard(inst->getTypeParam(), rFP[off]);
+  auto const baseOff = getLocalOffset(inst->getExtra<GuardLoc>()->locId);
+  emitTypeGuard(inst->getTypeParam(),
+                rFP[baseOff + TVOFF(m_type)],
+                rFP[baseOff + TVOFF(m_data)]);
 }
 
 void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
   auto const rbase = m_regs[inst->getSrc(0)].getReg();
-  auto const off   = getLocalOffset(inst->getExtra<CheckLoc>()->locId) +
-                       TVOFF(m_type);
-  emitTypeCheck(inst->getTypeParam(), rbase[off], inst->getTaken());
+  auto const baseOff = getLocalOffset(inst->getExtra<CheckLoc>()->locId);
+  emitTypeCheck(inst->getTypeParam(), rbase[baseOff + TVOFF(m_type)],
+                rbase[baseOff + TVOFF(m_data)], inst->getTaken());
 }
 
-template<class MemLoc>
-void CodeGenerator::emitSideExitGuard(Type type, MemLoc mem, Offset taken) {
-  auto const cc = emitTypeTest(type, mem, true /* negate */);
-  auto const sk = SrcKey(getCurFunc(), taken);
-  if (cc == CC_None) return;
-  m_tx64->emitBindJcc(m_as, cc, sk, REQ_BIND_SIDE_EXIT);
+template<class Loc>
+void CodeGenerator::emitSideExitGuard(Type type,
+                                      Loc typeSrc,
+                                      Loc dataSrc,
+                                      Offset taken) {
+  emitTypeTest(type, typeSrc, dataSrc,
+    [&](ConditionCode cc) {
+      auto const sk = SrcKey(getCurFunc(), taken);
+      m_tx64->emitBindJcc(m_as, ccNegate(cc), sk, REQ_BIND_SIDE_EXIT);
+  });
 }
 
 void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
@@ -4013,6 +4074,7 @@ void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
   auto const extra = inst->getExtra<SideExitGuardLoc>();
   emitSideExitGuard(inst->getTypeParam(),
                     fp[getLocalOffset(extra->checkedSlot) + TVOFF(m_type)],
+                    fp[getLocalOffset(extra->checkedSlot) + TVOFF(m_data)],
                     extra->taken);
 }
 
@@ -4021,6 +4083,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   auto const extra = inst->getExtra<SideExitGuardStk>();
   emitSideExitGuard(inst->getTypeParam(),
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
+                    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
                     extra->taken);
 }
 
@@ -4031,22 +4094,24 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->getSrc(0);
+  auto const rData = m_regs[src].getReg(0);
   auto const rType = m_regs[src].getReg(1);
 
-  auto const cc = emitTypeTest(inst->getTypeParam(), rType, true);
-  if (cc == CC_None) return;
+  emitTypeTest(inst->getTypeParam(), rType, rData,
+    [&](ConditionCode cc) {
+      emitFwdJcc(ccNegate(cc), inst->getTaken());
 
-  emitFwdJcc(cc, inst->getTaken());
-
-  auto const dstReg = m_regs[inst->getDst()].getReg();
-  if (dstReg != InvalidReg) {
-    emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
-  }
+      auto const dstReg = m_regs[inst->getDst()].getReg();
+      if (dstReg != InvalidReg) {
+        emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
+      }
+    });
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
   auto const reg = m_regs[inst->getSrc(0)].getReg();
-  emitTypeCheck(inst->getTypeParam(), reg[TVOFF(m_type)], inst->getTaken());
+  emitTypeCheck(inst->getTypeParam(), reg[TVOFF(m_type)],
+                reg[TVOFF(m_data)], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
@@ -4810,11 +4875,14 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto base    = m_regs[addr].getReg();
   auto dstReg  = m_regs[dst].getReg();
   emitMovRegReg(m_as, base, dstReg);
-  auto const cc = emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], true);
-  ifThen(m_as, cc, [&] {
-    cgCallHelper(m_as, (TCA)tvBox, dstReg, kNoSyncPoint,
-                 ArgGroup(m_regs).ssa(addr));
-  });
+  emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)],
+               base[TVOFF(m_data)],
+    [&](ConditionCode cc) {
+      ifThen(m_as, ccNegate(cc), [&] {
+        cgCallHelper(m_as, (TCA)tvBox, dstReg, kNoSyncPoint,
+                     ArgGroup(m_regs).ssa(addr));
+      });
+    });
 }
 
 void CodeGenerator::cgDefCns(IRInstruction* inst) {
@@ -5088,9 +5156,12 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
 }
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
-  ConditionCode cc = emitTypeTest(inst->getTypeParam(),
-                                  m_regs[inst->getSrc(0)].getReg(1), true);
-  ifThen(m_as, cc, [&] { m_as.ud2(); });
+  emitTypeTest(inst->getTypeParam(),
+               m_regs[inst->getSrc(0)].getReg(1),
+               m_regs[inst->getSrc(0)].getReg(0),
+               [&](ConditionCode cc) {
+                 ifThen(m_as, ccNegate(cc), [&] { m_as.ud2(); });
+               });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {

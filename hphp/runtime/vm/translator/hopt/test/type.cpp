@@ -18,6 +18,8 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/translator/hopt/ir.h"
+// for specialized object tests to get some real VM::Class
+#include "hphp/system/lib/systemlib.h"
 
 namespace std { namespace tr1 {
   template<> struct hash<HPHP::JIT::Type> {
@@ -125,6 +127,47 @@ TEST(Type, Subtypes) {
   EXPECT_FALSE(Type::TCA.subtypeOf(Type::Gen));
 
   EXPECT_TRUE(Type::PtrToCell.strictSubtypeOf(Type::PtrToGen));
+}
+
+TEST(Type, RuntimeType) {
+  HPHP::Transl::RuntimeType rt(new StringData());
+  Type t = Type::fromRuntimeType(rt);
+  EXPECT_TRUE(t.subtypeOf(Type::Str));
+  EXPECT_FALSE(t.subtypeOf(Type::Int));
+
+  rt = HPHP::Transl::RuntimeType(HphpArray::GetStaticEmptyArray());
+  t = Type::fromRuntimeType(rt);
+  EXPECT_TRUE(t.subtypeOf(Type::Arr));
+  EXPECT_FALSE(t.subtypeOf(Type::Str));
+
+  rt = HPHP::Transl::RuntimeType(true);
+  t = Type::fromRuntimeType(rt);
+  EXPECT_TRUE(t.subtypeOf(Type::Bool));
+  EXPECT_FALSE(t.subtypeOf(Type::Obj));
+
+  rt = HPHP::Transl::RuntimeType((int64_t) 1);
+  t = Type::fromRuntimeType(rt);
+  EXPECT_TRUE(t.subtypeOf(Type::Int));
+  EXPECT_FALSE(t.subtypeOf(Type::Dbl));
+
+  rt = HPHP::Transl::RuntimeType(DataType::KindOfObject,
+                                 DataType::KindOfInvalid);
+  rt = rt.setKnownClass(SystemLib::s_TraversableClass);
+  t = Type::fromRuntimeType(rt);
+  EXPECT_TRUE(t.subtypeOf(Type::Obj));
+  EXPECT_FALSE(Type::Obj.subtypeOf(t));
+  EXPECT_FALSE(Type::Int.subtypeOf(t));
+  HPHP::Transl::RuntimeType rt1 =
+    HPHP::Transl::RuntimeType(DataType::KindOfObject,
+                              DataType::KindOfInvalid);
+  rt1 = rt1.setKnownClass(SystemLib::s_IteratorClass);
+  Type t1 = Type::fromRuntimeType(rt1);
+  EXPECT_TRUE(t1.subtypeOf(Type::Obj));
+  EXPECT_TRUE(t1.subtypeOf(t));
+  EXPECT_FALSE(Type::Obj.subtypeOf(t1));
+  EXPECT_FALSE(t.subtypeOf(t1));
+  EXPECT_FALSE(t.subtypeOf(Type::Str));
+  EXPECT_FALSE(Type::Int.subtypeOf(t));
 }
 
 TEST(Type, CanRunDtor) {

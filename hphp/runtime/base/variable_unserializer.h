@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_VARIABLE_UNSERIALIZER_H__
-#define __HPHP_VARIABLE_UNSERIALIZER_H__
+#ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
+#define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,4 +145,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_VARIABLE_UNSERIALIZER_H__
+#endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

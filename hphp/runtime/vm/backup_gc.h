@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_BACKUP_GC_H_
-#define incl_VM_BACKUP_GC_H_
+#ifndef incl_HPHP_VM_BACKUP_GC_H_
+#define incl_HPHP_VM_BACKUP_GC_H_
 
 #include <string>
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -41,6 +41,6 @@ void gc_detect_cycles(const std::string& filename);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

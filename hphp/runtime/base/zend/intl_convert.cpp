@@ -14,7 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/zend/intl_convert.h>
+#include "hphp/runtime/base/zend/intl_convert.h"
 #include <stdlib.h>
 
 namespace HPHP {

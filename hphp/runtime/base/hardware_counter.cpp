@@ -15,8 +15,8 @@
 */
 
 #define _GNU_SOURCE 1
-#include <runtime/base/hardware_counter.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/util/logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,13 +27,13 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include <asm/unistd.h>
+#include "asm/unistd.h"
 #include <sys/prctl.h>
-#include <linux/perf_event.h>
-#include <runtime/base/string_data.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/vm/translator/translator-x64.h>
+#include "linux/perf_event.h"
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,8 +51,9 @@ static inline bool useCounters() {
 
 class HardwareCounterImpl {
 public:
-  HardwareCounterImpl(int type, unsigned long config, StringData* desc = nullptr)
-    : m_desc(desc), m_err(0), m_fd(-1) {
+  HardwareCounterImpl(int type, unsigned long config,
+                      const char* desc = nullptr)
+    : m_desc(desc ? desc : ""), m_err(0), m_fd(-1) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
@@ -130,7 +131,7 @@ public:
   }
 
 public:
-  StringData* m_desc;
+  StaticString m_desc;
   int m_err;
 private:
   int m_fd;
@@ -326,8 +327,7 @@ bool HardwareCounter::addPerfEvent(char *event) {
     Logger::Warning("failed to find perf event: %s", event);
     return false;
   }
-  hwc = new HardwareCounterImpl(
-            type, config, StringData::GetStaticString(event));
+  hwc = new HardwareCounterImpl(type, config, event);
   if (hwc->m_err) {
     Logger::Warning("failed to set perf event: %s", event);
     delete hwc;
@@ -348,7 +348,7 @@ bool HardwareCounter::addPerfEvent(char *event) {
 bool HardwareCounter::eventExists(char *event) {
   // hopefully m_counters set is small, so a linear scan does not hurt
   for(unsigned i = 0; i < m_counters.size(); i++) {
-    if (!strcmp(event, m_counters[i]->m_desc->data())) {
+    if (!strcmp(event, m_counters[i]->m_desc.c_str())) {
       return true;
     }
   }
@@ -389,14 +389,18 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
+static const StaticString s_instructions("instructions");
+static const StaticString s_loads("loads");
+static const StaticString s_stores("stores");
+
 void HardwareCounter::getPerfEvents(Array& ret) {
-  ret.set("instructions", getInstructionCount());
+  ret.set(s_instructions, getInstructionCount());
   if (!m_countersSet) {
-    ret.set("loads", getLoadCount());
-    ret.set("stores", getStoreCount());
+    ret.set(s_loads, getLoadCount());
+    ret.set(s_stores, getStoreCount());
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
-    ret.set(m_counters[i]->m_desc->data(), m_counters[i]->read());
+    ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
   if (m_pseudoEvents) {
     TranslatorX64::Get()->getPerfCounters(ret);

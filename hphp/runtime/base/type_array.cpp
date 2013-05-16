@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/types.h>
-#include <runtime/base/comparisons.h>
-#include <util/exception.h>
-#include <runtime/base/shared/shared_map.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_qsort.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_iconv.h>
-#include <unicode/coll.h> // icu
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_qsort.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_iconv.h"
+#include "unicode/coll.h" // icu
+#include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {
 
@@ -79,15 +79,6 @@ Array &Array::operator =  (Variant&& v) {
     v.reset();
   } else {
     *this = const_cast<CVarRef>(v);
-  }
-  return *this;
-}
-
-HOT_FUNC
-Array &Array::operator=(const StaticArray &arr) {
-  if (m_px != arr.m_px) {
-    if (m_px) decRefArr(m_px);
-    m_px = arr.m_px;
   }
   return *this;
 }
@@ -404,7 +395,7 @@ bool Array::more(CVarRef v2) const {
 
 HOT_FUNC
 ArrayIter Array::begin(CStrRef context /* = null_string */) const {
-  return m_px;
+  return ArrayIter(m_px);
 }
 
 void Array::escalate() {
@@ -413,16 +404,6 @@ void Array::escalate() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
-
-Variant Array::rvalAt(bool key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
-  return null_variant;
-}
-
-CVarRef Array::rvalAtRef(bool key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
-  return null_variant;
-}
 
 Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
@@ -452,15 +433,6 @@ Variant Array::rvalAt(double key, ACCESSPARAMS_IMPL) const {
 CVarRef Array::rvalAtRef(double key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get(ToKey(key), flags & AccessFlags::Error);
   return null_variant;
-}
-
-CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
-  String strkey(key);
-  return rvalAtRef(strkey, flags);
-}
-
-Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
-  return Array::rvalAtRef(key, flags);
 }
 
 CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
@@ -550,15 +522,11 @@ Variant &Array::lvalAt() {
   return *ret;
 }
 
-Variant &Array::lvalAt(litstr  key, ACCESSPARAMS_IMPL) {
-  if (flags & AccessFlags::Key) return lvalAtImpl(String(key), flags);
-  return lvalAtImpl(String(key).toKey(), flags);
-}
-
 Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   return lvalAtImpl(key.toKey(), flags);
 }
+
 Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   VarNR k(key.toKey());
@@ -612,11 +580,6 @@ CVarRef Array::set(int64_t   key, CVarRef v) {
   return setImpl(key, v);
 }
 
-CVarRef Array::set(litstr  key, CVarRef v, bool isKey /* = false */) {
-  if (isKey) return setImpl(String(key), v);
-  return setImpl(String(key).toKey(), v);
-}
-
 CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   return setImpl(key.toKey(), v);
@@ -637,10 +600,7 @@ CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
 CVarRef Array::setRef(int64_t   key, CVarRef v) {
   return setRefImpl(key, v);
 }
-CVarRef Array::setRef(litstr  key, CVarRef v, bool isKey /* = false */) {
-  if (isKey) return setRefImpl(String(key), v);
-  return setRefImpl(String(key).toKey(), v);
-}
+
 CVarRef Array::setRef(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
   return setRefImpl(key.toKey(), v);
@@ -661,14 +621,12 @@ CVarRef Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
 CVarRef Array::add(int64_t   key, CVarRef v) {
   return addImpl(key, v);
 }
-CVarRef Array::add(litstr  key, CVarRef v, bool isKey /* = false */) {
-  if (isKey) return addImpl(String(key), v);
-  return addImpl(String(key).toKey(), v);
-}
+
 CVarRef Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
   return addImpl(key.toKey(), v);
 }
+
 CVarRef Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return addImpl(key.getNumData(), v);
@@ -679,11 +637,6 @@ CVarRef Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
     return addImpl(k, v);
   }
   return Variant::lvalBlackHole();
-}
-
-Variant &Array::addLval(litstr  key, bool isKey /* = false */) {
-  if (isKey) return addLvalImpl(String(key));
-  return addLvalImpl(String(key).toKey());
 }
 
 Variant &Array::addLval(CStrRef key, bool isKey /* = false */) {
@@ -750,14 +703,9 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 Array Array::values() const {
   ArrayInit ai(size(), ArrayInit::vectorInit);
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.set(iter.secondRef());
+    ai.set(withRefBind(iter.secondRef()));
   }
   return ai.create();
-}
-
-bool Array::exists(litstr key, bool isKey /* = false */) const {
-  String str(key);
-  return exists(str, isKey);
 }
 
 bool Array::exists(CStrRef key, bool isKey /* = false */) const {
@@ -781,14 +729,6 @@ bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   return false;
 }
 
-void Array::remove(litstr  key, bool isString /* = false */) {
-  String k(key);
-  if (isString) {
-    removeImpl(k);
-  } else {
-    removeImpl(k.toKey());
-  }
-}
 void Array::remove(CStrRef key, bool isString /* = false */) {
   if (isString) {
     removeImpl(key);

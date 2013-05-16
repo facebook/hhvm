@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "light_process.h"
-#include "process.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/process.h"
 #include "util.h"
-#include "logger.h"
+#include "hphp/util/logger.h"
 
 #include <afdt.h>
 #include <string>
@@ -298,7 +298,7 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
   }
   pid_t pid = info->si_pid;
   for (int i = 0; i < g_procsCount; ++i) {
-    if (g_procs[i].m_shadowProcess == pid) {
+    if (g_procs && g_procs[i].m_shadowProcess == pid) {
       // The exited process was a light process. Notify the callback, if any.
       if (s_lostChildHandler) {
         s_lostChildHandler(pid);
@@ -319,18 +319,6 @@ void LightProcess::Initialize(const std::string &prefix, int count,
     return;
   }
 
-  if (!s_handlerInited) {
-    struct sigaction sa;
-    struct sigaction old_sa;
-    sa.sa_sigaction = &LightProcess::SigChldHandler;
-    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
-    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
-      Logger::Error("Couldn't install SIGCHLD handler");
-      abort();
-    }
-    s_handlerInited = true;
-  }
-
   g_procs.reset(new LightProcess[count]);
   g_procsCount = count;
 
@@ -343,6 +331,18 @@ void LightProcess::Initialize(const std::string &prefix, int count,
       g_procsCount = 0;
       break;
     }
+  }
+
+  if (!s_handlerInited) {
+    struct sigaction sa;
+    struct sigaction old_sa;
+    sa.sa_sigaction = &LightProcess::SigChldHandler;
+    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
+    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+      Logger::Error("Couldn't install SIGCHLD handler");
+      abort();
+    }
+    s_handlerInited = true;
   }
 }
 
@@ -503,7 +503,7 @@ void LightProcess::runShadow(int fdin, int fdout) {
   fclose(fout);
   ::close(m_afdt_fd);
   remove(m_afdtFilename.c_str());
-  exit(0);
+  _Exit(0);
 }
 
 int LightProcess::GetId() {

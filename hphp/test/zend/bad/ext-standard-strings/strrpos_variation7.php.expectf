@@ -1,0 +1,7 @@
+*** Testing strrpos() function: with heredoc strings ***
+-- With empty heredoc string --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+*** Done ***

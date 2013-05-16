@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_ALLOC_H__
-#define __HPHP_UTIL_ALLOC_H__
+#ifndef incl_HPHP_UTIL_ALLOC_H_
+#define incl_HPHP_UTIL_ALLOC_H_
 
 #include <stdint.h>
 
-#include "exception.h"
+#include "hphp/util/exception.h"
 
 #ifdef USE_TCMALLOC
-#include <google/malloc_extension.h>
+#include "google/malloc_extension.h"
 #endif
 
 #ifndef USE_JEMALLOC
@@ -39,7 +39,7 @@
 # endif
 #endif
 
-#include <util/maphuge.h>
+#include "hphp/util/maphuge.h"
 
 extern "C" {
 #ifdef USE_TCMALLOC
@@ -65,8 +65,8 @@ namespace HPHP {
 
 class OutOfMemoryException : public Exception {
 public:
-  OutOfMemoryException(size_t size)
-      : Exception("Unable to allocate %zu bytes of memory", size) {}
+  explicit OutOfMemoryException(size_t size)
+    : Exception("Unable to allocate %zu bytes of memory", size) {}
   virtual ~OutOfMemoryException() throw() {}
   EXCEPTION_COMMON_IMPL(OutOfMemoryException);
 };
@@ -161,4 +161,4 @@ extern const size_t s_pageSize;
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_UTIL_ALLOC_H__
+#endif // incl_HPHP_UTIL_ALLOC_H_

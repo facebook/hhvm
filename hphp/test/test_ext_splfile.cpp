@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_splfile.h>
-#include <runtime/ext/ext_splfile.h>
+#include "hphp/test/test_ext_splfile.h"
+#include "hphp/runtime/ext/ext_splfile.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

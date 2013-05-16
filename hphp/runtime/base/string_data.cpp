@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/string_data.h>
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/util/exceptions.h>
-#include <util/alloc.h>
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/util/alloc.h"
 #include <math.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <tbb/concurrent_hash_map.h>
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {
 
@@ -91,6 +91,11 @@ StringData *StringData::GetStaticString(const StringData *str) {
   return const_cast<StringData*>(pair.first->first);
 }
 
+StringData* StringData::GetStaticString(const String& str) {
+  assert(!str.isNull());
+  return GetStaticString(str.get());
+}
+
 StringData* StringData::FindStaticString(const StringData* str) {
   if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
@@ -131,7 +136,7 @@ uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
   StringDataMap::iterator it = s_stringDataMap->find(cnsName);
   assert(it != s_stringDataMap->end());
   if (!it->second) {
-    VM::Transl::TargetCache::allocConstant(&it->second, persistent);
+    Transl::TargetCache::allocConstant(&it->second, persistent);
   }
   return it->second;
 }
@@ -139,13 +144,13 @@ uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
 Array StringData::GetConstants() {
   // Return an array of all defined constants.
   assert(s_stringDataMap);
-  Array a(VM::Transl::TargetCache::s_constants);
+  Array a(Transl::TargetCache::s_constants);
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
       TypedValue& tv =
-        VM::Transl::TargetCache::handleToRef<TypedValue>(it->second);
+        Transl::TargetCache::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(it->first));
         a.set(key, tvAsVariant(&tv), true);
@@ -792,7 +797,7 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
 }
 
 bool StringData::isNumeric() const {
-  if (isStatic()) return (m_hash >= 0);
+  if (m_hash < 0) return false;
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
@@ -849,6 +854,23 @@ DataType StringData::toNumeric(int64_t &lval, double &dval) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
+
+HOT_FUNC
+bool StringData::equal(const StringData *s) const {
+  assert(s);
+  if (s == this) return true;
+  int ret;
+
+  if (!(m_hash < 0 || s->m_hash < 0)) {
+    ret = numericCompare(s);
+    if (ret >= -1) {
+      return ret == 0;
+    }
+  }
+  if (m_len != s->m_len) return false;
+  ret = memcmp(rawdata(), s->rawdata(), m_len);
+  return ret == 0;
+}
 
 HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {

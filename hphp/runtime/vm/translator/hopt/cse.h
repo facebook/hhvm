@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HHIR_CSE_H_
-#define incl_HHIR_CSE_H_
+#ifndef incl_HPHP_HHIR_CSE_H_
+#define incl_HPHP_HHIR_CSE_H_
 
 #include <unordered_map>
 
 #include "folly/Hash.h"
 
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/cfg.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 /*
@@ -41,13 +41,13 @@ struct CSEHash {
     return (*it).second;
   }
   SSATmp* insert(SSATmp* opnd) {
-    return insert(opnd, opnd->getInstruction());
+    return insert(opnd, opnd->inst());
   }
   SSATmp* insert(SSATmp* opnd, IRInstruction* inst) {
     return map[inst] = opnd;
   }
   void erase(SSATmp* opnd) {
-    map.erase(opnd->getInstruction());
+    map.erase(opnd->inst());
   }
   void clear() {
     map.clear();
@@ -71,16 +71,16 @@ struct CSEHash {
 private:
   struct EqualsOp {
     bool operator()(IRInstruction* i1, IRInstruction* i2) const {
-      return i1->equals(i2);
+      return i1->cseEquals(i2);
     }
   };
 
   struct HashOp {
     size_t operator()(IRInstruction* inst) const {
-      return inst->hash();
+      return inst->cseHash();
     }
     size_t hash(IRInstruction* inst) const {
-      return inst->hash();
+      return inst->cseHash();
     }
   };
 
@@ -89,7 +89,7 @@ private:
   MapType map;
 };
 
-}}}
+}}
 
 #endif
 

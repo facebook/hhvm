@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATEMENT_LIST_H__
-#define __STATEMENT_LIST_H__
+#ifndef incl_HPHP_STATEMENT_LIST_H_
+#define incl_HPHP_STATEMENT_LIST_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(StatementList);
 
 class StatementList : public Statement {
 public:
-  StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
+  explicit StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
@@ -66,4 +66,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATEMENT_LIST_H__
+#endif // incl_HPHP_STATEMENT_LIST_H_

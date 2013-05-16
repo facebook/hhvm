@@ -1,0 +1,4 @@
+*** Testing interface_exists() : test autoload default value ***
+bool(true)
+
+DONE

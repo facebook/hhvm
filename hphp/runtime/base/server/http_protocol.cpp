@@ -15,21 +15,21 @@
 */
 
 
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/server/request_uri.h>
-#include <runtime/base/server/transport.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <runtime/base/server/upload.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/util/http_client.h>
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/util/http_client.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -73,6 +73,51 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   return VirtualHost::GetCurrent();
 }
 
+static const StaticString
+  s_REQUEST_START_TIME("REQUEST_START_TIME"),
+  s_HPHP("HPHP"),
+  s_HHVM("HHVM"),
+  s_HHVM_JIT("HHVM_JIT"),
+  s_HPHP_SERVER("HPHP_SERVER"),
+  s_HPHP_HOTPROFILER("HPHP_HOTPROFILER"),
+  s_HTTP_HOST("HTTP_HOST"),
+  s_CONTENT_TYPE("CONTENT_TYPE"),
+  s_CONTENT_LENGTH("CONTENT_LENGTH"),
+  s_PHP_AUTH_USER("PHP_AUTH_USER"),
+  s_PHP_AUTH_PW("PHP_AUTH_PW"),
+  s_REQUEST_URI("REQUEST_URI"),
+  s_SCRIPT_URL("SCRIPT_URL"),
+  s_SCRIPT_URI("SCRIPT_URI"),
+  s_SCRIPT_NAME("SCRIPT_NAME"),
+  s_PHP_SELF("PHP_SELF"),
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
+  s_PATH_TRANSLATED("PATH_TRANSLATED"),
+  s_PATH_INFO("PATH_INFO"),
+  s_argc("argc"),
+  s_argv("argv"),
+  s_GATEWAY_INTERFACE("GATEWAY_INTERFACE"),
+  s_CGI_1_1("CGI/1.1"),
+  s_SERVER_ADDR("SERVER_ADDR"),
+  s_SERVER_NAME("SERVER_NAME"),
+  s_SERVER_PORT("SERVER_PORT"),
+  s_SERVER_SOFTWARE("SERVER_SOFTWARE"),
+  s_SERVER_PROTOCOL("SERVER_PROTOCOL"),
+  s_SERVER_ADMIN("SERVER_ADMIN"),
+  s_SERVER_SIGNATURE("SERVER_SIGNATURE"),
+  s_REQUEST_METHOD("REQUEST_METHOD"),
+  s_GET("GET"),
+  s_HEAD("HEAD"),
+  s_POST("POST"),
+  s_HTTPS("HTTPS"),
+  s_1("1"),
+  s_REQUEST_TIME("REQUEST_TIME"),
+  s_QUERY_STRING("QUERY_STRING"),
+  s_REMOTE_ADDR("REMOTE_ADDR"),
+  s_REMOTE_HOST("REMOTE_HOST"),
+  s_REMOTE_PORT("REMOTE_PORT"),
+  s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
+  s_THREAD_TYPE("THREAD_TYPE");
+
 /**
  * PHP has "EGPCS" processing order of these global variables, and this
  * order is important in preparing $_REQUEST that needs to know which to
@@ -85,21 +130,21 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   const VirtualHost *vhost = VirtualHost::GetCurrent();
 
   Variant &server = g->GV(_SERVER);
-  server.set("REQUEST_START_TIME", time(nullptr));
+  server.set(s_REQUEST_START_TIME, time(nullptr));
 
   // $_ENV
   process_env_variables(g->GV(_ENV));
-  g->GV(_ENV).set("HPHP", 1);
-  g->GV(_ENV).set("HHVM", 1);
+  g->GV(_ENV).set(s_HPHP, 1);
+  g->GV(_ENV).set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
-    g->GV(_ENV).set("HHVM_JIT", 1);
+    g->GV(_ENV).set(s_HHVM_JIT, 1);
   }
 
   bool isServer = RuntimeOption::serverExecutionMode();
   if (isServer) {
-    g->GV(_ENV).set("HPHP_SERVER", 1);
+    g->GV(_ENV).set(s_HPHP_SERVER, 1);
 #ifdef HOTPROFILER
-    g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
+    g->GV(_ENV).set(s_HPHP_HOTPROFILER, 1);
 #endif
   }
 
@@ -235,7 +280,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   String hostName(VirtualHost::GetCurrent()->serverName(host));
   string hostHeader(host);
   if (hostHeader.empty()) {
-    server.set("HTTP_HOST", hostName);
+    server.set(s_HTTP_HOST, hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
   } else {
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
@@ -251,10 +296,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
   if (!contentType.empty()) {
-    server.set("CONTENT_TYPE", String(contentType));
+    server.set(s_CONTENT_TYPE, String(contentType));
   }
   if (!contentLength.empty()) {
-    server.set("CONTENT_LENGTH", String(contentLength));
+    server.set(s_CONTENT_LENGTH, String(contentLength));
   }
 
   // APE processes Authorization: Basic into PHP_AUTH_USER and PHP_AUTH_PW
@@ -267,14 +312,14 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         StringUtil::Base64Decode(String(authorization.c_str() + 6));
       int colonPos = decodedAuth.find(':');
       if (colonPos != String::npos) {
-        server.set("PHP_AUTH_USER", decodedAuth.substr(0, colonPos));
-        server.set("PHP_AUTH_PW", decodedAuth.substr(colonPos + 1));
+        server.set(s_PHP_AUTH_USER, decodedAuth.substr(0, colonPos));
+        server.set(s_PHP_AUTH_PW, decodedAuth.substr(colonPos + 1));
       }
     }
   }
 
-  server.set("REQUEST_URI", String(transport->getUrl(), CopyString));
-  server.set("SCRIPT_URL", r.originalURL());
+  server.set(s_REQUEST_URI, String(transport->getUrl(), CopyString));
+  server.set(s_SCRIPT_URL, r.originalURL());
   String prefix(transport->isSSL() ? "https://" : "http://");
   String port_suffix("");
 
@@ -282,10 +327,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   if (!transport->isSSL() && RuntimeOption::ServerPort != 80) {
     port_suffix = ":" + RuntimeOption::ServerPort;
   }
-  server.set("SCRIPT_URI", String(prefix +
-                                  (hostHeader.empty() ?
-                                    hostName + port_suffix : hostHeader)
-                                  + r.originalURL()));
+  server.set(s_SCRIPT_URI,
+             String(prefix + (hostHeader.empty() ? hostName + port_suffix :
+                              String(hostHeader)) + r.originalURL()));
 
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME
@@ -302,57 +346,57 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       }
       name += String(RuntimeOption::DefaultDocument);
     }
-    server.set("SCRIPT_NAME", name);
+    server.set(s_SCRIPT_NAME, name);
   } else {
-    server.set("SCRIPT_NAME", r.resolvedURL());
+    server.set(s_SCRIPT_NAME, r.resolvedURL());
   }
   if (!r.rewritten() && r.pathInfo().empty()) {
-    server.set("PHP_SELF", r.resolvedURL());
+    server.set(s_PHP_SELF, r.resolvedURL());
   } else {
     // when URL is rewritten, or pathinfo is not empty, use original URL
-    server.set("PHP_SELF", r.originalURL());
+    server.set(s_PHP_SELF, r.originalURL());
   }
 
-  server.set("SCRIPT_FILENAME", r.absolutePath());
+  server.set(s_SCRIPT_FILENAME, r.absolutePath());
   if (r.pathInfo().empty()) {
-    server.set("PATH_TRANSLATED", r.absolutePath());
+    server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
-    server.set("PATH_TRANSLATED",
+    server.set(s_PATH_TRANSLATED,
                String(vhost->getDocumentRoot() + r.pathInfo().data()));
-    server.set("PATH_INFO", r.pathInfo());
+    server.set(s_PATH_INFO, r.pathInfo());
   }
 
-  server.set("argv", r.queryString());
-  server.set("argc", 0);
-  server.set("GATEWAY_INTERFACE", "CGI/1.1");
-  server.set("SERVER_ADDR", String(RuntimeOption::ServerPrimaryIP));
-  server.set("SERVER_NAME", hostName);
-  server.set("SERVER_PORT", RuntimeOption::ServerPort);
-  server.set("SERVER_SOFTWARE", "HPHP");
-  server.set("SERVER_PROTOCOL", "HTTP/" + transport->getHTTPVersion());
-  server.set("SERVER_ADMIN", "");
-  server.set("SERVER_SIGNATURE", "");
+  server.set(s_argv, r.queryString());
+  server.set(s_argc, 0);
+  server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
+  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_NAME, hostName);
+  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_SOFTWARE, s_HPHP);
+  server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
+  server.set(s_SERVER_ADMIN, empty_string);
+  server.set(s_SERVER_SIGNATURE, empty_string);
   switch (transport->getMethod()) {
-  case Transport::GET:  server.set("REQUEST_METHOD", "GET");  break;
-  case Transport::HEAD: server.set("REQUEST_METHOD", "HEAD"); break;
+  case Transport::GET:  server.set(s_REQUEST_METHOD, s_GET);  break;
+  case Transport::HEAD: server.set(s_REQUEST_METHOD, s_HEAD); break;
   case Transport::POST:
     if (transport->getExtendedMethod() == nullptr) {
-      server.set("REQUEST_METHOD", "POST");
+      server.set(s_REQUEST_METHOD, s_POST);
     } else {
-      server.set("REQUEST_METHOD", transport->getExtendedMethod());
+      server.set(s_REQUEST_METHOD, transport->getExtendedMethod());
     }
     break;
-  default:              server.set("REQUEST_METHOD", "");     break;
+  default:              server.set(s_REQUEST_METHOD, empty_string);     break;
   }
-  server.set("HTTPS", transport->isSSL() ? "1" : "");
-  server.set("REQUEST_TIME", time(nullptr));
-  server.set("QUERY_STRING", r.queryString());
+  server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
+  server.set(s_REQUEST_TIME, time(nullptr));
+  server.set(s_QUERY_STRING, r.queryString());
 
-  server.set("REMOTE_ADDR", String(transport->getRemoteHost(), CopyString));
-  server.set("REMOTE_HOST", ""); // I don't think we need to nslookup
-  server.set("REMOTE_PORT", transport->getRemotePort());
+  server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));
+  server.set(s_REMOTE_HOST, empty_string); // I don't think we need to nslookup
+  server.set(s_REMOTE_PORT, transport->getRemotePort());
 
-  server.set("DOCUMENT_ROOT", String(vhost->getDocumentRoot()));
+  server.set(s_DOCUMENT_ROOT, String(vhost->getDocumentRoot()));
 
   for (map<string, string>::const_iterator iter =
          RuntimeOption::ServerVariables.begin();
@@ -368,7 +412,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   sri.setServerVariables(server);
 
   const char *threadType = transport->getThreadTypeName();
-  server.set("THREAD_TYPE", threadType);
+  server.set(s_THREAD_TYPE, threadType);
   StackTraceNoHeap::AddExtraLogging("ThreadType", threadType);
 }
 

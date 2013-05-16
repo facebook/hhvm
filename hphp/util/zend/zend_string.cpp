@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/zend/zend_string.h"
+#include "hphp/util/zend/zend_string.h"
 #include <cinttypes>
-#include "util/assertions.h"
-#include "util/mutex.h"
-#include "util/lock.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 

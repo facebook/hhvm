@@ -1,0 +1,13 @@
+*** Testing stat() on file with miscelleneous file permission and content ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+*** Testing stat() on directory with miscelleneous file permission ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+*** Done ***

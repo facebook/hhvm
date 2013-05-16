@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_run.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_run.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdRun::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -53,12 +55,12 @@ bool CmdRun::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdRun::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdRun::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   m_args = StringVecPtr(client->args(), null_deleter());
   m_smallStep = client->getDebuggerSmallStep();
-  client->send(this);
+  client->sendToServer(this);
   client->clearCachedLocal();
   client->setFrame(0);
   throw DebuggerConsoleExitException();

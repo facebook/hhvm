@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_FILE_H__
-#define __EXT_FILE_H__
+#ifndef incl_HPHP_EXT_FILE_H_
+#define incl_HPHP_EXT_FILE_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,4 +158,4 @@ void f_closedir(CObjRef dir_handle);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_FILE_H__
+#endif // incl_HPHP_EXT_FILE_H_

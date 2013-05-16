@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

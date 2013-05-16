@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_mailparse.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/file/temp_file.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/mailparse/mime.h>
-#include <runtime/ext/mailparse/rfc822.h>
+#include "hphp/runtime/ext/ext_mailparse.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/file/temp_file.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/mailparse/mime.h"
+#include "hphp/runtime/ext/mailparse/rfc822.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ Array f_mailparse_msg_get_part_data(CObjRef mimemail) {
 }
 
 Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
-  Object part = mimemail.getTyped<MimePart>()->findByName(mimesection);
+  Object part = mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
     raise_warning("cannot find section %s in message", mimesection.data());
     return false;
@@ -195,6 +195,10 @@ Array f_mailparse_msg_get_structure(CObjRef mimemail) {
   return mimemail.getTyped<MimePart>()->getStructure();
 }
 
+static const StaticString s_display("display");
+static const StaticString s_address("address");
+static const StaticString s_is_group("is_group");
+
 Array f_mailparse_rfc822_parse_addresses(CStrRef addresses) {
   php_rfc822_tokenized_t *toks =
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
@@ -204,12 +208,12 @@ Array f_mailparse_rfc822_parse_addresses(CStrRef addresses) {
   for (int i = 0; i < addrs->naddrs; i++) {
     Array item = Array::Create();
     if (addrs->addrs[i].name) {
-      item.set("display", String(addrs->addrs[i].name, CopyString));
+      item.set(s_display, String(addrs->addrs[i].name, CopyString));
     }
     if (addrs->addrs[i].address) {
-      item.set("address", String(addrs->addrs[i].address, CopyString));
+      item.set(s_address, String(addrs->addrs[i].address, CopyString));
     }
-    item.set("is_group", (bool)addrs->addrs[i].is_group);
+    item.set(s_is_group, (bool)addrs->addrs[i].is_group);
     ret.append(item);
   }
 
@@ -340,6 +344,9 @@ static size_t mailparse_do_uudecode(File *instream, File *outstream) {
   return file_size;
 }
 
+static const StaticString s_filename("filename");
+static const StaticString s_origfilename("origfilename");
+
 Variant f_mailparse_uudecode_all(CObjRef fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
@@ -371,20 +378,20 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
         /* create an initial item representing the file with all uuencoded
            parts removed */
         Array item = Array::Create();
-        item.set("filename", String(((TempFile*)outstream)->getName()));
+        item.set(s_filename, String(((TempFile*)outstream)->getName()));
         return_value.append(item);
       }
 
       /* add an item */
       Array item = Array::Create();
-      item.set("origfilename", String(origfilename, CopyString));
+      item.set(s_origfilename, String(origfilename, CopyString));
 
       /* create a temp file for the data */
       File *partstream = NEWOBJ(TempFile)(false);
       Object deleter(partstream);
       if (partstream)  {
         nparts++;
-        item.set("filename", String(((TempFile*)partstream)->getName()));
+        item.set(s_filename, String(((TempFile*)partstream)->getName()));
         return_value.append(item);
 
         /* decode it */

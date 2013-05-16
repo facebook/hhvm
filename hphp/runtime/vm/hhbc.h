@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_HHBC_H_
-#define incl_VM_HHBC_H_
+#ifndef incl_HPHP_VM_HHBC_H_
+#define incl_HPHP_VM_HHBC_H_
 
-#include <runtime/vm/core_types.h>
+#include "hphp/runtime/vm/core_types.h"
 
 namespace HPHP {
-namespace VM {
 
 struct Unit;
 
@@ -375,6 +374,8 @@ enum SetOpOp {
   O(ColAddElemC,     NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ColAddNewElemC,  NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(ClsCns,          ONE(SA),          ONE(AV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
@@ -490,6 +491,7 @@ enum SetOpOp {
   /* NOTE: isFPush below relies on the grouping of FPush* here */       \
   O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
+  O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushObjMethod,  ONE(IVA),         TWO(CV,CV),      NOV,        NF) \
   O(FPushObjMethodD, TWO(IVA,SA),      ONE(CV),         NOV,        NF) \
   O(FPushClsMethod,  ONE(IVA),         TWO(AV,CV),      NOV,        NF) \
@@ -848,6 +850,6 @@ mcodeMaybeArrayIntKey(MemberCode mcode) {
 }
 
 
-} }
+ }
 
 #endif

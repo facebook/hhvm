@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "lock.h"
-#include "stack_trace.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/stack_trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,100 @@
+*** Testing floatval() on non floating types ***
+
+-- Iteration : -2147483648 --
+float(-2147483648)
+
+-- Iteration : 2147483647 --
+float(2147483648)
+
+-- Iteration : file resoruce --
+float(%d)
+
+-- Iteration : directory resource --
+float(%d)
+
+-- Iteration : "0.0" --
+float(0)
+
+-- Iteration : "1.0" --
+float(1)
+
+-- Iteration : "-1.3e3" --
+float(-1300)
+
+-- Iteration : "bob-1.3e3" --
+float(0)
+
+-- Iteration : "10 Some dollars" --
+float(10)
+
+-- Iteration : "10.2 Some Dollars" --
+float(10.2)
+
+-- Iteration : "10.0 dollar" + 1 --
+float(11)
+
+-- Iteration : "10.0 dollar" + 1.0 --
+float(11)
+
+-- Iteration : "" --
+float(0)
+
+-- Iteration : true --
+float(1)
+
+-- Iteration : NULL --
+float(0)
+
+-- Iteration : null --
+float(0)
+
+*** Testing doubleval() on non floating types ***
+
+-- Iteration : -2147483648 --
+float(-2147483648)
+
+-- Iteration : 2147483647 --
+float(2147483648)
+
+-- Iteration : file resoruce --
+float(%d)
+
+-- Iteration : directory resource --
+float(%d)
+
+-- Iteration : "0.0" --
+float(0)
+
+-- Iteration : "1.0" --
+float(1)
+
+-- Iteration : "-1.3e3" --
+float(-1300)
+
+-- Iteration : "bob-1.3e3" --
+float(0)
+
+-- Iteration : "10 Some dollars" --
+float(10)
+
+-- Iteration : "10.2 Some Dollars" --
+float(10.2)
+
+-- Iteration : "10.0 dollar" + 1 --
+float(11)
+
+-- Iteration : "10.0 dollar" + 1.0 --
+float(11)
+
+-- Iteration : "" --
+float(0)
+
+-- Iteration : true --
+float(1)
+
+-- Iteration : NULL --
+float(0)
+
+-- Iteration : null --
+float(0)
+===DONE===

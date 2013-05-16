@@ -14,6 +14,6 @@ var_dump(ctype_space($c1));
 $c2 = "Hello, world!\n";
 var_dump(ctype_space($c2));
 
-setlocale(LC_CTYPE, $orig);
+setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===

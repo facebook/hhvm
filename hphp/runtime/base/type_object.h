@@ -14,19 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_OBJECT_H_
+#define incl_HPHP_OBJECT_H_
+
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_object.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_OBJECT_H__
-#define __HPHP_OBJECT_H__
-
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/object_data.h>
-#include <runtime/base/type_string.h>
-#include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/object_data.h"
+#include "hphp/runtime/base/type_string.h"
+#include "hphp/runtime/base/hphp_value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,16 +35,12 @@ namespace HPHP {
 class ArrayIter;
 class MutableArrayIter;
 
-#ifdef HHVM_GC
-typedef GCRootTracker<ObjectData> ObjectBase;
-#else
-typedef SmartPtr<ObjectData> ObjectBase;
-#endif
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object : protected ObjectBase {
+class Object : protected SmartPtr<ObjectData> {
+  typedef SmartPtr<ObjectData> ObjectBase;
+
 public:
   Object() {}
 
@@ -62,8 +57,8 @@ public:
   /**
    * Constructors
    */
-  Object(ObjectData *data) : ObjectBase(data) { }
-  Object(CObjRef src) : ObjectBase(src.m_px) { }
+  /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
+  /* implicit */ Object(CObjRef src) : ObjectBase(src.m_px) { }
 
   // Move ctor
   Object(Object&& src) : ObjectBase(std::move(src)) {
@@ -96,7 +91,7 @@ public:
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
-  bool instanceof(const VM::Class* cls) const {
+  bool instanceof(const Class* cls) const {
     return m_px && m_px->instanceof(cls);
   }
 
@@ -130,7 +125,7 @@ public:
     T *px = dynamic_cast<T*>(cur);
     if (!px) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(m_px->o_getClassName());
+        throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
       }
       return nullptr;
     }
@@ -230,4 +225,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OBJECT_H__
+#endif // incl_HPHP_OBJECT_H_

@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_FUNCTION_H__
-#define __EXT_FUNCTION_H__
+#ifndef incl_HPHP_EXT_FUNCTION_H_
+#define incl_HPHP_EXT_FUNCTION_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  * parameters to help the implementation.
  */
 Variant f_func_get_args();
-Array hhvm_get_frame_args(const VM::ActRec* ar);
+Array hhvm_get_frame_args(const ActRec* ar);
 Array func_get_args(int num_args, CArrRef params, CArrRef args);
 
 /**
@@ -74,4 +74,4 @@ void f_unregister_tick_function(CVarRef function_name);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_FUNCTION_H__
+#endif // incl_HPHP_EXT_FUNCTION_H_

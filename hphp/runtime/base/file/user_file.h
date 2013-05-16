@@ -17,7 +17,7 @@
 #ifndef HPHP_USER_FILE_H
 #define HPHP_USER_FILE_H
 
-#include <runtime/base/file/file.h>
+#include "hphp/runtime/base/file/file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ class UserFile : public File {
 public:
   DECLARE_OBJECT_ALLOCATION(UserFile);
 
-  UserFile(VM::Class *cls, int options = 0, CVarRef context = uninit_null());
+  UserFile(Class *cls, int options = 0, CVarRef context = uninit_null());
   virtual ~UserFile();
 
   static StaticString s_class_name;
@@ -57,29 +57,29 @@ public:
   virtual bool lock(int operation, bool &wouldBlock);
 
 protected:
-  VM::Class *m_cls;
+  Class *m_cls;
   int m_options;
   Object m_obj;
 
-  Variant invoke(const VM::Func *func, CStrRef name, CArrRef args, bool &success);
-  Variant invoke(const VM::Func *func, CStrRef name, CArrRef args) {
+  Variant invoke(const Func *func, CStrRef name, CArrRef args, bool &success);
+  Variant invoke(const Func *func, CStrRef name, CArrRef args) {
     bool success;
     return invoke(func, name, args, success);
   }
 
-  const VM::Func* lookupMethod(const StringData* name);
+  const Func* lookupMethod(const StringData* name);
 
-  const VM::Func* m_StreamOpen;
-  const VM::Func* m_StreamClose;
-  const VM::Func* m_StreamRead;
-  const VM::Func* m_StreamWrite;
-  const VM::Func* m_StreamSeek;
-  const VM::Func* m_StreamTell;
-  const VM::Func* m_StreamEof;
-  const VM::Func* m_StreamFlush;
-  const VM::Func* m_StreamLock;
+  const Func* m_StreamOpen;
+  const Func* m_StreamClose;
+  const Func* m_StreamRead;
+  const Func* m_StreamWrite;
+  const Func* m_StreamSeek;
+  const Func* m_StreamTell;
+  const Func* m_StreamEof;
+  const Func* m_StreamFlush;
+  const Func* m_StreamLock;
 
-  const VM::Func* m_Call;
+  const Func* m_Call;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

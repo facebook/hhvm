@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_preg.h>
-#include <runtime/ext/ext_preg.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_string.h>
+#include "hphp/test/test_ext_preg.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -276,7 +276,7 @@ bool TestExtPreg::test_preg_replace() {
       f_preg_replace("/(<\\/?)(\\w+)([^>]*>)/e",
                      "'\\\\1'.strtoupper('\\\\2').'\\\\3'",
                      html_body);
-    } catch (NotSupportedException e) {
+    } catch (const NotSupportedException& e) {
       return Count(true);
     }
   }

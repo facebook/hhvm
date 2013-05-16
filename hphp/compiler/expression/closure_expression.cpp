@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/closure_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/statement/function_statement.h>
-#include <compiler/statement/static_statement.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/file_scope.h>
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
 
 using namespace HPHP;
 

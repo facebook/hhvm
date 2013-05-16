@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_bcmath.h>
-#include <runtime/ext/bcmath/bcmath.h>
+#include "hphp/runtime/ext/ext_bcmath.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(bcmath);

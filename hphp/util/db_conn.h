@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_CONN_H__
-#define __DB_CONN_H__
+#ifndef incl_HPHP_DB_CONN_H_
+#define incl_HPHP_DB_CONN_H_
 
-#include "db_dataset.h"
-#include "exception.h"
-#include "mutex.h"
-#include "async_job.h"
+#include "hphp/util/db_dataset.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/async_job.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ class DBConn {
   static unsigned int DefaultReadTimeout;
 
  public:
-  DBConn(int maxRetryOpenOnFail = 0, int maxRetryQueryOnFail = 1);
+  explicit DBConn(int maxRetryOpenOnFail = 0, int maxRetryQueryOnFail = 1);
   ~DBConn();
 
   /**
@@ -203,4 +203,4 @@ class DBConn {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_CONN_H__
+#endif // incl_HPHP_DB_CONN_H_

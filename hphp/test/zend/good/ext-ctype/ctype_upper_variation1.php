@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s)
+ * Description: Checks for uppercase character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "STRING",
        'STRING',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

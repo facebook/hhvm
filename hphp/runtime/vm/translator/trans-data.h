@@ -14,16 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _TRANS_DATA_H_
-#define _TRANS_DATA_H_
+#ifndef TRANS_DATA_H_
+#define TRANS_DATA_H_
 
-#include <util/base.h>
-#include <runtime/vm/translator/types.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/types.h"
 
 #include <vector>
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 // Interface for classes maintaining meta-data about translations
@@ -46,6 +45,6 @@ public:
   virtual const TransIDSet& getTransSuccs(TransID transId) const = 0;
 };
 
-} } }
+} }
 
 #endif

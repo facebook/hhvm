@@ -1,4 +1,4 @@
-#!/bin/env php
+#!/usr/bin/env php
 <?php
 /**
 * Run the test suites in various configurations.
@@ -57,15 +57,7 @@ function error($message) {
 }
 
 function hphp_home() {
-  static $ret;
-  if (!$ret) {
-    $top_level = system('git rev-parse --show-toplevel', $status);
-    if ($status === 0) {
-      return $ret = rtrim($top_level, '/');
-    }
-    error("Couldn't determine the root of your fbcode repository.\n");
-  }
-  return $ret;
+  return __DIR__.'/../..';
 }
 
 function idx($array, $key, $default = null) {
@@ -73,15 +65,23 @@ function idx($array, $key, $default = null) {
 }
 
 function idx_file($array, $key, $default = null) {
-  return is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+  $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+  if (!is_file($file)) {
+    error("$file doesn't exist");
+  }
+  return $file;
 }
 
 function bin_root() {
-  return idx($_ENV, 'FBMAKE_BIN_ROOT', hphp_home().'/_bin');
+  return idx($_ENV, 'FBMAKE_BIN_ROOT',
+    is_dir(hphp_home().'/_bin') ?
+      hphp_home().'/_bin' : # fbmake
+      hphp_home() # github
+  );
 }
 
 function verify_hhbc() {
-  return idx_file($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
+  return idx($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
 }
 
 function get_options($argv) {
@@ -122,7 +122,7 @@ function get_options($argv) {
  * We support some 'special' file names, that just know where the test
  * suites are, to avoid typing 'hphp/test/foo'.
  */
-function map_convenience_filename(string $file) {
+function map_convenience_filename($file) {
   if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
     error(
       "I'm really sorry to change this, but now the mode is ".
@@ -130,18 +130,20 @@ function map_convenience_filename(string $file) {
     );
   }
 
-  $mappage = Map {
-    'quick' => 'hphp/test/quick',
-    'slow'  => 'hphp/test/slow',
-  };
+  $mappage = array(
+    'quick'    => 'hphp/test/quick',
+    'slow'     => 'hphp/test/slow',
+    'zend'     => 'hphp/test/zend/good',
+    'zend_bad' => 'hphp/test/zend/bad',
+  );
 
   $m = null;
   if (!preg_match('/([^\/]*)(.*)/', $file, $m) ||
-      !$mappage->containsKey($m[1])) {
+      !isset($mappage[$m[1]])) {
     error("Not valid file or directory: '$file'");
   }
   if (!isset($m[2])) $m[2] = '';
-  return hphp_home().'/'.$mappage->get($m[1]).$m[2];
+  return hphp_home().'/'.$mappage[$m[1]].$m[2];
 }
 
 function find_tests($files) {
@@ -177,7 +179,8 @@ function find_config($tests, $name) {
       implode(' ', $configs).""
     );
   }
-  return array_values($configs)[0];
+  $ret = array_values($configs);
+  return $ret[0];
 }
 
 function find_config_for_dir($dir, $name) {
@@ -197,24 +200,24 @@ function is_server($options) {
 
 function file_arg($options) {
   if (is_server($options)) {
-    return '-m server -v Server.SourceRoot=%s -p %s';
+    return '-m server -vServer.SourceRoot=%s -p %s';
   } else {
     return '--file %3\$s';
   }
 }
 
 function mode_arg($options) {
-  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
-  $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
+  $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  $jit_args = "$repo_args -vEval.Jit=1 -vEval.JitEnableRenameFunction=1";
   $mode = idx($options, 'mode');
   switch ($mode) {
     case '':
     case 'jit':
-      return $jit_args;
+      return "$jit_args -vEval.JitUseIR=0 -vEval.HHIRDisableTx64=0";
     case 'hhir':
-      return "$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true";
+      return "$jit_args -vEval.JitUseIR=1 -vEval.HHIRDisableTx64=1";
     case 'interp':
-      return "$repo_args -v Eval.Jit=false";
+      return "$repo_args -vEval.Jit=0";
     default:
       error("-m must be one of hhir | jit | interp. Got: '$mode'");
   }
@@ -227,7 +230,7 @@ function command_arg($options, $tests) {
     find_config($tests, 'config.hdf'),
     file_arg($options),
     mode_arg($options),
-    '-v Eval.EnableArgsInBacktraces=true',
+    '-vEval.EnableArgsInBacktraces=true',
   );
 }
 
@@ -254,6 +257,25 @@ function verify_args($options) {
   return $args;
 }
 
+function run($cmd, $tests) {
+  $descriptorspec = array(
+   0 => array("pipe", "r"),
+   1 => array("pipe", "w"),
+   2 => array("pipe", "w"),
+  );
+  $process = proc_open($cmd, $descriptorspec, $pipes);
+  if (!is_resource($process)) {
+    error("Can't run $cmd");
+  }
+  fwrite($pipes[0], implode(' ', $tests));
+  fclose($pipes[0]);
+  while(!feof($pipes[1])) {
+    echo fgets($pipes[1], 1024);
+  }
+  fclose($pipes[1]);
+  return proc_close($process);
+}
+
 list($options, $files) = get_options($argv);
 if (isset($options['help'])) {
   error(help());
@@ -264,13 +286,14 @@ $verify = array(
   hphp_home().'/hphp/test/verify',
   '--command="'.implode(' ', command_arg($options, $tests)).'"',
   implode(' ', verify_args($options)),
-  '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
-  implode(' ', $tests),
 );
+if (isset($options['repo'])) {
+  $verify[] = '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"';
+}
 
-passthru(implode(' ', $verify), $return_status);
+$return_value = run(implode(' ', $verify), $tests);
 
-if ($return_status) {
+if ($return_value) {
   $command = implode(' ', command_arg($options, $tests));
   $filename = 'FILENAME';
   $extra_help = ' change FILENAME to the test you want';
@@ -281,11 +304,14 @@ if ($return_status) {
   $command = str_replace('%3\\$s', $filename, $command);
 
   if (isset($options['repo'])) {
-    $command .= " -v Repo.Authoritative=true ";
+    $command .= " -vRepo.Authoritative=true ";
     $command = str_replace(verify_hhbc(), "$filename.repo/hhvm.hhbc", $command);
+    $command = implode(' ', hphp_arg($options, $tests)).
+      " -thhbc -l0 -k1 -o $filename.repo $filename\n".
+      $command;
   }
 
   print "\nTo run these by hand$extra_help:\n".
         "$command\n";
 }
-exit($return_status);
+exit($return_value);

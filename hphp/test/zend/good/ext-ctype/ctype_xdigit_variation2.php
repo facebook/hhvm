@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit
+ * Description: Checks for character(s) representing a hexadecimal digit 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -11,7 +11,7 @@
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C");
+$orig = setlocale(LC_CTYPE, "C"); 
 
 for($c = 1; $c < 256; $c++) {
 	if (ctype_xdigit($c)) {
@@ -19,6 +19,6 @@ for($c = 1; $c < 256; $c++) {
 	}
 }
 
-setlocale(LC_CTYPE, $orig);
+setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===

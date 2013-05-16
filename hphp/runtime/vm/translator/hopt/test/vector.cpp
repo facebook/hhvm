@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "folly/Format.h"
 
-#include "util/base.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
 #define EXPECT_TEQ(exp, act)                                            \
   EXPECT_EQ(exp, act)                                                   \
@@ -95,4 +95,4 @@ TEST(VectorEffects, UnknownBase) {
   EXPECT_TRUE(ve.valTypeChanged);
 }
 
-} } }
+} }

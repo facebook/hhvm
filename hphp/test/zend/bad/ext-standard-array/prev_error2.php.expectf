@@ -1,0 +1,4 @@
+-- Passing an indirect temporary variable --
+
+Strict Standards: Only variables should be passed by reference in hphp/test/zend/bad/ext-standard-array/prev_error2.phpt on line %d
+int(1)

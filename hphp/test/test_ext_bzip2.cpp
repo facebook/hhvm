@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_bzip2.h>
-#include <runtime/ext/ext_bzip2.h>
+#include "hphp/test/test_ext_bzip2.h"
+#include "hphp/runtime/ext/ext_bzip2.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Bzip2);
 ///////////////////////////////////////////////////////////////////////////////

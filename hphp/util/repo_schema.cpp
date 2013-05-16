@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp_repo_schema.h" // generated header
+#include <hphp_repo_schema.h> // generated header
 
 namespace HPHP {
 

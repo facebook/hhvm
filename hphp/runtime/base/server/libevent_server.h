@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_SERVER_LIB_EVENT_SERVER_H__
-#define __HTTP_SERVER_LIB_EVENT_SERVER_H__
+#ifndef incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_
+#define incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_
 
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/libevent_transport.h>
-#include <runtime/base/timeout_thread.h>
-#include <runtime/base/server/job_queue_vm_stack.h>
-#include <util/job_queue.h>
-#include <util/process.h>
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/libevent_transport.h"
+#include "hphp/runtime/base/timeout_thread.h"
+#include "hphp/runtime/base/server/job_queue_vm_stack.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,15 @@ public:
                  int timeoutSeconds);
   ~LibEventServer();
 
-  // implemting Server
+  /*
+   * Function to enable reducing the thread count during initial
+   * warmup requests.
+   *
+   * See RuntimeOption::ServerWarmupThrottleRequestCount.
+   */
+  void enableWarmupThrottle(int threadSlack, int reqCount);
+
+  // implementing Server
   virtual void start();
   virtual void waitForEnd();
   virtual void stop();
@@ -175,6 +183,18 @@ protected:
   virtual int getAcceptSocket();
   virtual int getAcceptSocketSSL();
 
+private:
+  // Number of threads to start when warmup request counter passes the
+  // throttled request threshold.
+  friend class LibEventWorker;
+  void bumpReqCount();
+
+private:
+  std::atomic<int> m_warmup_thread_slack;
+  std::atomic<int32_t> m_req_number;
+  int const m_warmup_req_threshold;
+
+protected:
   int m_accept_sock;
   int m_accept_sock_ssl;
   event_base *m_eventBase;
@@ -205,4 +225,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_SERVER_LIB_EVENT_SERVER_H__
+#endif // incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_

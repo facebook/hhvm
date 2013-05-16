@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "text_color.h"
+#include "hphp/util/text_color.h"
 #include "util.h"
 
 namespace HPHP {

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __UNARY_OP_EXPRESSION_H__
-#define __UNARY_OP_EXPRESSION_H__
+#ifndef incl_HPHP_UNARY_OP_EXPRESSION_H_
+#define incl_HPHP_UNARY_OP_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,4 +76,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __UNARY_OP_EXPRESSION_H__
+#endif // incl_HPHP_UNARY_OP_EXPRESSION_H_

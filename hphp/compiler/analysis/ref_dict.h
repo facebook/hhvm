@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __REF_DICT_H__
-#define __REF_DICT_H__
+#ifndef incl_HPHP_REF_DICT_H_
+#define incl_HPHP_REF_DICT_H_
 
-#include <compiler/analysis/dictionary.h>
+#include "hphp/compiler/analysis/dictionary.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class RefDict : public Dictionary {
 public:
-  RefDict(AliasManager &am) : Dictionary(am), first_pass(true) {}
+  explicit RefDict(AliasManager &am) : Dictionary(am), first_pass(true) {}
 
   /* Building the dictionary */
   void build(MethodStatementPtr m);
@@ -52,7 +52,7 @@ private:
 
 class RefDictWalker : public ControlFlowGraphWalker {
 public:
-  RefDictWalker(ControlFlowGraph *g) :
+  explicit RefDictWalker(ControlFlowGraph *g) :
     ControlFlowGraphWalker(g), first_pass(true) {}
   void walk() { ControlFlowGraphWalker::walk(*this); }
   int after(ConstructRawPtr cp);
@@ -63,4 +63,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __REF_DICT_H__
+#endif // incl_HPHP_REF_DICT_H_

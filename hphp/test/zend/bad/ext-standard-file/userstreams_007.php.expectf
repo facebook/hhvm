@@ -1,0 +1,17 @@
+bool(true)
+metadata: test://testdir/touch, 1
+
+metadata: test://testdir/touch, 1
+1,1
+metadata: test://testdir/touch, 1
+1,2
+metadata: test://testdir/chown, 2
+test
+metadata: test://testdir/chown, 3
+42
+metadata: test://testdir/chgrp, 4
+test
+metadata: test://testdir/chgrp, 5
+42
+metadata: test://testdir/chmod, 6
+493

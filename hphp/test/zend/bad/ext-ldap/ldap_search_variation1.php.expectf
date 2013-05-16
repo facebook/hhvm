@@ -1,0 +1,22 @@
+resource(%d) of type (ldap result)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(4) {
+    ["dc"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(9) "my-domain"
+    }
+    [0]=>
+    string(2) "dc"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(19) "dc=my-domain,dc=com"
+  }
+}
+===DONE===

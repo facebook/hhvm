@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_CRC32_H__
-#define __EXT_HASH_CRC32_H__
+#ifndef incl_HPHP_EXT_HASH_CRC32_H_
+#define incl_HPHP_EXT_HASH_CRC32_H_
 
-#include <runtime/ext/hash/hash_engine.h>
+#include "hphp/runtime/ext/hash/hash_engine.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,4 +39,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_CRC32_H__
+#endif // incl_HPHP_EXT_HASH_CRC32_H_

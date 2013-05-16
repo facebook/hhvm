@@ -1,0 +1,10 @@
+array(3) {
+  [0]=>
+  object(NumberFormatter)#1 (0) {
+  }
+  [1]=>
+  float(1.1)
+  [2]=>
+  string(7) "SFD1.00"
+}
+== didn't crash ==

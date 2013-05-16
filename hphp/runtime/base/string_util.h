@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_STRING_UTIL_H__
-#define __HPHP_STRING_UTIL_H__
+#ifndef incl_HPHP_STRING_UTIL_H_
+#define incl_HPHP_STRING_UTIL_H_
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,4 +134,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_UTIL_H__
+#endif // incl_HPHP_STRING_UTIL_H_

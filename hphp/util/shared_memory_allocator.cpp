@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "shared_memory_allocator.h"
-#include "exception.h"
+#include "hphp/util/shared_memory_allocator.h"
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

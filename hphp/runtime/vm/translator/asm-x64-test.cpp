@@ -16,10 +16,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "util/asm-x64.h"
+#include "hphp/util/asm-x64.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -205,7 +204,7 @@ void testEmitMethods() {
   X64Assembler e;
   e.init(10 << 20);
 
-  using namespace HPHP::VM::Transl::reg;
+  using namespace HPHP::Transl::reg;
 
   int n = sizeof(instr_list) / sizeof(instr_list[0]);
   for (int i = 0; i < n; ++i) {
@@ -570,7 +569,6 @@ void testEmitMethods() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }
 }
 

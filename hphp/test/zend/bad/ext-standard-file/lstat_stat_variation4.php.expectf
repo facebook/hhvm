@@ -1,0 +1,7 @@
+*** Testing stat() for file after using touch() on the file ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

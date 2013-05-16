@@ -1,0 +1,19 @@
+*** Testing sscanf() : basic functionality - using octal format ***
+
+-- Try sccanf() WITHOUT optional args --
+int(83)
+int(-83)
+int(83)
+int(10)
+NULL
+NULL
+
+-- Try sccanf() WITH optional args --
+int(4)
+int(83)
+int(-83)
+int(83)
+int(10)
+NULL
+NULL
+===DONE===

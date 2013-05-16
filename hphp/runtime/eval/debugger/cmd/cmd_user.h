@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_USER_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_USER_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_USER_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_USER_H_
 
-#include <runtime/eval/debugger/cmd/cmd_extended.h>
-#include <util/lock.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extended.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ public:
   CmdUser() {
     m_type = KindOfUser;
   }
-  CmdUser(Object cmd) : m_cmd(cmd) {
+  explicit CmdUser(Object cmd) : m_cmd(cmd) {
     m_type = KindOfUser;
   }
 
@@ -43,13 +43,14 @@ public:
   virtual bool help(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   virtual const ExtendedCommandMap &getCommandMap();
   virtual void invokeList(DebuggerClient *client, const std::string &cls);
   virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+
+protected:
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   static Mutex s_mutex;
@@ -61,4 +62,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_USER_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_USER_H_

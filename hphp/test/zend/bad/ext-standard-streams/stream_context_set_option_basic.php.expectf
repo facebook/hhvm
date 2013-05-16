@@ -1,0 +1,13 @@
+bool(true)
+bool(true)
+array(1) {
+  ["http"]=>
+  array(3) {
+    ["method"]=>
+    string(4) "POST"
+    ["protocol_version"]=>
+    float(1.1)
+    ["user_agent"]=>
+    string(10) "PHPT Agent"
+  }
+}

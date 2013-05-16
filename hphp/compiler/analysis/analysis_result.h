@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ANALYSIS_RESULT_H__
-#define __ANALYSIS_RESULT_H__
+#ifndef incl_HPHP_ANALYSIS_RESULT_H_
+#define incl_HPHP_ANALYSIS_RESULT_H_
 
-#include <compiler/code_generator.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/option.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/function_container.h>
-#include <compiler/package.h>
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/package.h"
 
-#include <util/string_bag.h>
-#include <util/thread_local.h>
+#include "hphp/util/string_bag.h"
+#include "hphp/util/thread_local.h"
 
 #include <boost/graph/adjacency_list.hpp>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,12 +91,12 @@ public:
 
   class Locker {
   public:
-    Locker(const AnalysisResult *ar) :
+    explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
     }
-    Locker(AnalysisResultConstPtr ar) :
+    explicit Locker(AnalysisResultConstPtr ar) :
         m_ar(const_cast<AnalysisResult*>(ar.get())),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
@@ -399,7 +399,7 @@ private:
 
 class RescheduleException : public Exception {
 public:
-  RescheduleException(BlockScopeRawPtr scope) :
+  explicit RescheduleException(BlockScopeRawPtr scope) :
     Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
@@ -413,7 +413,7 @@ private:
 
 class SetCurrentScope {
 public:
-  SetCurrentScope(BlockScopeRawPtr scope) {
+  explicit SetCurrentScope(BlockScopeRawPtr scope) {
     assert(!((*AnalysisResult::s_currentScopeThreadLocal).get()));
     *AnalysisResult::s_currentScopeThreadLocal = scope;
     scope->setInVisitScopes(true);
@@ -499,9 +499,9 @@ private:
     }
   }
 #else
-  BaseTryLock(BlockScopeRawPtr scopeToLock,
-              bool lockCondition = true,
-              bool profile = true)
+  explicit BaseTryLock(BlockScopeRawPtr scopeToLock,
+                       bool lockCondition = true,
+                       bool profile = true)
     : m_profiler(profile),
       m_mutex(scopeToLock->getInferTypesMutex()),
       m_acquired(false) {
@@ -536,8 +536,8 @@ public:
           bool profile = true) :
     BaseTryLock(scopeToLock, fromFunction, fromLine, true, profile) {}
 #else
-  TryLock(BlockScopeRawPtr scopeToLock,
-          bool profile = true) :
+  explicit TryLock(BlockScopeRawPtr scopeToLock,
+                   bool profile = true) :
     BaseTryLock(scopeToLock, true, profile) {}
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 };
@@ -595,4 +595,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __ANALYSIS_RESULT_H__
+#endif // incl_HPHP_ANALYSIS_RESULT_H_

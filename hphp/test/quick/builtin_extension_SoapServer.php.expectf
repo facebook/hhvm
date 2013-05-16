@@ -1,0 +1,51 @@
+SoapServer
+HipHop Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+object(SoapServer)#1 (0) {
+}
+string(22) "O:10:"SoapServer":0:{}"
+object(SoapServer)#2 (0) {
+}
+array(9) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(8) "setclass"
+  [2]=>
+  string(9) "setobject"
+  [3]=>
+  string(11) "addfunction"
+  [4]=>
+  string(12) "getfunctions"
+  [5]=>
+  string(6) "handle"
+  [6]=>
+  string(14) "setpersistence"
+  [7]=>
+  string(5) "fault"
+  [8]=>
+  string(13) "addsoapheader"
+}
+================
+A_SoapServer
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_SoapServer)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_SoapServer":1:{s:4:"___x";N;}"
+object(A_SoapServer)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

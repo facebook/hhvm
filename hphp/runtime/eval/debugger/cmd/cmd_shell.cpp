@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_shell.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_shell.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdShell::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -47,8 +49,8 @@ bool CmdShell::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdShell::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdShell::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }
@@ -69,7 +71,7 @@ bool CmdShell::onServer(DebuggerProxy *proxy) {
   argv[m_args.size()] = nullptr;
   Process::Exec(argv[0], argv, nullptr, m_out, &m_out, true);
   free(argv);
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

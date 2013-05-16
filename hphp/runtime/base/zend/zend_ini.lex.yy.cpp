@@ -683,9 +683,9 @@ char *yytext;
 
 #include <errno.h>
 #include <runtime/base/zend/zend_ini.tab.hpp>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/ini_setting.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/util/logger.h"
 
 using namespace HPHP;
 

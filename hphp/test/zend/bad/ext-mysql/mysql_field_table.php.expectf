@@ -1,0 +1,7 @@
+HipHop Warning: %a
+HipHop Warning: %a
+%unicode|string%(4) "test"
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+done!

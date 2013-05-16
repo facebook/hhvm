@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_icu_ucnv.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_icu_ucnv.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ static StaticString s_fromUCallback("fromUCallback");
 
 #define THROW_UFAILURE(fname, uerr, ierr) throwFailure(uerr, #fname, ierr);
 
-c_UConverter::c_UConverter(VM::Class* cb)
+c_UConverter::c_UConverter(Class* cb)
     : ExtObjectData(cb), m_src(NULL), m_dest(NULL) {
   m_error.code = U_ZERO_ERROR;
   m_error.custom_error_message = "";
@@ -170,10 +170,10 @@ void c_UConverter::ucnvToUCallback(c_UConverter *objval,
                                    UConverterCallbackReason reason,
                                    UErrorCode *pErrorCode) {
   String source(args->source, args->sourceLimit - args->source, CopyString);
-  VRefParam errRef((long)*pErrorCode);
-  Variant ret = objval->o_invoke(s_toUCallback, CREATE_VECTOR4(
-    reason, source, String(codeUnits, length, CopyString), ref(errRef)
-  ), -1);
+  Variant errRef((int64_t)*pErrorCode);
+  Variant ret = objval->o_invoke_few_args(
+    s_toUCallback, 4,
+    reason, source, String(codeUnits, length, CopyString), strongBind(errRef));
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
@@ -229,10 +229,11 @@ void c_UConverter::ucnvFromUCallback(c_UConverter *objval,
     U16_NEXT(codeUnits, i, length, c);
     source.append((int64_t)c);
   }
-  VRefParam errRef((int64_t)*pErrorCode);
-  Variant ret = objval->o_invoke(s_fromUCallback, CREATE_VECTOR4(
-    reason, source, (int64_t)codePoint, ref(errRef)
-  ), -1);
+  Variant errRef((int64_t)*pErrorCode);
+  Variant ret =
+    objval->o_invoke_few_args(
+      s_fromUCallback, 4,
+      reason, source, (int64_t)codePoint, strongBind(errRef));
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
@@ -470,9 +471,8 @@ String c_UConverter::doConvert(CStrRef str,
 static const StaticString s_from_subst("from_subst");
 static const StaticString s_to_subst("to_subst");
 
-Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
-                                   CStrRef toEncoding, CStrRef fromEncoding,
-                                   CArrRef options) {
+Variant c_UConverter::ti_transcode(CStrRef str, CStrRef toEncoding,
+                                   CStrRef fromEncoding, CArrRef options) {
   UConverter *fromCnv = NULL, *toCnv = NULL;
   if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
     return uninit_null();
@@ -509,7 +509,7 @@ String c_UConverter::t_geterrormessage() {
 /* Ennumerators and lookups */
 
 #define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
-String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
+String c_UConverter::ti_reasontext(int64_t reason) {
   switch (reason) {
     UCNV_REASON_CASE(UNASSIGNED)
     UCNV_REASON_CASE(ILLEGAL)
@@ -523,7 +523,7 @@ String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
   }
 }
 
-Array c_UConverter::ti_getavailable(const char* cls ) {
+Array c_UConverter::ti_getavailable() {
   int32_t i, count = ucnv_countAvailable();
   Array ret = Array::Create();
 
@@ -534,7 +534,7 @@ Array c_UConverter::ti_getavailable(const char* cls ) {
   return ret;
 }
 
-Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
+Array c_UConverter::ti_getaliases(CStrRef encoding) {
   UErrorCode error = U_ZERO_ERROR;
   int16_t i, count = ucnv_countAliases(encoding.data(), &error);
 
@@ -546,7 +546,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
   Array ret = Array::Create();
   for(i = 0; i < count; ++i) {
     error = U_ZERO_ERROR;
-    const char *alias = ucnv_getAlias(encoding, i, &error);
+    const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
       return uninit_null();
@@ -556,7 +556,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
   return ret;
 }
 
-Array c_UConverter::ti_getstandards(const char* cls ) {
+Array c_UConverter::ti_getstandards() {
   int16_t i, count = ucnv_countStandards();
   Array ret = Array::Create();
 
@@ -572,9 +572,7 @@ Array c_UConverter::ti_getstandards(const char* cls ) {
   return ret;
 }
 
-String c_UConverter::ti_getstandardname(const char* cls,
-                                        CStrRef name,
-                                        CStrRef standard) {
+String c_UConverter::ti_getstandardname(CStrRef name, CStrRef standard) {
   UErrorCode error = U_ZERO_ERROR;
   const char *standard_name = ucnv_getStandardName(name.data(),
                                                    standard.data(),
@@ -588,8 +586,8 @@ String c_UConverter::ti_getstandardname(const char* cls,
   return String(standard_name, CopyString);
 }
 
-String c_UConverter::ti_getmimename(const char* cls, CStrRef name) {
-  return ti_getstandardname(cls, name, "MIME");
+String c_UConverter::ti_getmimename(CStrRef name) {
+  return ti_getstandardname(name, "MIME");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

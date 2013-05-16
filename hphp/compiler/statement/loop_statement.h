@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LOOP_STATEMENT_H__
-#define __LOOP_STATEMENT_H__
+#ifndef incl_HPHP_LOOP_STATEMENT_H_
+#define incl_HPHP_LOOP_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(LoopStatement);
 
 class LoopStatement : public Statement {
 protected:
-  LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+  explicit LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 public:
   void clearStringBufs();
   void addStringBuf(const std::string &name);
@@ -40,4 +40,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __LOOP_STATEMENT_H__
+#endif // incl_HPHP_LOOP_STATEMENT_H_

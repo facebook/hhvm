@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/new_object_expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/option.h>
-#include <compiler/analysis/variable_table.h>
+#include "hphp/compiler/expression/new_object_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/variable_table.h"
 
 using namespace HPHP;
 
@@ -32,7 +32,7 @@ NewObjectExpression::NewObjectExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionListPtr params)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(NewObjectExpression),
-                 variable, "", params, variable),
+                 variable, "", false, params, variable),
     m_dynamic(false) {
   /*
     StaticClassName takes care of parent & self properly, so

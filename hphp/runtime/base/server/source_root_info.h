@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SOURCE_ROOT_INFO_H__
-#define __HPHP_SOURCE_ROOT_INFO_H__
+#ifndef incl_HPHP_SOURCE_ROOT_INFO_H_
+#define incl_HPHP_SOURCE_ROOT_INFO_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/eval/debugger/debugger_base.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/eval/debugger/debugger_base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,4 +81,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SOURCE_ROOT_INFO_H__
+#endif // incl_HPHP_SOURCE_ROOT_INFO_H_

@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_REQUEST_ARENA_H_
-#define incl_VM_REQUEST_ARENA_H_
+#ifndef incl_HPHP_VM_REQUEST_ARENA_H_
+#define incl_HPHP_VM_REQUEST_ARENA_H_
 
 #include <boost/aligned_storage.hpp>
 
-#include "util/arena.h"
+#include "hphp/util/arena.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,6 +53,6 @@ inline VarEnvArena& varenv_arena() {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SATELLITE_SERVER_H__
-#define __HPHP_SATELLITE_SERVER_H__
+#ifndef incl_HPHP_SATELLITE_SERVER_H_
+#define incl_HPHP_SATELLITE_SERVER_H_
 
-#include <util/hdf.h>
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,4 +104,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SATELLITE_SERVER_H__
+#endif // incl_HPHP_SATELLITE_SERVER_H_

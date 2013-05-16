@@ -15,11 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +34,7 @@ namespace {
   StaticString s_continuation("Continuation");
 }
 
-c_ContinuationWaitHandle::c_ContinuationWaitHandle(VM::Class* cb)
+c_ContinuationWaitHandle::c_ContinuationWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
       m_depth(0) {
 }
@@ -43,18 +44,51 @@ c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
 
 void c_ContinuationWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use ContinuationWaitHandle::start() instead of constructor"));
+        "Use $continuation->getWaitHandle() instead of constructor"));
   throw e;
 }
 
-Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation) {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(!continuation.instanceof(SystemLib::s_ContinuationClass))) {
+void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected continuation to be an instance of Continuation"));
+      "Unable to set ContinuationWaitHandle::onStart: on_start_cb not a closure"));
     throw e;
   }
+  AsioSession::Get()->setOnContinuationCreateCallback(callback.getObjectDataOrNull());
+}
 
+void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onYield: on_yield_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationYieldCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onSuccess: on_success_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationSuccessCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::ti_setonfailcallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onFail: on_fail_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationFailCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
+  assert(continuation);
+  assert(continuation->m_waitHandle.isNull());
+
+  AsioSession* session = AsioSession::Get();
   uint16_t depth = session->getCurrentWaitHandleDepth();
   if (UNLIKELY(depth >= MAX_DEPTH)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -62,28 +96,21 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation)
     throw e;
   }
 
-  c_Continuation* cont = static_cast<c_Continuation*>(continuation.get());
-  if (!cont->m_waitHandle.isNull()) {
-    if (session->isInContext()) {
-      // throws if cross-context cycle found
-      cont->m_waitHandle->enterContext(session->getCurrentContextIdx());
-    }
-    return cont->m_waitHandle;
-  }
-
-  if (UNLIKELY(cont->m_index != -1)) {
-    assert(cont->m_running);
+  if (UNLIKELY(continuation->m_index != -1)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Encountered an attempt to start currently running continuation"));
+      continuation->m_running
+      ? "Encountered an attempt to start currently running continuation"
+      : "Encountered an attempt to start tainted continuation"));
     throw e;
   }
 
-  p_ContinuationWaitHandle wh = NEWOBJ(c_ContinuationWaitHandle)();
-  wh->start(cont, depth + 1);
-  if (UNLIKELY(session->hasOnStartedCallback())) {
-    session->onStarted(wh);
+  continuation->m_waitHandle = NEWOBJ(c_ContinuationWaitHandle)();
+  continuation->m_waitHandle->initialize(continuation, depth + 1);
+
+  // needs to be called after continuation->m_waitHandle is set
+  if (UNLIKELY(session->hasOnContinuationCreateCallback())) {
+    session->onContinuationCreate(continuation->m_waitHandle.get());
   }
-  return wh;
 }
 
 Object c_ContinuationWaitHandle::t_getprivdata() {
@@ -94,12 +121,11 @@ void c_ContinuationWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
-void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint16_t depth) {
+void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t depth) {
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
   m_depth = depth;
-  continuation->m_waitHandle = this;
 
   setState(STATE_SCHEDULED);
   if (isInContext()) {
@@ -150,6 +176,12 @@ void c_ContinuationWaitHandle::run() {
               "Expected yield argument to be an instance of WaitHandle"));
           throw e;
         }
+
+        AsioSession* session = AsioSession::Get();
+        if (UNLIKELY(session->hasOnContinuationYieldCallback())) {
+          session->onContinuationYield(this, child);
+        }
+
         m_child = child;
       }
     } while (m_child.isNull() || m_child->isFinished());
@@ -157,7 +189,7 @@ void c_ContinuationWaitHandle::run() {
     // we are blocked on m_child so it must be WaitableWaitHandle
     assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
     blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
-  } catch (Object exception) {
+  } catch (const Object& exception) {
     // process exception thrown by generator or blockOn cycle detection
     markAsFailed(exception);
   }
@@ -171,6 +203,11 @@ void c_ContinuationWaitHandle::onUnblocked() {
 }
 
 void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnContinuationSuccessCallback())) {
+    session->onContinuationSuccess(this, tvAsCVarRef(result));
+  }
+
   setResult(result);
 
   // free m_continuation / m_child later, result may be stored there
@@ -179,7 +216,11 @@ void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
 }
 
 void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
-  AsioSession::Get()->onFailed(exception);
+  AsioSession* session = AsioSession::Get();
+  session->onFailed(exception);
+  if (UNLIKELY(session->hasOnContinuationFailCallback())) {
+    session->onContinuationFail(this, exception);
+  }
   setException(exception.get());
 
   m_continuation = nullptr;
@@ -197,10 +238,16 @@ String c_ContinuationWaitHandle::getName() {
     case STATE_BLOCKED:
     case STATE_SCHEDULED:
     case STATE_RUNNING:
-      return m_continuation->t_getorigfuncname();
+      if (m_continuation->t_getcalledclass().empty()) {
+        return m_continuation->t_getorigfuncname();
+      } else {
+        return concat3(m_continuation->t_getcalledclass(),
+                       "::",
+                       m_continuation->t_getorigfuncname());
+      }
 
     default:
-      throw new FatalErrorException(
+      throw FatalErrorException(
           "Invariant violation: encountered unexpected state");
   }
 }

@@ -13,17 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/translator/runtime-type.h"
 
 #include <assert.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include "runtime/vm/bytecode.h"
-#include "runtime/base/types.h"
-#include "runtime-type.h"
-#include "translator.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/translator.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static inline DataType
@@ -374,4 +373,4 @@ std::string Location::pretty() const {
   return std::string(buf);
 }
 
-} } }
+} }

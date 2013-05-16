@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_HPHP_SYSTEM_H__
-#define __CPP_BASE_HPHP_SYSTEM_H__
+#ifndef incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
+#define incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -23,26 +23,26 @@
  * This is the file that's included at top of a code generated system file.
  */
 
-#include <runtime/base/macros.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <util/exception.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/string_offset.h>
-#include <runtime/base/util/smart_object.h>
-#include <runtime/base/list_assignment.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/string_util.h>
-#include <util/util.h>
-#include <runtime/base/file/plain_file.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/simple_counter.h>
-#include <util/shm_counter.h>
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/string_offset.h"
+#include "hphp/runtime/base/util/smart_object.h"
+#include "hphp/runtime/base/list_assignment.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/util/shm_counter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,4 +63,4 @@ const char* getHphpCompilerId();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __CPP_BASE_HPHP_SYSTEM_H__
+#endif // incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_

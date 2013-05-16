@@ -15,25 +15,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_fb.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_mysql.h>
-#include <util/db_conn.h>
-#include <util/logger.h>
-#include <runtime/base/stat_cache.h>
-#include <netinet/in.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/intercept.h>
-#include <runtime/vm/backup_gc.h>
-#include <unicode/uchar.h>
-#include <unicode/utf8.h>
-#include <runtime/eval/runtime/file_repository.h>
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/stat_cache.h"
+#include "netinet/in.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/vm/backup_gc.h"
+#include "unicode/uchar.h"
+#include "unicode/utf8.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
 
-#include <util/parser/parser.h>
+#include "hphp/util/parser/parser.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(fb);
@@ -1010,9 +1010,15 @@ Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString
+  s_affected("affected"),
+  s_result("result"),
+  s_error("error"),
+  s_errno("errno");
+
 static void output_dataset(Array &ret, int affected, DBDataSet &ds,
                            const DBConn::ErrorInfoMap &errors) {
-  ret.set("affected", affected);
+  ret.set(s_affected, affected);
 
   Array rows;
   MYSQL_FIELD *fields = ds.getFields();
@@ -1026,7 +1032,7 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
     }
     rows.append(row);
   }
-  ret.set("result", rows);
+  ret.set(s_result, rows);
 
   if (!errors.empty()) {
     Array error, codes;
@@ -1035,18 +1041,22 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
       error.set(iter->first, String(iter->second.msg));
       codes.set(iter->first, iter->second.code);
     }
-    ret.set("error", error);
-    ret.set("errno", codes);
+    ret.set(s_error, error);
+    ret.set(s_errno, codes);
   }
 }
 
-static const StaticString s_session_variable("session_variable");
-static const StaticString s_ip("ip");
-static const StaticString s_db("db");
-static const StaticString s_port("port");
-static const StaticString s_username("username");
-static const StaticString s_password("password");
-static const StaticString s_sql("sql");
+static const StaticString
+  s_session_variable("session_variable"),
+  s_ip("ip"),
+  s_db("db"),
+  s_port("port"),
+  s_username("username"),
+  s_password("password"),
+  s_sql("sql"),
+  s_host("host"),
+  s_auth("auth"),
+  s_timeout("timeout");
 
 void f_fb_load_local_databases(CArrRef servers) {
   DBConn::ClearLocalDatabases();
@@ -1142,8 +1152,6 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   return ret;
 }
 
-static const StaticString s_error("error");
-
 Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
                           bool retry_query_on_fail /* = true */,
                           int connect_timeout /* = -1 */,
@@ -1156,7 +1164,7 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
 
   Array ret;
   // parameter checking
-  if (!sql || !*sql) {
+  if (sql.empty()) {
     static const StaticString s_errstr("empty SQL");
     ret.set(s_error, s_errstr);
     return ret;
@@ -1416,10 +1424,10 @@ Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
                                    CVarRef data, VRefParam done) {
-  String host = data["host"].toString();
-  int port = data["port"].toInt32();
-  String auth = data["auth"].toString();
-  int timeout = data["timeout"].toInt32();
+  String host = data[s_host].toString();
+  int port = data[s_port].toInt32();
+  String auth = data[s_auth].toString();
+  int timeout = data[s_timeout].toInt32();
 
   if (obj.isNull()) {
     return f_call_user_func_array_rpc(host, port, auth, timeout, name, params);
@@ -1447,7 +1455,8 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   }
 
   if (function_exists(new_func_name)) {
-    if (new_func_name.data()[0] != '1') {
+    if (new_func_name.data()[0] !=
+        ParserBase::CharCreateFunction) { // create_function
       raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
                     orig_func_name.data(), new_func_name.data(),
                     new_func_name.data());
@@ -1524,7 +1533,7 @@ Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
 
 Variant f_fb_get_code_coverage(bool flush) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.coverage) {
+  if (ti->m_reqInjectionData.getCoverage()) {
     Array ret = ti->m_coverage->Report();
     if (flush) {
       ti->m_coverage->Reset();
@@ -1537,7 +1546,7 @@ Variant f_fb_get_code_coverage(bool flush) {
 void f_fb_enable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_coverage->Reset();
-  ti->m_reqInjectionData.coverage = true;
+  ti->m_reqInjectionData.setCoverage(true);;
   if (g_vmContext->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
@@ -1547,7 +1556,7 @@ void f_fb_enable_code_coverage() {
 
 Variant f_fb_disable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_reqInjectionData.coverage = false;
+  ti->m_reqInjectionData.setCoverage(false);
   Array ret = ti->m_coverage->Report();
   ti->m_coverage->Reset();
   return ret;
@@ -1626,12 +1635,12 @@ String f_fb_lazy_realpath(CStrRef filename) {
 }
 
 String f_fb_gc_collect_cycles() {
-  std::string s = VM::gc_collect_cycles();
+  std::string s = gc_collect_cycles();
   return String(s);
 }
 
 void f_fb_gc_detect_cycles(CStrRef filename) {
-  VM::gc_detect_cycles(std::string(filename.c_str()));
+  gc_detect_cycles(std::string(filename.c_str()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

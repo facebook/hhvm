@@ -1,0 +1,4 @@
+Simple testcase for get_extension_funcs() function
+string(5) "array"
+bool(true)
+===DONE===

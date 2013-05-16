@@ -1,0 +1,16 @@
+*** Testing array_flip() : different invalid values in 'input' array argument ***
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+array(0) {
+}
+Done

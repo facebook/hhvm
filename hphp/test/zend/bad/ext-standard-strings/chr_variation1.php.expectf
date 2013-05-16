@@ -1,0 +1,42 @@
+*** Testing chr() function: with unexpected inputs for 'ascii' argument ***
+-- Iteration 1 --
+string(2) "00"
+-- Iteration 2 --
+string(2) "01"
+-- Iteration 3 --
+string(2) "ff"
+-- Iteration 4 --
+string(2) "00"
+-- Iteration 5 --
+string(2) "0a"
+-- Iteration 6 --
+string(2) "ec"
+-- Iteration 7 --
+string(2) "48"
+-- Iteration 8 --
+string(2) "00"
+-- Iteration 9 --
+string(2) "00"
+-- Iteration 10 --
+string(2) "00"
+-- Iteration 11 --
+string(2) "01"
+-- Iteration 12 --
+string(2) "00"
+-- Iteration 13 --
+string(2) "01"
+-- Iteration 14 --
+string(2) "00"
+-- Iteration 15 --
+string(2) "00"
+-- Iteration 16 --
+string(2) "00"
+-- Iteration 17 --
+string(2) "00"
+-- Iteration 18 --
+string(2) "00"
+-- Iteration 19 --
+string(2) "00"
+-- Iteration 20 --
+string(2) "00"
+===DONE===

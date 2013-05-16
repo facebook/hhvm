@@ -1,0 +1,7 @@
+*** Testing stat() for directory after using touch() on the directory ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

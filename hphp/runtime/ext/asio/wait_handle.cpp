@@ -15,13 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_session.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitHandle::c_WaitHandle(VM::Class* cb)
+c_WaitHandle::c_WaitHandle(Class* cb)
     : ExtObjectData(cb) {
 }
 
@@ -30,6 +31,15 @@ c_WaitHandle::~c_WaitHandle() {
 
 void c_WaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
+}
+
+void c_WaitHandle::ti_setonjoincallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnJoinCallback(callback.getObjectDataOrNull());
 }
 
 Object c_WaitHandle::t_getwaithandle() {

@@ -1,0 +1,99 @@
+Symbol 'DECIMAL_SEPARATOR_SYMBOL'
+Default symbol: [.]
+New symbol: [_._]
+A number formatted with the new symbol: 12,345_._123
+
+Symbol 'GROUPING_SEPARATOR_SYMBOL'
+Default symbol: [,]
+New symbol: [_,_]
+A number formatted with the new symbol: 12_,_345.123
+
+Symbol 'PATTERN_SEPARATOR_SYMBOL'
+Default symbol: [;]
+New symbol: [_;_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'PERCENT_SYMBOL'
+Default symbol: [%]
+New symbol: [_%_]
+A number formatted with the new symbol: 1,234,512_%_
+
+Symbol 'ZERO_DIGIT_SYMBOL'
+Default symbol: [0]
+New symbol: [_ZD_]
+A number formatted with the new symbol: `a,bcd.`ab
+
+Symbol 'DIGIT_SYMBOL'
+Default symbol: [#]
+New symbol: [_DS_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'MINUS_SIGN_SYMBOL'
+Default symbol: [-]
+New symbol: [_-_]
+A number formatted with the new symbol: _-_12,345.123
+
+Symbol 'PLUS_SIGN_SYMBOL'
+Default symbol: [+]
+New symbol: [_+_]
+A number formatted with the new symbol: 1.2345123456E4
+
+Symbol 'CURRENCY_SYMBOL'
+Default symbol: [$]
+New symbol: [_$_]
+A number formatted with the new symbol: _$_12,345.12
+
+Symbol 'INTL_CURRENCY_SYMBOL'
+Default symbol: [USD]
+New symbol: [_$_]
+A number formatted with the new symbol: $12,345.12
+
+Symbol 'MONETARY_SEPARATOR_SYMBOL'
+Default symbol: [.]
+New symbol: [_MS_]
+A number formatted with the new symbol: $12,345_MS_12
+
+Symbol 'EXPONENTIAL_SYMBOL'
+Default symbol: [E]
+New symbol: [_E_]
+A number formatted with the new symbol: 1.2345123456_E_4
+
+Symbol 'PERMILL_SYMBOL'
+Default symbol: [‰]
+New symbol: [_PS_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'PAD_ESCAPE_SYMBOL'
+Default symbol: [*]
+New symbol: [_PE_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'INFINITY_SYMBOL'
+Default symbol: [∞]
+New symbol: [_IS_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'NAN_SYMBOL'
+Default symbol: [NaN]
+New symbol: [_N_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'SIGNIFICANT_DIGIT_SYMBOL'
+Default symbol: [@]
+New symbol: [_SD_]
+A number formatted with the new symbol: 12,345.123
+
+Symbol 'MONETARY_GROUPING_SEPARATOR_SYMBOL'
+Default symbol: [,]
+New symbol: [_MG_]
+A number formatted with the new symbol: $12_MG_345.12
+
+Symbol 'MONETARY_GROUPING_SEPARATOR_SYMBOL-2'
+Default symbol: [,]
+New symbol: [&nbsp;]
+A number formatted with the new symbol: $12&nbsp;345.12
+
+Symbol 'MONETARY_GROUPING_SEPARATOR_SYMBOL-3'
+Default symbol: [,]
+New symbol: [blahblahblahblahblahblahblahblahblahblah]
+A number formatted with the new symbol: $12blahblahblahblahblahblahblahblahblahblah345.12

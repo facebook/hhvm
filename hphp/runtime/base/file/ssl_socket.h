@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SSL_SOCKET_H__
-#define __HPHP_SSL_SOCKET_H__
+#ifndef incl_HPHP_SSL_SOCKET_H_
+#define incl_HPHP_SSL_SOCKET_H_
 
-#include <runtime/base/file/socket.h>
-#include <util/lock.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/util/lock.h"
+#include "openssl/ssl.h"
+#include "openssl/x509.h"
+#include "openssl/err.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,4 +121,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SSL_SOCKET_H__
+#endif // incl_HPHP_SSL_SOCKET_H_

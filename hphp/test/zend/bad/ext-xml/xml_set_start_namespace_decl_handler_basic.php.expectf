@@ -1,0 +1,9 @@
+bool(true)
+bool(true)
+Namespace_Start_Handler called
+...Prefix: aw1
+...Uri: http://www.somewhere.com/namespace1
+Namespace_Start_Handler called
+...Prefix: aw2
+...Uri: file:/DTD/somewhere.dtd
+Done

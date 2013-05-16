@@ -1,0 +1,14 @@
+*** Testing stat(): on file and directory after accessing it
+    with is_dir() and is_file() functions ***
+-- Testing on Directory --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+-- Testing on file --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+*** Done ***

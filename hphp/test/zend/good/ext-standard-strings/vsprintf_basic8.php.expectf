@@ -1,0 +1,5 @@
+*** Testing vsprintf() : basic functionality - using octal format ***
+string(2) "21"
+string(6) "21 347"
+string(10) "21 347 567"
+Done

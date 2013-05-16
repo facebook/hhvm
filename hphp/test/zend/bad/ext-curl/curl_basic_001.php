@@ -1,10 +1,10 @@
 <?php
 /* Prototype  : bool curl_exec(resource ch)
- * Description: Perform a cURL session
+ * Description: Perform a cURL session 
  * Source code: ext/curl/interface.c
- * Alias to functions:
+ * Alias to functions: 
  */
-
+	
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing

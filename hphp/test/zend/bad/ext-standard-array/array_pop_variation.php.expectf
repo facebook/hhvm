@@ -1,0 +1,13 @@
+*** Checking for internal array pointer being reset when pop is called ***
+
+Current Element is : int(1)
+
+Next Element is : int(2)
+
+Next Element is : int(3)
+
+POPed Element is : int(9)
+
+Current Element after POP operation is: int(1)
+
+Done

@@ -1,0 +1,72 @@
+*** Testing imap_clearflag_full() : basic functionality ***
+Create a new mailbox for test
+Create a temporary mailbox and add 10 msgs
+.. mailbox '{%s}%s' created
+Initial msg count in new_mailbox : 10
+Set some flags
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+array(4) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(7)
+  [2]=>
+  int(9)
+  [3]=>
+  int(10)
+}
+array(4) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(6)
+  [2]=>
+  int(7)
+  [3]=>
+  int(8)
+}
+bool(true)
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(7)
+  [2]=>
+  int(10)
+}
+bool(false)
+===Done===

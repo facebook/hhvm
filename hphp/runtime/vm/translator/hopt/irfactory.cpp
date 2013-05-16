@@ -13,9 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+
+#include "hphp/runtime/vm/translator/hopt/cfg.h"
+
+namespace HPHP {  namespace JIT {
 
 IRInstruction* IRFactory::defLabel() {
   IRInstruction inst(DefLabel);
@@ -39,7 +42,7 @@ Block* IRFactory::defBlock(const Func* func, IRInstruction* label) {
 }
 
 IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
-  IRInstruction* inst = gen(Mov, dst->getType(), src);
+  IRInstruction* inst = gen(Mov, dst->type(), src);
   dst->setInstruction(inst);
   inst->setDst(dst);
   return inst;
@@ -50,10 +53,10 @@ SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
   inst.setExtra(&cdata);
   inst.setTypeParam(ctype);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->getType().equals(ctype));
+    assert(tmp->type().equals(ctype));
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->getDst());
 }
 
-}}}
+}}

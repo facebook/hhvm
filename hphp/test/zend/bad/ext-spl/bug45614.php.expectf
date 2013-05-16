@@ -1,0 +1,15 @@
+--> Show the first two items:
+pub1 => public1
+pub2 => public2
+
+--> Rewind and show the first two items:
+pub1 => public1
+pub2 => public2
+
+--> Invalidate current position and show the first two items:
+pub1 => public1
+pub3 => public3
+
+--> Rewind, seek and show the first two items:
+pub1 => public1
+pub3 => public3

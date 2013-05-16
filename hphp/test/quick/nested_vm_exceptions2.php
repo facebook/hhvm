@@ -10,9 +10,9 @@ function error_handler() {
 set_error_handler('error_handler');
 
 function unary_function($x) {
-  // Cause an undefined variable warning, and throw from the user
-  // error handler.
-  $x = $z;
+  // Raise a warning and throw from
+  // the user error handler.
+  return UNDEFINED === $x;
 }
 
 function binary_function($x, $y) {}

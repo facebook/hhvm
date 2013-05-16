@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [<!ENTITY ent2 "val2">]><root/>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [<!ENTITY c PUBLIC "-//W3C//TEXT copyright//EN" "http://www.w3.org/xmlspec/copyright.xml">]><root/>

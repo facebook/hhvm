@@ -9,10 +9,10 @@
  *
  */
 
-#ifndef __NEO_ERR_H_
-#define __NEO_ERR_H_ 1
+#ifndef incl_HPHP_NEO_ERR_H_
+#define incl_HPHP_NEO_ERR_H_ 1
 
-#include "neo_misc.h"
+#include "hphp/util/neo/neo_misc.h"
 
 /* For compilers (well, cpp actually) which don't define __PRETTY_FUNCTION__ */
 #ifndef __GNUC__
@@ -156,7 +156,7 @@ NEOERR *nerr_pass_ctxf (const char *func, const char *file, int lineno,
  */
 void nerr_log_error (NEOERR *nerr);
 
-#include "neo_str.h"
+#include "hphp/util/neo/neo_str.h"
 /* function: nerr_error_string - returns the string associated with an error
  * description: returns the string associated with an error (the bottom
  *              level of the error chain)
@@ -225,4 +225,4 @@ int nerr_handle (NEOERR **err, NERR_TYPE type);
 
 __END_DECLS
 
-#endif /* __NEO_ERR_H_ */
+#endif /* incl_HPHP_NEO_ERR_H_ */

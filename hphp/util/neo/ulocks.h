@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef __ULOCKS_H_
-#define __ULOCKS_H_
+#ifndef incl_HPHP_ULOCKS_H_
+#define incl_HPHP_ULOCKS_H_
 
 
 NEOERR *fCreate(int *plock, const char *file);
@@ -188,4 +188,4 @@ NEOERR *cSignal(pthread_cond_t *cond);
 
 #endif /* HAVE_PTHREAD */
 
-#endif                                                       /* __ULOCKS_H_ */
+#endif                                                       /* incl_HPHP_ULOCKS_H_ */

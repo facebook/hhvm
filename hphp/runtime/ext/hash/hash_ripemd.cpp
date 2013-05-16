@@ -19,7 +19,7 @@
    Note that ripemd laughs in the face of logic and uses
    little endian byte ordering */
 
-#include <runtime/ext/hash/hash_ripemd.h>
+#include "hphp/runtime/ext/hash/hash_ripemd.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

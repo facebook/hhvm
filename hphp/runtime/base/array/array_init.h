@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ARRAY_INIT_H__
-#define __ARRAY_INIT_H__
+#ifndef incl_HPHP_ARRAY_INIT_H_
+#define incl_HPHP_ARRAY_INIT_H_
 
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,15 +69,27 @@ class ArrayInit {
 public:
   enum VectorInit { vectorInit };
   enum MapInit { mapInit };
-  ArrayInit(ssize_t n);
+
+  explicit ArrayInit(ssize_t n);
+
   ArrayInit(ssize_t n, VectorInit) {
     m_data = CreateVector(n);
   }
+
   ArrayInit(ssize_t n, MapInit) {
     m_data = CreateMap(n);
   }
+
+  ArrayInit(ArrayInit&& other) : m_data(other.m_data) {
+    other.m_data = nullptr;
+  }
+
+  ArrayInit(const ArrayInit&) = delete;
+  ArrayInit& operator=(const ArrayInit&) = delete;
+
   static ArrayData *CreateVector(ssize_t n);
   static ArrayData *CreateMap(ssize_t n);
+
   ~ArrayInit() {
     // In case an exception interrupts the initialization.
     if (m_data) m_data->release();
@@ -264,16 +276,28 @@ public:
     return *this;
   }
 
+  // Prefer toArray() in new code---it can save a null check when the
+  // compiler can't prove m_data hasn't changed.
   ArrayData *create() {
     ArrayData *ret = m_data;
     m_data = nullptr;
     return ret;
   }
-  operator ArrayData *() { return create(); }
+
+  Array toArray() {
+    auto ptr = m_data;
+    m_data = nullptr;
+    return Array(ptr, Array::ArrayInitCtor::Tag);
+  }
+
+  Variant toVariant() {
+    auto ptr = m_data;
+    m_data = nullptr;
+    return Variant(ptr, Variant::ArrayInitCtor::Tag);
+  }
+
   static ArrayData *CreateParams(int count, ...);
-  // this consructor should never be called directly, it is only called from
-  // generated code.
-  ArrayInit (ArrayData *data) : m_data(data) {}
+
 private:
   ArrayData *m_data;
 };
@@ -281,4 +305,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __ARRAY_INIT_H__ */
+#endif /* incl_HPHP_ARRAY_INIT_H_ */

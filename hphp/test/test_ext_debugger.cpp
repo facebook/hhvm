@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_debugger.h>
-#include <runtime/ext/ext_debugger.h>
+#include "hphp/test/test_ext_debugger.h"
+#include "hphp/runtime/ext/ext_debugger.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Debugger);
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_ipc.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/base/variable_unserializer.h>
-#include <util/lock.h>
-#include <util/alloc.h>
+#include "hphp/runtime/ext/ext_ipc.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
 
 #include <memory>
 
@@ -57,10 +57,10 @@ int64_t f_ftok(CStrRef pathname, CStrRef proj) {
   }
   if (proj.length() != 1) {
     raise_warning("Project identifier has to be one character int64: %s",
-                    (const char *)proj);
+                  proj.c_str());
     return -1;
   }
-  return ftok((const char *)pathname, (int)(*((const char *)proj)));
+  return ftok(pathname.c_str(), (int)proj[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
   buffer = (struct msgbuf *)calloc(len + sizeof(struct msgbuf), 1);
   ScopedMem deleter(buffer);
   MSGBUF_MTYPE(buffer) = msgtype;
-  memcpy(MSGBUF_MTEXT(buffer), (const char *)data, len + 1);
+  memcpy(MSGBUF_MTEXT(buffer), data.c_str(), len + 1);
 
   int result = msgsnd(q->id, buffer, len, blocking ? 0 : IPC_NOWAIT);
   if (result < 0) {
@@ -260,7 +260,7 @@ bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
       return false;
     }
   } else {
-    message = (const char *)MSGBUF_MTEXT(buffer);
+    message = String((const char *)MSGBUF_MTEXT(buffer));
   }
 
   return true;

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_ABORT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_ABORT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_ABORT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_ABORT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,10 +28,12 @@ public:
   CmdAbort() : DebuggerCommand(KindOfAbort) {}
 
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_ABORT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_ABORT_H_

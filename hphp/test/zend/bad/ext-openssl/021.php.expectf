@@ -1,0 +1,23 @@
+resource(%d) of type (OpenSSL X.509)
+resource(%d) of type (OpenSSL X.509)
+resource(%d) of type (OpenSSL X.509)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+resource(%d) of type (OpenSSL X.509)

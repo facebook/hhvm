@@ -15,16 +15,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PHP_MAILPARSE_MIME_H__
-#define __PHP_MAILPARSE_MIME_H__
+#ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
+#define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/mailparse/rfc822.h>
-#include <runtime/base/util/string_buffer.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/mailparse/rfc822.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
 extern "C" {
-#include <mbfl/mbfl_convert.h>
-#include <mbfl/mbfilter.h>
+#include "mbfl/mbfl_convert.h"
+#include "mbfl/mbfilter.h"
 }
 
 namespace HPHP {
@@ -64,18 +64,18 @@ private:
   class MimeHeader {
   public:
     MimeHeader();
-    MimeHeader(const char *value);
+    explicit MimeHeader(const char *value);
     MimeHeader(php_rfc822_tokenized_t *toks);
 
     bool empty() const { return m_empty;}
     void clear();
 
-    Variant get(const char *attrname);
+    Variant get(CStrRef attrname);
     void getAll(Array &ret, CStrRef valuelabel, CStrRef attrprefix);
 
     bool m_empty;
     String m_value;
-    Variant m_attributes;
+    Array m_attributes;
 
   private:
     void rfc2231_to_mime(StringBuffer &value_buf, char* value,
@@ -156,4 +156,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PHP_MAILPARSE_MIME_H__
+#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_

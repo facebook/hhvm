@@ -1,0 +1,52 @@
+------------
+Input Array name is : loc1
+
+Composed Locale: sl_Latn_IT
+------------
+Input Array name is : loc2
+
+Composed Locale: de_DE
+------------
+Input Array name is : loc3
+
+Composed Locale: hi
+------------
+Input Array name is : loc4
+
+Composed Locale: zh_Hans_CN
+------------
+Input Array name is : loc5
+
+Composed Locale: es_Hans_CN
+------------
+Input Array name is : loc6
+
+Composed Locale: en_Hans_CN_nedis_rozaj
+------------
+Input Array name is : loc7
+
+Composed Locale: en_lng_ing_Hans_CN_nedis_rozaj
+------------
+Input Array name is : loc8
+
+Composed Locale: en_lng_ing_Hans_CN_nedis_rozaj_x_prv1_prv2
+------------
+Input Array name is : loc9
+
+Composed Locale: No values found from Locale compose due to the following error:
+locale_compose: parameter array does not contain 'language' tag.: U_ILLEGAL_ARGUMENT_ERROR
+------------
+Input Array name is : loc10
+
+Composed Locale: No values found from Locale compose due to the following error:
+locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR
+------------
+Input Array name is : loc11
+
+Composed Locale: No values found from Locale compose due to the following error:
+locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR
+------------
+Input Array name is : loc12
+
+Composed Locale: en_lng_ing_Hans_CN_nedis_rozaj_x_prv1_prv2
+------------

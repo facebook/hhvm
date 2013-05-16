@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_PRINTF_H__
-#define __HPHP_ZEND_PRINTF_H__
+#ifndef incl_HPHP_ZEND_PRINTF_H_
+#define incl_HPHP_ZEND_PRINTF_H_
 
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,4 +35,4 @@ int spprintf(char **pbuf, size_t max_len, const char *format, ...);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_PRINTF_H__
+#endif // incl_HPHP_ZEND_PRINTF_H_

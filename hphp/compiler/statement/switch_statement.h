@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SWITCH_STATEMENT_H__
-#define __SWITCH_STATEMENT_H__
+#ifndef incl_HPHP_SWITCH_STATEMENT_H_
+#define incl_HPHP_SWITCH_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
-#include <compiler/statement/case_statement.h>
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/case_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,4 +51,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __SWITCH_STATEMENT_H__
+#endif // incl_HPHP_SWITCH_STATEMENT_H_

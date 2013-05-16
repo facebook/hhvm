@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_macro.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_macro.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdMacro::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
@@ -62,8 +64,8 @@ void CmdMacro::processList(DebuggerClient *client) {
   }
 }
 
-bool CmdMacro::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdMacro::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }

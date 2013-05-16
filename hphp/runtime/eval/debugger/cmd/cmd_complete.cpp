@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_complete.h>
-#include <runtime/eval/debugger/cmd/cmd_info.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_complete.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_info.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdComplete::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -43,8 +45,8 @@ bool CmdComplete::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdComplete::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdComplete::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   std::string text = client->lineRest(1);
   std::vector<std::string> res = client->getAllCompletions(text);
   for (size_t i = 0; i < res.size(); ++i) {

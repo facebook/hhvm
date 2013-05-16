@@ -13,35 +13,35 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_RUNTIME_VM_TRANSLATOR_X64_H_
-#define incl_RUNTIME_VM_TRANSLATOR_X64_H_
+#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
+#define incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 
 #include <signal.h>
 #include <memory>
 #include <boost/noncopyable.hpp>
 
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/translator.h>
-#include <util/asm-x64.h>
-#include <runtime/vm/translator/srcdb.h>
-#include <runtime/vm/translator/unwind-x64.h>
-#include <runtime/vm/translator/regalloc.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/ringbuffer.h>
-#include <runtime/vm/debug/debug.h>
-#include "runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/srcdb.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
+#include "hphp/runtime/vm/translator/regalloc.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
 
 namespace HPHP { class ExecutionContext; }
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 class HhbcTranslator;
 class IRFactory;
 class CSEHash;
 class TraceBuilder;
 class CodeGenerator;
-}}}
+}}
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 class IRTranslator;
 class MVecTransState;
@@ -113,14 +113,13 @@ class TranslatorX64 : public Translator
   friend class RedirectSpillFill;
   friend class Tx64Reaper;
   friend class IRTranslator;
-  friend class HPHP::VM::JIT::CodeGenerator;
-  friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
+  friend class HPHP::JIT::CodeGenerator;
+  friend class HPHP::JIT::HhbcTranslator; // packBitVec()
   friend TCA funcBodyHelper(ActRec* fp);
   template<unsigned, unsigned, ConditionCode, class> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
   template<ConditionCode> friend class IfElseBlock;
   friend class UnlikelyIfBlock;
-  typedef HPHP::DataType DataType;
 
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
@@ -170,13 +169,13 @@ class TranslatorX64 : public Translator
   sigaction_t            m_segvChain;
   TCA                    m_callToExit;
   TCA                    m_retHelper;
+  TCA                    m_retInlHelper;
   TCA                    m_genRetHelper;
   TCA                    m_stackOverflowHelper;
   TCA                    m_irPopRHelper;
   TCA                    m_dtorGenericStub;
   TCA                    m_dtorGenericStubRegs;
   TCA                    m_dtorStubs[kDestrTableSize];
-  TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
 
@@ -214,7 +213,6 @@ class TranslatorX64 : public Translator
 
   RegAlloc                   m_regMap;
   std::stack<SavedRegState>  m_savedRegMaps;
-  volatile bool              m_interceptsEnabled;
   FixupMap                   m_fixupMap;
   UnwindRegMap               m_unwindRegMap;
   UnwindInfoHandle           m_unwindRegistrar;
@@ -345,9 +343,6 @@ private:
                                   const DynLocation& propInput,
                                   PhysReg scr);
 
-  inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
-  }
   template<int Arity> TCA emitNAryStub(Asm& a, Call c);
   TCA emitUnaryStub(Asm& a, Call c);
   TCA genericRefCountStub(Asm& a);
@@ -720,9 +715,6 @@ PSEUDOINSTRS
     return m_unwindRegMap.find(ip);
   }
 
-  void enableIntercepts() {m_interceptsEnabled = true;}
-  bool interceptsEnabled() {return m_interceptsEnabled;}
-
   static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
 
   // public for syncing gdb state
@@ -752,8 +744,16 @@ PSEUDOINSTRS
     return m_retHelper;
   }
 
+  TCA getRetFromInlinedFrame() {
+    return m_retInlHelper;
+  }
+
   TCA getRetFromInterpretedGeneratorFrame() {
     return m_genRetHelper;
+  }
+
+  inline bool isValidCodeAddress(TCA tca) const {
+    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
   }
 
   // If we were to shove every little helper function into this class
@@ -792,7 +792,6 @@ public:
   void dropWriteLease() {
     s_writeLease.drop();
   }
-  void interceptPrologues(Func* func);
 
   void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
     const RefDeps&, SrcRec&);
@@ -809,9 +808,8 @@ public:
 
   FreeStubList m_freeStubs;
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(bool inLine);
+  TCA getFreeStub();
 private:
-  TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
   void translateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
   void irInterpretInstr(const NormalizedInstruction& i);
@@ -846,7 +844,6 @@ private:
     SrcRec& fail);
   void irCheckType(Asm&, const Location& l, const RuntimeType& rtt,
                    SrcRec& fail);
-  void irEmitLoadDeps();
 
   void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
 
@@ -927,13 +924,6 @@ private:
                               int           offset,
                               SrcRec&       fail);
 
-  enum SRFlags {
-    SRNone            = 0,
-    SRAlign           = 1,
-    SRInline          = 2,
-    SRJmpInsteadOfRet = 4,
-    SREmitInA         = 8,
-  };
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
   TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,
@@ -971,7 +961,6 @@ private:
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-  TCA emitInterceptPrologue(Func* func);
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);
   void emitBindJmp(Asm& a, SrcKey dest,
@@ -995,11 +984,7 @@ private:
     bool m_local;
   };
   static void reqLitHelper(const ReqLitStaticArgs* args);
-  struct FCallArrayArgs {
-    Offset m_pcOff;
-    Offset m_pcNext;
-  };
-  static void fCallArrayHelper(const FCallArrayArgs* args);
+  static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
 
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);
@@ -1018,8 +1003,24 @@ public:
    * bytecode interpreter (see enterVMWork).  It operates on behalf of
    * a given nested invocation of the intepreter (calling back into it
    * as necessary for blocks that need to be interpreted).
+   *
+   * If start is not null, data will be used to initialize rStashedAr,
+   * to enable us to run a jitted prolog;
+   * otherwise, data should be a pointer to the SrcKey to start
+   * translating from.
+   *
+   * But don't call this directly, use one of the helpers below
    */
-  void enterTC(SrcKey sk, TCA start);
+  void enterTC(TCA start, void* data);
+  void enterTCAtSrcKey(SrcKey& sk) {
+    enterTC(nullptr, &sk);
+  }
+  void enterTCAtProlog(ActRec *ar, TCA start) {
+    enterTC(start, ar);
+  }
+  void enterTCAfterProlog(TCA start) {
+    enterTC(start, nullptr);
+  }
 
   TranslatorX64();
   virtual ~TranslatorX64();
@@ -1146,6 +1147,7 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
+void functionEnterHelper(const ActRec* ar);
 
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);
@@ -1162,7 +1164,9 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
+
+bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
+                             Class* contextClass);
 
 struct PropInfo {
   PropInfo()
@@ -1179,10 +1183,12 @@ struct PropInfo {
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* contextClass,
                            const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
 PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
+                                Class* contextClass,
                                 const MInstrInfo&);
 
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
@@ -1216,6 +1222,6 @@ struct SpaceRecorder {
 
 typedef const int COff; // Const offsets
 
-}}}
+}}
 
 #endif

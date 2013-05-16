@@ -1,0 +1,9 @@
+int(3)
+bool(true)
+int(3)
+bool(false)
+bool(true)
+From Array with string keys, no preserve
+No exception
+From Array with string keys, preserve
+Exception: array must contain only positive integer keys

@@ -1,0 +1,5 @@
+Error: 2 - gzfile() expects parameter 2 to be long, object given, %s(%d)
+NULL
+Error: 2 - gzfile() expects parameter 2 to be long, object given, %s(%d)
+NULL
+===DONE===

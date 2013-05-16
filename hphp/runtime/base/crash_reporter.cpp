@@ -13,14 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/base/crash_reporter.h"
-#include "util/stack_trace.h"
-#include "util/light_process.h"
-#include "util/logger.h"
+#include "hphp/runtime/base/crash_reporter.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/logger.h"
 
-#include "runtime/base/program_functions.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/ext/ext_error.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
 
 namespace HPHP {
 
@@ -77,6 +78,10 @@ static void bt_handler(int sig) {
   // Do it last just in case
 
   Logger::Error("Core dumped: %s", strsignal(sig));
+
+  // Give the debugger a chance to do extra logging if there are any attached
+  // debugger clients.
+  Eval::Debugger::LogShutdown(Eval::Debugger::ShutdownKind::Abnormal);
 
   if (!g_context.isNull()) {
     // sync up gdb Dwarf info so that gdb can do a full backtrace

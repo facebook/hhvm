@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_string.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/ext/ext_fb.h>
+#include "hphp/test/test_ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_fb.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -942,18 +942,23 @@ bool TestExtString::test_metaphone() {
 }
 
 bool TestExtString::test_parse_str() {
+  static const StaticString
+    s_first("first"),
+    s_arr("arr"),
+    s_a("a"),
+    s_i("i");
   {
     Variant output;
     f_parse_str("first=value&arr[]=foo+bar&arr[]=baz", ref(output));
-    VS(output["first"], "value");
-    VS(output["arr"][0], "foo bar");
-    VS(output["arr"][1], "baz");
+    VS(output[s_first], "value");
+    VS(output[s_arr][0], "foo bar");
+    VS(output[s_arr][1], "baz");
   }
   {
     Variant output;
     f_parse_str("a[2][i]=3&a[4][i]=5", ref(output));
-    VS(output["a"][2]["i"], "3");
-    VS(output["a"][4]["i"], "5");
+    VS(output[s_a][2][s_i], "3");
+    VS(output[s_a][4][s_i], "5");
   }
 
   return Count(true);

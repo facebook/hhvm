@@ -1,0 +1,14 @@
+Simple testcase for set_magic_quotes_runtime()  - error test
+
+-- Testing set_magic_quotes_runtime() function with less than expected no. of arguments --
+
+Deprecated: Function set_magic_quotes_runtime() is deprecated in hphp/test/zend/bad/ext-standard-general_functions/set_magic_quotes_runtime_error.phpt on line %d
+HipHop Warning: %a
+NULL
+
+-- Testing set_magic_quotes_runtime() function with more than expected no. of arguments --
+
+Deprecated: Function set_magic_quotes_runtime() is deprecated in hphp/test/zend/bad/ext-standard-general_functions/set_magic_quotes_runtime_error.phpt on line %d
+HipHop Warning: %a
+NULL
+===DONE===

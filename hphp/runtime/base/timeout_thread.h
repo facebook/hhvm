@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TIMEOUT_THREAD_H__
-#define __TIMEOUT_THREAD_H__
+#ifndef incl_HPHP_TIMEOUT_THREAD_H_
+#define incl_HPHP_TIMEOUT_THREAD_H_
 
 #include <queue>
 
-#include <runtime/base/types.h>
-#include <util/base.h>
-#include <util/process.h>
-#include <util/synchronizable.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/base.h"
+#include "hphp/util/process.h"
+#include "hphp/util/synchronizable.h"
 #include <event.h>
 
 namespace HPHP {
@@ -71,5 +71,5 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __TIMEOUT_THREAD_H__
+#endif // incl_HPHP_TIMEOUT_THREAD_H_
 

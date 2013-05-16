@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/thrift_buffer.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/variable_unserializer.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/util/thrift_buffer.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/util/logger.h"
 
 #define INVALID_DATA 1
 

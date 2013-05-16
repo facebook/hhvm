@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stat_cache.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,10 +21,10 @@
 #include <fcntl.h>
 #include <sys/param.h>
 
-#include "util/trace.h"
-#include "util/logger.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/translator/hooks.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/translator/hooks.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ void StatCache::Node::touchLocked(bool invalidate /* = true */) {
          ++it) {
       if (invalidate && m_valid) {
         TRACE(1, "StatCache: invalidate path '%s'\n", it->first.c_str());
-        HPHP::VM::invalidatePath(it->first);
+        HPHP::invalidatePath(it->first);
       }
       if (removePaths) {
         m_statCache.removePath(it->first, this);
@@ -197,7 +197,7 @@ void StatCache::Node::touchLocked(bool invalidate /* = true */) {
         NameMap::const_iterator it2 = m_paths.find(it->first);
         if (it2 == m_paths.end()) {
           TRACE(1, "StatCache: invalidate link path '%s'\n", it->first.c_str());
-          HPHP::VM::invalidatePath(it->first);
+          HPHP::invalidatePath(it->first);
         }
       }
       if (removePaths) {

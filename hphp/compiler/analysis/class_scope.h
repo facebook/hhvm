@@ -14,19 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CLASS_SCOPE_H__
-#define __CLASS_SCOPE_H__
+#ifndef incl_HPHP_CLASS_SCOPE_H_
+#define incl_HPHP_CLASS_SCOPE_H_
 
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/function_container.h>
-#include <compiler/statement/class_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include <compiler/expression/user_attribute.h>
-#include <util/json.h>
-#include <util/case_insensitive.h>
-#include <compiler/option.h>
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/util/json.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/compiler/option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,6 @@ public:
     return m_needsInit;
   }
 
-  bool needsEnableDestructor(AnalysisResultConstPtr ar) const;
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
 
@@ -433,7 +432,6 @@ private:
   // for classes with more than 31 bases, bit 31 is set iff
   // bases 32 through n are all known.
   unsigned m_knownBases;
-  mutable unsigned m_needsEnableDestructor:2;
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);
@@ -489,4 +487,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CLASS_SCOPE_H__
+#endif // incl_HPHP_CLASS_SCOPE_H_

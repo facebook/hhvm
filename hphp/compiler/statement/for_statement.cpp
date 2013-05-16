@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/for_statement.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 using namespace HPHP;
 

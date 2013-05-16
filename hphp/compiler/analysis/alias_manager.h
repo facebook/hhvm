@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ALIAS_MANAGER_H__
-#define __ALIAS_MANAGER_H__
+#ifndef incl_HPHP_ALIAS_MANAGER_H_
+#define incl_HPHP_ALIAS_MANAGER_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ class AliasManager {
   enum { SameAccess, SameLValueAccess, InterfAccess,
     DisjointAccess, NotAccess };
 
-  AliasManager(int opt);
+  explicit AliasManager(int opt);
   ~AliasManager();
 
   void clear();
@@ -141,7 +141,7 @@ class AliasManager {
   enum { FallThrough, CondBranch, Branch, Converge };
   enum { NoCopyProp = 1, NoDeadStore = 2 };
   struct CondStackElem {
-    CondStackElem(size_t s = 0) : m_size(s), m_exprs() {}
+    explicit CondStackElem(size_t s = 0) : m_size(s), m_exprs() {}
     size_t              m_size;
     ExpressionPtrList   m_exprs;
   };
@@ -154,7 +154,7 @@ class AliasManager {
 
   class LoopInfo {
   public:
-    LoopInfo(StatementPtr s);
+    explicit LoopInfo(StatementPtr s);
 
     StatementPtr m_stmt;
     StatementPtrVec m_inner;
@@ -276,4 +276,4 @@ class AliasManager {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __ALIAS_MANAGER_H__
+#endif // incl_HPHP_ALIAS_MANAGER_H_

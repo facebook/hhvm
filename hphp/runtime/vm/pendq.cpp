@@ -14,12 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/rank.h>
-#include <util/base.h>
-#include <runtime/vm/pendq.h>
+#include "hphp/util/rank.h"
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/pendq.h"
 
 namespace HPHP {
-namespace VM {
 
 static __thread PendQ* tl_q;
 
@@ -41,4 +40,4 @@ void PendQ::drain() {
   }
 }
 
-}}
+}

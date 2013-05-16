@@ -1,0 +1,90 @@
+*** Testing get_class_vars() : testing visibility
+
+-- From global context --
+array(2) {
+  ["pub"]=>
+  string(10) "public var"
+  ["pubs"]=>
+  string(17) "public static var"
+}
+
+-- From inside an object instance --
+array(6) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["priv"]=>
+  string(11) "private var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+  ["privs"]=>
+  string(18) "private static var"
+}
+
+-- From  a static context --
+array(6) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["priv"]=>
+  string(11) "private var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+  ["privs"]=>
+  string(18) "private static var"
+}
+
+-- From inside an  parent object instance --
+array(4) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+}
+
+-- From a parents static context --
+array(4) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+}
+
+-- From inside a child object instance --
+array(4) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+}
+
+-- From a child's static context --
+array(4) {
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+}
+===DONE===

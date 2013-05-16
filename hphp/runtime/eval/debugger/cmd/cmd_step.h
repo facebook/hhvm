@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_STEP_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_STEP_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_STEP_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_STEP_H_
 
-#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_flow_control.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,9 +28,11 @@ public:
   CmdStep() : CmdFlowControl(KindOfStep) {}
 
   virtual bool help(DebuggerClient *client);
+  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+  virtual void onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_STEP_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_STEP_H_

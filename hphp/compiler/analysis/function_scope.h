@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_SCOPE_H__
-#define __FUNCTION_SCOPE_H__
+#ifndef incl_HPHP_FUNCTION_SCOPE_H_
+#define incl_HPHP_FUNCTION_SCOPE_H_
 
-#include <compiler/expression/user_attribute.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/option.h>
+#include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/option.h"
 
-#include <util/json.h>
-#include <util/parser/parser.h>
+#include "hphp/util/json.h"
+#include "hphp/util/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -398,8 +398,11 @@ public:
 
   class FunctionInfo {
   public:
-    FunctionInfo(int rva = -1) : m_maybeStatic(false), m_maybeRefReturn(false),
-                                 m_refVarArg(rva) { }
+    explicit FunctionInfo(int rva = -1)
+      : m_maybeStatic(false)
+      , m_maybeRefReturn(false)
+      , m_refVarArg(rva)
+    {}
 
     bool isRefParam(int p) const {
       if (m_refVarArg >= 0 && p >= m_refVarArg) return true;
@@ -493,4 +496,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FUNCTION_SCOPE_H__
+#endif // incl_HPHP_FUNCTION_SCOPE_H_

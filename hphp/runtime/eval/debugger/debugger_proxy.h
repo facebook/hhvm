@@ -14,24 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_PROXY_H__
-#define __HPHP_EVAL_DEBUGGER_PROXY_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
+#define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 
-#include <util/base.h>
-#include <util/synchronizable.h>
-#include <util/async_func.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/eval/debugger/dummy_sandbox.h>
-#include <runtime/vm/instrumentation.h>
+#include "hphp/util/base.h"
+#include "hphp/util/synchronizable.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/eval/debugger/dummy_sandbox.h"
+#include "hphp/runtime/vm/instrumentation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// A DebuggerProxy provides a conection thru which a client may talk to a VM
+// which is being debugged. The VM can also send messages to the client via the
+// proxy, either in reponse to messages from the client, or to poll the client
+// for information.
+//
+// In an basic scenario where a client is debugging a remote VM, the VM will
+// create a proxy when the client connects (via DebuggerServer) and listen for
+// commands via this proxy. It will use this proxy when completing control flow
+// commands to interrupt the client. The client sends and receives messages over
+// a socket directly to this proxy. Thus we have:
+//
+//   Client <---> Proxy <---> VM
+//
+// The client always creates its own "local proxy", which allows debugging any
+// code running on the VM within the client. The two are easily confused.
+//
 
 class CmdInterrupt;
 DECLARE_BOOST_TYPES(DebuggerProxy);
 DECLARE_BOOST_TYPES(DebuggerCommand);
 DECLARE_BOOST_TYPES(CmdFlowControl);
-DECLARE_BOOST_TYPES(CmdJump);
 
 class DebuggerProxy : public Synchronizable,
                       public boost::enable_shared_from_this<DebuggerProxy> {
@@ -49,7 +64,7 @@ public:
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  virtual ~DebuggerProxy();
+  ~DebuggerProxy();
 
   bool isLocal() const { return m_local;}
 
@@ -67,17 +82,22 @@ public:
   void startDummySandbox();
   void notifyDummySandbox();
 
-  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
   void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
   bool couldBreakEnterClsMethod(const StringData* className);
   bool couldBreakEnterFunc(const StringData* funcFullName);
   void getBreakClsMethods(std::vector<const StringData*>& classNames);
   void getBreakFuncs(std::vector<const StringData*>& funcFullNames);
+  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
 
   bool needInterrupt();
-  bool needInterruptForNonBreak();
-  virtual void interrupt(CmdInterrupt &cmd);
-  bool send(DebuggerCommand *cmd);
+  bool needVMInterrupts();
+  void interrupt(CmdInterrupt &cmd);
+  bool sendToClient(DebuggerCommand *cmd);
+  CmdInterrupt& currentInterruptCmd();
+
+  int getStackDepth();
+  int getRealStackDepth();
 
   void startSignalThread();
   void pollSignal(); // for signal polling thread
@@ -85,7 +105,22 @@ public:
   void checkStop();
   void forceQuit();
 
-protected:
+  // For instrumentation
+  HPHP::InjectionTables* getInjTables() const { return m_injTables; }
+  void setInjTables(HPHP::InjectionTables* tables) { m_injTables = tables;}
+  void readInjTablesFromThread();
+  void writeInjTablesToThread();
+
+private:
+  bool blockUntilOwn(CmdInterrupt &cmd, bool check);
+  bool checkBreakPoints(CmdInterrupt &cmd);
+  bool checkFlowBreak(CmdInterrupt &cmd);
+  void processInterrupt(CmdInterrupt &cmd);
+
+  DThreadInfoPtr createThreadInfo(const std::string &desc);
+
+  void changeBreakPointDepth(CmdInterrupt& cmd);
+
   bool m_stopped;
 
   bool m_local;
@@ -110,7 +145,6 @@ protected:
   StringDataMap m_breaksEnterFunc;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
-  CmdJumpPtr m_jump;
 
   Mutex m_signalMutex; // who can talk to client
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
@@ -118,53 +152,11 @@ protected:
   Mutex m_signumMutex;
   int m_signum;
 
-  // helpers
-  bool blockUntilOwn(CmdInterrupt &cmd, bool check);
-  virtual bool checkBreakPoints(CmdInterrupt &cmd);
-  bool checkJumpFlowBreak(CmdInterrupt &cmd);
-  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
-  void processInterrupt(CmdInterrupt &cmd);
-  virtual void processFlowControl(CmdInterrupt &cmd);
-  virtual bool breakByFlowControl(CmdInterrupt &cmd);
-
-  DThreadInfoPtr createThreadInfo(const std::string &desc);
-};
-
-class DebuggerProxyVM : public DebuggerProxy {
-public:
-  static Variant ExecutePHP(const std::string &php, String &output, bool log,
-                            int frame);
-
-public:
-  DebuggerProxyVM(SmartPtr<Socket> socket, bool local)
-    : DebuggerProxy(socket, local), m_injTables(nullptr) {
-  }
-  virtual ~DebuggerProxyVM() {
-    delete m_injTables;
-  }
-  virtual void interrupt(CmdInterrupt &cmd);
-  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
-
   // For instrumentation
-  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
-  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
-  void readInjTablesFromThread();
-  void writeInjTablesToThread();
-  void changeBreakPointDepth(CmdInterrupt& cmd);
-  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
-
-private:
-  int getStackDepth();
-  int getRealStackDepth();
-
-  virtual void processFlowControl(CmdInterrupt &cmd);
-  virtual bool breakByFlowControl(CmdInterrupt &cmd);
-
-  // For instrumentation
-  HPHP::VM::InjectionTables* m_injTables;
+  HPHP::InjectionTables* m_injTables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_PROXY_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_PROXY_H_

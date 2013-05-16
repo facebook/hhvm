@@ -1,0 +1,32 @@
+A::offsetSet
+Exception: Index invalid or out of range
+A::offsetGet
+Exception: Index invalid or out of range
+A::offsetUnset
+Exception: Index invalid or out of range
+A::offsetSet
+A::offsetSet
+A::offsetSet
+A::offsetSet
+A::offsetSet
+A::offsetUnset
+A::offsetExists
+A::offsetExists
+A::offsetExists
+A::offsetExists
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+A::offsetGet
+A::offsetGet
+A::offsetGet
+A::offsetGet
+string(6) "value0"
+string(6) "value2"
+string(6) "value3"
+string(6) "value4"
+int(2)
+int(10)
+bool(false)
+===DONE===

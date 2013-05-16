@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_CALL_H__
-#define __FUNCTION_CALL_H__
+#ifndef incl_HPHP_FUNCTION_CALL_H_
+#define incl_HPHP_FUNCTION_CALL_H_
 
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/static_class_name.h>
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/static_class_name.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,8 +30,8 @@ DECLARE_BOOST_TYPES(FunctionCall);
 class FunctionCall : public Expression, public StaticClassName {
 protected:
   FunctionCall(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr nameExp,
-               const std::string &name, ExpressionListPtr params,
-               ExpressionPtr classExp);
+               const std::string &name, bool hadBackslash,
+               ExpressionListPtr params, ExpressionPtr classExp);
 public:
   void analyzeProgram(AnalysisResultPtr ar);
 
@@ -47,6 +47,13 @@ public:
 
   const std::string &getName() const { return m_name; }
   const std::string &getOriginalName() const { return m_origName; }
+  const std::string getNonNSOriginalName() const {
+    int nsPos = m_origName.rfind('\\');
+    if (nsPos == string::npos) {
+      return m_origName;
+    }
+    return m_origName.substr(nsPos + 1);
+  }
   ExpressionPtr getNameExp() const { return m_nameExp; }
   const ExpressionListPtr& getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
@@ -56,6 +63,7 @@ public:
   bool canInvokeFewArgs();
   void setArrayParams() { m_arrayParams = true; }
   bool isValid() const { return m_valid; }
+  bool hadBackslash() const { return m_hadBackslash; }
 
 protected:
   ExpressionPtr m_nameExp;
@@ -81,6 +89,7 @@ protected:
   unsigned m_noInline : 1;
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_arrayParams : 1;
+  bool m_hadBackslash;
 
   // Extra arguments form an array, to which the scalar array optimization
   // should also apply.
@@ -108,4 +117,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FUNCTION_CALL_H__
+#endif // incl_HPHP_FUNCTION_CALL_H_

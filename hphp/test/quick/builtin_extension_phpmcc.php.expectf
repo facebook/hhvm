@@ -1,0 +1,149 @@
+phpmcc
+HipHop Warning: phpmcc::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+object(phpmcc)#1 (0) {
+}
+string(17) "O:6:"phpmcc":0:{}"
+object(phpmcc)#2 (0) {
+}
+array(58) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "__tostring"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(5) "__get"
+  [4]=>
+  string(5) "close"
+  [5]=>
+  string(3) "del"
+  [6]=>
+  string(15) "add_accesspoint"
+  [7]=>
+  string(18) "remove_accesspoint"
+  [8]=>
+  string(16) "get_accesspoints"
+  [9]=>
+  string(10) "get_server"
+  [10]=>
+  string(22) "add_mirror_accesspoint"
+  [11]=>
+  string(25) "remove_mirror_accesspoint"
+  [12]=>
+  string(10) "add_server"
+  [13]=>
+  string(13) "remove_server"
+  [14]=>
+  string(12) "server_flush"
+  [15]=>
+  string(14) "server_version"
+  [16]=>
+  string(15) "server_is_alive"
+  [17]=>
+  string(10) "test_proxy"
+  [18]=>
+  string(10) "add_mirror"
+  [19]=>
+  string(13) "remove_mirror"
+  [20]=>
+  string(14) "add_serverpool"
+  [21]=>
+  string(17) "add_serverpool_ex"
+  [22]=>
+  string(17) "remove_serverpool"
+  [23]=>
+  string(24) "add_accesspoint_listener"
+  [24]=>
+  string(27) "remove_accesspoint_listener"
+  [25]=>
+  string(19) "add_server_listener"
+  [26]=>
+  string(22) "remove_server_listener"
+  [27]=>
+  string(18) "add_error_listener"
+  [28]=>
+  string(21) "remove_error_listener"
+  [29]=>
+  string(17) "get_server_by_key"
+  [30]=>
+  string(8) "get_host"
+  [31]=>
+  string(21) "get_serverpool_by_key"
+  [32]=>
+  string(21) "serverpool_add_server"
+  [33]=>
+  string(24) "serverpool_remove_server"
+  [34]=>
+  string(22) "serverpool_get_servers"
+  [35]=>
+  string(41) "serverpool_get_consistent_hashing_enabled"
+  [36]=>
+  string(41) "serverpool_get_consistent_hashing_version"
+  [37]=>
+  string(9) "multi_add"
+  [38]=>
+  string(13) "multi_replace"
+  [39]=>
+  string(9) "multi_set"
+  [40]=>
+  string(15) "multi_lease_set"
+  [41]=>
+  string(3) "add"
+  [42]=>
+  string(4) "decr"
+  [43]=>
+  string(4) "incr"
+  [44]=>
+  string(6) "delete"
+  [45]=>
+  string(14) "delete_details"
+  [46]=>
+  string(3) "get"
+  [47]=>
+  string(9) "lease_get"
+  [48]=>
+  string(12) "detailed_get"
+  [49]=>
+  string(9) "get_multi"
+  [50]=>
+  string(15) "lease_get_multi"
+  [51]=>
+  string(7) "replace"
+  [52]=>
+  string(3) "set"
+  [53]=>
+  string(9) "lease_set"
+  [54]=>
+  string(5) "stats"
+  [55]=>
+  string(13) "traffic_stats"
+  [56]=>
+  string(7) "metaget"
+  [57]=>
+  string(15) "get_mcc_version"
+}
+================
+A_phpmcc
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_phpmcc)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(32) "O:8:"A_phpmcc":1:{s:4:"___x";N;}"
+object(A_phpmcc)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

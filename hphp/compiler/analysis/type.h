@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TYPE_H__
-#define __TYPE_H__
+#ifndef incl_HPHP_TYPE_H_
+#define incl_HPHP_TYPE_H_
 
-#include <compiler/hphp.h>
-#include <util/json.h>
-#include <util/case_insensitive.h>
-#include <runtime/base/types.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/json.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/runtime/base/types.h"
 
 
 class TestCodeRun;
@@ -102,7 +102,7 @@ public:
   static TypePtr Some;
 
   typedef hphp_string_imap<TypePtr> TypePtrMap;
-  static const TypePtrMap &GetTypeHintTypes();
+  static const TypePtrMap &GetTypeHintTypes(bool hhType);
 
   /**
    * Uncertain types: types that are ambiguous yet.
@@ -201,7 +201,7 @@ public:
   /**
    * KindOf testing.
    */
-  Type(KindOf kindOf);
+  explicit Type(KindOf kindOf);
   bool is(KindOf kindOf) const { return m_kindOf == kindOf;}
   bool isExactType() const { return IsExactType(m_kindOf); }
   bool mustBe(KindOf kindOf) const { return !(m_kindOf & ~kindOf); }
@@ -267,6 +267,7 @@ private:
   static void ResetTypeHintTypes();
 
   static TypePtrMap s_TypeHintTypes;
+  static TypePtrMap s_HHTypeHintTypes;
 
   const KindOf m_kindOf;
   const std::string m_name;
@@ -274,4 +275,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __TYPE_H__
+#endif // incl_HPHP_TYPE_H_

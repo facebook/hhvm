@@ -1,0 +1,24 @@
+*** Testing array_intersect_ukey() : usage variation ***
+
+-- Testing array_intersect_ukey() function using class with static method as callback --
+array(2) {
+  ["blue"]=>
+  int(1)
+  ["green"]=>
+  int(3)
+}
+array(2) {
+  ["blue"]=>
+  int(1)
+  ["green"]=>
+  int(3)
+}
+
+-- Testing array_intersect_uassoc() function using class with regular method as callback --
+array(2) {
+  ["blue"]=>
+  int(1)
+  ["green"]=>
+  int(3)
+}
+===DONE===

@@ -14,85 +14,85 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/parser/parser.h>
-#include <compiler/type_annotation.h>
-#include <util/parser/hphp.tab.hpp>
-#include <compiler/analysis/file_scope.h>
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/type_annotation.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/compiler/analysis/file_scope.h"
 
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/dynamic_variable.h>
-#include <compiler/expression/static_member_expression.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/dynamic_function_call.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/object_method_expression.h>
-#include <compiler/expression/list_assignment.h>
-#include <compiler/expression/new_object_expression.h>
-#include <compiler/expression/include_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/qop_expression.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/class_constant_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/encaps_list_expression.h>
-#include <compiler/expression/closure_expression.h>
-#include <compiler/expression/yield_expression.h>
-#include <compiler/expression/user_attribute.h>
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/dynamic_variable.h"
+#include "hphp/compiler/expression/static_member_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/dynamic_function_call.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/object_method_expression.h"
+#include "hphp/compiler/expression/list_assignment.h"
+#include "hphp/compiler/expression/new_object_expression.h"
+#include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/user_attribute.h"
 
-#include <compiler/statement/function_statement.h>
-#include <compiler/statement/class_statement.h>
-#include <compiler/statement/interface_statement.h>
-#include <compiler/statement/class_variable.h>
-#include <compiler/statement/class_constant.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/block_statement.h>
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/statement/if_statement.h>
-#include <compiler/statement/while_statement.h>
-#include <compiler/statement/do_statement.h>
-#include <compiler/statement/for_statement.h>
-#include <compiler/statement/switch_statement.h>
-#include <compiler/statement/case_statement.h>
-#include <compiler/statement/break_statement.h>
-#include <compiler/statement/continue_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/global_statement.h>
-#include <compiler/statement/static_statement.h>
-#include <compiler/statement/echo_statement.h>
-#include <compiler/statement/unset_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/foreach_statement.h>
-#include <compiler/statement/catch_statement.h>
-#include <compiler/statement/try_statement.h>
-#include <compiler/statement/finally_statement.h>
-#include <compiler/statement/throw_statement.h>
-#include <compiler/statement/goto_statement.h>
-#include <compiler/statement/label_statement.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include "compiler/statement/typedef_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/interface_statement.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/if_statement.h"
+#include "hphp/compiler/statement/while_statement.h"
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/case_statement.h"
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/compiler/statement/continue_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/global_statement.h"
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/statement/echo_statement.h"
+#include "hphp/compiler/statement/unset_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/statement/catch_statement.h"
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/finally_statement.h"
+#include "hphp/compiler/statement/throw_statement.h"
+#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/statement/label_statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/typedef_statement.h"
 
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/analysis/function_scope.h"
 
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 
-#include <runtime/eval/runtime/file_repository.h>
+#include "hphp/runtime/eval/runtime/file_repository.h"
 
 #ifdef FACEBOOK
-#include <facebook/src/compiler/fb_compiler_hooks.h>
+#include "hphp/facebook/src/compiler/fb_compiler_hooks.h"
 #define RealSimpleFunctionCall FBSimpleFunctionCall
 #else
 #define RealSimpleFunctionCall SimpleFunctionCall
@@ -122,12 +122,12 @@ namespace HPHP {
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(
   EXPRESSION_CONSTRUCTOR_PARAMETERS,
-  const std::string &name, ExpressionListPtr params,
+  const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
     new RealSimpleFunctionCall(
       EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
-      name, params, cls));
+      name, hadBackslash, params, cls));
 }
 
 namespace Compiler {
@@ -141,7 +141,7 @@ StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
   if (!fileName || !*fileName) fileName = "string";
 
   int len = input.size();
-  Scanner scanner(input.data(), len, Option::ScannerType, fileName, true);
+  Scanner scanner(input.data(), len, Option::GetScannerType(), fileName, true);
   Parser parser(scanner, fileName, ar, len);
   parser.m_lambdaMode = lambdaMode;
   if (parser.parse()) {
@@ -157,7 +157,7 @@ StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
 Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
-      m_closureGenerator(false) {
+      m_closureGenerator(false), m_nsState(SeenNothing) {
   string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
@@ -207,10 +207,6 @@ string Parser::errString() {
 
 bool Parser::enableXHP() {
   return Option::EnableXHP;
-}
-
-bool Parser::enableHipHopSyntax() {
-  return Option::EnableHipHopSyntax;
 }
 
 bool Parser::enableFinallyStatement() {
@@ -296,7 +292,7 @@ void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
   }
   ExpressionPtr exp;
   if (constant) {
-    exp = NEW_EXP(ConstantExpression, var->text(), docComment);
+    exp = NEW_EXP(ConstantExpression, var->text(), false, docComment);
   } else {
     exp = NEW_EXP(SimpleVariable, var->text(), docComment);
   }
@@ -337,7 +333,7 @@ void Parser::onStaticMember(Token &out, Token &cls, Token &name) {
 
 void Parser::onRefDim(Token &out, Token &var, Token &offset) {
   if (!var->exp) {
-    var->exp = NEW_EXP(ConstantExpression, var->text());
+    var->exp = NEW_EXP(ConstantExpression, var->text(), var->num() & 2);
   }
   if (!offset->exp) {
     UnaryOpExpressionPtr uop;
@@ -400,12 +396,14 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
   } else {
     const string &s = name.text();
     if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
-      m_hasCallToGetArgs.back() = true;
+      if (m_hasCallToGetArgs.size() > 0) {
+        m_hasCallToGetArgs.back() = true;
+      }
     }
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (BlockScopePtr(), getLocation(), name->text(),
+       (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (fromCompiler) {
       call->setFromCompiler();
@@ -502,7 +500,8 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 // expressions
 
 void Parser::onConstantValue(Token &out, Token &constant) {
-  ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text());
+  ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text(),
+      constant->num() & 2);
   con->onParse(m_ar, m_file);
   out->exp = con;
 }
@@ -527,6 +526,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_LNUMBER:
     case T_DNUMBER:
     case T_LINE:
+    case T_COMPILER_HALT_OFFSET:
     case T_FUNC_C:
     case T_CLASS_C:
       exp = NEW_EXP(ScalarExpression, type, scalar->text());
@@ -543,6 +543,12 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       break;
     default:
       assert(false);
+  }
+  if (type == T_COMPILER_HALT_OFFSET) {
+    // Keep track of this expression for later backpatching
+    // If it doesn't get backpatched (because there was no HALT_COMPILER
+    // then the constant will return (int)"__COMPILER_HALT_OFFSET__" (zero)
+    m_compilerHaltOffsetVec.push_back(exp);
   }
   out->exp = exp;
 }
@@ -676,7 +682,7 @@ void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
 }
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
-  if (op != T_ARRAY && !Option::EnableHipHopSyntax) {
+  if (op != T_ARRAY && !m_scanner.hipHopSyntaxEnabled()) {
     PARSE_ERROR("Typed collection is not enabled");
     return;
   }
@@ -820,13 +826,9 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   FunctionStatementPtr func;
 
   if (funcContext.isGenerator) {
-    string closureName = "0_";
-    if (m_inTrait) {
-      // need to de-dupe
-      closureName += m_clsName + "_";
-    }
-    closureName += getContinuationName(name->text());
-
+    AnonFuncKind fKind = name->text().empty() ?
+      ContinuationFromClosure : Continuation;
+    const string &closureName = getAnonFuncName(fKind);
     Token new_params;
     prepare_generator(this, stmt, new_params);
 
@@ -870,9 +872,11 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   } else {
     string funcName = name->text();
     if (funcName.empty()) {
-      funcName = "{closure}";
+      funcName = getAnonFuncName(Closure);
     } else if (m_lambdaMode) {
-      funcName += "{lambda}";
+      string f;
+      f += GetAnonPrefix(CreateFunction);
+      funcName = f + "_" + funcName;
     }
 
     ExpressionListPtr attrList;
@@ -914,16 +918,18 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
-  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation, var->text(),
+  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
+                              m_scanner.hipHopSyntaxEnabled(), var->text(),
                               ref, defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
   out->exp = expList;
 }
 
 void Parser::onClassStart(int type, Token &name) {
+  const Type::TypePtrMap& typeHintTypes =
+    Type::GetTypeHintTypes(m_scanner.hipHopSyntaxEnabled());
   if (name.text() == "self" || name.text() == "parent" ||
-      Type::GetTypeHintTypes().find(name.text()) !=
-      Type::GetTypeHintTypes().end()) {
+      typeHintTypes.find(name.text()) != typeHintTypes.end()) {
     PARSE_ERROR("Cannot use '%s' as class name as it is reserved",
                 name.text().c_str());
   }
@@ -1124,15 +1130,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   fixStaticVars();
 
   MethodStatementPtr mth;
-
   if (funcContext.isGenerator) {
-    string closureName = "0_";
-    if (m_inTrait) {
-      // need to de-dupe
-      closureName += m_clsName + "_";
-    }
-    closureName += getContinuationName(name->text());
-
+    const string &closureName = getAnonFuncName(ParserBase::Continuation);
     Token new_params;
     prepare_generator(this, stmt, new_params);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
@@ -1197,13 +1196,11 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
 ///////////////////////////////////////////////////////////////////////////////
 // statements
 
-void Parser::saveParseTree(Token &tree) {
-  if (tree->stmt) {
-    m_tree = dynamic_pointer_cast<StatementList>(tree->stmt);
-  } else {
-    m_tree = NEW_STMT0(StatementList);
-  }
+void Parser::initParseTree() {
+  m_tree = NEW_STMT0(StatementList);
+}
 
+void Parser::finiParseTree() {
   if (m_staticVars.size()) fixStaticVars();
   FunctionScopePtr pseudoMain = m_file->setTree(m_ar, m_tree);
   completeScope(pseudoMain);
@@ -1215,8 +1212,23 @@ void Parser::saveParseTree(Token &tree) {
   pseudoMain->getStmt()->setLocation(loc);
 }
 
+void Parser::onHaltCompiler() {
+  if (m_nsState == InsideNamespace && !m_nsFileScope) {
+    error("__HALT_COMPILER() can only be used from the outermost scope");
+    return;
+  }
+  // Backpatch instances of __COMPILER_HALT_OFFSET__
+  for(auto &cho : m_compilerHaltOffsetVec) {
+     cho->setCompilerHaltOffset(m_scanner.getLocation()->cursor);
+  }
+}
+
 void Parser::onStatementListStart(Token &out) {
   out.reset();
+}
+
+void Parser::addTopStatement(Token &new_stmt) {
+  addStatement(m_tree, new_stmt->stmt);
 }
 
 void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
@@ -1225,18 +1237,21 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
   } else {
     out->stmt = stmts->stmt;
   }
+  addStatement(out->stmt, new_stmt->stmt);
+}
 
+void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
   assert(!m_prependingStatements.empty());
   vector<StatementPtr> &prepending = m_prependingStatements.back();
   if (!prepending.empty()) {
     assert(prepending.size() == 1);
     for (unsigned i = 0; i < prepending.size(); i++) {
-      out->stmt->addElement(prepending[i]);
+      stmt->addElement(prepending[i]);
     }
     prepending.clear();
   }
-  if (new_stmt->stmt) {
-    out->stmt->addElement(new_stmt->stmt);
+  if (new_stmt) {
+    stmt->addElement(new_stmt);
   }
 }
 
@@ -1356,17 +1371,13 @@ void Parser::onReturn(Token &out, Token *expr) {
 
 static void invalidYield(LocationPtr loc) {
   ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(), loc, "yield",
+                                           false,
                                            ExpressionListPtr(),
                                            ExpressionPtr()));
   Compiler::Error(Compiler::InvalidYield, exp);
 }
 
 bool Parser::setIsGenerator() {
-  if (!Option::EnableHipHopSyntax) {
-    PARSE_ERROR("Yield is not enabled");
-    return false;
-  }
-
   if (m_funcContexts.empty()) {
     invalidYield(getLocation());
     PARSE_ERROR("Yield can only be used inside a function");
@@ -1576,8 +1587,8 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
     expList = NEW_EXP0(ExpressionList);
   }
   expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
-                              param->text(), ref,
-                              ExpressionPtr(), ExpressionPtr()));
+                              m_scanner.hipHopSyntaxEnabled(), param->text(),
+                              ref, ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
 
@@ -1594,7 +1605,7 @@ void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
 }
 
 void Parser::onTypeAnnotation(Token& out, const Token& name,
-		                      const Token& typeArgs) {
+                                          const Token& typeArgs) {
   out.set(name.num(), name.text());
   out.typeAnnotation = TypeAnnotationPtr(
     new TypeAnnotation(name.text(), typeArgs.typeAnnotation));
@@ -1637,6 +1648,115 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// namespace support
+
+void Parser::nns(int token) {
+  if (m_nsState == SeenNamespaceStatement && token != ';') {
+    error("No code may exist outside of namespace {}: %s",
+          getMessage().c_str());
+    return;
+  }
+  if (m_nsState == SeenNothing && token != T_DECLARE) {
+    m_nsState = SeenNonNamespaceStatement;
+  }
+}
+
+void Parser::onNamespaceStart(const std::string &ns,
+                              bool file_scope /* =false */) {
+  if (m_nsState == SeenNonNamespaceStatement) {
+    error("Namespace declaration statement has to be the very first "
+          "statement in the script: %s", getMessage().c_str());
+    return;
+  }
+  if (m_nsState != SeenNothing && file_scope != m_nsFileScope) {
+    error("Cannot mix bracketed namespace declarations with unbracketed "
+          "namespace declarations");
+  }
+
+  m_nsState = InsideNamespace;
+  m_nsFileScope = file_scope;
+  m_aliases.clear();
+  pushComment();
+
+  m_namespace = ns;
+}
+
+void Parser::onNamespaceEnd() {
+  m_nsState = SeenNamespaceStatement;
+}
+
+void Parser::onUse(const std::string &ns, const std::string &as) {
+  if (m_aliases.find(as) != m_aliases.end()) {
+    error("Cannot use %s as %s because the name is already in use: %s",
+          ns.c_str(), as.c_str(), getMessage().c_str());
+    return;
+  }
+  string key = as;
+  if (key.empty()) {
+    size_t pos = ns.rfind(NAMESPACE_SEP);
+    if (pos == string::npos) {
+      key = ns;
+    } else {
+      key = ns.substr(pos + 1);
+    }
+  }
+  m_aliases[key] = ns;
+}
+
+std::string Parser::nsDecl(const std::string &name) {
+  if (m_namespace.empty()) {
+    return name;
+  }
+  return m_namespace + NAMESPACE_SEP + name;
+}
+
+std::string Parser::resolve(const std::string &ns, bool cls) {
+  string alias = ns;
+  size_t pos = ns.find(NAMESPACE_SEP);
+  if (pos != string::npos) {
+    alias = ns.substr(0, pos);
+  }
+
+  hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
+  if (iter != m_aliases.end()) {
+    // Was it a namespace alias?
+    if (pos != string::npos) {
+      return iter->second + ns.substr(pos);
+    }
+    // Only classes can appear directly in "use" statements
+    if (cls) {
+      return iter->second;
+    }
+  }
+
+  // Classes don't fallback to the global namespace.
+  if (cls) {
+    if (!strcasecmp("self", ns.c_str()) ||
+        !strcasecmp("parent", ns.c_str())) {
+      return ns;
+    }
+    return nsDecl(ns);
+  }
+
+  // if qualified name, prepend current namespace
+  if (pos != string::npos) {
+    return nsDecl(ns);
+  }
+
+  // unqualified name in global namespace
+  if (m_namespace.empty()) {
+    return ns;
+  }
+
+  if (!strcasecmp("true", ns.c_str()) ||
+      !strcasecmp("false", ns.c_str()) ||
+      !strcasecmp("null", ns.c_str())) {
+    return ns;
+  }
+  return nsDecl(ns);
+}
+
 void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {
   GotoStatement *gs = (GotoStatement*) stmt;
   assert(gs);
@@ -1658,7 +1778,7 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
-    if (!Option::EnableHipHopSyntax && !m_scanner.isStrictMode()) {
+    if (!m_scanner.hipHopSyntaxEnabled()) {
       PARSE_ERROR("Type hint is not enabled");
       return false;
     }

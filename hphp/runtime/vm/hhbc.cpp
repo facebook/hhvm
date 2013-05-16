@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_variable.h>
-#include <runtime/vm/hhbc.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/stats.h>
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/stats.h"
 #include <sstream>
 
 namespace HPHP {
-namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool isValidOpcode(Opcode op) {
@@ -490,6 +489,7 @@ bool pushesActRec(Opcode opcode) {
   switch (opcode) {
     case OpFPushFunc:
     case OpFPushFuncD:
+    case OpFPushFuncU:
     case OpFPushObjMethod:
     case OpFPushObjMethodD:
     case OpFPushClsMethod:
@@ -968,6 +968,5 @@ int instrSpToArDelta(const Opcode* opcode) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }
 

@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_FILE_REPOSITORY_H__
-#define __EVAL_FILE_REPOSITORY_H__
+#ifndef incl_HPHP_EVAL_FILE_REPOSITORY_H_
+#define incl_HPHP_EVAL_FILE_REPOSITORY_H_
 
 #include <time.h>
 #include <sys/stat.h>
-#include <util/lock.h>
+#include "hphp/util/lock.h"
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/md5.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/md5.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/string_util.h"
 
 namespace HPHP {
-namespace VM {
 class Unit;
 
 /* UnitVisitor: abstract interface for running code on each Unit. */
@@ -36,7 +35,6 @@ public:
   virtual ~UnitVisitor() { }
   virtual void operator()(Unit *u) = 0;
 };
-}
 }
 
 namespace HPHP {
@@ -55,7 +53,7 @@ class PhpFile {
 public:
   PhpFile(const std::string &fileName, const std::string &srcRoot,
           const std::string &relPath, const std::string &md5,
-          HPHP::VM::Unit* unit);
+          HPHP::Unit* unit);
   ~PhpFile();
   void incRef();
   int decRef(int num = 1);
@@ -66,7 +64,7 @@ public:
   const std::string &getSrcRoot() const { return m_srcRoot; }
   const std::string &getRelPath() const { return m_relPath; }
   const std::string &getMd5() const { return m_md5; }
-  HPHP::VM::Unit* unit() const { return m_unit; }
+  HPHP::Unit* unit() const { return m_unit; }
   int getId() const { return m_id; }
   void setId(int id);
 
@@ -78,7 +76,7 @@ private:
   std::string m_srcRoot;
   std::string m_relPath;
   std::string m_md5;
-  HPHP::VM::Unit* m_unit;
+  HPHP::Unit* m_unit;
 };
 
 class PhpFileWrapper {
@@ -156,9 +154,8 @@ public:
   static PhpFile *readHhbc(const std::string &name, const FileInfo &fileInfo);
   static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);
   static String translateFileName(StringData *file);
-  static void enableIntercepts();
   static void onDelete(PhpFile *f);
-  static void forEachUnit(VM::UnitVisitor& uit);
+  static void forEachUnit(UnitVisitor& uit);
   static size_t getLoadedFiles();
 private:
   static ParsedFilesMap s_files;
@@ -177,4 +174,4 @@ String resolveVmInclude(StringData* path, const char* currentDir,
 }
 }
 
-#endif /* __EVAL_FILE_REPOSITORY_H__ */
+#endif /* incl_HPHP_EVAL_FILE_REPOSITORY_H_ */

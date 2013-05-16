@@ -15,26 +15,26 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_hash.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/hash/hash_md.h>
-#include <runtime/ext/hash/hash_sha.h>
-#include <runtime/ext/hash/hash_ripemd.h>
-#include <runtime/ext/hash/hash_whirlpool.h>
-#include <runtime/ext/hash/hash_tiger.h>
-#include <runtime/ext/hash/hash_snefru.h>
-#include <runtime/ext/hash/hash_gost.h>
-#include <runtime/ext/hash/hash_adler32.h>
-#include <runtime/ext/hash/hash_crc32.h>
-#include <runtime/ext/hash/hash_haval.h>
-
-#include <runtime/ext/hash/hash_furc.h>
-#include <runtime/ext/hash/hash_murmur.h>
+#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/hash/hash_md.h"
+#include "hphp/runtime/ext/hash/hash_sha.h"
+#include "hphp/runtime/ext/hash/hash_ripemd.h"
+#include "hphp/runtime/ext/hash/hash_whirlpool.h"
+#include "hphp/runtime/ext/hash/hash_tiger.h"
+#include "hphp/runtime/ext/hash/hash_snefru.h"
+#include "hphp/runtime/ext/hash/hash_gost.h"
+#include "hphp/runtime/ext/hash/hash_adler32.h"
+#include "hphp/runtime/ext/hash/hash_crc32.h"
+#include "hphp/runtime/ext/hash/hash_haval.h"
+#include "hphp/runtime/ext/hash/hash_fnv1.h"
+#include "hphp/runtime/ext/hash/hash_furc.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
 #else
-#include <memcache/ch/hash.h>
+#include "memcache/ch/hash.h"
 #endif
 
 namespace HPHP {
@@ -51,6 +51,7 @@ public:
     HashEngines["md4"]        = HashEnginePtr(new hash_md4());
     HashEngines["md5"]        = HashEnginePtr(new hash_md5());
     HashEngines["sha1"]       = HashEnginePtr(new hash_sha1());
+    HashEngines["sha224"]     = HashEnginePtr(new hash_sha224());
     HashEngines["sha256"]     = HashEnginePtr(new hash_sha256());
     HashEngines["sha384"]     = HashEnginePtr(new hash_sha384());
     HashEngines["sha512"]     = HashEnginePtr(new hash_sha512());
@@ -59,12 +60,22 @@ public:
     HashEngines["ripemd256"]  = HashEnginePtr(new hash_ripemd256());
     HashEngines["ripemd320"]  = HashEnginePtr(new hash_ripemd320());
     HashEngines["whirlpool"]  = HashEnginePtr(new hash_whirlpool());
+#ifdef FACEBOOK
+    HashEngines["tiger128,3-fb"]
+                              = HashEnginePtr(new hash_tiger(true, 128, true));
+    // Temporarily leave tiger128,3 algo inverting its hash output
+    // to retain BC pending conversion of user code to correct endianness
+    // sgolemon(2013-04-30)
+    HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128, true));
+#else
     HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128));
+#endif
     HashEngines["tiger160,3"] = HashEnginePtr(new hash_tiger(true, 160));
     HashEngines["tiger192,3"] = HashEnginePtr(new hash_tiger(true, 192));
     HashEngines["tiger128,4"] = HashEnginePtr(new hash_tiger(false, 128));
     HashEngines["tiger160,4"] = HashEnginePtr(new hash_tiger(false, 160));
     HashEngines["tiger192,4"] = HashEnginePtr(new hash_tiger(false, 192));
+
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
     HashEngines["adler32"]    = HashEnginePtr(new hash_adler32());
@@ -85,6 +96,10 @@ public:
     HashEngines["haval192,5"] = HashEnginePtr(new hash_haval(5,192));
     HashEngines["haval224,5"] = HashEnginePtr(new hash_haval(5,224));
     HashEngines["haval256,5"] = HashEnginePtr(new hash_haval(5,256));
+    HashEngines["fnv132"]     = HashEnginePtr(new hash_fnv132(false));
+    HashEngines["fnv1a32"]    = HashEnginePtr(new hash_fnv132(true));
+    HashEngines["fnv164"]     = HashEnginePtr(new hash_fnv164(false));
+    HashEngines["fnv1a64"]    = HashEnginePtr(new hash_fnv164(true));
   }
 };
 
@@ -376,7 +391,7 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
 
 int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   len = std::max(std::min(len, key.size()), 0);
-  return furc_hash(key, len, nPart);
+  return furc_hash(key.data(), len, nPart);
 }
 
 bool f_furchash_hphp_ext_supported() {
@@ -385,7 +400,7 @@ bool f_furchash_hphp_ext_supported() {
 
 int64_t f_hphp_murmurhash(CStrRef key, int len, int seed) {
   len = std::max(std::min(len, key.size()), 0);
-  return murmur_hash_64A(key, len, seed);
+  return murmur_hash_64A(key.data(), len, seed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

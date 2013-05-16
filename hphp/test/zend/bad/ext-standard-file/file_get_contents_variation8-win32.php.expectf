@@ -1,0 +1,42 @@
+*** Testing file_get_contents() : variation ***
+
+-- Filename: -1 --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: TRUE --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: FALSE --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: NULL --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: "" --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: " " --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: \0 --
+HipHop Warning: %a
+NULL
+
+-- Filename: array() --
+HipHop Warning: %a
+NULL
+
+-- Filename: /no/such/file/dir --
+HipHop Warning: %a
+bool(false)
+
+-- Filename: php/php --
+HipHop Warning: %a
+bool(false)
+===Done===

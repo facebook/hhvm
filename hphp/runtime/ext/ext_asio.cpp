@@ -15,22 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-void f_asio_enter_context() {
-  // TODO: remove from API
-}
-
-void f_asio_exit_context() {
-  // TODO: remove from API
-}
 
 int f_asio_get_current_context_idx() {
   return AsioSession::Get()->getCurrentContextIdx();
@@ -59,28 +51,17 @@ Object f_asio_get_running() {
   return AsioSession::Get()->getCurrentWaitHandle();
 }
 
-Object f_asio_get_current() {
-  return AsioSession::Get()->getCurrentWaitHandle();
-}
-
 void f_asio_set_on_failed_callback(CVarRef on_failed_cb) {
   if (!on_failed_cb.isNull() && !on_failed_cb.instanceof(c_Closure::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set asio on failed callback: on_failed_cb not a closure"));
     throw e;
   }
-
   AsioSession::Get()->setOnFailedCallback(on_failed_cb.getObjectDataOrNull());
 }
 
 void f_asio_set_on_started_callback(CVarRef on_started_cb) {
-  if (!on_started_cb.isNull() && !on_started_cb.instanceof(c_Closure::s_cls)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set asio on started callback: on_started_cb not a closure"));
-    throw e;
-  }
-
-  AsioSession::Get()->setOnStartedCallback(on_started_cb.getObjectDataOrNull());
+  c_ContinuationWaitHandle::ti_setoncreatecallback(on_started_cb);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

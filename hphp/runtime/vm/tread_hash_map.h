@@ -13,18 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_TREAD_HASH_MAP_H_
-#define incl_VM_TREAD_HASH_MAP_H_
+#ifndef incl_HPHP_VM_TREAD_HASH_MAP_H_
+#define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <utility>
-#include "util/util.h"
-#include "util/atomic.h"
+#include "hphp/util/util.h"
+#include "hphp/util/atomic.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -239,6 +239,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

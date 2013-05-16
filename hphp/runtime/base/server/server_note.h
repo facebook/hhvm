@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HPHP_SERVER_NOTE_H__
-#define __HPHP_SERVER_NOTE_H__
+#ifndef incl_HPHP_SERVER_NOTE_H_
+#define incl_HPHP_SERVER_NOTE_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,4 +36,4 @@ void get_server_note() ATTRIBUTE_COLD;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SERVER_NOTE_H__
+#endif // incl_HPHP_SERVER_NOTE_H_

@@ -16,35 +16,35 @@
 
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/construct.h>
-#include <compiler/expression/class_constant_expression.h>
-#include <compiler/expression/closure_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/option.h>
-#include <compiler/parser/parser.h>
-#include <compiler/statement/interface_statement.h>
-#include <compiler/statement/function_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/class_info.h>
-#include <compiler/statement/class_variable.h>
-#include <compiler/statement/class_constant.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/util.h>
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/statement/interface_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/util.h"
 
 using namespace HPHP;
 using std::map;
@@ -61,8 +61,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
     m_persistent(false), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0),
-    m_needsEnableDestructor(0) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -93,7 +92,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
-    m_needsInit(true), m_knownBases(0), m_needsEnableDestructor(0) {
+    m_needsInit(true), m_knownBases(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -754,8 +753,8 @@ const string& ClassScope::getNewGeneratorName(
   if (mapIt != genRenameMap.end()) {
     return mapIt->second;
   }
-  string newName = lexical_cast<string>(genFuncScope->getNewID()) +
-    "_" + oldName;
+  string newName = oldName + "_" +
+    lexical_cast<string>(genFuncScope->getNewID());
   genRenameMap[oldName] = newName;
   return genRenameMap[oldName];
 }
@@ -778,7 +777,7 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
     const string &oldGenName =
       dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
 
-    MethodStatementPtr origGenStmt = importedMethods[Util::toLower(oldGenName)];
+    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
     assert(origGenStmt);
 
     const string &newGenName = origGenStmt->getOriginalName();
@@ -1429,36 +1428,6 @@ bool ClassScope::addFunction(AnalysisResultConstPtr ar,
   func = funcScope;
   m_functionsVec.push_back(funcScope);
   return true;
-}
-
-/*
- * A class without a constructor, but with a destructor may need a special
- * create method to clear the NoDestructor flag - but only if
- * there is a constructor somewhere above us, and if /that/ constructor
- * doesnt need to clear the NoDestructor flag.
- */
-bool ClassScope::needsEnableDestructor(
-  AnalysisResultConstPtr ar) const {
-  if (m_needsEnableDestructor & 2) {
-    return m_needsEnableDestructor & 1;
-  }
-  bool ret =
-    (!derivesFromRedeclaring() &&
-     !getAttribute(HasConstructor) &&
-     !getAttribute(ClassNameConstructor));
-
-  if (ret) {
-    if (!getAttribute(HasDestructor) && !m_parent.empty()) {
-      if (ClassScopePtr parent = getParentScope(ar)) {
-        if (!parent->needsEnableDestructor(ar)) {
-          ret = false;
-        }
-      }
-    }
-  }
-
-  m_needsEnableDestructor = ret ? 3 : 2;
-  return ret;
 }
 
 bool ClassScope::canSkipCreateMethod(AnalysisResultConstPtr ar) const {

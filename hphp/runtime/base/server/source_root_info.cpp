@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/eval/debugger/debugger.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
 
 using std::map;
 
@@ -224,8 +224,8 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
           res.write(data, n);
           break;
         }
-      case 's': res << m_sandbox; break;
-      case 'u': res << m_user; break;
+      case 's': res << m_sandbox.c_str(); break;
+      case 'u': res << m_user.c_str(); break;
       default: res << c; break;
       }
       control = false;
@@ -247,10 +247,12 @@ string SourceRootInfo::path() const {
   }
 }
 
+static const StaticString s_PHP_ROOT("PHP_ROOT");
+
 string& SourceRootInfo::initPhpRoot() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   Variant &server = g->GV(_SERVER);
-  Variant v = server.rvalAt("PHP_ROOT");
+  Variant v = server.rvalAt(s_PHP_ROOT);
   if (v.isString()) {
     *s_phproot.getCheck() = string(v.asCStrRef().data()) + string("/");
   } else {

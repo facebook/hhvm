@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_BASE_MEMORY_USAGE_STATS_H_
-#define incl_RUNTIME_BASE_MEMORY_USAGE_STATS_H_
+#ifndef incl_HPHP_RUNTIME_BASE_MEMORY_USAGESTATS_H_
+#define incl_HPHP_RUNTIME_BASE_MEMORY_USAGESTATS_H_
 
 namespace HPHP {
 

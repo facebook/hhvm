@@ -1,0 +1,7 @@
+*** Testing stat() on directory after using is_dir() on it ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PIPE_H__
-#define __HPHP_PIPE_H__
+#ifndef incl_HPHP_PIPE_H_
+#define incl_HPHP_PIPE_H_
 
-#include <runtime/base/file/plain_file.h>
+#include "hphp/runtime/base/file/plain_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,4 +47,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_PIPE_H__
+#endif // incl_HPHP_PIPE_H_

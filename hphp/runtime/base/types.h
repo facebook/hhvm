@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TYPES_H__
-#define __HPHP_TYPES_H__
+#ifndef incl_HPHP_TYPES_H_
+#define incl_HPHP_TYPES_H_
 
-#include <util/base.h>
-#include <util/thread_local.h>
-#include <util/mutex.h>
-#include <util/case_insensitive.h>
+#include "hphp/util/base.h"
+#include "hphp/util/thread_local.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/case_insensitive.h"
 #include <vector>
-#include <runtime/base/macros.h>
-#include <runtime/base/memory/memory_manager.h>
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
@@ -321,8 +321,9 @@ enum Type {
   VectorType = 1,
   MapType = 2,
   StableMapType = 3,
-  PairType = 4,
-  MaxNumTypes = 5
+  SetType = 4,
+  PairType = 5,
+  MaxNumTypes = 6
 };
 }
 
@@ -374,9 +375,7 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-namespace VM {
   class Class;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
@@ -388,12 +387,14 @@ public:
   static const ssize_t SignaledFlag         = 1 << 2;
   static const ssize_t EventHookFlag        = 1 << 3;
   static const ssize_t PendingExceptionFlag = 1 << 4;
-  static const ssize_t LastFlag             = PendingExceptionFlag;
+  static const ssize_t InterceptFlag        = 1 << 5;
+  static const ssize_t LastFlag             = InterceptFlag;
 
   RequestInjectionData()
     : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
-      debugger(false), debuggerIdle(0), dummySandbox(false),
-      debuggerIntr(false), coverage(false) {
+      m_debugger(false), m_dummySandbox(false),
+      m_debuggerIntr(false), m_coverage(false),
+      m_jit(false) {
   }
 
   inline volatile ssize_t* getConditionFlags() {
@@ -409,13 +410,37 @@ public:
 
   time_t started;      // when a request was started
   int timeoutSeconds;  // how many seconds to timeout
+ private:
+  bool m_debugger;       // whether there is a DebuggerProxy attached to me
+  bool m_dummySandbox;   // indicating it is from a dummy sandbox thread
+  bool m_debuggerIntr;   // indicating we should force interrupt for debugger
+  bool m_coverage;       // is coverage being collected
+  bool m_jit;            // is the jit enabled
+ public:
+  bool getJit() const { return m_jit; }
+  bool getDebugger() const { return m_debugger; }
+  void setDebugger(bool d) {
+    m_debugger = d;
+    updateJit();
+  }
+  static uint32_t debuggerReadOnlyOffset() {
+    return offsetof(RequestInjectionData, m_debugger);
+  }
+  bool getDebuggerIntr() const { return m_debuggerIntr; }
+  void setDebuggerIntr(bool d) {
+    m_debuggerIntr = d;
+    updateJit();
+  }
+  bool getCoverage() const { return m_coverage; }
+  void setCoverage(bool flag) {
+    m_coverage = flag;
+    updateJit();
+  }
+  bool getDummySandbox() const { return m_dummySandbox; }
+  void setDummySandbox(bool ds) { m_dummySandbox = ds; }
+  void updateJit();
 
-  bool debugger;       // whether there is a DebuggerProxy attached to me
-  int  debuggerIdle;   // skipping this many interrupts while proxy is idle
-  bool dummySandbox;   // indicating it is from a dummy sandbox thread
-  bool debuggerIntr;   // indicating we should force interrupt for debugger
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
-  bool coverage;       // is coverage being collected
 
   void reset();
 
@@ -426,19 +451,18 @@ public:
   void clearEventHookFlag();
   void setPendingExceptionFlag();
   void clearPendingExceptionFlag();
+  void setInterceptFlag();
+  void clearInterceptFlag();
   ssize_t fetchAndClearFlags();
 
   void onSessionInit();
 };
 
-namespace VM {
 class GlobalNameValueTableWrapper;
-}
-class FrameInjection;
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);
@@ -464,7 +488,6 @@ public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   std::vector<ObjectAllocatorBase *> m_allocators;
-  FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection.  m_stacklimit is the lowest
@@ -537,7 +560,7 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin_functions.cpp
-extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
+extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
@@ -552,7 +575,7 @@ public:
     m_info->m_executing =
       builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
   }
-  ExecutionProfiler(ThreadInfo::Executing executing) {
+  explicit ExecutionProfiler(ThreadInfo::Executing executing) {
     m_info = ThreadInfo::s_threadInfo.getNoCheck();
     m_executing = m_info->m_executing;
     m_info->m_executing = executing;
@@ -589,4 +612,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TYPES_H__
+#endif // incl_HPHP_TYPES_H_

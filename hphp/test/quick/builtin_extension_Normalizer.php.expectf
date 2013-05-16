@@ -1,0 +1,38 @@
+Normalizer
+object(Normalizer)#1 (0) {
+}
+string(22) "O:10:"Normalizer":0:{}"
+object(Normalizer)#2 (0) {
+}
+array(3) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isnormalized"
+  [2]=>
+  string(9) "normalize"
+}
+================
+A_Normalizer
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_Normalizer)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(37) "O:12:"A_Normalizer":1:{s:4:"___x";N;}"
+object(A_Normalizer)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

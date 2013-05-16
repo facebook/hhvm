@@ -1,0 +1,6 @@
+*** Testing get_loaded_extensions() : basic functionality ***
+Get loaded extensions
+array(%d) {
+%a
+}
+===DONE===

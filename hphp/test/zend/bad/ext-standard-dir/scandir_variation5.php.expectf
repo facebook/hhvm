@@ -1,0 +1,12 @@
+*** Testing scandir() : usage variations ***
+
+-- After restricting 1st level parent directory --
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+
+-- After restricting parent directory --
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+===DONE===

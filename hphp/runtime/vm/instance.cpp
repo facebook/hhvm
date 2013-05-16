@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/base_includes.h"
-#include "runtime/base/variable_serializer.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/instance.h"
-#include "runtime/vm/object_allocator_sizes.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/ext/ext_collections.h"
-#include "system/lib/systemlib.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/object_allocator_sizes.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
-namespace VM {
 
 static StaticString s___get(LITSTR_INIT("__get"));
 static StaticString s___set(LITSTR_INIT("__set"));
@@ -38,8 +37,22 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
 TRACE_SET_MOD(runtime);
 
-int HPHP::VM::Instance::ObjAllocatorSizeClassCount =
-  HPHP::VM::InitializeAllocators();
+int HPHP::Instance::ObjAllocatorSizeClassCount =
+  HPHP::InitializeAllocators();
+
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+                    size_t nProps) {
+  auto* dst = propVec;
+  auto* src = propData;
+  for (; src != propData + nProps; ++src, ++dst) {
+    *dst = *src;
+    // m_aux.u_deepInit is true for properties that need "deep" initialization
+    if (src->deepInit()) {
+      tvIncRef(dst);
+      collectionDeepCopyTV(dst);
+    }
+  }
+}
 
 TypedValue* Instance::propVec() {
   uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
@@ -62,7 +75,7 @@ Instance* Instance::callCustomInstanceInit() {
     // reasonable refcount.
     try {
       incRefCount();
-      g_vmContext->invokeFunc(&tv, init, Array::Create(), this);
+      g_vmContext->invokeFuncFew(&tv, init, this);
       decRefCount();
       assert(!IS_REFCOUNTED_TYPE(tv.m_type));
     } catch (...) {
@@ -611,7 +624,7 @@ Variant Instance::t___destruct() {
   const Func* method = m_cls->lookupMethod(sd__destruct);
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method, Array::Create(), this);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this);
     return v;
   } else {
     return uninit_null();
@@ -623,8 +636,10 @@ Variant Instance::t___call(Variant v_name, Variant v_arguments) {
   const Func* method = m_cls->lookupMethod(sd__call);
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR2(v_name, v_arguments), this);
+    TypedValue args[2];
+    tvDup(v_name.asTypedValue(), args + 0);
+    tvDup(v_arguments.asTypedValue(), args + 1);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 2, args);
     return v;
   } else {
     return uninit_null();
@@ -648,8 +663,9 @@ Variant Instance::t___get(Variant v_name) {
   const Func* method = m_cls->lookupMethod(s___get.get());
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+    TypedValue args[1];
+    tvDup(v_name.asTypedValue(), args + 0);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
     return v;
   } else {
     return uninit_null();
@@ -660,8 +676,9 @@ bool Instance::t___isset(Variant v_name) {
   const Func* method = m_cls->lookupMethod(s___isset.get());
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+    TypedValue args[1];
+    tvDup(v_name.asTypedValue(), args + 0);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
     return v;
   } else {
     return uninit_null();
@@ -672,8 +689,9 @@ Variant Instance::t___unset(Variant v_name) {
   const Func* method = m_cls->lookupMethod(s___unset.get());
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+    TypedValue args[1];
+    tvDup(v_name.asTypedValue(), args + 0);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
     return v;
   } else {
     return uninit_null();
@@ -685,7 +703,7 @@ Variant Instance::t___sleep() {
   const Func *method = m_cls->lookupMethod(sd__sleep);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
     clearAttribute(HasSleep);
@@ -698,7 +716,7 @@ Variant Instance::t___wakeup() {
   const Func *method = m_cls->lookupMethod(sd__wakeup);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
     return uninit_null();
@@ -710,8 +728,9 @@ Variant Instance::t___set_state(Variant v_properties) {
   const Func* method = m_cls->lookupMethod(sd__set_state);
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_properties), this);
+    TypedValue args[1];
+    tvDup(v_properties.asTypedValue(), args + 0);
+    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
     return v;
   } else {
     return false;
@@ -722,7 +741,7 @@ String Instance::t___tostring() {
   const Func *method = m_cls->getToString();
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFuncFew(&tv, method, this);
     if (!IS_STRING_TYPE(tv.m_type)) {
       void (*notify_user)(const char *, ...) = &raise_error;
       if (hphpiCompat) {
@@ -745,7 +764,7 @@ Variant Instance::t___clone() {
   const Func *method = m_cls->lookupMethod(sd__clone);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFuncFew(&tv, method, this);
     return false;
   } else {
     return false;
@@ -789,4 +808,4 @@ ObjectData* Instance::cloneImpl() {
   return obj;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

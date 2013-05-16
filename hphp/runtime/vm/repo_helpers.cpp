@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/repo.h"
-#include "runtime/vm/repo_helpers.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
@@ -449,4 +448,4 @@ void RepoTxnQuery::exec() {
   m_txn.exec(*this);
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

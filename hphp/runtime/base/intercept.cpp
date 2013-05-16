@@ -13,21 +13,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/intercept.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/unit.h>
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/event_hook.h"
 
-#include <util/parser/parser.h>
-#include <util/lock.h>
+#include "hphp/util/parser/parser.h"
+#include "hphp/util/lock.h"
 
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <util/trace.h>
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;
 
@@ -96,6 +97,8 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
     return true;
   }
 
+  EventHook::EnableIntercept();
+
   Array handler = CREATE_VECTOR2(callback, data);
 
   if (name.empty()) {
@@ -106,18 +109,6 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
   }
 
   Lock lock(s_mutex);
-  VM::Func::enableIntercept();
-  TranslatorX64* tx64 = TranslatorX64::Get();
-  if (!tx64->interceptsEnabled()) {
-    tx64->acquireWriteLease(true);
-    if (!tx64->interceptsEnabled()) {
-      tx64->enableIntercepts();
-      // redirect all existing generated prologues so that they first
-      // call the intercept helper
-      Eval::FileRepository::enableIntercepts();
-    }
-    tx64->dropWriteLease();
-  }
   if (name.empty()) {
     for (RegisteredFlagsMap::iterator iter =
            s_registered_flags.begin();
@@ -204,7 +195,7 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
 }
 
 String get_renamed_function(CStrRef name) {
-  HPHP::VM::Func* f = HPHP::VM::Unit::lookupFunc(name.get());
+  HPHP::Func* f = HPHP::Unit::lookupFunc(name.get());
   if (f) {
     return f->nameRef();
   }

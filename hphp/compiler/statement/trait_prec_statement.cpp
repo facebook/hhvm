@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/class_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/class_scope.h>
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/class_scope.h"
 
 using namespace HPHP;
 

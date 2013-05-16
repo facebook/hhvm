@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/option.h>
-#include <compiler/expression/static_member_expression.h>
-#include <compiler/analysis/function_scope.h>
-#include <util/parser/hphp.tab.hpp>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/static_member_expression.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 using namespace HPHP;
 

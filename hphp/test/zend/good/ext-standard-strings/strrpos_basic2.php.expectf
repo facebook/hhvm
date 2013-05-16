@@ -1,0 +1,15 @@
+*** Testing strrpos() function: basic functionality ***
+-- With all arguments --
+int(0)
+bool(false)
+int(7)
+int(7)
+int(0)
+int(0)
+bool(false)
+int(0)
+bool(false)
+int(8)
+int(8)
+bool(false)
+*** Done ***

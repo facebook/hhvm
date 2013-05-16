@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_xmlwriter.h>
+#include "hphp/runtime/ext/ext_xmlwriter.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
@@ -282,7 +282,7 @@ static xmlChar *xmls(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_XMLWriter::c_XMLWriter(VM::Class* cb) :
+c_XMLWriter::c_XMLWriter(Class* cb) :
     ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
 }
 

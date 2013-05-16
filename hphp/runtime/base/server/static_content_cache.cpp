@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/runtime_option.h>
-#include <util/timer.h>
-#include <util/logger.h>
-#include <util/process.h>
-#include <util/util.h>
-#include <util/compression.h>
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/util.h"
+#include "hphp/util/compression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

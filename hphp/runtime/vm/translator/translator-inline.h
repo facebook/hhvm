@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRANSLATOR_INLINE_H_
-#define incl_TRANSLATOR_INLINE_H_
+#ifndef incl_HPHP_TRANSLATOR_INLINE_H_
+#define incl_HPHP_TRANSLATOR_INLINE_H_
 
-#include "translator.h"
+#include "hphp/runtime/vm/translator/translator.h"
 #include <boost/noncopyable.hpp>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/execution_context.h"
 
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
@@ -29,8 +29,6 @@
  * translation-related helpers cannot live in translator.h.
  */
 namespace HPHP   {
-namespace VM     {
-namespace Transl {
 
 /*
  * Accessors for the virtual machine registers, both rvalues and
@@ -48,13 +46,15 @@ static inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
 static inline const Func* curFunc() { return curFrame()->m_func; }
 static inline const Unit* curUnit() { return curFunc()->unit(); }
 static inline Class* curClass() {
-  const Func* func = curFunc();
-  Class* clss = func->cls();
-  if (func->isPseudoMain() || func->isTraitMethod() || clss == nullptr) {
+  const auto* func = curFunc();
+  auto* cls = func->cls();
+  if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
     return nullptr;
   }
-  return clss;
+  return cls;
 }
+
+namespace Transl {
 
 static inline uintptr_t tlsBase() {
   uintptr_t retval;
@@ -90,14 +90,14 @@ struct VMRegAnchor : private boost::noncopyable {
     m_old = tl_regState;
     Translator::Get()->sync();
   }
-  VMRegAnchor(ActRec* ar) {
+  explicit VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call
     // instruction. This syncs us to right after the call instruction.
     assert(tl_regState == REGSTATE_DIRTY);
     m_old = REGSTATE_DIRTY;
     tl_regState = REGSTATE_CLEAN;
 
-    auto prevAr = (ActRec*)ar->m_savedRbp;
+    auto prevAr = g_vmContext->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
     vmsp() = ar->m_func->isGenerator() ?
       Stack::generatorStackBase(ar) :
@@ -132,8 +132,8 @@ struct CallerFrame : public VMRegAnchor {
 };
 
 #define SYNC_VM_REGS_SCOPED() \
-  HPHP::VM::Transl::VMRegAnchor _anchorUnused
+  HPHP::Transl::VMRegAnchor _anchorUnused
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif

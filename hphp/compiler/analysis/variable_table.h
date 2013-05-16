@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __VARIABLE_TABLE_H__
-#define __VARIABLE_TABLE_H__
+#ifndef incl_HPHP_VARIABLE_TABLE_H_
+#define incl_HPHP_VARIABLE_TABLE_H_
 
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/statement/statement.h>
-#include <compiler/analysis/class_scope.h>
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/analysis/class_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ public:
   }
 
 public:
-  VariableTable(BlockScope &blockScope);
+  explicit VariableTable(BlockScope &blockScope);
 
   /**
    * Get/set attributes.
@@ -353,4 +353,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __VARIABLE_TABLE_H__
+#endif // incl_HPHP_VARIABLE_TABLE_H_

@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "ICUTransliterator.h"
-#include <util/logger.h>
+#include "hphp/runtime/ext/icu/ICUTransliterator.h"
+#include "hphp/util/logger.h"
 
 using namespace U_ICU_NAMESPACE;
 

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <runtime/eval/debugger/inst_point.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/inst_point.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,17 +30,11 @@ public:
                     m_enabled(false), m_instPoints(nullptr) {}
 
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client) {
-    client->error("not supported\n");
-    return true;
-  }
   virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onClientVM(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy) {
-    return true;
-  }
-  virtual bool onServerVM(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy *proxy);
 
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -55,8 +49,8 @@ private:
   InstPointInfoPtrVec *m_instPoints;
   InstPointInfoPtrVec m_ips;
 
-  void readFromTable(DebuggerProxyVM *proxy);
-  void validateAndWriteToTable(DebuggerProxyVM *proxy);
+  void readFromTable(DebuggerProxy *proxy);
+  void validateAndWriteToTable(DebuggerProxy *proxy);
 
   void listInst(DebuggerClient *client);
   void clearInst(DebuggerClient *client);
@@ -67,4 +61,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_

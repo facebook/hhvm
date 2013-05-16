@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/base/hphp.h"
+#include "hphp/runtime/base/hphp.h"
 
 namespace HPHP {
 
@@ -41,7 +41,7 @@ void free_global_variables_after_sweep() {
 
 SystemGlobals*  get_system_globals() { return get_global_variables(); }
 
-VM::GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
+GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   NameValueTable* tab) : NameValueTableWrapper(tab) {
 
   VarNR arr(HphpArray::GetStaticEmptyArray());

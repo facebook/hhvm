@@ -13,13 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/translator/hopt/opt.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
-#include "util/trace.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/opt.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/check.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 // insert inst after the point dst is defined
@@ -37,7 +38,7 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  */
 static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
   for (SSATmp& dst : inst.getDsts()) {
-    Type t = dst.getType();
+    Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
       insertAfter(&inst, factory->gen(DbgAssertRefCount, &dst));
     }
@@ -46,27 +47,23 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
 
 /*
  * Insert a DbgAssertTv instruction for each stack location stored to by
- * a SpillStack instruction
+ * a SpillStack instruction.
  */
 static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
   SSATmp* sp = inst.getDst();
   auto const vals = inst.getSrcs().subpiece(2);
   auto* block = inst.getBlock();
   auto pos = block->iteratorTo(&inst); ++pos;
-  for (unsigned i = 0, offset = 0, n = vals.size(); i < n; ++i) {
-    Type t = vals[i]->getType();
-    if (t == Type::ActRec) {
-      offset += kNumActRecCells;
-      i += kSpillStackActRecExtraArgs;
-    } else {
-      if (t.subtypeOf(Type::Gen)) {
-        IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
-                                           sp, factory->defConst(offset));
-        block->insert(pos, addr);
-        IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
-        block->insert(pos, check);
-      }
-      ++offset;
+  for (unsigned i = 0, n = vals.size(); i < n; ++i) {
+    Type t = vals[i]->type();
+    if (t.subtypeOf(Type::Gen)) {
+      IRInstruction* addr = factory->gen(LdStackAddr,
+                                         Type::PtrToGen,
+                                         StackOffset(i),
+                                         sp);
+      block->insert(pos, addr);
+      IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
+      block->insert(pos, check);
     }
   }
 }
@@ -80,14 +77,16 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
     for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
       ++it;
-      if (inst.getOpcode() == SpillStack) {
+      if (inst.op() == SpillStack) {
         insertSpillStackAsserts(inst, factory);
         continue;
       }
-      if (inst.getOpcode() == Call) {
+      if (inst.op() == Call) {
         SSATmp* sp = inst.getDst();
-        IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
-                                           sp, factory->defConst(0));
+        IRInstruction* addr = factory->gen(LdStackAddr,
+                                           Type::PtrToGen,
+                                           StackOffset(0),
+                                           sp);
         insertAfter(&inst, addr);
         insertAfter(addr, factory->gen(DbgAssertPtr, addr->getDst()));
         continue;
@@ -99,22 +98,27 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
+
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, msg);
     assert(JIT::checkCfg(trace, *irFactory));
+    if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
+
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
     finishPass("after MemeLim");
   }
+
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     eliminateDeadCode(trace, irFactory);
     finishPass("after DCE");
   }
+
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
-    traceBuilder->optimizeTrace();
+    traceBuilder->reoptimize();
     finishPass("after CSE/Simplification");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
@@ -124,14 +128,16 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       finishPass("after DCE");
     }
   }
+
   if (RuntimeOption::EvalHHIRJumpOpts) {
     optimizeJumps(trace, irFactory);
     finishPass("jump opts");
   }
+
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertAsserts(trace, irFactory);
     finishPass("RefCnt asserts");
   }
 }
 
-} } }
+} }

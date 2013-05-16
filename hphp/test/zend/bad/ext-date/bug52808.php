@@ -11,12 +11,12 @@ $intervals = array(
 foreach($intervals as $iv) {
     try
     {
-	$di = new DateInterval($iv);
-	var_dump($di);
+    	$di = new DateInterval($iv);
+    	var_dump($di);
     }
     catch ( Exception $e )
     {
-	echo $e->getMessage(), "\n";
+    	echo $e->getMessage(), "\n";
     }
 }
 echo "==DONE==\n";

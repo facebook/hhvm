@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DICTIONARY_H__
-#define __DICTIONARY_H__
+#ifndef incl_HPHP_DICTIONARY_H_
+#define incl_HPHP_DICTIONARY_H_
 
-#include <compiler/hphp.h>
-#include <compiler/analysis/data_flow.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/compiler/analysis/data_flow.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ class Dictionary {
 public:
   typedef std::vector<ExpressionPtr> IdMap;
 
-  Dictionary(AliasManager &am);
+  explicit Dictionary(AliasManager &am);
   void build(MethodStatementPtr s);
   void build(StatementPtr s);
   void build(ExpressionPtr s);
@@ -78,4 +78,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DICTIONARY_H__
+#endif // incl_HPHP_DICTIONARY_H_

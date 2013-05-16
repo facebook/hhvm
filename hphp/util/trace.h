@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRACE_H_
-#define incl_TRACE_H_
+#ifndef incl_HPHP_TRACE_H_
+#define incl_HPHP_TRACE_H_
 
 #include <string>
 #include <vector>
 #include <stdarg.h>
 
 #include "folly/Format.h"
-#include "util/text_color.h"
+#include "hphp/util/text_color.h"
 
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a
@@ -75,6 +75,7 @@ namespace Trace {
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \
+      TM(debugger)    \
       TM(debuginfo)   \
       TM(stats)       \
       TM(emitter)     \
@@ -85,6 +86,7 @@ namespace Trace {
       TM(txdeps)      \
       TM(typeProfile) \
       TM(hhir)        \
+      TM(printir)     \
       TM(hhirTracelets) \
       TM(gc)          \
       TM(unlikely)    \
@@ -163,9 +165,10 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-extern void traceRelease(const char*, ...);
+void traceRelease(const char*, ...);
+void traceRelease(const std::string& s);
 extern int levels[NumModules];
-extern const char* moduleName(Module mod);
+const char* moduleName(Module mod);
 static inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] >= level;
 }
@@ -203,15 +206,15 @@ static const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-extern void trace(const char *, ...)
+void trace(const char *, ...)
   __attribute__((format(printf,1,2)));
-extern void trace(const std::string&);
+void trace(const std::string&);
 
 template<typename Pretty>
 static inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
-extern void vtrace(const char *fmt, va_list args);
-extern void dumpRingbuffer();
+void vtrace(const char *fmt, va_list args);
+void dumpRingbuffer();
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
 /*
  * Compile everything out of release builds. gcc is smart enough to
@@ -260,5 +263,5 @@ inline std::string color(const char* fg, const char* bg) {
 //////////////////////////////////////////////////////////////////////
 
 } // HPHP
-#endif /* incl_TRACE_H_ */
+#endif /* incl_HPHP_TRACE_H_ */
 

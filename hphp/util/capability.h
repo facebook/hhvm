@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CAPABILITY_H__
-#define __CAPABILITY_H__
+#ifndef incl_HPHP_CAPABILITY_H_
+#define incl_HPHP_CAPABILITY_H_
 
 #if !defined(SKIP_USER_CHANGE)
 
@@ -42,4 +42,4 @@ public:
 
 #endif
 
-#endif // __CAPABILITY_H__
+#endif // incl_HPHP_CAPABILITY_H_

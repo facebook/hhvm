@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_global.h>
-#include <runtime/eval/debugger/cmd/cmd_variable.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_global.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_variable.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdGlobal::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -46,8 +48,8 @@ bool CmdGlobal::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdGlobal::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdGlobal::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   String text;
   if (client->argCount() == 1) {
@@ -84,7 +86,7 @@ void CmdGlobal::setClientOutput(DebuggerClient *client) {
 
 bool CmdGlobal::onServer(DebuggerProxy *proxy) {
   m_globals = CmdVariable::GetGlobalVariables();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

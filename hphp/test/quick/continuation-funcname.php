@@ -10,3 +10,4 @@ class ShortDerp extends BaseDerp {}
 
 $sd = new ShortDerp;
 var_dump($sd->genDerp()->getOrigFuncName());
+var_dump($sd->genDerp()->getCalledClass());

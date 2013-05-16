@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 

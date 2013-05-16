@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_zlib.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/file/zip_file.h>
-#include <runtime/base/file/stream_wrapper.h>
-#include <runtime/base/file/stream_wrapper_registry.h>
-#include <runtime/base/file/file_stream_wrapper.h>
-#include <util/compression.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/file/zip_file.h"
+#include "hphp/runtime/base/file/stream_wrapper.h"
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file/file_stream_wrapper.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/logger.h"
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif
@@ -380,7 +380,7 @@ namespace QuickLZ1 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 1
 #define QLZ_STREAMING_BUFFER 0
-#include "quicklz.inc"
+#include "runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ2 {
@@ -392,7 +392,7 @@ namespace QuickLZ2 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 2
 #define QLZ_STREAMING_BUFFER 100000
-#include "quicklz.inc"
+#include "runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ3 {
@@ -404,7 +404,7 @@ namespace QuickLZ3 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 3
 #define QLZ_STREAMING_BUFFER 1000000
-#include "quicklz.inc"
+#include "runtime/ext/quicklz.inc"
 }
 
 #endif // HAVE_QUICKLZ

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONSTRUCT_H__
-#define __CONSTRUCT_H__
+#ifndef incl_HPHP_CONSTRUCT_H_
+#define incl_HPHP_CONSTRUCT_H_
 
-#include <util/json.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/util/json.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ public:
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;
 protected:
-  LocalEffectsContainer(Construct::Effect localEffect) :
+  explicit LocalEffectsContainer(Construct::Effect localEffect) :
     m_localEffects(localEffect) {}
   LocalEffectsContainer() :
     m_localEffects(0) {}
@@ -333,4 +333,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONSTRUCT_H__
+#endif // incl_HPHP_CONSTRUCT_H_

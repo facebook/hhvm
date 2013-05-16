@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_SOCKET_H__
-#define __EXT_SOCKET_H__
+#ifndef incl_HPHP_EXT_SOCKET_H_
+#define incl_HPHP_EXT_SOCKET_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,4 +62,4 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family = 0,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_SOCKET_H__
+#endif // incl_HPHP_EXT_SOCKET_H_

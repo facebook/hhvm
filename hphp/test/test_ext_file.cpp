@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_file.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/runtime_option.h>
-#include <util/light_process.h>
+#include "hphp/test/test_ext_file.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/light_process.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -223,13 +223,15 @@ bool TestExtFile::test_fseek() {
   return Count(true);
 }
 
+static const StaticString s_size("size");
+
 bool TestExtFile::test_fstat() {
   Variant f = f_fopen("test/test_ext_file.tmp", "w");
   f_fputs(f, "testing fstat");
   f_fclose(f);
 
   f = f_fopen("test/test_ext_file.tmp", "r");
-  VS(f_fstat(f)["size"], 13);
+  VS(f_fstat(f)[s_size], 13);
   return Count(true);
 }
 
@@ -511,13 +513,20 @@ bool TestExtFile::test_parse_hdf_file() {
   return Count(true);
 }
 
+static const StaticString s_bool("bool");
+static const StaticString s_string("string");
+static const StaticString s_text("text");
+static const StaticString s_num("num");
+static const StaticString s_arr("arr");
+static const StaticString s_anothertext("anothertext");
+
 bool TestExtFile::test_parse_hdf_string() {
   Array hdf;
-  hdf.set("bool", false);
-  hdf.set("string", "text");
-  hdf.set("num", 12345);
-  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
-  hdf.set("arr", arr);
+  hdf.set(s_bool, false);
+  hdf.set(s_string, s_text);
+  hdf.set(s_num, 12345);
+  Array arr = CREATE_MAP3(s_bool, false, s_string, s_anothertext, s_num, 6789);
+  hdf.set(s_arr, arr);
 
   VS(f_parse_hdf_string("bool = false\n"
                         "string = text\n"
@@ -537,11 +546,11 @@ bool TestExtFile::test_write_hdf_file() {
 
 bool TestExtFile::test_write_hdf_string() {
   Array hdf;
-  hdf.set("bool", false);
-  hdf.set("string", "text");
-  hdf.set("num", 12345);
-  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
-  hdf.set("arr", arr);
+  hdf.set(s_bool, false);
+  hdf.set(s_string, s_text);
+  hdf.set(s_num, 12345);
+  Array arr = CREATE_MAP3(s_bool, false, s_string, s_anothertext, s_num, 6789);
+  hdf.set(s_arr, arr);
 
   String str = f_write_hdf_string(hdf);
   VS(str,
@@ -723,12 +732,12 @@ bool TestExtFile::test_clearstatcache() {
 }
 
 bool TestExtFile::test_stat() {
-  VS(f_stat("test/test_ext_file.txt")["size"], 17);
+  VS(f_stat("test/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 
 bool TestExtFile::test_lstat() {
-  VS(f_lstat("test/test_ext_file.txt")["size"], 17);
+  VS(f_lstat("test/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 
@@ -913,11 +922,14 @@ bool TestExtFile::test_chroot() {
 }
 
 bool TestExtFile::test_dir() {
+  static const StaticString s_handle("handle");
+  static const StaticString s_test_ext_file_txt("test_ext_file.txt");
+  static const StaticString s_path("path");
   Variant d = f_dir("test");
-  VS(d.toArray()["path"], "test");
+  VS(d.toArray()[s_path], "test");
   Variant entry;
   bool seen = false;
-  while (!same(entry = f_readdir(d.toArray()["handle"]), false)) {
+  while (!same(entry = f_readdir(d.toArray()[s_handle]), false)) {
     if (same(entry, "test_ext_file.txt")) {
       seen = true;
     }

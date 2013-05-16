@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/user_attribute.h>
+#include "hphp/compiler/expression/user_attribute.h"
 
 namespace HPHP {
 

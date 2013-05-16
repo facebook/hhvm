@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_simplexml.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/util/request_local.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #ifndef LIBXML2_NEW_BUFFER
 # define xmlOutputBufferGetSize(buf)    ((buf)->buffer->use)
@@ -191,9 +191,10 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
 }
 
 static inline void add_namespace_name(Array &out, xmlNsPtr ns) {
-  const char *prefix = ns->prefix ? (const char *)ns->prefix : "";
+  String prefix = ns->prefix ? String((const char*)ns->prefix) :
+                               String(empty_string);
   if (!out.exists(prefix)) {
-    out.set(String(prefix, CopyString), String((char*)ns->href, CopyString));
+    out.set(prefix, String((char*)ns->href, CopyString));
   }
 }
 
@@ -246,9 +247,9 @@ Variant f_simplexml_load_string(CStrRef data,
     return uninit_null();
   }
 
-  VM::Class* cls;
+  Class* cls;
   if (!class_name.empty()) {
-    cls = VM::Unit::lookupClass(class_name.get());
+    cls = Unit::lookupClass(class_name.get());
     if (!cls) {
       throw_invalid_argument("class not found: %s", class_name.data());
       return uninit_null();
@@ -285,7 +286,7 @@ Variant f_simplexml_load_file(CStrRef filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_SimpleXMLElement::c_SimpleXMLElement(VM::Class* cb) :
+c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
@@ -540,6 +541,8 @@ String c_SimpleXMLElement::t_getname() {
   return String();
 }
 
+static const StaticString s_attributes("@attributes");
+
 Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
                                         bool is_prefix /* = false */) {
   if (m_is_attribute) {
@@ -558,7 +561,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     } else {
       elem->m_attributes.assignRef(m_attributes);
     }
-    elem->m_children.set("@attributes", elem->m_attributes);
+    elem->m_children.set(s_attributes, elem->m_attributes);
   }
   return obj;
 }
@@ -829,7 +832,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
     Object child = create_element(m_doc, newnode, ns, false);
     if (m_is_attribute) {
       m_attributes.set(name, child);
-      m_children.set("@attributes", m_attributes);
+      m_children.set(s_attributes, m_attributes);
     } else {
       m_children.set(name, child);
     }
@@ -865,7 +868,7 @@ Array c_SimpleXMLElement::o_toArray() const {
     return m_children;
   }
   Array ret;
-  ret.set("@attributes", m_attributes);
+  ret.set(s_attributes, m_attributes);
   ret += m_children;
   return ret;
 }
@@ -976,7 +979,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(VM::Class* cb) :
+c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
     ExtObjectData(cb), m_parent(), m_iter1(NULL), m_iter2(NULL) {
 }
 
@@ -1106,7 +1109,7 @@ Variant c_SimpleXMLElementIterator::t_valid() {
 ///////////////////////////////////////////////////////////////////////////////
 // LibXMLError
 
-c_LibXMLError::c_LibXMLError(VM::Class* cb) :
+c_LibXMLError::c_LibXMLError(Class* cb) :
     ExtObjectData(cb) {
 }
 c_LibXMLError::~c_LibXMLError() {
@@ -1188,14 +1191,21 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
   }
 }
 
+static const StaticString s_level("level");
+static const StaticString s_code("code");
+static const StaticString s_column("column");
+static const StaticString s_message("message");
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());
-  ret->o_set("level",   error.level);
-  ret->o_set("code",    error.code);
-  ret->o_set("column",  error.int2);
-  ret->o_set("message", String(error.message, CopyString));
-  ret->o_set("file",    String(error.file, CopyString));
-  ret->o_set("line",    error.line);
+  ret->o_set(s_level,   error.level);
+  ret->o_set(s_code,    error.code);
+  ret->o_set(s_column,  error.int2);
+  ret->o_set(s_message, String(error.message, CopyString));
+  ret->o_set(s_file,    String(error.file, CopyString));
+  ret->o_set(s_line,    error.line);
   return ret;
 }
 

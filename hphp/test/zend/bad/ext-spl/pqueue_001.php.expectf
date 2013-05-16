@@ -1,0 +1,32 @@
+Exception: Can't extract from an empty heap
+2=>b
+1=>a
+0=>c
+EXTR_BOTH
+2=>Array
+(
+    [data] => b
+    [priority] => 2
+)
+
+1=>Array
+(
+    [data] => a
+    [priority] => 1
+)
+
+0=>Array
+(
+    [data] => c
+    [priority] => 0
+)
+
+EXTR_DATA
+2=>b
+1=>a
+0=>c
+EXTR_PRIORITY
+2=>2
+1=>1
+0=>0
+===DONE===

@@ -4,30 +4,6 @@
     ],
     "funcs": [
         {
-            "name": "asio_enter_context",
-            "desc": "DEPRECATED: does nothing",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "asio_exit_context",
-            "desc": "DEPRECATED: does nothing",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "asio_get_current_context_idx",
             "desc": "Get index of the current scheduler context, or 0 if there is none",
             "flags": [
@@ -72,21 +48,8 @@
             ]
         },
         {
-            "name": "asio_get_current",
-            "desc": "DEPRECATED: use asio_get_running",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ContinuationWaitHandle that is running in the current context"
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "asio_set_on_failed_callback",
-            "desc": "Set callback to be called when wait handle fails",
+            "desc": "DEPRECATED: use ContinuationWaitHandle::setOnFailCallback()",
             "flags": [
                 "HasDocComment"
             ],
@@ -103,7 +66,7 @@
         },
         {
             "name": "asio_set_on_started_callback",
-            "desc": "Set callback to be called when a continuation is started",
+            "desc": "DEPRECATED: use ContinuationWaitHandle::setOnCreateCallback()",
             "flags": [
                 "HasDocComment"
             ],
@@ -142,6 +105,25 @@
                         "type": null
                     },
                     "args": [
+                    ]
+                },
+                {
+                    "name": "setOnJoinCallback",
+                    "desc": "Set callback for when join() is called",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_join_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on join()"
+                        }
                     ]
                 },
                 {
@@ -435,19 +417,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "getStackTrace",
-                    "desc": "Get stack trace of this wait handle",
-                    "flags": [
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "VariantVec",
-                        "desc": "An array of WaitableWaitHandles representing full stack trace, starting with this wait handle"
-                    },
-                    "args": [
-                    ]
                 }
             ],
             "consts": [
@@ -500,21 +469,78 @@
                     ]
                 },
                 {
-                    "name": "start",
-                    "desc": "Start asynchronous execution of a given Continuation",
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when a continuation wait handle is created",
                     "flags": [
                         "IsStatic",
-                        "HasDocComment"
+                        "HasDocComment",
+                        "HipHopSpecific"
                     ],
                     "return": {
-                        "type": "Object",
-                        "desc": "A WaitHandle representing started Continuation"
+                        "type": null
                     },
                     "args": [
                         {
-                            "name": "continuation",
-                            "type": "Object",
-                            "desc": "A Continuation to be started"
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when continuation is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnYieldCallback",
+                    "desc": "Set callback to be called when a continuation yields",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_yield_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when continuations yields"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when a continuation finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_success_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when continuations finishes"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnFailCallback",
+                    "desc": "Set callback to be called when a continuation fails",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_fail_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when continuations fails"
                         }
                     ]
                 },
@@ -590,6 +616,25 @@
                             "desc": "An Array of dependencies to wait for"
                         }
                     ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenArrayWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
                 }
             ],
             "consts": [
@@ -637,6 +682,25 @@
                             "type": "Variant",
                             "desc": "A reference to set the result to",
                             "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a SetResultToRefWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
                         }
                     ]
                 }
@@ -699,6 +763,32 @@
                     "name": "QUEUE_NO_PENDING_IO",
                     "type": "Int32",
                     "desc": "A queue that is run only once there is no pending I\/O operation"
+                }
+            ]
+        },
+        {
+            "name": "ExternalThreadEventWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that synchronizes against C++ operation in external thread",
+            "bases": [
+                "Sweepable"
+            ],
+            "flags": [
+                "HasDocComment",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
                 }
             ]
         }

@@ -904,6 +904,16 @@ Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str]
   as a cell. If there is no constant named %1, this instruction raises a notice
   and pushes the string %1 onto the stack as a cell.
 
+CnsE <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str]
+
+  Get constant. Pushes the value of the global constant named %1 onto the stack
+  as a cell. If there is no constant named %1, throws a fatal error.
+
+CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str]
+
+  Get constant. Identical to Cns except returns constant named %2 if the
+  constant named %1 is undefined.
+
 ClsCns <litstr id>    [A]  ->  [C:Null|Bool|Int|Dbl|Str]
 
   Get class constant. This instruction pushes the value of the class constant
@@ -1602,6 +1612,12 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   object x.
 
   If x is not a string or object, this instruction throws a fatal error.
+
+FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
+
+  FPI push function unqualified. Identical to FPushFuncD except first trys to
+  lookup the function named %2 and if it isn't defined calls the function named
+  %3.
 
 FPushObjMethod <num params>                 [C C]  ->  []
 FPushObjMethodD <num params> <litstr id>    [C]  ->  []

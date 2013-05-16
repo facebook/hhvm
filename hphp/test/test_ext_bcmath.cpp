@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_bcmath.h>
-#include <runtime/ext/ext_bcmath.h>
+#include "hphp/test/test_ext_bcmath.h"
+#include "hphp/runtime/ext/ext_bcmath.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

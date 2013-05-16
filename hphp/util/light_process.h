@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LIGHT_PROCESS_H__
-#define __LIGHT_PROCESS_H__
+#ifndef incl_HPHP_LIGHT_PROCESS_H_
+#define incl_HPHP_LIGHT_PROCESS_H_
 
-#include "process.h"
-#include "lock.h"
+#include "hphp/util/process.h"
+#include "hphp/util/lock.h"
 #include <string>
 #include <vector>
 
@@ -100,4 +100,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __LIGHT_PROCESS_H__
+#endif // incl_HPHP_LIGHT_PROCESS_H_

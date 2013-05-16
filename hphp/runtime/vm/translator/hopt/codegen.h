@@ -18,22 +18,25 @@
 #define incl_HPHP_VM_CG_H_
 
 #include <vector>
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/targetcache.h"
-#include <runtime/vm/translator/translator-x64.h>
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/linearscan.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/hopt/state_vector.h"
 
 namespace HPHP {
-namespace VM {
 namespace JIT {
 
 class FailedCodeGen : public std::exception {
  public:
-  const char* file;
-  const int   line;
-  const char* func;
-  FailedCodeGen(const char* _file, int _line, const char* _func) :
-      file(_file), line(_line), func(_func) { }
+  const char*    file;
+  const int      line;
+  const char*    func;
+  const uint32_t bcOff;
+  FailedCodeGen(const char* _file, int _line, const char* _func,
+                uint32_t _bcOff) :
+      file(_file), line(_line), func(_func), bcOff(_bcOff) { }
 };
 
 struct ArgGroup;
@@ -54,7 +57,7 @@ enum SyncOptions {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
-  AsmInfo(const IRFactory* factory)
+  explicit AsmInfo(const IRFactory* factory)
     : instRanges(factory, TcaRange(nullptr, nullptr))
     , asmRanges(factory, TcaRange(nullptr, nullptr))
     , astubRanges(factory, TcaRange(nullptr, nullptr))
@@ -66,13 +69,19 @@ struct AsmInfo {
   StateVector<Block,TcaRange> astubRanges;
 };
 
+typedef StateVector<IRInstruction, RegSet> LiveRegs;
+
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory, AsmInfo* asmInfo)
+  CodegenState(const IRFactory* factory, const RegAllocInfo& regs,
+               const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
+               AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , lastMarker(nullptr)
-    , firstMarkerSeen(false)
+    , regs(regs)
+    , liveRegs(liveRegs)
+    , lifetime(lifetime)
     , asmInfo(asmInfo)
   {}
 
@@ -82,12 +91,24 @@ struct CodegenState {
   // Keep track of the most recent Marker instruction we've seen in the
   // current trace (even across blocks).
   const MarkerData* lastMarker;
-  bool firstMarkerSeen;
 
   // True if this block's terminal Jmp_ has a desination equal to the
   // next block in the same assmbler.
   bool noTerminalJmp_;
 
+  // output from register allocator
+  const RegAllocInfo& regs;
+
+  // for each instruction, holds the RegSet of registers that must be
+  // preserved across that instruction.  This is for push/pop of caller-saved
+  // registers.
+  const LiveRegs& liveRegs;
+
+  // Optional information used when pretty-printing code after codegen.
+  // when not available, these are nullptrs.
+  const LifetimeInfo* lifetime;
+
+  // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
 };
 
@@ -96,8 +117,9 @@ struct CodeGenerator {
 
   CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
                 CodegenState& state)
-    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state)
-    , m_curInst(nullptr), m_curTrace(trace) {
+    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state),
+      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace),
+      m_curBcOff(-1){
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -119,6 +141,7 @@ private:
     cgCallNative(m_as, inst);
   }
   void cgCallNative(Asm& a, IRInstruction* inst);
+  void doStackArgs(Asm&, ArgGroup&);
   void cgCallHelper(Asm&,
                     TCA addr,
                     SSATmp* dst,
@@ -143,6 +166,14 @@ private:
                     PhysReg dstReg1,
                     SyncOptions sync,
                     ArgGroup& args,
+                    DestType destType = DestType::SSA);
+  void cgCallHelper(Asm& a,
+                    const Transl::Call& call,
+                    PhysReg dstReg0,
+                    PhysReg dstReg1,
+                    SyncOptions sync,
+                    ArgGroup& args,
+                    RegSet toSave,
                     DestType destType = DestType::SSA);
 
   void cgStore(PhysReg base,
@@ -175,18 +206,24 @@ private:
 
   enum Commutativity { Commutative, NonCommutative };
 
-  template<class Oper>
+  template<class Oper, class RegType>
   void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, Reg64),
-                  void (Asm::*intRR)(Reg64, Reg64),
+                  void (Asm::*intImm)(Immed, RegType),
+                  void (Asm::*intRR)(RegType, RegType),
+                  void (Asm::*mov)(RegType, RegType),
                   void (Asm::*fpRR)(RegXMM, RegXMM),
+                  void (*extend)(Asm&, const RegisterInfo&),
                   Oper,
+                  RegType (*conv)(PhysReg),
                   Commutativity);
-  template<class Oper>
+  template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
-                     void (Asm::*intImm)(Immed, Reg64),
-                     void (Asm::*intRR)(Reg64, Reg64),
+                     void (Asm::*intImm)(Immed, RegType),
+                     void (Asm::*intRR)(RegType, RegType),
+                     void (Asm::*mov)(RegType, RegType),
+                     void (*extend)(Asm&, const RegisterInfo&),
                      Oper,
+                     RegType (*conv)(PhysReg),
                      Commutativity);
 
   void cgNegateWork(SSATmp* dst, SSATmp* src);
@@ -220,12 +257,10 @@ private:
 
 private:
   void emitSetCc(IRInstruction*, ConditionCode);
-  void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
   ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
-  void emitInstanceCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceRet(CodeGenerator::Asm& as);
   Address cgCheckStaticBit(Type type,
@@ -241,9 +276,7 @@ private:
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,
-                          bool genZeroCheck,
-                          std::function<void(Asm&)> slowPathWork =
-                            std::function<void(Asm&)>());
+                          bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,
                            PhysReg dataReg,
                            Block* exit,
@@ -255,9 +288,6 @@ private:
                    PhysReg baseReg,
                    int64_t offset,
                    Block* exit);
-  void emitSpillActRec(SSATmp* sp,
-                       int64_t spOffset,
-                       SSATmp* defAR);
 
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
@@ -267,7 +297,6 @@ private:
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
   Address emitFwdJmp(Block* target);
-  Address emitSmashableFwdJmp(Block* target, IRInstruction* toSmash);
   Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
                                    IRInstruction* toSmash);
   void emitJccDirectExit(IRInstruction*, ConditionCode);
@@ -282,6 +311,8 @@ private:
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
+
+  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
@@ -323,19 +354,23 @@ private:
   void print() const;
 
 private:
-  Asm& m_as;                // current "main" assembler
-  Asm& m_astubs;            // assembler for stubs and other cold code.
-  TranslatorX64* m_tx64;
-  CodegenState& m_state;
-  IRInstruction* m_curInst; // current instruction being generated
-  Trace* m_curTrace;
+  Asm&                m_as;       // current "main" assembler
+  Asm&                m_astubs;   // assembler for stubs and other cold code.
+  TranslatorX64*      m_tx64;
+  CodegenState&       m_state;
+  const RegAllocInfo& m_regs;
+  IRInstruction*      m_curInst;  // current instruction being generated
+  Trace*              m_curTrace;
+  uint32_t            m_curBcOff; // offset of bytecode instr that produced
+                                  // m_curInst
 };
 
 class ArgDesc {
 public:
   enum Kind {
     Reg,     // Normal register
-    TypeReg, // Type register. Might need arch-specific mangling before call
+    TypeReg, // TypedValue's m_type field. Might need arch-specific
+             // mangling before call depending on TypedValue's layout.
     Imm,     // Immediate
     Addr,    // Address
     None,    // Nothing: register will contain garbage
@@ -362,7 +397,7 @@ private: // These should be created using ArgGroup.
     , m_done(false)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, bool val = true);
+  explicit ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val = true);
 
 private:
   Kind m_kind;
@@ -386,15 +421,29 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  size_t size() const { return m_args.size(); }
+  typedef std::vector<ArgDesc> ArgVec;
 
+  explicit ArgGroup(const RegAllocInfo& regs)
+      : m_regs(regs), m_override(nullptr)
+    {}
+
+  size_t numRegArgs() const { return m_regArgs.size(); }
+  size_t numStackArgs() const { return m_stkArgs.size(); }
+
+  ArgDesc& reg(size_t i) {
+    assert(i < m_regArgs.size());
+    return m_regArgs[i];
+  }
   ArgDesc& operator[](size_t i) {
-    assert(i < size());
-    return m_args[i];
+    return reg(i);
+  }
+  ArgDesc& stk(size_t i) {
+    assert(i < m_stkArgs.size());
+    return m_stkArgs[i];
   }
 
   ArgGroup& imm(uintptr_t imm) {
-    m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
+    push_arg(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
     return *this;
   }
 
@@ -402,34 +451,27 @@ struct ArgGroup {
     return imm(uintptr_t(ptr));
   }
 
+  ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
+
   ArgGroup& reg(PhysReg reg) {
-    m_args.push_back(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
+    push_arg(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
     return *this;
   }
 
   ArgGroup& addr(PhysReg base, intptr_t off) {
-    m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
+    push_arg(ArgDesc(ArgDesc::Addr, base, off));
     return *this;
   }
 
   ArgGroup& ssa(SSATmp* tmp) {
-    m_args.push_back(ArgDesc(tmp));
+    push_arg(ArgDesc(tmp, m_regs[tmp]));
     return *this;
   }
 
   ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
     for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
-      m_args.push_back(ArgDesc(s));
+      push_arg(ArgDesc(s, m_regs[s]));
     }
-    return *this;
-  }
-
-  /*
-   * Loads the type of tmp into an arg register destined to be the
-   * upper word of a TypedValue parameter passed by value in registers.
-   */
-  ArgGroup& type(SSATmp* tmp) {
-    m_args.push_back(ArgDesc(tmp, false));
     return *this;
   }
 
@@ -437,11 +479,14 @@ struct ArgGroup {
    * Pass tmp as a TypedValue passed by value.
    */
   ArgGroup& typedValue(SSATmp* tmp) {
-    return packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
-  }
-
-  ArgGroup& none() {
-    m_args.push_back(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    // If there's exactly one register argument slot left, the whole TypedValue
+    // goes on the stack instead of being split between a register and the
+    // stack.
+    if (m_regArgs.size() == kNumRegisterArgs - 1) {
+      m_override = &m_stkArgs;
+    }
+    packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
+    m_override = nullptr;
     return *this;
   }
 
@@ -454,6 +499,29 @@ struct ArgGroup {
   }
 
 private:
+  void push_arg(const ArgDesc& arg) {
+    // If m_override is set, use it unconditionally. Otherwise, select
+    // m_regArgs or m_stkArgs depending on how many args we've already pushed.
+    ArgVec* args = m_override;
+    if (!args) {
+      args = m_regArgs.size() < kNumRegisterArgs ? &m_regArgs : &m_stkArgs;
+    }
+    args->push_back(arg);
+  }
+
+  /*
+   * For passing the m_type field of a TypedValue.
+   */
+  ArgGroup& type(SSATmp* tmp) {
+    push_arg(ArgDesc(tmp, m_regs[tmp], false));
+    return *this;
+  }
+
+  ArgGroup& none() {
+    push_arg(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    return *this;
+  }
+
   ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
     if (key->isString() || (allowInt && key->isA(Type::Int))) {
       return packed_tv ? none().ssa(key) : ssa(key).none();
@@ -461,14 +529,13 @@ private:
     return typedValue(key);
   }
 
-  std::vector<ArgDesc> m_args;
+  const RegAllocInfo& m_regs;
+  ArgVec* m_override; // used to force args to go into a specific ArgVec
+  ArgVec m_regArgs;
+  ArgVec m_stkArgs;
 };
 
-using namespace HPHP::VM::Transl::TargetCache;
-ActRec* irNewInstanceHelper(Class* cls,
-                            int numArgs,
-                            Cell* sp,
-                            ActRec* prevAr);
+const Func* loadClassCtor(Class* cls);
 
 Instance* createClHelper(Class*, int, ActRec*, TypedValue*);
 
@@ -478,8 +545,10 @@ void genCodeForTrace(Trace*                  trace,
                      IRFactory*              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
-                     AsmInfo                 *asmInfo = nullptr);
+                     const RegAllocInfo&     regs,
+                     const LifetimeInfo*     lifetime = nullptr,
+                     AsmInfo*                asmInfo = nullptr);
 
-}}}
+}}
 
 #endif

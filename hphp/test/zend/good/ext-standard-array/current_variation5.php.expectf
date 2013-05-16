@@ -1,0 +1,14 @@
+*** Testing current() : usage variations ***
+
+-- Function: reference parameter --
+string(3) "yes"
+string(5) "maybe"
+string(5) "maybe"
+string(2) "no"
+
+-- Function: normal parameter --
+string(3) "yes"
+string(5) "maybe"
+string(5) "maybe"
+string(2) "no"
+===DONE===

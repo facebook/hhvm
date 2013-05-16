@@ -13,31 +13,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/func.h"
 
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
 
-#include "runtime/base/base_includes.h"
-#include "util/util.h"
-#include "util/trace.h"
-#include "util/debug.h"
-#include "runtime/base/strings.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/func.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/func_inline.h"
-#include "system/lib/systemlib.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/util.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/func_inline.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::bcinterp;
-bool Func::s_interceptsEnabled = false;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");
@@ -114,7 +112,7 @@ void Func::setFullName() {
 }
 
 void Func::initPrologues(int numParams, bool isGenerator) {
-  m_funcBody = (TCA)HPHP::VM::Transl::funcBodyHelperThunk;
+  m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
@@ -123,13 +121,13 @@ void Func::initPrologues(int numParams, bool isGenerator) {
 
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
-    m_prologueTable[i] = (TCA)HPHP::VM::Transl::fcallHelperThunk;
+    m_prologueTable[i] = (TCA)HPHP::Transl::fcallHelperThunk;
   }
 }
 
 void Func::init(int numParams, bool isGenerator) {
   // For methods, we defer setting the full name until m_cls is initialized
-  m_maybeIntercepted = s_interceptsEnabled ? -1 : 0;
+  m_maybeIntercepted = -1;
   if (!preClass()) {
     setNewFuncId();
     setFullName();
@@ -223,7 +221,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
 }
 
 Func::~Func() {
-  if (m_fullName != nullptr && s_interceptsEnabled && m_maybeIntercepted != -1) {
+  if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameRef(), &m_maybeIntercepted);
   }
 #ifdef DEBUG
@@ -270,11 +268,11 @@ const Func* Func::cloneAndSetClass(Class* cls) const {
   clonedFunc->setCls(cls);
 
   // Save it so we don't have to keep cloning it and retranslating
-  Func*& nextFunc = this->nextClonedClosure();
-  while (nextFunc) {
-    nextFunc = nextFunc->nextClonedClosure();
+  Func** nextFunc = &this->nextClonedClosure();
+  while (*nextFunc) {
+    nextFunc = &nextFunc[0]->nextClonedClosure();
   }
-  nextFunc = clonedFunc;
+  *nextFunc = clonedFunc;
 
   return clonedFunc;
 }
@@ -459,6 +457,7 @@ void Func::prettyPrint(std::ostream& out) const {
     if (m_attrs & AttrPrivate) { out << "private "; }
     if (m_attrs & AttrAbstract) { out << "abstract "; }
     if (m_attrs & AttrFinal) { out << "final "; }
+    if (m_attrs & AttrPhpLeafFn) { out << "(leaf) "; }
     out << preClass()->name()->data() << "::" << m_name->data();
   } else {
     out << "Function " << m_name->data();
@@ -646,13 +645,6 @@ void Func::SharedData::atomicRelease() {
   delete this;
 }
 
-void Func::enableIntercept() {
-  // we are protected by s_mutex in intercept.cpp
-  if (!s_interceptsEnabled) {
-    s_interceptsEnabled = true;
-  }
-}
-
 Func** Func::getCachedAddr() {
   assert(!isMethod());
   return getCachedFuncAddr(m_cachedOffset);
@@ -674,23 +666,50 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
 // FuncEmitter.
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
-  : m_ue(ue), m_pce(nullptr), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
-    m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
-    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
-}
+  : m_ue(ue)
+  , m_pce(nullptr)
+  , m_sn(sn)
+  , m_id(id)
+  , m_name(n)
+  , m_numLocals(0)
+  , m_numUnnamedLocals(0)
+  , m_activeUnnamedLocals(0)
+  , m_numIterators(0)
+  , m_nextFreeIterator(0)
+  , m_retTypeConstraint(nullptr)
+  , m_returnType(KindOfInvalid)
+  , m_top(false)
+  , m_isClosureBody(false)
+  , m_isGenerator(false)
+  , m_isGeneratorFromClosure(false)
+  , m_hasGeneratorAsBody(false)
+  , m_containsCalls(false)
+  , m_info(nullptr)
+  , m_builtinFuncPtr(nullptr)
+{}
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
                          PreClassEmitter* pce)
-  : m_ue(ue), m_pce(pce), m_sn(sn), m_name(n), m_numLocals(0),
-    m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
-    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
-}
+  : m_ue(ue)
+  , m_pce(pce)
+  , m_sn(sn)
+  , m_name(n)
+  , m_numLocals(0)
+  , m_numUnnamedLocals(0)
+  , m_activeUnnamedLocals(0)
+  , m_numIterators(0)
+  , m_nextFreeIterator(0)
+  , m_retTypeConstraint(nullptr)
+  , m_returnType(KindOfInvalid)
+  , m_top(false)
+  , m_isClosureBody(false)
+  , m_isGenerator(false)
+  , m_isGeneratorFromClosure(false)
+  , m_hasGeneratorAsBody(false)
+  , m_containsCalls(false)
+  , m_info(nullptr)
+  , m_builtinFuncPtr(nullptr)
+{}
 
 FuncEmitter::~FuncEmitter() {
 }
@@ -880,6 +899,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
+  if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
+
   Func* f = (m_pce == nullptr)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
                    m_past, m_name, attrs, m_top, m_docComment,
@@ -997,6 +1018,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isGenerator)
     (m_isGeneratorFromClosure)
     (m_hasGeneratorAsBody)
+    (m_containsCalls)
 
     (m_params)
     (m_localNames)
@@ -1104,4 +1126,4 @@ void FuncRepoProxy::GetFuncsStmt
   txn.commit();
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

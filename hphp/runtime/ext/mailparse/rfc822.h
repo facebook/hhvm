@@ -18,7 +18,7 @@
 #ifndef php_mailparse_rfc822_h
 #define php_mailparse_rfc822_h
 
-#include <util/base.h>
+#include "hphp/util/base.h"
 
 typedef struct _php_rfc822_token php_rfc822_token_t;
 typedef struct _php_rfc822_tokenized php_rfc822_tokenized_t;

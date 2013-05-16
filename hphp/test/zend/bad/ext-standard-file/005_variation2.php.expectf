@@ -1,0 +1,37 @@
+*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
+
+*** testing touch ***
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+*** testing file info ***
+-- File '' --
+-- File access time is => 
+-- File modification time is => 
+-- inode change time is => 
+
+-- File '' --
+-- File access time is => 
+-- File modification time is => 
+-- inode change time is => 
+
+-- File '' --
+-- File access time is => 
+-- File modification time is => 
+-- inode change time is => 
+
+-- File ' ' --
+-- File access time is => %d
+-- File modification time is => %d
+-- inode change time is => %d
+
+-- File '|' --
+-- File access time is => %d
+-- File modification time is => %d
+-- inode change time is => %d
+bool(true)
+bool(true)
+Done

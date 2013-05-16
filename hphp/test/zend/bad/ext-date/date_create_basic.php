@@ -5,7 +5,7 @@
  * Alias to functions: DateTime::__construct
  */
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_create() : basic functionality ***\n";

@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_PARSER_H__
-#define __HPHP_UTIL_PARSER_PARSER_H__
+#ifndef incl_HPHP_UTIL_PARSER_PARSER_H_
+#define incl_HPHP_UTIL_PARSER_PARSER_H_
 
-#include <util/parser/scanner.h>
-#include <util/lock.h>
-#include <util/case_insensitive.h>
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/case_insensitive.h"
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \
@@ -57,10 +57,39 @@ public:
     StaticName
   };
 
+  /**
+   * These numbers are scattered throughout the code base (often hardcoded).
+   * Do not change unless you change all the occurances.
+   */
+  enum AnonFuncKind {
+    Closure,
+    CreateFunction,
+    ContinuationFromClosure,
+    Continuation
+  };
+
+  enum AnonFuncKindChar {
+    CharClosure = '0',
+    CharCreateFunction,
+    CharContinuationFromClosure,
+    CharContinuation
+  };
+
+  static char GetAnonPrefix(AnonFuncKind kind);
+
   static bool IsClosureName                (const std::string &name);
+  static bool IsCreateFunctionName         (const std::string &name);
   static bool IsContinuationName           (const std::string &name);
+  static bool IsContinuationFromClosureName(const std::string &name);
   static bool IsClosureOrContinuationName  (const std::string &name);
-  std::string getContinuationName(const std::string &name);
+  static bool IsAnonFunctionName           (const std::string &name) {
+    return IsAnonFunctionName(name.c_str());
+  }
+  static bool IsAnonFunctionName           (const char *name);
+  /**
+   * Reset parser static variables. Good for unit tests.
+   */
+  static void Reset();
 
 public:
   ParserBase(Scanner &scanner, const char *fileName);
@@ -85,11 +114,6 @@ public:
   virtual bool enableXHP() = 0;
 
   /**
-   * Check if HipHop syntax is enabled.
-   */
-  virtual bool enableHipHopSyntax() = 0;
-
-  /**
    * Public accessors.
    */
   const char *file() const { return m_fileName;}
@@ -105,6 +129,7 @@ public:
   int char0() const { return m_loc.char0;}
   int line1() const { return m_loc.line1;}
   int char1() const { return m_loc.char1;}
+  int cursor() const { return m_loc.cursor;}
 
   // called by generated code
   int scan(ScannerToken *token, Location *loc) {
@@ -120,6 +145,7 @@ public:
   void pushClass(bool isXhpClass);
   bool peekClass();
   void popClass();
+  std::string getAnonFuncName(AnonFuncKind kind);
 
   // for typevar checking
   void pushTypeScope();
@@ -136,14 +162,6 @@ public:
   void addGoto(const std::string &label, LocationPtr loc,
                ScannerToken *stmt);
   void popLabelInfo();
-
-  // for namespace support
-  void onNamespaceStart(const std::string &ns);
-  void onNamespaceEnd();
-  void onUse(const std::string &ns, const std::string &as);
-  void nns(bool declare = false);
-  std::string nsDecl(const std::string &name);
-  std::string resolve(const std::string &ns, bool cls);
 
   enum GotoError {
     UndefLabel = 1,
@@ -197,19 +215,12 @@ protected:
   };
   std::vector<LabelInfo> m_labelInfos; // stack by function
 
-  // for namespace support
-  enum NamespaceState {
-    SeenNothing,
-    SeenNonNamespaceStatement,
-    SeenNamespaceStatement,
-    InsideNamespace,
-  };
-  NamespaceState m_nsState;
-  std::string m_namespace; // current namespace
-  hphp_string_imap<std::string> m_aliases;
+  // for closure hidden name
+  static Mutex s_mutex;
+  static std::map<int64_t, int> s_closureIds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_PARSER_H__
+#endif // incl_HPHP_UTIL_PARSER_PARSER_H_

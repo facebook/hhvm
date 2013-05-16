@@ -15,9 +15,9 @@
 */
 
 #include <unistd.h>
-#include <runtime/base/file/plain_file.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/request_local.h"
 
 namespace HPHP {
 

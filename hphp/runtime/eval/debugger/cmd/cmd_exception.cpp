@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_exception.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_exception.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdException::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
@@ -65,8 +67,8 @@ bool CmdException::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdException::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdException::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }
@@ -85,7 +87,7 @@ bool CmdException::onClient(DebuggerClient *client) {
 
   BreakPointInfoPtr bpi(new BreakPointInfo(regex, state, ExceptionThrown,
                                            client->argValue(index), ""));
-  if (!validate(client, bpi, index)) {
+  if (!addToBreakpointListAndUpdateServer(client, bpi, index)) {
     client->tutorial(
       "This is the order of different arguments:\n"
       "\n"

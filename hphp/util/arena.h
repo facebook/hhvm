@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_UTIL_ARENA_H_
-#define incl_UTIL_ARENA_H_
+#ifndef incl_HPHP_UTIL_ARENA_H_
+#define incl_HPHP_UTIL_ARENA_H_
 
 #include <vector>
 #include <cstdlib>
 
-#include "util/tiny_vector.h"
-#include "util/pointer_list.h"
+#include "hphp/util/tiny_vector.h"
+#include "hphp/util/pointer_list.h"
 
 namespace HPHP {
 

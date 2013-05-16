@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 #include <math.h>
 
 #if defined(__APPLE__)
@@ -926,7 +926,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
     switch (ch) {
     case 's': {
       String s = tmp.toString();
-      appendstring(&result, &outpos, &size, s,
+      appendstring(&result, &outpos, &size, s.c_str(),
                    width, precision, padding, alignment, s.size(),
                    0, expprec, 0);
       break;

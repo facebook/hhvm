@@ -1,0 +1,16 @@
+a: array(1) {
+  [1]=>
+  string(2) "a0"
+}
+aa: array(1) {
+  [1]=>
+  string(2) "aa"
+}
+aaa: array(1) {
+  [1]=>
+  string(4) "aaa0"
+}
+aaaa: array(1) {
+  [1]=>
+  string(4) "aaaa"
+}

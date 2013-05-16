@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_CPP_EXT_H__
-#define __TEST_CPP_EXT_H__
+#ifndef incl_HPHP_TEST_CPP_EXT_H_
+#define incl_HPHP_TEST_CPP_EXT_H_
 
-#include <test/test_cpp_base.h>
-#include <runtime/ext/ext_variable.h> // we frequently need to call f_var_dump()
-#include <runtime/base/program_functions.h>
-#include <runtime/ext/ext_misc.h>
+#include "hphp/test/test_cpp_base.h"
+#include "hphp/runtime/ext/ext_variable.h" // we frequently need to call f_var_dump()
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/ext/ext_misc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,4 +43,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_CPP_EXT_H__
+#endif // incl_HPHP_TEST_CPP_EXT_H_

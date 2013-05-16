@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace {
   StaticString s_staticException("<static-exception>");
 }
 
-c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(VM::Class* cb)
+c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(Class* cb)
     : c_StaticWaitHandle(cb) {
   setState(STATE_FAILED);
 }
@@ -40,7 +40,7 @@ void c_StaticExceptionWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception) {
+Object c_StaticExceptionWaitHandle::ti_create(CObjRef exception) {
   if (!exception.instanceof(SystemLib::s_ExceptionClass)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected exception to be an instance of Exception"));

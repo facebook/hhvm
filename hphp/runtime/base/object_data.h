@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_OBJECT_DATA_H__
-#define __HPHP_OBJECT_DATA_H__
+#ifndef incl_HPHP_OBJECT_DATA_H_
+#define incl_HPHP_OBJECT_DATA_H_
 
-#include <runtime/base/util/countable.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/types.h>
-#include <runtime/base/macros.h>
-#include <runtime/base/runtime_error.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/system/lib/systemlib.h"
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>
@@ -35,10 +35,8 @@ class MutableArrayIter;
 
 class HphpArray;
 class TypedValue;
-namespace VM {
-  class PreClass;
-  class Class;
-}
+class PreClass;
+class Class;
 
 extern StaticString ssIterator;
 
@@ -68,6 +66,7 @@ class ObjectData : public CountableNF {
     VectorAttrInit = (Collection::VectorType << 13),
     MapAttrInit = (Collection::MapType << 13),
     StableMapAttrInit = (Collection::StableMapType << 13),
+    SetAttrInit = (Collection::SetType << 13),
     PairAttrInit = (Collection::PairType << 13),
   };
 
@@ -78,7 +77,7 @@ class ObjectData : public CountableNF {
     RealPropExist = 16,    // For property_exists
   };
 
-  ObjectData(bool noId, VM::Class* type)
+  ObjectData(bool noId, Class* type)
       : o_attribute(0), m_cls(type) {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
@@ -90,7 +89,7 @@ class ObjectData : public CountableNF {
 
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
-  HPHP::VM::Class* getVMClass() const {
+  Class* getVMClass() const {
     return m_cls;
   }
   static size_t getVMClassOffset() {
@@ -98,8 +97,7 @@ class ObjectData : public CountableNF {
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
-  bool instanceof(const HPHP::VM::Class* c) const;
+  bool instanceof(const Class* c) const;
 
   bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;
@@ -141,8 +139,7 @@ class ObjectData : public CountableNF {
   CStrRef o_getClassName() const;
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
-  virtual bool isResource() const { return false;}
-  bool o_isClass(const char *s) const;
+  virtual bool isResource() const { return false; }
   int o_getId() const { return o_id;}
 
   // overridable casting
@@ -180,9 +177,8 @@ class ObjectData : public CountableNF {
   static Object FromArray(ArrayData *properties);
 
   // method invocation with CStrRef
-  Variant o_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
-                   bool fatal = true);
-  Variant o_invoke_few_args(CStrRef s, strhash_t hash, int count,
+  Variant o_invoke(CStrRef s, CArrRef params, bool fatal = true);
+  Variant o_invoke_few_args(CStrRef s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   // misc
@@ -235,7 +231,7 @@ class ObjectData : public CountableNF {
   } o_subclassData;
 
  protected:
-  HPHP::VM::Class* m_cls;
+  Class* m_cls;
 
  protected:
   ArrNR         o_properties;    // dynamic properties (VM and hphpc)
@@ -261,7 +257,7 @@ class ObjectData : public CountableNF {
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators
@@ -388,4 +384,4 @@ ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OBJECT_DATA_H__
+#endif // incl_HPHP_OBJECT_DATA_H_

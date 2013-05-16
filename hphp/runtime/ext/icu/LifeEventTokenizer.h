@@ -14,15 +14,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ICU_LIFE_EVENT_TOKENIZER_H__
-#define __ICU_LIFE_EVENT_TOKENIZER_H__
+#ifndef incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_
+#define incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_
 
 #include <atomic>
 #include <string>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include <unicode/rbbi.h> // icu
+#include "unicode/rbbi.h" // icu
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE
@@ -66,4 +66,4 @@ void tokenizeString(
 
 }
 
-#endif // __ICU_LIFE_EVENT_TOKENIZER_H__
+#endif // incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_

@@ -1,0 +1,26 @@
+array(12) {
+  ["test1bpix.bmp"]=>
+  string(14) "image/x-ms-bmp"
+  ["test1pix.bmp"]=>
+  string(14) "image/x-ms-bmp"
+  ["test1pix.jp2"]=>
+  string(9) "image/jp2"
+  ["test1pix.jpc"]=>
+  string(24) "application/octet-stream"
+  ["test1pix.jpg"]=>
+  string(10) "image/jpeg"
+  ["test2pix.gif"]=>
+  string(9) "image/gif"
+  ["test4pix.gif"]=>
+  string(9) "image/gif"
+  ["test4pix.iff"]=>
+  string(9) "image/iff"
+  ["test4pix.png"]=>
+  string(9) "image/png"
+  ["test4pix.psd"]=>
+  string(9) "image/psd"
+  ["test4pix.swf"]=>
+  string(29) "application/x-shockwave-flash"
+  ["test4pix.tif"]=>
+  string(10) "image/tiff"
+}

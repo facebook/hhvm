@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/zend/zend_string.h"
+#include "hphp/util/zend/zend_string.h"
 
 #include <cinttypes>
 

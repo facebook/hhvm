@@ -14,26 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_BYTECODE_H_
-#define incl_VM_BYTECODE_H_
+#ifndef incl_HPHP_VM_BYTECODE_H_
+#define incl_HPHP_VM_BYTECODE_H_
 
 #include <boost/optional.hpp>
 
-#include "util/util.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/class_info.h"
-#include "runtime/base/array/array_iterator.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/instance.h"
-#include "runtime/vm/unit.h"
-#include "runtime/vm/name_value_table.h"
-#include "runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/name_value_table.h"
+#include "hphp/runtime/vm/request_arena.h"
 
 namespace HPHP {
-
-namespace VM {
 
 // SETOP_BODY() would ideally be an inline function, but the header
 // dependencies for concat_assign() make this unfeasible.
@@ -57,7 +55,8 @@ namespace VM {
   }                                                                           \
 } while (0)
 
-class Func;
+ class Func;
+class ActRec;
 
 // max number of arguments for direct call to builtin
 static const int kMaxBuiltinArgs = 5;
@@ -229,7 +228,7 @@ struct ActRec {
   union {
     TypedValue _dummyB;
     struct {
-      const Func* m_func;      // Function.
+      const Func* m_func;  // Function.
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
@@ -244,7 +243,7 @@ struct ActRec {
     struct {
       union {
         ObjectData* m_this;    // This.
-        Class* m_cls;          // Late bound class.
+        Class* m_cls;      // Late bound class.
       };
       union {
         VarEnv* m_varEnv;       // Variable environment; only used when the
@@ -256,6 +255,10 @@ struct ActRec {
       };
     };
   };
+
+  // Get the next outermost VM frame, but if this is
+  // a re-entry frame, return ar
+  ActRec* arGetSfp() const;
 
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
@@ -287,6 +290,22 @@ struct ActRec {
 
   void setNumArgs(uint32_t numArgs) {
     initNumArgs(numArgs, isFromFPushCtor());
+  }
+
+  static void* encodeThis(ObjectData* obj, Class* cls) {
+    if (obj) return obj;
+    if (cls) return (char*)cls + 1;
+  }
+
+  static void* encodeThis(ObjectData* obj) { return obj; }
+  static void* encodeClass(const Class* cls) {
+    return cls ? (char*)cls + 1 : nullptr;
+  }
+  static ObjectData* decodeThis(void* p) {
+    return uintptr_t(p) & 1 ? nullptr : (ObjectData*)p;
+  }
+  static Class* decodeClass(void* p) {
+    return uintptr_t(p) & 1 ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
   /**
@@ -397,9 +416,14 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
 }
 
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
-#define arGetContextClass(ar)    HPHP::VM::arGetContextClassImpl<false>(ar)
-#define arGetContextClassFromBuiltin(ar) \
-  HPHP::VM::arGetContextClassImpl<true>(ar)
+template <> Class* arGetContextClassImpl<true>(const ActRec* ar);
+template <> Class* arGetContextClassImpl<false>(const ActRec* ar);
+inline Class* arGetContextClass(const ActRec* ar) {
+  return arGetContextClassImpl<false>(ar);
+}
+inline Class* arGetContextClassFromBuiltin(const ActRec* ar) {
+  return arGetContextClassImpl<true>(ar);
+}
 
 // Used by extension functions that take a PHP "callback", since they need to
 // figure out the callback context once and call it multiple times. (e.g.
@@ -411,8 +435,24 @@ struct CallCtx {
   StringData* invName;
 };
 
-static const size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
-static const size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
+constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+
+/*
+ * We pad all stack overflow checks by a small amount to allow for three
+ * things:
+ *
+ *   - inlining functions without having to either do another stack
+ *     check (or chase down prologues to smash checks to be bigger).
+ *
+ *   - omitting stack overflow checks on leaf functions
+ *
+ *   - delaying stack overflow checks on reentry
+ */
+constexpr int kStackCheckLeafPadding = 20;
+constexpr int kStackCheckReenterPadding = 9;
+constexpr int kStackCheckPadding = kStackCheckLeafPadding +
+  kStackCheckReenterPadding;
 
 struct Fault {
   enum Type : int16_t {
@@ -688,6 +728,7 @@ public:
   }
 
   inline void ALWAYS_INLINE pushArray(ArrayData* a) {
+    assert(a);
     pushArrayNoRc(a);
     a->incRefCount();
   }
@@ -783,7 +824,6 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }
 
 #endif // __VM_BYTECODE_H__

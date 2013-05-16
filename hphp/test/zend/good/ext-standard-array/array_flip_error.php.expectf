@@ -1,0 +1,8 @@
+*** Testing array_flip() : error conditions ***
+-- Testing array_flip() function with Zero arguments --
+HipHop Warning: %a
+NULL
+-- Testing array_flip() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+Done

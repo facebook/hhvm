@@ -1,0 +1,11 @@
+*** Testing session_start() : variation ***
+bool(true)
+HipHop Notice: %a
+bool(true)
+HipHop Notice: %a
+bool(true)
+HipHop Notice: %a
+bool(true)
+HipHop Notice: %a
+bool(true)
+Done

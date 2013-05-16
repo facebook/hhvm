@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/hash/hash_snefru.h>
-#include <runtime/ext/hash/php_hash_snefru_tables.h>
+#include "hphp/runtime/ext/hash/hash_snefru.h"
+#include "hphp/runtime/ext/hash/php_hash_snefru_tables.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

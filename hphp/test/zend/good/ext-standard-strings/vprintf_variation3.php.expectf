@@ -1,0 +1,34 @@
+*** Testing vprintf() : int formats with int values ***
+
+-- Iteration 1 --
+0
+int(1)
+
+-- Iteration 2 --
+-1 1 
+int(5)
+
+-- Iteration 3 --
+2147483647 d, 2147483640 -2147483640
+int(36)
+
+-- Iteration 4 --
+    123456 12345678   -1234567 1234567
+int(38)
+
+-- Iteration 5 --
+111 2222 333333 44444444
+int(24)
+
+-- Iteration 6 --
+4667 4011 83 10
+int(15)
+
+-- Iteration 7 --
+%-5678 d
+int(8)
+
+-- Iteration 8 --
+1 2 3 4
+int(7)
+===DONE===

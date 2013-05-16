@@ -14,12 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/fixed_string_map.h"
-#include "runtime/base/macros.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/fixed_string_map.h"
+#include "hphp/runtime/base/macros.h"
 
 namespace HPHP {
-namespace VM {
 
 TRACE_SET_MOD(runtime);
 
@@ -87,4 +86,4 @@ template class FixedStringMap<unsigned char* /* TCA */, true>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} }
+ }

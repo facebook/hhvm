@@ -14,43 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/compiler.h"
+#include "hphp/compiler/package.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/emitter.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/util/json.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/process.h"
+#include "hphp/util/util.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/repo_schema.h"
+
+#include "hphp/hhvm/process_init.h"
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <dlfcn.h>
+
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-
-#include <compiler/package.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/emitter.h>
-#include <compiler/analysis/type.h>
-#include <util/json.h>
-#include <util/logger.h>
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/option.h>
-#include <compiler/parser/parser.h>
-#include <compiler/builtin_symbols.h>
-#include <util/db_conn.h>
-#include <util/exception.h>
-#include <util/process.h>
-#include <util/util.h>
-#include <util/timer.h>
-#include <util/hdf.h>
-#include <util/async_func.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/thread_init_fini.h>
-#include <runtime/vm/repo.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dlfcn.h>
-#include <system/lib/systemlib.h>
-#include <compiler/compiler.h>
-#include "util/repo_schema.h"
-
-#include "hhvm/process_init.h"
 
 using namespace boost::program_options;
 using std::cout;
@@ -157,7 +158,7 @@ int compiler_main(int argc, char **argv) {
   try {
     Hdf empty;
     RuntimeOption::Load(empty);
-    VM::initialize_repo();
+    initialize_repo();
 
     CompilerOptions po;
 #ifdef FACEBOOK
@@ -359,7 +360,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     store(command_line_parser(argc, argv).options(desc).positional(p).run(),
           vm);
     notify(vm);
-  } catch (unknown_option e) {
+  } catch (const unknown_option& e) {
     Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
     return -1;
@@ -677,7 +678,7 @@ int process(const CompilerOptions &po) {
         int runId = package.saveStatsToDB(server, seconds, po.branch,
                                           po.revision);
         package.commitStats(server, runId);
-      } catch (DatabaseException e) {
+      } catch (const DatabaseException& e) {
         Logger::Error("%s", e.what());
       }
     } else {
@@ -702,7 +703,7 @@ int lintTarget(const CompilerOptions &po) {
   for (unsigned int i = 0; i < po.inputs.size(); i++) {
     string filename = po.inputDir + "/" + po.inputs[i];
     try {
-      Scanner scanner(filename.c_str(), Option::ScannerType);
+      Scanner scanner(filename.c_str(), Option::GetScannerType());
       Compiler::Parser parser(scanner, filename.c_str(),
                               AnalysisResultPtr(new AnalysisResult()));
       if (!parser.parse()) {
@@ -943,7 +944,8 @@ int runTarget(const CompilerOptions &po) {
   }
   cmd += po.outputDir + '/' + po.program;
   cmd += string(" --file ") +
-    (po.inputs.size() == 1 ? po.inputs[0] : "") + po.programArgs;
+    (po.inputs.size() == 1 ? po.inputs[0] : "") +
+    " " + po.programArgs;
   Logger::Info("running executable: %s", cmd.c_str());
   ret = Util::ssystem(cmd.c_str());
   if (ret && ret != -1) ret = 1;

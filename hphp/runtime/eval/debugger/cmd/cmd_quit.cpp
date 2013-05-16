@@ -14,12 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_quit.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_quit.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
+// The text to display when the debugger client processes "help quit".
 bool CmdQuit::help(DebuggerClient *client) {
+  TRACE(2, "CmdQuit::help\n");
   client->helpTitle("Quit Command");
   client->helpCmds(
     "[q]uit", "quits this program",
@@ -31,11 +35,14 @@ bool CmdQuit::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdQuit::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+// Carries out the Quit command by informing the server the client
+// is going away and then getting the client to quit.
+bool CmdQuit::onClientImpl(DebuggerClient *client) {
+  TRACE(2, "CmdQuit::onClientImpl\n");
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
-    client->send(this);
+    client->sendToServer(this);
     client->quit();
     return true;
   }

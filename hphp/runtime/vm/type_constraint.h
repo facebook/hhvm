@@ -19,17 +19,23 @@
 #include <string>
 #include <tr1/functional>
 
-#include <runtime/base/types.h>
-#include <util/case_insensitive.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/type_profile.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/case_insensitive.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/type_profile.h"
 
 namespace HPHP {
-namespace VM {
 
 class Func;
 
 class TypeConstraint {
+public:
+  enum Flags {
+    NoFlags = 0x0,
+    Nullable = 0x1,
+    HHType = 0x2
+  };
+
 protected:
   enum MetaType {
     Precise,
@@ -57,24 +63,39 @@ protected:
   // when this is set to KindOfObject we may have to look up a typedef
   // name and test for a different DataType.
   Type m_type;
-  bool m_nullable;
+  Flags m_flags;
   const StringData* m_typeName;
   const NamedEntity* m_namedEntity;
   typedef hphp_hash_map<const StringData*, Type,
                         string_data_hash, string_data_isame> TypeMap;
   static TypeMap s_typeNamesToTypes;
 
+  void init();
+
 public:
   void verifyFail(const Func* func, int paramNum, const TypedValue* tv) const;
 
-  explicit TypeConstraint(const StringData* typeName=nullptr, bool nullable=false);
+  explicit TypeConstraint(const StringData* typeName, Flags flags)
+    : m_flags(flags), m_typeName(typeName), m_namedEntity(0) {
+    init();
+  }
+
+  explicit TypeConstraint(const StringData* typeName = nullptr,
+                          bool nullable = false, bool hhType = false)
+    : m_flags(NoFlags), m_typeName(typeName), m_namedEntity(0) {
+    if (nullable) m_flags = (Flags)(m_flags | Nullable);
+    if (hhType) m_flags = (Flags)(m_flags | HHType);
+    init();
+  }
 
   bool exists() const { return m_typeName; }
 
   const StringData* typeName() const { return m_typeName; }
   const NamedEntity* namedEntity() const { return m_namedEntity; }
 
-  bool nullable() const { return m_nullable; }
+  bool nullable() const { return m_flags & Nullable; }
+  bool hhType() const { return m_flags & HHType; }
+  Flags flags() const { return m_flags; }
 
   bool isSelf() const {
     return m_type.isSelf();
@@ -96,17 +117,9 @@ public:
   }
 
   bool compat(const TypeConstraint& other) const {
-    if (!hphpiCompat) {
-      // php 5.4.0RC6 allows 'int' compatible to Int but not integer
-      return (m_typeName == other.m_typeName
-              || (m_typeName != nullptr && other.m_typeName != nullptr
-                  && m_typeName->isame(other.m_typeName)));
-    } else {
-      // For now, be compatible with hphpi: int $x != Int $x
-      return (m_typeName == other.m_typeName
-              || (m_typeName != nullptr && other.m_typeName != nullptr
-                  && m_typeName->same(other.m_typeName)));
-    }
+    return (m_typeName == other.m_typeName
+            || (m_typeName != nullptr && other.m_typeName != nullptr
+                && m_typeName->isame(other.m_typeName)));
   }
 
   inline static bool equivDataTypes(DataType t1, DataType t2) {
@@ -142,7 +155,6 @@ private:
   void parentToTypeName(const Func* func, const StringData **typeName) const;
 };
 
-}
 }
 
 

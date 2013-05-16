@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __IP_BLOCK_MAP_H__
-#define __IP_BLOCK_MAP_H__
+#ifndef incl_HPHP_IP_BLOCK_MAP_H_
+#define incl_HPHP_IP_BLOCK_MAP_H_
 
-#include <util/hdf.h>
-#include <runtime/base/types.h>
-#include <netinet/in.h>
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/types.h"
+#include "netinet/in.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,4 +92,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __IP_BLOCK_MAP_H__
+#endif // incl_HPHP_IP_BLOCK_MAP_H_

@@ -1,0 +1,22 @@
+*** Testing array_intersect_uassoc() : usage variation ***
+
+-- Result of integers and floating point intersection --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+
+-- Result of integers and strings containing integers intersection --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+
+-- Result of integers and strings containing floating points intersection --
+array(0) {
+}
+===DONE===

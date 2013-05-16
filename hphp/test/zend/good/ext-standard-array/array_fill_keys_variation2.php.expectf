@@ -1,0 +1,32 @@
+*** Testing array_fill_keys() : parameter variations ***
+
+-- Testing array_fill_keys() function with reference value --
+array(2) {
+  ["one"]=>
+  string(6) "simple"
+  ["two"]=>
+  string(6) "simple"
+}
+
+-- Testing array_fill_keys() function with reference keys --
+array(2) {
+  ["one"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
+}
+array(2) {
+  ["one"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
+}
+
+-- Testing array_fill_keys() function with reference array input --
+array(2) {
+  ["one"]=>
+  string(3) "bob"
+  ["two"]=>
+  string(3) "bob"
+}
+Done

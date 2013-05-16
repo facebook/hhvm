@@ -21,25 +21,25 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/base/util/extended_logger.h>
-#include <runtime/base/util/simple_counter.h>
-#include <util/util.h>
-#include <util/network.h>
-#include <util/logger.h>
-#include <util/stack_trace.h>
-#include <util/process.h>
-#include <util/file_cache.h>
-#include <runtime/base/hardware_counter.h>
-#include <runtime/base/preg.h>
-#include <util/parser/scanner.h>
-#include <runtime/base/server/access_log.h>
-#include "runtime/base/crash_reporter.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/util/util.h"
+#include "hphp/util/network.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/process.h"
+#include "hphp/util/file_cache.h"
+#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/crash_reporter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +100,9 @@ int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 bool RuntimeOption::ServerThreadRoundRobin = false;
+constexpr int kDefaultWarmupThrottleRequestCount = 0;
+int RuntimeOption::ServerWarmupThrottleRequestCount =
+  kDefaultWarmupThrottleRequestCount;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 bool RuntimeOption::ServerThreadJobLIFO = false;
 bool RuntimeOption::ServerThreadDropStack = false;
@@ -240,7 +243,9 @@ std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
 
 bool RuntimeOption::MySQLReadOnly = false;
+#ifdef FACEBOOK
 bool RuntimeOption::MySQLLocalize = false;
+#endif
 int RuntimeOption::MySQLConnectTimeout = 1000;
 int RuntimeOption::MySQLReadTimeout = 1000;
 int RuntimeOption::MySQLWaitTimeout = -1;
@@ -361,10 +366,17 @@ bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = false;
-int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+
+int RuntimeOption::GetScannerType() {
+  int type = 0;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
+  if (EnableShortTags) type |= Scanner::AllowShortTags;
+  if (EnableAspTags) type |= Scanner::AllowAspTags;
+  return type;
+}
 
 // Initializers for Eval flags.
 static inline bool evalJitDefault() {
@@ -435,8 +447,8 @@ std::string RuntimeOption::DebuggerUsageLogFile;
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
 
-int RuntimeOption::PregBacktraceLimit = 100000;
-int RuntimeOption::PregRecursionLimit = 100000;
+long RuntimeOption::PregBacktraceLimit = 1000000;
+long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
 bool RuntimeOption::EnableHotProfiler = true;
@@ -662,6 +674,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
     ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
+    ServerWarmupThrottleRequestCount =
+      server["WarmupThrottleRequestCount"].getInt32(
+        kDefaultWarmupThrottleRequestCount
+      );
     ServerThreadDropCacheTimeoutSeconds =
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
     ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
@@ -988,7 +1004,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   {
     Hdf mysql = config["MySQL"];
     MySQLReadOnly = mysql["ReadOnly"].getBool();
+#ifdef FACEBOOK
     MySQLLocalize = mysql["Localize"].getBool();
+#endif
     MySQLConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
     MySQLReadTimeout = mysql["ReadTimeout"].getInt32(1000);
     MySQLWaitTimeout = mysql["WaitTimeout"].getInt32(-1);
@@ -1102,13 +1120,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
-
-    if (EnableHipHopSyntax) ScannerType |= Scanner::EnableHipHopKeywords;
-    else ScannerType &= ~Scanner::EnableHipHopKeywords;
-    if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
-    else ScannerType &= ~Scanner::AllowShortTags;
-    if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
-    else ScannerType &= ~Scanner::AllowAspTags;
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 
@@ -1251,8 +1262,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf preg = config["Preg"];
-    PregBacktraceLimit = preg["BacktraceLimit"].getInt32(100000);
-    PregRecursionLimit = preg["RecursionLimit"].getInt32(100000);
+    PregBacktraceLimit = preg["BacktraceLimit"].getInt64(1000000);
+    PregRecursionLimit = preg["RecursionLimit"].getInt64(100000);
     EnablePregErrorLog = preg["ErrorLog"].getBool(true);
   }
 

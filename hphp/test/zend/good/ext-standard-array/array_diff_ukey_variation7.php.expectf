@@ -1,0 +1,14 @@
+*** Testing array_diff_ukey() : usage variation ***
+
+-- Testing array_diff_ukey() function with float indexed array --
+array(1) {
+  [-30]=>
+  string(5) "-30.5"
+}
+array(2) {
+  [-10]=>
+  string(3) "-10"
+  [20]=>
+  string(2) "20"
+}
+===DONE===

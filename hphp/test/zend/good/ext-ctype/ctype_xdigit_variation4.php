@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit
+ * Description: Checks for character(s) representing a hexadecimal digit 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -13,7 +13,7 @@
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C");
+$orig = setlocale(LC_CTYPE, "C"); 
 
 // contain hexadecimal digits but do not correspond to 'correct' ints
 $octal_values1 = array(012, 013, 014, 015);
@@ -46,6 +46,6 @@ echo "'Correct' Integers: \n";
 foreach($hex_values2 as $c) {
 	var_dump(ctype_xdigit($c));
 }
-setlocale(LC_CTYPE, $orig);
+setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===

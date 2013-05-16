@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_SHA_H__
-#define __EXT_HASH_SHA_H__
+#ifndef incl_HPHP_EXT_HASH_SHA_H_
+#define incl_HPHP_EXT_HASH_SHA_H_
 
-#include <runtime/ext/hash/hash_engine.h>
+#include "hphp/runtime/ext/hash/hash_engine.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,11 +35,22 @@ public:
 
 class hash_sha256 : public HashEngine {
 public:
-  hash_sha256();
+  explicit hash_sha256(int size = 32);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
+  virtual void hash_final(unsigned char *digest, void *context);
+};
+
+/* sha224 is just sha256 with a different initial vector
+ * and a truncated output.
+ */
+class hash_sha224 : public hash_sha256 {
+public:
+  hash_sha224() : hash_sha256(28) {}
+
+  virtual void hash_init(void *context);
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
@@ -66,4 +77,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_SHA_H__
+#endif // incl_HPHP_EXT_HASH_SHA_H_

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/ssl_init.h>
-#include <util/mutex.h>
-#include <util/process.h>
-#include <openssl/crypto.h>
+#include "hphp/util/ssl_init.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
+#include "openssl/crypto.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

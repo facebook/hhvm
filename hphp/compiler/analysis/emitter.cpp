@@ -14,92 +14,95 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/job_queue.h>
-#include <util/parser/hphp.tab.hpp>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/as.h>
-#include <runtime/vm/stats.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
+#include "hphp/compiler/analysis/emitter.h"
 
-#include <compiler/builtin_symbols.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/emitter.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/peephole.h>
-
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/class_constant_expression.h>
-#include <compiler/expression/closure_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/dynamic_variable.h>
-#include <compiler/expression/encaps_list_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/include_expression.h>
-#include <compiler/expression/list_assignment.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/expression/new_object_expression.h>
-#include <compiler/expression/object_method_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/qop_expression.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/static_member_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/yield_expression.h>
-
-#include <compiler/statement/break_statement.h>
-#include <compiler/statement/case_statement.h>
-#include <compiler/statement/catch_statement.h>
-#include <compiler/statement/class_constant.h>
-#include <compiler/statement/class_variable.h>
-#include <compiler/statement/do_statement.h>
-#include <compiler/statement/echo_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/for_statement.h>
-#include <compiler/statement/foreach_statement.h>
-#include <compiler/statement/function_statement.h>
-#include <compiler/statement/global_statement.h>
-#include <compiler/statement/goto_statement.h>
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/statement/if_statement.h>
-#include <compiler/statement/label_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/static_statement.h>
-#include <compiler/statement/switch_statement.h>
-#include <compiler/statement/try_statement.h>
-#include <compiler/statement/unset_statement.h>
-#include <compiler/statement/while_statement.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include "compiler/statement/typedef_statement.h"
-
-#include <compiler/parser/parser.h>
-
-#include <system/lib/systemlib.h>
+#include "folly/ScopeGuard.h"
 
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/peephole.h"
+
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/dynamic_variable.h"
+#include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/list_assignment.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/new_object_expression.h"
+#include "hphp/compiler/expression/object_method_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/static_member_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/yield_expression.h"
+
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/compiler/statement/case_statement.h"
+#include "hphp/compiler/statement/catch_statement.h"
+#include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/statement/echo_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/global_statement.h"
+#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/if_statement.h"
+#include "hphp/compiler/statement/label_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/unset_statement.h"
+#include "hphp/compiler/statement/while_statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/typedef_statement.h"
+
+#include "hphp/compiler/parser/parser.h"
+
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 namespace Compiler {
@@ -273,6 +276,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     getUnitEmitter().recordSourceLocation(m_tempLoc ? m_tempLoc.get() : \
                                           m_node->getLocation().get(), curPos); \
     if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
+    if (isFCallStar(opcode)) getEmitterVisitor().recordCall(); \
     getEmitterVisitor().setPrevOpcode(opcode); \
   }
 
@@ -1396,6 +1400,10 @@ void EmitterVisitor::restoreJumpTargetEvalStack() {
   m_evalStack = it->second;
 }
 
+void EmitterVisitor::recordCall() {
+  m_curFunc->setContainsCalls();
+}
+
 bool EmitterVisitor::isJumpTarget(Offset target) {
   // Returns true iff one of the following conditions is true:
   //   1) We have seen an instruction that jumps to the specified offset
@@ -1432,7 +1440,7 @@ private:
  */
 class RestoreErrorReportingThunklet : public Thunklet {
 public:
-  RestoreErrorReportingThunklet(Id loc) : m_oldLevelLoc(loc) {}
+  explicit RestoreErrorReportingThunklet(Id loc) : m_oldLevelLoc(loc) {}
   virtual void emit(Emitter& e) {
     e.getEmitterVisitor().emitRestoreErrorReporting(e, m_oldLevelLoc);
     e.Unwind();
@@ -1443,7 +1451,7 @@ private:
 
 class UnsetUnnamedLocalThunklet : public Thunklet {
 public:
-  UnsetUnnamedLocalThunklet(Id loc) : m_loc(loc) {}
+  explicit UnsetUnnamedLocalThunklet(Id loc) : m_loc(loc) {}
   virtual void emit(Emitter& e) {
     e.getEmitterVisitor().emitVirtualLocal(m_loc);
     e.getEmitterVisitor().emitUnset(e);
@@ -1679,6 +1687,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 if (func->isSimpleDefine(&name, &tv)) {
                   UnitMergeKind k = func->isDefineWithoutImpl(ar) ?
                     UnitMergeKindPersistentDefine : UnitMergeKindDefine;
+                  if (tv.m_type == KindOfUninit) {
+                    tv.m_type = KindOfNull;
+                  }
                   m_ue.pushMergeableDef(k, name, tv);
                   visit(s);
                   continue;
@@ -1817,7 +1828,7 @@ static DataType getPredictedDataType(ExpressionPtr expr) {
 }
 
 void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
-                                   bool isBuiltinCall) {
+                                   bool useFCallBuiltin) {
   int ref = -1;
   if (fn->hasAnyContext(Expression::RefValue |
                         Expression::DeepReference |
@@ -1860,7 +1871,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   } else if (!ref) {
     DataType dt = getPredictedDataType(fn);
     if (dt != KindOfUnknown) {
-      if (isBuiltinCall) {
+      if (useFCallBuiltin) {
         switch (dt) {
           case KindOfBoolean:
           case KindOfInt64:
@@ -2892,6 +2903,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             cType = Collection::MapType;
           } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
             cType = Collection::StableMapType;
+          } else if (!strcasecmp(clsName->c_str(), "set")) {
+            cType = Collection::SetType;
           } else if (!strcasecmp(clsName->c_str(), "pair")) {
             cType = Collection::PairType;
             if (nElms != 2) {
@@ -2928,7 +2941,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               ExpressionPtr key = ap->getName();
               if ((bool)key) {
                 throw IncludeTimeFatalException(ap,
-                  "Keys may not be specified for Vector initialization");
+                  "Keys may not be specified for Vector, Set, or Pair "
+                  "initialization");
               }
               visit(ap->getValue());
               emitConvertToCell(e);
@@ -3023,8 +3037,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           return true;
         } else {
-          StringData* nName = StringData::GetStaticString(c->getName());
-          e.Cns(nName);
+          std::string nameStr = c->getOriginalName();
+          StringData* nName = StringData::GetStaticString(nameStr);
+          if (c->hadBackslash()) {
+            e.CnsE(nName);
+          } else {
+            const std::string& nonNSName = c->getNonNSOriginalName();
+            if (nonNSName != nameStr) {
+              StringData* nsName = nName;
+              nName = StringData::GetStaticString(nonNSName);
+              e.CnsU(nsName, nName);
+            } else {
+              e.Cns(StringData::GetStaticString(c->getName()));
+            }
+          }
         }
         return true;
       }
@@ -3826,7 +3852,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->addMethod(invoke);
         MethodStatementPtr body(
           static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
-        invoke->setHasGeneratorAsBody(body->getGeneratorFunc());
+        invoke->setHasGeneratorAsBody(!!body->getGeneratorFunc());
         postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
         return true;
@@ -4501,8 +4527,12 @@ void EmitterVisitor::emitUnset(Emitter& e) {
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
       case StackSym::CS:
-        throw IncludeTimeFatalException(e.getNode(),
-                                        "Cannot unset a static property");
+        e.String(
+          StringData::GetStaticString("Attempt to unset static property")
+        );
+        e.Fatal(0);
+        break;
+
       default: {
         unexpectedStackSym(sym, "emitUnset");
         break;
@@ -5173,7 +5203,7 @@ void EmitterVisitor::emitPostponedMeths() {
       fe = new FuncEmitter(m_ue, -1, -1, methName);
       fe->setIsGenerator(funcScope->isGenerator());
       fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
-      fe->setHasGeneratorAsBody(p.m_meth->getGeneratorFunc());
+      fe->setHasGeneratorAsBody(!!p.m_meth->getGeneratorFunc());
       p.m_fe = fe;
       top_fes.push_back(fe);
     }
@@ -5223,9 +5253,10 @@ void EmitterVisitor::emitPostponedMeths() {
           dynamic_pointer_cast<ConstantExpression>(par->defaultValue());
         bool nullable = ce && ce->isNull();
         TypeConstraint tc =
-          TypeConstraint(StringData::GetStaticString(
-                                     par->getOriginalTypeHint()),
-                                     nullable);
+          TypeConstraint(
+            StringData::GetStaticString(par->getOriginalTypeHint()),
+            nullable,
+            par->hhType());
         pi.setTypeConstraint(tc);
         TRACE(1, "Added constraint to %s\n", fe->name()->data());
       }
@@ -5241,10 +5272,17 @@ void EmitterVisitor::emitPostponedMeths() {
           initScalar(dv, vNode);
           pi.setDefaultValue(dv);
 
-          // Simple case: it's a scalar value so we just serialize it
-          VariableSerializer vs(VariableSerializer::PHPOutput);
-          String result = vs.serialize(tvAsCVarRef(&dv), true);
-          phpCode = StringData::GetStaticString(result.data());
+          std::string orig = vNode->getComment();
+          if (orig.empty()) {
+            // Simple case: it's a scalar value so we just serialize it
+            VariableSerializer vs(VariableSerializer::PHPOutput);
+            String result = vs.serialize(tvAsCVarRef(&dv), true);
+            phpCode = StringData::GetStaticString(result.get());
+          } else {
+            // This was optimized from a Constant, or ClassConstant
+            // use the original string
+            phpCode = StringData::GetStaticString(orig);
+          }
         } else {
           // Non-scalar, so we have to output PHP from the AST node
           std::ostringstream os;
@@ -5695,7 +5733,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     } else {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_STRING_NAME);
       m_evalStack.setString(
-        StringData::GetStaticString(node->getClassName()));
+        StringData::GetStaticString(node->getOriginalClassName()));
     }
   } else if (node->isParent() &&
              node->getOriginalClass()->getOriginalParent().empty()) {
@@ -5705,7 +5743,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   } else {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_STRING_NAME);
     m_evalStack.setString(
-      StringData::GetStaticString(node->getClassName()));
+      StringData::GetStaticString(node->getOriginalClassName()));
   }
 }
 
@@ -5843,7 +5881,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   const std::string& nameStr = node->getOriginalName();
   ExpressionListPtr params(node->getParams());
   int numParams = params ? params->getCount() : 0;
-  bool isBuiltinCall = false;
+  bool useFCallBuiltin = false;
   StringData* nLiteral = nullptr;
   Offset fpiStart;
   if (node->getClass() || !node->getClassName().empty()) {
@@ -5883,12 +5921,27 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = StringData::GetStaticString(nameStr);
-    isBuiltinCall = canEmitBuiltinCall(node, nameStr, numParams);
+    useFCallBuiltin = canEmitBuiltinCall(node, nameStr, numParams);
 
-    if (isBuiltinCall) {
+    StringData* nsName = nullptr;
+    if (!node->hadBackslash()) {
+      const std::string& nonNSName = node->getNonNSOriginalName();
+      if (nonNSName != nameStr) {
+        nsName = nLiteral;
+        nLiteral = StringData::GetStaticString(nonNSName);
+        useFCallBuiltin = false;
+      }
+    }
+
+    if (useFCallBuiltin) {
     } else if (!m_curFunc->isGenerator()) {
       fpiStart = m_ue.bcPos();
-      e.FPushFuncD(numParams, nLiteral);
+
+      if (nsName == nullptr) {
+        e.FPushFuncD(numParams, nLiteral);
+      } else {
+        e.FPushFuncU(numParams, nsName, nLiteral);
+      }
     } else {
       // Special handling for func_get_args and friends inside a generator.
       const StringData* specialMethodName = nullptr;
@@ -5909,7 +5962,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
         specialMethodName = s_get_arg;
       }
 
-      if (specialMethodName != nullptr) {
+      if (nsName != nullptr) {
+        e.FPushFuncU(numParams, nsName, nLiteral);
+      } else if (specialMethodName != nullptr) {
         emitVirtualLocal(contId);
         emitCGet(e);
         fpiStart = m_ue.bcPos();
@@ -5927,7 +5982,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     fpiStart = m_ue.bcPos();
     e.FPushFunc(numParams);
   }
-  if (isBuiltinCall) {
+  if (useFCallBuiltin) {
     FunctionScopePtr func = node->getFuncScope();
     assert(func);
     assert(numParams <= func->getMaxParamCount()
@@ -5955,7 +6010,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     e.FCall(numParams);
   }
   if (Option::WholeProgram) {
-    fixReturnType(e, node, isBuiltinCall);
+    fixReturnType(e, node, useFCallBuiltin);
   }
 }
 
@@ -6279,7 +6334,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86cinit");
     FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
-    assert(!(attr & VM::AttrTrait));
+    assert(!(attr & AttrTrait));
     bool added UNUSED = pce->addMethod(fe);
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
@@ -6654,8 +6709,13 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
 }
 
 void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
-  fe->setMaxStackCells(m_actualStackHighWater + kNumActRecCells
-                       + m_fdescHighWater);
+  // Max stack cells is used for stack overflow checks.  We need to
+  // count all the locals, and all cells due to ActRecs.  We don't
+  // need to count this function's own ActRec because whoever called
+  // it already included it in its "max stack cells".
+  fe->setMaxStackCells(m_actualStackHighWater +
+                       fe->numLocals() +
+                       m_fdescHighWater);
   m_actualStackHighWater = 0;
   m_fdescHighWater = 0;
 }
@@ -6744,7 +6804,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        HphpArray* a = NEW(HphpArray)(0);
+        auto a = NEW(HphpArray)(0);
         a->incRefCount();
         m_staticArrays.push_back(a);
 
@@ -6752,10 +6812,9 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 
         HphpArray* va = m_staticArrays.back();
         m_staticArrays.pop_back();
-        assert(ArrayData::GetScalarArray(va)->isHphpArray());
-        va = static_cast<HphpArray*>(ArrayData::GetScalarArray(va));
 
-        tvVal.m_data.parr = va;
+        auto sa = ArrayData::GetScalarArray(va);
+        tvVal.m_data.parr = sa;
         tvVal.m_type = KindOfArray;
 
         decRefArr(a);
@@ -6919,7 +6978,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
-      "MethodInfo not found; probably need to rebuild hphp/system");
+      "MethodInfo not found; may be a problem with the .idl.json files");
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
@@ -7054,12 +7113,12 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       Entry e;
       e.name = const_cast<StringData*>(it->first);
       e.info = it->second;
-      e.ci = ClassInfo::FindClassInterfaceOrTrait(e.name);
+      e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
       assert(e.ci);
       StringData* parentName
         = StringData::GetStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
-        // If this class doesn't have a base class, it's classEntries to be
+        // If this class doesn't have a base class, it's eligible to be
         // loaded now
         classEntries.push_back(e);
       } else {
@@ -7070,7 +7129,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
     for (unsigned k = 0; k < classEntries.size(); ++k) {
       Entry& e = classEntries[k];
-      // Any classes that derive from this class are now classEntries to be
+      // Any classes that derive from this class are now eligible to be
       // loaded
       PendingMap::iterator pendingIt = pending.find(e.name);
       if (pendingIt != pending.end()) {
@@ -7089,7 +7148,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData::GetStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent, parentName, nullptr);
+    pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
+              nullptr);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
@@ -7138,7 +7198,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           assert(false);
         }
         pce->addConstant(
-          cnsInfo->name.get(), nullptr, (TypedValue*)(&val), empty_string.get());
+          cnsInfo->name.get(),
+          nullptr,
+          (TypedValue*)(&val),
+          empty_string.get());
       }
     }
     {
@@ -7308,33 +7371,21 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
 static void emitSystemLib() {
   if (!Option::WholeProgram) return;
 
-  string slib = systemlib_path();
+  string slib = get_systemlib();
   if (slib.empty()) return;
 
-  FILE* sl = fopen(slib.c_str(), "r");
-  if (!sl) return;
-  fseek(sl, 0, SEEK_END);
-  long len = ftell(sl);
-  fseek(sl, 0, SEEK_SET);
-
-  char *code = (char*)malloc(len + 1);
   Option::WholeProgram = false;
   SystemLib::s_inited = false;
 
   SCOPE_EXIT {
     SystemLib::s_inited = true;
     Option::WholeProgram = true;
-    free(code);
   };
 
-  if (fread(code, len, 1, sl) != 1) {
-    throw Exception("Failed to read systemlib");
-  }
-
-  code[len] = 0;
   AnalysisResultPtr ar(new AnalysisResult());
-  Scanner scanner(code, len, RuntimeOption::ScannerType, "/:systemlib.php");
-  Parser parser(scanner, "/:systemlib.php", ar, len);
+  Scanner scanner(slib.c_str(), slib.size(),
+                  RuntimeOption::GetScannerType(), "/:systemlib.php");
+  Parser parser(scanner, "/:systemlib.php", ar, slib.size());
   parser.parse();
   FileScopePtr fsp = parser.getFileScope();
   fsp->setOuterScope(ar);
@@ -7344,7 +7395,7 @@ static void emitSystemLib() {
   fsp->analyzeProgram(ar);
 
   int md5len;
-  char* md5str = string_md5(code, len, false, md5len);
+  char* md5str = string_md5(slib.c_str(), slib.size(), false, md5len);
   MD5 md5(md5str);
   free(md5str);
 
@@ -7452,7 +7503,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       filename = "";
       unitOrigin = UnitOriginEval;
     }
-    ScopeGuard sg(SymbolTable::Purge);
+    SCOPE_EXIT { SymbolTable::Purge(); };
 
     // Check if this file contains raw hip hop bytecode instead of php.
     // For now this is just dictated by file extension, and doesn't ever
@@ -7461,13 +7512,13 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          return VM::assemble_file(filename, md5);
+          return assemble_file(filename, md5);
         }
       }
     }
 
     AnalysisResultPtr ar(new AnalysisResult());
-    Scanner scanner(code, codeLen, RuntimeOption::ScannerType, filename);
+    Scanner scanner(code, codeLen, RuntimeOption::GetScannerType(), filename);
     Parser parser(scanner, filename, ar, codeLen);
     parser.parse();
     FileScopePtr fsp = parser.getFileScope();

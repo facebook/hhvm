@@ -21,18 +21,20 @@
 #include <memory>
 #include <stack>
 
-#include "util/assertions.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/hopt/tracebuilder.h"
+#include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
 
-using namespace HPHP::VM::Transl;
+using HPHP::Transl::SrcKey;
+using HPHP::Transl::NormalizedInstruction;
 
 namespace HPHP {
-namespace VM {
 namespace Transl { struct PropInfo; }
 namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
   void push(SSATmp* tmp) {
@@ -65,7 +67,7 @@ struct EvalStack {
   uint32_t numCells() const {
     uint32_t ret = 0;
     for (auto& t : m_vector) {
-      ret += t->getType() == Type::ActRec ? kNumActRecCells : 1;
+      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
     }
     return ret;
   }
@@ -77,30 +79,26 @@ private:
   std::vector<SSATmp*> m_vector;
 };
 
-class TypeGuard {
- public:
-  enum Kind {
-    Local,
-    Stack,
-    Iter
-  };
+//////////////////////////////////////////////////////////////////////
 
-  TypeGuard(Kind kind, uint32_t index, Type type)
-      : m_kind(kind)
-      , m_index(index)
-      , m_type(type) {
-  }
-
-  Kind      getKind()  const { return m_kind;  }
-  uint32_t  getIndex() const { return m_index; }
-  Type      getType()  const { return m_type;  }
-
- private:
-  Kind      m_kind;
-  uint32_t    m_index;
-  Type m_type;
-};
-
+/*
+ * This module is responsible for determining high-level HHBC->IR
+ * compilation strategy.
+ *
+ * For each bytecode Foo in HHBC, there is a function in this class
+ * called emitFoo which handles translating it into HHIR.
+ *
+ * Additionally, while transating bytecode, this module manages a
+ * virtual execution stack modelling the state of the stack since the
+ * last time we emitted an IR instruction that materialized it
+ * (e.g. SpillStack or SpillFrame).
+ *
+ * HhbcTranslator is where we make optimiations that relate to overall
+ * knowledge of the runtime and HHBC.  For example, decisions like
+ * whether to use IR instructions that have constant Class*'s (for a
+ * AttrUnique class) instead of loading a Class* from TargetCache are
+ * made at this level.
+ */
 struct HhbcTranslator {
   HhbcTranslator(IRFactory& irFactory,
                  Offset bcStartOffset,
@@ -111,8 +109,7 @@ struct HhbcTranslator {
                             initialSpOffsetFromFp,
                             m_irFactory,
                             func))
-    , m_curFunc(func)
-    , m_bcOff(-1)
+    , m_bcStateStack {BcState(-1, func)}
     , m_startBcOff(bcStartOffset)
     , m_lastBcOff(false)
     , m_hasExit(false)
@@ -124,11 +121,20 @@ struct HhbcTranslator {
   Trace* getTrace() const { return m_tb->getTrace(); }
   TraceBuilder* getTraceBuilder() const { return m_tb.get(); }
 
+  void beginInlining(unsigned numArgs,
+                     const Func* target,
+                     Offset returnBcOffset);
+  void endInlining();
+  bool isInlining() const;
+  void profileFunctionEntry(const char* category);
+  void profileInlineFunctionShape(const std::string& str);
+  void profileSmallFunctionShape(const std::string& str);
+  void profileFailedInlShape(const std::string& str);
+
   void setBcOff(Offset newOff, bool lastBcOff);
   void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
   uint32_t getBcOffNextTrace() { return m_bcOffNextTrace; }
 
-  void emitUninitLoc(uint32_t id);
   void emitPrint();
   void emitThis();
   void emitCheckThis();
@@ -146,6 +152,8 @@ struct HhbcTranslator {
   void emitColAddNewElemC();
   void emitDefCns(uint32_t id);
   void emitCns(uint32_t id);
+  void emitCnsE(uint32_t id);
+  void emitCnsU(uint32_t id);
   void emitConcat();
   void emitDefCls(int id, Offset after);
   void emitDefFunc(int id);
@@ -213,11 +221,14 @@ struct HhbcTranslator {
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
-  void emitFPushCufOp(VM::Op op, Class* cls, StringData* invName,
+  void emitFPushCufOp(Op op, Class* cls, StringData* invName,
                       const Func* func, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
+  void emitFPushFuncU(int32_t numParams,
+                      int32_t funcId,
+                      int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFunc(int32_t numParams, SSATmp* funcName);
   SSATmp* getClsMethodCtx(const Func* callee, const Class* cls);
@@ -232,8 +243,12 @@ struct HhbcTranslator {
                            const StringData* methName);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
+  void emitFPushCtorCommon(SSATmp* cls,
+                           SSATmp* obj,
+                           const Func* func,
+                           int32_t numParams);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
-  void emitFCallArray();
+  void emitFCallArray(const Offset pcOffset, const Offset after);
   void emitFCall(uint32_t numParams,
                   Offset returnBcOffset,
                   const Func* callee);
@@ -271,6 +286,8 @@ struct HhbcTranslator {
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
 
+  // freeInline indicates whether we should be doing decrefs inlined in
+  // the TC, or using the generic decref helper.
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
 
@@ -332,11 +349,7 @@ struct HhbcTranslator {
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
-
-  template<typename T>
-  SSATmp* cns(T val) {
-    return m_tb->genDefConst(val);
-  }
+  void emitIncTransCounter();
 
   // tracelet guards
   Trace* guardTypeStack(uint32_t stackIndex,
@@ -355,7 +368,6 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
   void setThisAvailable();
-  void emitLoadDeps();
   void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
   void emitInterpOneCF(int numPopped);
 
@@ -366,7 +378,7 @@ private:
    */
   class VectorTranslator {
    public:
-    VectorTranslator(const Transl::NormalizedInstruction& ni,
+    VectorTranslator(const NormalizedInstruction& ni,
                      HhbcTranslator& ht);
     void emit();
 
@@ -389,7 +401,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
-    void emitPropSpecialized(const MInstrAttr mia, PropInfo);
+    void emitPropSpecialized(const MInstrAttr mia, Transl::PropInfo propInfo);
     void emitElem();
     void emitNewElem();
     void emitRatchetRefs();
@@ -424,9 +436,10 @@ private:
     SSATmp* getValue();
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
-                          PropInfo propOffset,
+                          Transl::PropInfo propOffset,
                           bool warn,
                           bool define);
+    Class* contextClass() const;
 
     /*
      * genStk is a wrapper around TraceBuilder::gen() to deal with instructions
@@ -441,6 +454,7 @@ private:
     bool isSimpleArrayOp();
     bool isSimpleBase();
     bool isSingleMember();
+    bool usePredictedResult();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -448,9 +462,14 @@ private:
     unsigned nLogicalRatchets() const;
     int ratchetInd() const;
 
-    template<typename T>
-    SSATmp* cns(T val) {
-      return m_tb.genDefConst(val);
+    template<class... Args>
+    SSATmp* cns(Args&&... args) {
+      return m_tb.cns(std::forward<Args>(args)...);
+    }
+
+    template<class... Args>
+    SSATmp* gen(Args&&... args) {
+      return m_tb.gen(std::forward<Args>(args)...);
     }
 
     const Transl::NormalizedInstruction& m_ni;
@@ -467,8 +486,21 @@ private:
     SSATmp* m_misBase;
     SSATmp* m_base;
     SSATmp* m_result;
+    SSATmp* m_predictedResult;
   };
 
+private: // tracebuilder forwarding utilities
+  template<class... Args>
+  SSATmp* cns(Args&&... args) {
+    return m_tb->cns(std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  SSATmp* gen(Args&&... args) {
+    return m_tb->gen(std::forward<Args>(args)...);
+  }
+
+private:
   /*
    * Emit helpers.
    */
@@ -479,51 +511,42 @@ private:
                 bool exitOnFailure,
                 CheckSupportedFun checkSupported,
                 EmitLdAddrFun emitLdAddr);
-
   void emitVGetMem(SSATmp* addr);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitVGet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitBindMem(SSATmp* ptr, SSATmp* src);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitBind(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitSetMem(SSATmp* ptr, SSATmp* src);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitSet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitEmptyMem(SSATmp* ptr);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitEmpty(const StringData* name,
                  CheckSupportedFun checkSupported,
                  EmitLdAddrFun emitLdAddr);
-
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Trace* exitTrace);
-
   bool checkSupportedClsProp(const StringData* propName,
                              Type resultType,
                              int stkIndex);
   bool checkSupportedGblName(const StringData* gblName,
-                             HPHP::VM::JIT::Type resultType,
+                             HPHP::JIT::Type resultType,
                              int stkIndex);
   SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Block* block);
   SSATmp* emitLdClsPropAddr(const StringData* propName) {
     return emitLdClsPropAddrOrExit(propName, nullptr);
   }
+  SSATmp* emitLdClsPropAddrCached(const StringData* propName,
+                                  Block* block);
   SSATmp* getStrName(const StringData* propName = nullptr);
   SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
   SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);
-  SSATmp* unboxPtr(SSATmp* ptr);
-
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, const StringData* clsName);
+  void emitRetFromInlined(Type type);
+  SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);
   void emitIsTypeC(Type t);
   void emitIsTypeL(Type t, int id);
@@ -531,28 +554,33 @@ private:
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  Trace* getExitTrace(Offset targetBcOff = -1);
+  Trace* getExitTrace(Offset targetBcOff,
+                      const std::vector<SSATmp*>& spillValues);
+  Trace* getExitTrace(Offset targetBcOff = -1) {
+    return getExitTrace(targetBcOff, getSpillValues());
+  }
   Trace* getExitTrace(uint32_t targetBcOff, uint32_t notTakenBcOff);
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
-  SSATmp* emitLdLocWarn(uint32_t id, Trace* target);
   void emitInterpOneOrPunt(Type type, int numPopped, int numExtraPushed = 0);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
+  void emitMarker();
 
   /*
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* getCurFunc()  { return m_curFunc; }
-  Class*      getCurClass() { return getCurFunc()->cls(); }
-  Unit*       getCurUnit()  { return getCurFunc()->unit(); }
+  const Func* getCurFunc()  const { return m_bcStateStack.back().func; }
+  Class*      getCurClass() const { return getCurFunc()->cls(); }
+  Unit*       getCurUnit()  const { return getCurFunc()->unit(); }
+  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
 
-  SrcKey      getCurSrcKey()  { return SrcKey(m_curFunc, m_bcOff); }
-  SrcKey      getNextSrcKey() {
-    SrcKey srcKey(m_curFunc, m_bcOff);
-    srcKey.advance(m_curFunc->unit());
+  SrcKey      getCurSrcKey()  const { return SrcKey(getCurFunc(), bcOff()); }
+  SrcKey      getNextSrcKey() const {
+    SrcKey srcKey(getCurFunc(), bcOff());
+    srcKey.advance(getCurFunc()->unit());
     return srcKey;
   }
 
@@ -564,12 +592,13 @@ private:
   Func*       lookupFuncId(int funcId);
   PreClass*   lookupPreClassId(int preClassId);
   const NamedEntityPair& lookupNamedEntityPairId(int id);
+  const NamedEntity* lookupNamedEntityId(int id);
 
   /*
-   * Eval stack helpers
+   * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
+  SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
   SSATmp* pop(Type type);
   void    popDecRef(Type type);
   void    discard(unsigned n);
@@ -581,18 +610,44 @@ private:
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
   std::vector<SSATmp*> getSpillValues() const;
   SSATmp* spillStack();
-  SSATmp* loadStackAddr(int32_t offset);
+  void    exceptionBarrier();
+  SSATmp* ldStackAddr(int32_t offset);
   SSATmp* top(Type type, uint32_t index = 0);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type type);
 
+  /*
+   * Local instruction helpers.
+   */
+  SSATmp* ldLoc(uint32_t id);
+  SSATmp* ldLocAddr(uint32_t id);
+  SSATmp* ldLocInner(uint32_t id, Trace* exitTrace);
+  SSATmp* ldLocInnerWarn(uint32_t id, Trace* target);
+  SSATmp* stLoc(uint32_t id, Trace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocNRC(uint32_t id, Trace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocImpl(uint32_t id, Trace*, SSATmp* newVal, bool doRefCount);
+
+private:
+  // Tracks information about the current bytecode offset and which
+  // function we are in.  Goes in m_bcStateStack; we push and pop as
+  // we deal with inlined calls.
+  struct BcState {
+    explicit BcState(Offset bcOff, const Func* func)
+      : bcOff(bcOff)
+      , func(func)
+    {}
+
+    Offset bcOff;
+    const Func* func;
+  };
+
 private:
   IRFactory&        m_irFactory;
   std::unique_ptr<TraceBuilder>
                     m_tb;
-  const Func*       m_curFunc;
-  Offset            m_bcOff;
+  std::vector<BcState>
+                    m_bcStateStack;
   Offset            m_startBcOff;
   Offset            m_bcOffNextTrace;
   bool              m_lastBcOff;
@@ -614,10 +669,19 @@ private:
   uint32_t          m_stackDeficit;
   EvalStack         m_evalStack;
 
-  vector<TypeGuard> m_typeGuards;
+  /*
+   * The FPI stack is used for inlining---when we start inlining at an
+   * FCall, we look in here to find a definition of the StkPtr,offset
+   * that can be used after the inlined callee "returns".
+   */
+  std::stack<std::pair<SSATmp*,int32_t>>
+                    m_fpiStack;
+
   Trace* const      m_exitGuardFailureTrace;
 };
 
-}}} // namespace HPHP::VM::JIT
+//////////////////////////////////////////////////////////////////////
+
+}} // namespace HPHP::JIT
 
 #endif

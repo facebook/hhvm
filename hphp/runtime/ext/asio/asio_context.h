@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ASIO_CONTEXT_H__
-#define __EXT_ASIO_CONTEXT_H__
+#ifndef incl_HPHP_EXT_ASIO_CONTEXT_H_
+#define incl_HPHP_EXT_ASIO_CONTEXT_H_
 
 #include <functional>
 #include <queue>
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
 
@@ -44,6 +45,8 @@ class AsioContext {
 
     void schedule(c_ContinuationWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
+    uint32_t registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
+    void unregisterExternalThreadEvent(uint32_t ete_idx);
     void runUntil(c_WaitableWaitHandle* wait_handle);
 
     static const uint32_t QUEUE_DEFAULT       = 0;
@@ -58,16 +61,19 @@ class AsioContext {
     c_ContinuationWaitHandle* m_current;
 
     // queue of ContinuationWaitHandles ready for immediate execution
-    smart::queue<c_ContinuationWaitHandle*> m_queue_ready;
+    smart::queue<c_ContinuationWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
-    reschedule_priority_queue_t m_priority_queue_default;
+    reschedule_priority_queue_t m_priorityQueueDefault;
 
     // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
-    reschedule_priority_queue_t m_priority_queue_no_pending_io;
+    reschedule_priority_queue_t m_priorityQueueNoPendingIO;
+
+    // list of all pending ExternalThreadEventWaitHandles
+    smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ASIO_CONTEXT_H__
+#endif // incl_HPHP_EXT_ASIO_CONTEXT_H_

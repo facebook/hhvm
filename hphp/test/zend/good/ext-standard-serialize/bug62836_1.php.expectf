@@ -1,0 +1,20 @@
+A Object
+(
+    [b] => B Object
+        (
+        )
+
+    [b1] => B Object
+        (
+        )
+
+    [c] => B Object
+        (
+        )
+
+    [c1] => B Object
+        (
+        )
+
+)
+okey

@@ -1,0 +1,11 @@
+*** Testing chop() : error conditions ***
+
+-- Testing chop() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing chop() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+string(11) "string_val "
+Done

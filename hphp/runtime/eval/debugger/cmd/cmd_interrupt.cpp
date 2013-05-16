@@ -14,12 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/eval/debugger/cmd/cmd_break.h>
-#include <runtime/eval/debugger/cmd/cmd_print.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_break.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_print.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -27,7 +29,9 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_program);
   thrift.write(m_errorMsg);
   thrift.write(m_threadId);
-  thrift.write(m_pendingJump);
+  // Used to be m_pendingJump, but that's been removed. Write false until
+  // we rev the protocol.
+  thrift.write(false);
   if (m_site) {
     thrift.write(true);
     thrift.write(m_site->getFile());
@@ -60,7 +64,10 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_program);
   thrift.read(m_errorMsg);
   thrift.read(m_threadId);
-  thrift.read(m_pendingJump);
+  // Used to be m_pendingJump, but that's been removed. Read a dummy bool until
+  // we rev the protocol.
+  bool dummy;
+  thrift.read(dummy);
   m_bpi = BreakPointInfoPtr(new BreakPointInfo());
   bool site; thrift.read(site);
   if (site) {
@@ -122,7 +129,7 @@ std::string CmdInterrupt::desc() const {
   return "";
 }
 
-bool CmdInterrupt::onClient(DebuggerClient *client) {
+bool CmdInterrupt::onClientImpl(DebuggerClient *client) {
   client->setCurrentLocation(m_threadId, m_bpi);
   if (!client->getDebuggerSmallStep()) {
     // Adjust line and char if it's not small stepping
@@ -132,17 +139,6 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
     }
   }
   client->setMatchedBreakPoints(m_matched);
-
-  switch (m_interrupt) {
-    case SessionEnded:
-    case RequestEnded:
-    case PSPEnded:
-      if (m_pendingJump) {
-        client->error("Your jump point cannot be reached. You may only jump "
-                      "to certain parallel or outer execution points.");
-      }
-      break;
-  }
 
   switch (m_interrupt) {
     case SessionStarted:
@@ -222,7 +218,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
         }
       }
       if (toggled) {
-        CmdBreak().update(client);
+        CmdBreak::SendClientBreakpointListToServer(client);
       }
       if (!found) {
         if (m_interrupt == HardBreakPoint) {
@@ -260,25 +256,29 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_format("format");
+static const StaticString s_php("php");
+static const StaticString s_value("value");
+
 void CmdInterrupt::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTCodeLoc);
   client->setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
   Array values;
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
-    Array watch;
-    watch.set("format", watches[i]->first);
-    watch.set("php", watches[i]->second);
+    ArrayInit watch(3);
+    watch.set(s_format, watches[i]->first);
+    watch.set(s_php, watches[i]->second);
     Variant v = CmdPrint().processWatch(client, watches[i]->first,
                                         watches[i]->second);
-    watch.set("value", CmdPrint::FormatResult(watches[i]->first, v));
-    values.append(watch);
+    watch.set(s_value, CmdPrint::FormatResult(watches[i]->first, v));
+    values.append(watch.create());
   }
   client->setOTValues(values);
 }
 
 bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
@@ -308,10 +308,6 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
   }
   assert(false);
   return false;
-}
-
-FrameInjection *CmdInterrupt::getFrame() {
-  return nullptr;
 }
 
 std::string CmdInterrupt::getFileLine() const {

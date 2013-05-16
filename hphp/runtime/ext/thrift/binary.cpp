@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/thrift/transport.h>
-#include <runtime/ext/ext_thrift.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/base/base_includes.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/logger.h"
 
 #include <sys/types.h>
-#include <netinet/in.h>
+#include "netinet/in.h"
 #include <unistd.h>
 #include <stdexcept>
 
@@ -369,7 +369,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
     case T_UTF16:
     case T_STRING: {
         String sv = value.toString();
-        transport.writeString(sv, sv.size());
+        transport.writeString(sv.data(), sv.size());
     } return;
     case T_MAP: {
       Array ht = value.toArray();
@@ -460,10 +460,10 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
   if (strict_write) {
     int32_t version = VERSION_1 | msgtype;
     transport.writeI32(version);
-    transport.writeString(method_name, method_name.size());
+    transport.writeString(method_name.data(), method_name.size());
     transport.writeI32(seqid);
   } else {
-    transport.writeString(method_name, method_name.size());
+    transport.writeString(method_name.data(), method_name.size());
     transport.writeI8(msgtype);
     transport.writeI32(seqid);
   }

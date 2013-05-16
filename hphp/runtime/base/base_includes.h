@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BASE_INCLUDES_H__
-#define __HPHP_BASE_INCLUDES_H__
+#ifndef incl_HPHP_BASE_INCLUDES_H_
+#define incl_HPHP_BASE_INCLUDES_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 // headers needed by extensions.
 
-#include <util/lock.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/ext/extension.h>
-#include <util/compatibility.h>
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/util/compatibility.h"
 #ifdef HHVM_FBMAKE
-#include <hphp/system/constants.h>
+#include "hphp/system/constants.h"
 #else
-#include <system/constants.h>
+#include "system/constants.h"
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __HPHP_BASE_INCLUDES_H__
+#endif // incl_HPHP_BASE_INCLUDES_H_

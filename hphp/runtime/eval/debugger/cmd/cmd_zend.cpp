@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_zend.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_zend.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 bool CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
@@ -36,8 +38,8 @@ bool CmdZend::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdZend::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdZend::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     const std::string &code = client->getCode();

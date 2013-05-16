@@ -1,0 +1,6 @@
+string(8) "02010403"
+string(8) "01020304"
+string(12) "feff02010403"
+string(12) "fffe02010403"
+string(12) "fffe01020304"
+string(12) "feff01020304"

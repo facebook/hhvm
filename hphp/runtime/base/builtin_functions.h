@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BUILTIN_FUNCTIONS_H__
-#define __HPHP_BUILTIN_FUNCTIONS_H__
+#ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
+#define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include <runtime/base/execution_context.h>
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/binary_operations.h>
-#include <runtime/base/string_offset.h>
-#include <runtime/base/intercept.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/strings.h>
-#include <util/case_insensitive.h>
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/binary_operations.h"
+#include "hphp/runtime/base/string_offset.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/util/case_insensitive.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**
@@ -268,14 +268,14 @@ bool isset(CArrRef v, CObjRef offset);
 bool isset(CArrRef v, CVarRef offset);
 bool isset(CArrRef v, CStrRef offset, bool isString = false);
 
-inline Variant unset(Variant &v)               { v.unset();   return uninit_null();}
-inline Variant unset(CVarRef v)                {              return uninit_null();}
-inline Variant setNull(Variant &v)             { v.setNull(); return uninit_null();}
-inline Object setNull(Object &v)               { v.reset();   return Object();}
-inline Array setNull(Array &v)                 { v.reset();   return Array();}
-inline String setNull(String &v)               { v.reset();   return String();}
-inline Variant unset(Object &v)                { v.reset();   return uninit_null();}
-inline Variant unset(Array &v)                 { v.reset();   return uninit_null();}
+inline Variant unset(Variant &v)   { v.unset();   return uninit_null();}
+inline Variant unset(CVarRef v)    {              return uninit_null();}
+inline Variant setNull(Variant &v) { v.setNull(); return uninit_null();}
+inline Object setNull(Object &v)   { v.reset();   return Object();}
+inline Array setNull(Array &v)     { v.reset();   return Array();}
+inline String setNull(String &v)   { v.reset();   return String();}
+inline Variant unset(Object &v)    { v.reset();   return uninit_null();}
+inline Variant unset(Array &v)     { v.reset();   return uninit_null();}
 
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
@@ -287,7 +287,11 @@ inline bool is_double(CVarRef v) { return v.is(KindOfDouble);}
 inline bool is_string(CVarRef v) { return v.isString();}
 inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
 inline bool is_object(CVarRef var) {
-  return var.is(KindOfObject) && !var.isResource();
+  // NB: just doing !var.isResource() is not right. isResource can have custom
+  // implementations in extension classes, and even if that returns false,
+  // is_object is still supposed to return false. Because PHP.
+  return var.is(KindOfObject) &&
+    var.getObjectData()->getVMClass() != SystemLib::s_resourceClass;
 }
 inline bool is_empty_string(CVarRef v) {
   return v.isString() && v.getStringData()->empty();
@@ -349,26 +353,26 @@ bool array_is_valid_callback(CArrRef arr);
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound = false);
 
-const HPHP::VM::Func*
+const HPHP::Func*
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
-                   HPHP::VM::Class*& cls,
+                   HPHP::Class*& cls,
                    StringData*& invName,
                    bool warn = true);
 
 inline void
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
-                   HPHP::VM::CallCtx& ctx,
+                   CallCtx& ctx,
                    bool warn = true) {
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
                                 ctx.invName, warn);
 }
 
-HPHP::VM::ActRec* vm_get_previous_frame();
+ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding = false);
 
@@ -596,4 +600,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_BUILTIN_FUNCTIONS_H__
+#endif // incl_HPHP_BUILTIN_FUNCTIONS_H_

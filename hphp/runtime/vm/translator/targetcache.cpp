@@ -13,24 +13,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/annotation.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/base.h"
+#include "hphp/util/maphuge.h"
+
 #include <string>
 #include <stdio.h>
 #include <sys/mman.h>
-
-#include <util/trace.h>
-#include <util/base.h>
-#include <util/maphuge.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/types.h>
-#include <runtime/base/strings.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/translator/annotation.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/stats.h>
 
 using namespace HPHP::MethodLookup;
 using namespace HPHP::Util;
@@ -40,7 +40,6 @@ using std::string;
  * The targetcache module provides a set of per-request caches.
  */
 namespace HPHP {
-namespace VM {
 
 /*
  * Put this where the compiler has a chance to inline it.
@@ -232,6 +231,12 @@ bool testAndSetBit(Handle handle, uint32_t mask) {
 
 bool isPersistentHandle(Handle handle) {
   return handle >= (unsigned)s_persistent_start;
+}
+
+bool classIsPersistent(const Class* cls) {
+  return (RuntimeOption::RepoAuthoritative &&
+          cls &&
+          isPersistentHandle(cls->m_cachedOffset));
 }
 
 static Handle allocLocked(bool persistent, int numBytes, int align) {
@@ -1141,4 +1146,4 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   return nullptr;
 }
 
-} } } } // HPHP::VM::Transl::TargetCache
+} } } // HPHP::Transl::TargetCache

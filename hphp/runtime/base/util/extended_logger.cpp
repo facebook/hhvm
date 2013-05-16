@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/extended_logger.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/libevent_transport.h>
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/server/server.h>
-#include <runtime/base/runtime_option.h>
-#include <util/util.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/server/libevent_transport.h"
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_OUTPUT_H__
-#define __EXT_OUTPUT_H__
+#ifndef incl_HPHP_EXT_OUTPUT_H_
+#define incl_HPHP_EXT_OUTPUT_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/server/server_stats.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/server/server_stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,4 +60,4 @@ void f_hphp_clear_hardware_events(void);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_OUTPUT_H__
+#endif // incl_HPHP_EXT_OUTPUT_H_

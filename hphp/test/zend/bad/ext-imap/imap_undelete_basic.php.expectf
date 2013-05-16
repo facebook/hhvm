@@ -1,0 +1,3 @@
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+bool(true)

@@ -13,6 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/class.h"
+
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/util.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/name_value_table.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/logger.h"
 
 #include <boost/checked_delete.hpp>
 #include <boost/optional.hpp>
@@ -21,26 +40,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "runtime/base/base_includes.h"
-#include "runtime/base/array/hphp_array.h"
-#include "util/util.h"
-#include "util/debug.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/treadmill.h"
-#include "runtime/vm/name_value_table.h"
-#include "runtime/vm/name_value_table_wrapper.h"
-#include "runtime/vm/request_arena.h"
-#include "system/lib/systemlib.h"
-#include "util/logger.h"
-
 namespace HPHP {
-namespace VM {
 
 static StringData* sd86ctor = StringData::GetStaticString("86ctor");
 static StringData* sd86pinit = StringData::GetStaticString("86pinit");
@@ -123,7 +123,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out) const {
 // PreClass::Const.
 
 PreClass::Const::Const(PreClass* preClass, const StringData* n,
-		               const StringData* typeConstraint,
+                       const StringData* typeConstraint,
                        const TypedValue& val, const StringData* phpCode)
   : m_preClass(preClass), m_name(n), m_typeConstraint(typeConstraint),
     m_phpCode(phpCode) {
@@ -270,7 +270,7 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
-		                          const StringData* typeConstraint,
+                                  const StringData* typeConstraint,
                                   const StringData* docComment,
                                   TypedValue* val,
                                   DataType hphpcType) {
@@ -293,8 +293,8 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
 }
 
 bool PreClassEmitter::addConstant(const StringData* n,
-		                          const StringData* typeConstraint,
-		                          TypedValue* val,
+                                  const StringData* typeConstraint,
+                                  TypedValue* val,
                                   const StringData* phpCode) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
@@ -514,8 +514,6 @@ void PreClassRepoProxy::GetPreClassesStmt
 ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
   unsigned classVecLen = (parent != nullptr) ? parent->m_classVecLen+1 : 1;
   void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
-  always_assert(IMPLIES(alwaysLowMem(), ptr_is_low_mem(mem)) &&
-         "All Classes must be allocated at 32-bit addresses");
   try {
     return ClassPtr(new (mem) Class(preClass, parent, classVecLen));
   } catch (...) {
@@ -773,29 +771,6 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   return AvailTrue;
 }
 
-// If this Class represents the same class as 'preClass' or a descendent of
-// 'preClass', this function returns the Class* that corresponds to 'preClass'.
-// Otherwise, this function returns NULL.
-Class* Class::classof(const PreClass* preClass) const {
-  Class* class_ = const_cast<Class*>(this);
-  do {
-    if (class_->m_preClass.get() == preClass) {
-      return class_;
-    }
-    std::vector<ClassPtr>& interfaces = class_->m_declInterfaces;
-    for (unsigned i = 0; i < interfaces.size(); ++i) {
-      // Interfaces can extend arbitrarily many interfaces themselves, so
-      // search them recursively
-      Class* iclass = interfaces[i]->classof(preClass);
-      if (iclass) {
-        return iclass;
-      }
-    }
-    class_ = class_->m_parent.get();
-  } while (class_ != nullptr);
-  return nullptr;
-}
-
 void Class::initialize(TypedValue*& sProps) const {
   if (m_pinitVec.size() > 0) {
     if (getPropData() == nullptr) {
@@ -844,49 +819,53 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // we prevent it by setting AttrNoInjection (see Func::init)
   NameValueTable propNvt(numDeclProperties());
   NameValueTableWrapper propArr(&propNvt);
+  // bump the refCount until we have a real reference to it
   propArr.incRefCount();
 
-  // Create a sentinel that uniquely identifies uninitialized properties.
-  ObjectData* sentinel = SystemLib::AllocPinitSentinel();
-  sentinel->incRefCount();
   // Insert propArr and sentinel into the args array, transferring ownership.
-  HphpArray* args = NEW(HphpArray)(2);
+  ArrayData* args = NEW(HphpArray)(2);
   args->incRefCount();
   {
-    TypedValue tv;
-    tv.m_data.parr = &propArr;
-    tv.m_type = KindOfArray;
-    args->nvAppend(&tv);
+    // the first argument is byRef. Make a reference,
+    // and hold its refCount above one until after the call
+    Variant arg0(&propArr);
+    // match the incRef above, now we have an owner
     propArr.decRefCount();
-  }
-  {
-    TypedValue tv;
-    tv.m_data.pobj = sentinel;
-    tv.m_type = KindOfObject;
-    args->nvAppend(&tv);
-    sentinel->decRefCount();
-  }
-  TypedValue* tvSentinel = args->nvGetValueRef(1);
-  for (size_t i = 0; i < nProps; ++i) {
-    TypedValue& prop = (*propVec)[i];
-    if (prop.m_type == KindOfUninit) {
-      // Replace undefined values with tvSentinel, which acts as a
-      // unique sentinel for undefined properties in 86pinit().
-      tvDup(tvSentinel, &prop);
+    args = args->appendRef(arg0, 0);
+    {
+      // Create a sentinel that uniquely identifies uninitialized properties.
+      ObjectData* sentinel = SystemLib::AllocPinitSentinel();
+      sentinel->incRefCount();
+      TypedValue tv;
+      tv.m_data.pobj = sentinel;
+      tv.m_type = KindOfObject;
+      args = args->append(tvAsCVarRef(&tv), false);
+      sentinel->decRefCount();
     }
-    // We have to use m_originalMangledName here because the
-    // 86pinit methods for traits depend on it
-    const StringData* k = (m_declProperties[i].m_attrs & AttrPrivate)
-                           ? m_declProperties[i].m_originalMangledName
-                           : m_declProperties[i].m_name;
-    propNvt.migrateSet(k, &prop);
-  }
-  // Iteratively invoke 86pinit() methods upward through the inheritance chain.
-  for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
-       it != m_pinitVec.rend(); ++it) {
-    TypedValue retval;
-    g_vmContext->invokeFunc(&retval, *it, args, nullptr, const_cast<Class*>(this));
-    assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+    TypedValue* tvSentinel = args->nvGetValueRef(1);
+    for (size_t i = 0; i < nProps; ++i) {
+      TypedValue& prop = (*propVec)[i];
+      if (prop.m_type == KindOfUninit) {
+        // Replace undefined values with tvSentinel, which acts as a
+        // unique sentinel for undefined properties in 86pinit().
+        tvDup(tvSentinel, &prop);
+      }
+      // We have to use m_originalMangledName here because the
+      // 86pinit methods for traits depend on it
+      const StringData* k = (m_declProperties[i].m_attrs & AttrPrivate)
+        ? m_declProperties[i].m_originalMangledName
+        : m_declProperties[i].m_name;
+      propNvt.migrateSet(k, &prop);
+    }
+    // Iteratively invoke 86pinit() methods upward
+    // through the inheritance chain.
+    for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
+         it != m_pinitVec.rend(); ++it) {
+      TypedValue retval;
+      g_vmContext->invokeFunc(&retval, *it, args, nullptr,
+                              const_cast<Class*>(this));
+      assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+    }
   }
   // For properties that do not require deep initialization, promote strings
   // and arrays that came from 86pinit to static. This allows us to initialize
@@ -1044,20 +1023,19 @@ TypedValue* Class::initSPropsImpl() const {
     NameValueTableWrapper nvtWrapper(&*nvt);
     nvtWrapper.incRefCount();
 
-    HphpArray* args = NEW(HphpArray)(1);
+    ArrayData* args = NEW(HphpArray)(1);
     args->incRefCount();
     try {
       {
-        TypedValue tv;
-        tv.m_data.parr = &nvtWrapper;
-        tv.m_type = KindOfArray;
-        args->nvAppend(&tv);
-      }
-      for (unsigned i = 0; i < m_sinitVec.size(); i++) {
-        TypedValue retval;
-        g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
-                                const_cast<Class*>(this));
-        assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+        Variant arg0(&nvtWrapper);
+        args = args->appendRef(arg0, false);
+
+        for (unsigned i = 0; i < m_sinitVec.size(); i++) {
+          TypedValue retval;
+          g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
+                                  const_cast<Class*>(this));
+          assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+        }
       }
       // Release the args array.  nvtWrapper is on the stack, so it
       // better have a single reference.
@@ -1198,12 +1176,12 @@ TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
     static StringData* sd86cinit = StringData::GetStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
-    TypedValue tv;
-    tv.m_data.pstr = (StringData*)clsCnsName;
-    tv.m_type = KindOfString;
-    g_vmContext->invokeFunc(clsCns, meth86cinit,
-                            CREATE_VECTOR1(tvAsCVarRef(&tv)), nullptr,
-                            const_cast<Class*>(this));
+    TypedValue tv[1];
+    tv->m_data.pstr = (StringData*)clsCnsName;
+    tv->m_type = KindOfString;
+    clsCnsName->incRefCount();
+    g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
+                               nullptr, 1, tv);
   }
   return clsCns;
 }
@@ -1304,7 +1282,7 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, sd86ctor);
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert(m_ctor->attrs() == (AttrPublic|AttrNoInjection));
+  assert(m_ctor->attrs() == (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {
@@ -2236,9 +2214,8 @@ void Class::setInitializers() {
 //    compatible (at least as many parameters, additional parameters must have
 //    defaults), and typehints must be compatible
 void Class::checkInterfaceMethods() {
-  for (ClassSet::const_iterator it = m_allInterfaces.begin();
-       it != m_allInterfaces.end(); it++) {
-    const Class* iface = *it;
+  for (int i = 0, size = m_interfaces.size(); i < size; i++) {
+    const Class* iface = m_interfaces[i];
 
     for (size_t m = 0; m < iface->m_methods.size(); m++) {
       Func* imeth = iface->m_methods[m];
@@ -2285,12 +2262,13 @@ void Class::checkInterfaceMethods() {
 }
 
 void Class::setInterfaces() {
-  if (attrs() & AttrInterface) {
-    m_allInterfaces.insert(this);
-  }
+  InterfaceMap::Builder interfacesBuilder;
   if (m_parent.get() != nullptr) {
-    m_allInterfaces.insert(m_parent->m_allInterfaces.begin(),
-                           m_parent->m_allInterfaces.end());
+    int size = m_parent->m_interfaces.size();
+    for (int i = 0; i < size; i++) {
+      Class* interface = m_parent->m_interfaces[i];
+      interfacesBuilder.add(interface->name(), interface);
+    }
   }
   for (PreClass::InterfaceVec::const_iterator it =
          m_preClass->interfaces().begin();
@@ -2304,9 +2282,20 @@ void Class::setInterfaces() {
                   m_preClass->name()->data(), cp->name()->data());
     }
     m_declInterfaces.push_back(cp);
-    m_allInterfaces.insert(cp->m_allInterfaces.begin(),
-                           cp->m_allInterfaces.end());
+    if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
+      interfacesBuilder.add(cp->name(), cp.get());
+    }
+    int size = cp->m_interfaces.size();
+    for (int i = 0; i < size; i++) {
+      Class* interface = cp->m_interfaces[i];
+      interfacesBuilder.find(interface->name());
+      if (interfacesBuilder.find(interface->name()) ==
+          interfacesBuilder.end()) {
+        interfacesBuilder.add(interface->name(), interface);
+      }
+    }
   }
+  m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();
 }
 
@@ -2633,4 +2622,4 @@ void Class::setSPropData(TypedValue* sPropData) const {
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

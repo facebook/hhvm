@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/object_data.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/object_data.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,13 +101,19 @@ void ArrayIter::objInit(ObjectData *obj) {
       m_pos = smp->iter_begin();
       break;
     }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      m_version = st->getVersion();
+      m_pos = st->iter_begin();
+      break;
+    }
     case Collection::PairType: {
       m_pos = 0;
       break;
     }
     default: {
       assert(obj->instanceof(SystemLib::s_IteratorClass));
-      obj->o_invoke(s_rewind, Array());
+      obj->o_invoke_few_args(s_rewind, 0);
       break;
     }
   }
@@ -157,12 +163,15 @@ bool ArrayIter::endHelper() {
     case Collection::StableMapType: {
       return m_pos == 0;
     }
+    case Collection::SetType: {
+      return m_pos == 0;
+    }
     case Collection::PairType: {
       return m_pos >= getPair()->t_count();
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return !obj->o_invoke(s_valid, Array());
+      return !obj->o_invoke_few_args(s_valid, 0);
     }
   }
 }
@@ -191,13 +200,22 @@ void ArrayIter::nextHelper() {
       m_pos = smp->iter_next(m_pos);
       return;
     }
+    case Collection::SetType: {
+      assert(m_pos != 0);
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      m_pos = st->iter_next(m_pos);
+      return;
+    }
     case Collection::PairType: {
       m_pos++;
       return;
     }
     default:
       ObjectData* obj = getIteratorObj();
-      obj->o_invoke(s_next, Array());
+      obj->o_invoke_few_args(s_next, 0);
   }
 }
 
@@ -222,12 +240,15 @@ Variant ArrayIter::firstHelper() {
       }
       return smp->iter_key(m_pos);
     }
+    case Collection::SetType: {
+      return uninit_null();
+    }
     case Collection::PairType: {
       return m_pos;
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return obj->o_invoke(s_key, Array());
+      return obj->o_invoke_few_args(s_key, 0);
     }
   }
 }
@@ -262,12 +283,19 @@ Variant ArrayIter::second() {
       }
       return smp->iter_value(m_pos);
     }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      return st->iter_value(m_pos);
+    }
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return obj->o_invoke(s_current, Array());
+      return obj->o_invoke_few_args(s_current, 0);
     }
   }
 }
@@ -298,13 +326,21 @@ void ArrayIter::secondHelper(Variant& v) {
       v = smp->iter_value(m_pos);
       break;
     }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      v = st->iter_value(m_pos);
+      break;
+    }
     case Collection::PairType: {
       v = tvAsCVarRef(getPair()->at(m_pos));
       break;
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      v = obj->o_invoke(s_current, Array());
+      v = obj->o_invoke_few_args(s_current, 0);
       break;
     }
   }
@@ -530,8 +566,6 @@ MArrayIter::~MArrayIter() {
     decRefArr(getAd());
   }
 }
-
-namespace VM {
 
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
@@ -1053,8 +1087,6 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   }
 cold:
   return iter_next_cold(iter, valOut, keyOut);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

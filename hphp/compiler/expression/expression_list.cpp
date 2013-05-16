@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/analysis/function_scope.h>
-#include <runtime/base/array/array_init.h>
-#include <compiler/parser/parser.h>
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
 

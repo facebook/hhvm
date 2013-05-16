@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_imap.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_imap.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/logger.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_

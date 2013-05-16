@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/static_class_name.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <util/util.h>
+#include "hphp/compiler/expression/static_class_name.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

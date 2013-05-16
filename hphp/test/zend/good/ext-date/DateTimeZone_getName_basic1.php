@@ -7,7 +7,7 @@
 
 echo "*** Testing DateTimeZone::getName() : basic functionality ***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("GMT");
 
 $tz1 = new DateTimeZone("Europe/London");

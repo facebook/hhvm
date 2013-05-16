@@ -1,0 +1,43 @@
+object(Vector)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  object(stdClass)#4 (0) {
+  }
+  [2]=>
+  string(3) "foo"
+  [3]=>
+  object(stdClass)#4 (0) {
+  }
+}
+========
+object(Map)#6 (4) {
+  [33]=>
+  string(3) "foo"
+  ["a"]=>
+  int(1)
+  [44]=>
+  object(stdClass)#7 (0) {
+  }
+  ["b"]=>
+  object(stdClass)#7 (0) {
+  }
+}
+========
+object(StableMap)#9 (4) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  object(stdClass)#10 (0) {
+  }
+  [33]=>
+  string(3) "foo"
+  [44]=>
+  object(stdClass)#10 (0) {
+  }
+}
+========
+object(Set)#12 (2) {
+  int(1)
+  string(3) "foo"
+}

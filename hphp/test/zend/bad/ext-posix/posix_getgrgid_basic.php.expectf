@@ -1,0 +1,11 @@
+Basic test of POSIX getgid and getgrid fucntions
+Array
+(
+    [name] => %s
+    [passwd] => %a
+    [members] => Array
+%a
+
+    [gid] => %d
+)
+===DONE===

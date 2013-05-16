@@ -1,0 +1,110 @@
+*** Testing xml_set_object() : usage variations ***
+
+Arg value 0 
+HipHop Warning: %a
+NULL
+
+Arg value 1 
+HipHop Warning: %a
+NULL
+
+Arg value 12345 
+HipHop Warning: %a
+NULL
+
+Arg value -2345 
+HipHop Warning: %a
+NULL
+
+Arg value 10.5 
+HipHop Warning: %a
+NULL
+
+Arg value -10.5 
+HipHop Warning: %a
+NULL
+
+Arg value 101234567000 
+HipHop Warning: %a
+NULL
+
+Arg value 1.07654321E-9 
+HipHop Warning: %a
+NULL
+
+Arg value 0.5 
+HipHop Warning: %a
+NULL
+
+Arg value Array 
+HipHop Warning: %a
+NULL
+
+Arg value Array 
+HipHop Warning: %a
+NULL
+
+Arg value Array 
+HipHop Warning: %a
+NULL
+
+Arg value Array 
+HipHop Warning: %a
+NULL
+
+Arg value Array 
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value 1 
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value 1 
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value string 
+HipHop Warning: %a
+NULL
+
+Arg value string 
+HipHop Warning: %a
+NULL
+
+Arg value Resource id %s
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+
+Arg value  
+HipHop Warning: %a
+NULL
+Done

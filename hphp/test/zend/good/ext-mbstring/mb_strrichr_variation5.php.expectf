@@ -1,0 +1,18 @@
+*** Testing mb_strrichr() : basic functionality ***
+
+-- ASCII string: needle exists --
+string(10) "4263447978"
+string(16) "616263446566207a"
+string(10) "4263447978"
+string(16) "616263446566207a"
+string(10) "4263447978"
+string(16) "616263446566207a"
+
+-- Multibyte string: needle exists --
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+===DONE===

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_STRINGS_H__
-#define __HPHP_STRINGS_H__
+#ifndef incl_HPHP_STRINGS_H_
+#define incl_HPHP_STRINGS_H_
 
 namespace HPHP {
 namespace Strings {
@@ -64,4 +64,4 @@ const char* const OP_NOT_SUPPORTED_STRING =
 } // namespace Strings
 } // namespace HPHP
 
-#endif // __HPHP_STRINGS_H__
+#endif // incl_HPHP_STRINGS_H_

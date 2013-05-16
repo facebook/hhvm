@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/string_offset.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_printf.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/string_offset.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
 
 namespace HPHP {
 

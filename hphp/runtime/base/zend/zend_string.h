@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_STRING_H__
-#define __HPHP_ZEND_STRING_H__
+#ifndef incl_HPHP_ZEND_STRING_H_
+#define incl_HPHP_ZEND_STRING_H_
 
-#include <util/base.h>
-#include <util/zend/zend_string.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
+#include "hphp/util/base.h"
+#include "hphp/util/zend/zend_string.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -295,4 +295,4 @@ void string_charmask(const char *input, int len, char *mask);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_STRING_H__
+#endif // incl_HPHP_ZEND_STRING_H_

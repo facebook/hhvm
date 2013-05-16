@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BLOCK_SCOPE_H__
-#define __BLOCK_SCOPE_H__
+#ifndef incl_HPHP_BLOCK_SCOPE_H_
+#define incl_HPHP_BLOCK_SCOPE_H_
 
-#include <compiler/hphp.h>
+#include "hphp/compiler/hphp.h"
 
-#include <util/bits.h>
-#include <util/lock.h>
-#include <runtime/base/macros.h>
+#include "hphp/util/bits.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/macros.h"
 
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -366,4 +366,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __BLOCK_SCOPE_H__
+#endif // incl_HPHP_BLOCK_SCOPE_H_

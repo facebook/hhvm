@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
+#include "hphp/runtime/ext/ext_asio.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_StaticWaitHandle::c_StaticWaitHandle(VM::Class* cb)
+c_StaticWaitHandle::c_StaticWaitHandle(Class* cb)
     : c_WaitHandle(cb) {
 }
 

@@ -1,0 +1,8 @@
+*** Testing gzuncompress() : basic functionality ***
+
+-- Basic decompress --
+int(0)
+
+-- Calling gzuncompress() with max length of 3547 --
+Result length is 3547
+===DONE===

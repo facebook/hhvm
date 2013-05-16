@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_SORT_FLAGS_H_
-#define incl_SORT_FLAGS_H_
+#ifndef incl_HPHP_SORT_FLAGS_H_
+#define incl_HPHP_SORT_FLAGS_H_
 
 namespace HPHP {
 
@@ -31,5 +31,5 @@ enum SortFlags {
 
 }
 
-#endif // incl_SORT_FLAGS_H_
+#endif // incl_HPHP_SORT_FLAGS_H_
 

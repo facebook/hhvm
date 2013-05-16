@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/verifier/util.h>
+#include "hphp/runtime/vm/verifier/util.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-namespace HPHP { namespace VM { namespace Verifier {
+namespace HPHP {  namespace Verifier {
 
 Bits::Bits(Arena& arena, int bit_cap) {
   int word_cap = (bit_cap + BPW - 1) / BPW;
@@ -27,4 +27,4 @@ Bits::Bits(Arena& arena, int bit_cap) {
   memset(m_words, 0, word_cap * sizeof(*m_words));
 }
 
-}}}
+}}

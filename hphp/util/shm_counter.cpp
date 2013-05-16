@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/shm_counter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +21,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <new>
-#include <util/shm_counter.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

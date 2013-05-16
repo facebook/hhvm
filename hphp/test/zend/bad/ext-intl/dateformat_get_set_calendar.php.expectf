@@ -1,0 +1,12 @@
+Creating IntlDateFormatter with calendar = 1
+After call to get_calendar :  calendar= 1
+-------------------
+Setting IntlDateFormatter with calendar = 1
+After call to get_calendar :  calendar= 1
+-------------------
+Setting IntlDateFormatter with calendar = 0
+After call to get_calendar :  calendar= 0
+-------------------
+Setting IntlDateFormatter with calendar = 3
+After call to get_calendar :  calendar= 0
+-------------------

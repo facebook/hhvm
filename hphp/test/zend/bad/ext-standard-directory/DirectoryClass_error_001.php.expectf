@@ -1,0 +1,23 @@
+--> Try all methods with bad handle:
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+--> Try all methods with no handle:
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+--> Try all methods with wrong number of args:
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL

@@ -1,0 +1,10 @@
+*** Testing mcrypt_cbc() : error conditions ***
+
+-- Testing mcrypt_cbc() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing mcrypt_cbc() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+===DONE===

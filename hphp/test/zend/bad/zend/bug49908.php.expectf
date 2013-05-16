@@ -5,4 +5,4 @@ Stack trace:
 #0 %s(7): __autoload('Bar')
 #1 %s(13): __autoload('Foo')
 #2 {main}
-  thrown in hphp/test/zend/bad/zend/bug49908.php on line %d
+  thrown in hphp/test/zend/bad/zend/bug49908.phpt on line %d

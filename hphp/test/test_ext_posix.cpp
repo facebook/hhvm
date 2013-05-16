@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_posix.h>
-#include <runtime/ext/ext_posix.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_ext_posix.h"
+#include "hphp/runtime/ext/ext_posix.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -101,22 +101,24 @@ bool TestExtPosix::test_posix_getgid() {
 }
 
 bool TestExtPosix::test_posix_getgrgid() {
+  static const StaticString s_name("name");
   Variant ret = f_posix_getgrgid(f_posix_getgid());
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
 
-  Variant bynam = f_posix_getgrnam(ret["name"]);
+  Variant bynam = f_posix_getgrnam(ret[s_name]);
   VS(ret, bynam);
 
   return Count(true);
 }
 
 bool TestExtPosix::test_posix_getgrnam() {
+  static const StaticString s_gid("gid");
   Variant ret = f_posix_getgrnam("root");
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
 
-  Variant bygid = f_posix_getgrgid(ret["gid"]);
+  Variant bygid = f_posix_getgrgid(ret[s_gid]);
   VS(ret, bygid);
 
   return Count(true);

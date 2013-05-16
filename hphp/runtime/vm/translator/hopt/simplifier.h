@@ -14,22 +14,40 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HHVM_HHIR_SIMPLIFIER_H_
-#define incl_HHVM_HHIR_SIMPLIFIER_H_
+#ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
+#define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 
-#include "runtime/vm/translator/hopt/cse.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/cse.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
 
-namespace HPHP {
-namespace VM {
-namespace JIT {
+namespace HPHP {  namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
 
 class TraceBuilder;
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Module that handles state-independent optimizations.
+ *
+ * Specifically, the optimizations in this module should be those that
+ * we can do based only on chasing the use-def chain.  Instructions
+ * can be modified in place or replaced with new instructions as
+ * needed.
+ *
+ * The Simplifier recursively invokes TraceBuilder, which can call
+ * back into it.  It's used both during our initial gen-time
+ * optimizations and in the TraceBuilder::reoptimize pass.
+ *
+ * The line of separation between these two modules is essentially
+ * about who needs to know about tracked state.  If an optimization is
+ * completely stateless (e.g. strength reduction, constant folding,
+ * etc) it goes in here, otherwise it goes in TraceBuilder or some
+ * other pass.
+ */
 struct Simplifier {
   explicit Simplifier(TraceBuilder* t) : m_tb(t) {}
-
-  static void copyProp(IRInstruction* tmp);
 
   /*
    * Simplify performs a number of optimizations.
@@ -80,6 +98,7 @@ private:
   SSATmp* simplifyConvBoolToStr(IRInstruction*);
   SSATmp* simplifyConvDblToStr(IRInstruction*);
   SSATmp* simplifyConvIntToStr(IRInstruction*);
+  SSATmp* simplifyConvCellToBool(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
@@ -87,6 +106,7 @@ private:
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyGuardType(IRInstruction* inst);
+  SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
   SSATmp* simplifyLdCtx(IRInstruction*);
@@ -94,19 +114,76 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
   SSATmp* simplifyCall(IRInstruction* inst);
-
-private:
-  SSATmp* genDefInt(int64_t val);
-  SSATmp* genDefDbl(double val);
-  SSATmp* genDefBool(bool val);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
   SSATmp* simplifyQueryJmp(IRInstruction*);
+  SSATmp* simplifyExitOnVarEnv(IRInstruction*);
+  SSATmp* simplifyCastStk(IRInstruction*);
+  SSATmp* simplifyAssertStk(IRInstruction*);
+  SSATmp* simplifyLdStack(IRInstruction*);
+  SSATmp* simplifyLdStackAddr(IRInstruction*);
+  SSATmp* simplifyDecRefStack(IRInstruction*);
+  SSATmp* simplifyDecRefLoc(IRInstruction*);
+  SSATmp* simplifyLdLoc(IRInstruction*);
+  SSATmp* simplifyStRef(IRInstruction*);
+
+private: // tracebuilder forwarders
+  template<class... Args> SSATmp* cns(Args&&...);
+  template<class... Args> SSATmp* gen(Args&&...);
 
 private:
   TraceBuilder* const m_tb;
 };
 
-}}}
+//////////////////////////////////////////////////////////////////////
+
+struct StackValueInfo {
+  explicit StackValueInfo(SSATmp* value = nullptr)
+    : value(value)
+    , knownType(value ? value->type() : Type::None)
+    , spansCall(false)
+  {}
+
+  explicit StackValueInfo(Type type)
+    : value(nullptr)
+    , knownType(type)
+    , spansCall(false)
+  {}
+
+  SSATmp* value;   // may be null
+  Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
+  bool spansCall;  // whether the tmp's definition was above a call
+};
+
+/*
+ * Track down a value or type using the StkPtr chain.
+ *
+ * The spansCall parameter tracks whether the returned value's
+ * lifetime on the stack spans a call.  This search bottoms out on
+ * hitting either the initial DefSP instruction (failure), or some
+ * instruction that produced a view of the stack with the requested
+ * value.
+ */
+StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
+
+/*
+ * Propagate very simple copies on the given instruction.
+ * Specifically, Movs, and also IncRefs of non-refcounted types.
+ *
+ * More complicated copy-propagation is performed in the Simplifier.
+ */
+void copyProp(IRInstruction*);
+
+/*
+ * Checks if property propName of class clsTmp, called from context class ctx,
+ * can be accessed via the static property cache.
+ */
+bool canUseSPropCache(SSATmp* clsTmp,
+                      const StringData* propName,
+                      const Class* ctx);
+
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

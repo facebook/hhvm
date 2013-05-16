@@ -1,0 +1,15 @@
+*** Testing end() : usage variations ***
+
+-- Pass a two-dimensional array as $array_arg --
+array(3) {
+  [0]=>
+  int(9)
+  [1]=>
+  int(8)
+  [2]=>
+  int(7)
+}
+
+-- Pass a sub-array as $array_arg --
+int(7)
+===DONE===

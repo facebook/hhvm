@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_reflection.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/string_util.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 
-using VM::Transl::VMRegAnchor;
+using Transl::VMRegAnchor;
 
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,14 +83,15 @@ static StaticString s___invoke("__invoke");
 static StaticString s_closure_in_braces("{closure}");
 static StaticString s_closureobj("closureobj");
 static StaticString s_return_type("return_type");
+static StaticString s_type_hint("type_hint");
 
-static const VM::Class* get_cls(CVarRef class_or_object) {
-  VM::Class* cls = NULL;
+static const Class* get_cls(CVarRef class_or_object) {
+  Class* cls = NULL;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
   } else {
-    cls = VM::Unit::loadClass(class_or_object.toString().get());
+    cls = Unit::loadClass(class_or_object.toString().get());
   }
   return cls;
 }
@@ -122,14 +123,14 @@ int get_modifiers(int attribute, bool cls) {
   return php_modifier;
 }
 
-int get_modifiers(VM::Attr attrs, bool cls) {
+int get_modifiers(Attr attrs, bool cls) {
   int php_modifier = 0;
-  if (attrs & VM::AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
-  if (attrs & VM::AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
-  if (attrs & VM::AttrStatic)    php_modifier |= 0x01;
-  if (attrs & VM::AttrPublic)    php_modifier |= 0x100;
-  if (attrs & VM::AttrProtected) php_modifier |= 0x200;
-  if (attrs & VM::AttrPrivate)   php_modifier |= 0x400;
+  if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
+  if (attrs & AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
+  if (attrs & AttrStatic)    php_modifier |= 0x01;
+  if (attrs & AttrPublic)    php_modifier |= 0x100;
+  if (attrs & AttrProtected) php_modifier |= 0x200;
+  if (attrs & AttrPrivate)   php_modifier |= 0x400;
   return php_modifier;
 }
 
@@ -201,7 +202,7 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
 }
 
 
-static void set_instance_prop_info(Array &ret, const VM::Class::Prop* prop) {
+static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
   ret.set(s_name, VarNR(prop->m_name));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
@@ -213,7 +214,7 @@ static void set_instance_prop_info(Array &ret, const VM::Class::Prop* prop) {
   }
 }
 
-static void set_static_prop_info(Array &ret, const VM::Class::SProp* prop) {
+static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, VarNR(prop->m_name));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
@@ -321,9 +322,9 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
   }
 }
 
-static void set_function_info(Array &ret, const VM::Func* func) {
+static void set_function_info(Array &ret, const Func* func) {
   // return type
-  if (func->attrs() & VM::AttrReference) {
+  if (func->attrs() & AttrReference) {
     ret.set(s_ref,      true_varNR);
   }
   if (func->isBuiltin()) {
@@ -340,17 +341,20 @@ static void set_function_info(Array &ret, const VM::Func* func) {
   // parameters
   {
     Array arr = Array::Create();
-    const VM::Func::ParamInfoVec& params = func->params();
+    const Func::ParamInfoVec& params = func->params();
     for (int i = 0; i < func->numParams(); i++) {
       Array param = Array::Create();
-      const VM::Func::ParamInfo& fpi = params[i];
+      const Func::ParamInfo& fpi = params[i];
 
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.userType() ?
-        fpi.userType() : empty_string.get();
+      const StringData* type = fpi.typeConstraint().exists() ?
+        fpi.typeConstraint().typeName() : empty_string.get();
       param.set(s_type, VarNR(type));
+      const StringData* typeHint = fpi.userType() ?
+        fpi.userType() : empty_string.get();
+      param.set(s_type_hint, VarNR(typeHint));
       param.set(s_function, VarNR(func->name()));
       if (func->preClass()) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
@@ -396,9 +400,9 @@ static void set_function_info(Array &ret, const VM::Func* func) {
   // static variables
   {
     Array arr = Array::Create();
-    const VM::Func::SVInfoVec& staticVars = func->staticVars();
+    const Func::SVInfoVec& staticVars = func->staticVars();
     for (unsigned int i = 0; i < staticVars.size(); i++) {
-      const VM::Func::SVInfo &sv = staticVars[i];
+      const Func::SVInfo &sv = staticVars[i];
       arr.set(VarNR(sv.name), VarNR(sv.phpCode));
     }
     ret.set(s_static_variables, VarNR(arr));
@@ -407,7 +411,7 @@ static void set_function_info(Array &ret, const VM::Func* func) {
   // user attributes
   {
     Array arr = Array::Create();
-    VM::Func::UserAttributeMap::const_iterator it;
+    Func::UserAttributeMap::const_iterator it;
     for (it = func->userAttributes().begin();
          it != func->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
@@ -436,18 +440,18 @@ static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
   set_source_info(ret, info->file, info->line1, info->line2);
 }
 
-static bool isConstructor(const VM::Func* func) {
-  VM::PreClass* pcls = func->preClass();
+static bool isConstructor(const Func* func) {
+  PreClass* pcls = func->preClass();
   if (!pcls) return false;
   if (func->cls()) return func == func->cls()->getCtor();
   /* A same named function is not a constructor in a trait,
      or if the function was imported from a trait */
-  if ((pcls->attrs() | func->attrs()) & VM::AttrTrait) return false;
+  if ((pcls->attrs() | func->attrs()) & AttrTrait) return false;
   if (!strcasecmp("__construct", func->name()->data())) return true;
   return pcls->name()->isame(func->name());
 }
 
-static void set_method_info(Array &ret, const VM::Func* func) {
+static void set_method_info(Array &ret, const Func* func) {
   ret.set(s_name, VarNR(func->nameRef()));
   set_attrs(ret, get_modifiers(func->attrs(), false));
 
@@ -476,7 +480,7 @@ static Array get_method_info(const ClassInfo *cls, CVarRef name) {
 }
 
 Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
-  const VM::Class* c = get_cls(cls);
+  const Class* c = get_cls(cls);
   if (!c) return Array();
   if (c->clsInfo()) {
     /*
@@ -486,15 +490,13 @@ Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
     return get_method_info(c->clsInfo(), name);
   }
   CStrRef method_name = name.toString();
-  const VM::Func* func = c->lookupMethod(method_name.get());
+  const Func* func = c->lookupMethod(method_name.get());
   if (!func) {
-    if (c->attrs() & VM::AttrAbstract) {
-      VM::ClassSet::const_iterator it = c->allInterfaces().begin(),
-        end = c->allInterfaces().end();
-      while (it != end) {
-        func = (*it)->lookupMethod(method_name.get());
+    if (c->attrs() & AttrAbstract) {
+      const Class::InterfaceMap& ifaces = c->allInterfaces();
+      for (int i = 0, size = ifaces.size(); i < size; i++) {
+        func = ifaces[i]->lookupMethod(method_name.get());
         if (func) break;
-        ++it;
       }
     }
     if (!func) return Array();
@@ -664,7 +666,7 @@ static Array get_class_info(const ClassInfo *cls) {
 }
 
 Array f_hphp_get_class_info(CVarRef name) {
-  const VM::Class* cls = get_cls(name);
+  const Class* cls = get_cls(name);
   if (!cls) return Array();
   if (cls->clsInfo()) {
     /*
@@ -679,7 +681,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   ret.set(s_extension, empty_string);
   ret.set(s_parent,    cls->parentRef());
 
-  typedef vector<VM::ClassPtr> ClassVec;
+  typedef vector<ClassPtr> ClassVec;
   // interfaces
   {
     Array arr = Array::Create();
@@ -705,7 +707,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   // trait aliases
   {
     Array arr = Array::Create();
-    const VM::Class::TraitAliasVec& aliases = cls->traitAliases();
+    const Class::TraitAliasVec& aliases = cls->traitAliases();
     for (int i = 0, s = aliases.size(); i < s; ++i) {
       arr.set(*(String*)&aliases[i].first, VarNR(aliases[i].second));
     }
@@ -721,16 +723,16 @@ Array f_hphp_get_class_info(CVarRef name) {
     if (false && ClassInfo::HipHopSpecific) {
       ret.set(s_hphp,      true_varNR);
     }
-    if (cls->attrs() & VM::AttrFinal) {
+    if (cls->attrs() & AttrFinal) {
       ret.set(s_final,     true_varNR);
     }
-    if (cls->attrs() & VM::AttrAbstract) {
+    if (cls->attrs() & AttrAbstract) {
       ret.set(s_abstract,  true_varNR);
     }
-    if (cls->attrs() & VM::AttrInterface) {
+    if (cls->attrs() & AttrInterface) {
       ret.set(s_interface, true_varNR);
     }
-    if (cls->attrs() & VM::AttrTrait) {
+    if (cls->attrs() & AttrTrait) {
       ret.set(s_trait,     true_varNR);
     }
     ret.set(s_modifiers, VarNR(get_modifiers(cls->attrs(), true)));
@@ -739,21 +741,21 @@ Array f_hphp_get_class_info(CVarRef name) {
   // methods
   {
     Array arr = Array::Create();
-    VM::Func* const* methods = cls->preClass()->methods();
+    Func* const* methods = cls->preClass()->methods();
     size_t const numMethods = cls->preClass()->numMethods();
-    for (VM::Slot i = 0; i < numMethods; ++i) {
-      const VM::Func* m = methods[i];
+    for (Slot i = 0; i < numMethods; ++i) {
+      const Func* m = methods[i];
       if (isdigit(m->name()->data()[0])) continue;
       Array info = Array::Create();
       set_method_info(info, m);
       arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
     }
 
-    VM::Func* const* clsMethods = cls->methods();
-    for (VM::Slot i = cls->traitsBeginIdx();
+    Func* const* clsMethods = cls->methods();
+    for (Slot i = cls->traitsBeginIdx();
          i < cls->traitsEndIdx();
          ++i) {
-      const VM::Func* m = clsMethods[i];
+      const Func* m = clsMethods[i];
       if (isdigit(m->name()->data()[0])) continue;
       Array info = Array::Create();
       set_method_info(info, m);
@@ -767,13 +769,13 @@ Array f_hphp_get_class_info(CVarRef name) {
     Array arr = Array::Create();
     Array arrPriv = Array::Create();
 
-    const VM::Class::Prop* properties = cls->declProperties();
+    const Class::Prop* properties = cls->declProperties();
     const size_t nProps = cls->numDeclProperties();
 
-    for (VM::Slot i = 0; i < nProps; ++i) {
-      const VM::Class::Prop& prop = properties[i];
+    for (Slot i = 0; i < nProps; ++i) {
+      const Class::Prop& prop = properties[i];
       Array info = Array::Create();
-      if ((prop.m_attrs & VM::AttrPrivate) == VM::AttrPrivate) {
+      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
           set_instance_prop_info(info, &prop);
           arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
@@ -784,13 +786,13 @@ Array f_hphp_get_class_info(CVarRef name) {
       arr.set(*(String*)(&prop.m_name), VarNR(info));
     }
 
-    const VM::Class::SProp* staticProperties = cls->staticProperties();
+    const Class::SProp* staticProperties = cls->staticProperties();
     const size_t nSProps = cls->numStaticProperties();
 
-    for (VM::Slot i = 0; i < nSProps; ++i) {
-      const VM::Class::SProp& prop = staticProperties[i];
+    for (Slot i = 0; i < nSProps; ++i) {
+      const Class::SProp& prop = staticProperties[i];
       Array info = Array::Create();
-      if ((prop.m_attrs & VM::AttrPrivate) == VM::AttrPrivate) {
+      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
           set_static_prop_info(info, &prop);
           arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
@@ -810,7 +812,7 @@ Array f_hphp_get_class_info(CVarRef name) {
     Array arr = Array::Create();
 
     size_t numConsts = cls->numConstants();
-    const VM::Class::Const* consts = cls->constants();
+    const Class::Const* consts = cls->constants();
 
     for (size_t i = 0; i < numConsts; i++) {
       // Note: hphpc doesn't include inherited constants in
@@ -825,7 +827,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   }
 
   { // source info
-    const VM::PreClass* pcls = cls->preClass();
+    const PreClass* pcls = cls->preClass();
     set_source_info(ret, pcls->unit()->filepath()->data(),
                     pcls->line1(), pcls->line2());
     set_doc_comment(ret, pcls->docComment());
@@ -834,8 +836,8 @@ Array f_hphp_get_class_info(CVarRef name) {
   // user attributes
   {
     Array arr = Array::Create();
-    const VM::PreClass* pcls = cls->preClass();
-    VM::PreClass::UserAttributeMap::const_iterator it;
+    const PreClass* pcls = cls->preClass();
+    PreClass::UserAttributeMap::const_iterator it;
     for (it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
@@ -849,7 +851,7 @@ Array f_hphp_get_class_info(CVarRef name) {
 
 Array f_hphp_get_function_info(CStrRef name) {
   Array ret;
-  const VM::Func* func = VM::Unit::loadFunc(name.get());
+  const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
   ret.set(s_name,       VarNR(func->name()));
   ret.set(s_closure,    empty_string);
@@ -871,7 +873,7 @@ Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
     return invoke_static_method(cls, name, params);
   }
   ObjectData *o = obj.toCObjRef().get();
-  return o->o_invoke(name, params, -1);
+  return o->o_invoke(name, params);
 }
 
 bool f_hphp_instanceof(CObjRef obj, CStrRef name) {
@@ -896,7 +898,7 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
 }
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {
-  VM::Class* class_ = VM::Unit::lookupClass(cls.get());
+  Class* class_ = Unit::lookupClass(cls.get());
   if (class_ == NULL) {
     raise_error("Non-existent class %s", cls.get()->data());
   }
@@ -917,7 +919,7 @@ Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {
 }
 
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
-  VM::Class* class_ = VM::Unit::lookupClass(cls.get());
+  Class* class_ = Unit::lookupClass(cls.get());
   if (class_ == NULL) {
     raise_error("Non-existent class %s", cls.get()->data());
   }
@@ -938,7 +940,7 @@ void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
 }
 
 String f_hphp_get_original_class_name(CStrRef name) {
-  VM::Class* cls = VM::Unit::loadClass(name.get());
+  Class* cls = Unit::loadClass(name.get());
   if (!cls) return empty_string;
   return cls->nameRef();
 }

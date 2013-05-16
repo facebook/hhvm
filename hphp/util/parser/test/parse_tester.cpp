@@ -18,7 +18,7 @@
 #include <cstdlib>
 #include <string.h>
 
-#include "util/parser/test/parser.h"
+#include "hphp/util/parser/test/parser.h"
 
 namespace HPHP { namespace Test {
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv) try {
     using HPHP::Scanner;
     using HPHP::Test::Parser;
     Scanner scan(in, Scanner::AllowShortTags |
-                     Scanner::EnableHipHopKeywords);
+                     Scanner::AllowHipHopSyntax);
     Parser parser(scan, argv[1]);
     parser.parse();
   } catch (const std::exception& e) {

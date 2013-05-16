@@ -57,8 +57,7 @@ class MappedIterator implements Iterator {
     $this->it->next();
   }
   public function key() {
-    throw new RuntimeException(
-      "Call to undefined method MappedIterator::key()");
+    return null;
   }
   public function current() {
     return ($this->fn)($this->it->current());
@@ -154,8 +153,7 @@ class FilteredIterator implements Iterator {
     }
   }
   public function key() {
-    throw new RuntimeException(
-      "Call to undefined method FilteredIterator::key()");
+    return null;
   }
   public function current() {
     return $this->it->current();
@@ -254,8 +252,7 @@ class ZippedIterator implements Iterator {
     $this->it2->next();
   }
   public function key() {
-    throw new RuntimeException(
-      "Call to undefined method ZippedIterator::key()");
+    return null;
   }
   public function current() {
     return Pair {$this->it1->current(), $this->it2->current()};
@@ -344,8 +341,7 @@ class KeysIterator implements Iterator {
     $this->it->next();
   }
   public function key() {
-    throw new RuntimeException(
-      "Call to undefined method KeysIterator::key()");
+    return null;
   }
   public function current() {
     return $this->it->key();
@@ -384,8 +380,7 @@ class KVZippedIterator implements Iterator {
     $this->it->next();
   }
   public function key() {
-    throw new RuntimeException(
-      "Call to undefined method KVZippedIterator::key()");
+    return null;
   }
   public function current() {
     return Pair {$this->it->key(), $this->it->current()};

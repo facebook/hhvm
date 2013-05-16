@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_pdo.h>
-#include <runtime/ext/pdo_driver.h>
-#include <runtime/ext/pdo_mysql.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/macros.h>
+#include "hphp/runtime/ext/ext_pdo.h"
+#include "hphp/runtime/ext/pdo_driver.h"
+#include "hphp/runtime/ext/pdo_mysql.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/macros.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -453,19 +453,24 @@ public:
 };
 static PDOErrorHash s_err_hash;
 
+static const StaticString s_code("code");
+static const StaticString s_message("message");
+static const StaticString s_errorInfo("errorInfo");
+static const StaticString s_PDOException("PDOException");
+
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   ObjectData *obj = SystemLib::AllocPDOExceptionObject();
-  obj->o_set("code", code, "PDOException");
+  obj->o_set(s_code, code, s_PDOException);
 
   va_list ap;
   va_start(ap, fmt);
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  obj->o_set("message", String(msg), "PDOException");
+  obj->o_set(s_message, String(msg), s_PDOException);
   va_end(ap);
 
   if (!info.isNull()) {
-    obj->o_set("errorInfo", info, "PDOException");
+    obj->o_set(s_errorInfo, info, s_PDOException);
   }
   throw Object(obj);
 }
@@ -565,22 +570,22 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
                          "constructor arguments must be passed as an array");
     return Object();
   }
-  VM::Class* cls = VM::Unit::loadClass(name.get());
+  Class* cls = Unit::loadClass(name.get());
   if (!cls) {
     return Object();
   }
-  return HPHP::VM::Instance::newInstance(cls);
+  return HPHP::Instance::newInstance(cls);
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                CStrRef clsname, CVarRef ctor_args) {
-  VM::Class* cls = VM::Unit::loadClass(clsname.get());
+  Class* cls = Unit::loadClass(clsname.get());
   if (!cls) {
     return;
   }
   object->o_set("queryString", stmt->query_string);
   TypedValue ret;
-  VM::Instance* inst = static_cast<VM::Instance*>(object.get());
+  Instance* inst = static_cast<Instance*>(object.get());
   inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
   tvRefcountedDecRef(&ret);
 }
@@ -605,9 +610,9 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get()); 
+  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
   if (cls) {
-    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    const HPHP::Func* method = cls->getDeclaredCtor();
     if (method && method->isPublic()) {
       pdo_raise_impl_error
         (dbh, NULL, "HY000",
@@ -726,9 +731,9 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
     stmt->fetch.clsname = "stdclass";
   }
   stmt->fetch.constructor = empty_string; //NULL;
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get());
+  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
   if (cls) {
-    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    const HPHP::Func* method = cls->getDeclaredCtor();
     if (method) {
       stmt->fetch.constructor = method->nameRef();
       return true;
@@ -908,7 +913,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
-c_PDO::c_PDO(VM::Class* cb) : ExtObjectData(cb) {
+c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
 }
 
 c_PDO::~c_PDO() {
@@ -1477,7 +1482,7 @@ Variant c_PDO::t___sleep() {
   return uninit_null();
 }
 
-Array c_PDO::ti_getavailabledrivers(const char* cls) {
+Array c_PDO::ti_getavailabledrivers() {
   return f_pdo_drivers();
 }
 
@@ -1665,7 +1670,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
     dest = dest.toString();
   }
   if (dest.isNull() && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
-    dest = "";
+    dest = empty_string;
   }
 }
 
@@ -1828,7 +1833,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       if (!stmt->fetch.constructor.empty() &&
           (flags & PDO_FETCH_PROPS_LATE)) {
         ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
-                                        stmt->fetch.ctor_args, -1);
+                                        stmt->fetch.ctor_args);
         ret.asCObjRef().get()->clearNoDestruct();
       }
     }
@@ -1964,8 +1969,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   case PDO_FETCH_CLASS:
     if (!stmt->fetch.constructor.empty() &&
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
-      ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args,
-                               -1);
+      ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args);
       ret.toObject()->clearNoDestruct();
     }
     if (flags & PDO_FETCH_CLASSTYPE) {
@@ -2543,7 +2547,8 @@ rewrite:
       String name(plc->pos, plc->len, AttachLiteral);
 
       /* check if bound parameter is already available */
-      if (!strcmp(name, "?") || !stmt->bound_param_map.exists(name)) {
+      if (!strcmp(name.c_str(), "?") ||
+          !stmt->bound_param_map.exists(name)) {
         idxbuf.printf(tmpl, bind_no++);
       } else {
         idxbuf.clear();
@@ -2593,7 +2598,7 @@ clean_up:
 ///////////////////////////////////////////////////////////////////////////////
 // PDOStatement
 
-c_PDOStatement::c_PDOStatement(VM::Class* cb) :
+c_PDOStatement::c_PDOStatement(Class* cb) :
     ExtObjectData(cb), m_rowIndex(-1) {
 }
 
@@ -2974,6 +2979,11 @@ int64_t c_PDOStatement::t_columncount() {
   return m_stmt->column_count;
 }
 
+static const StaticString s_name("name");
+static const StaticString s_len("len");
+static const StaticString s_precision("precision");
+static const StaticString s_pdo_type("pdo_type");
+
 Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   if (column < 0) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
@@ -2996,12 +3006,12 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
 
   /* add stock items */
   PDOColumn *col = m_stmt->columns[column].toObject().getTyped<PDOColumn>();
-  ret.set("name", col->name);
-  ret.set("len", (int64_t)col->maxlen); /* FIXME: unsigned ? */
-  ret.set("precision", (int64_t)col->precision);
+  ret.set(s_name, col->name);
+  ret.set(s_len, (int64_t)col->maxlen); /* FIXME: unsigned ? */
+  ret.set(s_precision, (int64_t)col->precision);
   if (col->param_type != PDO_PARAM_ZVAL) {
     // if param_type is PDO_PARAM_ZVAL the driver has to provide correct data
-    ret.set("pdo_type", (int64_t)col->param_type);
+    ret.set(s_pdo_type, (int64_t)col->param_type);
   }
   return ret;
 }

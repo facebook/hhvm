@@ -27,14 +27,14 @@ SOFTWARE.
 */
 
 
-#include <runtime/ext/JSON_parser.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/utf8_decode.h>
+#include "hphp/runtime/ext/JSON_parser.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/utf8_decode.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -293,6 +293,7 @@ static const int loose_state_transition_table[31][31] = {
 struct json_parser {
   int the_stack[JSON_PARSER_MAX_DEPTH];
   Variant the_zstack[JSON_PARSER_MAX_DEPTH];
+  String the_kstack[JSON_PARSER_MAX_DEPTH];
   int the_top;
   int the_mark; // the watermark
 };
@@ -301,10 +302,11 @@ IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
 
 class JsonParserCleaner {
 public:
-  JsonParserCleaner(json_parser *json) : m_json(json) {}
+  explicit JsonParserCleaner(json_parser *json) : m_json(json) {}
   ~JsonParserCleaner() {
     for (int i = 0; i <= m_json->the_mark; i++) {
       m_json->the_zstack[i].unset();
+      m_json->the_kstack[i].reset();
     }
   }
 private:
@@ -430,46 +432,30 @@ static void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
   }
 }
 
-static void object_set(Variant &var, StringBuffer &key, CVarRef value,
+static void object_set(Variant &var, CStrRef key, CVarRef value,
                        int assoc) {
-  String data = key.detach();
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
-    if (data.empty()) {
+    if (key.empty()) {
       var.getObjectData()->o_set("_empty_", value);
     } else {
-      var.getObjectData()->o_set(data, value);
+      var.getObjectData()->o_set(key, value);
     }
   } else {
-    var.set(data, value);
+    var.set(key, value);
   }
 }
 
-static void object_set(Variant &var, StringBuffer &key, RefResult value,
-                       int assoc) {
-  String data = key.detach();
-  if (!assoc) {
-    // We know it is stdClass, and everything is public (and dynamic).
-    if (data.empty()) {
-      var.getObjectData()->o_set("_empty_", value);
-    } else {
-      var.getObjectData()->o_set(data, value);
-    }
-  } else {
-    var.set(data, value);
-  }
-}
-
-static void attach_zval(json_parser *json, int up, int cur, StringBuffer &key,
+static void attach_zval(json_parser *json, CStrRef key,
                         int assoc) {
-  Variant &root = json->the_zstack[up];
-  Variant &child =  json->the_zstack[cur];
-  int up_mode = json->the_stack[up];
+  Variant &root = json->the_zstack[json->the_top - 1];
+  Variant &child =  json->the_zstack[json->the_top];
+  int up_mode = json->the_stack[json->the_top - 1];
 
   if (up_mode == MODE_ARRAY) {
-    root.append(ref(child));
+    root.append(child);
   } else if (up_mode == MODE_OBJECT) {
-    object_set(root, key, ref(child), assoc);
+    object_set(root, key, child, assoc);
   }
 }
 
@@ -591,9 +577,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           } else {
             top = Array::Create();
           }
-          if (JSON(the_top) > 1) {
-            attach_zval(the_json, JSON(the_top-1), JSON(the_top), *key, assoc);
-          }
+          JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }
         break;
@@ -620,11 +604,12 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           Variant mval;
           json_create_zval(mval, *buf, type);
           Variant &top = JSON(the_zstack)[JSON(the_top)];
-          object_set(top, *key, mval, assoc);
+          object_set(top, key->detach(), mval, assoc);
           buf->reset();
           JSON_RESET_TYPE();
         }
 
+        attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
 
         if (!pop(the_json, MODE_OBJECT)) {
           return false;
@@ -647,9 +632,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             JSON(the_zstack)[JSON(the_top)].unset();
           }
           JSON(the_zstack)[JSON(the_top)] = Array::Create();
-          if (JSON(the_top) > 1) {
-            attach_zval(the_json, JSON(the_top-1), JSON(the_top), *key, assoc);
-          }
+          JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }
         break;
@@ -666,6 +649,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             buf->reset();
             JSON_RESET_TYPE();
           }
+
+          attach_zval(the_json, JSON(the_kstack[JSON(the_top)]), assoc);
 
           if (!pop(the_json, MODE_ARRAY)) {
             return false;
@@ -716,7 +701,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
                 push(the_json, MODE_KEY)) {
               if (type != -1) {
                 Variant &top = JSON(the_zstack)[JSON(the_top)];
-                object_set(top, *key, mval, assoc);
+                object_set(top, key->detach(), mval, assoc);
               }
               the_state = 29;
             }

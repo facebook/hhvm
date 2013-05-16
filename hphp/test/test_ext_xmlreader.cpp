@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_xmlreader.h>
-#include <runtime/ext/ext_xmlreader.h>
+#include "hphp/test/test_ext_xmlreader.h"
+#include "hphp/runtime/ext/ext_xmlreader.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Xmlreader);
 ///////////////////////////////////////////////////////////////////////////////

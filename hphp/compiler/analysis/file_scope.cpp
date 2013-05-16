@@ -14,27 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/option.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/function_scope.h"
 #include <sys/stat.h>
-#include <compiler/parser/parser.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/base.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/statement/function_statement.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/include_expression.h>
-#include <compiler/expression/user_attribute.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/base.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/runtime/base/complex_types.h"
 
 using namespace HPHP;
 
@@ -98,7 +98,8 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar,
   ExpressionListPtr args(new ExpressionList(scope, loc));
   args->addElement(Expression::MakeScalarExpression(ar, scope, loc, msg));
   SimpleFunctionCallPtr e(
-    new SimpleFunctionCall(scope, loc, "throw_fatal", args, ExpressionPtr()));
+    new SimpleFunctionCall(scope, loc, "throw_fatal", false, args,
+      ExpressionPtr()));
   e->setThrowFatal();
   ExpStatementPtr exp(new ExpStatement(scope, loc, e));
   StatementListPtr stmts(new StatementList(scope, loc));

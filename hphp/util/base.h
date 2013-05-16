@@ -20,16 +20,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#define __STDC_FORMAT_MACROS
 #include <cinttypes>
 
 #include <errno.h>
 #include <string.h>
-#include <strings.h>
+#include "hphp/runtime/base/strings.h"
 #include <unistd.h>
 #include <poll.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include "netinet/in.h"
+#include "arpa/inet.h"
 #include <netdb.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -66,8 +65,8 @@
 #include <boost/type_traits.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "util/hash.h"
-#include "util/assertions.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/assertions.h"
 
 #ifdef __INTEL_COMPILER
 #define va_copy __builtin_va_copy
@@ -122,14 +121,6 @@ namespace HPHP {
 
 static const bool debug =
 #ifdef DEBUG
-  true
-#else
-  false
-#endif
-  ;
-
-const bool hhvm_gc =
-#ifdef HHVM_GC
   true
 #else
   false
@@ -263,14 +254,18 @@ public:
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  hphp_raw_ptr(const boost::weak_ptr<T> &p) : px(p.lock().get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<T> &p)
+    : px(p.lock().get())
+  {}
 
   template <class S>
-  hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
   template <class S>
-  hphp_raw_ptr(const boost::weak_ptr<S> &p) : px(p.lock().get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<S> &p)
+    : px(p.lock().get())
+  {}
   template <class S>
-  hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 
   boost::shared_ptr<T> lock() const {
     return px ? boost::static_pointer_cast<T>(px->shared_from_this()) :
@@ -281,7 +276,7 @@ public:
   }
 
   template <class S>
-  operator boost::shared_ptr<S>() const {
+  /* implicit */ operator boost::shared_ptr<S>() const {
     S *s = px; // just to verify the implicit conversion T->S
     return s ? boost::static_pointer_cast<S>(px->shared_from_this()) :
       boost::shared_ptr<S>();
@@ -289,7 +284,7 @@ public:
 
   T *operator->() const { assert(px); return px; }
   T *get() const { return px; }
-  operator bool() const { return !expired(); }
+  explicit operator bool() const { return !expired(); }
   void reset() { px = 0; }
 private:
   T     *px;
@@ -447,18 +442,6 @@ destroyMapValues(Container& c) {
     delete i->second;
   }
 }
-
-// Arbitrary callback when a scope exits.
-struct ScopeGuard {
-  typedef std::tr1::function<void()> Callback;
-
-  ScopeGuard(void(*cbFptr)()) : m_cb(Callback(cbFptr)) { }
-  ScopeGuard(Callback cb) : m_cb(cb) { }
-  ~ScopeGuard() { m_cb(); }
-private:
-  Callback m_cb;
-};
-
 
 
 ///////////////////////////////////////////////////////////////////////////////

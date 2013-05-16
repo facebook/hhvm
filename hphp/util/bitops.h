@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_BITOPS_H_
-#define incl_BITOPS_H_
+#ifndef incl_HPHP_BITOPS_H_
+#define incl_HPHP_BITOPS_H_
 
 namespace HPHP {
 

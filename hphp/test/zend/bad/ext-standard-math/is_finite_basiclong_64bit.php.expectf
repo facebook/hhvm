@@ -1,0 +1,31 @@
+--- testing: 9223372036854775807 ---
+bool(true)
+--- testing: -9223372036854775808 ---
+bool(true)
+--- testing: 2147483647 ---
+bool(true)
+--- testing: -2147483648 ---
+bool(true)
+--- testing: 9223372034707292160 ---
+bool(true)
+--- testing: -9223372034707292160 ---
+bool(true)
+--- testing: 2147483648 ---
+bool(true)
+--- testing: -2147483649 ---
+bool(true)
+--- testing: 4294967294 ---
+bool(true)
+--- testing: 4294967295 ---
+bool(true)
+--- testing: 4294967293 ---
+bool(true)
+--- testing: 9223372036854775806 ---
+bool(true)
+--- testing: 9.2233720368548E+18 ---
+bool(true)
+--- testing: -9223372036854775807 ---
+bool(true)
+--- testing: -9.2233720368548E+18 ---
+bool(true)
+===DONE===

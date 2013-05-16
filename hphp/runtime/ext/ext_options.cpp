@@ -15,22 +15,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_options.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/extension.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/timeout_thread.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/process.h>
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/timeout_thread.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/process.h"
 #include <sys/utsname.h>
 #include <pwd.h>
 
-#include <runtime/vm/request_arena.h>
+#include "hphp/runtime/vm/request_arena.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -676,8 +676,8 @@ int64_t f_memory_get_allocation() {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64_t ret = stats.totalAlloc;
-    ret -= VM::request_arena().slackEstimate() +
-           VM::varenv_arena().slackEstimate();
+    ret -= request_arena().slackEstimate() +
+           varenv_arena().slackEstimate();
     return ret;
   }
   return 0;
@@ -697,8 +697,8 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64_t ret = real_usage ? stats.usage : stats.alloc;
-    ret -= VM::request_arena().slackEstimate() +
-           VM::varenv_arena().slackEstimate();
+    ret -= request_arena().slackEstimate() +
+           varenv_arena().slackEstimate();
     return ret;
   }
   return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;

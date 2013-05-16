@@ -1,0 +1,5 @@
+*** Testing for EXTR_PREFIX_ALL called twice with same prefix string ***
+int(5)
+int(11)
+int(11)
+Done

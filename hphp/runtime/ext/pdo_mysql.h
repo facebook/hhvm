@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PDO_MYSQL_H__
-#define __PDO_MYSQL_H__
+#ifndef incl_HPHP_PDO_MYSQL_H_
+#define incl_HPHP_PDO_MYSQL_H_
 
-#include <runtime/ext/pdo_driver.h>
+#include "hphp/runtime/ext/pdo_driver.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,4 +48,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PDO_MYSQL_H__
+#endif // incl_HPHP_PDO_MYSQL_H_

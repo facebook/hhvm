@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CLASS_CONSTANT_H__
-#define __CLASS_CONSTANT_H__
+#ifndef incl_HPHP_CLASS_CONSTANT_H_
+#define incl_HPHP_CLASS_CONSTANT_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,4 +46,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CLASS_CONSTANT_H__
+#endif // incl_HPHP_CLASS_CONSTANT_H_

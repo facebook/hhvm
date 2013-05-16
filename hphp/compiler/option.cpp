@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/option.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <util/parser/scanner.h>
-#include <util/logger.h>
-#include <util/db_query.h>
-#include <util/util.h>
-#include <util/process.h>
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/util/parser/scanner.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/db_query.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
 #include <boost/algorithm/string/trim.hpp>
-#include <runtime/base/preg.h>
+#include "hphp/runtime/base/preg.h"
 
 using namespace HPHP;
 
@@ -120,8 +120,15 @@ bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = true;
 bool Option::EnableFinallyStatement = false;
-int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
+
+int Option::GetScannerType() {
+  int type = 0;
+  if (EnableShortTags) type |= Scanner::AllowShortTags;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
+  if (EnableAspTags) type |= Scanner::AllowAspTags;
+  return type;
+}
 
 int Option::InvokeFewArgsCount = 6;
 bool Option::InvokeWithSpecificArgs = true;
@@ -161,10 +168,11 @@ std::string Option::GetSystemRoot() {
   if (SystemRoot.empty()) {
     const char *home = getenv("HPHP_HOME");
     if (!home || !*home) {
-      throw Exception("Environment variable HPHP_HOME is not set.");
+      throw Exception("Environment variable HPHP_HOME is not set, "
+                      "and neither is the SystemRoot option.");
     }
     SystemRoot = home;
-    SystemRoot += "/src";
+    SystemRoot += "/hphp";
   }
   return SystemRoot;
 }
@@ -276,17 +284,8 @@ void Option::Load(Hdf &config) {
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);
-  if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
-  else ScannerType &= ~Scanner::AllowShortTags;
-  if (EnableHipHopExperimentalSyntax) {
-    ScannerType |= Scanner::EnableHipHopKeywords;
-  } else {
-    ScannerType &= ~Scanner::EnableHipHopKeywords;
-  }
 
   EnableAspTags = config["EnableAspTags"].getBool();
-  if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
-  else ScannerType &= ~Scanner::AllowAspTags;
 
   EnableXHP = config["EnableXHP"].getBool(true);
 

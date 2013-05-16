@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_REPO_SCHEMA_H_
+#define incl_HPHP_REPO_SCHEMA_H_
 
 namespace HPHP {
 
@@ -25,3 +27,5 @@ extern const char* kRepoSchemaId;
 //////////////////////////////////////////////////////////////////////
 
 }
+
+#endif

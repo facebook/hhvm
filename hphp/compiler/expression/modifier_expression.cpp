@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/modifier_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 

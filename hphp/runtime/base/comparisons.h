@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_COMPARISONS_H__
-#define __HPHP_COMPARISONS_H__
+#ifndef incl_HPHP_COMPARISONS_H_
+#define incl_HPHP_COMPARISONS_H_
 
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -390,7 +390,7 @@ inline bool equal(const StringData *v1, const StringData *v2) {
   if (v1 == v2) return true;
   if (v1 == nullptr) return v2->empty();
   if (v2 == nullptr) return v1->empty();
-  return v1->compare(v2) == 0;
+  return v1->equal(v2);
 }
 inline bool equal(const StringData *v1, CStrRef v2) {
   return equal(v1, v2.get());
@@ -812,4 +812,4 @@ bool more_or_equal(CVarRef v1, CVarRef v2);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_COMPARISONS_H__
+#endif // incl_HPHP_COMPARISONS_H_

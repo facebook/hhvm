@@ -1,0 +1,85 @@
+*** Testing usort() : usage variation ***
+
+-- Sorting Integer array --
+bool(true)
+array(9) {
+  [0]=>
+  int(-1200)
+  [1]=>
+  int(-3)
+  [2]=>
+  int(0)
+  [3]=>
+  int(2)
+  [4]=>
+  int(3)
+  [5]=>
+  int(25)
+  [6]=>
+  int(100)
+  [7]=>
+  int(150)
+  [8]=>
+  int(350)
+}
+
+-- Sorting Octal array --
+bool(true)
+array(7) {
+  [0]=>
+  int(-37)
+  [1]=>
+  int(-7)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(13)
+  [5]=>
+  int(19)
+  [6]=>
+  int(46)
+}
+
+-- Sorting Hex array --
+bool(true)
+array(6) {
+  [0]=>
+  int(-242)
+  [1]=>
+  int(-207)
+  [2]=>
+  int(16)
+  [3]=>
+  int(18)
+  [4]=>
+  int(43)
+  [5]=>
+  int(174)
+}
+
+-- Sorting Float array --
+bool(true)
+array(7) {
+  [0]=>
+  float(-3.4)
+  [1]=>
+  float(-0.0934)
+  [2]=>
+  int(0)
+  [3]=>
+  float(0.5)
+  [4]=>
+  float(2.4)
+  [5]=>
+  float(10.2)
+  [6]=>
+  float(7300)
+}
+
+-- Sorting empty array --
+bool(true)
+array(0) {
+}
+===DONE===

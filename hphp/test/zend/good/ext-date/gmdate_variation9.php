@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time
+ * Description: Format a GMT date/time 
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing gmdate() : usage variation ***\n";
@@ -29,7 +29,7 @@ foreach($time_formats as $key =>$value) {
       echo "\n--$key--\n";
 	  var_dump( gmdate($value) );
 	  var_dump( gmdate($value, $timestamp) );
-}
+}	  
 
 ?>
 ===DONE===

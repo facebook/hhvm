@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_intl.h>
-#include <runtime/ext/ext_array.h> // for throw_bad_array_exception
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/intl_convert.h>
-#include <runtime/base/zend/zend_collator.h>
-#include <runtime/base/zend/zend_qsort.h>
-#include <unicode/uidna.h>
-#include <unicode/ustring.h>
-#include <unicode/ucol.h> // icu
-#include <unicode/uclean.h> // icu
-#include <unicode/putil.h> // icu
-#include <unicode/utypes.h>
-#include <unicode/unorm.h>
+#include "hphp/runtime/ext/ext_intl.h"
+#include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/intl_convert.h"
+#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/zend/zend_qsort.h"
+#include "unicode/uidna.h"
+#include "unicode/ustring.h"
+#include "unicode/ucol.h" // icu
+#include "unicode/uclean.h" // icu
+#include "unicode/putil.h" // icu
+#include "unicode/utypes.h"
+#include "unicode/unorm.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #ifdef UIDNA_INFO_INITIALIZER
 #define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */
@@ -88,7 +88,7 @@ const int64_t q_Collator$$UPPER_FIRST = UCOL_UPPER_FIRST;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Collator::c_Collator(VM::Class* cb) :
+c_Collator::c_Collator(Class* cb) :
     ExtObjectData(cb), m_locale(), m_ucoll(NULL), m_errcode() {
 }
 
@@ -193,7 +193,7 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
   return ret;
 }
 
-Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
+Variant c_Collator::ti_create(CStrRef locale) {
   p_Collator c(NEWOBJ(c_Collator)());
   c.get()->t___construct(locale);
   return c;
@@ -484,7 +484,7 @@ Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
 }
 
 Variant f_collator_create(CStrRef locale) {
-  return c_Collator::ti_create(nullptr, locale);
+  return c_Collator::ti_create(locale);
 }
 
 Variant f_collator_get_attribute(CVarRef obj, int64_t attr) {
@@ -540,7 +540,7 @@ const int64_t q_Locale$$VALID_LOCALE = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Locale::c_Locale(VM::Class* cb) : ExtObjectData(cb) {
+c_Locale::c_Locale(Class* cb) : ExtObjectData(cb) {
 }
 
 c_Locale::~c_Locale() {
@@ -563,7 +563,7 @@ const int64_t q_Normalizer$$NFKC     = UNORM_NFKC;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Normalizer::c_Normalizer(VM::Class* cb) : ExtObjectData(cb) {
+c_Normalizer::c_Normalizer(Class* cb) : ExtObjectData(cb) {
 }
 
 c_Normalizer::~c_Normalizer() {
@@ -574,7 +574,7 @@ void c_Normalizer::t___construct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
+Variant c_Normalizer::ti_isnormalized(CStrRef input,
                                       int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
@@ -621,7 +621,7 @@ Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
   return uret;
 }
 
-Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
+Variant c_Normalizer::ti_normalize(CStrRef input,
                                    int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
@@ -735,6 +735,11 @@ enum {
 };
 
 #ifdef HAVE_46_API
+
+static const StaticString s_result("result");
+static const StaticString s_isTransitionalDifferent("isTransitionalDifferent");
+static const StaticString s_errors("errors");
+
 static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   int32_t     converted_capacity;
   char        *converted = NULL;
@@ -768,17 +773,16 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
   }
 
   // Set up the array returned in idna_info.
-  Array arr;
-  arr.set("result", result);
-  arr.set("isTransitionalDifferent", info.isTransitionalDifferent);
-  arr.set("errors", (long)info.errors);
-  idna_info = arr; // As in Zend, the previous value of idn_variant is overwritten, not modified.
-
+  ArrayInit arr(3);
+  arr.set(s_result, result);
+  arr.set(s_isTransitionalDifferent, info.isTransitionalDifferent);
+  arr.set(s_errors, (long)info.errors);
+  // As in Zend, the previous value of idn_variant is overwritten, not modified.
+  idna_info = arr.create();
   if (info.errors == 0) {
     return result;
-  } else {
-    return false;
   }
+  return false;
 }
 
 #endif

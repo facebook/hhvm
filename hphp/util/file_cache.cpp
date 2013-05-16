@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "file_cache.h"
-#include "exception.h"
-#include "compression.h"
+#include "hphp/util/file_cache.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/compression.h"
 #include "util.h"
-#include "logger.h"
+#include "hphp/util/logger.h"
 #include <sys/mman.h>
 
 namespace HPHP {

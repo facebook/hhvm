@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/libevent_server_with_takeover.h>
-#include <util/logger.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/string_util.h"
 #include <afdt.h>
 
 /*

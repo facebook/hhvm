@@ -87,13 +87,13 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
-#include "runtime/vm/unit.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 TRACE_SET_MOD(hhas);
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1852,4 +1852,4 @@ Unit* assemble_file(const char* filename, const MD5& md5) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

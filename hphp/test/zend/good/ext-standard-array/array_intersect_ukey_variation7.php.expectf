@@ -1,0 +1,26 @@
+*** Testing array_intersect_ukey() : usage variation ***
+
+-- Result of strings containing integers intersection --
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+}
+
+-- Result of strings containing floating points intersection --
+array(2) {
+  ["0.00"]=>
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
+}
+
+-- Result of strings containing integers and strings containing floating points intersection --
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+}
+===DONE===

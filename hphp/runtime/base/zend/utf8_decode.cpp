@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <runtime/base/zend/utf8_decode.h>
+#include "hphp/runtime/base/zend/utf8_decode.h"
 
 /*
     Very Strict UTF-8 Decoder

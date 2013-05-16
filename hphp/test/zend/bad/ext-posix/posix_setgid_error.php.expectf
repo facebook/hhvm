@@ -1,0 +1,6 @@
+*** Test by calling method or function with incorrect numbers of arguments ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

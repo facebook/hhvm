@@ -14,16 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_machine.h>
-#include <runtime/eval/debugger/cmd/cmd_signal.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/intercept.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_machine.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_signal.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -191,8 +193,8 @@ void CmdMachine::UpdateIntercept(DebuggerClient *client,
   client->xend<CmdMachine>(&cmd);
 }
 
-bool CmdMachine::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdMachine::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) return help(client);
 
   bool rpc = client->arg(1, "rpc");
@@ -287,19 +289,19 @@ bool CmdMachine::onClient(DebuggerClient *client) {
 
 bool CmdMachine::onServer(DebuggerProxy *proxy) {
   if (m_body == "rpc") {
-    String host = m_rpcConfig["host"].toString();
+    String host = m_rpcConfig[s_host].toString();
     if (host.empty()) {
       register_intercept("", false, uninit_null());
     } else {
-      int port = m_rpcConfig["port"].toInt32();
+      int port = m_rpcConfig[s_port].toInt32();
       LibEventHttpClient::SetCache(host.data(), port, 1);
       register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
     }
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "attach" && !m_sandboxes.empty()) {
     m_succeed = proxy->switchSandbox(m_sandboxes[0]->id(), m_force);
@@ -307,7 +309,7 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
       proxy->notifyDummySandbox();
       m_exitInterrupt = true;
     }
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   return false;
 }

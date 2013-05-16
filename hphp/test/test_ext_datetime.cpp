@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_datetime.h>
-#include <runtime/ext/ext_datetime.h>
-#include <runtime/ext/ext_string.h>
+#include "hphp/test/test_ext_datetime.h"
+#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -79,7 +79,7 @@ bool TestExtDatetime::RunTests(const std::string &which) {
 
 /* Ignore unimplemented datetime features when timelib is old */
 #define TIMELIB_TEST_UNIMPL(minver, exp) try { exp } \
-  catch (NotImplementedException e) { \
+  catch (const NotImplementedException& e) { \
     return Count(f_timezone_version_get().toDouble() < minver); \
   }
 
@@ -154,18 +154,25 @@ bool TestExtDatetime::test_date_format() {
   return Count(true);
 }
 
+static const StaticString
+  s_warning_count("warning_count"),
+  s_error_count("error_count"),
+  s_warnings("warnings"),
+  s_errors("errors"),
+  s_sec("sec");
+
 bool TestExtDatetime::test_date_get_last_errors() {
   Object dt = f_date_create("asdfasdf");
   Array errs = f_date_get_last_errors();
   VS(errs.size(), 4);
 
-  VS(errs["warning_count"], 1);
-  Array err_warnings = errs["warnings"];
+  VS(errs[s_warning_count], 1);
+  Array err_warnings = errs[s_warnings];
   VS(err_warnings.size(), 1);
   VS(err_warnings[6], "Double timezone specification");
 
-  VS(errs["error_count"], 1);
-  Array err_errors = errs["errors"];
+  VS(errs[s_error_count], 1);
+  Array err_errors = errs[s_errors];
   VS(err_errors.size(), 1);
   VS(err_errors[0], "The timezone could not be found in the database");
 
@@ -405,7 +412,7 @@ bool TestExtDatetime::test_getdate() {
 bool TestExtDatetime::test_gettimeofday() {
   Array ret = f_gettimeofday();
   VS(ret.size(), 4);
-  VERIFY(more(ret["sec"], 1073504408));
+  VERIFY(more(ret[s_sec], 1073504408));
 
   VERIFY(more(f_gettimeofday(true), 1073504408.23910));
   return Count(true);
@@ -638,15 +645,21 @@ bool TestExtDatetime::test_timezone_identifiers_list() {
   return Count(true);
 }
 
+static const StaticString
+  s_country_code("country_code"),
+  s_latitude("latitude"),
+  s_longitude("longitude"),
+  s_comments("comments");
+
 bool TestExtDatetime::test_timezone_location_get() {
   TIMELIB_TEST_UNIMPL(2011.1,
     Object tz = f_timezone_open("Europe/Prague");
     Array loc = f_timezone_location_get(tz);
     VS(loc.size(), 4);
-    VS(loc["country_code"].toString(), "CZ");
-    VS((int)(loc["latitude"].toDoubleVal() * 100), 5008);
-    VS((int)(loc["longitude"].toDoubleVal() * 100), 1443);
-    VS(loc["comments"].toString(), "");
+    VS(loc[s_country_code].toString(), "CZ");
+    VS((int)(loc[s_latitude].toDoubleVal() * 100), 5008);
+    VS((int)(loc[s_longitude].toDoubleVal() * 100), 1443);
+    VS(loc[s_comments].toString(), "");
     return Count(true);
   );
 }
@@ -686,13 +699,19 @@ bool TestExtDatetime::test_timezone_open() {
   return Count(true);
 }
 
+static const StaticString
+  s_ts("ts"),
+  s_offset("offset"),
+  s_isdst("isdst"),
+  s_abbr("abbr");
+
 bool TestExtDatetime::test_timezone_transitions_get() {
   Object timezone = f_timezone_open("CET");
   Array transitions = f_timezone_transitions_get(timezone);
-  VS(transitions[0]["ts"], -1693706400);
-  VS(transitions[0]["offset"], 7200);
-  VS(transitions[0]["isdst"], true);
-  VS(transitions[0]["abbr"], "CEST");
+  VS(transitions[0][s_ts], -1693706400);
+  VS(transitions[0][s_offset], 7200);
+  VS(transitions[0][s_isdst], true);
+  VS(transitions[0][s_abbr], "CEST");
   return Count(true);
 }
 

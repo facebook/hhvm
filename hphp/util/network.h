@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __NETWORK_H__
-#define __NETWORK_H__
+#ifndef incl_HPHP_NETWORK_H_
+#define incl_HPHP_NETWORK_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 #include <string>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -49,12 +49,7 @@ std::string safe_inet_ntoa(struct in_addr &in);
  */
 std::string GetPrimaryIP();
 
-/**
- * Get network bytes per second.
- */
-bool GetNetworkStats(const char *iface, int &in_bps, int &out_bps);
-
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __NETWORK_H__
+#endif // incl_HPHP_NETWORK_H_

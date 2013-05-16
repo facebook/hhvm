@@ -18,13 +18,13 @@
 #ifndef incl_HPHP_EXT_STRING_H_
 #define incl_HPHP_EXT_STRING_H_
 
-#include "util/zend/zend_html.h"
-#include <runtime/base/base_includes.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/bstring.h>
+#include "hphp/util/zend/zend_html.h"
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
-#include <runtime/ext/ext_class.h>
+#include "hphp/runtime/ext/ext_class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

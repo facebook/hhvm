@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_session.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/ext/ext_hash.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/zend_math.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/array/array_iterator.h>
-#include <util/lock.h>
-#include <util/logger.h>
-#include <util/compatibility.h>
+#include "hphp/runtime/ext/ext_session.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/compatibility.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -277,9 +277,11 @@ static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
   }
 }
 
+static const StaticString s_REMOTE_ADDR("REMOTE_ADDR");
+
 String SessionModule::create_sid() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String remote_addr = g->GV(_SERVER)["REMOTE_ADDR"].toString();
+  String remote_addr = g->GV(_SERVER)[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -757,7 +759,7 @@ static UserSessionModule s_user_session_module;
 
 class SessionSerializer {
 public:
-  SessionSerializer(const char *name) : m_name(name) {
+  explicit SessionSerializer(const char *name) : m_name(name) {
     RegisteredSerializers.push_back(this);
   }
   virtual ~SessionSerializer() {}
@@ -1187,9 +1189,11 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
   ubuf[n] = '\0';
 }
 
+static const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
+
 static inline void last_modified() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String path = g->GV(_SERVER)["PATH_TRANSLATED"].toString();
+  String path = g->GV(_SERVER)[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1303,14 +1307,20 @@ void f_session_set_cookie_params(int64_t lifetime,
   }
 }
 
+static const StaticString s_lifetime("lifetime");
+static const StaticString s_path("path");
+static const StaticString s_domain("domain");
+static const StaticString s_secure("secure");
+static const StaticString s_httponly("httponly");
+
 Array f_session_get_cookie_params() {
-  Array ret = Array::Create();
-  ret.set("lifetime", PS(cookie_lifetime));
-  ret.set("path",     String(PS(cookie_path)));
-  ret.set("domain",   String(PS(cookie_domain)));
-  ret.set("secure",   PS(cookie_secure));
-  ret.set("httponly", PS(cookie_httponly));
-  return ret;
+  ArrayInit ret(5);
+  ret.set(s_lifetime, PS(cookie_lifetime));
+  ret.set(s_path,     String(PS(cookie_path)));
+  ret.set(s_domain,   String(PS(cookie_domain)));
+  ret.set(s_secure,   PS(cookie_secure));
+  ret.set(s_httponly, PS(cookie_httponly));
+  return ret.create();
 }
 
 String f_session_name(CStrRef newname /* = null_string */) {
@@ -1445,6 +1455,10 @@ bool f_session_decode(CStrRef data) {
   return false;
 }
 
+static const StaticString
+  s_REQUEST_URI("REQUEST_URI"),
+  s_HTTP_REFERER("HTTP_REFERER");
+
 bool f_session_start() {
   PS(apply_trans_sid) = PS(use_trans_sid);
 
@@ -1515,7 +1529,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->GV(_SERVER)["REQUEST_URI"].toString();
+    value = g->GV(_SERVER)[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1530,7 +1544,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->GV(_SERVER)["HTTP_REFERER"].toString();
+    value = g->GV(_SERVER)[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;

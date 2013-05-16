@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_CONTAINER_H__
-#define __FUNCTION_CONTAINER_H__
+#ifndef incl_HPHP_FUNCTION_CONTAINER_H_
+#define incl_HPHP_FUNCTION_CONTAINER_H_
 
-#include <compiler/hphp.h>
+#include "hphp/compiler/hphp.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,4 +56,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FUNCTION_CONTAINER_H__
+#endif // incl_HPHP_FUNCTION_CONTAINER_H_

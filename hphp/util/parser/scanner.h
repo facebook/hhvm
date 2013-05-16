@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_SCANNER_H__
-#define __HPHP_UTIL_PARSER_SCANNER_H__
+#ifndef incl_HPHP_UTIL_PARSER_SCANNER_H_
+#define incl_HPHP_UTIL_PARSER_SCANNER_H_
 
 #include <sstream>
-#include <util/exception.h>
-#include <util/parser/location.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/exception.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ public:
     AllowShortTags       = 0x01, // allow <?
     AllowAspTags         = 0x02, // allow <% %>
     ReturnAllTokens      = 0x08, // return comments and whitespaces
-    EnableHipHopKeywords = 0x10, // allow hip-hop specific reserved words
+    AllowHipHopSyntax = 0x10, // allow hip-hop specific reserved words
   };
 
 public:
@@ -274,19 +274,19 @@ public:
     m_heredocLabel.clear();
   }
 
-  void setStrictMode() {
-    m_isStrictMode = 1;
-  }
-
-  bool isStrictMode() const {
-    return m_isStrictMode;
-  }
-
-  /*
-   * Returns: whether HipHop-extension keywords are enabled.
+  /**
+   * Enables Hack for HipHop mode (types and other goodies).
    */
-  bool hipHopKeywordsEnabled() const {
-    return m_type & EnableHipHopKeywords;
+  void setHackMode() {
+    m_isHackMode = 1;
+  }
+
+  bool isHackMode() const {
+    return m_isHackMode;
+  }
+
+  bool hipHopSyntaxEnabled() const {
+    return (m_type & AllowHipHopSyntax) || m_isHackMode;
   }
 
   int getLookaheadLtDepth() {
@@ -333,7 +333,7 @@ private:
   // fields for XHP parsing
   int m_lastToken;
   void incLoc(const char *rawText, int rawLeng);
-  bool m_isStrictMode;
+  bool m_isHackMode;
 
   TokenStore m_lookahead;
   int m_lookaheadLtDepth;
@@ -342,4 +342,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_SCANNER_H__
+#endif // incl_HPHP_UTIL_PARSER_SCANNER_H_

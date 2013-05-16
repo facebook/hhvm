@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_BlockableWaitHandle::c_BlockableWaitHandle(VM::Class* cb)
+c_BlockableWaitHandle::c_BlockableWaitHandle(Class* cb)
     : c_WaitableWaitHandle(cb), m_nextParent(nullptr) {
 }
 

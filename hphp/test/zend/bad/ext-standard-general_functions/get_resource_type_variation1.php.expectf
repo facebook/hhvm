@@ -1,0 +1,30 @@
+*** Testing get_resource_type() : variation test ***
+
+-- bool --
+HipHop Warning: %a
+NULL
+
+-- int 10 --
+HipHop Warning: %a
+NULL
+
+-- float 10.5 --
+HipHop Warning: %a
+NULL
+
+-- string --
+HipHop Warning: %a
+NULL
+
+-- array --
+HipHop Warning: %a
+NULL
+
+-- NULL --
+HipHop Warning: %a
+NULL
+
+-- Object --
+HipHop Warning: %a
+NULL
+===DONE===

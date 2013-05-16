@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __MUTEX_H__
-#define __MUTEX_H__
+#ifndef incl_HPHP_MUTEX_H_
+#define incl_HPHP_MUTEX_H_
 
-#include <util/assertions.h>
-#include <util/util.h>
+#include "hphp/util/assertions.h"
+#include "hphp/util/util.h"
 #include <pthread.h>
 #include <time.h>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include "util/rank.h"
+#include "hphp/util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ public:
 #endif
   }
 public:
-  BaseMutex(bool recursive = true, Rank r = RankUnranked) {
+  explicit BaseMutex(bool recursive = true, Rank r = RankUnranked) {
     pthread_mutexattr_init(&m_mutexattr);
     if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
@@ -189,7 +189,7 @@ protected:
  */
 class Mutex : public BaseMutex<false> {
 public:
-  Mutex(bool recursive = true, Rank rank = RankUnranked) :
+  explicit Mutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<false>(recursive, rank) {}
   pthread_mutex_t &getRaw() { return m_mutex; }
 };
@@ -200,7 +200,7 @@ public:
  */
 class SimpleMutex : public BaseMutex<true> {
 public:
-  SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
+  explicit SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<true>(recursive, rank) {}
 };
 
@@ -211,7 +211,7 @@ class SpinLock {
   Rank m_rank;
 #endif
 public:
-  SpinLock(Rank rank = RankUnranked)
+  explicit SpinLock(Rank rank = RankUnranked)
 #ifdef DEBUG
     : m_rank(rank)
 #endif
@@ -283,7 +283,7 @@ class ReadWriteMutex {
   }
 
 public:
-  ReadWriteMutex(Rank rank = RankUnranked)
+  explicit ReadWriteMutex(Rank rank = RankUnranked)
 #ifdef DEBUG
     : m_rank(rank)
 #endif
@@ -380,4 +380,4 @@ class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __MUTEX_H__
+#endif // incl_HPHP_MUTEX_H_

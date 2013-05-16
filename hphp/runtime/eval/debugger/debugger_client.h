@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CLIENT_H__
-#define __HPHP_EVAL_DEBUGGER_CLIENT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_client_settings.h>
-#include <runtime/eval/debugger/inst_point.h>
-#include <runtime/base/debuggable.h>
-#include <util/text_color.h>
-#include <util/hdf.h>
-#include <util/mutex.h>
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_client_settings.h"
+#include "hphp/runtime/eval/debugger/inst_point.h"
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/util/text_color.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 
@@ -68,6 +68,7 @@ public:
    */
   static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
+  static void Shutdown();
 
   /**
    * Pre-defined auto-complete lists. Append-only, as they will be used in
@@ -109,7 +110,7 @@ public:
   static String FormatTitle(const char *title);
 
 public:
-  DebuggerClient(std::string name = ""); // name only for api usage
+  explicit DebuggerClient(std::string name = ""); // name only for api usage
   ~DebuggerClient();
   void reset();
 
@@ -124,6 +125,7 @@ public:
    * Main processing functions.
    */
   bool console();
+  // Carries out the current command and returns true if the command completed.
   bool process();
   void quit();
   void onSignal(int sig);
@@ -165,9 +167,8 @@ public:
   void tutorial(const char *text);
   void setTutorial(int mode);
 
-  /**
-   * Input functions.
-   */
+  // Returns the source code string that the debugger is currently
+  // evaluating.
   const std::string &getCode() const { return m_code;}
   void swapHelp();
 
@@ -184,13 +185,15 @@ public:
   StringVec *args() { return &m_args;}
 
   /**
-   * Send the commmand to DebuggerProxy and expect same type of command back.
+   * Send the commmand to server's DebuggerProxy
+   * and expect same type of command back.
    */
   template<typename T> boost::shared_ptr<T> xend(DebuggerCommand *cmd) {
     return boost::static_pointer_cast<T>(xend(cmd));
   }
-  void send(DebuggerCommand *cmd);
-  DebuggerCommandPtr recv(int expected);
+
+  void sendToServer(DebuggerCommand *cmd);
+  DebuggerCommandPtr recvFromServer(int expected);
 
   /**
    * Machine functions. True if we're switching to a machine that's not
@@ -231,8 +234,15 @@ public:
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64_t threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
+
+  // Retrieves a source location that is the current focus of the
+  // debugger. The current focus is initially determined by the
+  // breakpoint where the debugger is currently stopped and can
+  // thereafter be modified by list commands and by switching the
+  // the stack frame.
   void getListLocation(std::string &file, int &line, int &lineFocus0,
                        int &charFocus0, int &lineFocus1, int &charFocus1);
+
   void setListLocation(const std::string &file, int line, bool center);
   void setSourceRoot(const std::string &sourceRoot);
 
@@ -382,6 +392,7 @@ private:
   bool m_acProtoTypePrompted;
 
   std::string m_line;
+  // The current command to process.
   std::string m_command;
   std::string m_commandCanonical;
   std::string m_prevCmd;
@@ -481,4 +492,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CLIENT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CLIENT_H_

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "compiler/statement/typedef_statement.h"
+#include "hphp/compiler/statement/typedef_statement.h"
 
 namespace HPHP {
 

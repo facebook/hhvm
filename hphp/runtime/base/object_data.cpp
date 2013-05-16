@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/execution_context.h>
-#include <util/lock.h>
-#include <runtime/base/class_info.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collections.h>
-#include <runtime/vm/class.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,12 +54,7 @@ ObjectData::~ObjectData() {
   }
 }
 
-HPHP::VM::Class*
-ObjectData::instanceof(const HPHP::VM::PreClass* pc) const {
-  return m_cls->classof(pc);
-}
-
-bool ObjectData::instanceof(const HPHP::VM::Class* c) const {
+bool ObjectData::instanceof(const HPHP::Class* c) const {
   return m_cls->classof(c);
 }
 
@@ -78,7 +73,7 @@ void ObjectData::destruct() {
       // case.
       auto& faults = g_vmContext->m_faults;
       if (!faults.empty()) {
-        if (faults.back().m_faultType == HPHP::VM::Fault::CppException) return;
+        if (faults.back().m_faultType == Fault::CppException) return;
       }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
@@ -87,7 +82,7 @@ void ObjectData::destruct() {
       tvWriteNull(&retval);
       try {
         // Call the destructor method
-        g_vmContext->invokeFunc(&retval, meth, null_array, this);
+        g_vmContext->invokeFuncFew(&retval, meth, this);
       } catch (...) {
         // Swallow any exceptions that escape the __destruct method
         handle_destructor_exception();
@@ -117,13 +112,9 @@ CStrRef ObjectData::o_getClassNameHook() const {
 
 HOT_FUNC
 bool ObjectData::o_instanceof(CStrRef s) const {
-  HPHP::VM::Class* cls = VM::Unit::lookupClass(s.get());
+  HPHP::Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
   return m_cls->classof(cls);
-}
-
-bool ObjectData::o_isClass(const char *s) const {
-  return strcasecmp(s, o_getClassName()) == 0;
 }
 
 int64_t ObjectData::o_toInt64() const {
@@ -146,7 +137,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   Object obj(this);
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    Variant iterator = obj->o_invoke(s_getIterator, Array());
+    Variant iterator = obj->o_invoke_few_args(s_getIterator, 0);
     if (!iterator.isObject()) break;
     ObjectData* o = iterator.getObjectData();
     if (o->instanceof(SystemLib::s_IteratorClass)) {
@@ -189,7 +180,7 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
 }
 
 void ObjectData::initProperties(int nProp) {
-  if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
+  if (!o_properties.get()) ((HPHP::Instance*)this)->initDynProps(nProp);
 }
 
 Variant* ObjectData::o_realProp(CStrRef propName, int flags,
@@ -200,12 +191,12 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
    * behavior in cases where the named property is nonexistent or
    * inaccessible.
    */
-  HPHP::VM::Class* ctx = nullptr;
+  HPHP::Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = VM::Unit::lookupClass(context.get());
+    ctx = Unit::lookupClass(context.get());
   }
 
-  HPHP::VM::Instance* thiz = (HPHP::VM::Instance*)(this);  // sigh
+  HPHP::Instance* thiz = (HPHP::Instance*)(this);  // sigh
   bool visible, accessible, unset;
   TypedValue* ret = (flags & RealPropNoDynamic)
                     ? thiz->getDeclProp(ctx, propName.get(), visible,
@@ -320,10 +311,10 @@ Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
 
 HOT_FUNC
 void ObjectData::o_setArray(CArrRef properties) {
-  auto thiz = static_cast<VM::Instance*>(this);
+  auto thiz = static_cast<Instance*>(this);
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
-    VM::Class* ctx = nullptr;
+    Class* ctx = nullptr;
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
     if (!k.empty() && k.charAt(0) == '\0') {
@@ -334,7 +325,7 @@ void ObjectData::o_setArray(CArrRef properties) {
         ctx = m_cls;
       } else {
         // Private.
-        ctx = VM::Unit::lookupClass(cls.get());
+        ctx = Unit::lookupClass(cls.get());
         if (!ctx) continue;
       }
       k = k.substr(subLen);
@@ -358,13 +349,13 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
   std::vector<bool> inserted(m_cls->numDeclProperties(), false);
 
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
-  const VM::Class* cls = m_cls;
-  auto thiz = static_cast<const VM::Instance*>(this);
+  const Class* cls = m_cls;
+  auto thiz = static_cast<const Instance*>(this);
   do {
     thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    const std::vector<VM::ClassPtr> &usedTraits = cls->m_usedTraits;
+    const std::vector<ClassPtr> &usedTraits = cls->m_usedTraits;
     for (unsigned t = 0; t < usedTraits.size(); t++) {
-      const VM::ClassPtr& trait = usedTraits[t];
+      const ClassPtr& trait = usedTraits[t];
       thiz->getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
     }
     cls = cls->m_parent.get();
@@ -390,7 +381,7 @@ Object ObjectData::FromArray(ArrayData *properties) {
 
 Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
-  ClassInfo::GetArray(this, ret, ClassInfo::GetArrayAll);
+  o_getArray(ret, false);
   return ret;
 }
 
@@ -399,22 +390,22 @@ Array ObjectData::o_toIterArray(CStrRef context,
   size_t size = m_cls->m_declPropNumAccessible +
                 (o_properties.get() ? o_properties.get()->size() : 0);
   HphpArray* retval = NEW(HphpArray)(size);
-  VM::Class* ctx = nullptr;
+  Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = VM::Unit::lookupClass(context.get());
+    ctx = Unit::lookupClass(context.get());
   }
 
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
-  const VM::Class* klass = m_cls;
+  const Class* klass = m_cls;
   while (klass) {
-    const VM::PreClass::Prop* props = klass->m_preClass->properties();
+    const PreClass::Prop* props = klass->m_preClass->properties();
     const size_t numProps = klass->m_preClass->numProperties();
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       bool visible, accessible, unset;
-      TypedValue* val = ((VM::Instance*)this)->getProp(
+      TypedValue* val = ((Instance*)this)->getProp(
         ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
         if (getRef) {
@@ -473,86 +464,79 @@ Array ObjectData::o_toIterArray(CStrRef context,
   return Array(retval);
 }
 
-Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
-                             strhash_t hash /* = -1 */,
-                             bool fatal /* = true */) {
+static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
+                          CallCtx& ctx) {
   // TODO This duplicates some logic from vm_decode_function and
   // vm_call_user_func, we should refactor this in the near future
-  ObjectData* this_ = this;
-  HPHP::VM::Class* cls = getVMClass();
-  StringData* invName = nullptr;
+  ctx.this_ = obj;
+  ctx.cls = obj->getVMClass();
+  ctx.invName = nullptr;
+
   // XXX The lookup below doesn't take context into account, so it will lead
   // to incorrect behavior in some corner cases. o_invoke is gradually being
   // removed from the HPHP runtime this should be ok for the short term.
-  const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-  if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
-    // If we found a method and its static, null out this_
-    this_ = nullptr;
-  } else if (!f) {
-    if (this_) {
-      // If this_ is non-null AND we could not find a method, try
-      // looking up __call in cls's method table
-      f = cls->lookupMethod(s___call.get());
+  ctx.func = ctx.cls->lookupMethod(s.get());
+  if (ctx.func) {
+    if (ctx.func->attrs() & AttrStatic) {
+      // If we found a method and its static, null out this_
+      ctx.this_ = nullptr;
     }
-    if (!f) {
+  } else {
+    // If this_ is non-null AND we could not find a method, try
+    // looking up __call in cls's method table
+    ctx.func = ctx.cls->lookupMethod(s___call.get());
+
+    if (!ctx.func) {
       // Bail if we couldn't find the method or __call
-      o_invoke_failed(o_getClassName().data(), s.data(), fatal);
-      return uninit_null();
+      o_invoke_failed(ctx.cls->name()->data(), s.data(), fatal);
+      return false;
     }
     // We found __call! Stash the original name into invName.
-    assert(!(f->attrs() & HPHP::VM::AttrStatic));
-    invName = s.get();
-    invName->incRefCount();
+    assert(!(ctx.func->attrs() & AttrStatic));
+    ctx.invName = s.get();
+    ctx.invName->incRefCount();
   }
-  assert(f);
+  return true;
+}
+
+Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
+                             bool fatal /* = true */) {
+  CallCtx ctx;
+  if (!decode_invoke(s, this, fatal, ctx)) return Variant(Variant::nullInit);
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                          nullptr, invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, ctx, params);
   return ret;
 }
 
-#define APPEND_1_ARGS(params) params.append(a0);
-#define APPEND_2_ARGS(params) APPEND_1_ARGS(params); params.append(a1)
-#define APPEND_3_ARGS(params) APPEND_2_ARGS(params); params.append(a2)
-#define APPEND_4_ARGS(params) APPEND_3_ARGS(params); params.append(a3)
-#define APPEND_5_ARGS(params) APPEND_4_ARGS(params); params.append(a4)
-#define APPEND_6_ARGS(params) APPEND_5_ARGS(params); params.append(a5)
-#define APPEND_7_ARGS(params) APPEND_6_ARGS(params); params.append(a6)
-#define APPEND_8_ARGS(params) APPEND_7_ARGS(params); params.append(a7)
-#define APPEND_9_ARGS(params) APPEND_8_ARGS(params); params.append(a8)
-#define APPEND_10_ARGS(params)  APPEND_9_ARGS(params); params.append(a9)
-
-Variant ObjectData::o_invoke_few_args(CStrRef s, strhash_t hash, int count,
+Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
-  Array params = Array::Create();
+
+  CallCtx ctx;
+  if (!decode_invoke(s, this, true, ctx)) return Variant(Variant::nullInit);
+
+  TypedValue args[INVOKE_FEW_ARGS_COUNT];
   switch(count) {
-    case 1: APPEND_1_ARGS(params);
-            break;
-    case 2: APPEND_2_ARGS(params);
-            break;
-    case 3: APPEND_3_ARGS(params);
-            break;
-#if INVOKE_FEW_ARGS_COUNT > 3
-    case 4: APPEND_4_ARGS(params);
-            break;
-    case 5: APPEND_5_ARGS(params);
-            break;
-    case 6: APPEND_6_ARGS(params);
-            break;
-#if INVOKE_FEW_ARGS_COUNT > 6
-    case 7: APPEND_7_ARGS(params);
-            break;
-    case 8: APPEND_8_ARGS(params);
-            break;
-    case 9: APPEND_9_ARGS(params);
-            break;
-    case 10: APPEND_10_ARGS(params);
-            break;
-#endif
-#endif
     default: not_implemented();
+#if INVOKE_FEW_ARGS_COUNT > 6
+    case 10: tvDup(a9.asTypedValue(), args + 9);
+    case  9: tvDup(a8.asTypedValue(), args + 8);
+    case  8: tvDup(a7.asTypedValue(), args + 7);
+    case  7: tvDup(a6.asTypedValue(), args + 6);
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 3
+    case  6: tvDup(a5.asTypedValue(), args + 5);
+    case  5: tvDup(a4.asTypedValue(), args + 4);
+    case  4: tvDup(a3.asTypedValue(), args + 3);
+#endif
+    case  3: tvDup(a2.asTypedValue(), args + 2);
+    case  2: tvDup(a1.asTypedValue(), args + 1);
+    case  1: tvDup(a0.asTypedValue(), args + 0);
+    case  0: break;
   }
-  return o_invoke(s, params, hash);
+
+  Variant ret;
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, ctx, count, args);
+  return ret;
 }
 
 bool ObjectData::php_sleep(Variant &ret) {
@@ -580,7 +564,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       Variant ret =
-        const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
+        const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
       if (ret.isString()) {
         serializer->writeSerializableObject(o_getClassName(), ret.toString());
       } else if (ret.isNull()) {
@@ -598,7 +582,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       assert(!isCollection());
       try {
         Variant ret =
-          const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
+          const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
         if (ret.isString()) {
           serializer->writeSerializableObject(o_getClassName(), ret.toString());
         } else if (ret.isNull()) {
@@ -627,7 +611,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = (VM::Instance*)(this);
+      auto thiz = (Instance*)(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
       for (ArrayIter iter(props); iter; ++iter) {
@@ -636,10 +620,9 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
         thiz->getProp(m_cls, name.get(), visible, accessible, unset);
         if (accessible && !unset) {
           String propName = name;
-          VM::Slot propInd =
-            m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
-          if (accessible && propInd != VM::kInvalidSlot) {
-            if (m_cls->m_declProperties[propInd].m_attrs & VM::AttrPrivate) {
+          Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
+          if (accessible && propInd != kInvalidSlot) {
+            if (m_cls->m_declProperties[propInd].m_attrs & AttrPrivate) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
           }
@@ -704,7 +687,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData *ObjectData::clone() {
-  HPHP::VM::Instance* instance = static_cast<HPHP::VM::Instance*>(this);
+  HPHP::Instance* instance = static_cast<HPHP::Instance*>(this);
   return instance->cloneImpl();
 }
 
@@ -734,14 +717,16 @@ Variant ObjectData::t___get(Variant v_name) {
 
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
-  const VM::Func* method = m_cls->lookupMethod(s_offsetGet.get());
+  const Func* method = m_cls->lookupMethod(s_offsetGet.get());
   assert(method);
   if (!method) {
     return uninit_null();
   }
   Variant v;
-  g_vmContext->invokeFunc((TypedValue*)(&v), method,
-                          CREATE_VECTOR1(key), this);
+  TypedValue args[1];
+  tvDup(key.asTypedValue(), args + 0);
+  g_vmContext->invokeFuncFew((TypedValue*)(&v), method,
+                             this, nullptr, 1, args);
   return v;
 }
 

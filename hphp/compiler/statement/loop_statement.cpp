@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/loop_statement.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/function_scope.h>
-#include <util/parser/parser.h>
+#include "hphp/compiler/statement/loop_statement.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/util/parser/parser.h"
 
 using namespace HPHP;
 

@@ -13,21 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _HPHP_DWARF_H_
-#define _HPHP_DWARF_H_
+#ifndef HPHP_DWARF_H_
+#define HPHP_DWARF_H_
 
 #include <string>
 
-#include <runtime/base/types.h>
-#include <runtime/vm/translator/translator.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/translator.h"
 #include <libdwarf.h>
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 typedef enum {
@@ -183,7 +182,6 @@ struct DwarfInfo {
   void syncChunks();
 };
 
-}
 }
 }
 

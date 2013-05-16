@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_TYPE_H_
-#define incl_RUNTIME_TYPE_H_
+#ifndef incl_HPHP_RUNTIME_TYPE_H_
+#define incl_HPHP_RUNTIME_TYPE_H_
 
-#include "runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 // Location --
@@ -37,10 +36,12 @@ struct Location {
     This,     // $this in the current frame
   };
 
-  Location(Space spc)
-  : space(spc)
-  , offset(0)
-  { assert(spc == This); }
+  explicit Location(Space spc)
+    : space(spc)
+    , offset(0)
+  {
+    assert(spc == This);
+  }
 
   Location(Space spc, int64_t off)
     : space(spc)
@@ -125,12 +126,12 @@ public:
 };
 
 struct InputInfo {
-  InputInfo(const Location &l)
-    : loc(l),
-      dontBreak(false),
-      dontGuard(l.isLiteral()),
-      dontGuardInner(false)
-    {}
+  explicit InputInfo(const Location &l)
+    : loc(l)
+    , dontBreak(false)
+    , dontGuard(l.isLiteral())
+    , dontGuardInner(false)
+  {}
 
   std::string pretty() const {
     std::string p = loc.pretty();
@@ -228,17 +229,17 @@ class RuntimeType {
   }
 
  public:
-  RuntimeType(DataType outer, DataType inner = KindOfInvalid,
-              const Class* = nullptr);
-  RuntimeType(const StringData*);
-  RuntimeType(const ArrayData*);
-  RuntimeType(const Class*);
+  explicit RuntimeType(DataType outer, DataType inner = KindOfInvalid,
+                       const Class* = nullptr);
+  explicit RuntimeType(const StringData*);
+  explicit RuntimeType(const ArrayData*);
+  explicit RuntimeType(const Class*);
   explicit RuntimeType(bool value);
   explicit RuntimeType(int64_t value);
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
-  RuntimeType(const Iter* iter);
-  RuntimeType(ArrayIter::Type type);
+  explicit RuntimeType(const Iter* iter);
+  explicit RuntimeType(ArrayIter::Type type);
 
   static const int UnknownBool = -1;
 
@@ -284,6 +285,6 @@ class RuntimeType {
   std::string pretty() const;
 };
 
-} } }
+} }
 
-#endif // incl_RUNTIME_TYPE_H_
+#endif // incl_HPHP_RUNTIME_TYPE_H_

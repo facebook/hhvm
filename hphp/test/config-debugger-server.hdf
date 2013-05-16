@@ -28,3 +28,11 @@ Sandbox {
   # only match hphpd.<user>.sth.sth, not any requests
   Pattern = hphpd\.([a-z0-9_-]+)\.[a-z0-9_-]+\.[a-z0-9_-]+
 }
+
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli_%{schema}.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = true
+}

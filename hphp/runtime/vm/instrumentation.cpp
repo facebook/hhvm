@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/instrumentation.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/vm/instrumentation.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
-namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,8 +51,8 @@ void Injection::execute() const {
   }
   // Note: For now we don't merge analysis code's class and function.
   // Later we might decide to do so
-  g_vmContext->invokeFunc(&retval, m_unit->getMain(Transl::curClass()),
-                          Array::Create(), this_, cls, varEnv, nullptr, nullptr);
+  g_vmContext->invokeFunc(&retval, m_unit->getMain(curClass()),
+                          null_array, this_, cls, varEnv);
   if (varEnv) {
     varEnv->setCfp(cfpSave);
   }
@@ -220,22 +219,22 @@ void InjectionTables::clear() {
 InjectionTables* InjectionTables::clone() {
   InjectionTables* newTables = new InjectionTables();
   for (int i = 0; i < InstHookTypeInt64Count; i++) {
-    VM::InjectionTableInt64* table = m_int64Tables[i];
+    InjectionTableInt64* table = m_int64Tables[i];
     if (!table) {
       newTables->m_int64Tables[i] = nullptr;
       continue;
     }
-    VM::InjectionTableInt64* newTable = new InjectionTableInt64();
+    InjectionTableInt64* newTable = new InjectionTableInt64();
     newTable->insert(table->begin(), table->end());
     newTables->m_int64Tables[i] = newTable;
   }
   for (int i = 0; i < InstHookTypeSDCount; i++) {
-    VM::InjectionTableSD* table = m_sdTables[i];
+    InjectionTableSD* table = m_sdTables[i];
     if (!table) {
       newTables->m_sdTables[i] = nullptr;
       continue;
     }
-    VM::InjectionTableSD* newTable = new InjectionTableSD();
+    InjectionTableSD* newTable = new InjectionTableSD();
     newTable->insert(table->begin(), table->end());
     newTables->m_sdTables[i] = newTable;
   }
@@ -270,65 +269,4 @@ int InjectionTables::countInjections() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static InjectionTables* s_globalInjTables = nullptr;
-static ReadWriteMutex s_globalInjTableLock;
-
-void InstHelpers::InstCustomStringCallback(const StringData* hook,
-                                           Injection::Callback callback,
-                                           void *arg, const StringData* desc) {
-  const Injection* inj = InjectionCache::GetInjection(callback, arg, desc);
-  assert(inj);
-  const StringData* hookCached = InjectionCache::GetStringData(hook);
-  if (!g_vmContext->m_injTables) {
-    g_vmContext->m_injTables = new InjectionTables();
-  }
-  if (!g_vmContext->m_injTables->getSDTable(InstHookTypeCustomEvt)) {
-    g_vmContext->m_injTables->setSDTable(InstHookTypeCustomEvt,
-                                       new InjectionTableSD());
-  }
-  InjectionTableSD* table =
-    g_vmContext->m_injTables->getSDTable(InstHookTypeCustomEvt);
-  (*table)[hookCached] = inj;
-}
-
-void InstHelpers::PushInstToGlobal() {
-  WriteLock lock(s_globalInjTableLock);
-  if (s_globalInjTables) {
-    delete s_globalInjTables;
-    s_globalInjTables = nullptr;
-  }
-  if (g_vmContext->m_injTables) {
-    s_globalInjTables = g_vmContext->m_injTables->clone();
-  }
-}
-
-void InstHelpers::PullInstFromGlobal() {
-  if (g_vmContext->m_injTables) {
-    delete g_vmContext->m_injTables;
-    g_vmContext->m_injTables = nullptr;
-  }
-  ReadLock lock(s_globalInjTableLock);
-  if (s_globalInjTables) {
-    g_vmContext->m_injTables = s_globalInjTables->clone();
-  }
-}
-
-int InstHelpers::CountGlobalInst() {
-  ReadLock lock(s_globalInjTableLock);
-  if (s_globalInjTables) {
-    return s_globalInjTables->countInjections();
-  }
-  return 0;
-}
-
-void InstHelpers::ClearGlobalInst() {
-  WriteLock lock(s_globalInjTableLock);
-  if (s_globalInjTables) {
-    delete s_globalInjTables;
-    s_globalInjTables = nullptr;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-} }    // HPHP::VM
+ }    // HPHP::VM

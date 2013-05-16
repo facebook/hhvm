@@ -14,32 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/variable_table.h>
-#include <util/util.h>
-#include <compiler/option.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/parser/parser.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/string_util.h>
-#include <runtime/ext/ext_variable.h>
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/util/util.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/ext/ext_variable.h"
 
 using namespace HPHP;
 
@@ -96,9 +96,10 @@ public:
 
 SimpleFunctionCall::SimpleFunctionCall
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- const std::string &name, ExpressionListPtr params, ExpressionPtr cls)
+ const std::string &name, bool hadBackslash, ExpressionListPtr params,
+ ExpressionPtr cls)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
-                 ExpressionPtr(), name, params, cls),
+                 ExpressionPtr(), name, hadBackslash, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_fromCompiler(false),
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
@@ -332,7 +333,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-        (m_type == DefinedFunction ||
+        (m_type == DefineFunction ||
+         m_type == DefinedFunction ||
          m_type == FunctionExistsFunction ||
          m_type == FBCallUserFuncSafeFunction ||
          m_type == ClassExistsFunction ||
@@ -345,6 +347,28 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
+            case DefineFunction: {
+              ConstantTableConstPtr constants = ar->getConstants();
+              // system constant
+              if (constants->isPresent(symbol)) {
+                break;
+              }
+              // user constant
+              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
+              // not found (i.e., undefined)
+              if (!block) break;
+              constants = block->getConstants();
+              const Symbol *sym = constants->getSymbol(symbol);
+              always_assert(sym);
+              if (!sym->isDynamic()) {
+                if (FunctionScopeRawPtr fsc = getFunctionScope()) {
+                  if (!fsc->inPseudoMain()) {
+                    const_cast<Symbol*>(sym)->setDynamic();
+                  }
+                }
+              }
+              break;
+            }
             case DefinedFunction: {
               ConstantTablePtr constants = ar->getConstants();
               if (!constants->isPresent(symbol)) {
@@ -838,6 +862,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
               return CONSTANT("true");
             }
             ConstantTableConstPtr constants = ar->getConstants();
+            if (symbol[0] == '\\') symbol = symbol.substr(1);
             // system constant
             if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
               return CONSTANT("true");
@@ -1346,7 +1371,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           }
           SimpleFunctionCallPtr rep(
             NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                  name, p2, ExpressionPtr()));
+                                  name, false, p2, ExpressionPtr()));
           return rep;
         }
         v = t;
@@ -1441,7 +1466,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         }
         SimpleFunctionCallPtr rep(
           NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                smethod, p2, cl));
+                                smethod, false, p2, cl));
         return rep;
       }
     }

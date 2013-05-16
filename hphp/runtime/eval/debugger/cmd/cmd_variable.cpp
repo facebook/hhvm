@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/base/hphp_system.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_variable.h"
+#include "hphp/runtime/base/hphp_system.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdVariable::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -109,8 +111,8 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
   }
 }
 
-bool CmdVariable::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdVariable::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   String text;
   if (client->argCount() == 1) {
@@ -146,15 +148,17 @@ void CmdVariable::setClientOutput(DebuggerClient *client) {
   client->setOTValues(values);
 }
 
+static const StaticString s_GLOBALS("GLOBALS");
+
 Array CmdVariable::GetGlobalVariables() {
   Array ret = g_vmContext->m_globalVarEnv->getDefinedVariables();
-  ret.remove("GLOBALS");
+  ret.remove(s_GLOBALS);
   return ret;
 }
 
-bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
+bool CmdVariable::onServer(DebuggerProxy *proxy) {
   m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,20 @@
+int(%d)
+array(8) {
+  ["key"]=>
+  %s(%d)
+  ["is_dir"]=>
+  bool(true)
+  ["realpath"]=>
+  string(%d) "%sfile"
+  ["expires"]=>
+  int(%d)
+  ["is_rvalid"]=>
+  bool(%s)
+  ["is_wvalid"]=>
+  bool(%s)
+  ["is_readable"]=>
+  bool(%s)
+  ["is_writable"]=>
+  bool(%s)
+}
+Done

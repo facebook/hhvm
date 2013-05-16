@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "db_mysql.h"
-#include <mysql/mysql.h>
+#include "hphp/util/db_mysql.h"
+#include "mysql/mysql.h"
 
 namespace HPHP {
 

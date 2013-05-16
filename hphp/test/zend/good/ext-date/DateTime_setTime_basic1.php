@@ -1,11 +1,11 @@
 <?php
 /* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )
- * Description: Resets the current time of the DateTime object to a different time.
+ * Description: Resets the current time of the DateTime object to a different time. 
  * Source code: ext/date/php_date.c
  * Alias to functions: date_time_set
  */
-
- //Set the default time zone
+ 
+ //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing DateTime::setTime() : basic functionality ***\n";

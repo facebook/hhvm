@@ -1,0 +1,58 @@
+*** Testing mb_stripos() : basic functionality***
+
+ -- ASCII Strings, needle should be found --
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+
+ -- ASCII Strings, needle should not be found --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+ -- Greek Strings, needle should be found --
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+
+ -- ASCII Strings, needle should not be found --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Done

@@ -14,36 +14,37 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
+#ifndef incl_HPHP_EXT_HHBC_H_
+#define incl_HPHP_EXT_HHBC_H_
 
-#ifndef __HPHP_EXT_HHBC_H__
-#define __HPHP_EXT_HHBC_H__
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace VM {
+struct ActRec;
+
   class Instance;
-};
+;
 
 struct HhbcExtFuncInfo {
   const char* m_name;
-  TypedValue* (*m_builtinFunc)(HPHP::VM::ActRec* ar);
+  TypedValue* (*m_builtinFunc)(ActRec* ar);
   void* m_nativeFunc;
 };
 
 struct HhbcExtMethodInfo {
   const char* m_name;
-  TypedValue* (*m_pGenericMethod)(HPHP::VM::ActRec* ar);
+  TypedValue* (*m_pGenericMethod)(ActRec* ar);
 };
 
 struct HhbcExtClassInfo {
   const char* m_name;
-  HPHP::VM::Instance* (*m_InstanceCtor)(HPHP::VM::Class*);
+  HPHP::Instance* (*m_InstanceCtor)(HPHP::Class*);
   int m_sizeof;
   long long m_methodCount;
   const HhbcExtMethodInfo* m_methods;
-  HPHP::VM::Class** m_clsPtr;
+  HPHP::Class** m_clsPtr;
 };
 
 extern const long long hhbc_ext_funcs_count;
@@ -54,5 +55,5 @@ extern const HhbcExtClassInfo hhbc_ext_classes[];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_EXT_HHBC_H__
+#endif // incl_HPHP_EXT_HHBC_H_
 

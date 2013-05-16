@@ -1,7 +1,5 @@
 <?php
 
-include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
-
 function getFiles(&$rdi,$depth=0) {
   if (!is_object($rdi)) return;
   $files = array(); // order changes per machine

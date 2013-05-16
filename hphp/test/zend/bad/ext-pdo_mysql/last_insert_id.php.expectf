@@ -1,0 +1,13 @@
+PDOStatement Object
+(
+    [queryString] => CREATE TABLE test (id int auto_increment primary key, num int)
+)
+PDOStatement Object
+(
+    [queryString] => INSERT INTO test (id, num) VALUES (23, 42)
+)
+PDOStatement Object
+(
+    [queryString] => INSERT INTO test (num) VALUES (451)
+)
+24

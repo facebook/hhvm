@@ -99,7 +99,7 @@ enterTCHelper:
   ret
   .cfi_endproc
 ///////////////////////////////////////////////////////////////////////////////
-#elif defined(__AARCH64_EL__)
+#elif defined(__AARCH64EL__)
   .globl enterTCHelper
 enterTCHelper:
   brk 0

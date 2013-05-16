@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/complex_types.h>
-#include <util/exception.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/exception.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 #include <math.h>
 #include <cmath>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_collections.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -378,7 +378,7 @@ void VariableSerializer::write(CObjRef v) {
 
     if (v.instanceof(SystemLib::s_JsonSerializableClass)) {
       assert(!v->isCollection());
-      Variant ret = v->o_invoke(s_jsonSerialize, null_array, -1);
+      Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
       // for non objects or when $this is returned
       if (!ret.isObject() || (ret.isObject() && !ret.same(v))) {
         write(ret);
@@ -392,7 +392,7 @@ void VariableSerializer::write(CObjRef v) {
         collectionSerialize(v.get(), this);
       } else {
         Array props(ArrayData::Create());
-        ClassInfo::GetArray(v.get(), props, ClassInfo::GetArrayPublic);
+        v->o_getArray(props, true);
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
         props.serialize(this);
       }
@@ -545,7 +545,12 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
     if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
-      m_buf->append("::__set_state(array(\n");
+      if (m_objCode == 'O') {
+        m_buf->append("::__set_state(array(\n");
+      } else {
+        assert(m_objCode == 'V' || m_objCode == 'K');
+        m_buf->append(" {\n");
+      }
     } else {
       m_buf->append("array (\n");
     }
@@ -708,7 +713,6 @@ void VariableSerializer::writeArrayKey(Variant key) {
     m_buf->append("]=>\n");
     break;
   case APCSerialize:
-    assert(!info.is_object);
   case Serialize:
   case DebuggerSerialize:
     write(key);
@@ -758,6 +762,37 @@ void VariableSerializer::writeCollectionKey(CVarRef key) {
   writeArrayKey(key);
 }
 
+void VariableSerializer::writeCollectionKeylessPrefix() {
+  switch (m_type) {
+  case PrintR:
+  case VarExport:
+  case PHPOutput:
+    indent();
+    break;
+  case VarDump:
+  case DebugDump:
+  case APCSerialize:
+  case Serialize:
+  case DebuggerSerialize:
+    break;
+  case JSON:
+  case DebuggerDump: {
+    ArrayInfo &info = m_arrayInfos.back();
+    if (!info.first_element) {
+      m_buf->append(',');
+    }
+    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
+      indent();
+    }
+    break;
+  }
+  default:
+    assert(false);
+    break;
+  }
+}
+
 void VariableSerializer::writeArrayValue(CVarRef value) {
   // Do not count referenced values after the first
   if ((m_type == Serialize || m_type == APCSerialize ||
@@ -802,7 +837,12 @@ void VariableSerializer::writeArrayFooter() {
   case PHPOutput:
     indent();
     if (info.is_object) {
-      m_buf->append("))");
+      if (m_objCode == 'O') {
+        m_buf->append("))");
+      } else {
+        assert(m_objCode == 'V' || m_objCode == 'K');
+        m_buf->append("}");
+      }
     } else {
       m_buf->append(')');
     }

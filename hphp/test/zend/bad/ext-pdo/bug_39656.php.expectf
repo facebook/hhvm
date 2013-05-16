@@ -1,0 +1,12 @@
+array(4) {
+  ["id"]=>
+  string(1) "1"
+  [0]=>
+  string(1) "1"
+  ["usr"]=>
+  string(4) "user"
+  [1]=>
+  string(4) "user"
+}
+bool(false)
+Done

@@ -1,0 +1,28 @@
+*** Testing error conditions for fileperms(), chmod() ***
+HipHop Warning: %a
+bool(false)
+100%d44
+HipHop Warning: %a
+bool(false)
+40755
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Done ***

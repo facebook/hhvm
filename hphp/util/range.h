@@ -17,7 +17,7 @@
 #ifndef RANGE_H_
 #define RANGE_H_
 
-#include <util/meta.h>
+#include "hphp/util/meta.h"
 
 namespace HPHP {
 

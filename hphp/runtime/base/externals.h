@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_EXTERNALS_H__
-#define __CPP_BASE_EXTERNALS_H__
+#ifndef incl_HPHP_CPP_BASE_EXTERNALS_H_
+#define incl_HPHP_CPP_BASE_EXTERNALS_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,8 +25,8 @@
  * runtime/base .cpp files.
  */
 
-#include <runtime/base/types.h>
-#include <runtime/vm/name_value_table_wrapper.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ extern const char *g_class_map[];
 /**
  * Returns a thread local global variable class pointer.
  */
-typedef VM::GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
 extern void init_global_variables();
 extern void free_global_variables();
@@ -65,7 +65,7 @@ extern Array get_global_state();
 /**
  * Returns a thread local global variable table pointer.
  */
-typedef VM::GlobalNameValueTableWrapper SystemGlobals;
+typedef GlobalNameValueTableWrapper SystemGlobals;
 extern SystemGlobals *get_system_globals();
 
 /**
@@ -76,4 +76,4 @@ extern StaticString literalStrings[];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CPP_BASE_HPHP_H__
+#endif // incl_HPHP_CPP_BASE_HPHP_H_

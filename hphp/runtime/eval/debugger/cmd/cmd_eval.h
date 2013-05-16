@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_EVAL_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_EVAL_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EVAL_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_EVAL_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,15 +27,15 @@ class CmdEval : public DebuggerCommand {
 public:
   CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {}
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
-  virtual bool onServerVM(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   virtual void handleReply(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   String m_output;
@@ -46,4 +46,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_EVAL_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EVAL_H_

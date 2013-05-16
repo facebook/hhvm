@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
 namespace HPHP {
 

@@ -1,0 +1,14 @@
+*** Testing opendir() : usage variations ***
+
+-- Wildcard = '*' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+-- Wildcard = '?' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

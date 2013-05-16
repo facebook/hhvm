@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_COMPILER_PARSER_H_
 #define incl_HPHP_COMPILER_PARSER_H_
 
-#include "runtime/base/util/exceptions.h"
-#include "util/parser/parser.h"
-#include "compiler/construct.h"
-#include "compiler/option.h"
-#include "compiler/type_annotation.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/util/parser/parser.h"
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/type_annotation.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -112,7 +113,6 @@ public:
   bool parse();
   virtual void error(const char* fmt, ...);
   virtual bool enableXHP();
-  virtual bool enableHipHopSyntax();
   virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
@@ -123,7 +123,9 @@ public:
   StatementListPtr getTree() const { return m_tree;}
 
   // parser handlers
-  void saveParseTree(Token &tree);
+  void initParseTree();
+  void finiParseTree();
+  void onHaltCompiler();
   void onName(Token &out, Token &name, NameKind kind);
   void onVariable(Token &out, Token *exprs, Token &var, Token *value,
                   bool constant = false,
@@ -202,6 +204,7 @@ public:
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
+  void addTopStatement(Token &new_stmt);
   void onClassStatement(Token &out, Token &stmts, Token &new_stmt) {
     addStatement(out, stmts, new_stmt);
   }
@@ -250,6 +253,14 @@ public:
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
 
+  // for namespace support
+  void onNamespaceStart(const std::string &ns, bool file_scope = false);
+  void onNamespaceEnd();
+  void onUse(const std::string &ns, const std::string &as);
+  void nns(int token = 0);
+  std::string nsDecl(const std::string &name);
+  std::string resolve(const std::string &ns, bool cls);
+
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
 
@@ -290,6 +301,7 @@ private:
   std::vector<BlockScopePtrVec> m_scopes;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<std::vector<StatementPtr> > m_prependingStatements;
+  std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
   bool m_inTrait;
@@ -318,6 +330,20 @@ private:
   bool hasType(Token &type);
 
   void checkAssignThis(Token &var);
+
+  void addStatement(StatementPtr stmt, StatementPtr new_stmt);
+
+  // for namespace support
+  enum NamespaceState {
+    SeenNothing,
+    SeenNonNamespaceStatement,
+    SeenNamespaceStatement,
+    InsideNamespace,
+  };
+  NamespaceState m_nsState;
+  bool m_nsFileScope;
+  std::string m_namespace; // current namespace
+  hphp_string_imap<std::string> m_aliases;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

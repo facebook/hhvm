@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_DATASET_H__
-#define __DB_DATASET_H__
+#ifndef incl_HPHP_DB_DATASET_H_
+#define incl_HPHP_DB_DATASET_H_
 
-#include "dataset.h"
+#include "hphp/util/dataset.h"
 
 namespace HPHP {
 
@@ -57,7 +57,8 @@ class DBDataSet : public DataSet {
   virtual int getFieldLength(int field) const;
 
  private:
-  DBDataSet(DBDataSet &ds) { assert(false);} // no copy constructor
+  DBDataSet(const DBDataSet &ds) = delete;
+  DBDataSet& operator=(const DBDataSet&) = delete;
 
   typedef std::list<MYSQL_RES*> ResultList;
   ResultList m_results;
@@ -74,4 +75,4 @@ class DBDataSet : public DataSet {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_DATASET_H__
+#endif // incl_HPHP_DB_DATASET_H_

@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
+#ifndef incl_HPHP_LOGGER_H_
+#define incl_HPHP_LOGGER_H_
 
 #include <atomic>
 #include <string>
 #include <stdarg.h>
-#include <util/thread_local.h>
-#include <util/cronolog.h>
+#include "hphp/util/thread_local.h"
+#include "hphp/util/cronolog.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,11 @@ class Exception;
 class LogFileData {
 public:
   LogFileData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
-  LogFileData(FILE *f) : log(f), bytesWritten(0), prevBytesWritten(0) {}
+  explicit LogFileData(FILE *f)
+    : log(f)
+    , bytesWritten(0)
+    , prevBytesWritten(0)
+  {}
   LogFileData(const LogFileData& rhs) :
       log(rhs.log), prevBytesWritten(rhs.prevBytesWritten) {
     bytesWritten.store(rhs.bytesWritten.load());
@@ -165,4 +169,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __LOGGER_H__
+#endif // incl_HPHP_LOGGER_H_

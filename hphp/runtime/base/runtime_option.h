@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __RUNTIME_OPTION_H__
-#define __RUNTIME_OPTION_H__
+#ifndef incl_HPHP_RUNTIME_OPTION_H_
+#define incl_HPHP_RUNTIME_OPTION_H_
 
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/files_match.h>
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/files_match.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,6 +96,7 @@ public:
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
+  static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
   static bool ServerThreadJobLIFO;
@@ -239,7 +240,9 @@ public:
   static bool AlwaysUseRelativePath;
 
   static bool MySQLReadOnly;
+#ifdef FACEBOOK
   static bool MySQLLocalize;  // whether to localize MySQL query results
+#endif
   static int  MySQLConnectTimeout;
   static int  MySQLReadTimeout;
   static int  MySQLWaitTimeout;
@@ -366,10 +369,11 @@ public:
   static bool EnableEmitterStats;
   static bool EnableInstructionCounts;
   static bool CheckSymLink;
-  static int ScannerType;
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
+
+  static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
@@ -409,7 +413,7 @@ public:
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitMGeneric,                 true)                            \
-  F(bool, JitUseIR,                    false)                           \
+  F(bool, JitUseIR,                    true)                            \
   F(double, JitCompareHHIR,            0)                               \
   F(bool, IRPuntDontInterp,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
@@ -421,6 +425,7 @@ public:
   F(bool, HHIRExtraOptPass,            true)                            \
   F(bool, HHIRMemOpt,                  true)                            \
   F(uint32_t, HHIRNumFreeRegs,         -1)                              \
+  F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(bool, HHIREnableRematerialization, true)                            \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
@@ -429,10 +434,11 @@ public:
   F(bool, HHIREnableSinking,           true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
-  F(bool, HHIRDisableTx64,             false)                           \
+  F(bool, HHIRDisableTx64,             true)                            \
   F(uint64_t, MaxHHIRTrans,            -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
-  F(bool, DumpBytecode,                false)                           \
+  /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
+  F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \
@@ -493,8 +499,8 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static int PregBacktraceLimit;
-  static int PregRecursionLimit;
+  static long PregBacktraceLimit;
+  static long PregRecursionLimit;
   static bool EnablePregErrorLog;
 
   // Convenience switch to turn on/off code alternatives via command-line
@@ -505,4 +511,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __RUNTIME_OPTION_H__
+#endif // incl_HPHP_RUNTIME_OPTION_H_

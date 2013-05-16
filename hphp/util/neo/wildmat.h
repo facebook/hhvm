@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef __WILDMAT_H_
-#define __WILDMAT_H_ 1
+#ifndef incl_HPHP_WILDMAT_H_
+#define incl_HPHP_WILDMAT_H_ 1
 
 __BEGIN_DECLS
 
@@ -13,4 +13,4 @@ int wildmatcase(const char *text, const char *p);
 
 __END_DECLS
 
-#endif /* __WILDMAT_H_ */
+#endif /* incl_HPHP_WILDMAT_H_ */

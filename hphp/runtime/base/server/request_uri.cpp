@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/request_uri.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/server/transport.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/string_util.h>
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/string_util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != "https://") {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL, redirect, "rewriteURL");
+      transport->redirect(m_rewrittenURL.c_str(), redirect, "rewriteURL");
       return false;
     }
     splitURL(m_rewrittenURL, m_rewrittenURL, m_queryString);
@@ -168,7 +168,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != "https://") {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL, 301, "rewriteURL");
+      transport->redirect(m_rewrittenURL.c_str(), 301, "rewriteURL");
       return false;
     }
   }

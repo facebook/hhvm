@@ -14,13 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_thread.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/string_util.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_thread.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdThread::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -70,9 +72,9 @@ bool CmdThread::help(DebuggerClient *client) {
     "\n"
     "Some debugging commands will automatically turn thread mode to sticky. "
     "These include continue, step, next or out commands with a counter of "
-    "more than 1. Or a jump command. These commands imply non-interruption "
-    "from another thread. The mode will remain even after these commands "
-    "until '[t]hread [n]ormal' is issued."
+    "more than 1. These commands imply non-interruption from another thread. "
+    "The mode will remain even after these commands until '[t]hread [n]ormal' "
+    "is issued."
     "\n"
     "When multple threads hit breakpoints at the same time, use '[t]hread "
     "[l]ist' command to display their indices, which can be used to switch "
@@ -99,8 +101,8 @@ void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
   }
 }
 
-bool CmdThread::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdThread::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }
@@ -113,18 +115,18 @@ bool CmdThread::onClient(DebuggerClient *client) {
     processList(client);
   } else if (client->arg(1, "normal")) {
     m_body = "normal";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in normal mode now. Other threads will "
                  "interleave when they hit breakpoints as well.");
   } else if (client->arg(1, "sticky")) {
     m_body = "sticky";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in sticky mode now. All other threads "
                  "will wait until this thread finishes, when they hit "
                  "breakpoints.");
   } else if (client->arg(1, "exclusive")) {
     m_body = "exclusive";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in exclusive mode now. All other threads "
                  "will not break, even when they hit breakpoints.");
   } else {
@@ -160,7 +162,7 @@ bool CmdThread::onClient(DebuggerClient *client) {
 
     m_body = "switch";
     m_threads.push_back(thread);
-    client->send(this);
+    client->sendToServer(this);
     throw DebuggerConsoleExitException();
   }
 
@@ -189,12 +191,12 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
     g_context->debuggerInfo(info);
 
     m_out = DebuggerClient::FormatInfoVec(info);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
 
   if (m_body == "list") {
     proxy->getThreads(m_threads);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "switch") {
     if (!m_threads.empty()) {

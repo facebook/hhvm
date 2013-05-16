@@ -14,14 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <util/compatibility.h>
-#include <util/logger.h>
+#include <atomic>
+
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/logger.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler
@@ -86,6 +88,8 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   evhttp_request *request = job->request;
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
+
+  server->bumpReqCount();
 
   if (m_handler == nullptr || server->supportReset()) {
     m_handler = server->createRequestHandler();
@@ -153,6 +157,9 @@ void LibEventWorker::onThreadExit() {
 LibEventServer::LibEventServer(const std::string &address, int port,
                                int thread, int timeoutSeconds)
   : Server(address, port, thread),
+    m_warmup_thread_slack(0),
+    m_req_number(0),
+    m_warmup_req_threshold(0),
     m_accept_sock(-1),
     m_accept_sock_ssl(-1),
     m_timeoutThreadData(timeoutSeconds),
@@ -202,6 +209,24 @@ int LibEventServer::getAcceptSocket() {
 
 int LibEventServer::getLibEventConnectionCount() {
   return evhttp_get_connection_count(m_server);
+}
+
+void LibEventServer::enableWarmupThrottle(int threadSlack, int reqCount) {
+  m_warmup_thread_slack = threadSlack;
+  const_cast<int&>(m_warmup_req_threshold) = reqCount;
+}
+
+void LibEventServer::bumpReqCount() {
+  auto const oldReqNum = m_req_number.fetch_add(1, std::memory_order_relaxed);
+  if (oldReqNum == m_warmup_req_threshold) {
+    if (auto const num = m_warmup_thread_slack.load()) {
+      Logger::Info("Finished warmup; adding %d new worker threads\n", num);
+      m_dispatcher.addWorkers(num);
+
+      // Set to zero so we can't do it if the req counter wraps.
+      m_warmup_thread_slack.store(0);
+    }
+  }
 }
 
 void LibEventServer::start() {

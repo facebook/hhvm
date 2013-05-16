@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_VM_BLOB_HELPER_H_
-#define incl_RUNTIME_VM_BLOB_HELPER_H_
+#ifndef incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
+#define incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
 
 #include <algorithm>
 #include <vector>
@@ -25,8 +25,8 @@
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/type_traits/is_enum.hpp>
 
-#include "runtime/base/builtin_functions.h"
-#include "runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex_types.h"
 
 /*
  * This module contains helpers for serializing and deserializing
@@ -58,7 +58,7 @@
  * code implement both serialization and deserialization.
  */
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -314,6 +314,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_openssl.h>
-#include <runtime/ext/ext_openssl.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_string.h>
+#include "hphp/test/test_ext_openssl.h"
+#include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,10 +98,16 @@ bool TestExtOpenssl::test_openssl_csr_get_public_key() {
   return Count(true);
 }
 
+static const StaticString
+  s_O("O"),
+  s_cert("cert"),
+  s_pkey("pkey"),
+  s_subject("subject");
+
 bool TestExtOpenssl::test_openssl_csr_get_subject() {
   Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
-  VERIFY(f_openssl_csr_get_subject(csr)["O"] == "Internet Widgits Pty Ltd");
+  VERIFY(f_openssl_csr_get_subject(csr)[s_O] == "Internet Widgits Pty Ltd");
   return Count(true);
 }
 
@@ -194,8 +200,8 @@ bool TestExtOpenssl::test_openssl_pkcs12_read() {
 
   Variant certs;
   VERIFY(f_openssl_pkcs12_read(pkcs12, ref(certs), "1234"));
-  VERIFY(certs["cert"].toString().size() > 500);
-  VERIFY(certs["pkey"].toString().size() > 500);
+  VERIFY(certs[s_cert].toString().size() > 500);
+  VERIFY(certs[s_pkey].toString().size() > 500);
 
   return Count(true);
 }
@@ -324,19 +330,20 @@ bool TestExtOpenssl::test_openssl_pkey_free() {
 }
 
 bool TestExtOpenssl::test_openssl_pkey_get_details() {
+  static const StaticString s_bits("bits");
   {
     Variant fkey = f_file_get_contents("test/test_public.pem");
     Variant k = f_openssl_pkey_get_public(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
-    VS(f_openssl_pkey_get_details(k)["bits"], 1024);
+    VS(f_openssl_pkey_get_details(k)[s_bits], 1024);
   }
   {
     Variant fkey = f_file_get_contents("test/test_private.pem");
     Variant k = f_openssl_pkey_get_private(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
-    VS(f_openssl_pkey_get_details(k)["bits"], 512);
+    VS(f_openssl_pkey_get_details(k)[s_bits], 512);
   }
   return Count(true);
 }
@@ -485,7 +492,7 @@ bool TestExtOpenssl::test_openssl_x509_export_to_file() {
   Variant fcert2 = f_file_get_contents(tmp);
   Variant cert2 = f_openssl_x509_read(fcert2);
   Variant info = f_openssl_x509_parse(cert2);
-  VS(info["subject"]["O"], "RSA Data Security, Inc.");
+  VS(info[s_subject][s_O], "RSA Data Security, Inc.");
 
   f_unlink(tmp);
   return Count(true);
@@ -498,7 +505,7 @@ bool TestExtOpenssl::test_openssl_x509_export() {
   VERIFY(f_openssl_x509_export(cert, ref(out)));
   Variant cert2 = f_openssl_x509_read(out);
   Variant info = f_openssl_x509_parse(cert2);
-  VS(info["subject"]["O"], "RSA Data Security, Inc.");
+  VS(info[s_subject][s_O], "RSA Data Security, Inc.");
   return Count(true);
 }
 
@@ -514,7 +521,7 @@ bool TestExtOpenssl::test_openssl_x509_parse() {
   Variant fcert = f_file_get_contents("test/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   Variant info = f_openssl_x509_parse(cert);
-  VS(info["subject"]["O"], "RSA Data Security, Inc.");
+  VS(info[s_subject][s_O], "RSA Data Security, Inc.");
   return Count(true);
 }
 

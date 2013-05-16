@@ -19,8 +19,8 @@
 #include <emmintrin.h>
 #include <stdint.h>
 
-#include <util/util.h>
-#include <util/assertions.h>
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
 
 extern "C" {
 

@@ -43,12 +43,12 @@ documentation]] for more details.
 
 The command to run a script normally looks like this,
 
-  ./hphpi -f myscript.php
+  hhvm myscript.php
 
 Simply add "-m debug" to run the script in debugger,
 
-  ./hphpi -m debug -f myscript.php
-
+  hhvm -m debug myscript.php
+  
 Once started, set breakpoints like this,
 
   hphpd> break myscript.php:10
@@ -92,9 +92,9 @@ Finally, quit debugger,
 
 3. Debugging sandbox
 
-Connect to an HPHPi server from command line,
+Connect to an HPHP server from command line,
 
-  ./hphpi -m debug --debug-host mymachine.com
+  hhvm -m debug -h mymachine.com
 
 Or, connect from within debugger,
 
@@ -126,8 +126,8 @@ Request" thread. Use "thread" command to display this information,
 What will debugger use when there is no web request thread that's
 active, but we need to set a breakpoint? We created so-called "dummy
 sandbox", purely for taking debugger commands when there is no active
-web request. When there is no active request, hit Ctrl-C to break
-debugger, and use "thread" to display dummy sandbox thread's
+web request. When there is no active request, hit Ctrl-C to break into
+the debugger, and use "thread" to display dummy sandbox thread's
 information.
 
   Ctrl-C

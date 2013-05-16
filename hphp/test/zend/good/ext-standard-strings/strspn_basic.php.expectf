@@ -1,0 +1,5 @@
+*** Testing strspn() : basic functionality ***
+int(11)
+int(11)
+int(2)
+Done

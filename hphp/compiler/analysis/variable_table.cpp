@@ -14,24 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/type.h>
-#include <compiler/code_generator.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/option.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/expression/static_member_expression.h>
-#include <runtime/base/class_info.h>
-#include <util/util.h>
-#include <util/parser/location.h>
-#include <util/parser/parser.h>
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/static_member_expression.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/util/util.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/util/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -744,7 +744,7 @@ static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
                         const VariableTable::StaticGlobalInfoPtr &p2) {
   ConstructRawPtr d1 = p1->sym->getDeclaration();
   ConstructRawPtr d2 = p2->sym->getDeclaration();
-  if (!d1) return d2;
+  if (!d1) return !!d2;
   if (!d2) return false;
   return d1->getLocation()->compare(d2->getLocation().get()) < 0;
 }

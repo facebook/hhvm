@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FILES_MATCH_H__
-#define __FILES_MATCH_H__
+#ifndef incl_HPHP_FILES_MATCH_H_
+#define incl_HPHP_FILES_MATCH_H_
 
-#include <util/hdf.h>
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,4 +38,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __FILES_MATCH_H__
+#endif // incl_HPHP_FILES_MATCH_H_

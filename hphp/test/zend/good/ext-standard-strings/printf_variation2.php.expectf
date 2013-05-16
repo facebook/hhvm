@@ -1,0 +1,170 @@
+*** Testing printf() : with different types of values passed for arg1 argument ***
+
+-- Iteration 1 --
+0
+int(1)
+0
+int(1)
+
+-- Iteration 2 --
+1
+int(1)
+1
+int(1)
+
+-- Iteration 3 --
+12345
+int(5)
+12345
+int(5)
+
+-- Iteration 4 --
+-2345
+int(5)
+-2345
+int(5)
+
+-- Iteration 5 --
+10.5
+int(4)
+10.5
+int(4)
+
+-- Iteration 6 --
+-10.5
+int(5)
+-10.5
+int(5)
+
+-- Iteration 7 --
+101234567000
+int(12)
+101234567000
+int(12)
+
+-- Iteration 8 --
+1.07654321E-9
+int(13)
+1.07654321E-9
+int(13)
+
+-- Iteration 9 --
+0.5
+int(3)
+0.5
+int(3)
+
+-- Iteration 10 --
+Array
+int(5)
+Array
+int(5)
+
+-- Iteration 11 --
+Array
+int(5)
+Array
+int(5)
+
+-- Iteration 12 --
+Array
+int(5)
+Array
+int(5)
+
+-- Iteration 13 --
+Array
+int(5)
+Array
+int(5)
+
+-- Iteration 14 --
+Array
+int(5)
+Array
+int(5)
+
+-- Iteration 15 --
+
+int(0)
+
+int(0)
+
+-- Iteration 16 --
+
+int(0)
+
+int(0)
+
+-- Iteration 17 --
+1
+int(1)
+1
+int(1)
+
+-- Iteration 18 --
+
+int(0)
+
+int(0)
+
+-- Iteration 19 --
+1
+int(1)
+1
+int(1)
+
+-- Iteration 20 --
+
+int(0)
+
+int(0)
+
+-- Iteration 21 --
+
+int(0)
+
+int(0)
+
+-- Iteration 22 --
+
+int(0)
+
+int(0)
+
+-- Iteration 23 --
+string
+int(6)
+string
+int(6)
+
+-- Iteration 24 --
+string
+int(6)
+string
+int(6)
+
+-- Iteration 25 --
+Object
+int(6)
+Object
+int(6)
+
+-- Iteration 26 --
+
+int(0)
+
+int(0)
+
+-- Iteration 27 --
+
+int(0)
+
+int(0)
+
+-- Iteration 28 --
+Resource id #%d
+int(%d)
+Resource id #%d
+int(%d)
+===DONE===

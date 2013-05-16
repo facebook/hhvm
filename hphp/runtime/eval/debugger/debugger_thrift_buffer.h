@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_DEBUGGER_THRIFT_BUFFER_H__
-#define __HPHP_DEBUGGER_THRIFT_BUFFER_H__
+#ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
+#define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 
-#include <runtime/base/util/thrift_buffer.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/base/util/thrift_buffer.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,4 +80,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_DEBUGGER_THRIFT_BUFFER_H__
+#endif // incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_

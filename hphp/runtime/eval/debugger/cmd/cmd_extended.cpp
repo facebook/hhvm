@@ -14,12 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_extended.h>
-#include <runtime/eval/debugger/cmd/all.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extended.h"
+#include "hphp/runtime/eval/debugger/cmd/all.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdExtended::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
@@ -100,7 +102,7 @@ bool CmdExtended::helpCommands(DebuggerClient *client,
   return true;
 }
 
-bool CmdExtended::onClient(DebuggerClient *client) {
+bool CmdExtended::onClientImpl(DebuggerClient *client) {
   if (client->arg(1, "help") || client->arg(1, "?")) {
     if (client->argCount() == 1) {
       return help(client);

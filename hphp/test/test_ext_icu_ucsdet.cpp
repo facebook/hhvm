@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_icu_ucsdet.h>
-#include <runtime/ext/ext_icu_ucsdet.h>
-#include <runtime/ext/ext_array.h>
+#include "hphp/test/test_ext_icu_ucsdet.h"
+#include "hphp/runtime/ext/ext_icu_ucsdet.h"
+#include "hphp/runtime/ext/ext_array.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

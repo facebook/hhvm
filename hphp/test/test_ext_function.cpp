@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_function.h>
-#include <runtime/ext/ext_function.h>
+#include "hphp/test/test_ext_function.h"
+#include "hphp/runtime/ext/ext_function.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -49,8 +49,9 @@ bool TestExtFunction::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtFunction::test_get_defined_functions() {
+  static const StaticString s_internal("internal");
   Array funcs = f_get_defined_functions();
-  VERIFY(!funcs["internal"][0].toString().empty());
+  VERIFY(!funcs[s_internal][0].toString().empty());
   return Count(true);
 }
 
@@ -92,7 +93,7 @@ bool TestExtFunction::test_forward_static_call() {
 bool TestExtFunction::test_create_function() {
   try {
     f_create_function("$a", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(false);
   }
   return Count(true);
@@ -131,7 +132,7 @@ bool TestExtFunction::test_register_cleanup_function() {
 bool TestExtFunction::test_register_tick_function() {
   try {
     f_register_tick_function(0, "test", Array::Create());
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -140,7 +141,7 @@ bool TestExtFunction::test_register_tick_function() {
 bool TestExtFunction::test_unregister_tick_function() {
   try {
     f_unregister_tick_function("test");
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);

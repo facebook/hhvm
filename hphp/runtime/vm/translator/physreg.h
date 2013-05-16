@@ -16,10 +16,10 @@
 #ifndef incl_HPHP_VM_PHYSREG_H_
 #define incl_HPHP_VM_PHYSREG_H_
 
-#include "util/asm-x64.h"
-#include "util/bitops.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/bitops.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,13 +37,13 @@ namespace HPHP { namespace VM { namespace Transl {
  */
 struct PhysReg {
   explicit constexpr PhysReg(int n = -1) : n(n) {}
-  /* implicit */ constexpr PhysReg(Reg64 r) : n(int(r)) {}
+  constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
   explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 
-  constexpr operator Reg64() const { return Reg64(n); }
-  constexpr operator RegNumber() const { return RegNumber(n); }
+  constexpr /* implicit */ operator Reg64() const { return Reg64(n); }
+  constexpr /* implicit */ operator RegNumber() const { return RegNumber(n); }
 
   explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
@@ -223,45 +223,39 @@ static_assert(std::has_trivial_destructor<RegSet>::value,
 
 //////////////////////////////////////////////////////////////////////
 
-template<int StackParity>
 struct PhysRegSaverParity {
-  PhysRegSaverParity(X64Assembler& a_, RegSet s_) : a(a_), s(s_) {
-    s.forEach([&] (PhysReg pr) {
-      a.    push   (pr);
-    });
-    if ((s.size() & 1) == StackParity) {
-      // Maintain stack evenness for SIMD compatibility.
-      a.    subq   (8, reg::rsp);
-    }
-  }
+  PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
+  ~PhysRegSaverParity();
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) = default;
   PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 
-  ~PhysRegSaverParity() {
-    if ((s.size() & 1) == StackParity) {
-      // See above; stack parity.
-      a.    addq   (8, reg::rsp);
-    }
-    s.forEachR([&] (PhysReg pr) {
-      a.    pop    (pr);
-    });
-  }
-
-  int rspAdjustment() const {
-    return s.size() + ((s.size() & 1) == StackParity);
-  }
+  int rspAdjustment() const;
+  void bytesPushed(int64_t bytes);
 
 private:
-  X64Assembler& a;
-  RegSet s;
+  X64Assembler& m_as;
+  RegSet m_regs;
+  int64_t m_adjust;
+};
+
+struct PhysRegSaverStub : public PhysRegSaverParity {
+  PhysRegSaverStub(X64Assembler& as, RegSet regs)
+      : PhysRegSaverParity(0, as, regs)
+  {}
+};
+
+struct PhysRegSaver : public PhysRegSaverParity {
+  PhysRegSaver(X64Assembler& as, RegSet regs)
+      : PhysRegSaverParity(1, as, regs)
+  {}
 };
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif
 

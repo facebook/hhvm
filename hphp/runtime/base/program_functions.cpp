@@ -13,58 +13,59 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/program_functions.h"
 
-#include "runtime/base/types.h"
-#include "runtime/base/program_functions.h"
-#include "runtime/base/type_conversions.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/thread_init_fini.h"
-#include "runtime/base/code_coverage.h"
-#include "runtime/base/runtime_option.h"
-#include "util/shared_memory_allocator.h"
-#include "runtime/base/server/pagelet_server.h"
-#include "runtime/base/server/xbox_server.h"
-#include "runtime/base/server/http_server.h"
-#include "runtime/base/server/replay_transport.h"
-#include "runtime/base/server/http_request_handler.h"
-#include "runtime/base/server/admin_request_handler.h"
-#include "runtime/base/server/server_stats.h"
-#include "runtime/base/server/server_note.h"
-#include "runtime/base/memory/memory_manager.h"
-#include "util/process.h"
-#include "util/capability.h"
-#include "util/timer.h"
-#include "util/stack_trace.h"
-#include "util/light_process.h"
-#include "util/repo_schema.h"
-#include "runtime/base/stat_cache.h"
-#include "runtime/ext/extension.h"
-#include "runtime/ext/ext_fb.h"
-#include "runtime/ext/ext_json.h"
-#include "runtime/ext/ext_variable.h"
-#include "runtime/ext/ext_apc.h"
-#include "runtime/ext/ext_function.h"
-#include "runtime/eval/debugger/debugger.h"
-#include "runtime/eval/debugger/debugger_client.h"
-#include "runtime/base/util/simple_counter.h"
-#include "runtime/base/util/extended_logger.h"
-#include "runtime/base/file/stream_wrapper_registry.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/shared_memory_allocator.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/admin_request_handler.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/server_note.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/util/process.h"
+#include "hphp/util/capability.h"
+#include "hphp/util/embedded_data.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/repo_schema.h"
+#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
+#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
 
-#include "boost/program_options/options_description.hpp"
-#include "boost/program_options/positional_options.hpp"
-#include "boost/program_options/variables_map.hpp"
-#include "boost/program_options/parsers.hpp"
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/positional_options.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
-#include <libxml/parser.h>
+#include "libxml/parser.h"
 
-#include "runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
 
-#include "runtime/vm/runtime.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/translator.h"
-#include "compiler/builtin_symbols.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/compiler/builtin_symbols.h"
 
 using namespace boost::program_options;
 using std::cout;
@@ -76,7 +77,7 @@ namespace HPHP {
 
 extern InitFiniNode *extra_process_init, *extra_process_exit;
 
-namespace VM { void initialize_repo(); }
+ void initialize_repo();
 
 /*
  * XXX: VM process initialization is handled through a function
@@ -127,7 +128,7 @@ static void process_cmd_arguments(int argc, char **argv) {
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
   g->GV(argc) = argc;
   for (int i = 0; i < argc; i++) {
-    g->GV(argv).lvalAt() = argv[i];
+    g->GV(argv).lvalAt() = String(argv[i]);
   }
 }
 
@@ -438,6 +439,21 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
+static const StaticString
+  s_HPHP("HPHP"),
+  s_HHVM("HHVM"),
+  s_HHVM_JIT("HHVM_JIT"),
+  s_REQUEST_START_TIME("REQUEST_START_TIME"),
+  s_REQUEST_TIME("REQUEST_TIME"),
+  s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
+  s_SCRIPT_NAME("SCRIPT_NAME"),
+  s_PHP_SELF("PHP_SELF"),
+  s_argc("argc"),
+  s_argv("argv"),
+  s_PWD("PWD"),
+  s_HOSTNAME("HOSTNAME");
+
 void execute_command_line_begin(int argc, char **argv, int xhprof) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   string args;
@@ -454,10 +470,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
 
   process_env_variables(g->GV(_ENV));
-  g->GV(_ENV).set("HPHP", 1);
-  g->GV(_ENV).set("HHVM", 1);
+  g->GV(_ENV).set(s_HPHP, 1);
+  g->GV(_ENV).set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
-    g->GV(_ENV).set("HHVM_JIT", 1);
+    g->GV(_ENV).set(s_HHVM_JIT, 1);
   }
 
   process_cmd_arguments(argc, argv);
@@ -465,18 +481,18 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
   time_t now = time(nullptr);
-  server.set("REQUEST_START_TIME", now);
-  server.set("REQUEST_TIME", now);
-  server.set("DOCUMENT_ROOT", "");
-  server.set("SCRIPT_FILENAME", argv[0]);
-  server.set("SCRIPT_NAME", argv[0]);
-  server.set("PHP_SELF", argv[0]);
-  server.set("argv", g->GV(argv));
-  server.set("argc", g->GV(argc));
-  server.set("PWD", g_context->getCwd());
+  server.set(s_REQUEST_START_TIME, now);
+  server.set(s_REQUEST_TIME, now);
+  server.set(s_DOCUMENT_ROOT, empty_string);
+  server.set(s_SCRIPT_FILENAME, argv[0]);
+  server.set(s_SCRIPT_NAME, argv[0]);
+  server.set(s_PHP_SELF, argv[0]);
+  server.set(s_argv, g->GV(argv));
+  server.set(s_argc, g->GV(argc));
+  server.set(s_PWD, g_context->getCwd());
   char hostname[1024];
   if (!gethostname(hostname, 1024)) {
-    server.set("HOSTNAME", String(hostname, CopyString));
+    server.set(s_HOSTNAME, String(hostname, CopyString));
   }
 
   for(std::map<string,string>::iterator it =
@@ -490,13 +506,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 }
 
-namespace Eval { void shutdown_hphpd(); }
-
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
   if (RuntimeOption::EvalJit && RuntimeOption::EvalDumpTC) {
-    HPHP::VM::Transl::tc_dump();
+    HPHP::Transl::tc_dump();
   }
 
   if (xhprof) {
@@ -504,12 +518,10 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
   hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();
-  if (coverage && ti->m_reqInjectionData.coverage &&
+  if (coverage && ti->m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti->m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
-
-  Eval::shutdown_hphpd();
 }
 
 static void pagein_self(void) {
@@ -618,7 +630,7 @@ static int start_server(const std::string &username) {
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {
       rt.onRequestStart(start);
-      rt.replayInput(file);
+      rt.replayInput(Hdf(file));
       handler.handleRequest(&rt);
       Logger::Info("Finished successfully");
     } catch (std::exception& e) {
@@ -673,7 +685,7 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
-    VM::initialize_repo();
+    initialize_repo();
     init_thread_locals();
     ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
@@ -927,8 +939,7 @@ static int execute_program_impl(int argc, char **argv) {
   LightProcess::SetLostChildHandler([](pid_t child) {
     if (!HttpServer::Server) return;
     if (!HttpServer::Server->isStopped()) {
-      Logger::Warning("Lost light process child %ld. Stopping server.", child);
-      HttpServer::Server->stop();
+      HttpServer::Server->stop("lost light process child");
     }
   });
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
@@ -953,7 +964,7 @@ static int execute_program_impl(int argc, char **argv) {
 
   ShmCounters::initialize(true, Logger::Error);
   // Initialize compiler state
-  VM::compile_file(0, 0, MD5(), 0);
+  compile_file(0, 0, MD5(), 0);
 
   if (!po.lint.empty()) {
     if (po.isTempFile) {
@@ -967,7 +978,7 @@ static int execute_program_impl(int argc, char **argv) {
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
       }
-      VM::Unit* unit = phpFile->unit();
+      Unit* unit = phpFile->unit();
       const StringData* msg;
       int line;
       if (unit->compileTimeFatal(msg, line)) {
@@ -1008,9 +1019,9 @@ static int execute_program_impl(int argc, char **argv) {
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
     if (!po.file.empty()) {
-      VM::Repo::setCliFile(po.file);
+      Repo::setCliFile(po.file);
     } else if (new_argc >= 2) {
-      VM::Repo::setCliFile(new_argv[1]);
+      Repo::setCliFile(new_argv[1]);
     }
 
     int ret = 0;
@@ -1066,6 +1077,7 @@ static int execute_program_impl(int argc, char **argv) {
     }
 
     free(new_argv);
+    Eval::DebuggerClient::Shutdown();
     hphp_process_exit();
 
     return ret;
@@ -1116,30 +1128,29 @@ String canonicalize_path(CStrRef p, const char* root, int rootLen) {
   return path;
 }
 
-static bool check_path(const char *path) {
-  if (!path) return false;
-
-  string file = string(path) + "/systemlib.php";
-  struct stat result;
-  if (stat(file.c_str(), &result)) {
-    return false;
+// Search for systemlib.php in the following places:
+// 1) ${HHVM_SYSTEMLIB}
+// 2) section "systemlib" in the current executable
+// and return its contents
+string get_systemlib() {
+  if (char *file = getenv("HHVM_SYSTEMLIB")) {
+    std::ifstream ifs(file);
+    if (ifs.good()) {
+      return std::string(std::istreambuf_iterator<char>(ifs),
+                         std::istreambuf_iterator<char>());
+    }
   }
-  return S_ISREG(result.st_mode);
-}
 
-string systemlib_path() {
-  char *file;
-  char buf[PATH_MAX + 1];
-  if (!check_path(file = getenv("HHVM_LIB_PATH")) &&
-      !(realpath("/proc/self/exe", buf) &&
-        check_path(file = dirname(buf)))
-#ifdef HHVM_LIB_PATH_DEFAULT
-      && !(check_path(file = HHVM_LIB_PATH_DEFAULT))
-#endif
-     ) {
-    return "";
-  }
-  return string(file) + "/systemlib.php";
+  Util::embedded_data desc;
+  if (!Util::get_embedded_data("systemlib", &desc)) return "";
+
+  std::ifstream ifs(desc.m_filename);
+  if (!ifs.good()) return "";
+  ifs.seekg(desc.m_start, std::ios::beg);
+  std::unique_ptr<char[]> data(new char[desc.m_len]);
+  ifs.read(data.get(), desc.m_len);
+  string result(data.get(), desc.m_len);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1181,7 +1192,7 @@ void hphp_process_init() {
   apc_load(RuntimeOption::ApcLoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
-  VM::Transl::TargetCache::requestExit();
+  Transl::TargetCache::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BZIP2_FILE_H__
-#define __BZIP2_FILE_H__
+#ifndef incl_HPHP_BZIP2_FILE_H_
+#define incl_HPHP_BZIP2_FILE_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/file/plain_file.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/file/plain_file.h"
 #include <stdio.h>
 #include <bzlib.h>
 
@@ -58,4 +58,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __BZIP2_FILE_H__
+#endif // incl_HPHP_BZIP2_FILE_H_

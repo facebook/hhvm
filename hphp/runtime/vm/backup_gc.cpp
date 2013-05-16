@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/vm/backup_gc.h"
+#include "hphp/runtime/vm/backup_gc.h"
 
 #include <fstream>
 #include <algorithm>
@@ -21,17 +21,17 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 
-#include "util/assertions.h"
-#include "util/timer.h"
-#include "util/trace.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/memory/smart_allocator.h"
-#include "runtime/base/memory/memory_manager.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/vm/class.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/vm/class.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 static const Trace::Module TRACEMOD = Trace::gc;
 
@@ -95,7 +95,7 @@ bool is_smart_allocated(ObjectData* obj) {
   // size, so currently we have to check them all.
   MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
   while (SmartAllocatorImpl* sa = aIter.current()) {
-    if (sa->getAllocatorType() == SmartAllocatorImpl::ObjectData) {
+    if (sa->getAllocatorType() == typeid(ObjectData)) {
       if (sa->isFromThisAllocator(obj)) return true;
     }
     aIter.next();
@@ -131,25 +131,18 @@ void walk_allocator(const Visitor& visit, SmartAllocatorImpl* sa) {
 template<class Visitor>
 void walk_smart_heap(const Visitor& visit) {
   MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
-  while (SmartAllocatorImpl* sa = aIter.current()) {
-    switch (sa->getAllocatorType()) {
-    case SmartAllocatorImpl::HphpArray:
+  for (; SmartAllocatorImpl* sa = aIter.current(); aIter.next()) {
+    auto const& t = sa->getAllocatorType();
+    if (t == typeid(HphpArray)) {
       walk_allocator<ArrayData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::RefData:
+    } else if (t == typeid(RefData)) {
       walk_allocator<RefData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::ObjectData:
+    } else  if (t == typeid(ObjectData)) {
       walk_allocator<ObjectData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::StringData:
+    } else if (t == typeid(StringData)) {
       // Unneccesary for the first level walk, because strings can't
       // have references to other objects.
-      break;
-    default:
-      break;
     }
-    aIter.next();
   }
 }
 
@@ -257,7 +250,7 @@ void traceImpl(const Visitor& visit, ObjectData* obj) {
   }
 
   // Declared properties.  We need to indirect through the TypedValue
-  // before visiting, since these are in-situ in the VM::Instance.
+  // before visiting, since these are in-situ in the Instance.
   void* vpObj = obj;
   unsigned char* address = static_cast<unsigned char*>(vpObj);
 
@@ -611,5 +604,5 @@ void gc_detect_cycles(const std::string& filename) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

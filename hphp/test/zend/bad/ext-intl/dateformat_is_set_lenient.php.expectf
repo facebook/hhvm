@@ -1,0 +1,9 @@
+IntlDateFormatter Created.
+After call to get_lenient :  lenient= TRUE
+--------------------
+Setting IntlDateFormatter with lenient = TRUE
+After call to is_lenient :  lenient= TRUE
+--------------------
+Setting IntlDateFormatter with lenient =FALSE
+After call to is_lenient :  lenient= FALSE
+--------------------

@@ -4,11 +4,11 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getTransitions()
  */
-
-//Set the default time zone
+ 
+//Set the default time zone 
 date_default_timezone_set("GMT");
 $tz = timezone_open("Europe/London");
-
+ 
 echo "*** Testing timezone_transitions_get() : error conditions ***\n";
 
 echo "\n-- Testing timezone_transitions_get() function with zero arguments --\n";
@@ -22,10 +22,10 @@ var_dump( timezone_transitions_get($tz, $timestamp_begin, $timestamp_end, $extra
 
 echo "\n-- Testing timezone_transitions_get() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( timezone_transitions_get($invalid_obj) );
+var_dump( timezone_transitions_get($invalid_obj) );  
 $invalid_obj = 10;
 var_dump( timezone_transitions_get($invalid_obj) );
 $invalid_obj = null;
-var_dump( timezone_transitions_get($invalid_obj) );
+var_dump( timezone_transitions_get($invalid_obj) ); 
 ?>
 ===DONE===

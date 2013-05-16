@@ -1,0 +1,6 @@
+string(12) "AåBäCöDü"
+string(11) "åBäCöDü"
+string(11) "åBäCöDü"
+string(9) "BäCöDü"
+string(0) ""
+bool(false)

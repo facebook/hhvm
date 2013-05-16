@@ -1,0 +1,24 @@
+array(4) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(4) "host"
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(4) "pass"
+}
+array(3) {
+  ["host"]=>
+  string(4) "host"
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(4) "pass"
+}
+array(2) {
+  ["host"]=>
+  string(4) "host"
+  ["user"]=>
+  string(4) "user"
+}

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_INST_POINT_H__
-#define __HPHP_EVAL_DEBUGGER_INST_POINT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_INST_POINT_H_
+#define incl_HPHP_EVAL_DEBUGGER_INST_POINT_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,4 +65,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_INST_POINT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_INST_POINT_H_

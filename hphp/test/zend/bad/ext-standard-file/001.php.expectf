@@ -1,0 +1,25 @@
+test.file does not exist
+test.file exists
+test.link exists
+test.file is not a symlink
+test.link is a symlink
+test.file exists
+test.link lstat and stat differ at element 1
+test.link lstat and stat differ at element 2
+test.link lstat and stat differ at element 7
+test.link lstat and stat differ at element 8
+test.link lstat and stat differ at element 9
+test.file is file
+test.link is link
+test.file permissions are 0744
+test.file size is 0
+test.file is writeable
+test.file is readable
+test.file is executable
+test.file is a regular file
+test.link is a regular file
+test.link is not a directory
+../file is a directory
+test.file is not a directory
+test.file does not exist
+test.file does not exist

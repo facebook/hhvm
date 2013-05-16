@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root prefix:id="elem1" xmlns:prefix="http://www.php.net/uri">
+ <elem1 attr1="first"/>
+</root>

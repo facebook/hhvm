@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_up.h>
-#include <runtime/eval/debugger/cmd/cmd_where.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_up.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_where.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 bool CmdUp::help(DebuggerClient *client) {
   client->helpTitle("Up Command");
@@ -49,8 +51,8 @@ int CmdUp::ParseNumber(DebuggerClient *client) {
   return 1;
 }
 
-bool CmdUp::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdUp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

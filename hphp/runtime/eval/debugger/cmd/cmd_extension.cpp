@@ -14,14 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_extension.h>
-#include <runtime/ext/ext_array.h>
-#include <util/text_art.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_extension.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/util/text_art.h"
 
 using namespace HPHP::Util::TextArt;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdExtension::sendImpl(DebuggerThriftBuffer &thrift) {
   CmdExtended::sendImpl(thrift);
@@ -71,8 +73,8 @@ bool CmdExtension::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdExtension::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdExtension::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   m_args = *client->args();
 
@@ -122,7 +124,7 @@ bool CmdExtension::processList(DebuggerProxy *proxy) {
   for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
 
   m_out = sb.detach();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdExtension::onServer(DebuggerProxy *proxy) {
@@ -165,7 +167,7 @@ bool CmdExtension::onServer(DebuggerProxy *proxy) {
     m_err = "Unable to find the specified extension: ";
     m_err += String(name);
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

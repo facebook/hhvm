@@ -13,9 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifndef _TRANSLATOR_H_
-#define _TRANSLATOR_H_
+#ifndef incl_HPHP_TRANSLATOR_H_
+#define incl_HPHP_TRANSLATOR_H_
 
 #include <limits.h>
 #include <string.h>
@@ -29,21 +28,20 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "util/hash.h"
-#include "util/timer.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/translator/immstack.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/fixup.h"
-#include "runtime/vm/translator/writelease.h"
-#include "runtime/vm/translator/trans-data.h"
-#include "runtime/vm/debugger_hook.h"
-#include "runtime/base/md5.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/timer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/immstack.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/fixup.h"
+#include "hphp/runtime/vm/translator/writelease.h"
+#include "hphp/runtime/vm/translator/trans-data.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static const bool trustSigSegv = false;
@@ -158,7 +156,7 @@ typedef hphp_hash_set<SrcKey, SrcKey> SrcKeySet;
 #define SKTRACE(level, sk, ...) \
   ONTRACE(level, (sk).trace(__VA_ARGS__))
 
-class NormalizedInstruction;
+struct NormalizedInstruction;
 
 // A DynLocation is a Location-in-execution: a location, along with
 // whatever is known about its runtime type.
@@ -253,6 +251,9 @@ enum TXFlags {
   Native = MachineCode | Simple
 };
 
+struct Tracelet;
+struct TraceletContext;
+
 // A NormalizedInstruction has been decorated with its typed inputs and
 // outputs.
 class NormalizedInstruction {
@@ -295,6 +296,14 @@ class NormalizedInstruction {
    * Other entries here store null.  See MetaInfo::MVecPropClass.
    */
   std::vector<Class*> immVecClasses;
+
+  /*
+   * On certain FCalls, we can inspect the callee and generate a
+   * tracelet with information about what happens over there.
+   *
+   * The HHIR translator uses this to possibly inline callees.
+   */
+  std::unique_ptr<Tracelet> calleeTrace;
 
   unsigned checkedInputs;
   // StackOff: logical delta at *start* of this instruction to
@@ -391,32 +400,30 @@ class NormalizedInstruction {
   const Unit* unit() const;
   Offset offset() const;
 
-  NormalizedInstruction() :
-    next(nullptr),
-    prev(nullptr),
-    source(),
-    inputs(),
-    outStack(nullptr),
-    outLocal(nullptr),
-    outLocal2(nullptr),
-    outStack2(nullptr),
-    outStack3(nullptr),
-    deadLocs(),
-    checkedInputs(0),
-    hasConstImm(false),
-    invertCond(false),
-    ignoreInnerType(false),
-    skipSync(false),
-    grouped(false),
-    guardedThis(false),
-    guardedCls(false),
-    noSurprise(false),
-    noCtor(false),
-    noOp(false),
-    interp(false),
-    directCall(false),
-    inlineReturn(false),
-    m_txFlags(Interp) {
+  NormalizedInstruction()
+    : next(nullptr)
+    , prev(nullptr)
+    , outStack(nullptr)
+    , outLocal(nullptr)
+    , outLocal2(nullptr)
+    , outStack2(nullptr)
+    , outStack3(nullptr)
+    , checkedInputs(0)
+    , hasConstImm(false)
+    , invertCond(false)
+    , ignoreInnerType(false)
+    , skipSync(false)
+    , grouped(false)
+    , guardedThis(false)
+    , guardedCls(false)
+    , noSurprise(false)
+    , noCtor(false)
+    , noOp(false)
+    , interp(false)
+    , directCall(false)
+    , inlineReturn(false)
+    , m_txFlags(Interp)
+  {
     memset(imm, 0, sizeof(imm));
   }
 
@@ -465,6 +472,9 @@ class NormalizedInstruction {
   std::string toString() const;
 };
 
+// Return a summary string of the bytecode in a tracelet.
+std::string traceletShape(const Tracelet&);
+
 class TranslationFailedExc : public std::exception {
  public:
   const char* m_file; // must be static
@@ -491,9 +501,10 @@ class UnknownInputExc : public std::exception {
 
 class GuardType {
  public:
-  GuardType(DataType outer = KindOfInvalid, DataType inner = KindOfInvalid);
-  GuardType(const RuntimeType& rtt);
-  GuardType(const GuardType& other);
+  explicit GuardType(DataType outer = KindOfInvalid,
+                     DataType inner = KindOfInvalid);
+  explicit GuardType(const RuntimeType& rtt);
+           GuardType(const GuardType& other);
   const DataType   getOuterType() const;
   const DataType   getInnerType() const;
   bool             isSpecific() const;
@@ -520,6 +531,7 @@ class GuardType {
  * and output.
  */
 typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
+typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
 typedef ChangeMap DepMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
 typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
@@ -690,42 +702,6 @@ struct Tracelet : private boost::noncopyable {
   void print(std::ostream& out) const;
 };
 
-struct TraceletContext {
-  Tracelet*   m_t;
-  ChangeMap   m_currentMap;
-  DepMap      m_dependencies;
-  DepMap      m_resolvedDeps; // dependencies resolved by static analysis
-  LocationSet m_changeSet;
-  LocationSet m_deletedSet;
-  int         m_numJmps;
-  bool        m_aliasTaint;
-  bool        m_varEnvTaint;
-
-  TraceletContext()
-    : m_t(nullptr)
-    , m_numJmps(0)
-    , m_aliasTaint(false)
-    , m_varEnvTaint(false)
-  {}
-  TraceletContext(Tracelet* t)
-    : m_t(t)
-    , m_numJmps(0)
-    , m_aliasTaint(false)
-    , m_varEnvTaint(false)
-  {}
-  RuntimeType currentType(const Location& l) const;
-  DynLocation* recordRead(const InputInfo& l, bool useHHIR,
-                          DataType staticType = KindOfInvalid);
-  void recordWrite(DynLocation* dl, NormalizedInstruction* source);
-  void recordDelete(const Location& l);
-  void recordJmp();
-  void aliasTaint();
-  void varEnvTaint();
-
- private:
-  static bool canBeAliased(const DynLocation* dl);
-};
-
 enum TransKind {
   TransNormal   = 0,
   TransNormalIR = 1,
@@ -820,6 +796,9 @@ private:
   friend struct TraceletContext;
 
   void analyzeSecondPass(Tracelet& t);
+  void analyzeCallee(TraceletContext&,
+                     Tracelet& parent,
+                     NormalizedInstruction* fcall);
   void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
   bool applyInputMetaData(Unit::MetaHandle&,
                           NormalizedInstruction* ni,
@@ -848,8 +827,8 @@ private:
                             const GuardType&       specType);
 
 
-  static RuntimeType liveType(Location l, const Unit &u);
-  static RuntimeType liveType(const Cell* outer, const Location& l);
+  RuntimeType liveType(Location l, const Unit &u);
+  RuntimeType liveType(const Cell* outer, const Location& l);
 
   void consumeStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
   void produceStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
@@ -911,12 +890,6 @@ public:
   virtual void protectCode() = 0;
   virtual void unprotectCode() = 0;
   virtual bool isValidCodeAddress(TCA) const = 0;
-
-  enum FuncPrologueFlags {
-    FuncPrologueNormal      = 0,
-    FuncPrologueMagicCall   = 1,
-    FuncPrologueIntercepted = 2,
-  };
 
   const TransDB& getTransDB() const {
     return m_transDB;
@@ -980,9 +953,17 @@ public:
     return id;
   }
 
+  /*
+   * Create a Tracelet for the given SrcKey, which must actually be
+   * the current VM frame.
+   *
+   * XXX The analysis pass will inspect the live state of the VM stack
+   * as needed to determine the current types of in-flight values.
+   */
+  std::unique_ptr<Tracelet> analyze(SrcKey sk, const TypeMap& = TypeMap());
+
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
-  std::unique_ptr<Tracelet> analyze(SrcKey sk);
   void advance(Opcode const **instrs);
   static int locPhysicalOffset(Location l, const Func* f = nullptr);
   static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
@@ -1017,6 +998,9 @@ protected:
   Mutex m_dbgBlacklistLock;
   bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
 
+private:
+  int m_analysisDepth;
+
 public:
   void clearDbgBL();
   bool addDbgBLPC(PC pc);
@@ -1028,6 +1012,11 @@ public:
   }
   TCA getResumeHelperRet() {
     return m_resumeHelperRet;
+  }
+
+  int analysisDepth() const {
+    assert(m_analysisDepth >= 0);
+    return m_analysisDepth;
   }
 };
 
@@ -1124,6 +1113,6 @@ static inline bool isSmartPtrRef(DataType t) {
          t == KindOfArray || t == KindOfObject;
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
 #endif

@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
-#define incl_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
+#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
+#define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 
-#include "util/base.h"
-#include "runtime/base/types.h"
-#include "runtime/vm/stats.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/member_operations.h"
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/member_operations.h"
 
-namespace HPHP { namespace VM { namespace JIT {
+namespace HPHP {  namespace JIT {
 
-#define CTX() m_tb.genDefConst(arGetContextClass(curFrame()))
+#define CTX() cns(contextClass())
 
 static const MInstrAttr Warn = MIA_warn;
 static const MInstrAttr Unset = MIA_unset;
@@ -106,7 +106,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
                           bool nonLitInt) {
-  auto keyType = key->getType();
+  auto keyType = key->type();
   assert(keyType.notBoxed());
   assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 
@@ -143,6 +143,6 @@ static inline TypedValue* keyPtr(TypedValue& key) {
   }
 }
 
-} } }
+} }
 
 #endif

@@ -7,7 +7,7 @@
 
 echo "*** Testing timezone_open() : usage variation -  unexpected values to first argument \$timezone***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -87,15 +87,15 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-
-      // resource
+      
+      // resource 
       'resource' => $file_handle
 );
 
 foreach($inputs as $variation =>$timezone) {
     echo "\n-- $variation --\n";
 	var_dump( timezone_open($timezone) );
-
+      
 };
 
 // closing the resource

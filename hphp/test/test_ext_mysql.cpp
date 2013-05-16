@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_mysql.h>
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/base/runtime_option.h>
-#include <hphp/test/test_mysql_info.h>
-#include <mysql/errmsg.h>
+#include "hphp/test/test_ext_mysql.h"
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/test/test_mysql_info.h"
+#include "mysql/errmsg.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -242,7 +242,7 @@ bool TestExtMysql::test_mysql_thread_id() {
 bool TestExtMysql::test_mysql_create_db() {
   try {
     f_mysql_create_db("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -256,7 +256,7 @@ bool TestExtMysql::test_mysql_select_db() {
 bool TestExtMysql::test_mysql_drop_db() {
   try {
     f_mysql_drop_db("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -369,17 +369,18 @@ bool TestExtMysql::test_mysql_unbuffered_query() {
 bool TestExtMysql::test_mysql_db_query() {
   try {
     f_mysql_db_query("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
 }
 
 bool TestExtMysql::test_mysql_list_dbs() {
+  static const StaticString s_Database("Database");
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_dbs();
   Variant db = f_mysql_fetch_assoc(res);
-  if (db["Database"].toString().empty()) {
+  if (db[s_Database].toString().empty()) {
     return CountSkip();
   }
   return Count(true);
@@ -398,17 +399,18 @@ bool TestExtMysql::test_mysql_list_fields() {
     Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME,
                                    TEST_PASSWORD);
     f_mysql_list_fields(TEST_DATABASE, "test");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
 }
 
 bool TestExtMysql::test_mysql_list_processes() {
+  static const StaticString s_Id("Id");
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_processes();
   Variant process = f_mysql_fetch_assoc(res);
-  VERIFY(!process["Id"].toString().empty());
+  VERIFY(!process[s_Id].toString().empty());
   return Count(true);
 }
 

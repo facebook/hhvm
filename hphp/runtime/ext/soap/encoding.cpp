@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/soap/encoding.h>
-#include <runtime/ext/soap/soap.h>
-#include <runtime/ext/ext_soap.h>
-#include <runtime/base/util/string_buffer.h>
+#include "hphp/runtime/ext/soap/encoding.h"
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -552,7 +552,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
 
     if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
       if (!p->m_stype.empty()) {
-        set_ns_and_type_ex(node, p->m_ns, p->m_stype);
+        set_ns_and_type_ex(node, p->m_ns.c_str(), p->m_stype.c_str());
       }
     }
 
@@ -1169,7 +1169,7 @@ static bool get_zval_property(Variant &object, const char* name,
 }
 
 static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
-  const char* name = NULL;
+  const char* name = nullptr;
   Variant any;
   while (node != NULL) {
     if (!get_zval_property(ret, (const char *)node->name)) {
@@ -1212,8 +1212,9 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
       } else {
         /* Add array element */
         if (name) {
-          if (any.toArray().exists(name)) {
-            Variant &el = any.lvalAt(name);
+          String name_str(name);
+          if (any.toArray().exists(name_str)) {
+            Variant &el = any.lvalAt(name_str);
             if (!el.isArray()) {
               /* Convert into array */
               Array arr = Array::Create();
@@ -1222,7 +1223,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             }
             el.append(val);
           } else {
-            any.set(String(name, CopyString), val);
+            any.set(name_str, val);
           }
         } else {
           any.append(val);
@@ -1353,10 +1354,12 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
   String clsname;
   if (pce) {
     ce = pce;
-  } else if (!SOAP_GLOBAL(classmap).empty() && !type->type_str.empty() &&
-             SOAP_GLOBAL(classmap).exists(String(type->type_str))) {
-    clsname = SOAP_GLOBAL(classmap)[type->type_str.c_str()].toString();
-    ce = clsname.data();
+  } else if (!SOAP_GLOBAL(classmap).empty() && !type->type_str.empty()) {
+    String type_str(type->type_str);
+    if (SOAP_GLOBAL(classmap).exists(type_str)) {
+      clsname = SOAP_GLOBAL(classmap)[type_str].toString();
+      ce = clsname.data();
+    }
   }
 
   Variant ret;

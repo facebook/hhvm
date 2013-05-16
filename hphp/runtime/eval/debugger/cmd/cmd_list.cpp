@@ -14,14 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_list.h>
-#include <runtime/eval/debugger/cmd/cmd_info.h>
-#include <runtime/base/file/file.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_list.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_info.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(debugger);
+
+// Serializes this command into the given Thrift buffer.
 void CmdList::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_file);
@@ -30,6 +33,7 @@ void CmdList::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_code);
 }
 
+// Deserializes a CmdList from the given Thrift buffer.
 void CmdList::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_file);
@@ -38,10 +42,14 @@ void CmdList::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_code);
 }
 
+// Informs the client of all strings that may follow a list command.
+// Used for auto completion. The client uses the prefix of the argument
+// following the command to narrow down the list displayed to the user.
 void CmdList::list(DebuggerClient *client) {
   client->addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
+// The text to display when the debugger client processes "help break".
 bool CmdList::help(DebuggerClient *client) {
   client->helpTitle("List Command");
   client->helpCmds(
@@ -68,7 +76,7 @@ bool CmdList::help(DebuggerClient *client) {
     "\n"
     "Hit return to display more lines of code after current display.\n"
     "\n"
-    "When a directory name is specified, this will be set to root directory "
+    "When a directory name is specified, this will become a root directory "
     "for resolving relative paths of PHP files. Files with absolute paths "
     "will not be affected by this setting. This directory will be stored "
     "in configuration file for future sessions as well."
@@ -121,6 +129,12 @@ bool CmdList::listFileRange(DebuggerClient *client, int line,
   return false;
 }
 
+static const StaticString
+  s_methods("methods"),
+  s_file("file"),
+  s_line1("line2"),
+  s_line2("line2");
+
 bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   assert(client->argCount() == 1);
   CmdInfoPtr cmdInfo(new CmdInfo());
@@ -134,13 +148,13 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   ArrayIter iter(info);
   Array funcInfo = iter.second();
   if (!subsymbol.empty()) {
-    String key = CmdInfo::FindSubSymbol(funcInfo["methods"], subsymbol);
+    String key = CmdInfo::FindSubSymbol(funcInfo[s_methods], subsymbol);
     if (key.isNull()) return false;
-    funcInfo = funcInfo["methods"][key].toArray();
+    funcInfo = funcInfo[s_methods][key].toArray();
   }
-  String file = funcInfo["file"].toString();
-  int line1 = funcInfo["line1"].toInt32();
-  int line2 = funcInfo["line2"].toInt32();
+  String file = funcInfo[s_file].toString();
+  int line1 = funcInfo[s_line1].toInt32();
+  int line2 = funcInfo[s_line2].toInt32();
   int line = line1 ? line1 : line2;
   if (file.empty() || !line) return false;
   client->setListLocation(file.data(), line - 1, false);
@@ -159,8 +173,8 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   return false;
 }
 
-bool CmdList::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdList::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }
@@ -284,9 +298,12 @@ bool CmdList::onServer(DebuggerProxy *proxy) {
       m_code = f_file_get_contents(full_path.c_str());
     }
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
+// Sends a "list file" command to the proxy attached to the given client.
+// Returns false if the file does not exist or could not be read or an
+// HPHP::String instance containing the contents of the file.
 Variant CmdList::GetSourceFile(DebuggerClient *client,
                                const std::string &file) {
   CmdList cmd;

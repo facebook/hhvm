@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/object_allocator_sizes.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/object_data.h>
-#include <runtime/base/memory/smart_allocator.h>
+#include "hphp/runtime/vm/object_allocator_sizes.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/object_data.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
 
 namespace HPHP {
-namespace VM {
 
 namespace {
 
@@ -47,4 +46,4 @@ int InitializeAllocators() {
 }
 
 
-}}
+}

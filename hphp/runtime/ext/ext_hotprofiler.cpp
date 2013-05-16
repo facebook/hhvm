@@ -15,15 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_fb.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/zend_math.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/vm/event_hook.h>
-#include <util/alloc.h>
-#include <util/vdso.h>
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/vdso.h"
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>
@@ -226,8 +226,7 @@ class esyscall {
 public:
   int num;
 
-  esyscall(const char *syscall_name)
-  {
+  explicit esyscall(const char *syscall_name) {
     num = -1;
     char format[strlen(syscall_name) + sizeof(" %d")];
     sprintf(format, "%s %%d", syscall_name);
@@ -520,6 +519,15 @@ enum Flag {
   TrackMalloc           = 0x80,
 };
 
+static const StaticString s_ct("ct");
+static const StaticString s_wt("wt");
+static const StaticString s_cpu("cpu");
+static const StaticString s_mu("mu");
+static const StaticString s_pmu("pmu");
+static const StaticString s_alloc("alloc");
+static const StaticString s_free("free");
+static const StaticString s_compressed_trace("(compressed_trace)");
+
 /**
  * Maintain profiles of a running stack.
  */
@@ -582,20 +590,20 @@ public:
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,
                   int flags, int64_t MHz)
   {
-    Array arr;
-    arr.set("ct",  counts.count);
-    arr.set("wt",  to_usec(counts.wall_time, MHz));
+    ArrayInit arr(5);
+    arr.set(s_ct,  counts.count);
+    arr.set(s_wt,  to_usec(counts.wall_time, MHz));
     if (flags & TrackCPU) {
-      arr.set("cpu", to_usec(counts.cpu, MHz, true));
+      arr.set(s_cpu, to_usec(counts.cpu, MHz, true));
     }
     if (flags & TrackMemory) {
-      arr.set("mu",  counts.memory);
-      arr.set("pmu", counts.peak_memory);
+      arr.set(s_mu,  counts.memory);
+      arr.set(s_pmu, counts.peak_memory);
     } else if (flags & TrackMalloc) {
-      arr.set("alloc", counts.memory);
-      arr.set("free", counts.peak_memory);
+      arr.set(s_alloc, counts.memory);
+      arr.set(s_free, counts.peak_memory);
     }
-    ret.set(String(name), arr);
+    ret.set(String(name), arr.create());
   }
 
   template<class phpret, class StatsMap>
@@ -799,7 +807,7 @@ private:
 public:
 
 public:
-  HierarchicalProfiler(int flags) : m_flags(flags) {
+  explicit HierarchicalProfiler(int flags) : m_flags(flags) {
   }
 
   virtual void beginFrameEx() {
@@ -1089,8 +1097,8 @@ public:
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
-  TraceProfiler(int flags) : Profiler(), nTrace(0),
-                             full(false), m_flags(flags) {
+  explicit TraceProfiler(int flags)
+    : Profiler(), nTrace(0), full(false), m_flags(flags) {
     if (pthread_mutex_trylock(&s_in_use)) {
       m_successful = false;
     } else {
@@ -1181,7 +1189,7 @@ public:
     if (m_flags & GetTrace) {
       String traceData;
       packTraceData(fmap, traceData, m_MHz);
-      ret.set("(compressed_trace)", traceData);
+      ret.set(s_compressed_trace, traceData);
       fprintf(stderr, "%d bytes\n", traceData.size());
     }
     CountMap trace_buffer;
@@ -1511,7 +1519,7 @@ public:
     if (!RuntimeOption::EnableHotProfiler) {
       return;
     }
-    HPHP::VM::EventHook::Enable();
+    HPHP::EventHook::Enable();
     if (m_profiler == NULL) {
       switch (level) {
       case Simple:
@@ -1621,9 +1629,9 @@ void f_fb_setprofile(CVarRef callback) {
 #endif
   g_vmContext->m_setprofileCallback = callback;
   if (callback.isNull()) {
-    HPHP::VM::EventHook::Disable();
+    HPHP::EventHook::Disable();
   } else {
-    HPHP::VM::EventHook::Enable();
+    HPHP::EventHook::Enable();
   }
 }
 

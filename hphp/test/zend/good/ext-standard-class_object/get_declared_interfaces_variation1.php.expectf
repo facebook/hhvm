@@ -1,0 +1,9 @@
+*** Testing get_declared_interfaces() : autoloading of interfaces ***
+
+-- before interface is used --
+bool(false)
+
+-- after interface is used --
+bool(true)
+
+DONE

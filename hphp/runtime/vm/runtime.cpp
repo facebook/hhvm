@@ -13,27 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "runtime/base/execution_context.h"
-#include "runtime/base/complex_types.h"
-#include "runtime/base/zend/zend_string.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/ext/ext_closure.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/ext/ext_collections.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/repo.h"
-#include "util/trace.h"
-#include "runtime.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
-#include "runtime/base/zend/zend_functions.h"
-#include "runtime/ext/ext_string.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
-namespace VM {
+
+using Transl::tx64;
 
 static const Trace::Module TRACEMOD = Trace::runtime;
 
@@ -94,7 +95,8 @@ ArrayData* new_tuple(int n, const TypedValue* values) {
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
-  
+NEW_COLLECTION_HELPER(Set)
+
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();
   obj->incRefCount();
@@ -197,7 +199,7 @@ concat_si(StringData* v1, int64_t v2) {
  * incRef the output string
  */
 StringData*
-concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
+concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
   const char *s1, *s2;
   size_t s1len, s2len;
   bool free1, free2;
@@ -283,7 +285,7 @@ int64_t arr0_to_bool(ArrayData* ad) {
 }
 
 int64_t arr_to_bool(ArrayData* ad) {
-  assert(Transl::tx64->stateIsDirty());
+  assert(tx64->stateIsDirty());
   int64_t retval = arr0_to_bool(ad);
   decRefArr(ad);
   return retval;
@@ -331,7 +333,7 @@ Unit* compile_string(const char* s, size_t sz) {
   int out_len;
   md5 = MD5(string_md5(s, sz, false, out_len));
 
-  VM::Unit* u = Repo::get().loadUnit("", md5);
+  Unit* u = Repo::get().loadUnit("", md5);
   if (u != nullptr) {
     return u;
   }
@@ -354,32 +356,6 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   magicArgs->append(ar->getInvName(), false);
   magicArgs->append(argArray, false);
   return magicArgs;
-}
-
-bool run_intercept_handler_for_invokefunc(TypedValue* retval,
-                                          const Func* f,
-                                          CArrRef params,
-                                          ObjectData* this_,
-                                          StringData* invName,
-                                          Variant* ihandler) {
-  using namespace HPHP::VM::Transl;
-  assert(ihandler);
-  assert(retval);
-  Variant doneFlag = true;
-  Array args = params;
-  if (invName) {
-    // This is a magic call, so we need to shuffle the args
-    HphpArray* magicArgs = NEW(HphpArray)(2);
-    magicArgs->append(invName, false);
-    magicArgs->append(params, false);
-    args = magicArgs;
-  }
-  Array intArgs =
-    CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : uninit_null()),
-                   args, ihandler->asCArrRef()[1], ref(doneFlag));
-  call_intercept_handler<false>(retval, intArgs, nullptr, ihandler);
-  // $done is true, meaning don't enter the intercepted function.
-  return !doneFlag.toBoolean();
 }
 
 HphpArray* get_static_locals(const ActRec* ar) {
@@ -425,6 +401,11 @@ void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
       smp->set(key, value);
       break;
     }
+    case Collection::SetType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Set does not support $c[$k] syntax"));
+      throw e;
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot assign to an element of a Pair"));
@@ -454,6 +435,11 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
       smp->set(key, value);
       break;
     }
+    case Collection::SetType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Set does not support $c[$k] syntax"));
+      throw e;
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot assign to an element of a Pair"));
@@ -473,20 +459,6 @@ bool checkTv(const TypedValue* tv) {
 
 void assertTv(const TypedValue* tv) {
   always_assert(checkTv(tv));
-}
-
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
-                    size_t nProps) {
-  auto* dst = propVec;
-  auto* src = propData;
-  for (; src != propData + nProps; ++src, ++dst) {
-    *dst = *src;
-    // m_aux.u_deepInit is true for properties that need "deep" initialization
-    if (src->deepInit()) {
-      tvIncRef(dst);
-      collectionDeepCopyTV(dst);
-    }
-  }
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {
@@ -529,5 +501,5 @@ HOT_FUNC int64_t modHelper(int64_t left, int64_t right) {
   return left % right;
 }
 
-} } // HPHP::VM
+} // HPHP::VM
 

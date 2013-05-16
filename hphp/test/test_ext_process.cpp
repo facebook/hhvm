@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_process.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/runtime_option.h>
-#include <util/light_process.h>
+#include "hphp/test/test_ext_process.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/light_process.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -49,6 +49,7 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_proc_open);
   RUN_TEST(test_proc_terminate);
   RUN_TEST(test_proc_close);
+  RUN_TEST(test_proc_open_env_inh);
   RUN_TEST(test_proc_get_status);
   RUN_TEST(test_proc_nice);
   RUN_TEST(test_escapeshellarg);
@@ -79,6 +80,7 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_proc_open);
   RUN_TEST(test_proc_terminate);
   RUN_TEST(test_proc_close);
+  RUN_TEST(test_proc_open_env_inh);
   RUN_TEST(test_proc_get_status);
   RUN_TEST(test_proc_nice);
   LightProcess::Close();
@@ -284,6 +286,31 @@ bool TestExtProcess::test_system() {
   return Count(true);
 }
 
+bool TestExtProcess::test_proc_open_env_inh() {
+  Array descriptorspec =
+    CREATE_MAP3(0, CREATE_VECTOR2("pipe", "r"),
+                1, CREATE_VECTOR2("pipe", "w"),
+                2, CREATE_VECTOR3("file", "/tmp/error-output.txt", "a"));
+
+  Variant pipes;
+  g_context->setenv("inherit_me", "please");
+  Variant process = f_proc_open("echo $inherit_me", descriptorspec, ref(pipes));
+  VERIFY(!same(process, false));
+
+  {
+    File *f = pipes[1].toObject().getTyped<File>();
+    VERIFY(f->valid());
+    StringBuffer sbuf;
+    sbuf.read(f);
+    f->close();
+    VS(sbuf.detach(), "please\n");
+  }
+
+  VS(f_proc_close(process.toObject()), 0);
+
+  return Count(true);
+}
+
 bool TestExtProcess::test_proc_open() {
   Array descriptorspec =
     CREATE_MAP3(0, CREATE_VECTOR2("pipe", "r"),
@@ -335,6 +362,15 @@ bool TestExtProcess::test_proc_close() {
 }
 
 bool TestExtProcess::test_proc_get_status() {
+  static const StaticString
+    s_command("command"),
+    s_pid("pid"),
+    s_running("running"),
+    s_signaled("signaled"),
+    s_exitcode("exitcode"),
+    s_termsig("termsig"),
+    s_stopsig("stopsig");
+
   Array descriptorspec =
     CREATE_MAP3(0, CREATE_VECTOR2("pipe", "r"),
                 1, CREATE_VECTOR2("pipe", "w"),
@@ -343,13 +379,13 @@ bool TestExtProcess::test_proc_get_status() {
   Variant process = f_proc_open(php_path, descriptorspec, ref(pipes));
   VERIFY(!same(process, false));
   Array ret = f_proc_get_status(process.toObject());
-  VS(ret["command"], php_path);
-  VERIFY(ret["pid"].toInt32() > 0);
-  VERIFY(ret["running"]);
-  VERIFY(!ret["signaled"]);
-  VS(ret["exitcode"], -1);
-  VS(ret["termsig"], 0);
-  VS(ret["stopsig"], 0);
+  VS(ret[s_command], php_path);
+  VERIFY(ret[s_pid].toInt32() > 0);
+  VERIFY(ret[s_running]);
+  VERIFY(!ret[s_signaled]);
+  VS(ret[s_exitcode], -1);
+  VS(ret[s_termsig], 0);
+  VS(ret[s_stopsig], 0);
 
   {
     File *f = pipes[0].toObject().getTyped<File>();

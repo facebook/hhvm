@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/execution_context.h>
+#include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
+#include "hphp/runtime/vm/debug/elfwriter.h"
 
-#include "debug.h"
-#include "gdb-jit.h"
-#include "elfwriter.h"
+#include "hphp/runtime/base/execution_context.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -26,12 +26,11 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <runtime/vm/translator/translator-x64.h>
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 DebugInfo* DebugInfo::Get() {
@@ -108,7 +107,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
       name = highOpcodeName[op - OpHighStart];
     }
     fprintf(m_perfMap, "%lx %x %s\n",
-	    uintptr_t(range.begin()), range.size(), name);
+            uintptr_t(range.begin()), range.size(), name);
   }
 }
 
@@ -150,6 +149,5 @@ std::string lookupFunction(const Func* f,
   return fname;
 }
 
-}
 }
 }

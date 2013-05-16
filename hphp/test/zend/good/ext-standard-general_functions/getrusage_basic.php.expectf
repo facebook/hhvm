@@ -1,0 +1,4 @@
+Simple testcase for getrusage() function
+User time used (seconds) %d
+User time used (microseconds) %d
+===DONE===

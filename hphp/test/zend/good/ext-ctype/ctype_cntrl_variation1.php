@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s)
+ * Description: Checks for control character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
        '
 ',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

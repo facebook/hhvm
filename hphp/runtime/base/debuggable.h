@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HPHP_DEBUGGABLE_H__
-#define __HPHP_DEBUGGABLE_H__
+#ifndef incl_HPHP_DEBUGGABLE_H_
+#define incl_HPHP_DEBUGGABLE_H_
 
-#include <util/base.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,4 +120,4 @@ HPHPD_SETTINGS
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_DEBUGGABLE_H__
+#endif // incl_HPHP_DEBUGGABLE_H_

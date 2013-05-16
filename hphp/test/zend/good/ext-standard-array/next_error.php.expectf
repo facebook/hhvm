@@ -1,0 +1,10 @@
+*** Testing next() : error conditions ***
+
+-- Testing next() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing next() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+===DONE===

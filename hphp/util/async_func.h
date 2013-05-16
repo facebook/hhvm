@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONCURRENCY_ASYNC_FUNC_H__
-#define __CONCURRENCY_ASYNC_FUNC_H__
+#ifndef incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
+#define incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 #include <pthread.h>
-#include "synchronizable.h"
-#include "lock.h"
-#include "exception.h"
-#include "alloc.h"
+#include "hphp/util/synchronizable.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,6 +116,15 @@ public:
   void start();
 
   /**
+   * Sends a cancellation request to the thread. NB: Do not use this unless
+   * the function is known to support cancellation and known to leave shared
+   * state in a consistent state (alternatively, the caller should proceed to
+   * shut down the process as well). Also, call waitForEnd following this call
+   * before proceeding as if the async func has stopped executing.
+   */
+  void cancel();
+
+  /**
    * Waits until this thread finishes running.
    */
   bool waitForEnd(int seconds = 0);
@@ -205,4 +214,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CONCURRENCY_ASYNC_FUNC_H__
+#endif // incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_

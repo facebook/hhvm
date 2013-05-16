@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_fb.h>
-#include <runtime/ext/ext_fb.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_iconv.h>
+#include "hphp/test/test_ext_fb.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_iconv.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

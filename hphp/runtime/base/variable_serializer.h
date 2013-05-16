@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_VARIABLE_SERIALIZER_H__
-#define __HPHP_VARIABLE_SERIALIZER_H__
+#ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
+#define incl_HPHP_VARIABLE_SERIALIZER_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/unit.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ public:
   /**
    * Constructor and destructor.
    */
-  VariableSerializer(Type type, int option = 0, int maxRecur = 3);
+  explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
   ~VariableSerializer() {
     if (m_arrayIds) delete m_arrayIds;
   }
@@ -91,6 +91,7 @@ public:
   void writeArrayKey(Variant key);
   void writeArrayValue(CVarRef value);
   void writeCollectionKey(CVarRef key);
+  void writeCollectionKeylessPrefix();
   void writeArrayFooter();
   void writeSerializableObject(CStrRef clsname, CStrRef serialized);
 
@@ -141,4 +142,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_VARIABLE_SERIALIZER_H__
+#endif // incl_HPHP_VARIABLE_SERIALIZER_H_

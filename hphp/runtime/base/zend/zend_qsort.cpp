@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_qsort.h>
+#include "hphp/runtime/base/zend/zend_qsort.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

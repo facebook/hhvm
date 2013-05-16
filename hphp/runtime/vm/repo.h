@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_REPO_H_
-#define incl_VM_REPO_H_
+#ifndef incl_HPHP_VM_REPO_H_
+#define incl_HPHP_VM_REPO_H_
 
-#include "runtime/vm/unit.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/func.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
 
 #include <sqlite3.h>
 
@@ -30,7 +30,6 @@
 #include <pwd.h>
 
 namespace HPHP {
-namespace VM {
 
 class Repo : public RepoProxy {
  private:
@@ -172,6 +171,6 @@ class Repo : public RepoProxy {
   FuncRepoProxy m_frp;
 };
 
-}}
+}
 
 #endif

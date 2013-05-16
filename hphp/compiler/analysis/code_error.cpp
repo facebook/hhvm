@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/parser/parser.h>
-#include <compiler/construct.h>
-#include <compiler/option.h>
-#include <util/exception.h>
-#include <util/lock.h>
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/lock.h"
 
 using namespace HPHP::JSON;
 

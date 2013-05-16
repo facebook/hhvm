@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/type.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/expression/expression.h"
 #include <boost/format.hpp>
 
 using namespace HPHP;
@@ -49,28 +49,32 @@ TypePtr Type::Any         (new Type(Type::KindOfAny         ));
 TypePtr Type::Some        (new Type(Type::KindOfSome        ));
 
 Type::TypePtrMap Type::s_TypeHintTypes;
+Type::TypePtrMap Type::s_HHTypeHintTypes;
 
 void Type::InitTypeHintMap() {
   assert(s_TypeHintTypes.empty());
+  assert(s_HHTypeHintTypes.empty());
+
   s_TypeHintTypes["array"] = Type::Array;
-  if (Option::EnableHipHopSyntax) {
-    s_TypeHintTypes["bool"]    = Type::Boolean;
-    s_TypeHintTypes["boolean"] = Type::Boolean;
-    s_TypeHintTypes["int"]     = Type::Int64;
-    s_TypeHintTypes["integer"] = Type::Int64;
-    s_TypeHintTypes["real"]    = Type::Double;
-    s_TypeHintTypes["double"]  = Type::Double;
-    s_TypeHintTypes["float"]   = Type::Double;
-    s_TypeHintTypes["string"]  = Type::String;
-  }
+
+  s_HHTypeHintTypes["array"] = Type::Array;
+  s_HHTypeHintTypes["bool"]    = Type::Boolean;
+  s_HHTypeHintTypes["boolean"] = Type::Boolean;
+  s_HHTypeHintTypes["int"]     = Type::Int64;
+  s_HHTypeHintTypes["integer"] = Type::Int64;
+  s_HHTypeHintTypes["real"]    = Type::Double;
+  s_HHTypeHintTypes["double"]  = Type::Double;
+  s_HHTypeHintTypes["float"]   = Type::Double;
+  s_HHTypeHintTypes["string"]  = Type::String;
 }
 
-const Type::TypePtrMap &Type::GetTypeHintTypes() {
-  return s_TypeHintTypes;
+const Type::TypePtrMap &Type::GetTypeHintTypes(bool hhType) {
+  return hhType ? s_HHTypeHintTypes : s_TypeHintTypes;
 }
 
 void Type::ResetTypeHintTypes() {
   s_TypeHintTypes.clear();
+  s_HHTypeHintTypes.clear();
 }
 
 TypePtr Type::CreateObjectType(const std::string &classname) {

@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/pipe.h>
-#include <runtime/base/complex_types.h>
-#include <util/light_process.h>
+#include "hphp/runtime/base/file/pipe.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/light_process.h"
 
 namespace HPHP {
 

@@ -13,20 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _HPHP_ELFWRITER_H_
-#define _HPHP_ELFWRITER_H_
+#ifndef HPHP_ELFWRITER_H_
+#define HPHP_ELFWRITER_H_
 
-#include <runtime/base/types.h>
-#include "dwarf.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/debug/dwarf.h"
 #include <elf.h>
 #include <gelf.h>
 #include <vector>
 #include <string>
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 struct ElfWriter {
@@ -61,7 +60,6 @@ struct ElfWriter {
   int writeTextSection();
 };
 
-}
 }
 }
 

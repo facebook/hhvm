@@ -15,20 +15,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/zend/zend_string.h>
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/zend/zend_string.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <util/lock.h>
-#include <runtime/base/file/plain_file.h>
-#include <util/light_process.h>
-#include <util/logger.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/vm/repo.h>
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/util/light_process.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -114,7 +114,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
-  if (VM::Repo::prefork()) {
+  if (Repo::prefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;
   }
@@ -138,7 +138,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   // build environment pair list
   std::vector<String> senvs; // holding those char *
   char **envp = build_envp(envs, senvs);
-  if (execve(path, argv, envp) == -1) {
+  if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occured: (errno %d) %s",
                     errno, Util::safe_strerror(errno).c_str());
   }
@@ -152,7 +152,7 @@ int64_t f_pcntl_fork() {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
-  if (VM::Repo::prefork()) {
+  if (Repo::prefork()) {
     raise_error("forking is disallowed in multi-threaded mode");
     return -1;
   }
@@ -160,7 +160,7 @@ int64_t f_pcntl_fork() {
   std::cout.flush();
   std::cerr.flush();
   pid_t pid = fork();
-  VM::Repo::postfork(pid);
+  Repo::postfork(pid);
   return pid;
 }
 
@@ -418,7 +418,7 @@ private:
 
 String f_shell_exec(CStrRef cmd) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(cmd);
+  FILE *fp = ctx.exec(cmd.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -428,7 +428,7 @@ String f_shell_exec(CStrRef cmd) {
 String f_exec(CStrRef command, VRefParam output /* = null */,
               VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -457,7 +457,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return;
 
   char buffer[1024];
@@ -475,7 +475,7 @@ void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
 
 String f_system(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   if (fp) {
@@ -612,7 +612,7 @@ public:
   bool openFile(CStrRef zfile, CStrRef zmode) {
     mode = DESC_FILE;
     /* try a wrapper */
-    FILE *file = fopen(zfile, zmode);
+    FILE *file = fopen(zfile.c_str(), zmode.c_str());
     if (!file) {
       raise_warning("Unable to open specified file: %s (mode %s)",
                       zfile.data(), zmode.data());
@@ -761,6 +761,17 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     scwd = g_context->getCwd().c_str();
   }
 
+  Array enva;
+
+  if (env.isNull()) {
+    // Default to the current environment from the execution context
+    // rather than leaving it unspecified so that we pick up local
+    // changes made via putenv()
+    enva = g_context->getEnvs();
+  } else {
+    enva = env.toArray();
+  }
+
   pid_t child;
 
   if (LightProcess::Available()) {
@@ -776,7 +787,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     }
 
     std::vector<std::string> envs;
-    for (ArrayIter iter(env.toArray()); iter; ++iter) {
+    for (ArrayIter iter(enva); iter; ++iter) {
       StringBuffer nvpair;
       nvpair += iter.first().toString();
       nvpair += '=';
@@ -787,7 +798,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
     assert(child);
-    return post_proc_open(cmd, pipes, env, items, child);
+    return post_proc_open(cmd, pipes, enva, items, child);
   } else {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
@@ -795,7 +806,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     child = fork();
     if (child) {
       // the parent process
-      return post_proc_open(cmd, pipes, env, items, child);
+      return post_proc_open(cmd, pipes, enva, items, child);
     }
   }
 
@@ -811,14 +822,10 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
-  if (!env.isNull()) {
-    vector<String> senvs; // holding those char *
-    char **envp = build_envp(env.toArray(), senvs);
-    execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
-    free(envp);
-  } else {
-    execl("/bin/sh", "sh", "-c", cmd.data(), NULL);
-  }
+  vector<String> senvs; // holding those char *
+  char **envp = build_envp(enva, senvs);
+  execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
+  free(envp);
   _exit(127);
 }
 
@@ -830,6 +837,15 @@ bool f_proc_terminate(CObjRef process, int signal /* = 0 */) {
 int64_t f_proc_close(CObjRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
+
+static const StaticString s_command("command");
+static const StaticString s_pid("pid");
+static const StaticString s_running("running");
+static const StaticString s_signaled("signaled");
+static const StaticString s_stopped("stopped");
+static const StaticString s_exitcode("exitcode");
+static const StaticString s_termsig("termsig");
+static const StaticString s_stopsig("stopsig");
 
 Array f_proc_get_status(CObjRef process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
@@ -859,16 +875,16 @@ Array f_proc_get_status(CObjRef process) {
     running = false;
   }
 
-  Array ret;
-  ret.set("command",  proc->command);
-  ret.set("pid",      proc->child);
-  ret.set("running",  running);
-  ret.set("signaled", signaled);
-  ret.set("stopped",  stopped);
-  ret.set("exitcode", exitcode);
-  ret.set("termsig",  termsig);
-  ret.set("stopsig",  stopsig);
-  return ret;
+  ArrayInit ret(8);
+  ret.set(s_command,  proc->command);
+  ret.set(s_pid,      proc->child);
+  ret.set(s_running,  running);
+  ret.set(s_signaled, signaled);
+  ret.set(s_stopped,  stopped);
+  ret.set(s_exitcode, exitcode);
+  ret.set(s_termsig,  termsig);
+  ret.set(s_stopsig,  stopsig);
+  return ret.create();
 }
 
 bool f_proc_nice(int increment) {
@@ -885,7 +901,7 @@ bool f_proc_nice(int increment) {
 
 String f_escapeshellarg(CStrRef arg) {
   if (!arg.empty()) {
-    char *ret = string_escape_shell_arg(arg);
+    char *ret = string_escape_shell_arg(arg.c_str());
     return String(ret, AttachString);
   }
   return arg;
@@ -893,7 +909,7 @@ String f_escapeshellarg(CStrRef arg) {
 
 String f_escapeshellcmd(CStrRef command) {
   if (!command.empty()) {
-    char *ret = string_escape_shell_cmd(command);
+    char *ret = string_escape_shell_cmd(command.c_str());
     return String(ret, AttachString);
   }
   return command;

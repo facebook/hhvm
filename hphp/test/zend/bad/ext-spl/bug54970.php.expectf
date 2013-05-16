@@ -1,0 +1,15 @@
+object(SplFixedArray)#%d (3) {
+  [0]=>
+  string(5) "Hello"
+  [1]=>
+  string(5) "World"
+  [2]=>
+  string(1) "!"
+}
+object(SplFixedArray)#%d (2) {
+  [0]=>
+  string(5) "Hello"
+  [1]=>
+  string(5) "World"
+}
+int(2)

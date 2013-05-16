@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __THREAD_LOCAL_H__
-#define __THREAD_LOCAL_H__
+#ifndef incl_HPHP_THREAD_LOCAL_H_
+#define incl_HPHP_THREAD_LOCAL_H_
 
 #include <pthread.h>
-#include "exception.h"
+#include "hphp/util/exception.h"
 #include <errno.h>
-#include <util/util.h>
+#include "hphp/util/util.h"
 #include <boost/aligned_storage.hpp>
 
 namespace HPHP {
@@ -562,4 +562,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __THREAD_LOCAL_H__
+#endif // incl_HPHP_THREAD_LOCAL_H_

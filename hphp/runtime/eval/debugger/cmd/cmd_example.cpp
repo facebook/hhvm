@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_example.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_example.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdExample::sendImpl(DebuggerThriftBuffer &thrift) {
   CmdExtended::sendImpl(thrift);
@@ -53,8 +55,8 @@ bool CmdExample::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdExample::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdExample::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 1) {
     return help(client);
   }
@@ -67,7 +69,7 @@ bool CmdExample::onClient(DebuggerClient *client) {
 
 bool CmdExample::onServer(DebuggerProxy *proxy) {
   m_output = m_input.size();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

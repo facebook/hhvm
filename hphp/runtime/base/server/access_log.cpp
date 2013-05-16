@@ -13,19 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/time/timestamp.h>
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/time/timestamp.h"
 #include <time.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_note.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/request_uri.h>
-#include <util/process.h>
-#include <util/atomic.h>
-#include <util/compatibility.h>
-#include <util/util.h>
-#include <runtime/base/hardware_counter.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_note.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/util/process.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/hardware_counter.h"
 
 using std::endl;
 
@@ -312,6 +312,9 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
       }
     }
     break;
+  case 'I':
+    out << transport->getRequestSize();
+    break;
   case 'n':
     if (arg.empty()) return false;
     {
@@ -378,7 +381,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     {
       String b, q;
       RequestURI::splitURL(transport->getUrl(), b, q);
-      out << b;
+      out << b.c_str();
     }
     break;
   case 'v':

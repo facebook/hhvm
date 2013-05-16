@@ -1,0 +1,16 @@
+*** Testing imap_append() : basic functionality ***
+Create a new mailbox for test
+Create a temporary mailbox and add 0 msgs
+.. mailbox '%s' created
+Add a couple of msgs to new mailbox {%s}INBOX.%s
+bool(true)
+bool(true)
+Msg Count after append : 2
+List the msg headers
+array(2) {
+  [0]=>
+  string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
+  [1]=>
+  string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
+}
+===Done===

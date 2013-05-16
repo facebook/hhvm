@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/logger.h"
-#include "util/trace.h"
-#include "util/repo_schema.h"
-#include "runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/repo_schema.h"
 
 namespace HPHP {
-namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
@@ -425,7 +424,7 @@ static int busyHandler(void* opaque, int nCalls) {
   Repo* repo UNUSED = static_cast<Repo*>(opaque);
   // yield to allow other threads access to the machine
   // spin-wait can starve other threads.
-  sched_yield();
+  usleep(1000 * nCalls);
   return 1; // Tell SQLite to retry.
 }
 
@@ -701,4 +700,4 @@ bool Repo::writable(int repoId) {
   return true;
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

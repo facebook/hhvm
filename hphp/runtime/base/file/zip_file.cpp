@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/zip_file.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_error.h>
+#include "hphp/runtime/base/file/zip_file.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 namespace HPHP {
 
@@ -45,7 +45,7 @@ void ZipFile::sweep() {
 bool ZipFile::open(CStrRef filename, CStrRef mode) {
   assert(m_gzFile == nullptr);
 
-  if (strchr(mode, '+')) {
+  if (strchr(mode.c_str(), '+')) {
     raise_warning("cannot open a zlib stream for reading and writing "
                     "at the same time!");
     return false;

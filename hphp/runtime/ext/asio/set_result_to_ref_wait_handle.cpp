@@ -15,10 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +28,7 @@ namespace {
   StaticString s_setResultToRef("<set-result-to-ref>");
 }
 
-c_SetResultToRefWaitHandle::c_SetResultToRefWaitHandle(VM::Class* cb)
+c_SetResultToRefWaitHandle::c_SetResultToRefWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_child(), m_ref() {
 }
 
@@ -43,7 +44,16 @@ void c_SetResultToRefWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handle, VRefParam ref) {
+void c_SetResultToRefWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set SetResultToRefWaitHandle::onCreate: on_create_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnSetResultToRefCreateCallback(callback.getObjectDataOrNull());
+}
+
+Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref) {
   TypedValue* var_or_cell = ref->asTypedValue();
   if (wait_handle.isNull()) {
     tvSetNull(var_or_cell);
@@ -78,8 +88,14 @@ Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handl
     tvBox(var_or_cell);
   }
 
-  c_SetResultToRefWaitHandle* my_wh = NEWOBJ(c_SetResultToRefWaitHandle)();
+  p_SetResultToRefWaitHandle my_wh = NEWOBJ(c_SetResultToRefWaitHandle)();
   my_wh->initialize(child_wh, var_or_cell->m_data.pref);
+
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnSetResultToRefCreateCallback())) {
+    session->onSetResultToRefCreate(my_wh.get(), child_wh);
+  }
+
   return my_wh;
 }
 
@@ -89,7 +105,7 @@ void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData
   m_ref->incRefCount();
   try {
     blockOn(child);
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     markAsFailed(cycle_exception);
   }
 }

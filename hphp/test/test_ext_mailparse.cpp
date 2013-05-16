@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_mailparse.h>
-#include <runtime/ext/ext.h>
+#include "hphp/test/test_ext_mailparse.h"
+#include "hphp/runtime/ext/ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -119,6 +119,9 @@ bool TestExtMailparse::test_mailparse_msg_parse_file() {
 }
 
 bool TestExtMailparse::test_mailparse_msg_parse() {
+  static const StaticString
+    s_headers("headers"),
+    s_to("to");
   String text =
     "To: fred@bloggs.com\n"
     "To: wez@thebrainroom.com\n"
@@ -128,7 +131,7 @@ bool TestExtMailparse::test_mailparse_msg_parse() {
   Variant mime = f_mailparse_msg_create();
   f_mailparse_msg_parse(mime, text);
   Variant data = f_mailparse_msg_get_part_data(mime);
-  VS(data["headers"]["to"], "fred@bloggs.com, wez@thebrainroom.com");
+  VS(data[s_headers][s_to], "fred@bloggs.com, wez@thebrainroom.com");
   return Count(true);
 }
 
@@ -274,6 +277,10 @@ bool TestExtMailparse::test_mailparse_msg_get_structure() {
 }
 
 bool TestExtMailparse::test_mailparse_rfc822_parse_addresses() {
+  static const StaticString
+    s_display("display"),
+    s_address("address"),
+    s_is_group("is_group");
   Array addresses =
     CREATE_VECTOR2("\":sysmail\"@ Some-Group. Some-Org, Muhammed."
                    "(I am the greatest) Ali @(the)Vegas.WBA",
@@ -286,13 +293,13 @@ bool TestExtMailparse::test_mailparse_rfc822_parse_addresses() {
     Variant parsed = f_mailparse_rfc822_parse_addresses(iter.second());
     for (ArrayIter iter2(parsed); iter2; ++iter2) {
       Variant pair = iter2.second();
-      echo(pair["display"]); echo("\n");
-      echo(pair["address"]); echo("\n");
-      if (pair["is_group"].toBoolean()) {
+      echo(pair[s_display]); echo("\n");
+      echo(pair[s_address]); echo("\n");
+      if (pair[s_is_group].toBoolean()) {
         Variant sub = f_mailparse_rfc822_parse_addresses
-          (f_substr(pair["address"], 1, f_strlen(pair["address"]) - 2));
+          (f_substr(pair[s_address], 1, f_strlen(pair[s_address]) - 2));
         for (ArrayIter iter3(sub); iter3; ++iter3) {
-          echo("   "); echo(iter3.second()["address"]); echo("\n");
+          echo("   "); echo(iter3.second()[s_address]); echo("\n");
         }
       }
     }
@@ -365,6 +372,7 @@ bool TestExtMailparse::test_mailparse_stream_encode() {
 }
 
 bool TestExtMailparse::test_mailparse_uudecode_all() {
+  static const StaticString s_filename("filename");
   String text =
     "To: fred@bloggs.com\n"
     "\n"
@@ -383,12 +391,12 @@ bool TestExtMailparse::test_mailparse_uudecode_all() {
 
   Variant data = f_mailparse_uudecode_all(fp);
   echo("BODY\n");
-  f_readfile(data[0]["filename"]);
+  f_readfile(data[0][s_filename]);
   echo("UUE\n");
-  f_readfile(data[1]["filename"]);
+  f_readfile(data[1][s_filename]);
 
-  f_unlink(data[0]["filename"]);
-  f_unlink(data[1]["filename"]);
+  f_unlink(data[0][s_filename]);
+  f_unlink(data[1][s_filename]);
 
   String output = f_ob_get_contents();
   f_ob_end_clean();

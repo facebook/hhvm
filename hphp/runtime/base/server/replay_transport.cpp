@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/zend/zend_string.h>
-#include <util/process.h>
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

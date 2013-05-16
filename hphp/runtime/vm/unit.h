@@ -14,32 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_UNIT_H_
-#define incl_VM_UNIT_H_
+#ifndef incl_HPHP_VM_UNIT_H_
+#define incl_HPHP_VM_UNIT_H_
 
 // Expects that runtime/vm/core_types.h is already included.
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/repo_helpers.h"
-#include "runtime/vm/named_entity.h"
-#include "runtime/base/array/hphp_array.h"
-#include "util/range.h"
-#include "util/parser/location.h"
-#include "runtime/base/md5.h"
-#include "util/tiny_vector.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/vm/named_entity.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/range.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/runtime/base/md5.h"
+#include "hphp/util/tiny_vector.h"
 
 namespace HPHP {
-namespace Compiler { class Peephole; }
-namespace VM {
-
 // Forward declarations.
+namespace Compiler { class Peephole; }
+struct ActRec;
+
 class Func;
 class FuncEmitter;
 class Repo;
 class FuncDict;
 class Unit;
-struct ActRec;
 
 enum UnitOrigin {
   UnitOriginFile = 0,
@@ -484,12 +483,12 @@ struct Unit {
     return const_cast<ArrayData*>(m_arrays.at(id));
   }
 
-  static Func *lookupFunc(const NamedEntity *ne, const StringData* name);
+  static Func *lookupFunc(const NamedEntity *ne);
   static Func *lookupFunc(const StringData *funcName);
   static Func *loadFunc(const NamedEntity *ne, const StringData* name);
   static Func *loadFunc(const StringData* name);
 
-  static Class* defClass(const HPHP::VM::PreClass* preClass,
+  static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
   void defTypedef(Id id);
 
@@ -636,7 +635,6 @@ public:
   }
 
   const Func* getFunc(Offset pc) const;
-  void enableIntercepts();
   void setCacheId(unsigned id) {
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);
@@ -714,7 +712,7 @@ class UnitEmitter {
   friend class UnitRepoProxy;
   friend class ::HPHP::Compiler::Peephole;
  public:
-  UnitEmitter(const MD5& md5);
+  explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
   int repoId() const { return m_repoId; }
@@ -885,7 +883,7 @@ class UnitRepoProxy : public RepoProxy {
   friend class Unit;
   friend class UnitEmitter;
  public:
-  UnitRepoProxy(Repo& repo);
+  explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
   Unit* load(const std::string& name, const MD5& md5);
@@ -1093,5 +1091,5 @@ public:
   Class* popFront();
 };
 
-} } // HPHP::VM
+ } // HPHP::VM
 #endif

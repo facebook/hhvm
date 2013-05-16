@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/kernel_version.h"
-#include <gtest/gtest.h>
+#include "hphp/util/kernel_version.h"
+#include "gtest/gtest.h"
 
 namespace HPHP {
 

@@ -14,16 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_INSTRUMENTATION_H_
-#define incl_INSTRUMENTATION_H_
+#ifndef incl_HPHP_INSTRUMENTATION_H_
+#define incl_HPHP_INSTRUMENTATION_H_
 
-#include <runtime/vm/core_types.h>
-#include <runtime/vm/unit.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/lock.h>
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/unit.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
-namespace VM {
 
 // Define a set of hooks to be used
 enum InstHookTypeInt64 {
@@ -148,21 +147,8 @@ private:
   std::vector<InjectionTableSD*> m_sdTables;
 };
 
-class InstHelpers {
-public:
-  static void InstCustomStringCallback(const StringData* hook,
-                                       Injection::Callback callback,
-                                       void *arg, const StringData* desc);
-
-  static void PushInstToGlobal();
-  static void PullInstFromGlobal();
-
-  static int CountGlobalInst();
-  static void ClearGlobalInst();
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
-} }    // HPHP::VM
+ }    // HPHP::VM
 
-#endif /* incl_INSTRUMENTATION_H_ */
+#endif /* incl_HPHP_INSTRUMENTATION_H_ */

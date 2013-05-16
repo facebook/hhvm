@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "compatibility.h"
-#include "vdso.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/vdso.h"
 
 #if defined(__APPLE__)
 # include <mach/mach_time.h>

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,6 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
   // so CmdUser can override these functions
@@ -47,6 +46,7 @@ public:
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
 
 protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   void helpImpl(DebuggerClient *client, const char *name);
 
 private:
@@ -57,4 +57,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_

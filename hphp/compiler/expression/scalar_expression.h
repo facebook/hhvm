@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SCALAR_EXPRESSION_H__
-#define __SCALAR_EXPRESSION_H__
+#ifndef incl_HPHP_SCALAR_EXPRESSION_H_
+#define incl_HPHP_SCALAR_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,12 +70,14 @@ public:
   int64_t getHash() const;
 
   void setComment(const std::string &comment) { m_comment = comment;}
-  const std::string getComment() { return m_comment;}
+  std::string getComment() { return m_comment;}
 
 
   bool getString(const std::string *&s) const;
   bool getInt(int64_t &i) const;
   bool getDouble(double &d) const;
+
+  void setCompilerHaltOffset(int64_t ofs);
 private:
   int m_type;
   std::string m_serializedValue;
@@ -89,4 +91,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __SCALAR_EXPRESSION_H__
+#endif // incl_HPHP_SCALAR_EXPRESSION_H_

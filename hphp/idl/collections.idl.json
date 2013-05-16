@@ -2113,6 +2113,516 @@
             ]
         },
         {
+            "name": "Set",
+            "ifaces": [
+                "MutableSet"
+            ],
+            "desc": "An unordered set-style collection.",
+            "flags": [
+                "IsFinal",
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Set built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns true if the Set is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns the number of values in the Set.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "view",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a lazy iterable view of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Removes all values from the Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns true if the specified value is present in the Set, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Removes the specified value from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "discard",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Removes the specified value from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Adds the specified value to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAll",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Adds the values produced by the specified Iterable to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns an Iterable of the values produced by applying the specified callback on the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Iterable of all the values from this Set for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Iterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "difference",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "updateFromArrayValues",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "updateFromIterableValues",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Set built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArray",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Set built from the values from the specified array.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArrays",
+                    "flags": [
+                        "IsStatic",
+                        "VariableArguments",
+                        "HasDocComment"
+                    ],
+                    "desc": "Returns a Set built from the values from the specified arrays.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "fromIterableValues",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SetIterator",
+            "ifaces": [
+                "Iterator"
+            ],
+            "desc": "An iterator implementation for iterating over a Set.",
+            "flags": [
+                "IsFinal",
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "desc": "Returns the current value that the iterator points to.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Advance this iterator forward one position.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "desc": "Move this iterator back to the first position.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "Pair",
             "ifaces": [
                 "ConstVector"

@@ -13,19 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _TRANSLATOR_DEBUG_H_
-#define _TRANSLATOR_DEBUG_H_
+#ifndef TRANSLATOR_DEBUG_H_
+#define TRANSLATOR_DEBUG_H_
 
-#include <runtime/base/types.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/hhbc.h>
-#include "dwarf.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/debug/dwarf.h"
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 class DebugInfo {
  public:
@@ -69,7 +68,6 @@ std::string lookupFunction(const Func* func,
                            bool inPrologue,
                            bool pseudoWithFileName);
 
-}
 }
 }
 

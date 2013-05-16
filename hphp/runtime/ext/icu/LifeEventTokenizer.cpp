@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "LifeEventTokenizer.h"
+#include "hphp/runtime/ext/icu/LifeEventTokenizer.h"
 
 using namespace U_ICU_NAMESPACE;
 

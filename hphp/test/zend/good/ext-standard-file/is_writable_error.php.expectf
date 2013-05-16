@@ -1,0 +1,16 @@
+*** Testing is_writable(): error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Testing is_writeable(): error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Testing is_writable() on non-existent file ***
+bool(false)
+bool(false)
+Done

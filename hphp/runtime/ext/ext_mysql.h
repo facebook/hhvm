@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_MYSQL_H__
-#define __EXT_MYSQL_H__
+#ifndef incl_HPHP_EXT_MYSQL_H_
+#define incl_HPHP_EXT_MYSQL_H_
 
-#include <runtime/base/base_includes.h>
-#include <mysql/mysql.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "mysql/mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -375,4 +375,4 @@ extern const int64_t k_ASYNC_OP_FETCH_ROW;
 
 }
 
-#endif // __EXT_MYSQL_H__
+#endif // incl_HPHP_EXT_MYSQL_H_

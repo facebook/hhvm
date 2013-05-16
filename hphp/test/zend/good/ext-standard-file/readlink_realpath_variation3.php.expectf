@@ -1,0 +1,28 @@
+*** Testing readlink() and realpath() : usage variations ***
+
+*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***
+-- Iteration1 --
+HipHop Warning: %a
+bool(false)
+%s
+-- Iteration2 --
+HipHop Warning: %a
+bool(false)
+%s
+-- Iteration3 --
+HipHop Warning: %a
+bool(false)
+string(%d) "%s"
+-- Iteration4 --
+HipHop Warning: %a
+bool(false)
+string(%d) "%s"
+-- Iteration5 --
+HipHop Warning: %a
+bool(false)
+string(%d) "%s"
+-- Iteration6 --
+HipHop Warning: %a
+bool(false)
+string(%d) "%s"
+Done

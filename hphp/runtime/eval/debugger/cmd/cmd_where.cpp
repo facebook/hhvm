@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_where.h>
-#include <runtime/base/array/array_iterator.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_where.h"
+#include "hphp/runtime/base/array/array_iterator.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdWhere::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -71,8 +73,8 @@ Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
   return st;
 }
 
-bool CmdWhere::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdWhere::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }
@@ -154,15 +156,11 @@ void CmdWhere::processStackTrace() {
 }
 
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
-  const_assert(false);
-}
-
-bool CmdWhere::onServerVM(DebuggerProxy *proxy) {
   m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
   if (!m_stackArgs) {
     processStackTrace();
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

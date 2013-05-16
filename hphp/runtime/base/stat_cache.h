@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STAT_CACHE_H__
-#define __STAT_CACHE_H__
+#ifndef incl_HPHP_STAT_CACHE_H_
+#define incl_HPHP_STAT_CACHE_H_
 
 #include <sys/inotify.h>
 
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include "util/base.h"
-#include "util/lock.h"
-#include "runtime/base/util/smart_ptr.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ class StatCache {
     typedef hphp_hash_map<std::string, NodePtr, string_hash> NameNodeMap;
     typedef hphp_hash_map<std::string, void*, string_hash> NameMap;
 
-    Node(StatCache& statCache, int wd=-1);
+    explicit Node(StatCache& statCache, int wd=-1);
     void atomicRelease();
 
     void touch(bool invalidate=true);
@@ -129,4 +129,4 @@ class StatCache {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STAT_CACHE_H__
+#endif // incl_HPHP_STAT_CACHE_H_

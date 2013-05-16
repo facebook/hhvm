@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/hash/hash_gost.h>
-#include <runtime/ext/hash/php_hash_gost_tables.h>
+#include "hphp/runtime/ext/hash/hash_gost.h"
+#include "hphp/runtime/ext/hash/php_hash_gost_tables.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,19 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPILER_EMITTER_H__
-#define __COMPILER_EMITTER_H__
+#ifndef incl_HPHP_COMPILER_EMITTER_H_
+#define incl_HPHP_COMPILER_EMITTER_H_
 
-#include <compiler/expression/expression.h>
-#include <compiler/statement/statement.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/statement/trait_prec_statement.h>
-#include <compiler/statement/trait_alias_statement.h>
-#include "compiler/statement/typedef_statement.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/typedef_statement.h"
 
-#include <runtime/vm/func.h>
-#include <runtime/vm/unit.h>
-#include <util/hash.h>
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 
@@ -46,16 +46,6 @@ class HhbcExtClassInfo;
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
-
-using VM::Offset;
-using VM::Func;
-using VM::Class;
-using VM::Unit;
-using VM::InvalidAbsoluteOffset;
-using VM::Opcode;
-using VM::Id;
-
-using namespace VM;
 
 // Forward declarations.
 class Label;
@@ -287,7 +277,7 @@ public:
 class Label {
 public:
   Label() : m_off(InvalidAbsoluteOffset) {}
-  Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
+  explicit Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
     set(e);
   }
   Offset getAbsoluteOffset() const { return m_off; }
@@ -326,7 +316,7 @@ public:
 class EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
 public:
-  EmitterVisitor(UnitEmitter& ue);
+  explicit EmitterVisitor(UnitEmitter& ue);
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);
@@ -362,6 +352,7 @@ public:
     recordJumpTarget(target, m_evalStack);
   }
   void restoreJumpTargetEvalStack();
+  void recordCall();
   bool isJumpTarget(Offset target);
   void setPrevOpcode(Opcode op) { m_prevOpcode = op; }
   Opcode getPrevOpcode() const { return m_prevOpcode; }
@@ -689,4 +680,4 @@ extern "C" {
 }
 }
 
-#endif // __COMPILER_EMITTER_H__
+#endif // incl_HPHP_COMPILER_EMITTER_H_

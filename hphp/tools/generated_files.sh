@@ -13,57 +13,27 @@ check_err()
 VERBOSE=1
 
 HHVM=$HPHP_HOME/hphp/hhvm/hhvm
-[ ! -x "$HHVM" ] && HHVM=`which hhvm`
+if [ -x "$HHVM" ]; then
+  export HHVM_SYSTEMLIB=$HPHP_HOME/bin/systemlib.php
+else
+  HHVM=`which hhvm`
+  export HHVM_SYSTEMLIB=`dirname $HHVM`/systemlib.php
+fi
+
 [ ! -x "$HHVM" ] && check_err 1 "$HHVM is not executable"
 
 HPHP_TOOLS=$HPHP_HOME/hphp/tools/
 
 if [ "$1" = "help" ]; then
-  echo "$0 hhvm       - Build hphp/system/runtime/ext/*.ext_hhvm.cpp"
-  echo "$0 infotabs   - Build hphp/system/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
   echo "$0 systemlib  - Build bin/systemlib.php"
   echo "$0 constants  - Build hphp/system/constants.h"
   echo "$0 class_map  - Build hphp/system/class_map.cpp"
+  echo "$0 lexer      - Regenerate the lexer"
+  echo "$0 parser     - Regenerate the parser"
   echo "$0 license    - Add license headers to all files"
   echo ""
   echo "$0 all  - All of the above in listed order"
   exit 0
-fi
-
-# $1 - Binary to pull symbols from
-# $2 - .ext_hhvm.cpp file to build
-make_hhvm()
-{
-  [ ! -f "$1" ] && check_err 1 "No object file to generate $2 from, did you build first?"
-  [ $VERBOSE -eq 1 ] && echo "Generating $2"
-  $HHVM gen_ext_hhvm.php $2 . /dev/null /dev/null "" $1
-  check_err $? "Failed generating $2"
-}
-
-if [ "$1" = "hhvm" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/runtime/ext
-  SOURCES=`find . -name '*.cpp' | grep -v ext_hhvm | grep -v sep | cut -c 3- | cut -d . -f 1`
-  RUNTIME_BUILD=$HPHP_HOME/hphp/CMakeFiles/hphp_runtime_static.dir
-  cd $HPHP_HOME/hphp/runtime/ext_hhvm
-  if [ -z "$SOURCES" -a $VERBOSE -eq 1 ]; then
-    echo "No extensions found while generating *.ext_hhvm.cpp"
-  fi
-  for i in $SOURCES; do
-    make_hhvm $RUNTIME_BUILD/runtime/ext/$i.cpp.o ../ext/$i.ext_hhvm.cpp
-  done
-  make_hhvm $RUNTIME_BUILD/runtime/base/builtin_functions.cpp.o ../base/builtin_functions.ext_hhvm.cpp
-fi
-
-if [ "$1" = "infotabs" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/runtime/ext_hhvm
-
-  SOURCES=`find ../ext -name '*.ext_hhvm.cpp'`
-  [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h"
-  $HHVM gen_infotabs_header.php ext_hhvm_infotabs.h $SOURCES ../base/builtin_functions.ext_hhvm.cpp
-
-  [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
-  $HHVM gen_infotabs.php ext_hhvm_infotabs.cpp . "" "" ""
-  check_err $? "Failed generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
 fi
 
 if [ "$1" = "systemlib" -o "$1" = "all" ]; then
@@ -84,6 +54,62 @@ if [ "$1" = "class_map" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/class_map.h"
   $HHVM hphp/idl/class_map.php hphp/system/class_map.cpp hphp/system/globals/constdef.json \
 	`find hphp/idl -name '*.idl.json'`
+fi
+
+if [ "$1" = "lexer" -o "$1" = "all" ]; then
+  cd $HPHP_HOME/hphp/util/parser
+  [ $VERBOSE -eq 1 ] && echo "Generating lexer"
+  FLEX=`which flex`
+  if [ -x "$FLEX" ]; then
+    $FLEX -i -f -Phphp -R -8 --bison-locations -o lex.yy.cpp hphp.ll
+    check_err $? "Failed generating lexer"
+  else
+    echo "No flex with which to generate lexer"
+  fi
+fi
+
+if [ "$1" = "parser" -o "$1" = "all" ]; then
+  cd $HPHP_HOME/hphp/util/parser
+  BISON=`which bison`
+  SED=`which sed`
+  if [ -x "$BISON" -a -x "$SED" ]; then
+    [ $VERBOSE -eq 1 ] && echo "Generating parser"
+    $BISON -pCompiler --verbose --locations -d -onew_hphp.tab.cpp hphp.y
+    rm -f new_hphp.output
+
+    # Header
+    cat new_hphp.tab.hpp | \
+      $SED -r -e 's/(T_\w+) = ([0-9]+)/YYTOKEN(\2, \1)/' | \
+      $SED -e "s/^\s*enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num\n#endif\n   YYTOKEN_MAP/" > new_hphp.tab.hpp.tmp
+    mv new_hphp.tab.hpp.tmp new_hphp.tab.hpp
+    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | head -n 1 | \
+      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' \
+      >> new_hphp.tab.hpp
+    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | tail -n 1 | \
+      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' \
+      >> new_hphp.tab.hpp
+    (diff -q hphp.tab.hpp new_hphp.tab.hpp >/dev/null ||
+      mv -f new_hphp.tab.hpp hphp.tab.hpp) &&
+      rm -f new_hphp.tab.hpp
+
+    # Implementation
+    cat new_hphp.tab.cpp | \
+      $SED -e "s/first_line/line0/g" \
+           -e "s/last_line/line1/g" \
+           -e "s/first_column/char0/g" \
+           -e "s/last_column/char1/g" \
+           -e "s/union/struct/g" \
+           -e "s/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n        memset(yyptr, 0, YYSTACK_BYTES (yystacksize));\n/" \
+           -e "s/YYSTACK_RELOCATE \(yyvs_alloc, yyvs\)/YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs)/" \
+           -e "s/YYSTACK_FREE \(yyss\)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
+      > new_hphp.tab.cpp.tmp
+    mv new_hphp.tab.cpp.tmp new_hphp.tab.cpp
+    (diff -q new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp >/dev/null ||
+      mv -f new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp) &&
+      rm -f new_hphp.tab.cpp
+  else
+    [ $VERBOSE -eq 1 ] && echo "No bison/sed with which to generate parser"
+  fi
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/kernel_version.h"
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
+
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <stdio.h>
-
-#include <util/util.h>
-#include <util/assertions.h>
-#include <util/kernel_version.h>
 
 namespace HPHP {
 

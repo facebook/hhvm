@@ -14,28 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/function_call.h>
-#include <util/util.h>
-#include <util/logger.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/statement/statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 
@@ -44,15 +44,15 @@ using namespace HPHP;
 
 FunctionCall::FunctionCall
 (EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS,
- ExpressionPtr nameExp, const std::string &name, ExpressionListPtr params,
- ExpressionPtr classExp)
+ ExpressionPtr nameExp, const std::string &name, bool hadBackslash,
+ ExpressionListPtr params, ExpressionPtr classExp)
   : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     StaticClassName(classExp), m_nameExp(nameExp),
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_redeclared(false),
     m_noStatic(false), m_noInline(false), m_invokeFewArgsDecision(true),
-    m_arrayParams(false),
+    m_arrayParams(false), m_hadBackslash(hadBackslash),
     m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
 
   if (m_nameExp &&
@@ -208,7 +208,10 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 struct InlineCloneInfo {
-  InlineCloneInfo(FunctionScopePtr fs) : func(fs), callWithThis(false) {}
+  explicit InlineCloneInfo(FunctionScopePtr fs)
+    : func(fs)
+    , callWithThis(false)
+  {}
 
   FunctionScopePtr              func;
   StringToExpressionPtrMap      sepm;

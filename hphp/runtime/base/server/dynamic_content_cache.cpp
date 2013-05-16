@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/dynamic_content_cache.h>
-#include <util/lock.h>
-#include <util/compression.h>
+#include "hphp/runtime/base/server/dynamic_content_cache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/compression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

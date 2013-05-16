@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_UTIL_EXP_ARENA_H_
-#define incl_UTIL_EXP_ARENA_H_
+#ifndef incl_HPHP_UTIL_EXP_ARENA_H_
+#define incl_HPHP_UTIL_EXP_ARENA_H_
 
 #include <boost/noncopyable.hpp>
 #include <stdint.h>
-#include "util/alloc.h"
-#include "util/util.h"
-#include "util/assertions.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONSTANT_TABLE_H__
-#define __CONSTANT_TABLE_H__
+#ifndef incl_HPHP_CONSTANT_TABLE_H_
+#define incl_HPHP_CONSTANT_TABLE_H_
 
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ DECLARE_BOOST_TYPES(ClassScope);
  */
 class ConstantTable : public SymbolTable {
 public:
-  ConstantTable(BlockScope &blockScope);
+  explicit ConstantTable(BlockScope &blockScope);
 
   /**
    * Whether defining something to be non-scalar value or redeclared, or
@@ -103,4 +103,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONSTANT_TABLE_H__
+#endif // incl_HPHP_CONSTANT_TABLE_H_

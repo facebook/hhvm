@@ -15,21 +15,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_mysql.h>
-#include <runtime/ext/ext_preg.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/mysql_stats.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/util/extended_logger.h>
-#include <util/timer.h>
-#include <util/db_mysql.h>
-#include <netinet/in.h>
+#include "folly/ScopeGuard.h"
+
+#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/db_mysql.h"
+#include "netinet/in.h"
 #include <netdb.h>
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -559,7 +561,8 @@ static Variant php_mysql_do_connect(String server, String username,
   }
 
   if (mySQL == NULL) {
-    mySQL = new MySQL(host, port, username, password, database);
+    mySQL = new MySQL(host.c_str(), port, username.c_str(), password.c_str(),
+                      database.c_str());
     ret = mySQL;
     if (async) {
 #ifdef FACEBOOK
@@ -827,6 +830,7 @@ Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
   return data;
 }
 
+#ifdef FACEBOOK
 extern "C" {
 struct MEM_ROOT;
 unsigned long cli_safe_read(MYSQL *);
@@ -901,6 +905,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
   return result;
 }
+#endif // FACEBOOK
 
 static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
@@ -1036,9 +1041,17 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
 
   MYSQL_RES *mysql_result;
   if (use_store) {
+#ifdef FACEBOOK
+    // Facebook specific optimization which depends
+    // on versions of MySQL which allow access to the
+    // grotty internals of libmysqlclient
+    //
+    // If php_mysql_localize_result ever gets rewritten
+    // to use standard APIs, this can be opened up to everyone.
     if (RuntimeOption::MySQLLocalize) {
       return php_mysql_localize_result(conn);
     }
+#endif
     mysql_result = mysql_store_result(conn);
   } else {
     mysql_result = mysql_use_result(conn);
@@ -1443,7 +1456,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   }
 
   struct pollfd* fds = (struct pollfd*)calloc(count, sizeof(struct pollfd));
-  ScopeGuard fds_free([fds]() { free(fds); });
+  SCOPE_EXIT { free(fds); };
 
   // Walk our input, determine what kind of poll() operation is
   // necessary for the descriptor in question, and put an entry into
@@ -1586,7 +1599,7 @@ Variant f_mysql_fetch_object(CVarRef result,
   Variant properties = php_mysql_fetch_hash(result, MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);
-    ClassInfo::SetArray(obj.get(), properties);
+    obj->o_setArray(properties);
 
     return obj;
   }

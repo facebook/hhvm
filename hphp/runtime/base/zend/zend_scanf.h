@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_SCANF_H__
-#define __HPHP_ZEND_SCANF_H__
+#ifndef incl_HPHP_ZEND_SCANF_H_
+#define incl_HPHP_ZEND_SCANF_H_
 
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,4 +40,4 @@ int string_sscanf(const char *string, const char *format, int numVars,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_SCANF_H__
+#endif // incl_HPHP_ZEND_SCANF_H_

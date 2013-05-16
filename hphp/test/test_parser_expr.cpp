@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_parser_expr.h>
-#include <compiler/option.h>
-#include <util/parser/scanner.h>
+#include "hphp/test/test_parser_expr.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/parser/scanner.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -387,9 +387,6 @@ bool TestParserExpr::TestClosure() {
 }
 
 bool TestParserExpr::TestXHP() {
-  //HPHP::Option::ScannerType |= HPHP::Scanner::PreprocessXHP;
-  //HPHP::RuntimeOption::ScannerType |= HPHP::Scanner::PreprocessXHP;
-
   // basics
   V("<?php $x = <thing />;",
     "$x = new xhp_thing(array(), array());\n");

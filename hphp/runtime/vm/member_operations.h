@@ -14,19 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_MEMBER_OPERATIONS_H_
-#define incl_VM_MEMBER_OPERATIONS_H_
+#ifndef incl_HPHP_VM_MEMBER_OPERATIONS_H_
+#define incl_HPHP_VM_MEMBER_OPERATIONS_H_
 
-#include "runtime/base/types.h"
-#include "runtime/base/strings.h"
-#include "system/lib/systemlib.h"
-#include "runtime/base/builtin_functions.h"
-#include "runtime/vm/core_types.h"
-#include "runtime/vm/runtime.h"
-#include "runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
-namespace VM {
 
 // When MoreWarnings is set to true, the VM will raise more warnings
 // on SetOpM, IncDecM and CGetG, intended to match Zend.
@@ -194,8 +193,7 @@ inline TypedValue* ElemArray(ArrayData* base,
 // $result = $base[$key];
 template <bool warn, KeyType keyType = AnyKey>
 inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                               TypedValue* base,
-                               TypedValue* key) {
+                        TypedValue* base, TypedValue* key) {
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -651,11 +649,10 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     } else {
       // Convert key to string offset.
       int64_t x;
-      {
-        TypedValue tv;
-        tvDup(key, &tv);
-        tvCastToInt64InPlace(&tv);
-        x = tv.m_data.num;
+      if (LIKELY(key->m_type == KindOfInt64)) {
+        x = key->m_data.num;
+      } else {
+        x = tvCastToInt64(key);
       }
       if (x < 0 || x >= StringData::MaxSize) {
         // Andrei: can't use PRId64 here because of order of inclusion
@@ -674,16 +671,21 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       // Extract the first character of (string)value.
       char y[2];
       {
-        TypedValue tv;
-        tvDup(value, &tv);
-        tvCastToStringInPlace(&tv);
-        if (tv.m_data.pstr->size() > 0) {
-          y[0] = tv.m_data.pstr->data()[0];
+        StringData* valStr;
+        if (LIKELY(IS_STRING_TYPE(value->m_type))) {
+          valStr = value->m_data.pstr;
+          valStr->incRefCount();
+        } else {
+          valStr = tvCastToString(value);
+        }
+
+        if (valStr->size() > 0) {
+          y[0] = valStr->data()[0];
           y[1] = '\0';
         } else {
           y[0] = '\0';
         }
-        tvRefcountedDecRef(&tv);
+        decRefStr(valStr);
       }
       // Create and save the result.
       if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {
@@ -1326,7 +1328,7 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
           KeyType keyType = AnyKey>
 inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
-                               Class* ctx, TypedValue* base, TypedValue* key) {
+                        Class* ctx, TypedValue* base, TypedValue* key) {
   static_assert(keyType != IntKey, "Integer property keys are not supported");
   assert(!warn || !unset);
   TypedValue* result = nullptr;
@@ -1753,5 +1755,4 @@ inline void UnsetProp(Class* ctx, TypedValue* base,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-}
-#endif // incl_VM_MEMBER_OPERATIONS_H_
+#endif // incl_HPHP_VM_MEMBER_OPERATIONS_H_

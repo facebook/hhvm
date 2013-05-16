@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DYNAMIC_FUNCTION_CALL_H__
-#define __DYNAMIC_FUNCTION_CALL_H__
+#ifndef incl_HPHP_DYNAMIC_FUNCTION_CALL_H_
+#define incl_HPHP_DYNAMIC_FUNCTION_CALL_H_
 
-#include <compiler/expression/function_call.h>
+#include "hphp/compiler/expression/function_call.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,4 +37,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DYNAMIC_FUNCTION_CALL_H__
+#endif // incl_HPHP_DYNAMIC_FUNCTION_CALL_H_

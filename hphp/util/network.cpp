@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "network.h"
-#include "lock.h"
-#include "process.h"
+#include "hphp/util/network.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/process.h"
 #include "util.h"
 
-#include <netinet/in.h>
-#include <arpa/nameser.h>
+#include "netinet/in.h"
+#include "arpa/nameser.h"
 #include <resolv.h>
 
 namespace HPHP {
@@ -90,30 +90,6 @@ std::string Util::GetPrimaryIP() {
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
   return safe_inet_ntoa(in);
-}
-
-bool Util::GetNetworkStats(const char *iface, int &in_bps, int &out_bps) {
-  assert(iface && *iface);
-
-  const char *argv[] = {"", "1", "1", "-n", "DEV", nullptr};
-  string out;
-  Process::Exec("sar", argv, nullptr, out);
-
-  vector<string> lines;
-  Util::split('\n', out.c_str(), lines, true);
-  for (unsigned int i = 0; i < lines.size(); i++) {
-    string &line = lines[i];
-    if (line.find(iface) != string::npos) {
-      vector<string> fields;
-      Util::split(' ', line.c_str(), fields, true);
-      if (fields[1] == iface) {
-        in_bps = atoll(fields[4].c_str());
-        out_bps = atoll(fields[5].c_str());
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

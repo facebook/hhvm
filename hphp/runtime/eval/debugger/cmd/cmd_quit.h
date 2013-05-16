@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_QUIT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_QUIT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,11 +27,17 @@ class CmdQuit : public DebuggerCommand {
 public:
   CmdQuit() : DebuggerCommand(KindOfQuit) {}
 
+  // The text to display when the debugger client processes "help quit".
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
+
+protected:
+  // Carries out the Quit command by informing the server the client
+  // is going away and then getting the client to quit.
+  virtual bool onClientImpl(DebuggerClient *client);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_QUIT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_

@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DO_STATEMENT_H__
-#define __DO_STATEMENT_H__
+#ifndef incl_HPHP_DO_STATEMENT_H_
+#define incl_HPHP_DO_STATEMENT_H_
 
-#include <compiler/statement/loop_statement.h>
+#include "hphp/compiler/statement/loop_statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,4 +46,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DO_STATEMENT_H__
+#endif // incl_HPHP_DO_STATEMENT_H_

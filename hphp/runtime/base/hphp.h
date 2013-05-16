@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_HPHP_H__
-#define __CPP_BASE_HPHP_H__
+#ifndef incl_HPHP_CPP_BASE_HPHP_H_
+#define incl_HPHP_CPP_BASE_HPHP_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,10 +26,10 @@
  * globals.h that defines GlobalVariables class.
  */
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/ext/ext.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/ext/ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __CPP_BASE_HPHP_H__
+#endif // incl_HPHP_CPP_BASE_HPHP_H_

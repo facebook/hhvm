@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SMART_PTR_H__
-#define __HPHP_SMART_PTR_H__
+#ifndef incl_HPHP_SMART_PTR_H_
+#define incl_HPHP_SMART_PTR_H_
 
 #include <boost/static_assert.hpp>
-#include <util/base.h>
-#include <runtime/base/util/exceptions.h>
-#include <runtime/base/util/countable.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/util/countable.h"
 #include <utility>
 
 namespace HPHP {
@@ -51,6 +51,12 @@ public:
   SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
+  }
+
+  enum class NonNull { Tag };
+  explicit SmartPtr(T* px, NonNull) : m_px(px) {
+    assert(px);
+    m_px->incRefCount();
   }
 
   // Move ctor
@@ -245,4 +251,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SMART_PTR_H__
+#endif // incl_HPHP_SMART_PTR_H_

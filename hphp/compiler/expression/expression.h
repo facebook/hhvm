@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPRESSION_H__
-#define __EXPRESSION_H__
+#ifndef incl_HPHP_EXPRESSION_H_
+#define incl_HPHP_EXPRESSION_H_
 
-#include <compiler/construct.h>
-#include <compiler/analysis/type.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/compiler/construct.h"
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
   BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf
@@ -172,6 +172,7 @@ public:
   }
   bool hasSubExpr(ExpressionPtr sub) const;
   virtual void setComment(const std::string &) {}
+  virtual std::string getComment() { return ""; }
   /**
    * Set this expression's error flags.
    */
@@ -417,4 +418,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXPRESSION_H__
+#endif // incl_HPHP_EXPRESSION_H_

@@ -1,0 +1,18 @@
+*** Testing hash_hmac() : error conditions ***
+
+-- Testing hash_hmac() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Testing hash_hmac() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing hash_hmac() function with invalid hash algorithm --
+HipHop Warning: %a
+bool(false)
+===Done===

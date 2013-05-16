@@ -1,0 +1,10 @@
+*** Testing array_values() : error conditions ***
+
+-- Testing array_values() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_values() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+Done

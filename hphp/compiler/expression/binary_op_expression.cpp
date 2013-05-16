@@ -14,23 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <util/parser/hphp.tab.hpp>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/zend/zend_string.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/encaps_list_expression.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/statement/loop_statement.h>
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/statement/loop_statement.h"
 
 using namespace HPHP;
 
@@ -71,6 +71,8 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::MapType;
     } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
       cType = Collection::StableMapType;
+    } else if (strcasecmp(s.c_str(), "set") == 0) {
+      cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
       cType = Collection::PairType;
     }
@@ -218,7 +220,7 @@ ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultConstPtr ar) {
   try {
     ExpressionPtr rep = foldConst(ar);
     if (rep) return replaceValue(rep);
-  } catch (Exception e) {
+  } catch (const Exception& e) {
   }
   return ExpressionPtr();
 }
@@ -410,7 +412,7 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
 
   SimpleFunctionCallPtr call
     (new SimpleFunctionCall(exp->getScope(), loc,
-                            "is_null", expList, ExpressionPtr()));
+                            "is_null", false, expList, ExpressionPtr()));
 
   call->setValid();
   call->setActualType(Type::Boolean);

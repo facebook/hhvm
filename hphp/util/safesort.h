@@ -102,8 +102,8 @@
  * of the input.
  */
 
-#ifndef incl_SAFESORT_H_
-#define incl_SAFESORT_H_
+#ifndef incl_HPHP_SAFESORT_H_
+#define incl_HPHP_SAFESORT_H_
 
 #include <algorithm>
 
@@ -339,5 +339,5 @@ void sort(IterT first, IterT last, CompT comp) {
 }
 }
 
-#endif // incl_SAFESORT_H_
+#endif // incl_HPHP_SAFESORT_H_
 

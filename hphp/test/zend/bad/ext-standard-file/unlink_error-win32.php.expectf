@@ -1,0 +1,33 @@
+*** Testing unlink() : error conditions ***
+-- Testing unlink() on unexpected no. of arguments --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+bool(true)
+
+-- Testing unlink() on invalid arguments --
+HipHop Warning: %a
+bool(false)
+bool(false)
+HipHop Warning: %a
+bool(false)
+bool(false)
+HipHop Warning: %a
+bool(false)
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+-- Testing unlink() on non-existent file --
+HipHop Warning: %a
+bool(false)
+
+-- Testing unlink() on directory --
+HipHop Warning: %a
+bool(false)
+Done

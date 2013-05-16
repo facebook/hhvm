@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BINARY_OPERATIONS_H__
-#define __HPHP_BINARY_OPERATIONS_H__
+#ifndef incl_HPHP_BINARY_OPERATIONS_H_
+#define incl_HPHP_BINARY_OPERATIONS_H_
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
 /**
  * This file contains binary operations that are frequently used and they
@@ -114,4 +114,4 @@ inline Variant operator*(CVarRef v, CObjRef n) { return Variant(v) *= n;}
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_BINARY_OPERATIONS_H__
+#endif // incl_HPHP_BINARY_OPERATIONS_H_

@@ -20,15 +20,15 @@
 
 #include <list>
 
-#include "util/trace.h"
-#include "util/base.h"
-#include "util/rank.h"
-#include "runtime/base/macros.h"
-#include "runtime/vm/class.h"
-#include "treadmill.h"
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/base.h"
+#include "hphp/util/rank.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
-namespace HPHP { namespace VM { namespace Treadmill {
+namespace HPHP {  namespace Treadmill {
 
 TRACE_SET_MOD(treadmill);
 
@@ -153,4 +153,4 @@ void deferredFree(void* p) {
   WorkItem::enqueue(new FreeMemoryTrigger(p));
 }
 
-}}}
+}}

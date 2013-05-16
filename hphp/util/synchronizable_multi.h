@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SYNCHRONIZABLE_MULTI_H__
-#define __SYNCHRONIZABLE_MULTI_H__
+#ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
+#define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
-#include "base.h"
-#include "mutex.h"
-#include "rank.h"
+#include "hphp/util/base.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class SynchronizableMulti {
 public:
-  SynchronizableMulti(int size);
+  explicit SynchronizableMulti(int size);
   virtual ~SynchronizableMulti();
 
   /**
@@ -67,4 +67,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SYNCHRONIZABLE_MULTI_H__
+#endif // incl_HPHP_SYNCHRONIZABLE_MULTI_H_

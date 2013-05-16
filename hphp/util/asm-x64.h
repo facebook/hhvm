@@ -13,15 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_UTIL_ASM_X64_H_
-#define incl_UTIL_ASM_X64_H_
+#ifndef incl_HPHP_UTIL_ASM_X64_H_
+#define incl_HPHP_UTIL_ASM_X64_H_
 
 #include <type_traits>
 
-#include "util/util.h"
-#include "util/base.h"
-#include "util/atomic.h"
-#include "util/trace.h"
+#include "hphp/util/util.h"
+#include "hphp/util/base.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/trace.h"
 
 /*
  * An experimental macro assembler for x64, that strives for low coupling to
@@ -48,7 +48,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -79,7 +79,7 @@ struct Reg64 {
 
   // Implicit conversion for backward compatability only.  This is
   // needed to keep the store_reg##_disp_reg## style apis working.
-  constexpr operator RegNumber() const { return RegNumber(rn); }
+  constexpr /* implicit */ operator RegNumber() const { return RegNumber(rn); }
 
   // Integer conversion is allowed but only explicitly.  (It's not
   // unusual to want to printf registers, etc.  Just cast it first.)
@@ -101,7 +101,7 @@ private:
 #define SIMPLE_REGTYPE(What)                                        \
   struct What {                                                     \
     explicit constexpr What(int rn) : rn(rn) {}                     \
-    explicit constexpr operator RegNumber() const {                 \
+    explicit constexpr /* implicit */ operator RegNumber() const {  \
       return RegNumber(rn);                                         \
     }                                                               \
     explicit constexpr operator int() const { return rn; }          \
@@ -440,14 +440,6 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-static inline void
-atomic_store64(volatile uint64_t* dest, uint64_t value) {
-  // gcc on x64 will implement this with a 64-bit store, and
-  // normal 64-bit stores don't tear across instruction boundaries
-  // assuming all 8 bytes of dest are on the same cacheline.
-  *dest = value;
-}
-
 /*
  * Note that CodeAddresses are not const; the whole point is that we intend
  * to mutate them. uint8_t is as good a type as any: instructions are
@@ -574,7 +566,12 @@ struct DataBlock {
       for (size_t i = 0; i < n; ++i) {
         u.bytes[i] = bs[i];
       }
-      atomic_store64((uint64_t*)frontier, u.qword);
+
+      // If this address doesn't span cache lines, on x64 this is an
+      // atomic store.  We're not using atomic_release_store() because
+      // this code path occurs even when it may span cache lines, and
+      // that function asserts about this.
+      *reinterpret_cast<uint64_t*>(frontier) = u.qword;
     } else {
       memcpy(frontier, bs, n);
     }
@@ -1022,6 +1019,13 @@ struct X64Assembler {
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
                                                        rn(src), rn(dest)); }
 
+  void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
+                                                      m, r); }
+  void loadsbq(IndexedMemoryRef m, Reg64 r) { instrMR(instr_movsbx,
+                                                      m, r); }
+  void movsbq(Reg8 src, Reg64 dest)         { emitRR(instr_movsbx,
+                                                       rn(src), rn(dest)); }
+
   void lea(IndexedMemoryRef p, Reg64 reg) { instrMR(instr_lea, p, reg); }
   void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
   void lea(RIPRelativeRef p, Reg64 reg)   { instrMR(instr_lea, p, reg); }
@@ -1038,6 +1042,7 @@ struct X64Assembler {
   }
 
   void push(Reg64 r)  { instrR(instr_push, r); }
+  void pushl(Reg32 r) { instrR(instr_push, r); }
   void pop (Reg64 r)  { instrR(instr_pop,  r); }
   void idiv(Reg64 r)  { instrR(instr_idiv, r); }
   void incq(Reg64 r)  { instrR(instr_inc,  r); }
@@ -2509,6 +2514,6 @@ X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
 #undef logical_const
 #undef CCS
 
-}}}
+}}
 
 #endif

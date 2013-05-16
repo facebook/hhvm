@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PREG_H__
-#define __PREG_H_
+#ifndef incl_HPHP_PREG_H_
+#define incl_HPHP_PREG_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,4 +57,4 @@ size_t preg_pcre_cache_size();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PREG_H__
+#endif // incl_HPHP_PREG_H__

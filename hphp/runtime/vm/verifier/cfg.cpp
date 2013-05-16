@@ -14,12 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/verifier/cfg.h>
-#include <runtime/vm/verifier/util.h>
-#include <util/range.h>
+#include "hphp/runtime/vm/verifier/cfg.h"
+#include "hphp/runtime/vm/verifier/util.h"
+#include "hphp/util/range.h"
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -303,4 +302,4 @@ void sortRpo(Graph* g) {
   RpoSort _(g);
 }
 
-}}}
+}}

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
-#define __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
+#ifndef incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_
+#define incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_
 
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
@@ -26,7 +26,7 @@
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 
@@ -220,7 +220,7 @@ public:
     return boost::interprocess::named_mutex::remove(name);
   }
 
-  SharedMemoryLock(const char *name) {
+  explicit SharedMemoryLock(const char *name) {
     assert(name && *name);
     m_mutex = new boost::interprocess::named_mutex
       (boost::interprocess::open_or_create, name);
@@ -239,4 +239,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
+#endif // incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_

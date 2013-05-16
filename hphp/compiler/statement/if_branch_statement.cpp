@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/expression/constant_expression.h>
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/expression/constant_expression.h"
 
 using namespace HPHP;
 

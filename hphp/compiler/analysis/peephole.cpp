@@ -14,14 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "compiler/analysis/peephole.h"
-#include "compiler/analysis/emitter.h"
+#include "hphp/compiler/analysis/peephole.h"
+#include "hphp/compiler/analysis/emitter.h"
 
 namespace HPHP { namespace Compiler {
 
-using VM::FuncEmitter;
-using VM::UnitEmitter;
-using VM::Offset;
 
 static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
   if (offsetPtr) {

@@ -15,21 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_debugger.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/eval/debugger/cmd/cmd_user.h>
-#include <runtime/eval/debugger/cmd/cmd_interrupt.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <tbb/concurrent_hash_map.h>
-#include <util/logger.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_debugger.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_user.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/util/logger.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace Eval;
-using HPHP::VM::Transl::CallerFrame;
+using HPHP::Transl::CallerFrame;
 
 const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES =
   DebuggerClient::AutoCompleteFileNames;
@@ -157,7 +157,7 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(Class* cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser() {
@@ -172,12 +172,12 @@ bool c_DebuggerProxyCmdUser::t_islocal() {
 
 Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
   CmdUser cmdUser(cmd);
-  return m_proxy->send(&cmdUser);
+  return m_proxy->sendToClient(&cmdUser);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(Class* cb) : ExtObjectData(cb) {
 }
 
 c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser() {
@@ -307,7 +307,7 @@ Array c_DebuggerClientCmdUser::t_args() {
 
 Variant c_DebuggerClientCmdUser::t_send(CObjRef cmd) {
   CmdUser cmdUser(cmd);
-  m_client->send(&cmdUser);
+  m_client->sendToServer(&cmdUser);
   return true;
 }
 
@@ -317,18 +317,29 @@ Variant c_DebuggerClientCmdUser::t_xend(CObjRef cmd) {
   return ret->getUserCommand();
 }
 
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+static const StaticString s_namespace("namespace");
+static const StaticString s_class("class");
+static const StaticString s_function("function");
+static const StaticString s_text("text");
+static const StaticString s_user("user");
+static const StaticString s_configFName("configFName");
+static const StaticString s_host("host");
+static const StaticString s_port("port");
+static const StaticString s_sandbox("sandbox");
+
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
   BreakPointInfoPtr bpi = m_client->getCurrentLocation();
-  Array ret(Array::Create());
-  if (bpi) {
-    ret.set("file",      String(bpi->m_file));
-    ret.set("line",      (int64_t)bpi->m_line1);
-    ret.set("namespace", String(bpi->getNamespace()));
-    ret.set("class",     String(bpi->getClass()));
-    ret.set("function",  String(bpi->getFunction()));
-    ret.set("text",      String(bpi->site()));
-  }
-  return ret;
+  if (!bpi) return Array::Create();
+  ArrayInit ret(6);
+  ret.set(s_file,      String(bpi->m_file));
+  ret.set(s_line,      (int64_t)bpi->m_line1);
+  ret.set(s_namespace, String(bpi->getNamespace()));
+  ret.set(s_class,     String(bpi->getClass()));
+  ret.set(s_function,  String(bpi->getFunction()));
+  ret.set(s_text,      String(bpi->site()));
+  return ret.create();
 }
 
 Variant c_DebuggerClientCmdUser::t_getstacktrace() {
@@ -368,7 +379,7 @@ const int64_t q_DebuggerClient$$STATE_READY_FOR_COMMAND
 const int64_t q_DebuggerClient$$STATE_BUSY
   = DebuggerClient::StateBusy;
 
-c_DebuggerClient::c_DebuggerClient(VM::Class* cb) : ExtObjectData(cb) {
+c_DebuggerClient::c_DebuggerClient(Class* cb) : ExtObjectData(cb) {
   m_client = NULL;
 }
 
@@ -404,15 +415,15 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
   ops.apiMode = true;
 
   Array opsArr = options.toArray();
-  if (opsArr.exists("user")) {
-    ops.user = opsArr.rvalAtRef("user").toString().data();
+  if (opsArr.exists(s_user)) {
+    ops.user = opsArr.rvalAtRef(s_user).toString().data();
   } else {
     raise_warning("must specify user in options");
     return false;
   }
 
-  if (opsArr.exists("configFName")) {
-    ops.configFName = opsArr.rvalAtRef("configFName").toString().data();
+  if (opsArr.exists(s_configFName)) {
+    ops.configFName = opsArr.rvalAtRef(s_configFName).toString().data();
     FILE *f = fopen(ops.configFName.c_str(), "r");
     if (!f) {
       raise_warning("cannot access config file %s", ops.configFName.c_str());
@@ -421,14 +432,14 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
     fclose(f);
   }
 
-  if (opsArr.exists("host")) {
-    ops.host = opsArr.rvalAtRef("host").toString().data();
+  if (opsArr.exists(s_host)) {
+    ops.host = opsArr.rvalAtRef(s_host).toString().data();
   }
-  if (opsArr.exists("port")) {
-    ops.port = opsArr.rvalAtRef("port").toInt32();
+  if (opsArr.exists(s_port)) {
+    ops.port = opsArr.rvalAtRef(s_port).toInt32();
   }
-  if (opsArr.exists("sandbox")) {
-    ops.sandbox = opsArr.rvalAtRef("sandbox").toString().data();
+  if (opsArr.exists(s_sandbox)) {
+    ops.sandbox = opsArr.rvalAtRef(s_sandbox).toString().data();
   }
 
   m_client->init(ops);
@@ -539,7 +550,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
       raise_warning("not getting a command");
     } else if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      cmdInterrupt->onClientD(m_client);
+      cmdInterrupt->onClient(m_client);
     } else {
       // Previous pending commands
       cmd->handleReply(m_client);

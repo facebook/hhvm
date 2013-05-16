@@ -1,0 +1,32 @@
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+Check general fields
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Check type
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+Recent: OK
+Unseen: OK
+Flagged: OK
+Answered: OK
+Deleted: OK
+Draft: OK
+string(%d) "%s"
+string(%d) "%d"
+int(%d)

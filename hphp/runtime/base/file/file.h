@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_FILE_H__
-#define __HPHP_FILE_H__
+#ifndef incl_HPHP_FILE_H_
+#define incl_HPHP_FILE_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/request_local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,4 +183,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_FILE_H__
+#endif // incl_HPHP_FILE_H_

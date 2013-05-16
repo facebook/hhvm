@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/static_statement.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/expression/expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/block_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/option.h>
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/option.h"
 
 using namespace HPHP;
 

@@ -13,16 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_READ_ONLY_ARENA_H_
-#define incl_READ_ONLY_ARENA_H_
+#ifndef incl_HPHP_READ_ONLY_ARENA_H_
+#define incl_HPHP_READ_ONLY_ARENA_H_
 
 #include <cstdlib>
 #include <thread>
 #include <mutex>
 #include <boost/noncopyable.hpp>
 
-#include "util/tiny_vector.h"
-#include "util/alloc.h"
+#include "hphp/util/tiny_vector.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 

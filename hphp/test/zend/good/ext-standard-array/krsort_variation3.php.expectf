@@ -1,0 +1,202 @@
+*** Testing krsort() : usage variations ***
+
+-- Testing krsort() by supplying various integer/float arrays --
+
+-- Iteration 1 --
+- With defualt sort flag -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [7]=>
+  int(0)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [-2]=>
+  int(-11)
+  [-4]=>
+  int(-21)
+  [-6]=>
+  int(-31)
+  [-10]=>
+  int(-41)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [7]=>
+  int(0)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [-2]=>
+  int(-11)
+  [-4]=>
+  int(-21)
+  [-6]=>
+  int(-31)
+  [-10]=>
+  int(-41)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [7]=>
+  int(0)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [-2]=>
+  int(-11)
+  [-4]=>
+  int(-21)
+  [-6]=>
+  int(-31)
+  [-10]=>
+  int(-41)
+}
+
+-- Iteration 2 --
+- With defualt sort flag -
+bool(true)
+array(6) {
+  [6]=>
+  float(0.0001)
+  [4]=>
+  float(0.106)
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [0]=>
+  float(0.5)
+  [-7]=>
+  float(-0.1)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+array(6) {
+  [6]=>
+  float(0.0001)
+  [4]=>
+  float(0.106)
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [0]=>
+  float(0.5)
+  [-7]=>
+  float(-0.1)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+array(6) {
+  [6]=>
+  float(0.0001)
+  [4]=>
+  float(0.106)
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [0]=>
+  float(0.5)
+  [-7]=>
+  float(-0.1)
+}
+
+-- Iteration 3 --
+- With defualt sort flag -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [9]=>
+  float(0.106)
+  [7]=>
+  int(2)
+  [6]=>
+  float(0.09)
+  [5]=>
+  int(0)
+  [4]=>
+  int(-1)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [-3]=>
+  float(-0.01)
+  [-8]=>
+  float(-0.9)
+  [-10]=>
+  float(-0.106)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [9]=>
+  float(0.106)
+  [7]=>
+  int(2)
+  [6]=>
+  float(0.09)
+  [5]=>
+  int(0)
+  [4]=>
+  int(-1)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [-3]=>
+  float(-0.01)
+  [-8]=>
+  float(-0.9)
+  [-10]=>
+  float(-0.106)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [9]=>
+  float(0.106)
+  [7]=>
+  int(2)
+  [6]=>
+  float(0.09)
+  [5]=>
+  int(0)
+  [4]=>
+  int(-1)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [-3]=>
+  float(-0.01)
+  [-8]=>
+  float(-0.9)
+  [-10]=>
+  float(-0.106)
+}
+Done

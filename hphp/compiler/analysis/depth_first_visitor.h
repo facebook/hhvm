@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DEPTH_FIRST_VISITOR_H__
-#define __DEPTH_FIRST_VISITOR_H__
+#ifndef incl_HPHP_DEPTH_FIRST_VISITOR_H_
+#define incl_HPHP_DEPTH_FIRST_VISITOR_H_
 
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/analysis/block_scope.h>
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/block_scope.h"
 
-#include <compiler/expression/expression.h>
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,4 +230,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DEPTH_FIRST_VISITOR_H__
+#endif // incl_HPHP_DEPTH_FIRST_VISITOR_H_

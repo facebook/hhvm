@@ -1,0 +1,137 @@
+*** Testing fgetss() : usage variations ***
+
+-- Testing fgetss() with file opened using w+ mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using w+b mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using w+t mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using a+ mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using a+b mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using a+t mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using x+ mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using x+b mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+
+-- Testing fgetss() with file opened using x+t mode --
+int(445)
+bool(true)
+int(0)
+bool(false)
+-- Reading when file pointer points to EOF --
+int(0)
+int(445)
+bool(false)
+int(445)
+bool(true)
+bool(false)
+int(445)
+bool(true)
+Done

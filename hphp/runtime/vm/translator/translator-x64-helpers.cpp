@@ -13,16 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/event_hook.h>
-#include <runtime/vm/stats.h>
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 inline bool
@@ -118,7 +117,7 @@ static TCA callAndResume(ActRec *ar) {
      */
     VMRegAnchor _(ar);
     uint64_t rip = ar->m_savedRip;
-    g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
+    g_vmContext->doFCall(ar, g_vmContext->m_pc);
     ar->m_savedRip = rip;
     return Translator::Get()->getResumeHelperRet();
   }
@@ -233,15 +232,15 @@ TCA funcBodyHelper(ActRec* fp) {
   return tca;
 }
 
-void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
+void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
   DECLARE_FRAME_POINTER(framePtr);
   ActRec* fp = (ActRec*)framePtr->m_savedRbp;
 
   VMExecutionContext *ec = g_vmContext;
   ec->m_fp = fp;
   ec->m_stack.top() = sp;
-  ec->m_pc = curUnit()->at(args->m_pcOff);
-  PC pc = curUnit()->at(args->m_pcNext);
+  ec->m_pc = curUnit()->at(pcOff);
+  PC pc = curUnit()->at(pcNext);
 
   tl_regState = REGSTATE_CLEAN;
   bool runFunc = ec->doFCallArray(pc);
@@ -255,4 +254,20 @@ void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
   framePtr->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
-} } } // HPHP::VM::Transl
+void functionEnterHelper(const ActRec* ar) {
+  DECLARE_FRAME_POINTER(framePtr);
+
+  uint64_t savedRip = ar->m_savedRip;
+  uint64_t savedRbp = ar->m_savedRbp;
+  if (LIKELY(EventHook::onFunctionEnter(ar, EventHook::NormalFunc))) return;
+  /* We need to skip the function.
+     FunctionEnter already cleaned up ar, and pushed the return value,
+     so all we need to do is return to where ar would have returned to,
+     with rbp set to ar's outer frame.
+  */
+  framePtr->m_savedRip = savedRip;
+  framePtr->m_savedRbp = savedRbp;
+  sp = g_vmContext->m_stack.top();
+}
+
+} } // HPHP::Transl

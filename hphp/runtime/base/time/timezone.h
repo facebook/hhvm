@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TIMEZONE_H__
-#define __HPHP_TIMEZONE_H__
+#ifndef incl_HPHP_TIMEZONE_H_
+#define incl_HPHP_TIMEZONE_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/util/smart_object.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/util/smart_object.h"
 
 extern "C" {
 #include <timelib.h>
@@ -143,4 +143,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TIMEZONE_H__
+#endif // incl_HPHP_TIMEZONE_H_

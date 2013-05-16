@@ -15,24 +15,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_closure.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/util/libevent_http_client.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <util/exception.h>
-#include <util/util.h>
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::VM::ActRec;
-using HPHP::VM::Transl::CallerFrame;
+using HPHP::Transl::CallerFrame;
 
 static const StaticString s_internal("internal");
 static const StaticString s_user("user");
@@ -50,15 +49,19 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
      function_exists(function_name));
 }
 
+static const StaticString
+  s__invoke("__invoke"),
+  s_Closure__invoke("Closure::__invoke");
+
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
   bool ret = true;
   if (LIKELY(!syntax)) {
     CallerFrame cf;
     ObjectData* obj = NULL;
-    HPHP::VM::Class* cls = NULL;
+    HPHP::Class* cls = NULL;
     StringData* invName = NULL;
-    const HPHP::VM::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+    const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
                                                  invName, false);
     if (f == NULL) {
       ret = false;
@@ -108,13 +111,11 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 
   if (Variant::GetAccessorType(tv_func) == KindOfObject) {
     ObjectData *d = Variant::GetObjectData(tv_func);
-    static const StringData* sd__invoke
-      = StringData::GetStaticString("__invoke");
-    const VM::Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
+    const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
       if (d->instanceof(c_Closure::s_cls)) {
         // Hack to stop the mangled name from showing up
-        name = "Closure::__invoke";
+        name = s_Closure__invoke;
       } else {
         name = d->o_getClassName() + "::__invoke";
       }
@@ -125,7 +126,8 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   return false;
 }
 
-Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+Variant f_call_user_func(int _argc, CVarRef function,
+                         CArrRef _argv /* = null_array */) {
   return vm_call_user_func(function, _argv);
 }
 
@@ -156,13 +158,19 @@ Variant f_end_user_func_async(CObjRef handle,
   return uninit_null();
 }
 
+static const StaticString
+  s_func("func"),
+  s_args("args"),
+  s_exception("exception"),
+  s_ret("ret");
+
 String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
-    out.set("ret", vm_call_user_func(in["func"], in["args"]));
+    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args]));
   } catch (Object &e) {
-    out.set("exception", e);
+    out.set(s_exception, e);
   }
   return f_serialize(out);
 }
@@ -172,9 +180,6 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
                                    CArrRef params) {
   return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
 }
-
-static const StaticString s_func("func");
-static const StaticString s_args("args");
 
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
                              int timeout, CVarRef function,
@@ -229,17 +234,18 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
     return false;
   }
 
-  if (res.toArray().exists("exception")) {
-    throw res["exception"];
+  if (res.toArray().exists(s_exception)) {
+    throw res[s_exception];
   }
-  return res["ret"];
+  return res[s_ret];
 }
 
 Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
   return f_forward_static_call(0, function, params);
 }
 
-Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+Variant f_forward_static_call(int _argc, CVarRef function,
+                              CArrRef _argv /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, _argv, true);

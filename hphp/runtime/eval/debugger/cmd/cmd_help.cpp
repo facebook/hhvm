@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_help.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_help.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdHelp::HelpAll(DebuggerClient *client) {
   client->helpCmds(
@@ -35,7 +37,6 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     "[s]tep     *", "steps into a function call or an expression",
     "[n]ext     *", "steps over a function call or a line",
     "[o]ut      *", "steps out a function call",
-    "[j]ump",       "jumps to specified line of code for execution",
 
     "Display Commands", "",
     "[p]rint",      "prints a variable's value",
@@ -59,7 +60,7 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     "Documentation and Source Code", "",
     "[i]nfo",       "displays documentations and other information",
     "[l]ist     *", "displays source codes",
-    "[h]elp",       "displays this help",
+    "[h]elp    **", "displays this help",
     "?",            "displays this help",
 
     "Shell and Extended Commands", "",
@@ -71,7 +72,8 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     nullptr
   );
 
-  client->helpBody("* These commands are replayable by just hitting return.");
+  client->helpBody("* These commands are replayable by just hitting return.\n"
+      "** Type \"help help\" to get more help.");
 }
 
 void CmdHelp::HelpStarted(DebuggerClient *client) {
@@ -120,11 +122,11 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "\n"
     "The command to run a script normally looks like this,\n"
     "\n"
-    "  ./hhvm -f myscript.php\n"
+    "  hhvm myscript.php\n"
     "\n"
-    "Simply add \"-m debug\" to run the script in debugger,\n"
+    "Simply add \"-m debug\" to run the script in debugger,\n\n"
     "\n"
-    "  ./hhvm -m debug -f myscript.php\n"
+    "  hhvm -m debug myscript.php\n"
     "\n"
     "Once started, set breakpoints like this,\n"
     "\n"
@@ -172,7 +174,7 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "\n"
     "Connect to an HHVM server from command line,\n"
     "\n"
-    "  ./hhvm -m debug --debug-host mymachine.com\n"
+    "  hhvm -m debug -h mymachine.com\n"
     "\n"
     "Or, connect from within debugger,\n"
     "\n"
@@ -276,8 +278,8 @@ bool CmdHelp::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdHelp::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdHelp::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     HelpAll(client);

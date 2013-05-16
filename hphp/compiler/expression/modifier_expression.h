@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __MODIFIER_EXPRESSION_H__
-#define __MODIFIER_EXPRESSION_H__
+#ifndef incl_HPHP_MODIFIER_EXPRESSION_H_
+#define incl_HPHP_MODIFIER_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(ModifierExpression);
 
 class ModifierExpression : public Expression {
 public:
-  ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
+  explicit ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
@@ -52,4 +52,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __MODIFIER_EXPRESSION_H__
+#endif // incl_HPHP_MODIFIER_EXPRESSION_H_

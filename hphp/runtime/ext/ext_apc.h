@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_APC_H__
-#define __EXT_APC_H__
+#ifndef incl_HPHP_EXT_APC_H_
+#define incl_HPHP_EXT_APC_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/server/upload.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/server/upload.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,4 +129,4 @@ size_t get_const_map_size();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_APC_H__
+#endif // incl_HPHP_EXT_APC_H_

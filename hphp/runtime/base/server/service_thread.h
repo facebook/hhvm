@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SERVICE_THREAD_H__
-#define __SERVICE_THREAD_H__
+#ifndef incl_HPHP_SERVICE_THREAD_H_
+#define incl_HPHP_SERVICE_THREAD_H_
 
-#include <util/async_func.h>
+#include "hphp/util/async_func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,4 +47,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SERVICE_THREAD_H__
+#endif // incl_HPHP_SERVICE_THREAD_H_

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_base.h>
+#include "hphp/test/test_base.h"
 #include <sys/param.h>
-#include <compiler/option.h>
-#include <test/test.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_array.h>
+#include "hphp/compiler/option.h"
+#include "hphp/test/test.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_array.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -13,22 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_TRANSLATOR_X64_INTERNAL_H_
-#define incl_TRANSLATOR_X64_INTERNAL_H_
+#ifndef incl_HPHP_TRANSLATOR_X64_INTERNAL_H_
+#define incl_HPHP_TRANSLATOR_X64_INTERNAL_H_
 
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include <runtime/vm/translator/abi-x64.h>
+#include "hphp/runtime/vm/translator/abi-x64.h"
 
-using namespace HPHP::VM::Transl::reg;
+using namespace HPHP::Transl::reg;
 using namespace HPHP::Util;
 using namespace HPHP::Trace;
 using std::max;
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 static const Trace::Module TRACEMOD = Trace::tx64;
@@ -44,11 +43,6 @@ void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 }
 
 // RAII aids to machine code.
-
-// In shared stubs, we've already made the stack odd by calling
-// from a to astubs. Calls from a are on an even rsp.
-typedef PhysRegSaverParity<0> PhysRegSaverStub;
-typedef PhysRegSaverParity<1> PhysRegSaver;
 
 // Put FreezeRegs in a scope around any emit calls where the caller needs
 // to be sure the callee will not modify the state of the register
@@ -917,7 +911,7 @@ inline void emitCopyToAligned(X64Assembler& a,
 
 // ArgManager -- support for passing VM-level data to helper functions.
 class ArgManager {
-  typedef HPHP::VM::Transl::X64Assembler& A;
+  typedef HPHP::Transl::X64Assembler& A;
 public:
   ArgManager(TranslatorX64 &tx64, A& a) : m_tx64(tx64), m_a(a) { }
 
@@ -1053,7 +1047,7 @@ struct Deleter : private boost::noncopyable {
   T** p;
 };
 
-}}}
+}}
 
 #endif
 

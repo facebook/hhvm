@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __IF_BRANCH_STATEMENT_H__
-#define __IF_BRANCH_STATEMENT_H__
+#ifndef incl_HPHP_IF_BRANCH_STATEMENT_H_
+#define incl_HPHP_IF_BRANCH_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,4 +45,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __IF_BRANCH_STATEMENT_H__
+#endif // incl_HPHP_IF_BRANCH_STATEMENT_H_

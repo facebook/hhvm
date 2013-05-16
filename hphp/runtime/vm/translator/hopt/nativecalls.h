@@ -20,10 +20,10 @@
 #include <initializer_list>
 #include <vector>
 
-#include "runtime/vm/translator/types.h"
-#include "runtime/vm/translator/hopt/codegen.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h"
 
-namespace HPHP { namespace VM { namespace JIT { namespace NativeCalls {
+namespace HPHP {  namespace JIT { namespace NativeCalls {
 
 // Information about C++ helpers called by translated code, used by
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full
@@ -36,7 +36,7 @@ enum FuncType : unsigned {
 
 struct FuncPtr {
   FuncPtr() {}
-  FuncPtr(TCA f) : type(FPtr), ptr(f) {}
+  /* implicit */ FuncPtr(TCA f) : type(FPtr), ptr(f) {}
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) { assert(t == FSSA); }
 
   FuncType type;
@@ -51,6 +51,7 @@ enum ArgType : unsigned {
   TV,
   VecKeyS,
   VecKeyIS,
+  Immed,
 };
 struct Arg {
   ArgType type;
@@ -80,6 +81,6 @@ private:
   CallInfoMap m_map;
 };
 
-} } } }
+} } }
 
 #endif

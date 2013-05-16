@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/user_file.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/vm/instance.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/base/file/user_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/instance.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 
@@ -38,22 +38,21 @@ StaticString s_call("__call");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UserFile::UserFile(VM::Class *cls, int options /*= 0 */,
+UserFile::UserFile(Class *cls, int options /*= 0 */,
                    CVarRef context /*= null */) :
                    m_cls(cls), m_options(options) {
-  VM::Transl::VMRegAnchor _;
-  const VM::Func *ctor;
+  Transl::VMRegAnchor _;
+  const Func *ctor;
   if (MethodLookup::MethodFoundWithThis !=
       g_vmContext->lookupCtorMethod(ctor, cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    cls->name()->data());
   }
 
-  m_obj = VM::Instance::newInstance(cls);
+  m_obj = Instance::newInstance(cls);
   m_obj.o_set("context", context);
   Variant ret;
-  g_vmContext->invokeFunc(ret.asTypedValue(), ctor,
-                          Array::Create(), m_obj.get());
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
 
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());
@@ -71,11 +70,11 @@ UserFile::UserFile(VM::Class *cls, int options /*= 0 */,
 UserFile::~UserFile() {
 }
 
-const VM::Func* UserFile::lookupMethod(const StringData* name) {
-  const VM::Func *f = m_cls->lookupMethod(name);
+const Func* UserFile::lookupMethod(const StringData* name) {
+  const Func *f = m_cls->lookupMethod(name);
   if (!f) return nullptr;
 
-  if (f->attrs() & VM::AttrStatic) {
+  if (f->attrs() & AttrStatic) {
     throw InvalidArgumentException(0, "%s::%s() must not be declared static",
                                    m_cls->name()->data(), name->data());
   }
@@ -84,16 +83,16 @@ const VM::Func* UserFile::lookupMethod(const StringData* name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant UserFile::invoke(const VM::Func *func, CStrRef name,
+Variant UserFile::invoke(const Func *func, CStrRef name,
                          CArrRef args, bool &success) {
-  VM::Transl::VMRegAnchor _;
+  Transl::VMRegAnchor _;
 
   // Assume failure
   success = false;
 
   // Public method, no private ancestor, no need for further checks (common)
   if (func &&
-      !(func->attrs() & (VM::AttrPrivate|VM::AttrProtected|VM::AttrAbstract)) &&
+      !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
       !func->hasPrivateAncestor()) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());

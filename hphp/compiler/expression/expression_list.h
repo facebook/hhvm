@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPRESSION_LIST_H__
-#define __EXPRESSION_LIST_H__
+#ifndef incl_HPHP_EXPRESSION_LIST_H_
+#define incl_HPHP_EXPRESSION_LIST_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,8 +33,8 @@ public:
     ListKindLeft
   };
 
-  ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                 ListKind kind = ListKindParam);
+  explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                          ListKind kind = ListKindParam);
 
   // change case to lower so to make it case insensitive
   void toLower();
@@ -105,4 +105,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __EXPRESSION_LIST_H__
+#endif // incl_HPHP_EXPRESSION_LIST_H_

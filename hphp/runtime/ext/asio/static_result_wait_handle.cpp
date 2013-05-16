@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace {
   StaticString s_staticResult("<static-result>");
 }
 
-c_StaticResultWaitHandle::c_StaticResultWaitHandle(VM::Class* cb)
+c_StaticResultWaitHandle::c_StaticResultWaitHandle(Class* cb)
     : c_StaticWaitHandle(cb) {
   setState(STATE_SUCCEEDED);
 }
@@ -40,7 +40,7 @@ void c_StaticResultWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticResultWaitHandle::ti_create(const char* cls, CVarRef result) {
+Object c_StaticResultWaitHandle::ti_create(CVarRef result) {
   return Create(result.asTypedValue());
 }
 

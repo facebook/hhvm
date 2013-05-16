@@ -14,15 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_VERIFIER_CFG_H_
-#define incl_VM_VERIFIER_CFG_H_
+#ifndef incl_HPHP_VM_VERIFIER_CFG_H_
+#define incl_HPHP_VM_VERIFIER_CFG_H_
 
-#include "runtime/vm/repo.h"
-#include "runtime/vm/verifier/util.h"
-#include "util/arena.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/verifier/util.h"
+#include "hphp/util/arena.h"
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -265,6 +264,6 @@ inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
   return fcall + instrLen((Opcode*)fcall) - bc;
 }
 
-}}} // HPHP::VM::Verifier
+}} // HPHP::Verifier
 
-#endif // incl_VM_VERIFIER_CFG_H_
+#endif // incl_HPHP_VM_VERIFIER_CFG_H_

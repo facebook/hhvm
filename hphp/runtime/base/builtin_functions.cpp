@@ -14,31 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/variable_unserializer.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/strings.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/ext/ext_process.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_collections.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/process.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/event_hook.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/system/lib/systemlib.h"
 
 #include <limits>
 
@@ -81,17 +81,17 @@ bool array_is_valid_callback(CArrRef arr) {
   return true;
 }
 
-const HPHP::VM::Func*
+const HPHP::Func*
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
-                   HPHP::VM::Class*& cls,
+                   HPHP::Class*& cls,
                    StringData*& invName,
                    bool warn /* = true */) {
   invName = nullptr;
   if (function.isString() || function.isArray()) {
-    HPHP::VM::Class* ctx = nullptr;
+    HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);
     // Decode the 'function' parameter into this_, cls, name, pos, and
     // nameContainsClass.
@@ -160,7 +160,7 @@ vm_decode_function(CVarRef function,
                             "is undefined", sclass->data(), name->data());
             }
           }
-          cls = VM::Unit::loadClass(sclass.get());
+          cls = Unit::loadClass(sclass.get());
         }
         if (!cls) {
           if (warn) {
@@ -175,7 +175,7 @@ vm_decode_function(CVarRef function,
       }
     }
 
-    HPHP::VM::Class* cc = cls;
+    HPHP::Class* cc = cls;
     if (nameContainsClass) {
       String c = name.substr(0, pos);
       name = name.substr(pos + 2);
@@ -206,7 +206,7 @@ vm_decode_function(CVarRef function,
           }
         }
       } else {
-        cc = VM::Unit::loadClass(c.get());
+        cc = Unit::loadClass(c.get());
       }
       if (!cc) {
         if (warn) {
@@ -231,7 +231,7 @@ vm_decode_function(CVarRef function,
       }
     }
     if (!cls) {
-      HPHP::VM::Func* f = HPHP::VM::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
       if (!f) {
         if (warn) {
           throw_invalid_argument("function: method '%s' not found",
@@ -244,9 +244,9 @@ vm_decode_function(CVarRef function,
     }
     assert(cls);
     CallType lookupType = this_ ? ObjMethod : ClsMethod;
-    const HPHP::VM::Func* f =
+    const HPHP::Func* f =
       g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
-    if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
+    if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;
     } else {
@@ -264,11 +264,11 @@ vm_decode_function(CVarRef function,
           // If this_ is non-null AND we could not find a method, try
           // looking up __call in cls's method table
           f = cls->lookupMethod(s___call.get());
-          assert(!f || !(f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || !(f->attrs() & AttrStatic));
         }
         if (!f && lookupType == ClsMethod) {
           f = cls->lookupMethod(s___callStatic.get());
-          assert(!f || (f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
         }
         if (f) {
@@ -293,7 +293,7 @@ vm_decode_function(CVarRef function,
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
     if (!this_ && forwarding && ar) {
-      HPHP::VM::Class* fwdCls = nullptr;
+      HPHP::Class* fwdCls = nullptr;
       ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
       if (obj) {
         fwdCls = obj->getVMClass();
@@ -302,7 +302,7 @@ vm_decode_function(CVarRef function,
       }
       // Only forward the current late bound class if it is the same or
       // a descendent of cls
-      if (fwdCls && fwdCls->classof(cls->preClass())) {
+      if (fwdCls && fwdCls->classof(cls)) {
         cls = fwdCls;
       }
     }
@@ -312,9 +312,9 @@ vm_decode_function(CVarRef function,
     static StringData* invokeStr = StringData::GetStaticString("__invoke");
     this_ = function.asCObjRef().get();
     cls = nullptr;
-    const HPHP::VM::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
+    const HPHP::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
     if (f != nullptr &&
-        ((f->attrs() & HPHP::VM::AttrStatic) && !f->isClosureBody())) {
+        ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
@@ -330,10 +330,10 @@ vm_decode_function(CVarRef function,
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
-  HPHP::VM::Class* cls = nullptr;
-  HPHP::VM::Transl::CallerFrame cf;
+  HPHP::Class* cls = nullptr;
+  HPHP::Transl::CallerFrame cf;
   StringData* invName = nullptr;
-  const HPHP::VM::Func* f = vm_decode_function(function, cf(), forwarding,
+  const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
                                                obj, cls, invName);
   if (f == nullptr) {
     return uninit_null();
@@ -346,7 +346,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
-  VM::Func* func = VM::Unit::loadFunc(function.get());
+  Func* func = Unit::loadFunc(function.get());
   if (func) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
@@ -363,13 +363,13 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
 
 Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
                              bool fatal /* = true */) {
-  HPHP::VM::Class* class_ = VM::Unit::lookupClass(s.get());
+  HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
-  const HPHP::VM::Func* f = class_->lookupMethod(method.get());
-  if (f == nullptr || !(f->attrs() & HPHP::VM::AttrStatic)) {
+  const HPHP::Func* f = class_->lookupMethod(method.get());
+  if (f == nullptr || !(f->attrs() & AttrStatic)) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
@@ -504,12 +504,13 @@ void pause_forever() {
   for (;;) sleep(300);
 }
 
-void check_request_surprise(ThreadInfo *info) {
+ssize_t check_request_surprise(ThreadInfo *info) {
   RequestInjectionData &p = info->m_reqInjectionData;
   bool do_timedout, do_memExceeded, do_signaled;
 
   ssize_t flags = p.fetchAndClearFlags();
-  do_timedout = (flags & RequestInjectionData::TimedOutFlag) && !p.debugger;
+  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebugger();
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
 
@@ -528,6 +529,7 @@ void check_request_surprise(ThreadInfo *info) {
   if (pendingException) {
     pendingException->throwException();
   }
+  return flags;
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
@@ -584,7 +586,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
 
 void throw_bad_array_exception() {
   const char* fn = "(unknown)";
-  HPHP::VM::ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_vmContext->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
@@ -685,7 +687,9 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfStaticString:
   case KindOfString:  otype = "string";      break;
   case KindOfArray:   otype = "array";       break;
-  case KindOfObject:  otype = val.getObjectData()->o_getClassName(); break;
+  case KindOfObject:
+    otype = val.getObjectData()->o_getClassName().c_str();
+    break;
   default:
     assert(false);
   }
@@ -880,7 +884,7 @@ bool empty(CVarRef v, CVarRef offset) {
       return collectionOffsetEmpty(obj, offset);
     } else {
       if (!Variant::GetArrayAccess(tva)->
-          o_invoke(s_offsetExists, Array::Create(offset))) {
+          o_invoke_few_args(s_offsetExists, 1, offset)) {
         return true;
       }
       return empty(v.rvalAt(offset));
@@ -924,7 +928,7 @@ bool isset(CVarRef v, int64_t   offset) {
       return collectionOffsetIsset(obj, offset);
     } else {
       return Variant::GetArrayAccess(tva)->
-        o_invoke(s_offsetExists, Array::Create(offset), -1);
+        o_invoke_few_args(s_offsetExists, 1, offset);
     }
   }
   if (Variant::IsString(tva)) {
@@ -952,7 +956,7 @@ bool isset(CVarRef v, CVarRef offset) {
       return collectionOffsetIsset(obj, offset);
     } else {
       return Variant::GetArrayAccess(tva)->
-        o_invoke(s_offsetExists, Array::Create(offset), -1);
+        o_invoke_few_args(s_offsetExists, 1, offset);
     }
   }
   if (Variant::IsString(tva)) {
@@ -1042,7 +1046,7 @@ bool invoke_file_impl(Variant &res, CStrRef path, bool once,
   bool initial;
   HPHP::Eval::PhpFile* efile =
     g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
-  HPHP::VM::Unit* u = nullptr;
+  HPHP::Unit* u = nullptr;
   if (efile) u = efile->unit();
   if (u == nullptr) {
     return false;
@@ -1221,14 +1225,14 @@ class ClassExistsChecker {
  public:
   ClassExistsChecker() {}
   bool operator()(CStrRef name) const {
-    return VM::Unit::lookupClass(name.get()) != nullptr;
+    return Unit::lookupClass(name.get()) != nullptr;
   }
 };
 
 class ConstantExistsChecker {
  public:
   bool operator()(CStrRef name) const {
-    return VM::Unit::lookupCns(name.get()) != nullptr;
+    return Unit::lookupCns(name.get()) != nullptr;
   }
 };
 
@@ -1253,15 +1257,16 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
         }
       }
       try {
-        VM::Transl::VMRegAnchor _;
+        Transl::VMRegAnchor _;
         bool initial;
         VMExecutionContext* ec = g_vmContext;
-        VM::Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
+        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
         if (u) {
           if (initial) {
             TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), Array(),
-                           nullptr, nullptr, nullptr, nullptr, u);
+            ec->invokeFunc(&retval, u->getMain(), null_array,
+                           nullptr, nullptr, nullptr, nullptr,
+                           ExecutionContext::InvokePseudoMain);
             tvRefcountedDecRef(&retval);
           }
           ok = true;
@@ -1301,7 +1306,7 @@ bool AutoloadHandler::autoloadType(CStrRef name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_type, true,
       [] (CStrRef name) {
-        return !!VM::Unit::GetNamedEntity(name.get())->getCachedNameDef();
+        return !!Unit::GetNamedEntity(name.get())->getCachedNameDef();
       }
     ) != Failure;
 }
@@ -1357,7 +1362,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
         autoloadException = ex;
       }
     }
-    if (VM::Unit::lookupClass(className.get()) != nullptr) {
+    if (Unit::lookupClass(className.get()) != nullptr) {
       break;
     }
   }
@@ -1424,7 +1429,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 }
 
 bool function_exists(CStrRef function_name) {
-  return HPHP::VM::Unit::lookupFunc(function_name.get()) != nullptr;
+  return HPHP::Unit::lookupFunc(function_name.get()) != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

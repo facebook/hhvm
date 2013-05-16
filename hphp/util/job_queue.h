@@ -19,12 +19,12 @@
 
 #include <vector>
 #include <set>
-#include "util/async_func.h"
-#include "util/synchronizable_multi.h"
-#include "util/lock.h"
-#include "util/atomic.h"
-#include "util/alloc.h"
-#include "util/exception.h"
+#include "hphp/util/async_func.h"
+#include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ public:
             }
           }
         }
-      } catch (typename QueueType::StopSignal) {
+      } catch (const typename QueueType::StopSignal&) {
         m_stopped = true; // queue is empty and stopped, so we are done
       }
     }
@@ -353,9 +353,11 @@ public:
   int getActiveWorker() {
     return m_queue.getActiveWorker();
   }
+
   int getQueuedJobs() {
     return m_queue.getQueuedJobs();
   }
+
   int getTargetNumWorkers() {
     if (TWorker::CountActive) {
       int target = getActiveWorker() + getQueuedJobs();
@@ -402,6 +404,17 @@ public:
   void addWorker() {
     Lock lock(m_mutex);
     if (!m_stopped) {
+      addWorkerImpl(true);
+    }
+  }
+
+  /*
+   * Add N new worker threads.
+   */
+  void addWorkers(int n) {
+    Lock lock(m_mutex);
+    if (m_stopped) return;
+    for (int i = 0; i < n; ++i) {
       addWorkerImpl(true);
     }
   }

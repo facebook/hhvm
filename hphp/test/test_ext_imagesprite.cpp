@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_imagesprite.h>
-#include <runtime/ext/ext_imagesprite.h>
-#include <runtime/ext/ext_url.h>
+#include "hphp/test/test_ext_imagesprite.h"
+#include "hphp/runtime/ext/ext_imagesprite.h"
+#include "hphp/runtime/ext/ext_url.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Imagesprite);
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,6 +176,11 @@ bool TestExtImagesprite::test_clear() {
 
   return Count(true);
 }
+
+static const StaticString
+  s_width("width"),
+  s_height("height");
+
 bool TestExtImagesprite::test_loadDims() {
   sprite->t_addfile("test/images/php.gif");
   sprite->t_loaddims(true);
@@ -185,8 +190,8 @@ bool TestExtImagesprite::test_loadDims() {
 
   sprite->t_clear();
   Array dims = Array::Create();
-  dims.set("width", 1);
-  dims.set("height", 1);
+  dims.set(s_width, 1);
+  dims.set(s_height, 1);
   sprite->t_addfile("test/images/php.gif", dims);
   sprite->t_loaddims(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 1);
@@ -220,8 +225,8 @@ bool TestExtImagesprite::test_loadImages() {
 
   sprite->t_clear();
   Array dims = Array::Create();
-  dims.set("width", 1);
-  dims.set("height", 1);
+  dims.set(s_width, 1);
+  dims.set(s_height, 1);
   sprite->t_addfile("test/images/php.gif", dims);
   sprite->t_loadimages(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
@@ -250,53 +255,38 @@ bool TestExtImagesprite::test_loadImages() {
   return Count(true);
 }
 bool TestExtImagesprite::test_map() {
-  sprite->t_addfile("test/images/php.gif");
+  static const StaticString
+    s_images("images"),
+    s_width("width"),
+    s_height("height"),
+    s_x("x"),
+    s_y("y"),
+    testpath("test/images/php.gif");
+
+  sprite->t_addfile(testpath);
   VS(sprite->m_current, false);
   Array map = sprite->t_mapping();
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["width"].toInt32(),
-    120);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["height"].toInt32(),
-    67);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["x"].toInt32(),
-    0);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-    ["y"].toInt32(),
-    0);
-  VS(map["width"].toInt32(), 121);
-  VS(map["height"].toInt32(), 68);
+  VS(map[s_images].toArray()[testpath].toArray()[s_width].toInt32(), 120);
+  VS(map[s_images].toArray()[testpath].toArray()[s_height].toInt32(), 67);
+  VS(map[s_images].toArray()[testpath].toArray()[s_x].toInt32(), 0);
+  VS(map[s_images].toArray()[testpath].toArray()[s_y].toInt32(), 0);
+  VS(map[s_width].toInt32(), 121);
+  VS(map[s_height].toInt32(), 68);
   VS(sprite->m_current, true);
 
   sprite->t_clear();
   Array dims = Array::Create();
-  dims.set("width", 1);
-  dims.set("height", 1);
-  sprite->t_addfile("test/images/php.gif", dims);
+  dims.set(s_width, 1);
+  dims.set(s_height, 1);
+  sprite->t_addfile(testpath, dims);
   VS(sprite->m_current, false);
   map = sprite->t_mapping();
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["width"].toInt32(),
-    1);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["height"].toInt32(),
-    1);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["x"].toInt32(), 0);
-  VS(
-    map["images"].toArray()["test/images/php.gif"].toArray()
-      ["y"].toInt32(),
-    0);
-  VS(map["width"].toInt32(), 2);
-  VS(map["height"].toInt32(), 2);
+  VS(map[s_images].toArray()[testpath].toArray()[s_width].toInt32(), 1);
+  VS(map[s_images].toArray()[testpath].toArray()[s_height].toInt32(), 1);
+  VS(map[s_images].toArray()[testpath].toArray()[s_x].toInt32(), 0);
+  VS(map[s_images].toArray()[testpath].toArray()[s_y].toInt32(), 0);
+  VS(map[s_width].toInt32(), 2);
+  VS(map[s_height].toInt32(), 2);
   VS(sprite->m_current, true);
 
   return Count(true);

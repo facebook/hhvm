@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPR_DICT_H__
-#define __EXPR_DICT_H__
+#ifndef incl_HPHP_EXPR_DICT_H_
+#define incl_HPHP_EXPR_DICT_H_
 
-#include <compiler/analysis/dictionary.h>
+#include "hphp/compiler/analysis/dictionary.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ typedef std::vector<TypePtrIdxPair> TypePtrIdxPairVec;
 
 class ExprDict : public Dictionary {
 public:
-  ExprDict(AliasManager &am);
+  explicit ExprDict(AliasManager &am);
   /* Building the dictionary */
   void build(MethodStatementPtr m);
   void visit(ExpressionPtr e);
@@ -43,8 +43,8 @@ public:
   TypePtr propagateType(ExpressionPtr e);
 
   void getTypes(ExpressionPtr e, TypePtrIdxPairVec &types);
-private:
 
+private:
   /**
    * types is filled with (type assertion, canon id for that type assertion)
    * tuples
@@ -94,4 +94,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __EXPR_DICT_H__
+#endif // incl_HPHP_EXPR_DICT_H_

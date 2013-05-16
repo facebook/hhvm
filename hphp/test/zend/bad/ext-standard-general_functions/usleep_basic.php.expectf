@@ -1,0 +1,4 @@
+*** Testing usleep() : basic functionality ***
+Thread slept for %f micro-seconds
+TEST PASSED
+===DONE===

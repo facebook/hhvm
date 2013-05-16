@@ -18,33 +18,32 @@
 
 #include <iostream>
 #include <iomanip>
-#include <tbb/concurrent_unordered_map.h>
+#include "tbb/concurrent_unordered_map.h"
 #include <boost/algorithm/string.hpp>
 
 #include "folly/ScopeGuard.h"
 
-#include "util/lock.h"
-#include "util/util.h"
-#include "util/atomic.h"
-#include "util/read_only_arena.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/util.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/read_only_arena.h"
 
-#include "runtime/ext/ext_variable.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/blob_helper.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/verifier/check.h"
-#include "runtime/base/strings.h"
-#include "runtime/vm/func_inline.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/vm/stats.h"
-#include "runtime/vm/treadmill.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/verifier/check.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/func_inline.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
-namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 
 using Util::getDataRef;
@@ -450,7 +449,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
 
 class FrameRestore {
  public:
-  FrameRestore(const PreClass* preClass) {
+  explicit FrameRestore(const PreClass* preClass) {
     VMExecutionContext* ec = g_vmContext;
     ActRec* fp = ec->getFP();
     PC pc = ec->getPC();
@@ -550,7 +549,7 @@ Class* Unit::defClass(const PreClass* preClass,
       Class::Avail avail = class_->avail(parent, failIsFatal /*tryAutoload*/);
       if (LIKELY(avail == Class::AvailTrue)) {
         class_->setCached();
-        DEBUGGER_ATTACHED_ONLY(phpDefClassHook(class_));
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(class_));
         return class_;
       }
       if (avail == Class::AvailFail) {
@@ -614,7 +613,7 @@ Class* Unit::defClass(const PreClass* preClass,
     }
     newClass.get()->incAtomicCount();
     newClass.get()->setCached();
-    DEBUGGER_ATTACHED_ONLY(phpDefClassHook(newClass.get()));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }
 }
@@ -1039,6 +1038,8 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
       } else if (out) {
         out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
       }
+    } else if (out) {
+      out->mergeableObj(oix++) = obj;
     }
   }
 
@@ -1063,6 +1064,8 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
             out->mergeableObj(oix++) =
               (void*)(uintptr_t(cls) | UnitMergeKindUniqueDefinedClass);
           }
+        } else if (out) {
+          out->mergeableObj(oix++) = obj;
         }
         break;
       }
@@ -1123,7 +1126,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         Func* func = *it;
         assert(func->top());
         getDataRef<Func*>(tcbase, func->getCachedOffset()) = func;
-        if (debugger) phpDefFuncHook(func);
+        if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
       do {
@@ -1169,7 +1172,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           }
         }
         getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
-        if (debugger) phpDefClassHook(cls);
+        if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
           redoHoistable = true;
@@ -1247,7 +1250,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           }
           assert(avail == Class::AvailTrue);
           getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
-          if (debugger) phpDefClassHook(cls);
+          if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindUniqueDefinedClass);
@@ -1270,6 +1273,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_define);
           StringData* name = (StringData*)((char*)obj - (int)k);
           auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          assert(v->m_type != KindOfUninit);
           mergeCns(getDataRef<TypedValue>(tcbase, v->cacheHandle()), v, name);
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
@@ -1316,8 +1320,8 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                   // local scope.
                 }
               }
-              g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
-                                      nullptr, nullptr, ve, nullptr, nullptr);
+              g_vmContext->invokeFunc(&ret, unit->getMain(), null_array,
+                                      nullptr, nullptr, ve);
               tvRefcountedDecRef(&ret);
             } else {
               Stats::inc(Stats::PseudoMain_SkipDeep);
@@ -1395,6 +1399,8 @@ Func* Unit::getMain(Class* cls /*= NULL*/) const {
   return f;
 }
 
+// This uses range lookups so offsets in the middle of instructions are
+// supported.
 int Unit::getLineNumber(Offset pc) const {
   LineEntry key = LineEntry(pc, -1);
   std::vector<LineEntry>::const_iterator it =
@@ -1570,75 +1576,13 @@ std::string Unit::toString() const {
   return ss.str();
 }
 
-void Unit::enableIntercepts() {
-  TranslatorX64* tx64 = TranslatorX64::Get();
-  // Its ok to set maybeIntercepted(), because
-  // we are protected by s_mutex in intercept.cpp
-  for (MutableFuncRange fr(nonMainFuncs()); !fr.empty(); ) {
-    Func *func = fr.popFront();
-    if (func->isPseudoMain()) {
-      // pseudomain's can't be intercepted
-      continue;
-    }
-    tx64->interceptPrologues(func);
-  }
-  {
-    Lock lock(s_classesMutex);
-    for (int i = m_preClasses.size(); i--; ) {
-      PreClass* pcls = m_preClasses[i].get();
-      Class* cls = pcls->namedEntity()->clsList();
-      while (cls) {
-        /*
-         * verify that this class corresponds to the
-         * preclass we're looking at. This avoids
-         * redundantly iterating over the same class
-         * multiple times, but also avoids a hard to
-         * repro crash, if the unit owning cls is being
-         * destroyed at the time we pick up cls from the
-         * list (which is possible). Note that cls
-         * itself will be destroyed by treadmill, so
-         * it is safe to call preClass()
-         */
-        if (cls->preClass() == pcls) {
-          size_t numFuncs = cls->numMethods();
-          Func* const* funcs = cls->methods();
-          for (unsigned i = 0; i < numFuncs; i++) {
-            if (funcs[i]->cls() != cls) {
-              /*
-               * This func is defined by a base
-               * class. We can skip it now, because
-               * we'll hit it when we process
-               * the base class. More importantly,
-               * the base class's unit may have been
-               * destroyed; in which case we have to
-               * skip it here, or we'll likely crash.
-               *
-               * Note that Classes are ref counted,
-               * so the the funcs[i]'s Class cant have
-               * been freed yet, so the comparison is
-               * safe; although we do seem to have a
-               * class leak here (sandbox mode only)
-               */
-              continue;
-            }
-            tx64->interceptPrologues(funcs[i]);
-          }
-        }
-        cls = cls->m_nextClass;
-      }
-    }
-  }
-}
-
-Func* Unit::lookupFunc(const NamedEntity* ne, const StringData* name) {
-  Func* func = ne->getCachedFunc();
-  return func;
+Func* Unit::lookupFunc(const NamedEntity* ne) {
+  return ne->getCachedFunc();
 }
 
 Func* Unit::lookupFunc(const StringData* funcName) {
   const NamedEntity* ne = GetNamedEntity(funcName);
-  Func* func = ne->getCachedFunc();
-  return func;
+  return ne->getCachedFunc();
 }
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
@@ -2704,7 +2648,7 @@ Unit* UnitEmitter::create() {
 
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.
-    Trace::trace(u->toString());
+    Trace::traceRelease(u->toString());
   }
 
   static const bool kAlwaysVerify = getenv("HHVM_ALWAYS_VERIFY");
@@ -2720,5 +2664,4 @@ Unit* UnitEmitter::create() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }

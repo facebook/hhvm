@@ -12,10 +12,10 @@ StableMap Object
     [bar] => 7
 )
 {"3":"foo","bar":7}
-StableMap::__set_state(array(
+StableMap {
   3 => 'foo',
   'bar' => 7,
-))
+}
 object(StableMap)#2 (2) {
   [3]=>
   string(3) "foo"
@@ -28,10 +28,10 @@ StableMap Object
     [bar] => 7
 )
 {"3":"foo","bar":7}
-StableMap::__set_state(array(
+StableMap {
   3 => 'foo',
   'bar' => 7,
-))
+}
 ------------------------
 string(48) "K:9:"StableMap":2:{s:3:"bar";i:7;i:3;s:3:"foo";}"
 ------------------------
@@ -47,10 +47,10 @@ StableMap Object
     [3] => foo
 )
 {"bar":7,"3":"foo"}
-StableMap::__set_state(array(
+StableMap {
   'bar' => 7,
   3 => 'foo',
-))
+}
 object(StableMap)#4 (2) {
   ["bar"]=>
   int(7)
@@ -63,7 +63,7 @@ StableMap Object
     [3] => foo
 )
 {"bar":7,"3":"foo"}
-StableMap::__set_state(array(
+StableMap {
   'bar' => 7,
   3 => 'foo',
-))
+}

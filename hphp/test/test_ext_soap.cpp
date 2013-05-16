@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_soap.h>
-#include <runtime/ext/ext_output.h>
+#include "hphp/test/test_ext_soap.h"
+#include "hphp/runtime/ext/ext_output.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -129,7 +129,7 @@ bool TestExtSoap::test_SoapServerArrayParam() {
 
 bool TestExtSoap::test_SoapServerWSDL() {
   m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
-  m_server->t___construct("test/test.wsdl",
+  m_server->t___construct("test/slow/ext_soap/1809.wsdl",
                           CREATE_MAP1("uri", "http://testuri.org"));
   m_server->t_addfunction("Add");
 

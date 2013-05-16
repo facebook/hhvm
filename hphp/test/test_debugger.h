@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_DEBUGGER_H__
-#define __TEST_DEBUGGER_H__
+#ifndef incl_HPHP_TEST_DEBUGGER_H_
+#define incl_HPHP_TEST_DEBUGGER_H_
 
-#include <test/test_base.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/test/test_base.h"
+#include "hphp/runtime/base/complex_types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,11 +56,11 @@ private:
                    const std::string& host = "");
   bool recvFromTests(char& c);
 
-  void testWebRequestHelper();
-  void testWebRequestHelperSignal();
+  void testWebRequestHelperPhase1();
+  void testWebRequestHelperPhase2();
   bool m_tempResult;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_DEBUGGER_H__
+#endif // incl_HPHP_TEST_DEBUGGER_H_

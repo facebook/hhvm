@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,14 +31,15 @@ public:
   };
 
 public:
-  CmdSignal(Signal sig = SignalNone)
+  explicit CmdSignal(Signal sig = SignalNone)
       : DebuggerCommand(KindOfSignal), m_signum(sig) {}
 
   Signal getSignal() const { return (Signal)m_signum;}
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -49,4 +50,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_SIGNAL_H_

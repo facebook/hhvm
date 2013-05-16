@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_INTL_CONVERT_H__
-#define __HPHP_INTL_CONVERT_H__
+#ifndef incl_HPHP_INTL_CONVERT_H_
+#define incl_HPHP_INTL_CONVERT_H_
 
-#include <runtime/base/complex_types.h>
-#include <unicode/ustring.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "unicode/ustring.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,4 +34,4 @@ void intl_convert_utf16_to_utf8(char** target, int* target_len,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_INTL_CONVERT_H__
+#endif // incl_HPHP_INTL_CONVERT_H_

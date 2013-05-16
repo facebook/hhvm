@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LIVE_DICT_H__
-#define __LIVE_DICT_H__
+#ifndef incl_HPHP_LIVE_DICT_H_
+#define incl_HPHP_LIVE_DICT_H_
 
-#include <compiler/analysis/dictionary.h>
+#include "hphp/compiler/analysis/dictionary.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace HPHP {
 
 class LiveDict : public Dictionary {
 public:
-  LiveDict(AliasManager &am) : Dictionary(am) {}
+  explicit LiveDict(AliasManager &am) : Dictionary(am) {}
   /* Building the dictionary */
   void build(MethodStatementPtr m);
   void visit(ExpressionPtr e);
@@ -53,4 +53,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __LIVE_DICT_H__
+#endif // incl_HPHP_LIVE_DICT_H_

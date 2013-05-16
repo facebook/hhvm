@@ -1,0 +1,18 @@
+*** Testing mb_strstr() : basic functionality ***
+
+-- ASCII string: needle exists --
+string(6) "646566"
+string(6) "646566"
+string(8) "61626320"
+
+-- ASCII string: needle doesn't exist --
+bool(false)
+
+-- Multibyte string: needle exists --
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(0) ""
+
+-- Multibyte string: needle doesn't exist --
+bool(false)
+===DONE===

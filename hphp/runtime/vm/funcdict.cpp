@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/runtime_option.h>
-#include <util/base.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/base.h"
 
-#include <runtime/base/execution_context.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/unit.h>
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/unit.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
-namespace VM {
 
 RenamedFuncDict::RenamedFuncDict() : m_restrictRenameableFunctions(false) { }
 
@@ -38,7 +37,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   NamedEntity *oldNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(old));
   NamedEntity *newNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(n3w));
 
-  Func* func = Unit::lookupFunc(oldNe, old);
+  Func* func = Unit::lookupFunc(oldNe);
   if (!func) {
       // It's the caller's responsibility to ensure that the old function
       // exists.
@@ -54,7 +53,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
     }
   }
 
-  Func *fnew = Unit::lookupFunc(newNe, n3w);
+  Func *fnew = Unit::lookupFunc(newNe);
   if (fnew && fnew != func) {
     // To match hphpc, we silently ignore functions defined in user code that
     // have the same name as a function defined in a separable extension
@@ -72,7 +71,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {
-    VM::Transl::TargetCache::invalidateForRename(old);
+    Transl::TargetCache::invalidateForRename(old);
   }
 
   return true;
@@ -93,4 +92,4 @@ void RenamedFuncDict::addRenameableFunctions(ArrayData* arr) {
   }
 }
 
-} } // HPHP::VM
+ } // HPHP::VM

@@ -1,0 +1,8 @@
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#%d (1) {
+    ["a"]=>
+    string(3) "xyz"
+  }
+}
+===DONE===

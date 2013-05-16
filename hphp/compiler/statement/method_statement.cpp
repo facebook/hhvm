@@ -14,41 +14,41 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/try_statement.h>
-#include <compiler/statement/label_statement.h>
-#include <compiler/statement/goto_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/switch_statement.h>
-#include <compiler/statement/case_statement.h>
-#include <compiler/statement/catch_statement.h>
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/label_statement.h"
+#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/case_statement.h"
+#include "hphp/compiler/statement/catch_statement.h"
 
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/closure_expression.h>
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/closure_expression.h"
 
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/function_scope.h>
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
 
-#include <compiler/option.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/analysis/alias_manager.h>
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/analysis/alias_manager.h"
 
-#include <util/parser/parser.h>
-#include <util/util.h>
+#include "hphp/util/parser/parser.h"
+#include "hphp/util/util.h"
 
 using namespace HPHP;
 using std::map;

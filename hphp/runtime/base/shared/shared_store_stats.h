@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SHARED_STORE_STATS_H__
-#define __HPHP_SHARED_STORE_STATS_H__
+#ifndef incl_HPHP_SHARED_STORESTATS_H_
+#define incl_HPHP_SHARED_STORESTATS_H_
 
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 
-#include "runtime/base/shared/shared_variant.h"
-#include "runtime/base/complex_types.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,4 +155,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_SHARED_STORE_STATS_H__ */
+#endif /* incl_HPHP_SHARED_STORESTATS_H_ */

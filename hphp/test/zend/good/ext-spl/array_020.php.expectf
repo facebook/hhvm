@@ -1,0 +1,15 @@
+ArrayIteratorEx::rewind
+ArrayIteratorEx::valid
+ArrayIteratorEx::current
+ArrayIteratorEx::key
+int(0)
+int(1)
+ArrayIteratorEx::next
+ArrayIteratorEx::valid
+ArrayIteratorEx::current
+ArrayIteratorEx::key
+int(1)
+int(2)
+ArrayIteratorEx::next
+ArrayIteratorEx::valid
+===DONE===

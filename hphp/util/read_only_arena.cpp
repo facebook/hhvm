@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/read_only_arena.h"
+#include "hphp/util/read_only_arena.h"
 
 #include <sys/mman.h>
 
 #include "folly/Exception.h"
 
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

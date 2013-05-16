@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/throw_statement.h>
+#include "hphp/compiler/statement/throw_statement.h"
 
 using namespace HPHP;
 

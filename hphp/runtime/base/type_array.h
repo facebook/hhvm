@@ -14,22 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_ARRAY_H_
+#define incl_HPHP_ARRAY_H_
+
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_array.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_ARRAY_H__
-#define __HPHP_ARRAY_H__
-
 #include <boost/static_assert.hpp>
 
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/types.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/type_string.h>
-#include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/type_string.h"
+#include "hphp/runtime/base/hphp_value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,13 +39,6 @@ inline int64_t ToKey(double d) {
 
 // forward declaration
 class ArrayIter;
-class StaticArray;
-
-#ifdef HHVM_GC
-typedef GCRootTracker<ArrayData> ArrayBase;
-#else
-typedef SmartPtr<ArrayData> ArrayBase;
-#endif
 
 /**
  * Array type wrapping around ArrayData to implement reference
@@ -57,7 +49,9 @@ typedef SmartPtr<ArrayData> ArrayBase;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation.
  */
-class Array : protected ArrayBase {
+class Array : protected SmartPtr<ArrayData> {
+ typedef SmartPtr<ArrayData> ArrayBase;
+
  public:
   /**
    * Create an empty array or an array with one element. Note these are
@@ -85,8 +79,17 @@ class Array : protected ArrayBase {
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  Array(ArrayData *data) : ArrayBase(data) { }
-  Array(CArrRef arr) : ArrayBase(arr.m_px) { }
+  /* implicit */ Array(ArrayData *data) : ArrayBase(data) { }
+  /* implicit */ Array(CArrRef arr) : ArrayBase(arr.m_px) { }
+
+  /*
+   * Special constructor for use from ArrayInit that creates an Array
+   * without a null check.
+   */
+  enum class ArrayInitCtor { Tag };
+  explicit Array(ArrayData* ad, ArrayInitCtor)
+    : ArrayBase(ad, ArrayBase::NonNull::Tag)
+  {}
 
   // Move ctor
   Array(Array&& src) : ArrayBase(std::move(src)) {
@@ -130,7 +133,6 @@ class Array : protected ArrayBase {
   Array &operator =  (ArrayData *data);
   Array &operator =  (CArrRef v);
   Array &operator =  (CVarRef v);
-  Array &operator =  (const StaticArray &v);
   Array  operator +  (ArrayData *data) const;
   Array  operator +  (CArrRef v) const;
   Array  operator +  (CVarRef v) const;
@@ -260,32 +262,27 @@ class Array : protected ArrayBase {
   /**
    * Offset
    */
-  Variant rvalAt(bool    key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(litstr  key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
 
   /**
    * To get offset for temporary usage
    */
-  CVarRef rvalAtRef(bool    key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(litstr  key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
-  const Variant operator[](bool    key) const;
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t   key) const;
   const Variant operator[](double  key) const;
-  const Variant operator[](litstr  key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
+  const Variant operator[](const char*) const = delete; // use CStrRef
 
   Variant &lval(int64_t key) {
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
@@ -309,9 +306,6 @@ class Array : protected ArrayBase {
 
   Variant &lvalAt();
 
-  Variant &lvalAt(bool    key, ACCESSPARAMS_DECL) {
-    return lvalAtImpl(key, flags);
-  }
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(key, flags);
   }
@@ -321,7 +315,6 @@ class Array : protected ArrayBase {
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(ToKey(key), flags);
   }
-  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
@@ -331,9 +324,6 @@ class Array : protected ArrayBase {
   template<typename T>
   CVarRef setRefImpl(const T &key, CVarRef v);
 
-  CVarRef set(bool    key, CVarRef v) {
-    return set(int64_t(key ? 1 : 0), v);
-  }
   CVarRef set(int     key, CVarRef v) {
     return set((int64_t)key, v);
   }
@@ -342,20 +332,15 @@ class Array : protected ArrayBase {
     return set(ToKey(key), v);
   }
 
-  CVarRef set(litstr  key, CVarRef v, bool isKey = false);
   CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
 
-  CVarRef set(bool    key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(char    key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(short   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(int     key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(int64_t   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key,variant(v)); }
 
-  CVarRef set(litstr  key, RefResult v, bool isKey = false) {
-    return setRef(key,variant(v), isKey);
-  }
   CVarRef set(CStrRef key, RefResult v, bool isKey = false) {
     return setRef(key,variant(v), isKey);
   }
@@ -363,9 +348,6 @@ class Array : protected ArrayBase {
     return setRef(key,variant(v), isKey);
   }
 
-  CVarRef setRef(bool    key, CVarRef v) {
-    return setRef((int64_t)key, v);
-  }
   CVarRef setRef(int     key, CVarRef v) {
     return setRef((int64_t)key, v);
   }
@@ -374,7 +356,6 @@ class Array : protected ArrayBase {
     return setRef(ToKey(key), v);
   }
 
-  CVarRef setRef(litstr  key, CVarRef v, bool isKey = false);
   CVarRef setRef(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef setRef(CVarRef key, CVarRef v, bool isKey = false);
 
@@ -382,9 +363,6 @@ class Array : protected ArrayBase {
   template<typename T>
   CVarRef addImpl(const T &key, CVarRef v);
 
-  CVarRef add(bool    key, CVarRef v) {
-    return add((int64_t)key, v);
-  }
   CVarRef add(int     key, CVarRef v) {
     return add((int64_t)key, v);
   }
@@ -393,7 +371,6 @@ class Array : protected ArrayBase {
     return add(ToKey(key), v);
   }
 
-  CVarRef add(litstr  key, CVarRef v, bool isKey = false);
   CVarRef add(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef add(CVarRef key, CVarRef v, bool isKey = false);
 
@@ -408,9 +385,6 @@ class Array : protected ArrayBase {
     return *ret;
   }
 
-  Variant &addLval(bool    key) {
-    return addLvalImpl(key ? 1LL : 0LL);
-  }
   Variant &addLval(int     key) {
     return addLvalImpl((int64_t)key);
   }
@@ -421,7 +395,6 @@ class Array : protected ArrayBase {
     return addLvalImpl(ToKey(key));
   }
 
-  Variant &addLval(litstr  key, bool isKey = false);
   Variant &addLval(CStrRef key, bool isKey = false);
   Variant &addLval(CVarRef key, bool isKey = false);
 
@@ -432,9 +405,6 @@ class Array : protected ArrayBase {
   bool existsImpl(const T &key) const {
     if (m_px) return m_px->exists(key);
     return false;
-  }
-  bool exists(bool    key) const {
-    return existsImpl(key ? 1LL : 0LL);
   }
   bool exists(char    key) const {
     return existsImpl((int64_t)key);
@@ -451,7 +421,6 @@ class Array : protected ArrayBase {
   bool exists(double  key) const {
     return existsImpl(ToKey(key));
   }
-  bool exists(litstr  key, bool isKey = false) const;
   bool exists(CStrRef key, bool isKey = false) const;
   bool exists(CVarRef key, bool isKey = false) const;
 
@@ -461,9 +430,6 @@ class Array : protected ArrayBase {
       ArrayData *escalated = m_px->remove(key, (m_px->getCount() > 1));
       if (escalated != m_px) ArrayBase::operator=(escalated);
     }
-  }
-  void remove(bool    key) {
-    removeImpl(key ? 1LL : 0LL);
   }
   void remove(char    key) {
     removeImpl((int64_t)key);
@@ -480,21 +446,8 @@ class Array : protected ArrayBase {
   void remove(double  key) {
     removeImpl(ToKey(key));
   }
-  void remove(litstr  key, bool isString = false);
   void remove(CStrRef key, bool isString = false);
   void remove(CVarRef key);
-
-  void weakRemove(litstr  key, bool isString = false) {
-    remove(key, isString);
-  }
-  void weakRemove(CStrRef key, bool isString = false) {
-    remove(key, isString);
-  }
-
-  template<typename T>
-  void weakRemove(const T &key) {
-    remove(key);
-  }
 
   void removeAll();
   void clear() { removeAll();}
@@ -557,26 +510,6 @@ class Array : protected ArrayBase {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * A StaticArray can be co-accessed by multiple threads, therefore they are
- * not thread local, and they have to be allocated BEFORE any thread starts,
- * so that they won't be garbage collected by MemoryManager. This is used by
- * scalar arrays, so they can be pre-allocated before request handling.
- */
-class StaticArray : public Array {
-public:
-  StaticArray() { }
-  StaticArray(ArrayData *data) : Array(data) {
-  }
-  ~StaticArray() {
-    // prevent ~SmartPtr from calling decRefCount after data is released
-    m_px = nullptr;
-  }
-};
-
-
-///////////////////////////////////////////////////////////////////////////////
 // ArrNR
 
 struct ArrNR {
@@ -609,4 +542,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_H__
+#endif // incl_HPHP_ARRAY_H_

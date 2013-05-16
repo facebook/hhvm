@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TYPE_CONVERSIONS_H__
-#define __HPHP_TYPE_CONVERSIONS_H__
+#ifndef incl_HPHP_TYPE_CONVERSIONS_H_
+#define incl_HPHP_TYPE_CONVERSIONS_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,4 +187,4 @@ inline const Object *toOPOD(CObjRef v) { return &v;}
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TYPE_CONVERSIONS_H__
+#endif // incl_HPHP_TYPE_CONVERSIONS_H_

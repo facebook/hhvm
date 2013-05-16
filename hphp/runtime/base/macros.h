@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_MACROS_H__
-#define __HPHP_MACROS_H__
+#ifndef incl_HPHP_MACROS_H_
+#define incl_HPHP_MACROS_H_
 
-#include "util/assertions.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 
@@ -85,21 +85,21 @@ namespace HPHP {
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  static HPHP::VM::Class* s_cls;                                        \
+  static HPHP::Class* s_cls;                                        \
 
 #define DECLARE_CLASS_COMMON_NO_ALLOCATION(cls, originalName)           \
   public:                                                               \
   static void *ObjAllocatorInitSetup;                                   \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  static HPHP::VM::Class* s_cls;                                        \
+  static HPHP::Class* s_cls;                                        \
 
 #define DECLARE_CLASS_COMMON(cls, originalName)                         \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  static HPHP::VM::Class* s_cls;                                        \
+  static HPHP::Class* s_cls;                                        \
 
 #define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
@@ -119,7 +119,7 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
-  HPHP::VM::Class* c_##cls::s_cls = nullptr;                            \
+  HPHP::Class* c_##cls::s_cls = nullptr;                            \
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_CLASS_COMMON(cls)                                           \
@@ -153,4 +153,4 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_MACROS_H__
+#endif // incl_HPHP_MACROS_H_

@@ -1,0 +1,32 @@
+*** Testing array_unshift() : basic functionality with associative array ***
+int(5)
+array(5) {
+  [0]=>
+  int(10)
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+}
+int(7)
+array(7) {
+  [0]=>
+  int(222)
+  [1]=>
+  string(5) "hello"
+  [2]=>
+  float(12.33)
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
+  [3]=>
+  string(3) "one"
+  [4]=>
+  string(3) "two"
+}
+Done

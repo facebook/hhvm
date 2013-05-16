@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H__
-#define __HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
+#define incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
 
 #define HPHPD_CLIENT_SETTINGS \
   HPHPD_CLIENT_SETTING(ApiModeSerialize,    bool,  false)         \
@@ -55,4 +55,4 @@ HPHPD_CLIENT_SETTINGS
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_

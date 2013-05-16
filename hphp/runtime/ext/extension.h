@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXTENSION_H__
-#define __EXTENSION_H__
+#ifndef incl_HPHP_EXTENSION_H_
+#define incl_HPHP_EXTENSION_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/debuggable.h>
-#include <util/hdf.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ public:
   static void ShutdownModules();
   static bool ModulesInitialised();
 public:
-  Extension(litstr name, const char *version = "");
+  explicit Extension(litstr name, const char *version = "");
   virtual ~Extension() {}
 
   const char *getVersion() const { return m_version.c_str();}
@@ -79,11 +79,11 @@ public:
   virtual void moduleShutdown() {}
 
 private:
-  const char *m_name;
+  const String m_name;
   std::string m_version;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXTENSION_H__
+#endif // incl_HPHP_EXTENSION_H_

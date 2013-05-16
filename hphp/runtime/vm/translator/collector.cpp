@@ -20,21 +20,20 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <strings.h>
+#include "hphp/runtime/base/strings.h"
 #include <string>
 #include <queue>
 
-#include "util/trace.h"
-#include "util/debug.h"
-#include "runtime/eval/runtime/file_repository.h"
-#include "system/lib/systemlib.h"
-#include "runtime/vm/treadmill.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/debug.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -127,8 +126,6 @@ bool TranslatorX64::replace() {
   severFuncReferences(tx64);
   TranslatorX64* n00b = new TranslatorX64();
   n00b->initGdb();
-  // m_interceptsEnabled should persist across TC spaces.
-  n00b->m_interceptsEnabled = m_interceptsEnabled;
   TRACE(0, "Tx64: replace %p a.code %p -> %p a.code %p complete\n",
         this, a.code.base, n00b, n00b->a.code.base);
   // Here is the changing of the guard.
@@ -166,4 +163,4 @@ struct Tx64Annihilator {
 
 static Tx64Annihilator boom;
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

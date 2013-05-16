@@ -14,16 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_REPO_HELPERS_H_
-#define incl_VM_REPO_HELPERS_H_
+#ifndef incl_HPHP_VM_REPO_HELPERS_H_
+#define incl_HPHP_VM_REPO_HELPERS_H_
 
 #include <boost/noncopyable.hpp>
 #include <sqlite3.h>
 
-#include "runtime/base/md5.h"
+#include "hphp/runtime/base/md5.h"
 
 namespace HPHP {
-namespace VM {
 
 // Forward declaration.
 class Repo;
@@ -207,6 +206,6 @@ class RepoProxy {
   Repo& m_repo;
 };
 
-} }
+ }
 
 #endif

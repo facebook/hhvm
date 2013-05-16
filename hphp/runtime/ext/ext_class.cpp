@@ -15,16 +15,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_class.h>
-#include <runtime/base/class_info.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <util/util.h>
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 
-using VM::Transl::CallerFrame;
-using VM::Transl::VMRegAnchor;
+using Transl::CallerFrame;
+using Transl::VMRegAnchor;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -37,17 +37,17 @@ static String get_classname(CVarRef class_or_object) {
 }
 
 static inline CStrRef ctxClassName() {
-  VM::Class* ctx = g_vmContext->getContextClass();
+  Class* ctx = g_vmContext->getContextClass();
   return ctx ? ctx->nameRef() : empty_string;
 }
 
-static const VM::Class* get_cls(CVarRef class_or_object) {
-  VM::Class* cls = NULL;
+static const Class* get_cls(CVarRef class_or_object) {
+  Class* cls = NULL;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
   } else {
-    cls = VM::Unit::loadClass(class_or_object.toString().get());
+    cls = Unit::loadClass(class_or_object.toString().get());
   }
   return cls;
 }
@@ -67,20 +67,20 @@ Array f_get_declared_traits() {
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
-  return VM::Unit::classExists(class_name.get(), autoload, VM::AttrNone);
+  return Unit::classExists(class_name.get(), autoload, AttrNone);
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
-  return VM::Unit::classExists(interface_name.get(), autoload,
-                               VM::AttrInterface);
+  return Unit::classExists(interface_name.get(), autoload,
+                               AttrInterface);
 }
 
 bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
-  return VM::Unit::classExists(trait_name.get(), autoload, VM::AttrTrait);
+  return Unit::classExists(trait_name.get(), autoload, AttrTrait);
 }
 
 Array f_get_class_methods(CVarRef class_or_object) {
-  const VM::Class* cls = get_cls(class_or_object);
+  const Class* cls = get_cls(class_or_object);
   if (!cls) return Array();
   VMRegAnchor _;
 
@@ -91,14 +91,14 @@ Array f_get_class_methods(CVarRef class_or_object) {
 }
 
 Array vm_get_class_constants(CStrRef className) {
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(className.get());
+  HPHP::Class* cls = HPHP::Unit::loadClass(className.get());
   if (cls == NULL) {
     return NEW(HphpArray)(0);
   }
 
   size_t numConstants = cls->numConstants();
   HphpArray* retVal = NEW(HphpArray)(numConstants);
-  const VM::Class::Const* consts = cls->constants();
+  const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
@@ -121,29 +121,29 @@ Array f_get_class_constants(CStrRef class_name) {
 }
 
 Array vm_get_class_vars(CStrRef className) {
-  HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(className.get());
+  HPHP::Class* cls = HPHP::Unit::lookupClass(className.get());
   if (cls == NULL) {
     raise_error("Unknown class %s", className->data());
   }
   cls->initialize();
 
-  const VM::Class::SProp* sPropInfo = cls->staticProperties();
+  const Class::SProp* sPropInfo = cls->staticProperties();
   const size_t numSProps = cls->numStaticProperties();
-  const VM::Class::Prop* propInfo = cls->declProperties();
+  const Class::Prop* propInfo = cls->declProperties();
   const size_t numDeclProps = cls->numDeclProperties();
 
   // The class' instance property initialization template is in different
   // places, depending on whether it has any request-dependent initializers
   // (i.e. constants)
-  const VM::Class::PropInitVec& declPropInitVec = cls->declPropInit();
-  const VM::Class::PropInitVec* propVals = !cls->pinitVec().empty()
+  const Class::PropInitVec& declPropInitVec = cls->declPropInit();
+  const Class::PropInitVec* propVals = !cls->pinitVec().empty()
     ? cls->getPropData() : &declPropInitVec;
   assert(propVals != NULL);
   assert(propVals->size() == numDeclProps);
 
   // For visibility checks
   CallerFrame cf;
-  HPHP::VM::Class* ctx = arGetContextClass(cf());
+  HPHP::Class* ctx = arGetContextClass(cf());
 
   HphpArray* ret = NEW(HphpArray)(numDeclProps + numSProps);
 
@@ -151,7 +151,7 @@ Array vm_get_class_vars(CStrRef className) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
     // Empty names are used for invisible/private parent properties; skip them
     assert(name->size() != 0);
-    if (VM::Class::IsPropAccessible(propInfo[i], ctx)) {
+    if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
       ret->nvSet(name, value, false);
     }
@@ -179,7 +179,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
     // No arg passed.
     String ret;
     CallerFrame cf;
-    HPHP::VM::Class* cls = HPHP::VM::arGetContextClassImpl<true>(cf());
+    HPHP::Class* cls = arGetContextClassImpl<true>(cf());
     if (cls) {
       ret = CStrRef(cls->nameRef());
     }
@@ -197,7 +197,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   if (!object.isInitialized()) {
     CallerFrame cf;
-    HPHP::VM::Class* cls = arGetContextClass(cf());
+    HPHP::Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
       return CStrRef(cls->parentRef());
     }
@@ -213,7 +213,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
     return false;
   }
 
-  VM::Class* cls = VM::Unit::lookupClass(class_name.toString().get());
+  Class* cls = Unit::lookupClass(class_name.toString().get());
   if (cls) {
     CStrRef parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
@@ -229,12 +229,12 @@ static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
     return false;
   }
 
-  const VM::Class* cls = get_cls(class_or_object);
+  const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
-  if (cls->attrs() & VM::AttrTrait) return false;
-  const VM::Class* other = VM::Unit::lookupClass(class_name.get());
+  if (cls->attrs() & AttrTrait) return false;
+  const Class* other = Unit::lookupClass(class_name.get());
   if (!other) return false;
-  if (other->attrs() & VM::AttrTrait) return false;
+  if (other->attrs() & AttrTrait) return false;
   if (other == cls) return !subclass_only;
   return cls->classof(other);
 }
@@ -248,15 +248,13 @@ bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_st
 }
 
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
-  const VM::Class* cls = get_cls(class_or_object);
+  const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
-  if (cls->attrs() & VM::AttrAbstract) {
-    const VM::ClassSet& ifaces = cls->allInterfaces();
-    for (VM::ClassSet::const_iterator it = ifaces.begin();
-         it != ifaces.end();
-         ++it) {
-      if ((*it)->lookupMethod(method_name.get())) return true;
+  if (cls->attrs() & AttrAbstract) {
+    const Class::InterfaceMap& ifaces = cls->allInterfaces();
+    for (int i = 0, size = ifaces.size(); i < size; i++) {
+      if (ifaces[i]->lookupMethod(method_name.get())) return true;
     }
   }
   return false;
@@ -275,17 +273,17 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
     return Variant(Variant::nullInit);
   }
 
-  VM::Class* cls = VM::Unit::lookupClass(get_classname(class_or_object).get());
+  Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
   if (!cls) {
     return false;
   }
   bool accessible;
-  VM::Slot propInd = cls->getDeclPropIndex(cls, property.get(), accessible);
-  if (propInd != VM::kInvalidSlot) {
+  auto propInd = cls->getDeclPropIndex(cls, property.get(), accessible);
+  if (propInd != kInvalidSlot) {
     return true;
   }
   propInd = cls->lookupSProp(property.get());
-  return (propInd != VM::kInvalidSlot);
+  return (propInd != kInvalidSlot);
 }
 
 Variant f_get_object_vars(CVarRef object) {
@@ -300,12 +298,12 @@ Variant f_get_object_vars(CVarRef object) {
 
 Variant f_call_user_method_array(CStrRef method_name, VRefParam obj,
                                  CArrRef paramarr) {
-  return obj.toObject()->o_invoke(method_name, paramarr, -1);
+  return obj.toObject()->o_invoke(method_name, paramarr);
 }
 
 Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj,
                            CArrRef _argv /* = null_array */) {
-  return obj.toObject()->o_invoke(method_name, _argv, -1);
+  return obj.toObject()->o_invoke(method_name, _argv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

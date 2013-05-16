@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/concurrent_shared_store.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/ext/ext_apc.h>
-#include <util/logger.h>
-#include <util/timer.h>
+#include "hphp/runtime/base/shared/concurrent_shared_store.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 #include <mutex>
 
 using std::set;

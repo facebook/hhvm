@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ZLIB_H__
-#define __EXT_ZLIB_H__
+#ifndef incl_HPHP_EXT_ZLIB_H_
+#define incl_HPHP_EXT_ZLIB_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,4 +67,4 @@ Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length = 0);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ZLIB_H__
+#endif // incl_HPHP_EXT_ZLIB_H_

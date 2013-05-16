@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_PENDQ_H_
-#define incl_PENDQ_H_
+#ifndef incl_HPHP_PENDQ_H_
+#define incl_HPHP_PENDQ_H_
 
 #include <queue>
 
 namespace HPHP {
-namespace VM {
 
 /*
  * We sometimes have work to do that must be deferred to a lower-ranked
@@ -49,7 +48,7 @@ struct PendQ : private std::queue<DeferredWorkItem*> {
   static void drain();
 };
 
-}}
+}
 
 #endif
 

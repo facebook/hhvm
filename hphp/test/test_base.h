@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_BASE_H__
-#define __TEST_BASE_H__
+#ifndef incl_HPHP_TEST_BASE_H_
+#define incl_HPHP_TEST_BASE_H_
 
 #include <string>
 #include <assert.h>
-#include <compiler/hphp.h>
-#include <runtime/base/types.h>
-#include <test/test.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/test/test.h"
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,4 +136,4 @@ typedef WithOption<false> WithNoOpt;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_BASE_H__
+#endif // incl_HPHP_TEST_BASE_H_

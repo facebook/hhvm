@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_SERVER_H__
-#define __HTTP_SERVER_H__
+#ifndef incl_HPHP_HTTP_SERVER_H_
+#define incl_HPHP_HTTP_SERVER_H_
 
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/libevent_server_with_takeover.h>
-#include <util/async_func.h>
-#include <runtime/base/server/service_thread.h>
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/base/server/service_thread.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,9 @@ public:
   ~HttpServer();
 
   void run();
-  void stop();
+
+  // Stop may be called from a signal handler.
+  void stop(const char* reason = nullptr);
 
   bool isStopped() const { return m_stopped;}
 
@@ -51,6 +53,7 @@ public:
 
 private:
   bool m_stopped;
+  const char* m_stopReason;
   void *m_sslCTX;
 
   ServerPtr m_pageServer;
@@ -77,4 +80,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_SERVER_H__
+#endif // incl_HPHP_HTTP_SERVER_H_

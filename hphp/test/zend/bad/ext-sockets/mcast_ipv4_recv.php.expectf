@@ -1,0 +1,43 @@
+creating send socket bound to 127.0.0.1
+bool(true)
+creating unbound socket and hoping the routing table causes an interface other than lo to be used for sending messages to 224.0.0.23
+bool(true)
+creating receive socket
+resource(%d) of type (Socket)
+bool(true)
+bool(true)
+int(14)
+1> initial packet
+leaving group
+bool(true)
+int(20)
+int(14)
+2> unicast packet
+re-joining group
+bool(true)
+int(42)
+int(12)
+3> mcast packet
+blocking source
+bool(true)
+int(31)
+int(14)
+4> unicast packet
+unblocking source
+bool(true)
+int(27)
+5> mcast packet from 127.0.0.1
+leaving group
+bool(true)
+int(20)
+int(14)
+6> unicast packet
+joining source group
+bool(true)
+int(27)
+7> mcast packet from 127.0.0.1
+leaving source group
+bool(true)
+int(20)
+int(14)
+8> unicast packet

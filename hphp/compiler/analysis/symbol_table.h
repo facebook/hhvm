@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SYMBOL_TABLE_H__
-#define __SYMBOL_TABLE_H__
+#ifndef incl_HPHP_SYMBOL_TABLE_H_
+#define incl_HPHP_SYMBOL_TABLE_H_
 
-#include <compiler/hphp.h>
-#include <util/json.h>
-#include <util/util.h>
-#include <util/lock.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/json.h"
+#include "hphp/util/util.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ private:
 
 class SymParamWrapper : public JSON::DocTarget::ISerializable {
 public:
-  SymParamWrapper(const Symbol* sym) : m_sym(sym) {
+  explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
   virtual void serialize(JSON::DocTarget::OutputStream &out) const {
@@ -266,7 +266,7 @@ private:
 
 class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
 public:
-  SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
+  explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
   virtual void serialize(JSON::DocTarget::OutputStream &out) const {
@@ -392,4 +392,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SYMBOL_TABLE_H__
+#endif // incl_HPHP_SYMBOL_TABLE_H_

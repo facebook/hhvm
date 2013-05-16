@@ -15,21 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ASIO_H__
-#define __EXT_ASIO_H__
+#ifndef incl_HPHP_EXT_ASIO_H_
+#define incl_HPHP_EXT_ASIO_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/ext/asio/asio_session.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_asio_enter_context();
-void f_asio_exit_context();
 int f_asio_get_current_context_idx();
 Object f_asio_get_running_in_context(int ctx_idx);
 Object f_asio_get_running();
-Object f_asio_get_current();
 void f_asio_set_on_failed_callback(CVarRef on_failed_cb);
 void f_asio_set_on_started_callback(CVarRef on_started_cb);
 
@@ -63,9 +60,10 @@ class c_WaitHandle : public ExtObjectData {
   DECLARE_CLASS(WaitHandle, WaitHandle, ObjectData)
 
   // need to implement
-  public: c_WaitHandle(VM::Class* cls = c_WaitHandle::s_cls);
+  public: c_WaitHandle(Class* cls = c_WaitHandle::s_cls);
   public: ~c_WaitHandle();
   public: void t___construct();
+  public: static void ti_setonjoincallback(CVarRef callback);
   public: Object t_getwaithandle();
   public: void t_import();
   public: Variant t_join();
@@ -115,7 +113,7 @@ class c_StaticWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(StaticWaitHandle, StaticWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_StaticWaitHandle(VM::Class* cls = c_StaticWaitHandle::s_cls);
+  public: c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::s_cls);
   public: ~c_StaticWaitHandle();
   public: void t___construct();
 
@@ -133,14 +131,10 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticResultWaitHandle, StaticResultWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticResultWaitHandle(VM::Class* cls = c_StaticResultWaitHandle::s_cls);
+  public: c_StaticResultWaitHandle(Class* cls = c_StaticResultWaitHandle::s_cls);
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CVarRef result);
-  public: static Object t_create(CVarRef result) {
-    return ti_create("staticresultwaithandle", result);
-  }
-
+  public: static Object ti_create(CVarRef result);
 
  public:
   static p_StaticResultWaitHandle Create(const TypedValue* result);
@@ -159,14 +153,10 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticExceptionWaitHandle, StaticExceptionWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticExceptionWaitHandle(VM::Class* cls = c_StaticExceptionWaitHandle::s_cls);
+  public: c_StaticExceptionWaitHandle(Class* cls = c_StaticExceptionWaitHandle::s_cls);
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CObjRef exception);
-  public: static Object t_create(CObjRef exception) {
-    return ti_create("staticexceptionwaithandle", exception);
-  }
-
+  public: static Object ti_create(CObjRef exception);
 
  public:
   static p_StaticExceptionWaitHandle Create(ObjectData* exception);
@@ -189,13 +179,12 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(WaitableWaitHandle, WaitableWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_WaitableWaitHandle(VM::Class* cls = c_WaitableWaitHandle::s_cls);
+  public: c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::s_cls);
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
   public: int t_getcontextidx();
   public: Object t_getcreator();
   public: Array t_getparents();
-  public: Array t_getstacktrace();
 
 
  public:
@@ -216,7 +205,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   bool isInContext() { return getContextIdx(); }
 
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
-  c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
 
   virtual c_WaitableWaitHandle* getChild();
   bool hasCycle(c_WaitableWaitHandle* start);
@@ -242,7 +230,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(BlockableWaitHandle, BlockableWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_BlockableWaitHandle(VM::Class* cls = c_BlockableWaitHandle::s_cls);
+  public: c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::s_cls);
   public: ~c_BlockableWaitHandle();
   public: void t___construct();
 
@@ -282,18 +270,18 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(ContinuationWaitHandle, ContinuationWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_ContinuationWaitHandle(VM::Class* cls = c_ContinuationWaitHandle::s_cls);
+  public: c_ContinuationWaitHandle(Class* cls = c_ContinuationWaitHandle::s_cls);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
-  public: static Object ti_start(const char* cls , CObjRef continuation);
-  public: static Object t_start(CObjRef continuation) {
-    return ti_start("continuationwaithandle", continuation);
-  }
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static void ti_setonyieldcallback(CVarRef callback);
+  public: static void ti_setonsuccesscallback(CVarRef callback);
+  public: static void ti_setonfailcallback(CVarRef callback);
   public: Object t_getprivdata();
   public: void t_setprivdata(CObjRef data);
 
-
  public:
+  static void Create(c_Continuation* continuation);
   void run();
   uint16_t getDepth() { return m_depth; }
   String getName();
@@ -305,7 +293,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void start(c_Continuation* continuation, uint16_t depth);
+  void initialize(c_Continuation* continuation, uint16_t depth);
   void markAsSucceeded(const TypedValue* result);
   void markAsFailed(CObjRef exception);
 
@@ -333,13 +321,11 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(GenArrayWaitHandle, GenArrayWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_GenArrayWaitHandle(VM::Class* cls = c_GenArrayWaitHandle::s_cls);
+  public: c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::s_cls);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CArrRef dependencies);
-  public: static Object t_create(CArrRef dependencies) {
-    return ti_create("genarraywaithandle", dependencies);
-  }
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CArrRef dependencies);
 
 
  public:
@@ -371,13 +357,11 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(SetResultToRefWaitHandle, SetResultToRefWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_SetResultToRefWaitHandle(VM::Class* cls = c_SetResultToRefWaitHandle::s_cls);
+  public: c_SetResultToRefWaitHandle(Class* cls = c_SetResultToRefWaitHandle::s_cls);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CObjRef wait_handle, VRefParam ref);
-  public: static Object t_create(CObjRef wait_handle, VRefParam ref) {
-    return ti_create("setresulttorefwaithandle", wait_handle, ref);
-  }
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CObjRef wait_handle, VRefParam ref);
 
 
  public:
@@ -415,13 +399,10 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(RescheduleWaitHandle, RescheduleWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_RescheduleWaitHandle(VM::Class* cls = c_RescheduleWaitHandle::s_cls);
+  public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::s_cls);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , int queue, int priority);
-  public: static Object t_create(int queue, int priority) {
-    return ti_create("reschedulewaithandle", queue, priority);
-  }
+  public: static Object ti_create(int queue, int priority);
 
  public:
   void run();
@@ -439,6 +420,50 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class ExternalThreadEventWaitHandle
+
+/**
+ * A wait handle that synchronizes against C++ operation in external thread.
+ *
+ * See asio_external_thread_event.h for more details.
+ */
+class AsioExternalThreadEvent;
+FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Sweepable {
+ public:
+  DECLARE_CLASS(ExternalThreadEventWaitHandle, ExternalThreadEventWaitHandle, WaitableWaitHandle)
+
+  // need to implement
+  public: c_ExternalThreadEventWaitHandle(Class* cls = c_ExternalThreadEventWaitHandle::s_cls);
+  public: ~c_ExternalThreadEventWaitHandle();
+  public: void t___construct();
+
+ public:
+  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
+
+  c_ExternalThreadEventWaitHandle* getNextToProcess() { assert(getState() == STATE_WAITING); return m_nextToProcess; }
+  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) { assert(getState() == STATE_WAITING); m_nextToProcess = next; }
+  ObjectData* getPrivData() { return m_privData.get(); }
+  void setIndex(uint32_t ete_idx) { assert(getState() == STATE_WAITING); m_index = ete_idx; }
+
+  void abandon(bool sweeping);
+  void process();
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
+
+ private:
+  void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
+
+  c_ExternalThreadEventWaitHandle* m_nextToProcess;
+  AsioExternalThreadEvent* m_event;
+  Object m_privData;
+  uint32_t m_index;
+
+  static const uint8_t STATE_WAITING  = 3;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ASIO_H__
+#endif // incl_HPHP_EXT_ASIO_H_

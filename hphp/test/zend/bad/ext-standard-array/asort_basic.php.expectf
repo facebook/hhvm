@@ -1,0 +1,167 @@
+*** Testing asort() : basic functionality ***
+
+-- Testing asort() by supplying string array, 'flag' value is default --
+bool(true)
+array(8) {
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o20"]=>
+  string(8) "orange20"
+}
+
+-- Testing asort() by supplying numeric array, 'flag' value is default --
+bool(true)
+array(4) {
+  [4]=>
+  int(22)
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+
+-- Testing asort() by supplying string array, 'flag' = SORT_REGULAR --
+bool(true)
+array(8) {
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o20"]=>
+  string(8) "orange20"
+}
+
+-- Testing asort() by supplying numeric array, 'flag' = SORT_REGULAR --
+bool(true)
+array(4) {
+  [4]=>
+  int(22)
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+
+-- Testing asort() by supplying string array, 'flag' = SORT_STRING --
+bool(true)
+array(8) {
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o20"]=>
+  string(8) "orange20"
+}
+
+-- Testing asort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --
+bool(true)
+array(8) {
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o20"]=>
+  string(8) "orange20"
+  ["O3"]=>
+  string(7) "Orange3"
+}
+
+-- Testing asort() by supplying string array (natural), 'flag' = SORT_NATURAL --
+bool(true)
+array(8) {
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o20"]=>
+  string(8) "orange20"
+}
+
+-- Testing asort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --
+bool(true)
+array(8) {
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
+  ["O"]=>
+  string(6) "Orange"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["o2"]=>
+  string(7) "orange2"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["o20"]=>
+  string(8) "orange20"
+}
+
+-- Testing asort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [4]=>
+  int(22)
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+Done

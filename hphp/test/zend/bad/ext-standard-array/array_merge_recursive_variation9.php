@@ -1,0 +1,47 @@
+<?php
+/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
+ * Description: Recursively merges elements from passed arrays into one array
+ * Source code: ext/standard/array.c
+*/
+
+/*
+ * Testing the functionality of array_merge_recursive() by passing 
+ * arrays having common key and value.
+*/
+
+echo "*** Testing array_merge_recursive() : arrays with common key and value ***\n";
+
+/* initialize the array having duplicate values */
+
+// integer values
+$arr1 = array("a" => 1, "b" => 2);
+$arr2 = array("b" => 2, "c" => 4);
+echo "-- Integer values --\n";
+var_dump( array_merge_recursive($arr1, $arr2) );
+
+// float values
+$arr1 = array("a" => 1.1, "b" => 2.2);
+$arr2 = array("b" => 2.2, "c" => 3.3);
+echo "-- Float values --\n";
+var_dump( array_merge_recursive($arr1, $arr2) );
+
+// string values
+$arr1 = array("a" => "hello", "b" => "world");
+$arr2 = array("b" => "world", "c" => "string");
+echo "-- String values --\n";
+var_dump( array_merge_recursive($arr1, $arr2) );
+
+// boolean values
+$arr1 = array("a" => true, "b" => false);
+$arr2 = array("b" => false);
+echo "-- Boolean values --\n";
+var_dump( array_merge_recursive($arr1, $arr2) );
+
+// null values
+$arr1 = array( "a" => NULL);
+$arr2 = array( "a" => NULL);
+echo "-- Null values --\n";
+var_dump( array_merge_recursive($arr1, $arr2) );
+
+echo "Done";
+?>

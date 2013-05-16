@@ -29,10 +29,10 @@
 
 *************************************************************************/
 
-#ifndef _BCMATH_H_
-#define _BCMATH_H_
+#ifndef incl_HPHP_BCMATH_H_
+#define incl_HPHP_BCMATH_H_
 
-#include "config.h"
+#include "hphp/runtime/ext/bcmath/config.h"
 
 typedef enum {PLUS, MINUS} sign;
 

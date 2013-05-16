@@ -15,22 +15,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_soap.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/class_info.h>
-#include <runtime/ext/soap/soap.h>
-#include <runtime/ext/soap/packet.h>
-#include <runtime/base/string_util.h>
-#include <runtime/ext/ext_zlib.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_stream.h>
+#include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/soap/packet.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_stream.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 
@@ -68,7 +68,7 @@ private:
 
 class SoapServerScope : public SoapScope {
 public:
-  SoapServerScope(c_SoapServer *server) {
+  explicit SoapServerScope(c_SoapServer *server) {
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(error_code) = "Server";
     SOAP_GLOBAL(error_object) = Object(server);
@@ -77,7 +77,7 @@ public:
 
 class SoapClientScope : public SoapScope {
 public:
-  SoapClientScope(c_SoapClient *client) {
+  explicit SoapClientScope(c_SoapClient *client) {
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(error_code) = "Client";
     SOAP_GLOBAL(error_object) = Object(client);
@@ -86,7 +86,7 @@ public:
 
 class SoapServiceScope {
 public:
-  SoapServiceScope(c_SoapServer *server) {
+  explicit SoapServiceScope(c_SoapServer *server) {
     save();
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(soap_version) = server->m_version;
@@ -97,7 +97,7 @@ public:
     SOAP_GLOBAL(features) = server->m_features;
   }
 
-  SoapServiceScope(c_SoapClient *client) {
+  explicit SoapServiceScope(c_SoapClient *client) {
     save();
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(soap_version) = client->m_soap_version;
@@ -475,7 +475,7 @@ static bool do_request(c_SoapClient *client, xmlDoc *request,
   if (client->m_trace) {
     client->m_last_request = String((char*)buf, buf_size, CopyString);
   }
-  response = client->o_invoke_few_args(s___dorequest, -1, 5,
+  response = client->o_invoke_few_args(s___dorequest, 5,
       String(buf, buf_size, AttachLiteral),
       String(location, AttachLiteral),
       String(action, AttachLiteral),
@@ -1009,7 +1009,7 @@ static sdlFunctionPtr deserialize_function_call
               key += (char*)hdr_func->ns->href;
               key += ':';
             }
-            key += h->function_name;
+            key += (std::string)h->function_name;
             sdlSoapBindingFunctionHeaderMap::iterator iter =
               fnb->input.headers.find(key);
             if (iter != fnb->input.headers.end()) {
@@ -1132,7 +1132,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
         param_index = key.toInt64();
       }
 
-      parameter = get_param(function, param_name, param_index, true);
+      parameter = get_param(function, param_name.c_str(), param_index, true);
       if (style == SOAP_RPC) {
         param = serialize_parameter(parameter, data, i, param_name.data(),
                                     use, method);
@@ -1751,12 +1751,14 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 ///////////////////////////////////////////////////////////////////////////////
 // soap fault functions
 
+static const StaticString s_HTTP_USER_AGENT("HTTP_USER_AGENT");
+
 static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
                                    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  if (g->GV(_SERVER)["HTTP_USER_AGENT"].toString() == "Shockwave Flash") {
+  if (g->GV(_SERVER)[s_HTTP_USER_AGENT].toString() == "Shockwave Flash") {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -1815,7 +1817,7 @@ int64_t f__soap_active_version() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-c_SoapServer::c_SoapServer(VM::Class* cb) :
+c_SoapServer::c_SoapServer(Class* cb) :
     ExtObjectData(cb),
     m_type(SOAP_FUNCTIONS),
     m_version(SOAP_1_1),
@@ -2034,7 +2036,7 @@ Variant c_SoapServer::t_getfunctions() {
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
                            CStrRef fn_name) {
-  HPHP::VM::Class* cls;
+  HPHP::Class* cls;
   if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
     cls = server->m_soap_object->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
@@ -2042,9 +2044,11 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(StringUtil::ToLower(fn_name));
   }
-  HPHP::VM::Func* f = cls->lookupMethod(fn_name.get());
+  HPHP::Func* f = cls->lookupMethod(fn_name.get());
   return (f && f->isPublic());
 }
+
+static const StaticString s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING");
 
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   USE_SOAP_GLOBAL;
@@ -2088,8 +2092,8 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     req = String(data, size, AttachLiteral);
 
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    if (g->GV(_SERVER).toArray().exists("HTTP_CONTENT_ENCODING")) {
-      String encoding = g->GV(_SERVER)["HTTP_CONTENT_ENCODING"];
+    if (g->GV(_SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
+      String encoding = g->GV(_SERVER)[s_HTTP_CONTENT_ENCODING];
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
         ret = f_gzinflate(String(data, size, AttachLiteral));
@@ -2131,9 +2135,9 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   int soap_version = 0;
   sdlFunctionPtr function;
   try {
-    function = deserialize_function_call
-      (m_sdl, doc_request, m_actor, function_name, params, soap_version,
-       m_soap_headers);
+    function = deserialize_function_call(m_sdl, doc_request, m_actor.c_str(),
+                                         function_name, params, soap_version,
+                                         m_soap_headers);
   } catch (Exception &e) {
     xmlFreeDoc(doc_request);
     send_soap_server_fault(function, e, NULL);
@@ -2293,7 +2297,7 @@ void c_SoapServer::t_addsoapheader(CObjRef fault) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-c_SoapClient::c_SoapClient(VM::Class* cb) :
+c_SoapClient::c_SoapClient(Class* cb) :
     ExtObjectDataFlags<ObjectData::HasCall>(cb),
     m_soap_version(SOAP_1_1),
     m_sdl(NULL),
@@ -2560,11 +2564,11 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
         action += '#';
         action += name.data();
       } else {
-        action += soap_action;
+        action += (std::string) soap_action;
       }
       Variant response;
       try {
-        ret = do_request(this, request, location, action.c_str(),
+        ret = do_request(this, request, location.c_str(), action.c_str(),
                          m_soap_version, 0, response);
       } catch (Exception &e) {
         xmlFreeDoc(request);
@@ -2769,7 +2773,7 @@ bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-c_SoapVar::c_SoapVar(VM::Class* cb) : ExtObjectData(cb) {
+c_SoapVar::c_SoapVar(Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapVar::~c_SoapVar() {
@@ -2804,7 +2808,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-c_SoapParam::c_SoapParam(VM::Class* cb) : ExtObjectData(cb) {
+c_SoapParam::c_SoapParam(Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapParam::~c_SoapParam() {
@@ -2822,7 +2826,7 @@ void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-c_SoapHeader::c_SoapHeader(VM::Class* cb) :
+c_SoapHeader::c_SoapHeader(Class* cb) :
     ExtObjectData(cb) {
 }
 

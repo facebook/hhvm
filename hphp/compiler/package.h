@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PACKAGE_H__
-#define __PACKAGE_H__
+#ifndef incl_HPHP_PACKAGE_H_
+#define incl_HPHP_PACKAGE_H_
 
-#include <compiler/hphp.h>
-#include <util/string_bag.h>
-#include <util/file_cache.h>
-#include <util/mutex.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/string_bag.h"
+#include "hphp/util/file_cache.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,9 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  */
 class Package {
 public:
-  Package(const char *root, bool bShortTags = true, bool bAspTags = false);
+  explicit Package(const char *root,
+                   bool bShortTags = true,
+                   bool bAspTags = false);
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
@@ -89,4 +91,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __PACKAGE_H__
+#endif // incl_HPHP_PACKAGE_H_

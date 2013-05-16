@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_JSON_H__
-#define __HPHP_JSON_H__
+#ifndef incl_HPHP_JSON_H_
+#define incl_HPHP_JSON_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
   DECLARE_BOOST_TYPES(AnalysisResult);
@@ -55,11 +55,11 @@ public:
 
 class Name {
 public:
-  Name(const char *name) {
+  explicit Name(const char *name) {
     assert(name && *name);
     m_name = name;
   }
-  Name(const std::string &name) {
+  explicit Name(const std::string &name) {
     assert(!name.empty());
     m_name = name;
   }
@@ -193,7 +193,7 @@ private:
 template <typename Type>
 class _MapStream {
 public:
-  _MapStream(_OutputStream<Type> &jout)
+  explicit _MapStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
 
   template<typename T>
@@ -234,7 +234,7 @@ private:
 template <typename Type>
 class _ListStream {
 public:
-  _ListStream(_OutputStream<Type> &jout)
+  explicit _ListStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
 
   void next() {
@@ -269,4 +269,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_JSON_H__
+#endif // incl_HPHP_JSON_H_

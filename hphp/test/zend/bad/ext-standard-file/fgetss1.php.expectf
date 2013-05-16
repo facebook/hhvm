@@ -1,0 +1,33 @@
+string(21) "askasdfasdf<b>aaaaaa
+"
+string(6) "dddddd"
+string(28) "asdqw<i onClick="hello();">
+"
+string(8) "aaaaqqqq"
+string(23) "aaafunction foo() {}qqq"
+bool(false)
+string(6) "asdasd"
+string(0) ""
+bool(false)
+bool(false)
+string(11) "some text 
+"
+string(4) "blah"
+string(24) "some another text  hoho "
+bool(false)
+string(9) "askasdfas"
+string(6) "dfaaaa"
+string(5) "asdqw"
+string(0) ""
+string(3) "aaa"
+string(9) "t>functio"
+string(6) "asdasd"
+string(0) ""
+bool(false)
+bool(false)
+string(9) "some text"
+string(2) " 
+"
+string(9) "some anot"
+string(9) "her text "
+Done

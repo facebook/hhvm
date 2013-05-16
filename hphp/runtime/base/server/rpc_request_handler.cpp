@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/rpc_request_handler.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/server/source_root_info.h>
-#include <runtime/base/server/request_uri.h>
-#include <runtime/ext/ext_json.h>
-#include <util/process.h>
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/base/server/request_uri.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/util/process.h"
 
 using std::set;
 
@@ -152,8 +152,10 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
-static const StaticString s_output("output");
-static const StaticString s_return("return");
+static const StaticString
+  s_output("output"),
+  s_return("return"),
+  s_HPHP_RPC("HPHP_RPC");
 
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo) {
@@ -166,7 +168,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    g->GV(_ENV).set("HPHP_RPC", 1);
+    g->GV(_ENV).set(s_HPHP_RPC, 1);
   }
 
   bool isFile = rpcFunc.rfind('.') != string::npos;
@@ -220,7 +222,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       reqInitDoc = m_serverInfo->getReqInitDoc();
     }
 
-    if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
+    if (!reqInitDoc.empty()) {
+      reqInitDoc = (std::string)canonicalize_path(reqInitDoc, "", 0);
+    }
     if (!reqInitDoc.empty()) {
       reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
@@ -248,7 +252,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         }
       }
       if (!forbidden) {
-        rpcFile = canonicalize_path(rpcFile, "", 0);
+        rpcFile = (std::string) canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
         ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce);

@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_STRTOD_H__
-#define __HPHP_ZEND_STRTOD_H__
+#ifndef incl_HPHP_ZEND_STRTOD_H_
+#define incl_HPHP_ZEND_STRTOD_H_
 
-#include <runtime/base/types.h>
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,4 +37,4 @@ void zend_get_bigint_data() ATTRIBUTE_COLD;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_STRTOD_H__
+#endif // incl_HPHP_ZEND_STRTOD_H_

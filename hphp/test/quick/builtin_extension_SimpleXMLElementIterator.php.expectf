@@ -1,0 +1,44 @@
+SimpleXMLElementIterator
+object(SimpleXMLElementIterator)#1 (0) {
+}
+string(36) "O:24:"SimpleXMLElementIterator":0:{}"
+object(SimpleXMLElementIterator)#2 (0) {
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "current"
+  [2]=>
+  string(3) "key"
+  [3]=>
+  string(4) "next"
+  [4]=>
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
+}
+================
+A_SimpleXMLElementIterator
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_SimpleXMLElementIterator)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(51) "O:26:"A_SimpleXMLElementIterator":1:{s:4:"___x";N;}"
+object(A_SimpleXMLElementIterator)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

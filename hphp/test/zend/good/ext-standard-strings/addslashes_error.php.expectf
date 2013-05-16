@@ -1,0 +1,11 @@
+*** Testing addslashes() : error conditions ***
+
+-- Testing addslashes() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing addslashes() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+string(15) ""hello"\"world""
+Done

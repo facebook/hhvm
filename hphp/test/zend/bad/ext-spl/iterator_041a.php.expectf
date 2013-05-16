@@ -1,0 +1,12 @@
+===iterator_to_array===
+State 7: __destruct()
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+===iterator_count===
+State 7: __destruct()
+int(2)
+===DONE===

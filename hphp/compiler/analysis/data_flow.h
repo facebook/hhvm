@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DATA_FLOW_H__
-#define __DATA_FLOW_H__
+#ifndef incl_HPHP_DATA_FLOW_H_
+#define incl_HPHP_DATA_FLOW_H_
 
-#include <compiler/analysis/bit_set_vec.h>
-#include <compiler/analysis/control_flow.h>
+#include "hphp/compiler/analysis/bit_set_vec.h"
+#include "hphp/compiler/analysis/control_flow.h"
 
 namespace HPHP {
 
@@ -91,7 +91,7 @@ private:
 
 class DataFlowWalker : public ControlFlowGraphWalker {
 public:
-  DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+  explicit DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
 
   template<class T>
   void walk(T &t) { ControlFlowGraphWalker::walk(t); }
@@ -107,4 +107,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DATA_FLOW_H__
+#endif // incl_HPHP_DATA_FLOW_H_

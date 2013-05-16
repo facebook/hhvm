@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,19 +39,25 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextQueue(ctx_idx, m_queue_ready);
+  exitContextQueue(ctx_idx, m_runnableQueue);
 
-  for (auto it : m_priority_queue_default) {
+  for (auto it : m_priorityQueueDefault) {
     exitContextQueue(ctx_idx, it.second);
   }
 
-  for (auto it : m_priority_queue_no_pending_io) {
+  for (auto it : m_priorityQueueNoPendingIO) {
     exitContextQueue(ctx_idx, it.second);
+  }
+
+  while (!m_externalThreadEvents.empty()) {
+    auto ete_wh = m_externalThreadEvents.back();
+    m_externalThreadEvents.pop_back();
+    ete_wh->exitContext(ctx_idx);
   }
 }
 
 void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {
-  m_queue_ready.push(wait_handle);
+  m_runnableQueue.push(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -60,12 +66,26 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
 
   reschedule_priority_queue_t& dst_queue =
     (queue == QUEUE_DEFAULT)
-      ? m_priority_queue_default
-      : m_priority_queue_no_pending_io;
+      ? m_priorityQueueDefault
+      : m_priorityQueueNoPendingIO;
 
   // creates a new per-prio queue if necessary
   dst_queue[priority].push(wait_handle);
   wait_handle->incRefCount();
+}
+
+uint32_t AsioContext::registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle) {
+  m_externalThreadEvents.push_back(wait_handle);
+  return m_externalThreadEvents.size() - 1;
+}
+
+void AsioContext::unregisterExternalThreadEvent(uint32_t ete_idx) {
+  assert(ete_idx < m_externalThreadEvents.size());
+  if (ete_idx != m_externalThreadEvents.size() - 1) {
+    m_externalThreadEvents[ete_idx] = m_externalThreadEvents.back();
+    m_externalThreadEvents[ete_idx]->setIndex(ete_idx);
+  }
+  m_externalThreadEvents.pop_back();
 }
 
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
@@ -73,28 +93,51 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
+  auto session = AsioSession::Get();
+  uint8_t check_ete_counter = 0;
+
   while (!wait_handle->isFinished()) {
-    // run queue of ready continuations
-    while (!m_queue_ready.empty()) {
-      auto current = m_queue_ready.front();
-      m_queue_ready.pop();
+    // process ready external thread events once per 256 other events
+    // (when 8-bit check_ete_counter overflows)
+    if (!++check_ete_counter) {
+      auto ete_wh = session->getReadyExternalThreadEvents();
+      while (ete_wh) {
+        auto next_wh = ete_wh->getNextToProcess();
+        ete_wh->process();
+        ete_wh = next_wh;
+      }
+    }
+
+    // run queue of ready continuations once
+    if (!m_runnableQueue.empty()) {
+      auto current = m_runnableQueue.front();
+      m_runnableQueue.pop();
       m_current = current;
       m_current->run();
       m_current = nullptr;
       decRefObj(current);
-
-      if (wait_handle->isFinished()) {
-        return;
-      }
+      continue;
     }
 
     // run default priority queue once
-    if (runSingle(m_priority_queue_default)) {
+    if (runSingle(m_priorityQueueDefault)) {
+      continue;
+    }
+
+    // pending external thread events? wait for at least one to become ready
+    if (!m_externalThreadEvents.empty()) {
+      // all your wait time are belong to us
+      auto ete_wh = session->waitForExternalThreadEvents();
+      while (ete_wh) {
+        auto next_wh = ete_wh->getNextToProcess();
+        ete_wh->process();
+        ete_wh = next_wh;
+      }
       continue;
     }
 
     // run no-pending-io priority queue once
-    if (runSingle(m_priority_queue_no_pending_io)) {
+    if (runSingle(m_priorityQueueNoPendingIO)) {
       continue;
     }
 

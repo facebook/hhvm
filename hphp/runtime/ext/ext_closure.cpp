@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_closure.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure(VM::Class* cb) : ExtObjectData(cb),
+c_Closure::c_Closure(Class* cb) : ExtObjectData(cb),
   m_thisOrClass(nullptr), m_func(nullptr) {}
 c_Closure::~c_Closure() {
   // same as ar->hasThis()
@@ -39,11 +39,11 @@ void c_Closure::t___construct() {
  * sp points to the last use variable on the stack.
  * returns the closure so that translator-x64 can just return "rax".
  */
-c_Closure* c_Closure::init(int numArgs, VM::ActRec* ar, TypedValue* sp) {
+c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   static StringData* invokeName = StringData::GetStaticString("__invoke");
-  VM::Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
+  Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
 
-  if (invokeFunc->attrs() & VM::AttrStatic) {
+  if (invokeFunc->attrs() & AttrStatic) {
     // Only set the class for static closures
     m_thisOrClass = (ObjectData*)(intptr_t(ar->m_func->cls()) | 1LL);
   } else {
@@ -56,7 +56,7 @@ c_Closure* c_Closure::init(int numArgs, VM::ActRec* ar, TypedValue* sp) {
   }
 
   // Change my __invoke's m_cls to be the same as my creator's
-  VM::Class* scope = ar->m_func->cls();
+  Class* scope = ar->m_func->cls();
   m_func = invokeFunc->cloneAndSetClass(scope);
 
   // copy the props to instance variables
@@ -94,7 +94,7 @@ HphpArray* c_Closure::getStaticLocals() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyClosure::c_DummyClosure(VM::Class* cb) :
+c_DummyClosure::c_DummyClosure(Class* cb) :
   ExtObjectData(cb) {
 }
 

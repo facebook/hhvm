@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONTROL_FLOW_H__
-#define __CONTROL_FLOW_H__
+#ifndef incl_HPHP_CONTROL_FLOW_H_
+#define incl_HPHP_CONTROL_FLOW_H_
 
 #include <boost/graph/properties.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include <compiler/hphp.h>
+#include "hphp/compiler/hphp.h"
 
-#include <compiler/analysis/ast_walker.h>
-#include <compiler/analysis/bit_set_vec.h>
+#include "hphp/compiler/analysis/ast_walker.h"
+#include "hphp/compiler/analysis/bit_set_vec.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -309,7 +309,10 @@ inline void put(boost::vertex_color_t c,
 
 class ControlFlowGraphWalker : public FunctionWalker {
 public:
-  ControlFlowGraphWalker(ControlFlowGraph *g) : m_block(0), m_graph(*g) {}
+  explicit ControlFlowGraphWalker(ControlFlowGraph *g)
+    : m_block(0)
+    , m_graph(*g)
+  {}
   template <class T>
   void walk(T &t) {
     std::pair<ControlFlowGraph::vertex_iterator,
@@ -333,4 +336,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONTROL_FLOW_H__
+#endif // incl_HPHP_CONTROL_FLOW_H_

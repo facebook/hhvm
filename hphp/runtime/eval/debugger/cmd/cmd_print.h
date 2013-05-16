@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_PRINT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_PRINT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,18 +35,18 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
-  virtual bool onServerVM(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   Variant processWatch(DebuggerClient *client, const char *format,
                     const std::string &php);
 
   virtual void handleReply(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   Variant m_ret;
@@ -64,4 +64,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_PRINT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_

@@ -14,37 +14,40 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_H__
-#define __HPHP_EVAL_DEBUGGER_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_H_
+#define incl_HPHP_EVAL_DEBUGGER_H_
 
-#include <util/lock.h>
-#include <runtime/eval/debugger/debugger_proxy.h>
-#include <runtime/base/program_functions.h>
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_queue.h>
+#include "hphp/util/lock.h"
+#include "hphp/runtime/eval/debugger/debugger_proxy.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/concurrent_queue.h"
 
 namespace HPHP { namespace Eval {
+
+// Tag used on server log messages to highlight that they are likely useful to
+// show to users.
+#define DEBUGGER_LOG_TAG "[DBGINFO] "
+
 ///////////////////////////////////////////////////////////////////////////////
+// The Debugger generally manages proxies, sandboxes, and is the inital handler
+// of interrupts from the VM. It associates VM threads with sandboxes, and
+// sandboxes with proxies. Interrupts get minimal handling before being handed
+// off to the proper proxy.
 
 class Debugger {
 public:
-  /**
-   * Start/stop Debugger for remote debugging.
-   */
+  // Start/stop Debugger for remote debugging.
   static bool StartServer();
   static DebuggerProxyPtr StartClient(const DebuggerClientOptions &options);
   static void Stop();
 
-  /**
-   * Add a new sandbox a debugger can connect to.
-   */
+  // Add a new sandbox a debugger can connect to.
   static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void UnregisterSandbox(CStrRef id);
   static void RegisterThread();
 
-  /**
-   * Add/remove/change DebuggerProxy.
-   */
+  //  Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
   static bool SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
@@ -65,9 +68,7 @@ public:
   static void DebuggerSession(const DebuggerClientOptions& options,
                               const std::string& file, bool restart);
 
-  /**
-   * Called from differnt time point of execution thread.
-   */
+  // Called from differnt time point of execution thread.
   static void InterruptSessionStarted(const char *file,
                                       const char *error = nullptr);
   static void InterruptSessionEnded(const char *file);
@@ -75,25 +76,25 @@ public:
   static void InterruptRequestEnded(const char *url);
   static void InterruptPSPEnded(const char *url);
 
-  /**
-   * A new line of PHP code is reached from execution thread.
-   */
-  static void InterruptFileLine(InterruptSite &site);
-  static void InterruptHard(InterruptSite &site);
+  // Called when a user handler fails to handle an exception.
   static bool InterruptException(CVarRef e);
 
-  /**
-   * Interrupt from VM
-   */
+  // Interrupt from VM
   static void InterruptVMHook(int type = BreakPointReached,
                               CVarRef e = null_variant);
 
-  /**
-   * Surround text with color, if set.
-   */
+  // Surround text with color, if set.
   static void SetTextColors();
   static String ColorStdout(CStrRef s);
   static String ColorStderr(CStrRef s);
+
+  // Log debugging state when we're shutting the server down.
+  enum ShutdownKind {
+    Normal,
+    Abnormal
+  };
+
+  static void LogShutdown(ShutdownKind shutdownKind);
 
 private:
   static Debugger s_debugger;
@@ -101,6 +102,7 @@ private:
 
   static void Interrupt(int type, const char *program,
                         InterruptSite *site = nullptr, const char *error = nullptr);
+  static void InterruptWithUrl(int type, const char *url);
 
   typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
                                    StringDataHashCompare> ProxyMap;
@@ -157,9 +159,12 @@ public:
   ~DebuggerDummyEnv();
 };
 
+// Suppress the debugger's ability to get interrupted while executing PHP.
+// Primarily used to suppress debugger events while evaling PHP in response
+// to commands like print, or for expressions in conditional breakpoints.
 class EvalBreakControl {
 public:
-  EvalBreakControl(bool noBreak);
+  explicit EvalBreakControl(bool noBreak);
   ~EvalBreakControl();
 private:
   bool m_noBreakSave;
@@ -168,4 +173,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_H_

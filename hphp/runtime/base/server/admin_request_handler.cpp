@@ -17,40 +17,40 @@
 #include <sstream>
 #include <iomanip>
 
-#include "runtime/eval/runtime/file_repository.h"
-#include "runtime/base/server/admin_request_handler.h"
-#include "runtime/base/server/http_server.h"
-#include "runtime/base/server/pagelet_server.h"
-#include "runtime/base/util/http_client.h"
-#include "runtime/base/server/server_stats.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/preg.h"
-#include "util/process.h"
-#include "util/logger.h"
-#include "util/util.h"
-#include "util/mutex.h"
-#include "runtime/base/time/datetime.h"
-#include "runtime/base/memory/memory_manager.h"
-#include "runtime/base/program_functions.h"
-#include "runtime/base/shared/shared_store_base.h"
-#include "runtime/base/memory/leak_detectable.h"
-#include "runtime/ext/mysql_stats.h"
-#include "runtime/base/shared/shared_store_stats.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-x64.h"
-#include "util/alloc.h"
-#include <util/timer.h>
-#include "util/repo_schema.h"
-#include "runtime/ext/ext_fb.h"
-#include "runtime/ext/ext_apc.h"
+#include "hphp/runtime/base/server/admin_request_handler.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/process.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/mutex.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/base/shared/shared_store_stats.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/repo_schema.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_apc.h"
 
 #ifdef GOOGLE_CPU_PROFILER
-#include <google/profiler.h>
+#include "google/profiler.h"
 #endif
 #ifdef GOOGLE_HEAP_PROFILER
-#include <google/heap-profiler.h>
+#include "google/heap-profiler.h"
 #endif
 
 using std::endl;
@@ -555,9 +555,7 @@ static bool send_status(Transport *transport, ServerStats::Format format,
   return true;
 }
 
-namespace VM {
   extern size_t hhbc_arena_capacity();
-}
 
 bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
@@ -588,8 +586,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    VM::Transl::Translator* tx = VM::Transl::Translator::Get();
-    appendStat("hhbc-roarena-capac", VM::hhbc_arena_capacity());
+    Transl::Translator* tx = Transl::Translator::Get();
+    appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", tx->getTargetCacheSize());
@@ -961,12 +959,12 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(VM::Transl::Translator::Get()->getUsage());
+    transport->sendString(Transl::Translator::Get()->getUsage());
     return true;
   }
   if (cmd == "vm-preconsts") {
     InfoMap counts;
-    using namespace HPHP::VM::Transl;
+    using namespace HPHP::Transl;
     for (PreConstDepMap::iterator i = gPreConsts.begin(); i != gPreConsts.end();
          ++i) {
       PreConstDep& dep = i->second;
@@ -993,7 +991,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::VM::Transl::tc_dump()) {
+    if (HPHP::Transl::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");
@@ -1002,7 +1000,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-tcreset") {
     int64_t start = Timer::GetCurrentTimeMicros();
-    if (HPHP::VM::Transl::tx64->replace()) {
+    if (HPHP::Transl::tx64->replace()) {
       string msg;
       Util::string_printf(msg, "Done %ld ms",
                           (Timer::GetCurrentTimeMicros() - start) / 1000);

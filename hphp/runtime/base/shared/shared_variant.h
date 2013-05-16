@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SHARED_VARIANT_H__
-#define __HPHP_SHARED_VARIANT_H__
+#ifndef incl_HPHP_SHARED_VARIANT_H_
+#define incl_HPHP_SHARED_VARIANT_H_
 
-#include <runtime/base/types.h>
-#include <util/lock.h>
-#include <util/hash.h>
-#include <util/atomic.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/shared/immutable_map.h>
-#include <runtime/base/shared/immutable_obj.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/atomic.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/shared/immutable_map.h"
+#include "hphp/runtime/base/shared/immutable_obj.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
@@ -272,4 +272,4 @@ class SharedVariantStats {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_SHARED_VARIANT_H__ */
+#endif /* incl_HPHP_SHARED_VARIANT_H_ */

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_icu_uspoof.h>
-#include <runtime/ext/ext_icu_uspoof.h>
+#include "hphp/test/test_ext_icu_uspoof.h"
+#include "hphp/runtime/ext/ext_icu_uspoof.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

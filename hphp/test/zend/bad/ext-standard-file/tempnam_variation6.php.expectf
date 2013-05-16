@@ -1,0 +1,12 @@
+*** Test tempnam(): by passing previously created filenames ***
+-- Iteration 1 --
+File name is => %s%etempnam_variation6.tmp%s
+File created in => directory specified
+-- Iteration 2 --
+File name is => %s%etempnam_variation6.tmp%s
+File created in => directory specified
+-- Iteration 3 --
+File name is => %s%etempnam_variation6.tmp%s
+File created in => directory specified
+
+*** Done ***

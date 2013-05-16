@@ -1,0 +1,13 @@
+bool(false)
+bool(false)
+string(12) "@example.com"
+string(1) "a"
+string(2) "@e"
+string(10) "asdfasdfas"
+string(1) "@"
+string(0) ""
+string(5) "eE@fF"
+string(0) ""
+string(4) "E@fF"
+string(1) "e"
+bool(false)

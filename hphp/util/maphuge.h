@@ -13,6 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_MAPHUGE_H_
+#define incl_HPHP_MAPHUGE_H_
+
 namespace HPHP {
 void hintHuge(void* mem, size_t length);
 }
+
+#endif

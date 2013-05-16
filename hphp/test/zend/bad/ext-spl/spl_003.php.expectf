@@ -1,0 +1,37 @@
+HipHop Warning: %a
+string(3) "foo"
+HipHop Warning: %a
+array(2) {
+  ["b"]=>
+  string(1) "b"
+  ["a"]=>
+  string(1) "a"
+}
+array(2) {
+  ["b"]=>
+  string(1) "b"
+  ["a"]=>
+  string(1) "a"
+}
+array(1) {
+  ["a"]=>
+  string(1) "a"
+}
+array(1) {
+  ["a"]=>
+  string(1) "a"
+}
+array(0) {
+}
+bool(false)
+bool(false)
+string(3) "aaa"
+HipHop Warning: %a
+HipHop Warning: %a
+array(0) {
+}
+array(0) {
+}
+bool(false)
+bool(false)
+===DONE===

@@ -14,29 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/server/libevent_server_with_fd.h>
-#include <runtime/base/server/libevent_server_with_takeover.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/admin_request_handler.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/class_info.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <util/logger.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <util/db_conn.h>
-#include <runtime/ext/ext_apc.h>
+#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/server/libevent_server_with_fd.h"
+#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/server/admin_request_handler.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/server/replay_transport.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include <sys/types.h>
 #include <signal.h>
-#include <util/ssl_init.h>
+#include "hphp/util/ssl_init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,36 +45,59 @@ namespace HPHP {
 HttpServerPtr HttpServer::Server;
 time_t HttpServer::StartTime;
 
+const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer(void *sslCTX /* = NULL */)
-  : m_stopped(false), m_sslCTX(sslCTX),
+  : m_stopped(false), m_stopReason(nullptr), m_sslCTX(sslCTX),
     m_watchDog(this, &HttpServer::watchDog) {
 
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
+  bool const useWarmupThrottle =
+    RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
+    RuntimeOption::ServerThreadCount > kNumProcessors;
+
+  auto maybeEnableThrottle = [&] (LibEventServer* s) {
+    if (!useWarmupThrottle) return;
+
+    s->enableWarmupThrottle(RuntimeOption::ServerThreadCount - kNumProcessors,
+                            RuntimeOption::ServerWarmupThrottleRequestCount);
+    Logger::Info("Starting with %d threads for the first %d requests\n",
+                 kNumProcessors,
+                 RuntimeOption::ServerWarmupThrottleRequestCount);
+  };
+
+  int const startingThreadCount = !useWarmupThrottle
+    ? RuntimeOption::ServerThreadCount
+    : kNumProcessors;
+
   if (RuntimeOption::ServerPortFd != -1 || RuntimeOption::SSLPortFd != -1) {
     LibEventServerWithFd* server =
       (new TypedServer<LibEventServerWithFd, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
+        startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds));
+    maybeEnableThrottle(server);
     server->setServerSocketFd(RuntimeOption::ServerPortFd);
     server->setSSLSocketFd(RuntimeOption::SSLPortFd);
     m_pageServer = ServerPtr(server);
   } else if (RuntimeOption::TakeoverFilename.empty()) {
-    m_pageServer = ServerPtr
-      (new TypedServer<LibEventServer, HttpRequestHandler>
+    auto const server = new TypedServer<LibEventServer, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
-        RuntimeOption::RequestTimeoutSeconds));
+        startingThreadCount,
+        RuntimeOption::RequestTimeoutSeconds);
+    maybeEnableThrottle(server);
+    m_pageServer = ServerPtr(server);
   } else {
     LibEventServerWithTakeover* server =
       (new TypedServer<LibEventServerWithTakeover, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount,
+        startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds));
+    maybeEnableThrottle(server);
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
     server->addTakeoverListener(this);
     m_pageServer = ServerPtr(server);
@@ -261,6 +284,9 @@ void HttpServer::run() {
     while (!m_stopped) {
       wait();
     }
+    if (m_stopReason) {
+      Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
+    }
     removePid();
     Logger::Info("page server stopped");
   }
@@ -302,7 +328,7 @@ static void exit_on_timeout(int sig) {
   exit(0);
 }
 
-void HttpServer::stop() {
+void HttpServer::stop(const char* stopReason) {
   if (RuntimeOption::ServerGracefulShutdownWait) {
     signal(SIGALRM, exit_on_timeout);
     alarm(RuntimeOption::ServerGracefulShutdownWait);
@@ -310,6 +336,7 @@ void HttpServer::stop() {
 
   Lock lock(this);
   m_stopped = true;
+  m_stopReason = stopReason;
   notify();
 }
 

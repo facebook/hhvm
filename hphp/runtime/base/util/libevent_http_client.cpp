@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/libevent_http_client.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/runtime_option.h>
-#include <util/compression.h>
-#include <util/logger.h>
-#include <util/timer.h>
+#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 
 // libevent is not exposing this data structure, but we need it.
 struct evkeyvalq_ {

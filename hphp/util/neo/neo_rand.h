@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __NEO_RAND_H_
-#define __NEO_RAND_H_ 1
+#ifndef incl_HPHP_NEO_RAND_H_
+#define incl_HPHP_NEO_RAND_H_ 1
 
 __BEGIN_DECLS
 
@@ -21,4 +21,4 @@ int neo_rand_word (char *s, int slen);
 
 __END_DECLS
 
-#endif /* __NEO_RAND_H_ */
+#endif /* incl_HPHP_NEO_RAND_H_ */

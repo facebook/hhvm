@@ -9,13 +9,13 @@
  *
  */
 
-#ifndef __NEO_HASH_H_
-#define __NEO_HASH_H_ 1
+#ifndef incl_HPHP_NEO_HASH_H_
+#define incl_HPHP_NEO_HASH_H_ 1
 
 __BEGIN_DECLS
 
 #include <stdlib.h>
-#include "neo_misc.h"
+#include "hphp/util/neo/neo_misc.h"
 
 typedef UINT32 (*NE_HASH_FUNC)(const void *);
 typedef int (*NE_COMP_FUNC)(const void *, const void *);
@@ -54,4 +54,4 @@ UINT32 ne_hash_int_hash(const void *a);
 
 __END_DECLS
 
-#endif /* __NEO_HASH_H_ */
+#endif /* incl_HPHP_NEO_HASH_H_ */

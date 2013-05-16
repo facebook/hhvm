@@ -14,13 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_print.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/string_util.h>
-#include <runtime/vm/debugger_hook.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_print.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/vm/debugger_hook.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 const char *CmdPrint::Formats[] = {
   "x", "v", "hex", "oct", "dec", "unsigned", "time", nullptr
@@ -285,8 +287,8 @@ void CmdPrint::handleReply(DebuggerClient *client) {
   client->output(m_ret);
 }
 
-bool CmdPrint::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdPrint::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     return help(client);
   }
@@ -340,6 +342,12 @@ bool CmdPrint::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_format("format");
+static const StaticString s_php("php");
+static const StaticString s_body("body");
+static const StaticString s_value_serialize("value_serialize");
+static const StaticString s_value("value");
+
 void CmdPrint::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTValues);
   Array values;
@@ -347,45 +355,37 @@ void CmdPrint::setClientOutput(DebuggerClient *client) {
     // Manipulating the watch list, output the current list
     DebuggerClient::WatchPtrVec &watches = client->getWatches();
     for (int i = 0; i < (int)watches.size(); i++) {
-      Array watch;
-      watch.set("format", watches[i]->first);
-      watch.set("php", watches[i]->second);
-      values.append(watch);
+      ArrayInit watch(2);
+      watch.set(s_format, watches[i]->first);
+      watch.set(s_php, watches[i]->second);
+      values.append(watch.create());
     }
   } else {
     // Just print an expression, do similar output as eval
-    values.set("body", m_body);
+    values.set(s_body, m_body);
     if (client->getDebuggerClientApiModeSerialize()) {
-      values.set("value_serialize",
+      values.set(s_value_serialize,
                  DebuggerClient::FormatVariable(m_ret, 200));
     } else {
-      values.set("value", m_ret);
+      values.set(s_value, m_ret);
     }
   }
   client->setOTValues(values);
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
-  m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    m_output, !proxy->isLocal(), m_frame);
-  g_context->setDebuggerBypassCheck(false);
-  return proxy->send(this);
-}
-
-bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
-  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
-    m_ret = DebuggerProxyVM::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                        m_output, !proxy->isLocal(), m_frame);
+    m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                                      m_output, !proxy->isLocal(), m_frame);
   }
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = locSave;
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

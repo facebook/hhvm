@@ -1,0 +1,13 @@
+*** Testing popen(): reading from the pipe ***
+Sample String
+*** Testing popen(): writing to the pipe ***
+aaa
+ddd
+ggg
+sss
+*** Testing popen() and pclose(): return type ***
+Sample String
+bool(true)
+bool(true)
+
+--- Done ---

@@ -1,0 +1,4 @@
+*** Testing method_exists() : variation ***
+bool(true)
+bool(true)
+Done

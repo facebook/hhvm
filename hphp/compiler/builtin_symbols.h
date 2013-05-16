@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BUILTIN_SYMBOLS_H__
-#define __BUILTIN_SYMBOLS_H__
+#ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
+#define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include <compiler/hphp.h>
-#include <util/string_bag.h>
-#include <runtime/base/class_info.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/util/string_bag.h"
+#include "hphp/runtime/base/class_info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,9 +73,6 @@ private:
   static const char *SystemClasses[];
 
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
-  static void Parse(AnalysisResultPtr ar,
-                    const std::string& phpBaseName,
-                    const std::string& phpFileName);
 
   static StringToTypePtrMap s_superGlobals;
 
@@ -105,4 +102,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __BUILTIN_SYMBOLS_H__
+#endif // incl_HPHP_BUILTIN_SYMBOLS_H_

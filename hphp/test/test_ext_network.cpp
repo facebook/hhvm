@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_network.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/server/libevent_transport.h>
+#include "hphp/test/test_ext_network.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/server/libevent_transport.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtNetwork::RunTests(const std::string &which) {

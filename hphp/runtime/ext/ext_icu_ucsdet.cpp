@@ -15,16 +15,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_icu_ucsdet.h>
-#include <unicode/unistr.h>
+#include "hphp/runtime/ext/ext_icu_ucsdet.h"
+#include "unicode/unistr.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 IMPLEMENT_DEFAULT_EXTENSION(icu_ucsdet);
 
-c_EncodingDetector::c_EncodingDetector(VM::Class* cb) :
+c_EncodingDetector::c_EncodingDetector(Class* cb) :
     ExtObjectData(cb) {
   UErrorCode status = U_ZERO_ERROR;
   m_encoding_detector = ucsdet_open(&status);
@@ -110,7 +110,7 @@ Array c_EncodingDetector::t_detectall() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_EncodingMatch::c_EncodingMatch(VM::Class* cb) :
+c_EncodingMatch::c_EncodingMatch(Class* cb) :
     ExtObjectData(cb), m_encoding_match(0) {
 }
 

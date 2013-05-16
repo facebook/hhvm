@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_INSTANCE_H_
-#define incl_VM_INSTANCE_H_
+#ifndef incl_HPHP_VM_INSTANCE_H_
+#define incl_HPHP_VM_INSTANCE_H_
 
-#include "runtime/base/object_data.h"
-#include "runtime/base/memory/smart_allocator.h"
-#include "runtime/base/array/array_init.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/base/array/hphp_array.h"
-#include "runtime/vm/class.h"
-#include "runtime/vm/unit.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
-namespace VM {
 
-void deepInitHelper(TypedValue*, const TypedValueAux*, size_t);
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+                    size_t nProps);
 
 class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in
@@ -95,20 +95,6 @@ class Instance : public ObjectData {
 
  private:
   void instanceInit(Class* cls) {
-    /*
-     * During the construction of an instance, the instance has a ref
-     * count of zero, and no pointer to it yet exists anywhere the
-     * tracing collector can find it.  (I.e., newInstance() hasn't
-     * returned, so it isn't on the execution stack or in an Object
-     * smart pointer yet.)
-     *
-     * However, instance creation can sometimes lead to execution of
-     * arbitrary code (in the form of an autoload handler).  Moreover
-     * it can also lead to memory allocations (which may be a point at
-     * which we want to do GC), so we need to register the root for
-     * the duration of construction.
-     */
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
     setAttributes(cls->getODAttrs());
     size_t nProps = cls->numDeclProperties();
     if (cls->needInitialization()) {
@@ -258,21 +244,21 @@ inline Instance* instanceFromTv(TypedValue* tv) {
   return static_cast<Instance*>(tv->m_data.pobj);
 }
 
-} } // HPHP::VM
+ } // HPHP::VM
 
 namespace HPHP {
 
-class ExtObjectData : public HPHP::VM::Instance {
+class ExtObjectData : public HPHP::Instance {
  public:
-  ExtObjectData(HPHP::VM::Class* cls)
-    : HPHP::VM::Instance(cls, false) {
+  explicit ExtObjectData(HPHP::Class* cls)
+    : HPHP::Instance(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
 };
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
  public:
-  ExtObjectDataFlags(HPHP::VM::Class* cb) : ExtObjectData(cb) {
+  explicit ExtObjectDataFlags(HPHP::Class* cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }
 };

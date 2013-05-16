@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_IPC_H__
-#define __EXT_IPC_H__
+#ifndef incl_HPHP_EXT_IPC_H_
+#define incl_HPHP_EXT_IPC_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,4 +61,4 @@ bool f_shm_remove_var(int64_t shm_identifier, int64_t variable_key);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_IPC_H__
+#endif // incl_HPHP_EXT_IPC_H_

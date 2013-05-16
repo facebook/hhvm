@@ -32,9 +32,6 @@ $opt_server = 0;
 $opt_port = 8080;
 $opt_home = ".";
 $opt_threads = `cat /proc/cpuinfo | grep '^processor' | wc -l`;
-if ($opt_threads > 20) {
-    $opt_threads = 20;
-}
 $opt_reduce = "";
 $opt_coverage = "";
 $opt_hhvm = "hhvm";
@@ -98,9 +95,14 @@ if ($opt_verbose && $opt_quiet)
 
 if ($#ARGV + 1 == 0)
 {
-    print STDERR "No tests specified\n";
-    &usage();
-    exit 1;
+    while (<STDIN>) {
+      push @ARGV, split /\s+/;
+    }
+    @ARGV = grep !/^$/, @ARGV;
+    if (scalar @ARGV == 0) {
+      print STDERR "no files passed in or on stdin\n";
+      exit 1;
+    }
 }
 
 if ($opt_verbose)
@@ -137,7 +139,8 @@ if (!$opt_threads) {
 (
  "--------------------------------------------------------------------------\n",
  "Test                                      c_user c_system c_total     chng\n",
- " passed/FAILED                            h_user h_system h_total   %% chng\n"
+ " passed/FAILED                            h_user h_system h_total   %% chng\n",
+ "--------------------------------------------------------------------------\n",
  );
 
 if (!$opt_quiet)
@@ -201,7 +204,6 @@ foreach $test (@ARGV)
 
     my (@TSTATS);
     my ($t_str);
-    @TSTATS = ("--------------------------------------------------------------------------\n");
 
     $t_str = sprintf ("%s%s", $test, ' ' x (40 - length($test)));
     @TSTATS = (@TSTATS, $t_str);
@@ -366,7 +368,7 @@ sub run_test
         }
     }
 
-    if (-e "$opt_objdir/$test.opts") {
+    if (!$opt_no_exp && -e "$opt_objdir/$test.opts") {
         open (FILE, "<$opt_objdir/$test.opts");
         @lines = <FILE>;
         close(FILE);
@@ -660,12 +662,15 @@ sub print_stats
     my (@TSTATS);
     my ($t_str, $pass_str);
 
-    $pass_str = $okay ? "passed" : "*** FAILED ***";
+    $pass_str = $okay ? "" : "*** FAILED ***";
     if ((0 != $subtests) && (!$okay))
     {
         $pass_str = $pass_str . " ($failed_subtests/$subtests failed)";
     }
-    $pass_str = $pass_str . ' ' x (39 - length($pass_str));
+    if (length($pass_str) > 0)
+    {
+      $pass_str = $pass_str . ' ' x (39 - length($pass_str));
+    }
 
     if (-r "$test.perf")
     {
@@ -695,9 +700,9 @@ sub print_stats
         $hstime = 0.0;
 
         $t_str = sprintf (" %7.2f  %7.2f %7.2f        \n"
-                          . " %s\n",
+                          . "%s",
                           $utime, $stime, $utime + $stime,
-                          $pass_str);
+                          length($pass_str) > 0 ? " $pass_str\n" : "");
     }
     @TSTATS = ($t_str);
     if (!$opt_quiet)

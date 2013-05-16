@@ -15,11 +15,11 @@
 */
 
 #include "util.h"
-#include "base.h"
-#include "lock.h"
-#include "logger.h"
-#include "exception.h"
-#include "network.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/network.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -867,7 +867,7 @@ char* Util::getNativeFunctionName(void* codeAddr) {
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
     // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::VM::Transl::interpOneIterInit()
+    // HPHP::Transl::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
     // and ends up giving us a blank managled name, like this:

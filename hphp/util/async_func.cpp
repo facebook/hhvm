@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "async_func.h"
+#include "hphp/util/async_func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,6 +63,10 @@ void AsyncFuncImpl::start() {
 
   pthread_create(&m_threadId, &m_attr, ThreadFunc, (void*)this);
   assert(m_threadId);
+}
+
+void AsyncFuncImpl::cancel() {
+  pthread_cancel(m_threadId);
 }
 
 bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {

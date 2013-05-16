@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext/hash/hash_whirlpool.h>
-#include <runtime/ext/hash/php_hash_whirlpool_tables.h>
+#include "hphp/runtime/ext/hash/hash_whirlpool.h"
+#include "hphp/runtime/ext/hash/php_hash_whirlpool_tables.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/transport.h>
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/upload.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/zend/zend_url.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/ext/ext_openssl.h>
-#include <util/compression.h>
-#include <util/util.h>
-#include <util/logger.h>
-#include <util/compatibility.h>
-#include <runtime/base/hardware_counter.h>
+#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/runtime/base/hardware_counter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -648,7 +648,7 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
         f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
       assert(decrypted->same(ip.get()));
     }
-    addHeaderImpl("X-FB-Debug", output);
+    addHeaderImpl("X-FB-Debug", output.c_str());
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections
@@ -793,7 +793,7 @@ void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info) {
   addHeaderImpl("Location", location);
   setResponse(code, info);
-  sendStringLocked(location, code);
+  sendStringLocked("Moved", code);
 }
 
 void Transport::onFlushProgress(int writtenSize, int64_t delayUs) {

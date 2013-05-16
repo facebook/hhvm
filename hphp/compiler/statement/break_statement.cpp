@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/break_statement.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/runtime/base/complex_types.h"
 
 using namespace HPHP;
 

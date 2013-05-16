@@ -1,0 +1,4 @@
+resource(%i) of type (Socket)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a

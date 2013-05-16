@@ -1,0 +1,99 @@
+*** Testing mb_strstr() : usage variation ***
+
+--int 0--
+string(8) "5f76616c"
+
+--int 1--
+string(12) "737472696e67"
+
+--int 12345--
+string(12) "737472696e67"
+
+--int -12345--
+string(12) "737472696e67"
+
+--float 10.5--
+string(12) "737472696e67"
+
+--float -10.5--
+string(12) "737472696e67"
+
+--float 12.3456789000e10--
+string(12) "737472696e67"
+
+--float -12.3456789000e10--
+string(12) "737472696e67"
+
+--float .5--
+string(12) "737472696e67"
+
+--empty array--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--int indexed array--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--associative array--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--nested arrays--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--uppercase NULL--
+string(8) "5f76616c"
+
+--lowercase null--
+string(8) "5f76616c"
+
+--lowercase true--
+string(12) "737472696e67"
+
+--lowercase false--
+string(8) "5f76616c"
+
+--uppercase TRUE--
+string(12) "737472696e67"
+
+--uppercase FALSE--
+string(8) "5f76616c"
+
+--empty string DQ--
+string(8) "5f76616c"
+
+--empty string SQ--
+string(8) "5f76616c"
+
+--string DQ--
+string(12) "737472696e67"
+
+--string SQ--
+string(12) "737472696e67"
+
+--mixed case string--
+string(12) "737472696e67"
+
+--heredoc--
+string(12) "737472696e67"
+
+--instance of classWithToString--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
+bool(false)
+
+--instance of classWithoutToString--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
+bool(false)
+
+--undefined var--
+string(8) "5f76616c"
+
+--unset var--
+string(8) "5f76616c"
+
+--resource--
+Error: 2 - mb_strstr() expects parameter 3 to be boolean, resource given, %s(%d)
+bool(false)
+===DONE===

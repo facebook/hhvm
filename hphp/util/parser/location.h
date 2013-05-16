@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_LOCATION_H__
-#define __HPHP_UTIL_PARSER_LOCATION_H__
+#ifndef incl_HPHP_UTIL_PARSER_LOCATION_H_
+#define incl_HPHP_UTIL_PARSER_LOCATION_H_
 
-#include <util/base.h>
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,13 +25,14 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Location);
 class Location {
 public:
-  Location() : file(""), line0(1), char0(1), line1(1), char1(1) {}
+  Location() : file(""), line0(1), char0(1), line1(1), char1(1), cursor(0) {}
 
   const char *file;
   int line0;
   int char0;
   int line1;
   int char1;
+  int cursor;
 
   void first(int line, char pos) {
     line0 = line; char0 = pos;
@@ -63,4 +64,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_LOCATION_H__
+#endif // incl_HPHP_UTIL_PARSER_LOCATION_H_

@@ -1,0 +1,14 @@
+===Default with array===
+1 => apple
+1 => grape
+===Public Property===
+title => apple
+title => grape
+===Protected Property===
+===Public Property New===
+1 => apple
+1 => grape
+===Protected Property New===
+1 => apple
+1 => grape
+===DONE===

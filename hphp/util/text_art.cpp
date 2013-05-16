@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "text_art.h"
+#include "hphp/util/text_art.h"
 
 namespace HPHP { namespace Util { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////

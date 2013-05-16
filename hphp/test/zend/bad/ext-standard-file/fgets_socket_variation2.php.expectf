@@ -1,0 +1,7 @@
+Write data from the file:
+int(9000)
+
+Read lines from the client
+
+Close the server side socket and read the remaining data from the client
+done

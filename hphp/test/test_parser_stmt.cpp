@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_parser_stmt.h>
-#include <compiler/parser/parser.h>
-#include <compiler/code_generator.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/analysis/analysis_result.h>
+#include "hphp/test/test_parser_stmt.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -220,8 +220,11 @@ bool TestParserStmt::TestStatementList() {
   V("<?php function test() {} ; class Test {} __halt_compiler();",
     "function test() {\n}\nclass Test {\n}\n");
 
+  V("<?php function test() {} ; __halt_compiler(); function test() {}",
+    "function test() {\n}\n");
+
   V("<?php ; __halt_compiler(); function test() {} class Test {}",
-    "function test() {\n}\nclass Test {\n}\n");
+    "");
 
   return true;
 }
@@ -663,7 +666,7 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
-    "('', '0_foo$continuation', __FUNCTION__);\n"
+    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php function foo() { yield 123;}",
@@ -673,14 +676,14 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
-    "('', '0_foo$continuation', __FUNCTION__);\n"
+    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php class bar { function foo() { yield 123; yield 456;} }",
     "class bar {\n"
     "public function foo() {\n"
     "return hphp_create_continuation"
-    "(__CLASS__, '0_foo$continuation', __METHOD__);\n"
+    "(__CLASS__, '3990978909_1', __METHOD__);\n"
     "}\n"
     "public function ($" CONTINUATION_OBJECT_NAME ") {\n"
     "hphp_unpack_continuation();\n"

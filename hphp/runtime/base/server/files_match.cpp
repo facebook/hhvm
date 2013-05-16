@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/server/files_match.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/preg.h>
-#include <util/util.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/server/files_match.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

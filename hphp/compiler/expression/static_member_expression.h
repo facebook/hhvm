@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATIC_MEMBER_EXPRESSION_H__
-#define __STATIC_MEMBER_EXPRESSION_H__
+#ifndef incl_HPHP_STATIC_MEMBER_EXPRESSION_H_
+#define incl_HPHP_STATIC_MEMBER_EXPRESSION_H_
 
-#include <compiler/expression/static_class_name.h>
+#include "hphp/compiler/expression/static_class_name.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,4 +51,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATIC_MEMBER_EXPRESSION_H__
+#endif // incl_HPHP_STATIC_MEMBER_EXPRESSION_H_

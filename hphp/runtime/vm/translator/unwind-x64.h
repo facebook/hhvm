@@ -14,23 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_TRANSLATOR_UNWIND_X64_H_
-#define incl_VM_TRANSLATOR_UNWIND_X64_H_
+#ifndef incl_HPHP_VM_TRANSLATOR_UNWIND_X64_H_
+#define incl_HPHP_VM_TRANSLATOR_UNWIND_X64_H_
 
 #include <cstdlib>
 #include <sstream>
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-#include "util/assertions.h"
-#include "runtime/base/types.h"
-#include "runtime/vm/translator/types.h"
-#include "runtime/vm/tread_hash_map.h"
-#include "runtime/vm/translator/types.h"
-#include "util/asm-x64.h"
-#include "runtime/vm/translator/runtime-type.h"
+#include "hphp/util/assertions.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -79,6 +79,6 @@ UnwindInfoHandle register_unwind_region(unsigned char* address, size_t size);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

@@ -13,6 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/util/trace.h"
+
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -20,15 +26,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "util/trace.h"
-#include "runtime/base/types.h"
-#include "runtime/base/runtime_option.h"
-#include "runtime/vm/stats.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/type_profile.h"
-
 namespace HPHP {
-namespace VM {
 
 TRACE_SET_MOD(typeProfile);
 
@@ -173,7 +171,13 @@ static inline bool profileThisRequest() {
 
 void
 profileRequestStart() {
-  profileOn = profileThisRequest();
+  bool p = profileThisRequest();
+  if (p != profileOn) {
+    profileOn = p;
+    if (!ThreadInfo::s_threadInfo.isNull()) {
+      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
+    }
+  }
 }
 
 void profileRequestEnd() {
@@ -294,5 +298,4 @@ bool isProfileOpcode(const PC& pc) {
   return *pc == OpRetC || *pc == OpCGetM;
 }
 
-}
 }

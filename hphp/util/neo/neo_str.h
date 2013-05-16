@@ -9,14 +9,14 @@
  *
  */
 
-#ifndef __NEO_STR_H_
-#define __NEO_STR_H_ 1
+#ifndef incl_HPHP_NEO_STR_H_
+#define incl_HPHP_NEO_STR_H_ 1
 
 __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "neo_misc.h"
+#include "hphp/util/neo/neo_misc.h"
 
 /* This modifies the string its called with by replacing all the white
  * space on the end with \0, and returns a pointer to the first
@@ -65,7 +65,7 @@ NEOERR *string_readline (NEOSTRING *str, FILE *fp);
 void string_clear (NEOSTRING *str);
 
 /* typedef struct _ulist ULIST; */
-#include "ulist.h"
+#include "hphp/util/neo/ulist.h"
 /* s is not const because we actually temporarily modify the string
  * during split */
 NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
@@ -111,4 +111,4 @@ NEOERR *neos_url_validate (const char *in, char **esc);
 
 __END_DECLS
 
-#endif /* __NEO_STR_H_ */
+#endif /* incl_HPHP_NEO_STR_H_ */

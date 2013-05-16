@@ -13,21 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_RUNTIME_H_
-#define incl_VM_RUNTIME_H_
+#ifndef incl_HPHP_VM_RUNTIME_H_
+#define incl_HPHP_VM_RUNTIME_H_
 
-#include <runtime/vm/event_hook.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
 namespace HPHP {
 
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
-
-namespace VM {
 
 ArrayData* new_array(int capacity);
 ArrayData* new_tuple(int numArgs, const TypedValue* args);
@@ -35,12 +33,13 @@ ArrayData* new_tuple(int numArgs, const TypedValue* args);
 ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newStableMapHelper(int nElms);
+ObjectData* newSetHelper(int nElms);
 ObjectData* newPairHelper();
 
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
-StringData* concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
+StringData* concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
 
 int64_t tv_to_bool(TypedValue* tv);
 
@@ -107,27 +106,23 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
-      // When destroying an array or object we can reenter the VM
-      // to call a __destruct method. Null out the local before
-      // calling the destructor so that stacktrace logic doesn't
-      // choke.
-      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }
 }
 
 inline void ALWAYS_INLINE
-frame_free_locals_inl(ActRec* fp, int numLocals) {
+frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
-    // If a destructor for a local calls debug_backtrace, it can read
-    // the m_this field from the ActRec, so we need to zero it to
-    // ensure they can't access a free'd object.
-    fp->setThis(nullptr);
     decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
+}
+
+inline void ALWAYS_INLINE
+frame_free_locals_inl(ActRec* fp, int numLocals) {
+  frame_free_locals_inl_no_hook(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
@@ -144,116 +139,26 @@ frame_free_args(TypedValue* args, int count) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
-      // When destroying an array or object we can reenter the VM
-      // to call a __destruct method. Null out the local before
-      // calling the destructor so that stacktrace logic doesn't
-      // choke.
-      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }
 
 }
 
-Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
+Unit*
+compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
 Unit* compile_string(const char* s, size_t sz);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                             ssize_t numBuiltinFuncs);
+                                 ssize_t numBuiltinFuncs);
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                              ssize_t numBuiltinClasses);
+                                  ssize_t numBuiltinClasses);
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
-
-template <bool handle_throw>
-void call_intercept_handler(TypedValue* retval,
-                            CArrRef intArgs,
-                            ActRec* ar,
-                            Variant* ihandler) {
-  if (handle_throw) { assert(ar); }
-  ObjectData* intThis = nullptr;
-  Class* intCls = nullptr;
-  StringData* intInvName = nullptr;
-  const Func* handler = vm_decode_function(ihandler->asCArrRef()[0],
-                                           g_vmContext->getFP(),
-                                           false, intThis, intCls, intInvName);
-  if (handle_throw) {
-    // It's possible for the intercept handler could throw an exception.
-    // If run_intercept_handler() was called from the translator and the
-    // handler throws, we need to do some cleanup here before allowing
-    // the exception to propagate.
-    try {
-      g_vmContext->invokeFunc(retval, handler, intArgs,
-                              intThis, intCls, nullptr, intInvName);
-    } catch (...) {
-      Stack& stack = g_vmContext->getStack();
-      assert((TypedValue*)ar - stack.top() == ar->numArgs());
-      while (uintptr_t(stack.top()) < uintptr_t(ar)) {
-        stack.popTV();
-      }
-      stack.popAR();
-      throw;
-    }
-  } else {
-    g_vmContext->invokeFunc(retval, handler, intArgs,
-                            intThis, intCls, nullptr, intInvName);
-  }
-}
-
-/**
- * run_intercept_handler is used for functions invoked via FCall, whereas
- * run_intercept_handler_for_invokefunc is used for functions invoked by
- * the runtime via invokeFunc(). The run_intercept_handler* functions will
- * return true if and only if the original function should be executed.
- *
- * run_intercept_handler is called when the ActRec for the original function
- * is in the "pre-live" state. run_intercept_handler_for_invokefunc is called
- * before the ActRec for the original function has been materialized.
- */
-
-template <bool handle_throw>
-bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
-  using namespace HPHP::VM::Transl;
-  assert(ihandler);
-  TypedValue retval;
-  tvWriteNull(&retval);
-  Variant doneFlag = true;
-  Array intArgs =
-    CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                   (ar->hasThis() ? Variant(Object(ar->getThis())) : uninit_null()),
-                   Array(pack_args_into_array(ar, ar->numArgs())),
-                   ihandler->asCArrRef()[1],
-                   ref(doneFlag));
-  call_intercept_handler<handle_throw>(&retval, intArgs, ar, ihandler);
-  if (doneFlag.toBoolean()) {
-    // $done is true, meaning don't enter the intercepted function. Clean up
-    // the pre-live ActRec and the args, move the intercept handler's return
-    // value to the right place, and get out.
-    Stack& stack = g_vmContext->getStack();
-    assert((TypedValue*)ar - stack.top() == ar->numArgs());
-    while (uintptr_t(stack.top()) < uintptr_t(ar)) {
-      stack.popTV();
-    }
-    stack.popAR();
-    stack.allocTV();
-    memcpy(stack.top(), &retval, sizeof(TypedValue));
-    return false;
-  }
-  // Discard the handler's return value
-  tvRefcountedDecRef(&retval);
-  return true;
-}
-
-bool run_intercept_handler_for_invokefunc(TypedValue* retval,
-                                          const Func* f,
-                                          CArrRef params,
-                                          ObjectData* this_,
-                                          StringData* invName,
-                                          Variant* ihandler);
 
 static inline Instance*
 newInstance(Class* cls) {
   assert(cls);
-  Instance *inst = Instance::newInstance(cls);
+  auto* inst = Instance::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);
   }
@@ -289,11 +194,8 @@ bool checkTv(const TypedValue* tv);
 // always_assert tv is a plausible TypedValue*
 void assertTv(const TypedValue* tv);
 
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
-                    size_t nProps);
-
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 
-} }
+}
 #endif

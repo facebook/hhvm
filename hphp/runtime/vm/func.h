@@ -14,17 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_FUNC_H_
-#define incl_VM_FUNC_H_
+#ifndef incl_HPHP_VM_FUNC_H_
+#define incl_HPHP_VM_FUNC_H_
 
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/type_constraint.h"
-#include "runtime/vm/repo_helpers.h"
-#include "runtime/vm/indexed_string_map.h"
-#include "runtime/base/intercept.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/base/intercept.h"
 
 namespace HPHP {
-namespace VM {
 
 static const int kNumFixedPrologues = 6;
 
@@ -49,22 +48,21 @@ struct Func {
 
     template<class SerDe>
     void serde(SerDe& sd) {
-      const StringData* tcName = m_typeConstraint.typeName();
-      bool tcNullable          = m_typeConstraint.nullable();
+      const StringData* tcName      = m_typeConstraint.typeName();
+      TypeConstraint::Flags tcFlags = m_typeConstraint.flags();
 
       sd(m_builtinType)
         (m_funcletOff)
         (m_defVal)
         (m_phpCode)
         (tcName)
-        (tcNullable)
+        (tcFlags)
         (m_userAttributes)
         (m_userType)
         ;
 
       if (SerDe::deserializing) {
-        setTypeConstraint(TypeConstraint(tcName,
-                                         tcNullable));
+        setTypeConstraint(TypeConstraint(tcName, tcFlags));
       }
     }
 
@@ -300,13 +298,7 @@ struct Func {
   static size_t sharedBaseOffset() {
     return offsetof(SharedData, m_base);
   }
-  static void enableIntercept();
   char &maybeIntercepted() const { return m_maybeIntercepted; }
-  bool checkInterceptable() const {
-    if (!m_maybeIntercepted) return false;
-    return m_maybeIntercepted > 0 ||
-    get_intercept_handler(fullNameRef(), &m_maybeIntercepted);
-  }
   int numParams() const { return m_numParams; }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
@@ -497,9 +489,6 @@ private:
   const Func* findCachedClone(Class* cls) const;
 
 private:
-  static bool s_interceptsEnabled;
-
-private:
   Unit* m_unit;
   Class* m_cls;      // The Class that provided this method implementation
   Class* m_baseCls;  // The first Class in the inheritance hierarchy that
@@ -638,6 +627,8 @@ public:
   void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
   bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
 
+  void setContainsCalls() { m_containsCalls = true; }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
 
   void commit(RepoTxn& txn) const;
@@ -683,6 +674,7 @@ private:
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
   bool m_hasGeneratorAsBody;
+  bool m_containsCalls;
 
   Func::UserAttributeMap m_userAttributes;
 
@@ -695,7 +687,7 @@ class FuncRepoProxy : public RepoProxy {
   friend class Func;
   friend class FuncEmitter;
 public:
-  FuncRepoProxy(Repo& repo);
+  explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
 
@@ -727,6 +719,6 @@ FRP_OPS
 #undef FRP_OP
 };
 
-} }
+ }
 
 #endif

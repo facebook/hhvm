@@ -21,7 +21,7 @@
 #include <cstdarg>
 #include "folly/Format.h"
 #include "folly/String.h"
-#include "util/parser/parser.h"
+#include "hphp/util/parser/parser.h"
 
 #define HPHP_PARSER_NS Test
 
@@ -139,12 +139,12 @@ struct Parser : ParserBase {
   void* extractStatement(ScannerToken*) { X(); return nullptr; }
 
   bool enableFinallyStatement() { return true; }
-  bool enableHipHopSyntax() { return true; }
   bool enableXHP() { return true; }
 
   IMPLEMENT_XHP_ATTRIBUTES;
 
-  void saveParseTree(Token& tree) { X(); }
+  void initParseTree() { X(); }
+  void finiParseTree() { X(); }
 
   void onName(Token& out, Token& name, NameKind kind) {
     X(name, kind);
@@ -385,6 +385,9 @@ struct Parser : ParserBase {
 
   void onStatementListStart(Token &out) { X(); }
 
+  void addTopStatement(Token &new_stmt) { X(new_stmt); }
+  void onHaltCompiler() { X(); }
+
   void addStatement(Token& out, Token& stmts, Token& new_stmt) {
     X(stmts, new_stmt);
   }
@@ -510,6 +513,26 @@ struct Parser : ParserBase {
 
   void onTypeSpecialization(const Token& type, char specialization) {
     X(type, specialization);
+  }
+
+  // for namespace support
+  void onNamespaceStart(const std::string &ns, bool file_scope = false) {
+    X(ns, file_scope);
+  }
+  void onNamespaceEnd() {}
+  void onUse(const std::string &ns, const std::string &as) {
+    X(ns, as);
+  }
+  void nns(bool declare = false) {
+    X(declare);
+  }
+  std::string nsDecl(const std::string &name) {
+    X(name);
+    return name;
+  }
+  std::string resolve(const std::string &ns, bool cls) {
+    X(ns, cls);
+    return ns;
   }
 };
 

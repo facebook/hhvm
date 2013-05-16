@@ -14,28 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/emitter.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/unit.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/funcdict.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/fixup.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <system/lib/systemlib.h>
-#include <util/logger.h>
+#include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/ext/ext.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/fixup.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/system/lib/systemlib.h"
+#include "hphp/util/logger.h"
 
 #include <libgen.h> // For dirname(3).
 #include <string>
 
 namespace HPHP {
-namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,22 +97,15 @@ void ProcessInit() {
   ClassInfo::SetHook(&vm_class_info_hook);
 
   // ensure that nextTx64 and tx64 are set
-  (void)VM::Transl::Translator::Get();
+  (void)Transl::Translator::Get();
 
-  if (!RuntimeOption::RepoAuthoritative &&
-      RuntimeOption::EvalJitEnableRenameFunction &&
-      RuntimeOption::EvalJit) {
-    VM::Func::enableIntercept();
-    VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
-    tx64->enableIntercepts();
-  }
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
   // normal repo.
-  bool db = RuntimeOption::EvalDumpBytecode;
+  int db = RuntimeOption::EvalDumpBytecode;
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
-  RuntimeOption::EvalDumpBytecode = false;
+  RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
 
@@ -123,37 +115,28 @@ void ProcessInit() {
                                                 hhbc_ext_funcs_count);
   SystemLib::s_nativeFuncUnit = nativeFuncUnit;
 
-  // Search for systemlib.php in the following places:
-  // 1) ${HHVM_LIB_PATH}/systemlib.php
-  // 2) <dirname(realpath(hhvm))>/systemlib.php (requires proc filesystem)
-  // 3) <HHVM_LIB_PATH_DEFAULT>/systemlib.php
-  //
-  // HHVM_LIB_PATH allows a manual override at runtime. If systemlib.php
-  // exists next to the hhvm binary, that is likely to be the next best
-  // version to use. The realpath()-based lookup will succeed as long as the
-  // proc filesystem exists (e.g. on Linux and some FreeBSD configurations)
-  // and no hard links are in use for the executable. Failing all of those
-  // options, the HHVM_LIB_PATH_DEFAULT-based lookup will always succeed,
-  // assuming that the application was built and installed correctly.
   String currentDir = g_vmContext->getCwd();
-  HPHP::Eval::PhpFile* file = nullptr;
 
-  string slib = RuntimeOption::RepoAuthoritative ?
-    string("/:systemlib.php") : systemlib_path();
+  if (RuntimeOption::RepoAuthoritative) {
+    auto file = g_vmContext->lookupPhpFile(String("/:systemlib.php").get(),
+                                         currentDir.data(), nullptr);
+    if (!file) {
+      // Die a horrible death.
+      Logger::Error("Unable to find/load systemlib.php");
+      _exit(1);
+    }
+    file->incRef();
+    SystemLib::s_unit = file->unit();
+  } else {
+    string slib = get_systemlib();
 
-  if (!slib.empty()) {
-    file = g_vmContext->lookupPhpFile(String(slib).get(),
-                                      currentDir.data(), nullptr);
+    if (slib.empty()) {
+      // Die a horrible death.
+      Logger::Error("Unable to find/load systemlib.php");
+      _exit(1);
+    }
+    SystemLib::s_unit = compile_string(slib.c_str(), slib.size());
   }
-  if (!file) {
-    // Die a horrible death.
-    Logger::Error("Unable to find/load systemlib.php");
-    _exit(1);
-  }
-
-  SystemLib::s_phpFile = file;
-  file->incRef();
-  SystemLib::s_unit = file->unit();
 
   // Restore most settings before merging anything,
   // because of optimizations that depend on them
@@ -209,5 +192,4 @@ void ProcessInit() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }

@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/unwind-x64.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
 #include <libunwind.h>
 #include <unwind.h>
 #include <vector>
 #include <memory>
 #include <boost/mpl/identity.hpp>
 
-#include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/translator/runtime-type.h"
-#include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/stats.h"
-#include "runtime/vm/runtime.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/runtime.h"
 
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format
@@ -33,7 +33,7 @@
 extern "C" void __register_frame(void*);
 extern "C" void __deregister_frame(void*);
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -126,6 +126,9 @@ tc_unwind_personality(int version,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context) {
   assert(version == 1);
+
+  FTRACE(2, "unwind: tc_unwind_personality {}\n",
+         int(tl_regState));
 
   /*
    * We don't do anything during the search phase---before attempting
@@ -319,4 +322,4 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

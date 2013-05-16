@@ -1,0 +1,12 @@
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+array(2) {
+  [0]=>
+  string(3) "  c"
+  [1]=>
+  string(3) "  d"
+}

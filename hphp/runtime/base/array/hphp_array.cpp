@@ -16,22 +16,22 @@
 
 #define INLINE_VARIANT_HELPER 1
 
-#include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/shared/shared_map.h>
-#include <util/hash.h>
-#include <util/lock.h>
-#include <util/alloc.h>
-#include <util/trace.h>
-#include <util/util.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/member_operations.h>
-#include <runtime/vm/stats.h>
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/base/stats.h"
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
 // function even as an array approaches 2^31 elements.  In practice this is
@@ -500,7 +500,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
     // Try to get at it without dirtying a data cache line.
     Elm* e = m_data + uint64_t(ki);
     if (e->data.m_type != HphpArray::KindOfTombstone && hitIntKey(e, ki)) {
-      VM::Stats::inc(VM::Stats::HA_FindIntFast);
+      Stats::inc(Stats::HA_FindIntFast);
       assert([&] {
           // Our results had better match the other path
           FIND_BODY(ki, hitIntKey(&elms[pos], ki));
@@ -508,7 +508,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
       return ki;
     }
   }
-  VM::Stats::inc(VM::Stats::HA_FindIntSlow);
+  Stats::inc(Stats::HA_FindIntSlow);
   FIND_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 
@@ -526,38 +526,38 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   return ei;
 }
 
-#define FIND_FOR_INSERT_BODY(h0, hit) \
-  ElmInd* ret = nullptr; \
-  size_t tableMask = m_tableMask; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Elm* elms = m_data; \
-  ElmInd* ei = &m_hash[probeIndex]; \
-  ssize_t /*ElmInd*/ pos = *ei; \
-  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
-    return ei; \
-  } \
-  if (!validElmInd(pos)) ret = ei; \
-  /* Quadratic probe. */ \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    ei = &m_hash[probeIndex]; \
-    pos = ssize_t(*ei); \
-    if (validElmInd(pos)) { \
-      if (hit) { \
-        assert(m_hLoad <= computeMaxElms(tableMask)); \
-        return ei; \
-      } \
-    } else { \
-      if (!ret) ret = ei; \
-      if (pos == ElmIndEmpty) { \
-        assert(m_hLoad <= computeMaxElms(tableMask)); \
-        return LIKELY(i <= 100) || \
-               LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ? \
-                 ret : warnUnbalanced(i, ret);\
-      } \
-    } \
+#define FIND_FOR_INSERT_BODY(h0, hit)                                   \
+  ElmInd* ret = nullptr;                                                \
+  size_t tableMask = m_tableMask;                                       \
+  size_t probeIndex = size_t(h0) & tableMask;                           \
+  Elm* elms = m_data;                                                   \
+  ElmInd* ei = &m_hash[probeIndex];                                     \
+  ssize_t /*ElmInd*/ pos = *ei;                                         \
+  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) {       \
+    return ei;                                                          \
+  }                                                                     \
+  if (!validElmInd(pos)) ret = ei;                                      \
+  /* Quadratic probe. */                                                \
+  for (size_t i = 1;; ++i) {                                            \
+    assert(i <= tableMask);                                             \
+    probeIndex = (probeIndex + i) & tableMask;                          \
+    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);  \
+    ei = &m_hash[probeIndex];                                           \
+    pos = ssize_t(*ei);                                                 \
+    if (validElmInd(pos)) {                                             \
+      if (hit) {                                                        \
+        assert(m_hLoad <= computeMaxElms(tableMask));                   \
+        return ei;                                                      \
+      }                                                                 \
+    } else {                                                            \
+      if (!ret) ret = ei;                                               \
+      if (pos == ElmIndEmpty) {                                         \
+        assert(m_hLoad <= computeMaxElms(tableMask));                   \
+        return LIKELY(i <= 100) ||                                      \
+          LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ?           \
+          ret : warnUnbalanced(i, ret);                                 \
+      }                                                                 \
+    }                                                                   \
   }
 
 NEVER_INLINE
@@ -1679,7 +1679,6 @@ CVarRef HphpArray::endRef() {
 
 //=============================================================================
 // VM runtime support functions.
-namespace VM {
 
 // Helpers for array_setm.
 ArrayData* nvCheckedSet(ArrayData* a, StringData* key, TypedValue* value,
@@ -1891,8 +1890,6 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
   }
   decRefArr(a2);
   return a1;
-}
-
 }
 
 //=============================================================================

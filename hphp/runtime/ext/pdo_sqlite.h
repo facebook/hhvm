@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PDO_SQLITE_H__
-#define __PDO_SQLITE_H__
+#ifndef incl_HPHP_PDO_SQLITE_H_
+#define incl_HPHP_PDO_SQLITE_H_
 
-#include <runtime/ext/pdo_driver.h>
+#include "hphp/runtime/ext/pdo_driver.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,4 +33,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PDO_SQLITE_H__
+#endif // incl_HPHP_PDO_SQLITE_H_

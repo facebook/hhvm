@@ -2,12 +2,12 @@
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
  * Description: Validate a Gregorian date
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing checkdate() : error conditions ***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("America/Chicago");
 
 $arg_0 = 1;
@@ -24,4 +24,4 @@ var_dump (checkdate($arg_0));
 var_dump (checkdate($arg_0, $arg_1));
 
 ?>
-===DONE===
+===DONE=== 

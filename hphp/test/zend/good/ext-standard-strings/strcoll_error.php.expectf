@@ -1,0 +1,16 @@
+*** Testing strcoll() : error conditions ***
+
+-- Testing strcoll() function with no arguments --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Testing strcoll() function with one argument --
+HipHop Warning: %a
+NULL
+
+-- Testing strcoll() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+===Done===

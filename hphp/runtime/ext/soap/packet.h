@@ -18,7 +18,7 @@
 #ifndef PHP_PACKET_SOAP_H
 #define PHP_PACKET_SOAP_H
 
-#include <runtime/ext/soap/sdl.h>
+#include "hphp/runtime/ext/soap/sdl.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

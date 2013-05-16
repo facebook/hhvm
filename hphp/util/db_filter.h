@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_FILTER_H__
-#define __DB_FILTER_H__
+#ifndef incl_HPHP_DB_FILTER_H_
+#define incl_HPHP_DB_FILTER_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 
@@ -91,7 +91,7 @@ class DBInStringFilter : public DBQueryFilter {
   /**
    * We need a connection object to escape strings.
    */
-  DBInStringFilter(DBConn *conn);
+  explicit DBInStringFilter(DBConn *conn);
 
   /**
    * Just keep adding strings to the filter.
@@ -154,4 +154,4 @@ class DBOrStringFilter : public DBQueryFilter {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_FILTER_H__
+#endif // incl_HPHP_DB_FILTER_H_

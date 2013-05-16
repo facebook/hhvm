@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/function_statement.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/statement/statement_list.h>
-#include <util/util.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/modifier_expression.h>
-#include <compiler/option.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/class_scope.h>
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/util/util.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/class_scope.h"
 #include <sstream>
 
 using namespace HPHP;

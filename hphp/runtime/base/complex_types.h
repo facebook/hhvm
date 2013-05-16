@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_COMPLEX_TYPES_H__
-#define __HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_COMPLEX_TYPES_H_
+#define incl_HPHP_COMPLEX_TYPES_H_
 
-#define __INSIDE_HPHP_COMPLEX_TYPES_H__
+#define incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
-#include <runtime/base/hphp_value.h>
-#include <runtime/base/type_string.h>
-#include <runtime/base/type_array.h>
-#include <runtime/base/type_object.h>
-#include <runtime/base/ref_data.h>
-#include <runtime/base/type_variant.h>
-#include <runtime/base/tv_helpers.h>
-#include <runtime/base/array/array_inline.h>
+#include "hphp/runtime/base/hphp_value.h"
+#include "hphp/runtime/base/type_string.h"
+#include "hphp/runtime/base/type_array.h"
+#include "hphp/runtime/base/type_object.h"
+#include "hphp/runtime/base/ref_data.h"
+#include "hphp/runtime/base/type_variant.h"
+#include "hphp/runtime/base/tv_helpers.h"
+#include "hphp/runtime/base/array/array_inline.h"
 
-#undef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#undef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
-#endif // __HPHP_COMPLEX_TYPES_H__
+#endif // incl_HPHP_COMPLEX_TYPES_H_

@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/zend/zend_html.h"
-#include <util/lock.h>
-#include <unicode/uchar.h>
-#include <unicode/utf8.h>
+#include "hphp/util/zend/zend_html.h"
+#include "hphp/util/lock.h"
+#include "unicode/uchar.h"
+#include "unicode/utf8.h"
 
 namespace HPHP {
 

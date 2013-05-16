@@ -1,5 +1,4 @@
 <?php
-# test_code_run.cpp:29360
 
 class MyDerivedClass {
   public function __construct() {

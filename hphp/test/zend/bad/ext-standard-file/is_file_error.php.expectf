@@ -1,0 +1,10 @@
+*** Testing is_file() error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+bool(false)
+HipHop Warning: %a
+NULL
+
+*** Done ***

@@ -1,0 +1,94 @@
+*** Testing var_export() with integer values ***
+
+*** Output for integer values ***
+
+-- Iteration: 0 --
+'0'
+'0'
+string(3) "'0'"
+
+-- Iteration: 1 --
+'1'
+'1'
+string(3) "'1'"
+
+-- Iteration: -1 --
+'-1'
+'-1'
+string(4) "'-1'"
+
+-- Iteration: -2147483648 --
+'-2147483648'
+'-2147483648'
+string(13) "'-2147483648'"
+
+-- Iteration: -2147483647 --
+'-2147483647'
+'-2147483647'
+string(13) "'-2147483647'"
+
+-- Iteration: 2147483647 --
+2147483647
+2147483647
+string(10) "2147483647"
+
+-- Iteration: 2147483640 --
+2147483640
+2147483640
+string(10) "2147483640"
+
+-- Iteration: 0x123B --
+4667
+4667
+string(4) "4667"
+
+-- Iteration: '0x12ab' --
+'0x12ab'
+'0x12ab'
+string(8) "'0x12ab'"
+
+-- Iteration: '0Xfff' --
+'0Xfff'
+'0Xfff'
+string(7) "'0Xfff'"
+
+-- Iteration: '0XFA' --
+'0XFA'
+'0XFA'
+string(6) "'0XFA'"
+
+-- Iteration: -0x80000000 --
+-2147483648
+-2147483648
+string(11) "-2147483648"
+
+-- Iteration: '0x7fffffff' --
+'0x7fffffff'
+'0x7fffffff'
+string(12) "'0x7fffffff'"
+
+-- Iteration: 0x7FFFFFFF --
+2147483647
+2147483647
+string(10) "2147483647"
+
+-- Iteration: '0123' --
+'0123'
+'0123'
+string(6) "'0123'"
+
+-- Iteration: 01912 --
+1
+1
+string(1) "1"
+
+-- Iteration: -020000000000 --
+-2147483648
+-2147483648
+string(11) "-2147483648"
+
+-- Iteration: 017777777777 --
+2147483647
+2147483647
+string(10) "2147483647"
+===DONE===

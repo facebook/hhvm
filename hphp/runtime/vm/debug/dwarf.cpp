@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 #include <stdio.h>
-#include "dwarf.h"
+#include "hphp/runtime/vm/debug/dwarf.h"
 #include "debug.h"
-#include "elfwriter.h"
-#include "gdb-jit.h"
+#include "hphp/runtime/vm/debug/elfwriter.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
 
-#include <runtime/base/types.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 
@@ -301,6 +300,5 @@ void DwarfInfo::syncChunks() {
   }
 }
 
-}
 }
 }

@@ -1,0 +1,56 @@
+ImageSprite
+object(ImageSprite)#1 (0) {
+}
+string(23) "O:11:"ImageSprite":0:{}"
+object(ImageSprite)#2 (0) {
+}
+array(12) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "addFile"
+  [2]=>
+  string(9) "addString"
+  [3]=>
+  string(6) "addUrl"
+  [4]=>
+  string(5) "clear"
+  [5]=>
+  string(8) "loadDims"
+  [6]=>
+  string(10) "loadImages"
+  [7]=>
+  string(6) "output"
+  [8]=>
+  string(3) "css"
+  [9]=>
+  string(9) "getErrors"
+  [10]=>
+  string(7) "mapping"
+  [11]=>
+  string(10) "__destruct"
+}
+================
+A_ImageSprite
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_ImageSprite)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(38) "O:13:"A_ImageSprite":1:{s:4:"___x";N;}"
+object(A_ImageSprite)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

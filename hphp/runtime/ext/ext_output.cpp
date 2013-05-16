@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_output.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/hardware_counter.h>
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_output.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ Array f_hphp_get_iostatus() {
   return ServerStats::GetThreadIOStatuses();
 }
 void f_hphp_set_iostatus_address(CStrRef name) {
-  return ServerStats::SetThreadIOStatusAddress(name);
+  return ServerStats::SetThreadIOStatusAddress(name.c_str());
 }
 
 
@@ -123,6 +123,11 @@ static String ts_microtime(const timespec &ts) {
   return String(ret, CopyString);
 }
 
+static const StaticString s_queue("queue");
+static const StaticString s_process_wall("process-wall");
+static const StaticString s_process_cpu("process-cpu");
+static const StaticString s_process_inst("process-inst");
+
 Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   Transport *transport = g_context->getTransport();
   if (transport == NULL) {
@@ -134,18 +139,18 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   const timespec &tsCpu = transport->getCpuTime();
   const int64_t &instStart = transport->getInstructions();
 
-  Array ret;
+  ArrayInit ret(4);
   if (get_as_float) {
-    ret.set("queue",        ts_float(tsQueue));
-    ret.set("process-wall", ts_float(tsWall));
-    ret.set("process-cpu",  ts_float(tsCpu));
+    ret.set(s_queue,        ts_float(tsQueue));
+    ret.set(s_process_wall, ts_float(tsWall));
+    ret.set(s_process_cpu,  ts_float(tsCpu));
   } else {
-    ret.set("queue",        ts_microtime(tsQueue));
-    ret.set("process-wall", ts_microtime(tsWall));
-    ret.set("process-cpu",  ts_microtime(tsCpu));
+    ret.set(s_queue,        ts_microtime(tsQueue));
+    ret.set(s_process_wall, ts_microtime(tsWall));
+    ret.set(s_process_cpu,  ts_microtime(tsCpu));
   }
-  ret.set("process-inst", instStart);
-  return ret;
+  ret.set(s_process_inst, instStart);
+  return ret.create();
 }
 
 Variant f_hphp_output_global_state(bool serialize /* = true */) {

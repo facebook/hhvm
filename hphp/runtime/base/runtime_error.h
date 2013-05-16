@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RUNTIME_ERROR_H__
-#define __HPHP_RUNTIME_ERROR_H__
+#ifndef incl_HPHP_RUNTIME_ERROR_H_
+#define incl_HPHP_RUNTIME_ERROR_H_
 
 #include <cstdarg>
 #include <string>
 
-#include "util/base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,10 +60,6 @@ public:
   };
 };
 
-namespace VM {
-  struct ActRec;
-}
-
 void raise_error(const std::string &msg);
 void raise_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_error_without_first_frame(const std::string &msg);
@@ -96,5 +92,5 @@ warn_or_error(const char* fmt, ...) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_RUNTIME_ERROR_H__
+#endif // incl_HPHP_RUNTIME_ERROR_H_
 

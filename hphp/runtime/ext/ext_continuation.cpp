@@ -15,19 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_asio.h>
-#include <runtime/base/builtin_functions.h>
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
-#include <runtime/ext/ext_spl.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_function.h>
+#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_function.h"
 
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/func.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/stats.h>
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation(VM::Class* cb) :
+c_Continuation::c_Continuation(Class* cb) :
     ExtObjectData(cb),
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
@@ -53,7 +53,7 @@ c_Continuation::c_Continuation(VM::Class* cb) :
 }
 
 c_Continuation::~c_Continuation() {
-  VM::ActRec* ar = actRec();
+  ActRec* ar = actRec();
 
   // The first local is the object itself, and it wasn't increffed at creation
   // time (see createContinuation()). Overwrite its type to exempt it from
@@ -69,20 +69,7 @@ c_Continuation::~c_Continuation() {
   }
 }
 
-void c_Continuation::t___construct(
-  int64_t func, CStrRef origFuncName, CVarRef obj, CArrRef args) {
-  m_vmFunc       = (VM::Func*)func;
-  assert(m_vmFunc);
-  m_origFuncName = origFuncName;
-
-  if (!obj.isNull()) {
-    m_obj = obj.toObject();
-    assert(!m_obj.isNull());
-  } else {
-    assert(m_obj.isNull());
-  }
-  m_args = args;
-}
+void c_Continuation::t___construct() {}
 
 void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
@@ -90,7 +77,11 @@ void c_Continuation::t_update(int64_t label, CVarRef value) {
 }
 
 Object c_Continuation::t_getwaithandle() {
-  return m_waitHandle.isNull() ? c_ContinuationWaitHandle::t_start(this) : m_waitHandle;
+  if (m_waitHandle.isNull()) {
+    c_ContinuationWaitHandle::Create(this);
+    assert(!m_waitHandle.isNull());
+  }
+  return m_waitHandle;
 }
 
 int64_t c_Continuation::t_getlabel() {
@@ -131,7 +122,7 @@ void c_Continuation::t_next() {
 
 static StaticString s_next("next");
 void c_Continuation::t_rewind() {
-  this->o_invoke(s_next, Array());
+  this->o_invoke_few_args(s_next, 0);
 }
 
 bool c_Continuation::t_valid() {
@@ -155,26 +146,21 @@ void c_Continuation::t_raised() {
 }
 
 String c_Continuation::t_getorigfuncname() {
+  return String(const_cast<StringData*>(m_origFuncName));
+}
+
+String c_Continuation::t_getcalledclass() {
   String called_class;
+
   if (actRec()->hasThis()) {
     called_class = actRec()->getThis()->getVMClass()->name()->data();
   } else if (actRec()->hasClass()) {
     called_class = actRec()->getClass()->name()->data();
-  }
-  if (called_class.size() == 0) {
-    return m_origFuncName;
+  } else {
+    called_class = empty_string;
   }
 
-  /*
-    Replace the class name in m_origFuncName with the LSB class.  This
-    produces more useful traces.
-   */
-  size_t method_pos = m_origFuncName.find("::");
-  if (method_pos != std::string::npos) {
-    return concat3(called_class, "::", m_origFuncName.substr(method_pos+2));
-  } else {
-    return m_origFuncName;
-  }
+  return called_class;
 }
 
 Variant c_Continuation::t___clone() {
@@ -196,12 +182,12 @@ namespace {
 }
 
 void c_Continuation::call_next() {
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_next.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_next.get());
   g_vmContext->invokeContFunc(func, this);
 }
 
 void c_Continuation::call_send(TypedValue* v) {
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_send.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
   g_vmContext->invokeContFunc(func, this, v);
 }
 
@@ -209,7 +195,7 @@ void c_Continuation::call_raise(ObjectData* e) {
   assert(e);
   assert(e->instanceof(SystemLib::s_ExceptionClass));
 
-  const HPHP::VM::Func* func = m_cls->lookupMethod(s_raise.get());
+  const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
 
   TypedValue arg;
   arg.m_type = KindOfObject;
@@ -220,7 +206,7 @@ void c_Continuation::call_raise(ObjectData* e) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyContinuation::c_DummyContinuation(VM::Class* cb) :
+c_DummyContinuation::c_DummyContinuation(Class* cb) :
   ExtObjectData(cb) {
 }
 

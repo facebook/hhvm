@@ -1646,6 +1646,7 @@ extern const int64_t k_T_CLASS_C;
 extern const int64_t k_T_CLONE;
 extern const int64_t k_T_CLOSE_TAG;
 extern const int64_t k_T_COMMENT;
+extern const int64_t k_T_COMPILER_HALT_OFFSET;
 extern const int64_t k_T_CONCAT_EQUAL;
 extern const int64_t k_T_CONST;
 extern const int64_t k_T_CONSTANT_ENCAPSED_STRING;

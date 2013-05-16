@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_server.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/server/http_protocol.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/server/rpc_request_handler.h>
+#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/server/rpc_request_handler.h"
 
 #define DANGLING_HEADER "HPHP_DANGLING"
 
@@ -111,6 +111,8 @@ bool f_pagelet_server_is_enabled() {
   return PageletServer::Enabled();
 }
 
+static const StaticString s_Host("Host");
+
 Object f_pagelet_server_task_start(CStrRef url,
                                    CArrRef headers /* = null_array */,
                                    CStrRef post_data /* = null_string */,
@@ -119,9 +121,9 @@ Object f_pagelet_server_task_start(CStrRef url,
   Transport *transport = g_context->getTransport();
   if (transport) {
     remote_host = transport->getRemoteHost();
-    if (!headers.exists("Host") && RuntimeOption::SandboxMode) {
+    if (!headers.exists(s_Host) && RuntimeOption::SandboxMode) {
       Array tmp = headers;
-      tmp.set("Host", transport->getHeader("Host"));
+      tmp.set(s_Host, transport->getHeader("Host"));
       return PageletServer::TaskStart(url, tmp, remote_host, post_data, files);
     }
   }

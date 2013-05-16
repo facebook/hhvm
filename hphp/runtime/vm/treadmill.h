@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TREADMILL_H_
-#define incl_TREADMILL_H_
+#ifndef incl_HPHP_TREADMILL_H_
+#define incl_HPHP_TREADMILL_H_
 
-#include "runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
-namespace VM {
 
 class Class;
 class Typedef;
@@ -71,6 +70,6 @@ class FreeClassTrigger : public Treadmill::WorkItem {
   virtual void operator()();
 };
 
-}}}
+}}
 
 #endif

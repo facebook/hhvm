@@ -1,0 +1,41 @@
+*** Testing ksort() : usage variations ***
+
+-- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --
+bool(true)
+array(3) {
+  ["HEREDOC"]=>
+  string(7) "HEREDOC"
+  ["Heredoc"]=>
+  string(7) "Heredoc"
+  ["heredoc string	with!@# and 123
+Test this!!!"]=>
+  string(43) "heredoc string	with!@# and 123
+Test this!!!"
+}
+
+-- Testing ksort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
+bool(true)
+array(3) {
+  ["HEREDOC"]=>
+  string(7) "HEREDOC"
+  ["Heredoc"]=>
+  string(7) "Heredoc"
+  ["heredoc string	with!@# and 123
+Test this!!!"]=>
+  string(43) "heredoc string	with!@# and 123
+Test this!!!"
+}
+
+-- Testing ksort() by supplying heredoc string array, 'flag' = SORT_STRING --
+bool(true)
+array(3) {
+  ["HEREDOC"]=>
+  string(7) "HEREDOC"
+  ["Heredoc"]=>
+  string(7) "Heredoc"
+  ["heredoc string	with!@# and 123
+Test this!!!"]=>
+  string(43) "heredoc string	with!@# and 123
+Test this!!!"
+}
+Done

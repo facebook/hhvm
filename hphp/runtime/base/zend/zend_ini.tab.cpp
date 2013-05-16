@@ -132,10 +132,10 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE String
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/ini_setting.h>
-#include <runtime/base/externals.h>
-#include <runtime/ext/ext_misc.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/ext/ext_misc.h"
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////

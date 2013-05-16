@@ -1,0 +1,4 @@
+PDOStatement Object
+(
+    [queryString] => SHOW TABLES
+)

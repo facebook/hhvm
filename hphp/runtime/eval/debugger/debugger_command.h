@@ -14,19 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_COMMAND_H__
-#define __HPHP_EVAL_DEBUGGER_COMMAND_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
+#define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 
-#include <util/base.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/eval/debugger/debugger_client.h>
+#include "hphp/util/base.h"
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/eval/debugger/debugger_client.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// DebuggerCommand is the base of all commands executed by the debugger. It
+// also represents the base binary communication format between DebuggerProxy
+// and DebuggerClient.
+//
+// Each command has serialization logic, plus client- and server-side logic.
+// Client-side logic is implemented in the onClient* methods, while server-side
+// is in the onServer* methods.
+//
 
-/**
- * Binary communication format between DebuggerProxy and DebuggerClient.
- */
 DECLARE_BOOST_TYPES(DebuggerCommand);
 class DebuggerCommand {
 public:
@@ -46,7 +51,7 @@ public:
     KindOfGlobal              = 7,
     KindOfHelp                = 8,
     KindOfInfo                = 9,
-    KindOfJump                = 10,
+    KindOfJump_UNUSED         = 10,
     KindOfConstant            = 11,
     KindOfList                = 12,
     KindOfMachine             = 13,
@@ -80,40 +85,68 @@ public:
                       const char *caller);
 
 public:
-  DebuggerCommand(Type type)
+  explicit DebuggerCommand(Type type)
     : m_type(type), m_version(0), m_exitInterrupt(false),
       m_incomplete(false) {}
 
   bool is(Type type) const { return m_type == type;}
+
   Type getType() const { return m_type;}
 
   bool send(DebuggerThriftBuffer &thrift);
+
   bool recv(DebuggerThriftBuffer &thrift);
 
+  // Informs the client of all strings that may follow a break command.
+  // Used for auto completion. The client uses the prefix of the argument
+  // following the command to narrow down the list displayed to the user.
   virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
-  virtual bool onClientVM(DebuggerClient *client) { return onClient(client); }
-  virtual void setClientOutput(DebuggerClient *client);
-  bool onClientD(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
-  virtual bool onServerVM(DebuggerProxy *proxy) { return onServer(proxy); }
-  bool onServerD(DebuggerProxy *proxy) {
-    return onServerVM(proxy);
-  }
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  // The text to display when the debugger client
+  // processes "help <this command name>".
+  virtual bool help(DebuggerClient *client);
+
+  // Carries out the command and returns true if the command completed.
+  // If the client is controlled via the API, the setClientOuput method
+  // is invoked to update the client with the command output for access
+  // via the API.
+  bool onClient(DebuggerClient *client);
+
+  // Updates the client with information about the execution of this command.
+  // This information is not used by the command line client, but can
+  // be accessed via the debugger client API exposed to PHP programs.
+  virtual void setClientOutput(DebuggerClient *client);
+
+  // Server-side work for a command. Returning false indicates a failure to
+  // communicate with the client (for commands that do so).
+  virtual bool onServer(DebuggerProxy *proxy);
+
+  // This seems to be confined to eval and print commands.
+  // It is not clear that it belongs in this interface or that the
+  // assert is safe.
   virtual void handleReply(DebuggerClient *client) { assert(false); }
 
-  /**
-   * A server command processing can set m_exitInterrupt to true to break
-   * message loop in DebuggerProxy::processInterrupt().
-   */
-  virtual bool shouldExitInterrupt() { return m_exitInterrupt;}
+  // Returns true if DebuggerProxy::processInterrupt() should return
+  // to its caller instead of processing further commands from the client.
+  bool shouldExitInterrupt() { return m_exitInterrupt;}
+
+  // Returns a non empty error message if the receipt of this command
+  // did not complete successfully.
   String getWireError() const { return m_wireError; }
 
 protected:
+  // Client-side work for a command. Returns true if the command completed
+  // successfully.
+  virtual bool onClientImpl(DebuggerClient *client);
+
+  // Always called from send and must implement the subclass specific
+  // logic for serializing a command to send via Thrift.
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+
+  // Always called from recv and must implement the subclass specific
+  // logic for deserializing a command received via Thrift.
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
   Type m_type;
   std::string m_class; // for CmdExtended
   std::string m_body;
@@ -127,4 +160,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_COMMAND_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_COMMAND_H_

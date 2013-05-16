@@ -1,0 +1,14 @@
+*** Testing lchown() : error functionality ***
+HipHop Warning: %a
+bool(true)
+HipHop Warning: %a
+bool(true)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(true)
+HipHop Warning: %a
+bool(true)
+HipHop Warning: %a
+bool(false)
+===DONE===

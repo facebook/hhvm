@@ -163,6 +163,7 @@ above PHP-facing types.
   FuncCtx         Tuple of (Func*,{Cctx|Obj})
   RetAddr         Return address
   StkPtr          Pointer into VM execution stack
+  FramePtr        Pointer to a frame on the VM execution stack
   TCA             Machine code address
 
 In the instruction descriptions below, we also use a "Const" prefix on
@@ -330,36 +331,41 @@ D:T = GuardType<T> S0:Gen -> L
   Check that the type of the src S0 is T, and if so copy it to D.  If
   S0 is not type T, branch to the exit trace label L.
 
-GuardLoc<T,localId> S0:StkPtr -> L
+GuardLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
   branch to the exit trace label L.
 
-AssertLoc<T,localId> S0:StkPtr
+AssertLoc<T,localId> S0:FramePtr
 
   Asserts that type of the supplied local on the frame S0 is T.  This
   is used as a hint for local type information, and is similar to
   GuardLoc except it doesn't imply a runtime check and cannot cause
   control flow.
 
-D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt -> L
+OverrideLoc<T,localId> S0:FramePtr
+
+  Overrides tracked information about the type of a local in frame S0.
+  This is used to fix tracked state after InterpOne instructions.
+
+D:StkPtr = GuardStk<T,offset> S0:StkPtr -> L
 
   Check that the type of the cell on the stack pointed to by S0 at
-  index S1 (in cells) is T; if not, branch to the exit trace label L.
+  offset (in cells) is T; if not, branch to the exit trace label L.
   Returns a new StkPtr that represents the same stack but with the
   knowledge that the slot at the index S1 has type T.
 
-D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
+D:StkPtr = AssertStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with
-  the knowledge that the slot at the index S1 (in cells) has type T.
-  This is similar to a GuardStk except that it does not imply a
-  runtime check and cannot cause control flow.
+  the knowledge that the slot at offset (in cells) has type T.  This
+  is similar to a GuardStk except that it does not imply a runtime
+  check and cannot cause control flow.
 
-D:StkPtr = CastStk<T> S0:StkPtr S1:ConstInt
+D:StkPtr = CastStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with
-  the slot at index S1 (in cells) converted to type T.
+  the slot at offset (in cells) converted to type T.
 
 CheckInit S0:Gen -> L
 
@@ -446,7 +452,6 @@ D:Bool = OpNSame S0:Gen S1:Gen
   result in D.
 
 D:Bool =  InstanceOf S0:Cls S1:Cls S2:ConstBool
-D:Bool = NInstanceOf S0:Cls S1:Cls S2:ConstBool
 
   Sets D based on whether S0 is a descendant of the class, interface,
   or trait in S1.  (Note that this is always false for a trait).  S1
@@ -494,7 +499,6 @@ JmpNeq
 JmpSame
 JmpNSame
 JmpInstanceOf
-JmpNInstanceOf
 JmpInstanceOfBitmask
 JmpNInstanceOfBitmask
 JmpIsType
@@ -519,7 +523,7 @@ ExitWhenSurprised -> L
   Tests the surprise flags and if they are set, jumps to the
   exit-trace label L.
 
-ExitOnVarEnv S0:StkPtr -> L
+ExitOnVarEnv S0:FramePtr -> L
 
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
@@ -592,22 +596,22 @@ be decoupled gives the compiler the flexibility to avoid partially
 dead loads of local and stack values and to avoid unnecessarily long
 live ranges due to eagerly loaded values at the start of the tracelet.
 
-D:T = LdStack<T> S0:StkPtr S1:ConstInt
+D:T = LdStack<T,offset> S0:StkPtr
 
-  Loads from S0 at index S1 (in cells), and puts the value in D as
-  type T.
+  Loads from S0 at offset (in cells), and puts the value in D as type
+  T.
 
-D:T = LdLoc<T,localId> S0:StkPtr
+D:T = LdLoc<T,localId> S0:FramePtr
 
   Loads local number localId from the frame S0 and puts the value in D
   as type T.
 
-D:PtrToGen = LdStackAddr S0:StkPtr S1:ConstInt
+D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
-  Loads the address of the stack slot given by the pointer in S0 and
-  the index S1 (in cells).
+  Loads the address of the stack slot given by the pointer in S0 at
+  the offset (in cells).
 
-D:T* = LdLocAddr<T, localId> S0:StkPtr
+D:T* = LdLocAddr<T, localId> S0:FramePtr
 
   Loads the address of the local slot localId from the frame S0 into D.
 
@@ -631,20 +635,20 @@ D:T = LdRef<T> S0:Cell& [ -> L ]
   type does not match T, this instruction does not load into D and
   transfers control to L.
 
-D:Obj = LdThis S0:StkPtr [ -> L ]
+D:Obj = LdThis S0:FramePtr [ -> L ]
 
   Loads the this pointer out of the ActRec pointed to by S0, and puts
   it in D.  If the optional label L is supplied, if the this pointer
   in S0 is not, this instruction does not load it into D and transfers
   control to the exit label L.
 
-D:Ctx = LdCtx S0:StkPtr S1:Func
+D:Ctx = LdCtx S0:FramePtr S1:Func
 
   Loads into D the value of the m_this/m_cls field out of the frame
   pointer S0 in the function given by S1. The result could be either
   an object representing the this pointer or a class context.
 
-D:Cctx = LdCctx S0:StkPtr
+D:Cctx = LdCctx S0:FramePtr
 
   Loads into D the value of the m_cls field out of the frame pointer
   S0. The compiler should generate this only if it can prove that the
@@ -660,6 +664,11 @@ D:Cls = LdClsCctx S0:Cctx
 
   Loads into D the class representing the current context. Extracts
   the class from the S0, which is a context class.
+
+D:Func = LdClsCtor S0:Cls
+
+  Loads into D the constructor of class S0. If the constructor cannot
+  be called from the current context, raise an error.
 
 D:Home = LdHome S0:StkPtr S1:ConstInt
 
@@ -782,7 +791,7 @@ D:Func = LdCurFuncPtr
 
   ...
 
-D:Func& = LdARFuncPtr S0:StkPtr S1:ConstInt
+D:Func& = LdARFuncPtr S0:{StkPtr|FramePtr} S1:ConstInt
 
   Loads the m_func member of an ActRec.  S0 is the base address, and
   S1 is an offset, such that S0 + S1 points to the base of the ActRec.
@@ -808,28 +817,15 @@ D:BoxedCell = LdStaticLocCached S0:ConstCacheHandle -> L
 
 8. Allocation
 
-D:StkPtr = NewObj S0:ConstInt S1:Cls S2:StkPtr S3:StkPtr
+D:Obj = AllocObj S1:Cls
 
-  Allocate a new object.  Push a Cell pointing to the object and an
-  ActRec for the constructor onto the stack and return the new SP.
-  S0 is the number of parameters for the constructor
-  S1 is the class of the object
-  S2 is the current stack pointer
-  S3 is the frame pointer of the current ActRec
+  Allocates a new object of class S1.
 
-D:StkPtr = NewObjCached S0:ConstInt S1:Str S2:StkPtr S3:StkPtr
+D:Obj = AllocObjFast S1:ConstCls
 
-  Allocate a new object with class name S1, using a target cache
-  lookup.  S1 is the string name of the class, other parameters are
-  the same as NewObj.
-
-D:StkPtr = NewObjNoCtorCached S0:Str S1:StkPtr
-
-  Allocate a new object, which does not require a constructor call,
-  with class name S0, using a target cache lookup.  Because no
-  constructor will be called this opcode does not allocate an ActRec.
-  Operand S0 is the name of the class, S1 is the current stack
-  pointer.
+  Allocate a new object of class S1 where S1 is persistent and able to
+  be instantiated (i.e., S1 is not an abstract class, interface, or
+  trait).
 
 NewArray
 NewTuple
@@ -837,30 +833,53 @@ NewTuple
 
 9. Call & Return
 
-D:ActRec = DefActRec S0:StkPtr
-                     S1:Func
-                     S2:{CtxPtr|ClassPtr|Null}
-                     S3:ConstInt
-                     S4:{String|Null}
+D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
+                                       S1:FramePtr
+                                       S2:Func
+                                       S3:{Ctx|Class|Null}
 
   Operands:
 
-     S0 - callee frame pointer
-     S1 - callee Func
-     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
+     S0 - caller stack pointer
+     S1 - caller frame pointer
+     S2 - callee Func
+     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
-     S3 - number of arguments
-     S4 - invName field for magic calls, or null
 
-  Defines the fields for an activation record.  May be passed to a
-  SpillStack to store the fields to the stack.
+  Defines the fields for an activation record and writes them to the
+  stack pointed to by S1.
 
-D:StkPtr = FreeActRec S0:StkPtr
+D:FramePtr = FreeActRec S0:FramePtr
 
   Load the saved frame pointer from the activation record pointed to
   by S0 into D.
 
-D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
+D:FramePtr = DefInlineFP<returnBcOffset> S0:StkPtr
+
+  Defines a frame pointer for an inlined function.  S0 is a StkPtr
+  that points to the ActRec for the callee (i.e. after parameters have
+  been popped).
+
+  This instruction is primarily used to represent a frame in the IR in
+  a way that allows us to eliminate it entirely.  When it cannot be
+  eliminated (or if it is pushed into an unlikely path) it performs
+  callee-side responsibilities for setting up an activation record
+  (i.e. setting the return ip and m_soff, storing the frame pointer
+  into D).
+
+InlineReturn S0:FramePtr
+
+  Unlinks a frame constructed by DefInlineFP.
+
+D:StkPtr = CallArray S0:StkPtr
+
+  Invoke function corresponding to the current FPI with array args.
+  S0 points to the stack resulting after the ActRec for the function
+  and the array of its arguments is pushed. CallArray pops the array
+  off the stack, pushes the elements of the array as arguments, and
+  invokes the function in the ActRec.
+
+D:StkPtr = Call S0:StkPtr S1:ConstInt S2:Func S3...
 
   Invoke the function S2 with ActRec S0 and variadic arguments S3...
   representing values to pass to the function.  A value of type None
@@ -868,7 +887,7 @@ D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
   bytecode offset of the next instruction to execute when the call
   returns.
 
-NativeImpl = S0:ConstFunc S1:StkPtr
+NativeImpl = S0:ConstFunc S1:FramePtr
 
   Execute a call to the native builtin specified by the func in S0.
 
@@ -897,7 +916,7 @@ D:T = CallBuiltin<T> S0:FuncPtr S1...SN
     Object              {Obj|InitNull}    destination
     Variant             {Gen-UninitNull}  destination
 
-D:RetAddr = LdRetAddr S0:StkPtr
+D:RetAddr = LdRetAddr S0:FramePtr
 
   Load the return address off of the activation record pointed to by
   S0.  The return address D is normally provided to a RetCtrl.
@@ -905,23 +924,23 @@ D:RetAddr = LdRetAddr S0:StkPtr
   to free the activation record S0.  This is the reason why LdRetAddr
   is a separate instruction from RetCtrl.
 
-RetCtrl S0:{StkPtr|PtrToGen} S1:StkPtr S2:RetAddr
+RetCtrl S0:StkPtr S1:FramePtr S2:RetAddr
 
   Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
   specified by S2.
 
-RetVal S0:StkPtr S1:Gen
+RetVal S0:FramePtr S1:Gen
 
   Writes the value in S1 to the return value slot on the activation
   record pointed to by S0.
 
-D:StkPtr = RetAdjustStack S0:StkPtr
+D:StkPtr = RetAdjustStack S0:FramePtr
 
   Loads the new VM stack pointer into the destination.  S0 is a
   pointer to the current activation record.
 
-ReleaseVVOrExit S0:StkPtr -> L
+ReleaseVVOrExit S0:FramePtr -> L
 
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   null, does nothing.  If it is an ExtraArgs, deallocates the
@@ -935,7 +954,7 @@ RaiseWarning S0:Str
 
   Raises a warning with the text in S0 as its message.
 
-D:StkPtr = GenericRetDecRefs S0:StkPtr S1:Gen S2:ConstInt
+D:StkPtr = GenericRetDecRefs S0:FramePtr S1:Gen S2:ConstInt
 
   Does decrefs of all the current function's locals, where S0 is a
   pointer to the relevant activation record, and S2 is the number of
@@ -959,17 +978,27 @@ StMemNT S0:PtrToGen S1:ConstInt S2:Gen
 StProp S0:Obj S1:Int S2:Gen
 StPropNT S0:Obj S1:Int S2:Gen
 
-StLoc<localId> S0:StkPtr S1:Gen
+StLoc<localId> S0:FramePtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0.
 
-StLocNT<localId> S0:StkPtr S1:Gen
+StLocNT<localId> S0:FramePtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0,
   without storing the type.
 
-StRef
-StRefNT
+D:BoxedCell = StRef S0:BoxedCell S1:Cell
+
+  Store the value in S1 into the RefData pointed to by S0.  Stores the
+  RefData::m_type also.  Returns a new value for S0, which will now
+  have the type of S1 after boxing.
+
+D:BoxedCell = StRefNT S0:BoxedCell S1:Cell
+
+  Store the value in S1 into the RefData pointed to by S0.  Does not
+  change RefData::m_type.  Returns a new value for S0, which will now
+  have the type of S1 after boxing.
+
 StRaw
 
 D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
@@ -987,10 +1016,8 @@ D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
                is pushed
 
      S2...   - variadic list of elements to spill, with values
-               representing cells, ActRecs, or None.  Each temp of type
-               ActRec is followed by kSpillStackActRecExtraArgs for
-               the contents of the ActRec.  A temp with type None means
-               to keep the previous value on the stack.
+               representing cells.  A temp with type None means to
+               keep the previous value on the stack.
 
 
 11. Trace exits
@@ -1037,36 +1064,29 @@ D:T* = LdAddr S0:T* S1:ConstInt
 
 IncRef
 
-DecRefLoc<localId> S0:StkPtr
+DecRefLoc<localId> S0:FramePtr
 
   DecRef the local given by localId on the frame S0.
 
-DecRefStack<T> S0:StkPtr S1:ConstInt
+DecRefStack<T,offset> S0:StkPtr
 
-  DecRef a value of type T at offset S1 on the stack pointed to by S0.
+  DecRef a value of type T at offset on the stack pointed to by S0.
 
-DecRefThis S0:StkPtr
+DecRefThis S0:FramePtr
 
-  DecRef the $this pointer in the ActRec S0, checking to see if there
-  is one.  If it needs to be destroyed, zero the this slot before
-  calling the destructor.
-
-  This is done to prevent backtraces from seeing stale this pointers.
-
-DecRefKillThis S0:Obj S1:StkPtr
-
-  Similar to DecRefThis, except for use when we have the $this pointer
-  in S0.  This instruction does the same thing as DecRef, except that
-  in the case it needs to destroy its argument, it first zeros the
-  this pointer on the frame S1.  It is expected that the argument will
-  be the $this pointer.
-
-  This is done to prevent backtraces from seeing stale $this pointers.
+  DecRef the $this pointer in the ActRec S0, if it had one.  Does
+  nothing if there was a class context or null $this on the ActRec.
 
 DecRef S0:Gen
 
   Decrease the reference count of S0 by one, and call a destructor for
   types that require it if it goes to zero.
+
+  Note that although DecRef takes a Gen, we don't allow it to use
+  information about the inner types of a BoxedCell.  This is because
+  we don't guard on the inner types of a BoxedCell except when doing
+  LdRef.  For any S0 that is a strict subtype of BoxedCell, the DecRef
+  must just decref it as if it were a BoxedCell.
 
 DecRefMem S0:PtrToGen S1:ConstInt
 
@@ -1082,16 +1102,55 @@ DecRefNZ S0:Gen
 
 13. Misc
 
-D:StkPtr = DefFP
+D:FramePtr = DefFP
 
   Creates a temporary D representing the current vm frame pointer.
 
-D:StkPtr = DefSP S0:StkPtr S1:ConstInt
+D:StkPtr = DefSP<stackOff> S0:StkPtr
 
   Creates a temporary D representing the current vm stack pointer.  S0
-  is a pointer to the current frame, and S1 is the offset between the
-  stack pointer and the frame pointer.  (XXX: this doesn't work
-  because of continuations, and is unused.)
+  is a pointer to the current frame.  The 'stackOff' is the logical
+  offset between S0 and the stack pointer, but in the case of
+  continuations this is not the physical offset at runtime.
+
+  This instruction is used at the beginning of tracelets to represent
+  the state of the stack on entry and does not emit code.
+
+D:StkPtr = ReDefSP<offset> S0:FramePtr S1:StkPtr
+
+  Re-define a stack in terms of a frame pointer S0 and an offset,
+  putting the resulting pointer in D.  The resulting stack is assumed
+  to give the same view as S1, which is a previous stack pointer.
+  (I.e. for getStackValue we just chain to S1.)
+
+  This instruction is used when entering or "returning" from an
+  inlined call.  The one used on entry will be DCE'd when the actrec
+  can be eliminated.  The one on exit is only needed until TODO(#2288359).
+
+D:StkPtr = StashGeneratorSP S0:StkPtr
+
+  Store a generator stack pointer, for later use.
+
+  This instruction has exactly the effects of Mov.
+
+  The point of this is a bit of a hack to handle the fact that we
+  currently assign the same registers to frame (rVmFp) and stack
+  pointers (rVmSp) through the IR.  During an inline call, we want to
+  be able to have uses of the stack after the call, but we can't
+  restore it using a frame pointer like with ReDefSP, because the
+  values of rVmSp and rVmFp are not related like that in a generator.
+
+  This instruction moves the value of rVmSp into a temporary, which we
+  can get back using ReDefGeneratorSP.
+
+  TODO(#2288359): this shouldn't be needed.
+
+D:StkPtr = ReDefGeneratorSP<offset> S0:StkPtr
+
+  Restore a generator stack pointer.  See StashGeneratorSP.
+
+  This instruction has exactly the effects of Mov, except that the
+  destination is allocated to rVmSp.
 
 Nop
 
@@ -1141,13 +1200,13 @@ RaiseUndefProp S0:Obj S1:ConstStr
 
   Raise a notice for an undefined property named S1 on the class of S0.
 
-D:BoxedCell = StaticLocInit S0:ConstStr S1:StkPtr S2:Cell
+D:BoxedCell = StaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
   Get boxed value to initialize static local named S0 in frame S1. If
   the static local has not yet been initialized, its value will be set
   to S2. The returned value is not stored in the frame S1.
 
-D:BoxedCell = StaticLocInitCached S0:ConstStr S1:StkPtr S2:Cell
+D:BoxedCell = StaticLocInitCached S0:ConstStr S1:FramePtr S2:Cell
                                   S3:ConstCacheHandle
 
   Get boxed value to initialize static local named S0 in frame S1. If
@@ -1176,7 +1235,7 @@ D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
   in the range [S1:S1 + S2), and if so return the value S1 - (Int)S0.
   Else, they return the target of the default target, S2 + 1.
 
-D:StkPtr InterpOne<T> S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
+D:StkPtr InterpOne<T> S0:FramePtr S1:StkPtr S2:ConstInt S3:ConstInt
 
   Call the interpreter implementation function for one opcode.  S0 and
   S1 are, respectively, the VM frame and stack pointers before this
@@ -1185,7 +1244,7 @@ D:StkPtr InterpOne<T> S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
   of cells pushed.  This instruction returns the updated VM stack
   pointer.
 
-InterpOneCF S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
+InterpOneCF S0:FramePtr S1:StkPtr S2:ConstInt S3:ConstInt
 
   Call the interpreter implementation function for one control-flow
   opcode.  S0 and S1 are, respectively, the VM frame and stack
@@ -1215,18 +1274,35 @@ FreeSpill S0:ConstInt
 
 16. Continuations & Closures
 
-D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:StkPtr S3:StkPtr
+D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
 
   Creates an object of class S0 (which must be a subclass of Closure),
   copies S1 number of parameters from S2 into the properties on the
   object.  Saves the $this and Func* from ActRec S2 into the object,
   and returns the object.
 
-CreateCont
+D:Obj = CreateCont S0:TCA S1:FramePtr S2:ConstBool S3:ConstFunc S4:ConstFunc
+
+  Create a continuation object.  Arguments:
+
+     S0 - function pointer to C++ helper
+     S1 - current frame pointer
+     S2 - whether the CreateCont hhbc op had getArgs set to true (which means
+          the function body may call func_get_args, etc).
+     S3 - the "original" function
+     S4 - the generator function
+
+D:Obj = InlineCreateCont<origFunc,genFunc> S0:{Obj,Null}
+
+  Create a zero-argument continuation object.  S0 is the this pointer
+  for the continuation if it was a method, otherwise null.  Used to
+  weaken the use of the frame in CreateCont when inlining an 'outer'
+  generator function.
+
 FillContLocals
 FillContThis
 
-ContEnter S0:StkPtr S1:TCA S2:ConstInt S3:StkPtr
+ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 
   Enters a generator body. S0 is the ActRec embedded in the Continuation
   object. S1 is the address to jump to. S2 is the bytecode offset in the
@@ -1268,8 +1344,8 @@ DbgAssertPtr S0:PtrToGen
 
 18. Iterators
 
-D:Bool = IterInit S0:{Arr|Obj} S1:StkPtr S2:ConstInt S3:ConstInt
-D:Bool = IterInitK S0:{Arr|Obj} S1:StkPtr S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = IterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
+D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object
@@ -1288,8 +1364,8 @@ D:Bool = IterInitK S0:{Arr|Obj} S1:StkPtr S2:ConstInt S3:ConstInt S4:ConstInt
   decrements the reference count of s0 or stores a reference to S0
   into the new iterator.
 
-D:Bool = IterNext S0:StkPtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextK S0:StkPtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 
   Advances the iterator variable whose index is given by S1. S2 and S3
   are local variable indices. S0 points to the stack frame containing
@@ -1301,7 +1377,7 @@ D:Bool = IterNextK S0:StkPtr S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
-IterFree S0:StkPtr S1:ConstInt
+IterFree S0:FramePtr S1:ConstInt
 
   Free the iterator variable whose index is given by S1 in the stack
   frame pointed to by S0.

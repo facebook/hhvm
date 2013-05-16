@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "stack_trace.h"
-#include "process.h"
-#include "base.h"
-#include "lock.h"
-#include "logger.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/process.h"
+#include "hphp/util/base.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include "util.h"
 
 #include <execinfo.h>
@@ -27,9 +27,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <util/light_process.h>
-#include <util/compatibility.h>
-#include <util/hash.h>
+#include "hphp/util/light_process.h"
+#include "hphp/util/compatibility.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 

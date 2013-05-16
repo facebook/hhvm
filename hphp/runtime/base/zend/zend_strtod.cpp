@@ -89,9 +89,9 @@
  *  directly -- and assumed always to succeed.
  */
 
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/util/exceptions.h>
-#include <util/thread_local.h>
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/util/thread_local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,8 +145,8 @@ extern void *MALLOC(size_t);
 #define MALLOC malloc
 #endif
 
-#include "ctype.h"
-#include "errno.h"
+#include <ctype.h>
+#include <errno.h>
 
 #ifdef Bad_float_h
 #ifdef IEEE_BIG_ENDIAN
@@ -188,10 +188,10 @@ extern void *MALLOC(size_t);
 #define LONG_MAX 2147483647
 #endif
 #else
-#include "float.h"
+#include <float.h>
 #endif
 #ifndef __MATH_H__
-#include "math.h"
+#include <math.h>
 #endif
 
 #ifndef CONST

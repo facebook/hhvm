@@ -13,17 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_REG_ALLOC_H_
-#define incl_REG_ALLOC_H_
+#ifndef incl_HPHP_REG_ALLOC_H_
+#define incl_HPHP_REG_ALLOC_H_
 
 #include <boost/noncopyable.hpp>
 
-#include "util/trace.h"
-#include "util/asm-x64.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/translator/physreg.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/physreg.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 // Assumption: the set interfaces are limited to the first 64 registers.
 static const int kMaxRegs = 64;
@@ -51,10 +51,14 @@ struct RegContent {
   int64_t    m_int;
   Location m_loc;
 
-  RegContent(const Location &loc, int64_t intval = 0)
-      : m_kind(Loc), m_int(intval), m_loc(loc) { }
+  explicit RegContent(const Location &loc, int64_t intval = 0)
+    : m_kind(Loc), m_int(intval), m_loc(loc) {}
 
-  RegContent(int64_t _m_int) : m_kind(Int), m_int(_m_int), m_loc(Location()) { }
+  explicit RegContent(int64_t _m_int)
+    : m_kind(Int)
+    , m_int(_m_int)
+    , m_loc(Location())
+  {}
 
   RegContent() : m_kind(Invalid), m_int(0), m_loc(Location()) { }
 
@@ -419,7 +423,7 @@ class LazyScratchReg : boost::noncopyable {
   RegAlloc& m_regMap;
   PhysReg m_reg;
  public:
-  LazyScratchReg(RegAlloc& regMap);
+  explicit LazyScratchReg(RegAlloc& regMap);
   ~LazyScratchReg();
 
   bool isAllocated() const { return m_reg != reg::noreg; }
@@ -436,7 +440,7 @@ class LazyScratchReg : boost::noncopyable {
 
 class ScratchReg : public LazyScratchReg {
  public:
-  ScratchReg(RegAlloc& regMap);
+  explicit ScratchReg(RegAlloc& regMap);
   // Use this constructor to reserve an already-selected register, which
   // must be free.
   ScratchReg(RegAlloc& regMap, PhysReg pr);
@@ -465,6 +469,6 @@ private:
   const PhysReg m_reg;
 };
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl
 
-#endif /* incl_REG_ALLOC_H_ */
+#endif /* incl_HPHP_REG_ALLOC_H_ */

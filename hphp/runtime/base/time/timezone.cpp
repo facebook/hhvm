@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/time/timezone.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/runtime_error.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/time/timezone.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/time/datetime.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -156,20 +156,31 @@ Array TimeZone::GetNames() {
   return ret;
 }
 
+static const StaticString s_dst("dst");
+static const StaticString s_offset("offset");
+static const StaticString s_timezone_id("timezone_id");
+static const StaticString s_ts("ts");
+static const StaticString s_time("time");
+static const StaticString s_isdst("isdst");
+static const StaticString s_abbr("abbr");
+static const StaticString s_country_code("country_code");
+static const StaticString s_latitude("latitude");
+static const StaticString s_longitude("longitude");
+static const StaticString s_comments("comments");
+
 Array TimeZone::GetAbbreviations() {
   Array ret;
   for (const timelib_tz_lookup_table *entry =
          timelib_timezone_abbreviations_list(); entry->name; entry++) {
-    Array element;
-    element.set("dst", (bool)entry->type);
-    element.set("offset", entry->gmtoffset);
+    ArrayInit element(3);
+    element.set(s_dst, (bool)entry->type);
+    element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
-      element.set("timezone_id", String(entry->full_tz_name, AttachLiteral));
+      element.set(s_timezone_id, String(entry->full_tz_name, AttachLiteral));
     } else {
-      element.set("timezone_id", uninit_null());
+      element.set(s_timezone_id, uninit_null());
     }
-
-    ret.lvalAt(entry->name).append(element);
+    ret.lvalAt(String(entry->name)).append(element.create());
   }
   return ret;
 }
@@ -241,14 +252,13 @@ Array TimeZone::transitions() const {
       ttinfo &offset = m_tzi->type[index];
       const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 
-      Array element;
-      element.set("ts", timestamp);
-      element.set("time", dt.toString(DateTime::ISO8601));
-      element.set("offset", offset.offset);
-      element.set("isdst", (bool)offset.isdst);
-      element.set("abbr", String(abbr, CopyString));
-
-      ret.append(element);
+      ArrayInit element(5);
+      element.set(s_ts, timestamp);
+      element.set(s_time, dt.toString(DateTime::ISO8601));
+      element.set(s_offset, offset.offset);
+      element.set(s_isdst, (bool)offset.isdst);
+      element.set(s_abbr, String(abbr, CopyString));
+      ret.append(element.create());
     }
   }
   return ret;
@@ -259,10 +269,10 @@ Array TimeZone::getLocation() const {
   if (!m_tzi) return ret;
 
 #ifdef TIMELIB_HAVE_TZLOCATION
-  ret.set("country_code", String(m_tzi->location.country_code, CopyString));
-  ret.set("latitude",     m_tzi->location.latitude);
-  ret.set("longitude",    m_tzi->location.longitude);
-  ret.set("comments",     String(m_tzi->location.comments, CopyString));
+  ret.set(s_country_code, String(m_tzi->location.country_code, CopyString));
+  ret.set(s_latitude,     m_tzi->location.latitude);
+  ret.set(s_longitude,    m_tzi->location.longitude);
+  ret.set(s_comments,     String(m_tzi->location.comments, CopyString));
 #else
   throw NotImplementedException("timelib version too old");
 #endif

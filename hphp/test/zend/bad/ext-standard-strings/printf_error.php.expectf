@@ -1,0 +1,26 @@
+*** Testing printf() : error conditions ***
+
+-- Testing printf() function with Zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing printf() function with less than expected no. of arguments --
+
+-- Call printf with one argument less than expected --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+-- Call printf with two argument less than expected --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+-- Call printf with three argument less than expected --
+HipHop Warning: %a
+bool(false)
+===DONE===

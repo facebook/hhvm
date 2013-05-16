@@ -8,7 +8,7 @@
   curl_exec($ch);
   $info = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
   var_dump($url == $info);
-
+  
   curl_close($ch);
 ?>
 ===DONE===

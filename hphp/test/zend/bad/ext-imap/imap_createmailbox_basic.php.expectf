@@ -1,0 +1,11 @@
+*** Testing imap_createmailbox() : basic functionality ***
+Newname will be 'phpnewbox'
+Add a couple of msgs to 'phpnewbox' mailbox
+Your new mailbox 'phpnewbox' has the following status:
+Messages:    2
+Recent:      2
+Unseen:      2
+UIDnext:     %d
+UIDvalidity: %d
+Mailbox 'phpnewbox' removed to restore initial state
+===Done===

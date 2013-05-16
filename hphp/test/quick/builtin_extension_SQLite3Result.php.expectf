@@ -1,0 +1,46 @@
+SQLite3Result
+object(SQLite3Result)#1 (0) {
+}
+string(25) "O:13:"SQLite3Result":0:{}"
+object(SQLite3Result)#2 (0) {
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "numcolumns"
+  [2]=>
+  string(10) "columnname"
+  [3]=>
+  string(10) "columntype"
+  [4]=>
+  string(10) "fetcharray"
+  [5]=>
+  string(5) "reset"
+  [6]=>
+  string(8) "finalize"
+}
+================
+A_SQLite3Result
+HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+object(A_SQLite3Result)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(40) "O:15:"A_SQLite3Result":1:{s:4:"___x";N;}"
+object(A_SQLite3Result)#4 (1) {
+  ["___x"]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(20) "createFromDateString"
+  [4]=>
+  string(6) "format"
+}

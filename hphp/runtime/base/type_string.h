@@ -14,21 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_STRING_H_
+#define incl_HPHP_STRING_H_
+
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_string.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_STRING_H__
-#define __HPHP_STRING_H__
-
-#include <util/assertions.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/string_data.h>
-#include <runtime/base/string_offset.h>
-#include <runtime/base/types.h>
-#include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
+#include "hphp/util/assertions.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string_offset.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp_value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,17 +41,13 @@ StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
 StringData* buildStringData(litstr  s);
 
-#ifdef HHVM_GC
-typedef GCRootTracker<StringData> StringBase;
-#else
-typedef SmartPtr<StringData> StringBase;
-#endif
-
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : protected StringBase {
+class String : protected SmartPtr<StringData> {
+  typedef SmartPtr<StringData> StringBase;
+
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;
@@ -73,6 +68,9 @@ public:
   // create a string from a character
   static String FromChar(char ch) {
     return StringData::GetStaticString(ch);
+  }
+  static String FromCStr(const char* str) {
+    return StringData::GetStaticString(str);
   }
 
   static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
@@ -124,21 +122,21 @@ public:
   /**
    * Constructors
    */
-  String(StringData *data) : StringBase(data) { }
-  String(int     n);
-  String(int64_t   n);
-  String(double  n);
-  String(litstr  s) {
+  /* implicit */ String(StringData *data) : StringBase(data) { }
+  /* implicit */ String(int     n);
+  /* implicit */ String(int64_t   n);
+  /* implicit */ String(double  n);
+  /* implicit */ String(litstr  s) {
     if (s) {
       m_px = buildStringData(s);
       m_px->setRefCount(1);
     }
   }
-  String(CStrRef str) : StringBase(str.m_px) { }
+  String(const String& str) : StringBase(str.m_px) { }
 
   // Move ctor
-  String(String&& str) : StringBase(std::move(str)) {}
-  String(Variant&& src);
+  /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
+  /* implicit */ String(Variant&& src);
   // Move assign
   String& operator=(String&& src) {
     static_assert(sizeof(String) == sizeof(StringBase),"Fix this.");
@@ -149,7 +147,7 @@ public:
   // Move assign from Variant
   String& operator=(Variant&& src);
 
-  String(const std::string &s) { // always make a copy
+  /* implicit */ String(const std::string &s) { // always make a copy
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
@@ -195,6 +193,13 @@ public:
       m_px->setRefCount(1);
     }
   }
+  // force a copy of a String
+  String(const String& s, CopyStringMode mode) {
+    if (s.m_px) {
+      m_px = NEW(StringData)(s.c_str(), s.size(), mode);
+      m_px->setRefCount(1);
+    }
+  }
   // make an empty string with cap reserve bytes, plus 1 for '\0'
   String(int cap, ReserveStringMode mode) {
     m_px = NEW(StringData)(cap);
@@ -208,9 +213,6 @@ public:
   /**
    * Informational
    */
-  operator const char *() const {
-    return m_px ? m_px->data() : "";
-  }
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
@@ -309,7 +311,7 @@ public:
    */
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
-  String &operator =  (CStrRef v);
+  String &operator =  (const String& v);
   String &operator =  (CVarRef v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
@@ -331,6 +333,12 @@ public:
   String &operator &= (CStrRef v);
   String &operator ^= (CStrRef v);
   String  operator ~  () const;
+  explicit operator std::string () const {
+    return std::string(c_str(), size());
+  }
+  explicit operator bool() const {
+    return m_px != nullptr;
+  }
 
   /**
    * These are convenient functions for writing extensions, since code
@@ -605,9 +613,9 @@ class StaticString : public String {
 public:
   friend class StringUtil;
 
-  StaticString(litstr s);
+  explicit StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
-  StaticString(std::string s);
+  explicit StaticString(std::string s);
   StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released
@@ -624,4 +632,4 @@ extern const StaticString empty_string;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_H__
+#endif // incl_HPHP_STRING_H_

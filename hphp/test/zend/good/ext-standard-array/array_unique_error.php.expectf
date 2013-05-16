@@ -1,0 +1,10 @@
+*** Testing array_unique() : error conditions ***
+
+-- Testing array_unique() function with zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_unique() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+Done

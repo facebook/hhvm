@@ -15,31 +15,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_iterator.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collections.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/zend/zend_collator.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/sort_flags.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/base/array/hphp_array.h>
-#include <util/logger.h>
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_iterator.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/sort_flags.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/logger.h"
 
 #define SORT_DESC               3
 #define SORT_ASC                4
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_Iterator("Iterator");
-static StaticString s_IteratorAggregate("IteratorAggregate");
-static StaticString s_ArrayIterator("ArrayIterator");
-static StaticString s_MutableArrayIterator("MutableArrayIterator");
-
-static StaticString s_getIterator("getIterator");
 static StaticString s_count("count");
 
 const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
@@ -69,7 +63,7 @@ const int64_t k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
-using HPHP::VM::Transl::CallerFrame;
+using HPHP::Transl::CallerFrame;
 
 #define getCheckedArrayRetType(input, fail, type)                       \
   Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
@@ -92,6 +86,63 @@ Variant f_array_chunk(CVarRef input, int size,
   getCheckedArray(input);
   return ArrayUtil::Chunk(arr_input, size, preserve_keys);
 }
+
+static inline bool array_column_coerce_key(Variant &key, const char *name) {
+  /* NULL has a special meaning for each field */
+  if (key.isNull()) {
+    return true;
+  }
+
+  /* Custom coercion rules for key types */
+  if (key.isInteger() || key.isDouble()) {
+    key = key.toInt64();
+    return true;
+  } else if (key.isString() || key.isObject()) {
+    key = key.toString();
+    return true;
+  } else {
+    raise_warning("The %s key should be either a string or an integer", name);
+    return false;
+  }
+}
+
+Variant f_array_column(CVarRef input, CVarRef val_key,
+                       CVarRef idx_key /* = null_variant */) {
+  /* Be strict about array type */
+  getCheckedArrayRet(input, uninit_null());
+  Variant val = val_key, idx = idx_key;
+  if (!array_column_coerce_key(val, "column") ||
+      !array_column_coerce_key(idx, "index")) {
+    return false;
+  }
+  Array ret = Array::Create();
+  for(auto it = arr_input.begin(); !it.end(); it.next()) {
+    if (!it.second().isArray()) {
+      continue;
+    }
+    Array sub = it.second().toArray();
+
+    Variant elem;
+    if (val.isNull()) {
+      elem = sub;
+    } else if (sub.exists(val)) {
+      elem = sub[val];
+    } else {
+      // skip subarray without named element
+      continue;
+    }
+
+    if (idx.isNull() || !sub.exists(idx)) {
+      ret.append(elem);
+    } else if (sub[idx].isObject()) {
+      ret.set(sub[idx].toString(), elem);
+    } else {
+      ret.set(sub[idx], elem);
+    }
+  }
+  return ret;
+}
+
 Variant f_array_combine(CVarRef keys, CVarRef values) {
   getCheckedArray(keys);
   getCheckedArray(values);
@@ -110,11 +161,11 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 }
 
 static bool filter_func(CVarRef value, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  TypedValue args[1];
+  tvDup(value.asTypedValue(), args + 0);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, args);
   return ret.toBoolean();
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -123,10 +174,9 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (callback.isNull()) {
     return ArrayUtil::Filter(arr_input);
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -146,10 +196,14 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   if (LIKELY(saccType == KindOfArray)) {
     ad = Variant::GetArrayData(sacc);
   } else if (saccType == KindOfObject) {
+    ObjectData* obj = Variant::GetObjectData(sacc);
+    if (obj->isCollection()) {
+      return collectionOffsetContains(obj, key);
+    }
     return f_array_key_exists(key, toArray(search));
   } else {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
-                           "false returned.");
+                             "false returned.");
     return false;
   }
   Variant::TypedValueAccessor kacc = key.getTypedAccessor();
@@ -185,7 +239,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
 }
 
 static Variant map_func(CArrRef params, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   if (ctx == NULL) {
     if (params.size() == 1) {
       return params[0];
@@ -193,9 +247,7 @@ static Variant map_func(CArrRef params, const void *data) {
     return params;
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params,
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, params);
   return ret;
 }
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
@@ -208,12 +260,11 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   if (!_argv.empty()) {
     inputs = inputs.merge(_argv);
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
     CallerFrame cf;
-    ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                  ctx.invName);
+    vm_decode_function(callback, cf(), false, ctx);
   }
   if (ctx.func == NULL) {
     return ArrayUtil::Map(inputs, map_func, NULL);
@@ -408,20 +459,20 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func,
-                          CREATE_VECTOR2(result, operand), ctx->this_,
-                          ctx->cls, NULL, ctx->invName);
+  TypedValue args[2];
+  tvDup(result.asTypedValue(), args + 0);
+  tvDup(operand.asTypedValue(), args + 1);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 2, args);
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
   getCheckedArray(input);
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -516,12 +567,13 @@ Variant f_array_values(CVarRef input) {
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant sink;
-  g_vmContext->invokeFunc((TypedValue*)&sink, ctx->func,
-                          CREATE_VECTOR3(ref(value), key, userdata),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  TypedValue args[3];
+  tvDup(value->asTypedValue(), args + 0);
+  tvDup(key.asTypedValue(), args + 1);
+  tvDup(userdata.asTypedValue(), args + 2);
+  g_vmContext->invokeFuncFew((TypedValue*)&sink, *ctx, 3, args);
 }
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
@@ -529,10 +581,9 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -546,10 +597,9 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -557,7 +607,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   return true;
 }
 
-static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
+static void compact(VarEnv* v, Array &ret, CVarRef var) {
   if (var.isArray()) {
     for (ArrayIter iter(var.getArrayData()); iter; ++iter) {
       compact(v, ret, iter.second());
@@ -572,7 +622,7 @@ static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
 
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   Array ret = Array::Create();
-  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_vmContext->getVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, _argv);
@@ -610,7 +660,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     {
       Object obj = var.toObject();
       if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke(s_count, null_array, -1);
+        return obj->o_invoke_few_args(s_count, 0);
       }
     }
     break;
@@ -635,13 +685,6 @@ Variant f_each(VRefParam array) {
 Variant f_current(VRefParam array) {
   return array.array_iter_current();
 }
-Variant f_hphp_current_ref(VRefParam array) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  return strongBind(array.array_iter_current_ref());
-}
 Variant f_next(VRefParam array) {
   return array.array_iter_next();
 }
@@ -659,59 +702,6 @@ Variant f_end(VRefParam array) {
 }
 Variant f_key(VRefParam array) {
   return array.array_iter_key();
-}
-
-
-static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
-  if (iterable.isArray()) {
-    if (isMutable) {
-      return create_object(s_MutableArrayIterator,
-                           CREATE_VECTOR1(ref(iterable)));
-    }
-    return create_object(s_ArrayIterator,
-                         CREATE_VECTOR1(iterable));
-  }
-  if (iterable.isObject()) {
-    ObjectData *obj = iterable.getObjectData();
-    Variant iterator;
-    while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-      iterator = obj->o_invoke(s_getIterator, Array());
-      if (!iterator.isObject()) break;
-      obj = iterator.getObjectData();
-    }
-    VM::Class*ctx = g_vmContext->getContextClass();
-    CStrRef context = ctx ? ctx->nameRef() : empty_string;
-    if (isMutable) {
-      if (obj->instanceof(SystemLib::s_IteratorClass)) {
-        throw FatalErrorException("An iterator cannot be used for "
-                                  "iteration by reference");
-      }
-      Array properties = obj->o_toIterArray(context, true);
-      return create_object(s_MutableArrayIterator,
-                           CREATE_VECTOR1(ref(properties)));
-    } else {
-      if (obj->instanceof(SystemLib::s_IteratorClass)) {
-        return obj;
-      }
-      return create_object(s_ArrayIterator,
-                           CREATE_VECTOR1(obj->o_toIterArray(context)));
-    }
-  }
-  raise_warning("Invalid argument supplied for iteration");
-  if (isMutable) {
-    return create_object(s_MutableArrayIterator,
-                         CREATE_VECTOR1(Array::Create()));
-  }
-  return create_object(s_ArrayIterator,
-                       CREATE_VECTOR1(Array::Create()));
-}
-
-Variant f_hphp_get_iterator(CVarRef iterable) {
-  return f_hphp_get_iterator(directRef(iterable), false);
-}
-
-Variant f_hphp_get_mutable_iterator(VRefParam iterable) {
-  return f_hphp_get_iterator(iterable, true);
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {
@@ -1077,7 +1067,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 
 class ArraySortTmp {
  public:
-  ArraySortTmp(Array& arr) : m_arr(arr) {
+  explicit ArraySortTmp(Array& arr) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort();
     m_ad->incRefCount();
   }

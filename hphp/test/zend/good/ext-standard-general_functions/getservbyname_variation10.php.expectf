@@ -1,0 +1,7 @@
+*** Test substituting argument 2 with emptyUnsetUndefNull values ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)

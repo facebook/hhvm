@@ -16,9 +16,9 @@
 #ifndef HPHP_USER_STREAM_WRAPPER_H
 #define HPHP_USER_STREAM_WRAPPER_H
 
-#include <runtime/base/types.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/file/stream_wrapper.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file/stream_wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ class UserStreamWrapper : public Stream::Wrapper {
                      int options, CVarRef context);
  private:
   String m_name;
-  VM::Class *m_cls;
+  Class *m_cls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

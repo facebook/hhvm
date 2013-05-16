@@ -1,0 +1,13 @@
+*** Testing get_declared_interfaces() : basic functionality ***
+
+-- Testing get_declared_interfaces() function with Zero arguments --
+array(%d) {
+%a
+}
+
+-- Ensure userspace classes are not listed --
+bool(false)
+
+-- Ensure userspace interfaces are listed --
+bool(true)
+Done

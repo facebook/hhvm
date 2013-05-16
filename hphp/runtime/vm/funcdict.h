@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_FUNC_DICT_H_
-#define incl_VM_FUNC_DICT_H_
+#ifndef incl_HPHP_VM_FUNC_DICT_H_
+#define incl_HPHP_VM_FUNC_DICT_H_
 
-#include <runtime/vm/func.h>
+#include "hphp/runtime/vm/func.h"
 
 namespace HPHP {
-namespace VM {
 
 /*
  * Abstraction around the Name -> Function mapping.
@@ -45,11 +44,8 @@ private:
   bool rename(const StringData* old, const StringData* n3w);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
-
-  //Array getUserFunctions();
 };
 
-}
 } // HPHP::VM
 
 #endif

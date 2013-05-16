@@ -13,17 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/string_util.h>
-#include <runtime/base/util/request_local.h>
-#include <util/lock.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include <pcre.h>
 #include <onigposix.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/array/array_iterator.h>
-#include <tbb/concurrent_hash_map.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "tbb/concurrent_hash_map.h"
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -106,6 +108,14 @@ static __thread pcre_extra t_extra_data;
 static __thread int t_last_error_code;
 
 namespace {
+
+static void preg_init_thread_locals() {
+    IniSetting::Bind("pcre.backtrack_limit", "1000000", ini_on_update_long,
+                     &g_context->m_preg_backtrace_limit);
+    IniSetting::Bind("pcre.recursion_limit", "100000", ini_on_update_long,
+                     &g_context->m_preg_recursion_limit);
+}
+InitFiniNode init(preg_init_thread_locals, InitFiniNode::ThreadInit);
 
 template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {
@@ -284,8 +294,8 @@ static void set_extra_limits(pcre_extra*& extra) {
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
   }
-  extra->match_limit = RuntimeOption::PregBacktraceLimit;
-  extra->match_limit_recursion = RuntimeOption::PregRecursionLimit;
+  extra->match_limit = g_context->m_preg_backtrace_limit;
+  extra->match_limit_recursion = g_context->m_preg_recursion_limit;
 }
 
 static int *create_offset_array(const pcre_cache_entry *pce,
@@ -319,14 +329,12 @@ static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
 
 static inline void add_offset_pair(Variant &result, CStrRef str, int offset,
                                    const char *name) {
-  Array match_pair;
-  match_pair.append(str);
-  match_pair.append(offset);
-
-  if (name) {
-    result.set(name, match_pair);
-  }
-  result.append(match_pair);
+  ArrayInit match_pair(2);
+  match_pair.set(str);
+  match_pair.set(offset);
+  Variant match_pair_v = match_pair.toVariant();
+  if (name) result.set(String(name), match_pair_v);
+  result.append(match_pair_v);
 }
 
 static inline bool pcre_need_log_error(int pcre_code) {
@@ -356,10 +364,10 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
     "UNKNOWN";
   raise_debugging(
     "REGEXERR: %s/%d: err=%d(%s), pattern='%s', subject='%s', repl='%s', "
-    "limits=(%d, %d), extra=(%d, %d, %d, %d)",
+    "limits=(%ld, %ld), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    RuntimeOption::PregBacktraceLimit, RuntimeOption::PregRecursionLimit,
+    g_context->m_preg_backtrace_limit, g_context->m_preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);
   free((void *)escapedSubject);
@@ -623,7 +631,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                result_set.set(subpat_names[i], value);
+                result_set.set(String(subpat_names[i]), value);
               }
               result_set.append(value);
             }
@@ -644,7 +652,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
             String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                          CopyString);
             if (subpat_names[i]) {
-              subpats->set(subpat_names[i], value);
+              subpats->set(String(subpat_names[i]), value);
             }
             subpats->append(value);
           }
@@ -688,7 +696,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        subpats->set(subpat_names[i], match_sets[i]);
+        subpats->set(String(subpat_names[i]), match_sets[i]);
       }
       subpats->append(match_sets[i]);
     }

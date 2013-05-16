@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_xmlreader.h>
+#include "hphp/runtime/ext/ext_xmlreader.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlreader);
@@ -121,7 +121,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_XMLReader::c_XMLReader(VM::Class* cb) :
+c_XMLReader::c_XMLReader(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet>(cb), m_ptr(NULL), m_input(NULL), m_schema(NULL) {
 }
 
@@ -439,7 +439,7 @@ bool c_XMLReader::t_setschema(CStrRef source) {
   }
 
   if (m_ptr) {
-    int ret = xmlTextReaderSchemaValidate(m_ptr, source);
+    int ret = xmlTextReaderSchemaValidate(m_ptr, source.c_str());
     if (ret == 0) {
       return true;
     }
@@ -510,8 +510,8 @@ struct PropertyAccessor {
 
 class PropertyAccessorMap : private hphp_const_char_imap<PropertyAccessor*> {
 public:
-  PropertyAccessorMap(PropertyAccessor* props,
-                      PropertyAccessorMap *base = NULL) {
+  explicit PropertyAccessorMap(PropertyAccessor* props,
+                               PropertyAccessorMap *base = nullptr) {
     if (base) {
       *this = *base;
     }
@@ -554,7 +554,7 @@ static PropertyAccessorMap xmlreader_properties_map
 
 Variant c_XMLReader::t___get(Variant name) {
   const xmlChar *retchar = NULL;
-	int retint = 0;
+  int retint = 0;
 
   PropertyAccessor *propertyMap = xmlreader_properties_map.get(name);
   if (m_ptr) {

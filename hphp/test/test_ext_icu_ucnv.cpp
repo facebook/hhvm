@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_icu_ucnv.h>
-#include <runtime/ext/ext_icu_ucnv.h>
+#include "hphp/test/test_ext_icu_ucnv.h"
+#include "hphp/runtime/ext/ext_icu_ucnv.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Icu_ucnv);
 ///////////////////////////////////////////////////////////////////////////////

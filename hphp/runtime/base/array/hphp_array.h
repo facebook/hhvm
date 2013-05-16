@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_HPHP_ARRAY_H__
-#define __HPHP_HPHP_ARRAY_H__
+#ifndef incl_HPHP_HPHP_ARRAY_H_
+#define incl_HPHP_HPHP_ARRAY_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,6 @@ public:
 
 //=============================================================================
 // VM runtime support functions.
-namespace VM {
 
 enum ArrayGetFlags {
   DecRefKey = 1,
@@ -545,10 +544,9 @@ uint64_t array_issetm_i(const void* hphpArray, int64_t key)
   FLATTEN;
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
-}
 //=============================================================================
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_HPHP_ARRAY_H__
+#endif // incl_HPHP_HPHP_ARRAY_H_

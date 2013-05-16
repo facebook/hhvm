@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SORT_HELPERS_H__
-#define __SORT_HELPERS_H__
+#ifndef incl_HPHP_SORT_HELPERS_H_
+#define incl_HPHP_SORT_HELPERS_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/zend/zend_functions.h>
-#include <runtime/base/sort_flags.h>
-#include <util/safesort.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/sort_flags.h"
+#include "hphp/util/safesort.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,8 +140,8 @@ struct ElmCompare {
         if (LIKELY(acc.isStr(right))) {
           StringData* sLeft = acc.getStr(left);
           StringData* sRight = acc.getStr(right);
-          return ascending ? (sLeft->compare(sRight) < 0) : 
-                             (sLeft->compare(sRight) > 0); 
+          return ascending ? (sLeft->compare(sRight) < 0) :
+                             (sLeft->compare(sRight) > 0);
         }
       } else if (acc.isInt(left)) {
         if (LIKELY(acc.isInt(right))) {
@@ -238,13 +238,14 @@ template <typename AccessorT>
 struct ElmUCompare {
   typedef typename AccessorT::ElmT ElmT;
   AccessorT acc;
-  const Variant* callback;
+  const CallCtx* ctx;
   bool operator()(ElmT left, ElmT right) const {
-    Variant ret =
-      vm_call_user_func(
-        *callback,
-        CREATE_VECTOR2(acc.getValue(left), acc.getValue(right))
-      );
+    Variant ret;
+    TypedValue args[2];
+    tvDup(acc.getValue(left).asTypedValue(), args+0);
+    tvDup(acc.getValue(right).asTypedValue(), args+1);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx,
+                               2, args);
     if (ret.isInteger()) {
       return ret.toInt64() < 0;
     }
@@ -269,11 +270,11 @@ struct ElmUCompare {
       if (b) {
         return false;
       }
-      Variant ret2 =
-        vm_call_user_func(
-          *callback,
-          CREATE_VECTOR2(acc.getValue(right), acc.getValue(left))
-        );
+      Variant ret2;
+      tvDup(acc.getValue(right).asTypedValue(), args+0);
+      tvDup(acc.getValue(left).asTypedValue(), args+1);
+      g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx,
+                                 2, args);
       if (ret2.isBoolean()) {
         return ret2.toBoolean();
       }
@@ -287,4 +288,4 @@ struct ElmUCompare {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SORT_HELPERS_H__
+#endif // incl_HPHP_SORT_HELPERS_H_

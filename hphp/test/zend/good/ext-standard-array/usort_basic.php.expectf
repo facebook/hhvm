@@ -1,0 +1,62 @@
+*** Testing usort() : basic functionality ***
+
+-- Numeric array with default keys --
+bool(true)
+array(7) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(6)
+  [4]=>
+  int(7)
+  [5]=>
+  int(8)
+  [6]=>
+  int(9)
+}
+
+-- String array with default keys --
+bool(true)
+array(4) {
+  [0]=>
+  string(4) "This"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(2) "is"
+  [3]=>
+  string(4) "test"
+}
+
+-- Associative array with numeric keys --
+bool(true)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(4)
+  [3]=>
+  int(7)
+  [4]=>
+  int(9)
+}
+
+-- Associative array with string keys --
+bool(true)
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(4)
+  [3]=>
+  int(10)
+}
+===DONE===

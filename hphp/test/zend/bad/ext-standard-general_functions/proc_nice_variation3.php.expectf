@@ -1,0 +1,9 @@
+*** Test substituting argument 1 with emptyUnsetUndefNull values ***
+bool(true)
+bool(true)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+bool(true)
+bool(true)

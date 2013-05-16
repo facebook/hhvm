@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_icu_uspoof.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/ext/ext_icu_uspoof.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);
@@ -36,7 +36,7 @@ const int64_t q_SpoofChecker$$INVISIBLE = USPOOF_INVISIBLE;
 const int64_t q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
 
 ///////////////////////////////////////////////////////////////////////////////
-c_SpoofChecker::c_SpoofChecker(VM::Class* cb) :
+c_SpoofChecker::c_SpoofChecker(Class* cb) :
     ExtObjectData(cb) {
   UErrorCode status = U_ZERO_ERROR;
   m_spoof_checker = uspoof_open(&status);

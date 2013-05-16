@@ -15,8 +15,8 @@
 */
 
 #include <pwd.h>
-#include <util/cronolog.h>
-#include <util/util.h>
+#include "hphp/util/cronolog.h"
+#include "hphp/util/util.h"
 
 /* Default permissions for files and directories that are created */
 

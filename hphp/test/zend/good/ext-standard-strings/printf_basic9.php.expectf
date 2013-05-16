@@ -1,0 +1,24 @@
+*** Testing printf() : basic functionality - using hexadecimal format ***
+
+-- Calling printf() with no arguments --
+format
+int(6)
+
+-- Calling printf() with one arguments --
+b
+int(1)
+B
+int(1)
+
+-- Calling printf() with two arguments --
+b 84
+int(4)
+B 84
+int(4)
+
+-- Calling printf() with three arguments --
+b 84 b1
+int(7)
+B 84 B1
+int(7)
+===DONE===

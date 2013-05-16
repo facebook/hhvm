@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/shared/concurrent_shared_store.h>
-#include <util/timer.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/memory/leak_detectable.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/shared/concurrent_shared_store.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/logger.h"
 #include <sys/mman.h>
 
 namespace HPHP {

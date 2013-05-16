@@ -1,0 +1,6 @@
+Doesn't trigger __get.
+HipHop Notice: %a
+Doesn't trigger __set.
+Doesn't trigger __unset.
+HipHop Notice: %a
+Shouldn't trigger __isset.

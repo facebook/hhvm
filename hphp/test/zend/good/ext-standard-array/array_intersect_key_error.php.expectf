@@ -1,0 +1,10 @@
+*** Testing array_intersect_key() : error conditions ***
+
+-- Testing array_intersect_key() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_intersect_key() function with no arguments --
+HipHop Warning: %a
+NULL
+===DONE===

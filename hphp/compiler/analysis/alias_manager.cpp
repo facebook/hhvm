@@ -14,58 +14,58 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/expression/expression.h>
-#include <compiler/expression/assignment_expression.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/list_assignment.h>
-#include <compiler/expression/binary_op_expression.h>
-#include <compiler/expression/unary_op_expression.h>
-#include <compiler/expression/qop_expression.h>
-#include <compiler/expression/simple_variable.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/simple_function_call.h>
-#include <compiler/expression/array_element_expression.h>
-#include <compiler/expression/object_property_expression.h>
-#include <compiler/expression/object_method_expression.h>
-#include <compiler/expression/parameter_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/expression.h>
-#include <compiler/expression/include_expression.h>
-#include <compiler/expression/closure_expression.h>
-#include <compiler/statement/statement.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/catch_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/block_statement.h>
-#include <compiler/statement/if_statement.h>
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/statement/switch_statement.h>
-#include <compiler/statement/break_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/loop_statement.h>
-#include <compiler/statement/foreach_statement.h>
-#include <compiler/statement/for_statement.h>
-#include <compiler/statement/while_statement.h>
-#include <compiler/statement/do_statement.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/echo_statement.h>
-#include <compiler/statement/try_statement.h>
-#include <compiler/statement/global_statement.h>
-#include <compiler/statement/static_statement.h>
-#include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/control_flow.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/data_flow.h>
-#include <compiler/analysis/dictionary.h>
-#include <compiler/analysis/expr_dict.h>
-#include <compiler/analysis/live_dict.h>
-#include <compiler/analysis/ref_dict.h>
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/list_assignment.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/object_method_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/catch_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/statement/if_statement.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/loop_statement.h"
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/statement/while_statement.h"
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/echo_statement.h"
+#include "hphp/compiler/statement/try_statement.h"
+#include "hphp/compiler/statement/global_statement.h"
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/control_flow.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/data_flow.h"
+#include "hphp/compiler/analysis/dictionary.h"
+#include "hphp/compiler/analysis/expr_dict.h"
+#include "hphp/compiler/analysis/live_dict.h"
+#include "hphp/compiler/analysis/ref_dict.h"
 
-#include <util/parser/hphp.tab.hpp>
-#include <util/parser/location.h>
-#include <util/util.h>
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/util/parser/location.h"
+#include "hphp/util/util.h"
 
 #define spc(T,p) boost::static_pointer_cast<T>(p)
 #define dpc(T,p) boost::dynamic_pointer_cast<T>(p)
@@ -263,7 +263,7 @@ void AliasManager::beginScope() {
   ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                        T_STRING, string("begin")));
   m_accessList.add(e);
-  m_stack.push_back(m_accessList.size());
+  m_stack.push_back(CondStackElem(m_accessList.size()));
   m_accessList.beginScope();
   if (BucketMapEntry *tail = m_bucketList) {
     BucketMapEntry *bm = tail;
@@ -601,6 +601,10 @@ void AliasManager::cleanRefs(ExpressionPtr e,
                              ExpressionPtrList::reverse_iterator it,
                              ExpressionPtrList::reverse_iterator &end,
                              int depth) {
+  if (e->is(Expression::KindOfUnaryOpExpression) &&
+      e->getLocalEffects() == Expression::UnknownEffect) {
+    return;
+  }
   if (e->is(Expression::KindOfAssignmentExpression) ||
       e->is(Expression::KindOfBinaryOpExpression) ||
       e->is(Expression::KindOfUnaryOpExpression)) {
@@ -752,6 +756,7 @@ void AliasManager::killLocals() {
         continue;
 
       case Expression::KindOfUnaryOpExpression:
+        if (e->getLocalEffects() == Expression::UnknownEffect) goto kill_it;
         cleanInterf(spc(UnaryOpExpression, e)->getExpression(),
                     ++it, end, depth);
         continue;
@@ -848,9 +853,14 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
       return testAccesses(e, rv, forLval);
     }
 
+    case Expression::KindOfUnaryOpExpression:
+      if (e->getLocalEffects() == Expression::UnknownEffect) {
+        isLoad = false;
+        return InterfAccess;
+      }
+      // fall through
     case Expression::KindOfAssignmentExpression:
-    case Expression::KindOfBinaryOpExpression:
-    case Expression::KindOfUnaryOpExpression: {
+    case Expression::KindOfBinaryOpExpression: {
       isLoad = false;
       ExpressionPtr var = e->getStoreVariable();
       int access = testAccesses(var, rv, forLval);
@@ -899,6 +909,10 @@ int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfBinaryOpExpression:
     case Expression::KindOfUnaryOpExpression:
+      if (e1->getLocalEffects() == Expression::UnknownEffect) {
+        isLoad = false;
+        return InterfAccess;
+      }
       e1 = e1->getStoreVariable();
       if (!e1 || !e1->hasContext(Expression::OprLValue)) return DisjointAccess;
       break;
@@ -1274,6 +1288,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           }
           case Expression::KindOfUnaryOpExpression: {
             UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
+            assert(u->getOp() == T_INC || u->getOp() == T_DEC);
             if (Option::EliminateDeadCode) {
               if (u->getActualType() && u->getActualType()->isInteger()) {
                 ExpressionPtr val = u->getExpression()->clone();
@@ -1720,7 +1735,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 default:
                   break;
               }
-              always_assert(alt->getKindOf() == uop->getExpression()->getKindOf());
+              always_assert(alt->getKindOf() ==
+                            uop->getExpression()->getKindOf());
               uop->getExpression()->setCanonID(alt->getCanonID());
             } else {
               uop->getExpression()->setCanonID(m_nextID++);
@@ -1729,7 +1745,11 @@ ExpressionPtr AliasManager::canonicalizeNode(
           add(m_accessList, e);
           break;
         default:
-          getCanonical(e);
+          if (uop->getLocalEffects() == Expression::UnknownEffect) {
+            add(m_accessList, e);
+          } else {
+            getCanonical(e);
+          }
           break;
       }
       break;
@@ -2504,7 +2524,7 @@ static void markAvailable(ExpressionRawPtr e) {
 
 class TypeAssertionInserter {
 public:
-  TypeAssertionInserter(AnalysisResultConstPtr ar) :
+  explicit TypeAssertionInserter(AnalysisResultConstPtr ar) :
     m_ar(ar), m_changed(false) {
     BuildAssertionMap();
   }

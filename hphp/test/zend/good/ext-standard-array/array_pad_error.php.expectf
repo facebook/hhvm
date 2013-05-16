@@ -1,0 +1,16 @@
+*** Testing array_pad() : error conditions ***
+
+-- Testing array_pad() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_pad() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_pad() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+Done

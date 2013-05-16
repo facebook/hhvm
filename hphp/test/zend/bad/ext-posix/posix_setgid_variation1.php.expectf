@@ -1,0 +1,10 @@
+*** Test substituting argument 1 with array values ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

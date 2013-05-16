@@ -1,0 +1,60 @@
+UTF-8 redundancy
+string(24) "000000310000003200000033"
+string(24) "000000410000004200000043"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(24) "000000a2000000a3000000a5"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(8) "00000080"
+string(8) "000007ff"
+bool(false)
+string(8) "00000800"
+string(8) "0000ffff"
+bool(false)
+string(8) "00010000"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+UTF-8 and surrogates area
+int(2048)
+string(16) "0000d7ff0000e000"
+UTF-32 code range
+bool(false)
+string(8) "0010ffff"
+bool(false)
+string(8) "0010ffff"
+bool(false)
+string(8) "0010ffff"
+string(16) "0000feff0000fffd"
+string(16) "0000feff0010ffff"
+string(16) "0000feff0000fffd"
+string(16) "0000feff0010ffff"
+UTF-32 and surrogates area
+int(2048)
+string(16) "0000d7ff0000e000"
+int(2048)
+string(16) "0000d7ff0000e000"
+int(2048)
+string(16) "0000d7ff0000e000"
+UTF-32 and surrogates area with BOM
+int(2048)
+string(16) "0000d7ff0000e000"
+int(2048)
+string(16) "0000d7ff0000e000"

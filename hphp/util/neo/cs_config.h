@@ -15,8 +15,8 @@
  * config file
  */
 
-#ifndef __CS_CONFIG_H_
-#define __CS_CONFIG_H_ 1
+#ifndef incl_HPHP_CS_CONFIG_H_
+#define incl_HPHP_CS_CONFIG_H_ 1
 
 
 /* Enable support for HTML Compression (still must be enabled at run time) */
@@ -221,4 +221,4 @@
 /* Define to `unsigned' if <sys/types.h> does not define. */
 /* #undef size_t */
 
-#endif /* __CS_CONFIG_H_ */
+#endif /* incl_HPHP_CS_CONFIG_H_ */

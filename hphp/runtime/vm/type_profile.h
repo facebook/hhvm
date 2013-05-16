@@ -13,11 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _TYPE_PROFILE_H_
-#define _TYPE_PROFILE_H_
+#ifndef TYPE_PROFILE_H_
+#define TYPE_PROFILE_H_
+
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
-namespace VM {
+
+class StringData;
+
 
 struct TypeProfileKey {
   enum KeyType {
@@ -48,6 +53,6 @@ static inline bool shouldProfile() {
   return profileOn;
 }
 
-} }
+ }
 
-#endif // _TYPE_PROFILE_H_
+#endif // TYPE_PROFILE_H_

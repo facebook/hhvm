@@ -1,0 +1,14 @@
+*** Testing array_fill_keys() : error conditions ***
+
+-- Testing array_fill_keys() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_fill_keys() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_fill_keys() function with no argumets --
+HipHop Warning: %a
+NULL
+Done

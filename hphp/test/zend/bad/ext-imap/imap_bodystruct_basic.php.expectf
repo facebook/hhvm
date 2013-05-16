@@ -1,0 +1,17 @@
+*** Testing string imap_bodystruct : basic functionality ***
+Create a new mailbox for test and add a multipart msgs
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+
+Get and validate structure of body part 1
+ifsubtype is 0 or 1
+ifdescription is 0 or 1
+ifid is 0 or 1
+ifdisposition is 0 or 1
+ifdparameters is 0 or 1
+ifparameters is 0 or 1
+parameters is an array
+
+Try to get part 4!
+bool(false)
+===Done===

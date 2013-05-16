@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_code_error.h>
-#include <compiler/parser/parser.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/code_generator.h>
-#include <compiler/option.h>
+#include "hphp/test/test_code_error.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

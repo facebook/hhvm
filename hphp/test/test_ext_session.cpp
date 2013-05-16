@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_session.h>
-#include <runtime/ext/ext_session.h>
+#include "hphp/test/test_ext_session.h"
+#include "hphp/runtime/ext/ext_session.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

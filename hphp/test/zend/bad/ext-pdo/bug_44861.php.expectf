@@ -1,0 +1,38 @@
+string(4) "row1"
+string(4) "row2"
+string(4) "row3"
+string(4) "row4"
+bool(false)
+array(1) {
+  [0]=>
+  string(4) "row3"
+}
+array(1) {
+  [0]=>
+  string(4) "row2"
+}
+array(1) {
+  [0]=>
+  string(4) "row1"
+}
+array(1) {
+  [0]=>
+  string(4) "row4"
+}
+array(1) {
+  [0]=>
+  string(4) "row3"
+}
+array(1) {
+  [0]=>
+  array(1) {
+    ["r"]=>
+    string(4) "row4"
+  }
+}
+array(1) {
+  [0]=>
+  string(12) "it's working"
+}
+string(9) "try again"
+bool(false)

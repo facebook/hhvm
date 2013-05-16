@@ -13,12 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _WRITELEASE_H_
-#define _WRITELEASE_H_
+#ifndef incl_HPHP_WRITELEASE_H_
+#define incl_HPHP_WRITELEASE_H_
+
+#include "hphp/util/base.h"
 
 #include <pthread.h>
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 /*
  * The write Lease guards write access to the translation caches,
@@ -80,7 +82,7 @@ struct LeaseHolderBase {
 
   public:
     ~LeaseHolderBase();
-    operator bool() const { return m_haveLock; }
+    explicit operator bool() const { return m_haveLock; }
     bool acquire();
 
   private:
@@ -89,14 +91,14 @@ struct LeaseHolderBase {
     bool m_acquired;
 };
 struct LeaseHolder : public LeaseHolderBase {
-  LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
+  explicit LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
     : LeaseHolderBase(l, acquire, false) {}
 };
 struct BlockingLeaseHolder : public LeaseHolderBase {
-  BlockingLeaseHolder(Lease& l)
+  explicit BlockingLeaseHolder(Lease& l)
     : LeaseHolderBase(l, ACQUIRE, true) {}
 };
 
-}}} // HPHP::VM::Transl
+}} // HPHP::Transl
 
-#endif /* _WRITELEASE_H_ */
+#endif /* incl_HPHP_WRITELEASE_H_ */

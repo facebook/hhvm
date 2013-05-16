@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_config.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_config.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 bool CmdConfig::help(DebuggerClient *client) {
   client->helpTitle("Config Command");
@@ -31,8 +33,8 @@ bool CmdConfig::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdConfig::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdConfig::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() == 0) {
     listVars(client);
     return true;
@@ -148,16 +150,23 @@ bool CmdConfig::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_BypassAccessCheck("BypassAccessCheck");
+static const StaticString s_LogFile("LogFile");
+static const StaticString s_PrintLevel("PrintLevel");
+static const StaticString s_SmallStep("SmallStep");
+static const StaticString s_StackArgs("StackArgs");
+static const StaticString s_ApiModeSerialize("ApiModeSerialize");
+
 void CmdConfig::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTValues);
-  Array values;
+  ArrayInit values(6);
   values.set("BypassAccessCheck", client->getDebuggerBypassCheck());
   values.set("LogFile", client->getLogFile());
   values.set("PrintLevel", client->getDebuggerPrintLevel());
   values.set("SmallStep", client->getDebuggerSmallStep());
   values.set("StackArgs", client->getDebuggerStackArgs());
   values.set("ApiModeSerialize", client->getDebuggerClientApiModeSerialize());
-  client->setOTValues(values);
+  client->setOTValues(values.create());
 }
 
 void CmdConfig::listVars(DebuggerClient *client) {

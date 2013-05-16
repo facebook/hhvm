@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_apc.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/program_functions.h>
+#include "hphp/test/test_ext_apc.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/program_functions.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,6 +109,12 @@ bool TestExtApc::test_apc_add() {
   return Count(true);
 }
 
+static const StaticString s_a("a");
+static const StaticString s_q("q");
+static const StaticString s_ts("ts");
+static const StaticString s_TestString("TestString");
+static const StaticString s_start_time("start_time");
+
 bool TestExtApc::test_apc_store() {
   Array complexMap = CREATE_MAP2("a",
                                  CREATE_MAP2("b", 1, "c",
@@ -129,9 +135,9 @@ bool TestExtApc::test_apc_store() {
 
   // Make sure it doesn't change the shared value.
   Array complexMapFetched = f_apc_fetch("complexMap");
-  VERIFY(complexMapFetched.exists("a"));
-  complexMapFetched.set("q",0);
-  VERIFY(complexMapFetched.exists("q"));
+  VERIFY(complexMapFetched.exists(s_a));
+  complexMapFetched.set(s_q,0);
+  VERIFY(complexMapFetched.exists(s_q));
   VS(f_apc_fetch("complexMap"), complexMap);
 
   String tsFetched = f_apc_fetch("ts");
@@ -152,7 +158,7 @@ bool TestExtApc::test_apc_fetch() {
   {
     Variant apcdata = f_apc_fetch("apcdata");
     Variant c = apcdata; // bump up ref count to make a MapVariant copy
-    apcdata.set("b", 3); // problem
+    apcdata.set(String("b"), 3); // problem
     VS(apcdata, CREATE_MAP2("a", "test", "b", 3));
   }
   {
@@ -190,7 +196,7 @@ bool TestExtApc::test_apc_delete() {
 bool TestExtApc::test_apc_compile_file() {
   try {
     f_apc_compile_file("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -198,7 +204,7 @@ bool TestExtApc::test_apc_compile_file() {
 
 bool TestExtApc::test_apc_cache_info() {
   Array ci = f_apc_cache_info();
-  VS(ci.rvalAt("start_time"), start_time());
+  VS(ci.rvalAt(s_start_time), start_time());
   return Count(true);
 }
 
@@ -218,7 +224,7 @@ bool TestExtApc::test_apc_clear_cache() {
 bool TestExtApc::test_apc_define_constants() {
   try {
     f_apc_define_constants("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -227,7 +233,7 @@ bool TestExtApc::test_apc_define_constants() {
 bool TestExtApc::test_apc_load_constants() {
   try {
     f_apc_load_constants("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -241,7 +247,7 @@ bool TestExtApc::test_apc_sma_info() {
 bool TestExtApc::test_apc_filehits() {
   try {
     f_apc_filehits();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -250,7 +256,7 @@ bool TestExtApc::test_apc_filehits() {
 bool TestExtApc::test_apc_delete_file() {
   try {
     f_apc_delete_file("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -284,7 +290,7 @@ bool TestExtApc::test_apc_cas() {
 bool TestExtApc::test_apc_bin_dump() {
   try {
     f_apc_bin_dump();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -293,7 +299,7 @@ bool TestExtApc::test_apc_bin_dump() {
 bool TestExtApc::test_apc_bin_load() {
   try {
     f_apc_bin_load("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -302,7 +308,7 @@ bool TestExtApc::test_apc_bin_load() {
 bool TestExtApc::test_apc_bin_dumpfile() {
   try {
     f_apc_bin_dumpfile(0, uninit_null(), "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -311,16 +317,16 @@ bool TestExtApc::test_apc_bin_dumpfile() {
 bool TestExtApc::test_apc_bin_loadfile() {
   try {
     f_apc_bin_loadfile("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
 }
 
 bool TestExtApc::test_apc_exists() {
-  f_apc_store("ts", "TestString");
-  VS(f_apc_exists("ts"), true);
-  VS(f_apc_exists("TestString"), false);
-  VS(f_apc_exists(CREATE_VECTOR2("ts", "TestString")), CREATE_VECTOR1("ts"));
+  f_apc_store(s_ts, s_TestString);
+  VS(f_apc_exists(s_ts), true);
+  VS(f_apc_exists(s_TestString), false);
+  VS(f_apc_exists(CREATE_VECTOR2(s_ts, s_TestString)), CREATE_VECTOR1(s_ts));
   return Count(true);
 }

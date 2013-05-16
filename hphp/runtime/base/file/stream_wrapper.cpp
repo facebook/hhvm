@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/stream_wrapper.h>
-#include <runtime/base/file/stream_wrapper_registry.h>
+#include "hphp/runtime/base/file/stream_wrapper.h"
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////

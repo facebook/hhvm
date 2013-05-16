@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ARRAY_ELEMENT_EXPRESSION_H__
-#define __ARRAY_ELEMENT_EXPRESSION_H__
+#ifndef incl_HPHP_ARRAY_ELEMENT_EXPRESSION_H_
+#define incl_HPHP_ARRAY_ELEMENT_EXPRESSION_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,4 +70,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __ARRAY_ELEMENT_EXPRESSION_H__
+#endif // incl_HPHP_ARRAY_ELEMENT_EXPRESSION_H_

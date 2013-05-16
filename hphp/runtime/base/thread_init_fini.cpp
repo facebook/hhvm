@@ -14,22 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/thread_init_fini.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/preg.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/server_note.h>
-#include <runtime/base/zend/zend_strtod.h>
-#include <runtime/base/zend/zend_math.h>
-#include <util/async_func.h>
-#include <util/alloc.h>
-#include <runtime/base/hardware_counter.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <runtime/ext/ext_icu.h>
-#include <runtime/base/intercept.h>
+#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/server_note.h"
+#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/util/async_func.h"
+#include "hphp/util/alloc.h"
+#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/ext_icu.h"
+#include "hphp/runtime/base/intercept.h"
 
-#include "runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

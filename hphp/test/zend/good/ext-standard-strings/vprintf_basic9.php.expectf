@@ -1,0 +1,14 @@
+*** Testing vprintf() : basic functionality - using hexadecimal format ***
+b
+int(1)
+B
+int(1)
+b 84
+int(4)
+B 84
+int(4)
+b 84 b1
+int(7)
+B 84 B1
+int(7)
+===DONE===

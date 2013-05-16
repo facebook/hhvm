@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/base/types.h>
-#include <runtime/base/hphp_system.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <util/lock.h>
-#include <util/alloc.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/alloc.h"
 
 using std::map;
 
@@ -53,7 +53,7 @@ ThreadInfo::ThreadInfo()
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
 
-  VM::Transl::TargetCache::threadInit();
+  Transl::TargetCache::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -66,7 +66,7 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  VM::Transl::TargetCache::threadExit();
+  Transl::TargetCache::threadExit();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -83,7 +83,6 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
-  m_top = nullptr;
   m_reqInjectionData.onSessionInit();
 
   // Take the address of the cached per-thread stackLimit, and use this to allow
@@ -117,22 +116,31 @@ void ThreadInfo::setPendingException(Exception* e) {
 
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
-  VM::Transl::TargetCache::requestExit();
+  Transl::TargetCache::requestExit();
 }
 
 void RequestInjectionData::onSessionInit() {
-  VM::Transl::TargetCache::requestInit();
-  cflagsPtr = VM::Transl::TargetCache::conditionFlagsPtr();
+  Transl::TargetCache::requestInit();
+  cflagsPtr = Transl::TargetCache::conditionFlagsPtr();
   reset();
   started = time(0);
 }
 
 void RequestInjectionData::reset() {
   __sync_fetch_and_and(getConditionFlags(), 0);
-  coverage = RuntimeOption::RecordCodeCoverage;
-  debugger = false;
-  debuggerIntr = false;
+  m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_debugger = false;
+  m_debuggerIntr = false;
+  updateJit();
   while (!interrupts.empty()) interrupts.pop();
+}
+
+void RequestInjectionData::updateJit() {
+  m_jit = RuntimeOption::EvalJit &&
+    !(RuntimeOption::EvalJitDisabledByHphpd && m_debugger) &&
+    !m_debuggerIntr &&
+    !m_coverage &&
+    !shouldProfile();
 }
 
 void RequestInjectionData::setMemExceededFlag() {
@@ -170,17 +178,20 @@ void RequestInjectionData::clearPendingExceptionFlag() {
                        ~RequestInjectionData::PendingExceptionFlag);
 }
 
+void RequestInjectionData::setInterceptFlag() {
+  __sync_fetch_and_or(getConditionFlags(),
+                      RequestInjectionData::InterceptFlag);
+}
+
+void RequestInjectionData::clearInterceptFlag() {
+  __sync_fetch_and_and(getConditionFlags(),
+                       ~RequestInjectionData::InterceptFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
-  ssize_t flags;
-  for (;;) {
-    flags = atomic_acquire_load(getConditionFlags());
-    const ssize_t newFlags =
-      flags & RequestInjectionData::EventHookFlag;
-    if (__sync_bool_compare_and_swap(getConditionFlags(), flags, newFlags)) {
-      break;
-    }
-  }
-  return flags;
+  return __sync_fetch_and_and(getConditionFlags(),
+                              (RequestInjectionData::EventHookFlag |
+                               RequestInjectionData::InterceptFlag));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

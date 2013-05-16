@@ -17,31 +17,31 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include <runtime/base/execution_context.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/comparisons.h>
-#include <runtime/base/externals.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/resource_data.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/vm/event_hook.h>
-#include <runtime/ext/ext_string.h>
-#include <util/logger.h>
-#include <util/process.h>
-#include <util/text_color.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/base/server/server_stats.h>
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/text_color.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/base/server/server_stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
 BaseExecutionContext::BaseExecutionContext() :
-    m_fp(nullptr), m_pc(nullptr), m_isValid(1), m_eventHook(nullptr),
+    m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
@@ -72,6 +72,8 @@ BaseExecutionContext::BaseExecutionContext() :
 }
 
 VMExecutionContext::VMExecutionContext() :
+    m_preg_backtrace_limit(RuntimeOption::PregBacktraceLimit),
+    m_preg_recursion_limit(RuntimeOption::PregRecursionLimit),
     m_lambdaCounter(0), m_nesting(0),
     m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),
@@ -86,10 +88,6 @@ VMExecutionContext::VMExecutionContext() :
                 "m_fp offset too large");
   static_assert(offsetof(ExecutionContext, m_pc) <= 0xff,
                 "m_pc offset too large");
-  static_assert(offsetof(ExecutionContext, m_isValid) <= 0xff,
-                "m_isValid offset too large");
-  static_assert(offsetof(ExecutionContext, m_eventHook) <= 0xff,
-                "m_eventHook offset too large");
   static_assert(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff,
                 "m_currentThreadIdx offset too large");
 
@@ -101,7 +99,6 @@ VMExecutionContext::VMExecutionContext() :
       s_threadIdxMap[tid] = m_currentThreadIdx;
     }
   }
-  m_eventHook = new HPHP::VM::EventHook();
 }
 
 BaseExecutionContext::~BaseExecutionContext() {
@@ -137,14 +134,13 @@ VMExecutionContext::~VMExecutionContext() {
     delete *it;
   }
 
-  delete m_eventHook;
   delete m_injTables;
   delete m_breakPointFilter;
   delete m_lastLocFilter;
 
   if (UNLIKELY(!m_preConsts.empty())) {
-    VM::Transl::unmergePreConsts(m_preConsts, this);
-    for (VM::PreConstVec::iterator i = m_preConsts.begin();
+    Transl::unmergePreConsts(m_preConsts, this);
+    for (PreConstVec::iterator i = m_preConsts.begin();
          i != m_preConsts.end(); ++i) {
       decRefStr(const_cast<StringData*>(i->name));
     }
@@ -198,7 +194,7 @@ void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
     contentType += "; ";
     contentType += "charset=";
     contentType += charset;
-    m_transport->addHeader("Content-Type", contentType);
+    m_transport->addHeader("Content-Type", contentType.c_str());
     m_transport->setDefaultContentType(false);
   }
 }
@@ -366,6 +362,12 @@ int BaseExecutionContext::obGetLevel() {
   return m_buffers.size() - m_protectedLevel;
 }
 
+static const StaticString s_level("level");
+static const StaticString s_type("type");
+static const StaticString s_name("name");
+static const StaticString s_args("args");
+static const StaticString s_default_output_handler("default output handler");
+
 Array BaseExecutionContext::obGetStatus(bool full) {
   Array ret = Array::Create();
   std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
@@ -373,13 +375,13 @@ Array BaseExecutionContext::obGetStatus(bool full) {
   int level = 0;
   for (; iter != m_buffers.end(); ++iter, ++level) {
     Array status;
-    status.set("level", level);
+    status.set(s_level, level);
     if (level < m_protectedLevel) {
-      status.set("type", 1);
-      status.set("name", "default output handler");
+      status.set(s_type, 1);
+      status.set(s_name, s_default_output_handler);
     } else {
-      status.set("type", 0);
-      status.set("name", (*iter)->handler);
+      status.set(s_type, 0);
+      status.set(s_name, (*iter)->handler);
     }
 
     if (full) {
@@ -434,9 +436,6 @@ void BaseExecutionContext::resetCurrentBuffer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // program executions
-
-static const StaticString s_name("name");
-static const StaticString s_args("args");
 
 void BaseExecutionContext::registerShutdownFunction(CVarRef function,
                                                     Array arguments,
@@ -635,7 +634,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
 
-    const char *file = nullptr;
+    String file = empty_string;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
       if (!bt.empty()) {
@@ -645,7 +644,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       }
     }
 
-    Logger::Log(Logger::LogError, prefix.c_str(), ee, file, line);
+    Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
   }
 }
 
@@ -699,7 +698,7 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
-  const char *file = nullptr;
+  String file = empty_string;
   int line = 0;
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
@@ -713,7 +712,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     }
   }
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+                file.c_str(), line);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -721,7 +721,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+                file.c_str(), line);
   }
   return handled;
 }

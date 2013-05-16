@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/vm/translator/translator-runtime.h"
 
-#include "runtime/ext/ext_function.h"
-#include "runtime/vm/member_operations.h"
-#include "runtime/vm/type_constraint.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/type_constraint.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
@@ -305,4 +305,4 @@ RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
   return staticLocInitImpl<true>(name, fp, val, ch);
 }
 
-} } }
+} }

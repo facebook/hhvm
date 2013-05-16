@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_math.h>
-#include <util/thread_local.h>
-#include <openssl/rand.h>
+#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/util/thread_local.h"
+#include "openssl/rand.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

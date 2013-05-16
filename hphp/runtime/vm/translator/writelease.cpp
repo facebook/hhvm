@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/translator/writelease.h"
+#include "hphp/util/timer.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/translator.h"
+
 #include <sys/mman.h>
 
-#include <util/timer.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/writelease.h>
-
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 TRACE_SET_MOD(txlease);
 
 bool
@@ -143,4 +143,4 @@ bool LeaseHolderBase::acquire() {
   return m_haveLock = m_acquired = m_lease.acquire();
 }
 
-}}}
+}}

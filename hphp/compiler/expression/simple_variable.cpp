@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/expression/simple_variable.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/option.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/expression/scalar_expression.h>
-#include <util/parser/hphp.tab.hpp>
-#include <util/parser/parser.h>
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/util/parser/parser.h"
 
 using namespace HPHP;
 

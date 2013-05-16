@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _GDB_JIT_H_
-#define _GDB_JIT_H_
+#ifndef GDB_JIT_H_
+#define GDB_JIT_H_
 
-#include "dwarf.h"
-#include <runtime/base/types.h>
+#include "hphp/runtime/vm/debug/dwarf.h"
+#include "hphp/runtime/base/types.h"
 
-using namespace HPHP::VM::Debug;
+using namespace HPHP::Debug;
 
 typedef enum {
   JIT_NOACTION = 0,

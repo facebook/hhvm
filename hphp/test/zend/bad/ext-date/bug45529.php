@@ -9,5 +9,5 @@ $d->setTimeZone($tz1);
 echo $d->format(DATE_ISO8601), PHP_EOL;
 $d = new DateTime('2008-01-01 12:00:00+0200');
 $d->setTimeZone($tz2);
-echo $d->format(DATE_ISO8601), PHP_EOL;
+echo $d->format(DATE_ISO8601), PHP_EOL; 
 ?>

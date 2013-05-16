@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_INFO_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_INFO_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,16 +35,17 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   bool parseZeroArg(DebuggerClient *client);
   void parseOneArg(DebuggerClient *client, std::string &subsymbol);
   Array getInfo() { return m_info; }
   static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   enum SymbolType {
@@ -61,7 +62,7 @@ private:
   DebuggerClient::LiveListsPtr m_acLiveLists;
 
   static String GetParams(CArrRef params, bool varg, bool detailed = false);
-  static String GetModifier(CArrRef info, const char *name);
+  static String GetModifier(CArrRef info, CStrRef);
 
   static bool TryConstant(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol);
@@ -80,4 +81,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_INFO_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_

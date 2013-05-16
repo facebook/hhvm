@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
 
-#include <runtime/eval/debugger/cmd/cmd_break.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_break.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,11 +31,13 @@ public:
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_

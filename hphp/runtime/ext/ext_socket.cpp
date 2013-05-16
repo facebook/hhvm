@@ -15,25 +15,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_socket.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/base/file/ssl_socket.h>
-#include <runtime/base/server/server_stats.h>
+#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/file/ssl_socket.h"
+#include "hphp/runtime/base/server/server_stats.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
+#include "netinet/in.h"
+#include "netinet/tcp.h"
 #include <sys/un.h>
-#include <arpa/inet.h>
+#include "arpa/inet.h"
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/uio.h>
-#include <util/network.h>
+#include "hphp/util/network.h"
 #include <poll.h>
 
 #define PHP_NORMAL_READ 0x0001
@@ -370,6 +370,11 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   return true;
 }
 
+static const StaticString s_l_onoff("l_onoff");
+static const StaticString s_l_linger("l_linger");
+static const StaticString s_sec("sec");
+static const StaticString s_usec("usec");
+
 Variant f_socket_get_option(CObjRef socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
   Array ret;
@@ -386,8 +391,8 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
         return false;
       }
 
-      ret.set("l_onoff", linger_val.l_onoff);
-      ret.set("l_linger", linger_val.l_linger);
+      ret.set(s_l_onoff, linger_val.l_onoff);
+      ret.set(s_l_linger, linger_val.l_linger);
     }
     break;
 
@@ -400,8 +405,8 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
         SOCKET_ERROR(sock, "unable to retrieve socket option", errno);
         return false;
       }
-      ret.set("sec",  (int)tv.tv_sec);
-      ret.set("usec", (int)tv.tv_usec);
+      ret.set(s_sec,  (int)tv.tv_sec);
+      ret.set(s_usec, (int)tv.tv_usec);
     }
     break;
 
@@ -456,11 +461,6 @@ bool f_socket_set_nonblock(CObjRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(false);
 }
-
-static const StaticString s_l_onoff("l_onoff");
-static const StaticString s_l_linger("l_linger");
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
 
 bool f_socket_set_option(CObjRef socket, int level, int optname,
                          CVarRef optval) {
@@ -773,7 +773,7 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       s_un.sun_family = AF_UNIX;
       snprintf(s_un.sun_path, 108, "%s", addr.data());
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&s_un, SUN_LEN(&s_un));
     }
     break;
@@ -783,11 +783,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       memset(&sin, 0, sizeof(sin));
       sin.sin_family = AF_INET;
       sin.sin_port = htons((unsigned short) port);
-      if (!php_set_inet_addr(&sin, addr, sock)) {
+      if (!php_set_inet_addr(&sin, addr.c_str(), sock)) {
         return false;
       }
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&sin, sizeof(sin));
     }
     break;
@@ -798,11 +798,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       sin6.sin6_family = AF_INET6;
       sin6.sin6_port = htons((unsigned short) port);
 
-      if (!php_set_inet6_addr(&sin6, addr, sock)) {
+      if (!php_set_inet6_addr(&sin6, addr.c_str(), sock)) {
         return false;
       }
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&sin6, sizeof(sin6));
     }
     break;
@@ -841,6 +841,10 @@ Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   }
   return retval;
 }
+
+static const StaticString
+  s_2colons("::"),
+  s_0_0_0_0("0.0.0.0");
 
 Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
                       VRefParam name, VRefParam port /* = 0 */) {
@@ -893,7 +897,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
 
       name = String(Util::safe_inet_ntoa(sin.sin_addr));
       if (name.toString().empty()) {
-        name = "0.0.0.0";
+        name = s_0_0_0_0;
       }
       port = ntohs(sin.sin_port);
     }
@@ -922,7 +926,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
       if (succ) {
         name = String(addr6, CopyString);
       } else {
-        name = "::";
+        name = s_2colons;
       }
       port = ntohs(sin6.sin6_port);
     }
@@ -1110,6 +1114,15 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
   return String(buffer, CopyString);
 }
 
+static const StaticString s_family("family");
+static const StaticString s_socktype("socktype");
+static const StaticString s_protocol("protocol");
+static const StaticString s_address("address");
+static const StaticString s_port("port");
+static const StaticString s_flow_info("flow_info");
+static const StaticString s_scope_id("scope_id");
+static const StaticString s_sockaddr("sockaddr");
+
 Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
                       int socktype /* = 0 */, int protocol /* = 0 */,
                       int flags /* = 0 */) {
@@ -1147,9 +1160,9 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
     Array data = Array::Create();
     Array sockinfo = Array::Create();
 
-    data.set("family", res->ai_family);
-    data.set("socktype", res->ai_socktype);
-    data.set("protocol", res->ai_protocol);
+    data.set(s_family, res->ai_family);
+    data.set(s_socktype, res->ai_socktype);
+    data.set(s_protocol, res->ai_protocol);
 
     switch (res->ai_addr->sa_family) {
       case AF_INET:
@@ -1158,8 +1171,8 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in *)res->ai_addr;
-          sockinfo.set("address", buffer);
-          sockinfo.set("port", ntohs(a->sin_port));
+          sockinfo.set(s_address, buffer);
+          sockinfo.set(s_port, ntohs(a->sin_port));
         }
         break;
       }
@@ -1169,16 +1182,16 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in6 *)res->ai_addr;
-          sockinfo.set("address", buffer);
-          sockinfo.set("port", ntohs(a->sin6_port));
-          sockinfo.set("flow_info", (int32_t)a->sin6_flowinfo);
-          sockinfo.set("scope_id", (int32_t)a->sin6_scope_id);
+          sockinfo.set(s_address, buffer);
+          sockinfo.set(s_port, ntohs(a->sin6_port));
+          sockinfo.set(s_flow_info, (int32_t)a->sin6_flowinfo);
+          sockinfo.set(s_scope_id, (int32_t)a->sin6_scope_id);
         }
         break;
       }
     }
 
-    data.set("sockaddr", (sockinfo.empty() ? NULL : sockinfo));
+    data.set(s_sockaddr, (sockinfo.empty() ? nullptr : sockinfo));
 
     ret.append(data);
   }

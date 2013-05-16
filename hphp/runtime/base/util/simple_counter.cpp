@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/simple_counter.h>
-#include <runtime/ext/ext_math.h>
-#include <util/stack_trace.h>
-#include <util/lock.h>
+#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/util/stack_trace.h"
+#include "hphp/util/lock.h"
 #include <stdio.h>
 
 namespace HPHP {

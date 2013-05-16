@@ -16,11 +16,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_MEMCACHED_H__
-#define __EXT_MEMCACHED_H__
+#ifndef incl_HPHP_EXT_MEMCACHED_H_
+#define incl_HPHP_EXT_MEMCACHED_H_
 
-#include <runtime/base/base_includes.h>
-#include <libmemcached/memcached.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "libmemcached/memcached.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +91,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Memcached, Memcached, ObjectData)
 
   // need to implement
-  public: c_Memcached(VM::Class* cls = c_Memcached::s_cls);
+  public: c_Memcached(Class* cls = c_Memcached::s_cls);
   public: ~c_Memcached();
   public: void t___construct(CStrRef persistent_id = null_string);
   public: bool t_add(CStrRef key, CVarRef value, int expiration = 0);
@@ -169,4 +169,4 @@ class c_Memcached : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_MEMCACHED_H__
+#endif // incl_HPHP_EXT_MEMCACHED_H_

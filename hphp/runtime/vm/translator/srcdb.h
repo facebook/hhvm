@@ -13,46 +13,63 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _SRCDB_H_
-#define _SRCDB_H_
+#ifndef incl_HPHP_SRCDB_H_
+#define incl_HPHP_SRCDB_H_
 
 #include <boost/noncopyable.hpp>
 
-#include "util/asm-x64.h"
-#include "util/trace.h"
-#include "util/mutex.h"
-#include "translator.h"
-#include "runtime/vm/tread_hash_map.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/mutex.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/tread_hash_map.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
+/*
+ * Incoming branches between different translations are tracked using
+ * this structure.
+ *
+ * This allows us to smash them later to point to different things.
+ * We handle conditional and unconditional jumps, as well as pointers
+ * to code (via IncomingBranch::ADDR, used for example in a switch
+ * table).
+ *
+ * We don't need to track which condition code a conditional jump used
+ * because we take care to smash only the address and leave the code
+ * intact.
+ */
 struct IncomingBranch {
   enum BranchType {
     JMP,
     JCC,
     ADDR,
   };
-  IncomingBranch(BranchType t, TCA src)
-  : m_type(t), m_src(src) { }
-  IncomingBranch(TCA src)
-  : m_type(JMP), m_src(src) { }
-  IncomingBranch(TCA* addr)
-  : m_type(ADDR), m_addr(addr) { }
+
+  static IncomingBranch jmpFrom(TCA from) { return IncomingBranch(JMP, from); }
+  static IncomingBranch jccFrom(TCA from) { return IncomingBranch(JCC, from); }
+  static IncomingBranch addr(TCA* from) {
+    return IncomingBranch(ADDR, TCA(from));
+  }
+
+  BranchType type() const { return m_type; }
+  TCA toSmash()     const { return m_toSmash; }
+
+private:
+  explicit IncomingBranch(BranchType type, TCA toSmash)
+    : m_type(type)
+    , m_toSmash(toSmash)
+  {}
 
   BranchType m_type;
-  union {
-    TCA m_src;
-    TCA* m_addr;
-  };
+  TCA m_toSmash;
 };
 
 /*
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec {
-  typedef X64Assembler Asm;
   static const unsigned int kMaxTranslations = 12;
 
   SrcRec()
@@ -79,12 +96,11 @@ struct SrcRec {
    * when holding the translator write lease.
    */
   void setFuncInfo(const Func* f);
-  void chainFrom(Asm& a, IncomingBranch br);
-  void emitFallbackJump(Asm &a, TCA from, int cc = -1);
-  void newTranslation(Asm& a, Asm &astubs, TCA newStart);
-  void replaceOldTranslations(Asm& a, Asm& astubs);
-  void addDebuggerGuard(Asm& a, Asm &astubs, TCA dbgGuard,
-                        TCA m_dbgBranchGuardSrc);
+  void chainFrom(IncomingBranch br);
+  void emitFallbackJump(TCA from, int cc = -1);
+  void newTranslation(TCA newStart);
+  void replaceOldTranslations();
+  void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
   const MD5& unitMd5() const { return m_unitMd5; }
 
@@ -92,6 +108,10 @@ struct SrcRec {
     return m_translations;
   }
 
+  /*
+   * The anchor translation is a retranslate request for the current
+   * SrcKey that will continue the tracelet chain.
+   */
   void setAnchorTranslation(TCA anc) {
     assert(!m_anchorTranslation);
     assert(m_tailFallbackJumps.empty());
@@ -108,8 +128,8 @@ struct SrcRec {
 
 private:
   TCA getFallbackTranslation() const;
-  void patch(Asm* a, IncomingBranch branch, TCA dest);
-  void patchIncomingBranches(Asm& a, Asm& astubs, TCA newStart);
+  void patch(IncomingBranch branch, TCA dest);
+  void patchIncomingBranches(TCA newStart);
 
 private:
   // This either points to the most recent translation in the
@@ -221,6 +241,6 @@ public:
   size_t invalidateCode(const Eval::PhpFile* file);
 };
 
-} } }
+} }
 
 #endif

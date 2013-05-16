@@ -15,24 +15,23 @@
 */
 #include <elf.h>
 #include <gelf.h>
-#include "elf.h"
-#include "elfwriter.h"
-#include "gdb-jit.h"
+#include <elf.h>
+#include "hphp/runtime/vm/debug/elfwriter.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <string>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <util/trace.h>
-#include <util/asm-x64.h>
+#include "hphp/util/trace.h"
+#include "hphp/util/asm-x64.h"
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/vm/translator/translator-x64.h>
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 
-using namespace HPHP::VM::Transl;
+using namespace HPHP::Transl;
 
 namespace HPHP {
-namespace VM {
 namespace Debug {
 
 static const Trace::Module TRACEMOD = Trace::debuginfo;
@@ -609,6 +608,5 @@ ElfWriter::~ElfWriter() {
     dwarf_producer_finish(m_dwarfProducer, 0);
 }
 
-}
 }
 }

@@ -1,0 +1,8 @@
+*** Testing preg_split() : error conditions ***
+
+Arg value is: Array
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+Done

@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_memcache.h>
-#include <runtime/base/util/request_local.h>
-#include <runtime/base/ini_setting.h>
+#include "hphp/runtime/ext/ext_memcache.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/ini_setting.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 #define MMC_SERIALIZED 1
 #define MMC_COMPRESSED 2
@@ -79,7 +79,7 @@ bool ini_on_update_hash_function(CStrRef value, void *p) {
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_Memcache::c_Memcache(VM::Class* cb) :
+c_Memcache::c_Memcache(Class* cb) :
     ExtObjectData(cb), m_memcache(), m_compress_threshold(0),
     m_min_compress_savings(0.2) {
   memcached_create(&m_memcache);

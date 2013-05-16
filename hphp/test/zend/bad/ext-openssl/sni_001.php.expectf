@@ -1,0 +1,28 @@
+-- auto host name (1) --
+%unicode|string%(18) "alice.sni.velox.ch"
+-- auto host name (2) --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- auto host name (3) --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- user supplied server name --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- sni disabled --
+%unicode|string%(18) "alice.sni.velox.ch"
+-- raw SSL stream (1) --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- raw SSL stream (2) --
+%unicode|string%(14) "*.sni.velox.ch"
+-- raw SSL stream with user supplied sni --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- raw SSL stream with sni disabled --
+%unicode|string%(18) "alice.sni.velox.ch"
+-- stream_socket_enable_crypto (1) --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- stream_socket_enable_crypto (2) --
+%unicode|string%(14) "*.sni.velox.ch"
+-- stream_socket_enable_crypto with user supplied sni --
+%unicode|string%(16) "bob.sni.velox.ch"
+-- stream_socket_enable_crypto with sni disabled --
+%unicode|string%(18) "alice.sni.velox.ch"
+-- stream_socket_enable_crypto with long name --
+%unicode|string%(18) "alice.sni.velox.ch"

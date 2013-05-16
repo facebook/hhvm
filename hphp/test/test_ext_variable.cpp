@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_variable.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_string.h>
-#include <system/lib/systemlib.h>
+#include "hphp/test/test_ext_variable.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/system/lib/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -396,7 +396,7 @@ bool TestExtVariable::test_get_defined_vars() {
 bool TestExtVariable::test_import_request_variables() {
   try {
     f_import_request_variables("G");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

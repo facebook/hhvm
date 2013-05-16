@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __THRIFT_TRANSPORT_H__
-#define __THRIFT_TRANSPORT_H__
+#ifndef incl_HPHP_THRIFT_TRANSPORT_H_
+#define incl_HPHP_THRIFT_TRANSPORT_H_
 
-#include <runtime/base/base_includes.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/logger.h"
 
 #include <sys/types.h>
-#include <netinet/in.h>
+#include "netinet/in.h"
 #include <unistd.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
@@ -116,7 +116,7 @@ protected:
     buffer_used = 0;
     buffer_size = _buffer_size;
     p = _p;
-    t = p->o_invoke(s_getTransport, Array(), -1);
+    t = p->o_invoke_few_args(s_getTransport, 0);
   }
   ~PHPTransport() {
     free(buffer);
@@ -134,7 +134,7 @@ protected:
 
 class PHPOutputTransport : public PHPTransport {
 public:
-  PHPOutputTransport(CObjRef _p, size_t _buffer_size = 8192) {
+  explicit PHPOutputTransport(CObjRef _p, size_t _buffer_size = 8192) {
     construct_with_zval(_p, _buffer_size);
   }
 
@@ -204,17 +204,16 @@ public:
 
 protected:
   void directFlush() {
-    t->o_invoke(s_flush, Array(), -1);
+    t->o_invoke_few_args(s_flush, 0);
   }
   void directWrite(const char* data, size_t len) {
-    Array args = CREATE_VECTOR1(String(data, len, CopyString));
-    t->o_invoke(s_write, args, -1);
+    t->o_invoke_few_args(s_write, 1, String(data, len, CopyString));
   }
 };
 
 class PHPInputTransport : public PHPTransport {
 public:
-  PHPInputTransport(Object _p, size_t _buffer_size = 8192) {
+  explicit PHPInputTransport(Object _p, size_t _buffer_size = 8192) {
     construct_with_zval(_p, _buffer_size);
   }
 
@@ -236,9 +235,8 @@ public:
 
   void put_back() {
     if (buffer_used) {
-      t->o_invoke(s_putBack,
-                  CREATE_VECTOR1(String(buffer_ptr, buffer_used, CopyString)),
-                  -1);
+      t->o_invoke_few_args(s_putBack,
+                           1, String(buffer_ptr, buffer_used, CopyString));
     }
     buffer_used = 0;
     buffer_ptr = buffer;
@@ -299,8 +297,7 @@ public:
 protected:
   void refill() {
     assert(buffer_used == 0);
-    String ret = t->o_invoke(s_read,
-                             CREATE_VECTOR1((int64_t)buffer_size), -1).toString();
+    String ret = t->o_invoke_few_args(s_read, 1, (int64_t)buffer_size);
     buffer_used = ret.size();
     memcpy(buffer, ret.data(), buffer_used);
     buffer_ptr = buffer;

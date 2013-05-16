@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_server.h>
-#include <compiler/parser/parser.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/code_generator.h>
-#include <compiler/analysis/analysis_result.h>
-#include <util/util.h>
-#include <util/process.h>
-#include <compiler/option.h>
-#include <util/async_func.h>
-#include <runtime/ext/ext_curl.h>
-#include <runtime/ext/ext_options.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/test/test_server.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/code_generator.h"
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/util/util.h"
+#include "hphp/util/process.h"
+#include "hphp/compiler/option.h"
+#include "hphp/util/async_func.h"
+#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/base/server/http_request_handler.h"
+#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 using namespace HPHP;
 
@@ -36,9 +36,7 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TestServer::TestServer() {
-  TestCodeRun::FastMode = false;
-}
+TestServer::TestServer() { }
 
 static int s_server_port = 0;
 static int s_admin_port = 0;
@@ -100,7 +98,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
 
       Variant res = f_curl_exec(c);
       if (!same(res, false)) {
-        actual = res.toString();
+        actual = (std::string) res.toString();
         break;
       }
       sleep(1); // wait until HTTP server is up and running
@@ -194,7 +192,7 @@ static int find_server_port(int port_min, int port_max) {
       server->stop();
       server->waitForEnd();
       return port;
-    } catch (FailedToListenException e) {
+    } catch (const FailedToListenException& e) {
       if (port >= port_max) throw;
     }
   }
@@ -569,7 +567,7 @@ bool TestServer::TestHttpClient() {
                          ("127.0.0.1", s_server_port, 50, -1));
       server->start();
       break;
-    } catch (FailedToListenException e) {
+    } catch (const FailedToListenException& e) {
       if (s_server_port == PORT_MAX) throw;
     }
   }

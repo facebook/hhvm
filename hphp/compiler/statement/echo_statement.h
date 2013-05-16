@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ECHO_STATEMENT_H__
-#define __ECHO_STATEMENT_H__
+#ifndef incl_HPHP_ECHO_STATEMENT_H_
+#define incl_HPHP_ECHO_STATEMENT_H_
 
-#include <compiler/statement/statement.h>
+#include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,4 +38,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __ECHO_STATEMENT_H__
+#endif // incl_HPHP_ECHO_STATEMENT_H_

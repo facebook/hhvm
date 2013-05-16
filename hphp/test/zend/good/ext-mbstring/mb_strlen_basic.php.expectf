@@ -1,0 +1,9 @@
+*** Testing mb_strlen() : basic functionality***
+
+-- ASCII String --
+int(7)
+
+-- Multibyte String --
+int(21)
+
+Done

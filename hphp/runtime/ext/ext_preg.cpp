@@ -15,10 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/preg.h>
-#include <runtime/ext/ext_mb.h>
-#include <runtime/ext/ext_string.h>
-#include <runtime/base/util/request_local.h>
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/ext/ext_mb.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/util/request_local.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(pcre);

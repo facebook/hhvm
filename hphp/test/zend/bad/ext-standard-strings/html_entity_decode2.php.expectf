@@ -1,0 +1,11 @@
+*** HTML 4.01 implicit (shouldn't decode) ***
+&apos;
+*** HTML 4.01 (shouldn't decode) ***
+&apos;
+*** HTML 5 ***
+'
+*** XHTML 1.0 ***
+'
+*** XML 1.0 ***
+'
+Done.

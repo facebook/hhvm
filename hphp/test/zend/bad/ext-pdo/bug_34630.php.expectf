@@ -1,0 +1,9 @@
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["val"]=>
+    string(17) "I am the LOB data"
+  }
+}

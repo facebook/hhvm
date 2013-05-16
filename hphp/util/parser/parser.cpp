@@ -15,42 +15,65 @@
 */
 
 #include "parser.h"
-#include <atomic>
-#include <util/hash.h>
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Mutex ParserBase::s_mutex;
+std::map<int64_t, int> ParserBase::s_closureIds;
+
+char ParserBase::GetAnonPrefix(AnonFuncKind kind) {
+  static_assert(Closure == 0 && Continuation <= 9,
+                "AnonFuncKind enum has unexpected values");
+  static_assert(CharClosure == '0' && CharContinuation <= '9',
+                "AnonFuncKindChar enum has unexpected values");
+  return '0' + kind;
+}
+
+template <int i>
+static bool NameImpl(const std::string &name) {
+  return !name.empty() && isdigit(name[0]) && i == (name[0] - '0');
+}
+
 bool ParserBase::IsClosureName(const std::string &name) {
-  return name.compare("{closure}") == 0;
+  return NameImpl<Closure>(name);
+}
+
+bool ParserBase::IsCreateFunctionName(const std::string &name) {
+  return NameImpl<CreateFunction>(name);
 }
 
 bool ParserBase::IsContinuationName(const std::string &name) {
-  return name.rfind("$continuation") != std::string::npos;
+  return NameImpl<ContinuationFromClosure>(name) ||
+         NameImpl<Continuation>(name);
+}
+
+bool ParserBase::IsContinuationFromClosureName(const std::string &name) {
+  return NameImpl<ContinuationFromClosure>(name);
 }
 
 bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
   return IsClosureName(name) || IsContinuationName(name);
 }
 
-std::string ParserBase::getContinuationName(const std::string &name) {
-  static std::atomic<int32_t> id(0);
-  std::string prefix;
+bool ParserBase::IsAnonFunctionName(const char *name) {
+  if (!*name) return true;
+  char begin = CharClosure;
+  char end   = CharContinuation;
+  char test  = name[0];
+  return begin <= test && test <= end;
+}
 
-  if (name.empty()) {
-    // The real name will be done at emission time so we can't know it here :(
-    prefix = "Closure_" + std::to_string(id++);
-  } else {
-    prefix = name;
-  }
-
-  return prefix + "$continuation";
+void ParserBase::Reset() {
+  Lock lock(s_mutex);
+  s_closureIds.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ParserBase::ParserBase(Scanner &scanner, const char *fileName)
-    : m_scanner(scanner), m_fileName(fileName), m_nsState(SeenNothing) {
+    : m_scanner(scanner), m_fileName(fileName) {
   if (m_fileName == nullptr) m_fileName = "";
 
   // global scope
@@ -91,6 +114,7 @@ LocationPtr ParserBase::getLocation() const {
   location->char0 = char0();
   location->line1 = line1();
   location->char1 = char1();
+  location->cursor = cursor();
   return location;
 }
 
@@ -119,6 +143,23 @@ bool ParserBase::peekClass() {
 
 void ParserBase::popClass() {
   m_classes.pop_back();
+}
+
+std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
+  int64_t h = hash_string_cs(m_fileName, strlen(m_fileName));
+  int closureId;
+  {
+    Lock lock(s_mutex);
+    int &id = s_closureIds[h];
+    closureId = ++id;
+  }
+
+  string ret;
+  ret += GetAnonPrefix(kind);
+  ret += boost::lexical_cast<string>(h);
+  ret += "_";
+  ret += boost::lexical_cast<string>(closureId);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -241,104 +282,6 @@ void ParserBase::popLabelInfo() {
   }
 
   m_labelInfos.pop_back();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// namespace support
-
-void ParserBase::nns(bool declare /* = false */) {
-  if (m_nsState == SeenNamespaceStatement) {
-    error("No code may exist outside of namespace {}: %s",
-          getMessage().c_str());
-    return;
-  }
-  if (m_nsState == SeenNothing && !declare) {
-    m_nsState = SeenNonNamespaceStatement;
-  }
-}
-
-void ParserBase::onNamespaceStart(const std::string &ns) {
-  if (m_nsState == SeenNonNamespaceStatement) {
-    error("Namespace declaration statement has to be the very first "
-          "statement in the script: %s", getMessage().c_str());
-    return;
-  }
-  m_nsState = InsideNamespace;
-
-  m_namespace = ns;
-}
-
-void ParserBase::onNamespaceEnd() {
-  m_nsState = SeenNamespaceStatement;
-}
-
-void ParserBase::onUse(const std::string &ns, const std::string &as) {
-  if (m_aliases.find(as) != m_aliases.end()) {
-    error("Cannot use %s as %s because the name is already in use: %s",
-          ns.c_str(), as.c_str(), getMessage().c_str());
-    return;
-  }
-  string key = as;
-  if (key.empty()) {
-    size_t pos = ns.rfind(NAMESPACE_SEP);
-    if (pos == string::npos) {
-      key = ns;
-    } else {
-      key = ns.substr(pos + 1);
-    }
-  }
-  m_aliases[key] = ns;
-}
-
-std::string ParserBase::nsDecl(const std::string &name) {
-  if (m_namespace.empty()) {
-    return name;
-  }
-  return m_namespace + NAMESPACE_SEP + name;
-}
-
-std::string ParserBase::resolve(const std::string &ns, bool cls) {
-  // try import rules first
-  string alias = ns;
-  size_t pos = ns.find(NAMESPACE_SEP);
-  if (pos != string::npos) {
-    alias = ns.substr(0, pos);
-  }
-  hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
-  if (iter != m_aliases.end()) {
-    if (pos != string::npos) {
-      return iter->second + ns.substr(pos);
-    }
-    return iter->second;
-  }
-
-  // if qualified name, prepend current namespace
-  if (pos != string::npos) {
-    return nsDecl(ns);
-  }
-
-  // unqualified name in global namespace
-  if (m_namespace.empty()) {
-    return ns;
-  }
-
-  // unqualified class name always prefixed with NAMESPACE_SEP
-  if (cls) {
-    if (strcasecmp("self", ns.c_str()) && strcasecmp("parent", ns.c_str())) {
-      return m_namespace + NAMESPACE_SEP + ns;
-    }
-    return ns;
-  }
-
-  if (!strcasecmp("true", ns.c_str()) ||
-      !strcasecmp("false", ns.c_str()) ||
-      !strcasecmp("null", ns.c_str())) {
-    return ns;
-  }
-
-  // unqualified function name needs leading NAMESPACE_SEP to indicate this
-  // needs runtime resolution
-  return NAMESPACE_SEP + m_namespace + NAMESPACE_SEP + ns;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

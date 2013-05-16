@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "process.h"
-#include "base.h"
+#include "hphp/util/process.h"
+#include "hphp/util/base.h"
 #include "util.h"
-#include "logger.h"
-#include "async_func.h"
-#include "text_color.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/async_func.h"
+#include "hphp/util/text_color.h"
 
 #include <pwd.h>
 

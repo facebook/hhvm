@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRANSL_TYPES_H_
-#define incl_TRANSL_TYPES_H_
+#ifndef incl_HPHP_TRANSL_TYPES_H_
+#define incl_HPHP_TRANSL_TYPES_H_
 
-#include "util/base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 /*
@@ -44,6 +43,6 @@ struct ctca_identity_hash {
 typedef uint32_t               TransID;
 typedef hphp_hash_set<TransID> TransIDSet;
 
-}}}
+}}
 
 #endif

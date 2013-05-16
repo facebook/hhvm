@@ -14,18 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/array_data.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/macros.h>
-#include <runtime/base/shared/shared_map.h>
-#include <util/exception.h>
-#include <tbb/concurrent_hash_map.h>
+#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/util/exception.h"
+#include "tbb/concurrent_hash_map.h"
+#include "hphp/runtime/base/array/policy_array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,6 +116,11 @@ void ArrayData::release() {
     that->release();
     return;
   }
+  if (isArrayShell()) {
+    auto that = static_cast<ArrayShell*>(this);
+    that->release();
+    return;
+  }
   assert(m_kind == kNameValueTableWrapper);
   // NameValueTableWrapper: nop.
 }
@@ -123,7 +129,7 @@ void ArrayData::release() {
 // reads
 
 Object ArrayData::toObject() const {
-  return VM::Instance::FromArray(const_cast<ArrayData *>(this));
+  return Instance::FromArray(const_cast<ArrayData *>(this));
 }
 
 bool ArrayData::isVectorData() const {

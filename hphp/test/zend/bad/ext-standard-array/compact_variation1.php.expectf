@@ -1,0 +1,21 @@
+*** Testing compact() : usage variations  - arrays containg references ***
+HipHop Warning: %a
+array(1) {
+  ["a"]=>
+  int(1)
+}
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+array(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}
+array(1) {
+  ["c"]=>
+  int(3)
+}
+Done

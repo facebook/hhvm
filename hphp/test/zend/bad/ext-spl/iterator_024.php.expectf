@@ -1,0 +1,17 @@
+1
+2
+31
+32
+331
+4
+string(13) "ArrayIterator"
+An instance of RecursiveIterator or IteratorAggregate creating it is required
+===MANUAL===
+string(22) "RecursiveArrayIterator"
+1
+2
+31
+32
+331
+4
+===DONE===

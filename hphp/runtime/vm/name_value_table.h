@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_VM_NAMEVALUETABLE_H_
-#define incl_RUNTIME_VM_NAMEVALUETABLE_H_
+#ifndef incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
+#define incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
 
 #include <boost/noncopyable.hpp>
 #include <deque>
 #include <limits>
 
-#include "util/util.h"
-#include "util/exp_arena.h"
-#include "runtime/base/complex_types.h"
+#include "hphp/util/util.h"
+#include "hphp/util/exp_arena.h"
+#include "hphp/runtime/base/complex_types.h"
 
-namespace HPHP { namespace VM {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -504,6 +504,6 @@ inline NameValueTable::~NameValueTable() {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

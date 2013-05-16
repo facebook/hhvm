@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <util/process.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,13 +28,13 @@ class CmdInterrupt : public DebuggerCommand {
 public:
   CmdInterrupt()
       : DebuggerCommand(KindOfInterrupt),
-        m_interrupt(-1), m_threadId(0), m_site(nullptr), m_pendingJump(false) {}
+        m_interrupt(-1), m_threadId(0), m_site(nullptr) {}
 
   CmdInterrupt(InterruptType interrupt, const char *program,
                InterruptSite *site, const char *error)
       : DebuggerCommand(KindOfInterrupt),
         m_interrupt(interrupt), m_program(program ? program : ""),
-        m_site(site), m_pendingJump(false) {
+        m_site(site) {
     m_threadId = (int64_t)Process::GetThreadId();
     if (error) m_errorMsg = error;
   }
@@ -44,20 +44,18 @@ public:
   std::string desc() const;
   std::string error() const { return m_errorMsg;}
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   bool shouldBreak(const BreakPointInfoPtrVec &bps);
-  FrameInjection *getFrame();
   std::string getFileLine() const;
 
   InterruptSite *getSite() { return m_site;}
 
-  void setPendingJump() { m_pendingJump = true;}
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   int16_t m_interrupt;
@@ -67,10 +65,9 @@ private:
   InterruptSite *m_site;   // server side
   BreakPointInfoPtr m_bpi; // client side
   BreakPointInfoPtrVec m_matched;
-  bool m_pendingJump;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H_

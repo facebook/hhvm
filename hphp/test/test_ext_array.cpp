@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_array.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_array.h>
-#include <runtime/ext/ext_math.h>
+#include "hphp/test/test_ext_array.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_math.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -940,6 +940,8 @@ bool TestExtArray::test_array_shift() {
   return Count(true);
 }
 
+static const StaticString s_a("a");
+
 bool TestExtArray::test_array_slice() {
   Array input = CREATE_VECTOR5("a", "b", "c", "d", "e");
 
@@ -969,12 +971,12 @@ bool TestExtArray::test_array_slice() {
      CREATE_VECTOR2("b", "c"));
 
   Array a = CREATE_MAP4("a", "g", 0, "a", 1, "b", 2, "c");
-  a.remove("a");
+  a.remove(s_a);
   VS(f_array_slice(a, 1, 2, true),  CREATE_MAP2(1, "b", 2, "c"));
   VS(f_array_slice(a, 1, 2, false), CREATE_VECTOR2("b", "c"));
 
   a = CREATE_MAP4("a", 123, 0, "a", 1, "b", 2, "c");
-  a.remove("a");
+  a.remove(s_a);
   VS(f_array_slice(a, 1, 2, true),  CREATE_MAP2(1, "b", 2, "c"));
   VS(f_array_slice(a, 1, 2, false), CREATE_VECTOR2("b", "c"));
 
@@ -989,12 +991,12 @@ bool TestExtArray::test_array_slice() {
 
 bool TestExtArray::test_array_splice() {
   Variant params = CREATE_MAP2("a", "aaa", "0", "apple");
-  params.remove("a");
+  params.remove(s_a);
   f_array_splice(ref(params), 0, 0, CREATE_MAP1(123, "test"));
   VS(params, CREATE_VECTOR2("test", "apple"));
 
   params = CREATE_MAP2("a", "aaa", "1", "apple");
-  params.remove("a");
+  params.remove(s_a);
   f_array_splice(ref(params), 0, 0, CREATE_MAP1(123, "test"));
   VS(params, CREATE_VECTOR2("test", "apple"));
 
@@ -1113,7 +1115,7 @@ bool TestExtArray::test_array_unshift() {
      ")\n");
 
   q = CREATE_MAP3(0, "orange", 1, "banana", "a", "dummy");
-  q.remove("a");
+  q.remove(String("a"));
   f_array_unshift(3, ref(q), "apple", CREATE_VECTOR1("raspberry"));
   VS(f_print_r(q, true),
      "Array\n"

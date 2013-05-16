@@ -14,24 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/file.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/server/static_content_cache.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/runtime_error.h>
-#include <util/logger.h>
-#include <util/process.h>
-#include <util/util.h>
-#include <runtime/base/zend/zend_string.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/util/exceptions.h"
 #include <sys/file.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/file/stream_wrapper_registry.h>
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

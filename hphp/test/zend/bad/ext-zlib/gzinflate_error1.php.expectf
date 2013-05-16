@@ -1,0 +1,20 @@
+*** Testing gzinflate() : error conditions ***
+
+-- Testing gzcompress() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing gzcompress() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing with a buffer that is too small --
+HipHop Warning: %a
+bool(false)
+
+-- Testing with incorrect parameters --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+===DONE===

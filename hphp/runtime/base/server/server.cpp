@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/server/server.h>
-#include <runtime/base/server/satellite_server.h>
-#include <runtime/base/preg.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/server/satellite_server.h"
+#include "hphp/runtime/base/preg.h"
 #include <signal.h>
 
 ///////////////////////////////////////////////////////////////////////////////

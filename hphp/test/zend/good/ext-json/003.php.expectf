@@ -1,0 +1,10 @@
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+HipHop Warning: %a
+string(8) "[[null]]"
+Done

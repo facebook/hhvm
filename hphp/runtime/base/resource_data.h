@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RESOURCE_DATA_H__
-#define __HPHP_RESOURCE_DATA_H__
+#ifndef incl_HPHP_RESOURCE_DATA_H_
+#define incl_HPHP_RESOURCE_DATA_H_
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/memory/sweepable.h>
-#include <runtime/vm/instance.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/memory/sweepable.h"
+#include "hphp/runtime/vm/instance.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ namespace HPHP {
  * Base class of all resources used by extensions for opaquely passing object
  * pointers.
  */
-class ResourceData : public VM::Instance {
+class ResourceData : public Instance {
 public:
   ResourceData();
   virtual ~ResourceData();
@@ -134,4 +134,4 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_RESOURCE_DATA_H__
+#endif // incl_HPHP_RESOURCE_DATA_H_

@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_sqlite3.h>
-#include <runtime/ext/ext_stream.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
@@ -162,7 +162,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 ///////////////////////////////////////////////////////////////////////////////
 // sqlite3
 
-c_SQLite3::c_SQLite3(VM::Class* cb) :
+c_SQLite3::c_SQLite3(Class* cb) :
     ExtObjectData(cb), m_raw_db(NULL) {
 }
 
@@ -249,11 +249,14 @@ bool c_SQLite3::t_exec(CStrRef sql) {
   return true;
 }
 
+static const StaticString s_versionString("versionString");
+static const StaticString s_versionNumber("versionNumber");
+
 Array c_SQLite3::t_version() {
-  Array ret;
-  ret.set("versionString", String((char*)sqlite3_libversion(), CopyString));
-  ret.set("versionNumber", (int64_t)sqlite3_libversion_number());
-  return ret;
+  ArrayInit ret(2);
+  ret.set(s_versionString, String((char*)sqlite3_libversion(), CopyString));
+  ret.set(s_versionNumber, (int64_t)sqlite3_libversion_number());
+  return ret.create();
 }
 
 int64_t c_SQLite3::t_lastinsertrowid() {
@@ -429,7 +432,7 @@ bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64_t rowid,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Stmt::c_SQLite3Stmt(VM::Class* cb) :
+c_SQLite3Stmt::c_SQLite3Stmt(Class* cb) :
     ExtObjectData(cb), m_raw_stmt(NULL) {
 }
 
@@ -597,7 +600,7 @@ Variant c_SQLite3Stmt::t_execute() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Result::c_SQLite3Result(VM::Class* cb) :
+c_SQLite3Result::c_SQLite3Result(Class* cb) :
     ExtObjectData(cb) {
 }
 

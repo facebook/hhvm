@@ -14,25 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_CLASS_H_
-#define incl_VM_CLASS_H_
+#ifndef incl_HPHP_VM_CLASS_H_
+#define incl_HPHP_VM_CLASS_H_
 
 #include <bitset>
-#include <tbb/concurrent_hash_map.h>
+#include "tbb/concurrent_hash_map.h"
 #ifdef USE_JEMALLOC
 # include <jemalloc/jemalloc.h>
 #endif
 #include <atomic>
 
-#include <runtime/vm/core_types.h>
-#include <runtime/vm/repo_helpers.h>
-#include <runtime/base/runtime_option.h>
-#include <util/parser/location.h>
-#include <util/fixed_vector.h>
-#include <util/range.h>
-#include <runtime/vm/fixed_string_map.h>
-#include <runtime/vm/indexed_string_map.h>
-#include "runtime/vm/named_entity.h"
+#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/vm/repo_helpers.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/parser/location.h"
+#include "hphp/util/fixed_vector.h"
+#include "hphp/util/range.h"
+#include "hphp/runtime/vm/fixed_string_map.h"
+#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/vm/named_entity.h"
 
 namespace HPHP {
 
@@ -43,7 +43,6 @@ class HphpArray;
 class ObjectData;
 struct HhbcExtClassInfo;
 
-namespace VM {
 
 // Forward declarations.
 class Func;
@@ -157,8 +156,8 @@ class PreClass : public AtomicCountable {
   struct Const {
     Const() {}
     Const(PreClass* preClass, const StringData* n,
-    	  const StringData* typeConstraint, const TypedValue& val,
-          const StringData* phpCode);
+   	  const StringData* typeConstraint, const TypedValue& val,
+      const StringData* phpCode);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -320,7 +319,7 @@ class PreClass : public AtomicCountable {
   }
 
   BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
-  int builtinPropSize() { return m_builtinPropSize; }
+  int builtinPropSize() const { return m_builtinPropSize; }
 
   void prettyPrint(std::ostream& out) const;
 
@@ -639,30 +638,19 @@ public:
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
 
+  typedef IndexedStringMap<Class*,true,int> InterfaceMap;
+
 public:
   // Call newClass() instead of directly calling new.
   static ClassPtr newClass(PreClass* preClass, Class* parent);
   Class(PreClass* preClass, Class* parent, unsigned classVecLen);
   void atomicRelease();
 
-  static bool alwaysLowMem() {
-    // jemalloc 3.2.0 and later support allocating objects in low memory
-    // (addresses that fit in 32 bits), and we take advantage of this in
-    // translated code.
-#if defined(JEMALLOC_VERSION) &&                                        \
-  ((JEMALLOC_VERSION_MAJOR == 3 && JEMALLOC_VERSION_MINOR >= 2) ||      \
-   JEMALLOC_VERSION_MAJOR > 3)
-    return use_jemalloc && RuntimeOption::RepoAuthoritative;
-#else
-    return false;
-#endif
-  }
   static size_t sizeForNClasses(unsigned nClasses) {
     return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
   }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
-  Class* classof(const PreClass* preClass) const;
   bool classof(const Class* cls) const {
     /*
       If cls is an interface or trait, we're going to have
@@ -678,7 +666,8 @@ public:
       interfaces/traits).
     */
     if (UNLIKELY(cls->attrs() & (AttrInterface | AttrTrait))) {
-      return (classof(cls->m_preClass.get()) == cls);
+      return m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr)
+        == cls;
     }
     if (m_classVecLen >= cls->m_classVecLen) {
       return (m_classVec[cls->m_classVecLen-1] == cls);
@@ -735,7 +724,7 @@ public:
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
-  const ClassSet& allInterfaces() const { return m_allInterfaces; }
+  const InterfaceMap& allInterfaces() const { return m_interfaces; }
   const std::vector<ClassPtr>& usedTraits() const {
     return m_usedTraits;
   }
@@ -746,8 +735,8 @@ public:
   // ObjectData attributes, to be set during Instance initialization.
   int getODAttrs() const { return m_ODAttrs; }
 
-  int builtinPropSize() { return m_builtinPropSize; }
-  BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
+  int builtinPropSize() const { return m_builtinPropSize; }
+  BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
 
   // Interfaces this class declares in its "implements" clause.
   const std::vector<ClassPtr>& declInterfaces() const {
@@ -955,8 +944,8 @@ private:
   ClassPtr m_parent;
   std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in
                                           // its "implements" clause
-  ClassSet m_allInterfaces; // all interfaces a non-abstract class deriving
-                            // from this one (including itself) must implement
+  InterfaceMap m_interfaces;
+
   std::vector<ClassPtr> m_usedTraits;
   TraitAliasVec m_traitAliases;
 
@@ -1045,6 +1034,6 @@ struct class_same {
   }
 };
 
-} } // HPHP::VM
+ } // HPHP::VM
 
 #endif

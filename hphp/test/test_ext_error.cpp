@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_error.h>
-#include <runtime/ext/ext_error.h>
-#include <runtime/base/runtime_option.h>
+#include "hphp/test/test_ext_error.h"
+#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/base/runtime_option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

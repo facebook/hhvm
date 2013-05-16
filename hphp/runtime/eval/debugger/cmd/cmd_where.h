@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_WHERE_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_WHERE_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,16 +29,16 @@ public:
 
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
-  virtual bool onServerVM(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   Array fetchStackTrace(DebuggerClient *client); // client side
   void processStackTrace(); // server side
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void sendImpl(DebuggerThriftBuffer &thrift);
+  virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
   Array m_stacktrace;
@@ -48,4 +48,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_WHERE_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_

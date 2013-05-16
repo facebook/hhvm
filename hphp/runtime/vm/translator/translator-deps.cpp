@@ -14,11 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/translator/translator-deps.h>
+#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/translator/translator-deps.h"
 
 namespace HPHP {
-namespace VM {
 namespace Transl {
 
 PreConstDepMap gPreConsts;
@@ -141,4 +140,4 @@ void unmergePreConsts(const PreConstVec& preConsts, void* owner) {
   }
 }
 
-} } } // HPHP::VM::Transl
+} } // HPHP::Transl

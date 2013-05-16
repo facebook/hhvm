@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <compiler/statement/block_statement.h>
-#include <compiler/statement/statement_list.h>
+#include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
 
 using namespace HPHP;
 

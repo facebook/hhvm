@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_continuation.h>
-#include <runtime/ext/ext_continuation.h>
+#include "hphp/test/test_ext_continuation.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Continuation);
 ///////////////////////////////////////////////////////////////////////////////

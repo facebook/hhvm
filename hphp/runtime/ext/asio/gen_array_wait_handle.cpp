@@ -15,10 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ namespace {
   }
 }
 
-c_GenArrayWaitHandle::c_GenArrayWaitHandle(VM::Class* cb)
+c_GenArrayWaitHandle::c_GenArrayWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_exception() {
 }
 
@@ -49,7 +50,16 @@ void c_GenArrayWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
+void c_GenArrayWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set GenArrayWaitHandle::onCreate: on_create_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnGenArrayCreateCallback(callback.getObjectDataOrNull());
+}
+
+Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
   Array deps = dependencies->copy();
   for (ssize_t iter_pos = deps->iter_begin();
        iter_pos != ArrayData::invalid_index;
@@ -92,8 +102,14 @@ Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
       assert(dynamic_cast<c_WaitableWaitHandle*>(child));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      c_GenArrayWaitHandle* my_wh = NEWOBJ(c_GenArrayWaitHandle)();
+      p_GenArrayWaitHandle my_wh = NEWOBJ(c_GenArrayWaitHandle)();
       my_wh->initialize(exception, deps, iter_pos, child_wh);
+
+      AsioSession* session = AsioSession::Get();
+      if (UNLIKELY(session->hasOnGenArrayCreateCallback())) {
+        session->onGenArrayCreate(my_wh.get(), dependencies);
+      }
+
       return my_wh;
     }
   }
@@ -114,7 +130,7 @@ void c_GenArrayWaitHandle::initialize(CObjRef exception, CArrRef deps, ssize_t i
   m_iterPos = iter_pos;
   try {
     blockOn(child);
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     putException(m_exception, cycle_exception.get());
     m_iterPos = m_deps->iter_advance(m_iterPos);
     onUnblocked();
@@ -148,7 +164,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
       try {
         blockOn(child_wh);
         return;
-      } catch (Object cycle_exception) {
+      } catch (const Object& cycle_exception) {
         putException(m_exception, cycle_exception.get());
       }
     }
@@ -229,7 +245,7 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
       child_wh->enterContext(ctx_idx);
     }
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     // exception will be eventually processed by onUnblocked()
   }
 }

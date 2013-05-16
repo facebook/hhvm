@@ -1,0 +1,10 @@
+*** Testing copy() function: error conditions --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+*** Done ***

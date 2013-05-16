@@ -1,0 +1,10 @@
+array(1) {
+  [%u|b%"valid"]=>
+  %unicode|string%(30) "this is sql but with semicolon"
+}
+bool(true)
+resource(%d) of type (mysql result)
+int(0)
+HipHop Notice: %a
+HipHop Warning: %a
+done!

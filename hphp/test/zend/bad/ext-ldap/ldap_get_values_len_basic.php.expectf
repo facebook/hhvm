@@ -1,0 +1,7 @@
+array(2) {
+  [0]=>
+  string(9) "my-domain"
+  ["count"]=>
+  int(1)
+}
+===DONE===

@@ -1,0 +1,6 @@
+Delimiter:  ZZZ
+	<?php // 1
+	234567890A
+Delimiter:  Z
+	<?php // 1
+	234567890A

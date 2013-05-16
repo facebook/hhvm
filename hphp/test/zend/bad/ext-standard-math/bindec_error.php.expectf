@@ -1,0 +1,7 @@
+*** Testing bindec() : error conditions ***
+Incorrect number of arguments
+HipHop Warning: %a
+HipHop Warning: %a
+Incorrect input
+
+HipHop Fatal error: %a

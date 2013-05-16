@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_KERNEL_VERSION_H_
-#define incl_KERNEL_VERSION_H_
+#ifndef incl_HPHP_KERNEL_VERSION_H_
+#define incl_HPHP_KERNEL_VERSION_H_
 
 namespace HPHP {
 
@@ -26,7 +26,7 @@ struct KernelVersion {
   int m_dash;
   int m_fbk;
   KernelVersion();             // Use uname
-  KernelVersion(const char*);  // A known kernel version for cmp.
+  explicit KernelVersion(const char*);  // A known kernel version for cmp.
   static int cmp(const KernelVersion& l, const KernelVersion& r) {
 #define C(field) if (l.field != r.field) return l.field - r.field;
     C(m_major);

@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_abort.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_abort.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 bool CmdAbort::help(DebuggerClient *client) {
   client->helpTitle("Abort Command");
@@ -33,8 +35,8 @@ bool CmdAbort::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdAbort::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdAbort::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
 
   if (client->argCount() == 0) {
     client->tutorial(

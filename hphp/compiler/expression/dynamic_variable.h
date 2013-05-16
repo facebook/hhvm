@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DYNAMIC_VARIABLE_H__
-#define __DYNAMIC_VARIABLE_H__
+#ifndef incl_HPHP_DYNAMIC_VARIABLE_H_
+#define incl_HPHP_DYNAMIC_VARIABLE_H_
 
-#include <compiler/expression/expression.h>
+#include "hphp/compiler/expression/expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,4 +40,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DYNAMIC_VARIABLE_H__
+#endif // incl_HPHP_DYNAMIC_VARIABLE_H_

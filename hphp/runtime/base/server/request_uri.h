@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_REQUEST_URI_H__
-#define __HPHP_REQUEST_URI_H__
+#ifndef incl_HPHP_REQUEST_URI_H_
+#define incl_HPHP_REQUEST_URI_H_
 
-#include <runtime/base/complex_types.h>
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,4 +95,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_REQUEST_URI_H__
+#endif // incl_HPHP_REQUEST_URI_H_

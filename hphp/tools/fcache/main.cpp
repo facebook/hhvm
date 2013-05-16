@@ -15,7 +15,7 @@
 */
 
 #include <stdio.h>
-#include <util/file_cache.h>
+#include "hphp/util/file_cache.h"
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_thread.h>
-#include <runtime/ext/ext_thread.h>
+#include "hphp/test/test_ext_thread.h"
+#include "hphp/runtime/ext/ext_thread.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

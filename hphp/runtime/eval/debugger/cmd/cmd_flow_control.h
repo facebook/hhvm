@@ -14,53 +14,82 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// CmdFlowControl is the base class of all "flow control" cmds: Continue, Step,
+// Next, and Out. A DebuggerProxy can execute exactly one of these cmds at a
+// time.
+//
+// 1. Proxy receives a flow command (say, Next).
+// 2. Proxy calls the cmd's onSetup() with current source position.
+// 3. Cmd sets up state in the VM to control stepping, etc.
+// 4. If the cmd is complete the proxy deletes the cmd, otherwise it saves it
+//    in m_flow.
+// 5. Proxy lets the thread continue execution.
+// 6. Proxy receives an interrupt from the VM, delivers it to the cmd in m_flow.
+// 7. Cmd inspects the site and VM state, and either decides it is done, or
+//    sets up state in the VM to continue the control flow operation.
+// 8. If the cmd is complete the proxy stops and waits for more input from the
+//    client. Otherwise, rinse and repeat at step 5.
 
 DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
-  CmdFlowControl(Type type)
-      : DebuggerCommand(type), m_count(1), m_frame(nullptr), m_nframe(nullptr),
-        m_stackDepth(0), m_vmDepth(0) { }
+  explicit CmdFlowControl(Type type)
+    : DebuggerCommand(type), m_complete(false), m_needsVMInterrupt(false),
+      m_stackDepth(0), m_vmDepth(0), m_stepOutOffset(0), m_stepOutUnit(nullptr),
+      m_count(1) { }
+  virtual ~CmdFlowControl();
 
-  int decCount() { assert(m_count > 0); return --m_count;}
-  int getCount() const { assert(m_count > 0); return m_count;}
-  void setFrame(FrameInjection *frame) { m_frame = frame;}
-  FrameInjection *getFrame() const { return m_frame;}
-  void setNegativeFrame(FrameInjection *frame) { m_nframe = frame;}
-  FrameInjection *getNegativeFrame() const { return m_nframe;}
-  void setFileLine(const std::string &loc) { m_loc = loc;}
-  const std::string &getFileLine() const { return m_loc;}
+  virtual bool onServer(DebuggerProxy *proxy);
 
+  // Work done to setup a new flow command, after receiving it from the client.
+  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+
+  // Work done when a VM thread interrupts the proxy.
+  virtual void onBeginInterrupt(DebuggerProxy *proxy,
+                                CmdInterrupt &interrupt) = 0;
+
+  // A completed flow cmd has done all its work and can be deleted.
+  bool complete() { return m_complete; }
+
+  // Does this cmd need to force interrupts in the interpreter loop?
+  bool needsVMInterrupt() { return m_needsVMInterrupt; }
+
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
-  virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  int decCount() { assert(m_count > 0); return --m_count;}
+  int getCount() const { assert(m_count > 0); return m_count;}
+  void installLocationFilterForLine(InterruptSite *site);
+  void removeLocationFilter();
+  void setupStepOut();
+  void cleanupStepOut();
 
-  void setStackDepth(int depth) { m_stackDepth = depth; }
-  int getStackDepth() const { return m_stackDepth; }
-  void setVMDepth(int depth) { m_vmDepth = depth; }
-  int getVMDepth() const { return m_vmDepth; }
+  bool m_complete;
+  bool m_needsVMInterrupt;
+
+  // Support for stepping operations
+  int m_stackDepth;
+  int m_vmDepth;
+  std::string m_loc; // last break's source location
+  Offset m_stepOutOffset;
+  HPHP::Unit *m_stepOutUnit;
 
 private:
   int16_t m_count;
-  FrameInjection *m_frame;  // which frame to break next time
-  FrameInjection *m_nframe; // definitely not to break with this frame
-  std::string m_loc; // last break's source location
   bool m_smallStep;
-
-  int m_stackDepth;
-  int m_vmDepth;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_

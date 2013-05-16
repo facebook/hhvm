@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ARRAY_H__
-#define __EXT_ARRAY_H__
+#ifndef incl_HPHP_EXT_ARRAY_H_
+#define incl_HPHP_EXT_ARRAY_H_
 
-#include <runtime/base/base_includes.h>
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/zend/zend_collator.h>
+#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/zend/zend_collator.h"
 
 namespace HPHP {
 
@@ -51,6 +51,8 @@ extern const int64_t k_UCOL_NUMERIC_COLLATION;
 Variant f_array_change_key_case(CVarRef input, bool upper = false);
 Variant f_array_chunk(CVarRef input, int size,
                       bool preserve_keys = false);
+Variant f_array_column(CVarRef arr, CVarRef val_key,
+                       CVarRef idx_key = null_variant);
 Variant f_array_combine(CVarRef keys, CVarRef values);
 Variant f_array_count_values(CVarRef input);
 Variant f_array_fill_keys(CVarRef keys, CVarRef value);
@@ -111,16 +113,12 @@ int64_t f_count(CVarRef var, bool recursive = false);
 int64_t f_sizeof(CVarRef var, bool recursive = false);
 Variant f_each(VRefParam array);
 Variant f_current(VRefParam array);
-Variant f_hphp_current_ref(VRefParam array);
 Variant f_next(VRefParam array);
 Variant f_pos(VRefParam array);
 Variant f_prev(VRefParam array);
 Variant f_reset(VRefParam array);
 Variant f_end(VRefParam array);
 Variant f_key(VRefParam array);
-
-Variant f_hphp_get_iterator(CVarRef iterable);
-Variant f_hphp_get_mutable_iterator(VRefParam iterable);
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);
@@ -178,4 +176,4 @@ Variant f_i18n_loc_get_error_code();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ARRAY_H__
+#endif // incl_HPHP_EXT_ARRAY_H_

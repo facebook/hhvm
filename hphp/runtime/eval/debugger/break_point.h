@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
-#define __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
+#define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
+#include "hphp/runtime/eval/debugger/debugger_thrift_buffer.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,39 +28,44 @@ enum InterruptType {
   RequestStarted,
   RequestEnded,
   PSPEnded,
-  HardBreakPoint,
-  BreakPointReached,
+  HardBreakPoint, // From f_hphpd_break().
+  BreakPointReached, // Break from the VM interpreter loop
   ExceptionThrown,
 };
 
+// Represents a site in the code, at the source level.
+// Forms an InterruptSite by looking at the current thread's current PC and
+// grabbing source data out of the corresponding Unit.
 class InterruptSite {
 public:
-  InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
-                const char *function = nullptr, StringData *file = nullptr,
-                int line0 = 0, int char0 = 0, int line1 = 0, int char1 = 0)
-    : m_exception(e), m_class(cls), m_function(function), m_file(file),
-      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
-      m_jumping(false) { }
+  InterruptSite(bool hardBreakPoint, CVarRef e);
 
-  virtual const char *getFile() const = 0;
-  virtual const char *getClass() const = 0;
-  virtual const char *getFunction() const = 0;
-  virtual const char *getNamespace() const { return nullptr; }
+  const char *getFile() const { return m_file.data(); }
+  const char *getClass() const { return m_class ? m_class : ""; }
+  const char *getFunction() const { return m_function ? m_function : ""; }
+  // Placeholder for future namespace support.
+  const char *getNamespace() const { return nullptr; }
   int getFileLen() const;
 
-  int32_t getLine0() const { return m_line0;}
-  int32_t getChar0() const { return m_char0;}
-  int32_t getLine1() const { return m_line1;}
-  int32_t getChar1() const { return m_char1;}
-  CVarRef getException() { return m_exception;}
+  int32_t getLine0() const { return m_line0; }
+  int32_t getChar0() const { return m_char0; }
+  int32_t getLine1() const { return m_line1; }
+  int32_t getChar1() const { return m_char1; }
+  CVarRef getException() { return m_exception; }
 
-  std::string &url() const { return m_url;}
+  std::string &url() const { return m_url; }
   std::string desc() const;
 
-  bool isJumping() const { return m_jumping;}
-  void setJumping() { m_jumping = true;}
+  const SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
+  const OffsetRangeVec& getCurOffsetRange() const {
+    return m_offsetRangeVec;
+  }
+  const Unit* getUnit() const { return m_unit; }
 
-protected:
+  bool valid() const { return m_valid; }
+  bool funcEntry() const { return m_funcEntry; }
+
+private:
   Variant m_exception;
 
   // cached
@@ -74,31 +79,9 @@ protected:
   int32_t m_line1;
   int32_t m_char1;
 
-  // jump instruction
-  bool m_jumping;
-};
-
-class InterruptSiteVM : public InterruptSite {
-public:
-  InterruptSiteVM(bool hardBreakPoint = false, CVarRef e = null_variant);
-  virtual const char *getFile() const;
-  virtual const char *getClass() const;
-  virtual const char *getFunction() const;
-  const VM::SourceLoc *getSourceLoc() const {
-    return &m_sourceLoc;
-  }
-  const VM::OffsetRangeVec& getCurOffsetRange() const {
-    return m_offsetRangeVec;
-  }
-  const VM::Unit* getUnit() const {
-    return m_unit;
-  }
-  bool valid() const { return m_valid; }
-  bool funcEntry() const { return m_funcEntry; }
-private:
-  VM::SourceLoc m_sourceLoc;
-  VM::OffsetRangeVec m_offsetRangeVec;
-  VM::Unit* m_unit;
+  SourceLoc m_sourceLoc;
+  OffsetRangeVec m_offsetRangeVec;
+  Unit* m_unit;
   bool m_valid;
   bool m_funcEntry;
 };
@@ -214,17 +197,17 @@ private:
 
   void parseExceptionThrown(const std::string &exp);
   void parseBreakPointReached(const std::string &exp, const std::string &file);
+  int32_t parseFileLocation(const std::string &str, int32_t offset);
   bool parseLines(const std::string &token);
 
   bool checkException(CVarRef e);
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);
-  bool checkFrame(FrameInjection *frame);
   bool checkClause();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_

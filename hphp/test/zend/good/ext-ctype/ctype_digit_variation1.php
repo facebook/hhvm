@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s)
+ * Description: Checks for numeric character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "2",
        '309',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

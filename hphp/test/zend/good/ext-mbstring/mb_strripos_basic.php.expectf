@@ -1,0 +1,58 @@
+*** Testing mb_strripos() : basic functionality***
+
+ -- ASCII Strings, needle should be found --
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+
+ -- ASCII Strings, needle should not be found --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+ -- Greek Strings, needle should be found --
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+
+ -- ASCII Strings, needle should not be found --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Done

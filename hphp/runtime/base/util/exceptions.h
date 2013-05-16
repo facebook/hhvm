@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_EXCEPTIONS_H__
-#define __CPP_BASE_EXCEPTIONS_H__
+#ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
+#define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
-#include <util/exception.h>
-#include <util/util.h>
-#include <runtime/base/types.h>
+#include "hphp/util/exception.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,4 +314,4 @@ void throw_null_pointer_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CPP_BASE_EXCEPTIONS_H__
+#endif // incl_HPHP_CPP_BASE_EXCEPTIONS_H_

@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_REQUEST_HANDLER_H__
-#define __HTTP_REQUEST_HANDLER_H__
+#ifndef incl_HPHP_HTTP_REQUEST_HANDLER_H_
+#define incl_HPHP_HTTP_REQUEST_HANDLER_H_
 
-#include <runtime/base/server/libevent_server.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/server/virtual_host.h>
-#include <runtime/base/server/access_log.h>
+#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/server/access_log.h"
 
 namespace HPHP {
 
@@ -66,4 +66,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_REQUEST_HANDLER_H__
+#endif // incl_HPHP_HTTP_REQUEST_HANDLER_H_

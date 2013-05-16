@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/libevent_server_with_fd.h>
-#include <util/logger.h>
+#include "hphp/runtime/base/server/libevent_server_with_fd.h"
+#include "hphp/util/logger.h"
 
 /*
  * LibEventServer that supports using existing/inherited accept sockets.

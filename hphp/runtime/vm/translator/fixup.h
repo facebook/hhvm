@@ -14,21 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_FIXUP_H_
-#define incl_FIXUP_H_
+#ifndef incl_HPHP_FIXUP_H_
+#define incl_HPHP_FIXUP_H_
 
-#include <util/util.h>
-#include <runtime/vm/translator/types.h>
-#include <runtime/base/execution_context.h>
-#include "runtime/vm/tread_hash_map.h"
-#include "runtime/vm/translator/types.h"
-#include "util/atomic.h"
+#include "hphp/util/util.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/translator/types.h"
+#include "hphp/util/atomic.h"
 
 namespace HPHP {
 
 class ExecutionContext;
 
-namespace VM { namespace Transl {
+ namespace Transl {
 
 /*
  * The Fixup map allows us to reconstruct the state of the VM
@@ -214,6 +214,6 @@ private:
   TreadHashMap<CTCA,FixupEntry,ctca_identity_hash> m_fixups;
 };
 
-}}}
+}}
 
 #endif

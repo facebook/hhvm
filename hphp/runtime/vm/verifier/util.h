@@ -14,18 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_VERIFIER_UTIL_H_
-#define incl_VM_VERIFIER_UTIL_H_
+#ifndef incl_HPHP_VM_VERIFIER_UTIL_H_
+#define incl_HPHP_VM_VERIFIER_UTIL_H_
 
 #include <cstddef> // for size_t
 #include <vector>
 #include <stdint.h>
 #include <boost/iterator/iterator_traits.hpp>
-#include "util/assertions.h"
-#include "util/arena.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/arena.h"
 
 namespace HPHP {
-namespace VM {
 namespace Verifier {
 
 /**
@@ -59,6 +58,6 @@ inline bool contains(const C &c, T e) {
   return c.find(e) != c.end();
 }
 
-}}} // namespace HPHP::VM::Verifier
+}} // namespace HPHP::Verifier
 
-#endif // incl_VM_VERIFIER_UTIL_H
+#endif // incl_HPHP_VM_VERIFIER_UTIL_H

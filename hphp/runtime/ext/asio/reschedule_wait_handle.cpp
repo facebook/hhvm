@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_asio.h>
-#include <runtime/ext/asio/asio_context.h>
-#include <runtime/ext/asio/asio_session.h>
-#include <system/lib/systemlib.h>
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ namespace {
 const int q_RescheduleWaitHandle$$QUEUE_DEFAULT = AsioContext::QUEUE_DEFAULT;
 const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO = AsioContext::QUEUE_NO_PENDING_IO;
 
-c_RescheduleWaitHandle::c_RescheduleWaitHandle(VM::Class *cb)
+c_RescheduleWaitHandle::c_RescheduleWaitHandle(Class *cb)
     : c_WaitableWaitHandle(cb) {
 }
 
@@ -43,7 +43,7 @@ void c_RescheduleWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_RescheduleWaitHandle::ti_create(const char* cls, int queue, int priority) {
+Object c_RescheduleWaitHandle::ti_create(int queue, int priority) {
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {

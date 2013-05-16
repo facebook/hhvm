@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_MIN_MAX_MACROS__
-#define __HPHP_MIN_MAX_MACROS__
+#ifndef incl_HPHP_MIN_MAX_MACROS
+#define incl_HPHP_MIN_MAX_MACROS
 
 #ifdef MIN
 #undef MIN
@@ -27,5 +27,5 @@
 #endif
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 
-#endif // __HPHP_MIN_MAX_MACROS__
+#endif
 

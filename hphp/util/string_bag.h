@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STRING_BAG_H__
-#define __STRING_BAG_H__
+#ifndef incl_HPHP_STRING_BAG_H_
+#define incl_HPHP_STRING_BAG_H_
 
-#include "base.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class StringBag {
 public:
-  StringBag(int reserve_count = 0);
+  explicit StringBag(int reserve_count = 0);
   ~StringBag();
 
   const char *add(const char *s);
@@ -42,4 +42,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __STRING_BAG_H__
+#endif // incl_HPHP_STRING_BAG_H_

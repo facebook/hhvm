@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "db_conn.h"
-#include "db_query.h"
-#include "db_mysql.h"
-#include "exception.h"
-#include "lock.h"
-#include "async_job.h"
+#include "hphp/util/db_conn.h"
+#include "hphp/util/db_query.h"
+#include "hphp/util/db_mysql.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/async_job.h"
 #include "util.h"
-#include "alloc.h"
+#include "hphp/util/alloc.h"
 #include <boost/lexical_cast.hpp>
 
 namespace HPHP {

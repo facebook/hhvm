@@ -14,42 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/debugger_command.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/cmd/all.h>
-#include <util/logger.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/debugger/cmd/all.h"
+#include "hphp/util/logger.h"
 
 #define POLLING_SECONDS 1
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-// send/recv
+TRACE_SET_MOD(debugger);
 
+// send/recv
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
+  TRACE(5, "DebuggerCommand::send\n");
   try {
     thrift.reset(false);
     sendImpl(thrift);
     thrift.flush();
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::send(): a socket error has happened");
-    thrift.close();
+    Logger::Error("DebuggerCommand::send(): a socket error has happened");
     return false;
   }
   return true;
 }
 
 bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
+  TRACE(5, "DebuggerCommand::recv\n");
   try {
     recvImpl(thrift);
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::recv(): a socket error has happened");
-    thrift.close();
+    Logger::Error("DebuggerCommand::recv(): a socket error has happened");
     return false;
   }
   return true;
 }
 
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(5, "DebuggerCommand::sendImpl\n");
   thrift.write((int32_t)m_type);
   thrift.write(m_class);
   thrift.write(m_body);
@@ -57,12 +59,14 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(5, "DebuggerCommand::recvImpl\n");
   thrift.read(m_body);
   thrift.read(m_version);
 }
 
 bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
                               DebuggerCommandPtr &cmd, const char *caller) {
+  TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
   struct pollfd fds[1];
@@ -83,9 +87,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {
-    Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
+    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
     return true;
   }
+
+  TRACE(1, "DebuggerCommand::Receive: got cmd of type %d\n", type);
 
   // not all commands are here, as not all commands need to be sent over wire
   switch (type) {
@@ -96,7 +102,6 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfFrame    :  cmd = DebuggerCommandPtr(new CmdFrame    ()); break;
     case KindOfGlobal   :  cmd = DebuggerCommandPtr(new CmdGlobal   ()); break;
     case KindOfInfo     :  cmd = DebuggerCommandPtr(new CmdInfo     ()); break;
-    case KindOfJump     :  cmd = DebuggerCommandPtr(new CmdJump     ()); break;
     case KindOfConstant :  cmd = DebuggerCommandPtr(new CmdConstant ()); break;
     case KindOfList     :  cmd = DebuggerCommandPtr(new CmdList     ()); break;
     case KindOfMachine  :  cmd = DebuggerCommandPtr(new CmdMachine  ()); break;
@@ -116,8 +121,6 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
     case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
 
-    case KindOfInstrument: cmd = DebuggerCommandPtr(new CmdInstrument()); break;
-
     case KindOfExtended: {
       assert(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);
@@ -132,6 +135,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
       return true;
   }
   if (!cmd->recv(thrift)) {
+    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
     cmd.reset();
   }
   return true;
@@ -141,34 +145,43 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 // default handlers
 
 void DebuggerCommand::list(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::list\n");
 }
 
 bool DebuggerCommand::help(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::help\n");
   assert(false);
   return true;
 }
 
-bool DebuggerCommand::onClient(DebuggerClient *client) {
+// If the first argument of the command is "help" or "?"
+// this displays help text for the command and returns true.
+// Otherwise it returns false.
+bool DebuggerCommand::onClientImpl(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClientImpl\n");
   if (client->arg(1, "help") || client->arg(1, "?")) {
     return help(client);
   }
   return false;
 }
 
-void DebuggerCommand::setClientOutput(DebuggerClient *client) {
-  // Just default to text
-  client->setOutputType(DebuggerClient::OTText);
-}
-
-bool DebuggerCommand::onClientD(DebuggerClient *client) {
-  bool ret = onClientVM(client);
+bool DebuggerCommand::onClient(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClient\n");
+  bool ret = onClientImpl(client);
   if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }
   return ret;
 }
 
+void DebuggerCommand::setClientOutput(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::setClientOutput\n");
+  // Just default to text
+  client->setOutputType(DebuggerClient::OTText);
+}
+
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {
+  TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;

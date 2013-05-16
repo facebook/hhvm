@@ -1,0 +1,202 @@
+basename for path foo, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo, supplying suffix .b is:
+string(3) "foo"
+basename for path foo, supplying suffix . is:
+string(3) "foo"
+basename for path foo, supplying suffix   is:
+string(3) "foo"
+basename for path foo, supplying suffix foo is:
+string(3) "foo"
+basename for path foo, supplying suffix foo.bar is:
+string(3) "foo"
+basename for path foo, supplying suffix foo/bar is:
+string(3) "foo"
+basename for path foo, supplying suffix foo\bar is:
+string(3) "foo"
+basename for path foo, supplying suffix / is:
+string(3) "foo"
+basename for path foo, supplying suffix \ is:
+string(3) "foo"
+basename for path foo/, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo/, supplying suffix .b is:
+string(3) "foo"
+basename for path foo/, supplying suffix . is:
+string(3) "foo"
+basename for path foo/, supplying suffix   is:
+string(3) "foo"
+basename for path foo/, supplying suffix foo is:
+string(3) "foo"
+basename for path foo/, supplying suffix foo.bar is:
+string(3) "foo"
+basename for path foo/, supplying suffix foo/bar is:
+string(3) "foo"
+basename for path foo/, supplying suffix foo\bar is:
+string(3) "foo"
+basename for path foo/, supplying suffix / is:
+string(3) "foo"
+basename for path foo/, supplying suffix \ is:
+string(3) "foo"
+basename for path foo\, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo\, supplying suffix .b is:
+string(3) "foo"
+basename for path foo\, supplying suffix . is:
+string(3) "foo"
+basename for path foo\, supplying suffix   is:
+string(3) "foo"
+basename for path foo\, supplying suffix foo is:
+string(3) "foo"
+basename for path foo\, supplying suffix foo.bar is:
+string(3) "foo"
+basename for path foo\, supplying suffix foo/bar is:
+string(3) "foo"
+basename for path foo\, supplying suffix foo\bar is:
+string(3) "foo"
+basename for path foo\, supplying suffix / is:
+string(3) "foo"
+basename for path foo\, supplying suffix \ is:
+string(3) "foo"
+basename for path foo.bar, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo.bar, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix . is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix   is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix / is:
+string(7) "foo.bar"
+basename for path foo.bar, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo.bar/, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix . is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix   is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix / is:
+string(7) "foo.bar"
+basename for path foo.bar/, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix .bar is:
+string(3) "foo"
+basename for path foo.bar\, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix . is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix   is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix / is:
+string(7) "foo.bar"
+basename for path foo.bar\, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix .bar is:
+string(3) "foo"
+basename for path dir/foo.bar, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix . is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix   is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix / is:
+string(7) "foo.bar"
+basename for path dir/foo.bar, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix .bar is:
+string(3) "foo"
+basename for path dir\foo.bar, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix . is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix   is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix / is:
+string(7) "foo.bar"
+basename for path dir\foo.bar, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix .bar is:
+string(3) "foo"
+basename for path dir with spaces/foo.bar, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix . is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix   is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix / is:
+string(7) "foo.bar"
+basename for path dir with spaces/foo.bar, supplying suffix \ is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix .bar is:
+string(3) "foo"
+basename for path dir with spaces\foo.bar, supplying suffix .b is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix . is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix   is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix foo is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix foo.bar is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix foo/bar is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix foo\bar is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix / is:
+string(7) "foo.bar"
+basename for path dir with spaces\foo.bar, supplying suffix \ is:
+string(7) "foo.bar"
+
+done

@@ -1,0 +1,4 @@
+*** Testing session_status() : active, none
+bool(true)
+bool(true)
+bool(true)

@@ -14,22 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'tv_helpers.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_TV_HELPERS_H__
-#define __HPHP_TV_HELPERS_H__
+#ifndef incl_HPHP_TV_HELPERS_H_
+#define incl_HPHP_TV_HELPERS_H_
 
-#include <runtime/base/types.h>
-
-namespace HPHP {
-namespace VM {
-class Class;
-class Stack;
-}
-}
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -454,8 +447,10 @@ inline bool tvIsString(const TypedValue* tv) {
 
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
+int64_t tvCastToInt64(TypedValue* tv, int base = 10);
 void tvCastToDoubleInPlace(TypedValue* tv);
 void tvCastToStringInPlace(TypedValue* tv);
+StringData* tvCastToString(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
 
@@ -465,4 +460,4 @@ extern const RawDestructor g_destructors[kDestrTableSize];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TV_HELPERS_H__
+#endif // incl_HPHP_TV_HELPERS_H_

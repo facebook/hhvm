@@ -1,0 +1,21 @@
+*** Testing array_values() : usage variations ***
+
+-- $input is an array made up of referenced variables: --
+array(3) {
+  [0]=>
+  &string(3) "one"
+  [1]=>
+  &string(3) "two"
+  [2]=>
+  &string(5) "three"
+}
+Change $val2 and check result of array_values():
+array(3) {
+  [0]=>
+  &string(3) "one"
+  [1]=>
+  &string(4) "deux"
+  [2]=>
+  &string(5) "three"
+}
+Done

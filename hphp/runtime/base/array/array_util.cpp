@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/array/array_util.h>
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/string_util.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/runtime_error.h>
-#include <runtime/ext/ext_math.h>
-#include <runtime/ext/ext_json.h>
+#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/ext_json.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

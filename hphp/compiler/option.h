@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __OPTION_H__
-#define __OPTION_H__
+#ifndef incl_HPHP_OPTION_H_
+#define incl_HPHP_OPTION_H_
 
-#include <util/hdf.h>
-#include <util/string_bag.h>
-#include <util/base.h>
+#include "hphp/util/hdf.h"
+#include "hphp/util/string_bag.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -235,8 +235,9 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static bool EnableFinallyStatement;
-  static int ScannerType;
   static int ParserThreadCount;
+
+  static int GetScannerType();
 
   /**
    * "Dynamic" means a function or a method can be invoked dynamically.
@@ -300,4 +301,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __OPTION_H__
+#endif // incl_HPHP_OPTION_H_

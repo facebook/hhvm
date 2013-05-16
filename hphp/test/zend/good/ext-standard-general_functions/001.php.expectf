@@ -1,0 +1,11 @@
+sprintf string truncate test:   passed
+sprintf padding and align test: passed
+sprintf octal and hex test:     passed
+sprintf octal binary test:      passed
+sprintf float test:             passed
+99.00
+99.00
+1.234000e-18
+1.234000e+18
+9.843243e+6
+-9.843243e+6

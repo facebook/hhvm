@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s)
+ * Description: Checks for alphanumeric character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -10,7 +10,7 @@
 
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C");
+$orig = setlocale(LC_CTYPE, "C"); 
 
 //get an unset variable
 $unset_var = 10;
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "pqr",
        'LMN',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

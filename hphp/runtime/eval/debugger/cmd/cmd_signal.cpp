@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_signal.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_signal.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 void CmdSignal::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -29,14 +31,14 @@ void CmdSignal::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_signum);
 }
 
-bool CmdSignal::onClient(DebuggerClient *client) {
+bool CmdSignal::onClientImpl(DebuggerClient *client) {
   m_signum = client->pollSignal();
-  client->send(this);
+  client->sendToServer(this);
   return true;
 }
 
 bool CmdSignal::onServer(DebuggerProxy *proxy) {
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,6 @@
+bool(true)
+%string|unicode%(4) "TEST"
+bool(true)
+%string|unicode%(4) "test"
+bool(true)
+%string|unicode%(4) "test"

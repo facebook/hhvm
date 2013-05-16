@@ -1,0 +1,7 @@
+array(2) {
+  [0]=>
+  string(3) "Sub"
+  [1]=>
+  string(3) "Add"
+}
+ok

@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_STRING_DATA_H__
-#define __HPHP_STRING_DATA_H__
+#ifndef incl_HPHP_STRING_DATA_H_
+#define incl_HPHP_STRING_DATA_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/countable.h>
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/macros.h>
-#include <runtime/base/bstring.h>
-#include <util/hash.h>
-#include <util/alloc.h>
-#include <runtime/base/util/exceptions.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/countable.h"
+#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/alloc.h"
+#include "hphp/runtime/base/util/exceptions.h"
 
 namespace HPHP {
 
@@ -154,7 +154,7 @@ class StringData {
    * Different ways of constructing StringData. Default constructor at above
    * is actually only for SmartAllocator to pre-allocate the objects.
    */
-  StringData(const char* data) {
+  explicit StringData(const char* data) {
     initLiteral(data);
   }
   StringData(const char *data, AttachLiteralMode) {
@@ -208,9 +208,9 @@ class StringData {
    * Create a new empty string big enough to hold the requested size,
    * not counting the \0 terminator.
    */
-  StringData(int reserve);
+  explicit StringData(int reserve);
 
-  StringData(SharedVariant *shared);
+  explicit StringData(SharedVariant *shared);
 
 public:
   void append(StringSlice r) { append(r.ptr, r.len); }
@@ -322,21 +322,7 @@ public:
   /**
    * Comparisons.
    */
-  bool equal(const StringData *s) const {
-    assert(s);
-    if (s == this) return true;
-    int ret;
-
-    if (!(m_hash < 0 || s->m_hash < 0)) {
-      ret = numericCompare(s);
-      if (ret >= -1) {
-        return ret == 0;
-      }
-    }
-    if (m_len != s->m_len) return false;
-    ret = memcmp(rawdata(), s->rawdata(), m_len);
-    return ret == 0;
-  }
+  bool equal(const StringData *s) const;
 
   bool same(const StringData *s) const {
     assert(s);
@@ -360,10 +346,11 @@ public:
   std::string toCPPString() const;
   static void sweepAll();
 
-  static StringData *FindStaticString(const StringData *str);
-  static StringData *GetStaticString(const StringData *str);
-  static StringData *GetStaticString(const std::string &str);
-  static StringData *GetStaticString(const char *str);
+  static StringData *FindStaticString(const StringData* str);
+  static StringData *GetStaticString(const StringData* str);
+  static StringData *GetStaticString(const std::string& str);
+  static StringData *GetStaticString(const String& str);
+  static StringData *GetStaticString(const char* str);
   static StringData *GetStaticString(char c);
   static size_t GetStaticStringCount();
   static uint32_t GetCnsHandle(const StringData* cnsName);
@@ -440,7 +427,7 @@ public:
 class StackStringData : public StringData {
  public:
   StackStringData() { incRefCount(); }
-  StackStringData(const char* s) : StringData(s) { incRefCount(); }
+  explicit StackStringData(const char* s) : StringData(s) { incRefCount(); }
   template <class T>
   StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }
   template <class T>
@@ -463,4 +450,4 @@ ALWAYS_INLINE inline void decRefStr(StringData* s) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_DATA_H__
+#endif // incl_HPHP_STRING_DATA_H_

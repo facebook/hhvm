@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_EXT_SOAP_H__
-#define __TEST_EXT_SOAP_H__
+#ifndef incl_HPHP_TEST_EXT_SOAP_H_
+#define incl_HPHP_TEST_EXT_SOAP_H_
 
-#include <test/test_cpp_ext.h>
-#include <runtime/ext/ext_soap.h>
+#include "hphp/test/test_cpp_ext.h"
+#include "hphp/runtime/ext/ext_soap.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -78,4 +78,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_EXT_SOAP_H__
+#endif // incl_HPHP_TEST_EXT_SOAP_H_

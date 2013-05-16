@@ -15,17 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_stream.h>
-#include <runtime/ext/ext_socket.h>
-#include <runtime/ext/ext_network.h>
-#include <runtime/base/file/socket.h>
-#include <runtime/base/file/plain_file.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/file/stream_wrapper.h>
-#include <runtime/base/file/stream_wrapper_registry.h>
-#include <runtime/base/file/user_stream_wrapper.h>
+#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/file/stream_wrapper.h"
+#include "hphp/runtime/base/file/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file/user_stream_wrapper.h"
 #include <memory>
 #include <unistd.h>
 #include <fcntl.h>
@@ -275,7 +275,7 @@ bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(
                    new UserStreamWrapper(protocol, classname));
-  } catch (InvalidArgumentException e) {
+  } catch (const InvalidArgumentException& e) {
     raise_warning("%s", e.what());
     return false;
   }

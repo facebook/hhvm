@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/mailparse/rfc822.h>
-#include <runtime/base/util/string_buffer.h>
-#include <runtime/base/runtime_error.h>
+#include "hphp/runtime/ext/mailparse/rfc822.h"
+#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 #define YYFILL(n)  if (YYCURSOR == YYLIMIT) goto stop
 #define YYCTYPE    unsigned char

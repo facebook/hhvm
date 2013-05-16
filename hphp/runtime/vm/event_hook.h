@@ -13,23 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_EVENT_HOOK_H_
-#define incl_VM_EVENT_HOOK_H_
+#ifndef incl_HPHP_VM_EVENT_HOOK_H_
+#define incl_HPHP_VM_EVENT_HOOK_H_
 
-#include "runtime/base/execution_context.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
 
 namespace HPHP {
-namespace VM {
-
-#define DECLARE_HOOK(name, declargs, useargs)                              \
-  static inline void name declargs {                                       \
-    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {             \
-      g_vmContext->m_eventHook->on ## name useargs;                        \
-    }                                                                      \
-  }                                                                        \
-  void on ## name declargs;
 
 class EventHook {
  public:
@@ -41,14 +32,21 @@ class EventHook {
 
   static void Enable();
   static void Disable();
-  static void CheckSurprise();
+  static void EnableIntercept();
+  static void DisableIntercept();
+  static ssize_t CheckSurprise();
 
   /*
    * Can throw from user-defined signal handlers, or OOM or timeout
    * exceptions.
    */
-  DECLARE_HOOK(FunctionEnter, (const ActRec* ar, int funcType),
-               (ar, funcType));
+  static bool onFunctionEnter(const ActRec* ar, int funcType);
+  static inline bool FunctionEnter(const ActRec* ar, int funcType) {
+    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+      return onFunctionEnter(ar, funcType);
+    }
+    return true;
+  }
 
   /*
    * FunctionExit may throw.
@@ -58,7 +56,12 @@ class EventHook {
    * unwinder itself will call the function exit hooks and swallow
    * exceptions.
    */
-  DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar));
+  static void onFunctionExit(const ActRec* ar);
+  static inline void FunctionExit(const ActRec* ar) {
+    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+      onFunctionExit(ar);
+    }
+  }
 
 private:
   enum {
@@ -67,11 +70,11 @@ private:
   };
 
   static void RunUserProfiler(const ActRec* ar, int mode);
+  static bool RunInterceptHandler(ActRec* ar);
 };
 
 #undef DECLARE_HOOK
 
-} // namespace VM
 } // namespace HPHP
 
 #endif

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __AST_WALKER_H__
-#define __AST_WALKER_H__
+#ifndef incl_HPHP_AST_WALKER_H_
+#define incl_HPHP_AST_WALKER_H_
 
-#include <compiler/hphp.h>
-#include <compiler/construct.h>
+#include "hphp/compiler/hphp.h"
+#include "hphp/compiler/construct.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace HPHP {
 class AstWalkerState {
 public:
   AstWalkerState() : index(0) {}
-  AstWalkerState(ConstructRawPtr c) : cp(c), index(0) {}
+  explicit AstWalkerState(ConstructRawPtr c) : cp(c), index(0) {}
 
   friend bool operator==(const AstWalkerState &s1,
                          const AstWalkerState &s2) {
@@ -40,7 +40,7 @@ public:
 class AstWalkerStateVec : public std::vector<AstWalkerState> {
   public:
   AstWalkerStateVec() {}
-  AstWalkerStateVec(ConstructRawPtr cp) {
+  explicit AstWalkerStateVec(ConstructRawPtr cp) {
     push_back(AstWalkerState(cp));
   }
 };
@@ -132,4 +132,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __AST_WALKER_H__
+#endif // incl_HPHP_AST_WALKER_H_

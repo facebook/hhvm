@@ -1,0 +1,80 @@
+*** Testing mb_substr() : usage variations ***
+
+**-- Offset is: -60 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: -50 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: -40 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: -30 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: -20 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: -10 --**
+-- ASCII String --
+string(16) "SXMgYW4gRW5nbA=="
+--Multibyte String --
+string(40) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMA=="
+
+**-- Offset is: 0 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 10 --**
+-- ASCII String --
+string(16) "SXMgYW4gRW5nbA=="
+--Multibyte String --
+string(40) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMA=="
+
+**-- Offset is: 20 --**
+-- ASCII String --
+string(28) "SXMgYW4gRW5nbGlzaCBzdHJpbmc="
+--Multibyte String --
+string(68) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+
+**-- Offset is: 30 --**
+-- ASCII String --
+string(28) "SXMgYW4gRW5nbGlzaCBzdHJpbmc="
+--Multibyte String --
+string(68) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+
+**-- Offset is: 40 --**
+-- ASCII String --
+string(28) "SXMgYW4gRW5nbGlzaCBzdHJpbmc="
+--Multibyte String --
+string(68) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+
+**-- Offset is: 50 --**
+-- ASCII String --
+string(28) "SXMgYW4gRW5nbGlzaCBzdHJpbmc="
+--Multibyte String --
+string(68) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+
+**-- Offset is: 60 --**
+-- ASCII String --
+string(28) "SXMgYW4gRW5nbGlzaCBzdHJpbmc="
+--Multibyte String --
+string(68) "5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+Done

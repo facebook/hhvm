@@ -16,8 +16,8 @@
 */
 /* utf8_decode.h */
 
-#ifndef __HPHP_ZEND_UTF8_DECODE_H__
-#define __HPHP_ZEND_UTF8_DECODE_H__
+#ifndef incl_HPHP_ZEND_UTF8_DECODE_H_
+#define incl_HPHP_ZEND_UTF8_DECODE_H_
 
 #define UTF8_END   -1
 #define UTF8_ERROR -2
@@ -47,4 +47,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_UTF8_DECODE_H__
+#endif // incl_HPHP_ZEND_UTF8_DECODE_H_

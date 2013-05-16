@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include "hphp/runtime/eval/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,9 +30,10 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
+protected:
+  virtual bool onClientImpl(DebuggerClient *client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -42,4 +43,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_

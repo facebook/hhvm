@@ -23,13 +23,13 @@
  * translator.
  */
 
-#ifndef incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
-#define incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
+#ifndef incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
+#define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
-#include "util/asm-x64.h"
-#include "runtime/vm/translator/regalloc.h"
+#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/translator/regalloc.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -226,6 +226,51 @@ enum ServiceRequest {
 #undef REQ
 };
 
+/*
+ * Various flags that are passed to emitServiceReq.  May be or'd
+ * together.
+ */
+enum class SRFlags {
+  None = 0,
+
+  /*
+   * Indicates the service request should be aligned.
+   */
+  Align = 1,
+
+  /*
+   * Indicates the service request is not a one-time use stub, so it's
+   * ineligable for service request reclamation.
+   *
+   * The service request also will not reuse an existing service
+   * request---i.e. it will be emitted at the current astubs frontier.
+   */
+  Persistent = 2,
+
+  /*
+   * For some service requests (returning from interpreted frames),
+   * using a ret instruction to get back to enterTCHelper will
+   * unbalance the return stack buffer---in these cases use a jmp.
+   */
+  JmpInsteadOfRet = 4,
+
+  /*
+   * The service request should be emitted on a instead of astubs.
+   *
+   * Overrides whatever the bits for Align and Persistent are and
+   * implies !Align and !Persistent.
+   */
+  EmitInA = 8,
+};
+
+inline bool operator&(SRFlags a, SRFlags b) {
+  return int(a) & int(b);
+}
+
+inline SRFlags operator|(SRFlags a, SRFlags b) {
+  return SRFlags(int(a) | int(b));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Set of all the x64 registers.
@@ -259,6 +304,6 @@ const size_t kReservedRSPSpillSpace = 0x80;
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

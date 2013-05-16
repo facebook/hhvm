@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/asm-x64.h"
+
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -23,12 +25,11 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 
-#include "util/assertions.h"
-#include "util/asm-x64.h"
-#include "util/maphuge.h"
-#include "runtime/base/runtime_option.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/runtime/base/runtime_option.h"
 
-namespace HPHP { namespace VM { namespace Transl {
+namespace HPHP { namespace Transl {
 
 static void panic(const char *fmt, ...) {
   va_list ap;
@@ -127,4 +128,4 @@ void StoreImmPatcher::patch(uint64_t actual) {
   }
 }
 
-}}}
+}}

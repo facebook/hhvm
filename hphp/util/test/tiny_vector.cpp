@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "util/tiny_vector.h"
-#include <gtest/gtest.h>
+#include "hphp/util/tiny_vector.h"
+#include "gtest/gtest.h"
 
 namespace HPHP {
 

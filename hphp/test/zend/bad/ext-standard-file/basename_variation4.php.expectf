@@ -1,0 +1,82 @@
+*** Testing basename() : usage variation ***
+
+--int 0--
+string(4) "path"
+
+--int 1--
+string(4) "path"
+
+--int 12345--
+string(4) "path"
+
+--int -12345--
+string(4) "path"
+
+--float 10.5--
+string(4) "path"
+
+--float -10.5--
+string(4) "path"
+
+--float 12.3456789000e10--
+string(4) "path"
+
+--float -12.3456789000e10--
+string(4) "path"
+
+--float .5--
+string(4) "path"
+
+--empty array--
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+NULL
+
+--int indexed array--
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+NULL
+
+--associative array--
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+NULL
+
+--nested arrays--
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+NULL
+
+--uppercase NULL--
+string(4) "path"
+
+--lowercase null--
+string(4) "path"
+
+--lowercase true--
+string(4) "path"
+
+--lowercase false--
+string(4) "path"
+
+--uppercase TRUE--
+string(4) "path"
+
+--uppercase FALSE--
+string(4) "path"
+
+--empty string DQ--
+string(4) "path"
+
+--empty string SQ--
+string(4) "path"
+
+--instance of classWithToString--
+string(4) "path"
+
+--instance of classWithoutToString--
+Error: 2 - basename() expects parameter 2 to be string, object given, %s(%d)
+NULL
+
+--undefined var--
+string(4) "path"
+
+--unset var--
+string(4) "path"
+===DONE===

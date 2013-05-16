@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_IMMUTABLE_MAP_H__
-#define __HPHP_IMMUTABLE_MAP_H__
+#ifndef incl_HPHP_IMMUTABLE_MAP_H_
+#define incl_HPHP_IMMUTABLE_MAP_H_
 
-#include <runtime/base/types.h>
-#include <util/lock.h>
-#include <util/hash.h>
-#include <util/atomic.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/atomic.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,4 +94,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_IMMUTABLE_MAP_H__ */
+#endif /* incl_HPHP_IMMUTABLE_MAP_H_ */

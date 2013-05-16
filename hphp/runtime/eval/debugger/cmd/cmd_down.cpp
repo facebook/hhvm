@@ -14,12 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/debugger/cmd/cmd_down.h>
-#include <runtime/eval/debugger/cmd/cmd_up.h>
-#include <runtime/eval/debugger/cmd/cmd_where.h>
+#include "hphp/runtime/eval/debugger/cmd/cmd_down.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_up.h"
+#include "hphp/runtime/eval/debugger/cmd/cmd_where.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(debugger);
 
 bool CmdDown::help(DebuggerClient *client) {
   client->helpTitle("Down Command");
@@ -35,8 +37,8 @@ bool CmdDown::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdDown::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+bool CmdDown::onClientImpl(DebuggerClient *client) {
+  if (DebuggerCommand::onClientImpl(client)) return true;
   if (client->argCount() > 1) {
     return help(client);
   }

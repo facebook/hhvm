@@ -15,7 +15,8 @@ VERIFY_SCRIPT=./hphp/test/verify
 PARSE_TEST=$FBMAKE_BIN_ROOT/hphp/util/parser/test/parse_tester
 
 # some tests are expected not to parse
-PARSE_SKIP='dv_i0.php strict_bad_end.php strict_bad_start.php
+PARSE_SKIP='dv_i0.php hh_bad_end.php hh_bad_start.php hh_numbers.php
+  strict_bad_end.php strict_bad_start.php
   strict_numbers.php syntax-error.php xhp-malformed.php Xhp.php
   trailing_comma_bad1.php trailing_comma_bad2.php trailing_comma_bad3.php
   trailing_comma_bad4.php trailing_comma_bad5.php trailing_comma_bad6.php'

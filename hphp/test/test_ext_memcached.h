@@ -16,10 +16,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_EXT_MEMCACHED_H__
-#define __TEST_EXT_MEMCACHED_H__
+#ifndef incl_HPHP_TEST_EXT_MEMCACHED_H_
+#define incl_HPHP_TEST_EXT_MEMCACHED_H_
 
-#include <test/test_cpp_ext.h>
+#include "hphp/test/test_cpp_ext.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,4 +36,4 @@ class TestExtMemcached : public TestCppExt {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_EXT_MEMCACHED_H__
+#endif // incl_HPHP_TEST_EXT_MEMCACHED_H_

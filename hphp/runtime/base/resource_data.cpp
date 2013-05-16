@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/resource_data.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/variable_serializer.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ int ResourceData::GetMaxResourceId() {
 }
 
 ResourceData::ResourceData()
-    : VM::Instance(SystemLib::s_resourceClass, true) {
+    : Instance(SystemLib::s_resourceClass, true) {
   assert(!m_cls->callsCustomInstanceInit());
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR

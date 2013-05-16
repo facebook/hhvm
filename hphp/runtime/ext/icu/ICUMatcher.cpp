@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "ICUMatcher.h"
-#include <util/logger.h>
+#include "hphp/runtime/ext/icu/ICUMatcher.h"
+#include "hphp/util/logger.h"
 using namespace U_ICU_NAMESPACE;
 
 namespace HPHP {

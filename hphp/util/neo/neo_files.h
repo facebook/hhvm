@@ -9,14 +9,14 @@
  *
  */
 
-#ifndef __NEO_FILES_H_
-#define __NEO_FILES_H_ 1
+#ifndef incl_HPHP_NEO_FILES_H_
+#define incl_HPHP_NEO_FILES_H_ 1
 
 __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <sys/types.h>
-#include "ulist.h"
+#include "hphp/util/neo/ulist.h"
 
 
 
@@ -29,9 +29,9 @@ NEOERR *ne_save_file (const char *path, char *str);
 NEOERR *ne_remove_dir (const char *path);
 NEOERR *ne_listdir(const char *path, ULIST **files);
 NEOERR *ne_listdir_match(const char *path, ULIST **files, const char *match);
-NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch, 
+NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
                           void *rock);
 
 __END_DECLS
 
-#endif /* __NEO_FILES_H_ */
+#endif /* incl_HPHP_NEO_FILES_H_ */

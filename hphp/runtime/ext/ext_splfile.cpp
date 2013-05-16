@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_splfile.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/runtime/ext/ext_splfile.h"
+#include "hphp/runtime/ext/ext_file.h"
 
-#include <system/lib/systemlib.h>
+#include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SPL);
@@ -34,7 +34,7 @@ IMPLEMENT_OBJECT_ALLOCATION(SplFileObject)
 
 static SplFileInfo *get_splfileinfo(CObjRef obj) {
   if (!obj->o_instanceof("SplFileInfo")) {
-    throw InvalidObjectTypeException(obj->o_getClassName());
+    throw InvalidObjectTypeException(obj->o_getClassName().c_str());
   }
   CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
   return rsrc.getTyped<SplFileInfo>();
@@ -42,7 +42,7 @@ static SplFileInfo *get_splfileinfo(CObjRef obj) {
 
 static SplFileObject *get_splfileobject(CObjRef obj) {
   if (!obj->o_instanceof("SplFileObject")) {
-    throw InvalidObjectTypeException(obj->o_getClassName());
+    throw InvalidObjectTypeException(obj->o_getClassName().c_str());
   }
   // "SplFileInfo" as context -- rsrc is a private property
   CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");

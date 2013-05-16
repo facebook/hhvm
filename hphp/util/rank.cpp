@@ -16,8 +16,8 @@
 
 #include <stack>
 
-#include "util/base.h"
-#include "util/mutex.h"
+#include "hphp/util/base.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 #ifdef DEBUG

@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_PROCESS_H__
-#define __EXT_PROCESS_H__
+#ifndef incl_HPHP_EXT_PROCESS_H_
+#define incl_HPHP_EXT_PROCESS_H_
 
-#include <runtime/base/base_includes.h>
+#include "hphp/runtime/base/base_includes.h"
 #include <sys/wait.h>
 
 namespace HPHP {
@@ -76,4 +76,4 @@ String f_escapeshellcmd(CStrRef command);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_PROCESS_H__
+#endif // incl_HPHP_EXT_PROCESS_H_

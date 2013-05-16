@@ -1,0 +1,14 @@
+int(0)
+int(0)
+string(35) "array size cannot be less than zero"
+string(35) "array size cannot be less than zero"
+NULL
+int(0)
+int(0)
+object(SplFixedArray)#%d (0) {
+}
+string(52) "An iterator cannot be used with foreach by reference"
+bool(false)
+string(3) "foo"
+bool(true)
+==DONE==

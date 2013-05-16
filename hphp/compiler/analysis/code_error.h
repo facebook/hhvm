@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPILER_ERROR_H__
-#define __COMPILER_ERROR_H__
+#ifndef incl_HPHP_COMPILER_ERROR_H_
+#define incl_HPHP_COMPILER_ERROR_H_
 
-#include <compiler/analysis/type.h>
-#include <util/json.h>
+#include "hphp/compiler/analysis/type.h"
+#include "hphp/util/json.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,4 +79,4 @@ bool HasError(); // any error
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __COMPILER_ERROR_H__
+#endif // incl_HPHP_COMPILER_ERROR_H_

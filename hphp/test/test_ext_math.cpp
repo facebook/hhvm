@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_math.h>
-#include <runtime/ext/ext_math.h>
+#include "hphp/test/test_ext_math.h"
+#include "hphp/runtime/ext/ext_math.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

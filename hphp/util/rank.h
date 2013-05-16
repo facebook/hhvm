@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RANK_H_
-#define incl_RANK_H_
+#ifndef incl_HPHP_RANK_H_
+#define incl_HPHP_RANK_H_
 
 #include <limits.h>
 

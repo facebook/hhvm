@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_server.h>
-#include <runtime/ext/ext_server.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/ext/ext_file.h>
+#include "hphp/test/test_ext_server.h"
+#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/base/server/pagelet_server.h"
+#include "hphp/runtime/base/server/xbox_server.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -129,10 +129,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtServer::test_xbox_send_message() {
+  static const StaticString
+    s_code("code"),
+    s_response("response");
   Variant ret;
   VERIFY(f_xbox_send_message("hello", ref(ret), 5000));
-  VS(ret["code"], 200);
-  VS(ret["response"], "olleh");
+  VS(ret[s_code], 200);
+  VS(ret[s_response], "olleh");
   return Count(true);
 }
 

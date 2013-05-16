@@ -19,40 +19,40 @@
 #include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
-#include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/code_error.h>
-#include <compiler/analysis/depth_first_visitor.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/if_branch_statement.h>
-#include <compiler/statement/method_statement.h>
-#include <compiler/statement/loop_statement.h>
-#include <compiler/statement/class_variable.h>
-#include <compiler/statement/use_trait_statement.h>
-#include <compiler/analysis/symbol_table.h>
-#include <compiler/package.h>
-#include <compiler/parser/parser.h>
-#include <compiler/option.h>
-#include <compiler/analysis/function_scope.h>
-#include <compiler/builtin_symbols.h>
-#include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/variable_table.h>
-#include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/constant_expression.h>
-#include <compiler/expression/expression_list.h>
-#include <compiler/expression/array_pair_expression.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/program_functions.h>
-#include <util/atomic.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/hash.h>
-#include <util/process.h>
-#include <util/job_queue.h>
-#include <util/timer.h>
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/alias_manager.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/depth_first_visitor.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/if_branch_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/loop_statement.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/analysis/symbol_table.h"
+#include "hphp/compiler/package.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/compiler/analysis/constant_table.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/util/atomic.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/process.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/timer.h"
 
 using namespace HPHP;
 using std::map;
@@ -169,7 +169,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   StringToFunctionScopePtrMap::const_iterator bit =
     m_functions.find(funcName);
-  if (bit != m_functions.end()) {
+  if (bit != m_functions.end() && !bit->second->ignoreRedefinition()) {
     return bit->second;
   }
   StringToFunctionScopePtrMap::const_iterator iter =
@@ -177,7 +177,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   if (iter != m_functionDecs.end()) {
     return iter->second;
   }
-  return FunctionScopePtr();
+  return bit != m_functions.end() ? bit->second : FunctionScopePtr();
 }
 
 BlockScopePtr AnalysisResult::findConstantDeclarer(
@@ -343,11 +343,14 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
 
   string fname = funcScope->getName();
   // System functions override
-  if (m_functions.find(fname) != m_functions.end()) {
-    // we need someone to hold on to a reference to it
-    // even though we're not going to do anything with it
-    this->lock()->m_ignoredScopes.push_back(funcScope);
-    return false;
+  auto it = m_functions.find(fname);
+  if (it != m_functions.end()) {
+    if (!it->second->ignoreRedefinition()) {
+      // we need someone to hold on to a reference to it
+      // even though we're not going to do anything with it
+      this->lock()->m_ignoredScopes.push_back(funcScope);
+      return false;
+    }
   }
 
   return true;
@@ -660,7 +663,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
            methods.begin(); iterMethod != methods.end(); ++iterMethod) {
       FunctionScopePtr func = iterMethod->second;
-      if (!func->hasImpl() && needAbstractMethodImpl) {
+      if (Option::WholeProgram && !func->hasImpl() && needAbstractMethodImpl) {
         FunctionScopePtr tmpFunc =
           cls->findFunction(ar, func->getName(), true, true);
         always_assert(!tmpFunc || !tmpFunc->hasImpl());
@@ -853,9 +856,11 @@ struct OptVisitor {
   OptVisitor(AnalysisResultPtr ar, unsigned nscope) :
       m_ar(ar), m_nscope(nscope), m_dispatcher(0) {
   }
-  OptVisitor(const Visitor &po) : m_ar(po.m_ar),
-                                  m_nscope(po.m_nscope),
-                                  m_dispatcher(po.m_dispatcher) {
+  /* implicit */ OptVisitor(const Visitor &po)
+    : m_ar(po.m_ar)
+    , m_nscope(po.m_nscope)
+    , m_dispatcher(po.m_dispatcher)
+  {
     const_cast<Visitor&>(po).m_dispatcher = 0;
   }
   ~OptVisitor() {

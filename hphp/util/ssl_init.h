@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_SSL_INIT_H__
-#define __HTTP_SSL_INIT_H__
+#ifndef incl_HPHP_HTTP_SSL_INIT_H_
+#define incl_HPHP_HTTP_SSL_INIT_H_
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,4 +29,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_SSL_INIT_H__
+#endif // incl_HPHP_HTTP_SSL_INIT_H_

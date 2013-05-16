@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ARRAY_UTIL_H__
-#define __HPHP_ARRAY_UTIL_H__
+#ifndef incl_HPHP_ARRAY_UTIL_H_
+#define incl_HPHP_ARRAY_UTIL_H_
 
-#include <runtime/base/complex_types.h>
-#include <util/hdf.h>
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,4 +206,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_UTIL_H__
+#endif // incl_HPHP_ARRAY_UTIL_H_

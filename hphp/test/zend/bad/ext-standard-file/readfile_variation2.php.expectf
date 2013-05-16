@@ -1,0 +1,20 @@
+*** Testing readfile() on soft link ***
+bool(true)
+line
+line of text
+line
+line of text
+line
+line of t
+int(50)
+
+*** Testing readfile() on hard link ***
+bool(true)
+line
+line of text
+line
+line of text
+line
+line of t
+int(50)
+Done

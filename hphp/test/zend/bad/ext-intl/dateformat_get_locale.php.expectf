@@ -1,0 +1,11 @@
+Creating IntlDateFormatter with locale = de-DE
+After call to get_locale :  locale= de_DE
+
+Creating IntlDateFormatter with locale = sl-IT-nedis
+After call to get_locale :  locale= sl
+
+Creating IntlDateFormatter with locale = en_UK
+After call to get_locale :  locale= en
+
+Creating IntlDateFormatter with locale = hi
+After call to get_locale :  locale= hi

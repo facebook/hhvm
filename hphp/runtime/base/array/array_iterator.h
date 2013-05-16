@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ARRAY_ITERATOR_H__
-#define __HPHP_ARRAY_ITERATOR_H__
+#ifndef incl_HPHP_ARRAY_ITERATOR_H_
+#define incl_HPHP_ARRAY_ITERATOR_H_
 
-#include <runtime/base/types.h>
-#include <runtime/base/util/smart_ptr.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/array/hphp_array.h>
-#include <util/min_max_macros.h>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/util/min_max_macros.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,10 +30,9 @@ struct TypedValue;
 class c_Vector;
 class c_Map;
 class c_StableMap;
+class c_Set;
 class c_Pair;
-namespace VM {
-  struct Iter;
-}
+struct Iter;
 
 /**
  * An iteration normally looks like this:
@@ -59,7 +58,7 @@ class ArrayIter {
    * Constructors.
    */
   ArrayIter();
-  ArrayIter(const ArrayData* data);
+  explicit ArrayIter(const ArrayData* data);
 
   enum NoInc { noInc = 0 };
   // Special constructor used by the VM. This constructor does not increment
@@ -81,26 +80,26 @@ class ArrayIter {
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
-  ArrayIter(CArrRef array);
+  explicit ArrayIter(CArrRef array);
   void reset();
 
  private:
   // not defined.
   // Either use ArrayIter(const ArrayData*) or
   //            ArrayIter(const HphpArray*, NoIncNonNull)
-  ArrayIter(const HphpArray*);
+  explicit ArrayIter(const HphpArray*);
   template <bool incRef>
   void objInit(ObjectData* obj);
 
  public:
-  ArrayIter(ObjectData* obj);
+  explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   enum TransferOwner { transferOwner };
   ArrayIter(Object& obj, TransferOwner);
 
   ~ArrayIter();
 
-  operator bool() { return !end(); }
+  explicit operator bool() { return !end(); }
   void operator++() { next(); }
 
   bool end() {
@@ -194,6 +193,10 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::StableMapType);
     return (c_StableMap*)((intptr_t)m_obj & ~1);
   }
+  c_Set* getSet() {
+    assert(hasCollection() && getCollectionType() == Collection::SetType);
+    return (c_Set*)((intptr_t)m_obj & ~1);
+  }
   c_Pair* getPair() {
     assert(hasCollection() && getCollectionType() == Collection::PairType);
     return (c_Pair*)((intptr_t)m_obj & ~1);
@@ -235,7 +238,7 @@ class ArrayIter {
   int m_version;
   Type m_itype;
 
-  friend struct VM::Iter;
+  friend struct Iter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -380,7 +383,7 @@ class FullPos {
  */
 class FullPosRange {
  public:
-  FullPosRange(FullPos* list) : m_fpos(list) {}
+  explicit FullPosRange(FullPos* list) : m_fpos(list) {}
   FullPosRange(const FullPosRange& other) : m_fpos(other.m_fpos) {}
   bool empty() const { return m_fpos == 0; }
   FullPos* front() const { assert(!empty()); return m_fpos; }
@@ -412,8 +415,8 @@ class MutableArrayIter : public FullPos {
 class MArrayIter : public FullPos {
  public:
   MArrayIter() { m_data = NULL; }
-  MArrayIter(const RefData* ref);
-  MArrayIter(ArrayData* data);
+  explicit MArrayIter(const RefData* ref);
+  explicit MArrayIter(ArrayData* data);
   ~MArrayIter();
 
   /**
@@ -433,49 +436,47 @@ class MArrayIter : public FullPos {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
     assert(data->getCount() <= 1 || data->noCopyOnWrite());
-    assert(!getResetFlag() && data->validFullPos(*this));
+    assert(!getResetFlag());
+    assert(data->validFullPos(*this));
     return data->getValueRef(m_pos);
   }
 
-  friend struct VM::Iter;
+  friend struct Iter;
 };
 
-namespace VM {
-  struct Iter {
-    ArrayIter& arr() {
-      return *(ArrayIter*)m_u;
-    }
-    MArrayIter& marr() {
-      return *(MArrayIter*)m_u;
-    }
-    bool init(TypedValue* c1);
-    bool minit(TypedValue* v1);
-    bool next();
-    bool mnext();
-    void free();
-    void mfree();
-   private:
-    // C++ won't let you have union members with constructors. So we get to
-    // implement unions by hand.
-    char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
-  } __attribute__ ((aligned(16)));
+struct Iter {
+  ArrayIter& arr() {
+    return *(ArrayIter*)m_u;
+  }
+  MArrayIter& marr() {
+    return *(MArrayIter*)m_u;
+  }
+  bool init(TypedValue* c1);
+  bool minit(TypedValue* v1);
+  bool next();
+  bool mnext();
+  void free();
+  void mfree();
+  private:
+  // C++ won't let you have union members with constructors. So we get to
+  // implement unions by hand.
+  char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
+} __attribute__ ((aligned(16)));
 
-  bool interp_init_iterator(Iter* it, TypedValue* c1);
-  bool interp_init_iterator_m(Iter* it, TypedValue* v1);
-  bool interp_iter_next(Iter* it);
-  bool interp_iter_next_m(Iter* it);
+bool interp_init_iterator(Iter* it, TypedValue* c1);
+bool interp_init_iterator_m(Iter* it, TypedValue* v1);
+bool interp_iter_next(Iter* it);
+bool interp_iter_next_m(Iter* it);
 
-  int64_t new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
-                       TypedValue* val);
-  int64_t new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
-                           TypedValue* val, TypedValue* key);
-  int64_t new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
+int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
+int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
+                           TypedValue* key);
+int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
-  int64_t iter_next(HPHP::VM::Iter* dest, TypedValue* val);
-  int64_t iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
-}
+int64_t iter_next(Iter* dest, TypedValue* val);
+int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_ITERATOR_H__
+#endif // incl_HPHP_ARRAY_ITERATOR_H_

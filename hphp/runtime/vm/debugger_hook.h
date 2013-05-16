@@ -14,34 +14,48 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_DEBUGGER_HOOK_H_
-#define incl_DEBUGGER_HOOK_H_
+#ifndef incl_HPHP_DEBUGGER_HOOK_H_
+#define incl_HPHP_DEBUGGER_HOOK_H_
 
-#include <util/base.h>
+#include "hphp/util/base.h"
 
 namespace HPHP {
 namespace Eval{
-class DebuggerProxyVM;
+class DebuggerProxy;
 class PhpFile;
 }}
 
+///////////////////////////////////////////////////////////////////////////////
+// This is a set of functions which are primarily called from the VM to notify
+// the debugger about various events. Some of the implementations also interact
+// with the VM to setup further notifications, though this is not the only place
+// the debugger interacts directly with the VM.
+
 namespace HPHP {
-namespace VM {
 
-void phpDebuggerHook(const uchar* pc);
-void phpExceptionHook(ObjectData* e);
-
+// "Hooks" called by the VM at various points during program execution while
+// debugging to give the debugger a chance to act. The debugger may block
+// execution indefinitely within one of these hooks.
+void phpDebuggerOpcodeHook(const uchar* pc);
+void phpDebuggerExceptionHook(ObjectData* e);
 void phpDebuggerEvalHook(const Func* f);
-void phpBreakPointHook(Eval::DebuggerProxyVM* proxy);
-void phpFileLoadHook(Eval::PhpFile* efile);
-
+void phpDebuggerFileLoadHook(Eval::PhpFile* efile);
 class Class;
 class Func;
-void phpDefClassHook(const Class* cls);
-void phpDefFuncHook(const Func* func);
+void phpDebuggerDefClassHook(const Class* cls);
+void phpDebuggerDefFuncHook(const Func* func);
 
+// Helper to apply pending breakpoints to all files.
+void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy);
+
+// Add/remove breakpoints at a specific offset.
+void phpAddBreakPoint(const Unit* unit, Offset offset);
+void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+
+// Is this thread being debugged?
 static inline bool isDebuggerAttached() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debugger;
+  return ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getDebugger();
 }
 
 #define DEBUGGER_ATTACHED_ONLY(code) do {                             \
@@ -50,53 +64,69 @@ static inline bool isDebuggerAttached() {
   }                                                                   \
 } while(0)                                                            \
 
-#define DEBUGGER_FORCE_INTR  \
-  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debuggerIntr)
+// Is this process being debugged?
+bool isDebuggerAttachedProcess();
 
+// This flag ensures two things: first, that we stay in the interpreter and
+// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
+// debugger interrupts for every opcode executed (modulo filters.)
+#define DEBUGGER_FORCE_INTR  \
+  (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.getDebuggerIntr())
+
+// Map which holds a set of PCs and supports reasonably fast addition and
+// lookup. Used by the debugger to decide if a given PC falls within an
+// interesting area, e.g., for breakpoints and stepping.
+class PCFilter {
+private:
+  // Radix-tree implementation of pointer map
+  struct PtrMapNode;
+  class PtrMap {
 #define PTRMAP_PTR_SIZE       (sizeof(void*) * 8)
 #define PTRMAP_LEVEL_BITS     8LL
 #define PTRMAP_LEVEL_ENTRIES  (1LL << PTRMAP_LEVEL_BITS)
 #define PTRMAP_LEVEL_MASK     (PTRMAP_LEVEL_ENTRIES - 1LL)
 
-bool isDebuggerAttachedProcess();
+  public:
+    PtrMap() {
+      static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
+                    "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
+      m_root = MakeNode();
+    }
+    ~PtrMap();
+    void setPointer(void* ptr, void* val);
+    void* getPointer(void* ptr);
+    void clear();
 
-class PtrMapNode;
-class PtrMap {
-  // Radix-tree implementation of pointer map
-public:
-  PtrMap() {
-    static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
-                  "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
-    m_root = MakeNode();
-  }
-  ~PtrMap();
-  void setPointer(void* ptr, void* val);
-  void* getPointer(void* ptr);
-  void clear();
+  private:
+    PtrMapNode* m_root;
+    static PtrMapNode* MakeNode();
+  };
 
-private:
-  PtrMapNode* m_root;
-  static PtrMapNode* MakeNode();
-};
-
-class PCFilter {
-private:
   PtrMap m_map;
 
 public:
   PCFilter() {}
+
+  // Add/remove offsets, either individually or by range.
   int addRanges(const Unit* unit, const OffsetRangeVec& offsets);
+  void removeOffset(const Unit* unit, Offset offset);
+
+  // Add/remove/check explicit PCs.
   void addPC(const uchar* pc) {
     m_map.setPointer((void*)pc, (void*)pc);
+  }
+  void removePC(const uchar* pc) {
+    m_map.setPointer((void*)pc, nullptr);
   }
   bool checkPC(const uchar* pc) {
     return m_map.getPointer((void*)pc) == (void*)pc;
   }
+
   void clear() {
     m_map.clear();
   }
 };
 
-}}      // namespace HPHP::VM
+}      // namespace HPHP::VM
 
-#endif /* incl_DEBUGGER_HOOK_H_ */
+#endif /* incl_HPHP_DEBUGGER_HOOK_H_ */

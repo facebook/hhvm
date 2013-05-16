@@ -1,0 +1,85 @@
+*** Testing posix_strerror() : usage variations ***
+HipHop Notice: %a
+HipHop Notice: %a
+
+Arg value 10.5 
+string
+
+Arg value -10.5 
+string
+
+Arg value 101234567000 
+string
+
+Arg value 1.07654321E-9 
+string
+
+Arg value 0.5 
+string
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+boolean
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+boolean
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+boolean
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+boolean
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+boolean
+
+Arg value  
+string
+
+Arg value  
+string
+
+Arg value 1 
+string
+
+Arg value  
+string
+
+Arg value 1 
+string
+
+Arg value  
+string
+
+Arg value  
+HipHop Warning: %a
+boolean
+
+Arg value  
+HipHop Warning: %a
+boolean
+
+Arg value string 
+HipHop Warning: %a
+boolean
+
+Arg value string 
+HipHop Warning: %a
+boolean
+
+Arg value  
+string
+
+Arg value  
+string
+
+HipHop Fatal error: %a

@@ -1,0 +1,9 @@
+*** Testing session_cache_limiter() : variation ***
+string(7) "nocache"
+bool(true)
+string(7) "nocache"
+string(7) "nocache"
+string(6) "public"
+bool(true)
+string(6) "public"
+Done

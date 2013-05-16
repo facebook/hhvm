@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/file/ssl_socket.h>
-#include <runtime/base/complex_types.h>
-#include <util/util.h>
+#include "hphp/runtime/base/file/ssl_socket.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/util/util.h"
 #include <poll.h>
 
 namespace HPHP {
@@ -487,19 +487,20 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
       return false;
     }
 
-    bool match = (strcmp(cnmatch, buf) == 0);
+    bool match = (strcmp(cnmatch.c_str(), buf) == 0);
     if (!match && strlen(buf) > 3 && buf[0] == '*' && buf[1] == '.') {
       /* Try wildcard */
       if (strchr(buf+2, '.')) {
-        const char *tmp = strstr(cnmatch, buf+1);
-        match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
+        const char* cnmatch_str = cnmatch.c_str();
+        const char *tmp = strstr(cnmatch_str, buf+1);
+        match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch_str, '.');
       }
     }
 
     if (!match) {
       /* didn't match */
       raise_warning("Peer certificate CN=`%.*s' did not match expected CN=`%s'",
-                    name_len, buf, cnmatch.data());
+                    name_len, buf, cnmatch.c_str());
       return false;
     }
   }

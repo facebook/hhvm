@@ -81,6 +81,16 @@ frame_local_inner(const ActRec* fp, int n) {
   return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
 }
 
+/*
+ * 'Unwinding' versions of the below frame_free_locals_* functions
+ * zero locals and the $this pointer.
+ *
+ * This is necessary during unwinding because another object being
+ * destructed by the unwind may decide to do a debug_backtrace and
+ * read a destructed value.
+ */
+
+template<bool unwinding>
 inline void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   assert(numLocals == fp->m_func->numLocals());
@@ -106,32 +116,46 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
+      if (unwinding) {
+        tvWriteUninit(loc);
+      }
       tvDecRefHelper(t, datum);
     }
   }
 }
 
+template<bool unwinding>
 inline void ALWAYS_INLINE
 frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
+    if (unwinding) {
+      fp->setThis(nullptr);
+    }
     decRefObj(this_);
   }
-  frame_free_locals_helper_inl(fp, numLocals);
+  frame_free_locals_helper_inl<unwinding>(fp, numLocals);
 }
 
 inline void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals) {
-  frame_free_locals_inl_no_hook(fp, numLocals);
+  frame_free_locals_inl_no_hook<false>(fp, numLocals);
+  EventHook::FunctionExit(fp);
+}
+
+inline void ALWAYS_INLINE
+frame_free_locals_unwind(ActRec* fp, int numLocals) {
+  frame_free_locals_inl_no_hook<true>(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
 inline void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
-  frame_free_locals_helper_inl(fp, numLocals);
+  frame_free_locals_helper_inl<false>(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
+// Helper for iopFCallBuiltin.
 inline void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
   for (int i = 0; i < count; i++) {
@@ -139,10 +163,13 @@ frame_free_args(TypedValue* args, int count) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
+      // We don't have to write KindOfUninit here, because a
+      // debug_backtrace wouldn't be able to see these slots (they are
+      // stack cells).  But note we're also relying on the destructors
+      // not throwing.
       tvDecRefHelper(t, datum);
     }
   }
-
 }
 
 Unit*

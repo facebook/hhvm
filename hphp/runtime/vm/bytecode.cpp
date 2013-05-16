@@ -1026,10 +1026,15 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
      *
      *   - Finally, the exit hook for the returning function can
      *     throw, but this happens last so everything is destructed.
+     *
      */
     if (!unwindingReturningFrame) {
       try {
-        frame_free_locals_inl(fp, func->numLocals());
+        // Note that we must convert locals and the $this to
+        // uninit/zero during unwind.  This is because a backtrace
+        // from another destructing object during this unwind may try
+        // to read them.
+        frame_free_locals_unwind(fp, func->numLocals());
       } catch (...) {}
     }
     ndiscard(func->numSlotsInFrame());

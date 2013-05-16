@@ -164,7 +164,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
     Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
     if (doneFlag.toBoolean()) {
-      frame_free_locals_inl_no_hook(ar, ar->m_func->numLocals());
+      frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
       Stack& stack = g_vmContext->getStack();
       stack.top() = (Cell*)(ar + 1);
       tvDup(ret.asTypedValue(), stack.allocTV());

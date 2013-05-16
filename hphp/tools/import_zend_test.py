@@ -177,6 +177,7 @@ bad_tests = (
     '/ext-standard-strings/setlocale_basic3.php',
     '/ext-standard-file/filetype_variation2.php',
     '/ext-standard-file/filetype_variation3.php',
+    '/ext-sockets/ipv4loop.php',
 
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',

@@ -707,6 +707,8 @@ users can use the same machine serving their own source files.
     EnableXHP = true         # XHP extension
     NativeXHP = true         # Use HPHP to directly handle XHP
 
+    VMStackElms = 16384      # Maximum stack size
+
     # debugger
     Debugger {
       EnableDebugger = false

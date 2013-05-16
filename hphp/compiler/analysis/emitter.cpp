@@ -5319,15 +5319,17 @@ void EmitterVisitor::emitPostponedMeths() {
 
     m_curFunc = fe;
 
-    if (fe->isClosureBody()) {
+    if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
       // We are going to keep the closure as the first local
       fe->allocVarId(StringData::GetStaticString("0Closure"));
 
-      ClosureUseVarVec* useVars = p.m_closureUseVars;
-      for (auto& useVar : *useVars) {
-        // These are all locals. I want them right after the params so I don't
-        // have to keep track of which one goes where at runtime.
-        fe->allocVarId(useVar.first);
+      if (fe->isClosureBody()) {
+        ClosureUseVarVec* useVars = p.m_closureUseVars;
+        for (auto& useVar : *useVars) {
+          // These are all locals. I want them right after the params so I don't
+          // have to keep track of which one goes where at runtime.
+          fe->allocVarId(useVar.first);
+        }
       }
     }
 

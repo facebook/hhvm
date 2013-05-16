@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
-
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/return_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -46,6 +44,8 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/alias_manager.h"
+
+#include "hphp/runtime/base/complex_types.h"
 
 #include "hphp/util/parser/parser.h"
 #include "hphp/util/util.h"
@@ -389,8 +389,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
       if (ExpressionListPtr params = orig->getParams()) {
         for (int i = 0; i < params->getCount(); ++i) {
           auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-          Symbol *gp = variables->addDeclaredSymbol(
-            param->getName(), ConstructPtr());
+          Symbol *gp = variables->addDeclaredSymbol(param->getName(), param);
           gp->setGeneratorParameter();
           if (param->isRef()) {
             gp->setRefGeneratorParameter();

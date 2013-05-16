@@ -1931,6 +1931,7 @@ static_scalar:
   | '-' static_scalar                  { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
+  | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
     static_shape_pair_list ')'         { only_in_hh_syntax(_p);
                                          _p->onArray($$,$3,T_ARRAY); }

@@ -5873,7 +5873,7 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
       return false;
     }
     // in sandbox mode, don't emit FCallBuiltin for redefinable functions
-    if (func->ignoreRedefinition() && !Option::WholeProgram) {
+    if (func->allowOverride() && !Option::WholeProgram) {
       return false;
     }
     return true;

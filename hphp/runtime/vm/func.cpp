@@ -654,6 +654,11 @@ void Func::setCached() {
   setCachedFunc(this, isDebuggerAttached());
 }
 
+bool Func::isAllowOverride() const {
+  return shared()->m_info &&
+    (shared()->m_info->attribute & ClassInfo::AllowOverride);
+}
+
 const Func* Func::getGeneratorBody(const StringData* name) const {
   if (isNonClosureMethod()) {
     return cls()->lookupMethod(name);

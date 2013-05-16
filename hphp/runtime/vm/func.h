@@ -347,10 +347,7 @@ struct Func {
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
-  bool isIgnoreRedefinition() const {
-    return shared()->m_info &&
-    (shared()->m_info->attribute & ClassInfo::IgnoreRedefinition);
-  }
+  bool isAllowOverride() const;
   const BuiltinFunction& nativeFuncPtr() const {
     return shared()->m_nativeFuncPtr;
   }

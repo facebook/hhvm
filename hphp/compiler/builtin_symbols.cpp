@@ -203,8 +203,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::NeedsActRec) {
     f->setNeedsActRec();
   }
-  if ((attrs & ClassInfo::IgnoreRedefinition) && !isMethod) {
-    f->setIgnoreRedefinition();
+  if ((attrs & ClassInfo::AllowOverride) && !isMethod) {
+    f->setAllowOverride();
   }
 
   FunctionScope::RecordFunctionInfo(f->getName(), f);

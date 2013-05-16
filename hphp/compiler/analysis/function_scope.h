@@ -222,10 +222,10 @@ public:
   void setNeedsActRec();
 
   /*
-   * If this is a builtin and can be redefined
+   * If this is a builtin (C++ or PHP) and can be redefined
    */
-  bool ignoreRedefinition() const;
-  void setIgnoreRedefinition();
+  bool allowOverride() const;
+  void setAllowOverride();
 
   /**
    * Whether this function is a runtime helper function

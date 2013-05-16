@@ -52,7 +52,7 @@ public:
     IsInherited            = (1 << 10), //                         x
     HasCall                = IsPublic,  //    x
     HasCallStatic          = IsProtected,//   x
-    IgnoreRedefinition     = IsPrivate, //                  x
+    AllowOverride          = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
     IsConstructor          = (1 << 12), //                         x
 

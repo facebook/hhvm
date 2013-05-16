@@ -121,7 +121,7 @@ define('IsFinal',                        1 <<  5);
 define('IsPublic',                       1 <<  6);
 define('IsProtected',                    1 <<  7);
 define('IsPrivate',                      1 <<  8);
-define('IgnoreRedefinition',             1 <<  8);
+define('AllowOverride',                  1 <<  8);
 define('IsStatic',                       1 <<  9);
 // FIXME (#2163116): IsInherited = (1 << 10) in base_class.h
 define('IsCppAbstract',                  1 << 10);
@@ -162,7 +162,7 @@ function get_flag_names($arr, $name, $global_func) {
   if ($flag & IsPublic              ) $ret .= ' | IsPublic'              ;
   if ($flag & IsProtected           ) $ret .= ' | IsProtected'           ;
   if ($global_func) {
-    if ($flag & IgnoreRedefinition  ) $ret .= ' | IgnoreRedefinition'    ;
+    if ($flag & AllowOverride       ) $ret .= ' | AllowOverride'         ;
   } else {
     if ($flag & IsPrivate           ) $ret .= ' | IsPrivate'             ;
   }

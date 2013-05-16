@@ -1266,7 +1266,7 @@ const int64_t k_PHP_URL_PORT = 2;
 const int64_t k_PHP_URL_QUERY = 6;
 const int64_t k_PHP_URL_SCHEME = 0;
 const int64_t k_PHP_URL_USER = 3;
-extern const StaticString k_PHP_VERSION("5.3.3.hiphop",12);
+extern const StaticString k_PHP_VERSION("5.4.999-hiphop",14);
 const int64_t k_PKCS7_BINARY = 128;
 const int64_t k_PKCS7_DETACHED = 64;
 const int64_t k_PKCS7_NOATTR = 256;
@@ -18735,7 +18735,7 @@ const char *g_class_map[] = {
   "PHP_URL_QUERY", (const char*)4, "i:6;",
   "PHP_URL_SCHEME", (const char*)4, "i:0;",
   "PHP_URL_USER", (const char*)4, "i:3;",
-  "PHP_VERSION", (const char*)20, "s:12:\"5.3.3.hiphop\";",
+  "PHP_VERSION", (const char*)22, "s:14:\"5.4.999-hiphop\";",
   "PKCS7_BINARY", (const char*)6, "i:128;",
   "PKCS7_DETACHED", (const char*)5, "i:64;",
   "PKCS7_NOATTR", (const char*)6, "i:256;",

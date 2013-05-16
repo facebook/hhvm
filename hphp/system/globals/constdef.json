@@ -4999,7 +4999,7 @@
         },
         {
             "name": "PHP_VERSION",
-            "value": "5.3.3.hiphop"
+            "value": "5.4.999-hiphop"
         },
         {
             "name": "PKCS7_BINARY",

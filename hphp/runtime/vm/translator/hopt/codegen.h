@@ -117,9 +117,15 @@ struct CodeGenerator {
 
   CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
                 CodegenState& state)
-    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state),
-      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace),
-      m_curBcOff(-1){
+    : m_as(as)
+    , m_astubs(astubs)
+    , m_tx64(tx64)
+    , m_state(state)
+    , m_regs(state.regs)
+    , m_rScratch(InvalidReg)
+    , m_curInst(nullptr)
+    , m_curTrace(trace)
+    , m_curBcOff(-1) {
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -254,8 +260,15 @@ private:
   bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
 
 private:
+  PhysReg selectScratchReg(IRInstruction* inst);
+  void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg);
+  PhysReg prepXMMReg(const SSATmp* tmp,
+                     X64Assembler& as,
+                     const RegAllocInfo& allocInfo,
+                     RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
+  void doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
@@ -357,6 +370,7 @@ private:
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
   const RegAllocInfo& m_regs;
+  Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   Trace*              m_curTrace;
   uint32_t            m_curBcOff; // offset of bytecode instr that produced

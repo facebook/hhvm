@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/base/util/exceptions.h"
-#include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/util/string_buffer.h"
 #include "hphp/util/logger.h"
 
@@ -108,17 +107,15 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
   std::string line(message.data(),
                    // Truncate to 512k
                    message.size() > (1<<19) ? (1<<19) : message.size());
-  if (RuntimeOption::ServerExecutionMode() ||
-      RuntimeOption::AlwaysEscapeLog) {
-    Logger::Error(line);
-  } else {
-    Logger::RawError(line);
 
+  Logger::Error(line);
+
+  if (!RuntimeOption::ServerExecutionMode() &&
+      Logger::UseLogFile && Logger::Output) {
     // otherwise errors will go to error log without displaying on screen
-    if (Logger::UseLogFile && Logger::Output) {
-      std::cerr << line;
-    }
+    std::cerr << line;
   }
+
   return true;
 }
 

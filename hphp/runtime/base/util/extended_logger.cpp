@@ -51,15 +51,7 @@
       }                                                                \
     }                                                                  \
     Logger::Log(Log ## LOGLEVEL, msg, nullptr, true);                  \
-  }                                                                    \
-  void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
-    if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(Log ## LOGLEVEL, msg, nullptr, false);                 \
-    if (RuntimeOption::InjectedStackTrace &&                           \
-        !ExtendedLogger::EnabledByDefault) {                           \
-      Log(Log ## LOGLEVEL, g_vmContext->debugBacktrace());            \
-    }                                                                  \
-  }                                                                    \
+  }
 
 namespace HPHP {
 

@@ -39,12 +39,6 @@ public:
   static void Info(const char *fmt, ...);
   static void Verbose(const char *fmt, ...);
 
-  // Log messages without escaping.
-  static void RawError(const std::string &msg);
-  static void RawWarning(const std::string &msg);
-  static void RawInfo(const std::string &msg);
-  static void RawVerbose(const std::string &msg);
-
   // Log additional injected stacktrace.
   static void Log(LogLevelType level, CArrRef stackTrace, bool escape = true,
                   bool escapeMore = false);

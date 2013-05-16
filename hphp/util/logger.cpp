@@ -23,7 +23,7 @@
 #include "hphp/util/text_color.h"
 #include <syslog.h>
 
-#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                               \
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
     va_list ap; va_start(ap, fmt);                                      \
@@ -32,12 +32,8 @@
   }                                                                     \
   void Logger::LOGLEVEL(const std::string &msg) {                       \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(Log ## LOGLEVEL, msg, nullptr);                                    \
-  }                                                                     \
-  void Logger::Raw ## LOGLEVEL(const std::string &msg) {                \
-    if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(Log ## LOGLEVEL, msg, nullptr, false);                             \
-  }                                                                     \
+    Log(Log ## LOGLEVEL, msg, nullptr);                                 \
+  }
 
 namespace HPHP {
 
@@ -64,6 +60,7 @@ bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
 std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
+bool Logger::Escape = true;
 IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 Logger *Logger::s_logger = new Logger();
@@ -117,7 +114,7 @@ void Logger::ResetRequestCount() {
 
 void Logger::Log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
-                 bool escape /* = true */, bool escapeMore /* = false */) {
+                 bool escape /* = false */, bool escapeMore /* = false */) {
   s_logger->log(level, msg, stackTrace, escape, escapeMore);
 }
 
@@ -137,8 +134,13 @@ int Logger::GetSyslogLevel(LogLevelType level) {
 
 void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
-                 bool escape /* = true */, bool escapeMore /* = false */) {
+                 bool escape /* = false */, bool escapeMore /* = false */) {
+
+  if (Logger::Escape) {
+    escape = true;
+  }
   assert(!escapeMore || escape);
+
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {

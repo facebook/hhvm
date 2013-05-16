@@ -583,12 +583,31 @@ static void pagein_self(void) {
   free(buf);
 }
 
+/* Sets RuntimeOption::ExecutionMode according
+ * to commandline options prior to config load
+ */
+static void set_execution_mode(string mode) {
+  if (mode == "daemon" || mode == "server" || mode == "replay") {
+    RuntimeOption::ExecutionMode = "srv";
+    Logger::Escape = true;
+  } else if (mode == "run" || mode == "debug") {
+    RuntimeOption::ExecutionMode = "cli";
+    Logger::Escape = false;
+  } else if (mode == "translate") {
+    RuntimeOption::ExecutionMode = "";
+    Logger::Escape = false;
+  } else {
+    // Undefined mode
+    always_assert(false);
+  }
+}
+
 static int start_server(const std::string &username) {
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
   pagein_self();
 
-  RuntimeOption::ExecutionMode = "srv";
+  set_execution_mode("server");
   HttpRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
      username);
@@ -759,22 +778,6 @@ static void close_server_log_file(int kind) {
     pclose(Logger::Output);
   } else {
     always_assert(!Logger::Output);
-  }
-}
-
-/* Sets RuntimeOption::ExecutionMode according
- * to commandline options prior to config load
- */
-static void set_execution_mode(string mode) {
-  if (mode == "daemon" || mode == "server" || mode == "replay") {
-    RuntimeOption::ExecutionMode = "srv";
-  } else if (mode == "run" || mode == "debug") {
-    RuntimeOption::ExecutionMode = "cli";
-  } else if (mode == "translate") {
-    RuntimeOption::ExecutionMode = "";
-  } else {
-    // Undefined mode
-    always_assert(false);
   }
 }
 
@@ -1030,7 +1033,7 @@ static int execute_program_impl(int argc, char **argv) {
       tempFile = po.file;
     }
 
-    RuntimeOption::ExecutionMode = "cli";
+    set_execution_mode("run");
 
     int new_argc;
     char **new_argv;
@@ -1113,7 +1116,7 @@ static int execute_program_impl(int argc, char **argv) {
 
   if (po.mode == "replay" && !po.args.empty()) {
     RuntimeOption::RecordInput = false;
-    RuntimeOption::ExecutionMode = "srv";
+    set_execution_mode("server");
     HttpServer server; // so we initialize runtime properly
     HttpRequestHandler handler;
     for (int i = 0; i < po.count; i++) {

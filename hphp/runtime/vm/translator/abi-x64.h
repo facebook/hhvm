@@ -245,11 +245,8 @@ const int kNumServiceReqArgRegs =
   REQ(STACK_OVERFLOW) \
   \
   /*
-   * When HHIR is in use, this requests a retranslation that does not use HHIR.
-   * This is only used when HHIR is turned on.
-   *
-   * Note that, when EvalJitUseIR is enabled, RETRANSLATE requests will attempt
-   * to use HHIR.
+   * This requests a retranslation that does not use HHIR, meaning it
+   * will be an INTERPRET service request.
    */ \
   REQ(RETRANSLATE_NO_IR) \
   \

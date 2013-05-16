@@ -1444,15 +1444,16 @@ TranslatorX64::lookupTranslation(SrcKey sk) const {
 
 TCA
 TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
-  bool useHHIR = allowIR && RuntimeOption::EvalJitUseIR;
+  bool useHHIR = allowIR;
   INC_TPC(translate);
   assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assert(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
   if (useHHIR) {
-    if (m_numHHIRTrans == RuntimeOption::EvalMaxHHIRTrans) {
+    if (m_numHHIRTrans == RuntimeOption::EvalMaxTrans) {
       useHHIR = m_useHHIR = false;
-      RuntimeOption::EvalJitUseIR = false;
+      RuntimeOption::EvalJit = false;
+      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
     } else {
       m_useHHIR = true;
     }
@@ -1468,7 +1469,7 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
 
   TCA start = a.code.frontier;
   m_lastHHIRPunt.clear();
-  translateTracelet(sk, m_useHHIR || RuntimeOption::EvalHHIRDisableTx64);
+  translateTracelet(sk, true);
 
   SKTRACE(1, sk, "translate moved head from %p to %p\n",
           getTopTranslation(sk), start);
@@ -10878,10 +10879,6 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   Stats::emitInc(a, Stats::TC_TypePredHit);
 }
 
-static void failedTypePred() {
-  raise_error("A type prediction was incorrect");
-}
-
 void
 TranslatorX64::translateInstrWork(const Tracelet& t,
                                   const NormalizedInstruction& i) {
@@ -10904,146 +10901,7 @@ TranslatorX64::translateInstrWork(const Tracelet& t,
 void
 TranslatorX64::translateInstr(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  /**
-   * translateInstr() translates an individual instruction in a tracelet,
-   * either by directly emitting machine code for that instruction or by
-   * emitting a call to the interpreter.
-   *
-   * If the instruction ends the current tracelet, we must emit machine code
-   * to transfer control to some target that will continue to make forward
-   * progress. This target may be the beginning of another tracelet, or it may
-   * be a translator service request. Before transferring control, a tracelet
-   * must ensure the following invariants hold:
-   *   1) The machine registers rVmFp and rVmSp are in sync with vmfp()
-   *      and vmsp().
-   *   2) All "dirty" values are synced in memory. This includes the
-   *      evaluation stack, locals, globals, statics, and any other program
-   *      accessible locations. This also means that all refcounts must be
-   *      up to date.
-   */
-  assert(!m_useHHIR);
-  assert(!(RuntimeOption::EvalJitUseIR && RuntimeOption::EvalHHIRDisableTx64));
-  assert(!i.outStack || i.outStack->isStack());
-  assert(!i.outLocal || i.outLocal->isLocal());
-  const char *opNames[] = {
-#define O(name, imm, push, pop, flags) \
-#name,
-  OPCODES
-#undef O
-  };
-  SpaceRecorder sr(opNames[i.op()], a);
-  SKTRACE(1, i.source, "translate %#lx\n", long(a.code.frontier));
-  const Opcode op = i.op();
-
-  TCA start = a.code.frontier;
-  TCA astart = astubs.code.frontier;
-
-  m_regMap.bumpEpoch();
-  // Allocate the input regs upfront unless instructed otherwise
-  // or the instruction is interpreted
-  if (!i.manuallyAllocInputs && i.m_txFlags) {
-    m_regMap.allocInputRegs(i);
-  }
-
-  if (debug) {
-    for (unsigned j = 0; j < i.inputs.size(); j++) {
-      if (i.inputWasInferred(j)) {
-        DynLocation* dl = i.inputs[j];
-        assert(dl->rtt.isValue() &&
-               !dl->rtt.isVagueValue() &&
-               dl->outerType() != KindOfInvalid);
-        PhysReg base;
-        int disp;
-        locToRegDisp(dl->location, &base, &disp);
-        DataType type = dl->rtt.typeCheckValue();
-        emitTypeCheck(a, type, base, disp);
-        ConditionCode cc = IS_STRING_TYPE(type) ? CC_Z : CC_NZ;
-        {
-          UnlikelyIfBlock typePredFailed(cc, a, astubs);
-          EMIT_CALL(astubs, failedTypePred);
-          recordReentrantStubCall(i);
-        }
-      }
-    }
-  }
-
-  if (!i.grouped) {
-    emitVariantGuards(t, i);
-    const NormalizedInstruction* n = &i;
-    while (n->next && n->next->grouped) {
-      n = n->next;
-      emitVariantGuards(t, *n);
-    }
-  }
-
-  // Allocate the input regs upfront unless instructed otherwise
-  // or the instruction is interpreted
-  if (!i.manuallyAllocInputs && i.m_txFlags) {
-    m_regMap.allocInputRegs(i);
-  }
-
-  if (i.m_txFlags == Interp || RuntimeOption::EvalThreadingJit) {
-    // If the problem is local to this instruction, just call out to
-    // the interpreter. emitInterpOne will perform end-of-tracelet duties
-    // if this instruction ends the tracelet.
-    SKTRACE(1, i.source, "Interp\n");
-    emitInterpOne(t, i);
-  } else {
-    // Actually translate the instruction's body.
-    Stats::emitIncTranslOp(a, op, RuntimeOption::EnableInstructionCounts);
-    translateInstrWork(t, i);
-  }
-
-  // Invalidate locations that are no longer live
-  for (unsigned k = 0; k < i.deadLocs.size(); ++k) {
-    const Location& l = i.deadLocs[k];
-    m_regMap.invalidate(l);
-  }
-
-  // Kill any live regs that won't be of further use in this trace.
-  RegSet live = m_regMap.getRegsLike(RegInfo::DIRTY) |
-    m_regMap.getRegsLike(RegInfo::CLEAN);
-  PhysReg pr;
-  while (live.findFirst(pr)) {
-    live.remove(pr);
-    const RegInfo* ri = m_regMap.getInfo(pr);
-    assert(ri->m_state == RegInfo::CLEAN || ri->m_state == RegInfo::DIRTY);
-    bool dirty = ri->m_state == RegInfo::DIRTY;
-    if (ri->m_cont.m_kind != RegContent::Loc) continue;
-    const Location loc = ri->m_cont.m_loc;
-    // These heuristics do poorly on stack slots, which are more like
-    // ephemeral temps.
-    if (loc.space != Location::Local) continue;
-    if (false && dirty && !t.isWrittenAfterInstr(loc, i)) {
-      // This seems plausible enough: the intuition is that carrying aroud
-      // a register we'll read, but not write, in a dirty state, has a cost
-      // because any control-flow diamonds will have to spill it and then
-      // refill it. It appears to hurt performance today, though.
-      m_regMap.cleanLoc(loc);
-    }
-    if (t.isLiveAfterInstr(loc, i)) continue;
-    SKTRACE(1, i.source, "killing %s reg %d for (%s, %d)\n",
-            dirty ? "dirty" : "clean", (int)pr, loc.spaceName(), loc.offset);
-    if (dirty) {
-       m_regMap.cleanLoc(loc);
-    }
-    assert(ri->m_state == RegInfo::CLEAN);
-    m_regMap.smashLoc(loc);
-  }
-
-  emitPredictionGuards(i);
-  recordBCInstr(op, a, start);
-  recordBCInstr(op + Op_count, astubs, astart);
-
-  if (i.breaksTracelet && !i.changesPC) {
-    // If this instruction's opcode always ends the tracelet then the
-    // instruction case is responsible for performing end-of-tracelet
-    // duties. Otherwise, we handle ending the tracelet here.
-    syncOutputs(t);
-    emitBindJmp(t.m_nextSk);
-  }
-
-  m_regMap.assertNoScratch();
+  not_reached();
 }
 
 bool
@@ -11218,9 +11076,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
       // with more aggressive assumptions, or fall back to the
       // interpreter.
       if (considerHHIR) {
-        if (RuntimeOption::EvalHHIRDisableTx64) {
-          punt();
-        }
+        punt();
         // Recur. We need to re-analyze. Since m_useHHIR is clear, we
         // won't go down this path again.
         return translateTracelet(sk, false);

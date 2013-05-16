@@ -376,9 +376,6 @@ void TestDebugger::runServer() {
                            boost::lexical_cast<string>(m_debugPort);
   string jitConfig = "-vEval.Jit=" +
                      boost::lexical_cast<string>(RuntimeOption::EvalJit);
-  string jitUseIRConfig = "-vEval.JitUseIR=" +
-                          boost::lexical_cast<string>(
-                              RuntimeOption::EvalJitUseIR);
 
   // To emulate sandbox setup, let home to be "hphp/test", and user name to be
   // "debugger_tests", so that it can find the sandbox_conf there
@@ -395,7 +392,6 @@ void TestDebugger::runServer() {
                         adminPortConfig.c_str(),
                         debugPortConfig.c_str(),
                         jitConfig.c_str(),
-                        jitUseIRConfig.c_str(),
                         nullptr};
   printf("Running server with arguments:\n");
   for (unsigned i = 1; i < array_size(argv) - 1; ++i) {

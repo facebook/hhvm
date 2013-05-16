@@ -215,9 +215,7 @@ function mode_arg($options) {
   switch ($mode) {
     case '':
     case 'jit':
-      return "$jit_args -vEval.JitUseIR=0 -vEval.HHIRDisableTx64=0";
-    case 'hhir':
-      return "$jit_args -vEval.JitUseIR=1 -vEval.HHIRDisableTx64=1";
+      return "$jit_args";
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:

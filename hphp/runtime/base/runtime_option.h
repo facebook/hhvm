@@ -413,9 +413,7 @@ public:
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitMGeneric,                 true)                            \
-  F(bool, JitUseIR,                    true)                            \
   F(double, JitCompareHHIR,            0)                               \
-  F(bool, IRPuntDontInterp,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
@@ -435,8 +433,7 @@ public:
   F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
-  F(bool, HHIRDisableTx64,             true)                            \
-  F(uint64_t, MaxHHIRTrans,            -1)                              \
+  F(uint64_t, MaxTrans,                -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \

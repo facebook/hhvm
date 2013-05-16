@@ -1798,14 +1798,13 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       } catch (JIT::FailedIRGen& fcg) {
         // If we haven't tried interpreting ni yet, flag it to be interpreted
         // and retry
-        if (RuntimeOption::EvalHHIRDisableTx64 && !ni->interp &&
-            supportedInterpOne(ni)) {
+        if (!ni->interp && supportedInterpOne(ni)) {
           ni->interp = true;
           transResult = Retry;
           break;
         }
-        if (!RuntimeOption::EvalHHIRDisableTx64 || !ni->prev) {
-          // Let tx64 handle the entire tracelet.
+        if (!ni->prev) {
+          // Let the interpreter handle the entire tracelet.
           throw;
         }
         // We've made forward progress. Proceed with the partial tracelet,

@@ -2993,14 +2993,7 @@ void HhbcTranslator::emitInterpOneCF(int numPopped) {
 
 void HhbcTranslator::emitInterpOneOrPunt(Type type, int numPopped,
                                          int numExtraPushed) {
-  if (RuntimeOption::EvalIRPuntDontInterp) {
-    Op op = *(Op*)(getCurUnit()->entry() + bcOff());
-    const char* name = StringData::GetStaticString(
-      std::string("PuntDontInterp-") + opcodeToName(op))->data();
-    SPUNT(name);
-  } else {
-    emitInterpOne(type, numPopped, numExtraPushed);
-  }
+  emitInterpOne(type, numPopped, numExtraPushed);
 }
 
 /*

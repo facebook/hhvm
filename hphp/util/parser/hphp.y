@@ -892,7 +892,7 @@ class_namespace_string_typeargs:
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),1));
                                          }
-                                         $$ = $1;}
+                                         _p->onTypeAnnotation($$, $1, $2);}
 ;
 constant_declaration:
     constant_declaration ','
@@ -2433,7 +2433,7 @@ hh_type:
   | '@' hh_type                        { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization($2, '@');
                                          $$ = $2; }
-  | namespace_string hh_typeargs_opt   { _p->onTypeAnnotation($$, $1, $2); }
+  | class_namespace_string_typeargs    { $$ = $1; }
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }

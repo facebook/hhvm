@@ -127,12 +127,8 @@ bool TestExtOptions::test_get_extension_funcs() {
 }
 
 bool TestExtOptions::test_get_cfg_var() {
-  try {
-    f_get_cfg_var("");
-  } catch (const NotSupportedException& e) {
-    return Count(true);
-  }
-  return Count(false);
+  VERIFY(!f_get_cfg_var(""))
+  return Count(true);
 }
 
 bool TestExtOptions::test_get_current_user() {

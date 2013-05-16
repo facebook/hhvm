@@ -125,7 +125,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the current value of the PHP configuration variable specified by option, or FALSE if an error occurs."
             },
             "args": [

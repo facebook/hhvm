@@ -118,8 +118,8 @@ Array f_get_extension_funcs(CStrRef module_name) {
   throw NotSupportedException(__func__, "extensions are built differently");
 }
 
-String f_get_cfg_var(CStrRef option) {
-  throw NotSupportedException(__func__, "global configurations not used");
+Variant f_get_cfg_var(CStrRef option) {
+  return false;
 }
 
 String f_get_current_user() {

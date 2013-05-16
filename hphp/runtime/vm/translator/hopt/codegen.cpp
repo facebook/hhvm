@@ -741,15 +741,20 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
         break;
 
       case ArgDesc::TypeReg:
-        static_assert(kTypeWordOffset == 4 || kTypeWordOffset == 0,
+        static_assert(kTypeWordOffset == 4 || kTypeWordOffset == 1,
                       "kTypeWordOffset value not supported");
         // x86 stacks grow down, so push higher offset items first
         if (kTypeWordOffset == 4) {
           a.  pushl(r32(srcReg));
+          // 4 bytes of garbage:
           a.  pushl(eax);
         } else {
+          // 4 bytes of garbage:
           a.  pushl(eax);
-          a.  pushl(r32(srcReg));
+          // get the type in the right place in rScratch before pushing it
+          a.  movb (rbyte(srcReg), rbyte(rScratch));
+          a.  shll (CHAR_BIT, r32(rScratch));
+          a.  pushl(r32(rScratch));
         }
         break;
 

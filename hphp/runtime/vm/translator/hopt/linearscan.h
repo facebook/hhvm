@@ -195,12 +195,8 @@ RegAllocInfo allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* = nullptr);
 // +---------------+
 // |  return addr  |
 // +---------------+
-// |    extra      |  <-- spill[2]
-// |    spill      |  <-- spill[1]
-// |  locations    |  <-- spill[0]
-// +---------------+  <-- %rsp
-// If a spill location falls into the pre-allocated region, we
-// need to increase its index by 1 to avoid overwriting the
+//
+// We need to increase spill indexes by 1 to avoid overwriting the
 // return address.
 
 /*

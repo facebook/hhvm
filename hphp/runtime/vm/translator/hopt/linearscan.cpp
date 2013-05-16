@@ -146,8 +146,6 @@ private:
   static SSATmp* getSpilledTmp(SSATmp* tmp);
   static SSATmp* getOrigTmp(SSATmp* tmp);
   uint32_t assignSpillLoc();
-  void insertAllocFreeSpill(Trace* trace, uint32_t numExtraSpillLocs);
-  void insertAllocFreeSpillAux(Trace* trace, uint32_t numExtraSpillLocs);
   void rematerialize();
   void rematerializeAux();
   void removeUnusedSpills();
@@ -573,47 +571,6 @@ uint32_t LinearScan::assignSpillLoc() {
   return maxSpillLoc;
 }
 
-void LinearScan::insertAllocFreeSpill(Trace* trace,
-                                      uint32_t numExtraSpillLocs) {
-  insertAllocFreeSpillAux(trace, numExtraSpillLocs);
-  for (Trace* exit : trace->getExitTraces()) {
-    insertAllocFreeSpillAux(exit, numExtraSpillLocs);
-  }
-}
-
-void LinearScan::insertAllocFreeSpillAux(Trace* trace,
-                                         uint32_t numExtraSpillLocs) {
-  SSATmp* tmp = m_irFactory->gen(DefConst, Type::Int,
-    ConstData(numExtraSpillLocs))->getDst();
-
-  for (Block* block : trace->getBlocks()) {
-    for (auto it = block->begin(); it != block->end(); ) {
-      auto next = it; ++next;
-      IRInstruction& inst = *it;
-      Opcode opc = inst.op();
-      if (opc == Call) {
-        // Insert FreeSpill and AllocSpill around each Call.
-        IRInstruction* allocSpill = m_irFactory->gen(AllocSpill, tmp);
-        IRInstruction* freeSpill = m_irFactory->gen(FreeSpill, tmp);
-        block->insert(it, freeSpill);
-        block->insert(next, allocSpill);
-      } else if (opc == ExitTrace || opc == ExitSlow || opc == ExitTraceCc ||
-                 opc == ExitSlowNoProgress || opc == ExitGuardFailure ||
-                 opc == LdRetAddr) {
-        // Insert FreeSpill at trace exits.
-        IRInstruction* freeSpill = m_irFactory->gen(FreeSpill, tmp);
-        block->insert(it, freeSpill);
-      }
-      it = next;
-    }
-  }
-
-  // Insert AllocSpill at the start of the main trace.
-  if (trace->isMain()) {
-    trace->front()->prepend(m_irFactory->gen(AllocSpill, tmp));
-  }
-}
-
 void LinearScan::collectInfo(BlockList::iterator it, Trace* trace) {
   m_natives.clear();
   m_jmps.reset();
@@ -967,18 +924,7 @@ RegAllocInfo LinearScan::allocRegs(Trace* trace, LifetimeInfo* lifetime) {
     ++numSpillLocs;
   }
   if (numSpillLocs > (uint32_t)NumPreAllocatedSpillLocs) {
-    /*
-     * We only insert AllocSpill and FreeSpill when the pre-allocated
-     * spill locations are not enough.
-     *
-     * AllocSpill and FreeSpill take the number of extra spill locations
-     * besides the pre-allocated ones.
-     *
-     * TODO(#2044051) AllocSpill/FreeSpill are currently disabled
-     * due to bugs.
-     */
-    PUNT(LinearScan_AllocSpill);
-    insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
+    PUNT(LinearScan_TooManySpills);
   }
 
   if (m_slots.size()) genSpillStats(trace, numSpillLocs);

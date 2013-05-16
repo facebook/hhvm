@@ -416,8 +416,6 @@ O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
-O(AllocSpill,                       ND, C(Int),                        E|Mem) \
-O(FreeSpill,                        ND, C(Int),                        E|Mem) \
 O(CreateCont,                   D(Obj), C(TCA)                                \
                                           S(FramePtr)                         \
                                           C(Bool)                             \

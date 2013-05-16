@@ -2352,28 +2352,6 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
              m_regs[inst->getDst()].getReg());
 }
 
-void CodeGenerator::cgAllocSpill(IRInstruction* inst) {
-  SSATmp* numSlots = inst->getSrc(0);
-
-  assert(numSlots->isConst());
-  int64_t n = numSlots->getValInt();
-  assert(n >= 0 && n % 2 == 0);
-  if (n > 0) {
-    m_as.sub_imm32_reg64(spillSlotsToSize(n), reg::rsp);
-  }
-}
-
-void CodeGenerator::cgFreeSpill(IRInstruction* inst) {
-  SSATmp* numSlots = inst->getSrc(0);
-
-  assert(numSlots->isConst());
-  int64_t n = numSlots->getValInt();
-  assert(n >= 0 && n % 2 == 0);
-  if (n > 0) {
-    m_as.add_imm32_reg64(spillSlotsToSize(n), reg::rsp);
-  }
-}
-
 void CodeGenerator::cgSpill(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);

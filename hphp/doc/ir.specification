@@ -1258,15 +1258,6 @@ D:T = Reload S0:T
 
   Loads from a spilled temporary S0, and stores the result in D.
 
-AllocSpill S0:ConstInt
-
-  Allocates S0 slots of additional spill space on the stack.
-  Generated when the preallocated spill space is exhausted.
-
-FreeSpill S0:ConstInt
-
-  Deallocates S0 slots of spill space on the stack.
-
 
 16. Continuations & Closures
 

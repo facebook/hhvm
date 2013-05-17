@@ -903,6 +903,15 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
        (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
+  if (RuntimeOption::EvalJitEnableRenameFunction &&
+      !m_name->empty() &&
+      !Func::isSpecial(m_name) &&
+      !m_isClosureBody &&
+      !m_isGenerator) {
+    // intercepted functions need to pass all args through
+    // to the interceptee
+    attrs = attrs | AttrMayUseVV;
+  }
 
   if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
 

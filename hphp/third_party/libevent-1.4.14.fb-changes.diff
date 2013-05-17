@@ -1,3 +1,16 @@
+diff --git i/configure.in w/configure.in
+index 68d7987..c165529 100644
+--- i/configure.in
++++ w/configure.in
+@@ -3,7 +3,7 @@ dnl Dug Song <dugsong@monkey.org>
+ AC_INIT(event.c)
+ 
+ AM_INIT_AUTOMAKE(libevent,1.4.14b-stable)
+-AM_CONFIG_HEADER(config.h)
++AC_CONFIG_HEADERS(config.h)
+ dnl AM_MAINTAINER_MODE
+ 
+ AC_CANONICAL_HOST
 diff --git a/event.c b/event.c
 index 74ba5c4..06984b8 100644
 --- a/event.c

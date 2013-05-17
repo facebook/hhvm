@@ -4839,7 +4839,6 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   SSATmp* sp = inst->getSrc(1);
   SSATmp* pcOffTmp  = inst->getSrc(2);
   SSATmp* spAdjustmentTmp = inst->getSrc(3);
-  Type resultType = inst->getTypeParam();
   int64_t pcOff = pcOffTmp->getValInt();
 
   auto opc = *(getCurFunc()->unit()->at(pcOff));

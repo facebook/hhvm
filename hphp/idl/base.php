@@ -776,7 +776,7 @@ EOT
     fprintf($f, "  // constructor must call setAttributes(%s)\n",
             implode('|', $flags));
   }
-  fprintf($f, "  public: c_%s(VM::Class* cls = c_%s::s_cls);\n",
+  fprintf($f, "  public: c_%s(Class* cls = c_%s::s_cls);\n",
           $class['name'], $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
@@ -851,7 +851,10 @@ function generateFuncCPPImplementation($func, $f, $prefix = 'f_') {
   $output = '';
   $need_ret = false;
 
-  fprintf($f, '%s %s%s(', typename($func['return']), $prefix, $func['name']);
+  fprintf($f, '%s %s%s(',
+          typename($func['return']),
+          $prefix,
+          strtolower($func['name']));
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc');
   if ($var_arg && count($func['args']) > 0) fprintf($f, ', ');

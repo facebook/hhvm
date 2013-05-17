@@ -26,7 +26,22 @@ EOT
 
 sort($files);
 foreach ($files as $file) {
-  preg_match('%^(?:.*/([^/]*)/)?(.*)\.idl\.json$%', $file, $matches);
+  // Find the common prefix of our current path (which is
+  // $SOMETHING/hphp/idl) and whatever is on our command line
+  // (typically EXT= and FIND_IDL, both from make).  From here we know
+  // the prefix to use when constructing our #include's.
+  $file = realpath($file);
+  $cwd = realpath(getcwd()) . "/";
+  for ($i = strlen($cwd); $i >= 0; --$i) {
+    if (strncmp($cwd, $file, $i) === 0) {
+      $file = substr($file, $i);
+      break;
+    }
+  }
+  // Separate bar/quux/blah.idl.json into $prefix (bar/quux) and $name
+  // (blah) for generating the includes below.  If a prefix can't be
+  // determined, we assume it is under runtime/ext.
+  preg_match('%^(.*/)?(.*)\.idl\.json$%', $file, $matches);
   $prefix = $matches[1];
   $name = $matches[2];
   $ucname = $prefix ? camelCase($name) : ucfirst($name);

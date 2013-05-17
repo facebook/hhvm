@@ -1,9 +1,15 @@
 <?php
 
-chdir(preg_replace('#/hphp/tools/license.php$#', '/src', realpath(__FILE__)));
+error_reporting(E_ALL | E_STRICT | E_WARNING);
+
+$dir = preg_replace('#/hphp/tools/license.php$#', '/hphp', realpath(__FILE__));
+if (!chdir($dir)) {
+  print("Unable to chdir to $dir\n");
+  exit(1);
+}
 
 // parse all these files
-$inputs = 'find . -regex ".*\.cpp" -or -regex ".*\.c"   -or -regex ".*\.h"';
+$inputs = 'find . -name "*.cpp" -o -name "*.c" -o -name "*.h"';
 
 // do not touch these files
 $excluded = array(

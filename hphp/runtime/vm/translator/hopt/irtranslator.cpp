@@ -1567,6 +1567,10 @@ TranslatorX64::irTranslateInstrWork(const Tracelet& t,
   }
 }
 
+static bool isPop(Opcode opc) {
+  return opc == OpPopC || opc == OpPopR;
+}
+
 void
 TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
   assert(m_useHHIR);
@@ -1574,16 +1578,27 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
   if (!i.outStack || i.breaksTracelet) return;
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
+  JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
 
-  if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted) ||
-      (u == NormalizedInstruction::OutputInferred)) {
-    JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
-    if (u == NormalizedInstruction::OutputInferred) {
-      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output inferred as %s\n",
+  if (u == NormalizedInstruction::OutputInferred) {
+    TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
+          jitType.toString().c_str());
+    m_hhbcTrans->assertTypeStack(0, jitType);
+
+  } else if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
+    // If the value was predicted statically by the front-end, it
+    // means that it's either the predicted type or null.  In this
+    // case, if the predicted value is not ref-counted and it's simply
+    // going to be popped, then pass the information as an assertion
+    // that the type is not ref-counted.  This avoid both generating a
+    // type check and dec-refing the value.
+    if (i.outputPredictionStatic && isPop(i.next->op()) &&
+        !jitType.isCounted()) {
+      TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
             jitType.toString().c_str());
-      m_hhbcTrans->assertTypeStack(0, jitType);
+      m_hhbcTrans->assertTypeStack(0, JIT::Type::Uncounted);
     } else {
-      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output predicted as %s\n",
+      TRACE(1, "irPassPredictedAndInferredTypes: output predicted as %s\n",
             jitType.toString().c_str());
       m_hhbcTrans->checkTypeTopOfStack(jitType, i.next->offset());
     }

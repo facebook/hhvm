@@ -91,8 +91,8 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
       // delete label on these instructions if this is due to an
       // assertType and also handled LdClsCns.
       // TODO(#2035446): fix this for LdClsCns
-      assert(opc == LdLoc || opc == LdStack  ||
-             opc == LdMem || opc == LdProp ||
+      assert(opc == LdLoc || opc == LdStack ||
+             opc == LdMem || opc == LdProp  ||
              opc == LdRef);
       inst->setTypeParam(type);
       tmp->setType(type);

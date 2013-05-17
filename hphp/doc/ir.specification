@@ -337,7 +337,7 @@ GuardLoc<T,localId> S0:FramePtr
   the type T; if not, make a fallback jump.  (A jump to a service
   request that chains to a retranslation for this tracelet.)
 
-CheckLoc<T,localId> S0:FramePtr
+CheckLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
   branch to the label L.

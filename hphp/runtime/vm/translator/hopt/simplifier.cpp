@@ -531,27 +531,29 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
     if (hoistGuardToLoad(src, type)) {
       return src;
     }
-  } else {
-    if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
-      // If we're guarding against Str and srcType has StaticStr or CountedStr
-      // in it, refine the output type. This can happen when we have a
-      // KindOfString guard from Translator but internally we know a more
-      // specific subtype of Str.
-      FTRACE(1, "Guarding {} to {}\n", srcType.toString(), type.toString());
-      inst->setTypeParam(type & srcType);
-    } else {
-      /*
-       * incompatible types!  We should just generate a jump here and
-       * return null.
-       *
-       * For now, this case should currently be impossible, but it may
-       * come up later due to other optimizations.  The assert is so
-       * we'll remember this spot ...
-       */
-      not_implemented();
-    }
+    return nullptr;
   }
-  return nullptr;
+  if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
+    /*
+     * If we're guarding against Str and srcType has StaticStr or CountedStr
+     * in it, refine the output type. This can happen when we have a
+     * KindOfString guard from Translator but internally we know a more
+     * specific subtype of Str.
+     */
+    FTRACE(1, "CheckType: refining {} to {}\n", srcType.toString(),
+           type.toString());
+    inst->setTypeParam(type & srcType);
+    return nullptr;
+  }
+
+  /*
+   * We got a predicted type that is wrong -- it's incompatible with
+   * the tracked type.  So throw the prediction away, since it would
+   * always fail.
+   */
+  FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
+         srcType.toString(), type.toString());
+  return src;
 }
 
 SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
@@ -1701,6 +1703,10 @@ SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
+  if (inst->getTypeParam().notCounted()) {
+    inst->convertToNop();
+    return nullptr;
+  }
   auto const info = getStackValue(inst->getSrc(0),
                                   inst->getExtra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {

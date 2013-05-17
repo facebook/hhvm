@@ -658,6 +658,7 @@ void DebuggerClient::stop() {
 
 void DebuggerClient::run() {
   TRACE(2, "DebuggerClient::run\n");
+  StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
   // Make sure we don't run the interface thread for API mode
   assert(!isApiMode());
 

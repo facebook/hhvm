@@ -52,7 +52,10 @@ static void bt_handler(int sig) {
   sprintf(tracefn, "%s/stacktrace.%s.log",
           RuntimeOption::CoreDumpReportDirectory.c_str(), pid);
 
-  st.log(strsignal(sig), tracefn, pid, kCompilerId);
+  int debuggerCount = RuntimeOption::EnableDebugger ?
+    Eval::Debugger::CountConnectedProxy() : 0;
+
+  st.log(strsignal(sig), tracefn, pid, kCompilerId, debuggerCount);
 
   int fd = ::open(tracefn, O_APPEND|O_WRONLY, S_IRUSR|S_IWUSR);
   if (fd >= 0) {

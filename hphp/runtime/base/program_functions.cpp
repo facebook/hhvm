@@ -1028,6 +1028,7 @@ static int execute_program_impl(int argc, char **argv) {
     hphp_process_init();
 
     if (po.mode == "debug") {
+      StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       RuntimeOption::EnableDebugger = true;
       Eval::DebuggerProxyPtr proxy =
         Eval::Debugger::StartClient(po.debugger_options);

@@ -140,12 +140,10 @@ public:
   explicit StackTraceNoHeap(bool trace = true);
 
   /**
-   * Log stacktrace into a file under /tmp. If "out" is not null,
-   * also store translated stack trace into the variable.
-   * Returns the name of the generated file.
+   * Log stacktrace into the given file.
    */
   void log(const char *errorType, const char * fname, const char *pid,
-           const char *buildId) const;
+           const char *buildId, int debuggerCount) const;
 
   /**
    * Add extra information to log together with a crash stacktrace log.

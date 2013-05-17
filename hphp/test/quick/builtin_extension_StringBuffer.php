@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_StringBuffer extends DateInterval {
+class A_StringBuffer extends StringBuffer {
   public $___x;
 }
 test("StringBuffer");

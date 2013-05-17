@@ -1,5 +1,5 @@
 SQLite3Stmt
-HipHop Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s on line 5
+HipHop Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
 object(SQLite3Stmt)#1 (0) {
 }
 string(23) "O:11:"SQLite3Stmt":0:{}"
@@ -25,7 +25,7 @@ array(8) {
 }
 ================
 A_SQLite3Stmt
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
 object(A_SQLite3Stmt)#3 (1) {
   ["___x"]=>
   NULL
@@ -35,15 +35,21 @@ object(A_SQLite3Stmt)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(8) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(10) "paramcount"
   [2]=>
-  string(5) "__set"
+  string(5) "close"
   [3]=>
-  string(20) "createFromDateString"
+  string(5) "reset"
   [4]=>
-  string(6) "format"
+  string(5) "clear"
+  [5]=>
+  string(9) "bindparam"
+  [6]=>
+  string(9) "bindvalue"
+  [7]=>
+  string(7) "execute"
 }

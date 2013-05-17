@@ -1,5 +1,5 @@
 SoapServer
-HipHop Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+HipHop Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
 object(SoapServer)#1 (0) {
 }
 string(22) "O:10:"SoapServer":0:{}"
@@ -27,7 +27,7 @@ array(9) {
 }
 ================
 A_SoapServer
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
 object(A_SoapServer)#3 (1) {
   ["___x"]=>
   NULL
@@ -37,15 +37,23 @@ object(A_SoapServer)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(9) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(8) "setclass"
   [2]=>
-  string(5) "__set"
+  string(9) "setobject"
   [3]=>
-  string(20) "createFromDateString"
+  string(11) "addfunction"
   [4]=>
-  string(6) "format"
+  string(12) "getfunctions"
+  [5]=>
+  string(6) "handle"
+  [6]=>
+  string(14) "setpersistence"
+  [7]=>
+  string(5) "fault"
+  [8]=>
+  string(13) "addsoapheader"
 }

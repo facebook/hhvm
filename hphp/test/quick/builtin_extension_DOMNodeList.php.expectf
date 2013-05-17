@@ -20,7 +20,6 @@ array(6) {
 }
 ================
 A_DOMNodeList
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_DOMNodeList)#3 (1) {
   ["___x"]=>
   NULL
@@ -30,15 +29,17 @@ object(A_DOMNodeList)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(6) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(4) "item"
   [2]=>
-  string(5) "__set"
+  string(5) "__get"
   [3]=>
-  string(20) "createFromDateString"
+  string(5) "__set"
   [4]=>
-  string(6) "format"
+  string(7) "__isset"
+  [5]=>
+  string(11) "getIterator"
 }

@@ -62,7 +62,6 @@ array(27) {
 }
 ================
 A_XMLReader
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_XMLReader)#3 (1) {
   ["___x"]=>
   NULL
@@ -72,15 +71,59 @@ object(A_XMLReader)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(27) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(4) "open"
   [2]=>
-  string(5) "__set"
+  string(3) "XML"
   [3]=>
-  string(20) "createFromDateString"
+  string(5) "close"
   [4]=>
-  string(6) "format"
+  string(4) "read"
+  [5]=>
+  string(4) "next"
+  [6]=>
+  string(10) "readString"
+  [7]=>
+  string(12) "readInnerXML"
+  [8]=>
+  string(12) "readOuterXML"
+  [9]=>
+  string(19) "moveToNextAttribute"
+  [10]=>
+  string(12) "getAttribute"
+  [11]=>
+  string(14) "getAttributeNo"
+  [12]=>
+  string(14) "getAttributeNs"
+  [13]=>
+  string(15) "moveToAttribute"
+  [14]=>
+  string(17) "moveToAttributeNo"
+  [15]=>
+  string(17) "moveToAttributeNs"
+  [16]=>
+  string(13) "moveToElement"
+  [17]=>
+  string(20) "moveToFirstAttribute"
+  [18]=>
+  string(7) "isValid"
+  [19]=>
+  string(6) "expand"
+  [20]=>
+  string(5) "__get"
+  [21]=>
+  string(17) "getParserProperty"
+  [22]=>
+  string(15) "lookupNamespace"
+  [23]=>
+  string(9) "setSchema"
+  [24]=>
+  string(17) "setParserProperty"
+  [25]=>
+  string(16) "setRelaxNGSchema"
+  [26]=>
+  string(22) "setRelaxNGSchemaSource"
 }

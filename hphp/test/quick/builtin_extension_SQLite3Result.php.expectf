@@ -22,7 +22,6 @@ array(7) {
 }
 ================
 A_SQLite3Result
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_SQLite3Result)#3 (1) {
   ["___x"]=>
   NULL
@@ -32,15 +31,19 @@ object(A_SQLite3Result)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(7) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(10) "numcolumns"
   [2]=>
-  string(5) "__set"
+  string(10) "columnname"
   [3]=>
-  string(20) "createFromDateString"
+  string(10) "columntype"
   [4]=>
-  string(6) "format"
+  string(10) "fetcharray"
+  [5]=>
+  string(5) "reset"
+  [6]=>
+  string(8) "finalize"
 }

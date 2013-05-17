@@ -20,7 +20,6 @@ array(6) {
 }
 ================
 A_SimpleXMLElementIterator
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_SimpleXMLElementIterator)#3 (1) {
   ["___x"]=>
   NULL
@@ -30,15 +29,17 @@ object(A_SimpleXMLElementIterator)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(6) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(7) "current"
   [2]=>
-  string(5) "__set"
+  string(3) "key"
   [3]=>
-  string(20) "createFromDateString"
+  string(4) "next"
   [4]=>
-  string(6) "format"
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
 }

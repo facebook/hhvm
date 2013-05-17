@@ -1,5 +1,5 @@
 SoapClient
-HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
 object(SoapClient)#1 (0) {
 }
 string(22) "O:10:"SoapClient":0:{}"
@@ -35,7 +35,7 @@ array(13) {
 }
 ================
 A_SoapClient
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
 object(A_SoapClient)#3 (1) {
   ["___x"]=>
   NULL
@@ -45,15 +45,31 @@ object(A_SoapClient)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(13) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(6) "__call"
   [2]=>
-  string(5) "__set"
+  string(10) "__soapcall"
   [3]=>
-  string(20) "createFromDateString"
+  string(16) "__getlastrequest"
   [4]=>
-  string(6) "format"
+  string(17) "__getlastresponse"
+  [5]=>
+  string(23) "__getlastrequestheaders"
+  [6]=>
+  string(24) "__getlastresponseheaders"
+  [7]=>
+  string(14) "__getfunctions"
+  [8]=>
+  string(10) "__gettypes"
+  [9]=>
+  string(11) "__dorequest"
+  [10]=>
+  string(11) "__setcookie"
+  [11]=>
+  string(13) "__setlocation"
+  [12]=>
+  string(16) "__setsoapheaders"
 }

@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_DateTime extends DateInterval {
+class A_DateTime extends DateTime {
   public $___x;
   public function __clone() {
     $this->___x++;

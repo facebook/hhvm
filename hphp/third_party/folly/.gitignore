@@ -1,1 +1,4 @@
 /Makefile
+/folly/build/
+/folly/docs/
+/folly/m4/

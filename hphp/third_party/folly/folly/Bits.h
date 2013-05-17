@@ -69,10 +69,20 @@
 #include "folly/detail/BitIteratorDetail.h"
 #include "folly/Likely.h"
 
-#include <byteswap.h>
 #include <cassert>
 #include <cinttypes>
-#include <endian.h>
+
+#ifndef __APPLE__
+  #include <sys/endian.h>
+  #include <byteswap.h>
+#else
+  #include <architecture/byte_order.h>
+  #include <libkern/OSByteOrder.h>
+  #define bswap_16 OSSwapInt16
+  #define bswap_32 OSSwapInt32
+  #define bswap_64 OSSwapInt64
+#endif
+
 #include <iterator>
 #include <limits>
 #include <type_traits>

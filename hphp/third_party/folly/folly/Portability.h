@@ -32,13 +32,22 @@
 // TODO(tudorb/agallagher): Autotoolize this.
 #undef FOLLY_FINAL
 #undef FOLLY_OVERRIDE
+ 
+#ifndef __GNUC_PREREQ
+# if defined __GNUC__ && defined __GNUC_MINOR__
+#  define __GNUC_PREREQ(maj, min) \
+            ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+# else
+#  define __GNUC_PREREQ(maj, min) 0
+# endif
+#endif
 
 #if defined(__clang__)
 #  define FOLLY_FINAL final
 #  define FOLLY_OVERRIDE override
 #elif defined(__GNUC__)
-# include <features.h>
-# if __GNUC_PREREQ(4,7)
+# define GNUC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+# if GNUC_VERSION >= 40700
 #  define FOLLY_FINAL final
 #  define FOLLY_OVERRIDE override
 # endif
@@ -58,6 +67,12 @@
 struct MaxAlign { char c; } __attribute__((aligned));
 #else /* !__GNUC__ */
 # error Cannot define MaxAlign on this platform
+#endif
+
+#if defined(__clang__) || defined(__GNUC__)
+# define FOLLY_NORETURN __attribute__((noreturn))
+#else
+# define FOLLY_NORETURN
 #endif
 
 #endif // FOLLY_PORTABILITY_H_

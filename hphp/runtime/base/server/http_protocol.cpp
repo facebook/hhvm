@@ -401,7 +401,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
   server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
   server.set(s_REQUEST_TIME, now);
-  server.set(s_REQUEST_TIME, now_double);
+  server.set(s_REQUEST_TIME_FLOAT, now_double);
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));

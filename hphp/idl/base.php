@@ -370,6 +370,9 @@ function DefineFunction($func) {
 
 function ReadIDLFile($path) {
   $entries = json_decode(file_get_contents($path), /* use arrays */ true);
+  if (!$entries) {
+    throw new Exception("Unable to parse json from $path");
+  }
 
   if (!empty($entries['funcs'])) {
     foreach ($entries['funcs'] as $func) {

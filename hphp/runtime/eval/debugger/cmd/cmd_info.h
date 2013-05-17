@@ -25,25 +25,25 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdInfo);
 class CmdInfo : public DebuggerCommand {
 public:
-  static void UpdateLiveLists(DebuggerClient *client);
-  static String GetProtoType(DebuggerClient *client, const std::string &cls,
+  static void UpdateLiveLists(DebuggerClient &client);
+  static String GetProtoType(DebuggerClient &client, const std::string &cls,
                              const std::string &func);
 
 public:
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual void help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
-  bool parseZeroArg(DebuggerClient *client);
-  void parseOneArg(DebuggerClient *client, std::string &subsymbol);
+  bool parseZeroArg(DebuggerClient &client);
+  void parseOneArg(DebuggerClient &client, std::string &subsymbol);
   Array getInfo() { return m_info; }
   static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -68,13 +68,13 @@ private:
                           const std::string &subsymbol);
   static bool TryProperty(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol);
-  static bool TryMethod(DebuggerClient *client, StringBuffer &sb,
+  static bool TryMethod(DebuggerClient &client, StringBuffer &sb,
                         CArrRef info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, CArrRef info);
-  static void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
+  static void PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol);
-  static void PrintHeader(DebuggerClient *client, StringBuffer &sb,
+  static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
                           CArrRef info);
 };
 

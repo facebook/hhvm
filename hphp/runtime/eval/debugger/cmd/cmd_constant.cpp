@@ -33,35 +33,35 @@ void CmdConstant::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_constants);
 }
 
-void CmdConstant::help(DebuggerClient *client) {
-  client->helpTitle("Constant Command");
-  client->helpCmds(
+void CmdConstant::help(DebuggerClient &client) {
+  client.helpTitle("Constant Command");
+  client.helpCmds(
     "[k]onstant",           "lists all constants",
     "[k]onstant {text}",    "full-text search constants",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "This will print names and values of all constants, if {text} is not "
-    "speified. Otherwise, it will print names and values of all constants "
+    "specified. Otherwise, it will print names and values of all constants "
     "that contain the text in their names or values. The search is case-"
     "insensitive and string-based."
   );
 }
 
-void CmdConstant::onClientImpl(DebuggerClient *client) {
+void CmdConstant::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
-  if (client->argCount() == 1) {
-    text = client->argValue(1);
-  } else if (client->argCount() != 0) {
+  if (client.argCount() == 1) {
+    text = client.argValue(1);
+  } else if (client.argCount() != 0) {
     help(client);
     return;
   }
 
-  CmdConstantPtr cmd = client->xend<CmdConstant>(this);
+  CmdConstantPtr cmd = client.xend<CmdConstant>(this);
   if (cmd->m_constants.empty()) {
-    client->info("(no constant was defined)");
+    client.info("(no constant was defined)");
   } else {
     int i = 0;
     bool found = false;
@@ -74,15 +74,15 @@ void CmdConstant::onClientImpl(DebuggerClient *client) {
         String fullvalue = DebuggerClient::FormatVariable(iter.second(), -1);
         if (name.find(text, 0, false) >= 0 ||
             fullvalue.find(text, 0, false) >= 0) {
-          client->print("%s = %s", name.data(), value.data());
+          client.print("%s = %s", name.data(), value.data());
           found = true;
         }
       } else {
-        client->print("%s = %s", name.data(), value.data());
+        client.print("%s = %s", name.data(), value.data());
         ++i;
-        if (!client->isApiMode() &&
+        if (!client.isApiMode() &&
             i % DebuggerClient::ScrollBlockSize == 0 &&
-            client->ask("There are %d more constants. Continue? [Y/n]",
+            client.ask("There are %d more constants. Continue? [Y/n]",
                         m_constants.size() - i) == 'n') {
           break;
         }
@@ -90,31 +90,31 @@ void CmdConstant::onClientImpl(DebuggerClient *client) {
     }
 
     if (!text.empty() && !found) {
-      client->info("(unable to find specified text in any constants)");
+      client.info("(unable to find specified text in any constants)");
     }
   }
 }
 
-void CmdConstant::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTValues);
+void CmdConstant::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTValues);
   Array values;
   for (ArrayIter iter(m_constants); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerClientApiModeSerialize()) {
+    if (client.getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {
       values.set(name, iter.second());
     }
   }
-  client->setOTValues(values);
+  client.setOTValues(values);
 }
 
-bool CmdConstant::onServer(DebuggerProxy *proxy) {
+bool CmdConstant::onServer(DebuggerProxy &proxy) {
   try {
     m_constants = ClassInfo::GetConstants();
   } catch (...) {}
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

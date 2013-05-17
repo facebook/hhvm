@@ -36,14 +36,14 @@ void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_bypassAccessCheck);
 }
 
-void CmdEval::onClientImpl(DebuggerClient *client) {
-  m_body = client->getCode();
-  m_frame = client->getFrame();
-  m_bypassAccessCheck = client->getDebuggerBypassCheck();
-  client->sendToServer(this);
-  DebuggerCommandPtr res = client->recvFromServer(m_type);
+void CmdEval::onClientImpl(DebuggerClient &client) {
+  m_body = client.getCode();
+  m_frame = client.getFrame();
+  m_bypassAccessCheck = client.getDebuggerBypassCheck();
+  client.sendToServer(this);
+  DebuggerCommandPtr res = client.recvFromServer(m_type);
   if (!res->is(m_type)) {
-    assert(client->isApiMode());
+    assert(client.isApiMode());
     m_incomplete = true;
     res->setClientOutput(client);
   } else {
@@ -51,30 +51,30 @@ void CmdEval::onClientImpl(DebuggerClient *client) {
   }
 }
 
-void CmdEval::handleReply(DebuggerClient *client) {
-  client->print(m_output);
+void CmdEval::handleReply(DebuggerClient &client) {
+  client.print(m_output);
 }
 
 static const StaticString s_body("body");
 static const StaticString s_value("value");
 
-void CmdEval::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTValues);
+void CmdEval::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTValues);
   ArrayInit values(2);
   values.set("body", m_body);
   values.set("value", m_output);
-  client->setOTValues(values.create());
+  client.setOTValues(values.create());
 }
 
-bool CmdEval::onServer(DebuggerProxy *proxy) {
+bool CmdEval::onServer(DebuggerProxy &proxy) {
   PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
-  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
+  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy.isLocal(), m_frame);
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = locSave;
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

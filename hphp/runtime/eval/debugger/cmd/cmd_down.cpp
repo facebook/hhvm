@@ -23,31 +23,31 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdDown::help(DebuggerClient *client) {
-  client->helpTitle("Down Command");
-  client->helpCmds(
+void CmdDown::help(DebuggerClient &client) {
+  client.helpTitle("Down Command");
+  client.helpCmds(
     "[d]own {num=1}", "moves to inner frames (callees) on stacktrace",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command to walk down on stacktrace to find out inner callees of "
     "current frame. By default it moves down by one level. Specify a number "
     "to move down several levels a time."
   );
 }
 
-void CmdDown::onClientImpl(DebuggerClient *client) {
+void CmdDown::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client->argCount() > 1) {
+  if (client.argCount() > 1) {
     help(client);
   } else {
     CmdWhere().fetchStackTrace(client);
-    client->moveToFrame(client->getFrame() - CmdUp::ParseNumber(client));
+    client.moveToFrame(client.getFrame() - CmdUp::ParseNumber(client));
   }
 }
 
-void CmdDown::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTStacktrace);
+void CmdDown::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

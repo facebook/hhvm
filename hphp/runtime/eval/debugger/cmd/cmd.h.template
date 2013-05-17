@@ -27,11 +27,11 @@ class CmdMachine : public DebuggerCommand {
 public:
   CmdMachine() : DebuggerCommand(KindOfMachine) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual bool help(DebuggerClient &client);
 
-  virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onClient(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

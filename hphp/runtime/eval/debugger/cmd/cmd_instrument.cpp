@@ -38,10 +38,10 @@ void CmdInstrument::recvImpl(DebuggerThriftBuffer &thrift) {
   InstPointInfo::RecvImpl(m_ips, thrift);
 }
 
-void CmdInstrument::help(DebuggerClient *client) {
-  client->helpTitle("Instrument Command");
+void CmdInstrument::help(DebuggerClient &client) {
+  client.helpTitle("Instrument Command");
   // TODO: more functionalities
-  client->helpCmds("inst here <file> [desc]",
+  client.helpCmds("inst here <file> [desc]",
                    "inject <file> to here",
                    "inst <func>() <file> [desc]",
                    "inject <file> to the entry point of <func>",
@@ -50,40 +50,40 @@ void CmdInstrument::help(DebuggerClient *client) {
                    "inst [c]lear",
                    "clear all injections",
                    nullptr);
-  client->helpBody(
+  client.helpBody(
     "Use this command to instrument the program"
   );
 }
 
-void CmdInstrument::onClientImpl(DebuggerClient *client) {
+void CmdInstrument::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client->argCount() == 1) {
-    if (client->argValue(1) == "list" || client->argValue(1) == "l") {
+  if (client.argCount() == 1) {
+    if (client.argValue(1) == "list" || client.argValue(1) == "l") {
       listInst(client);
       return;
     }
-    if (client->argValue(1) == "clear" || client->argValue(1) == "c") {
+    if (client.argValue(1) == "clear" || client.argValue(1) == "c") {
       clearInst(client);
       return;
     }
   }
-  if (client->argCount() < 2 || client->argValue(1) == "help") {
+  if (client.argCount() < 2 || client.argValue(1) == "help") {
     help(client);
     return;
   }
 
-  std::string loc = client->argValue(1);
-  std::string file = client->argValue(2);
+  std::string loc = client.argValue(1);
+  std::string file = client.argValue(2);
   std::string desc;
-  if (client->argCount() >= 3) {
-    desc = client->argValue(3);
+  if (client.argCount() >= 3) {
+    desc = client.argValue(3);
   }
   Variant code = f_file_get_contents(file.c_str());
   if (code.isNull()) {
-    client->error("Unable to read from file %s", file.c_str());
+    client.error("Unable to read from file %s", file.c_str());
     return;
   }
-  m_instPoints = client->getInstPoints();
+  m_instPoints = client.getInstPoints();
   if (loc == "here") {
     InstPointInfoPtr ipi(new InstPointInfo());
     ipi->setLocHere();
@@ -97,15 +97,15 @@ void CmdInstrument::onClientImpl(DebuggerClient *client) {
     ipi->m_desc = desc;
     m_instPoints->push_back(ipi);
   } else {
-    client->error("Not implemented\n");
+    client.error("Not implemented\n");
     return;
   }
   m_type = ActionWrite;
-  CmdInstrumentPtr instCmdPtr = client->xend<CmdInstrument>(this);
+  CmdInstrumentPtr instCmdPtr = client.xend<CmdInstrument>(this);
   if (!instCmdPtr->m_enabled) {
-    client->error("Instrumentation is not enabled on the server");
+    client.error("Instrumentation is not enabled on the server");
   }
-  client->setInstPoints(instCmdPtr->m_ips);
+  client.setInstPoints(instCmdPtr->m_ips);
   CmdInstrument::PrintInstPoints(client);
 }
 
@@ -118,11 +118,11 @@ static const StaticString s_line("line");
 static const StaticString s_func_entry("func_entry");
 static const StaticString s_func("func");
 
-void CmdInstrument::setClientOutput(DebuggerClient *client) {
+void CmdInstrument::setClientOutput(DebuggerClient &client) {
   // Output all instrumentation point info
-  client->setOutputType(DebuggerClient::OTValues);
+  client.setOutputType(DebuggerClient::OTValues);
   Array values;
-  InstPointInfoPtrVec* ips = client->getInstPoints();
+  InstPointInfoPtrVec* ips = client.getInstPoints();
   for (unsigned int i = 0; i < ips->size(); i++) {
     InstPointInfoPtr ipi = (*ips)[i];
     Array instpoint;
@@ -138,10 +138,10 @@ void CmdInstrument::setClientOutput(DebuggerClient *client) {
     }
     values.append(instpoint);
   }
-  client->setOTValues(values);
+  client.setOTValues(values);
 }
 
-bool CmdInstrument::onServer(DebuggerProxy *proxy) {
+bool CmdInstrument::onServer(DebuggerProxy &proxy) {
   m_instPoints = &m_ips;
   m_enabled = true;
   if (m_type == ActionRead) {
@@ -149,19 +149,19 @@ bool CmdInstrument::onServer(DebuggerProxy *proxy) {
   } else if (m_type == ActionWrite) {
     validateAndWriteToTable(proxy);
   }
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
-void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
-  proxy->readInjTablesFromThread();
+void CmdInstrument::readFromTable(DebuggerProxy &proxy) {
+  proxy.readInjTablesFromThread();
   m_ips.clear();
-  if (!proxy->getInjTables()) {
+  if (!proxy.getInjTables()) {
     // nothing there
     return;
   }
   // Bytecode address
   InjectionTableInt64* tablePC =
-    proxy->getInjTables()->getInt64Table(InstHookTypeBCPC);
+    proxy.getInjTables()->getInt64Table(InstHookTypeBCPC);
   if (tablePC) {
     for (InjectionTableInt64::const_iterator it = tablePC->begin();
          it != tablePC->end(); ++it) {
@@ -178,7 +178,7 @@ void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
     }
   }
   InjectionTableSD* tableFEntry =
-    proxy->getInjTables()->getSDTable(InstHookTypeFuncEntry);
+    proxy.getInjTables()->getSDTable(InstHookTypeFuncEntry);
   if (tableFEntry) {
     for (InjectionTableSD::const_iterator it = tableFEntry->begin();
          it != tableFEntry->end(); ++it) {
@@ -195,9 +195,9 @@ void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
   }
 }
 
-void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
-  if (!proxy->getInjTables()) {
-    proxy->setInjTables(new InjectionTables());
+void CmdInstrument::validateAndWriteToTable(DebuggerProxy &proxy) {
+  if (!proxy.getInjTables()) {
+    proxy.setInjTables(new InjectionTables());
   }
   InjectionTableInt64* tablePC = nullptr;
   InjectionTableSD* tableFEntry = nullptr;
@@ -233,41 +233,41 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
     }
   }
 
-  proxy->getInjTables()->setInt64Table(InstHookTypeBCPC, tablePC);
-  proxy->getInjTables()->setSDTable(InstHookTypeFuncEntry, tableFEntry);
+  proxy.getInjTables()->setInt64Table(InstHookTypeBCPC, tablePC);
+  proxy.getInjTables()->setSDTable(InstHookTypeFuncEntry, tableFEntry);
 
-  proxy->writeInjTablesToThread();
+  proxy.writeInjTablesToThread();
 }
 
-void CmdInstrument::listInst(DebuggerClient *client) {
+void CmdInstrument::listInst(DebuggerClient &client) {
   m_type = ActionRead;
-  m_instPoints = client->getInstPoints();
-  CmdInstrumentPtr instCmdPtr = client->xend<CmdInstrument>(this);
-  client->setInstPoints(instCmdPtr->m_ips);
+  m_instPoints = client.getInstPoints();
+  CmdInstrumentPtr instCmdPtr = client.xend<CmdInstrument>(this);
+  client.setInstPoints(instCmdPtr->m_ips);
   PrintInstPoints(client);
 }
 
-void CmdInstrument::clearInst(DebuggerClient *client) {
+void CmdInstrument::clearInst(DebuggerClient &client) {
   m_type = ActionWrite;
-  m_instPoints = client->getInstPoints();
+  m_instPoints = client.getInstPoints();
   m_instPoints->clear();
-  CmdInstrumentPtr instCmdPtr = client->xend<CmdInstrument>(this);
-  client->setInstPoints(instCmdPtr->m_ips);
+  CmdInstrumentPtr instCmdPtr = client.xend<CmdInstrument>(this);
+  client.setInstPoints(instCmdPtr->m_ips);
   PrintInstPoints(client);
 }
 
-void CmdInstrument::PrintInstPoints(DebuggerClient *client) {
-  InstPointInfoPtrVec* ips = client->getInstPoints();
+void CmdInstrument::PrintInstPoints(DebuggerClient &client) {
+  InstPointInfoPtrVec* ips = client.getInstPoints();
   int size = ips->size();
-  client->print("%d instrumentation points", size);
+  client.print("%d instrumentation points", size);
   for (int i = 0; i < size; i++) {
     InstPointInfoPtr ipi = (*ips)[i];
     if (ipi->m_locType == InstPointInfo::LocFileLine) {
-      client->print("  %d\t%s\t%s\tfile:\t%s:%d", i,
+      client.print("  %d\t%s\t%s\tfile:\t%s:%d", i,
                     ipi->m_valid ? "valid" : "invalid",
                     ipi->m_desc.c_str(), ipi->m_file.c_str(), ipi->m_line);
     } else if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
-      client->print("  %d\t%s\t%s\tfunc entry:\t%s", i,
+      client.print("  %d\t%s\t%s\tfunc entry:\t%s", i,
                     ipi->m_valid ? "valid" : "invalid",
                     ipi->m_desc.c_str(), ipi->m_func.c_str());
     }

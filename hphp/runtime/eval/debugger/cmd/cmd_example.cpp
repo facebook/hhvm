@@ -33,19 +33,19 @@ void CmdExample::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_output);
 }
 
-void CmdExample::list(DebuggerClient *client) {
-  client->addCompletion("tic-tac-toe");
-  client->addCompletion("hip-hop-roll");
+void CmdExample::list(DebuggerClient &client) {
+  client.addCompletion("tic-tac-toe");
+  client.addCompletion("hip-hop-roll");
 }
 
-void CmdExample::help(DebuggerClient *client) {
-  client->helpTitle("Example Command");
-  client->helpCmds(
+void CmdExample::help(DebuggerClient &client) {
+  client.helpTitle("Example Command");
+  client.helpCmds(
     "xample {string}",      "it will tell you how long it is!",
     "x ample {string}",     "it will tell you how long it is!",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "This is just an example of extending debugger commands with C++. "
     "To add a new command, simply run \"php new_cmd.php {name}\" under "
     "runtime/eval/debugger/cmd, and it will generate two files to start with. "
@@ -54,21 +54,21 @@ void CmdExample::help(DebuggerClient *client) {
   );
 }
 
-void CmdExample::onClientImpl(DebuggerClient *client) {
+void CmdExample::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client->argCount() == 1) {
+  if (client.argCount() == 1) {
     help(client);
     return;
   }
 
-  m_input = client->lineRest(2);
-  CmdExamplePtr res = client->xend<CmdExample>(this);
-  client->output("%d", res->m_output);
+  m_input = client.lineRest(2);
+  CmdExamplePtr res = client.xend<CmdExample>(this);
+  client.output("%d", res->m_output);
 }
 
-bool CmdExample::onServer(DebuggerProxy *proxy) {
+bool CmdExample::onServer(DebuggerProxy &proxy) {
   m_output = m_input.size();
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

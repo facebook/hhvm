@@ -27,9 +27,9 @@ class CmdOut : public CmdFlowControl {
 public:
   CmdOut() : CmdFlowControl(KindOfOut) {}
 
-  virtual void help(DebuggerClient *client);
-  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+  virtual void help(DebuggerClient &client);
+  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

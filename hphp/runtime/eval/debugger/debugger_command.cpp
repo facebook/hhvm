@@ -145,11 +145,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 ///////////////////////////////////////////////////////////////////////////////
 // default handlers
 
-void DebuggerCommand::list(DebuggerClient *client) {
+void DebuggerCommand::list(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::list\n");
 }
 
-void DebuggerCommand::help(DebuggerClient *client) {
+void DebuggerCommand::help(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::help\n");
   assert(false);
 }
@@ -157,30 +157,30 @@ void DebuggerCommand::help(DebuggerClient *client) {
 // If the first argument of the command is "help" or "?"
 // this displays help text for the command and returns true.
 // Otherwise it returns false.
-bool DebuggerCommand::displayedHelp(DebuggerClient *client) {
-  TRACE(2, "DebuggerCommand::onClientImpl\n");
-  if (client->arg(1, "help") || client->arg(1, "?")) {
+bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
+  TRACE(2, "DebuggerCommand::displayedHelp\n");
+  if (client.arg(1, "help") || client.arg(1, "?")) {
     help(client);
     return true;
   }
   return false;
 }
 
-void DebuggerCommand::onClient(DebuggerClient *client) {
+void DebuggerCommand::onClient(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::onClient\n");
   onClientImpl(client);
-  if (client->isApiMode() && !m_incomplete) {
+  if (client.isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }
 }
 
-void DebuggerCommand::setClientOutput(DebuggerClient *client) {
+void DebuggerCommand::setClientOutput(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::setClientOutput\n");
   // Just default to text
-  client->setOutputType(DebuggerClient::OTText);
+  client.setOutputType(DebuggerClient::OTText);
 }
 
-bool DebuggerCommand::onServer(DebuggerProxy *proxy) {
+bool DebuggerCommand::onServer(DebuggerProxy &proxy) {
   TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);

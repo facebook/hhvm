@@ -48,14 +48,14 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_global);
 }
 
-void CmdVariable::help(DebuggerClient *client) {
-  client->helpTitle("Variable Command");
-  client->helpCmds(
+void CmdVariable::help(DebuggerClient &client) {
+  client.helpTitle("Variable Command");
+  client.helpCmds(
     "[v]ariable",           "lists all local variables on stack",
     "[v]ariable {text}",    "full-text search local variables",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "This will print names and values of all variables that are currently "
     "accessible by simple names. Use '[w]here', '[u]p {num}', '[d]own {num}', "
     "'[f]rame {index}' commands to choose a different frame to view variables "
@@ -67,7 +67,7 @@ void CmdVariable::help(DebuggerClient *client) {
   );
 }
 
-void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
+void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
                                  bool global, CStrRef text) {
   bool system = true;
   int i = 0;
@@ -79,26 +79,26 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
       String fullvalue = DebuggerClient::FormatVariable(iter.second(), -1);
       if (name.find(text, 0, false) >= 0 ||
           fullvalue.find(text, 0, false) >= 0) {
-        client->print("%s = %s", name.data(), value.data());
+        client.print("%s = %s", name.data(), value.data());
         found = true;
       }
     } else {
       if (global && system) {
-        client->print("$%s = %s", name.data(), value.data());
+        client.print("$%s = %s", name.data(), value.data());
       } else {
-        client->output("$%s = %s", name.data(), value.data());
+        client.output("$%s = %s", name.data(), value.data());
       }
 
       // we knew this is the last system global
       if (global && name == "http_response_header") {
-        client->output("");
+        client.output("");
         system = false;
       }
 
       ++i;
-      if (!client->isApiMode() &&
+      if (!client.isApiMode() &&
           i % DebuggerClient::ScrollBlockSize == 0 &&
-          client->ask("There are %d more variables. Continue? [Y/n]",
+          client.ask("There are %d more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;
       }
@@ -106,44 +106,44 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
   }
 
   if (!text.empty() && !found) {
-    client->info("(unable to find specified text in any variables)");
+    client.info("(unable to find specified text in any variables)");
   }
 }
 
-void CmdVariable::onClientImpl(DebuggerClient *client) {
+void CmdVariable::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
-  if (client->argCount() == 1) {
-    text = client->argValue(1);
-  } else if (client->argCount() != 0) {
+  if (client.argCount() == 1) {
+    text = client.argValue(1);
+  } else if (client.argCount() != 0) {
     help(client);
     return;
   }
 
-  m_frame = client->getFrame();
-  CmdVariablePtr cmd = client->xend<CmdVariable>(this);
+  m_frame = client.getFrame();
+  CmdVariablePtr cmd = client.xend<CmdVariable>(this);
   if (cmd->m_variables.empty()) {
-    client->info("(no variable was defined)");
+    client.info("(no variable was defined)");
   } else {
     m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
 }
 
-void CmdVariable::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTValues);
+void CmdVariable::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTValues);
   Array values;
   for (ArrayIter iter(m_variables); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerClientApiModeSerialize()) {
+    if (client.getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {
       values.set(name, iter.second());
     }
   }
-  client->setOTValues(values);
+  client.setOTValues(values);
 }
 
 static const StaticString s_GLOBALS("GLOBALS");
@@ -154,9 +154,9 @@ Array CmdVariable::GetGlobalVariables() {
   return ret;
 }
 
-bool CmdVariable::onServer(DebuggerProxy *proxy) {
+bool CmdVariable::onServer(DebuggerProxy &proxy) {
   m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

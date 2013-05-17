@@ -22,13 +22,13 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdZend::help(DebuggerClient *client) {
-  client->helpTitle("Zend Command");
-  client->helpCmds(
+void CmdZend::help(DebuggerClient &client) {
+  client.helpTitle("Zend Command");
+  client.helpCmds(
     "[z]end", "running the most recent code snippet in Zend PHP",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "This is mainly for comparing results from PHP vs. HipHop. After you type "
     "in some PHP code, it will be evaluated immediately in HipHop. Then you "
     "can type '[z]end' command to re-run the same script in Zend PHP. Please "
@@ -37,14 +37,14 @@ void CmdZend::help(DebuggerClient *client) {
   );
 }
 
-void CmdZend::onClientImpl(DebuggerClient *client) {
+void CmdZend::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
-  if (client->argCount() == 0) {
-    const std::string &code = client->getCode();
+  if (client.argCount() == 0) {
+    const std::string &code = client.getCode();
     string out;
     Process::Exec("php", nullptr, code.c_str(), out, &out, true);
-    client->print(out);
+    client.print(out);
   } else {
     help(client);
   }

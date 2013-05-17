@@ -27,14 +27,14 @@ class CmdMacro : public DebuggerCommand {
 public:
   CmdMacro() : DebuggerCommand(KindOfMacro) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual void help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
 
 private:
-  void processList(DebuggerClient *client);
+  void processList(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,15 +37,15 @@ void CmdUser::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_cmd);
 }
 
-void CmdUser::list(DebuggerClient *client) {
+void CmdUser::list(DebuggerClient &client) {
   Lock lock(s_mutex);
   CmdExtended::list(client);
 }
 
-void CmdUser::help(DebuggerClient *client) {
-  client->helpTitle("User Extended Command");
+void CmdUser::help(DebuggerClient &client) {
+  client.helpTitle("User Extended Command");
   helpImpl(client, "y");
-  client->helpBody(
+  client.helpBody(
     "These commands are implemented and installed in PHP by implementing "
     "DebuggerCommand and calling hphpd_install_user_command(). For example\n"
     "\n"
@@ -75,18 +75,18 @@ const ExtendedCommandMap &CmdUser::getCommandMap() {
   return s_commands;
 }
 
-void CmdUser::invokeList(DebuggerClient *client, const std::string &cls) {
+void CmdUser::invokeList(DebuggerClient &client, const std::string &cls) {
   p_DebuggerClientCmdUser pclient(NEWOBJ(c_DebuggerClientCmdUser)());
-  pclient->m_client = client;
+  pclient->m_client = &client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
     cmd->o_invoke_few_args(s_onAutoComplete, 1, pclient);
   } catch (...) {}
 }
 
-bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
+bool CmdUser::invokeHelp(DebuggerClient &client, const std::string &cls) {
   p_DebuggerClientCmdUser pclient(NEWOBJ(c_DebuggerClientCmdUser)());
-  pclient->m_client = client;
+  pclient->m_client = &client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
     Variant ret = cmd->o_invoke_few_args(s_help, 1, pclient);
@@ -95,9 +95,9 @@ bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
   return false;
 }
 
-bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
+bool CmdUser::invokeClient(DebuggerClient &client, const std::string &cls) {
   p_DebuggerClientCmdUser pclient(NEWOBJ(c_DebuggerClientCmdUser)());
-  pclient->m_client = client;
+  pclient->m_client = &client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
     Variant ret = cmd->o_invoke_few_args(s_onClient, 1, pclient);
@@ -106,10 +106,10 @@ bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
   return false;
 }
 
-bool CmdUser::onServer(DebuggerProxy *proxy) {
+bool CmdUser::onServer(DebuggerProxy &proxy) {
   if (m_cmd.isNull()) return false;
   p_DebuggerProxyCmdUser pproxy(NEWOBJ(c_DebuggerProxyCmdUser)());
-  pproxy->m_proxy = proxy;
+  pproxy->m_proxy = &proxy;
   try {
     Variant ret = m_cmd->o_invoke_few_args(s_onServer, 1, pproxy);
     return !same(ret, false);

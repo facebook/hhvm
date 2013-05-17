@@ -27,16 +27,16 @@ class CmdWhere : public DebuggerCommand {
 public:
   CmdWhere() : DebuggerCommand(KindOfWhere), m_stackArgs(true) {}
 
-  virtual void help(DebuggerClient *client);
+  virtual void help(DebuggerClient &client);
 
-  virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
-  Array fetchStackTrace(DebuggerClient *client); // client side
+  Array fetchStackTrace(DebuggerClient &client); // client side
   void processStackTrace(); // server side
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

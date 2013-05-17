@@ -26,19 +26,19 @@ DECLARE_BOOST_TYPES(CmdVariable);
 class CmdVariable : public DebuggerCommand {
 public:
   static Array GetGlobalVariables();
-  static void PrintVariables(DebuggerClient *client, CArrRef variables,
+  static void PrintVariables(DebuggerClient &client, CArrRef variables,
                              bool global, CStrRef text);
 
 public:
   CmdVariable() : DebuggerCommand(KindOfVariable) {}
 
-  virtual void help(DebuggerClient *client);
+  virtual void help(DebuggerClient &client);
 
-  virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

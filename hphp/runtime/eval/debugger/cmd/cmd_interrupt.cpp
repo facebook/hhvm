@@ -129,43 +129,43 @@ std::string CmdInterrupt::desc() const {
   return "";
 }
 
-void CmdInterrupt::onClientImpl(DebuggerClient *client) {
-  client->setCurrentLocation(m_threadId, m_bpi);
-  if (!client->getDebuggerSmallStep()) {
+void CmdInterrupt::onClientImpl(DebuggerClient &client) {
+  client.setCurrentLocation(m_threadId, m_bpi);
+  if (!client.getDebuggerSmallStep()) {
     // Adjust line and char if it's not small stepping
     if (m_bpi->m_line1 == m_bpi->m_line2) {
       m_bpi->m_char1 = 1;
       m_bpi->m_char2 = 100;
     }
   }
-  client->setMatchedBreakPoints(m_matched);
+  client.setMatchedBreakPoints(m_matched);
 
   switch (m_interrupt) {
     case SessionStarted:
       if (!m_program.empty()) {
-        client->info("Program %s loaded. Type '[r]un' or '[c]ontinue' to go.",
+        client.info("Program %s loaded. Type '[r]un' or '[c]ontinue' to go.",
                      m_program.c_str());
         m_bpi->m_file = m_program;
       }
       break;
     case SessionEnded:
       if (!m_program.empty()) {
-        client->info("Program %s exited normally.", m_program.c_str());
+        client.info("Program %s exited normally.", m_program.c_str());
       }
       break;
     case RequestStarted:
       if (!m_program.empty()) {
-        client->info("Web request %s started.", m_program.c_str());
+        client.info("Web request %s started.", m_program.c_str());
       }
       break;
     case RequestEnded:
       if (!m_program.empty()) {
-        client->info("Web request %s ended.", m_program.c_str());
+        client.info("Web request %s ended.", m_program.c_str());
       }
       break;
     case PSPEnded:
       if (!m_program.empty()) {
-        client->info("Post-Send Processing for %s was ended.",
+        client.info("Post-Send Processing for %s was ended.",
                      m_program.c_str());
       }
       break;
@@ -174,7 +174,7 @@ void CmdInterrupt::onClientImpl(DebuggerClient *client) {
     case ExceptionThrown: {
       bool found = false;
       bool toggled = false;
-      BreakPointInfoPtrVec *bps = client->getBreakPoints();
+      BreakPointInfoPtrVec *bps = client.getBreakPoints();
       for (unsigned int i = 0; i < m_matched.size(); i++) {
         BreakPointInfoPtr bpm = m_matched[i];
         BreakPointInfoPtr bp;
@@ -193,27 +193,27 @@ void CmdInterrupt::onClientImpl(DebuggerClient *client) {
           }
           if (m_interrupt == BreakPointReached ||
               m_interrupt == HardBreakPoint) {
-            client->info("Breakpoint %d reached %s", bp->index(),
+            client.info("Breakpoint %d reached %s", bp->index(),
                          m_bpi->site().c_str());
-            client->shortCode(m_bpi);
+            client.shortCode(m_bpi);
           } else {
             if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
-              client->info("Breakpoint %d reached: An error occurred %s",
+              client.info("Breakpoint %d reached: An error occurred %s",
                            bp->index(), m_bpi->site().c_str());
-              client->shortCode(m_bpi);
-              client->error("Error Message: %s",
+              client.shortCode(m_bpi);
+              client.error("Error Message: %s",
                             m_bpi->m_exceptionObject.c_str());
             } else {
-              client->info("Breakpoint %d reached: Throwing %s %s",
+              client.info("Breakpoint %d reached: Throwing %s %s",
                            bp->index(),
                            m_bpi->m_exceptionClass.c_str(),
                            m_bpi->site().c_str());
-              client->shortCode(m_bpi);
-              client->output(m_bpi->m_exceptionObject);
+              client.shortCode(m_bpi);
+              client.output(m_bpi->m_exceptionObject);
             }
           }
           if (!bpm->m_output.empty()) {
-            client->print(bpm->m_output);
+            client.print(bpm->m_output);
           }
         }
       }
@@ -223,17 +223,17 @@ void CmdInterrupt::onClientImpl(DebuggerClient *client) {
       if (!found) {
         if (m_interrupt == HardBreakPoint) {
           // for HardBreakPoint, default the frame to the caller
-          client->setFrame(1);
+          client.setFrame(1);
         }
-        client->info("Break %s", m_bpi->site().c_str());
-        client->shortCode(m_bpi);
+        client.info("Break %s", m_bpi->site().c_str());
+        client.shortCode(m_bpi);
       }
       break;
     }
   }
 
   if (!m_errorMsg.empty()) {
-    client->error(m_errorMsg);
+    client.error(m_errorMsg);
   }
 
   // watches
@@ -242,13 +242,13 @@ void CmdInterrupt::onClientImpl(DebuggerClient *client) {
     case RequestStarted:
       break;
     default: {
-      DebuggerClient::WatchPtrVec &watches = client->getWatches();
+      DebuggerClient::WatchPtrVec &watches = client.getWatches();
       for (int i = 0; i < (int)watches.size(); i++) {
-        if (i > 0) client->output("");
-        client->info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
+        if (i > 0) client.output("");
+        client.info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
         Variant v = CmdPrint().processWatch(client, watches[i]->first,
                                             watches[i]->second);
-        client->output(CmdPrint::FormatResult(watches[i]->first, v));
+        client.output(CmdPrint::FormatResult(watches[i]->first, v));
       }
     }
   }
@@ -258,11 +258,11 @@ static const StaticString s_format("format");
 static const StaticString s_php("php");
 static const StaticString s_value("value");
 
-void CmdInterrupt::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTCodeLoc);
-  client->setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
+void CmdInterrupt::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTCodeLoc);
+  client.setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
   Array values;
-  DebuggerClient::WatchPtrVec &watches = client->getWatches();
+  DebuggerClient::WatchPtrVec &watches = client.getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
     ArrayInit watch(3);
     watch.set(s_format, watches[i]->first);
@@ -272,11 +272,11 @@ void CmdInterrupt::setClientOutput(DebuggerClient *client) {
     watch.set(s_value, CmdPrint::FormatResult(watches[i]->first, v));
     values.append(watch.create());
   }
-  client->setOTValues(values);
+  client.setOTValues(values);
 }
 
-bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
-  return proxy->sendToClient(this);
+bool CmdInterrupt::onServer(DebuggerProxy &proxy) {
+  return proxy.sendToClient(this);
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {

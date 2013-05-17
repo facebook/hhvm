@@ -21,19 +21,19 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdContinue::help(DebuggerClient *client) {
-  client->helpTitle("Continue Command");
-  client->helpCmds(
+void CmdContinue::help(DebuggerClient &client) {
+  client.helpTitle("Continue Command");
+  client.helpCmds(
     "[c]ontinue {count=1}", "continues program execution",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command at break to resume program execution. Specify a "
     "count to repeat the same command many times."
   );
 }
 
-void CmdContinue::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdContinue::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
   CmdFlowControl::onSetup(proxy, interrupt);
   // If there's a remaining count on this cmd then we want it left installed
@@ -41,7 +41,7 @@ void CmdContinue::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
   m_complete = (decCount() == 0);
 }
 
-void CmdContinue::onBeginInterrupt(DebuggerProxy *proxy,
+void CmdContinue::onBeginInterrupt(DebuggerProxy &proxy,
                                    CmdInterrupt &interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
   m_complete = (decCount() == 0);

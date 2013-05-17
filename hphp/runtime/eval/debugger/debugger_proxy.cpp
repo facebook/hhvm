@@ -350,7 +350,7 @@ void DebuggerProxy::pollSignal() {
 
     // Send CmdSignal over to the client and wait for a response.
     CmdSignal cmd;
-    if (!cmd.onServer(this)) {
+    if (!cmd.onServer(*this)) {
       TRACE_RB(2, "DebuggerProxy::pollSignal: "
                "Failed to send CmdSignal to client\n");
       break;
@@ -541,7 +541,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
        cmd.getInterruptType() == HardBreakPoint ||
        cmd.getInterruptType() == ExceptionThrown) && m_flow) {
     if (!m_flow->is(DebuggerCommand::KindOfContinue)) {
-      m_flow->onBeginInterrupt(this, cmd);
+      m_flow->onBeginInterrupt(*this, cmd);
       if (m_flow->complete()) {
         fcShouldBreak = true;
         m_flow.reset();
@@ -561,7 +561,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
-      m_flow->onBeginInterrupt(this, cmd);
+      m_flow->onBeginInterrupt(*this, cmd);
       if (m_flow->complete()) m_flow.reset();
       return false;
     }
@@ -581,7 +581,7 @@ void DebuggerProxy::checkStop() {
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   TRACE_RB(2, "DebuggerProxy::processInterrupt\n");
   // Do the server-side work for this interrupt, which just notifies the client.
-  if (!cmd.onServer(this)) {
+  if (!cmd.onServer(*this)) {
     TRACE_RB(1, "Failed to send CmdInterrupt to client\n");
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
@@ -602,7 +602,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
-        m_flow->onSetup(this, cmd);
+        m_flow->onSetup(*this, cmd);
         if (!m_flow->complete()) {
           TRACE_RB(2, "Incomplete flow command %d remaining on proxy for "
                    "further processing\n", m_flow->getType());
@@ -628,7 +628,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     try {
       // Perform the server-side work for this command.
       if (res) {
-        if (!res->onServer(this)) {
+        if (!res->onServer(*this)) {
           TRACE_RB(1, "Failed to execute cmd %d from client\n", res->getType());
           cmdFailure = true;
         }

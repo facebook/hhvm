@@ -32,19 +32,19 @@ public:
   CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false),
                m_isForWatch(false), m_noBreak(false) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual void help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
-  virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
-  Variant processWatch(DebuggerClient *client, const char *format,
+  Variant processWatch(DebuggerClient &client, const char *format,
                     const std::string &php);
 
-  virtual void handleReply(DebuggerClient *client);
+  virtual void handleReply(DebuggerClient &client);
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -57,8 +57,8 @@ private:
   bool m_isForWatch;
   bool m_noBreak;
 
-  void processList(DebuggerClient *client);
-  void processClear(DebuggerClient *client);
+  void processList(DebuggerClient &client);
+  void processClear(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

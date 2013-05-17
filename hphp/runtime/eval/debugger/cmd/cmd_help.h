@@ -25,20 +25,20 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdHelp);
 class CmdHelp : public DebuggerCommand {
 public:
-  static void HelpAll(DebuggerClient *client);
-  static void HelpStarted(DebuggerClient *client);
+  static void HelpAll(DebuggerClient &client);
+  static void HelpStarted(DebuggerClient &client);
 
 public:
   CmdHelp() : DebuggerCommand(KindOfHelp) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual void help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
 protected:
-  virtual void onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
 
 private:
-  bool processTutorial(DebuggerClient *client);
+  bool processTutorial(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

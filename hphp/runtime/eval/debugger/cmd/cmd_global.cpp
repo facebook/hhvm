@@ -32,14 +32,14 @@ void CmdGlobal::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_globals);
 }
 
-void CmdGlobal::help(DebuggerClient *client) {
-  client->helpTitle("Global Command");
-  client->helpCmds(
+void CmdGlobal::help(DebuggerClient &client) {
+  client.helpTitle("Global Command");
+  client.helpCmds(
     "[g]lobal",           "lists all global variables",
     "[g]lobal {text}",    "full-text search global variables",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "This will print names and values of all global variables, if {text} is "
     "not speified. Otherwise, it will print global variables that contain the "
     "text in their names or values. The search is case-insensitive and "
@@ -47,44 +47,44 @@ void CmdGlobal::help(DebuggerClient *client) {
   );
 }
 
-void CmdGlobal::onClientImpl(DebuggerClient *client) {
+void CmdGlobal::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
-  if (client->argCount() == 1) {
-    text = client->argValue(1);
-  } else if (client->argCount() != 0) {
+  if (client.argCount() == 1) {
+    text = client.argValue(1);
+  } else if (client.argCount() != 0) {
     help(client);
     return;
   }
 
-  CmdGlobalPtr cmd = client->xend<CmdGlobal>(this);
+  CmdGlobalPtr cmd = client.xend<CmdGlobal>(this);
   if (cmd->m_globals.empty()) {
-    client->info("(no global variable was found)");
+    client.info("(no global variable was found)");
   } else {
     m_globals = cmd->m_globals;
     CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
   }
 }
 
-void CmdGlobal::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTValues);
+void CmdGlobal::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTValues);
   Array values;
   for (ArrayIter iter(m_globals); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerClientApiModeSerialize()) {
+    if (client.getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {
       values.set(name, iter.second());
     }
   }
-  client->setOTValues(values);
+  client.setOTValues(values);
 }
 
-bool CmdGlobal::onServer(DebuggerProxy *proxy) {
+bool CmdGlobal::onServer(DebuggerProxy &proxy) {
   m_globals = CmdVariable::GetGlobalVariables();
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,17 +21,17 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdMacro::list(DebuggerClient *client) {
-  if (client->argCount() == 0) {
+void CmdMacro::list(DebuggerClient &client) {
+  if (client.argCount() == 0) {
     static const char *keywords[] =
       { "start", "end", "replay", "list", "clear", nullptr};
-    client->addCompletion(keywords);
+    client.addCompletion(keywords);
   }
 }
 
-void CmdMacro::help(DebuggerClient *client) {
-  client->helpTitle("Macro Command");
-  client->helpCmds(
+void CmdMacro::help(DebuggerClient &client) {
+  client.helpTitle("Macro Command");
+  client.helpCmds(
     "& [s]tart",            "starts recording of default macro",
     "& [s]tart {name}",     "starts recording of a named macro",
     "& [e]nd",              "stops and saves recorded macro",
@@ -41,7 +41,7 @@ void CmdMacro::help(DebuggerClient *client) {
     "& [c]lear {index}",    "deletes a macro",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Macro command allows you to record a series of debugger command, so "
     "you can replay later by its name. When name is not specified, it will "
     "use \"default\" as the name.\n"
@@ -54,38 +54,38 @@ void CmdMacro::help(DebuggerClient *client) {
   );
 }
 
-void CmdMacro::processList(DebuggerClient *client) {
-  const MacroPtrVec &macros = client->getMacros();
+void CmdMacro::processList(DebuggerClient &client) {
+  const MacroPtrVec &macros = client.getMacros();
   for (unsigned int i = 0; i < macros.size(); i++) {
     MacroPtr macro = macros[i];
-    client->output("%4d  %s", i + 1, macro->m_name.c_str());
-    client->print(macro->desc("     > ").c_str());
+    client.output("%4d  %s", i + 1, macro->m_name.c_str());
+    client.print(macro->desc("     > ").c_str());
   }
 }
 
-void CmdMacro::onClientImpl(DebuggerClient *client) {
+void CmdMacro::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client->argCount() == 0) {
+  if (client.argCount() == 0) {
     help(client);
     return;
   }
 
-  if (client->arg(1, "start")) {
-    client->startMacro(client->argValue(2));
-  } else if (client->arg(1, "end")) {
-    client->endMacro();
-  } else if (client->arg(1, "replay")) {
-    if (!client->playMacro(client->argValue(2))) {
-      client->error("Unable to find specified macro.");
+  if (client.arg(1, "start")) {
+    client.startMacro(client.argValue(2));
+  } else if (client.arg(1, "end")) {
+    client.endMacro();
+  } else if (client.arg(1, "replay")) {
+    if (!client.playMacro(client.argValue(2))) {
+      client.error("Unable to find specified macro.");
       processList(client);
     }
-  } else if (client->arg(1, "list")) {
+  } else if (client.arg(1, "list")) {
     processList(client);
-  } else if (client->arg(1, "clear")) {
-    string snum = client->argValue(2);
+  } else if (client.arg(1, "clear")) {
+    string snum = client.argValue(2);
     if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("'& [c]lear' needs an {index} argument.");
-      client->tutorial(
+      client.error("'& [c]lear' needs an {index} argument.");
+      client.tutorial(
         "You will have to run '& [l]ist' first to see a list of valid "
         "numbers or indices to specify."
       );
@@ -93,8 +93,8 @@ void CmdMacro::onClientImpl(DebuggerClient *client) {
     }
 
     int num = atoi(snum.c_str());
-    if (!client->deleteMacro(num)) {
-      client->error("\"%s\" is not a valid macro index. Choose one from "
+    if (!client.deleteMacro(num)) {
+      client.error("\"%s\" is not a valid macro index. Choose one from "
                     "this list:", snum.c_str());
       processList(client);
       return;

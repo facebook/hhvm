@@ -39,14 +39,14 @@ public:
 
   Object getUserCommand() { return m_cmd;}
 
-  virtual void list(DebuggerClient *client);
-  virtual void help(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   virtual const ExtendedCommandMap &getCommandMap();
-  virtual void invokeList(DebuggerClient *client, const std::string &cls);
-  virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
-  virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+  virtual void invokeList(DebuggerClient &client, const std::string &cls);
+  virtual bool invokeHelp(DebuggerClient &client, const std::string &cls);
+  virtual bool invokeClient(DebuggerClient &client, const std::string &cls);
 
 protected:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);

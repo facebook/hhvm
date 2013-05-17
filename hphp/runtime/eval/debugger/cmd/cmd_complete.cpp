@@ -30,13 +30,13 @@ void CmdComplete::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
 }
 
-void CmdComplete::list(DebuggerClient *client) {
+void CmdComplete::list(DebuggerClient &client) {
 }
 
-void CmdComplete::help(DebuggerClient *client) {
-  client->helpTitle("Copmplete");
-  client->help("complete <cmd>");
-  client->helpBody(
+void CmdComplete::help(DebuggerClient &client) {
+  client.helpTitle("Copmplete");
+  client.help("complete <cmd>");
+  client.helpBody(
     "This command provides the same results as TAB completion does on the"
     " command line, but bypasses the complexity of interacting with the"
     " readline library. This help is primarily for use by programs that"
@@ -44,16 +44,16 @@ void CmdComplete::help(DebuggerClient *client) {
   );
 }
 
-void CmdComplete::onClientImpl(DebuggerClient *client) {
+void CmdComplete::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  std::string text = client->lineRest(1);
-  std::vector<std::string> res = client->getAllCompletions(text);
+  std::string text = client.lineRest(1);
+  std::vector<std::string> res = client.getAllCompletions(text);
   for (size_t i = 0; i < res.size(); ++i) {
-    client->print(res[i].c_str());
+    client.print(res[i].c_str());
   }
 }
 
-bool CmdComplete::onServer(DebuggerProxy *proxy) {
+bool CmdComplete::onServer(DebuggerProxy &proxy) {
   assert(false); // this command is processed entirely locally
   return false;
 }

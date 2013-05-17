@@ -708,7 +708,7 @@ void DebuggerClient::run() {
 void DebuggerClient::updateLiveLists() {
   TRACE(2, "DebuggerClient::updateLiveLists\n");
   ReadlineWaitCursor waitCursor;
-  CmdInfo::UpdateLiveLists(this);
+  CmdInfo::UpdateLiveLists(*this);
   m_acLiveListsDirty = false;
 }
 
@@ -740,7 +740,7 @@ void DebuggerClient::promptFunctionPrototype() {
     }
   }
 
-  String output = highlight_code(CmdInfo::GetProtoType(this, cls, func));
+  String output = highlight_code(CmdInfo::GetProtoType(*this, cls, func));
   print("\n%s", output.data());
   rl_forced_update_display();
 }
@@ -891,7 +891,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
             if (cmd) {
               if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
               DebuggerCommandPtr deleter(cmd);
-              cmd->list(this);
+              cmd->list(*this);
             }
           }
           break;
@@ -943,14 +943,14 @@ bool DebuggerClient::initializeMachine() {
   if (!m_machine->m_initialized) {
     // set/clear intercept for RPC thread
     if (!m_machines.empty() && m_machine == m_machines[0]) {
-      CmdMachine::UpdateIntercept(this, m_machine->m_rpcHost,
+      CmdMachine::UpdateIntercept(*this, m_machine->m_rpcHost,
                                   m_machine->m_rpcPort);
     }
 
     // upload breakpoints
     if (!m_breakpoints.empty()) {
       info("Updating breakpoints...");
-      CmdBreak::SendClientBreakpointListToServer(this);
+      CmdBreak::SendClientBreakpointListToServer(*this);
     }
 
     // attaching to default sandbox
@@ -959,7 +959,7 @@ bool DebuggerClient::initializeMachine() {
       const char *user = m_options.user.empty() ?
                          nullptr : m_options.user.c_str();
       m_machine->m_sandboxAttached = (waitForgSandbox =
-        CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str()));
+        CmdMachine::AttachSandbox(*this, user, m_options.sandbox.c_str()));
       if (!m_machine->m_sandboxAttached) {
         Logger::Error("Unable to communicate with default sandbox.");
       }
@@ -985,7 +985,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         return DebuggerCommandPtr();
       }
       if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        cmd->onClient(this);
+        cmd->onClient(*this);
         continue;
       }
       if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1024,7 +1024,7 @@ void DebuggerClient::runImpl() {
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          cmd->onClient(this);
+          cmd->onClient(*this);
           continue;
         }
         if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1034,7 +1034,7 @@ void DebuggerClient::runImpl() {
         m_sigTime = 0;
         usageLogInterrupt(cmd);
         {
-          cmd->onClient(this);
+          cmd->onClient(*this);
         }
         m_machine->m_interrupting = true;
         setClientState(StateReadyForCommand);
@@ -1198,7 +1198,7 @@ Array DebuggerClient::getOutputArray() {
 void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   TRACE(2, "DebuggerClient::shortCode\n");
   if (bp && !bp->m_file.empty() && bp->m_line1) {
-    Variant source = CmdList::GetSourceFile(this, bp->m_file);
+    Variant source = CmdList::GetSourceFile(*this, bp->m_file);
     if (source.isString()) {
       // Line and column where highlight should start and end
       int beginHighlightLine = bp->m_line1;
@@ -1630,7 +1630,7 @@ bool DebuggerClient::process() {
     case '?': {
       if (match("?")) {
         usageLog("help", m_line);
-        CmdHelp().onClient(this);
+        CmdHelp().onClient(*this);
         return true;
       }
       if (match("?>")) {
@@ -1645,7 +1645,7 @@ bool DebuggerClient::process() {
         usageLog(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
-        cmd->onClient(this);
+        cmd->onClient(*this);
       } else {
         processTakeCode();
       }
@@ -1854,7 +1854,7 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
     }
 
     // eval() can cause more breakpoints
-    res->onClient(this);
+    res->onClient(*this);
     if (!console()) {
       if (m_quitting) {
         throw DebuggerClientExitException();
@@ -1934,7 +1934,7 @@ void DebuggerClient::processEval() {
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClient(this);
+  CmdEval().onClient(*this);
 }
 
 void DebuggerClient::swapHelp() {

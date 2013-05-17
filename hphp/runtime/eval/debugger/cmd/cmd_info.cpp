@@ -89,17 +89,17 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
   }
 }
 
-void CmdInfo::list(DebuggerClient *client) {
-  client->addCompletion(DebuggerClient::AutoCompleteFunctions);
-  client->addCompletion(DebuggerClient::AutoCompleteClasses);
-  client->addCompletion(DebuggerClient::AutoCompleteClassMethods);
-  client->addCompletion(DebuggerClient::AutoCompleteClassProperties);
-  client->addCompletion(DebuggerClient::AutoCompleteClassConstants);
+void CmdInfo::list(DebuggerClient &client) {
+  client.addCompletion(DebuggerClient::AutoCompleteFunctions);
+  client.addCompletion(DebuggerClient::AutoCompleteClasses);
+  client.addCompletion(DebuggerClient::AutoCompleteClassMethods);
+  client.addCompletion(DebuggerClient::AutoCompleteClassProperties);
+  client.addCompletion(DebuggerClient::AutoCompleteClassConstants);
 }
 
-void CmdInfo::help(DebuggerClient *client) {
-  client->helpTitle("Info Command");
-  client->helpCmds(
+void CmdInfo::help(DebuggerClient &client) {
+  client.helpTitle("Info Command");
+  client.helpCmds(
     "info",                   "displays current function's info",
     "info {cls}",             "displays declaration of this class",
     "info {function}",        "displays declaration of this function",
@@ -108,14 +108,14 @@ void CmdInfo::help(DebuggerClient *client) {
     "info {cls::$property}",  "displays declaration of this property",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command to display declaration of a symbol."
   );
 }
 
-bool CmdInfo::parseZeroArg(DebuggerClient *client) {
-  assert(client->argCount() == 0);
-  BreakPointInfoPtr bpi = client->getCurrentLocation();
+bool CmdInfo::parseZeroArg(DebuggerClient &client) {
+  assert(client.argCount() == 0);
+  BreakPointInfoPtr bpi = client.getCurrentLocation();
   if (bpi) {
     m_symbol = bpi->getClass();
     m_type = KindOfClass;
@@ -127,9 +127,9 @@ bool CmdInfo::parseZeroArg(DebuggerClient *client) {
   return !m_symbol.empty();
 }
 
-void CmdInfo::parseOneArg(DebuggerClient *client, string &subsymbol) {
-  assert(client->argCount() == 1);
-  string symbol = client->argValue(1);
+void CmdInfo::parseOneArg(DebuggerClient &client, string &subsymbol) {
+  assert(client.argCount() == 1);
+  string symbol = client.argValue(1);
   size_t pos = symbol.find("::");
   if (pos != string::npos) {
     m_symbol = String(symbol.substr(0, pos));
@@ -144,49 +144,49 @@ void CmdInfo::parseOneArg(DebuggerClient *client, string &subsymbol) {
   }
 }
 
-void CmdInfo::onClientImpl(DebuggerClient *client) {
+void CmdInfo::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   string subsymbol;
 
-  if (client->argCount() == 0) {
+  if (client.argCount() == 0) {
     if (!parseZeroArg(client)) {
-      client->error("There is no current function or method to look up.");
-      client->tutorial(
+      client.error("There is no current function or method to look up.");
+      client.tutorial(
         "You can only use '[i]nfo' without a symbol name when you are running "
         "your program and it breaks at a function or a class method. It will "
         "then look up information about that function or method."
       );
       return;
     }
-  } else if (client->argCount() == 1) {
+  } else if (client.argCount() == 1) {
     parseOneArg(client, subsymbol);
   } else {
     help(client);
     return;
   }
 
-  CmdInfoPtr cmd = client->xend<CmdInfo>(this);
+  CmdInfoPtr cmd = client.xend<CmdInfo>(this);
   Array info = cmd->m_info;
   if (info.empty()) {
-    client->info("(specified symbol cannot be found)");
+    client.info("(specified symbol cannot be found)");
   } else {
     for (ArrayIter iter(info); iter; ++iter) {
       StringBuffer sb;
       PrintInfo(client, sb, iter.second(), subsymbol);
-      client->code(sb.detach());
+      client.code(sb.detach());
     }
   }
 }
 
-void CmdInfo::UpdateLiveLists(DebuggerClient *client) {
+void CmdInfo::UpdateLiveLists(DebuggerClient &client) {
   CmdInfo cmd;
   cmd.m_type = KindOfLiveLists;
-  CmdInfoPtr res = client->xend<CmdInfo>(&cmd);
-  client->setLiveLists(res->m_acLiveLists);
+  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
+  client.setLiveLists(res->m_acLiveLists);
 }
 
-String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
+String CmdInfo::GetProtoType(DebuggerClient &client, const std::string &cls,
                              const std::string &func) {
   CmdInfo cmd;
   cmd.m_type = KindOfFunction;
@@ -195,7 +195,7 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
   } else {
     cmd.m_symbol = String(cls) + "::" + String(func);
   }
-  CmdInfoPtr res = client->xend<CmdInfo>(&cmd);
+  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
   Array info = res->m_info;
   if (!info.empty()) {
     info = info[0];
@@ -211,7 +211,7 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
   return String();
 }
 
-bool CmdInfo::onServer(DebuggerProxy *proxy) {
+bool CmdInfo::onServer(DebuggerProxy &proxy) {
   if (m_type == KindOfLiveLists) {
     std::vector<String> tmpAcLiveLists[DebuggerClient::AutoCompleteCount];
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
@@ -254,7 +254,7 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       vars.push_back("$" + iter.first().toString()->toCPPString());
     }
 
-    return proxy->sendToClient(this);
+    return proxy.sendToClient(this);
   }
 
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
@@ -273,7 +273,7 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       }
     } catch (...) {}
   }
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,7 +296,7 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
   }
 }
 
-void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
+void CmdInfo::PrintHeader(DebuggerClient &client, StringBuffer &sb,
                           CArrRef info) {
   if (!info[s_internal].toBoolean()) {
     String file = info[s_file].toString();
@@ -309,11 +309,11 @@ void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
     } else if (line1 && line2 && line1 != line2) {
       sb.printf("// defined on line %d to %d of %s\n", line1, line2,
                 file.data());
-      client->setListLocation(file.data(), line1 - 1, false);
+      client.setListLocation(file.data(), line1 - 1, false);
     } else {
       int line = line1 ? line1 : line2;
       sb.printf("// defined on line %d of %s\n", line, file.data());
-      client->setListLocation(file.data(), line - 1, false);
+      client.setListLocation(file.data(), line - 1, false);
     }
   }
 
@@ -421,7 +421,7 @@ bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
   return false;
 }
 
-bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
+bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, CArrRef info,
                         std::string subsymbol) {
   if (subsymbol.size() > 2 && subsymbol.substr(subsymbol.size() - 2) == "()") {
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
@@ -445,7 +445,7 @@ bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
   return false;
 }
 
-void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
+void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol) {
   if (info.exists(s_params)) {
     PrintHeader(client, sb, info);
@@ -462,7 +462,7 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     if (TryProperty(sb, info, subsymbol)) found = true;
     if (TryMethod(client, sb, info, subsymbol)) found = true;
     if (found) return;
-    client->info("Specified symbol cannot be found. Here the whole class:\n");
+    client.info("Specified symbol cannot be found. Here the whole class:\n");
   }
 
   PrintHeader(client, sb, info);

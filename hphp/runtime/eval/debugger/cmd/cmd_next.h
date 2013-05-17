@@ -27,9 +27,9 @@ class CmdNext : public CmdFlowControl {
 public:
   CmdNext() : CmdFlowControl(KindOfNext) {}
 
-  virtual void help(DebuggerClient *client);
-  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+  virtual void help(DebuggerClient &client);
+  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

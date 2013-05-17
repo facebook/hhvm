@@ -21,23 +21,23 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdNext::help(DebuggerClient *client) {
-  client->helpTitle("Next Command");
-  client->helpCmds(
+void CmdNext::help(DebuggerClient &client) {
+  client.helpTitle("Next Command");
+  client.helpCmds(
     "[n]ext {count=1}", "steps over lines of code",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command at break to step over lines of code. Specify a "
     "count to step over more than one line of code."
   );
 }
 
-void CmdNext::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdNext::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdNext::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   CmdFlowControl::onSetup(proxy, interrupt);
-  m_stackDepth = proxy->getStackDepth();
+  m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_vmContext->m_nesting;
   m_loc = interrupt.getFileLine();
 
@@ -46,7 +46,7 @@ void CmdNext::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
   m_needsVMInterrupt = true;
 }
 
-void CmdNext::onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdNext::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   if (interrupt.getInterruptType() == ExceptionThrown) {
@@ -58,7 +58,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
   }
 
   int currentVMDepth = g_vmContext->m_nesting;
-  int currentStackDepth = proxy->getStackDepth();
+  int currentStackDepth = proxy.getStackDepth();
 
   if ((currentVMDepth < m_vmDepth) ||
       ((currentVMDepth == m_vmDepth) && (currentStackDepth <= m_stackDepth))) {

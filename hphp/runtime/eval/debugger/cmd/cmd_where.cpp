@@ -46,83 +46,83 @@ void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_stackArgs);
 }
 
-void CmdWhere::help(DebuggerClient *client) {
-  client->helpTitle("Where Command");
-  client->helpCmds(
+void CmdWhere::help(DebuggerClient &client) {
+  client.helpTitle("Where Command");
+  client.helpCmds(
     "[w]here",           "displays current stacktrace",
     "[w]here {num}",     "displays number of innermost frames",
     "[w]here -{num}",    "displays number of outermost frames",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace. "
     "Use '[f]rame {index}' to jump to one particular frame. At any frame, "
     "use '[v]ariable' command to display all local variables."
   );
 }
 
-Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
-  Array st = client->getStackTrace();
+Array CmdWhere::fetchStackTrace(DebuggerClient &client) {
+  Array st = client.getStackTrace();
   if (st.isNull()) {
-    m_stackArgs = client->getDebuggerStackArgs();
-    CmdWherePtr cmd = client->xend<CmdWhere>(this);
+    m_stackArgs = client.getDebuggerStackArgs();
+    CmdWherePtr cmd = client.xend<CmdWhere>(this);
     st = cmd->m_stacktrace;
-    client->setStackTrace(st);
+    client.setStackTrace(st);
   }
   return st;
 }
 
-void CmdWhere::onClientImpl(DebuggerClient *client) {
+void CmdWhere::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client->argCount() > 1) {
+  if (client.argCount() > 1) {
     help(client);
     return;
   }
 
   Array st = fetchStackTrace(client);
   if (st.empty()) {
-    client->info("(no stacktrace to display or in global scope)");
-    client->info("if you hit serialization limit, consider do "
+    client.info("(no stacktrace to display or in global scope)");
+    client.info("if you hit serialization limit, consider do "
                  "\"set sa off\" and then get the stack without args");
     return;
   }
 
   // so list command can default to current frame
-  client->moveToFrame(client->getFrame(), false);
+  client.moveToFrame(client.getFrame(), false);
 
-  if (client->argCount() == 0) {
+  if (client.argCount() == 0) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {
-      client->printFrame(i, iter.second());
+      client.printFrame(i, iter.second());
       ++i;
-      if (!client->isApiMode() &&
+      if (!client.isApiMode() &&
           i % DebuggerClient::ScrollBlockSize == 0 &&
-          client->ask("There are %d more frames. Continue? [Y/n]",
+          client.ask("There are %d more frames. Continue? [Y/n]",
                       st.size() - i) == 'n') {
         break;
       }
     }
   } else {
-    string snum = client->argValue(1);
+    string snum = client.argValue(1);
     int num = atoi(snum.c_str());
     if (snum[0] == '-') {
       snum = snum.substr(1);
     }
     if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("The argument, if specified, has to be numeric.");
+      client.error("The argument, if specified, has to be numeric.");
       return;
     }
     if (num > 0) {
       for (int i = 0; i < num && i < st.size(); i++) {
-        client->printFrame(i, st[i]);
+        client.printFrame(i, st[i]);
       }
     } else if (num < 0) {
       for (int i = st.size() + num; i < st.size(); i++) {
-        client->printFrame(i, st[i]);
+        client.printFrame(i, st[i]);
       }
     } else {
-      client->error("0 was specified for the number of frames");
-      client->tutorial(
+      client.error("0 was specified for the number of frames");
+      client.tutorial(
         "The optional argument is the number of frames to print out. "
         "Use a positive number to print out innermost frames. Use a negative "
         "number to print out outermost frames."
@@ -131,8 +131,8 @@ void CmdWhere::onClientImpl(DebuggerClient *client) {
   }
 }
 
-void CmdWhere::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTStacktrace);
+void CmdWhere::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 void CmdWhere::processStackTrace() {
@@ -153,12 +153,12 @@ void CmdWhere::processStackTrace() {
   m_stacktrace = smallST;
 }
 
-bool CmdWhere::onServer(DebuggerProxy *proxy) {
+bool CmdWhere::onServer(DebuggerProxy &proxy) {
   m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
   if (!m_stackArgs) {
     processStackTrace();
   }
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

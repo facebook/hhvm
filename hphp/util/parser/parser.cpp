@@ -16,58 +16,50 @@
 
 #include "parser.h"
 #include "hphp/util/hash.h"
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Mutex ParserBase::s_mutex;
-std::map<int64_t, int> ParserBase::s_closureIds;
-
-char ParserBase::GetAnonPrefix(AnonFuncKind kind) {
-  static_assert(Closure == 0 && Continuation <= 9,
-                "AnonFuncKind enum has unexpected values");
-  static_assert(CharClosure == '0' && CharContinuation <= '9',
-                "AnonFuncKindChar enum has unexpected values");
-  return '0' + kind;
-}
-
-template <int i>
-static bool NameImpl(const std::string &name) {
-  return !name.empty() && isdigit(name[0]) && i == (name[0] - '0');
-}
-
 bool ParserBase::IsClosureName(const std::string &name) {
-  return NameImpl<Closure>(name);
-}
-
-bool ParserBase::IsCreateFunctionName(const std::string &name) {
-  return NameImpl<CreateFunction>(name);
+  return boost::istarts_with(name, "closure$");
 }
 
 bool ParserBase::IsContinuationName(const std::string &name) {
-  return NameImpl<ContinuationFromClosure>(name) ||
-         NameImpl<Continuation>(name);
-}
-
-bool ParserBase::IsContinuationFromClosureName(const std::string &name) {
-  return NameImpl<ContinuationFromClosure>(name);
+  return boost::iends_with(name, "$continuation");
 }
 
 bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
   return IsClosureName(name) || IsContinuationName(name);
 }
 
-bool ParserBase::IsAnonFunctionName(const char *name) {
-  if (!*name) return true;
-  char begin = CharClosure;
-  char end   = CharContinuation;
-  char test  = name[0];
-  return begin <= test && test <= end;
+std::string ParserBase::newContinuationName(const std::string &name) {
+  assert(!name.empty());
+  size_t pos = 0;
+  std::string shorterName = name;
+  std::string suffix("$continuation");
+  while((pos = shorterName.find(suffix, pos)) != std::string::npos) {
+    shorterName.replace(pos, suffix.length(), "");
+  }
+  return shorterName + suffix;
 }
 
-void ParserBase::Reset() {
-  Lock lock(s_mutex);
-  s_closureIds.clear();
+std::string ParserBase::newClosureName(
+    const std::string &className,
+    const std::string &funcName) {
+  std::string name = "Closure$";
+  if (!className.empty()) {
+    name += className + "::";
+  }
+  name += funcName;
+
+  static std::map<std::string, int> s_seenClosures;
+  int id = ++s_seenClosures[name];
+  if (id > 1) {
+    // we've seen the same name before, uniquify
+    name = name + '#' + std::to_string(id);
+  }
+  return name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,23 +135,6 @@ bool ParserBase::peekClass() {
 
 void ParserBase::popClass() {
   m_classes.pop_back();
-}
-
-std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
-  int64_t h = hash_string_cs(m_fileName, strlen(m_fileName));
-  int closureId;
-  {
-    Lock lock(s_mutex);
-    int &id = s_closureIds[h];
-    closureId = ++id;
-  }
-
-  string ret;
-  ret += GetAnonPrefix(kind);
-  ret += boost::lexical_cast<string>(h);
-  ret += "_";
-  ret += boost::lexical_cast<string>(closureId);
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

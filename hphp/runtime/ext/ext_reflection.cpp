@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/util/parser/parser.h"
 
 #include "hphp/system/lib/systemlib.h"
 
@@ -745,7 +746,10 @@ Array f_hphp_get_class_info(CVarRef name) {
     size_t const numMethods = cls->preClass()->numMethods();
     for (Slot i = 0; i < numMethods; ++i) {
       const Func* m = methods[i];
-      if (isdigit(m->name()->data()[0])) continue;
+      if (isdigit(m->name()->data()[0]) ||
+          ParserBase::IsClosureOrContinuationName(m->name()->toCPPString())) {
+        continue;
+      }
       Array info = Array::Create();
       set_method_info(info, m);
       arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
@@ -756,7 +760,10 @@ Array f_hphp_get_class_info(CVarRef name) {
          i < cls->traitsEndIdx();
          ++i) {
       const Func* m = clsMethods[i];
-      if (isdigit(m->name()->data()[0])) continue;
+      if (isdigit(m->name()->data()[0]) ||
+          ParserBase::IsClosureOrContinuationName(m->name()->toCPPString())) {
+        continue;
+      }
       Array info = Array::Create();
       set_method_info(info, m);
       arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));

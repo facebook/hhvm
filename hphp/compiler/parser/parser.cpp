@@ -113,7 +113,7 @@ using namespace HPHP::Compiler;
 
 extern void prepare_generator(Parser *_p, Token &stmt, Token &params);
 extern void create_generator(Parser *_p, Token &out, Token &params,
-                             Token &name, const std::string &closureName,
+                             Token &name, const std::string &genName,
                              const char *clsname, Token *modifiers,
                              bool getArgs, Token &origGenFunc, bool isHhvm,
                              Token *attr);
@@ -825,14 +825,20 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
 
   FunctionStatementPtr func;
 
+  string funcName = name->text();
+  if (funcName.empty()) {
+    funcName = newClosureName(m_clsName, m_containingFuncName);
+  } else if (m_lambdaMode) {
+    funcName += "{lambda}";
+  }
+
   if (funcContext.isGenerator) {
-    AnonFuncKind fKind = name->text().empty() ?
-      ContinuationFromClosure : Continuation;
-    const string &closureName = getAnonFuncName(fKind);
+    string genName = newContinuationName(funcName);
+
     Token new_params;
     prepare_generator(this, stmt, new_params);
 
-    func = NEW_STMT(FunctionStatement, exp, ref->num(), closureName,
+    func = NEW_STMT(FunctionStatement, exp, ref->num(), genName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
                     ret.typeAnnotationName(),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
@@ -857,7 +863,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       // the MethodStatement it's building will get the docComment
       pushComment(comment);
       Token origGenFunc;
-      create_generator(this, out, params, name, closureName, nullptr, nullptr,
+      create_generator(this, out, params, name, genName, nullptr, nullptr,
                        hasCallToGetArgs, origGenFunc,
                        (!Option::WholeProgram || !Option::ParseTimeOpts),
                        attr);
@@ -870,15 +876,6 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
     }
 
   } else {
-    string funcName = name->text();
-    if (funcName.empty()) {
-      funcName = getAnonFuncName(Closure);
-    } else if (m_lambdaMode) {
-      string f;
-      f += GetAnonPrefix(CreateFunction);
-      funcName = f + "_" + funcName;
-    }
-
     ExpressionListPtr attrList;
     if (attr && attr->exp) {
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
@@ -1131,12 +1128,23 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   fixStaticVars();
 
   MethodStatementPtr mth;
+
+  string funcName = name->text();
+  if (funcName.empty()) {
+    funcName = newClosureName(m_clsName, m_containingFuncName);
+  }
+
   if (funcContext.isGenerator) {
-    const string &closureName = getAnonFuncName(ParserBase::Continuation);
+    string genName = newContinuationName(funcName);
+    if (m_inTrait) {
+      // see traits/2067.php
+      genName = newContinuationName(funcName + "@" + m_clsName);
+    }
+
     Token new_params;
     prepare_generator(this, stmt, new_params);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
-    mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
+    mth = NEW_STMT(MethodStatement, exp2, ref->num(), genName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
                    ret.typeAnnotationName(),
                    dynamic_pointer_cast<StatementList>(stmt->stmt),
@@ -1154,7 +1162,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     // the MethodStatement it's building will get the docComment
     pushComment(comment);
     Token origGenFunc;
-    create_generator(this, out, params, name, closureName, m_clsName.c_str(),
+    create_generator(this, out, params, name, genName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs, origGenFunc,
                      (!Option::WholeProgram || !Option::ParseTimeOpts),
                      attr);
@@ -1169,7 +1177,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     if (attr && attr->exp) {
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
-    mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),
+    mth = NEW_STMT(MethodStatement, exp, ref->num(), funcName,
                    old_params,
                    ret.typeAnnotationName(),
                    stmts, attribute, comment,
@@ -1556,6 +1564,11 @@ void Parser::onThrow(Token &out, Token &expr) {
 }
 
 void Parser::onClosureStart(Token &name) {
+  if (!m_funcName.empty()) {
+    m_containingFuncName = m_funcName;
+  } else {
+    // pseudoMain
+  }
   onFunctionStart(name, true);
 }
 

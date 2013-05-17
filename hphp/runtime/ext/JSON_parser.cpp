@@ -551,6 +551,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           empty }
         */
       case -9:
+        attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
+
         if (!pop(the_json, MODE_KEY)) {
           return false;
         }

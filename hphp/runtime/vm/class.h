@@ -19,9 +19,6 @@
 
 #include <bitset>
 #include "tbb/concurrent_hash_map.h"
-#ifdef USE_JEMALLOC
-# include <jemalloc/jemalloc.h>
-#endif
 #include <atomic>
 
 #include "hphp/runtime/vm/core_types.h"

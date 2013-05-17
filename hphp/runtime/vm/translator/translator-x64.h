@@ -629,6 +629,7 @@ MINSTRS
   CASE(ContHandle) \
   CASE(Strlen) \
   CASE(IncStat) \
+  CASE(ArrayIdx) \
 
   // These are instruction-like functions which cover more than one
   // opcode.

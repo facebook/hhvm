@@ -1263,6 +1263,9 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClassRef,       1 }},
   { OpNativeImpl,  {None,             None,         OutNone,           0 }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject,         1 }},
+  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
+  { OpIncStat,     {None,             None,         OutNone,           0 }},
+  { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1280,8 +1283,6 @@ static const struct {
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
-  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
-  { OpIncStat,     {None,             None,         OutNone,           0 }},
 };
 
 static hphp_hash_map<Opcode, InstrInfo> instrInfo;

@@ -581,6 +581,8 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(IncTransCounter,                  ND, NA,                                E) \
+O(ArrayIdx,                    D(Cell), C(TCA) S(Arr) S(Int,Str) S(Cell),     \
+                                                        E|N|CRc|PRc|Refs|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(Nop,                              ND, NA,                               NF) \

@@ -350,6 +350,7 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
+  void emitArrayIdx();
 
   // tracelet guards
   Trace* guardTypeStack(uint32_t stackIndex,
@@ -370,6 +371,9 @@ struct HhbcTranslator {
   void setThisAvailable();
   void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
   void emitInterpOneCF(int numPopped);
+
+  void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
+                            bool& checkForInt);
 
 private:
   /*
@@ -423,8 +427,6 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     void emitArrayGet(SSATmp* key);
     void emitArrayIsset();
-    void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                              bool& checkForInt);
 
     // Misc Helpers
     void numberStackInputs();

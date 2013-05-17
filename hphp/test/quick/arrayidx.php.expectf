@@ -1,0 +1,12 @@
+string(1) "2"
+int(3)
+string(1) "2"
+int(3)
+string(1) "2"
+string(1) "2"
+int(3)
+string(5) "world"
+int(3)
+string(5) "empty"
+int(3)
+HipHop Fatal error: hphp_array_idx: search must be an array in %s on line 22

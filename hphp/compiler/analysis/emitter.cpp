@@ -3162,6 +3162,17 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.AKExists();
             return true;
           }
+        } else if (call->isCallToFunction("hphp_array_idx")) {
+          if (params && params->getCount() == 3) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            visit((*params)[1]);
+            emitConvertToCell(e);
+            visit((*params)[2]);
+            emitConvertToCell(e);
+            e.ArrayIdx();
+            return true;
+          }
         } else if (call->isCallToFunction("strlen")) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);

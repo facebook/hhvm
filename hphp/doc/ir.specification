@@ -1230,6 +1230,7 @@ ArrayAdd
 DefCls
 DefFunc
 AKExists
+ArrayIdx
 
 D:Int LdSwitchDblIndex S0:Dbl S1:Int S2:Int
 D:Int LdSwitchStrIndex S0:Str S1:Int S2:Int

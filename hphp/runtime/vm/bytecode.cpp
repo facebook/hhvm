@@ -5104,6 +5104,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAKExists(PC& pc) {
   key->m_type = KindOfBoolean;
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopArrayIdx(PC& pc) {
+  NEXT();
+  TypedValue* def = m_stack.topTV();
+  TypedValue* arr = m_stack.indTV(1);
+  TypedValue* key = m_stack.indTV(2);
+
+  Variant result = f_hphp_array_idx(tvAsCVarRef(key),
+                                    tvAsCVarRef(arr),
+                                    tvAsCVarRef(def));
+  m_stack.popTV();
+  m_stack.popTV();
+  tvAsVariant(key) = result;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopSetL(PC& pc) {
   NEXT();
   DECODE_HA(local);

@@ -2039,6 +2039,36 @@
             },
             "args": [
             ]
+        },
+        {
+            "name": "hphp_array_idx",
+            "desc": "hphp_array_idx() returns the value at the given key in the given array or the given default value if it is not found. An error will be raised if the search parameter is not an array.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific",
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the value at 'key' in 'search' or 'def' if it is not found."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "Value to check."
+                },
+                {
+                    "name": "search",
+                    "type": "Variant",
+                    "desc": "An array with keys to check."
+                },
+                {
+                    "name": "def",
+                    "type": "Variant",
+                    "desc": "The value to return if key is not found in search."
+                }
+            ]
         }
     ],
     "classes": [

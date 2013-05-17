@@ -1419,26 +1419,6 @@ void HhbcTranslator::VectorTranslator::emitUnsetProp() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::checkStrictlyInteger(
-  SSATmp*& key, KeyType& keyType, bool& checkForInt) {
-  checkForInt = false;
-  if (key->isA(Type::Int)) {
-    keyType = IntKey;
-  } else {
-    assert(key->isA(Type::Str));
-    keyType = StrKey;
-    if (key->isConst()) {
-      int64_t i;
-      if (key->getValStr()->isStrictlyInteger(i)) {
-        keyType = IntKey;
-        key = cns(i);
-      }
-    } else {
-      checkForInt = true;
-    }
-  }
-}
-
 static inline TypedValue* checkedGetCell(ArrayData* a, StringData* key) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGetCell(i)
@@ -1477,7 +1457,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
   KeyType keyType;
   bool checkForInt;
-  checkStrictlyInteger(key, keyType, checkForInt);
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
 
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB_HOT(keyType, checkForInt);
@@ -1650,7 +1630,7 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
   SSATmp* key = getKey();
   KeyType keyType;
   bool checkForInt;
-  checkStrictlyInteger(key, keyType, checkForInt);
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
 
   typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
@@ -1726,7 +1706,7 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
   assert(value->type().notBoxed());
   KeyType keyType;
   bool checkForInt;
-  checkStrictlyInteger(key, keyType, checkForInt);
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
   const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
   bool setRef = base.outerType() == KindOfRef;
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);

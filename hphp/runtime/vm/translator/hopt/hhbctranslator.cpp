@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
+#include "hphp/runtime/vm/translator/hopt/codegen.h" // ArrayIdx helpers
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"
@@ -1122,6 +1123,46 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
   if (Stats::enabled() || force) {
     gen(IncStat, cns(counter), cns(value), cns(force));
   }
+}
+
+void HhbcTranslator::emitArrayIdx() {
+  SSATmp* def = popC();
+  SSATmp* arr = popC();
+  SSATmp* key = popC();
+
+  if (UNLIKELY(!arr->isA(Type::Arr))) {
+    // raise fatal
+    emitInterpOne(Type::Cell, 3);
+    return;
+  }
+  if (UNLIKELY(key->isA(Type::Null))) {
+    // if the key is null it will not be found so just return the default
+    push(def);
+    gen(DecRef, arr);
+    gen(DecRef, key);
+    return;
+  }
+  if (UNLIKELY(!(key->isA(Type::Int) || key->isA(Type::Str)))) {
+    PUNT(ArrayIdx_unsupportedKey);
+  }
+
+  KeyType keyType;
+  bool checkForInt;
+  checkStrictlyInteger(key, keyType, checkForInt);
+
+  TCA opFunc;
+  if (checkForInt) {
+    opFunc = (TCA)&arrayIdxSi;
+  } else if (IntKey == keyType) {
+    opFunc = (TCA)&arrayIdxI;
+  } else {
+    assert(StrKey == keyType);
+    opFunc = (TCA)&arrayIdxS;
+  }
+
+  push(gen(ArrayIdx, cns(opFunc), arr, key, def));
+  gen(DecRef, arr);
+  gen(DecRef, key);
 }
 
 void HhbcTranslator::emitIncTransCounter() {
@@ -3204,6 +3245,26 @@ void HhbcTranslator::end(int nextPc) {
   setBcOff(nextPc, true);
   spillStack();
   m_tb->genTraceEnd(nextPc);
+}
+
+void HhbcTranslator::checkStrictlyInteger(
+  SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+  checkForInt = false;
+  if (key->isA(Type::Int)) {
+    keyType = IntKey;
+  } else {
+    assert(key->isA(Type::Str));
+    keyType = StrKey;
+    if (key->isConst()) {
+      int64_t i;
+      if (key->getValStr()->isStrictlyInteger(i)) {
+        keyType = IntKey;
+        key = cns(i);
+      }
+    } else {
+      checkForInt = true;
+    }
+  }
 }
 
 }} // namespace HPHP::JIT

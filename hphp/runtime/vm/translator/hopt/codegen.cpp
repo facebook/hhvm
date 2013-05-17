@@ -415,6 +415,7 @@ CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(StaticLocInit)
 CALL_OPCODE(StaticLocInitCached)
 CALL_OPCODE(OpMod)
+CALL_OPCODE(ArrayIdx)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
@@ -5231,6 +5232,36 @@ void genCodeForTrace(Trace* trace,
   for (Trace* exit : trace->getExitTraces()) {
     cgTrace(exit, astubs, astubs, tx64, nullptr, state);
   }
+}
+
+ALWAYS_INLINE
+TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
+  if (UNLIKELY(nullptr == tv)) {
+    // refcount is already correct since def was never decrefed
+    return def;
+  }
+  tvRefcountedDecRef(&def);
+  TypedValue* ret = tvToCell(tv);
+  tvRefcountedIncRef(ret);
+  return *ret;
+}
+
+HOT_FUNC_VM
+TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  return getDefaultIfNullCell(a->nvGet(key), def);
+}
+
+HOT_FUNC_VM
+TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ?
+         getDefaultIfNullCell(a->nvGet(i), def) :
+         getDefaultIfNullCell(a->nvGet(key), def);
+}
+
+HOT_FUNC_VM
+TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 }}

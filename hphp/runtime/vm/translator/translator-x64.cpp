@@ -7519,12 +7519,16 @@ void TranslatorX64::translateStrlen(const Tracelet& t,
       not_reached();
   }
 }
-
 void TranslatorX64::translateIncStat(const Tracelet& t,
                                      const NormalizedInstruction& i) {
   int32_t counter = i.imm[0].u_IVA;
   int32_t value = i.imm[1].u_IVA;
   Stats::emitInc(a, Stats::StatCounter(counter), value);
+}
+
+void TranslatorX64::translateArrayIdx(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  not_reached();
 }
 
 static void analyzeClassExistsImpl(NormalizedInstruction& i) {
@@ -12247,6 +12251,7 @@ bool TranslatorX64::dumpTCData() {
    * Always-interp instructions,
    */ \
   INTERP_OP(ContHandle) \
+  INTERP_OP(ArrayIdx) \
 
 
 // Define the trivial analyze methods

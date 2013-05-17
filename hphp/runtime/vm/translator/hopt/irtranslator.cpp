@@ -686,6 +686,11 @@ void TranslatorX64::irTranslateIncStat(const Tracelet& t,
   HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
+void TranslatorX64::irTranslateArrayIdx(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+  HHIR_EMIT(ArrayIdx);
+}
+
 void TranslatorX64::irTranslateClassExists(const Tracelet& t,
                                            const NormalizedInstruction& i) {
   const StringData* clsName = i.inputs[1]->rtt.valueStringOrNull();

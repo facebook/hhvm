@@ -5731,6 +5731,13 @@ void EmitterVisitor::emitVirtualLocal(int localId,
   }
 }
 
+static bool isNormalLocalVariable(const ExpressionPtr& expr) {
+  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
+  return (expr->is(Expression::KindOfSimpleVariable) &&
+          !sv->isSuperGlobal() &&
+          !sv->isThis());
+}
+
 template<class Expr>
 void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
@@ -5741,10 +5748,8 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
   } else if (node->getClass()) {
     const ExpressionPtr& expr = node->getClass();
-    SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
-    if (expr->is(Expression::KindOfSimpleVariable) &&
-        !sv->isSuperGlobal() &&
-        !sv->isThis()) {
+    if (isNormalLocalVariable(expr)) {
+      SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
       StringData* name = StringData::GetStaticString(sv->getName());
       Id locId = m_curFunc->lookupVarId(name);
       m_evalStack.setClsBaseType(SymbolicStack::CLS_NAMED_LOCAL);
@@ -6475,8 +6480,8 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
   ForeachIterGuard fig(*this, itId, strong);
-  bool simpleCase = (!key || key->is(Expression::KindOfSimpleVariable)) &&
-                             val->is(Expression::KindOfSimpleVariable);
+  bool simpleCase = (!key || isNormalLocalVariable(key)) &&
+                    isNormalLocalVariable(val);
 
   if (simpleCase) {
     SimpleVariablePtr svVal(static_pointer_cast<SimpleVariable>(val));

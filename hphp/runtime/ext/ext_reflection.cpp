@@ -87,7 +87,7 @@ static StaticString s_return_type("return_type");
 static StaticString s_type_hint("type_hint");
 
 static const Class* get_cls(CVarRef class_or_object) {
-  Class* cls = NULL;
+  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
@@ -263,7 +263,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
         param.set(s_class, VarNR(*classname));
       }
       const char *defText = p->valueText;
-      if (defText == NULL) defText = "";
+      if (defText == nullptr) defText = "";
       if (!p->type || !*p->type || !strcasecmp("null", defText)) {
         param.set(s_nullable, true_varNR);
       }
@@ -905,37 +905,49 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
 }
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {
-  Class* class_ = Unit::lookupClass(cls.get());
-  if (class_ == NULL) {
-    raise_error("Non-existent class %s", cls.get()->data());
+  StringData* sd = cls.get();
+  Class* class_ = Unit::lookupClass(sd);
+  if (class_ == nullptr) {
+    String normName = normalizeNS(sd);
+    if (normName) {
+      return f_hphp_get_static_property(normName, prop);
+    } else {
+      raise_error("Non-existent class %s", sd->data());
+    }
   }
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(arGetContextClass(
                                       g_vmContext->getFP()),
                                     prop.get(), visible, accessible);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     raise_error("Class %s does not have a property named %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   if (!visible || !accessible) {
     raise_error("Invalid access to class %s's property %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   return tvAsVariant(tv);
 }
 
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
-  Class* class_ = Unit::lookupClass(cls.get());
-  if (class_ == NULL) {
-    raise_error("Non-existent class %s", cls.get()->data());
+  StringData* sd = cls.get();
+  Class* class_ = Unit::lookupClass(sd);
+  if (class_ == nullptr) {
+    String normName = normalizeNS(sd);
+    if (normName) {
+      return f_hphp_set_static_property(normName, prop, value);
+    } else {
+      raise_error("Non-existent class %s", sd->data());
+    }
   }
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(arGetContextClass(
                                       g_vmContext->getFP()),
                                     prop.get(), visible, accessible);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     raise_error("Class %s does not have a property named %s",
                 cls.get()->data(), prop.get()->data());
   }

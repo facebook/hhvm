@@ -1,5 +1,7 @@
 <?php
 
+namespace A;
+
 class TType {
   const STOP   = 0;
   const VOID   = 1;
@@ -136,6 +138,6 @@ function test() {
   var_dump($v1);
   thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
+  var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
 }
 test();

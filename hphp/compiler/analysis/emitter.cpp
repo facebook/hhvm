@@ -5927,7 +5927,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   int numParams = params ? params->getCount() : 0;
   bool useFCallBuiltin = false;
   StringData* nLiteral = nullptr;
-  Offset fpiStart;
+  Offset fpiStart = 0;
   if (node->getClass() || !node->getClassName().empty()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
     if (!node->isStatic() && !isSelfOrParent &&

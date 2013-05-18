@@ -195,6 +195,9 @@ bad_tests = (
     '/ext-sqlite3/sqlite3_25_create_aggregate.php',
     '/ext-sockets/socket_connect_params.php',
     '/ext-sockets/socket_getpeername_ipv4loop.php',
+
+    # time tests are hard to write, these are poorly written
+    '/ext-date/bug48187.php',
 )
 
 # Random other files that zend wants

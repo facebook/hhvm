@@ -1,10 +1,9 @@
-
 .PHONY: hphp.tab.cpp
 hphp.tab.cpp: $(PROJECT_ROOT)/src/util/parser/hphp.y
 	@echo "Generating parser code..."
 	export BISON_PKGDATADIR=\
-$(realpath $(EXTERNAL_TOOLS_ROOT))/bison/bison-2.4.1/da39a3e/share/bison
-	$(V)$(EXTERNAL_TOOLS_ROOT)/bison/bison-2.4.1/da39a3e/bin/bison \
+$(realpath $(EXTERNAL_TOOLS_ROOT))/share/bison
+	$(V)$(EXTERNAL_TOOLS_ROOT)/bin/bison \
 		-p$(YYPREFIX) --verbose --locations -d -o$@ $<
 	@perl -p -i -n -e "s/(T_\w+) = ([0-9]+)/YYTOKEN(\\2, \\1)/" \
 		hphp.tab.hpp

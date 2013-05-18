@@ -915,6 +915,9 @@ void CSEHash::filter(Block* block, IdomVector& idoms) {
  *     fall-through edge to the next block.
  */
 void TraceBuilder::reoptimize() {
+  FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
+
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
@@ -924,25 +927,31 @@ void TraceBuilder::reoptimize() {
     // t2135219 should address that
     return;
   }
+
   BlockList sortedBlocks = sortCfg(m_trace.get(), m_irFactory);
   IdomVector idoms = findDominators(sortedBlocks);
   clearTrackedState();
+
   auto blocks = std::move(m_trace->getBlocks());
   assert(m_trace->getBlocks().empty());
   while (!blocks.empty()) {
     Block* block = blocks.front();
     blocks.pop_front();
     assert(block->getTrace() == m_trace.get());
+    FTRACE(5, "Block: {}\n", block->postId());
+
     m_trace->push_back(block);
     if (m_snapshots[block]) {
       useState(block);
       m_cseHash.filter(block, idoms);
     }
+
     auto instructions = std::move(block->getInstrs());
     assert(block->empty());
     while (!instructions.empty()) {
       auto *inst = &instructions.front();
       instructions.pop_front();
+
       SSATmp* tmp = optimizeWork(inst); // Can generate new instrs!
       if (!tmp) {
         // Could not optimize; keep the old instruction

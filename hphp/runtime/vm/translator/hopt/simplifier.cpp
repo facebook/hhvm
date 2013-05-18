@@ -1688,6 +1688,7 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
   auto const info = getStackValue(inst->getSrc(0),
                                   inst->getExtra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
+    inst->convertToNop();
     return gen(DecRef, info.knownType, info.value);
   }
   if (!info.knownType.equals(Type::None)) {

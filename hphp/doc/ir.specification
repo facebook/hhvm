@@ -331,6 +331,10 @@ D:T = CheckType<T> S0:Gen -> L
   Check that the type of the src S0 is T, and if so copy it to D.  If
   S0 is not type T, branch to the label L.
 
+CheckTypeMem<T> S0:PtrToGen -> L
+
+  If the value pointed to by S0 is not type T, branch to the label L.
+
 GuardLoc<T,localId> S0:FramePtr
 
   Guard that type of the given localId on the frame S0 is a subtype of
@@ -644,11 +648,12 @@ D:T* = LdLocAddr<T, localId> S0:FramePtr
 
   Loads the address of the local slot localId from the frame S0 into D.
 
-D:T = LdMem<T> S0:PtrToGen [ -> L ]
+D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> L ]
 
-  Loads from S0 and puts the value in D. If the optional label L is
-  specified and the loaded value's type does not match T, this
-  instruction does not load into D and transfers control to L.
+  Loads from S0 + S1 (in bytes) and puts the value in D. If the
+  optional label L is specified and the loaded value's type does not
+  match T, this instruction does not load into D and transfers control
+  to L.
 
 D:T = LdProp<T> S0:Obj S1:ConstInt [ -> L ]
 

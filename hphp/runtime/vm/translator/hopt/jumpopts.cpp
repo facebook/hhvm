@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/translator/hopt/opt.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 

@@ -18,15 +18,20 @@
 
 namespace HPHP {  namespace JIT {
 
+//////////////////////////////////////////////////////////////////////
+
 class Trace;
 class TraceBuilder;
 class IRFactory;
 class IRInstruction;
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * The main optimization passes, in the order they run.
  */
 void optimizeMemoryAccesses(Trace*, IRFactory*);
+void optimizePredictions(Trace*, IRFactory*);
 void eliminateDeadCode(Trace*, IRFactory*);
 void optimizeJumps(Trace*, IRFactory*);
 
@@ -34,6 +39,8 @@ void optimizeJumps(Trace*, IRFactory*);
  * Run all the optimization passes.
  */
 void optimizeTrace(Trace*, TraceBuilder*);
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

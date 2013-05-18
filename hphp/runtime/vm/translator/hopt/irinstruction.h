@@ -161,12 +161,7 @@ struct IRInstruction {
    * The target instruction may be transient---we'll clone anything we
    * need to keep, using factory for any needed memory.
    *
-   * Note: if you want to use this to replace a CSE-able instruction
-   * you're probably going to have a bad time.  For now it's a
-   * precondition that the current instruction can't CSE.
-   *
    * Pre: other->isTransient() || numDsts() == other->numDsts()
-   * Pre: !canCSE()
    */
   void become(IRFactory*, IRInstruction* other);
 

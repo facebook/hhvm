@@ -154,6 +154,7 @@ class FailedIRGen : public std::exception {
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(CheckType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
+O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                         ND, S(FramePtr),                       E) \

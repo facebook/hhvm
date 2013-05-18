@@ -34,7 +34,7 @@ bool checkCfg(Trace*, const IRFactory&);
  * We can't have SSATmps spanning php-level calls, except for frame
  * pointers and constant values.
  *
- * We have no caller-saved registers in php, and there'd be nowhere to
+ * We have no callee-saved registers in php, and there'd be nowhere to
  * spill these because all translations share the spill space.
  */
 bool checkTmpsSpanningCalls(Trace*, const IRFactory&);

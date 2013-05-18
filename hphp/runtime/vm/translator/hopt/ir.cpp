@@ -753,7 +753,6 @@ void IRInstruction::convertToMov() {
 
 void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
-  assert(!canCSE());
   auto& arena = factory->arena();
 
   // Copy all but m_id, m_block, m_listNode, and don't clone

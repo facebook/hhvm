@@ -105,24 +105,31 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
 
   auto finishPass = [&](const char* msg) {
-    dumpTrace(6, trace, msg);
+    dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(trace, *irFactory));
     assert(checkTmpsSpanningCalls(trace, *irFactory));
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  auto dcePass = [&](const char* which) {
+  auto doPass = [&](void (*fn)(Trace*, IRFactory*),
+                    const char* msg) {
+    fn(trace, irFactory);
+    finishPass(msg);
+  };
+
+  auto dce = [&](const char* which) {
     if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
     eliminateDeadCode(trace, irFactory);
     finishPass(folly::format("after {} DCE", which).str().c_str());
   };
 
   if (false && RuntimeOption::EvalHHIRMemOpt) {
-    optimizeMemoryAccesses(trace, irFactory);
-    finishPass("after MemeLim");
+    doPass(optimizeMemoryAccesses, "MemeLim");
   }
-
-  dcePass("initial");
+  dce("initial");
+  if (RuntimeOption::EvalHHIRPredictionOpts) {
+    doPass(optimizePredictions, "prediction opts");
+  }
 
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
@@ -132,18 +139,16 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary
-    dcePass("reoptimize");
+    dce("reoptimize");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {
-    optimizeJumps(trace, irFactory);
-    finishPass("jump opts");
-    dcePass("jump opts");
+    doPass(optimizeJumps, "jumpopts");
+    dce("jump opts");
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    insertAsserts(trace, irFactory);
-    finishPass("RefCnt asserts");
+    doPass(insertAsserts, "RefCnt asserts");
   }
 }
 

@@ -164,8 +164,8 @@ struct Block : boost::noncopyable {
   template <class Predicate> void remove_if(Predicate p) {
     m_instrs.remove_if(p);
   }
-  void erase(iterator pos) {
-    m_instrs.erase(pos);
+  iterator erase(iterator pos) {
+    return m_instrs.erase(pos);
   }
 
  private:

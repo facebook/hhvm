@@ -318,8 +318,9 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   m_rScratch = selectScratchReg(inst);
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
-  case name: cg ## name (inst);                                   \
-            return m_as.code.frontier == start ? nullptr : start;
+  case name: FTRACE(7, "cg" #name "\n");                          \
+             cg ## name (inst);                                   \
+             return m_as.code.frontier == start ? nullptr : start;
   IR_OPCODES
 #undef O
 
@@ -4023,6 +4024,11 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   if (dstReg != InvalidReg) {
     emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
   }
+}
+
+void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
+  auto const reg = m_regs[inst->getSrc(0)].getReg();
+  emitTypeCheck(inst->getTypeParam(), reg[TVOFF(m_type)], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {

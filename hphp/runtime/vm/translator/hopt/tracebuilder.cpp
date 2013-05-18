@@ -850,7 +850,7 @@ void TraceBuilder::reoptimize() {
     Block* block = blocks.front();
     blocks.pop_front();
     assert(block->getTrace() == m_trace.get());
-    FTRACE(5, "Block: {}\n", block->postId());
+    FTRACE(5, "Block: {}\n", block->getId());
 
     m_trace->push_back(block);
     if (m_snapshots[block]) {

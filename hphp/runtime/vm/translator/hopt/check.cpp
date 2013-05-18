@@ -167,7 +167,7 @@ bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
         /*
          * Php calls kill all live temporaries.  We can't keep them
          * alive across the call because we currently have no
-         * caller-saved registers in our abi, and all translations
+         * callee-saved registers in our abi, and all translations
          * share the same spill slots.
          */
         if (isCall(inst.op())) state.reset();

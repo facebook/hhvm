@@ -786,8 +786,8 @@ static void close_server_log_file(int kind) {
   }
 }
 
-static int execute_program_impl(int argc, char **argv) {
-  string usage = "Usage:\n\n\t";
+static int execute_program_impl(int argc, char** argv) {
+  string usage = "Usage:\n\n   ";
   usage += argv[0];
   usage += " [-m <mode>] [<options>] [<arg1>] [<arg2>] ...\n\nOptions";
 
@@ -858,8 +858,67 @@ static int execute_program_impl(int argc, char **argv) {
   p.add("arg", -1);
   variables_map vm;
   try {
-    store(command_line_parser(argc, argv).options(desc).positional(p).run(),
-          vm);
+    // We use the boost command line parser to do the initial parsing,
+    // and then we do a manual pass to find the first occurrence of
+    // either "--" or a non-option argument so that we can properly
+    // determine which arguments should be consumed by HHVM and which
+    // arguments should be passed to the PHP application.
+    //
+    // We instruct the boost command line parser to allow unrecognized
+    // options and we manually deal with raising an error when there is
+    // an unrecognized option; we need to do this because otherwise the
+    // boost parser may choke on arguments intended for PHP application.
+    // Also, during the manual pass we keep track of our position in the
+    // original argv array so that we can correctly detect the first
+    // occurrence of "--" (since the boost parser swallows this token).
+    auto opts = command_line_parser(argc, argv)
+      .options(desc)
+      .positional(p)
+      .allow_unregistered()
+      .run();
+    // argvPos will track where we are in the original argv array
+    int argvPos = 1;
+    for (unsigned i = 0; i < opts.options.size(); ++i) {
+      const auto& option = opts.options[i];
+      if (option.unregistered) {
+        Logger::Error("Error in command line: unknown option %s",
+                      option.original_tokens[0].c_str());
+        cout << desc << "n";
+        return -1;
+      }
+      // Check if we've encountered "--" and make sure that argvPos
+      // accounts for it
+      bool foundDashDash = !strcmp(argv[argvPos], "--");
+      if (foundDashDash) {
+        ++argvPos;
+      }
+      // If we haven't encountered "--" or the first non-option
+      // argument, update argvPos appropriately and keep scanning
+      if (!foundDashDash && option.position_key == -1) {
+        argvPos += option.original_tokens.size();
+        continue;
+      }
+      // We've found the first occurrence of "--" or a non-option
+      // argument. Truncate opts.options, and then take all the
+      // remaining arguments from the original argv array and insert
+      // them into opts.options.
+      opts.options.resize(i);
+      std::vector<basic_option<char> > vec;
+      int pos = 0;
+      for (int m = argvPos; m < argc; ++m) {
+        string str = argv[m];
+        basic_option<char> bo;
+        bo.string_key = "arg";
+        bo.position_key = pos++;
+        bo.value.push_back(str);
+        bo.original_tokens.push_back(str);
+        bo.unregistered = false;
+        bo.case_insensitive = false;
+        opts.options.push_back(bo);
+      }
+      break;
+    }
+    store(opts, vm);
     notify(vm);
     if (po.mode == "d") po.mode = "debug";
     if (po.mode == "s") po.mode = "server";

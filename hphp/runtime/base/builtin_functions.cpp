@@ -1036,25 +1036,7 @@ Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
   if (invoke_file_impl(r, s, once, currentDir)) {
     return r;
   }
-  if (!s.empty()) {
-    return throw_missing_file(s.c_str());
-  }
-  // The gross hack which follows is here so that "hhvm foo.php" works
-  // the same as "hhvm -f foo.php".
-  // TODO Task #2171414: Find a less hacky way to accomplish this; we probably
-  // should be handling this elsewhere at a higher level rather than within
-  // the bowels of the invoke/include machinery
-  SystemGlobals* g = (SystemGlobals*)get_global_variables();
-  Variant& v_argc = g->GV(argc);
-  Variant& v_argv = g->GV(argv);
-  if (!more(v_argc, int64_t(0))) {
-    return true;
-  }
-  String s2 = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
-  if (invoke_file_impl(r, s2, once, "")) {
-    return r;
-  }
-  return throw_missing_file(s2.c_str());
+  return throw_missing_file(s.c_str());
 }
 
 bool invoke_file_impl(Variant &res, CStrRef path, bool once,

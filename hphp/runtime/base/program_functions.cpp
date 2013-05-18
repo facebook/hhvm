@@ -491,13 +491,17 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     now = time(nullptr);
     now_double = (double)now;
   }
+  String file = empty_string;
+  if (argc > 0) {
+    file = NEW(StringData)(argv[0], AttachLiteral);
+  }
   server.set(s_REQUEST_START_TIME, now);
   server.set(s_REQUEST_TIME, now);
   server.set(s_REQUEST_TIME_FLOAT, now_double);
   server.set(s_DOCUMENT_ROOT, empty_string);
-  server.set(s_SCRIPT_FILENAME, argv[0]);
-  server.set(s_SCRIPT_NAME, argv[0]);
-  server.set(s_PHP_SELF, argv[0]);
+  server.set(s_SCRIPT_FILENAME, file);
+  server.set(s_SCRIPT_NAME, file);
+  server.set(s_PHP_SELF, file);
   server.set(s_argv, g->GV(argv));
   server.set(s_argc, g->GV(argc));
   server.set(s_PWD, g_context->getCwd());
@@ -1031,12 +1035,17 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (!po.file.empty()) {
       Repo::setCliFile(po.file);
-    } else if (new_argc >= 1) {
+    } else if (new_argc > 0) {
       Repo::setCliFile(new_argv[0]);
     }
 
     int ret = 0;
     hphp_process_init();
+
+    string file;
+    if (new_argc > 0) {
+      file = new_argv[0];
+    }
 
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
@@ -1049,7 +1058,6 @@ static int execute_program_impl(int argc, char **argv) {
       }
       Eval::Debugger::RegisterSandbox(proxy->getDummyInfo());
       Eval::Debugger::RegisterThread();
-      string file = po.file;
       StringVecPtr client_args;
       bool restart = false;
       ret = 0;
@@ -1081,10 +1089,10 @@ static int execute_program_impl(int argc, char **argv) {
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 1;
-        if (hphp_invoke_simple(po.file)) {
+        if (hphp_invoke_simple(file)) {
           ret = ExitException::ExitCode;
         }
-        execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
+        execute_command_line_end(po.xhprofFlags, true, file.c_str());
       }
     }
 
@@ -1296,9 +1304,10 @@ ExecutionContext *hphp_context_init() {
 
 bool hphp_invoke_simple(const std::string &filename,
                         bool warmupOnly /* = false */) {
-  bool error; string errorMsg;
-  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, uninit_null(),
-                     "", "", error, errorMsg, true, warmupOnly);
+  bool error;
+  string errorMsg;
+  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
+                     uninit_null(), "", "", error, errorMsg, true, warmupOnly);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,

@@ -445,6 +445,7 @@ static const StaticString
   s_HHVM_JIT("HHVM_JIT"),
   s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_REQUEST_TIME("REQUEST_TIME"),
+  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -480,9 +481,19 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
-  time_t now = time(nullptr);
+  time_t now;
+  struct timeval tp = {0};
+  double now_double;
+  if (!gettimeofday(&tp, nullptr)) {
+    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+    now = tp.tv_sec;
+  } else {
+    now = time(nullptr);
+    now_double = (double)now;
+  }
   server.set(s_REQUEST_START_TIME, now);
   server.set(s_REQUEST_TIME, now);
+  server.set(s_REQUEST_TIME_FLOAT, now_double);
   server.set(s_DOCUMENT_ROOT, empty_string);
   server.set(s_SCRIPT_FILENAME, argv[0]);
   server.set(s_SCRIPT_NAME, argv[0]);

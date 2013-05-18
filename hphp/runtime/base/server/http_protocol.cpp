@@ -14,9 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-
-#include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/zend/zend_url.h"
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/runtime/base/program_functions.h"
@@ -111,6 +110,7 @@ static const StaticString
   s_HTTPS("HTTPS"),
   s_1("1"),
   s_REQUEST_TIME("REQUEST_TIME"),
+  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_QUERY_STRING("QUERY_STRING"),
   s_REMOTE_ADDR("REMOTE_ADDR"),
   s_REMOTE_HOST("REMOTE_HOST"),
@@ -388,8 +388,19 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     break;
   default:              server.set(s_REQUEST_METHOD, empty_string);     break;
   }
+  time_t now;
+  struct timeval tp = {0};
+  double now_double;
+  if (!gettimeofday(&tp, nullptr)) {
+    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+    now = tp.tv_sec;
+  } else {
+    now = time(nullptr);
+    now_double = (double)now;
+  }
   server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
-  server.set(s_REQUEST_TIME, time(nullptr));
+  server.set(s_REQUEST_TIME, now);
+  server.set(s_REQUEST_TIME_FLOAT, now_double);
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));

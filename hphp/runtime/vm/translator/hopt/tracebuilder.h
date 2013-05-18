@@ -316,7 +316,7 @@ private:
   SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
-  bool      callerLocalHasValue(SSATmp*) const;
+  bool      callerHasValueAvailable(SSATmp*) const;
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   void      trackDefInlineFP(IRInstruction* inst);
   void      trackInlineReturn(IRInstruction* inst);

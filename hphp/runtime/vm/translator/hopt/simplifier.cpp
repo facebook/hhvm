@@ -38,11 +38,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case DefSP:
     return {};
 
-  case ReDefGeneratorSP: {
-    auto srcInst = inst->getSrc(0)->inst();
-    assert(srcInst->op() == StashGeneratorSP);
-    return getStackValue(srcInst->getSrc(0), index);
-  }
+  case ReDefGeneratorSP:
+  case StashGeneratorSP:
+    return getStackValue(inst->getSrc(0), index);
+
   case ReDefSP:
     return getStackValue(inst->getSrc(1), index);
 
@@ -151,6 +150,18 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   // Should not get here!
   not_reached();
+}
+
+smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
+  smart::vector<SSATmp*> ret;
+  ret.reserve(stackDepth);
+  for (uint32_t i = 0; i < stackDepth; ++i) {
+    auto const value = getStackValue(sp, i).value;
+    if (value) {
+      ret.push_back(value);
+    }
+  }
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

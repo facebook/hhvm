@@ -73,7 +73,7 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
   while (true) {
     if (m_refCountedMemValue == tmp) return true;
     if (anyLocalHasValue(tmp)) return true;
-    if (callerLocalHasValue(tmp)) return true;
+    if (callerHasValueAvailable(tmp)) return true;
 
     IRInstruction* srcInstr = tmp->inst();
     Opcode srcOpcode = srcInstr->op();
@@ -126,6 +126,12 @@ void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
   m_spOffset = savedSPOff;
   m_spValue = savedSP;
 
+  auto const stackValues = collectStackValues(m_spValue, m_spOffset);
+  for (DEBUG_ONLY auto& val : stackValues) {
+    FTRACE(4, "    marking caller stack value available: {}\n",
+           val->toString());
+  }
+
   m_inlineSavedStates.push_back(createState());
 
   /*
@@ -146,6 +152,9 @@ void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
   m_callerAvailableValues.insert(m_callerAvailableValues.end(),
                                  m_localValues.begin(),
                                  m_localValues.end());
+  m_callerAvailableValues.insert(m_callerAvailableValues.end(),
+                                 stackValues.begin(),
+                                 stackValues.end());
 
   m_localValues.clear();
   m_localTypes.clear();
@@ -603,7 +612,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
      * frame, so debug_backtrace() can't see a non-live pointer value.
      */
     if (thisInst->op() == IncRef &&
-        callerLocalHasValue(thisInst->getSrc(0))) {
+        callerHasValueAvailable(thisInst->getSrc(0))) {
       gen(DecRefNZ, thiss);
       inst->convertToNop();
       return nullptr;
@@ -919,7 +928,7 @@ bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
                    tmp) != m_localValues.end();
 }
 
-bool TraceBuilder::callerLocalHasValue(SSATmp* tmp) const {
+bool TraceBuilder::callerHasValueAvailable(SSATmp* tmp) const {
   return std::find(m_callerAvailableValues.begin(),
                    m_callerAvailableValues.end(),
                    tmp) != m_callerAvailableValues.end();

@@ -683,7 +683,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
                          const char *file) {
   argv = (char **)malloc((args.size() + 2) * sizeof(char*));
   argc = 0;
-  if (file) {
+  if (*file) {
     argv[argc++] = (char*)file;
   }
   for (int i = 0; i < (int)args.size(); i++) {
@@ -1031,8 +1031,8 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (!po.file.empty()) {
       Repo::setCliFile(po.file);
-    } else if (new_argc >= 2) {
-      Repo::setCliFile(new_argv[1]);
+    } else if (new_argc >= 1) {
+      Repo::setCliFile(new_argv[0]);
     }
 
     int ret = 0;

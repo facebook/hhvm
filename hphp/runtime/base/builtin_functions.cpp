@@ -1047,11 +1047,9 @@ Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
   SystemGlobals* g = (SystemGlobals*)get_global_variables();
   Variant& v_argc = g->GV(argc);
   Variant& v_argv = g->GV(argv);
-  if (!more(v_argc, int64_t(1))) {
+  if (!more(v_argc, int64_t(0))) {
     return true;
   }
-  v_argc--;
-  v_argv.dequeue();
   String s2 = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
   if (invoke_file_impl(r, s2, once, "")) {
     return r;

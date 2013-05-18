@@ -1,6 +1,5 @@
 <?php
 
-
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE courses [
@@ -38,49 +37,42 @@ $dtd = $dom->doctype;
 /* Notation Tests */
 $nots = $dtd->notations;
 
-$length = $nots->length; var_dump($length);
-echo "Length: ".$length."
-";
+$length = $nots->length;
+var_dump($length);
+echo "Length: ".$length."\n";
 
 foreach ($nots AS $key=>$node) {
- echo "Key $key: ".$node->nodeName." (".
-$node->systemId.") (".$node->publicId.")
-";
+  echo "Key $key: ".$node->nodeName." (".
+       $node->systemId.") (".$node->publicId.")\n";
 }
 print "
 ";
 for($x=0; $x < $length; $x++) {
- echo "Index $x: ".$nots->item($x)->nodeName." (".
-  $nots->item($x)->systemId.") (".$nots->item($x)->publicId.")
-";
+  echo "Index $x: ".$nots->item($x)->nodeName." (".
+       $nots->item($x)->systemId.") (".$nots->item($x)->publicId.")\n";
 }
 
-echo "
-";
+echo "\n";
 $node = $nots->getNamedItem('xxx');
 var_dump($node);
 
-echo "
-";
+echo "\n";
 /* Entity Decl Tests */
 $ents = $dtd->entities;
-$length = $ents->length;
-echo "Length: ".$length."
-";
-foreach ($ents AS $key=>$node) {
- echo "Key: $key Name: ".$node->nodeName."
-";
-}
-echo "
-";
-for($x=0; $x < $length; $x++) {
- echo "Index $x: ".$ents->item($x)->nodeName."
-";
-}
 
-echo "
-";
-$node = $ents->item(3);
-var_dump($node);
+$length = $ents->length;
+echo "Length: ".$length."\n";
+
+$a = array();
+foreach ($ents AS $key=>$node) {
+  $a[$key] = $node;
+}
+ksort($a);
+
+foreach ($a as $key => $node) {
+ echo "Key: $key Name: ".$node->nodeName."\n";
+}
+echo "\n";
+
 $node = $ents->getNamedItem('xxx');
 var_dump($node);

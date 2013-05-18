@@ -198,6 +198,18 @@ bad_tests = (
 
     # time tests are hard to write, these are poorly written
     '/ext-date/bug48187.php',
+
+    # broken on unbuntu 12.04
+    '/ext-date/DateTimeZone_listAbbreviations_basic1.php',
+    '/ext-date/bug52290.php',
+    '/ext-date/timezone_abbreviations_list_basic1.php',
+    '/ext-gd/bug24155.php',
+    '/ext-gd/bug39366.php',
+    '/ext-gd/bug48732.php',
+    '/ext-mbstring/bug54494.php',
+    '/ext-openssl/openssl_x509_parse_basic.php',
+    '/ext-standard-streams/bug61115-2.php',
+    '/ext-standard-strings/moneyformat.php',
 )
 
 # Random other files that zend wants

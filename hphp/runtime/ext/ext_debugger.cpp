@@ -229,7 +229,7 @@ void c_DebuggerClientCmdUser::t_error(int _argc, CStrRef format,
 void c_DebuggerClientCmdUser::t_code(CStrRef source, int highlight_line /* = 0 */,
                               int start_line_no /* = 0 */,
                               int end_line_no /* = 0 */) {
-  m_client->code(source, highlight_line, start_line_no, end_line_no);
+  m_client->code(source, start_line_no, end_line_no, highlight_line);
 }
 
 Variant c_DebuggerClientCmdUser::t_ask(int _argc, CStrRef format,

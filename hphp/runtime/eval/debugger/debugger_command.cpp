@@ -25,7 +25,9 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(debugger);
 
-// send/recv
+// Resets the buffer, serializes this command into the buffer and then
+// flushes the buffer.
+// Returns false if an exception occurs during these steps.
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
   TRACE(5, "DebuggerCommand::send\n");
   try {
@@ -50,6 +52,8 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
   return true;
 }
 
+// Always called from send and must implement the subclass specific
+// logic for serializing a command to send via Thrift.
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
   TRACE(5, "DebuggerCommand::sendImpl\n");
   thrift.write((int32_t)m_type);
@@ -58,6 +62,8 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_version);
 }
 
+// Always called from recv and must implement the subclass specific
+// logic for deserializing a command received via Thrift.
 void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
   TRACE(5, "DebuggerCommand::recvImpl\n");
   thrift.read(m_body);
@@ -145,10 +151,15 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 ///////////////////////////////////////////////////////////////////////////////
 // default handlers
 
+// Informs the client of all argument strings that may follow this command
+// name. Used for auto completion. The client uses the prefix of the argument
+// following the command name to narrow down the list displayed to the user.
 void DebuggerCommand::list(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::list\n");
 }
 
+// The text to display when the debugger client
+// processes "help <this command name>".
 void DebuggerCommand::help(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::help\n");
   assert(false);
@@ -166,6 +177,10 @@ bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
   return false;
 }
 
+// Carries out the command, possibly by sending it to the server.
+// If the client is controlled via the API, the setClientOuput method
+// is invoked to update the client with the command output for access
+// via the API.
 void DebuggerCommand::onClient(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::onClient\n");
   onClientImpl(client);
@@ -174,12 +189,17 @@ void DebuggerCommand::onClient(DebuggerClient &client) {
   }
 }
 
+// Updates the client with information about the execution of this command.
+// This information is not used by the command line client, but can
+// be accessed via the debugger client API exposed to PHP programs.
 void DebuggerCommand::setClientOutput(DebuggerClient &client) {
   TRACE(2, "DebuggerCommand::setClientOutput\n");
   // Just default to text
   client.setOutputType(DebuggerClient::OTText);
 }
 
+// Server-side work for a command. Returning false indicates a failure to
+// communicate with the client (for commands that do so).
 bool DebuggerCommand::onServer(DebuggerProxy &proxy) {
   TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);

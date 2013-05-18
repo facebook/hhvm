@@ -38,15 +38,14 @@ bool CmdMachine::help(DebuggerClient &client) {
   client.helpBody(
     ""
   );
-  return true;
 }
 
-bool CmdMachine::onClient(DebuggerClient &client) {
-  if (DebuggerCommand::onClient(client)) return true;
+void CmdMachine::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return true;
 
   //TODO
 
-  return help(client);
+  help(client);
 }
 
 bool CmdMachine::onServer(DebuggerProxy &proxy) {

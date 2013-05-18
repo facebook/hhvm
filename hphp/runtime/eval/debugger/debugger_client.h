@@ -420,7 +420,12 @@ private:
   InstPointInfoPtrVec m_instPoints;
 
   // list command's current location, which may be different from m_breakpoint
+
+  // The file currently being listed. Set implicitly by breakpoints and
+  // explicitly by list commands issued to the client by a user or via the API.
   std::string m_listFile;
+
+  // The first line to list
   int m_listLine;
   int m_listLineFocus;
 

@@ -311,6 +311,9 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   }
 }
 
+// Sends a copy of the given command to the associated client
+// using the buffer in m_thrift. Returns false if an exception
+// occurs during the send (typically a socket error).
 bool DebuggerProxy::sendToClient(DebuggerCommand *cmd) {
   TRACE(2, "DebuggerProxy::sendToClient\n");
   return cmd->send(m_thrift);

@@ -1231,8 +1231,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
         }
       }
 
-      code(source, beginHighlightLine,
-           firstLine, lastLine,
+      code(source, firstLine, lastLine,
+           beginHighlightLine,
            beginHighlightColumn,
            endHighlightLine,
            endHighlightColumn);
@@ -1240,8 +1240,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   }
 }
 
-bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
-                          int line2 /* = 0 */, int charFocus0 /* = 0 */,
+bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
+                          int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(2, "DebuggerClient::code\n");
   if (line1 == 0 && line2 == 0) {
@@ -1249,7 +1249,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
     if (isApiMode()) {
       highlighted = source;
     } else {
-      highlighted = highlight_code(source, 0, lineFocus, charFocus0,
+      highlighted = highlight_code(source, 0, lineFocus0, charFocus0,
                                    lineFocus1, charFocus1);
     }
     if (!highlighted.empty()) {
@@ -1263,7 +1263,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
   if (isApiMode()) {
     highlighted = source;
   } else {
-    highlighted = highlight_php(source, 1, lineFocus, charFocus0,
+    highlighted = highlight_php(source, 1, lineFocus0, charFocus0,
                                 lineFocus1, charFocus1);
   }
   int line = 1;
@@ -1992,11 +1992,14 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
   return DThreadInfoPtr();
 }
 
-// Retrieves a source location that is the current focus of the
-// debugger. The current focus is initially determined by the
+// Retrieves the current source location (file, line).
+// The current location is initially determined by the
 // breakpoint where the debugger is currently stopped and can
 // thereafter be modified by list commands and by switching the
-// the stack frame.
+// the stack frame. The lineFocus and and charFocus parameters
+// are non zero only when the source location comes from a breakpoint.
+// They can be used to highlight the location of the current breakpoint
+// in the edit window of an attached IDE, for example.
 void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus0, int &charFocus0,
                                      int &lineFocus1, int &charFocus1) {

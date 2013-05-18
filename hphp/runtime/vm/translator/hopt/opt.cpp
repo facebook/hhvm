@@ -101,7 +101,8 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, msg);
-    assert(JIT::checkCfg(trace, *irFactory));
+    assert(checkCfg(trace, *irFactory));
+    assert(checkTmpsSpanningCalls(trace, *irFactory));
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 

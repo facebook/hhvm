@@ -76,7 +76,7 @@ IdomVector findDominators(const BlockList& blocks);
 typedef std::vector<BlockPtrList> DomChildren;
 
 /*
- * compute the dominator tree, then populate a list of dominator children
+ * Compute the dominator tree, then populate a list of dominator children
  * for each block.  Note that DomChildren is indexed by block->postId(),
  * not block->id(); that's why we don't use StateVector here.
  */
@@ -107,7 +107,7 @@ bool hasInternalFlow(Trace*);
  * as each block is processed.
  */
 template <class State, class Body>
-void forPreorderDoms(Block* block, const std::vector<BlockPtrList>& children,
+void forPreorderDoms(Block* block, const DomChildren& children,
                      State state, Body body) {
   body(block, state);
   for (Block* child : children[block->postId()]) {

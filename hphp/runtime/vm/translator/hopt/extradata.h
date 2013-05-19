@@ -158,16 +158,6 @@ struct CreateContData : IRExtraData {
 };
 
 /*
- * EdgeData is linked list node that tracks the set of Jmp_'s that pass values
- * to a particular block.  Each such Jmp_ has one node, and the block points
- * to the list head.
- */
-struct EdgeData : IRExtraData {
-  IRInstruction* jmp;    // owner of this edge
-  EdgeData* next;        // next edge to same target
-};
-
-/*
  * Information for the REQ_BIND_JMPCC stubs we create when a tracelet
  * ends with conditional jumps.
  */
@@ -284,7 +274,6 @@ X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(DefConst,                     ConstData);
 X(LdConst,                      ConstData);
-X(Jmp_,                         EdgeData);
 X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);

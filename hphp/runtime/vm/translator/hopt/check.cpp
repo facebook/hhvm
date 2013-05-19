@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/translator/hopt/check.h"
 
 #include <boost/next_prior.hpp>
+#include <unordered_set>
 
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
@@ -89,11 +90,14 @@ bool checkBlock(Block* b) {
       assert(inst.op() != DefLabel);
       assert(!inst.isBlockEnd());
     }
+    for (DEBUG_ONLY IRInstruction& inst : *b) {
+      assert(inst.getBlock() == b);
+    }
   }
 
   for (int i = 0; i < b->front()->getNumDsts(); ++i) {
     auto const traceBlocks = b->getTrace()->getBlocks();
-    b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*){
+    b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
       assert(std::find(traceBlocks.begin(), traceBlocks.end(),
                        inst->getBlock()) != traceBlocks.end());
     });
@@ -102,6 +106,18 @@ bool checkBlock(Block* b) {
   return true;
 }
 
+}
+
+const Edge* takenEdge(IRInstruction* inst) {
+  return inst->m_taken.to() ? &inst->m_taken : nullptr;
+}
+
+const Edge* takenEdge(Block* b) {
+  return takenEdge(b->back());
+}
+
+const Edge* nextEdge(Block* b) {
+  return b->m_next.to() ? &b->m_next : nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -113,13 +129,35 @@ bool checkBlock(Block* b) {
  * 2. Each src must be defined earlier in the same block or in a dominator.
  * 3. Each dst must not be previously defined.
  * 4. Treat tmps defined by DefConst as always defined.
+ * 5. Each predecessor of a reachable block must be reachable (deleted
+ *    blocks must not have out-edges to reachable blocks).
  */
 bool checkCfg(Trace* trace, const IRFactory& factory) {
-  auto const blocks = sortCfg(trace, factory);
   forEachTraceBlock(trace, checkBlock);
-  std::vector<BlockPtrList> children = findDomChildren(blocks);
+
+  // Check valid successor/predecessor edges.
+  auto const blocks = sortCfg(trace, factory);
+  std::unordered_set<const Edge*> edges;
+  for (Block* b : blocks) {
+    auto checkEdge = [&] (const Edge* e) {
+      assert(e->from() == b);
+      edges.insert(e);
+      for (auto& p : e->to()->preds()) if (&p == e) return;
+      assert(false); // did not find edge.
+    };
+    if (auto *e = nextEdge(b))  checkEdge(e);
+    if (auto *e = takenEdge(b)) checkEdge(e);
+  }
+  for (Block* b : blocks) {
+    for (DEBUG_ONLY auto const &e : b->preds()) {
+      assert(edges.find(&e) != edges.end());
+      assert(&e == takenEdge(e.from()) || &e == nextEdge(e.from()));
+      assert(e.to() == b);
+    }
+  }
 
   // visit dom tree in preorder, checking all tmps
+  std::vector<BlockPtrList> children = findDomChildren(blocks);
   boost::dynamic_bitset<> defined0(factory.numTmps());
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, boost::dynamic_bitset<>& defined) {

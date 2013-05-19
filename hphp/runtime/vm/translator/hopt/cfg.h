@@ -79,18 +79,6 @@ BlockList sortCfg(Trace*, const IRFactory&);
 bool isRPOSorted(const BlockList&);
 
 /*
- * Compute predecessors for all blocks in a list, using a list
- * produced by sortCfg().
- *
- * TODO(#2272599): we want to track this on the fly instead of
- * recomputing it.
- *
- * Pre: isRPOSorted(blocks)
- */
-typedef smart::vector<smart::vector<Block*>> PredVector;
-PredVector computePredecessors(const BlockList& blocks);
-
-/*
  * Compute the postorder number of each immediate dominator of each
  * block, using a list produced by sortCfg().
  *

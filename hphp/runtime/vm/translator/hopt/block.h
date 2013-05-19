@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_BLOCK_H_
 
 #include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/edge.h"
 #include "hphp/runtime/vm/translator/hopt/irinstruction.h"
 
 namespace HPHP { namespace JIT {
@@ -42,9 +43,8 @@ struct Block : boost::noncopyable {
   Block(unsigned id, const Func* func, IRInstruction* label)
     : m_trace(nullptr)
     , m_func(func)
-    , m_next(nullptr)
+    , m_next(this, nullptr)
     , m_id(id)
-    , m_preds(nullptr)
     , m_hint(Neither)
   {
     push_back(label);
@@ -104,8 +104,8 @@ struct Block : boost::noncopyable {
 
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
-  Block* getNext() const { return m_next; }
-  void setNext(Block* b) { m_next = b; }
+  Block* getNext() const { return m_next.to(); }
+  void setNext(Block* b) { m_next.setTo(b); }
 
   // return the target block if the last instruction is a branch.
   Block* getTaken() const {
@@ -141,13 +141,29 @@ struct Block : boost::noncopyable {
     return m_instrs.iterator_to(*inst);
   }
 
+  // Accessors of list of predecessor edges.  Each edge has a from() property
+  // which is the predecessor block.
+  const EdgeList& preds() const { return m_preds; }
+  size_t numPreds() const { return m_preds.size(); }
+  static Block* updatePreds(Edge* edge, Block* new_to) {
+    if (Block* old_to = edge->to()) {
+      auto &preds = old_to->m_preds;
+      preds.erase(preds.iterator_to(*edge));
+    }
+    if (new_to) {
+      new_to->m_preds.push_front(*edge);
+    }
+    return new_to;
+  }
+
   // visit each src that provides a value to label->dsts[i]. body
   // should take an IRInstruction* and an SSATmp*.
   template<typename L>
   void forEachSrc(unsigned i, L body) {
-    for (const EdgeData* n = m_preds; n; n = n->next) {
-      assert(n->jmp->op() == Jmp_ && n->jmp->getTaken() == this);
-      body(n->jmp, n->jmp->getSrc(i));
+    for (Edge& e : m_preds) {
+      IRInstruction* jmp = e.from()->back();
+      assert(jmp->op() == Jmp_ && jmp->getTaken() == this);
+      body(jmp, jmp->getSrc(i));
     }
   }
 
@@ -155,11 +171,20 @@ struct Block : boost::noncopyable {
   // which body(src) returns true, or nullptr if none are found.
   template<typename L>
   SSATmp* findSrc(unsigned i, L body) {
-    for (const EdgeData* n = m_preds; n; n = n->next) {
-      SSATmp* src = n->jmp->getSrc(i);
+    for (Edge& e : m_preds) {
+      SSATmp* src = e.from()->back()->getSrc(i);
       if (body(src)) return src;
     }
     return nullptr;
+  }
+
+  template <typename L>
+  void forEachPred(L body) {
+    for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
+      Block* from = i->from();
+      ++i;
+      body(from);
+    }
   }
 
   // list-compatible interface; these delegate to m_instrs but also update
@@ -191,18 +216,24 @@ struct Block : boost::noncopyable {
     return m_instrs.erase(pos);
   }
 
+  friend const Edge* nextEdge(Block*); // only for validation
+
  private:
   InstructionList m_instrs; // instructions in this block
   Trace* m_trace;           // owner of this block.
   const Func* m_func;       // which func are we in
-  Block* m_next;            // fall-through path; null if back()->isTerminal().
+  Edge m_next;              // fall-through path; null if back()->isTerminal().
   const unsigned m_id;      // factory-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
-  EdgeData* m_preds;        // head of list of predecessor Jmps
+  EdgeList m_preds;         // Edges that point to this block
   Hint m_hint;              // execution frequency hint
 };
 typedef std::list<Block*> BlockList;
 typedef std::forward_list<Block*> BlockPtrList;
+
+inline void Edge::setTo(Block* to) {
+  m_to = Block::updatePreds(this, to);
+}
 
 }}
 

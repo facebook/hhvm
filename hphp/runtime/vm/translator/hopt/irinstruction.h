@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_IRINSTRUCTION_H_
 
 #include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/edge.h"
 #include "hphp/runtime/vm/translator/hopt/extradata.h"
 
 namespace HPHP { namespace JIT {
@@ -45,8 +46,6 @@ struct IRInstruction {
     , m_id(kTransient)
     , m_srcs(srcs)
     , m_dst(nullptr)
-    , m_taken(nullptr)
-    , m_block(nullptr)
     , m_extra(nullptr)
   {}
 
@@ -125,11 +124,11 @@ struct IRInstruction {
    */
   const IRExtraData* rawExtra() const { return m_extra; }
 
-  /*
-   * Clear the extra data pointer in a IRInstruction.  Used during
-   * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
-   * memory.
-   */
+   /*
+    * Clear the extra data pointer in a IRInstruction.  Used during
+    * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
+    * memory.
+    */
   void clearExtra() { m_extra = nullptr; }
 
   /*
@@ -224,15 +223,28 @@ struct IRInstruction {
    * inserting it in any blocks.
    */
   bool       isTransient() const       { return m_id == kTransient; }
-
-  Block*     getBlock() const          { return m_block; }
-  void       setBlock(Block* b)        { m_block = b; }
   Trace*     getTrace() const;
-  void       setTaken(Block* b);
-  Block*     getTaken() const          { return m_taken; }
 
-  bool isControlFlowInstruction() const { return m_taken != nullptr; }
-  bool isBlockEnd() const { return m_taken || isTerminal(); }
+  /*
+   * getBlock() and setBlock() keep track of the block that contains this
+   * instruction, as well as where the taken edge is coming from, if there
+   * is a taken edge.
+   */
+  Block*     getBlock() const { return m_taken.from(); }
+  void       setBlock(Block* b) { m_taken.setFrom(b); }
+
+  /*
+   * Optional control flow edge.  If present, this instruction must
+   * be the last one in the block.
+   */
+  Block*     getTaken() const { return m_taken.to(); }
+  void       setTaken(Block* b) {
+    if (isTransient()) m_taken.setTransientTo(b);
+    else m_taken.setTo(b);
+  }
+
+  bool isControlFlowInstruction() const { return bool(m_taken.to()); }
+  bool isBlockEnd() const { return m_taken.to() || isTerminal(); }
   bool isLoad() const;
   bool stores(uint32_t srcIdx) const;
 
@@ -278,6 +290,8 @@ struct IRInstruction {
   // ModifiesStack set.
   bool hasMainDst() const;
 
+  friend const Edge* takenEdge(IRInstruction*); // only for validation
+
 private:
   bool mayReenterHelper() const;
 
@@ -289,8 +303,7 @@ private:
   const Id          m_id;
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
-  Block*            m_taken;   // for branches, guards, and jmp
-  Block*            m_block;   // block that owns this instruction
+  Edge              m_taken;   // for branches, guards, and jmp
   IRExtraData*      m_extra;
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList

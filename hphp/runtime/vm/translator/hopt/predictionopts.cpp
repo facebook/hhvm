@@ -68,9 +68,6 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
   auto const sortedBlocks = folly::lazy([&]{
     return sortCfg(trace, *irFactory);
   });
-  auto const predecessors = folly::lazy([&]{
-    return computePredecessors(sortedBlocks());
-  });
 
   /*
    * We frequently generate a generic LdMem, followed by a generic
@@ -99,7 +96,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
     auto const specialized = checkType->getBlock()->getNext();
 
     if (mainBlock != checkType->getBlock()) return;
-    if (predecessors()[exit->postId()].size() != 1) return;
+    if (exit->numPreds() != 1) return;
     if (exit->isMain()) return;
 
     auto const sinkFirst = mainBlock->iteratorTo(ldMem);

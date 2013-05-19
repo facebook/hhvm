@@ -805,7 +805,6 @@ class CodeGenerator;
 struct AsmInfo;
 class IRFactory;
 class Simplifier;
-struct Block;
 struct LifetimeInfo;
 struct RegAllocInfo;
 

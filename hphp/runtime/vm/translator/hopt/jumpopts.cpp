@@ -140,16 +140,13 @@ void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto const sortedBlocks = sortCfg(trace, *irFactory);
-  auto const preds        = computePredecessors(sortedBlocks);
-
   auto const mainExit     = findMainExitBlock(trace, irFactory);
   if (!isNormalExit(mainExit)) return;
 
-  auto const mainPreds = preds[mainExit->postId()];
+  auto const &mainPreds = mainExit->preds();
   if (mainPreds.size() != 1) return;
 
-  auto const jccBlock = mainPreds[0];
+  auto const jccBlock = mainPreds.front().from();
   if (!jccCanBeDirectExit(jccBlock->back()->op())) return;
   FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
          opcodeName(jccBlock->back()->op()));

@@ -299,13 +299,11 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
-  , m_taken(nullptr)
-  , m_block(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
-  setTaken(inst->m_taken);
+  setTaken(inst->getTaken());
 }
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
@@ -322,7 +320,7 @@ Opcode getStackModifyingOpcode(Opcode opc) {
 }
 
 Trace* IRInstruction::getTrace() const {
-  return m_block->getTrace();
+  return getBlock()->getTrace();
 }
 
 bool IRInstruction::hasExtra() const {
@@ -800,14 +798,14 @@ bool isRefCounted(SSATmp* tmp) {
 
 void IRInstruction::convertToNop() {
   IRInstruction nop(Nop);
-  // copy all but m_id, m_block, m_taken, m_listNode
+  // copy all but m_id, m_taken, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
   m_srcs = nop.m_srcs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
-  m_taken = nullptr;
+  setTaken(nullptr);
   m_extra = nullptr;
 }
 
@@ -835,15 +833,15 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = factory->arena();
 
-  // Copy all but m_id, m_block, m_listNode, and don't clone
+  // Copy all but m_id, m_taken.from, m_listNode, and don't clone
   // dests---the whole point of become() is things still point to us.
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
-  m_taken = other->m_taken;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+  setTaken(other->getTaken());
 }
 
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
@@ -858,32 +856,6 @@ SSATmp* IRInstruction::getSrc(uint32_t i) const {
 void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   assert(i < getNumSrcs());
   m_srcs[i] = newSrc;
-}
-
-void IRInstruction::setTaken(Block* target) {
-  if (m_op == Jmp_ && m_extra) {
-    if (m_taken) m_taken->removeEdge(this);
-    if (target) target->addEdge(this);
-  }
-  m_taken = target;
-}
-
-void Block::addEdge(IRInstruction* jmp) {
-  assert(!jmp->isTransient());
-  EdgeData* node = jmp->getExtra<Jmp_>();
-  node->jmp = jmp;
-  node->next = m_preds;
-  m_preds = node;
-}
-
-void Block::removeEdge(IRInstruction* jmp) {
-  assert(!jmp->isTransient());
-  EdgeData* node = jmp->getExtra<Jmp_>();
-  assert(node->jmp == jmp);
-  EdgeData** ptr = &m_preds;
-  while (*ptr != node) ptr = &(*ptr)->next;
-  *ptr = node->next;
-  assert((node->next = nullptr, true));
 }
 
 bool Block::isMainExit() const {
@@ -1119,23 +1091,6 @@ bool isRPOSorted(const BlockList& blocks) {
   return true;
 }
 
-PredVector computePredecessors(const BlockList& blocks) {
-  assert(isRPOSorted(blocks));
-
-  PredVector ret(blocks.size());
-
-  for (auto& block : blocks) {
-    if (auto succ = block->getNext()) {
-      ret[succ->postId()].push_back(block);
-    }
-    if (auto succ = block->getTaken()) {
-      ret[succ->postId()].push_back(block);
-    }
-  }
-
-  return ret;
-}
-
 /*
  * Find the immediate dominator of each block using Cooper, Harvey, and
  * Kennedy's "A Simple, Fast Dominance Algorithm", returned as a vector
@@ -1144,13 +1099,11 @@ PredVector computePredecessors(const BlockList& blocks) {
 IdomVector findDominators(const BlockList& blocks) {
   assert(isRPOSorted(blocks));
 
-  auto const num_blocks = blocks.size();
-  auto const preds = computePredecessors(blocks);
-
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
   // the general algorithm but it will only loop twice for loop-free graphs.
+  auto const num_blocks = blocks.size();
   IdomVector idom(num_blocks, -1);
   auto start = blocks.begin();
   int start_id = (*start)->postId();
@@ -1160,14 +1113,15 @@ IdomVector findDominators(const BlockList& blocks) {
     changed = false;
     // for each block after start, in reverse postorder
     for (auto it = start; it != blocks.end(); it++) {
-      int b = (*it)->postId();
+      Block* block = *it;
+      int b = block->postId();
       // new_idom = any already-processed predecessor
-      auto pred_it = preds[b].begin();
-      int new_idom = (*pred_it)->postId();
-      while (idom[new_idom] == -1) new_idom = (*++pred_it)->postId();
+      auto edge_it = block->preds().begin();
+      int new_idom = edge_it->from()->postId();
+      while (idom[new_idom] == -1) new_idom = (++edge_it)->from()->postId();
       // for all other already-processed predecessors p of b
-      for (auto pred : preds[b]) {
-        auto p = pred->postId();
+      for (auto& edge : block->preds()) {
+        auto p = edge.from()->postId();
         if (p != new_idom && idom[p] != -1) {
           // find earliest common predecessor of p and new_idom
           // (higher postIds are earlier in flow and in dom-tree).

@@ -124,7 +124,8 @@ void removeDeadInstructions(Trace* trace, const DceState& state) {
     block->remove_if([&] (const IRInstruction& inst) {
       return state[inst].isDead();
     });
-    if (block->empty()) blocks.erase(cur);
+    // Marker and DefLabel instructions are marked live in reachable blocks
+    assert(!block->empty());
   }
 }
 
@@ -170,6 +171,15 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
   BlockList blocks = sortCfg(trace, *factory);
   StateVector<Block, bool> reachable(factory, false);
   for (Block* b : blocks) reachable[b] = true;
+  for (Block* b : blocks) {
+    b->forEachPred([&](Block *p) {
+      if (!reachable[p]) {
+        // remove edges from unreachable block to reachable block.
+        if (!p->empty()) p->back()->setTaken(nullptr);
+        p->setNext(nullptr);
+      }
+    });
+  }
   forEachTrace(trace, [&](Trace* t) {
     for (auto bit = t->begin(); bit != t->end();) {
       if (reachable[*bit]) {

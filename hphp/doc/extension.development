@@ -37,8 +37,8 @@ This will modify several files with the new signatures.
 4. Unit tests
 
 The "EXT=name make -C idl update" does the following for test files:
-  creates  test/test_ext_[name].h -- entry points for this unit test, don't modify
-  updates  test/test_ext.inc      -- to invoke the test, don't modify
+  creates  test/ext/test_ext_[name].h -- entry points for this unit test, don't modify
+  updates  test/ext/test_ext.inc      -- to invoke the test, don't modify
   creates  idl/test_ext_[name].cpp -- A template to be modified.
 
 You can probably delete these and modify the existing unit tests.
@@ -115,13 +115,13 @@ of them manually. These are the two files that you will add implementation to.
 5. Unit tests
 
 The "EXT=name make update" does the following for test files:
-  creates  test/test_ext_[name].h -- entry points for this unit test, don't modify
-  updates  test/test_ext.inc      -- to invoke the test, don't modify
+  creates  test/ext/test_ext_[name].h -- entry points for this unit test, don't modify
+  updates  test/ext/test_ext.inc      -- to invoke the test, don't modify
   creates  idl/test_ext_[name].cpp -- A template to be modified.
 
 You will have to add new unit tests to
 
-  test/test_ext_[name].cpp
+  test/ext/test_ext_[name].cpp
 
 into both the list of RUN_TEST() at top portion of the file and a real
 unit test function like this,

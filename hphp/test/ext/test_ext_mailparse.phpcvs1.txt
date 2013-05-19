@@ -1,0 +1,141 @@
+Return-Path: <php-cvs-return-15542-wez.php.cvs=thebrainroom.com@lists.php.net>
+Received: from secure.thebrainroom.com (raq338.uk2net.com [213.239.42.171])
+	by zaneeb.brainnet.i (8.10.2/8.10.2/SuSE Linux 8.10.0-0.3) with ESMTP id g9SLLB208234
+	for <wez.php.cvs@thebrainroom.com>; Mon, 28 Oct 2002 21:21:11 GMT
+X-Authentication-Warning: zaneeb.brainnet.i: Host raq338.uk2net.com [213.239.42.171] claimed to be secure.thebrainroom.com
+Received: from pb1.pair.com (pb1.pair.com [216.92.131.4])
+	by secure.thebrainroom.com (8.9.3/8.9.3) with SMTP id SAA02428
+	for <wez.php.cvs@thebrainroom.com>; Mon, 28 Oct 2002 18:50:26 GMT
+Received: (qmail 63230 invoked by uid 1010); 28 Oct 2002 18:36:34 -0000
+Mailing-List: contact php-cvs-help@lists.php.net; run by ezmlm
+Precedence: bulk
+list-help: <mailto:php-cvs-help@lists.php.net>
+list-unsubscribe: <mailto:php-cvs-unsubscribe@lists.php.net>
+list-post: <mailto:php-cvs@lists.php.net>
+Delivered-To: mailing list php-cvs@lists.php.net
+Received: (qmail 63215 invoked from network); 28 Oct 2002 18:36:33 -0000
+Reply-to: marcus.boerger@post.rwth-aachen.de
+Message-Id: <5.1.0.14.2.20021028193555.01d47c20@mailbox.rwth-aachen.de>
+X-Mailer: QUALCOMM Windows Eudora Version 5.1
+Date: Mon, 28 Oct 2002 19:36:10 +0100
+To: Melvyn Sopacua <msopacua@idg.nl>
+From: marcus.boerger@t-online.de (Marcus =?iso-8859-1?Q?B=F6rger?=)
+Cc: php-cvs@lists.php.net
+In-Reply-To: <5.1.0.14.2.20021028192151.039729e0@yoshimo.webtechs.idg.nl
+ >
+References: <5.1.0.14.2.20021028190015.01d4d650@mailbox.rwth-aachen.de>
+ <5.1.0.14.2.20021028183051.03c18958@yoshimo.webtechs.idg.nl>
+ <cvshelly1035825322@cvsserver>
+Mime-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="=====================_71195359==_.ALT"
+X-Sender: 520072483730-0001@t-dialin.net
+X-Spam-Status: No, tests=bogofilter, spamicity=0.0% likelihood
+Subject: Re: [PHP-CVS] cvs: php4 /ext/iconv/tests
+X-TBR-DestBox: user.wez.php.cvs (auth as wez) (wez.php.cvs:)
+
+--=====================_71195359==_.ALT
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: quoted-printable
+
+Then what about:
+
+cvs -z3 -q diff skipif.inc test.inc (in directory=20
+S:\php4-HEAD\ext\iconv\tests\)
+Index: skipif.inc
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+RCS file: /repository/php4/ext/iconv/tests/skipif.inc,v
+retrieving revision 1.2
+diff -u -r1.2 skipif.inc
+--- skipif.inc  28 Oct 2002 17:15:21 -0000      1.2
++++ skipif.inc  28 Oct 2002 18:35:25 -0000
+@@ -1,10 +1,11 @@
+  <?php
+  // This script prints "skip" if condition does not meet.
+
+-if (!extension_loaded("iconv") && ini_get("enable_dl")) {
+-  $dlext =3D (substr(PHP_OS, 0, 3) =3D=3D "WIN") ? ".dll" : ".so";
+-  @dl("iconv$dlext");
+-}
++// Do not dl load extension
++//if (!extension_loaded("iconv") && ini_get("enable_dl")) {
++//  $dlext =3D (substr(PHP_OS, 0, 3) =3D=3D "WIN") ? ".dll" : ".so";
++//  @dl("iconv$dlext");
++//}
+  if (!extension_loaded("iconv")) {
+      die("skip iconv extension not available\n");
+  }
+Index: test.inc
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+RCS file: /repository/php4/ext/iconv/tests/test.inc,v
+retrieving revision 1.1
+diff -u -r1.1 test.inc
+--- test.inc    28 Oct 2002 17:15:21 -0000      1.1
++++ test.inc    28 Oct 2002 18:35:25 -0000
+@@ -1,8 +1,7 @@
+  <?php
+-// This script prints "skip" if condition does not meet.
+-
+-if (!extension_loaded("iconv") && ini_get("enable_dl")) {
+-  $dlext =3D (substr(PHP_OS, 0, 3) =3D=3D "WIN") ? ".dll" : ".so";
+-  @dl("iconv$dlext");
+-}
++// Do not dl load extension
++//if (!extension_loaded("iconv") && ini_get("enable_dl")) {
++//  $dlext =3D (substr(PHP_OS, 0, 3) =3D=3D "WIN") ? ".dll" : ".so";
++//  @dl("iconv$dlext");
++//}
+  ?>
+
+At 19:30 28.10.2002, Melvyn Sopacua wrote:
+>At 19:01 28-10-2002, Marcus B=F6rger wrote:
+>
+>>At 18:33 28.10.2002, Melvyn Sopacua wrote:
+>>>At 18:15 28-10-2002, Marcus B=F6rger wrote:
+>>>
+>>>>   Log:
+>>>>   fix this tests
+>>>>   -they did not dl load module in test....
+>>>
+>>>Yes, exactly as they shouldn't.
+>>>
+>>>It's been discussed. Why did you revert that?
+>>>
+>>>The main reason - to repeat it:
+>>>./configure --prefix=3D/previous/install
+>>>
+>>>dl('foo.so')    =3D> foo.so version is previous install, not current!
+>>
+>>I did so because skipif.inc did so. Maybe we remove that code
+>>from both skipif.inc and test.inc now. Feel free to do that.
+>
+>Ok, then that was a left over.
+>
+>IMHO we should do a complete overhaul of */tests/* and remove any dl()
+>code, or come up with something, that will force the modules/ directory
+>on the testkit.
+>
+>This is again a good reason to setup php.ini-test.
+>Windows will then be a problem, which kinda makes the dl() thingy=
+ troublesome
+>as well.
+>
+>The only thing I can think of to work around it, is to use a configure
+>option, that writes --with-test-modules-dir=3D into php.ini-test. But=
+ that's
+>prolly overkill.
+>
+>
+>
+>Met vriendelijke groeten / With kind regards,
+>
+>Webmaster IDG.nl
+>Melvyn Sopacua
+>
+
+--=====================_71195359==_.ALT--
+

@@ -233,6 +233,8 @@ struct IRInstruction {
 
   bool isControlFlowInstruction() const { return m_taken != nullptr; }
   bool isBlockEnd() const { return m_taken || isTerminal(); }
+  bool isLoad() const;
+  bool stores(uint32_t srcIdx) const;
 
   /*
    * Comparison and hashing for the purposes of CSE-equality.

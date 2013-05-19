@@ -970,7 +970,7 @@ RetCtrl S0:StkPtr S1:FramePtr S2:RetAddr
   execute a hardware procedure-return using the return address
   specified by S2.
 
-RetVal S0:FramePtr S1:Gen
+StRetVal S0:FramePtr S1:Gen
 
   Writes the value in S1 to the return value slot on the activation
   record pointed to by S0.

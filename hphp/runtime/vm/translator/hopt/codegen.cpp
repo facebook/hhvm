@@ -2161,29 +2161,10 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
              });
 }
 
-void CodeGenerator::cgRetVal(IRInstruction* inst) {
-  auto const rFp    = m_regs[inst->getSrc(0)].getReg();
-  auto* const val   = inst->getSrc(1);
-  auto& a = m_as;
-
-  // Store return value at the top of the caller's eval stack
-  // (a) Store the type
-  if (val->type().needsReg()) {
-    emitStoreTVType(a, m_regs[val].getReg(1), rFp[AROFF(m_r) + TVOFF(m_type)]);
-  } else {
-    emitStoreTVType(a, val->type().toDataType(),
-                    rFp[AROFF(m_r) + TVOFF(m_type)]);
-  }
-
-  // (b) Store the actual value (not necessary when storing Null)
-  if (val->type().isNull()) return;
-  if (val->inst()->op() == DefConst) {
-    a.    storeq (val->getValRawInt(),
-                  rFp[AROFF(m_r) + TVOFF(m_data)]);
-  } else {
-    zeroExtendIfBool(a, val, m_regs[val]);
-    emitStoreReg(a, m_regs[val].getReg(), rFp[AROFF(m_r) + TVOFF(m_data)]);
-  }
+void CodeGenerator::cgStRetVal(IRInstruction* inst) {
+  auto  const rFp = m_regs[inst->getSrc(0)].getReg();
+  auto* const val = inst->getSrc(1);
+  cgStore(rFp, AROFF(m_r), val);
 }
 
 void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
@@ -2443,11 +2424,24 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
   SSATmp* src   = inst->getSrc(0);
 
   assert(dst->numNeededRegs() == src->numNeededRegs());
-  for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
+  for (int locIndex = 0; locIndex < m_regs[src].numAllocatedRegs();
+       ++locIndex) {
     // We do not need to mask booleans, since the IR will reload the spill
     auto srcReg = m_regs[src].getReg(locIndex);
     auto sinfo = m_regs[dst].getSpillInfo(locIndex);
-    emitStoreReg(m_as, srcReg, reg::rsp[sinfo.offset()]);
+    if (m_regs[src].isFullXMM()) {
+      m_as.movdqa(srcReg, reg::rsp[sinfo.offset()]);
+    } else {
+      int offset = sinfo.offset();
+      if (locIndex == 0 || packed_tv) {
+        emitStoreReg(m_as, srcReg, reg::rsp[offset]);
+      } else {
+        // Note that type field is shifted in memory
+        assert(srcReg.isGP());
+        offset += TVOFF(m_type) - (TVOFF(m_data) + sizeof(Value));
+        emitStoreTVType(m_as, srcReg, reg::rsp[offset]);
+      }
+    }
   }
 }
 
@@ -2456,10 +2450,24 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
   SSATmp* src   = inst->getSrc(0);
 
   assert(dst->numNeededRegs() == src->numNeededRegs());
-  for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
+  for (int locIndex = 0; locIndex < m_regs[dst].numAllocatedRegs();
+       ++locIndex) {
     auto dstReg = m_regs[dst].getReg(locIndex);
     auto sinfo = m_regs[src].getSpillInfo(locIndex);
-    emitLoadReg(m_as, reg::rsp[sinfo.offset()], dstReg);
+    if (m_regs[dst].isFullXMM()) {
+      assert(dstReg.isXMM());
+      m_as.movdqa(reg::rsp[sinfo.offset()], dstReg);
+    } else {
+      int offset = sinfo.offset();
+      if (locIndex == 0 || packed_tv) {
+        emitLoadReg(m_as, reg::rsp[offset], dstReg);
+      } else {
+        // Note that type field is shifted in memory
+        offset += TVOFF(m_type) - (TVOFF(m_data) + sizeof(Value));
+        assert(dstReg.isGP());
+        emitLoadTVType(m_as, reg::rsp[offset], dstReg);
+      }
+    }
   }
 }
 
@@ -3788,7 +3796,16 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   assert(type == dst->type());
   assert(type.needsReg());
   auto valueDstReg = m_regs[dst].getReg(0);
-  auto typeDstReg = m_regs[dst].getReg(1);
+  auto typeDstReg  = m_regs[dst].getReg(1);
+
+  if (valueDstReg.isXMM()) {
+    // Whole typed value is stored in single XMM reg valueDstReg
+    assert(RuntimeOption::EvalHHIRAllocXMMRegs);
+    assert(typeDstReg == InvalidReg);
+    m_as.movdqa(base[off + TVOFF(m_data)], valueDstReg);
+    return;
+  }
+
   if (valueDstReg == InvalidReg && typeDstReg == InvalidReg &&
       (label == nullptr || type == Type::Gen)) {
     // a dead load
@@ -3826,8 +3843,17 @@ void CodeGenerator::cgStoreTypedValue(PhysReg base,
                                       int64_t off,
                                       SSATmp* src) {
   assert(src->type().needsReg());
-  m_as.storeq(m_regs[src].getReg(0), base[off + TVOFF(m_data)]);
-  emitStoreTVType(m_as, m_regs[src].getReg(1), base[off + TVOFF(m_type)]);
+  auto srcReg0 = m_regs[src].getReg(0);
+  auto srcReg1 = m_regs[src].getReg(1);
+  if (srcReg0.isXMM()) {
+    // Whole typed value is stored in single XMM reg srcReg0
+    assert(RuntimeOption::EvalHHIRAllocXMMRegs);
+    assert(srcReg1 == InvalidReg);
+    m_as.movdqa(srcReg0, base[off + TVOFF(m_data)]);
+    return;
+  }
+  m_as.storeq(srcReg0, base[off + TVOFF(m_data)]);
+  emitStoreTVType(m_as, srcReg1, base[off + TVOFF(m_type)]);
 }
 
 void CodeGenerator::cgStore(PhysReg base,
@@ -4688,6 +4714,10 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     for (unsigned i = 0, j = 0; i < n; i++) {
       assert(srcs[i]->type().subtypeOf(dsts[i].type()));
       SSATmp *dst = &dsts[i], *src = srcs[i];
+      // Currently, full XMM registers cannot be assigned to SSATmps
+      // passed from to Jmp_ to DefLabel. If this changes, it'll require
+      // teaching shuffleArgs() how to handle full XMM values.
+      assert(!m_regs[src].isFullXMM() && !m_regs[dst].isFullXMM());
       if (m_regs[dst].getReg(0) == InvalidReg) continue; // dst is unused.
       // first dst register
       args.ssa(src);

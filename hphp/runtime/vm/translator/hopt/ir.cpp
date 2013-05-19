@@ -386,8 +386,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (m_op == SpillStack) return srcNo >= 2;
   // Call consumes inputs 3 and onward
   if (m_op == Call) return srcNo >= 3;
-  // RetVal only consumes input 1
-  if (m_op == RetVal) return srcNo == 1;
+  // StRetVal only consumes input 1
+  if (m_op == StRetVal) return srcNo == 1;
 
   if (m_op == StLoc || m_op == StLocNT) {
     // StLoc[NT] <stkptr>, <value>
@@ -450,6 +450,86 @@ bool IRInstruction::isTerminal() const {
 
 bool IRInstruction::isPassthrough() const {
   return opcodeHasFlags(op(), Passthrough);
+}
+
+/*
+ * Returns true if the instruction loads into a SSATmp representing a
+ * PHP value (a subtype of Gen).  Note that this function returns
+ * false for instructions that load internal meta-data, such as Func*,
+ * Class*, etc.
+ */
+bool IRInstruction::isLoad() const {
+  switch (m_op) {
+    case LdStack:
+    case LdLoc:
+    case LdMem:
+    case LdProp:
+    case LdRef:
+    case LdThis:
+    case LdStaticLocCached:
+    case LookupCns:
+    case LookupClsCns:
+    case CGetProp:
+    case VGetProp:
+    case VGetPropStk:
+    case ArrayGet:
+    case CGetElem:
+    case VGetElem:
+    case VGetElemStk:
+    case ArrayIdx:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/*
+ * Returns true if the instruction stores its source operand srcIdx to memory.
+ */
+bool IRInstruction::stores(uint32_t srcIdx) const {
+  switch (m_op) {
+    case StRetVal:
+    case StLoc:
+    case StLocNT:
+    case StRef:
+    case StRefNT:
+    case SetNewElem:
+    case SetNewElemStk:
+    case BindNewElem:
+    case BindNewElemStk:
+      return srcIdx == 1;
+
+    case StMem:
+    case StMemNT:
+    case StProp:
+    case StPropNT:
+      return srcIdx == 2;
+
+    case SetElem:
+    case SetElemStk:
+    case BindElem:
+    case BindElemStk:
+      return srcIdx == 3;
+
+    case SetProp:
+    case SetPropStk:
+    case BindProp:
+    case BindPropStk:
+      return srcIdx == 4;
+
+    case SpillStack:
+      return srcIdx >= 2 && srcIdx < getNumSrcs();
+
+    case Call:
+      return srcIdx >= 3 && srcIdx < getNumSrcs();
+
+    case CallBuiltin:
+      return srcIdx >= 1 && srcIdx < getNumSrcs();
+
+    default:
+      return false;
+  }
 }
 
 SSATmp* IRInstruction::getPassthroughValue() const {

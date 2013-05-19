@@ -335,7 +335,7 @@ O(NativeImpl,                       ND, C(Func) S(FramePtr),    E|Mem|N|Refs) \
 O(RetCtrl,                          ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(RetAddr),                T|E|Mem) \
-O(RetVal,                           ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
+O(StRetVal,                         ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),      E|Mem|CRc|Refs) \

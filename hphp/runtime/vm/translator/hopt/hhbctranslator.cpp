@@ -2129,14 +2129,14 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* sp;
   if (freeInline) {
     SSATmp* useRet = emitDecRefLocalsInline(retVal);
-    gen(RetVal, m_tb->getFp(), useRet);
+    gen(StRetVal, m_tb->getFp(), useRet);
     sp = gen(RetAdjustStack, m_tb->getFp());
   } else {
     if (mayHaveThis(curFunc)) {
       gen(DecRefThis, m_tb->getFp());
     }
     sp = gen(GenericRetDecRefs, m_tb->getFp(), cns(curFunc->numLocals()));
-    gen(RetVal, m_tb->getFp(), retVal);
+    gen(StRetVal, m_tb->getFp(), retVal);
   }
 
   // Free ActRec, and return control to caller.

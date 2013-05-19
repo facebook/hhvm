@@ -62,7 +62,11 @@ namespace HPHP { namespace Util {
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define UNUSED         __attribute__((unused))
 #define FLATTEN        __attribute__((flatten))
+#ifndef __APPLE__
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+#else
+#define HOT_FUNC       __attribute__ ((section (".text.hot.bin,")))
+#endif
 
 #ifdef DEBUG
 #define DEBUG_ONLY /* nop */

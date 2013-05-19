@@ -27,7 +27,12 @@ namespace JIT {
 static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assert(!definer->isBlockEnd());
   Block* block = definer->getBlock();
-  auto pos = block->iteratorTo(definer); ++pos;
+  auto pos = block->iteratorTo(definer);
+  if (pos->op() == DefLabel) {
+    ++pos;
+    assert(pos != block->end() && pos->op() == Marker);
+  }
+  ++pos;
   block->insert(pos, inst);
 }
 

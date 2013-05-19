@@ -94,11 +94,15 @@ struct Block : boost::noncopyable {
   unsigned postId() const { return m_postid; }
   void setPostId(unsigned id) { m_postid = id; }
 
-  // insert inst after this block's label, return an iterator to the
-  // newly inserted instruction.
+  /*
+   * Insert inst after this block's DefLabel/Marker, return an
+   * iterator to the newly inserted instruction.
+   *
+   * Pre: the block contains a Marker after the DefLabel.
+   */
   iterator prepend(IRInstruction* inst) {
     assert(front()->op() == DefLabel);
-    auto it = begin();
+    auto it = skipLabel();
     return insert(++it, inst);
   }
 

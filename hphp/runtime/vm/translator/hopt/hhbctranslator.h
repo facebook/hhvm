@@ -104,21 +104,7 @@ struct HhbcTranslator {
                  Offset startOffset,
                  Offset nextTraceOffset,
                  uint32_t initialSpOffsetFromFp,
-                 const Func* func)
-    : m_irFactory(irFactory)
-    , m_tb(new TraceBuilder(startOffset,
-                            initialSpOffsetFromFp,
-                            m_irFactory,
-                            func))
-    , m_bcStateStack {BcState(startOffset, func)}
-    , m_startBcOff(startOffset)
-    , m_nextTraceBcOff(nextTraceOffset)
-    , m_lastBcOff(false)
-    , m_hasExit(false)
-    , m_stackDeficit(0)
-  {
-    emitMarker();
-  }
+                 const Func* func);
 
   // Accessors.
   Trace* getTrace() const { return m_tb->getTrace(); }

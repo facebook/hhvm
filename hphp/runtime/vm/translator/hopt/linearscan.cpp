@@ -1030,6 +1030,10 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
       block->getNext()->prepend(spill);
     } else {
       auto pos = block->iteratorTo(inst);
+      if (inst->op() == DefLabel) {
+        ++pos;
+        assert(pos != block->end() && pos->op() == Marker);
+      }
       block->insert(++pos, spill);
     }
   }

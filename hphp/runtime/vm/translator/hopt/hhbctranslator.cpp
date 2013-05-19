@@ -36,6 +36,28 @@ TRACE_SET_MOD(hhir);
 
 using namespace HPHP::Transl;
 
+HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
+                               Offset startOffset,
+                               Offset nextTraceOffset,
+                               uint32_t initialSpOffsetFromFp,
+                               const Func* func)
+  : m_irFactory(irFactory)
+  , m_tb(new TraceBuilder(startOffset,
+                          initialSpOffsetFromFp,
+                          m_irFactory,
+                          func))
+  , m_bcStateStack {BcState(startOffset, func)}
+  , m_startBcOff(startOffset)
+  , m_nextTraceBcOff(nextTraceOffset)
+  , m_lastBcOff(false)
+  , m_hasExit(false)
+  , m_stackDeficit(0)
+{
+  emitMarker();
+  auto const fp = gen(DefFP);
+  gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
+}
+
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
   return getCurUnit()->lookupArrayId(arrId);
 }

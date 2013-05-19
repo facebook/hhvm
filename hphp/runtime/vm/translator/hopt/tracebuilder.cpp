@@ -28,12 +28,11 @@ namespace JIT {
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
-                           uint32_t initialSpOffsetFromFp,
+                           Offset initialSpOffsetFromFp,
                            IRFactory& irFactory,
                            const Func* func)
   : m_irFactory(irFactory)
   , m_simplifier(this)
-  , m_initialBcOff(initialBcOffset)
   , m_trace(makeTrace(func, initialBcOffset))
   , m_enableCse(false)
   , m_enableSimplification(false)
@@ -46,19 +45,11 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_localValues(func->numLocals(), nullptr)
   , m_localTypes(func->numLocals(), Type::None)
 {
-  FTRACE(2, "TraceBuilder: initial sp offset {}\n", initialSpOffsetFromFp);
-
-  // put a function marker at the start of trace
   m_curFunc = cns(func);
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableCse = RuntimeOption::EvalHHIRCse;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
-
-  gen(DefFP);
-  gen(DefSP, StackOffset(initialSpOffsetFromFp), m_fpValue);
-
-  assert(m_spOffset >= 0);
 }
 
 TraceBuilder::~TraceBuilder() {
@@ -179,6 +170,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   switch (opc) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(inst); break;
+
+  case Marker:
+    m_lastMarker = *inst->getExtra<Marker>();
+    break;
 
   case Call:
     m_spValue = inst->getDst();
@@ -367,6 +362,7 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
   state->localTypes = m_localTypes;
   state->callerAvailableValues = m_callerAvailableValues;
   state->refCountedMemValue = m_refCountedMemValue;
+  state->lastMarker = *m_lastMarker;
   return state;
 }
 
@@ -427,6 +423,13 @@ void TraceBuilder::mergeState(State* state) {
 
   // Don't attempt to continue tracking caller's available values.
   state->callerAvailableValues.clear();
+
+  // We should not be merging states that have different hhbc bytecode
+  // boundaries.
+  assert(m_lastMarker &&
+    state->lastMarker.bcOff    == m_lastMarker->bcOff &&
+    state->lastMarker.stackOff == m_lastMarker->stackOff &&
+    state->lastMarker.func     == m_lastMarker->func);
 }
 
 void TraceBuilder::useState(std::unique_ptr<State> state) {
@@ -439,6 +442,7 @@ void TraceBuilder::useState(std::unique_ptr<State> state) {
   m_localValues = std::move(state->localValues);
   m_localTypes = std::move(state->localTypes);
   m_callerAvailableValues = std::move(state->callerAvailableValues);
+  m_lastMarker = state->lastMarker;
   // If spValue is null, we merged two different but equivalent values.
   // Define a new sp using the known-good spOffset.
   if (!m_spValue) {
@@ -470,6 +474,7 @@ void TraceBuilder::clearTrackedState() {
     delete *i;
     *i = nullptr;
   }
+  m_lastMarker = folly::none;
 }
 
 void TraceBuilder::appendInstruction(IRInstruction* inst, Block* block) {
@@ -491,6 +496,8 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
       block->setNext(next);
     }
     block = next;
+    assert(m_lastMarker.hasValue());
+    gen(Marker, *m_lastMarker);
   }
   appendInstruction(inst, block);
   updateTrackedState(inst);
@@ -503,6 +510,8 @@ void TraceBuilder::appendBlock(Block* block) {
   }
   m_trace->push_back(block);
   useState(block);
+  assert(m_lastMarker.hasValue());
+  gen(Marker, *m_lastMarker);
 }
 
 CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {

@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/translator/hopt/check.h"
+
+#include <boost/next_prior.hpp>
+
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/linearscan.h"
@@ -55,12 +57,17 @@ struct RegState {
 /*
  * Check one block for being well formed.  It must:
  * 1. have exactly one DefLabel as the first instruction
- * 2. if any instruction is isBlockEnd(), it must be last
- * 3. if the last instruction isTerminal(), block->next must be null.
+ * 2. have either no other instructions, or else at least one Marker
+ *    following the DefLabel before any other instructions.
+ * 3. if any instruction is isBlockEnd(), it must be last
+ * 4. if the last instruction isTerminal(), block->next must be null.
  */
 bool checkBlock(Block* b) {
   assert(!b->empty());
   assert(b->front()->op() == DefLabel);
+  if (b->skipLabel() != b->end()) {
+    assert(b->skipLabel()->op() == Marker);
+  }
   if (b->back()->isTerminal()) assert(!b->getNext());
   if (b->getTaken()) {
     // only Jmp_ can branch to a join block expecting values.

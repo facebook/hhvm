@@ -19,13 +19,14 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include "folly/ScopeGuard.h"
+#include "folly/Optional.h"
+
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/cse.h"
 #include "hphp/runtime/vm/translator/hopt/simplifier.h"
 #include "hphp/runtime/vm/translator/hopt/state_vector.h"
-
-#include "folly/ScopeGuard.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -89,7 +90,7 @@ namespace HPHP {  namespace JIT {
  */
 struct TraceBuilder {
   TraceBuilder(Offset initialBcOffset,
-               uint32_t initialSpOffsetFromFp,
+               Offset initialSpOffsetFromFp,
                IRFactory&,
                const Func* func);
   ~TraceBuilder();
@@ -280,6 +281,7 @@ private:
     std::vector<Type> localTypes;
     SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
+    MarkerData lastMarker;
   };
 
 private:
@@ -339,7 +341,6 @@ private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
-  Offset const m_initialBcOff; // offset of initial bytecode in trace
   boost::scoped_ptr<Trace> const m_trace; // generated trace
 
   // Flags that enable optimizations
@@ -399,6 +400,9 @@ private:
   // DecRefNZ transformations due to locals of the caller for an
   // inlined call.
   std::vector<SSATmp*> m_callerAvailableValues;
+
+  // The data for the last Marker instruction we've seen.
+  folly::Optional<MarkerData> m_lastMarker;
 
   // When we're building traces for an inlined callee, the state of
   // the caller needs to be preserved here.

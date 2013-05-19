@@ -487,6 +487,7 @@ public:
   // Debugger options
   static bool EnableDebugger;
   static bool EnableDebuggerServer;
+  static bool EnableDebuggerUsageLog;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
@@ -494,7 +495,6 @@ public:
   static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
-  static std::string DebuggerUsageLogFile;
 
   // Mail options
   static std::string SendmailPath;

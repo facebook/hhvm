@@ -587,6 +587,45 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Helpers for usage logging
+
+// NB: the usage logger is not owned by the Debugger. The caller will call this
+// again with nullptr before destroying the given usage logger.
+void Debugger::SetUsageLogger(DebuggerUsageLogger *usageLogger) {
+  TRACE(1, "Debugger::SetUsageLogger\n");
+  s_debugger.m_usageLogger = usageLogger;
+}
+
+void Debugger::InitUsageLogging() {
+  TRACE(1, "Debugger::InitUsageLogging\n");
+  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->init();
+}
+
+void Debugger::UsageLog(const std::string &mode, const std::string &cmd,
+                        const std::string &data) {
+  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->log(mode, cmd, data);
+}
+
+const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {
+  switch (cmd.getInterruptType()) {
+    case SessionStarted: return "SessionStarted";
+    case SessionEnded: return "SessionEnded";
+    case RequestStarted: return "RequestStarted";
+    case RequestEnded: return "RequestEnded";
+    case PSPEnded: return "PSPEnded";
+    case HardBreakPoint: return "HardBreakPoint";
+    case BreakPointReached: return "BreakPointReached";
+    case ExceptionThrown: return "ExceptionThrown";
+    default:
+      return "unknown";
+  }
+}
+
+void Debugger::UsageLogInterrupt(const std::string &mode, CmdInterrupt &cmd) {
+  UsageLog(mode, "interrupt", InterruptTypeName(cmd));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 DebuggerDummyEnv::DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::DebuggerDummyEnv\n");

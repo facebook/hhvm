@@ -30,9 +30,11 @@ namespace HPHP {
 class StringBuffer;
 
 namespace Eval {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(DebuggerCommand);
+DECLARE_BOOST_TYPES(CmdInterrupt);
 class DebuggerClient {
 public:
   static int LineWidth;
@@ -483,15 +485,8 @@ private:
   std::string m_nameForApi;
 
   // usage logging
-  FILE* m_usageLogFP;
-  std::string m_usageLogHeader;
-  void initUsageLogging();
-  void finiUsageLogging();
-  void usageLog(const std::string& cmd, const std::string& line);
-  void usageLogInit() { usageLog("init", ""); }
-  void usageLogSignal() { usageLog("signal", ""); }
-  void usageLogDone(const std::string& cmdType) { usageLog("done", cmdType); }
-  void usageLogInterrupt(DebuggerCommandPtr cmd);
+  const char *getUsageMode();
+  void usageLog(const std::string &cmd, const std::string &data = "");
 };
 
 ///////////////////////////////////////////////////////////////////////////////

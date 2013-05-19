@@ -60,7 +60,7 @@ class DebuggerClientExitException  : public DebuggerException {
 };
 class DebuggerRestartException     : public DebuggerException {
 public:
-  DebuggerRestartException(StringVecPtr args) : m_args(args) {}
+  explicit DebuggerRestartException(StringVecPtr args) : m_args(args) {}
   ~DebuggerRestartException() throw() {}
 
   virtual const char *what() const throw() {
@@ -127,7 +127,7 @@ DECLARE_BOOST_TYPES(DSandboxInfo);
 class DSandboxInfo {
 public:
   DSandboxInfo() {}
-  DSandboxInfo(const std::string &id) { set(id);}
+  explicit DSandboxInfo(const std::string &id) { set(id);}
 
   std::string m_user;
   std::string m_name;
@@ -195,6 +195,18 @@ public:
   std::string desc(const char *indent);
   void load(Hdf node);
   void save(Hdf node);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Simple base class which can be overridden to provide implementation-specific
+// usage logging for the debugger from both client- and server-side.
+
+class DebuggerUsageLogger {
+public:
+  virtual ~DebuggerUsageLogger() {}
+  virtual void init() {}
+  virtual void log(const std::string &mode, const std::string &cmd,
+                   const std::string &data) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

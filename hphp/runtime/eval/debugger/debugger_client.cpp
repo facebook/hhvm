@@ -103,7 +103,7 @@ void DebuggerClient::onSignal(int sig) {
            "press Ctrl-C again to quit.", secWait);
     } else {
       info("Pausing program execution, please wait...");
-      usageLogSignal();
+      usageLog("signal");
       m_sigTime = now;
     }
     m_signum = CmdSignal::SignalBreak;
@@ -409,9 +409,9 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
       m_clientState(StateUninit), m_inApiUse(false),
-      m_nameForApi(name), m_usageLogFP(nullptr) {
+      m_nameForApi(name) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
-  initUsageLogging();
+  Debugger::InitUsageLogging();
 }
 
 DebuggerClient::~DebuggerClient() {
@@ -423,7 +423,6 @@ DebuggerClient::~DebuggerClient() {
     fclose(f);
     setLogFileHandler(nullptr);
   }
-  finiUsageLogging();
 }
 
 void DebuggerClient::reset() {
@@ -618,7 +617,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     m_options.user = Process::GetCurrentUser();
   }
 
-  usageLogInit();
+  usageLog("init");
 
   loadConfig();
 
@@ -1000,12 +999,14 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
                         expected);
           return DebuggerCommandPtr();
         }
+      } else {
+        CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
       }
       m_sigTime = 0;
       m_machine->m_interrupting = true;
       setClientState(StateReadyForCommand);
       m_inputState = TakingCommand;
-      usageLogInterrupt(cmd);
       return cmd;
     }
   }
@@ -1033,7 +1034,8 @@ void DebuggerClient::runImpl() {
           return;
         }
         m_sigTime = 0;
-        usageLogInterrupt(cmd);
+        CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
         {
           cmd->onClient(*this);
         }
@@ -1829,7 +1831,7 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
       error("wire error: %s", res->getWireError().data());
     }
     if (res->is((DebuggerCommand::Type)expected)) {
-      usageLogDone(boost::lexical_cast<string>(expected));
+      usageLog("done", boost::lexical_cast<string>(expected));
       break;
     }
 
@@ -1838,7 +1840,8 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
       throw DebuggerProtocolException();
     }
 
-    usageLogInterrupt(res);
+    CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(res);
+    Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
 
     if (isApiMode()) {
       // Hit breakpoint during eval
@@ -2257,78 +2260,14 @@ void DebuggerClient::resetSmartAllocatedMembers() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers for usage logging
 
-void DebuggerClient::initUsageLogging() {
-  TRACE(2, "DebuggerClient::initUsageLogging\n");
-  // Usage log file is a runtime option instead of debugger config because
-  // it is for internal monitoring and we don't want users to modify this.
-  if (RuntimeOption::DebuggerUsageLogFile.empty()) {
-    return;
-  }
-  mode_t old = umask(0);
-  m_usageLogFP = fopen(RuntimeOption::DebuggerUsageLogFile.c_str(), "a");
-  if (!m_usageLogFP) {
-    Logger::Error("failed to open debugger usage log file %s",
-                  RuntimeOption::DebuggerUsageLogFile.c_str());
-  }
-  umask(old);
+const char *DebuggerClient::getUsageMode() {
+  return isApiMode() ? "api" : "terminal";
 }
 
-void DebuggerClient::finiUsageLogging() {
-  TRACE(2, "DebuggerClient::finiUsageLogging\n");
-  if (m_usageLogFP) {
-    fclose(m_usageLogFP);
-    m_usageLogFP = nullptr;
-  }
+void DebuggerClient::usageLog(const std::string &cmd, const std::string &data) {
+  Debugger::UsageLog(getUsageMode(), cmd, data);
 }
 
-void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
-  TRACE(2, "DebuggerClient::usageLog\n");
-  if (!m_usageLogFP) {
-    return;
-  }
-
-  if (m_usageLogHeader.empty()) {
-    std::string login = m_options.user;
-    std::string host = Process::GetHostName();
-    std::string clientMode = isApiMode() ? "api" : "terminal";
-    m_usageLogHeader = login + " " + host + " hhvm " + clientMode;
-  }
-
-  struct timespec tp;
-  gettime(CLOCK_REALTIME, &tp);
-
-#define MAX_LINE 1024
-  char buf[MAX_LINE];
-  int len = snprintf(buf, MAX_LINE, "%s %" PRId64 " %" PRId64 " %s #### %s",
-                     m_usageLogHeader.c_str(),
-                     (int64_t)tp.tv_sec, (int64_t)tp.tv_nsec,
-                     cmd.c_str(), line.c_str());
-  len = len >= MAX_LINE ? MAX_LINE - 1: len;
-  buf[len] = '\n';
-#undef MAX_LINE
-  fwrite(buf, len + 1, 1, m_usageLogFP);
-  fflush(m_usageLogFP);
-}
-
-void DebuggerClient::usageLogInterrupt(DebuggerCommandPtr cmd) {
-  TRACE(2, "DebuggerClient::usageLogInterrupt\n");
-  CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
-  if (!intr) {
-    return;
-  }
-  switch (intr->getInterruptType()) {
-    case SessionStarted: usageLog("interrupt", "SessionStarted"); break;
-    case SessionEnded: usageLog("interrupt", "SessionEnded"); break;
-    case RequestStarted: usageLog("interrupt", "RequestStarted"); break;
-    case RequestEnded: usageLog("interrupt", "RequestEnded"); break;
-    case PSPEnded: usageLog("interrupt", "PSPEnded"); break;
-    case HardBreakPoint: usageLog("interrupt", "HardBreakPoint"); break;
-    case BreakPointReached: usageLog("interrupt", "BreakPointReached"); break;
-    case ExceptionThrown: usageLog("interrupt", "ExceptionThrown"); break;
-    default:
-      usageLog("interrupt", "unknown");
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration

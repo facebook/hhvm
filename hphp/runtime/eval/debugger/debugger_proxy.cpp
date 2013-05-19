@@ -37,6 +37,7 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
+  Debugger::UsageLog("server", "connnect", socket->getAddress());
 }
 
 DebuggerProxy::~DebuggerProxy() {
@@ -49,6 +50,8 @@ DebuggerProxy::~DebuggerProxy() {
   }
 
   delete m_injTables;
+
+  Debugger::UsageLog("server", "disconnect");
   TRACE_RB(2, "DebuggerProxy::~DebuggerProxy complete\n");
 }
 
@@ -590,6 +593,8 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     return;
   }
 
+  Debugger::UsageLogInterrupt("server", cmd);
+
   // Wait for commands from the debugger client and process them. We'll stay
   // here until we get a command that should cause the thread to continue.
   while (true) {
@@ -602,6 +607,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     checkStop();
     if (res) {
       TRACE_RB(2, "Proxy got cmd type %d\n", res->getType());
+      Debugger::UsageLog("server", boost::lexical_cast<string>(res->getType()));
       // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {

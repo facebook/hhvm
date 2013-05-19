@@ -141,7 +141,9 @@ void c_Continuation::t_raise(CVarRef v) {
 void c_Continuation::t_raised() {
   if (m_should_throw) {
     m_should_throw = false;
-    throw_exception(m_received);
+    Variant e(Variant::nullInit);
+    m_received.swap(e);
+    throw_exception(e);
   }
 }
 

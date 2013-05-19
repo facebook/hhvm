@@ -1389,6 +1389,10 @@ DbgAssertPtr S0:PtrToGen
   the same logic as DbgAssertRefCount.  Internally this uses always_assert();
   failures cause an abort (whatever always_assert does).
 
+DbgAssertType<T> S0:Cell
+
+  Assert that S0 is of type T at runtime.  If the assertion fails,
+  execution is aborted via a hardware exception.
 
 18. Iterators
 

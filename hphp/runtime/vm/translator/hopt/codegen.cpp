@@ -5059,6 +5059,12 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   checkFrame(fp, sp, /*checkLocals*/true);
 }
 
+void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
+  ConditionCode cc = emitTypeTest(inst->getTypeParam(),
+                                  m_regs[inst->getSrc(0)].getReg(1), true);
+  ifThen(m_as, cc, [&] { m_as.ud2(); });
+}
+
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   SSATmp* objClass = inst->getSrc(0);
   assert(!objClass->isConst());

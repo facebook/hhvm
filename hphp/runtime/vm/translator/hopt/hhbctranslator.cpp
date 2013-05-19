@@ -1003,7 +1003,7 @@ void HhbcTranslator::emitContReceive() {
   gen(ContRaiseCheck, getExitSlowTrace(), cont);
   auto const valOffset = cns(CONTOFF(m_received));
   push(gen(LdProp, Type::Cell, cont, valOffset));
-  gen(StProp, cont, valOffset, m_tb->genDefUninit());
+  gen(StProp, cont, valOffset, m_tb->genDefNull());
 }
 
 void HhbcTranslator::emitContRetC() {
@@ -1026,10 +1026,11 @@ void HhbcTranslator::emitContNext() {
   assert(getCurClass());
   SSATmp* cont = gen(LdThis, m_tb->getFp());
   gen(ContPreNext, getExitSlowTrace(), cont);
-
-  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
-  gen(StProp, cont, cns(CONTOFF(m_received)), m_tb->genDefInitNull());
-  gen(DecRef, oldVal);
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // We're guaranteed to have a Null in m_received at this point
+    auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
+    gen(DbgAssertType, Type::InitNull, oldVal);
+  }
 }
 
 void HhbcTranslator::emitContSendImpl(bool raise) {
@@ -1037,16 +1038,16 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   SSATmp* cont = gen(LdThis, m_tb->getFp());
   gen(ContStartedCheck, getExitSlowTrace(), cont);
   gen(ContPreNext, getExitSlowTrace(), cont);
-
   gen(AssertLoc, Type::Cell, LocalId(0), m_tb->getFp());
   auto const newVal = gen(IncRef, ldLoc(0));
-  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // We're guaranteed to have a Null in m_received at this point
+    auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
+    gen(DbgAssertType, Type::InitNull, oldVal);
+  }
   gen(StProp, cont, cns(CONTOFF(m_received)), newVal);
-  gen(DecRef, oldVal);
   if (raise) {
-    gen(
-      StRaw, cont, cns(RawMemSlot::ContShouldThrow), cns(true)
-    );
+    gen(StRaw, cont, cns(RawMemSlot::ContShouldThrow), cns(true));
   }
 }
 

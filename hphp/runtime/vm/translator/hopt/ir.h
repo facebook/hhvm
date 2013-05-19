@@ -587,6 +587,7 @@ O(ArrayIdx,                    D(Cell), C(TCA) S(Arr) S(Int,Str) S(Cell),     \
                                                         E|N|CRc|PRc|Refs|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
+O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(Nop,                              ND, NA,                               NF) \
 /* */
 

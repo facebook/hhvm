@@ -7128,7 +7128,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   TypedValue* fr = cont->m_received.asTypedValue();
   TypedValue* to = m_stack.allocTV();
   memcpy(to, fr, sizeof(TypedValue));
-  tvWriteUninit(fr);
+  tvWriteNull(fr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {

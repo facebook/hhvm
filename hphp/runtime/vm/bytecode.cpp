@@ -5246,6 +5246,32 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopSetWithRefLM(PC& pc) {
+  NEXT();
+  DECLARE_SETHELPER_ARGS
+  bool skip = setHelperPre<false, true, false, false, 0,
+                           ConsumeAll>(MEMBERHELPERPRE_ARGS);
+  DECODE_HA(local);
+  if (!skip) {
+    TypedValue* from = frame_local(m_fp, local);
+    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+  }
+  setHelperPost<0>(SETHELPERPOST_ARGS);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopSetWithRefRM(PC& pc) {
+  NEXT();
+  DECLARE_SETHELPER_ARGS
+  bool skip = setHelperPre<false, true, false, false, 1,
+                           ConsumeAll>(MEMBERHELPERPRE_ARGS);
+  if (!skip) {
+    TypedValue* from = m_stack.top();
+    tvAsVariant(base) = withRefBind(tvAsVariant(from));
+  }
+  m_stack.popTV();
+  setHelperPost<1>(SETHELPERPOST_ARGS);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpL(PC& pc) {
   NEXT();
   DECODE_HA(local);
@@ -6460,6 +6486,37 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitK(PC& pc) {
   }
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopWIterInit(PC& pc) {
+  PC origPc = pc;
+  NEXT();
+  DECODE_IA(itId);
+  DECODE(Offset, offset);
+  DECODE_HA(val);
+  Cell* c1 = m_stack.topC();
+  Iter* it = frame_iter(m_fp, itId);
+  TypedValue* tv1 = frame_local(m_fp, val);
+  if (initIterator(pc, origPc, it, offset, c1)) {
+    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+  }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopWIterInitK(PC& pc) {
+  PC origPc = pc;
+  NEXT();
+  DECODE_IA(itId);
+  DECODE(Offset, offset);
+  DECODE_HA(val);
+  DECODE_HA(key);
+  Cell* c1 = m_stack.topC();
+  Iter* it = frame_iter(m_fp, itId);
+  TypedValue* tv1 = frame_local(m_fp, val);
+  TypedValue* tv2 = frame_local(m_fp, key);
+  if (initIterator(pc, origPc, it, offset, c1)) {
+    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+    tvAsVariant(tv2) = it->arr().first();
+  }
+}
+
 inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
                                               Offset offset, Var* v1) {
   bool hasElems = it->minit(v1);
@@ -6530,6 +6587,37 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNextK(PC& pc) {
   if (it->next()) {
     ITER_SKIP(offset);
     tvAsVariant(tv1) = it->arr().second();
+    tvAsVariant(tv2) = it->arr().first();
+  }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopWIterNext(PC& pc) {
+  PC origPc = pc;
+  NEXT();
+  DECODE_IA(itId);
+  DECODE(Offset, offset);
+  DECODE_HA(val);
+  Iter* it = frame_iter(m_fp, itId);
+  TypedValue* tv1 = frame_local(m_fp, val);
+  if (it->next()) {
+    ITER_SKIP(offset);
+    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
+  }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopWIterNextK(PC& pc) {
+  PC origPc = pc;
+  NEXT();
+  DECODE_IA(itId);
+  DECODE(Offset, offset);
+  DECODE_HA(val);
+  DECODE_HA(key);
+  Iter* it = frame_iter(m_fp, itId);
+  TypedValue* tv1 = frame_local(m_fp, val);
+  TypedValue* tv2 = frame_local(m_fp, key);
+  if (it->next()) {
+    ITER_SKIP(offset);
+    tvAsVariant(tv1) = withRefBind(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
 }

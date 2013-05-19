@@ -10398,6 +10398,18 @@ TranslatorX64::analyzeIterInitK(Tracelet& t, NormalizedInstruction& ni) {
   ni.m_txFlags = supportedPlan(inType == KindOfArray || inType == KindOfObject);
 }
 
+void
+TranslatorX64::analyzeWIterInit(Tracelet& t, NormalizedInstruction& ni) {
+  DataType inType = ni.inputs[0]->valueType();
+  ni.m_txFlags = supportedPlan(inType == KindOfArray || inType == KindOfObject);
+}
+
+void
+TranslatorX64::analyzeWIterInitK(Tracelet& t, NormalizedInstruction& ni) {
+  DataType inType = ni.inputs[0]->valueType();
+  ni.m_txFlags = supportedPlan(inType == KindOfArray || inType == KindOfObject);
+}
+
 void TranslatorX64::translateBasicIterInit(const Tracelet& t,
                                            const NormalizedInstruction& ni) {
   const int kValIdx = 0;
@@ -10416,11 +10428,15 @@ void TranslatorX64::translateBasicIterInit(const Tracelet& t,
       TypedValue *val = nullptr;
       TypedValue *key = nullptr;
       new_iter_array(dest, arr, val);
-      new_iter_array_key(dest, arr, val, key);
+      new_iter_array_key<false>(dest, arr, val, key);
+      new_iter_array_key<true>(dest, arr, val, key);
     }
-    if (ni.outLocal2) {
-      EMIT_RCALL(a, ni, new_iter_array_key, A(iterLoc), R(src),
-                 A(ni.outLocal->location), A(ni.outLocal2->location));
+    if (ni.outLocal2 || ni.op() == OpWIterInit) {
+      EMIT_RCALL(a, ni,
+                 ni.op() == OpIterInitK ?
+                 (TCA)new_iter_array_key<false> : (TCA)new_iter_array_key<true>,
+                 A(iterLoc), R(src), A(ni.outLocal->location),
+                 ni.outLocal2 ? A(ni.outLocal2->location) : IMM(0));
     } else {
       EMIT_RCALL(a, ni, new_iter_array, A(iterLoc), R(src),
                  A(ni.outLocal->location));
@@ -10473,6 +10489,22 @@ void TranslatorX64::translateIterInitK(const Tracelet& t,
   translateBasicIterInit(t, ni);
 }
 
+void TranslatorX64::translateWIterInit(const Tracelet& t,
+                                       const NormalizedInstruction& ni) {
+  assert(ni.inputs.size() == 1);
+  assert(ni.outLocal);
+  assert(!ni.outStack && !ni.outLocal2);
+  translateBasicIterInit(t, ni);
+}
+
+void TranslatorX64::translateWIterInitK(const Tracelet& t,
+                                        const NormalizedInstruction& ni) {
+  assert(ni.inputs.size() == 1);
+  assert(ni.outLocal && ni.outLocal2);
+  assert(!ni.outStack);
+  translateBasicIterInit(t, ni);
+}
+
 void
 TranslatorX64::analyzeIterNext(Tracelet& t, NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
@@ -10486,6 +10518,17 @@ TranslatorX64::analyzeIterNextK(Tracelet& t, NormalizedInstruction& i) {
 }
 
 void
+TranslatorX64::analyzeWIterNext(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = Supported;
+}
+
+void
+TranslatorX64::analyzeWIterNextK(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = Supported;
+}
+
+
+void
 TranslatorX64::translateBasicIterNext(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   if (false) { // type check
@@ -10493,19 +10536,23 @@ TranslatorX64::translateBasicIterNext(const Tracelet& t,
     TypedValue* val = nullptr;
     TypedValue* key = nullptr;
     int64_t ret = iter_next(it, val);
-    ret = iter_next_key(it, val, key);
+    ret = iter_next_key<false>(it, val, key);
+    ret = iter_next_key<true>(it, val, key);
     if (ret) printf("\n");
   }
   m_regMap.cleanAll(); // input might be in-flight
   // If the iterator reaches the end, iter_next will handle
   // freeing the iterator and it will decRef the array
   Location iterLoc(Location::Iter, i.imm[0].u_IVA);
-  if (i.outLocal2) {
-    EMIT_CALL(a, iter_next_key, A(iterLoc),
-              A(i.outLocal->location), A(i.outLocal2->location));
+  if (i.outLocal2 || i.op() == OpWIterNext) {
+    EMIT_CALL(a,
+              i.op() == OpIterNextK ?
+              (TCA)iter_next_key<false> : (TCA)iter_next_key<true>,
+              A(iterLoc),
+              A(i.outLocal->location),
+              i.op() == OpWIterNext ? IMM(0) : A(i.outLocal2->location));
   } else {
-    EMIT_CALL(a, iter_next, A(iterLoc),
-              A(i.outLocal->location));
+    EMIT_CALL(a, iter_next, A(iterLoc), A(i.outLocal->location));
   }
   recordReentrantCall(a, i);
   ScratchReg raxScratch(m_regMap, rax);
@@ -10531,6 +10578,24 @@ TranslatorX64::translateIterNext(const Tracelet& t,
 
 void
 TranslatorX64::translateIterNextK(const Tracelet& t,
+                                  const NormalizedInstruction& i) {
+  assert(i.inputs.size() == 0);
+  assert(!i.outStack);
+  assert(i.outLocal && i.outLocal2);
+  translateBasicIterNext(t, i);
+}
+
+void
+TranslatorX64::translateWIterNext(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  assert(i.inputs.size() == 0);
+  assert(!i.outStack && !i.outLocal2);
+  assert(i.outLocal);
+  translateBasicIterNext(t, i);
+}
+
+void
+TranslatorX64::translateWIterNextK(const Tracelet& t,
                                   const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
   assert(!i.outStack);
@@ -11866,6 +11931,8 @@ bool TranslatorX64::dumpTCData() {
    * Always-interp instructions,
    */ \
   INTERP_OP(ContHandle) \
+  INTERP_OP(SetWithRefLM) \
+  INTERP_OP(SetWithRefRM) \
   INTERP_OP(ArrayIdx) \
   INTERP_OP(CGetM) \
   INTERP_OP(FPassM) \

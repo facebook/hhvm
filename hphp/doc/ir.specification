@@ -1549,6 +1549,8 @@ DbgAssertType<T> S0:Cell
 
 D:Bool = IterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
 D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = WIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
+D:Bool = WIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object
@@ -1563,12 +1565,20 @@ D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   instruction stores the iterator's first value (and key) into the
   local variable S3 (and S4, respectively).
 
+  The IterInit and IterInitK instructions always copy the array
+  element by value.
+
+  The WIterInit and WIterInitK instructions copy referenced array
+  elements by reference, and non-referenced array elements by value.
+
   This instruction has the ConsumesRC property because it either
   decrements the reference count of s0 or stores a reference to S0
   into the new iterator.
 
 D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 
   Advances the iterator variable whose index is given by S1. S2 and S3
   are local variable indices. S0 points to the stack frame containing
@@ -1579,6 +1589,11 @@ D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator has not reached its end, then this instruction stores
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
+
+  The IterInit and IterInitK instructions always copy the array
+  element by value.
+  The WIterInit and WIterInitK instructions copy referenced array
+  elements by reference, and non-referenced array elements by value.
 
 IterFree S0:FramePtr S1:ConstInt
 
@@ -1729,6 +1744,12 @@ D:Vector, D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.
 
+SetWithRefElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen S4:PtrToCell
+D:StkPtr = SetWithRefElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen S4:PtrToCell
+
+  Set element with key S2 in S1 to S3. S4 should point to
+  an MInstrState struct.
+
 UnsetElem S0:ConstTCA S1:PtrToGen S2:Gen
 D:StkPtr = UnsetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
 
@@ -1751,6 +1772,12 @@ D:Vector = SetNewElem S0:PtrToGen S1:Cell
 D:Vector, D:StkPtr = SetNewElemStk S0:PtrToGen S1:Cell
 
   Append the value in S1 to S0.
+
+SetWithRefNewElem S0:ConstTCA S1:PtrToGen S2:PtrToGen S3:PtrToCell
+D:StkPtr = SetWithRefNewElemStk S0:ConstTCA S1:PtrToGen S2:PtrToGen
+                                          S3:PtrToCell
+
+  AppendWithRef the value in S2 to S1. S3 should point to an MInstrState struct.
 
 BindNewElem S0:ConstTCA S0:PtrToGen S1:BoxedCell S2:PtrToCell
 D:StkPtr = BindNewElemStk S0:PtrToGen S1:BoxedCell S2:PtrToCell

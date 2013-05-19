@@ -288,23 +288,27 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case IterInitK:
+  case WIterInitK:
     // kill the locals to which this instruction stores iter's key and value
     killLocalValue(inst->src(3)->getValInt());
     killLocalValue(inst->src(4)->getValInt());
     break;
 
   case IterInit:
+  case WIterInit:
     // kill the local to which this instruction stores iter's value
     killLocalValue(inst->src(3)->getValInt());
     break;
 
   case IterNextK:
+  case WIterNextK:
     // kill the locals to which this instruction stores iter's key and value
     killLocalValue(inst->src(2)->getValInt());
     killLocalValue(inst->src(3)->getValInt());
     break;
 
   case IterNext:
+  case WIterNext:
     // kill the local to which this instruction stores iter's value
     killLocalValue(inst->src(2)->getValInt());
     break;

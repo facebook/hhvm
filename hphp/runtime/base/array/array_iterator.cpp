@@ -716,10 +716,10 @@ void Iter::mfree() {
  * to make sure the hot part is a good-looking leaf function; otherwise,
  * you're likely to get a performance regression.
  */
-template <bool typeArray>
+template <bool typeArray, bool withRef>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
-  assert(oldType != KindOfRef);
+  assert(withRef || oldType != KindOfRef);
   uint64_t oldDatum = out->m_data.num;
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
@@ -727,8 +727,13 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
-    TypedValue* cur = tvToCell(arrIter.nvSecond());
-    tvDupCell(cur, out);
+    TypedValue* cur = arrIter.nvSecond();
+    if (cur->m_type == KindOfRef) {
+      if (!withRef || cur->m_data.pref->getCount() == 1) {
+        cur = cur->m_data.pref->tv();
+      }
+    }
+    tvDup(cur, out);
   } else {
     Variant val = arrIter.second();
     assert(val.getRawType() != KindOfRef);
@@ -737,10 +742,10 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
-template <bool typeArray>
+template <bool typeArray, bool withRef>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
-  assert(oldType != KindOfRef);
+  assert(withRef || oldType != KindOfRef);
   uint64_t oldDatum = out->m_data.num;
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
@@ -761,18 +766,19 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
  * refcount of the specified array. If new_iter_array does not create an
  * iterator, it decRefs the array.
  */
-static NEVER_INLINE
+template <bool withRef>
+NEVER_INLINE
 int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
-                          TypedValue* keyOut) {
+                            TypedValue* keyOut) {
   TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
   if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
     (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noInc);
     dest->arr().setIterType(ArrayIter::TypeArray);
-    iter_value_cell_local_impl<true>(dest, valOut);
+    iter_value_cell_local_impl<true, withRef>(dest, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<true>(dest, keyOut);
+      iter_key_cell_local_impl<true, withRef>(dest, keyOut);
     }
     return 1LL;
   }
@@ -782,12 +788,24 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   return 0LL;
 }
 
-static inline void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
-                                   TypedValue* keyOut) {
-  TypedValue* cur = tvToCell(&elm->data);
-  tvDupCell(cur, valOut);
-  if (keyOut) {
-    HphpArray::getElmKey(elm, keyOut);
+template <bool withRef>
+inline ALWAYS_INLINE
+void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
+                     TypedValue* keyOut) {
+  if (withRef) {
+    tvAsVariant(valOut) = withRefBind(tvAsVariant(&elm->data));
+    if (LIKELY(keyOut != nullptr)) {
+      DataType t = keyOut->m_type;
+      uint64_t d = keyOut->m_data.num;
+      HphpArray::getElmKey(elm, keyOut);
+      tvRefcountedDecRefHelper(t, d);
+    }
+  } else {
+    TypedValue* cur = tvToCell(&elm->data);
+    tvDupCell(cur, valOut);
+    if (keyOut) {
+      HphpArray::getElmKey(elm, keyOut);
+    }
   }
 }
 
@@ -810,7 +828,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->arr().setIterType(ArrayIter::TypeArray);
       HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
-      getHphpArrayElm(elm, valOut, nullptr);
+      getHphpArrayElm<false>(elm, valOut, nullptr);
       return 1LL;
     }
     // We did not transfer ownership of the array to an iterator, so we need
@@ -822,33 +840,38 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 0LL;
   }
 cold:
-  return new_iter_array_cold(dest, ad, valOut, nullptr);
+  return new_iter_array_cold<false>(dest, ad, valOut, nullptr);
 }
 
+template <bool withRef>
 HOT_FUNC
-int64_t new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
-                         TypedValue* keyOut) {
+int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
+                           TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
-  valOut = tvToCell(valOut);
-  keyOut = tvToCell(keyOut);
+  if (!withRef) {
+    valOut = tvToCell(valOut);
+    keyOut = tvToCell(keyOut);
+  }
   if (UNLIKELY(!ad->isHphpArray())) {
     goto cold;
   }
   {
     HphpArray* arr = (HphpArray*)ad;
     if (LIKELY(arr->getSize() != 0)) {
-      if (UNLIKELY(tvWillBeReleased(valOut)) ||
-          UNLIKELY(tvWillBeReleased(keyOut))) {
-        goto cold;
+      if (!withRef) {
+        if (UNLIKELY(tvWillBeReleased(valOut)) ||
+            UNLIKELY(tvWillBeReleased(keyOut))) {
+          goto cold;
+        }
+        tvDecRefOnly(valOut);
+        tvDecRefOnly(keyOut);
       }
-      tvDecRefOnly(valOut);
-      tvDecRefOnly(keyOut);
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->arr().setIterType(ArrayIter::TypeArray);
       HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
-      getHphpArrayElm(elm, valOut, keyOut);
+      getHphpArrayElm<withRef>(elm, valOut, keyOut);
       return 1LL;
     }
     // We did not transfer ownership of the array to an iterator, so we need
@@ -860,8 +883,15 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
     return 0LL;
   }
 cold:
-  return new_iter_array_cold(dest, ad, valOut, keyOut);
+  return new_iter_array_cold<withRef>(dest, ad, valOut, keyOut);
 }
+
+template int64_t new_iter_array_key<false>(Iter* dest, ArrayData* ad,
+                                           TypedValue* valOut,
+                                           TypedValue* keyOut);
+template int64_t new_iter_array_key<true>(Iter* dest, ArrayData* ad,
+                                          TypedValue* valOut,
+                                          TypedValue* keyOut);
 
 class FreeObj {
  public:
@@ -943,14 +973,14 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 
   dest->arr().setIterType(itType);
   if (itType == ArrayIter::TypeIterator) {
-    iter_value_cell_local_impl<false>(dest, valOut);
+    iter_value_cell_local_impl<false, false>(dest, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<false>(dest, keyOut);
+      iter_key_cell_local_impl<false, false>(dest, keyOut);
     }
   } else {
-    iter_value_cell_local_impl<true>(dest, valOut);
+    iter_value_cell_local_impl<true, false>(dest, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<true>(dest, keyOut);
+      iter_key_cell_local_impl<true, false>(dest, keyOut);
     }
   }
   return 1LL;
@@ -970,7 +1000,8 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
  * to make sure the hot part is a good-looking leaf function; otherwise,
  * you're likely to get a performance regression.
  */
-static NEVER_INLINE
+template <bool withRef>
+NEVER_INLINE
 int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_cold: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -983,14 +1014,14 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     return 0;
   }
   if (iter->arr().getIterType() == ArrayIter::TypeArray) {
-    iter_value_cell_local_impl<true>(iter, valOut);
+    iter_value_cell_local_impl<true, withRef>(iter, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<true>(iter, keyOut);
+      iter_key_cell_local_impl<true, withRef>(iter, keyOut);
     }
   } else {
-    iter_value_cell_local_impl<false>(iter, valOut);
+    iter_value_cell_local_impl<false, withRef>(iter, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<false>(iter, keyOut);
+      iter_key_cell_local_impl<false, withRef>(iter, keyOut);
     }
   }
   return 1;
@@ -1013,41 +1044,45 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     }
     const HphpArray* arr = (HphpArray*)ad;
     ssize_t pos = arrIter->getPos();
-    if (size_t(pos) >= size_t(arr->getLastE())) {
-      if (UNLIKELY(arr->getCount() == 1)) {
-        goto cold;
+
+    HphpArray::Elm* elm;
+    do {
+      if (size_t(pos) >= size_t(arr->getLastE())) {
+        if (UNLIKELY(arr->getCount() == 1)) {
+          goto cold;
+        }
+        arr->decRefCount();
+        if (debug) {
+          iter->arr().setIterType(ArrayIter::TypeUndefined);
+        }
+        return 0;
       }
-      arr->decRefCount();
-      if (debug) {
-        iter->arr().setIterType(ArrayIter::TypeUndefined);
-      }
-      return 0;
-    }
-    pos = pos + 1;
-    HphpArray::Elm* elm = arr->getElm(pos);
-    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
-      goto cold;
-    }
+      pos = pos + 1;
+      elm = arr->getElm(pos);
+    } while (elm->data.m_type >= HphpArray::KindOfTombstone);
     if (UNLIKELY(tvWillBeReleased(valOut))) {
       goto cold;
     }
     tvDecRefOnly(valOut);
     arrIter->setPos(pos);
-    getHphpArrayElm(elm, valOut, nullptr);
+    getHphpArrayElm<false>(elm, valOut, nullptr);
     return 1;
   }
 cold:
-  return iter_next_cold(iter, valOut, nullptr);
+  return iter_next_cold<false>(iter, valOut, nullptr);
 }
 
+template <bool withRef>
 HOT_FUNC
 int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "iter_next: I %p\n", iter);
+  TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
-  valOut = tvToCell(valOut);
-  keyOut = tvToCell(keyOut);
+  if (!withRef) {
+    valOut = tvToCell(valOut);
+    keyOut = tvToCell(keyOut);
+  }
   if (UNLIKELY(!arrIter->hasArrayData())) {
     goto cold;
   }
@@ -1058,36 +1093,45 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     }
     const HphpArray* arr = (HphpArray*)ad;
     ssize_t pos = arrIter->getPos();
-    if (size_t(pos) >= size_t(arr->getLastE())) {
-      if (UNLIKELY(arr->getCount() == 1)) {
+    HphpArray::Elm* elm;
+    do {
+      if (size_t(pos) >= size_t(arr->getLastE())) {
+        if (UNLIKELY(arr->getCount() == 1)) {
+          goto cold;
+        }
+        arr->decRefCount();
+        if (debug) {
+          iter->arr().setIterType(ArrayIter::TypeUndefined);
+        }
+        return 0;
+      }
+      pos = pos + 1;
+      elm = arr->getElm(pos);
+    } while (elm->data.m_type >= HphpArray::KindOfTombstone);
+    if (!withRef) {
+      if (UNLIKELY(tvWillBeReleased(valOut))) {
         goto cold;
       }
-      arr->decRefCount();
-      if (debug) {
-        iter->arr().setIterType(ArrayIter::TypeUndefined);
+      if (UNLIKELY(tvWillBeReleased(keyOut))) {
+        goto cold;
       }
-      return 0;
+      tvDecRefOnly(valOut);
+      tvDecRefOnly(keyOut);
     }
-    pos = pos + 1;
-    HphpArray::Elm* elm = arr->getElm(pos);
-    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
-      goto cold;
-    }
-    if (UNLIKELY(tvWillBeReleased(valOut))) {
-      goto cold;
-    }
-    if (UNLIKELY(tvWillBeReleased(keyOut))) {
-      goto cold;
-    }
-    tvDecRefOnly(valOut);
-    tvDecRefOnly(keyOut);
     arrIter->setPos(pos);
-    getHphpArrayElm(elm, valOut, keyOut);
+    getHphpArrayElm<withRef>(elm, valOut, keyOut);
     return 1;
   }
-cold:
-  return iter_next_cold(iter, valOut, keyOut);
+  cold:
+  return iter_next_cold<withRef>(iter, valOut, keyOut);
 }
+
+template int64_t iter_next_key<false>(Iter* dest,
+                                      TypedValue* valOut,
+                                      TypedValue* keyOut);
+template int64_t iter_next_key<true>(Iter* dest,
+                                     TypedValue* valOut,
+                                     TypedValue* keyOut);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

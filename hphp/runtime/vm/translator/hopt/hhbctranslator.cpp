@@ -892,6 +892,70 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
   emitJmpCondHelper(offset, false, res);
 }
 
+void HhbcTranslator::emitWIterInit(uint32_t iterId,
+                                   int offset,
+                                   uint32_t valLocalId) {
+  emitIterInitCommon(
+    offset, [=] (SSATmp* src) {
+      return gen(
+        WIterInit,
+        Type::Bool,
+        src,
+        m_tb->getFp(),
+        cns(iterId),
+        cns(valLocalId)
+      );
+    }
+  );
+}
+
+void HhbcTranslator::emitWIterInitK(uint32_t iterId,
+                                    int offset,
+                                    uint32_t valLocalId,
+                                    uint32_t keyLocalId) {
+  emitIterInitCommon(
+    offset, [=] (SSATmp* src) {
+      return gen(
+        WIterInitK,
+        Type::Bool,
+        src,
+        m_tb->getFp(),
+        cns(iterId),
+        cns(valLocalId),
+        cns(keyLocalId)
+      );
+    }
+  );
+}
+
+void HhbcTranslator::emitWIterNext(uint32_t iterId,
+                                   int offset,
+                                   uint32_t valLocalId) {
+  SSATmp* res = gen(
+    WIterNext,
+    Type::Bool,
+    m_tb->getFp(),
+    cns(iterId),
+    cns(valLocalId)
+  );
+  emitJmpCondHelper(offset, false, res);
+}
+
+void HhbcTranslator::emitWIterNextK(uint32_t iterId,
+                                    int offset,
+                                    uint32_t valLocalId,
+                                    uint32_t keyLocalId) {
+  SSATmp* res = gen(
+    WIterNextK,
+    Type::Bool,
+    m_tb->getFp(),
+    cns(iterId),
+    cns(valLocalId),
+    cns(keyLocalId)
+  );
+  emitJmpCondHelper(offset, false, res);
+}
+
 void HhbcTranslator::emitIterFree(uint32_t iterId) {
   gen(IterFree, m_tb->getFp(), cns(iterId));
 }

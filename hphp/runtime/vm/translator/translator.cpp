@@ -1242,6 +1242,8 @@ static const struct {
   { OpSetG,        {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
   { OpSetM,        {MVector|Stack1,   Stack1|Local, OutSameAsInput,    0 }},
+  { OpSetWithRefLM,{MVector|Local ,   Local,        OutNone,           0 }},
+  { OpSetWithRefRM,{MVector|Stack1,   Local,        OutNone,          -1 }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp,          0 }},
   { OpSetOpN,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
   { OpSetOpG,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
@@ -1328,12 +1330,16 @@ static const struct {
 
   { OpIterInit,    {Stack1,           Local,        OutUnknown,       -1 }},
   { OpMIterInit,   {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpWIterInit,   {Stack1,           Local,        OutUnknown,       -1 }},
   { OpIterInitK,   {Stack1,           Local,        OutUnknown,       -1 }},
   { OpMIterInitK,  {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpWIterInitK,  {Stack1,           Local,        OutUnknown,       -1 }},
   { OpIterNext,    {None,             Local,        OutUnknown,        0 }},
   { OpMIterNext,   {None,             Local,        OutUnknown,        0 }},
+  { OpWIterNext,   {None,             Local,        OutUnknown,        0 }},
   { OpIterNextK,   {None,             Local,        OutUnknown,        0 }},
   { OpMIterNextK,  {None,             Local,        OutUnknown,        0 }},
+  { OpWIterNextK,  {None,             Local,        OutUnknown,        0 }},
   { OpIterFree,    {None,             None,         OutNone,           0 }},
   { OpMIterFree,   {None,             None,         OutNone,           0 }},
 
@@ -2137,6 +2143,7 @@ void Translator::getInputs(Tracelet& t,
     // instructions that take a Local have its index at their first
     // immediate.
     int loc;
+    auto insertAt = inputs.end();
     switch (ni->op()) {
       case OpUnpackCont:
       case OpPackCont:
@@ -2147,6 +2154,9 @@ void Translator::getInputs(Tracelet& t,
         loc = 0;
         break;
 
+      case OpSetWithRefLM:
+        insertAt = inputs.begin();
+        // fallthrough
       case OpFPassL:
         loc = ni->imm[1].u_IVA;
         break;
@@ -2156,7 +2166,7 @@ void Translator::getInputs(Tracelet& t,
         break;
     }
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.emplace_back(Location(Location::Local, loc));
+    inputs.emplace(insertAt, Location(Location::Local, loc));
     if (input & DontGuardLocal) inputs.back().dontGuard = true;
     if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
@@ -2360,6 +2370,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
+                               op == OpSetWithRefLM || op == OpSetWithRefRM ||
                                op == OpIncDecL || op == OpIncDecG ||
                                op == OpUnsetG || op == OpBindG ||
                                op == OpSetG || op == OpSetOpG ||
@@ -2369,8 +2380,10 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpUnsetL ||
                                op == OpIterInit || op == OpIterInitK ||
                                op == OpMIterInit || op == OpMIterInitK ||
+                               op == OpWIterInit || op == OpWIterInitK ||
                                op == OpIterNext || op == OpIterNextK ||
-                               op == OpMIterNext || op == OpMIterNextK);
+                               op == OpMIterNext || op == OpMIterNextK ||
+                               op == OpWIterNext || op == OpWIterNextK);
         if (op == OpIncDecL) {
           assert(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
@@ -2407,49 +2420,62 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                           KindOfInvalid);
           continue;
         }
-        if (op == OpSetM || op == OpSetOpM || op == OpVGetM || op == OpBindM) {
-          // TODO(#1069330): This code assumes that the location is
-          // LH. We need to figure out how to handle cases where the
-          // location is LN or LG or LR.
-          // XXX: analogous garbage needed for OpSetOpM.
-          if (ni->immVec.locationCode() == LL) {
-            const int kVecStart = (op == OpSetM ||
-                                   op == OpSetOpM ||
-                                   op == OpBindM) ?
-              1 : 0; // 0 is rhs for SetM/SetOpM
-            DynLocation* inLoc = ni->inputs[kVecStart];
-            assert(inLoc->location.isLocal());
-            Location locLoc = inLoc->location;
-            if (inLoc->rtt.isString() ||
-                inLoc->rtt.valueType() == KindOfBoolean) {
-              // Strings and bools produce value-dependent results; "" and
-              // false upgrade to an array successfully, while other values
-              // fail and leave the lhs unmodified.
-              DynLocation* baseLoc = t.newDynLocation(locLoc, KindOfInvalid);
-              assert(baseLoc->isLocal());
-              ni->outLocal = baseLoc;
-            } else if (inLoc->rtt.valueType() == KindOfUninit ||
-                       inLoc->rtt.valueType() == KindOfNull) {
-              RuntimeType newLhsRtt = inLoc->rtt.setValueType(
-                mcodeMaybePropName(ni->immVecM[0]) ?
-                KindOfObject : KindOfArray);
-              SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
-                      locLoc.spaceName(), locLoc.offset, newLhsRtt.valueType());
-              DynLocation* baseLoc = t.newDynLocation(locLoc, newLhsRtt);
-              assert(baseLoc->location.isLocal());
-              ni->outLocal = baseLoc;
+        if (op == OpSetM || op == OpSetOpM ||
+            op == OpVGetM || op == OpBindM ||
+            op == OpSetWithRefLM || op == OpSetWithRefRM) {
+          switch (ni->immVec.locationCode()) {
+            case LL: {
+              const int kVecStart = (op == OpSetM ||
+                                     op == OpSetOpM ||
+                                     op == OpBindM ||
+                                     op == OpSetWithRefLM ||
+                                     op == OpSetWithRefRM) ?
+                1 : 0; // 0 is rhs for SetM/SetOpM
+              DynLocation* inLoc = ni->inputs[kVecStart];
+              assert(inLoc->location.isLocal());
+              Location locLoc = inLoc->location;
+              if (inLoc->rtt.isString() ||
+                  inLoc->rtt.valueType() == KindOfBoolean) {
+                // Strings and bools produce value-dependent results; "" and
+                // false upgrade to an array successfully, while other values
+                // fail and leave the lhs unmodified.
+                DynLocation* baseLoc = t.newDynLocation(locLoc, KindOfInvalid);
+                assert(baseLoc->isLocal());
+                ni->outLocal = baseLoc;
+              } else if (inLoc->rtt.valueType() == KindOfUninit ||
+                         inLoc->rtt.valueType() == KindOfNull) {
+                RuntimeType newLhsRtt = inLoc->rtt.setValueType(
+                  mcodeMaybePropName(ni->immVecM[0]) ?
+                  KindOfObject : KindOfArray);
+                SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
+                        locLoc.spaceName(), locLoc.offset,
+                        newLhsRtt.valueType());
+                DynLocation* baseLoc = t.newDynLocation(locLoc, newLhsRtt);
+                assert(baseLoc->location.isLocal());
+                ni->outLocal = baseLoc;
+              }
+              // Note (if we start translating pseudo-mains):
+              //
+              // A SetM in pseudo-main might alias a local whose type we're
+              // remembering:
+              //
+              //   $GLOBALS['a'] = 123; // $a :: Int
+              //
+              // and more deviously:
+              //
+              //   $loc['b'][17] = $GLOBALS; $x = 'b'; $y = 17;
+              //   $loc[$x][$y]['a'] = 123; // $a :: Int
+              break;
             }
-            // Note (if we start translating pseudo-mains):
-            //
-            // A SetM in pseudo-main might alias a local whose type we're
-            // remembering:
-            //
-            //   $GLOBALS['a'] = 123; // $a :: Int
-            //
-            // and more deviously:
-            //
-            //   $loc['b'][17] = $GLOBALS; $x = 'b'; $y = 17;
-            //   $loc[$x][$y]['a'] = 123; // $a :: Int
+            case LNL:
+            case LNC:
+              varEnvTaint = true;
+              break;
+            case LGL:
+            case LGC:
+              break;
+            default:
+              break;
           }
           continue;
         }
@@ -2470,11 +2496,13 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           ni->outLocal = dl;
           continue;
         }
-        if (op >= OpIterInit && op <= OpMIterNextK) {
+        if (op >= OpIterInit && op <= OpWIterNextK) {
           assert(op == OpIterInit || op == OpIterInitK ||
                  op == OpMIterInit || op == OpMIterInitK ||
+                 op == OpWIterInit || op == OpWIterInitK ||
                  op == OpIterNext || op == OpIterNextK ||
-                 op == OpMIterNext || op == OpMIterNextK);
+                 op == OpMIterNext || op == OpMIterNextK ||
+                 op == OpWIterNext || op == OpWIterNextK);
           const int kValImmIdx = 2;
           const int kKeyImmIdx = 3;
           DynLocation* outVal = t.newDynLocation();
@@ -2487,17 +2515,13 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             outVal->rtt = RuntimeType(KindOfInvalid);
           }
           ni->outLocal = outVal;
-          if (op == OpIterInitK || op == OpIterNextK) {
+          if (op == OpIterInitK || op == OpIterNextK ||
+              op == OpWIterInitK || op == OpWIterNextK ||
+              op == OpMIterInitK || op == OpMIterNextK) {
             DynLocation* outKey = t.newDynLocation();
             int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
             outKey->location = Location(Location::Local, keyOff);
             outKey->rtt = RuntimeType(KindOfInvalid);
-            ni->outLocal2 = outKey;
-          } else if (op == OpMIterInitK || op == OpMIterNextK) {
-            DynLocation* outKey = t.newDynLocation();
-            int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
-            outKey->location = Location(Location::Local, keyOff);
-            outKey->rtt = RuntimeType(KindOfRef, KindOfInvalid);
             ni->outLocal2 = outKey;
           }
           continue;

@@ -458,6 +458,19 @@ O(IterNext,                    D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),        E|N|Mem|Refs) \
 O(IterNextK,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
+O(WIterInit,                   D(Bool), S(Arr,Obj)                            \
+                                          S(FramePtr)                         \
+                                          C(Int)                              \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
+O(WIterInitK,                  D(Bool), S(Arr,Obj)                            \
+                                          S(FramePtr)                         \
+                                          C(Int)                              \
+                                          C(Int)                              \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
+O(WIterNext,                   D(Bool), S(FramePtr)                           \
+                                          C(Int) C(Int),        E|N|Mem|Refs) \
+O(WIterNextK,                  D(Bool), S(FramePtr)                           \
+                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(IterFree,                         ND, S(FramePtr) C(Int),     E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \
@@ -558,6 +571,11 @@ O_STK(SetElem,                 DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
+O_STK(SetWithRefElem,               ND, C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Cell)                             \
+                                          S(PtrToGen)                         \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O_STK(UnsetElem,                    ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
@@ -572,6 +590,10 @@ O_STK(IncDecElem,              D(Cell), C(TCA)                                \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O_STK(SetNewElem,              DVector, S(PtrToGen)                           \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
+O_STK(SetWithRefNewElem,            ND, C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(PtrToGen)                         \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \

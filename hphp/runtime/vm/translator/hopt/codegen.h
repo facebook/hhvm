@@ -310,8 +310,8 @@ private:
                    int64_t offset,
                    Block* exit);
 
-  void cgIterNextCommon(IRInstruction* inst, bool isNextK);
-  void cgIterInitCommon(IRInstruction* inst, bool isInitK);
+  void cgIterNextCommon(IRInstruction* inst);
+  void cgIterInitCommon(IRInstruction* inst);
   void cgLdFuncCachedCommon(IRInstruction* inst);
   TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);

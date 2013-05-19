@@ -799,7 +799,6 @@ TranslatorX64::irTranslateLateBoundCls(const Tracelet&,
   HHIR_EMIT(LateBoundCls);
 }
 
-
 void TranslatorX64::irTranslateFPassL(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
@@ -1397,6 +1396,46 @@ TranslatorX64::irTranslateIterNextK(const Tracelet& t,
                                     const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNextK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateWIterInit(const Tracelet& t,
+                                   const NormalizedInstruction& i) {
+  HHIR_EMIT(WIterInit,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateWIterInitK(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+  HHIR_EMIT(WIterInitK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateWIterNext(const Tracelet& t,
+                                   const NormalizedInstruction& i) {
+
+  HHIR_EMIT(WIterNext,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateWIterNextK(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+
+  HHIR_EMIT(WIterNextK,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
             i.imm[2].u_IVA,

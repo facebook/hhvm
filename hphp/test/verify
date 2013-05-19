@@ -378,7 +378,7 @@ sub run_test
 
 
     if ($opt_repo) {
-      if ($test =~ m/\.hhas/) {
+      if ($test =~ m/\.hhas/ || -e $test . ".norepo") {
         # We don't have a way to skip, I guess run non-repo?
       } else {
         my ($hphp_opts) = "";

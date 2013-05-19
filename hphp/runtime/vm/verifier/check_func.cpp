@@ -310,7 +310,7 @@ Offset decodeOffset(PC* ppc) {
  */
 class ImmVecRange {
  public:
-  ImmVecRange(const Opcode* instr) : v(getImmVector(instr)),
+  explicit ImmVecRange(const Opcode* instr) : v(getImmVector(instr)),
       vecp(v.vec() + 1), // skip location code
       loc(v.locationCode()),
       loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1) {
@@ -574,11 +574,13 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define LMANY() { },
   #define C_LMANY() { },
   #define V_LMANY() { },
+  #define R_LMANY() { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
   #undef C_LMANY
   #undef V_LMANY
+  #undef R_LMANY
   #undef LMANY
   #undef FMANY
   #undef CMANY
@@ -602,6 +604,10 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case OpSetM:      // ONE(LA),    C_LMANY(), ONE(CV)
   case OpSetOpM:    // TWO(OA,LA), C_LMANY(), ONE(CV)
     return vectorSig(pc, CV);
+  case OpSetWithRefLM://TWO(MA, HA), LMANY(), NOV
+    return vectorSig(pc, NOV);
+  case OpSetWithRefRM://ONE(MA),   R_LMANY(), NOV
+    return vectorSig(pc, RV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
   case OpFCallBuiltin: //TWO(IVA, SA) FMANY,  ONE(RV)
@@ -700,6 +706,7 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
   int id = getImmIva(pc);
   bool ok = true;
   if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitK ||
+      Op(*pc) == OpWIterInit || Op(*pc) == OpWIterInitK ||
       Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK) {
     if (cur->iters[id]) {
       verify_error(
@@ -732,11 +739,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define LMANY() { },
   #define C_LMANY() { },
   #define V_LMANY() { },
+  #define R_LMANY() { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
   #undef C_LMANY
   #undef V_LMANY
+  #undef R_LMANY
   #undef LMANY
   #undef FMANY
   #undef CMANY
@@ -911,7 +920,8 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     int id = getImmIva(b->last);
     bool taken_state =
       (Op(*b->last) == OpIterNext || Op(*b->last) == OpIterNextK ||
-       Op(*b->last) == OpMIterNext || Op(*b->last) == OpMIterNextK);
+       Op(*b->last) == OpMIterNext || Op(*b->last) == OpMIterNextK ||
+       Op(*b->last) == OpWIterNext || Op(*b->last) == OpWIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_verbose) {

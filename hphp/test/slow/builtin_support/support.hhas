@@ -1,0 +1,93 @@
+.main {
+          Int 1
+          RetC
+}
+
+.function test1($arr, $k, $v) {
+          SetWithRefLM <L:$arr EL:$k> $v
+          CGetL $arr
+          RetC
+}
+
+.function test2(&$arr, $k, $v) {
+          CGetL $v
+          SetM <L:$arr EL:$k>
+          PopC
+          CGetL $arr
+          RetC
+}
+
+.function test3($arr, &$v) {
+          SetWithRefLM <L:$arr W> $v
+          CGetL $arr
+          RetC
+}
+
+.function fast_array_filter($arr, $func) {
+          .numiters 1;
+
+          NewArray
+          SetL $res
+          PopC
+
+          CGetL $arr
+          WIterInitK 0 endloop $v $k
+          IssetL $func
+          JmpZ loop_n
+          IsArrayL $func
+          JmpNZ loop_a
+loop_s:   CGetL $func
+          FPushFunc 1
+          FPassL 0 $v
+          FCall 1
+          UnboxR
+          JmpZ skip_s
+          SetWithRefLM <L:$res EL:$k> $v
+skip_s:   WIterNextK 0 loop_s $v $k
+          Jmp endloop
+
+loop_n:   CGetL $v
+          JmpZ skip_n
+          SetWithRefLM <L:$res EL:$k> $v
+skip_n:   WIterNextK 0 loop_n $v $k
+          Jmp endloop
+
+loop_a:   CGetL $func
+          FPushCuf 1
+          FPassL 0 $v
+          FCall 1
+          UnboxR
+          JmpZ skip_a
+          SetWithRefLM <L:$res EL:$k> $v
+skip_a:   WIterNextK 0 loop_a $v $k
+
+endloop:  CGetL $res
+          RetC
+}
+
+.function fast_array_map($func, $arr) {
+          .numiters 1;
+
+          IssetL $func
+          JmpZ ident
+
+          NewArray
+          SetL $res
+          PopC
+
+          CGetL $arr
+          WIterInitK 0 endloop $v $k
+
+loop_x:   CGetL $func
+          FPushCuf 1
+          FPassL 0 $v
+          FCall 1
+          SetWithRefRM <L:$res EL:$k>
+          WIterNextK 0 loop_x $v $k
+
+endloop:  CGetL $res
+          RetC
+
+ident:    CGetL $arr
+          RetC
+}

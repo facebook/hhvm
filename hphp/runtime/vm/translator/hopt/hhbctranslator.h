@@ -339,6 +339,16 @@ struct HhbcTranslator {
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId);
+  void emitWIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitWIterInitK(uint32_t iterId,
+                      int targetOffset,
+                      uint32_t valLocalId,
+                      uint32_t keyLocalId);
+  void emitWIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitWIterNextK(uint32_t iterId,
+                      int targetOffset,
+                      uint32_t valLocalId,
+                      uint32_t keyLocalId);
 
   void emitIterFree(uint32_t iterId);
   void emitVerifyParamType(uint32_t paramId);
@@ -412,6 +422,7 @@ private:
     void emitNotSuppNewElem();
     void emitVGetNewElem();
     void emitSetNewElem();
+    void emitSetWithRefNewElem();
     void emitSetOpNewElem();
     void emitIncDecNewElem();
     void emitBindNewElem();
@@ -427,6 +438,7 @@ private:
     SSATmp* getBase();
     SSATmp* getKey();
     SSATmp* getValue();
+    SSATmp* getValAddr();
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
                           Transl::PropInfo propOffset,

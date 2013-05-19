@@ -435,6 +435,8 @@ CALL_OPCODE(ArrayGet)
 CALL_OPCODE(CGetElem)
 CALL_STK_OPCODE(VGetElem)
 CALL_STK_OPCODE(BindElem)
+CALL_STK_OPCODE(SetWithRefElem)
+CALL_STK_OPCODE(SetWithRefNewElem)
 CALL_OPCODE(ArraySet)
 CALL_OPCODE(ArraySetRef)
 CALL_STK_OPCODE(SetElem)
@@ -5049,46 +5051,26 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   emitFwdJcc(CC_L, inst->taken());
 }
 
-void CodeGenerator::cgIterNextK(IRInstruction* inst) {
-  cgIterNextCommon(inst, true);
-}
-
-void CodeGenerator::cgIterNext(IRInstruction* inst) {
-  cgIterNextCommon(inst, false);
-}
-
-void CodeGenerator::cgIterNextCommon(IRInstruction* inst, bool isNextK) {
-  PhysReg fpReg = m_regs[inst->src(0)].getReg();
-  ArgGroup args(m_regs);
-  args.addr(fpReg, getIterOffset(inst->src(1)))
-      .addr(fpReg, getLocalOffset(inst->src(2)));
-  if (isNextK) {
-    args.addr(fpReg, getLocalOffset(inst->src(3)));
-  }
-  TCA helperAddr = isNextK ? (TCA)iter_next_key : (TCA)iter_next;
-  cgCallHelper(m_as, helperAddr, inst->dst(), kSyncPoint, args);
-}
-
 void CodeGenerator::cgIterInit(IRInstruction* inst) {
-  cgIterInitCommon(inst, false);
-}
-
-void iterFreeHelper(Iter* iter) {
-  iter->free();
-}
-
-void CodeGenerator::cgIterFree(IRInstruction* inst) {
-  PhysReg fpReg = m_regs[inst->src(0)].getReg();
-  int64_t  offset = getIterOffset(inst->src(1));
-  cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, kSyncPoint,
-               ArgGroup(m_regs).addr(fpReg, offset));
+  cgIterInitCommon(inst);
 }
 
 void CodeGenerator::cgIterInitK(IRInstruction* inst) {
-  cgIterInitCommon(inst, true);
+  cgIterInitCommon(inst);
 }
 
-void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
+void CodeGenerator::cgWIterInit(IRInstruction* inst) {
+  cgIterInitCommon(inst);
+}
+
+void CodeGenerator::cgWIterInitK(IRInstruction* inst) {
+  cgIterInitCommon(inst);
+}
+
+void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
+  bool isInitK = inst->op() == IterInitK || inst->op() == WIterInitK;
+  bool isWInit = inst->op() == WIterInit || inst->op() == WIterInitK;
+
   PhysReg        fpReg = m_regs[inst->src(1)].getReg();
   int64_t     iterOffset = getIterOffset(inst->src(2));
   int64_t valLocalOffset = getLocalOffset(inst->src(3));
@@ -5099,8 +5081,11 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
       args.addr(fpReg, getLocalOffset(inst->src(4)));
+    } else if (isWInit) {
+      args.imm(0);
     }
-    TCA helperAddr = isInitK ? (TCA)new_iter_array_key : (TCA)new_iter_array;
+    TCA helperAddr = isWInit ? (TCA)new_iter_array_key<true> :
+      isInitK ? (TCA)new_iter_array_key<false> : (TCA)new_iter_array;
     cgCallHelper(m_as, helperAddr, inst->dst(), kSyncPoint, args);
   } else {
     assert(src->type() == Type::Obj);
@@ -5117,6 +5102,50 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
     cgCallHelper(m_as, (TCA)new_iter_object, inst->dst(),
                  kSyncPointAdjustOne, args);
   }
+}
+
+void CodeGenerator::cgIterNext(IRInstruction* inst) {
+  cgIterNextCommon(inst);
+}
+
+void CodeGenerator::cgIterNextK(IRInstruction* inst) {
+  cgIterNextCommon(inst);
+}
+
+void CodeGenerator::cgWIterNext(IRInstruction* inst) {
+  cgIterNextCommon(inst);
+}
+
+void CodeGenerator::cgWIterNextK(IRInstruction* inst) {
+  cgIterNextCommon(inst);
+}
+
+void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
+  bool isNextK = inst->op() == IterNextK || inst->op() == WIterNextK;
+  bool isWNext = inst->op() == WIterNext || inst->op() == WIterNextK;
+  PhysReg fpReg = m_regs[inst->src(0)].getReg();
+  ArgGroup args(m_regs);
+  args.addr(fpReg, getIterOffset(inst->src(1)))
+      .addr(fpReg, getLocalOffset(inst->src(2)));
+  if (isNextK) {
+    args.addr(fpReg, getLocalOffset(inst->src(3)));
+  } else if (isWNext) {
+    args.imm(0);
+  }
+  TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
+    isNextK ? (TCA)iter_next_key<false> : (TCA)iter_next;
+  cgCallHelper(m_as, helperAddr, inst->dst(), kSyncPoint, args);
+}
+
+void iterFreeHelper(Iter* iter) {
+  iter->free();
+}
+
+void CodeGenerator::cgIterFree(IRInstruction* inst) {
+  PhysReg fpReg = m_regs[inst->src(0)].getReg();
+  int64_t  offset = getIterOffset(inst->src(1));
+  cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, kSyncPoint,
+               ArgGroup(m_regs).addr(fpReg, offset));
 }
 
 void CodeGenerator::cgIncStat(IRInstruction *inst) {

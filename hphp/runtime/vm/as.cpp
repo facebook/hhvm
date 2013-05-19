@@ -1020,6 +1020,7 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_THREE(a,b,c) 3
 #define NUM_POP_LMANY() vecImmStackValues
 #define NUM_POP_V_LMANY() (1 + vecImmStackValues)
+#define NUM_POP_R_LMANY() (1 + vecImmStackValues)
 #define NUM_POP_C_LMANY() (1 + vecImmStackValues)
 #define NUM_POP_FMANY immIVA /* number of arguments */
 #define NUM_POP_CMANY immIVA /* number of arguments */
@@ -1094,6 +1095,7 @@ OPCODES
 #undef NUM_POP_POS_N
 #undef NUM_POP_LMANY
 #undef NUM_POP_V_LMANY
+#undef NUM_POP_R_LMANY
 #undef NUM_POP_C_LMANY
 #undef NUM_POP_FMANY
 #undef NUM_POP_CMANY

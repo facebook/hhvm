@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/stats.h"
 #include <sstream>
@@ -364,6 +364,7 @@ int instrNumPops(const Opcode* opcode) {
 #define LMANY(...) -1
 #define C_LMANY(...) -2
 #define V_LMANY(...) -2
+#define R_LMANY(...) -2
 #define FMANY -3
 #define CMANY -3
 #define O(name, imm, pop, push, flags) pop,
@@ -376,6 +377,7 @@ int instrNumPops(const Opcode* opcode) {
 #undef LMANY
 #undef C_LMANY
 #undef V_LMANY
+#undef R_LMANY
 #undef FMANY
 #undef CMANY
 #undef O

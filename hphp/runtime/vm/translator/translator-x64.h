@@ -490,6 +490,8 @@ private:
   CASE(SetS) \
   CASE(SetG) \
   CASE(SetM) \
+  CASE(SetWithRefLM) \
+  CASE(SetWithRefRM) \
   CASE(SetOpL) \
   CASE(SetOpM) \
   CASE(IncDecL) \
@@ -523,6 +525,10 @@ private:
   CASE(IterInitK) \
   CASE(IterNext) \
   CASE(IterNextK) \
+  CASE(WIterInit) \
+  CASE(WIterInitK) \
+  CASE(WIterNext) \
+  CASE(WIterNextK) \
   CASE(ReqDoc) \
   CASE(DefCls) \
   CASE(DefFunc) \

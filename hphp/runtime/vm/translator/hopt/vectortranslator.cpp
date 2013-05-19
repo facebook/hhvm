@@ -84,6 +84,12 @@ Opcode canonicalOp(Opcode op) {
       op == UnsetElem || op == UnsetElemStk) {
     return UnsetElem;
   }
+  if (op == SetWithRefElem ||
+      op == SetWithRefElemStk ||
+      op == SetWithRefNewElem ||
+      op == SetWithRefNewElemStk) {
+    return SetWithRefElem;
+  }
   return opcodeHasFlags(op, VectorProp) ? SetProp
        : opcodeHasFlags(op, VectorElem) || op == ArraySet ? SetElem
        : bad_value<Opcode>();
@@ -132,7 +138,7 @@ void VectorEffects::init(Opcode op, const Type origBase,
   valType = origVal;
   baseTypeChanged = baseValChanged = valTypeChanged = false;
 
-  // Canonicalize the op to SetProp or SetElem
+  // Canonicalize the op to SetProp/SetElem/UnsetElem/SetWithRefElem
   op = canonicalOp(op);
 
   // We're not expecting types other than specific known data types
@@ -141,9 +147,13 @@ void VectorEffects::init(Opcode op, const Type origBase,
   // since this shouldn't actually happen.)
   assert(key.equals(Type::None) || key.isKnownDataType() ||
          key.equals(Type::Cell));
-  assert(origVal.equals(Type::None) || origVal.isKnownDataType());
+  if (op == SetWithRefElem) {
+    assert(origVal.isPtr());
+  } else {
+    assert(origVal.equals(Type::None) || origVal.isKnownDataType());
+  }
 
-  if ((op == SetElem || op == SetProp) &&
+  if ((op == SetElem || op == SetProp || op == SetWithRefElem) &&
       baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     // stdClass or array promotion might happen
     auto newBase = op == SetElem ? Type::Arr : Type::Obj;
@@ -163,17 +173,19 @@ void VectorEffects::init(Opcode op, const Type origBase,
     }
     baseValChanged = !baseBoxed;
   }
-  if ((op == SetElem || op == UnsetElem) && baseType.maybe(Type::Arr)) {
-    // possible COW when modifying an array, unless the base was boxed. If the
-    // base is a box then the value of the box itself won't change, just what
-    // it points to.
-    baseValChanged = !baseBoxed;
-  }
-  if ((op == SetElem || op == UnsetElem) && baseType.maybe(Type::StaticArr)) {
-    // the base might get promoted to a CountedArr. We can ignore the change if
-    // the base is boxed, (for the same reasons as above).
-    baseType = baseType | Type::CountedArr;
-    baseValChanged = !baseBoxed;
+  if (op == SetElem || op == UnsetElem || op == SetWithRefElem) {
+    if (baseType.maybe(Type::Arr)) {
+      // possible COW when modifying an array, unless the base was boxed. If the
+      // base is a box then the value of the box itself won't change, just what
+      // it points to.
+      baseValChanged = !baseBoxed;
+    }
+    if (baseType.maybe(Type::StaticArr)) {
+      // the base might get promoted to a CountedArr. We can ignore the change
+      // if the base is boxed, (for the same reasons as above).
+      baseType = baseType | Type::CountedArr;
+      baseValChanged = !baseBoxed;
+    }
   }
 
   // Setting an element with a base of one of these types will either succeed
@@ -233,6 +245,7 @@ int vectorBaseIdx(const IRInstruction* inst) {
 // vectorKeyIdx returns the src index for inst's key operand.
 int vectorKeyIdx(Opcode opc) {
   return opc == SetNewElem || opc == SetNewElemStk ? -1
+         : opc == SetWithRefNewElem || opc == SetWithRefNewElemStk ? -1
          : opc == BindNewElem || opc == BindNewElem ? -1
          : opc == ArraySet ? 2
          : opc == SetOpProp || opc == SetOpPropStk ? 2
@@ -259,6 +272,7 @@ int vectorValIdx(Opcode opc) {
 
     case ArraySet: return 3;
     case SetNewElem: case SetNewElemStk: return 1;
+    case SetWithRefNewElem: case SetWithRefNewElemStk: return 2;
     case BindNewElem: case BindNewElemStk: return 1;
     case SetOpProp: case SetOpPropStk: return 3;
 
@@ -454,7 +468,9 @@ void HhbcTranslator::VectorTranslator::numberStackInputs() {
   // higher offsets in the stack. m_mii.valCount() tells us how many
   // rvals the instruction takes on the stack; they're pushed after
   // any vector elements and we want to ignore them here.
-  int stackIdx = m_mii.valCount() + m_ni.immVec.numStackValues() - 1;
+  bool stackRhs = m_mii.valCount() &&
+    m_ni.inputs[0]->location.space == Location::Stack;
+  int stackIdx = (int)stackRhs + m_ni.immVec.numStackValues() - 1;
   for (unsigned i = m_mii.valCount(); i < m_ni.inputs.size(); ++i) {
     const Location& l = m_ni.inputs[i]->location;
     switch (l.space) {
@@ -467,9 +483,9 @@ void HhbcTranslator::VectorTranslator::numberStackInputs() {
         break;
     }
   }
-  assert(stackIdx == (m_mii.valCount() - 1));
+  assert(stackIdx == (stackRhs ? 0 : -1));
 
-  if (m_mii.valCount()) {
+  if (stackRhs) {
     // If this instruction does have an RHS, it will be input 0 at
     // stack offset 0.
     assert(m_mii.valCount() == 1);
@@ -497,6 +513,20 @@ SSATmp* HhbcTranslator::VectorTranslator::getValue() {
   assert(m_mii.valCount() == 1);
   const int kValIdx = 0;
   return getInput(kValIdx);
+}
+
+SSATmp* HhbcTranslator::VectorTranslator::getValAddr() {
+  assert(m_mii.valCount() == 1);
+  const DynLocation& dl = *m_ni.inputs[0];
+  const Location& l = dl.location;
+  if (l.space == Location::Local) {
+    assert(!mapContains(m_stackInputs, 0));
+    return m_ht.ldLocAddr(l.offset);
+  } else {
+    assert(l.space == Location::Stack);
+    assert(mapContains(m_stackInputs, 0));
+    return m_ht.ldStackAddr(m_stackInputs[0]);
+  }
 }
 
 SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
@@ -1779,6 +1809,65 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
 }
 #undef HELPER_TABLE
 
+namespace VectorHelpers {
+void setWithRefElemC(TypedValue* base, TypedValue keyVal, TypedValue* val,
+                     MInstrState* mis) {
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, &keyVal);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvDup(val, base);
+  }
+}
+
+void setWithRefNewElem(TypedValue* base, TypedValue* val,
+                       MInstrState* mis) {
+  base = NewElem(mis->tvScratch, mis->tvRef, base);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvDup(val, base);
+  }
+}
+}
+
+void HhbcTranslator::VectorTranslator::emitSetWithRefLElem() {
+  SSATmp* key = getKey();
+  SSATmp* locAddr = getValAddr();
+  m_ht.exceptionBarrier();
+  if (m_base->type().strip().subtypeOf(Type::Arr) &&
+      !locAddr->type().deref().maybeBoxed()) {
+    emitSetElem();
+    m_predictedResult = nullptr;
+  } else {
+    genStk(SetWithRefElem, cns((TCA)VectorHelpers::setWithRefElemC),
+           m_base, key, locAddr, genMisPtr());
+  }
+  m_result = nullptr;
+}
+
+void HhbcTranslator::VectorTranslator::emitSetWithRefLProp() {
+  SPUNT(__func__);
+}
+
+void HhbcTranslator::VectorTranslator::emitSetWithRefRElem() {
+  emitSetWithRefLElem();
+}
+
+void HhbcTranslator::VectorTranslator::emitSetWithRefRProp() {
+  emitSetWithRefLProp();
+}
+
+void HhbcTranslator::VectorTranslator::emitSetWithRefNewElem() {
+  SSATmp* locAddr = getValAddr();
+  m_ht.exceptionBarrier();
+  if (m_base->type().strip().subtypeOf(Type::Arr) &&
+      !locAddr->type().deref().maybeBoxed()) {
+    emitSetNewElem();
+    m_predictedResult = nullptr;
+  } else {
+    genStk(SetWithRefNewElem, cns((TCA)VectorHelpers::setWithRefNewElem),
+           m_base, locAddr, genMisPtr());
+  }
+  m_result = nullptr;
+}
+
 template <KeyType keyType>
 static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
                                      Cell val) {
@@ -2029,7 +2118,9 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   if (m_result) {
     m_ht.push(usePredictedResult() ? m_predictedResult : m_result);
   } else {
-    assert(m_ni.mInstrOp() == OpUnsetM);
+    assert(m_ni.mInstrOp() == OpUnsetM ||
+           m_ni.mInstrOp() == OpSetWithRefLM ||
+           m_ni.mInstrOp() == OpSetWithRefRM);
   }
 
   // Clean up tvRef(2)

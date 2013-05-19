@@ -204,18 +204,22 @@ enum MInstrAttr {
 //     fN)     final new element operation name
 #define MINSTRS \
   MII(CGet,   MIA_warn|MIA_final_get,            W,  W, 0, NotSuppNewElem) \
-  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
                                                  D,  D, 0, VGetNewElem) \
   MII(Isset,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
   MII(Empty,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
-  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem) \
-  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem)  \
+  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
                                                 WD, WD, 1, SetOpNewElem) \
-  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
                                                 WD, WD, 0, IncDecNewElem) \
-  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
                                                  D,  D, 1, BindNewElem) \
   MII(Unset,  MIA_unset,                          ,  U, 0, NotSuppNewElem) \
+  MII(SetWithRefL,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
+                                                 D,  D, 1, SetWithRefNewElem) \
+  MII(SetWithRefR,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
+                                                 D,  D, 1, SetWithRefNewElem)
 
 enum MInstr {
 #define MII(instr, attrs, bS, iS, vC, fN) \
@@ -469,6 +473,8 @@ enum SetOpOp {
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetS,            NA,               THREE(CV,AV,CV), ONE(CV),    NF) \
   O(SetM,            ONE(MA),          C_LMANY(),       ONE(CV),    NF) \
+  O(SetWithRefLM,    TWO(MA, HA),      LMANY(),         NOV,        NF) \
+  O(SetWithRefRM,    ONE(MA),          R_LMANY(),       NOV,        NF) \
   O(SetOpL,          TWO(HA, OA),      ONE(CV),         ONE(CV),    NF) \
   O(SetOpN,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
@@ -521,12 +527,16 @@ enum SetOpOp {
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,HA),  ONE(VV),         NOV,        CF) \
+  O(WIterInit,       THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \
   O(IterInitK,       FOUR(IA,BA,HA,HA),ONE(CV),         NOV,        CF) \
   O(MIterInitK,      FOUR(IA,BA,HA,HA),ONE(VV),         NOV,        CF) \
+  O(WIterInitK,      FOUR(IA,BA,HA,HA),ONE(CV),         NOV,        CF) \
   O(IterNext,        THREE(IA,BA,HA),  NOV,             NOV,        CF) \
   O(MIterNext,       THREE(IA,BA,HA),  NOV,             NOV,        CF) \
+  O(WIterNext,       THREE(IA,BA,HA),  NOV,             NOV,        CF) \
   O(IterNextK,       FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(MIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
+  O(WIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \

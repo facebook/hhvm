@@ -3150,6 +3150,40 @@ SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
     SC         | BaseSC
     SL         | BaseSL
 
+SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
+
+  Set member preserving the reffiness of the local.
+
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
+    R          | BaseR      PC     | PropCD       | SetPropC
+    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
+    NC         | BaseNCD    PL     | PropLD       | SetPropL
+    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
+
+SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
+
+  Set member preserving the reffiness of the stack element.
+
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
+    R          | BaseR      PC     | PropCD       | SetPropC
+    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
+    NC         | BaseNCD    PL     | PropLD       | SetPropL
+    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
+
 SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
 
   Set op member.
@@ -3224,6 +3258,8 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 
 IterInit  <iterator id> <rel offset> <local id>                [C]  ->  []
 IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
+WIterInit  <iterator id> <rel offset> <local id>               [C]  ->  []
+WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
 
   Initialize iterator. If $1 is an array, these instructions create an array
   iterator, rewind the array iterator to point to the beginning of the array,
@@ -3264,8 +3300,9 @@ IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
   transfer control to the location specified by %2.
 
   If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, these instructions store a copy of the current
-  value in %3 as a cell.
+  extension class iterator, IterInit and IterInitK store a copy of the current
+  value in %3 as a cell; WIterInit and WIterInitK will store a reference
+  if the current element is a reference, or a value otherwise in %3
 
   If the iterator specified by %1 is a user class iterator for object $x, these
   instructions store the return value of $x->current() in %3 as a cell.
@@ -3331,6 +3368,8 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
 IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
+WIterNext  <iterator id> <rel offset> <local id>              []  ->  []
+WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
 
   Iterator next. If the specified iterator is a non-mutable array iterator
   or an extension class iterator, advance the iterator to point to the next
@@ -3353,8 +3392,10 @@ IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   If the specified iterator is not at the end, retrieve the key and value:
 
   If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, these instructions store a copy of the new current
-  value in %3 as a cell.
+  extension class iterator, IterNext and IterNextK store a copy of the new current
+  value in %3 as a cell; WIterNext and WIterNextK store a reference to the
+  new current value in %3 if the current value is a reference, otherwise
+  they store the new current value in %3 as a cell.
 
   If the iterator specified by %1 is a user class iterator for object $x, these
   instructions store the return value of $x->current() in %3 as a cell.

@@ -283,6 +283,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_FOUR(t1,t2,t3,t4) 4
 #define COUNT_LMANY() 0
 #define COUNT_C_LMANY() 0
+#define COUNT_R_LMANY() 0
 #define COUNT_V_LMANY() 0
 #define COUNT_FMANY 0
 #define COUNT_CMANY 0
@@ -331,6 +332,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackLMany()
 #define POP_V_LMANY() \
   getEmitterVisitor().popEvalStack(StackSym::V); \
+  getEmitterVisitor().popEvalStackLMany()
+#define POP_R_LMANY() \
+  getEmitterVisitor().popEvalStack(StackSym::R); \
   getEmitterVisitor().popEvalStackLMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
@@ -549,6 +553,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_LMANY
 #undef POP_C_LMANY
 #undef POP_V_LMANY
+#undef POP_R_LMANY
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -7231,9 +7236,13 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         const ClassInfo::PropertyInfo* propInfo = propVec[i];
         assert(propInfo);
         int attr = AttrNone;
-        if (propInfo->attribute & ClassInfo::IsProtected) attr |= AttrProtected;
-        else if (propInfo->attribute & ClassInfo::IsPrivate) attr |= AttrPrivate;
-        else attr |= AttrPublic;
+        if (propInfo->attribute & ClassInfo::IsProtected) {
+          attr |= AttrProtected;
+        } else if (propInfo->attribute & ClassInfo::IsPrivate) {
+          attr |= AttrPrivate;
+        } else {
+          attr |= AttrPublic;
+        }
         if (propInfo->attribute & ClassInfo::IsStatic) attr |= AttrStatic;
 
         TypedValue tvNull;
@@ -7242,7 +7251,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           propInfo->name.get(),
           Attr(attr),
           nullptr,
-          propInfo->docComment ? StringData::GetStaticString(propInfo->docComment) : nullptr,
+          propInfo->docComment ?
+          StringData::GetStaticString(propInfo->docComment) : nullptr,
           &tvNull,
           KindOfInvalid
         );

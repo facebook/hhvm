@@ -837,6 +837,7 @@ void LinearScan::computePreColoringHint() {
       }
       break;
     case IterInit:
+    case WIterInit:
       {
         m_preColoringHint.add(inst->src(0), 0, 1);
       }
@@ -1397,14 +1398,14 @@ void LinearScan::rematerializeAux() {
       }
       // Other instructions that may have side effects on locals must
       // kill the local variable values.
-      else if (opc == IterInit) {
+      else if (opc == IterInit || opc == WIterInit) {
         killLocal(inst, 3);
-      } else if (opc == IterInitK) {
+      } else if (opc == IterInitK || opc == WIterInitK) {
         killLocal(inst, 3);
         killLocal(inst, 4);
-      } else if (opc == IterNext) {
+      } else if (opc == IterNext || opc == WIterNext) {
         killLocal(inst, 2);
-      } else if (opc == IterNextK) {
+      } else if (opc == IterNextK || opc == WIterNextK) {
         killLocal(inst, 2);
         killLocal(inst, 3);
       }

@@ -469,11 +469,13 @@ bool interp_iter_next(Iter* it);
 bool interp_iter_next_m(Iter* it);
 
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
+template <bool withRef>
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 int64_t iter_next(Iter* dest, TypedValue* val);
+template <bool withRef>
 int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 ///////////////////////////////////////////////////////////////////////////////

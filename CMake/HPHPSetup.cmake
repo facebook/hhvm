@@ -105,6 +105,10 @@ if(APPLE OR FREEBSD)
 	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
+if(APPLE)
+    add_definitions(-fpermissive)
+endif()
+
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 

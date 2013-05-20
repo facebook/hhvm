@@ -66,7 +66,13 @@ static const Trace::Module TRACEMOD = Trace::runtime;
  * separately.  Even larger tables allocate the hashtable and slots
  * contiguously.
  */
-IMPLEMENT_SMART_ALLOCATION(HphpArray);
+void *HphpArray::SmaAllocatorInitSetup =  SmartAllocatorInitSetup<HphpArray>();
+
+void HphpArray::release() {
+  assert(typeid(*this) == typeid(HphpArray));
+  this->HphpArray::~HphpArray();
+  HphpArray::AllocatorType::getNoCheck()->dealloc(this);
+}
 
 //=============================================================================
 // Static members.
@@ -76,55 +82,57 @@ HphpArray HphpArray::s_theEmptyArray(StaticEmptyArray);
 //=============================================================================
 // Helpers.
 
-static inline size_t computeMaskFromNumElms(uint32_t numElms) {
-  assert(numElms <= 0x7fffffffU);
-  size_t lgSize = HphpArray::MinLgTableSize;
-  size_t maxElms = (size_t(3U)) << (lgSize-2);
-  assert(lgSize >= 2);
-  while (maxElms < numElms) {
-    ++lgSize;
-    maxElms <<= 1;
+static inline size_t computeMaskFromNumElms(const uint32_t n) {
+  if (n <= HphpArray::SmallSize) {
+    return HphpArray::SmallMask;
   }
-  assert(lgSize <= 32);
-  // return 2^lgSize - 1
-  return ((size_t(1U)) << lgSize) - 1;
-  static_assert(HphpArray::MinLgTableSize >= 2,
-                "lower limit for 0.75 load factor");
+  uint32_t cap = (3U << (HphpArray::MinLgTableSize - 2)) * 2;
+  while (cap < n) {
+    cap *= 2;
+  }
+  return ((size_t(cap) << 2UL) & (size_t(cap) << 1UL)) - 1;
 }
 
 //=============================================================================
 // Construction/destruction.
 
-inline void HphpArray::init(uint size) {
-  m_size = 0;
-  m_tableMask = computeMaskFromNumElms(size);
-  size_t tableSize = computeTableSize(m_tableMask);
-  size_t maxElms = computeMaxElms(m_tableMask);
-  allocData(maxElms, tableSize);
+inline uint32_t HphpArray::initWithoutHash(uint capacity) {
+  assert(m_size == 0);
+  m_tableMask = computeMaskFromNumElms(capacity);
+  auto const tableSize = computeTableSize(m_tableMask);
+  allocData(computeMaxElms(m_tableMask), tableSize);
   initHash(m_hash, tableSize);
-  m_pos = ArrayData::invalid_index;
+  assert(m_pos == ArrayData::invalid_index);
+  return tableSize;
 }
 
-HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
-  m_lastE(ElmIndEmpty), m_data(nullptr), m_nextKI(0), m_hLoad(0) {
+inline void HphpArray::init(uint capacity) {
+  assert(m_size == 0);
+  const auto tableSize = initWithoutHash(capacity);
+  initHash(m_hash, tableSize);
+}
+
+HphpArray::HphpArray(uint size) : ArrayData(kHphpArray, false, 0),
+  m_lastE(ElmIndEmpty), m_hLoad(0), m_nextKI(0) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
   }
 #endif
+  assert(m_size == 0);
   init(size);
 }
 
 HphpArray::HphpArray(uint size, const TypedValue* values) :
-    ArrayData(kHphpArray), m_lastE(ElmIndEmpty), m_data(nullptr),
-    m_nextKI(0), m_hLoad(0)
+    ArrayData(kHphpArray, false, 0), m_lastE(ElmIndEmpty),
+    m_hLoad(0), m_nextKI(0)
   {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
   }
 #endif
-  init(size);
+  initWithoutHash(size);
   assert(size <= m_tableMask + 1);
   // append values by moving -- Caller assumes we update refcount.  Values
   // are in reverse order since they come from the stack, which grows down.
@@ -132,13 +140,17 @@ HphpArray::HphpArray(uint size, const TypedValue* values) :
   assert(m_size == 0 && m_hLoad == 0 && m_nextKI == 0);
   ElmInd* hash = m_hash;
   Elm* data = m_data;
-  for (uint i = 0; i < size; i++) {
-    assert(hash[i] == HphpArray::ElmIndEmpty);
+  uint i = 0;
+  for (; i < size; i++) {
     const TypedValue& tv = values[size - i - 1];
     data[i].data.m_data = tv.m_data;
     data[i].data.m_type = tv.m_type;
     data[i].setIntKey(i);
     hash[i] = i;
+  }
+  // Initialize the leftover hash
+  for (; i < size; i++) {
+    hash[i] = ElmIndEmpty;
   }
   m_size = size;
   m_hLoad = size;
@@ -147,8 +159,8 @@ HphpArray::HphpArray(uint size, const TypedValue* values) :
   if (size > 0) m_pos = 0;
 }
 
-HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
-  m_lastE(ElmIndEmpty), m_data(nullptr), m_nextKI(0), m_hLoad(0) {
+HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray, false, 0),
+  m_lastE(ElmIndEmpty), m_hLoad(0), m_nextKI(0) {
   init(0);
   setStatic();
 }
@@ -192,7 +204,7 @@ void HphpArray::dumpDebugInfo() const {
          "m_tableMask = %u\tm_size = %d\tm_hLoad = %d\n"
          "m_nextKI = %" PRId64 "\t\tm_lastE = %d\tm_pos = %zd\n",
          m_data, m_hash, m_tableMask, m_size, m_hLoad,
-         m_nextKI, m_lastE, m_pos);
+          m_nextKI, m_lastE, size_t(m_pos));
   fprintf(stderr, "Elements:\n");
   ssize_t lastE = m_lastE;
   Elm* elms = m_data;
@@ -394,7 +406,7 @@ Variant HphpArray::key() const {
   return uninit_null();
 }
 
-Variant HphpArray::value(ssize_t& pos) const {
+Variant HphpArray::value(int32_t& pos) const {
   if (pos != ArrayData::invalid_index) {
     Elm* e = &m_data[pos];
     assert(e->data.m_type != KindOfTombstone);
@@ -703,7 +715,6 @@ void HphpArray::newElmStr(ElmInd* ei, strhash_t h, StringData* key,
 }
 
 void HphpArray::allocData(size_t maxElms, size_t tableSize) {
-  assert(!m_data);
   if (maxElms <= SmallSize) {
     m_data = m_inline_data.slots;
     m_hash = m_inline_data.hash;

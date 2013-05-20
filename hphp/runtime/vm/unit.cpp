@@ -239,7 +239,8 @@ class AllCachedClasses {
     Class* cls;
     while (!empty()) {
       cls = m_next->second.clsList();
-      if (cls && cls->getCached()) break;
+      if (cls && cls->getCached() &&
+          (cls->parent() != SystemLib::s_ClosureClass)) break;
       ++m_next;
     }
   }

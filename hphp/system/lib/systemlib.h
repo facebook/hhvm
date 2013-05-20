@@ -49,6 +49,7 @@ namespace Eval {
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
+  x(Closure)                                    \
   x(Continuation)                               \
   x(Serializable)                               \
   x(ArrayAccess)                                \

@@ -1,0 +1,8 @@
+language: cpp
+compiler:
+  - gcc
+before_script: 
+  - ./configure_ubuntu_12.04.sh
+# for some tests  
+  - sudo locale-gen de_DE
+script: HPHP_HOME=`pwd` make -j 8

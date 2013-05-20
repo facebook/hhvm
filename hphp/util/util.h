@@ -62,7 +62,13 @@ namespace HPHP { namespace Util {
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define UNUSED             __attribute__((unused))
 #define FLATTEN            __attribute__((flatten))
-#define HOT_FUNC           __attribute__ ((section (".text.hot.builtin")))
+#ifndef __APPLE__
+# define HOT_FUNC          __attribute__ ((section (".text.hot.builtin")))
+#else
+// OSX requires a comma after segment name.
+// The segment name must also not be longer than 16 characters.
+# define HOT_FUNC          __attribute__ ((section (".text.hot.built,")))
+#endif
 #define EXTERNALLY_VISIBLE __attribute__((externally_visible))
 
 #ifdef DEBUG

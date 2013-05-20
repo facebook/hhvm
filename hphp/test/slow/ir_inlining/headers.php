@@ -1,5 +1,9 @@
 <?hh
 
+function mapLookup($map, $key, $default) {
+  return $map->containsKey($key) ? $map[$key] : $default;
+}
+
 final class HTTPHeaders {
   private $headers;
 
@@ -15,7 +19,7 @@ final class HTTPHeaders {
   }
 
   public function getHeader(string $name, ?string $default = null): ?string {
-    return idx($this->getAllHeaders(), strtolower($name), $default);
+    return mapLookup($this->getAllHeaders(), strtolower($name), $default);
   }
 }
 

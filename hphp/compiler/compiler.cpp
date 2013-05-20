@@ -160,6 +160,9 @@ int compiler_main(int argc, char **argv) {
     RuntimeOption::Load(empty);
     initialize_repo();
 
+    // we need to initialize pcre cache table very early
+    pcre_init();
+
     CompilerOptions po;
 #ifdef FACEBOOK
     compiler_hook_initialize();

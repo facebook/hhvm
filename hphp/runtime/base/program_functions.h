@@ -63,6 +63,8 @@ time_t start_time();
 
 class ExecutionContext;
 
+void pcre_init();
+void pcre_reinit();
 void hphp_process_init() ATTRIBUTE_COLD;
 void hphp_session_init();
 

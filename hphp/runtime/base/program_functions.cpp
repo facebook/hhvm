@@ -905,6 +905,9 @@ static int execute_program_impl(int argc, char **argv) {
 
   po.isTempFile = vm.count("temp-file");
 
+  // we need to initialize pcre cache table very early
+  pcre_init();
+
   Hdf config;
   if (!po.config.empty()) {
     config.open(po.config);
@@ -1189,6 +1192,9 @@ void hphp_process_init() {
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
+
+  // reinitialize pcre table
+  pcre_reinit();
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not

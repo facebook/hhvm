@@ -377,6 +377,8 @@ public:
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
+  static const uint32_t kPCREInitialTableSize = 96 * 1024;
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \
@@ -447,6 +449,7 @@ public:
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize, 100000)                     \
+  F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   /* */                                                                 \
 
 #define F(type, name, unused) \

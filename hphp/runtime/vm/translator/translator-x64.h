@@ -316,8 +316,10 @@ private:
                                const NormalizedInstruction& i,
                                ScratchReg& output,
                                ptrdiff_t ch);
+public:
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
   void emitCall(Asm& a, Call call, bool killRegs=false);
+private:
 
   /* Continuation-related helpers */
   static bool mapContParams(ContParamMap& map, const Func* origFunc,

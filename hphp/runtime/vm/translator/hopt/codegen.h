@@ -78,6 +78,7 @@ struct CodegenState {
                const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
+    , addresses(factory, nullptr)
     , lastMarker(nullptr)
     , regs(regs)
     , liveRegs(liveRegs)
@@ -85,8 +86,10 @@ struct CodegenState {
     , asmInfo(asmInfo)
   {}
 
-  // Each block has a list of addresses to patch
+  // Each block has a list of addresses to patch, and an address if
+  // it's already been emitted.
   StateVector<Block,void*> patches;
+  StateVector<Block,TCA> addresses;
 
   // Keep track of the most recent Marker instruction we've seen in the
   // current trace (even across blocks).
@@ -133,10 +136,6 @@ struct CodeGenerator {
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
-
-  static void emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
-                            Transl::TranslatorX64* tx64);
-  static Address emitFwdJmp(Asm& as, Block* target, CodegenState& state);
 
 private:
   Address cgInst(IRInstruction* inst);
@@ -310,10 +309,8 @@ private:
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
   void cgLdFuncCachedCommon(IRInstruction* inst);
   TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
-  Address emitFwdJcc(ConditionCode cc, Block* target);
-  Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
-  Address emitFwdJmp(Asm& as, Block* target);
-  Address emitFwdJmp(Block* target);
+  void emitFwdJcc(ConditionCode cc, Block* target);
+  void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurFunc() const;
   Class*      getCurClass() const { return getCurFunc()->cls(); }

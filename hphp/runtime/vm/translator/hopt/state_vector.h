@@ -18,7 +18,6 @@
 #define incl_HPHP_JIT_STATE_VECTOR_H_
 
 #include "hphp/runtime/base/memory/memory_manager.h"
-
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {  namespace JIT {
@@ -42,7 +41,7 @@ struct StateVector {
 
   StateVector(const IRFactory* factory, Info init)
     : m_factory(factory)
-    , m_info(numIds(factory, (Key*)nullptr), init)
+    , m_info(numIds(factory, static_cast<Key*>(nullptr)), init)
     , m_init(init) {
   }
 

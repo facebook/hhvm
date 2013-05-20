@@ -886,8 +886,16 @@ void Block::removeEdge(IRInstruction* jmp) {
   assert((node->next = nullptr, true));
 }
 
+bool Block::isMainExit() const {
+  return isMain() && isExit();
+}
+
 bool Block::isMain() const {
   return m_trace->isMain();
+}
+
+bool Block::isExit() const {
+  return !getTaken() && !getNext();
 }
 
 bool IRInstruction::cseEquals(IRInstruction* inst) const {

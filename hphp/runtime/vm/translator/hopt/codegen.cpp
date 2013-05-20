@@ -16,9 +16,10 @@
 
 #include "hphp/runtime/vm/translator/hopt/codegen.h"
 
-#include <string.h>
+#include <cstring>
 
 #include "folly/ScopeGuard.h"
+#include "folly/Format.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/util.h"
 
@@ -45,6 +46,7 @@
 #include "hphp/runtime/vm/translator/hopt/linearscan.h"
 #include "hphp/runtime/vm/translator/hopt/nativecalls.h"
 #include "hphp/runtime/vm/translator/hopt/print.h"
+#include "hphp/runtime/vm/translator/hopt/layout.h"
 
 using HPHP::Transl::TCA;
 using namespace HPHP::Transl::TargetCache;
@@ -454,7 +456,9 @@ CALL_OPCODE(EmptyElem)
 #undef PUNT_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
-void prependPatchAddr(CodegenState& state, Block* block, TCA patchAddr) {
+static void prependPatchAddr(CodegenState& state,
+                             Block* block,
+                             TCA patchAddr) {
   auto &patches = state.patches;
   ssize_t diff = patches[block] ? (patchAddr - (TCA)patches[block]) : 0;
   assert(deltaFits(diff, sz::dword));
@@ -462,33 +466,30 @@ void prependPatchAddr(CodegenState& state, Block* block, TCA patchAddr) {
   patches[block] = patchAddr;
 }
 
-Address CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
-  assert(target);
-  Address start = a.code.frontier;
-  a.jcc(cc, a.code.frontier);
-  TCA immPtr = a.code.frontier - 4;
-  prependPatchAddr(m_state, target, immPtr);
-  return start;
-}
+static void emitFwdJmp(Asm& a, Block* target, CodegenState& state) {
+  if (auto addr = state.addresses[target]) {
+    return a.jmpAuto(addr);
+  }
 
-Address CodeGenerator::emitFwdJmp(Asm& a, Block* target, CodegenState& state) {
-  Address start = a.code.frontier;
+  // TODO(#2101926): it'd be nice to get 1-byte forward jumps here
   a.jmp(a.code.frontier);
   TCA immPtr = a.code.frontier - 4;
   prependPatchAddr(state, target, immPtr);
-  return start;
 }
 
-Address CodeGenerator::emitFwdJmp(Asm& a, Block* target) {
-  return emitFwdJmp(a, target, m_state);
+void CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
+  if (auto addr = m_state.addresses[target]) {
+    return a.jccAuto(cc, addr);
+  }
+
+  // TODO(#2101926): it'd be nice to get 1-byte forward jumps here
+  a.jcc(cc, a.code.frontier);
+  TCA immPtr = a.code.frontier - 4;
+  prependPatchAddr(m_state, target, immPtr);
 }
 
-Address CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
-  return emitFwdJcc(m_as, cc, target);
-}
-
-Address CodeGenerator::emitFwdJmp(Block* target) {
-  return emitFwdJmp(m_as, target);
+void CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
+  emitFwdJcc(m_as, cc, target);
 }
 
 void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg) {
@@ -567,8 +568,8 @@ static void emitStoreReg(CodeGenerator::Asm& as, PhysReg reg, Mem mem) {
   }
 }
 
-void shuffle2(CodeGenerator::Asm& a,
-              PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
+static void shuffle2(CodeGenerator::Asm& a,
+                     PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
   if (d0 == s1 && d1 != InvalidReg) {
     assert(d0 != d1);
@@ -2199,17 +2200,8 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
     }
   }
   // We unfortunately can't do the same kind of check for the stack
-  // because it may contain ActRecs.
-#if 0
-  for (Cell* c=sp; c < firstSp; c++) {
-    TypedValue* tv = (TypedValue*)c;
-    assert(tvIsPlausible(tv));
-    DataType t = tv->m_type;
-    if (IS_REFCOUNTED_TYPE(t)) {
-      assert(tv->m_data.pstr->getCount() > 0);
-    }
-  }
-#endif
+  // without knowing about FPI regions, because it may contain
+  // ActRecs.
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -4741,7 +4733,7 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     shuffleArgs(m_as, args);
   }
   if (!m_state.noTerminalJmp_) {
-    emitFwdJmp(inst->getTaken());
+    emitFwdJmp(m_as, inst->getTaken(), m_state);
   }
 }
 
@@ -5119,8 +5111,9 @@ void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   ifThen(m_as, CC_NE, [&]{ cgCallNative(inst); });
 }
 
-void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
-                                  Transl::TranslatorX64* tx64) {
+static void emitTraceCall(CodeGenerator::Asm& as,
+                          int64_t pcOff,
+                          Transl::TranslatorX64* tx64) {
   // call to a trace function
   as.mov_imm64_reg((int64_t)as.code.frontier, reg::rcx);
   as.mov_reg64_reg64(rVmFp, reg::rdi);
@@ -5128,6 +5121,11 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
   as.mov_imm64_reg(pcOff, reg::rdx);
   // do the call; may use a trampoline
   tx64->emitCall(as, (TCA)traceCallback);
+}
+
+void CodeGenerator::print() const {
+  JIT::print(std::cout, m_curTrace, &m_state.regs, m_state.lifetime,
+             m_state.asmInfo);
 }
 
 static void patchJumps(Asm& as, CodegenState& state, Block* block) {
@@ -5145,6 +5143,8 @@ static void patchJumps(Asm& as, CodegenState& state, Block* block) {
 }
 
 void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+  FTRACE(6, "cgBlock: {}\n", block->getId());
+
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
     if (inst->op() == Marker) {
@@ -5164,64 +5164,6 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
         TcaRange(m_state.asmInfo->asmRanges[block].start(), m_as.code.frontier);
     }
   }
-}
-
-void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
-             vector<TransBCMapping>* bcMap, CodegenState& state) {
-  state.lastMarker = nullptr;
-  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
-    CodeGenerator::emitTraceCall(amain, trace->getBcOff(), tx64);
-  }
-  auto chooseAs = [&](Block* b) {
-    return b->getHint() != Block::Unlikely ? &amain : &astubs;
-  };
-  auto& blocks = trace->getBlocks();
-  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
-    Block* block = *it; ++it;
-    Asm* as = chooseAs(block);
-    TCA asmStart = as->code.frontier;
-    TCA astubsStart = astubs.code.frontier;
-    patchJumps(*as, state, block);
-
-    // Grab the next block that will go into this assembler
-    Block* nextThisAs = nullptr;
-    for (auto next = it; next != end; ++next) {
-      if (chooseAs(*next) == as) {
-        nextThisAs = *next;
-        break;
-      }
-    }
-
-    // If the block ends with a Jmp_ to the next block for this
-    // assembler, it doesn't need to actually emit a jmp.
-    IRInstruction* last = block->back();
-    state.noTerminalJmp_ =
-      last->op() == Jmp_ && last->getTaken() == nextThisAs;
-
-    CodeGenerator cg(trace, *as, astubs, tx64, state);
-    if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(asmStart, as->code.frontier);
-    }
-    cg.cgBlock(block, bcMap);
-    Block* next = block->getNext();
-    if (next && next != nextThisAs) {
-      // if there's a fallthrough block and it's not the next thing
-      // going into this assembler, then emit a jump to it.
-      CodeGenerator::emitFwdJmp(*as, next, state);
-    }
-    if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(asmStart, as->code.frontier);
-      if (as != &astubs) {
-        state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
-                                                     astubs.code.frontier);
-      }
-    }
-  }
-}
-
-void CodeGenerator::print() const {
-  JIT::print(std::cout, m_curTrace, &m_state.regs, m_state.lifetime,
-             m_state.asmInfo);
 }
 
 /*
@@ -5254,7 +5196,6 @@ LiveRegs computeLiveRegs(const IRFactory* factory, const RegAllocInfo& regs,
   return live_regs;
 }
 
-// select instructions for the trace and its exits
 void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& as,
                      CodeGenerator::Asm& astubs,
@@ -5267,9 +5208,77 @@ void genCodeForTrace(Trace* trace,
   assert(trace->isMain());
   LiveRegs live_regs = computeLiveRegs(irFactory, regs, trace->front());
   CodegenState state(irFactory, regs, live_regs, lifetime, asmInfo);
-  cgTrace(trace, as, astubs, tx64, bcMap, state);
-  for (Trace* exit : trace->getExitTraces()) {
-    cgTrace(exit, astubs, astubs, tx64, nullptr, state);
+
+  // Returns: whether a block has already been emitted.
+  auto isEmitted = [&](Block* block) { return state.addresses[block]; };
+
+  /*
+   * Emit the given block on the supplied assembler.  The `nextBlock'
+   * is the nextBlock that will be emitted on this assembler.  If is
+   * not the fallthrough block, emit a patchable jump to the
+   * fallthrough block.
+   */
+  auto emitBlock = [&](Asm& a, Block* block, Block* nextBlock) {
+    assert(!isEmitted(block));
+
+    FTRACE(6, "cgBlock {} on {}\n", block->getId(),
+           &a == &astubs ? "astubs" : "a");
+
+    auto const aStart      = a.code.frontier;
+    auto const astubsStart = astubs.code.frontier;
+    patchJumps(a, state, block);
+    state.addresses[block] = aStart;
+
+    // If the block ends with a Jmp_ and the next block is going to be
+    // its target, we don't need to actually emit it.
+    IRInstruction* last = block->back();
+    state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->getTaken();
+
+    CodeGenerator cg(trace, a, astubs, tx64, state);
+    if (state.asmInfo) {
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.code.frontier);
+    }
+
+    cg.cgBlock(block, bcMap);
+    state.lastMarker = nullptr;
+    if (auto next = block->getNext()) {
+      if (next != nextBlock) {
+        // If there's a fallthrough block and it's not the next thing
+        // going into this assembler, then emit a jump to it.
+        emitFwdJmp(a, next, state);
+      }
+    }
+
+    if (state.asmInfo) {
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.code.frontier);
+      if (&a != &astubs) {
+        state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
+                                                     astubs.code.frontier);
+      }
+    }
+  };
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
+    emitTraceCall(as, trace->getBcOff(), tx64);
+  }
+
+  auto const linfo = layoutBlocks(trace, *irFactory);
+
+  for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
+    Block* nextBlock = boost::next(it) != linfo.astubsIt
+      ? *boost::next(it) : nullptr;
+    emitBlock(as, *it, nextBlock);
+  }
+  for (auto it = linfo.astubsIt; it != linfo.blocks.end(); ++it) {
+    Block* nextBlock = boost::next(it) != linfo.blocks.end()
+      ? *boost::next(it) : nullptr;
+    emitBlock(astubs, *it, nextBlock);
+  }
+
+  if (debug) {
+    for (Block* UNUSED block : linfo.blocks) {
+      assert(isEmitted(block));
+    }
   }
 }
 

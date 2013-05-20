@@ -118,7 +118,12 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
   os << "L" << block->getId();
-  if (block->getHint() == Block::Unlikely) os << "<Unlikely>";
+  switch (block->getHint()) {
+  case Block::Unlikely:    os << "<Unlikely>"; break;
+  case Block::Likely:      os << "<Likely>"; break;
+  default:
+    break;
+  }
   os << color(ANSI_COLOR_END);
 }
 
@@ -265,6 +270,45 @@ void print(const Trace* trace) {
   print(std::cout, trace);
 }
 
+// Print unlikely blocks at the end in normal generation.  If we have
+// asmInfo, order the blocks based on how they were layed out.
+static smart::vector<Block*> getBlocks(const Trace* trace,
+                                       const AsmInfo* asmInfo) {
+  smart::vector<Block*> blocks;
+
+  if (!asmInfo) {
+    smart::vector<Block*> unlikely;
+    for (Block* block : trace->getBlocks()) {
+      if (block->getHint() == Block::Unlikely) {
+        unlikely.push_back(block);
+      } else {
+        blocks.push_back(block);
+      }
+    }
+    for (Trace* e : trace->getExitTraces()) {
+      unlikely.insert(unlikely.end(),
+                      e->getBlocks().begin(),
+                      e->getBlocks().end());
+    }
+    blocks.insert(blocks.end(), unlikely.begin(), unlikely.end());
+    return blocks;
+  }
+
+  blocks.assign(trace->getBlocks().begin(), trace->getBlocks().end());
+  for (Trace* e : trace->getExitTraces()) {
+    blocks.insert(blocks.end(), e->getBlocks().begin(), e->getBlocks().end());
+  }
+  std::sort(
+    blocks.begin(),
+    blocks.end(),
+    [&] (Block* a, Block* b) {
+      return asmInfo->asmRanges[a].begin() < asmInfo->asmRanges[b].begin();
+    }
+  );
+
+  return blocks;
+}
+
 void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
            const LifetimeInfo* lifetime, const AsmInfo* asmInfo) {
   static const int kIndent = 4;
@@ -272,18 +316,13 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
                                  .printEncoding(dumpIREnabled(kExtraLevel))
                                  .color(color(ANSI_COLOR_BROWN)));
 
-  // Print unlikely blocks at the end
-  BlockList blocks, unlikely;
-  for (Block* block : trace->getBlocks()) {
-    if (block->getHint() == Block::Unlikely) {
-      unlikely.push_back(block);
-    } else {
-      blocks.push_back(block);
+  for (Block* block : getBlocks(trace, asmInfo)) {
+    if (!block->isMain()) {
+      os << "\n" << color(ANSI_COLOR_GREEN)
+         << "    -------  Exit Trace  -------"
+         << color(ANSI_COLOR_END) << '\n';
     }
-  }
-  blocks.splice(blocks.end(), unlikely);
 
-  for (Block* block : blocks) {
     TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
                           TcaRange(nullptr, nullptr);
     for (auto it = block->begin(); it != block->end();) {
@@ -373,16 +412,10 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
       }
     }
   }
-
-  for (auto* exitTrace : trace->getExitTraces()) {
-    os << "\n" << color(ANSI_COLOR_GREEN)
-       << "    -------  Exit Trace  -------"
-       << color(ANSI_COLOR_END) << '\n';
-    print(os, exitTrace, regs, lifetime, asmInfo);
-  }
 }
 
-void dumpTraceImpl(const Trace* trace, std::ostream& out,
+void dumpTraceImpl(const Trace* trace,
+                   std::ostream& out,
                    const RegAllocInfo* regs,
                    const LifetimeInfo* lifetime,
                    const AsmInfo* asmInfo) {

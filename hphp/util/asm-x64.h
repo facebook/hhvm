@@ -1144,6 +1144,24 @@ struct X64Assembler {
     emitCJ8(instr_jcc, cond, (ssize_t)dest);
   }
 
+  void jmpAuto(CodeAddress dest) {
+    auto delta = dest - (code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jmp8(dest);
+    } else {
+      jmp(dest);
+    }
+  }
+
+  void jccAuto(ConditionCode cc, CodeAddress dest) {
+    auto delta = dest - (code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jcc8(cc, dest);
+    } else {
+      jcc(cc, dest);
+    }
+  }
+
   void call(Label&);
   void jmp(Label&);
   void jmp8(Label&);

@@ -64,7 +64,30 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
+  /*
+   * Returns true if this block is the main trace exit.  This block
+   * post-dominates all main trace blocks.
+   *
+   * Currently there is only ever a single main trace exit.
+   */
+  bool isMainExit() const;
+
+  /*
+   * Returns true if this block is part of the main trace.  I.e. it is
+   * post-dominated by a block with isMainExit() == true.
+   */
   bool isMain() const;
+
+  /*
+   * Returns: !getTaken() && !getNext().
+   */
+  bool isExit() const;
+
+  /*
+   * Returns whether this block is the initial entry block for the
+   * tracelet.
+   */
+  bool isEntry() const { return getId() == 0; }
 
   // return the last instruction in the block
   IRInstruction* back() const {
@@ -180,8 +203,6 @@ struct Block : boost::noncopyable {
 };
 typedef std::list<Block*> BlockList;
 typedef std::forward_list<Block*> BlockPtrList;
-
-
 
 }}
 

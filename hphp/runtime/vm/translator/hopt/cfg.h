@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_CFG_H_
 #define incl_HPHP_VM_CFG_H_
 
-#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/block.h"
 #include "hphp/runtime/vm/translator/hopt/trace.h"
 
 namespace HPHP { namespace JIT {

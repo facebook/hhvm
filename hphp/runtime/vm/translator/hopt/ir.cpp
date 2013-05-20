@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/translator/hopt/cse.h"
+#include "hphp/runtime/vm/translator/hopt/irinstruction.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/linearscan.h"
 #include "hphp/runtime/vm/translator/hopt/print.h"
@@ -992,6 +993,18 @@ int32_t spillValueCells(IRInstruction* spillStack) {
   assert(spillStack->op() == SpillStack);
   int32_t numSrcs = spillStack->getNumSrcs();
   return numSrcs - 2;
+}
+
+bool isConvIntOrPtrToBool(IRInstruction* instr) {
+  switch (instr->op()) {
+    case ConvIntToBool:
+      return true;
+    case ConvCellToBool:
+      return instr->getSrc(0)->type().subtypeOfAny(
+        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
+    default:
+      return false;
+  }
 }
 
 BlockList sortCfg(Trace* trace, const IRFactory& factory) {

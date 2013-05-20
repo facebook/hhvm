@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member_operations.h"
-#include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/hhbctranslator.h"
+#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/irinstruction.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 
 // These files do ugly things with macros so include them last
@@ -37,6 +38,9 @@ static bool wantPropSpecializedWarnings() {
 
 bool VectorEffects::supported(Opcode op) {
   return opcodeHasFlags(op, VectorProp | VectorElem);
+}
+bool VectorEffects::supported(const IRInstruction* inst) {
+  return supported(inst->op());
 }
 
 void VectorEffects::get(const IRInstruction* inst,
@@ -84,6 +88,35 @@ Opcode canonicalOp(Opcode op) {
        : opcodeHasFlags(op, VectorElem) || op == ArraySet ? SetElem
        : bad_value<Opcode>();
 }
+}
+
+VectorEffects::VectorEffects(const IRInstruction* inst) {
+  int keyIdx = vectorKeyIdx(inst);
+  int valIdx = vectorValIdx(inst);
+  init(inst->op(),
+       inst->getSrc(vectorBaseIdx(inst))->type(),
+       keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->type(),
+       valIdx == -1 ? Type::None : inst->getSrc(valIdx)->type());
+}
+
+VectorEffects::VectorEffects(Opcode op, Type base, Type key, Type val) {
+  init(op, base, key, val);
+}
+
+VectorEffects::VectorEffects(Opcode op,
+                             SSATmp* base, SSATmp* key, SSATmp* val) {
+  auto typeOrNone =
+    [](SSATmp* val){ return val ? val->type() : Type::None; };
+  init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
+}
+
+VectorEffects::VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
+  int keyIdx = vectorKeyIdx(opc);
+  int valIdx = vectorValIdx(opc);
+  init(opc,
+       srcs[vectorBaseIdx(opc)]->type(),
+       keyIdx == -1 ? Type::None : srcs[keyIdx]->type(),
+       valIdx == -1 ? Type::None : srcs[valIdx]->type());
 }
 
 void VectorEffects::init(Opcode op, const Type origBase,
@@ -193,6 +226,9 @@ int vectorBaseIdx(Opcode opc) {
          : opcodeHasFlags(opc, VectorElem) ? 1
          : bad_value<int>();
 }
+int vectorBaseIdx(const IRInstruction* inst) {
+  return vectorBaseIdx(inst->op());
+}
 
 // vectorKeyIdx returns the src index for inst's key operand.
 int vectorKeyIdx(Opcode opc) {
@@ -203,6 +239,9 @@ int vectorKeyIdx(Opcode opc) {
          : opcodeHasFlags(opc, VectorProp) ? 3
          : opcodeHasFlags(opc, VectorElem) ? 2
          : bad_value<int>();
+}
+int vectorKeyIdx(const IRInstruction* inst) {
+  return vectorKeyIdx(inst->op());
 }
 
 // vectorValIdx returns the src index for inst's value operand.
@@ -229,6 +268,9 @@ int vectorValIdx(Opcode opc) {
            : bad_value<int>();
   }
 }
+int vectorValIdx(const IRInstruction* inst) {
+  return vectorValIdx(inst->op());
+}
 
 HhbcTranslator::VectorTranslator::VectorTranslator(
   const NormalizedInstruction& ni,
@@ -245,20 +287,11 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
 {
 }
 
-/* Copy varargs SSATmp*s into a vector */
-template<typename... Srcs>
-static void getSrcs(std::vector<SSATmp*>& srcVec, SSATmp* src, Srcs... srcs) {
-  srcVec.push_back(src);
-  getSrcs(srcVec, srcs...);
-}
-static void getSrcs(std::vector<SSATmp*>& srcVec) {}
-
 template<typename... Srcs>
 SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   assert(!opcodeHasFlags(opc, ModifiesStack));
-  std::vector<SSATmp*> srcVec;
-  getSrcs(srcVec, srcs...);
+  std::vector<SSATmp*> srcVec({srcs...});
   SSATmp* base = srcVec[vectorBaseIdx(opc)];
 
   /* If the base is a pointer to a stack cell and the operation might change

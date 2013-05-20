@@ -20,6 +20,8 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/irinstruction.h"
+#include "hphp/runtime/vm/translator/hopt/ssatmp.h"
 
 using namespace HPHP::Transl;
 

@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
-#include "hphp/runtime/vm/translator/hopt/cfg.h"
+#include "hphp/runtime/vm/translator/hopt/block.h"
 
 namespace HPHP {  namespace JIT {
 

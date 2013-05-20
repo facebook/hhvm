@@ -174,7 +174,7 @@ function find_config($tests, $name) {
     return find_config_for_dir($test, $name);
   }, $tests);
   $configs = array_unique($configs);
-  if (!count($configs) == 1) {
+  if (count($configs) != 1) {
     error(
       "These tests would use many different configs and we only support ".
       "using one for all the tests. Need these configs: ".

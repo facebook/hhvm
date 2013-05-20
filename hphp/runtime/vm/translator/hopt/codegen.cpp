@@ -3563,7 +3563,7 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     // we don't need to spill it.
     if (inst->op() == LdStack && inst->getSrc(0) == sp &&
         inst->getExtra<LdStack>()->offset * sizeof(Cell) == offset) {
-      FTRACE(1, "{}: Not spilling spill value {} from {}\n",
+      FTRACE(6, "{}: Not spilling spill value {} from {}\n",
              __func__, i, inst->toString());
     } else {
       cgStore(spReg, offset, val);
@@ -3942,7 +3942,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   Offset pcOff = m_state.lastMarker->bcOff - m_state.lastMarker->func->base();
 
-  FTRACE(3, "IR recordSyncPoint: {} {} {}\n", as.code.frontier, pcOff,
+  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.code.frontier, pcOff,
          stackOff);
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }

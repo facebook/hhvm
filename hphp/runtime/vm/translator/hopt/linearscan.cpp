@@ -33,7 +33,7 @@ namespace JIT{
 
 using namespace Transl::reg;
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
+TRACE_SET_MOD(hhir);
 
 int RegisterInfo::numAllocatedRegs() const {
   // Return the number of register slots that actually have an allocated
@@ -142,7 +142,8 @@ private:
   void initFreeList();
   void coalesce(Trace* trace);
   void genSpillStats(Trace* trace, int numSpillLocs);
-  void allocRegsOneTrace(BlockList::iterator& blockIt, ExitTraceMap& etm);
+  void allocRegsOneTrace(BlockList::iterator& blockIt,
+                         ExitTraceMap& etm);
   void allocRegsToTrace();
   uint32_t createSpillSlot(SSATmp* tmp);
   static SSATmp* getSpilledTmp(SSATmp* tmp);
@@ -168,7 +169,7 @@ private:
 
   template<typename Inner, int DumpVal=4>
   void dumpIR(const Inner* in, const char* msg) {
-    if (dumpIREnabled(DumpVal)) {
+    if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, DumpVal)) {
       std::ostringstream str;
       print(str, in, &m_allocInfo, &m_lifetime);
       HPHP::Trace::traceRelease("--- %s: %s\n", msg, str.str().c_str());
@@ -1125,7 +1126,8 @@ RegAllocInfo LinearScan::allocRegs(Trace* trace, LifetimeInfo* lifetime) {
 
 void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
                                    ExitTraceMap& etm) {
-  Trace* trace = (*blockIt)->getTrace();
+  auto const trace = (*blockIt)->getTrace();
+
   collectInfo(blockIt, trace);
   computePreColoringHint();
 
@@ -1145,8 +1147,16 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
   while (blockIt != m_blocks.end()) {
     Block* block = *blockIt;
     if (block->getTrace() != trace) {
-      break;
+      if (!isMain) {
+        break;
+      } else {
+        ++blockIt;
+        continue;
+      }
     }
+    FTRACE(5, "Block{}: {} ({})\n",
+           trace->isMain() ? "" : " (exit trace)",
+           (*blockIt)->getId(), (*blockIt)->postId());
 
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {
@@ -1158,7 +1168,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
     }
     for (auto it = block->begin(), end = block->end(); it != end; ++it) {
       allocRegToInstruction(it);
-      dumpIR<IRInstruction, kExtraLevel>(&*it, "allocated to instruction");
+      dumpIR<IRInstruction, kExtraLevel>(&*it, "allocated to instruction ");
     }
     if (isMain) {
       assert(block->getTrace()->isMain());
@@ -1213,8 +1223,28 @@ void LinearScan::allocRegsToTrace() {
 
   numberInstructions(m_blocks);
 
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, 5)) {
+    std::stringstream s;
+    s << "RPO: ";
+    for (auto& b : m_blocks) {
+      s << folly::format("{}{} ",
+                         b->isMain() ? "M" : "E",
+                         b->getId());
+    }
+    s << "\n";
+    HPHP::Trace::traceRelease("%s\n", s.str().c_str());
+  }
+
   BlockList::iterator it = m_blocks.begin();
   while (it != m_blocks.end()) {
+    allocRegsOneTrace(it, etm);
+  }
+
+  for (it = m_blocks.begin(); it != m_blocks.end();) {
+    if ((*it)->isMain()) {
+      ++it;
+      continue;
+    }
     allocRegsOneTrace(it, etm);
   }
 }

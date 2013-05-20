@@ -32,7 +32,7 @@ namespace HPHP { namespace JIT {
  */
 template <class Visitor>
 struct PostorderSort {
-  PostorderSort(Visitor &visitor, unsigned num_blocks)
+  PostorderSort(Visitor& visitor, unsigned num_blocks)
     : m_visited(num_blocks), m_visitor(visitor)
   {}
 

@@ -138,21 +138,6 @@ public:
     return success;
   }
 
-  bool tryLockWait(long long ns) {
-#ifdef DEBUG
-    assert(m_magic == kMagic);
-#endif
-    struct timespec delta;
-    delta.tv_sec  = 0;
-    delta.tv_nsec = ns;
-    bool success = !pthread_mutex_timedlock(&m_mutex, &delta);
-    if (success) {
-      recordAcquisition();
-      assertOwnedBySelf();
-    }
-    return success;
-  }
-
   void lock() {
 #ifdef DEBUG
     assert(m_magic == kMagic);

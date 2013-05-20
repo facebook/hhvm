@@ -6,7 +6,7 @@
 
 function usage() {
   global $argv;
-  return "usage: $argv[0] [-m jit|hhir|interp] [-r] <test/directories>";
+  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
 }
 
 function help() {
@@ -29,9 +29,6 @@ Examples:
 
   # Quick tests in JIT mode:
   % $argv[0]
-
-  # Quick tests in HHIR mode:
-  % $argv[0] -m hhir
 
   # Slow tests in interp mode:
   % $argv[0] -m interp test/slow
@@ -124,7 +121,7 @@ function get_options($argv) {
  * suites are, to avoid typing 'hphp/test/foo'.
  */
 function map_convenience_filename($file) {
-  if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
+  if ($file == 'jit' || $file == 'interp') {
     error(
       "I'm really sorry to change this, but now the mode is ".
       "passed with '-m $file', and repo mode is turned on with '-r'"
@@ -219,7 +216,7 @@ function mode_arg($options) {
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of hhir | jit | interp. Got: '$mode'");
+      error("-m must be one of jit | interp. Got: '$mode'");
   }
 }
 

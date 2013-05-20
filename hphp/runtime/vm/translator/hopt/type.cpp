@@ -29,6 +29,17 @@ namespace HPHP {  namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
+Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
+  if (!dynLoc) {
+    return Type::None;
+  }
+  DataType dt = dynLoc->rtt.outerType();
+  if (dt == KindOfUnknown) {
+    return Type::Gen;
+  }
+  return Type::fromDataType(dt, dynLoc->rtt.innerType());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

@@ -121,13 +121,6 @@ function get_options($argv) {
  * suites are, to avoid typing 'hphp/test/foo'.
  */
 function map_convenience_filename($file) {
-  if ($file == 'jit' || $file == 'interp') {
-    error(
-      "I'm really sorry to change this, but now the mode is ".
-      "passed with '-m $file', and repo mode is turned on with '-r'"
-    );
-  }
-
   $mappage = array(
     'quick'    => 'hphp/test/quick',
     'slow'     => 'hphp/test/slow',

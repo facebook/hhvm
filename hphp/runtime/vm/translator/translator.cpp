@@ -1816,7 +1816,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                    "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
+        DynLocation* dl = tas.recordRead(ii, true, (DataType)info.m_data);
         if (dl->rtt.outerType() != info.m_data &&
             (!dl->isString() || info.m_data != KindOfString)) {
           if (dl->rtt.outerType() != KindOfInvalid) {
@@ -1872,7 +1872,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfString);
+        DynLocation* dl = tas.recordRead(ii, true, KindOfString);
         assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
                dl->rtt.valueString() == sd);
         SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
@@ -1884,7 +1884,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
+        DynLocation* dl = tas.recordRead(ii, true);
         if (dl->rtt.valueType() != KindOfObject) {
           continue;
         }
@@ -2955,7 +2955,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       assert(opndIdx < 2);
       if (opndIdx == 0) { // stack value
         auto stackValUsage = instr->getOutputUsage(instr->outStack, true);
-        if ((instr->outStack && (!m_useHHIR || stackValUsage == kOutputUsed)) ||
+        if ((instr->outStack && stackValUsage == kOutputUsed) ||
             (instr->getOutputUsage(instr->outLocal) == kOutputUsed)) {
           return DataTypeSpecific;
         }
@@ -3160,7 +3160,6 @@ extern bool shouldIRInline(const Func* curFunc,
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
-  always_assert(m_useHHIR);
   if (!shouldAnalyzeCallee(fcall)) return;
 
   auto const numArgs     = fcall->imm[0].u_IVA;
@@ -3318,7 +3317,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    */
   restoreFrame();
   for (auto& loc : callerArgLocs) {
-    fcall->inputs.push_back(tas.recordRead(InputInfo(loc), m_useHHIR));
+    fcall->inputs.push_back(tas.recordRead(InputInfo(loc), true));
   }
 
   FTRACE(1, "analyzeCallee: inline candidate\n");
@@ -3427,10 +3426,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       getInputs(t, ni, stackFrameOffset, inputInfos, tas);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
-        if (m_useHHIR) {
-          t.m_instrStream.append(ni);
-          ++t.m_numOpcodes;
-        }
+        t.m_instrStream.append(ni);
+        ++t.m_numOpcodes;
         stackFrameOffset = oldStackFrameOffset;
         continue;
       }
@@ -3453,7 +3450,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       for (unsigned int i = 0; i < inputInfos.size(); i++) {
         SKTRACE(2, sk, "typing input %d\n", i);
         const InputInfo& ii = inputInfos[i];
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
+        DynLocation* dl = tas.recordRead(ii, true);
         const RuntimeType& rtt = dl->rtt;
         // Some instructions are able to handle an input with an unknown type
         if (!ii.dontBreak && !ii.dontGuard) {
@@ -3582,7 +3579,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     }
 
     analyzeInstr(t, *ni);
-    if (m_useHHIR && ni->op() == OpFCall) {
+    if (ni->op() == OpFCall) {
       analyzeCallee(tas, t, ni);
     }
 
@@ -3696,12 +3693,6 @@ breakBB:
     }
   }
 
-  // Peephole optimizations may leave the bytecode stream in a state that is
-  // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
-  if (!m_useHHIR) {
-    analyzeSecondPass(t);
-  }
-
   relaxDeps(t, tas);
 
   // Mark the last instruction appropriately
@@ -3725,7 +3716,6 @@ breakBB:
 
 Translator::Translator()
   : m_resumeHelper(nullptr)
-  , m_useHHIR(false)
   , m_createdTime(Timer::GetCurrentTimeMicros())
   , m_analysisDepth(0)
 {

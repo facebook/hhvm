@@ -703,7 +703,7 @@ struct Tracelet : private boost::noncopyable {
 };
 
 enum TransKind {
-  TransNormal   = 0,
+  TransInterp   = 0,
   TransNormalIR = 1,
   TransAnchor   = 2,
   TransProlog   = 3,
@@ -781,6 +781,37 @@ struct TransRec {
   string print(uint64_t profCount) const;
 };
 
+struct TranslArgs {
+  TranslArgs(const SrcKey& sk, bool align)
+      : m_sk(sk)
+      , m_src(nullptr)
+      , m_align(align)
+      , m_interp(false)
+    {}
+
+  TranslArgs& sk(const SrcKey& sk) {
+    m_sk = sk;
+    return *this;
+  }
+  TranslArgs& src(TCA src) {
+    m_src = src;
+    return *this;
+  }
+  TranslArgs& align(bool align) {
+    m_align = align;
+    return *this;
+  }
+  TranslArgs& interp(bool interp) {
+    m_interp = interp;
+    return *this;
+  }
+
+  SrcKey m_sk;
+  TCA m_src;
+  bool m_align;
+  bool m_interp;
+};
+
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
@@ -850,8 +881,6 @@ protected:
   TransDB            m_transDB;
   vector<TransRec>   m_translations;
   vector<uint64_t*>    m_transCounters;
-
-  bool               m_useHHIR; // Is HHIR in effect for current trace?
 
   int64_t              m_createdTime;
 

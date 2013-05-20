@@ -739,8 +739,6 @@ private:
   void irTranslateInstrDefault(const Tracelet& t,
                                const NormalizedInstruction& i);
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  void translateTracelet(SrcKey sk, bool considerHHIR=true,
-                         bool dryRun = false);
   enum TranslateTraceletResult {
     Failure,
     Retry,
@@ -786,11 +784,13 @@ private:
     smash(a, src, dest, true);
   }
 
-  TCA getTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
-  TCA createTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
+  TCA getTranslation(const TranslArgs& args);
+  TCA createTranslation(const TranslArgs& args);
+  TCA retranslate(const TranslArgs& args);
+  TCA translate(const TranslArgs& args);
+  void translateTracelet(const TranslArgs& args);
+
   TCA lookupTranslation(SrcKey sk) const;
-  TCA translate(SrcKey sk, bool align, bool useHHIR);
-  TCA retranslate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslateOpt(TransID transId, bool align);
   TCA retranslateAndPatchNoIR(SrcKey sk,
                               bool   align,

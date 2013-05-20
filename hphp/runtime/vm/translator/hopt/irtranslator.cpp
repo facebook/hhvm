@@ -117,7 +117,6 @@ TranslatorX64::irCheckType(X64Assembler& a,
                            const Location& l,
                            const RuntimeType& rtt,
                            SrcRec& fail) {
-  assert(m_useHHIR);
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue()) return;
@@ -1573,8 +1572,6 @@ static bool isPop(Opcode opc) {
 
 void
 TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
-  assert(m_useHHIR);
-
   if (!i.outStack || i.breaksTracelet) return;
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
@@ -1648,7 +1645,6 @@ void TranslatorX64::irInterpretInstr(const NormalizedInstruction& i) {
 
 void TranslatorX64::irTranslateInstr(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  assert(m_useHHIR);
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
@@ -1692,7 +1688,6 @@ void TranslatorX64::irTranslateInstr(const Tracelet& t,
 
 void TranslatorX64::irAssertType(const Location& l,
                                  const RuntimeType& rtt) {
-  assert(m_useHHIR);
   if (rtt.isVagueValue()) return;
 
   switch (l.space) {
@@ -1755,8 +1750,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
                                    const TCA               stubStart,
                                    vector<TransBCMapping>* bcMap) {
   auto transResult = Failure;
-  assert(m_useHHIR);
-
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   assert(srcRec.inProgressTailJumps().size() == 0);
@@ -1895,7 +1888,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     assert(0);
   }
 
-  m_useHHIR = transResult != Failure;
   if (transResult != Success) {
     // The whole translation failed; give up on this BB. Since it is not
     // linked into srcDB yet, it is guaranteed not to be reachable.
@@ -1914,7 +1906,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
 void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
                                    Offset nextTraceletOffset) {
   assert(!m_irFactory);
-  assert(m_useHHIR);
 
   Cell* fp = vmfp();
   if (curFunc()->isGenerator()) {
@@ -1925,14 +1916,12 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_useHHIR      = true;
   m_irFactory.reset(new JIT::IRFactory());
   m_hhbcTrans.reset(new JIT::HhbcTranslator(
     *m_irFactory, bcStartOffset, nextTraceletOffset, fp - vmsp(), curFunc()));
 }
 
 void TranslatorX64::hhirTraceEnd() {
-  assert(m_useHHIR);
   m_hhbcTrans->end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
@@ -1942,7 +1931,6 @@ void TranslatorX64::hhirTraceEnd() {
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
-  assert(m_useHHIR);
 
   HPHP::JIT::Trace* trace = m_hhbcTrans->getTrace();
   auto finishPass = [&](const char* msg, int level,

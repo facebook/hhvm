@@ -84,6 +84,30 @@
             ]
         },
         {
+            "name": "simplexml_import_dom",
+            "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a SimpleXMLElement or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "node",
+                    "type": "Variant",
+                    "desc": "A DOM Element node"
+                },
+                {
+                    "name": "class_name",
+                    "type": "Variant",
+                    "value": "\"SimpleXMLElement\"",
+                    "desc": "You may use this optional parameter so that simplexml_load_file() will return an object of the specified class. That class should extend the SimpleXMLElement class."
+                }
+            ]
+        },
+        {
             "name": "libxml_get_errors",
             "desc": "Retrieve array of errors.",
             "flags": [

@@ -18,9 +18,9 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/util/request_local.h"
-
 #include "hphp/system/lib/systemlib.h"
 
 #ifndef LIBXML2_NEW_BUFFER
@@ -42,13 +42,19 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  XmlDocWrapper(xmlDocPtr doc, CStrRef cls)
-    : m_doc(doc), m_cls(cls) { }
+  XmlDocWrapper(xmlDocPtr doc, CStrRef cls, Object domNode = nullptr)
+    : m_doc(doc), m_cls(cls), m_domNode(domNode) {
+    if (!domNode.isNull()) {
+      DEBUG_ONLY c_DOMNode *domnode = domNode.getTyped<c_DOMNode>();
+      assert(!domnode || domnode->m_node == (xmlNodePtr) doc);
+    }
+  }
 
   CStrRef getClass() { return m_cls; }
 
   void sweep() {
-    if (m_doc) {
+    // if m_domNode isn't null, then he owns the m_doc. Otherwise, I own it
+    if (m_doc && m_domNode.isNull()) {
       xmlFreeDoc(m_doc);
     }
   }
@@ -56,6 +62,8 @@ public:
 private:
   xmlDocPtr m_doc;
   String m_cls;
+  // Hold onto the original owner of the doc so it doesn't get free()d.
+  Object m_domNode;
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
 
@@ -235,6 +243,45 @@ static void add_registered_namespaces(Array &out, xmlNodePtr node,
 // simplexml
 
 static StaticString s_SimpleXMLElement("SimpleXMLElement");
+
+Variant f_simplexml_import_dom(CVarRef node,
+                               CVarRef class_name /* = "SimpleXMLElement" */) {
+
+  if (!node.isObject()) {
+    raise_warning(
+      "simplexml_import_dom() expects parameter 1 to be object"
+    );
+    return uninit_null();
+  }
+  if (!class_name.isString()) {
+    raise_warning(
+      "simplexml_import_dom() expects parameter 2 to be string"
+    );
+    return uninit_null();
+  }
+
+  c_DOMNode *domnode = node.asCObjRef().getTyped<c_DOMNode>();
+  xmlNodePtr nodep = domnode->m_node;
+
+  if (nodep) {
+    if (nodep->doc == nullptr) {
+      raise_warning("Imported Node must have associated Document");
+      return uninit_null();
+    }
+    if (nodep->type == XML_DOCUMENT_NODE ||
+        nodep->type == XML_HTML_DOCUMENT_NODE) {
+      nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+    }
+  }
+
+  if (nodep && nodep->type == XML_ELEMENT_NODE) {
+    Object obj = Object(NEWOBJ(XmlDocWrapper)(nodep->doc, class_name, node));
+    return create_element(obj, nodep, String(), false);
+  } else {
+    raise_warning("Invalid Nodetype to import");
+    return uninit_null();
+  }
+}
 
 Variant f_simplexml_load_string(CStrRef data,
                                 CStrRef class_name /* = "SimpleXMLElement" */,

@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Variant f_simplexml_import_dom(CVarRef node,
+                               CVarRef class_name = "SimpleXMLElement");
 Variant f_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
 Variant f_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
 Variant f_libxml_get_errors();

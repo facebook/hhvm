@@ -399,6 +399,8 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           string(""))                      \
+  F(uint32_t, JitMaxTranslations,      12)                              \
+  F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \
   F(string, JitProfilePath,            string(""))                      \
   F(int32_t, JitStressTypePredPercent, 0)                               \
@@ -433,7 +435,6 @@ public:
   F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
-  F(uint64_t, MaxTrans,                -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \

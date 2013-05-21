@@ -1276,7 +1276,8 @@ TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
   if (!writer) return nullptr;
   SKTRACE(1, sk, "retranslateAndPatchNoIR\n");
   SrcRec* srcRec = getSrcRec(sk);
-  if (srcRec->translations().size() == SrcRec::kMaxTranslations + 1) {
+  if (srcRec->translations().size() ==
+        RuntimeOption::EvalJitMaxTranslations + 1) {
     // we've gone over the translation limit and already have an anchor
     // translation that will interpret, so just return NULL and force
     // interpretation of this BB.
@@ -1450,7 +1451,7 @@ TranslatorX64::translate(const TranslArgs& args) {
   assert(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
   if (!args.m_interp) {
-    if (m_numHHIRTrans == RuntimeOption::EvalMaxTrans) {
+    if (m_numHHIRTrans == RuntimeOption::EvalJitGlobalTranslationLimit) {
       RuntimeOption::EvalJit = false;
       ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
     }
@@ -10776,7 +10777,7 @@ TranslatorX64::translateInstr(const Tracelet& t,
 bool
 TranslatorX64::checkTranslationLimit(SrcKey sk,
                                      const SrcRec& srcRec) const {
-  if (srcRec.translations().size() == SrcRec::kMaxTranslations) {
+  if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
     INC_TPC(max_trans);
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
       const vector<TCA>& tns = srcRec.translations();

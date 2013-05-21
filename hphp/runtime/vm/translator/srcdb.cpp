@@ -80,7 +80,7 @@ void SrcRec::emitFallbackJump(TCA from, int cc /* = -1 */) {
 void SrcRec::newTranslation(TCA newStart) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  assert(m_translations.size() <= kMaxTranslations);
+  assert(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 

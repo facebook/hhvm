@@ -181,7 +181,7 @@ Array Unit::getUserFunctions() {
     for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
-      if (!func_ || func_->isBuiltin() ||
+      if (!func_ || func_->isBuiltin() || func_->isPHPBuiltin() ||
           isdigit(func_->name()->data()[0])) {
         continue;
       }

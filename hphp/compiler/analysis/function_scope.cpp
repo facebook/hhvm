@@ -76,6 +76,12 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     }
     m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
   }
+
+  // Support for systemlib functions implemented in PHP
+  if (!m_method &&
+      m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
+      setAllowOverride();
+  }
 }
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,

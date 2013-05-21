@@ -39,6 +39,10 @@ static const Trace::Module TRACEMOD = Trace::bcinterp;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");
+static const StringData* sd___overridable =
+  StringData::GetStaticString("__Overridable");
+static const StringData* sd___PHPBuiltin =
+  StringData::GetStaticString("__PHPBuiltin");
 
 //=============================================================================
 // Func.
@@ -506,6 +510,11 @@ void Func::prettyPrint(std::ostream& out) const {
   }
 }
 
+bool Func::isPHPBuiltin() const {
+  return shared()->m_userAttributes.find(sd___PHPBuiltin) !=
+         shared()->m_userAttributes.end();
+}
+
 HphpArray* Func::getStaticLocals() const {
   return g_vmContext->getFuncStaticCtx(this);
 }
@@ -655,8 +664,10 @@ void Func::setCached() {
 }
 
 bool Func::isAllowOverride() const {
-  return shared()->m_info &&
-    (shared()->m_info->attribute & ClassInfo::AllowOverride);
+  return (shared()->m_info &&
+    (shared()->m_info->attribute & ClassInfo::AllowOverride)) ||
+    (shared()->m_userAttributes.find(sd___overridable) !=
+     shared()->m_userAttributes.end());
 }
 
 const Func* Func::getGeneratorBody(const StringData* name) const {

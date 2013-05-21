@@ -205,6 +205,7 @@ struct Func {
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return (bool)info(); }
+  bool isPHPBuiltin() const;
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
   }

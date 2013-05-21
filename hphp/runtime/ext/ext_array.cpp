@@ -1340,14 +1340,16 @@ Variant f_i18n_loc_get_error_code() {
 }
 
 Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def) {
-  if (UNLIKELY(!search.isArray())) {
-    raise_error("hphp_array_idx: search must be an array");
-  } else if (LIKELY(!key.isNull())) {
-    ArrayData *arr = search.getArrayData();
-    VarNR index = key.toKey();
-    if (LIKELY(!index.isNull())) {
-      CVarRef ret = arr->get(index, false);
-      return (&ret != &null_variant) ? ret : def;
+  if (!key.isNull()) {
+    if (LIKELY(search.isArray())) {
+      ArrayData *arr = search.getArrayData();
+      VarNR index = key.toKey();
+      if (!index.isNull()) {
+        CVarRef ret = arr->get(index, false);
+        return (&ret != &null_variant) ? ret : def;
+      }
+    } else {
+      raise_error("hphp_array_idx: search must be an array");
     }
   }
   return def;

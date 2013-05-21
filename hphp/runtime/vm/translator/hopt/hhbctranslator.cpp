@@ -1119,37 +1119,47 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
 }
 
 void HhbcTranslator::emitArrayIdx() {
-  SSATmp* def = popC();
-  SSATmp* arr = popC();
-  SSATmp* key = popC();
+  Type arrType = topC(1)->type();
+  Type keyType = topC(2)->type();
 
-  if (UNLIKELY(!arr->isA(Type::Arr))) {
+  if (UNLIKELY(!arrType.subtypeOf(Type::Arr))) {
     // raise fatal
     emitInterpOne(Type::Cell, 3);
     return;
   }
-  if (UNLIKELY(key->isA(Type::Null))) {
+
+  if (UNLIKELY(keyType.subtypeOf(Type::Null))) {
+    SSATmp* def = popC();
+    SSATmp* arr = popC();
+    SSATmp* key = popC();
+
     // if the key is null it will not be found so just return the default
     push(def);
     gen(DecRef, arr);
     gen(DecRef, key);
     return;
   }
-  if (UNLIKELY(!(key->isA(Type::Int) || key->isA(Type::Str)))) {
-    PUNT(ArrayIdx_unsupportedKey);
+  if (UNLIKELY(
+        !(keyType.subtypeOf(Type::Int) || keyType.subtypeOf(Type::Str)))) {
+    emitInterpOneOrPunt(Type::Cell, 3);
+    return;
   }
 
-  KeyType keyType;
+  SSATmp* def = popC();
+  SSATmp* arr = popC();
+  SSATmp* key = popC();
+
+  KeyType arrayKeyType;
   bool checkForInt;
-  checkStrictlyInteger(key, keyType, checkForInt);
+  checkStrictlyInteger(key, arrayKeyType, checkForInt);
 
   TCA opFunc;
   if (checkForInt) {
     opFunc = (TCA)&arrayIdxSi;
-  } else if (IntKey == keyType) {
+  } else if (IntKey == arrayKeyType) {
     opFunc = (TCA)&arrayIdxI;
   } else {
-    assert(StrKey == keyType);
+    assert(StrKey == arrayKeyType);
     opFunc = (TCA)&arrayIdxS;
   }
 

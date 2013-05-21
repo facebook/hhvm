@@ -65,8 +65,10 @@ function genSystemlib() {
     searchDirForPhpFiles($searchPath, $phpfiles);
     $searchPath = realpath($scriptPath . '/../../system/classes_hhvm');
     searchDirForPhpFiles($searchPath, $phpfiles);
+    $searchPath = realpath($scriptPath . '/../../facebook/system/classes');
+    searchDirForPhpFiles($searchPath, $phpfiles);
 
-    fwrite($systemlib_php, "<?php\n");
+    fwrite($systemlib_php, "<?hh\n");
     fwrite($systemlib_php, '// @' . 'generated' . "\n\n");
     // There are some dependencies between files, so we output
     // the classes in a certain order so that all classes can be

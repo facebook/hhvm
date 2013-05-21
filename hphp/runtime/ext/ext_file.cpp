@@ -742,6 +742,9 @@ bool f_is_file(CStrRef filename) {
 
 bool f_is_dir(CStrRef filename) {
   String cwd;
+  if (filename.empty()) {
+    return false;
+  }
   bool isRelative = (filename.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
   if (!isRelative || cwd == RuntimeOption::SourceRoot.c_str()) {

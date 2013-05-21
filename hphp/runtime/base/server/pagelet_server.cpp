@@ -40,7 +40,13 @@ public:
                    CArrRef files)
     : m_refCount(0), m_done(false), m_code(0) {
 
+#ifndef __APPLE__
     gettime(CLOCK_MONOTONIC, &m_queueTime);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &m_queueTime);
+#endif
     m_threadType = PageletThread;
 
     m_url.append(url.data(), url.size());

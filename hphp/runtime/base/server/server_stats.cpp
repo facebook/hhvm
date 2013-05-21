@@ -922,7 +922,13 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     // we output the iostatus, and ioInProcessDuationMicros
     if (ts.m_ioInProcess) {
       timespec now;
-      gettime(CLOCK_MONOTONIC, &now);
+#ifndef __APPLE__
+    gettime(CLOCK_MONOTONIC, &now);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &now);
+#endif
       w->writeEntry("iostatus", string(ts.m_ioName) + " " + ts.m_ioAddr);
       w->writeEntry("ioduration", gettime_diff_us(ts.m_ioStart, now));
     }
@@ -1160,7 +1166,13 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
     // an io, and record the time that the io started.
     m_threadStatus.m_ioInProcess = true;
     if (usWallTime < 0) {
-      gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
+#ifndef __APPLE__
+    gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &m_threadStatus.m_ioStart);
+#endif
     }
   }
 
@@ -1171,7 +1183,13 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
       int64_t wt = usWallTime;
       if (wt < 0) {
         timespec now;
+#ifndef __APPLE__
         gettime(CLOCK_MONOTONIC, &now);
+#else
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        TIMEVAL_TO_TIMESPEC(&tv, &now);
+#endif
         wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
       }
 
@@ -1233,8 +1251,16 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
                                      uint32_t track /* = false */)
   : m_section(section), m_instStart(0), m_track(track) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
+#ifndef __APPLE__
     gettime(CLOCK_MONOTONIC, &m_wallStart);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &m_wallStart);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
+#endif
     if (m_track & TRACK_HWINST) {
       m_instStart = HardwareCounter::GetInstructionCount();
     }
@@ -1244,8 +1270,16 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
 ServerStatsHelper::~ServerStatsHelper() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     timespec wallEnd, cpuEnd;
+#ifndef __APPLE__
     gettime(CLOCK_MONOTONIC, &wallEnd);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    TIMEVAL_TO_TIMESPEC(&tv, &wallEnd);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
     gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEnd);
+#endif
 
     logTime("page.wall.", m_wallStart, wallEnd);
     logTime("page.cpu.", m_cpuStart, cpuEnd);

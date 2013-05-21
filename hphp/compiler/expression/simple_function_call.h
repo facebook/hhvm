@@ -40,9 +40,8 @@ public:
 
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
-  void setNoPrefix() { m_noPrefix = true; }
   void setFromCompiler() { m_fromCompiler = true; }
-  void setThrowFatal() { m_noPrefix = true; m_type = ThrowFatalFunction; }
+  void setThrowFatal() { m_type = ThrowFatalFunction; }
   int isFatalFunction() const { return m_type == ThrowFatalFunction; }
   int isStaticCompact() const { return m_type == StaticCompactFunction; }
 
@@ -101,7 +100,6 @@ protected:
   int m_type;
   unsigned m_dynamicConstant : 1;
   unsigned m_builtinFunction : 1;
-  unsigned m_noPrefix : 1;
   unsigned m_fromCompiler : 1;
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;

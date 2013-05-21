@@ -101,7 +101,7 @@ SimpleFunctionCall::SimpleFunctionCall
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
                  ExpressionPtr(), name, hadBackslash, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
-    m_builtinFunction(false), m_noPrefix(false), m_fromCompiler(false),
+    m_builtinFunction(false), m_fromCompiler(false),
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
     m_safe(0), m_extra(nullptr) {
 
@@ -248,7 +248,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   if (!m_class && m_className.empty()) {
     if (!m_dynamicInvoke) {
       func = ar->findFunction(m_name);
-      if (!func && hadBackslash()) {
+      if (!func && !hadBackslash() && Option::WholeProgram) {
         int pos = m_name.rfind('\\');
         m_name = m_name.substr(pos + 1);
         func = ar->findFunction(m_name);
@@ -462,7 +462,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_fromCompiler && !m_noPrefix && m_type == UnknownType &&
+    if (!m_fromCompiler && m_type == UnknownType &&
         !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&

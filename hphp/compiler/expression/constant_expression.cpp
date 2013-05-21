@@ -119,7 +119,7 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
   BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
   if (!block) {
-    if (hadBackslash()) {
+    if (!hadBackslash() && Option::WholeProgram) {
       int pos = m_name.rfind('\\');
       m_name = m_name.substr(pos + 1);
       block = ar->findConstantDeclarer(m_name);

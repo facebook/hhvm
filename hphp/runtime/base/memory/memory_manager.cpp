@@ -76,8 +76,16 @@ static void threadStatsInit() {
   // where
   //   s_cactiveLimitCeiling == MemTotal - footprint
   size_t footprint = Process::GetCodeFootprint(Process::GetProcessId());
+  size_t MemTotal  = 0;
+#ifndef __APPLE__
   size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
-  size_t MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
+  MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
+#else
+  int mib[2] = { CTL_HW, HW_MEMSIZE };
+  u_int namelen = sizeof(mib) / sizeof(mib[0]);
+  size_t len = sizeof(MemTotal);
+  sysctl(mib, namelen, &MemTotal, &len, NULL, 0);
+#endif
   if (MemTotal > footprint) {
     MemoryManager::s_cactiveLimitCeiling = MemTotal - footprint;
   }

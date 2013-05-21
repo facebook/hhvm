@@ -46,6 +46,7 @@ namespace Eval {
   x(DirectoryIterator)                          \
   x(SplFileInfo)                                \
   x(SplFileObject)                              \
+  x(DOMDocument)                                \
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
@@ -90,6 +91,8 @@ class SystemLib {
   static ObjectData* AllocRuntimeExceptionObject(CVarRef message);
   static ObjectData* AllocOutOfBoundsExceptionObject(CVarRef message);
   static ObjectData* AllocInvalidOperationExceptionObject(CVarRef message);
+  static ObjectData* AllocDOMDocumentObject(CStrRef version = null_string,
+                                            CStrRef encoding = null_string);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
   static ObjectData* AllocDirectoryObject();

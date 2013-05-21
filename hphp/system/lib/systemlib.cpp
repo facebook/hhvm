@@ -90,6 +90,11 @@ ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
   CREATE_AND_CONSTRUCT(InvalidOperationException, CREATE_VECTOR1(message));
 }
 
+ObjectData* SystemLib::AllocDOMDocumentObject(CStrRef version,
+                                              CStrRef encoding) {
+  CREATE_AND_CONSTRUCT(DOMDocument, CREATE_VECTOR2(version, encoding));
+}
+
 ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
   CREATE_AND_CONSTRUCT(DOMException, CREATE_VECTOR2(message, code));
 }

@@ -39,7 +39,9 @@
 #include "hphp/util/stack_trace.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/repo_schema.h"
+#ifdef __linux__
 #include "hphp/runtime/base/stat_cache.h"
+#endif
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_json.h"
@@ -1265,7 +1267,9 @@ void hphp_session_init() {
 
   // Ordering is sensitive; StatCache::requestInit produces work that
   // must be done in VMExecutionContext::requestInit.
+#ifdef __linux__
   StatCache::requestInit();
+#endif
 
   g_vmContext->requestInit();
 }

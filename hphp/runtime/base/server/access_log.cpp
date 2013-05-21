@@ -25,6 +25,7 @@
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/util.h"
+#include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware_counter.h"
 
 using std::endl;
@@ -283,16 +284,18 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'D':
     {
-      struct timespec now;
-      gettime(CLOCK_MONOTONIC, &now);
+      timespec now;
+      Timer::GetMonotonicTime(now);
       out << gettime_diff_us(transport->getWallTime(), now);
     }
     break;
   case 'd':
     {
+#ifdef CLOCK_THREAD_CPUTIME_ID
       struct timespec now;
       gettime(CLOCK_THREAD_CPUTIME_ID, &now);
       out << gettime_diff_us(transport->getCpuTime(), now);
+#endif
     }
     break;
   case 'h':

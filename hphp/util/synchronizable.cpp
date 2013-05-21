@@ -17,6 +17,7 @@
 
 #include "hphp/util/compatibility.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@ bool Synchronizable::wait(long seconds) {
 
 bool Synchronizable::wait(long seconds, long long nanosecs) {
   struct timespec ts;
-  gettime(CLOCK_REALTIME, &ts);
+  Timer::GetRealtimeTime(ts);
   ts.tv_sec += seconds;
   ts.tv_nsec += nanosecs;
 

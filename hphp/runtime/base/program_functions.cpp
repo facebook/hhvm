@@ -664,7 +664,7 @@ static int start_server(const std::string &username) {
     HttpRequestHandler handler;
     ReplayTransport rt;
     timespec start;
-    gettime(CLOCK_MONOTONIC, &start);
+    Timer::GetMonotonicTime(start);
     std::string error;
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {

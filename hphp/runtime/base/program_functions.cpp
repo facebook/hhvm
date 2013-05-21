@@ -1164,7 +1164,11 @@ extern "C" void hphp_fatal_error(const char *s) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
+#ifndef __APPLE__
   pthread_getattr_np(pthread_self(), &attr);
+#else
+  pthread_attr_init(&attr);
+#endif
   Util::init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 

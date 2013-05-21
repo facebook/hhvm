@@ -39,36 +39,13 @@ static_assert(ssize_t(PosType::invalid) == ArrayData::invalid_index,
               "Bad design: can't have PosType::invalid and"
               " ArrayData::invalid_index mean distinct things.");
 
-// Change of type, no effect on representation
-static int64_t toInt64(PosType pos) {
-  static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
-  return static_cast<int64_t>(pos);
+template<typename T>
+static T toInt(PosType pos) {
+  return static_cast<T>(pos);
 }
 
-// Assumes a valid position, convert to an uint32_t. Useful for array
-// indices because they can't be larger than 32 bits anyway.
-static uint32_t toUint32(PosType pos) {
-  static_assert(uint32_t(PosType::invalid) == uint32_t(-1), "");
-  assert(pos != PosType::invalid);
-  return static_cast<uint32_t>(pos);
-}
-
-// Signed to pos, no change in representation.
-inline PosType toPos(int32_t n) {
-  static_assert(sizeof(int64_t) == sizeof(PosType), "");
-  return static_cast<PosType>(n);
-}
-static PosType toPos(int64_t n) {
-  static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
-  return static_cast<PosType>(n);
-}
-
-// Unsigned to pos.
-static PosType toPos(uint32_t n) {
-  // If this fails it's weird - uint max doesn't become
-  // PosType::invalid; instead, it'll be 4 billion something, which is
-  // unhelpful.
-  assert(n != uint32_t(-1));
+template<typename T>
+static PosType toPos(T n) {
   return static_cast<PosType>(n);
 }
 
@@ -165,17 +142,17 @@ protected:
   }
   PosType lastIndex(uint length) const {
     assert(length);
-    return toPos(length - 1);
+    return toPos<uint>(length - 1);
   }
   PosType nextIndex(PosType current, uint length) const {
-    auto result = toPos(toInt64(current) + 1);
-    return toUint32(result) < length ? result : PosType::invalid;
+    auto result = toPos<uint>(toInt<int64_t>(current) + 1);
+    return toInt<uint32_t>(result) < length ? result : PosType::invalid;
   }
   PosType prevIndex(PosType current, uint length) const {
     if (current == PosType(0) || current == PosType::invalid) {
       return PosType::invalid;
     }
-    return toPos(toUint32(current) - 1);
+    return toPos<uint>(toInt<uint32_t>(current) - 1);
   }
 
   /**
@@ -224,8 +201,8 @@ protected:
   Returns true iff the key at pos is a string.
    */
   bool hasStrKey(PosType pos) const {
-    assert(m_vals && toUint32(pos) < m_capacity);
-    return m_vals[toUint32(pos)].hash() != 0;
+    assert(m_vals && toInt<uint32_t>(pos) < m_capacity);
+    return m_vals[toInt<uint32_t>(pos)].hash() != 0;
   }
 
   /**
@@ -233,10 +210,10 @@ protected:
   KindOfString.
    */
   Variant key(PosType pos) const {
-    assert(m_keys && toUint32(pos) < m_capacity);
+    assert(m_keys && toInt<uint32_t>(pos) < m_capacity);
     return hasStrKey(pos)
-      ? Variant(m_keys[toUint32(pos)].s)
-      : Variant(m_keys[toUint32(pos)].i);
+      ? Variant(m_keys[toInt<uint32_t>(pos)].s)
+      : Variant(m_keys[toInt<uint32_t>(pos)].i);
   }
 
   /**
@@ -245,9 +222,9 @@ protected:
   it was a string).
    */
   void setKey(PosType pos, int64_t k) {
-    assert(m_keys && m_vals && toUint32(pos) < m_capacity);
-    m_keys[toUint32(pos)].i = k;
-    m_vals[toUint32(pos)].hash() = 0;
+    assert(m_keys && m_vals && toInt<uint32_t>(pos) < m_capacity);
+    m_keys[toInt<uint32_t>(pos)].i = k;
+    m_vals[toInt<uint32_t>(pos)].hash() = 0;
     if (m_nextKey <= k) m_nextKey = k + 1;
   }
 
@@ -258,9 +235,9 @@ protected:
   the StringData.
    */
   void setKey(PosType pos, StringData* k) {
-    assert(k && m_keys && m_vals && toUint32(pos) < m_capacity);
-    m_keys[toUint32(pos)].s = k;
-    m_vals[toUint32(pos)].hash() = 1;
+    assert(k && m_keys && m_vals && toInt<uint32_t>(pos) < m_capacity);
+    m_keys[toInt<uint32_t>(pos)].s = k;
+    m_vals[toInt<uint32_t>(pos)].hash() = 1;
     k->incRefCount();
   }
 
@@ -287,8 +264,8 @@ protected:
   for the data.
    */
   const Variant& val(PosType pos) const {
-    assert(m_vals && toUint32(pos) < m_capacity);
-    return tvAsCVarRef(m_vals + toUint32(pos));
+    assert(m_vals && toInt<uint32_t>(pos) < m_capacity);
+    return tvAsCVarRef(m_vals + toInt<uint32_t>(pos));
   }
 
   /**
@@ -298,10 +275,10 @@ protected:
   to initialize the value.
    */
   Variant& lval(PosType pos) const {
-    assert(m_vals && toUint32(pos) < m_capacity);
+    assert(m_vals && toInt<uint32_t>(pos) < m_capacity);
     // Don't use tvAsVariant here (which may assert on you), the
     // reference returned may refer to a not-yet-initialized object.
-    return tvAsUninitializedVariant(m_vals + toUint32(pos));
+    return tvAsUninitializedVariant(m_vals + toInt<uint32_t>(pos));
   }
 
 private:

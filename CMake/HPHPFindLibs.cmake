@@ -296,12 +296,9 @@ if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
 
+FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
-	FIND_LIBRARY (CRYPT_LIB NAMES xcrypt crypt)
 	FIND_LIBRARY (RT_LIB rt)
-elseif (APPLE)
-	FIND_LIBRARY (CRYPT_LIB crypto)
-	FIND_LIBRARY (ICONV_LIB iconv)
 endif()
 
 if (LINUX)
@@ -416,12 +413,9 @@ endif()
 
 	target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
+	target_link_libraries(${target} ${CRYPT_LIB})
 	if (LINUX OR FREEBSD)
-		target_link_libraries(${target} ${CRYPT_LIB})
 		target_link_libraries(${target} ${RT_LIB})
-	elseif (APPLE)
-		target_link_libraries(${target} ${CRYPTO_LIB})
-		target_link_libraries(${target} ${ICONV_LIB})
 	endif()
 
 	target_link_libraries(${target} timelib)

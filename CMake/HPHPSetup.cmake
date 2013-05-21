@@ -101,7 +101,7 @@ if(ENABLE_FULL_SETLINE)
 	add_definitions(-DENABLE_FULL_SETLINE=1)
 endif()
 
-if(APPLE OR FREEBSD)
+if(FREEBSD)
 	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 

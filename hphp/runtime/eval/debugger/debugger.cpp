@@ -143,7 +143,9 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionStarted(file.c_str());
   }
-  hphp_invoke_simple(file);
+  if (!file.empty()) {
+    hphp_invoke_simple(file);
+  }
   {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionEnded(file.c_str());

@@ -777,11 +777,6 @@ class Variant : private TypedValue {
   Variant share(bool save) const;
 
   /**
-   * Get the wrapped SharedVariant, if any.
-   */
-  SharedVariant *getSharedVariant() const;
-
-  /**
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(Variant);

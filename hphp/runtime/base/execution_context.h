@@ -411,6 +411,8 @@ private:
   DECLARE_DBG_SETTING
 };
 
+typedef std::vector<SharedVariant*> SVarVector;
+
 class VMExecutionContext : public BaseExecutionContext {
 public:
   VMExecutionContext();
@@ -445,8 +447,12 @@ public:
   static void unpackContVarEnvLinkage(ActRec* fp);
   static void packContVarEnvLinkage(ActRec* fp);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
+  void enqueueSharedVar(SharedVariant* var);
 
 private:
+  SVarVector m_freedSvars;
+  void treadmillSharedVars();
+
   enum VectorLeaveCode {
     ConsumeAll,
     LeaveLast

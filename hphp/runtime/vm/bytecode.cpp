@@ -31,7 +31,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
 
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/php_debug.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -2895,6 +2897,25 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   for (int i = 0; i < func->numIterators(); i++) {
     m_stack.allocI();
   }
+}
+
+void VMExecutionContext::enqueueSharedVar(SharedVariant* svar) {
+  m_freedSvars.push_back(svar);
+}
+
+class FreedSVars : public Treadmill::WorkItem {
+  SVarVector m_svars;
+public:
+  explicit FreedSVars(SVarVector&& svars) : m_svars(std::move(svars)) {}
+  virtual void operator()() {
+    for (auto it = m_svars.begin(); it != m_svars.end(); it++) {
+      delete *it;
+    }
+  }
+};
+
+void VMExecutionContext::treadmillSharedVars() {
+  Treadmill::WorkItem::enqueue(new FreedSVars(std::move(m_freedSvars)));
 }
 
 void VMExecutionContext::destructObjects() {
@@ -7577,6 +7598,7 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
+  treadmillSharedVars();
   destructObjects();
   syncGdbState();
   tx64->requestExit();

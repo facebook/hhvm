@@ -29,23 +29,17 @@ namespace HPHP {
 /**
  * Wrapper for a shared memory map.
  */
-class SharedMap : public ArrayData, Sweepable {
+class SharedMap : public ArrayData {
 public:
   SharedMap(SharedVariant* source)
     : ArrayData(kSharedMap)
     , m_arr(source)
     , m_localCache(nullptr) {
-    source->incRef();
   }
 
   ~SharedMap();
 
   virtual bool isSharedMap() const { return true; }
-
-  virtual SharedVariant *getSharedVariant() const {
-    if (m_arr->shouldCache()) return nullptr;
-    return m_arr;
-  }
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
@@ -121,9 +115,6 @@ public:
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(SharedMap);
-
-  // implements Sweepable.sweep()
-  void sweep() { m_arr->decRef(); }
 
   virtual ArrayData *escalate() const;
   virtual ArrayData* escalateForSort();

@@ -59,27 +59,9 @@ public:
   DataType getType() const { return (DataType)m_type; }
   CVarRef asCVarRef() const {
     // Must be non-refcounted types
-    assert(m_shouldCache == false);
     assert(m_flags == 0);
     assert(!IS_REFCOUNTED_TYPE(m_tv.m_type));
     return tvAsCVarRef(&m_tv);
-  }
-
-  void incRef() {
-    assert(IS_REFCOUNTED_TYPE(m_type));
-    atomic_inc(m_count);
-  }
-
-  void decRef() {
-    assert(m_count);
-    if (IS_REFCOUNTED_TYPE(m_type)) {
-      if (atomic_dec(m_count) == 0) {
-        delete this;
-      }
-    } else {
-      assert(m_count == 1);
-      delete this;
-    }
   }
 
   Variant toLocal();
@@ -139,7 +121,6 @@ public:
 
   SharedVariant *convertObj(CVarRef var);
   bool isUnserializedObj() { return getIsObj(); }
-  bool shouldCache() const { return m_shouldCache; }
 
   int countReachable() const;
 
@@ -156,7 +137,7 @@ private:
     ~VectorData() {
       SharedVariant** v = vals();
       for (size_t i = 0; i < m_size; i++) {
-        v[i]->decRef();
+        delete v[i];
       }
     }
     SharedVariant** vals() { return (SharedVariant**)(this + 1); }
@@ -172,7 +153,7 @@ private:
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
    * We want to have compile time assertion to guard it but still want to have
-   * anonymous struct. For non-refcounted types, m_shouldCache and m_flags are
+   * anonymous struct. For non-refcounted types, m_flags is
    * guaranteed to be 0, and other parts of runtime will not touch the count.
    */
 
@@ -191,23 +172,20 @@ private:
 #if PACKED_TV
       uint8_t _typePad;
       DataType m_type;
-      bool m_shouldCache;
-      uint8_t m_flags;
+      uint16_t m_flags;
       uint32_t m_count;
       SharedData m_data;
 #else
  #ifdef WORDS_BIGENDIAN
       SharedData m_data;
       uint32_t m_count;
-      bool m_shouldCache;
-      uint8_t m_flags;
+      uint16_t m_flags;
       uint16_t m_type;
  #else
       SharedData m_data;
       uint32_t m_count;
       uint16_t m_type;
-      bool m_shouldCache;
-      uint8_t m_flags;
+      uint16_t m_flags;
  #endif
 #endif
     };

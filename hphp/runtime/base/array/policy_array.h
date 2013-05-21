@@ -374,10 +374,6 @@ public:
    */
   virtual bool isVectorData() const FOLLY_OVERRIDE;
 
-  virtual SharedVariant *getSharedVariant() const FOLLY_OVERRIDE {
-    return nullptr;
-  }
-
   /**
    * Position-based iterations.
    */

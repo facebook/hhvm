@@ -128,14 +128,6 @@ class StringData {
   void setStatic() const;
   bool isStatic() const { return _count == RefCountStaticValue; }
 
-  /**
-   * Get the wrapped SharedVariant.
-   */
-  SharedVariant *getSharedVariant() const {
-    if (isShared()) return m_big.shared;
-    return nullptr;
-  }
-
   static StringData *Escalate(StringData *in);
 
   /**
@@ -344,7 +336,6 @@ public:
   DECLARE_SMART_ALLOCATION(StringData);
   void dump() const;
   std::string toCPPString() const;
-  static void sweepAll();
 
   static StringData *FindStaticString(const StringData* str);
   static StringData *GetStaticString(const StringData* str);
@@ -385,9 +376,8 @@ public:
       // Calculate padding so that node, shared, and cap are pointer aligned,
       // and ensure cap overlaps the last byte of m_small.
       static const size_t kPadding = sizeof(m_small) -
-        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
+        sizeof(SharedVariant*) - sizeof(uint64_t);
       char junk[kPadding];
-      SweepNode node;
       SharedVariant *shared;
       uint64_t cap;
     } m_big;
@@ -408,8 +398,6 @@ public:
   void releaseData();
   int numericCompare(const StringData *v2) const;
   MutableSlice escalate(uint32_t cap); // change to smart-malloced string
-  void enlist();
-  void delist();
 
   strhash_t hashHelper() const NEVER_INLINE;
 

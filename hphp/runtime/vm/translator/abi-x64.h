@@ -67,6 +67,9 @@ constexpr PhysReg rVmTl      = reg::r12;
  */
 
 const RegSet kCallerSaved = RegSet()
+                          // ------------
+                          // GP registers
+                          // ------------
                           | RegSet(reg::rax)
                           | RegSet(reg::rcx)
                           | RegSet(reg::rdx)
@@ -74,12 +77,15 @@ const RegSet kCallerSaved = RegSet()
                           | RegSet(reg::rdi)
                           | RegSet(reg::r8)
                           | RegSet(reg::r9)
-                          // r10 is reserved by the assembler, and for
-                          // various extremely-specific scratch uses.
-                          | RegSet(reg::r11)
-                          // XMM regs
-                          // | RegSet(reg::xmm0)   Reserved for rMMXScratch0
-                          // | RegSet(reg::xmm1)   Reserved for rMMXScratch1
+                          // r10 is reserved for the assembler (rAsm), and for
+                          //     various extremely-specific scratch uses
+                          // r11 is reserved for CodeGenerator (rCgGP)
+                          //
+                          // -------------
+                          // XMM registers
+                          // -------------
+                          // xmm0 is reserved for CodeGenerator (rCgXMM0)
+                          // xmm1 is reserved for CodeGenerator (rCgXMM1)
                           | RegSet(reg::xmm2)
                           | RegSet(reg::xmm3)
                           | RegSet(reg::xmm4)

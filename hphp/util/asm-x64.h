@@ -412,10 +412,8 @@ namespace reg {
   constexpr RegXMM xmm14(14);
   constexpr RegXMM xmm15(15);
 
-  // rScratch, rXMMScratch[01] are symbolic names for regs that are always free
-  constexpr Reg64  rScratch(r10);
-  constexpr RegXMM rXMMScratch0(xmm0);
-  constexpr RegXMM rXMMScratch1(xmm1);
+  // rAsm is the symbolic name for a reg that is reserved for the assembler
+  constexpr Reg64  rAsm(r10);
 
 #define X(x) if (r == x) return "%"#x
   inline const char* regname(Reg64 r) {
@@ -947,30 +945,30 @@ struct X64Assembler {
   /*
    * For when we a have a memory operand and the operand size is
    * 64-bits, only a 32-bit (sign-extended) immediate is supported.
-   * If the immediate is too big, we'll move it into rScratch first.
+   * If the immediate is too big, we'll move it into rAsm first.
    */
 #define IMM64_STORE_OP(name, instr)             \
   void name##q(Immed i, MemoryRef m) {          \
     if (i.fits(sz::dword)) {                    \
       return instrIM(instr, i, m);              \
     }                                           \
-    movq   (i, reg::rScratch);                  \
-    name##q(reg::rScratch, m);                  \
+    movq   (i, reg::rAsm);                      \
+    name##q(reg::rAsm, m);                      \
   }                                             \
                                                 \
   void name##q(Immed i, IndexedMemoryRef m) {   \
     if (i.fits(sz::dword)) {                    \
       return instrIM(instr, i, m);              \
     }                                           \
-    movq   (i, reg::rScratch);                  \
-    name##q(reg::rScratch, m);                  \
+    movq   (i, reg::rAsm);                      \
+    name##q(reg::rAsm, m);                      \
   }
 
   /*
    * For instructions other than movq, even when the operand size is
    * 64 bits only a 32-bit (sign-extended) immediate is supported.  We
    * provide foo##q instructions that may emit multiple x64
-   * instructions (smashing rScratch) if the immediate does not
+   * instructions (smashing rAsm) if the immediate does not
    * actually fit in a long.
    */
 #define IMM64R_OP(name, instr)                  \
@@ -978,8 +976,8 @@ struct X64Assembler {
     if (imm.fits(sz::dword)) {                  \
       return instrIR(instr, imm, r);            \
     }                                           \
-    movq   (imm, reg::rScratch);                \
-    name##q(reg::rScratch, r);                  \
+    movq   (imm, reg::rAsm);                    \
+    name##q(reg::rAsm, r);                      \
   }
 
 #define FULL_OP(name, instr)                    \
@@ -1044,8 +1042,8 @@ struct X64Assembler {
   void imul(Reg64 r1, Reg64 r2)  { instrRR(instr_imul, r1, r2); }
 
   void imul(Immed im, Reg64 r1) {
-    movq(im, reg::rScratch);
-    imul(reg::rScratch, r1);
+    movq(im, reg::rAsm);
+    imul(reg::rAsm, r1);
   }
 
   void push(Reg64 r)  { instrR(instr_push, r); }
@@ -1118,21 +1116,21 @@ struct X64Assembler {
 
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
-  // May smash rScratch.
+  // May smash rAsm.
   void jmp(CodeAddress dest) {
     if (!jmpDeltaFits(dest)) {
-      movq (dest, reg::rScratch);
-      jmp  (reg::rScratch);
+      movq (dest, reg::rAsm);
+      jmp  (reg::rAsm);
       return;
     }
     emitJ32(instr_jmp, ssize_t(dest));
   }
 
-  // May smash rScratch.
+  // May smash rAsm.
   void call(CodeAddress dest) {
     if (!jmpDeltaFits(dest)) {
-      movq (dest, reg::rScratch);
-      call (reg::rScratch);
+      movq (dest, reg::rAsm);
+      call (reg::rAsm);
       return;
     }
     emitJ32(instr_call, ssize_t(dest));
@@ -1945,8 +1943,8 @@ public:
     if (deltaFits(imm, sz::dword)) {
       emitIM(instr_mov, rdest, reg::noreg, sz::byte, off, imm);
     } else {
-      mov_imm64_reg(imm, reg::rScratch);
-      emitRM(instr_mov, rdest, reg::noreg, sz::byte, off, reg::rScratch);
+      mov_imm64_reg(imm, reg::rAsm);
+      emitRM(instr_mov, rdest, reg::noreg, sz::byte, off, reg::rAsm);
     }
   }
   // mov %rsrc, disp(%rdest)
@@ -2043,8 +2041,8 @@ public:
       name ## _imm32_reg64(imm, rdest);                                 \
       return;                                                           \
     }                                                                   \
-    mov_imm64_reg(imm, reg::rScratch);                                  \
-    name ## _reg64_reg64(reg::rScratch, rdest);                         \
+    mov_imm64_reg(imm, reg::rAsm);                                      \
+    name ## _reg64_reg64(reg::rAsm, rdest);                             \
   }                                                                     \
   /* opq rsrc, disp(rdest) */                                           \
   inline void name ## _reg64_disp_reg64(RegNumber rsrc, int disp, \
@@ -2110,8 +2108,8 @@ public:
 
   // imul imm, rdest
   inline void imul_imm64_reg64(int64_t imm, RegNumber rdest) {
-    mov_imm64_reg(imm, reg::rScratch);
-    imul_reg64_reg64(reg::rScratch, rdest);
+    mov_imm64_reg(imm, reg::rAsm);
+    imul_reg64_reg64(reg::rAsm, rdest);
   }
 
   inline void xchg_reg64_reg64(RegNumber rsrc, RegNumber rdest) {

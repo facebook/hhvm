@@ -112,6 +112,10 @@ struct CodegenState {
   AsmInfo* asmInfo;
 };
 
+constexpr Reg64  rCgGP  (reg::r11);
+constexpr RegXMM rCgXMM0(reg::xmm0);
+constexpr RegXMM rCgXMM1(reg::xmm1);
+
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 

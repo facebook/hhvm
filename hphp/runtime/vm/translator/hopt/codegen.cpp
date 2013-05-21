@@ -309,7 +309,7 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
   if ((kLowGPRegs - liveRegs).findFirst(selectedReg)) {
     return selectedReg;
   }
-  return rScratch;
+  return rCgGP;
 }
 
 Address CodeGenerator::cgInst(IRInstruction* inst) {
@@ -531,7 +531,7 @@ void CodeGenerator::emitLoadImm(CodeGenerator::Asm& as, int64_t val,
     if (val == 0) {
       as.pxor_xmm_xmm(dstReg, dstReg);
     } else {
-      // Can't move immediate directly into XMM register, so use rScratch
+      // Can't move immediate directly into XMM register, so use m_rScratch
       as.emitImmReg(val, m_rScratch);
       emitMovRegReg(as, m_rScratch, dstReg);
     }
@@ -613,14 +613,14 @@ static int64_t convIntToDouble(int64_t i) {
  * Returns a XMM register containing the value of SSATmp tmp,
  * which can be either a bool, an int, or a double.
  * If the value is already in a XMM register, simply returns it.
- * Otherwise, the value is moved into rXMMScratch, which is returned.
+ * Otherwise, the value is moved into rCgXMM, which is returned.
  * If instructions to convert to a double at runtime are needed,
  * they're emitted in 'as'.
  */
 PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
                                   X64Assembler& as,
                                   const RegAllocInfo& allocInfo,
-                                  RegXMM rXMMScratch) {
+                                  RegXMM rCgXMM) {
   assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int) || tmp->isA(Type::Dbl));
 
   PhysReg reg = allocInfo[tmp].getReg();
@@ -632,15 +632,15 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
   if (reg != InvalidReg) {
     // Case 2.a: Dbl stored in GP reg
     if (tmp->isA(Type::Dbl)) {
-      emitMovRegReg(as, reg, rXMMScratch);
-      return rXMMScratch;
+      emitMovRegReg(as, reg, rCgXMM);
+      return rCgXMM;
     }
     // Case 2.b: Bool or Int stored in GP reg
     assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int));
     zeroExtendIfBool(as, tmp, allocInfo[tmp]);
-    as.pxor_xmm_xmm(rXMMScratch, rXMMScratch);
-    as.cvtsi2sd_reg64_xmm(reg, rXMMScratch);
-    return rXMMScratch;
+    as.pxor_xmm_xmm(rCgXMM, rCgXMM);
+    as.cvtsi2sd_reg64_xmm(reg, rCgXMM);
+    return rCgXMM;
   }
 
   // Case 3: tmp is a constant
@@ -653,8 +653,8 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
     val = convIntToDouble(val);
   }
   emitLoadImm(as, val, m_rScratch);
-  emitMovRegReg(as, m_rScratch, rXMMScratch);
-  return rXMMScratch;
+  emitMovRegReg(as, m_rScratch, rCgXMM);
+  return rCgXMM;
 }
 
 void CodeGenerator::doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1) {
@@ -717,9 +717,9 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
     CG_PUNT(emitCompare);
   }
   if (src1Type == Type::Dbl || src2Type == Type::Dbl) {
-    PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, rXMMScratch0);
-    PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rXMMScratch1);
-    assert(srcReg1 != rXMMScratch1 && srcReg2 != rXMMScratch0);
+    PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, rCgXMM0);
+    PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rCgXMM1);
+    assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
     doubleCmp(m_as, srcReg1, srcReg2);
   } else {
     auto srcReg1 = m_regs[src1].getReg();
@@ -838,12 +838,12 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
     }
   }
   std::vector<MoveInfo> howTo;
-  doRegMoves(moves, int(reg::rScratch), howTo);
+  doRegMoves(moves, int(rCgGP), howTo);
 
   // Execute the plan
   for (size_t i = 0; i < howTo.size(); ++i) {
     if (howTo[i].m_kind == MoveInfo::Move) {
-      if (howTo[i].m_reg2 == reg::rScratch) {
+      if (howTo[i].m_reg2 == rCgGP) {
         emitMovRegReg(a, howTo[i].m_reg1, howTo[i].m_reg2);
       } else {
         ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
@@ -905,12 +905,12 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
     switch (arg.getKind()) {
       case ArgDesc::Reg:
         if (arg.isZeroExtend()) {
-          a.  movzbl(rbyte(srcReg), r32(rScratch));
-          a.  push(rScratch);
+          a.  movzbl(rbyte(srcReg), r32(rCgGP));
+          a.  push(rCgGP);
         } else {
           if (srcReg.isXMM()) {
-            emitMovRegReg(a, srcReg, rScratch);
-            a.push(rScratch);
+            emitMovRegReg(a, srcReg, rCgGP);
+            a.push(rCgGP);
           } else {
             a.push(srcReg);
           }
@@ -929,16 +929,16 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
         } else {
           // 4 bytes of garbage:
           a.  pushl(eax);
-          // get the type in the right place in rScratch before pushing it
-          a.  movb (rbyte(srcReg), rbyte(rScratch));
-          a.  shll (CHAR_BIT, r32(rScratch));
-          a.  pushl(r32(rScratch));
+          // get the type in the right place in rCgGP before pushing it
+          a.  movb (rbyte(srcReg), rbyte(rCgGP));
+          a.  shll (CHAR_BIT, r32(rCgGP));
+          a.  pushl(r32(rCgGP));
         }
         break;
 
       case ArgDesc::Imm:
-        a.    emitImmReg(arg.getImm(), rScratch);
-        a.    push(rScratch);
+        a.    emitImmReg(arg.getImm(), rCgGP);
+        a.    push(rCgGP);
         break;
 
       case ArgDesc::Addr:
@@ -1259,12 +1259,12 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
   if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
     PhysReg dstReg  = m_regs[dst].getReg();
     PhysReg resReg  = dstReg.isXMM() && dstReg != m_regs[src2].getReg() ?
-                      dstReg : PhysReg(rXMMScratch0);
+                      dstReg : PhysReg(rCgXMM0);
     assert(resReg.isXMM());
 
     PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, resReg);
-    PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rXMMScratch1);
-    assert(srcReg1 != rXMMScratch1 && srcReg2 != rXMMScratch0);
+    PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rCgXMM1);
+    assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
 
     emitMovRegReg(m_as, srcReg1, resReg);
 
@@ -1550,9 +1550,9 @@ void CodeGenerator::cgOpCmpHelper(
     else if (type1 == Type::Dbl || type2 == Type::Dbl) {
       if ((type1 == Type::Dbl || type1 == Type::Int) &&
           (type2 == Type::Dbl || type2 == Type::Int)) {
-        PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, rXMMScratch0);
-        PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rXMMScratch1);
-        assert(srcReg1 != rXMMScratch1 && srcReg2 != rXMMScratch0);
+        PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, rCgXMM0);
+        PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rCgXMM1);
+        assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
         doubleCmp(m_as, srcReg1, srcReg2);
         setFromFlags();
       } else {
@@ -1967,7 +1967,7 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
     // cause false dependencies to prevent register renaming from kicking
     // in. Break the dependency chain by zeroing out the XMM reg.
     PhysReg srcReg = m_regs[src].getReg();
-    PhysReg xmmReg = dstReg.isXMM() ? dstReg : PhysReg(rXMMScratch0);
+    PhysReg xmmReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM0);
     m_as.pxor_xmm_xmm(xmmReg, xmmReg);
     m_as.cvtsi2sd_reg64_xmm(srcReg, xmmReg);
     zeroExtendIfBool(m_as, src, m_regs[src]);

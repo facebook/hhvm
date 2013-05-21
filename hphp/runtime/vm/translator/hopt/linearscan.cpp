@@ -284,13 +284,14 @@ LinearScan::LinearScan(IRFactory* irFactory)
   }
 
   // Mark reserved regs.
-  m_regs[int(PhysReg(rVmSp))]       .m_reserved = true;
-  m_regs[int(PhysReg(rsp))]         .m_reserved = true;
-  m_regs[int(PhysReg(rVmFp))]       .m_reserved = true;
-  m_regs[int(PhysReg(rScratch))]    .m_reserved = true;
-  m_regs[int(PhysReg(rVmTl))]       .m_reserved = true;
-  m_regs[int(PhysReg(rXMMScratch0))].m_reserved = true;
-  m_regs[int(PhysReg(rXMMScratch1))].m_reserved = true;
+  m_regs[int(PhysReg(rVmSp))]  .m_reserved = true;
+  m_regs[int(PhysReg(rsp))]    .m_reserved = true;
+  m_regs[int(PhysReg(rVmFp))]  .m_reserved = true;
+  m_regs[int(PhysReg(rAsm))]   .m_reserved = true;
+  m_regs[int(PhysReg(rVmTl))]  .m_reserved = true;
+  m_regs[int(PhysReg(rCgGP))]  .m_reserved = true;
+  m_regs[int(PhysReg(rCgXMM0))].m_reserved = true;
+  m_regs[int(PhysReg(rCgXMM1))].m_reserved = true;
 
   // Reserve extra regs for testing purpose.
   uint32_t numFreeRegs = RuntimeOption::EvalHHIRNumFreeRegs;

@@ -656,8 +656,8 @@ emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
         a. store_imm64_disp_reg64(imm, off, r);
         return;
       }
-      emitImmReg(a, imm, rScratch);
-      immReg = rScratch;
+      emitImmReg(a, imm, rAsm);
+      immReg = rAsm;
     }
     a.   store_reg64_disp_reg64(immReg, off, r);
   } else if (size == sz::dword) {
@@ -905,8 +905,8 @@ inline void emitCopyToAligned(X64Assembler& a,
                               int destOff) {
   static_assert(sizeof(TypedValue) == 16,
                 "emitCopyToAligned assumes sizeof(TypedValue) is 128 bits");
-  a.    movdqa  (src[srcOff], rXMMScratch0);
-  a.    movdqa  (rXMMScratch0, dest[destOff]);
+  a.    movdqa  (src[srcOff], xmm0);
+  a.    movdqa  (xmm0, dest[destOff]);
 }
 
 // ArgManager -- support for passing VM-level data to helper functions.

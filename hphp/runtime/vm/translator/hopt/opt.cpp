@@ -120,7 +120,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   auto dce = [&](const char* which) {
     if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
     eliminateDeadCode(trace, irFactory);
-    finishPass(folly::format("after {} DCE", which).str().c_str());
+    finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
   if (false && RuntimeOption::EvalHHIRMemOpt) {
@@ -135,7 +135,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
     traceBuilder->reoptimize();
-    finishPass("after reoptimize");
+    finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/simplifier.h"
 #include "hphp/runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/runtime/vm/translator/hopt/mutation.h"
 
 namespace HPHP {
 namespace JIT {
@@ -143,6 +144,9 @@ bool isUnguardedLoad(IRInstruction* inst) {
 // removeUnreachable erases unreachable blocks from trace, and returns
 // a sorted list of the remaining blocks.
 BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
+  FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
+
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction. Targets that become
   //    unreachable from this pass will be eliminated in step 2 below.
@@ -162,14 +166,28 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
 
   // 2. get a list of reachable blocks by sorting them, and erase any
   //    blocks that are unreachable.
+  bool needsReflow = false;
   BlockList blocks = sortCfg(trace, *factory);
   StateVector<Block, bool> reachable(factory, false);
   for (Block* b : blocks) reachable[b] = true;
   forEachTrace(trace, [&](Trace* t) {
-    t->getBlocks().remove_if([&](Block* b) {
-      return !reachable[b];
-    });
+    for (auto bit = t->begin(); bit != t->end();) {
+      if (reachable[*bit]) {
+        ++bit;
+        continue;
+      }
+      FTRACE(5, "erasing block {}\n", (*bit)->getId());
+      if ((*bit)->getTaken() && (*bit)->back()->op() == Jmp_) {
+        needsReflow = true;
+      }
+      bit = t->erase(bit);
+    }
   });
+
+  // 3. if we removed any whole blocks that ended in Jmp_
+  //    instructions, reflow all types in case they change the
+  //    incoming types of DefLabel instructions.
+  if (needsReflow) reflowTypes(blocks.front(), blocks);
 
   return blocks;
 }

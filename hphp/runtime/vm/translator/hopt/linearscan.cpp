@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/translator/hopt/tracebuilder.h"
 #include "hphp/runtime/vm/translator/hopt/codegen.h"
 #include "hphp/runtime/vm/translator/hopt/state_vector.h"
+#include "hphp/runtime/vm/translator/hopt/check.h"
 #include "hphp/runtime/vm/translator/physreg.h"
 #include "hphp/runtime/vm/translator/abi-x64.h"
 #include <boost/noncopyable.hpp>
@@ -909,8 +910,12 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
         auto reg = findLabelSrcReg(m_allocInfo, srcInst, i, regIndex);
         // Until we handle loops, it's a bug to try and allocate a
         // register to a DefLabel's dest before all of its incoming
-        // Jmp_s have had their srcs allocated.
-        always_assert(reg != reg::noreg);
+        // Jmp_s have had their srcs allocated, unless the incoming
+        // block is unreachable.
+        const DEBUG_ONLY bool unreachable =
+          std::find(m_blocks.begin(), m_blocks.end(),
+                    srcInst->getBlock()) == m_blocks.end();
+        always_assert(reg != reg::noreg || unreachable);
         return reg;
       }
     }

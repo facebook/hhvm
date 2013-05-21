@@ -61,6 +61,8 @@ struct RegState {
  *    following the DefLabel before any other instructions.
  * 3. if any instruction is isBlockEnd(), it must be last
  * 4. if the last instruction isTerminal(), block->next must be null.
+ * 5. All the incoming edges to the DefLabel must be from blocks listed
+ *    in the block list for this block's Trace.
  */
 bool checkBlock(Block* b) {
   assert(!b->empty());
@@ -78,13 +80,25 @@ bool checkBlock(Block* b) {
     // cannot fall-through to join block expecting values
     assert(b->getNext()->front()->getNumDsts() == 0);
   }
-  auto i = b->begin(), e = b->end();
-  ++i;
-  if (b->back()->isBlockEnd()) --e;
-  for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(i, e)) {
-    assert(inst.op() != DefLabel);
-    assert(!inst.isBlockEnd());
+
+  {
+    auto i = b->begin(), e = b->end();
+    ++i;
+    if (b->back()->isBlockEnd()) --e;
+    for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(i, e)) {
+      assert(inst.op() != DefLabel);
+      assert(!inst.isBlockEnd());
+    }
   }
+
+  for (int i = 0; i < b->front()->getNumDsts(); ++i) {
+    auto const traceBlocks = b->getTrace()->getBlocks();
+    b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*){
+      assert(std::find(traceBlocks.begin(), traceBlocks.end(),
+                       inst->getBlock()) != traceBlocks.end());
+    });
+  }
+
   return true;
 }
 
@@ -101,10 +115,8 @@ bool checkBlock(Block* b) {
  * 4. Treat tmps defined by DefConst as always defined.
  */
 bool checkCfg(Trace* trace, const IRFactory& factory) {
-  forEachTraceBlock(trace, [&](Block* b) {
-    checkBlock(b);
-  });
-  BlockList blocks = sortCfg(trace, factory);
+  auto const blocks = sortCfg(trace, factory);
+  forEachTraceBlock(trace, checkBlock);
   std::vector<BlockPtrList> children = findDomChildren(blocks);
 
   // visit dom tree in preorder, checking all tmps

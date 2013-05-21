@@ -27,8 +27,10 @@ namespace HPHP { namespace JIT {
  * each block falls through to the next block but this is not guaranteed;
  * traces may contain internal forward-only control flow.
  */
-class Trace : boost::noncopyable {
-public:
+struct Trace : private boost::noncopyable {
+  typedef std::list<Block*>::const_iterator const_iterator;
+  typedef std::list<Block*>::iterator iterator;
+
   explicit Trace(Block* first, uint32_t bcOff)
     : m_bcOff(bcOff)
     , m_main(nullptr)
@@ -43,11 +45,37 @@ public:
 
   std::list<Block*>& getBlocks() { return m_blocks; }
   const std::list<Block*>& getBlocks() const { return m_blocks; }
+
   Block* front() { return *m_blocks.begin(); }
   Block* back() { auto it = m_blocks.end(); return *(--it); }
   const Block* front() const { return *m_blocks.begin(); }
   const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
 
+  const_iterator cbegin() const { return getBlocks().cbegin(); }
+  const_iterator cend()   const { return getBlocks().cend(); }
+  const_iterator begin()  const { return getBlocks().begin(); }
+  const_iterator end()    const { return getBlocks().end(); }
+        iterator begin()        { return getBlocks().begin(); }
+        iterator end()          { return getBlocks().end(); }
+
+  /*
+   * Unlink a block from a trace.  Updates any successor blocks that
+   * have a DefLabel with a dest depending on this block.
+   */
+  iterator erase(iterator it) {
+    Block* b = *it;
+    it = m_blocks.erase(it);
+    b->setTrace(nullptr);
+    if (b->back()->op() == Jmp_) {
+      b->back()->setTaken(nullptr);
+    }
+    b->setNext(nullptr);
+    return it;
+  }
+
+  /*
+   * Add a block to the back of this trace's block list.
+   */
   Block* push_back(Block* b) {
     b->setTrace(this);
     m_blocks.push_back(b);

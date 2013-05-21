@@ -164,8 +164,8 @@ static void thrift_error(CStrRef what, TError why) {
 
 class CompactWriter {
   public:
-    explicit CompactWriter(CObjRef _transportobj) :
-      transport(_transportobj),
+    explicit CompactWriter(PHPOutputTransport *transport) :
+      transport(transport),
       version(VERSION),
       state(STATE_CLEAR),
       lastFieldNum(0),
@@ -192,7 +192,8 @@ class CompactWriter {
     }
 
   private:
-    PHPOutputTransport transport;
+    PHPOutputTransport* transport;
+
     uint8_t version;
     CState state;
     uint16_t lastFieldNum;
@@ -328,7 +329,7 @@ class CompactWriter {
               bits = htolell(u.i);
             }
 
-            transport.write((char*)&bits, 8);
+            transport->write((char*)&bits, 8);
           }
           break;
 
@@ -338,7 +339,7 @@ class CompactWriter {
             String s = value.toString();
             auto slice = s.slice();
             writeVarint(slice.len);
-            transport.write(slice.ptr, slice.len);
+            transport->write(slice.ptr, slice.len);
             break;
           }
 
@@ -433,7 +434,7 @@ class CompactWriter {
     }
 
     void writeUByte(uint8_t n) {
-      transport.writeI8(n);
+      transport->writeI8(n);
     }
 
     void writeI(int64_t n) {
@@ -454,13 +455,13 @@ class CompactWriter {
         }
       }
 
-      transport.write((char*)buf, wsize);
+      transport->write((char*)buf, wsize);
     }
 
     void writeString(CStrRef s) {
       auto slice = s.slice();
       writeVarint(slice.len);
-      transport.write(slice.ptr, slice.len);
+      transport->write(slice.ptr, slice.len);
     }
 
     uint64_t i64ToZigzag(int64_t n) {
@@ -920,10 +921,14 @@ void f_thrift_protocol_write_compact(CObjRef transportobj,
                                      int64_t msgtype,
                                      CObjRef request_struct,
                                      int seqid) {
-  CompactWriter writer(transportobj);
+  PHPOutputTransport transport(transportobj);
+
+  CompactWriter writer(&transport);
   writer.setWriteVersion(s_compact_request_data->version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
   writer.write(request_struct);
+
+  transport.flush();
 }
 
 Variant f_thrift_protocol_read_compact(CObjRef transportobj,

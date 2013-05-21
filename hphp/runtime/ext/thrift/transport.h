@@ -139,14 +139,15 @@ public:
   }
 
   ~PHPOutputTransport() {
-    // flush() and directFlush() call into user code which may throw
-    // an exception. Because this is a destructor, we might already be
+    // Because this is a destructor, we might already be
     // in the process of unwinding when this function is called, so we
     // need to ensure that no exceptions can escape so that the unwinder
     // does not terminate the process.
     try {
-      flush();
-      directFlush();
+      if (buffer_used != 0) {
+        raise_warning("runtime/ext_thrift: "
+                      "Output buffer has %lu unflushed bytes", buffer_used);
+      }
     } catch (...) {
       handle_destructor_exception();
     }
@@ -154,7 +155,7 @@ public:
 
   void write(const char* data, size_t len) {
     if ((len + buffer_used) > buffer_size) {
-      flush();
+      writeBufferToTransport();
     }
     if (len > buffer_size) {
       directWrite(data, len);
@@ -194,12 +195,17 @@ public:
     write(str, len);
   }
 
-  void flush() {
+  void writeBufferToTransport() {
     if (buffer_used) {
       directWrite(buffer, buffer_used);
       buffer_ptr = buffer;
       buffer_used = 0;
     }
+  }
+
+  void flush() {
+    writeBufferToTransport();
+    directFlush();
   }
 
 protected:

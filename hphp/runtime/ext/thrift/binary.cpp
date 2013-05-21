@@ -471,6 +471,8 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
   Variant spec = f_hphp_get_static_property(request_struct->o_getClassName(),
                                             "_TSPEC");
   binary_serialize_spec(request_struct, transport, spec.toArray());
+
+  transport.flush();
 }
 
 Variant f_thrift_protocol_read_binary(CObjRef transportobj,

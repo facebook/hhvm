@@ -26,6 +26,12 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/string_util.h"
 
+#if HAVE_STRUCT_STAT_ST_ATIM
+  #define st_atimespec st_atim
+  #define st_ctimespec st_ctim
+  #define st_mtimespec st_mtim
+#endif
+
 namespace HPHP {
 class Unit;
 
@@ -88,7 +94,7 @@ class PhpFileWrapper {
   }
 public:
   PhpFileWrapper(const struct stat &s, PhpFile *phpFile) :
-    m_mtime(s.st_mtim), m_ino(s.st_ino), m_devId(s.st_dev),
+    m_mtime(s.st_mtimespec), m_ino(s.st_ino), m_devId(s.st_dev),
     m_phpFile(phpFile) {
   }
   ~PhpFileWrapper() {}
@@ -96,7 +102,7 @@ public:
     if (isAuthoritativeRepo()) {
       return false;
     }
-    return timespecCompare(m_mtime, s.st_mtim) < 0 ||
+    return timespecCompare(m_mtime, s.st_mtimespec) < 0 ||
            m_ino != s.st_ino ||
            m_devId != s.st_dev;
   }

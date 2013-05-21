@@ -11630,7 +11630,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     return false;
   }
   struct timespec tsBegin, tsEnd;
-  gettime(CLOCK_MONOTONIC, &tsBegin);
+  Timer::GetMonotonicTime(tsBegin);
   // Doc says even find _could_ invalidate iterator, in pactice it should
   // be very rare, so go with it now.
   for (SrcDB::iterator it = m_srcDB.begin(); it != m_srcDB.end(); ++it) {
@@ -11643,7 +11643,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     }
   }
   s_writeLease.drop();
-  gettime(CLOCK_MONOTONIC, &tsEnd);
+  Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
     Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);

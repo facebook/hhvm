@@ -783,25 +783,18 @@ ClassCache::lookup(Handle handle, StringData *name,
                    const void* unused) {
   ClassCache* thiz = cacheAtHandle(handle);
   Pair *pair = thiz->keyToPair(name);
-  String normName;
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, name)) {
     TRACE(1, "ClassCache miss: %s\n", name->data());
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      normName = normalizeNS(name);
+      String normName = normalizeNS(name);
       if (normName) {
-        name = normName.get();
-        ne = Unit::GetNamedEntity(name);
-        c = Unit::lookupClass(ne);
-        if (!c) {
-          c = Unit::loadMissingClass(ne, name);
-        }
+        return lookup(handle, normName.get(), unused);
       } else {
         c = Unit::loadMissingClass(ne, name);
       }
-
       if (UNLIKELY(!c)) {
         undefinedError(Strings::UNKNOWN_CLASS, name->data());
       }

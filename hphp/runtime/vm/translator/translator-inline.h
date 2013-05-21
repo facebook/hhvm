@@ -115,14 +115,11 @@ struct EagerVMRegAnchor {
   VMRegState m_old;
   EagerVMRegAnchor() {
     if (debug) {
-      const Cell* fp = vmfp();
-      const Cell* sp = vmsp();
-      const uchar* pc = vmpc();
+      DEBUG_ONLY const Cell* fp = vmfp();
+      DEBUG_ONLY const Cell* sp = vmsp();
+      DEBUG_ONLY const uchar* pc = vmpc();
       VMRegAnchor _;
       assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
-      // compiler complains about unused variables
-      fp = sp = nullptr;
-      pc = nullptr;
     }
     m_old = tl_regState;
     tl_regState = REGSTATE_CLEAN;

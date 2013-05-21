@@ -1579,7 +1579,7 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
     fn = gen(LdClsCtor, cls);
   }
   SSATmp* obj2 = gen(IncRef, obj);
-  int32_t numArgsAndCtorFlag = numParams | (1 << 31);
+  int32_t numArgsAndCtorFlag = ActRec::encodeNumArgs(numParams, true);
   emitFPushActRec(fn, obj2, numArgsAndCtorFlag, nullptr);
 }
 

@@ -271,17 +271,22 @@ struct ActRec {
    */
 
   int32_t numArgs() const {
-    return m_numArgsAndCtorFlag & ~(1u << 31);
+    return decodeNumArgs(m_numArgsAndCtorFlag).first;
   }
 
   bool isFromFPushCtor() const {
-    return m_numArgsAndCtorFlag & (1u << 31);
+    return decodeNumArgs(m_numArgsAndCtorFlag).second;
   }
 
   static inline uint32_t
   encodeNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
     assert((numArgs & (1u << 31)) == 0);
     return numArgs | (isFPushCtor << 31);
+  }
+
+  static inline std::pair<uint32_t,bool>
+  decodeNumArgs(uint32_t numArgs) {
+    return { numArgs & ~(1u << 31), numArgs & (1u << 31) };
   }
 
   void initNumArgs(uint32_t numArgs, bool isFPushCtor = false) {

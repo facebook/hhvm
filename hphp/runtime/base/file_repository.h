@@ -26,6 +26,10 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/string_util.h"
 
+#ifdef __APPLE__
+  #define st_mtim st_mtimespec
+#endif
+
 namespace HPHP {
 class Unit;
 

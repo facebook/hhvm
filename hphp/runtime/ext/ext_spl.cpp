@@ -33,6 +33,7 @@ static StaticString s_valid("valid");
 static StaticString s_next("next");
 static StaticString s_current("current");
 static StaticString s_key("key");
+static StaticString s_getIterator("getIterator");
 
 static const StaticString spl_classes[] = {
   StaticString("AppendIterator"),
@@ -199,12 +200,34 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
   return ret;
 }
 
+Object get_traversable_object_iterator(CVarRef obj) {
+  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
+    raise_error("Argument must implement interface Traversable");
+  }
+
+  bool isIteratorAggregate;
+  Object itObj = obj.getObjectData()
+    ->iterableObject(isIteratorAggregate, true);
+
+  if (!isIteratorAggregate) {
+    if (obj.instanceof(SystemLib::s_IteratorAggregateClass)) {
+      raise_error("Objects returned by getIterator() must be traversable or "
+                  "implement interface Iterator");
+    } else {
+      raise_error(
+        "Class %s must implement interface Traversable as part of either "
+        "Iterator or IteratorAggregate",
+        obj.toObject()->o_getClassName()->data()
+      );
+    }
+  }
+
+  return itObj;
+}
+
 Variant f_iterator_apply(CVarRef obj, CVarRef func,
                          CArrRef params /* = null_array */) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
-  Object pobj = obj.toObject();
+  Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
@@ -218,10 +241,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
 }
 
 Variant f_iterator_count(CVarRef obj) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
-  Object pobj = obj.toObject();
+  Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
@@ -232,11 +252,9 @@ Variant f_iterator_count(CVarRef obj) {
 }
 
 Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
+  Object pobj = get_traversable_object_iterator(obj);
   Array ret(Array::Create());
-  Object pobj = obj.toObject();
+
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     Variant val = pobj->o_invoke_few_args(s_current, 0);

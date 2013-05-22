@@ -5358,6 +5358,12 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->setReturnTypeConstraint(
         StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
 
+    // add the original filename for flattened traits
+    auto const originalFilename = p.m_meth->getOriginalFilename();
+    if (!originalFilename.empty()) {
+      fe->setOriginalFilename(StringData::GetStaticString(originalFilename));
+    }
+
     m_curFunc = fe;
 
     if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {

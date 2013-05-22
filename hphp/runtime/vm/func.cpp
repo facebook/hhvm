@@ -462,7 +462,11 @@ void Func::prettyPrint(std::ostream& out) const {
     if (m_attrs & AttrAbstract) { out << "abstract "; }
     if (m_attrs & AttrFinal) { out << "final "; }
     if (m_attrs & AttrPhpLeafFn) { out << "(leaf) "; }
-    out << preClass()->name()->data() << "::" << m_name->data();
+    if (cls() != nullptr) {
+      out << fullName()->data();
+    } else {
+      out << preClass()->name()->data() << "::" << m_name->data();
+    }
   } else {
     out << "Function " << m_name->data();
   }
@@ -641,7 +645,7 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_info(nullptr), m_refBitVec(nullptr), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false) {
+    m_hasGeneratorAsBody(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -702,6 +706,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_containsCalls(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
+  , m_originalFilename(nullptr)
 {}
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
@@ -725,6 +730,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_containsCalls(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
+  , m_originalFilename(nullptr)
 {}
 
 FuncEmitter::~FuncEmitter() {
@@ -966,6 +972,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
+  f->shared()->m_originalFilename = m_originalFilename;
   return f;
 }
 
@@ -1052,6 +1059,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_fpitab)
     (m_userAttributes)
     (m_retTypeConstraint)
+    (m_originalFilename)
     ;
 }
 

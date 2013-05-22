@@ -859,13 +859,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   const Func* func = fp->m_func;
   assert(func);
   func->validate();
-  string funcName;
-  if (func->isMethod()) {
-    funcName = string(func->preClass()->name()->data()) + "::" +
-      string(func->name()->data());
-  } else {
-    funcName = string(func->name()->data());
-  }
+  string funcName(func->fullName()->data());
   os << "{func:" << funcName
      << ",soff:" << fp->m_soff
      << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : nullptr)
@@ -2407,6 +2401,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         Unit *unit = fp->m_func->unit();
         assert(unit);
         const char* filename = unit->filepath()->data();
+        if (fp->m_func->originalFilename()) {
+          filename = fp->m_func->originalFilename()->data();
+        }
         assert(filename);
         Offset off = pc;
 
@@ -2441,9 +2438,12 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
       auto const prevUnit = prevFp->m_func->unit();
-      frame.set(s_file,
-                const_cast<StringData*>(prevUnit->filepath()),
-                true);
+      auto prevFile = prevUnit->filepath();
+      if (prevFp->m_func->originalFilename()) {
+        prevFile = prevFp->m_func->originalFilename();
+      }
+      assert(prevFile);
+      frame.set(s_file, const_cast<StringData*>(prevFile), true);
 
       // In the normal method case, the "saved pc" for line number printing is
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call

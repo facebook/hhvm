@@ -452,6 +452,10 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
 
+  // Preserve original filename (as this varies per-function and not per-unit
+  // in the case of methods imported from flattened traits)
+  cloneMeth->setOriginalFilename(meth->getFileScope()->getName());
+
   return cloneMeth;
 }
 

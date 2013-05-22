@@ -199,12 +199,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   Transl::VMRegAnchor _;
   std::ostringstream fname;
-  if (func->preClass() != nullptr) {
-    fname << func->preClass()->name()->data() << "::"
-      << func->name()->data() << "()";
-  } else {
-    fname << func->name()->data() << "()";
-  }
+  fname << func->fullName()->data() << "()";
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);

@@ -756,7 +756,17 @@ predictOutputs(const Tracelet& t,
   // lot. Get more conservative as evidence mounts that this is a
   // polymorphic tracelet.
   if (tx64->numTranslations(t.m_sk) >= kTooPolyPred) return KindOfInvalid;
-  if (hasImmVector(ni->op())) {
+  if (ni->op() == OpCGetS) {
+    const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
+    if (propName) {
+      pred = predictType(TypeProfileKey(TypeProfileKey::StaticPropName,
+                                        propName));
+      TRACE(1, "prediction for static fields named %s: %d, %f\n",
+            propName->data(),
+            pred.first,
+            pred.second);
+    }
+  } else if (hasImmVector(ni->op())) {
     pred = predictMVec(ni);
   }
   if (debug && pred.second < kAccept) {
@@ -1183,7 +1193,7 @@ static const struct {
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpCGetS,       {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpCGetS,       {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpCGetM,       {MVector,          Stack1,       OutPred,           1 }},
   { OpVGetL,       {Local,            Stack1,       OutVInputL,        1 }},
   { OpVGetN,       {Stack1,           Stack1,       OutVUnknown,       0 }},

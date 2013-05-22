@@ -4801,7 +4801,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   TypedValue* clsref = m_stack.topTV();                   \
   TypedValue* nameCell = m_stack.indTV(1);                \
   TypedValue* output = nameCell;                          \
-  StringData* name;                                       \
   TypedValue* val;                                        \
   bool visible, accessible;                               \
   lookup_sprop(m_fp, clsref, name, nameCell, val, visible, \
@@ -4830,7 +4829,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
 } while (0)
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetS(PC& pc) {
+  StringData* name;
   GETS(false);
+  if (shouldProfile() && name && name->isStatic()) {
+    recordType(TypeProfileKey(TypeProfileKey::StaticPropName, name),
+               m_stack.top()->m_type);
+  }
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
@@ -4890,6 +4894,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetS(PC& pc) {
+  StringData* name;
   GETS(true);
 }
 #undef GETS
@@ -4949,6 +4954,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   bool e;
   if (!(visible && accessible)) {
@@ -5077,6 +5083,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   bool e;
   if (!(visible && accessible)) {
@@ -5380,6 +5387,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncDecS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   DECODE(unsigned char, op);
   if (!(visible && accessible)) {

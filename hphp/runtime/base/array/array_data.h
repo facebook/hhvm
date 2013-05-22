@@ -55,26 +55,14 @@ class ArrayData : public Countable {
  public:
   static const ssize_t invalid_index = -1;
 
-  explicit ArrayData(ArrayKind kind, bool nonsmart = false)
-    : m_size(-1)
-    , m_kind(kind)
-    , m_nonsmart(nonsmart)
-    , m_pos(0)
-    , m_strongIterators(nullptr) {
-  }
-  explicit ArrayData(ArrayKind kind, bool nonsmart, uint size)
-      : m_size(size)
-      , m_kind(kind)
-      , m_nonsmart(nonsmart)
-      , m_pos(size ? 0 : ArrayData::invalid_index)
-      , m_strongIterators(nullptr) {
+  explicit ArrayData(ArrayKind kind, bool nonsmart = false) :
+    m_size(-1), m_pos(0), m_strongIterators(0), m_kind(kind),
+    m_nonsmart(nonsmart) {
   }
   ArrayData(const ArrayData *src, ArrayKind kind,
-            bool nonsmart = false)
-    : m_kind(src->m_kind)
-    , m_nonsmart(nonsmart)
-    , m_pos(src->m_pos)
-    , m_strongIterators(nullptr) {
+            bool nonsmart = false) :
+    m_pos(src->m_pos), m_strongIterators(0), m_kind(src->m_kind),
+    m_nonsmart(nonsmart) {
   }
 
   static HphpArray* Make(uint capacity);
@@ -194,7 +182,7 @@ class ArrayData : public Countable {
   virtual Variant next();
   virtual Variant end();
   virtual Variant key() const;
-  virtual Variant value(int32_t &pos) const;
+  virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
   bool isHead()            const { return m_pos == iter_begin(); }
@@ -492,13 +480,13 @@ class ArrayData : public Countable {
 
  protected:
   uint m_size;
-  const ArrayKind m_kind;
-  AllocMode m_allocMode;
-  const bool m_nonsmart; // never use smartalloc to allocate Elms
-  int32_t m_pos;
+  ssize_t m_pos;
  private:
   FullPos* m_strongIterators; // head of linked list
  protected:
+  const ArrayKind m_kind;
+  AllocMode m_allocMode;
+  const bool m_nonsmart; // never use smartalloc to allocate Elms
   /* The 4 bytes of padding here are available to subclasses if their
    * first field is also <= 4 bytes. */
 

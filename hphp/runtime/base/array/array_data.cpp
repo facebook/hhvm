@@ -360,7 +360,7 @@ Variant ArrayData::key() const {
   return uninit_null();
 }
 
-Variant ArrayData::value(int32_t &pos) const {
+Variant ArrayData::value(ssize_t &pos) const {
   if (size_t(pos) < size_t(size())) {
     return getValue(pos);
   }

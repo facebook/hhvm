@@ -111,7 +111,7 @@ public:
   Variant next();
   Variant end();
   Variant key() const;
-  Variant value(int32_t& pos) const;
+  Variant value(ssize_t& pos) const;
   Variant each();
 
   // implements ArrayData
@@ -297,7 +297,6 @@ public:
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
   static const uint32_t MinLgTableSize = 2;
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
-  static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
 
   struct InlineSlots {
@@ -359,11 +358,11 @@ private:
   //            +--------------------+
 
   ElmInd  m_lastE;       // Index of last used element.
-  uint32_t  m_tableMask; // Bitmask used when indexing into the hash table.
-  uint32_t  m_hLoad;     // Hash table load (# of non-empty slots).
-  int64_t   m_nextKI;    // Next integer key to use for append.
   Elm*    m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
+  int64_t   m_nextKI;      // Next integer key to use for append.
+  uint32_t  m_tableMask;   // Bitmask used when indexing into the hash table.
+  uint32_t  m_hLoad;       // Hash table load (# of non-empty slots).
   union {
     InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
@@ -440,11 +439,9 @@ private:
   void reallocData(size_t maxElms, size_t tableSize, uint oldMask);
 
   /**
-   * init(size) allocates space for size elements but initializes as
-   * an empty array. The "WithoutHash" version does not initialize the
-   * hash table and returns the hash table size.
+   * init(size) allocates space for size elements but initializes
+   * as an empty array
    */
-  uint32_t initWithoutHash(uint size);
   void init(uint size);
 
   /**

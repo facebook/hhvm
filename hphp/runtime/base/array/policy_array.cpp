@@ -284,7 +284,7 @@ Variant ArrayShell::key() const {
   return key(toPos(m_pos));
 }
 
-Variant ArrayShell::value(int32_t &pos) const {
+Variant ArrayShell::value(ssize_t &pos) const {
   NOT_IMPLEMENTED();
 }
 

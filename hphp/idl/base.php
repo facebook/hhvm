@@ -1135,7 +1135,7 @@ function phpnet_clean($text) {
   $text = preg_replace('#<div class="example-contents">.*?</div>#s',
                        '<>', $text);
   $text = preg_replace('#<p class="para">#', '<>', $text);
-  $text = preg_replace('#<b class="note">Note</b>:#', '', $text);
+  $text = preg_replace('#<strong class="note">Note</strong>:#', '', $text);
   $text = preg_replace('#<.+?>#', '', $text);
   $text = preg_replace('#[ \t\n]+#s', ' ', $text);
   $text = preg_replace('# ?<> ?#', "\n\n", $text);
@@ -1147,14 +1147,15 @@ function phpnet_clean($text) {
 
 function phpnet_get_function_info($name, $clsname = 'function') {
   $clsname = preg_replace('#_#', '-', strtolower($clsname));
-  $name = preg_replace('#_#', '-', strtolower($name));
+  $name = preg_replace('#__#', '', strtolower($name));
+  $name = preg_replace('#_#', '-', $name);
   $doc = @file_get_contents("http://php.net/manual/en/$clsname.$name.php");
   if ($doc === false) {
     return array();
   }
 
   $ret = array();
-  if (preg_match('#<div class="refsect1 description">(.*?)'.
+  if (preg_match('#<div class="refsect1 description"[^>]*>(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
     if (preg_match('#<p class="para rdfs-comment">(.*)</div>#s', $desc, $m)) {
@@ -1162,7 +1163,7 @@ function phpnet_get_function_info($name, $clsname = 'function') {
     }
   }
 
-  if (preg_match('#<div class="refsect1 parameters">(.*?)'.
+  if (preg_match('#<div class="refsect1 parameters"[^>]*>(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
     if (preg_match_all('#<tt class="parameter">(.*?)</tt>#s', $desc, $m)) {
@@ -1183,7 +1184,7 @@ function phpnet_get_function_info($name, $clsname = 'function') {
     }
   }
 
-  if (preg_match('#<div class="refsect1 returnvalues">(.*?)'.
+  if (preg_match('#<div class="refsect1 returnvalues"[^>]*>(.*?)'.
                  '(<div class="refsect1 |<div id="usernotes">)#s', $doc, $m)) {
     $desc = $m[1];
     $desc = preg_replace('#<h3.*</h3>#', '', $desc);

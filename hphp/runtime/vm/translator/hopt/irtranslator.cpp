@@ -61,19 +61,6 @@ static const bool debug = false;
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
 
-/*
- * tx64LocPhysicalOffset --
- *
- *   The translator uses the stack pointer slightly differently from
- *   Stack. Consequently, the translated code accesses slightly
- *   different offsets from rVmSp than the C++ runtime.
- */
-static inline int
-tx64LocPhysicalOffset(const Location& l, const Func *f = nullptr) {
-  return Translator::locPhysicalOffset(l, f);
-}
-
-
 #define HHIR_UNIMPLEMENTED_OP(op)                       \
   do {                                                  \
     throw JIT::FailedIRGen(__FILE__, __LINE__, op);     \
@@ -124,7 +111,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
   switch (l.space) {
   case Location::Stack:
     {
-      uint32_t stackOffset = tx64LocPhysicalOffset(l);
+      uint32_t stackOffset = locPhysicalOffset(l);
       m_hhbcTrans->guardTypeStack(stackOffset,
                                   JIT::Type::fromRuntimeType(rtt));
     }
@@ -1246,10 +1233,12 @@ bool shouldIRInline(const Func* curFunc,
    * Continuation allocation functions that take no arguments.
    */
   resetCursor();
-  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0 &&
-      !func->numParams()) {
+  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0) {
+    if (func->numParams()) {
+      FTRACE(1, "CreateCont with {} args\n", func->numParams());
+    }
     next();
-    if (atRet()) return accept("zero-arg continuation creator");
+    if (atRet()) return accept("continuation creator");
   }
 
   /*
@@ -1694,7 +1683,7 @@ void TranslatorX64::irAssertType(const Location& l,
     case Location::Stack: {
       // tx64LocPhysicalOffset returns positive offsets for stack values,
       // relative to rVmSp
-      uint32_t stackOffset = tx64LocPhysicalOffset(l);
+      uint32_t stackOffset = locPhysicalOffset(l);
       m_hhbcTrans->assertTypeStack(stackOffset,
                                    JIT::Type::fromRuntimeType(rtt));
       break;

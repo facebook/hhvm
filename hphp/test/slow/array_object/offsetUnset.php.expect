@@ -1,0 +1,11 @@
+object(ArrayObject)#1 (3) {
+  ["storage":"ArrayObject":private]=>
+  array(1) {
+    [0]=>
+    string(4) "zero"
+  }
+  ["flags":"ArrayObject":private]=>
+  int(0)
+  ["iteratorClass":"ArrayObject":private]=>
+  string(13) "ArrayIterator"
+}

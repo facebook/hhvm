@@ -331,7 +331,7 @@ parser.add_argument(
     "--only",
     type=str,
     action='append',
-    help="only import tests whose path matches this regex."
+    help="only import tests whose path contains this substring."
 )
 parser.add_argument(
     "--dirty",
@@ -592,11 +592,11 @@ if args.zend_path:
             for filename in files:
                 full_file = os.path.join(root, filename)
 
-                def matches(regexes):
-                    if not regexes:
+                def matches(patterns):
+                    if not patterns:
                         return True
-                    for regex in regexes:
-                        if re.search(regex, full_file):
+                    for pattern in patterns:
+                        if pattern in full_file:
                             return True
                     return False
 

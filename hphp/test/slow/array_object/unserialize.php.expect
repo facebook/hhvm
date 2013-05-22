@@ -1,0 +1,32 @@
+object(ArrayObject)#1 (3) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["flags":"ArrayObject":private]=>
+  int(0)
+  ["iteratorClass":"ArrayObject":private]=>
+  string(13) "ArrayIterator"
+}
+object(ArrayObject)#2 (3) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["flags":"ArrayObject":private]=>
+  int(0)
+  ["iteratorClass":"ArrayObject":private]=>
+  string(13) "ArrayIterator"
+}
+NULL
+bool(true)

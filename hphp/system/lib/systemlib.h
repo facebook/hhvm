@@ -44,6 +44,7 @@ namespace Eval {
   x(RecursiveDirectoryIterator)                 \
   x(RecursiveIteratorIterator)                  \
   x(DirectoryIterator)                          \
+  x(FilesystemIterator)                         \
   x(SplFileInfo)                                \
   x(SplFileObject)                              \
   x(DOMDocument)                                \

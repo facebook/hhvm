@@ -203,8 +203,7 @@ static const int64_t LEAVES_ONLY = 0L;
 static const int64_t SELF_FIRST = 1L;
 static const int64_t CHILD_FIRST = 2L;
 
-// Class constants that we use from RecursiveDirectoryIterator
-static const int64_t CURRENT_AS_FILEINFO = 16L;
+// Class constants that we use from FilesystemIterator
 static const int64_t CURRENT_AS_PATHNAME = 32L;
 static const int64_t KEY_AS_FILENAME = 256L;
 
@@ -419,10 +418,7 @@ Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
   if (rdi->m_flags & CURRENT_AS_PATHNAME) {
     return pathName;
   }
-  if (rdi->m_flags & CURRENT_AS_FILEINFO) {
-    return SystemLib::AllocSplFileInfoObject(pathName);
-  }
-  return obj;
+  return SystemLib::AllocSplFileInfoObject(pathName);
 }
 
 bool f_hphp_recursivedirectoryiterator_haschildren(CObjRef obj) {

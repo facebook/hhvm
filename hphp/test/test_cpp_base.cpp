@@ -628,7 +628,12 @@ bool TestCppBase::TestArray() {
 bool TestCppBase::TestObject() {
   {
     String s = "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}";
-    VS(f_serialize(unserialize_from_string(s)), "O:22:\"__PHP_Incomplete_Class\":2:{s:27:\"__PHP_Incomplete_Class_Name\";s:1:\"B\";s:3:\"obj\";O:22:\"__PHP_Incomplete_Class\":2:{s:27:\"__PHP_Incomplete_Class_Name\";s:1:\"A\";s:1:\"a\";i:10;}}");
+    Variant v = unserialize_from_string(s);
+    VERIFY(v.isObject());
+    auto o = v.toObject();
+    VS(o->o_getClassName(), "__PHP_Incomplete_Class");
+    auto os = f_serialize(o);
+    VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }
   VERIFY(!equal(Object(new TestResource()), Object(new TestResource()) ));
   return Count(true);

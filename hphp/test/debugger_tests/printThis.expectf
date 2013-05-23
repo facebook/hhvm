@@ -1,0 +1,20 @@
+[22;32mWelcome to HipHop Debugger![0m
+[22;32mType "help" or "?" for a complete list of commands.
+[0m
+[22;32mProgram %sprintThis.php loaded. Type '[r]un' or '[c]ontinue' to go.[0m
+hphpd> break printThis.php:5
+[22;32mBreakpoint 1 set on line 5 of printThis.php[0m
+hphpd> run
+[22;32mBreakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php[0m
+[22;37m   4 [0m  [22;36mfunction[0m [22;34mmethod[0m() {[0m
+[22;31;47m   5 [0m    [22;31;47m$[0m[22;31;47mother[0m[22;31;47m [0m[22;31;47m=[0m[22;31;47m [0m[22;31;47m$[0m[22;31;47mthis[0m[22;31;47m;[0m[0m
+[22;37m   6 [0m  }[0m
+[0m
+hphpd> print $this
+[22;36mFoo Object
+(
+    [prop] => Hello
+
+)
+[0m
+hphpd> quit

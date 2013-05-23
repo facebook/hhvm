@@ -556,6 +556,9 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
+static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+
 void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   bool handleSleep = false;
   Variant ret;
@@ -668,8 +671,20 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
-      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
-      o_toArray().serialize(serializer, true);
+      CStrRef className = o_getClassName();
+      Array properties = o_toArray();
+      if (serializer->getType() != VariableSerializer::VarDump &&
+          className == s_PHP_Incomplete_Class) {
+        Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
+        if (cname && cname->isString()) {
+          serializer->setObjectInfo(cname->toCStrRef(), o_getId(), 'O');
+          properties.remove(s_PHP_Incomplete_Class_Name, true);
+          properties.serialize(serializer, true);
+          return;
+        }
+      }
+      serializer->setObjectInfo(className, o_getId(), 'O');
+      properties.serialize(serializer, true);
     }
   }
 }

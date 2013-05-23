@@ -22,16 +22,13 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Testing HTTP server.
- */
 class TestDebugger : public TestBase {
 public:
   TestDebugger();
 
   virtual bool RunTests(const std::string &which);
 
-  // test test harness
+  bool TestCommandLine();
   bool TestSanity();
   bool TestBasic();
   bool TestBreak();
@@ -52,6 +49,7 @@ private:
   void runServer();
   void stopServer();
 
+  bool runCommandLineTestCase(string testName);
   bool getResponse(const std::string& path, std::string& result, int port = -1,
                    const std::string& host = "");
   bool recvFromTests(char& c);

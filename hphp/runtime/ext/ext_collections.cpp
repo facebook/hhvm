@@ -188,9 +188,8 @@ Array c_Vector::o_toArray() const {
   return toArrayImpl();
 }
 
-ObjectData* c_Vector::clone() {
-  ObjectData* obj = ObjectData::clone();
-  auto target = static_cast<c_Vector*>(obj);
+c_Vector* c_Vector::clone() {
+  auto target = static_cast<c_Vector*>(ObjectData::clone());
   uint sz = m_size;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
@@ -198,7 +197,7 @@ ObjectData* c_Vector::clone() {
   for (int i = 0; i < sz; ++i) {
     tvDup(&m_data[i], &data[i]);
   }
-  return obj;
+  return target;
 }
 
 Object c_Vector::t_add(CVarRef val) {
@@ -1065,11 +1064,10 @@ Array c_Map::o_toArray() const {
   return toArrayImpl();
 }
 
-ObjectData* c_Map::clone() {
-  ObjectData* obj = ObjectData::clone();
-  auto target = static_cast<c_Map*>(obj);
+c_Map* c_Map::clone() {
+  auto target = static_cast<c_Map*>(ObjectData::clone());
 
-  if (!m_size) return obj;
+  if (!m_size) return target;
 
   assert(m_nLastSlot != 0);
   target->m_size = m_size;
@@ -1088,7 +1086,7 @@ ObjectData* c_Map::clone() {
     }
   }
 
-  return obj;
+  return target;
 }
 
 Object c_Map::t_add(CVarRef val) {
@@ -1403,7 +1401,7 @@ Object c_Map::t_differencebykey(CVarRef it) {
   }
   ObjectData* obj = it.getObjectData();
   c_Map* target;
-  Object ret = target = static_cast<c_Map*>(clone());
+  Object ret = target = clone();
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
@@ -2236,11 +2234,10 @@ Array c_StableMap::o_toArray() const {
   return toArrayImpl();
 }
 
-ObjectData* c_StableMap::clone() {
-  ObjectData* obj = ObjectData::clone();
-  auto target = static_cast<c_StableMap*>(obj);
+c_StableMap* c_StableMap::clone() {
+  auto target = static_cast<c_StableMap*>(ObjectData::clone());
 
-  if (!m_size) return obj;
+  if (!m_size) return target;
 
   target->m_size = m_size;
   target->m_nTableSize = m_nTableSize;
@@ -2273,7 +2270,7 @@ ObjectData* c_StableMap::clone() {
   }
   target->m_pListTail = last;
 
-  return obj;
+  return target;
 }
 
 Object c_StableMap::t_add(CVarRef val) {
@@ -2583,7 +2580,7 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
   }
   ObjectData* obj = it.getObjectData();
   c_StableMap* target;
-  Object ret = target = static_cast<c_StableMap*>(clone());
+  Object ret = target = clone();
   if (obj->getCollectionType() == Collection::StableMapType) {
     auto smp = static_cast<c_StableMap*>(obj);
     c_StableMap::Bucket* p = smp->m_pListHead;
@@ -3493,11 +3490,10 @@ Array c_Set::o_toArray() const {
   return toArrayImpl();
 }
 
-ObjectData* c_Set::clone() {
-  ObjectData* obj = ObjectData::clone();
-  auto target = static_cast<c_Set*>(obj);
+c_Set* c_Set::clone() {
+  auto target = static_cast<c_Set*>(ObjectData::clone());
 
-  if (!m_size) return obj;
+  if (!m_size) return target;
 
   assert(m_nLastSlot != 0);
   target->m_size = m_size;
@@ -3513,7 +3509,7 @@ ObjectData* c_Set::clone() {
     }
   }
 
-  return obj;
+  return target;
 }
 
 Object c_Set::t_add(CVarRef val) {
@@ -4256,7 +4252,7 @@ Array c_Pair::o_toArray() const {
   return toArrayImpl();
 }
 
-ObjectData* c_Pair::clone() {
+c_Pair* c_Pair::clone() {
   auto pair = NEWOBJ(c_Pair)();
   pair->incRefCount();
   pair->m_size = 2;
@@ -4678,7 +4674,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
 }
 
 ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  Object o = vec = static_cast<c_Vector*>(vec->clone());
+  Object o = vec = vec->clone();
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
@@ -4687,7 +4683,7 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  Object o = mp = static_cast<c_Map*>(mp->clone());
+  Object o = mp = mp->clone();
   uint lastSlot = mp->m_nLastSlot;
   for (uint i = 0; i <= lastSlot; ++i) {
     c_Map::Bucket* p = mp->fetchBucket(i);
@@ -4699,7 +4695,7 @@ ObjectData* collectionDeepCopyMap(c_Map* mp) {
 }
 
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  Object o = smp = static_cast<c_StableMap*>(smp->clone());
+  Object o = smp = smp->clone();
   for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
     collectionDeepCopyTV(&p->data);
   }
@@ -4707,12 +4703,12 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
 }
 
 ObjectData* collectionDeepCopySet(c_Set* st) {
-  Object o = st = static_cast<c_Set*>(st->clone());
+  Object o = st = st->clone();
   return o.detach();
 }
 
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
-  Object o = pair = static_cast<c_Pair*>(pair->clone());
+  Object o = pair = pair->clone();
   collectionDeepCopyTV(&pair->elm0);
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();

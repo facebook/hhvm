@@ -2002,12 +2002,11 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
   return create_node_object(new_child, doc(), false);
 }
 
-ObjectData *c_DOMNode::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DOMNode *node = static_cast<c_DOMNode*>(obj);
+c_DOMNode* c_DOMNode::clone() {
+  c_DOMNode* node = static_cast<c_DOMNode*>(ObjectData::clone());
   node->m_node = m_node;
   node->m_doc = doc();
-  return obj;
+  return node;
 }
 
 Variant c_DOMNode::t_clonenode(bool deep /* = false */) {

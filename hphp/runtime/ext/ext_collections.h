@@ -142,7 +142,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   Array toArrayImpl() const;
 
   Array o_toArray() const;
-  ObjectData* clone();
+  c_Vector* clone();
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
@@ -324,7 +324,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Array toArrayImpl() const;
 
   Array o_toArray() const;
-  ObjectData* clone();
+  c_Map* clone();
 
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
@@ -623,7 +623,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Array toArrayImpl() const;
 
   Array o_toArray() const;
-  ObjectData* clone();
+  c_StableMap* clone();
 
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
@@ -849,7 +849,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Array toArrayImpl() const;
 
   Array o_toArray() const;
-  ObjectData* clone();
+  c_Set* clone();
 
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
@@ -1076,7 +1076,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   Array toArrayImpl() const;
 
   Array o_toArray() const;
-  ObjectData* clone();
+  c_Pair* clone();
 
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);

@@ -70,13 +70,12 @@ c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   return this;
 }
 
-ObjectData* c_Closure::clone() {
-  ObjectData* obj = ObjectData::clone();
-  auto closure = static_cast<c_Closure*>(obj);
+c_Closure* c_Closure::clone() {
+  auto closure = static_cast<c_Closure*>(ObjectData::clone());
   closure->m_VMStatics = m_VMStatics;
   closure->m_thisOrClass = m_thisOrClass;
   closure->m_func = m_func;
-  return obj;
+  return closure;
 }
 
 

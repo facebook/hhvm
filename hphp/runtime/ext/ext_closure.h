@@ -43,7 +43,7 @@ class c_Closure : public ExtObjectData {
   // implemented by HPHP
   public: c_Closure *create();
 public:
-  public: ObjectData* clone();
+  public: c_Closure* clone();
 
   c_Closure* init(int numArgs, ActRec* ar, TypedValue* sp);
   ObjectData* getThisOrClass() { return m_thisOrClass; }

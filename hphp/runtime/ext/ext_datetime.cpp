@@ -159,11 +159,10 @@ Object c_DateTime::t_sub(CObjRef interval) {
   return this;
 }
 
-ObjectData *c_DateTime::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateTime *dt = static_cast<c_DateTime*>(obj);
+c_DateTime* c_DateTime::clone() {
+  c_DateTime* dt = static_cast<c_DateTime*>(ObjectData::clone());
   dt->m_dt = m_dt->cloneDateTime();
-  return obj;
+  return dt;
 }
 
 c_DateTimeZone::c_DateTimeZone(Class* cb) :
@@ -209,11 +208,10 @@ Array c_DateTimeZone::ti_listidentifiers() {
   return TimeZone::GetNames();
 }
 
-ObjectData *c_DateTimeZone::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateTimeZone *dtz = static_cast<c_DateTimeZone*>(obj);
+c_DateTimeZone* c_DateTimeZone::clone() {
+  c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(ObjectData::clone());
   dtz->m_tz = m_tz->cloneTimeZone();
-  return obj;
+  return dtz;
 }
 
 c_DateInterval::c_DateInterval(Class* cb) :
@@ -316,11 +314,10 @@ String c_DateInterval::t_format(CStrRef format) {
   return m_di->format(format);
 }
 
-ObjectData *c_DateInterval::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateInterval *di = static_cast<c_DateInterval*>(obj);
+c_DateInterval* c_DateInterval::clone() {
+  c_DateInterval *di = static_cast<c_DateInterval*>(ObjectData::clone());
   di->m_di = m_di->cloneDateInterval();
-  return obj;
+  return di;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

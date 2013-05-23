@@ -85,7 +85,7 @@ class c_DateTime : public ExtObjectData {
  private:
   SmartObject<DateTime> m_dt;
  public:
-  virtual ObjectData *clone();
+  virtual c_DateTime* clone();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ class c_DateTimeZone : public ExtObjectData {
  private:
   SmartObject<TimeZone> m_tz;
  public:
-  virtual ObjectData *clone();
+  virtual c_DateTimeZone* clone();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
  private:
   SmartObject<DateInterval> m_di;
  public:
-  virtual ObjectData *clone();
+  virtual c_DateInterval* clone();
 
 };
 

@@ -135,7 +135,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
 
 
 public:
-  virtual ObjectData *clone();
+  virtual c_DOMNode* clone();
   virtual p_DOMDocument doc() { return m_doc;}
   p_DOMDocument m_doc;
   xmlNodePtr m_node;

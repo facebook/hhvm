@@ -252,7 +252,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
     VariableUnserializer vu(sval->sAddr, sval->getSerializedSize(), sType);
     Variant v;
     v.unserialize(&vu);
-    sval->var = SharedVariant::Create(v, sval->isSerializedObj());
+    sval->var = new SharedVariant(v, sval->isSerializedObj());
     stats_on_add(key.get(), sval, 0, true, true); // delayed prime
     return sval->var;
   } catch (Exception &e) {
@@ -518,7 +518,7 @@ bool ConcurrentTableSharedStore::constructPrime(CStrRef v, KeyValuePair& item,
       return false;
     }
   }
-  item.value = SharedVariant::Create(v, serialized);
+  item.value = new SharedVariant(v, serialized);
   return true;
 }
 
@@ -535,7 +535,7 @@ bool ConcurrentTableSharedStore::constructPrime(CVarRef v,
       return false;
     }
   }
-  item.value = SharedVariant::Create(v, false);
+  item.value = new SharedVariant(v, false);
   return true;
 }
 

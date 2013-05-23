@@ -31,10 +31,11 @@ namespace HPHP {
  */
 class SharedMap : public ArrayData {
 public:
-  SharedMap(SharedVariant* source)
+  explicit SharedMap(SharedVariant* source)
     : ArrayData(kSharedMap)
-    , m_arr(source)
     , m_localCache(nullptr) {
+    m_map      = source->getMap();
+    m_isVector = source->getIsVector();
   }
 
   ~SharedMap();
@@ -57,11 +58,19 @@ public:
   using ArrayData::remove;
 
   ssize_t vsize() const {
-    return m_arr->arrSize();
+    return isVector() ? m_vec->m_size : m_map->size();
   }
 
   Variant getKey(ssize_t pos) const {
-    return m_arr->getKey(pos);
+    if (isVector()) {
+      assert(pos < (ssize_t)m_vec->m_size);
+      return pos;
+    }
+    return m_map->getKey(pos);
+  }
+
+  SharedVariant* getValueImpl(ssize_t pos) const {
+    return isVector() ? m_vec->getValue(pos) : m_map->getValue(pos);
   }
 
   Variant getValue(ssize_t pos) const { return getValueRef(pos); }
@@ -119,9 +128,16 @@ public:
   virtual ArrayData *escalate() const;
   virtual ArrayData* escalateForSort();
 
+  ArrayData* loadElems(bool mapInit = false) const;
+
 private:
-  SharedVariant *m_arr;
+  bool m_isVector;
+  union {
+    ImmutableMap* m_map;
+    VectorData*   m_vec;
+  };
   mutable TypedValue* m_localCache;
+  bool isVector() const { return m_isVector; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

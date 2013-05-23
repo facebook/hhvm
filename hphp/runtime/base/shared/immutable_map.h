@@ -25,7 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedVariant;
 /**
  * an immutable map is a php-style array that can take strings and
  * ints as keys. the map also stores the order in which the elements
@@ -37,14 +36,19 @@ public:
   int indexOf(const StringData* key);
   int indexOf(int64_t key);
 
-  SharedVariant* getKeyIndex(int index) {
+  Variant getKey(int index) {
     assert(index < size());
-    return buckets()[index].key;
+    Bucket* b = &buckets()[index];
+    if (b->hasIntKey()) {
+      return b->ikey;
+    } else {
+      return b->skey;
+    }
   }
 
-  SharedVariant* getValIndex(int index) {
+  SharedVariant* getValue(int index) {
     assert(index < size());
-    return buckets()[index].val;
+    return (SharedVariant*)&buckets()[index].val;
   }
 
   unsigned size() const {
@@ -65,18 +69,43 @@ public:
   static ImmutableMap* Create(ArrayData* arr,
                               bool unserializeObj);
   static void Destroy(ImmutableMap* im);
-private:
-  ImmutableMap() {}
-  ~ImmutableMap() {}
-  void add(int pos, SharedVariant *key, SharedVariant *val);
 
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
-    /** the value of this bucket */
-    SharedVariant *key;
-    SharedVariant *val;
+    /* similar to HphpArray::Elm */
+    union {
+      int64_t     ikey;
+      StringData* skey;
+    };
+    // cannot declare SharedVariant here because of cyclic header
+    // includes
+    TypedValueAux val;
+    bool hasStrKey() const {
+      return val.hash() != 0;
+    }
+    bool hasIntKey() const {
+      return val.hash() == 0;
+    }
+    int32_t hash() const {
+      return val.hash();
+    }
+    void setStrKey(StringData* k, strhash_t h) {
+      skey = k;
+      val.hash() = int32_t(h) | 0x80000000;
+    }
+    void setIntKey(int64_t k) {
+      ikey = k;
+      val.hash() = 0;
+    }
   };
+
+private:
+  ImmutableMap() {}
+  ~ImmutableMap() {}
+  void addVal(int pos, int hash_pos, CVarRef val, bool unserializeObj);
+  void add(int pos, CVarRef key, CVarRef val, bool unserializeObj);
+
   /** index of the beginning of each hash chain */
   int *hash() const { return (int*)(this + 1); }
   /** buckets, stored in index order */

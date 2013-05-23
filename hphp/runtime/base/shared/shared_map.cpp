@@ -27,17 +27,16 @@ IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap);
 ///////////////////////////////////////////////////////////////////////////////
 HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
-  SharedVariant *sv = m_arr->getValue(pos);
+  SharedVariant *sv = getValueImpl(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
   if (LIKELY(m_localCache != nullptr)) {
-    assert(unsigned(pos) < m_arr->arrCap());
+    assert(unsigned(pos) < size());
     TypedValue* tv = &m_localCache[pos];
     if (tv->m_type != KindOfUninit) return tvAsCVarRef(tv);
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
-    unsigned cap = m_arr->arrCap();
-    m_localCache = (TypedValue*) smart_calloc(cap, sizeof(TypedValue));
+    m_localCache = (TypedValue*) smart_calloc(size(), sizeof(TypedValue));
   }
   TypedValue* tv = &m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();
@@ -48,7 +47,7 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
 HOT_FUNC
 SharedMap::~SharedMap() {
   if (m_localCache) {
-    for (TypedValue* tv = m_localCache, *end = tv + m_arr->arrCap();
+    for (TypedValue* tv = m_localCache, *end = tv + size();
          tv < end; ++tv) {
       tvRefcountedDecRef(tv);
     }
@@ -56,24 +55,29 @@ SharedMap::~SharedMap() {
   }
 }
 
-bool SharedMap::exists(const StringData* k) const {
-  return m_arr->getIndex(k) != -1;
-}
-
-bool SharedMap::exists(int64_t k) const {
-  return m_arr->getIndex(k) != -1;
+ssize_t SharedMap::getIndex(const StringData* k) const {
+  if (isVector()) return -1;
+  return m_map->indexOf(k);
 }
 
 ssize_t SharedMap::getIndex(int64_t k) const {
-  return m_arr->getIndex(k);
+  if (isVector()) {
+    if (k < 0 || (size_t)k >= m_vec->m_size) return -1;
+    return k;
+  }
+  return m_map->indexOf(k);
 }
 
-ssize_t SharedMap::getIndex(const StringData* k) const {
-  return m_arr->getIndex(k);
+bool SharedMap::exists(const StringData* k) const {
+  return getIndex(k) != -1;
+}
+
+bool SharedMap::exists(int64_t k) const {
+  return getIndex(k) != -1;
 }
 
 CVarRef SharedMap::get(const StringData* k, bool error /* = false */) const {
-  int index = m_arr->getIndex(k);
+  int index = getIndex(k);
   if (index == -1) {
     return error ? getNotFound(k) : null_variant;
   }
@@ -81,7 +85,7 @@ CVarRef SharedMap::get(const StringData* k, bool error /* = false */) const {
 }
 
 CVarRef SharedMap::get(int64_t k, bool error /* = false */) const {
-  int index = m_arr->getIndex(k);
+  int index = getIndex(k);
   if (index == -1) {
     return error ? getNotFound(k) : null_variant;
   }
@@ -171,25 +175,25 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
 }
 
 ArrayData *SharedMap::escalate() const {
-  ArrayData *ret = m_arr->loadElems(*this);
+  ArrayData *ret = loadElems();
   assert(!ret->isStatic());
   return ret;
 }
 
 TypedValue* SharedMap::nvGet(int64_t k) const {
-  int index = m_arr->getIndex(k);
+  int index = getIndex(k);
   if (index == -1) return nullptr;
   return (TypedValue*)&getValueRef(index);
 }
 
 TypedValue* SharedMap::nvGet(const StringData* key) const {
-  int index = m_arr->getIndex(key);
+  int index = getIndex(key);
   if (index == -1) return nullptr;
   return (TypedValue*)&getValueRef(index);
 }
 
 void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) {
-  Variant k = m_arr->getKey(pos);
+  Variant k = getKey(pos);
   TypedValue* tv = k.asTypedValue();
   // copy w/out clobbering out->_count.
   out->m_type = tv->m_type;
@@ -202,21 +206,45 @@ TypedValue* SharedMap::nvGetValueRef(ssize_t pos) {
 }
 
 TypedValue* SharedMap::nvGetCell(int64_t k) const {
-  int index = m_arr->getIndex(k);
+  int index = getIndex(k);
   return index != -1 ? getValueRef(index).getTypedAccessor() :
          nvGetNotFound(k);
 }
 
 TypedValue* SharedMap::nvGetCell(const StringData* key) const {
-  int index = m_arr->getIndex(key);
+  int index = getIndex(key);
   return index != -1 ? getValueRef(index).getTypedAccessor() :
          nvGetNotFound(key);
 }
 
 ArrayData* SharedMap::escalateForSort() {
-  ArrayData *ret = m_arr->loadElems(*this, true /* mapInit */);
+  ArrayData *ret = loadElems(true /* mapInit */);
   assert(!ret->isStatic());
   return ret;
+}
+
+ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {
+  uint count = size();
+  bool isVec = isVector();
+
+  auto ai =
+    mapInit ? ArrayInit(count, ArrayInit::mapInit) :
+    isVec ? ArrayInit(count, ArrayInit::vectorInit) :
+    ArrayInit(count);
+
+  if (isVec) {
+    for (uint i = 0; i < count; i++) {
+      ai.set(getValueRef(i));
+    }
+  } else {
+    for (uint i = 0; i < count; i++) {
+      ai.add(m_map->getKey(i), getValueRef(i),
+             true);
+    }
+  }
+  ArrayData* elems = ai.create();
+  if (elems->isStatic()) elems = elems->copy();
+  return elems;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

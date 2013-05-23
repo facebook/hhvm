@@ -54,6 +54,10 @@ static uint32_t toUint32(PosType pos) {
 }
 
 // Signed to pos, no change in representation.
+inline PosType toPos(int32_t n) {
+  static_assert(sizeof(int64_t) == sizeof(PosType), "");
+  return static_cast<PosType>(n);
+}
 static PosType toPos(int64_t n) {
   static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
   return static_cast<PosType>(n);
@@ -379,7 +383,7 @@ public:
   virtual Variant next() FOLLY_OVERRIDE;
   virtual Variant end() FOLLY_OVERRIDE;
   virtual Variant key() const FOLLY_OVERRIDE;
-  virtual Variant value(ssize_t &pos) const FOLLY_OVERRIDE;
+  virtual Variant value(int32_t &pos) const FOLLY_OVERRIDE;
   virtual Variant each() FOLLY_OVERRIDE;
 
   virtual bool isInvalid() const FOLLY_OVERRIDE {

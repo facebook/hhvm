@@ -130,7 +130,7 @@ public: // ArrayData implementation
   virtual Variant end();
   virtual CVarRef endRef();
   virtual Variant key() const;
-  virtual Variant value(ssize_t &pos) const;
+  virtual Variant value(int32_t &pos) const;
   virtual Variant each();
   virtual bool validFullPos(const FullPos & fp) const;
   virtual bool advanceFullPos(FullPos&);
@@ -149,7 +149,7 @@ private:
 
 class GlobalNameValueTableWrapper : public NameValueTableWrapper {
  public:
-  GlobalNameValueTableWrapper(NameValueTable* tab);
+  explicit GlobalNameValueTableWrapper(NameValueTable* tab);
   Variant gvm_argc;
   Variant gvm_argv;
   Variant gvm__SERVER;

@@ -252,7 +252,7 @@ Variant NameValueTableWrapper::key() const {
   return null_variant;
 }
 
-Variant NameValueTableWrapper::value(ssize_t& pos) const {
+Variant NameValueTableWrapper::value(int32_t& pos) const {
   return current();
 }
 

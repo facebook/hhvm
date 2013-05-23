@@ -55,14 +55,35 @@ class ArrayData : public Countable {
  public:
   static const ssize_t invalid_index = -1;
 
-  explicit ArrayData(ArrayKind kind, bool nonsmart = false) :
-    m_size(-1), m_pos(0), m_strongIterators(0), m_kind(kind),
-    m_nonsmart(nonsmart) {
+  explicit ArrayData(ArrayKind kind)
+    : m_size(-1)
+    , m_pos(0)
+    , m_kind(kind)
+    , m_nonsmart(false)
+    , m_strongIterators(nullptr) {
   }
-  ArrayData(const ArrayData *src, ArrayKind kind,
-            bool nonsmart = false) :
-    m_pos(src->m_pos), m_strongIterators(0), m_kind(src->m_kind),
-    m_nonsmart(nonsmart) {
+
+  ArrayData(ArrayKind kind, bool nonsmart)
+    : m_size(-1)
+    , m_pos(0)
+    , m_kind(kind)
+    , m_nonsmart(nonsmart)
+    , m_strongIterators(nullptr) {
+  }
+
+  ArrayData(ArrayKind kind, bool nonsmart, uint size)
+      : m_size(size)
+      , m_pos(size ? 0 : ArrayData::invalid_index)
+      , m_kind(kind)
+      , m_nonsmart(nonsmart)
+      , m_strongIterators(nullptr) {
+  }
+
+  ArrayData(const ArrayData *src, ArrayKind kind, bool nonsmart = false)
+      : m_pos(src->m_pos)
+      , m_kind(src->m_kind)
+      , m_nonsmart(nonsmart)
+      , m_strongIterators(nullptr) {
   }
 
   static HphpArray* Make(uint capacity);
@@ -182,7 +203,7 @@ class ArrayData : public Countable {
   virtual Variant next();
   virtual Variant end();
   virtual Variant key() const;
-  virtual Variant value(ssize_t &pos) const;
+  virtual Variant value(int32_t &pos) const;
   virtual Variant each();
 
   bool isHead()            const { return m_pos == iter_begin(); }
@@ -479,16 +500,17 @@ class ArrayData : public Countable {
   static bool IsValidKey(const StringData* k) { return k; }
 
  protected:
+  // Layout starts with 64 bits for vtable, then 32 bits for m_count
+  // from Countable base, then...
   uint m_size;
-  ssize_t m_pos;
- private:
-  FullPos* m_strongIterators; // head of linked list
+  int32_t m_pos;
  protected:
   const ArrayKind m_kind;
   AllocMode m_allocMode;
   const bool m_nonsmart; // never use smartalloc to allocate Elms
-  /* The 4 bytes of padding here are available to subclasses if their
-   * first field is also <= 4 bytes. */
+  uint8_t m_slack8;      // use this for whatever you wanna
+ private:
+  FullPos* m_strongIterators; // head of linked list
 
  public: // for the JIT
   static uint32_t getKindOff() {

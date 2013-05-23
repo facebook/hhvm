@@ -1915,10 +1915,10 @@ Variant c_Map::iter_key(ssize_t pos) const {
   return (int64_t)p->ikey;
 }
 
-Variant c_Map::iter_value(ssize_t pos) const {
+TypedValue* c_Map::iter_value(ssize_t pos) const {
   assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return tvAsCVarRef(&p->data);
+  return &p->data;
 }
 
 void c_Map::throwBadKeyType() {
@@ -2105,7 +2105,7 @@ Variant c_MapIterator::t_current() {
   if (!m_pos) {
     throw_iterator_not_valid();
   }
-  return mp->iter_value(m_pos);
+  return tvAsCVarRef(mp->iter_value(m_pos));
 }
 
 Variant c_MapIterator::t_key() {
@@ -3011,10 +3011,10 @@ Variant c_StableMap::iter_key(ssize_t pos) const {
   return (int64_t)p->ikey;
 }
 
-Variant c_StableMap::iter_value(ssize_t pos) const {
+TypedValue* c_StableMap::iter_value(ssize_t pos) const {
   assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return tvAsCVarRef(&p->data);
+  return &p->data;
 }
 
 struct StableMapKeyAccessor {
@@ -3386,7 +3386,7 @@ Variant c_StableMapIterator::t_current() {
   if (!m_pos) {
     throw_iterator_not_valid();
   }
-  return smp->iter_value(m_pos);
+  return tvAsCVarRef(smp->iter_value(m_pos));
 }
 
 Variant c_StableMapIterator::t_key() {
@@ -4060,10 +4060,10 @@ ssize_t c_Set::iter_prev(ssize_t pos) const {
   return 0;
 }
 
-Variant c_Set::iter_value(ssize_t pos) const {
+const TypedValue* c_Set::iter_value(ssize_t pos) const {
   assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return tvAsCVarRef(&p->data);
+  return &p->data;
 }
 
 void c_Set::throwBadValueType() {
@@ -4185,7 +4185,7 @@ Variant c_SetIterator::t_current() {
   if (!m_pos) {
     throw_iterator_not_valid();
   }
-  return st->iter_value(m_pos);
+  return tvAsCVarRef(st->iter_value(m_pos));
 }
 
 Variant c_SetIterator::t_key() {

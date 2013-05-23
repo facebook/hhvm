@@ -274,21 +274,21 @@ Variant ArrayIter::second() {
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
-      return mp->iter_value(m_pos);
+      return tvAsCVarRef(mp->iter_value(m_pos));
     }
     case Collection::StableMapType: {
       c_StableMap* smp = getStableMap();
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
-      return smp->iter_value(m_pos);
+      return tvAsCVarRef(smp->iter_value(m_pos));
     }
     case Collection::SetType: {
       c_Set* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
-      return st->iter_value(m_pos);
+      return tvAsCVarRef(st->iter_value(m_pos));
     }
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
@@ -315,7 +315,7 @@ void ArrayIter::secondHelper(Variant& v) {
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
-      v = mp->iter_value(m_pos);
+      v = tvAsCVarRef(mp->iter_value(m_pos));
       break;
     }
     case Collection::StableMapType: {
@@ -323,7 +323,7 @@ void ArrayIter::secondHelper(Variant& v) {
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
-      v = smp->iter_value(m_pos);
+      v = tvAsCVarRef(smp->iter_value(m_pos));
       break;
     }
     case Collection::SetType: {
@@ -331,7 +331,7 @@ void ArrayIter::secondHelper(Variant& v) {
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
-      v = st->iter_value(m_pos);
+      v = tvAsCVarRef(st->iter_value(m_pos));
       break;
     }
     case Collection::PairType: {

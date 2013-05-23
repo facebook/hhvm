@@ -472,7 +472,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   Variant iter_key(ssize_t pos) const;
-  Variant iter_value(ssize_t pos) const;
+  TypedValue* iter_value(ssize_t pos) const;
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -734,7 +734,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   Variant iter_key(ssize_t pos) const;
-  Variant iter_value(ssize_t pos) const;
+  TypedValue* iter_value(ssize_t pos) const;
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -956,7 +956,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   ssize_t iter_begin() const;
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
-  Variant iter_value(ssize_t pos) const;
+  const TypedValue* iter_value(ssize_t pos) const;
 
   static void throwBadValueType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 

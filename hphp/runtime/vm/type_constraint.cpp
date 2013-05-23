@@ -182,9 +182,14 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return true;
   }
 
-  return isObjectOrTypedef() && !isCallable()
-    ? checkTypedefNonObj(tv)
-    : equivDataTypes(m_type.m_dt, tv->m_type);
+  if (isObjectOrTypedef()) {
+    if (isCallable()) {
+      return f_is_callable(tvAsCVarRef(tv));
+    }
+    return checkTypedefNonObj(tv);
+  }
+
+  return equivDataTypes(m_type.m_dt, tv->m_type);
 }
 
 bool

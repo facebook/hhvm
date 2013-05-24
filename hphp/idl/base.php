@@ -1166,7 +1166,7 @@ function phpnet_get_function_info($name, $clsname = 'function') {
   if (preg_match('#<div class="refsect1 parameters"[^>]*>(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
-    if (preg_match_all('#<tt class="parameter">(.*?)</tt>#s', $desc, $m)) {
+    if (preg_match_all('#<code class="parameter">(.*?)</code>#s', $desc, $m)) {
       foreach ($m[1] as $param) {
         $ret['param_names'][] = phpnet_clean($param);
       }

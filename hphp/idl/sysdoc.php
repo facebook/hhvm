@@ -19,7 +19,8 @@ for ($i = 0; $i < count($lines) - 1; $i++) {
     $line = $lines[++$i];
   }
 
-  if (preg_match('/^\s*(?:class|interface)\s+(\w+)/', $line, $m)) {
+  if (preg_match('/^\s*(?:abstract\s+)?(?:class|interface)\s+(\w+)/',
+                 $line, $m)) {
     $class = $m[1];
     $info['name'] = $class;
     $doc = phpnet_get_class_desc($class);

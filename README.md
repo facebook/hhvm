@@ -22,7 +22,7 @@ For anything more complicated, you'll want to make a [config.hdf](https://github
 
 ## Contributing
 
-We'd love to have your help in making HipHop better. If you run into problems, please open an [issue](http://github.com/facebook/hiphop-php/issues), or better yet, fork us and send a pull request. Join us on [irc](irc://irc.freenode.net/hhvm).
+We'd love to have your help in making HipHop better. If you run into problems, please open an [issue](http://github.com/facebook/hiphop-php/issues), or better yet, fork us and send a pull request. Join us on [#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm).
 
 If you want to help but don't know where to start, try fixing some of the [Zend tests that don't pass](hphp/test/zend/bad). You can run them with [hphp/test/run](hphp/test/run). When they work, move them to [zend/good](hphp/test/zend/good) and send a pull request.
 

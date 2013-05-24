@@ -25,11 +25,24 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdNext);
 class CmdNext : public CmdFlowControl {
 public:
-  CmdNext() : CmdFlowControl(KindOfNext) {}
+  CmdNext() : CmdFlowControl(KindOfNext),
+              m_stepContUnit(nullptr),
+              m_stepContOffset(InvalidAbsoluteOffset) {}
+  virtual ~CmdNext();
 
-  virtual void help(DebuggerClient &client);
-  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  virtual void help(DebuggerClient& client);
+  virtual void onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt);
+  virtual void onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt);
+
+private:
+  void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
+  bool hasStepCont();
+  bool atStepContOffset(Unit* unit, Offset o);
+  void setupStepCont(ActRec* fp, PC pc);
+  void cleanupStepCont();
+
+  HPHP::Unit* m_stepContUnit;
+  Offset m_stepContOffset;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

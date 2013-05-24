@@ -15,13 +15,18 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_next.h"
+#include "hphp/runtime/vm/debugger_hook.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
 
-void CmdNext::help(DebuggerClient &client) {
+CmdNext::~CmdNext() {
+  cleanupStepCont();
+}
+
+void CmdNext::help(DebuggerClient& client) {
   client.helpTitle("Next Command");
   client.helpCmds(
     "[n]ext {count=1}", "steps over lines of code",
@@ -33,20 +38,20 @@ void CmdNext::help(DebuggerClient &client) {
   );
 }
 
-void CmdNext::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   CmdFlowControl::onSetup(proxy, interrupt);
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_vmContext->m_nesting;
   m_loc = interrupt.getFileLine();
-
-  // Start by single-stepping the current line.
-  installLocationFilterForLine(interrupt.getSite());
-  m_needsVMInterrupt = true;
+  ActRec *fp = g_vmContext->getFP();
+  assert(fp); // All interrupts which reach a flow cmd have an AR.
+  PC pc = g_vmContext->getPC();
+  stepCurrentLine(interrupt, fp, pc);
 }
 
-void CmdNext::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   if (interrupt.getInterruptType() == ExceptionThrown) {
@@ -58,55 +63,147 @@ void CmdNext::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
     return;
   }
 
-#ifdef HPHP_TRACE
   ActRec *fp = g_vmContext->getFP();
-  assert(fp);
+  assert(fp); // All interrupts which reach a flow cmd have an AR.
   PC pc = g_vmContext->getPC();
-  Opcode op = *((Opcode*)pc);
-  Offset offset = fp->m_func->unit()->offsetOf(pc);
+  Unit* unit = fp->m_func->unit();
+  Offset offset = unit->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
-        pc, opcodeToName(op), fp->m_func->fullName()->data(), offset);
-#endif
+        pc, opcodeToName(*pc), fp->m_func->fullName()->data(), offset);
 
   int currentVMDepth = g_vmContext->m_nesting;
   int currentStackDepth = proxy.getStackDepth();
 
-  TRACE(2, "Original depth %d:%d, current depth %d:%d\n",
+  TRACE(2, "CmdNext: original depth %d:%d, current depth %d:%d\n",
         m_vmDepth, m_stackDepth, currentVMDepth, currentStackDepth);
 
-  if ((currentVMDepth < m_vmDepth) ||
-      ((currentVMDepth == m_vmDepth) && (currentStackDepth <= m_stackDepth))) {
-    // We're at the same depth as when we started, or perhaps even shallower, so
-    // there's no need for any step out breakpoint anymore.
-    cleanupStepOuts();
+  // Where are we on the stack now vs. when we started? Breaking the answer down
+  // into distinct variables helps the clarity of the algorithm below.
+  bool deeper = false;
+  bool originalDepth = false;
+  if ((currentVMDepth == m_vmDepth) && (currentStackDepth == m_stackDepth)) {
+    originalDepth = true;
+  } else if ((currentVMDepth > m_vmDepth) ||
+             ((currentVMDepth == m_vmDepth) &&
+              (currentStackDepth > m_stackDepth))) {
+    deeper = true;
+  }
 
-    if (m_loc != interrupt.getFileLine()) {
-      TRACE(2, "CmdNext: same depth or shallower, off original line.\n");
-      m_complete = (decCount() == 0);
-      if (!m_complete) {
-        TRACE(2, "CmdNext: not complete, filter new line and keep stepping.\n");
-        m_loc = interrupt.getFileLine();
-        installLocationFilterForLine(interrupt.getSite());
-        m_needsVMInterrupt = true;
-      }
+  // First consider if we've got internal breakpoints setup. These are used when
+  // we can make an accurate prediction of where execution should flow,
+  // eventually, and when we want to let the program run normally until we get
+  // there.
+  if (hasStepOuts() || hasStepCont()) {
+    TRACE(2, "CmdNext: checking internal breakpoint(s)\n");
+    if (atStepOutOffset(unit, offset)) {
+      if (deeper) return; // Recursion
+      TRACE(2, "CmdNext: hit step-out\n");
+    } else if (atStepContOffset(unit, offset)) {
+      // For step-conts we want to hit the exact same frame, not a call to the
+      // same function higher or lower on the stack.
+      if (!originalDepth) return;
+      TRACE(2, "CmdNext: hit step-cont\n");
     } else {
-      TRACE(2, "CmdNext: not complete, still on same line, keep stepping.\n");
-      installLocationFilterForLine(interrupt.getSite());
-      m_needsVMInterrupt = true;
+      // We have internal breakpoints setup, but we haven't hit one yet. Keep
+      // running until we reach one.
+      TRACE(2, "CmdNext: waiting to hit internal breakpoint...\n");
+      return;
     }
-  } else {
-    // Deeper, so let's setup a step out operation and turn interrupts off.
-    TRACE(2, "CmdNext: deeper...\n");
-    if (!hasStepOuts()) {
-      // We can nuke the entire location filter here since we'll re-install it
-      // when we get back to the old level. Keeping it installed may be more
-      // efficient if we were on a large line, but there is a penalty for every
-      // opcode executed while it's installed and that's bad if there's a lot of
-      // code called from that line.
-      removeLocationFilter();
-      setupStepOuts();
-    }
+    // We've hit one internal breakpoint at a useful place, so we can remove
+    // them all now.
+    cleanupStepOuts();
+    cleanupStepCont();
+  }
+
+  if (deeper) {
+    TRACE(2, "CmdNext: deeper, setup step out to get back to original line\n");
+    setupStepOuts();
+    // We can nuke the entire location filter here since we'll re-install it
+    // when we get back to the old level. Keeping it installed may be more
+    // efficient if we were on a large line, but there is a penalty for every
+    // opcode executed while it's installed and that's bad if there's a lot of
+    // code called from that line.
+    removeLocationFilter();
     m_needsVMInterrupt = false;
+    return;
+  }
+
+  if (originalDepth && (m_loc == interrupt.getFileLine())) {
+    TRACE(2, "CmdNext: not complete, still on same line\n");
+    stepCurrentLine(interrupt, fp, pc);
+    return;
+  }
+
+  TRACE(2, "CmdNext: operation complete.\n");
+  m_complete = (decCount() == 0);
+  if (!m_complete) {
+    TRACE(2, "CmdNext: repeat count > 0, start fresh.\n");
+    onSetup(proxy, interrupt);
+  }
+}
+
+void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
+  // Special handling for yields from generators. The destination of these
+  // instructions is somewhat counter intuitive so we take care to ensure that
+  // we step to the most appropriate place. For yeilds, we want to land on the
+  // next statement when driven from a C++ iterator like ASIO. If the generator
+  // is driven directly from PHP (i.e., a loop calling send($foo)) then we'll
+  // land back at the callsite of send(). For returns from generators, we follow
+  // the execution stack for now, and end up at the caller of ASIO or send().
+  if (fp->m_func->isGenerator() &&
+      ((*pc == OpContExit) || (*pc == OpContRetC))) {
+    TRACE(2, "CmdNext: encountered yield or return from generator\n");
+    // Patch the projected return point(s) in both cases, to catch if we exit
+    // the the asio iterator or if we are being iterated directly by PHP.
+    setupStepOuts();
+    if (*pc == OpContExit) {
+      // Patch the next normal execution point so we can pickup the stepping
+      // from there if the caller is C++.
+      setupStepCont(fp, pc);
+    }
+    removeLocationFilter();
+    m_needsVMInterrupt = false;
+    return;
+  }
+
+  installLocationFilterForLine(interrupt.getSite());
+  m_needsVMInterrupt = true;
+}
+
+bool CmdNext::hasStepCont() {
+  return m_stepContUnit != nullptr;
+}
+
+bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
+  return (unit == m_stepContUnit) && (o == m_stepContOffset);
+}
+
+// A ContExit is followed by code to support ContRaise, then code for
+// ContSend/ContNext. We want to continue stepping on the latter. The normal
+// exception handling logic will take care of the former.
+// This logic is sensitive to the code gen here... we don't have access to the
+// offsets for the labels used to generate this code, so we rely on the
+// simplicity of the exceptional path.
+void CmdNext::setupStepCont(ActRec* fp, PC pc) {
+  assert(*pc == OpContExit); // One byte
+  assert(*(pc+1) == OpNull); // One byte
+  assert(*(pc+2) == OpThrow); // One byte
+  assert(*(pc+3) == OpNull); // One byte
+  Offset nextInst = fp->m_func->unit()->offsetOf(pc + 4);
+  m_stepContUnit = fp->m_func->unit();
+  m_stepContOffset = nextInst;
+  TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
+        fp->m_func->fullName()->data(), nextInst);
+  phpAddBreakPoint(m_stepContUnit, m_stepContOffset);
+}
+
+void CmdNext::cleanupStepCont() {
+  if (m_stepContUnit) {
+    if (m_stepContOffset != InvalidAbsoluteOffset) {
+      phpRemoveBreakPoint(m_stepContUnit, m_stepContOffset);
+      m_stepContOffset = InvalidAbsoluteOffset;
+    }
+    m_stepContUnit = nullptr;
   }
 }
 

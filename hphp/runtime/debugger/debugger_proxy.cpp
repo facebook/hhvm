@@ -254,22 +254,6 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   // thread the proxy considers "current".
   // NB: BreakPointReached really means we've got control of a VM thread from
   // the opcode hook. This could be for a breakpoint, stepping, etc.
-  if (cmd.getInterruptType() == BreakPointReached) {
-    // If we have this type of interrupt then the proxy must have outstanding
-    // work to do. If it doesn't, then we've come too far processing this
-    // interrupt.
-    assert(needInterrupt());
-
-    // If the breakpoint is not to be processed, we should continue execution.
-    BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
-    if (bp) {
-      if (!bp->breakable(getRealStackDepth())) {
-        return;
-      } else {
-        bp->unsetBreakable(getRealStackDepth());
-      }
-    }
-  }
 
   // Wait until this thread is the one this proxy wants to debug.
   if (!blockUntilOwn(cmd, true)) {
@@ -284,6 +268,19 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         Lock lock(m_signalMutex); // Block the signal polling thread.
         m_signum = CmdSignal::SignalNone;
         processInterrupt(cmd);
+        // If we've just processed a breakpoint, change it so we don't break at
+        // it again until we're off this site.
+        // Note: this feels quite out of place in here... should be part of
+        // processing the break point itself. Added a note to task #2361050.
+        if (cmd.getInterruptType() == BreakPointReached) {
+          BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
+          if (bp) {
+            int stackDepth = getRealStackDepth();
+            if (bp->breakable(stackDepth)) {
+              bp->unsetBreakable(stackDepth);
+            }
+          }
+        }
       } catch (const DebuggerException &e) {
         switchThreadMode(Normal);
         throw;
@@ -518,7 +515,7 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::checkBreakPoints\n");
   ReadLock lock(m_breakMutex);
-  return cmd.shouldBreak(m_breakpoints);
+  return cmd.shouldBreak(m_breakpoints, getRealStackDepth());
 }
 
 // Check if we should stop due to flow control, breakpoints, and signals.

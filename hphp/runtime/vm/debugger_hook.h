@@ -19,6 +19,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/unit.h"
+#include <functional>
 
 namespace HPHP {
 namespace Eval{
@@ -108,8 +109,13 @@ private:
 public:
   PCFilter() {}
 
-  // Add/remove offsets, either individually or by range.
-  void addRanges(const Unit* unit, const OffsetRangeVec& offsets);
+  // Filter function to exclude opcodes when adding ranges.
+  typedef std::function<bool(Opcode)> OpcodeFilter;
+
+  // Add/remove offsets, either individually or by range. By default allow all
+  // opcodes.
+  void addRanges(const Unit* unit, const OffsetRangeVec& offsets,
+                 OpcodeFilter isOpcodeAllowed = [] (Opcode) { return true; });
   void removeOffset(const Unit* unit, Offset offset);
 
   // Add/remove/check explicit PCs.

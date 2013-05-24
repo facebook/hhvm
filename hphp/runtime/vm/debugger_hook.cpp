@@ -330,13 +330,20 @@ void PCFilter::PtrMap::clear() {
   m_root->clearImpl(PTRMAP_PTR_SIZE);
 }
 
-void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets) {
+// Adds a range of PCs to the filter given a collection of offset ranges.
+// Omit PCs which have opcodes that don't pass the given opcode filter.
+void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
+                         OpcodeFilter isOpcodeAllowed) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
     for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
          pc += instrLen(pc)) {
-      TRACE(3, "\t\tpc %p\n", pc);
-      addPC(pc);
+      if (isOpcodeAllowed(*pc)) {
+        TRACE(3, "\t\tpc %p\n", pc);
+        addPC(pc);
+      } else {
+        TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc, unit->offsetOf(pc));
+      }
     }
   }
 }

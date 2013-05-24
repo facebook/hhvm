@@ -91,7 +91,7 @@ protected:
   void setupStepOuts();
   void cleanupStepOuts();
   bool hasStepOuts();
-  bool atStepOutOffset(Offset o);
+  bool atStepOutOffset(Unit* unit, Offset o);
 
   bool m_complete;
   bool m_needsVMInterrupt;

@@ -1349,7 +1349,7 @@ void DebuggerClient::print(CStrRef msg) {
       FWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
     FWRITE(msg.data(), 1, msg.length(), where);                         \
-    if (UseColor && color) {                                            \
+    if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       FWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
     FWRITE("\n", 1, 1, where);                                          \

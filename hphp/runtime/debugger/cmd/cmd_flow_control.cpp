@@ -23,8 +23,9 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debuggerflow);
 
 CmdFlowControl::~CmdFlowControl() {
-  // Remove any location filter that may have been setup by this cmd.
+  // Remove any location filter or step outs that may have been setup.
   removeLocationFilter();
+  cleanupStepOuts();
 }
 
 void CmdFlowControl::sendImpl(DebuggerThriftBuffer &thrift) {
@@ -81,6 +82,9 @@ void CmdFlowControl::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 // Setup the last location filter on the VM context for all offsets covered by
 // the current source line. This will short-circuit the work done in
 // phpDebuggerOpcodeHook() and ensure we don't interrupt on this source line.
+// We exclude continuation opcodes which transfer control out of the function,
+// which allows cmds to get a chance to alter their behavior when those opcodes
+// are encountered.
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   if (!site) return; // We may be stopped at a place with no source info.
   if (g_vmContext->m_lastLocFilter) {
@@ -90,8 +94,12 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   }
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
+  auto excludeContinuationReturns = [] (Opcode op) {
+    return (op != OpContExit) && (op != OpContRetC);
+  };
   g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
-                                          site->getCurOffsetRange());
+                                          site->getCurOffsetRange(),
+                                          excludeContinuationReturns);
 }
 
 void CmdFlowControl::removeLocationFilter() {
@@ -101,12 +109,13 @@ void CmdFlowControl::removeLocationFilter() {
   }
 }
 
-bool CmdFlowControl::atStepOutOffset(Offset o) {
-  return ((o == m_stepOutOffset1) || (o == m_stepOutOffset2));
-}
-
 bool CmdFlowControl::hasStepOuts() {
   return m_stepOutUnit != nullptr;
+}
+
+bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
+  return (unit == m_stepOutUnit) &&
+    ((o == m_stepOutOffset1) || (o == m_stepOutOffset2));
 }
 
 // Place internal breakpoints to get out of the current function. This may place

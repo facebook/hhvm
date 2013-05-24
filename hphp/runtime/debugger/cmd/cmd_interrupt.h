@@ -47,7 +47,7 @@ public:
   virtual void setClientOutput(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
 
-  bool shouldBreak(const BreakPointInfoPtrVec &bps);
+  bool shouldBreak(const BreakPointInfoPtrVec &bps, int stackDepth);
   std::string getFileLine() const;
 
   InterruptSite *getSite() { return m_site;}

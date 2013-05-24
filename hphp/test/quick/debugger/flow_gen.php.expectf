@@ -1,0 +1,166 @@
+Welcome to HipHop Debugger!
+Type "help" or "?" for a complete list of commands.
+
+Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
+hphpd> run
+flow_gen.php loaded
+Program %s/flow_gen.php exited normally.
+hphpd> break flow_gen.php:12
+Breakpoint 1 set on line 12 of flow_gen.php
+hphpd> @test(1)
+Breakpoint 1 reached at %s() on line 12 of %s/flow_gen.php
+  11 function genFoo($a) {
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+
+hphpd> next
+Break at %s() on line 13 of %s/flow_gen.php
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+  14   yield $z+1;
+
+hphpd> next
+Break at foo() on line 20 of %s/flow_gen.php
+  19   $gen1 = genFoo($a);
+  20   $gen1->next();
+  21   while ($gen1->valid()) {
+
+hphpd> next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21   while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+hphpd> next
+Break at foo() on line 22 of %s/flow_gen.php
+  21   while ($gen1->valid()) {
+  22     $val = $gen1->current();
+  23     var_dump($val);
+
+hphpd> next
+Break at foo() on line 23 of %s/flow_gen.php
+  22     $val = $gen1->current();
+  23     var_dump($val);
+  24     $gen1->send($a);
+
+hphpd> next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24     $gen1->send($a);
+  25   }
+
+hphpd> step
+Break at Continuation::send()
+hphpd> step
+Break at Continuation::send()
+hphpd> step
+Break at %s() on line 11 of %s/flow_gen.php
+  10 
+  11 function genFoo($a) {
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+  16 }
+  17 
+
+hphpd> step
+Break at %s() on line 13 of %s/flow_gen.php
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+  14   yield $z+1;
+
+hphpd> next
+Break at %s() on line 14 of %s/flow_gen.php
+  13   $z = yield $a+5;
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+
+hphpd> next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24     $gen1->send($a);
+  25   }
+
+hphpd> next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21   while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+hphpd> next
+Break at foo() on line 22 of %s/flow_gen.php
+  21   while ($gen1->valid()) {
+  22     $val = $gen1->current();
+  23     var_dump($val);
+
+hphpd> next
+Break at foo() on line 23 of %s/flow_gen.php
+  22     $val = $gen1->current();
+  23     var_dump($val);
+  24     $gen1->send($a);
+
+hphpd> next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24     $gen1->send($a);
+  25   }
+
+hphpd> step
+Break at Continuation::send()
+hphpd> step
+Break at Continuation::send()
+hphpd> step
+Break at %s() on line 11 of %s/flow_gen.php
+  10 
+  11 function genFoo($a) {
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+  16 }
+  17 
+
+hphpd> step
+Break at %s() on line 14 of %s/flow_gen.php
+  13   $z = yield $a+5;
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+
+hphpd> next
+Break at %s() on line 15 of %s/flow_gen.php
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+  16 }
+
+hphpd> next
+Finished in genFoo
+Break at %s() on line 11 of %s/flow_gen.php
+  10 
+  11 function genFoo($a) {
+  12   $a = bar($a);
+  13   $z = yield $a+5;
+  14   yield $z+1;
+  15   error_log('Finished in genFoo');
+  16 }
+  17 
+
+hphpd> next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24     $gen1->send($a);
+  25   }
+
+hphpd> next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21   while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+hphpd> break clear all
+All breakpoints are cleared.
+hphpd> continue
+int(8)
+int(2)
+
+hphpd> quit

@@ -639,9 +639,16 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
   string name;
   auto len = exp.length();
   auto offset0 = 0;
+  //Look for leading number by itself
+  auto offset1 = scanNumber(exp, offset0, m_line1);
+  if (offset1 == len) {
+    m_line2 = m_line1;
+    m_file = file;
+    return;
+  }
   // Skip over a leading backslash
   if (len > 0 && exp[0] == '\\') offset0++;
-  auto offset1 = scanName(exp, offset0);
+  offset1 = scanName(exp, offset0);
   // check that exp starts with a file or method name
   if (offset1 == offset0) goto returnInvalid;
   name = exp.substr(offset0, offset1-offset0);

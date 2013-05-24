@@ -24,6 +24,10 @@
 #include <pwd.h>
 #include <memory>
 
+#ifndef L_cuserid
+ #define L_cuserid 9
+#endif
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(posix);
 ///////////////////////////////////////////////////////////////////////////////

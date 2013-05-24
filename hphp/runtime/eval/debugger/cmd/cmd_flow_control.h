@@ -28,7 +28,7 @@ namespace HPHP { namespace Eval {
 //
 // 1. Proxy receives a flow command (say, Next).
 // 2. Proxy calls the cmd's onSetup() with current source position.
-// 3. Cmd sets up state in the VM to control stepping, etc.
+// 3. Cmd sets up state (see below) in the VM to control stepping, etc.
 // 4. If the cmd is complete the proxy deletes the cmd, otherwise it saves it
 //    in m_flow.
 // 5. Proxy lets the thread continue execution.
@@ -37,14 +37,31 @@ namespace HPHP { namespace Eval {
 //    sets up state in the VM to continue the control flow operation.
 // 8. If the cmd is complete the proxy stops and waits for more input from the
 //    client. Otherwise, rinse and repeat at step 5.
+//
+// When a cmd is setup, or receives an interrupt and determines it is not
+// complete, it will do one of three things to ensure it gets interrupted again
+// in the future:
+//
+// 1. Set m_needsVMInterrupt to true, to ensure we interpret and interrupt on
+//    each opcode executed.
+// 2. Set m_needsVMInterrupt to true, and setup a location filter. This ensures
+//    we interpret, but only interrupt when the PC misses the location filter.
+// 3. Place an "internal breakpoint", which ensures an interrupt when the
+//    breakpoint is hit without forcing us to interpret everything.
+//
+// The cmd may get interrupted for other reasons, such as an exception, reaching
+// a breakpoint, a hard break, etc. All flow cmds are designed to tollerate this
+// and remember enough state to determine if they should really transition their
+// state or not.
 
 DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
   explicit CmdFlowControl(Type type)
     : DebuggerCommand(type), m_complete(false), m_needsVMInterrupt(false),
-      m_stackDepth(0), m_vmDepth(0), m_stepOutOffset(0), m_stepOutUnit(nullptr),
-      m_count(1) { }
+      m_stackDepth(0), m_vmDepth(0), m_stepOutUnit(nullptr),
+      m_stepOutOffset1(InvalidAbsoluteOffset),
+      m_stepOutOffset2(InvalidAbsoluteOffset), m_count(1) { }
   virtual ~CmdFlowControl();
 
   virtual bool onServer(DebuggerProxy &proxy);
@@ -71,8 +88,10 @@ protected:
   int getCount() const { assert(m_count > 0); return m_count;}
   void installLocationFilterForLine(InterruptSite *site);
   void removeLocationFilter();
-  void setupStepOut();
-  void cleanupStepOut();
+  void setupStepOuts();
+  void cleanupStepOuts();
+  bool hasStepOuts();
+  bool atStepOutOffset(Offset o);
 
   bool m_complete;
   bool m_needsVMInterrupt;
@@ -81,8 +100,10 @@ protected:
   int m_stackDepth;
   int m_vmDepth;
   std::string m_loc; // last break's source location
-  Offset m_stepOutOffset;
+
   HPHP::Unit *m_stepOutUnit;
+  Offset m_stepOutOffset1;
+  Offset m_stepOutOffset2;
 
 private:
   int16_t m_count;

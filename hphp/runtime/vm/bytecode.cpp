@@ -2310,8 +2310,9 @@ int VMExecutionContext::hhvmPrepareThrow() {
  * set prevPc and prevSp.
  */
 ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
-                                           Offset*       prevPc /* = NULL */,
-                                           TypedValue**  prevSp /* = NULL */) {
+                                           Offset* prevPc /* = NULL */,
+                                           TypedValue** prevSp /* = NULL */,
+                                           bool* fromVMEntry /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -2325,6 +2326,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
       }
     }
     if (prevPc) *prevPc = prevFp->m_func->base() + fp->m_soff;
+    if (fromVMEntry) *fromVMEntry = false;
     return prevFp;
   }
   // Linear search from end of m_nestedVMs. In practice, we're probably
@@ -2339,9 +2341,8 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   assert(prevFp);
   assert(prevFp->m_func->unit());
   if (prevSp) *prevSp = vmstate.sp;
-  if (prevPc) {
-    *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
-  }
+  if (prevPc) *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+  if (fromVMEntry) *fromVMEntry = true;
   return prevFp;
 }
 

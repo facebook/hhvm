@@ -20,7 +20,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debuggerflow);
 
 CmdFlowControl::~CmdFlowControl() {
   // Remove any location filter that may have been setup by this cmd.
@@ -82,23 +82,16 @@ void CmdFlowControl::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 // the current source line. This will short-circuit the work done in
 // phpDebuggerOpcodeHook() and ensure we don't interrupt on this source line.
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
-  if (!site) return; // We may be stopped at a place with not source info.
+  if (!site) return; // We may be stopped at a place with no source info.
   if (g_vmContext->m_lastLocFilter) {
     g_vmContext->m_lastLocFilter->clear();
   } else {
     g_vmContext->m_lastLocFilter = new PCFilter();
   }
-  auto offsets = site->getCurOffsetRange();
-  if (Trace::moduleEnabled(Trace::debugger, 5)) {
-    Trace::trace("prepare source loc filter\n");
-    for (auto it = offsets.begin();
-         it != offsets.end(); ++it) {
-      Trace::trace("block source loc in %s:%d: unit %p offset [%d, %d)\n",
-                   site->getFile(), site->getLine0(),
-                   site->getUnit(), it->m_base, it->m_past);
-    }
-  }
-  g_vmContext->m_lastLocFilter->addRanges(site->getUnit(), offsets);
+  TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
+        site->getFile(), site->getLine0(), site->getUnit());
+  g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
+                                          site->getCurOffsetRange());
 }
 
 void CmdFlowControl::removeLocationFilter() {
@@ -108,21 +101,90 @@ void CmdFlowControl::removeLocationFilter() {
   }
 }
 
-void CmdFlowControl::setupStepOut() {
-  ActRec *fp = g_vmContext->getFP();
-  assert(fp);
-  ActRec *fpPrev = g_vmContext->getPrevVMState(fp, &m_stepOutOffset);
-  assert(fpPrev);
-  TRACE(2, "CmdFlowControl: step out to offset %d\n", m_stepOutOffset);
-  m_stepOutUnit = fpPrev->m_func->unit();
-  phpAddBreakPoint(m_stepOutUnit, m_stepOutOffset);
+bool CmdFlowControl::atStepOutOffset(Offset o) {
+  return ((o == m_stepOutOffset1) || (o == m_stepOutOffset2));
 }
 
-void CmdFlowControl::cleanupStepOut() {
+bool CmdFlowControl::hasStepOuts() {
+  return m_stepOutUnit != nullptr;
+}
+
+// Place internal breakpoints to get out of the current function. This may place
+// multiple internal breakpoints, and it may place them more than one frame up.
+// Some instructions can cause PHP to be invoked without an explicit call. A set
+// which causes a destructor to run, a iteration init which causes an object's
+// next() method to run, a RetC which causes destructors to run, etc. This
+// recgonizes such cases and ensures we have internal breakpoints to cover the
+// destination(s) of such instructions.
+void CmdFlowControl::setupStepOuts() {
+  // Existing step outs should be cleaned up before making new ones.
+  assert(!hasStepOuts());
+  ActRec* fp = g_vmContext->getFP();
+  assert(fp);
+  Offset returnOffset;
+  bool fromVMEntry;
+  while (!hasStepOuts()) {
+    fp = g_vmContext->getPrevVMState(fp, &returnOffset, nullptr, &fromVMEntry);
+    // If we've run off the top of the stack, just return having setup no
+    // step outs. This will cause cmds like Next and Out to just let the program
+    // run, which is appropriate.
+    if (!fp) break;
+    Unit* returnUnit = fp->m_func->unit();
+    PC returnPC = returnUnit->at(returnOffset);
+    TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
+          fp->m_func->fullName()->data(), returnOffset,
+          opcodeToName(*returnPC));
+    // Don't step out to generated functions, keep looking.
+    if (fp->m_func->line1() == 0) continue;
+    if (fromVMEntry) {
+      TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
+      // We only execute this for opcodes which invoke more PHP, and that does
+      // not include switches. Thus, we'll have at most two destinations.
+      assert(!isSwitch(*returnPC) && (numSuccs(returnPC) <= 2));
+      // Set an internal breakpoint after the instruction if it can fall thru.
+      if (instrAllowsFallThru(*returnPC)) {
+        m_stepOutUnit = returnUnit;
+        m_stepOutOffset1 = returnOffset + instrLen(returnPC);
+        TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
+              fp->m_func->fullName()->data(), m_stepOutOffset1);
+        phpAddBreakPoint(m_stepOutUnit, m_stepOutOffset1);
+      }
+      // Set an internal breakpoint at the target of a control flow instruction.
+      // A good example of a control flow op that invokes PHP is IterNext.
+      if (instrIsControlFlow(*returnPC)) {
+        Offset target = instrJumpTarget(returnPC, 0);
+        if (target != InvalidAbsoluteOffset) {
+          m_stepOutUnit = returnUnit;
+          m_stepOutOffset2 = returnOffset + target;
+          TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
+                fp->m_func->fullName()->data(), m_stepOutOffset2);
+          phpAddBreakPoint(m_stepOutUnit, m_stepOutOffset2);
+        }
+      }
+      // If we have no place to step out to, then unwind another frame and try
+      // again. The most common case that leads here is Ret*, which does not
+      // fall-thru and has no encoded target.
+    } else {
+      m_stepOutUnit = returnUnit;
+      m_stepOutOffset1 = returnOffset;
+      TRACE(2, "CmdFlowControl: step out to '%s' offset %d\n",
+            fp->m_func->fullName()->data(), m_stepOutOffset1);
+      phpAddBreakPoint(m_stepOutUnit, m_stepOutOffset1);
+    }
+  }
+}
+
+void CmdFlowControl::cleanupStepOuts() {
   if (m_stepOutUnit) {
-    phpRemoveBreakPoint(m_stepOutUnit, m_stepOutOffset);
+    if (m_stepOutOffset1 != InvalidAbsoluteOffset) {
+      phpRemoveBreakPoint(m_stepOutUnit, m_stepOutOffset1);
+      m_stepOutOffset1 = InvalidAbsoluteOffset;
+    }
+    if (m_stepOutOffset2 != InvalidAbsoluteOffset) {
+      phpRemoveBreakPoint(m_stepOutUnit, m_stepOutOffset2);
+      m_stepOutOffset2 = InvalidAbsoluteOffset;
+    }
     m_stepOutUnit = nullptr;
-    m_stepOutOffset = 0;
   }
 }
 

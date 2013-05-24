@@ -109,7 +109,7 @@ public:
   PCFilter() {}
 
   // Add/remove offsets, either individually or by range.
-  int addRanges(const Unit* unit, const OffsetRangeVec& offsets);
+  void addRanges(const Unit* unit, const OffsetRangeVec& offsets);
   void removeOffset(const Unit* unit, Offset offset);
 
   // Add/remove/check explicit PCs.

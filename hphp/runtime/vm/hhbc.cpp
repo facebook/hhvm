@@ -889,6 +889,11 @@ bool instrIsControlFlow(Opcode opcode) {
   return (opFlags & CF) != 0;
 }
 
+bool instrAllowsFallThru(Opcode opcode) {
+  InstrFlags opFlags = instrFlags(opcode);
+  return (opFlags & TF) == 0;
+}
+
 bool instrReadsCurrentFpi(Opcode opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & FF) != 0;

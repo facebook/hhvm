@@ -27,7 +27,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::bcinterp;
+TRACE_SET_MOD(debuggerflow);
 
 static inline Transl::Translator* transl() {
   return Transl::Translator::Get();
@@ -49,7 +49,7 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
   // we don't need an interrupt for, e.g., stepping over a line of code.
   if (UNLIKELY(g_vmContext->m_lastLocFilter != nullptr) &&
       g_vmContext->m_lastLocFilter->checkPC(pc)) {
-    TRACE_RB(5, "same location as last interrupt\n");
+    TRACE_RB(5, "Location filter hit at pc %p\n", pc);
     return;
   }
   // Are we hitting a breakpoint?
@@ -136,14 +136,8 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
     if (!unit->getOffsetRanges(bp->m_line1, offsets)) {
       continue;
     }
-    if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
-      for (OffsetRangeVec::const_iterator it = offsets.begin();
-           it != offsets.end(); ++it) {
-        Trace::trace("file:line break %s:%d : unit %p offset [%d, %d)\n",
-                     efile->getFileName().c_str(), bp->m_line1, unit,
-                     it->m_base, it->m_past);
-      }
-    }
+    TRACE(3, "Add to breakpoint filter for %s:%d, unit %p:\n",
+          efile->getFileName().c_str(), bp->m_line1, unit);
     getBreakPointFilter()->addRanges(unit, offsets);
     if (RuntimeOption::EvalJit) {
       blacklistRangesInJit(unit, offsets);
@@ -336,16 +330,15 @@ void PCFilter::PtrMap::clear() {
   m_root->clearImpl(PTRMAP_PTR_SIZE);
 }
 
-int PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets) {
-  int counter = 0;
+void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
+    TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
     for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
-         pc += instrLen((Opcode*)pc)) {
+         pc += instrLen(pc)) {
+      TRACE(3, "\t\tpc %p\n", pc);
       addPC(pc);
-      counter++;
     }
   }
-  return counter;
 }
 
 void PCFilter::removeOffset(const Unit* unit, Offset offset) {

@@ -658,8 +658,9 @@ public:
 
   int hhvmPrepareThrow();
   ActRec* getPrevVMState(const ActRec* fp,
-                             Offset* prevPc = nullptr,
-                             TypedValue** prevSp = nullptr);
+                         Offset* prevPc = nullptr,
+                         TypedValue** prevSp = nullptr,
+                         bool* fromVMEntry = nullptr);
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,

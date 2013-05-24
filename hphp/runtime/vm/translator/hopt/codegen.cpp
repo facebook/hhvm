@@ -2608,6 +2608,7 @@ void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
   auto destReg = m_regs[inst->dst()].getReg();
   auto addrReg = m_regs[inst->src(0)].getReg();
   SSATmp* src  = inst->src(1);
+  always_assert(!m_regs[src].isFullXMM());
   cgStore(addrReg, RefData::tvOffset(), src, genStoreType);
   if (destReg != InvalidReg)  emitMovRegReg(m_as, addrReg, destReg);
 }

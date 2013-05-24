@@ -45,7 +45,7 @@ enterTCHelper:
    * 16-byte aligned.
    */
 
-  sub $0x180, %rsp // kReservedRSPScratchSpace
+  sub $0x280, %rsp // kReservedRSPScratchSpace
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -63,7 +63,7 @@ enterTCHelper:
   call *%rdx
 .LenterTCHelper$serviceReqLabel:
 
-  add $0x180, %rsp // kReservedRSPScratchSpace
+  add $0x280, %rsp // kReservedRSPScratchSpace
   // Restore infoPtr into %rbx
   pop %rbx
   .cfi_adjust_cfa_offset -8

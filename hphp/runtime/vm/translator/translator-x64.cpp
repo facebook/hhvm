@@ -2749,7 +2749,7 @@ static_assert(rVmSp == rbx &&
               rVmTl == r12 &&
               rStashedAR == r15,
               "__enterTCHelper needs to be modified to use the correct ABI");
-static_assert(kReservedRSPScratchSpace == 0x180,
+static_assert(kReservedRSPScratchSpace == 0x280,
               "enterTCHelper needs to be updated for changes to "
               "kReservedRSPScratchSpace");
 static_assert(REQ_BIND_CALL == 0x1,

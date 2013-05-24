@@ -484,20 +484,11 @@ bool IRInstruction::isLoad() const {
   }
 }
 
-/*
- * Returns true if the instruction stores its source operand srcIdx to memory.
- */
-bool IRInstruction::stores(uint32_t srcIdx) const {
+bool IRInstruction::storesCell(uint32_t srcIdx) const {
   switch (m_op) {
     case StRetVal:
     case StLoc:
     case StLocNT:
-    case StRef:
-    case StRefNT:
-    case SetNewElem:
-    case SetNewElemStk:
-    case BindNewElem:
-    case BindNewElemStk:
       return srcIdx == 1;
 
     case StMem:
@@ -505,18 +496,6 @@ bool IRInstruction::stores(uint32_t srcIdx) const {
     case StProp:
     case StPropNT:
       return srcIdx == 2;
-
-    case SetElem:
-    case SetElemStk:
-    case BindElem:
-    case BindElemStk:
-      return srcIdx == 3;
-
-    case SetProp:
-    case SetPropStk:
-    case BindProp:
-    case BindPropStk:
-      return srcIdx == 4;
 
     case SpillStack:
       return srcIdx >= 2 && srcIdx < numSrcs();

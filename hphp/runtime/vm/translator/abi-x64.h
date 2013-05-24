@@ -341,8 +341,8 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
  * address).  It is used as spill locations by HHIR (see LinearScan),
  * and for MInstrState in both HHIR and translator-x64-vector.cpp.
  */
-const size_t kReservedRSPScratchSpace = 0x180;
-const size_t kReservedRSPSpillSpace   = 0x100;
+const size_t kReservedRSPScratchSpace = 0x280;
+const size_t kReservedRSPSpillSpace   = 0x200;
 
 //////////////////////////////////////////////////////////////////////
 

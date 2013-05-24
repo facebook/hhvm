@@ -406,7 +406,9 @@ class NormalizedInstruction {
     OutputInferred,
     OutputDoesntCare
   };
-  OutputUse getOutputUsage(DynLocation* output, bool ignorePops = false) const;
+  OutputUse getOutputUsage(const DynLocation* output) const;
+  bool isOutputUsed(const DynLocation* output) const;
+  bool isAnyOutputUsed() const;
 
   std::string toString() const;
 };
@@ -784,6 +786,14 @@ private:
                   int& currentStackOffset,
                   bool& varEnvTaint);
   void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
+  void propagateRelaxedType(Tracelet& tclet,
+                            NormalizedInstruction* firstInstr,
+                            DynLocation* loc,
+                            const GuardType& relxType);
+  void constrainDep(const DynLocation* loc,
+                    NormalizedInstruction* firstInstr,
+                    GuardType specType,
+                    GuardType& relxType);
   DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
                                                 size_t opndIdx);
   GuardType getOperandConstraintType(NormalizedInstruction* instr,

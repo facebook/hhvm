@@ -338,11 +338,6 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
     tmpId = spill->src(0)->id();
   }
 
-  if (tmpType.equals(Type::Uncounted) || tmpType.equals(Type::UncountedInit)) {
-    // These relaxed types should always be candidates for full XMM allocation
-    assert(m_fullXMMCandidates[tmpId]);
-  }
-
   if (m_fullXMMCandidates[tmpId]) {
     FTRACE(6,
        "getRegType(SSATmp {} : {}): it's a candidate for full XMM register\n",
@@ -1073,7 +1068,7 @@ void LinearScan::findFullXMMCandidates() {
       }
       int idx = 0;
       for (SSATmp* tmp : inst.srcs()) {
-        if (tmp->numNeededRegs() == 2 && !inst.stores(idx)) {
+        if (tmp->numNeededRegs() == 2 && !inst.storesCell(idx)) {
           notCandidates[tmp->id()] = true;
         }
         idx++;

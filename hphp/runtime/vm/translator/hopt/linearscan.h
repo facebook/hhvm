@@ -29,7 +29,7 @@ class IRFactory;
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
 // Be careful when changing this value.
-const int NumPreAllocatedSpillLocs = 32;
+const int NumPreAllocatedSpillLocs = 64;
 
 struct UseInfo {
   UseInfo() : lastUse(0), count(0) {}

@@ -246,7 +246,11 @@ struct IRInstruction {
   bool isControlFlow() const { return bool(m_taken.to()); }
   bool isBlockEnd() const { return m_taken.to() || isTerminal(); }
   bool isLoad() const;
-  bool stores(uint32_t srcIdx) const;
+  /*
+   * Returns true if the instruction stores its source operand srcIdx to
+   * memory as a cell.
+   */
+  bool storesCell(uint32_t srcIdx) const;
 
   /*
    * Comparison and hashing for the purposes of CSE-equality.

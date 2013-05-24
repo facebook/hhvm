@@ -2590,17 +2590,18 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
   }
 }
 
+static bool isPop(const NormalizedInstruction* instr) {
+  Opcode opc = instr->op();
+  return (opc == OpPopC ||
+          opc == OpPopV ||
+          opc == OpPopR);
+}
+
 NormalizedInstruction::OutputUse
-NormalizedInstruction::getOutputUsage(DynLocation* output,
-                                      bool ignorePops /* =false */) const {
+NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
   for (NormalizedInstruction* succ = next;
        succ; succ = succ->next) {
-    if (ignorePops &&
-        (succ->op() == OpPopC ||
-         succ->op() == OpPopV ||
-         succ->op() == OpPopR)) {
-      continue;
-    }
+    if (succ->noOp) continue;
     for (size_t i = 0; i < succ->inputs.size(); ++i) {
       if (succ->inputs[i] == output) {
         if (succ->inputWasInferred(i)) {
@@ -2624,6 +2625,17 @@ NormalizedInstruction::getOutputUsage(DynLocation* output,
     }
   }
   return OutputUnused;
+}
+
+bool NormalizedInstruction::isOutputUsed(const DynLocation* output) const {
+  return (output && !output->rtt.isVagueValue() &&
+          getOutputUsage(output) == OutputUsed);
+}
+
+bool NormalizedInstruction::isAnyOutputUsed() const
+{
+  return (isOutputUsed(outStack) ||
+          isOutputUsed(outLocal));
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
@@ -2733,44 +2745,95 @@ GuardType GuardType::getCountnessInit() const {
 }
 
 
+/**
+ * Returns true iff loc is consumed by a Pop* instruction in the sequence
+ * starting at instr.
+ */
+bool isPopped(DynLocation* loc, NormalizedInstruction* instr) {
+  for (; instr ; instr = instr->next) {
+    for (size_t i = 0; i < instr->inputs.size(); i++) {
+      if (instr->inputs[i] == loc) {
+        return isPop(instr);
+      }
+    }
+  }
+  return false;
+}
+
 DataTypeCategory
 Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
                                          size_t opndIdx) {
-  static const NormalizedInstruction::OutputUse kOutputUsed =
-    NormalizedInstruction::OutputUsed;
-  switch (instr->op()) {
-    case OpSetL : {
-      assert(opndIdx < 2);
+  Opcode opc = instr->op();
+
+  switch (opc) {
+    case OpSetS:
+    case OpSetG:
+    case OpSetL: {
       if (opndIdx == 0) { // stack value
-        auto stackValUsage = instr->getOutputUsage(instr->outStack, true);
-        if ((instr->outStack && stackValUsage == kOutputUsed) ||
-            (instr->getOutputUsage(instr->outLocal) == kOutputUsed)) {
-          return DataTypeSpecific;
+        // If the output on the stack is simply popped, then we don't
+        // even care whether the type is ref-counted or not because
+        // the ref-count is transfered to the target location.
+        if (!instr->outStack || isPopped(instr->outStack, instr->next)) {
+          return DataTypeGeneric;
         }
-        return DataTypeGeneric;
-      } else { // old local value
         return DataTypeCountness;
       }
-    }
-    case OpCGetL : {
-      if (!instr->outStack || (instr->getOutputUsage(instr->outStack, true) ==
-                               NormalizedInstruction::OutputUsed)) {
-        return DataTypeSpecific;
+      if (opc == OpSetL) {
+        // old local value is dec-refed
+        assert(opndIdx == 1);
+        return DataTypeCountness;
       }
+      return DataTypeSpecific;
+    }
+
+    case OpCGetL:
       return DataTypeCountnessInit;
-    }
-    case OpRetC :
-    case OpRetV : {
+
+    case OpRetC:
+    case OpRetV:
       return DataTypeCountness;
-    }
-    default: return DataTypeSpecific;
+
+    case OpFCall:
+      // Note: instead of pessimizing calls that may be inlined with
+      // DataTypeSpecific, we could apply the operand constraints of
+      // the callee in constrainDep.
+      return instr->calleeTrace ? DataTypeSpecific : DataTypeGeneric;
+
+    case OpFCallArray:
+      return DataTypeGeneric;
+
+    case OpPopC:
+    case OpPopV:
+    case OpPopR:
+      return DataTypeCountness;
+
+    case OpPackCont:
+    case OpContRetC:
+      // The stack input is teleported to the continuation's m_value field
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+
+    case OpContHandle:
+      // This always calls the interpreter
+      return DataTypeGeneric;
+
+    case OpAddElemC:
+      // The stack input is teleported to the array
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+
+    case OpArrayIdx:
+      // The default value (w/ opndIdx 0) is simply passed to a helper,
+      // which takes care of dec-refing it if needed
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+
+    default:
+      return DataTypeSpecific;
   }
 }
 
-
-GuardType Translator::getOperandConstraintType(NormalizedInstruction* instr,
-                                               size_t                 opndIdx,
-                                               const GuardType&       specType) {
+GuardType
+Translator::getOperandConstraintType(NormalizedInstruction* instr,
+                                     size_t                 opndIdx,
+                                     const GuardType&       specType) {
   DataTypeCategory dtCategory = getOperandConstraintCategory(instr, opndIdx);
   switch (dtCategory) {
     case DataTypeGeneric:       return GuardType(KindOfAny);
@@ -2787,21 +2850,144 @@ void Translator::constrainOperandType(GuardType&             relxType,
                                       const GuardType&       specType) {
   if (relxType.isSpecific()) return; // Can't constrain any further
 
-  switch (instr->op()) {
-    case OpRetC  :
-    case OpRetV  :
-    case OpCGetL :
-    case OpSetL  :
-    {
-      GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
-      if (consType.isMoreRefinedThan(relxType)) {
-        relxType = consType;
+  GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
+  if (consType.isMoreRefinedThan(relxType)) {
+    relxType = consType;
+  }
+}
+
+/*
+ * This method looks at every use of loc in the stream of instructions
+ * starting at firstInstr and constrains the relxType towards specType
+ * according to each use.  Note that this method not only looks at
+ * direct uses of loc, but it also recursively looks at any other
+ * DynLocs whose type depends on loc's type.
+ */
+void Translator::constrainDep(const DynLocation* loc,
+                              NormalizedInstruction* firstInstr,
+                              GuardType specType,
+                              GuardType& relxType) {
+  if (relxType.isSpecific()) return; // can't contrain it any further
+
+  for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
+    if (instr->noOp) continue;
+    Opcode opc = instr->op();
+    size_t nInputs = instr->inputs.size();
+    for (size_t i = 0; i < nInputs; i++) {
+      DynLocation* usedLoc = instr->inputs[i];
+      if (usedLoc == loc) {
+        constrainOperandType(relxType, instr, i, specType);
+
+        // If the instruction's input doesn't propagate to its output,
+        // then we're done.  Otherwise, we need to constrain relxType
+        // based on the uses of the output.
+        if (!outputDependsOnInput(opc)) continue;
+
+        bool outputIsStackInput = false;
+        const DynLocation* outStack = instr->outStack;
+        const DynLocation* outLocal = instr->outLocal;
+
+        switch (instrInfo[opc].type) {
+          case OutSameAsInput:
+            outputIsStackInput = true;
+            break;
+
+          case OutCInput:
+            outputIsStackInput = true;
+            // fall-through
+          case OutCInputL:
+            if (specType.getOuterType() == KindOfRef &&
+                instr->isAnyOutputUsed()) {
+              // Value gets unboxed along the way. Pessimize it for now.
+              relxType = specType;
+              return;
+            }
+            break;
+
+          default:
+            relxType = specType;
+            return;
+        }
+
+        // The instruction input's type propagates to the outputs.
+        // So constrain the dependence further based on uses of outputs.
+        if ((i == 0           &&  outputIsStackInput) || // stack input @ [0]
+            (i == nInputs - 1 && !outputIsStackInput)) { // local input is last
+          if (outStack && !outStack->rtt.isVagueValue()) {
+            // For SetL, getOperandConstraintCategory() generates
+            // DataTypeGeneric if the stack output is popped.  In this
+            // case, don't further constrain the stack output,
+            // otherwise the Pop* would make it a DataTypeCountness.
+            if (opc != OpSetL || !relxType.isGeneric()) {
+              constrainDep(outStack, instr->next, specType, relxType);
+            }
+          }
+          if (outLocal && !outLocal->rtt.isVagueValue()) {
+            constrainDep(outLocal, instr->next, specType, relxType);
+          }
+        }
       }
-      return;
     }
-    default: {
-      relxType = specType;
-      return;
+  }
+}
+
+/**
+ * Propagates the relaxed type relxType for loc to all its consumers,
+ * starting at firstInstr.
+ */
+void Translator::propagateRelaxedType(Tracelet& tclet,
+                                      NormalizedInstruction* firstInstr,
+                                      DynLocation* loc,
+                                      const GuardType& relxType) {
+  assert(relxType.isRelaxed());
+
+  for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
+    if (instr->noOp) continue;
+    Opcode opc = instr->op();
+    size_t nInputs = instr->inputs.size();
+    for (size_t i = 0; i < nInputs; i++) {
+      DynLocation* usedLoc = instr->inputs[i];
+      if (usedLoc == loc) {
+        auto outKind = instrInfo[opc].type;
+
+        // stack input propagates to outputs
+        bool outputIsStackInput = (i == 0 && // stack input is inputs[0]
+                         (outKind == OutSameAsInput || outKind == OutCInput));
+        bool outputIsLocalInput = (i == nInputs - 1 && // local input is last
+                                   outKind == OutCInputL);
+        bool outputIsInput = outputIsStackInput || outputIsLocalInput;
+
+        if (outputIsInput) {
+          // if instr has outStack, update its type and propagate to consumers
+          if (instr->outStack) {
+
+            TRACE(6,
+                  "propagateRelaxedType: Loc: %s oldType: %s => newType: %s\n",
+                  instr->outStack->location.pretty().c_str(),
+                  instr->outStack->rtt.pretty().c_str(),
+                  RuntimeType(relxType.getOuterType(),
+                              relxType.getInnerType()).pretty().c_str());
+
+            instr->outStack->rtt = RuntimeType(relxType.getOuterType(),
+                                               relxType.getInnerType());
+            propagateRelaxedType(tclet, instr->next, instr->outStack, relxType);
+          }
+          // if instr has outLocal, update its type and propagate to consumers
+          if (instr->outLocal) {
+
+            TRACE(6,
+                  "propagateRelaxedType: Loc: %s oldType: %s => newType: %s\n",
+                  instr->outLocal->location.pretty().c_str(),
+                  instr->outLocal->rtt.pretty().c_str(),
+                  RuntimeType(relxType.getOuterType(),
+                              relxType.getInnerType()).pretty().c_str());
+
+            instr->outLocal->rtt = RuntimeType(relxType.getOuterType(),
+                                               relxType.getInnerType());
+            propagateRelaxedType(tclet, instr->next, instr->outLocal, relxType);
+          }
+        }
+      }
     }
   }
 }
@@ -2812,7 +2998,6 @@ void Translator::constrainOperandType(GuardType&             relxType,
  */
 void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   DynLocTypeMap locRelxTypeMap;
-  DynLocTypeMap locSpecTypeMap;
 
   // Initialize type maps.  Relaxed types start off very relaxed, and then
   // they may get more specific depending on how the instructions use them.
@@ -2820,23 +3005,12 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   for (auto depIt = deps.begin(); depIt != deps.end(); depIt++) {
     DynLocation*       loc = depIt->second;
     const RuntimeType& rtt = depIt->second->rtt;
-    if (rtt.isValue() && !rtt.isVagueValue() && !loc->location.isThis()) {
-      locSpecTypeMap[loc] = GuardType(rtt);
-      locRelxTypeMap[loc] = GuardType(KindOfAny);
-    }
-  }
-
-  // Process the instruction stream, constraining the relaxed types
-  // along the way
-  for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
-       instr = instr->next) {
-    for (size_t i = 0; i < instr->inputs.size(); i++) {
-      DynLocation* loc = instr->inputs[i];
-      auto it = locRelxTypeMap.find(loc);
-      if (it != locRelxTypeMap.end()) {
-        GuardType& relxType = it->second;
-        constrainOperandType(relxType, instr, i, locSpecTypeMap[loc]);
-      }
+    if (rtt.isValue() && !rtt.isVagueValue() && !rtt.isClass() &&
+        !loc->location.isThis()) {
+      GuardType relxType = GuardType(KindOfAny);
+      GuardType specType = GuardType(rtt);
+      constrainDep(loc, tclet.m_instrStream.first, specType, relxType);
+      locRelxTypeMap[loc] = relxType;
     }
   }
 
@@ -2855,6 +3029,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
       assert(relxType.getOuterType() != KindOfInvalid);
       deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
                                              relxType.getInnerType());
+      propagateRelaxedType(tclet, tclet.m_instrStream.first, loc, relxType);
     }
   }
 }

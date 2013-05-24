@@ -627,13 +627,7 @@ static int start_server(const std::string &username) {
     HttpRequestHandler handler;
     ReplayTransport rt;
     timespec start;
-#ifndef __APPLE__
-    gettime(CLOCK_MONOTONIC, &start);
-#else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    TIMEVAL_TO_TIMESPEC(&tv, &start);
-#endif
+    Timer::GetMonotonicTime(start);
     std::string error;
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {

@@ -159,7 +159,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
   time_t now = time(nullptr);
   ExpirationPair tmp;
   struct timespec tsBegin, tsEnd;
-  gettime(CLOCK_MONOTONIC, &tsBegin);
+  Timer::GetMonotonicTime(tsBegin);
   int i = 0;
   while (RuntimeOption::ApcPurgeRate < 0 || i < RuntimeOption::ApcPurgeRate) {
     if (!m_expQueue.try_pop(tmp)) {
@@ -182,7 +182,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
     free((void *)tmp.first);
     ++i;
   }
-  gettime(CLOCK_MONOTONIC, &tsEnd);
+  Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   SharedStoreStats::addPurgingTime(elapsed);
   // Size could be inaccurate, but for stats reporting, it is good enough

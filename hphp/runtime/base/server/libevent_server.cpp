@@ -24,6 +24,7 @@
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler
@@ -51,25 +52,13 @@ namespace HPHP {
 // LibEventJob
 
 LibEventJob::LibEventJob(evhttp_request *req) : request(req) {
-#ifndef __APPLE__
-    gettime(CLOCK_MONOTONIC, &start);
-#else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    TIMEVAL_TO_TIMESPEC(&tv, &start);
-#endif
+  Timer::GetMonotonicTime(start);
 }
 
 void LibEventJob::stopTimer() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     timespec end;
-#ifndef __APPLE__
-    gettime(CLOCK_MONOTONIC, &end);
-#else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    TIMEVAL_TO_TIMESPEC(&tv, &end);
-#endif
+    Timer::GetMonotonicTime(end);
     time_t dsec = end.tv_sec - start.tv_sec;
     long dnsec = end.tv_nsec - start.tv_nsec;
     int64_t dusec = dsec * 1000000 + dnsec / 1000;
@@ -451,24 +440,13 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
   if (RuntimeOption::LibEventSyncSend && !skip_sync) {
     const char *reason = HttpProtocol::GetReasonString(code);
     timespec begin, end;
-    struct timeval tv;
-#ifndef __APPLE__
-    gettime(CLOCK_MONOTONIC, &begin);
-#else
-    gettimeofday(&tv, NULL);
-    TIMEVAL_TO_TIMESPEC(&tv, &begin);
-#endif
+    Timer::GetMonotonicTime(begin);
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN
     nwritten = evhttp_send_reply_sync(request, code, reason, nullptr, &totalSize);
 #else
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, nullptr);
 #endif
-#ifndef __APPLE__
-    gettime(CLOCK_MONOTONIC, &end);
-#else
-    gettimeofday(&tv, NULL);
-    TIMEVAL_TO_TIMESPEC(&tv, &end);
-#endif
+    Timer::GetMonotonicTime(end);
     int64_t delay = gettime_diff_us(begin, end);
     transport->onFlushBegin(totalSize);
     transport->onFlushProgress(nwritten, delay);

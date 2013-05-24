@@ -2706,13 +2706,13 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 
   if (numLocals == 0) return;
 
-  // The helpers called below use a special ABI, in which r13 is not saved.
-  // So save r13 on the stack if it's live.
-  bool saveR13 = m_state.liveRegs[inst].contains(r13);
+  // The helpers called below use a special ABI, in which r15 is not saved.
+  // So save r15 on the stack if it's live.
+  bool saveR15 = m_state.liveRegs[inst].contains(r15);
 
   int stackAdjust = 8;
-  if (saveR13)  {
-    a.push(r13);
+  if (saveR15)  {
+    a.push(r15);
     stackAdjust = 16;
   }
 
@@ -2725,9 +2725,9 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   a.call(target);
   recordSyncPoint(a);
 
-  if (saveR13) {
+  if (saveR15) {
     a.addq(8, rsp);
-    a.pop(r13);
+    a.pop(r15);
   }
 }
 

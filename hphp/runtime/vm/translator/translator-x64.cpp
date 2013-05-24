@@ -11000,12 +11000,12 @@ void TranslatorX64::emitFreeLocalsHelpers() {
   Label loopHead;
 
   /*
-   * Note: the IR currently requires that we preserve r14/r15 across
+   * Note: the IR currently requires that we preserve r13/r14 across
    * calls to these free locals helpers.
    */
   static_assert(rVmSp == rbx, "");
   auto const rIter     = rbx;
-  auto const rFinished = r13;
+  auto const rFinished = r15;
   auto const rType     = esi;
   auto const rData     = rdi;
 

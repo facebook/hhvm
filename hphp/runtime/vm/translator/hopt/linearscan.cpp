@@ -342,10 +342,10 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
   }
 
   if (m_fullXMMCandidates[tmpId]) {
-    FTRACE(1,
+    FTRACE(6,
        "getRegType(SSATmp {} : {}): it's a candidate for full XMM register\n",
            tmpId, tmpType.toString());
-    FTRACE(1,
+    FTRACE(6,
        "getRegType(SSATmp {}): crossNative = {} ; # freeCalleeSaved[GP] = {}\n",
            tmpId, crossNativeCall(tmp), m_freeCalleeSaved[PhysReg::GP].size());
 
@@ -508,7 +508,7 @@ bool LinearScan::crossNativeCall(const SSATmp* tmp) const {
 int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
   bool preferCallerSaved = true;
   PhysReg::Type regType = getRegType(ssaTmp, index);
-  FTRACE(1, "getRegType(SSATmp {}, {}) = {}\n", ssaTmp->getId(),
+  FTRACE(6, "getRegType(SSATmp {}, {}) = {}\n", ssaTmp->getId(),
          index, int(regType));
   assert(regType == PhysReg::GP || index == 0); // no type-only in XMM regs
 

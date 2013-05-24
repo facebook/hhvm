@@ -1456,265 +1456,6 @@ int getStackDelta(const NormalizedInstruction& ni) {
   return delta;
 }
 
-/*
- * analyzeSecondPass --
- *
- *   Whole-tracelet analysis pass, after we've set up the dataflow
- *   graph. Modifies the instruction stream, and further annotates
- *   individual instructions.
- */
-void Translator::analyzeSecondPass(Tracelet& t) {
-  assert(t.m_instrStream.last);
-  NormalizedInstruction* next;
-  for (NormalizedInstruction* ni = t.m_instrStream.first; ni; ni = next) {
-    const Opcode op = ni->op();
-    next = ni->next;
-
-    if (op == OpNop) {
-      t.m_instrStream.remove(ni);
-      continue;
-    }
-
-    if (op == OpCGetL) {
-      /*
-       * If the local isn't more broadly useful in this tracelet, don't bother
-       * allocating space for it.
-       */
-      const Location& local = ni->inputs[0]->location;
-
-      bool seen = false;
-      for (NormalizedInstruction* cur = ni->next; cur; cur = cur->next) {
-        if ((ni->m_txFlags & Native) != Native) break;
-        for (unsigned dli = 0; dli < cur->inputs.size(); ++dli) {
-          Location& loc = cur->inputs[dli]->location;
-          if (loc == local) {
-            SKTRACE(1, ni->source, "CGetL: loading input\n");
-            seen = true;
-            break;
-          }
-        }
-      }
-
-      ni->manuallyAllocInputs = !seen && !ni->inputs[0]->rtt.isUninit();
-      SKTRACE(1, ni->source, "CGetL: manuallyAllocInputs: %d\n",
-              ni->manuallyAllocInputs);
-      continue;
-    }
-
-    NormalizedInstruction* prev = ni->prev;
-    if (!prev || !(prev->m_txFlags & Supported)) continue;
-    const Opcode prevOp = prev->op();
-
-    if (!ni->next &&
-        (op == OpJmpZ || op == OpJmpNZ)) {
-      if (prevOp == OpNot && (ni->m_txFlags & Supported)) {
-        ni->invertCond = !ni->invertCond;
-        ni->inputs[0] = prev->inputs[0];
-        assert(!prev->deadLocs.size());
-        t.m_instrStream.remove(prev);
-        next = ni;
-        continue;
-      }
-      if (prevOp == OpGt || prevOp == OpLt ||
-          prevOp == OpGte || prevOp == OpLte ||
-          prevOp == OpEq || prevOp == OpNeq ||
-          prevOp == OpIssetL || prevOp == OpAKExists ||
-          isTypePred(prevOp) || prevOp == OpInstanceOfD ||
-          prev->fuseBranch) {
-        prev->breaksTracelet = true;
-        prev->changesPC = true; // Dont generate generic glue.
-        // Leave prev->next linked. The translator will end up needing it. The
-        // breaksTracelet annotation here will prevent us from really translating the
-        // Jmp*.
-        continue;
-      }
-    }
-
-    if (op == OpFPushClsMethodF && ni->directCall &&
-        prevOp == OpAGetC &&
-        prev->prev && prev->prev->op() == OpString &&
-        prev->prev->prev && prev->prev->prev->op() == OpString) {
-      /*
-       * We have a fully determined OpFPushClsMethodF. We dont
-       * need to put the class and method name strings, or the
-       * Class* into registers.
-       */
-      prev->outStack = nullptr;
-      prev->prev->outStack = nullptr;
-      prev->prev->prev->outStack = nullptr;
-    }
-
-    if (RuntimeOption::RepoAuthoritative &&
-        prevOp == OpFPushCtorD &&
-        !prev->noCtor &&
-        prev->imm[0].u_IVA == 0 &&
-        op == OpFCall && (ni->m_txFlags & Supported) &&
-        ni->next && (ni->next->m_txFlags & Supported) &&
-        ni->next->op() == OpPopR) {
-      /* new obj with a ctor that takes no args */
-      const NamedEntityPair& np =
-        curUnit()->lookupNamedEntityPairId(prev->imm[1].u_SA);
-      const Class* cls = Unit::lookupUniqueClass(np.second);
-      if (cls && (cls->attrs() & AttrUnique) &&
-          Func::isSpecial(cls->getCtor()->name())) {
-        /* its the generated 86ctor, so no need to call it */
-        next = next->next;
-        t.m_instrStream.remove(ni->next);
-        t.m_instrStream.remove(ni);
-        prev->noCtor = 1;
-        SKTRACE(1, prev->source, "FPushCtorD: killing ctor for %s in %s\n",
-                np.first->data(), curFunc()->fullName()->data());
-        continue;
-      }
-    }
-
-    /*
-     * If this is a Pop instruction and the previous instruction pushed a
-     * single return value cell on the stack, we can roll the pop into the
-     * previous instruction.
-     *
-     * TODO: SetG/SetS?
-     */
-    const bool isPop = op == OpPopC || op == OpPopV;
-    const bool isOptimizable = prevOp == OpSetL ||
-      prevOp == OpBindL ||
-      prevOp == OpIncDecL ||
-      prevOp == OpPrint ||
-      prevOp == OpSetM ||
-      prevOp == OpSetOpM ||
-      prevOp == OpIncDecM;
-
-    if (isPop && isOptimizable) {
-      // If one of these instructions already has a null outStack, we
-      // already hoisted a pop into it.
-      const bool alreadyHoisted = !prev->outStack;
-
-      if (!alreadyHoisted) {
-        prev->outStack = nullptr;
-        SKTRACE(3, ni->source, "hoisting Pop instruction in analysis\n");
-        for (unsigned i = 0; i < ni->deadLocs.size(); ++i) {
-          prev->deadLocs.push_back(ni->deadLocs[i]);
-        }
-        t.m_instrStream.remove(ni);
-        if ((prevOp == OpSetM || prevOp == OpSetOpM || prevOp == OpIncDecM) &&
-            prev->prev && prev->prev->op() == OpCGetL &&
-            prev->prev->inputs[0]->outerType() != KindOfUninit) {
-          assert(prev->prev->outStack);
-          prev->prev->outStack = 0;
-          prev->prev->manuallyAllocInputs = true;
-          prev->prev->ignoreInnerType = true;
-          prev->inputs[0] = prev->prev->inputs[0];
-          prev->grouped = true;
-        }
-        continue;
-      }
-    }
-
-    /*
-     * A Not instruction following an Is* instruction can
-     * be folded.
-     */
-    if (op == OpNot) {
-      switch (prevOp) {
-        case OpAKExists:
-        case OpIssetL:
-        case OpIsNullL:   case OpIsNullC:
-        case OpIsBoolL:   case OpIsBoolC:
-        case OpIsIntL:    case OpIsIntC:
-        case OpIsDoubleL: case OpIsDoubleC:
-        case OpIsStringL: case OpIsStringC:
-        case OpIsArrayL:  case OpIsArrayC:
-        case OpIsObjectL: case OpIsObjectC:
-          prev->invertCond = !prev->invertCond;
-          prev->outStack = ni->outStack;
-          SKTRACE(3, ni->source, "folding Not instruction in analysis\n");
-          assert(!ni->deadLocs.size());
-          t.m_instrStream.remove(ni);
-          continue;
-      }
-    }
-
-    if (op == OpInstanceOfD && prevOp == OpCGetL &&
-        (ni->m_txFlags & Supported)) {
-      assert(prev->outStack);
-      ni->inputs[0] = prev->inputs[0];
-      /*
-        the CGetL becomes a no-op (other
-        than checking for UninitNull), but
-        we mark the InstanceOfD as grouped to
-        avoid breaking the tracelet between the
-        two.
-      */
-      prev->ignoreInnerType = true;
-      prev->outStack = 0;
-      prev->manuallyAllocInputs = true;
-      ni->grouped = true;
-    }
-
-    if ((op == OpInstanceOfD || op == OpIsNullC) &&
-        (ni->m_txFlags & Supported) &&
-        (prevOp == OpThis || prevOp == OpBareThis)) {
-      prev->outStack = 0;
-      ni->grouped = true;
-      ni->manuallyAllocInputs = true;
-    }
-
-    /*
-     * TODO: #1181258 this should mostly be subsumed by the IR.
-     * Remove this once the IR is seen to be handling it.
-     */
-    NormalizedInstruction* pp = nullptr;
-    if (prevOp == OpString &&
-        (ni->m_txFlags & Supported)) {
-      switch (op) {
-        case OpReqDoc:
-          /* Dont waste a register on the string */
-          prev->outStack = nullptr;
-          pp = prev->prev;
-      }
-    }
-
-    if (op == OpRetC && (ni->m_txFlags & Supported) &&
-        (prevOp == OpString ||
-         prevOp == OpInt ||
-         prevOp == OpNull ||
-         prevOp == OpTrue ||
-         prevOp == OpFalse ||
-         prevOp == OpDouble ||
-         prevOp == OpArray ||
-         prevOp == OpThis ||
-         prevOp == OpBareThis)) {
-      assert(!ni->outStack);
-      ni->grouped = true;
-      prev->outStack = nullptr;
-      pp = prev->prev;
-    }
-
-    if (pp && pp->op() == OpPopC &&
-        pp->m_txFlags == Native) {
-      NormalizedInstruction* ppp = prev->prev->prev;
-      if (ppp && (ppp->m_txFlags & Supported)) {
-        switch (ppp->op()) {
-          case OpReqDoc:
-            /*
-              We have a require+pop followed by a require or a scalar ret,
-              where the pop doesnt have to do any work (the pop is Native).
-              There is no need to inc/dec rbx between the two (since
-              there will be no code between them)
-            */
-            ppp->outStack = nullptr;
-            ni->skipSync = true;
-            break;
-
-          default:
-            // do nothing
-            break;
-        }
-      }
-    }
-  }
-}
-
 static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
                                            DynLocation* dl) {
   while (ni != nullptr) {
@@ -3065,17 +2806,6 @@ void Translator::constrainOperandType(GuardType&             relxType,
   }
 }
 
-void Translator::reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc) {
-  for (auto& instr : tclet.m_instrs) {
-    for (size_t i = 0; i < instr.inputs.size(); i++) {
-      if (instr.inputs[i] == depDynLoc) {
-        analyzeInstr(tclet, instr);
-      }
-    }
-  }
-}
-
-
 /*
  * This method looks at all the uses of the tracelet dependencies in the
  * instruction stream and tries to relax the type associated with each location.
@@ -3125,7 +2855,6 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
       assert(relxType.getOuterType() != KindOfInvalid);
       deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
                                              relxType.getInnerType());
-      reanalizeConsumers(tclet, loc);
     }
   }
 }
@@ -3626,59 +3355,12 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       annotate(ni);
     }
 
-    analyzeInstr(t, *ni);
     if (ni->op() == OpFCall) {
       analyzeCallee(tas, t, ni);
     }
 
     for (auto& l : ni->deadLocs) {
       tas.recordDelete(l);
-    }
-
-    if (debug) {
-      // The interpreter has lots of nice sanity assertions in debug mode
-      // that the translator doesn't exercise. As a cross-check on the
-      // translator's correctness, this is a debug-only facility for
-      // sending a random selection of instructions through the
-      // interpreter.
-      //
-      // Set stress_txInterpPct to a value between 1 and 100. If you want
-      // to reproduce a failing case, look for the seed in the log and set
-      // stress_txInterpSeed accordingly.
-      if (!dbgTranslateCoin) {
-        dbgTranslateCoin = new BiasedCoin(Trace::stress_txInterpPct,
-                                          Trace::stress_txInterpSeed);
-        TRACE(1, "BiasedCoin(stress_txInterpPct,stress_txInterpSeed): "
-              "pct %f, seed %d\n",
-              dbgTranslateCoin->getPercent(), dbgTranslateCoin->getSeed());
-      }
-      assert(dbgTranslateCoin);
-      if (dbgTranslateCoin->flip()) {
-        SKTRACE(3, ni->source, "stress interp\n");
-        ni->m_txFlags = Interp;
-      }
-
-      if ((ni->op()) > Trace::moduleLevel(Trace::tmp0) &&
-          (ni->op()) < Trace::moduleLevel(Trace::tmp1)) {
-        ni->m_txFlags = Interp;
-      }
-    }
-
-    Op txOpBisectLowOp  = (Op)moduleLevel(Trace::txOpBisectLow),
-       txOpBisectHighOp = (Op)moduleLevel(Trace::txOpBisectHigh);
-    if (txOpBisectLowOp  > OpLowInvalid &&
-        txOpBisectHighOp > OpLowInvalid &&
-        txOpBisectHighOp < OpHighInvalid) {
-      // If the user specified an operation bisection interval [Low, High]
-      // that is strictly included in (OpLowInvalid, OpHighInvalid), then
-      // only support the operations in that interval. Since the default
-      // value of moduleLevel is 0 and OpLowInvalid is also 0, this ensures
-      // that bisection is disabled by default.
-      static_assert(OpLowInvalid >= 0,
-                    "OpLowInvalid must be nonnegative");
-      if (ni->op() < txOpBisectLowOp ||
-          ni->op() > txOpBisectHighOp)
-        ni->m_txFlags = Interp;
     }
 
     // Check if we need to break the tracelet.
@@ -3696,7 +3378,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       sk = SrcKey(curFunc(), sk.m_offset + ni->imm[0].u_IA);
       goto head; // don't advance sk
     } else if (opcodeBreaksBB(ni->op()) ||
-        (ni->m_txFlags == Interp && opcodeChangesPC(ni->op()))) {
+               (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
       SKTRACE(1, sk, "BB broken\n");
       sk.advance(unit);
       goto breakBB;

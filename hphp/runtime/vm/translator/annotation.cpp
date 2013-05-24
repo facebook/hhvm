@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/base.h"
+#include "hphp/runtime/vm/translator/annotation.h"
 #include "hphp/runtime/vm/translator/translator.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
-#include "hphp/runtime/vm/translator/annotation.h"
+#include "hphp/util/base.h"
 
 namespace HPHP {
 namespace Transl {
@@ -88,7 +88,6 @@ static void recordFunc(NormalizedInstruction& i,
   cr.m_type = Function;
   cr.m_func = func;
   s_callDB.insert(std::make_pair(sk, cr));
-  i.directCall = true;
 }
 
 static void recordActRecPush(NormalizedInstruction& i,

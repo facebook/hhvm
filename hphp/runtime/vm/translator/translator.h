@@ -317,26 +317,9 @@ class NormalizedInstruction {
   bool fuseBranch:1;
   bool preppedByRef:1;    // For FPass*; indicates parameter reffiness
   bool manuallyAllocInputs:1;
-  bool invertCond:1;
   bool outputPredicted:1;
   bool outputPredictionStatic:1;
   bool ignoreInnerType:1;
-
-  /*
-   * skipSync indicates that a previous instruction that should have
-   * adjusted the stack (eg FCall, Req*) didnt, because it could see
-   * that the next one was going to immediately adjust it again
-   * (ie at this point, rVmSp holds the "correct" value, rather
-   *  than the value it had at the beginning of the tracelet)
-   */
-  bool skipSync:1;
-
-  /*
-   * grouped indicates that the tracelet should not be broken
-   * (eg by a side exit) between the preceding instruction and
-   * this one
-   */
-  bool grouped:1;
 
   /*
    * guardedThis indicates that we know that ar->m_this is
@@ -359,12 +342,6 @@ class NormalizedInstruction {
   bool noSurprise:1;
 
   /*
-    noCtor is set on FPushCtorD to say that the ctor is
-    going to be skipped (so dont setup an actrec)
-  */
-  bool noCtor:1;
-
-  /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
    */
   bool noOp:1;
@@ -374,11 +351,6 @@ class NormalizedInstruction {
    * to translate it has failed.
    */
   bool interp:1;
-
-  /*
-   * This is an FPush* that will be directly bound to a Func*
-   */
-  bool directCall:1;
 
   /*
    * Indicates that a RetC/RetV should generate inlined return code
@@ -392,7 +364,6 @@ class NormalizedInstruction {
   boost::dynamic_bitset<> nonRefCountedLocals;
 
   ArgUnion constImm;
-  TXFlags m_txFlags;
 
   Op op() const;
   Op mInstrOp() const;
@@ -410,38 +381,15 @@ class NormalizedInstruction {
     , outStack3(nullptr)
     , checkedInputs(0)
     , hasConstImm(false)
-    , invertCond(false)
     , ignoreInnerType(false)
-    , skipSync(false)
-    , grouped(false)
     , guardedThis(false)
     , guardedCls(false)
     , noSurprise(false)
-    , noCtor(false)
     , noOp(false)
     , interp(false)
-    , directCall(false)
     , inlineReturn(false)
-    , m_txFlags(Interp)
   {
     memset(imm, 0, sizeof(imm));
-  }
-
-  bool isJmpNZ() const {
-    assert(op() == OpJmpNZ || op() == OpJmpZ);
-    return (op() == OpJmpNZ) != invertCond;
-  }
-
-  bool isSupported() const {
-    return (m_txFlags & Supported) == Supported;
-  }
-
-  bool isSimple() const {
-    return (m_txFlags & Simple) == Simple;
-  }
-
-  bool isNative() const {
-    return (m_txFlags & Native) == Native;
   }
 
   void markInputInferred(int i) {
@@ -450,15 +398,6 @@ class NormalizedInstruction {
 
   bool inputWasInferred(int i) const {
     return i < 32 && ((checkedInputs >> i) & 1);
-  }
-
-  bool wasGroupedWith(Op op) const {
-    return grouped && prev->op() == op;
-  }
-
-  template<class... OpTypes>
-  bool wasGroupedWith(Op op, OpTypes... ops) const {
-    return wasGroupedWith(op) || wasGroupedWith(ops...);
   }
 
   enum OutputUse {
@@ -845,7 +784,6 @@ private:
                   int& currentStackOffset,
                   bool& varEnvTaint);
   void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
-  void reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc);
   DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
                                                 size_t opndIdx);
   GuardType getOperandConstraintType(NormalizedInstruction* instr,
@@ -905,7 +843,6 @@ public:
    */
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
-  virtual void analyzeInstr(Tracelet& t, NormalizedInstruction& i) = 0;
   virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
   virtual TCA getCallToExit() = 0;
   virtual TCA getRetFromInterpretedFrame() = 0;

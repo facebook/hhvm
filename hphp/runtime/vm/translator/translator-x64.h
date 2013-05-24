@@ -298,11 +298,6 @@ private:
                               PhysReg src,
                               int off,
                               PhysReg tmpReg);
-  void emitTvSetRegSafe(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr, int toOffset, PhysReg tmp1, PhysReg tmp2,
-    bool incRefFrom);
-  void emitTvSet(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr, int toOffset = 0, bool incRefFrom = true);
 
   void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
   void emitPushAR(const NormalizedInstruction& i, const Func* func,
@@ -557,6 +552,21 @@ private:
   CASE(ArrayIdx) \
   CASE(FPushCufIter) \
   CASE(CIterFree) \
+  CASE(LateBoundCls) \
+  CASE(IssetS) \
+  CASE(IssetG) \
+  CASE(UnsetG) \
+  CASE(EmptyS) \
+  CASE(EmptyG) \
+  CASE(VGetS) \
+  CASE(BindS) \
+  CASE(BindG) \
+  CASE(IterFree) \
+  CASE(FPassV) \
+  CASE(UnsetN) \
+  CASE(BPassC) \
+  CASE(BPassV) \
+
   // These are instruction-like functions which cover more than one
   // opcode.
 #define PSEUDOINSTRS \
@@ -571,56 +581,6 @@ private:
   CASE(FPassCOp) \
   CASE(CheckTypeOp)
 
-#define PAIR(nm) \
-  void analyze ## nm(Tracelet& t, NormalizedInstruction& i); \
-  void translate ## nm(const Tracelet& t, const NormalizedInstruction& i);
-#define CASE PAIR
-
-INSTRS
-PSEUDOINSTRS
-
-#undef CASE
-#undef PAIR
-
-
-  void branchWithFlagsSet(const Tracelet& t, const NormalizedInstruction& i,
-                          ConditionCode cc);
-  void fuseBranchSync(const Tracelet& t, const NormalizedInstruction& i);
-  void fuseBranchAfterBool(const Tracelet& t, const NormalizedInstruction& i,
-                           ConditionCode cc);
-  void fuseHalfBranchAfterBool(const Tracelet& t,
-                               const NormalizedInstruction& i,
-                               ConditionCode cc, bool taken);
-  void fuseBranchAfterStaticBool(Asm& a, const Tracelet& t,
-                                 const NormalizedInstruction& i,
-                                 bool resultIsTrue, bool doSync = true);
-  void emitReturnVal(Asm& a, const NormalizedInstruction& i,
-                     PhysReg dstBase, int dstOffset,
-                     PhysReg thisBase, int thisOffset,
-                     PhysReg scratch);
-  void fuseBranchAfterHelper(const Tracelet& t,
-                             const NormalizedInstruction& i);
-  void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
-  void emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
-                     bool allowCreate);
-  void emitArrayElem(const NormalizedInstruction& i,
-                     const DynLocation* baseInput,
-                     PhysReg baseReg,
-                     const DynLocation* keyIn,
-                     const Location& outLoc);
-  void translateIssetMFast(const Tracelet& t,
-                           const NormalizedInstruction& ni);
-  void setupActRecClsForStaticCall(const NormalizedInstruction& i,
-                                   const Func* func, const Class* cls,
-                                   size_t clsOff, bool forward);
-  void emitInstanceCheck(const Tracelet& t, const NormalizedInstruction& i,
-                         const StringData* clsName,
-                         const Class* maybeCls,
-                         const ScratchReg& inCls,
-                         const ScratchReg& cls,
-                         const LazyScratchReg& result);
-  void emitFPushCtorDFast(const NormalizedInstruction& i, Class* cls,
-                          int arOff);
   template<typename L>
   void translatorAssert(X64Assembler& a, ConditionCode cc,
                         const char* msg, L setup);
@@ -691,9 +651,6 @@ PSEUDOINSTRS
 
   Asm& getAsm()   { return a; }
   void emitChainTo(SrcKey dest, bool isCall = false);
-  void syncOutputs(const Tracelet& t);
-  void syncOutputs(const NormalizedInstruction& i);
-  void syncOutputs(int stackOff);
 
   static bool isPseudoEvent(const char* event);
   void getPerfCounters(Array& ret);
@@ -713,7 +670,6 @@ private:
   void poison(PhysReg dest);
 
 public:
-  void analyzeInstr(Tracelet& t, NormalizedInstruction& i);
   bool acquireWriteLease(bool blocking) {
     return s_writeLease.acquire(blocking);
   }
@@ -723,14 +679,9 @@ public:
 
   void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
     const RefDeps&, SrcRec&);
-  void emitOneGuard(const Tracelet& t,
-                    const NormalizedInstruction& i,
-                    PhysReg reg, int disp, DataType type,
-                    TCA &sideExit);
   void irEmitResolvedDeps(const ChangeMap& resolvedDeps);
 
   void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
-  void emitPredictionGuards(const NormalizedInstruction& i);
 
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
@@ -837,11 +788,8 @@ private:
   TCA emitRetFromInterpretedGeneratorFrame();
   TCA emitGearTrigger(Asm& a, SrcKey sk, TransID transId);
   void emitPopRetIntoActRec(Asm& a);
-  void emitBox(DataType t, PhysReg rToBox);
-  void emitUnboxTopOfStack(const NormalizedInstruction& ni);
   int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
   void emitCondJmp(SrcKey skTrue, SrcKey skFalse, ConditionCode cc);
-  void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
@@ -878,10 +826,6 @@ private:
                           int numArgs);
   void emitIncCounter(TCA start, int cntOfs);
 
-  void analyzeReqLit(Tracelet& t, NormalizedInstruction& i,
-                     InclOpFlags flags);
-  void translateReqLit(const Tracelet& t, const NormalizedInstruction& i,
-                       InclOpFlags flags);
   struct ReqLitStaticArgs {
     HPHP::Eval::PhpFile* m_efile;
     TCA m_pseudoMain;
@@ -896,11 +840,6 @@ private:
 
   // Utility function shared with IR code
   static uint64_t packBitVec(const vector<bool>& bits, unsigned i);
-
-  void translateBasicIterInit(const Tracelet& t,
-                              const NormalizedInstruction& ni);
-  void translateBasicIterNext(const Tracelet& t,
-                              const NormalizedInstruction& ni);
 
 public:
   /*
@@ -992,18 +931,6 @@ PSEUDOINSTRS
 #undef CASE
 #undef DECLARE_FUNC
 
-  // Helper functions not covered by macros above
-  void irTranslateIssetS(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateIssetG(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateUnsetG(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateEmptyS(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateEmptyG(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateVGetS(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateBindS(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateBindG(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateIterFree(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateLateBoundCls(const Tracelet&, const NormalizedInstruction&i);
-  void irTranslateFPassV(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateReqLit(const Tracelet& t,
                          const NormalizedInstruction& i,
                          InclOpFlags flags);

@@ -191,7 +191,14 @@ TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
   assert(i.inputs[0]->outerType() != KindOfRef);
   assert(i.inputs[1]->outerType() != KindOfRef);
 
-  HHIR_UNIMPLEMENTED_WHEN((!i.isNative()), LtGtOp);
+  DataType leftType = i.inputs[0]->outerType();
+  DataType rightType = i.inputs[1]->outerType();
+  bool ok = TypeConstraint::equivDataTypes(leftType, rightType) &&
+    (i.inputs[0]->isNull() ||
+     leftType == KindOfBoolean ||
+     i.inputs[0]->isInt());
+
+  HHIR_UNIMPLEMENTED_WHEN(!ok, LtGtOp);
   switch (op) {
     case OpLt  : HHIR_EMIT(Lt);
     case OpLte : HHIR_EMIT(Lte);
@@ -442,7 +449,8 @@ TranslatorX64::irTranslateAdd(const Tracelet& t,
                               const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
 
-  if (planInstrAdd_Array(i)) {
+  if (i.inputs[0]->valueType() == KindOfArray &&
+      i.inputs[1]->valueType() == KindOfArray) {
     HHIR_EMIT(ArrayAdd);
     return;
   }
@@ -759,6 +767,12 @@ TranslatorX64::irTranslateUnsetG(const Tracelet& t,
   HHIR_EMIT(UnsetG, gblName);
 }
 
+void
+TranslatorX64::irTranslateUnsetN(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  HHIR_EMIT(UnsetN);
+}
+
 void TranslatorX64::irTranslateCGetS(const Tracelet& t,
                                      const NormalizedInstruction& i) {
   const int kPropNameIdx = 1;
@@ -912,13 +926,6 @@ TranslatorX64::irTranslateUnsetL(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateReqLit(const Tracelet& t,
-                                 const NormalizedInstruction& i,
-                                 InclOpFlags flags) {
-  HHIR_UNIMPLEMENTED(ReqLit);
-}
-
-void
 TranslatorX64::irTranslateReqDoc(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
@@ -1035,6 +1042,18 @@ void
 TranslatorX64::irTranslateFPushFuncD(const Tracelet& t,
                                    const NormalizedInstruction& i) {
   HHIR_EMIT(FPushFuncD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
+}
+
+void
+TranslatorX64::irTranslateBPassC(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  // No-op
+}
+
+void
+TranslatorX64::irTranslateBPassV(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  // No-op
 }
 
 void
@@ -1537,54 +1556,8 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
   };
   const Opcode op = i.op();
 
-  // Add to this switch the bytecodes that the IR handles but the base
-  // translator does not analyze and translate
-  switch (op) {
-    case OpLateBoundCls:
-      irTranslateLateBoundCls(t, i);
-      break;
-    case OpEmptyS:
-      irTranslateEmptyS(t, i);
-      break;
-    case OpEmptyG:
-      irTranslateEmptyG(t, i);
-      break;
-    case OpVGetS:
-      irTranslateVGetS(t, i);
-      break;
-    case OpIssetS:
-      irTranslateIssetS(t, i);
-      break;
-    case OpIssetG:
-      irTranslateIssetG(t, i);
-      break;
-    case OpUnsetN:
-      m_hhbcTrans->emitUnsetN();
-      break;
-    case OpUnsetG:
-      irTranslateUnsetG(t, i);
-      break;
-    case OpBindG:
-      irTranslateBindG(t, i);
-      break;
-    case OpIterFree:
-      irTranslateIterFree(t, i);
-      break;
-    case OpBPassC:
-    case OpBPassV:
-      // OpBPass* instructions are no-ops
-      break;
-    case OpFPassV:
-      irTranslateFPassV(t, i);
-      break;
-    case OpBindS:
-      irTranslateBindS(t, i);
-      break;
-    default:
-      // GO: if you hit this, check opNames[op] and add support for it
-      HHIR_UNIMPLEMENTED_OP(opNames[op]);
-      assert(false);
-  }
+  HHIR_UNIMPLEMENTED_OP(opNames[op]);
+  assert(false);
 }
 
 void
@@ -1693,14 +1666,7 @@ void TranslatorX64::irTranslateInstr(const Tracelet& t,
   m_hhbcTrans->setBcOff(i.source.offset(),
                         i.breaksTracelet && !m_hhbcTrans->isInlining());
 
-  if (!i.grouped) {
-    emitVariantGuards(t, i);
-    const NormalizedInstruction* n = &i;
-    while (n->next && n->next->grouped) {
-      n = n->next;
-      emitVariantGuards(t, *n);
-    }
-  }
+  emitVariantGuards(t, i);
 
   if (i.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

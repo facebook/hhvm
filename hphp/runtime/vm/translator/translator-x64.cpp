@@ -831,29 +831,6 @@ TranslatorX64::recordCallImpl(X64Assembler& a,
   recordSyncPoint(a, pcOff, stackOff);
   SKTRACE(2, sk, "record%sCall stackOff %d\n",
              reentrant ? "Reentrant" : "", int(stackOff));
-
-  /*
-   * Right now we assume call sites that need to record sync points
-   * may also throw exceptions.  We record information about dirty
-   * callee-saved registers so we can spill their contents during
-   * unwinding.  See unwind-x64.cpp.
-   */
-  if (!m_pendingUnwindRegInfo.empty()) {
-    if (Trace::moduleLevel(Trace::tunwind) >= 2) {
-      sk.trace("recordCallImpl has dirty callee-saved regs\n");
-      TRACE_MOD(Trace::tunwind, 2,
-                   "CTCA: %p saving dirty callee regs:\n",
-                   a.code.frontier);
-      for (int i = 0; i < UnwindRegInfo::kMaxCalleeSaved; ++i) {
-        if (m_pendingUnwindRegInfo.m_regs[i].dirty) {
-          TRACE_MOD(Trace::tunwind, 2, "  %s\n",
-                    m_pendingUnwindRegInfo.m_regs[i].pretty().c_str());
-        }
-      }
-    }
-    m_unwindRegMap.insert(a.code.frontier, m_pendingUnwindRegInfo);
-    m_pendingUnwindRegInfo.clear();
-  }
 }
 
 void
@@ -862,24 +839,6 @@ TranslatorX64::recordEagerCall(X64Assembler& a,
   SrcKey sk = i.source;
   emitEagerSyncPoint(a, curUnit()->entry() + sk.offset(),
                      -i.stackOff * sizeof(TypedValue));
-}
-
-void TranslatorX64::prepareCallSaveRegs() {
-  emitCallSaveRegs(); // Clean caller-saved regs.
-  m_pendingUnwindRegInfo.clear();
-
-  RegSet rset = kGPCalleeSaved;
-  PhysReg reg;
-  while (rset.findFirst(reg)) {
-    rset.remove(reg);
-    if (!m_regMap.regIsDirty(reg)) continue;
-    const RegInfo* ri = m_regMap.getInfo(reg);
-    assert(ri->m_cont.m_kind == RegContent::Loc);
-
-    // If the register is dirty, we'll record this so that we can
-    // restore it during stack unwinding if an exception is thrown.
-    m_pendingUnwindRegInfo.add(reg, ri->m_type, ri->m_cont.m_loc);
-  }
 }
 
 void
@@ -1235,7 +1194,7 @@ asm_label(a, release);
   {
     PhysRegSaver prs(a, kGPCallerSaved - RegSet(rdi));
     callDestructor(a, rAsm, rax);
-    recordIndirectFixup(a.code.frontier, prs.rspAdjustment());
+    recordIndirectFixup(a.code.frontier, prs.rspTotalAdjustmentRegs());
   }
   a.    ret    ();
 
@@ -11141,7 +11100,7 @@ TranslatorX64::TranslatorX64()
   m_irAstubsUsage(0),
   m_numHHIRTrans(0),
   m_regMap(kGPCallerSaved, kGPCalleeSaved, this),
-  m_unwindRegMap(128),
+  m_catchTraceMap(128),
   m_curTrace(0),
   m_curNI(0),
   m_curFile(nullptr),
@@ -11479,6 +11438,16 @@ TranslatorX64::callBinaryStub(X64Assembler& a, const NormalizedInstruction& i,
   recordReentrantCall(a, i);
   a.    pop  (rsi);
   a.    pop  (rdi);
+}
+
+void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
+  FTRACE(1, "registerCatchTrace: afterCall: {} trace: {}\n", ip, trace);
+  m_catchTraceMap.insert(ip, trace);
+}
+
+TCA TranslatorX64::getCatchTrace(CTCA ip) const {
+  TCA* found = m_catchTraceMap.find(ip);
+  return found ? *found : nullptr;
 }
 
 namespace {

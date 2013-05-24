@@ -27,6 +27,28 @@
 
 namespace HPHP {
 
+class InvalidSetMException : public std::runtime_error {
+ public:
+  InvalidSetMException()
+    : std::runtime_error("Empty InvalidSetMException")
+    , m_tv(HPHP::tv(KindOfNull, 0LL))
+  {}
+
+  explicit InvalidSetMException(const TypedValue& value)
+    : std::runtime_error(folly::format("InvalidSetMException containing {}",
+                                       value.pretty()).str())
+    , m_tv(value)
+  {}
+
+  ~InvalidSetMException() noexcept {}
+
+  const TypedValue& tv() const { return m_tv; };
+ private:
+  /* m_tv will contain a TypedValue with a reference destined for the
+   * VM eval stack. */
+  const TypedValue m_tv;
+};
+
 // When MoreWarnings is set to true, the VM will raise more warnings
 // on SetOpM, IncDecM and CGetG, intended to match Zend.
 const bool MoreWarnings =
@@ -447,7 +469,7 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
 
 // $result = ($base[] = ...);
 inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                  TypedValue* base) {
+                           TypedValue* base) {
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -516,9 +538,12 @@ inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
 template <bool setResult>
 inline void SetElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  // XXX Flip?
   if (setResult) {
     tvRefcountedDecRefCell((TypedValue*)value);
     tvWriteNull((TypedValue*)value);
+  } else {
+    throw InvalidSetMException(tv(KindOfNull, 0LL));
   }
 }
 
@@ -605,17 +630,35 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
     if (setResult) {
       tvRefcountedDecRef(value);
       tvWriteNull(value);
+    } else {
+      throw InvalidSetMException(tv(KindOfNull, 0LL));
     }
   }
 
   arrayRefShuffle<true>(a, newData, base);
 }
 
+template<KeyType keyType>
+inline int64_t castKeyToInt(TypedValue* key) {
+  TypedValue scratch;
+  initScratchKey<keyType>(scratch, key);
+  if (key->m_type == KindOfInt64) {
+    return key->m_data.num;
+  } else {
+    return tvCastToInt64(key);
+  }
+}
+
+template<>
+inline int64_t castKeyToInt<IntKey>(TypedValue* key) {
+  return keyAsRaw<IntKey>(key);
+}
+
 // SetElem() leaves the result in 'value', rather than returning it as in
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
 // get around.
 template <bool setResult, KeyType keyType = AnyKey>
-inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -642,23 +685,20 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   }
   case KindOfStaticString:
   case KindOfString: {
-    initScratchKey<keyType>(scratch, key);
     int baseLen = base->m_data.pstr->size();
     if (baseLen == 0) {
       SetElemEmptyish(base, key, value);
     } else {
       // Convert key to string offset.
-      int64_t x;
-      if (LIKELY(key->m_type == KindOfInt64)) {
-        x = key->m_data.num;
-      } else {
-        x = tvCastToInt64(key);
-      }
-      if (x < 0 || x >= StringData::MaxSize) {
-        // Andrei: can't use PRId64 here because of order of inclusion
-        // issues
+      int64_t x = castKeyToInt<keyType>(key);
+      if (UNLIKELY(x < 0 || x >= StringData::MaxSize)) {
+        // Can't use PRId64 here because of order of inclusion issues
         raise_warning("Illegal string offset: %lld", (long long)x);
-        break;
+        if (!setResult) {
+          throw InvalidSetMException(*value);
+        } else {
+          break;
+        }
       }
       // Compute how long the resulting string will be. Type needs
       // to agree with x.
@@ -706,14 +746,10 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         base->m_data.pstr = sd;
         base->m_type = KindOfString;
       }
-      if (setResult) {
-        // Push y onto the stack.
-        tvRefcountedDecRef(value);
-        StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
-        sd->incRefCount();
-        value->m_data.pstr = sd;
-        value->m_type = KindOfString;
-      }
+
+      StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
+      sd->incRefCount();
+      return sd;
     }
     break;
   }
@@ -732,6 +768,8 @@ inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   }
   default: not_reached();
   }
+
+  return nullptr;
 }
 
 inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
@@ -745,6 +783,8 @@ inline void SetNewElemNumberish(Cell* value) {
   if (setResult) {
     tvRefcountedDecRefCell((TypedValue*)value);
     tvWriteNull((TypedValue*)value);
+  } else {
+    throw InvalidSetMException(tv(KindOfNull, 0LL));
   }
 }
 template <bool setResult>
@@ -1469,11 +1509,13 @@ inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
 
 template <bool setResult>
 inline void SetPropNull(Cell* val) {
+  raise_warning("Cannot access property on non-object");
   if (setResult) {
     tvRefcountedDecRefCell(val);
     tvWriteNull(val);
+  } else {
+    throw InvalidSetMException(tv(KindOfNull, 0LL));
   }
-  raise_warning("Cannot access property on non-object");
 }
 inline void SetPropStdclass(TypedValue* base, TypedValue* key,
                                    Cell* val) {

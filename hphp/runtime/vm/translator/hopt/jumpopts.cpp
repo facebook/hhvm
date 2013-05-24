@@ -53,7 +53,7 @@ void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   IRInstruction& jmp = *lastInst;
   if (jmp.op() == Jmp_ && !isJoin[jmp.taken()->id()]) {
     Block* target = jmp.taken();
-    lastBlock->splice(lastInst, target, target->skipLabel(), target->end());
+    lastBlock->splice(lastInst, target, target->skipHeader(), target->end());
     lastBlock->erase(lastInst); // delete the jmp
   }
 }
@@ -92,7 +92,7 @@ Block* findMainExitBlock(Trace* trace, IRFactory* irFactory) {
 struct BlockMatcher {
   explicit BlockMatcher(Block* block)
     : m_block(block)
-    , m_it(block->skipLabel())
+    , m_it(block->skipHeader())
   {}
 
   bool match() { return true; }

@@ -36,9 +36,8 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   return array_setm_s0k1_v0(0, ad, key, &value);
 }
 
-HOT_FUNC_VM TypedValue setNewElem(TypedValue* base, Cell val) {
-  SetNewElem<true>(base, &val);
-  return val;
+HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
+  SetNewElem<false>(base, &val);
 }
 
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {

@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <unwind.h>
 #include <boost/shared_ptr.hpp>
 
 #include "hphp/util/assertions.h"
@@ -34,41 +35,23 @@ namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Information about callee-saved registers that was dirty at a
- * callsite.  This should be registered during translation time so the
- * unwinder can see it.
- */
-struct UnwindRegInfo {
-  static const int kMaxCalleeSaved = 3;
-
-  struct Data {
-    bool     dirty     : 1;
-    bool     exStack   : 1;  // false means a local
-    signed   dataType  : 8;  // DataType values
-    unsigned reg       : 4;  // Register id
-    int16_t  locOffset;
-
-    std::string pretty() const;
-  };
-  static_assert(sizeof(Data) == sizeof(uint32_t),
-                "UnwindRegInfo::Data was too big");
-
-  explicit UnwindRegInfo();
-
-  void add(RegNumber reg, DataType type, Location loc);
-  void clear();
-  bool empty() const;
-
-  Data m_regs[kMaxCalleeSaved];
-};
-
-static_assert(sizeof(UnwindRegInfo) <= sizeof(uint64_t) * 2,
-              "Unexpected size for UnwindRegInfo");
-
-typedef TreadHashMap<CTCA,UnwindRegInfo,ctca_identity_hash> UnwindRegMap;
+typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
 
 //////////////////////////////////////////////////////////////////////
+
+inline const std::type_info& typeInfoFromUnwindException(
+  _Unwind_Exception* exceptionObj)
+{
+  constexpr size_t kTypeInfoOff = 112;
+  return **reinterpret_cast<std::type_info**>(
+    reinterpret_cast<char*>(exceptionObj + 1) - kTypeInfoOff);
+}
+
+inline std::exception* exceptionFromUnwindException(
+  _Unwind_Exception* exceptionObj)
+{
+  return reinterpret_cast<std::exception*>(exceptionObj + 1);
+}
 
 /*
  * Called whenever we create a new translation cache for the whole

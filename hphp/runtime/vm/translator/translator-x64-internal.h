@@ -988,17 +988,17 @@ private:
 static inline void voidFunc() {}
 #define ID(argDbg) IE(debug, (argDbg), voidFunc())
 
-#define EMIT_CALL_PROLOGUE(a) do { \
+#define EMIT_CALL_PROLOGUE(a) do {         \
   SpaceRecorder sr("_HCallInclusive", a);  \
-  ArgManager _am(*this, a);       \
+  ArgManager _am(*this, a);                \
   prepareCallSaveRegs();
 
-#define EMIT_CALL_EPILOGUE(a, dest) \
-  _am.emitArguments();           \
-  { \
-    SpaceRecorder sr("_HCallExclusive", a); \
-    emitCall(a, (TCA)(dest), true);         \
-  } \
+#define EMIT_CALL_EPILOGUE(a, dest)             \
+  _am.emitArguments();                          \
+  {                                             \
+    SpaceRecorder sr("_HCallExclusive", a);     \
+    emitCall(a, (TCA)(dest), true);             \
+  }                                             \
 } while(0)
 
 #define EMIT_CALL(a, dest, ...) \

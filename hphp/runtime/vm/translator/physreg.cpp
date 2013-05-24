@@ -38,12 +38,20 @@ PhysRegSaverParity::~PhysRegSaverParity() {
     // See above; stack parity.
     m_as.    addq   (m_adjust, reg::rsp);
   }
-  m_regs.forEachR([&] (PhysReg pr) {
-    m_as.    pop    (pr);
+  emitPops(m_as, m_regs);
+}
+
+void PhysRegSaverParity::emitPops(X64Assembler& as, RegSet regs) {
+  regs.forEachR([&] (PhysReg pr) {
+    as.    pop    (pr);
   });
 }
 
 int PhysRegSaverParity::rspAdjustment() const {
+  return m_adjust;
+}
+
+int PhysRegSaverParity::rspTotalAdjustmentRegs() const {
   return m_regs.size() + m_adjust / sizeof(int64_t);
 }
 

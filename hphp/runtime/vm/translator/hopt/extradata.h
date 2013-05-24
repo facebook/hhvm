@@ -112,6 +112,13 @@ struct MarkerData : IRExtraData {
   uint32_t    bcOff;    // the bytecode offset in unit
   int32_t     stackOff; // stack off from start of trace
   const Func* func;     // which func are we in
+
+  std::string show() const {
+    return folly::format("--- bc {}, spOff {} ({})",
+                         bcOff,
+                         stackOff,
+                         func->fullName()->data()).str();
+  }
 };
 
 struct LocalId : IRExtraData {

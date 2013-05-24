@@ -264,7 +264,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpNeq:
   case OpSame:
   case OpNSame:
-    return simplifyCmp(opc, src1, src2);
+    return simplifyCmp(opc, inst, src1, src2);
 
   case Concat:        return simplifyConcat(src1, src2);
   case Mov:           return simplifyMov(src1);
@@ -323,6 +323,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
   case CheckType:    return simplifyCheckType(inst);
+  case AssertNonNull:return simplifyAssertNonNull(inst);
 
   case LdCls:        return simplifyLdCls(inst);
   case LdThis:       return simplifyLdThis(inst);
@@ -512,7 +513,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
   SSATmp* src2 = inst->src(1);
   Opcode opc = inst->op();
   // reuse the logic in simplifyCmp.
-  SSATmp* newCmp = simplifyCmp(queryJmpToQueryOp(opc), src1, src2);
+  SSATmp* newCmp = simplifyCmp(queryJmpToQueryOp(opc), nullptr, src1, src2);
   if (!newCmp) return nullptr;
 
   SSATmp* newQueryJmp = makeInstruction(
@@ -932,7 +933,11 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   }
 }
 
-SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
+                                SSATmp* src1, SSATmp* src2) {
+  auto newInst = [inst, this](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
   // ---------------------------------------------------------------------
   // Perform some execution optimizations immediately
   // ---------------------------------------------------------------------
@@ -985,9 +990,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     }
     // Type is neither a string nor an object - simplify to OpEq/OpNeq
     if (opName == OpSame) {
-      return gen(OpEq, src1, src2);
+      return newInst(OpEq, src1, src2);
     }
-    return gen(OpNeq, src1, src2);
+    return newInst(OpNeq, src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1047,9 +1052,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     // E.g. `some-int > false` is equivalent to `some-int == true`
     if (opName != OpEq) {
       if (cmpOp(opName, false, b)) {
-        return gen(OpEq, src1, cns(false));
+        return newInst(OpEq, src1, cns(false));
       } else {
-        return gen(OpEq, src1, cns(true));
+        return newInst(OpEq, src1, cns(true));
       }
     }
   }
@@ -1062,7 +1067,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   if (src1->type() == src2->type() ||
       (src1->type().isString() && src2->type().isString())) {
     if (src1->isConst() && !src2->isConst()) {
-      return gen(commuteQueryOp(opName), src2, src1);
+      return newInst(commuteQueryOp(opName), src2, src1);
     }
     return nullptr;
   }
@@ -1074,32 +1079,32 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 
   // nulls get canonicalized to the right
   if (src1->type().isNull()) {
-    return gen(commuteQueryOp(opName), src2, src1);
+    return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 1: null cmp string. Convert null to ""
   if (src1->type().isString() && src2->type().isNull()) {
-    return gen(opName, src1, cns(StringData::GetStaticString("")));
+    return newInst(opName, src1, cns(StringData::GetStaticString("")));
   }
 
   // case 2a: null cmp anything. Convert null to false
   if (src2->type().isNull()) {
-    return gen(opName, src1, cns(false));
+    return newInst(opName, src1, cns(false));
   }
 
   // bools get canonicalized to the right
   if (src1->type() == Type::Bool) {
-    return gen(commuteQueryOp(opName), src2, src1);
+    return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 2b: bool cmp anything. Convert anything to bool
   if (src2->type() == Type::Bool) {
     if (src1->isConst()) {
       if (src1->type() == Type::Int) {
-        return gen(opName, cns(bool(src1->getValInt())), src2);
+        return newInst(opName, cns(bool(src1->getValInt())), src2);
       } else if (src1->type().isString()) {
         auto str = src1->getValStr();
-        return gen(opName, cns(str->toBoolean()), src2);
+        return newInst(opName, cns(str->toBoolean()), src2);
       }
     }
 
@@ -1109,14 +1114,14 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
       always_assert(opName == OpEq);
 
       if (src2->getValBool()) {
-        return gen(OpNeq, src1, cns(0));
+        return newInst(OpNeq, src1, cns(0));
       } else {
-        return gen(OpEq, src1, cns(0));
+        return newInst(OpEq, src1, cns(0));
       }
     }
 
     // Nothing fancy to do - perform juggling as normal.
-    return gen(opName, gen(ConvCellToBool, src1), src2);
+    return newInst(opName, gen(ConvCellToBool, src1), src2);
   }
 
   // From here on, we must be careful of how Type::Obj gets dealt with,
@@ -1127,12 +1132,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 
   // strings get canonicalized to the left
   if (src2->type().isString()) {
-    return gen(commuteQueryOp(opName), src2, src1);
+    return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // ints get canonicalized to the right
   if (src1->type() == Type::Int) {
-    return gen(commuteQueryOp(opName), src2, src1);
+    return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 4: number/string/resource cmp. Convert to number (int OR double)
@@ -1146,12 +1151,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
     if (st == KindOfDouble) {
-      return gen(opName, cns(sd), src2);
+      return newInst(opName, cns(sd), src2);
     }
     if (st == KindOfNull) {
       si = 0;
     }
-    return gen(opName, cns(si), src2);
+    return newInst(opName, cns(si), src2);
   }
 
   // case 5: array cmp array. No juggling to do
@@ -1668,6 +1673,15 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
     inst->setTypeParam(
       Type::mostRefined(inst->typeParam(), info.knownType)
     );
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
+  auto t = inst->typeParam();
+  assert(t.maybe(Type::Nullptr));
+  if (t.subtypeOf(Type::Nullptr)) {
+    return inst->src(0);
   }
   return nullptr;
 }

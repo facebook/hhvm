@@ -115,7 +115,8 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
   SSATmp* simplifyCall(IRInstruction* inst);
-  SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
+                      SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
   SSATmp* simplifyQueryJmp(IRInstruction*);
   SSATmp* simplifyExitOnVarEnv(IRInstruction*);
@@ -127,6 +128,7 @@ private:
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
   SSATmp* simplifyStRef(IRInstruction*);
+  SSATmp* simplifyAssertNonNull(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);

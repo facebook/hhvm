@@ -108,10 +108,11 @@ namespace {
 #define DParam    HasDest
 #define DArith    HasDest
 #define DMulti    NaryDest
-#define DVector   HasDest
+#define DSetElem  HasDest
 #define DStk(x)   ModifiesStack|(x)
 #define DPtrToParam HasDest
 #define DBuiltin  HasDest
+#define DSubtract(n,t) HasDest
 
 struct {
   const char* name;
@@ -151,10 +152,11 @@ struct {
 #undef DParam
 #undef DArith
 #undef DMulti
-#undef DVector
+#undef DSetElem
 #undef DStk
 #undef DPtrToParam
 #undef DBuiltin
+#undef DSubtract
 
 //////////////////////////////////////////////////////////////////////
 
@@ -408,7 +410,7 @@ bool IRInstruction::mayModifyRefs() const {
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
     auto type = src(0)->type();
-    if (isControlFlowInstruction()) {
+    if (isControlFlow()) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
       // trace.
@@ -437,7 +439,7 @@ bool IRInstruction::isEssential() const {
       return true;
     }
   }
-  return isControlFlowInstruction() ||
+  return isControlFlow() ||
          opcodeHasFlags(opc, Essential) ||
          mayReenterHelper();
 }
@@ -778,10 +780,9 @@ Opcode commuteQueryOp(Opcode opc) {
 // __toString function.
 bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
   if (op == OpNSame || op == OpSame) return false;
-  assert(t0 != Type::Gen && t1 != Type::Gen);
-  return (t0 == Type::Cell || t1 == Type::Cell) ||
-    ((t0 == Type::Obj || t1 == Type::Obj) &&
-     (t0.isString() || t1.isString()));
+  assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
+  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
+         (t0.maybe(Type::Str) && t1.maybe(Type::Obj));
 }
 
 bool isRefCounted(SSATmp* tmp) {
@@ -810,19 +811,20 @@ void IRInstruction::convertToNop() {
 }
 
 void IRInstruction::convertToJmp() {
-  assert(isControlFlowInstruction());
-  assert(block()->back() == this);
+  assert(isControlFlow());
+  assert(IMPLIES(block(), block()->back() == this));
   m_op = Jmp_;
   m_typeParam = Type::None;
   m_numSrcs = 0;
   m_numDsts = 0;
   m_srcs = nullptr;
   m_dst = nullptr;
-  block()->setNext(nullptr);
+  // Instructions in the simplifier don't have blocks yet.
+  if (block()) block()->setNext(nullptr);
 }
 
 void IRInstruction::convertToMov() {
-  assert(!isControlFlowInstruction());
+  assert(!isControlFlow());
   m_op = Mov;
   m_typeParam = Type::None;
   assert(m_numSrcs == 1);
@@ -916,15 +918,21 @@ std::string IRInstruction::toString() const {
   return str.str();
 }
 
-int SSATmp::numNeededRegs() const {
-  auto t = type();
-  if (t.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr)) {
+namespace {
+int typeNeededRegs(Type t) {
+  assert(!t.equals(Type::Bottom));
+
+  if (t.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr,
+                     Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
     // which takes the return address from the stack.  This knowledge should be
     // moved to a machine-specific section once we target other architectures.
     return 0;
+  }
+  if (t.maybe(Type::Nullptr)) {
+    return typeNeededRegs(t - Type::Nullptr);
   }
   if (t.subtypeOf(Type::Ctx) || t.isPtr()) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
@@ -943,6 +951,11 @@ int SSATmp::numNeededRegs() const {
 
   assert(t.subtypeOf(Type::Gen));
   return t.needsReg() ? 2 : 1;
+}
+}
+
+int SSATmp::numNeededRegs() const {
+  return typeNeededRegs(type());
 }
 
 bool SSATmp::getValBool() const {

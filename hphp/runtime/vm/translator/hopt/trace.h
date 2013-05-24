@@ -95,6 +95,15 @@ struct Trace : private boost::noncopyable {
     return exit;
   }
   bool isMain() const { return m_main == nullptr; }
+  bool isCatch() const {
+    auto it = front()->skipHeader();
+    if (it == front()->end()) return false;
+
+    assert(it->op() == Marker);
+    if (it == front()->begin()) return false;
+
+    return (--it)->op() == BeginCatch;
+  }
   void setMain(Trace* t) {
     assert(m_main == nullptr);
     m_main = t;

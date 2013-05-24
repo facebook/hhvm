@@ -62,48 +62,64 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
 }
 
 /*
- * Check one block for being well formed.  It must:
- * 1. Optionally start with DefLabel.  DefLabel may not appear anywhere else.
- * 2. Have either no other instructions, or else at least one Marker
- *    following the DefLabel before any other instructions.
- * 3. If any instruction is isBlockEnd(), it must be last.
- * 4. If the last instruction isTerminal(), block->next must be null.
- * 5. If the block starts with a DefLabel with >=1 destinations, all the
- *    incoming must be from blocks listed in this block's trace.
+ * Check one block for being well formed. Invariants verified:
+ * 1. The block begins with an optional DefLabel, followed by an optional
+ *    BeginCatch, followed by either a Marker or no more instructions.
+ * 2. DefLabel and BeginCatch may not appear anywhere in a block other than
+ *    where specified in #1.
+ * 3. If the optional BeginCatch is present, the block must belong to an exit
+ *    trace and must be the first block in its Trace's block list.
+ * 4. If any instruction is isBlockEnd(), it must be last.
+ * 5. If the last instruction isTerminal(), block->next must be null.
+ * 6. If the DefLabel produces a value, all of its incoming edges must be from
+ *    blocks listed in the block list for this block's Trace.
+ * 7. Any path from this block to a Block that expects values must be
+ *    from a Jmp_ instruciton.
  */
 bool checkBlock(Block* b) {
-  if (b->skipLabel() != b->end()) {
-    assert(b->skipLabel()->op() == Marker);
+  auto it = b->begin();
+  auto end = b->end();
+  if (it == end) return true;
+
+  // Invariant #1
+  if (it->op() == DefLabel) ++it;
+
+  // Invariant #1, #3
+  if (it != end && it->op() == BeginCatch) {
+    ++it;
+    assert(!b->trace()->isMain());
+    assert(b == b->trace()->front());
   }
-  if (Block* next DEBUG_ONLY = b->next()) {
-    // cannot fall-through to join block expecting values
-    assert(numBlockParams(next) == 0);
+
+  // Invariant #3
+  if (it == end) return true;
+  assert(it->op() == Marker);
+
+  // Invariants #2, #4
+  if (++it == end) return true;
+  if (b->back()->isBlockEnd()) --end;
+  while (it != end && it->op() == Marker) ++it;
+  for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(it, end)) {
+    assert(inst.op() != DefLabel);
+    assert(inst.op() != BeginCatch);
+    assert(!inst.isBlockEnd());
   }
-  if (b->empty()) {
-    return true;
+  for (DEBUG_ONLY IRInstruction& inst : *b) {
+    assert(inst.block() == b);
   }
-  if (b->back()->isTerminal()) {
-    assert(!b->next());
-  }
-  if (Block* taken DEBUG_ONLY = b->taken()) {
+
+  // Invariant #5
+  assert(IMPLIES(b->back()->isTerminal(), !b->next()));
+
+  // Invariant #7
+  if (b->taken()) {
     // only Jmp_ can branch to a join block expecting values.
     DEBUG_ONLY IRInstruction* branch = b->back();
     DEBUG_ONLY auto numArgs = branch->op() == Jmp_ ? branch->numSrcs() : 0;
-    assert(numBlockParams(taken) == numArgs);
+    assert(numBlockParams(b->taken()) == numArgs);
   }
 
-  {
-    auto i = b->skipLabel(), e = b->end();
-    if (b->back()->isBlockEnd()) --e;
-    for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(i, e)) {
-      assert(inst.op() != DefLabel);
-      assert(!inst.isBlockEnd());
-    }
-    for (DEBUG_ONLY IRInstruction& inst : *b) {
-      assert(inst.block() == b);
-    }
-  }
-
+  // Invariant #6
   if (b->front()->op() == DefLabel) {
     for (int i = 0; i < b->front()->numDsts(); ++i) {
       auto const traceBlocks = b->trace()->blocks();
@@ -114,6 +130,21 @@ bool checkBlock(Block* b) {
     }
   }
 
+  return true;
+}
+
+/*
+ * Check that every catch trace has at most one incoming branch and a single
+ * block.
+ */
+bool checkCatchTraces(Trace* trace, const IRFactory& irFactory) {
+  forEachTraceBlock(trace, [&](Block* b) {
+    auto trace = b->trace();
+    if (trace->isCatch()) {
+      assert(trace->blocks().size() == 1);
+      assert(b->preds().size() <= 1);
+    }
+  });
   return true;
 }
 
@@ -166,6 +197,8 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
       assert(e.to() == b);
     }
   }
+
+  checkCatchTraces(trace, factory);
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);

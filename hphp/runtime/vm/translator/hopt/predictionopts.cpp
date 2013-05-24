@@ -123,7 +123,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
 
     // Clone the instructions to the exit before specializing.
     cloneToBlock(rpoSort, irFactory, sinkFirst, sinkLast, exit);
-    exit->insert(exit->skipLabel(), irFactory->cloneInstruction(lastMarker));
+    exit->insert(exit->skipHeader(), irFactory->cloneInstruction(lastMarker));
 
     /*
      * Specialize the LdMem left on the main trace after cloning the
@@ -145,7 +145,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
 
     // Move the fallthrough case to specialized.
     moveToBlock(sinkFirst, boost::next(sinkLast), specialized);
-    specialized->insert(specialized->skipLabel(),
+    specialized->insert(specialized->skipHeader(),
                         irFactory->cloneInstruction(lastMarker));
 
     reflowTypes(specialized, rpoSort);

@@ -240,8 +240,8 @@ class TranslatorX64 : public Translator
   RegAlloc                   m_regMap;
   std::stack<SavedRegState>  m_savedRegMaps;
   FixupMap                   m_fixupMap;
-  UnwindRegMap               m_unwindRegMap;
   UnwindInfoHandle           m_unwindRegistrar;
+  CatchTraceMap              m_catchTraceMap;
 
 public:
   // Currently translating trace or instruction---only valid during
@@ -262,7 +262,6 @@ private:
       m_tca(tca), m_fixup(fixup) { }
   };
   vector<PendingFixup> m_pendingFixups;
-  UnwindRegInfo        m_pendingUnwindRegInfo;
 
   void drawCFG(std::ofstream& out) const;
   static vector<PhysReg> x64TranslRegs();
@@ -311,7 +310,7 @@ private:
                   bool clearThis = true, uintptr_t varEnvInvName = 0);
 
   void emitCallSaveRegs();
-  void prepareCallSaveRegs();
+  void prepareCallSaveRegs() { not_reached(); }
   void emitCallStaticLocHelper(X64Assembler& as,
                                const NormalizedInstruction& i,
                                ScratchReg& output,
@@ -641,9 +640,8 @@ PSEUDOINSTRS
     }
   }
 
-  const UnwindRegInfo* getUnwindInfo(CTCA ip) const {
-    return m_unwindRegMap.find(ip);
-  }
+  void registerCatchTrace(CTCA ip, TCA trace);
+  TCA getCatchTrace(CTCA ip) const;
 
   static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
 

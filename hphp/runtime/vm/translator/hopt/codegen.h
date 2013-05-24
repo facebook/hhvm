@@ -84,6 +84,8 @@ struct CodegenState {
     , liveRegs(liveRegs)
     , lifetime(lifetime)
     , asmInfo(asmInfo)
+    , catches(factory, CatchInfo())
+    , catchTrace(nullptr)
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -113,6 +115,14 @@ struct CodegenState {
 
   // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
+
+  // Used to pass information about the state of the world at native
+  // calls between cgCallHelper and cgBeginCatch.
+  StateVector<Block, CatchInfo> catches;
+
+  // If non-null, represents the catch trace for the current
+  // instruction, to be registered with the unwinder.
+  Trace* catchTrace;
 };
 
 constexpr Reg64  rCgGP  (reg::r11);

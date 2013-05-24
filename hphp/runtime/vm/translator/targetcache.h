@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/vm/translator/types.h"
+#include "hphp/runtime/vm/translator/unwind-x64.h"
 #include "hphp/util/asm-x64.h"
 #include <boost/static_assert.hpp>
 
@@ -47,7 +48,31 @@ extern size_t s_persistent_start;
  */
 extern __thread HphpArray* s_constants;
 
-static const int kConditionFlagsOff = 0;
+/*
+ * The fields in TargetCacheHeader are pre-allocated at process
+ * startup and live at the beginning of the targetCache.
+ */
+struct TargetCacheHeader {
+  ssize_t conditionFlags;
+
+  // Used to pass values between unwinder code and catch traces:
+  int64_t unwinderScratch;
+  TypedValue unwinderTv;
+  bool doSideExit;
+};
+
+inline TargetCacheHeader* header() {
+  return (TargetCacheHeader*)tl_targetCaches;
+}
+
+constexpr int kConditionFlagsOff =
+  offsetof(TargetCacheHeader, conditionFlags);
+constexpr int kUnwinderScratchOff =
+  offsetof(TargetCacheHeader, unwinderScratch);
+constexpr int kUnwinderSideExitOff =
+  offsetof(TargetCacheHeader, doSideExit);
+constexpr int kUnwinderTvOff =
+  offsetof(TargetCacheHeader, unwinderTv);
 
 /*
  * Some caches have different numbers of lines. This is our default.
@@ -123,7 +148,7 @@ T& handleToRef(CacheHandle h) {
 }
 
 inline ssize_t* conditionFlagsPtr() {
-  return ((ssize_t*)handleToPtr(kConditionFlagsOff));
+  return &header()->conditionFlags;
 }
 
 inline ssize_t loadConditionFlags() {

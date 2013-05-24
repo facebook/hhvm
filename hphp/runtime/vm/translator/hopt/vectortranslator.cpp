@@ -135,8 +135,7 @@ void VectorEffects::init(Opcode op, const Type origBase,
   assert_not_implemented(basePtr ||
                          baseType.subtypeOfAny(Type::Obj, Type::Arr));
 
-  valType = origVal;
-  baseTypeChanged = baseValChanged = valTypeChanged = false;
+  baseTypeChanged = baseValChanged = false;
 
   // Canonicalize the op to SetProp/SetElem/UnsetElem/SetWithRefElem
   op = canonicalOp(op);
@@ -147,11 +146,6 @@ void VectorEffects::init(Opcode op, const Type origBase,
   // since this shouldn't actually happen.)
   assert(key.equals(Type::None) || key.isKnownDataType() ||
          key.equals(Type::Cell));
-  if (op == SetWithRefElem) {
-    assert(origVal.isPtr());
-  } else {
-    assert(origVal.equals(Type::None) || origVal.isKnownDataType());
-  }
 
   if ((op == SetElem || op == SetProp || op == SetWithRefElem) &&
       baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
@@ -196,36 +190,12 @@ void VectorEffects::init(Opcode op, const Type origBase,
   // warning, and evaulate to null.
   const Type badArrKey = Type::Arr | Type::Obj;
 
-  const bool maybeBadArrKey = key.maybe(badArrKey);
-  if ((op == SetElem && (!baseType.subtypeOf(okBase) || maybeBadArrKey)) ||
-      (op == SetProp && !baseType.subtypeOf(Type::Obj))) {
-    // The set operation might fail, issue a warning, and evaluate to null. Any
-    // other invalid combinations of base/key will throw an exception/fatal.
-
-    const bool definitelyFail =
-      // SetElem and the base is known to not be a good type
-      (op == SetElem && baseType.not(okBase)) ||
-      // SetElem and the array key is known to be bad
-      (op == SetElem && key.subtypeOf(badArrKey)) ||
-      // SetProp and the base is known to not be an object
-      (op == SetProp && baseType.not(Type::Obj));
-
-    valType = definitelyFail ? Type::InitNull : (valType | Type::InitNull);
-  }
-
-  if (op == SetElem && baseType.maybe(Type::Str)) {
-    // If the base is a String, the result will be different from the value
-    // use valTypeChanged (even though the type may not have)
-    valTypeChanged = true;
-  }
-
   // The final baseType should be a pointer/box iff the input was
   baseType = baseBoxed ? baseType.box() : baseType;
   baseType = basePtr   ? baseType.ptr() : baseType;
 
   baseTypeChanged = baseTypeChanged || baseType != origBase;
   baseValChanged = baseValChanged || baseTypeChanged;
-  valTypeChanged = valTypeChanged || valType != origVal;
 }
 
 // vectorBaseIdx returns the src index for inst's base operand.
@@ -292,17 +262,20 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
     : m_ni(ni)
     , m_ht(ht)
     , m_tb(*m_ht.m_tb)
+    , m_irf(m_ht.m_irFactory)
     , m_mii(getMInstrInfo(ni.mInstrOp()))
     , m_needMIS(true)
     , m_misBase(nullptr)
     , m_base(nullptr)
     , m_result(nullptr)
-    , m_predictedResult(nullptr)
+    , m_strTestResult(nullptr)
+    , m_failedSetTrace(nullptr)
 {
 }
 
 template<typename... Srcs>
-SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
+SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Trace* taken,
+                                                 Srcs... srcs) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   assert(!opcodeHasFlags(opc, ModifiesStack));
   std::vector<SSATmp*> srcVec({srcs...});
@@ -318,7 +291,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
     }
   }
 
-  return gen(opc, srcs...);
+  return gen(opc, taken, srcs...);
 }
 
 void HhbcTranslator::VectorTranslator::emit() {
@@ -525,6 +498,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getValAddr() {
   } else {
     assert(l.space == Location::Stack);
     assert(mapContains(m_stackInputs, 0));
+    m_ht.spillStack();
     return m_ht.ldStackAddr(m_stackInputs[0]);
   }
 }
@@ -578,8 +552,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     // Check for Uninit and warn/promote to InitNull as appropriate
     if (baseType.subtypeOf(Type::Uninit)) {
       if (mia & MIA_warn) {
-        m_ht.exceptionBarrier();
-        gen(RaiseUninitLoc, LocalId(base.location.offset));
+        gen(RaiseUninitLoc, m_ht.getCatchTrace(),
+            LocalId(base.location.offset));
       }
       if (mia & MIA_define) {
         gen(
@@ -620,6 +594,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       m_base = m_ht.ldLocAddr(base.location.offset);
     } else {
       assert(base.location.space == Location::Stack);
+      // Make sure the stack is clean before getting a pointer to one of its
+      // elements.
       m_ht.spillStack();
       assert(m_stackInputs.count(m_iInd));
       m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd]);
@@ -715,8 +691,8 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getBase();
-  m_ht.exceptionBarrier();
   m_base = gen(BaseG,
+               m_ht.getCatchTrace(),
                cns(reinterpret_cast<TCA>(opFunc)),
                gblName,
                genMisPtr());
@@ -819,11 +795,12 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   typedef TypedValue* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getKey();
   BUILD_OPTAB(mia, m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
   if (mia & Define) {
-    m_base = genStk(PropDX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+    m_base = genStk(PropDX, m_ht.getCatchTrace(), cns((TCA)opFunc), CTX(),
+                    m_base, key, genMisPtr());
   } else {
-    m_base = gen(PropX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+    m_base = gen(PropX, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
   }
 }
 #undef HELPER_TABLE
@@ -867,8 +844,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
           // init_null_variant.
       m_tb.hint(Block::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
-        // We did the exceptionBarrier for this up in emitPropSpecialized.
-        gen(RaiseUndefProp, baseAsObj, key);
+        gen(RaiseUndefProp, m_ht.getCatchTrace(), baseAsObj, key);
       }
       if (doDefine) {
         gen(
@@ -895,20 +871,6 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
   SSATmp* initNull = cns((const TypedValue*)&init_null_variant);
-
-  /*
-   * With the exception of single-dim CGetMs where hphpc knows the property
-   * can't be KindOfUninit, one of the conditional branches below may throw.
-   */
-  if (doWarn && wantPropSpecializedWarnings()) {
-    if (m_ni.mInstrOp() == OpCGetM && m_mInd == 0) {
-      if (propInfo.hphpcType == KindOfInvalid) {
-        m_ht.exceptionBarrier();
-      }
-    } else {
-      m_ht.exceptionBarrier();
-    }
-  }
 
   /*
    * Type-inference from hphpc only tells us that this is either an object of a
@@ -1056,12 +1018,12 @@ void HhbcTranslator::VectorTranslator::emitElem() {
 
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), mia);
-  m_ht.exceptionBarrier();
   if (define || unset) {
-    m_base = genStk(define ? ElemDX : ElemUX, cns((TCA)opFunc), m_base,
-                    key, genMisPtr());
+    m_base = genStk(define ? ElemDX : ElemUX, m_ht.getCatchTrace(),
+                    cns((TCA)opFunc), m_base, key, genMisPtr());
   } else {
-    m_base = gen(ElemX, cns((TCA)opFunc), m_base, key, genMisPtr());
+    m_base = gen(ElemX, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), m_base, key, genMisPtr());
   }
 }
 #undef HELPER_TABLE
@@ -1190,8 +1152,8 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getKey();
   BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
-  m_result = gen(CGetProp, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+  m_result = gen(CGetProp, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1232,8 +1194,7 @@ void HhbcTranslator::VectorTranslator::emitVGetProp() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
-  m_result = genStk(VGetProp, cns((TCA)opFunc), CTX(),
+  m_result = genStk(VGetProp, m_ht.getCatchTrace(), cns((TCA)opFunc), CTX(),
                     m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1265,9 +1226,8 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
   SSATmp* key = getKey();
   typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(isEmpty, m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
-  m_result = gen(isEmpty ? EmptyProp : IssetProp, cns((TCA)opFunc),
-                      CTX(), m_base, key);
+  m_result = gen(isEmpty ? EmptyProp : IssetProp, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), CTX(), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1280,10 +1240,9 @@ void HhbcTranslator::VectorTranslator::emitEmptyProp() {
 }
 
 template <bool isObj>
-static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
-                                     TypedValue keyVal, Cell val) {
-  HPHP::SetProp<true, isObj>(ctx, base, &keyVal, &val);
-  return val;
+static inline void setPropImpl(Class* ctx, TypedValue* base,
+                               TypedValue keyVal, Cell val) {
+  HPHP::SetProp<false, isObj>(ctx, base, &keyVal, &val);
 }
 
 #define HELPER_TABLE(m)                     \
@@ -1292,8 +1251,8 @@ static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
   m(setPropCO,    true)
 
 #define PROP(nm, ...)                                                   \
-TypedValue nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) { \
-  return setPropImpl<__VA_ARGS__>(ctx, base, key, val);                 \
+void nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) {       \
+  setPropImpl<__VA_ARGS__>(ctx, base, key, val);                        \
 }
 namespace VectorHelpers {
 HELPER_TABLE(PROP)
@@ -1320,12 +1279,13 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   }
 
   // Emit the appropriate helper call.
-  typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, Cell);
+  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, Cell);
   SSATmp* key = getKey();
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
-  m_result = genStk(SetProp, cns((TCA)opFunc), CTX(), m_base, key, value);
-  m_predictedResult = value;
+  m_failedSetTrace = m_ht.getCatchTrace();
+  genStk(SetProp, m_failedSetTrace, cns((TCA)opFunc), CTX(),
+         m_base, key, value);
+  m_result = value;
 }
 #undef HELPER_TABLE
 
@@ -1363,9 +1323,8 @@ void HhbcTranslator::VectorTranslator::emitSetOpProp() {
                                Cell, MInstrState*, SetOpOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
-  m_ht.exceptionBarrier();
   m_result =
-    genStk(SetOpProp, cns((TCA)opFunc),
+    genStk(SetOpProp, m_ht.getCatchTrace(), cns((TCA)opFunc),
            m_base, key, value, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
@@ -1404,9 +1363,8 @@ void HhbcTranslator::VectorTranslator::emitIncDecProp() {
                                MInstrState*, IncDecOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
-  m_ht.exceptionBarrier();
   m_result =
-    genStk(IncDecProp, cns((TCA)opFunc),
+    genStk(IncDecProp, m_ht.getCatchTrace(), cns((TCA)opFunc),
            m_base, key, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
@@ -1442,8 +1400,8 @@ void HhbcTranslator::VectorTranslator::emitBindProp() {
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, RefData*,
                          MInstrState*);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  m_ht.exceptionBarrier();
-  genStk(BindProp, cns((TCA)opFunc), CTX(), m_base, key, box, genMisPtr());
+  genStk(BindProp, m_ht.getCatchTrace(), cns((TCA)opFunc), CTX(),
+         m_base, key, box, genMisPtr());
   m_result = box;
 }
 #undef HELPER_TABLE
@@ -1569,9 +1527,8 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
 
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
-  m_ht.exceptionBarrier();
-  m_result = gen(CGetElem, cns((TCA)opFunc),
-                      m_base, key, genMisPtr());
+  m_result = gen(CGetElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
+                 m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1609,8 +1566,8 @@ void HhbcTranslator::VectorTranslator::emitVGetElem() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB(getKeyTypeIS(key));
-  m_ht.exceptionBarrier();
-  m_result = genStk(VGetElem, cns((TCA)opFunc), m_base, key, genMisPtr());
+  m_result = genStk(VGetElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
+                    m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1649,9 +1606,8 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
 
   typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), isEmpty);
-  m_ht.exceptionBarrier();
-  m_result = gen(isEmpty ? EmptyElem : IssetElem,
-                      cns((TCA)opFunc), m_base, key, genMisPtr());
+  m_result = gen(isEmpty ? EmptyElem : IssetElem, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1698,8 +1654,8 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
   typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-  m_ht.exceptionBarrier();
-  m_result = gen(ArrayIsset, cns((TCA)opFunc), m_base, key);
+  m_result = gen(ArrayIsset, m_ht.getCatchTrace(),
+                 cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1775,10 +1731,9 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
   BUILD_OPTAB_HOT(keyType, checkForInt, setRef);
 
-  // Don't exceptionBarrier below because the helper can't throw. It
-  // may reenter to call destructors so it has a sync point in
-  // nativecalls.cpp, but exceptions are swallowed at destructor
-  // boundaries right now: #2182869.
+  // No catch trace below because the helper can't throw. It may reenter to
+  // call destructors so it has a sync point in nativecalls.cpp, but exceptions
+  // are swallowed at destructor boundaries right now: #2182869.
   if (setRef) {
     assert(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
@@ -1813,16 +1768,20 @@ namespace VectorHelpers {
 void setWithRefElemC(TypedValue* base, TypedValue keyVal, TypedValue* val,
                      MInstrState* mis) {
   base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, &keyVal);
-  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+  if (base != &mis->tvScratch) {
     tvDup(val, base);
+  } else {
+    assert(base->m_type == KindOfUninit);
   }
 }
 
 void setWithRefNewElem(TypedValue* base, TypedValue* val,
                        MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
-  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+  if (base != &mis->tvScratch) {
     tvDup(val, base);
+  } else {
+    assert(base->m_type == KindOfUninit);
   }
 }
 }
@@ -1830,13 +1789,13 @@ void setWithRefNewElem(TypedValue* base, TypedValue* val,
 void HhbcTranslator::VectorTranslator::emitSetWithRefLElem() {
   SSATmp* key = getKey();
   SSATmp* locAddr = getValAddr();
-  m_ht.exceptionBarrier();
   if (m_base->type().strip().subtypeOf(Type::Arr) &&
       !locAddr->type().deref().maybeBoxed()) {
     emitSetElem();
-    m_predictedResult = nullptr;
+    assert(m_strTestResult == nullptr);
   } else {
-    genStk(SetWithRefElem, cns((TCA)VectorHelpers::setWithRefElemC),
+    genStk(SetWithRefElem, m_ht.getCatchTrace(),
+           cns((TCA)VectorHelpers::setWithRefElemC),
            m_base, key, locAddr, genMisPtr());
   }
   m_result = nullptr;
@@ -1855,25 +1814,22 @@ void HhbcTranslator::VectorTranslator::emitSetWithRefRProp() {
 }
 
 void HhbcTranslator::VectorTranslator::emitSetWithRefNewElem() {
-  SSATmp* locAddr = getValAddr();
-  m_ht.exceptionBarrier();
   if (m_base->type().strip().subtypeOf(Type::Arr) &&
-      !locAddr->type().deref().maybeBoxed()) {
+      getValue()->type().notBoxed()) {
     emitSetNewElem();
-    m_predictedResult = nullptr;
   } else {
-    genStk(SetWithRefNewElem, cns((TCA)VectorHelpers::setWithRefNewElem),
-           m_base, locAddr, genMisPtr());
+    genStk(SetWithRefNewElem, m_ht.getCatchTrace(),
+           cns((TCA)VectorHelpers::setWithRefNewElem),
+           m_base, getValAddr(), genMisPtr());
   }
   m_result = nullptr;
 }
 
 template <KeyType keyType>
-static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
-                                     Cell val) {
+static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
+                                      Cell val) {
   TypedValue* key = keyPtr<keyType>(keyVal);
-  HPHP::SetElem<true, keyType>(base, key, &val);
-  return val;
+  return HPHP::SetElem<false, keyType>(base, key, &val);
 }
 
 #define HELPER_TABLE(m)                                 \
@@ -1884,7 +1840,7 @@ static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
-TypedValue nm(TypedValue* base, TypedValue key, Cell val) {             \
+StringData* nm(TypedValue* base, TypedValue key, Cell val) {            \
   return setElemImpl<__VA_ARGS__>(base, key, val);                      \
 }
 namespace VectorHelpers {
@@ -1902,11 +1858,27 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   }
 
   // Emit the appropriate helper call.
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
+  typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
-  m_ht.exceptionBarrier();
-  m_result = genStk(SetElem, cns((TCA)opFunc), m_base, key, value);
-  m_predictedResult = value;
+  m_failedSetTrace = m_ht.getCatchTrace();
+  SSATmp* result = genStk(SetElem, m_failedSetTrace, cns((TCA)opFunc),
+                          m_base, key, value);
+  auto t = result->type();
+  if (t.equals(Type::Nullptr)) {
+    // Base is not a string. Result is always value.
+    m_result = value;
+  } else if (t.equals(Type::CountedStr)) {
+    // Base is a string. Stack result is a new string so we're responsible for
+    // decreffing value.
+    m_result = result;
+    gen(DecRef, value);
+  } else {
+    assert(t.equals(Type::CountedStr | Type::Nullptr));
+    // Base might be a string. Assume the result is value, then inform
+    // emitMPost that it needs to test the actual result.
+    m_result = value;
+    m_strTestResult = result;
+  }
 }
 #undef HELPER_TABLE
 
@@ -1945,9 +1917,9 @@ void HhbcTranslator::VectorTranslator::emitSetOpElem() {
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(SETOP_OPS, op);
 # undef SETOP_OP
-  m_ht.exceptionBarrier();
   m_result =
-    genStk(SetOpElem, cns((TCA)opFunc), m_base, key, getValue(), genMisPtr());
+    genStk(SetOpElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
+           m_base, key, getValue(), genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1980,8 +1952,8 @@ void HhbcTranslator::VectorTranslator::emitIncDecElem() {
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(INCDEC_OPS, op);
 # undef INCDEC_OP
-  m_ht.exceptionBarrier();
-  m_result = genStk(IncDecElem, cns((TCA)opFunc), m_base, key, genMisPtr());
+  m_result = genStk(IncDecElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
+                    m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1998,8 +1970,7 @@ void bindElemC(TypedValue* base, TypedValue keyVal, RefData* val,
 void HhbcTranslator::VectorTranslator::emitBindElem() {
   SSATmp* key = getKey();
   SSATmp* box = getValue();
-  m_ht.exceptionBarrier();
-  genStk(BindElem, cns((TCA)VectorHelpers::bindElemC),
+  genStk(BindElem, m_ht.getCatchTrace(), cns((TCA)VectorHelpers::bindElemC),
          m_base, key, box, genMisPtr());
   m_result = box;
 }
@@ -2043,8 +2014,7 @@ void HhbcTranslator::VectorTranslator::emitUnsetElem() {
 
   typedef void (*OpFunc)(TypedValue*, TypedValue);
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
-  m_ht.exceptionBarrier();
-  genStk(UnsetElem, cns((TCA)opFunc), m_base, key);
+  genStk(UnsetElem, m_ht.getCatchTrace(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -2058,9 +2028,9 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
-  m_ht.exceptionBarrier();
-  m_result = gen(SetNewElem, m_base, value);
-  m_predictedResult = value;
+  m_failedSetTrace = m_ht.getCatchTrace();
+  gen(SetNewElem, m_failedSetTrace, m_base, value);
+  m_result = value;
 }
 
 void HhbcTranslator::VectorTranslator::emitSetOpNewElem() {
@@ -2073,17 +2043,23 @@ void HhbcTranslator::VectorTranslator::emitIncDecNewElem() {
 
 void HhbcTranslator::VectorTranslator::emitBindNewElem() {
   SSATmp* box = getValue();
-  m_ht.exceptionBarrier();
-  genStk(BindNewElem, m_base, box, genMisPtr());
+  genStk(BindNewElem, m_ht.getCatchTrace(), m_base, box, genMisPtr());
   m_result = box;
 }
 
 void HhbcTranslator::VectorTranslator::emitMPost() {
+  SSATmp* catchSp = nullptr;
+  if (m_failedSetTrace) {
+    catchSp = m_failedSetTrace->back()->back()->src(0);
+    assert(catchSp->isA(Type::StkPtr));
+  }
+
   // Decref stack inputs. If we're translating a SetM or BindM, then input 0 is
-  // both our input and output so leave its refcount alone. The helpers for
-  // SetM can overwrite this value with InitNull if the operation fails, but
-  // they also decref the old value so it's still safe to leave its refcount
-  // alone.
+  // both our input and output so leave its refcount alone. If m_failedSetTrace
+  // is non-null, the final helper call may throw an InvalidSetMException. We
+  // need to add instructions to m_failedSetTrace to finish the vector
+  // instruction in case this happens, so any DecRefs emitted here are also
+  // added to m_failedSetTrace.
   unsigned nStack =
     (m_ni.mInstrOp() == OpSetM || m_ni.mInstrOp() == OpBindM) ? 1 : 0;
   for (unsigned i = nStack; i < m_ni.inputs.size(); ++i) {
@@ -2094,6 +2070,10 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
       auto input = getInput(i);
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
+        if (m_failedSetTrace) {
+          m_ht.genFor(m_failedSetTrace, DecRefStack,
+                      StackOffset(m_stackInputs[i]), Type::Cell, catchSp);
+        }
       }
       break;
     }
@@ -2116,7 +2096,7 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   // instead of the real result; its validity will be guarded later in this
   // function.
   if (m_result) {
-    m_ht.push(usePredictedResult() ? m_predictedResult : m_result);
+    m_ht.push(m_result);
   } else {
     assert(m_ni.mInstrOp() == OpUnsetM ||
            m_ni.mInstrOp() == OpSetWithRefLM ||
@@ -2124,45 +2104,76 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   }
 
   // Clean up tvRef(2)
-  if (nLogicalRatchets() > 1) {
-    gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
-  }
-  if (nLogicalRatchets() > 0) {
-    gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef)));
+  static const size_t refOffs[] = { HHIR_MISOFF(tvRef), HHIR_MISOFF(tvRef2) };
+  for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
+    IRInstruction* inst = m_irf.gen(DecRefMem, Type::Gen, m_misBase,
+                                    cns(refOffs[i]));
+    m_tb.add(inst);
+    if (m_failedSetTrace) {
+      m_failedSetTrace->back()->push_back(inst->clone(&m_irf));
+    }
   }
 
-  // Now that everything else is done, guard the predicted type of the result,
-  // if any.
-  if (usePredictedResult()) {
-    std::vector<SSATmp*> spillValues = m_ht.getSpillValues();
-    assert(spillValues.back() == m_predictedResult);
-    spillValues.back() = m_result;
-
-    gen(CheckType,
-        m_predictedResult->type(),
-        m_ht.getExitTrace(m_ht.nextSrcKey().offset(), spillValues),
-        m_result);
-  }
+  emitSideExits(catchSp, nStack);
 }
 
-bool HhbcTranslator::VectorTranslator::usePredictedResult() {
-  // First check that we have a predicted result.
-  if (!m_predictedResult) return false;
+void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
+                                                     int nStack) {
+  const Offset nextOff = m_ht.nextSrcKey().offset();
+  auto op = m_ni.mInstrOp();
+  const bool isSetWithRef = op == OpSetWithRefLM || op == OpSetWithRefRM;
 
-  // Next, check that the predicted result is actually possible. This check
-  // will trigger if we can prove at compile time that the set operation will
-  // fail.
-  if (!m_predictedResult->isA(m_result->type())) return false;
+  if (m_failedSetTrace) {
+    assert(bool(m_result) ^ isSetWithRef);
+    // This catch trace currently ends with an EndCatch that will fall through
+    // if an InvalidSetMException was thrown. We need to emit code to clean up
+    // if that happens. If we're translating a SetWithRef* bytecode we don't
+    // have to do anything special to the stack since they have no stack
+    // output. Otherwise we need to pop our input value and push the value from
+    // the exception to the stack (done with a DecRefStack followed by a
+    // SpillStack).
 
-  // We can use the predicted result as long as we didn't do an operation on a
-  // possibly string base with a possibly string value. This is the only case
-  // where the result of a SetM might have the same type as its input without
-  // being the same value.
-  IRInstruction* inst = m_result->inst();
-  SSATmp* base = inst->src(vectorBaseIdx(inst));
-  SSATmp* value = inst->src(vectorValIdx(inst));
-  return base->type().strip().not(Type::Str) ||
-    value->type().strip().not(Type::Str);
+    std::vector<SSATmp*> args{
+        catchSp,     // sp from the previous SpillStack
+        cns(nStack), // cells popped since the last SpillStack
+    };
+
+    if (!isSetWithRef) {
+      m_ht.genFor(m_failedSetTrace, DecRefStack, StackOffset(0),
+                  Type::Cell, catchSp);
+      args.push_back(m_ht.genFor(m_failedSetTrace, LdUnwinderValue,
+                                 Type::Cell));
+    }
+
+    SSATmp* sp = m_ht.genFor(m_failedSetTrace, SpillStack,
+                             std::make_pair(args.size(), &args[0]));
+    m_ht.genFor(m_failedSetTrace, DeleteUnwinderException);
+    m_ht.genFor(m_failedSetTrace, SyncABIRegs, m_tb.getFp(), sp);
+    m_ht.genFor(m_failedSetTrace, ReqBindJmp, BCOffset(nextOff));
+  }
+
+  if (m_strTestResult) {
+    assert(!isSetWithRef);
+    // We expected SetElem's base to not be a Str but might be wrong. Make an
+    // exit trace to side exit to the next instruction, replacing our guess
+    // with the correct stack output.
+
+    auto toSpill = m_ht.getSpillValues();
+    assert(toSpill.size());
+    assert(toSpill[0] == m_result);
+    SSATmp* str = m_irf.gen(AssertNonNull, m_strTestResult)->dst();
+    toSpill[0] = str;
+    Trace* exit = m_ht.getExitTrace(nextOff, toSpill);
+    exit->front()->prepend(str->inst());
+    exit->front()->prepend(m_irf.gen(DecRef, m_result));
+    exit->front()->prepend(
+      m_irf.gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss),
+                           cns(1), cns(false)));
+    exit->front()->prepend(m_ht.makeMarker(m_ht.bcOff()));
+
+    gen(CheckType, Type::Nullptr, exit, m_strTestResult);
+    gen(IncStat, cns(Stats::TC_SetMStrGuess_Hit), cns(1), cns(false));
+  }
 }
 
 bool HhbcTranslator::VectorTranslator::needFirstRatchet() const {

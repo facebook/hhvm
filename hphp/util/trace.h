@@ -233,7 +233,9 @@ void dumpRingbuffer();
 #define FTRACE(...)     do { } while (0)
 #define TRACE_MOD(...)  do { } while (0)
 #define FTRACE_MOD(...) do { } while (0)
-#define TRACE_SET_MOD(...) /* nil */
+#define TRACE_SET_MOD(name) \
+  DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
+
 static const bool enabled = false;
 
 static inline void trace(const char*, ...)      { }

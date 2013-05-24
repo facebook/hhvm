@@ -24,14 +24,12 @@
 namespace HPHP {
 namespace Debug {
 
-using namespace HPHP::Transl;
-
 class DebugInfo {
  public:
   DebugInfo();
   ~DebugInfo();
 
-  void recordTracelet(TCRange range, 
+  void recordTracelet(TCRange range,
                       const Func* func,
                       const Opcode *instr, bool exit,
                       bool inPrologue);

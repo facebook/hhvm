@@ -243,7 +243,7 @@ struct IRInstruction {
     else m_taken.setTo(b);
   }
 
-  bool isControlFlowInstruction() const { return bool(m_taken.to()); }
+  bool isControlFlow() const { return bool(m_taken.to()); }
   bool isBlockEnd() const { return m_taken.to() || isTerminal(); }
   bool isLoad() const;
   bool stores(uint32_t srcIdx) const;

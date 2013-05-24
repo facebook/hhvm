@@ -189,6 +189,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Ctx);
   expectTrue(Type::Obj | Type::Func);
   expectTrue(Type::Init);
+  expectTrue(Type::Top);
 
   for (Type t : types) {
     EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";
@@ -200,6 +201,16 @@ TEST(Type, UnionOf) {
   EXPECT_EQ(Type::UncountedInit, Type::unionOf(Type::Int, Type::Dbl));
   EXPECT_EQ(Type::Str, Type::unionOf(Type::StaticStr, Type::Str));
   EXPECT_EQ(Type::Gen, Type::unionOf(Type::Cell, Type::BoxedInt));
+}
+
+TEST(Type, Top) {
+  for (auto t : allTypes()) {
+    EXPECT_TRUE(t.subtypeOf(Type::Top));
+  }
+  for (auto t : allTypes()) {
+    if (t.equals(Type::Top)) continue;
+    EXPECT_FALSE(Type::Top.subtypeOf(t));
+  }
 }
 
 } }

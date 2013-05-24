@@ -42,9 +42,9 @@ void cloneToBlock(const BlockList& rpoBlocks,
     }
   };
 
-  auto targetIt = target->skipLabel();
+  auto targetIt = target->skipHeader();
   for (auto it = first; it != last; ++it) {
-    assert(!it->isControlFlowInstruction());
+    assert(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
     auto const newInst = irFactory->cloneInstruction(&*it);
@@ -79,10 +79,10 @@ void moveToBlock(Block::iterator const first,
 
   auto const srcBlock = first->block();
 
-  auto targetIt = target->skipLabel();
+  auto targetIt = target->skipHeader();
   for (auto it = first; it != last;) {
     auto const inst = &*it;
-    assert(!inst->isControlFlowInstruction());
+    assert(!inst->isControlFlow());
 
     FTRACE(5, "moveToBlock({}): {}\n",
            target->id(),

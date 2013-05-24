@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/vm/translator/annotation.h"
+#include "hphp/runtime/vm/translator/hopt/type.h"
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -48,6 +49,7 @@ namespace HPHP {
 namespace Transl {
 
 using namespace HPHP;
+using HPHP::JIT::Type;
 
 TRACE_SET_MOD(trans)
 
@@ -944,43 +946,50 @@ getDynLocType(const vector<DynLocation*>& inputs,
         op == OpDup
       );
 
-      if (op == OpSetM || op == OpBindM) {
+      if (op == OpSetM) {
         /*
-         * these return null for "invalid" inputs
-         * if we cant prove everything's ok, we will
-         * have to insert a side exit
+         * SetM returns null for "invalid" inputs, or a string if the
+         * base was a string. VectorTranslator ensures that invalid
+         * inputs or a string output when we weren't expecting it will
+         * cause a side exit, so we can keep this fairly simple.
          */
-        bool ok = inputs.size() <= 3;
-        if (ok) {
-          switch (inputs[1]->rtt.valueType()) {
-            case KindOfObject:
-              ok = mcodeMaybePropName(ni->immVecM[0]);
-              break;
-            case KindOfArray:
-              ok = mcodeMaybeArrayKey(ni->immVecM[0]);
-              break;
-            case KindOfNull:
-            case KindOfUninit:
-              break;
-            default:
-              ok = false;
-          }
+
+        if (ni->immVecM.size() > 1) {
+          // We don't know the type of the base for the final
+          // operation so we can't assume anything about the output
+          // type.
+          return RuntimeType(KindOfAny);
         }
-        if (ok) {
-          for (int i = inputs.size(); --i >= 2; ) {
-            switch (inputs[i]->rtt.valueType()) {
-              case KindOfObject:
-              case KindOfArray:
-                ok = false;
-                break;
-              default:
-                continue;
-            }
+
+        // For single-element vectors, we can determine the output
+        // type from the base.
+        Type baseType;
+        switch (ni->immVec.locationCode()) {
+          case LGL: case LGC:
+          case LNL: case LNC:
+          case LSL: case LSC:
+            baseType = Type::Gen;
             break;
-          }
+
+          default:
+            baseType = Type::fromRuntimeType(inputs[1]->rtt);
         }
-        if (!ok) {
-          ni->outputPredicted = true;
+
+        const bool setElem = mcodeMaybeArrayKey(ni->immVecM[0]);
+        const bool setNewElem = ni->immVecM[0] == MW;
+        const Type keyType =
+          setNewElem ? Type::None
+                     : Type::fromRuntimeType(inputs[2]->rtt);
+        const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
+        if (setElem && baseType.maybe(Type::Str)) {
+          if (baseType.isString()) {
+            // The base is a string so our output is a string.
+            return RuntimeType(KindOfString);
+          } else if (!valType.isString()) {
+            // The base might be a string and our value isn't known to
+            // be a string. The output type could be Str or valType.
+            return RuntimeType(KindOfAny);
+          }
         }
       }
 

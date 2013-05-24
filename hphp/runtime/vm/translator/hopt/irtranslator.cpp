@@ -1977,8 +1977,8 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs = nullptr,
                         const LifetimeInfo* lifetime = nullptr) {
-    assert(checkCfg(trace, *m_irFactory));
     dumpTrace(level, trace, msg, regs, lifetime);
+    assert(checkCfg(trace, *m_irFactory));
   };
 
   finishPass(" after initial translation ", kIRLevel);

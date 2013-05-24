@@ -125,7 +125,9 @@ struct TraceBuilder {
   template<class... Args>
   SSATmp* gen(Args&&... args) {
     return makeInstruction(
-      [this] (IRInstruction* inst) { return optimizeInst(inst); },
+      [this] (IRInstruction* inst) {
+        return optimizeInst(inst, CloneFlag::Yes);
+      },
       std::forward<Args>(args)...
     );
   }
@@ -134,15 +136,23 @@ struct TraceBuilder {
    * Create an IRInstruction, similar to gen(), except link it into
    * the Trace t instead of the current main trace.
    *
-   * Also does not run optimization passes.
+   * Does not run optimization passes.
    *
    * TODO(#2404447): run simplifier?
    */
   template<class... Args>
-  SSATmp* genFor(Trace* t, Args... args) {
-    auto instr = m_irFactory.gen(args...);
+  SSATmp* genFor(Trace* t, Args&&... args) {
+    auto instr = m_irFactory.gen(std::forward<Args>(args)...);
     t->back()->push_back(instr);
     return instr->dst();
+  }
+
+  /*
+   * Add an already created instruction, running it through the normal
+   * optimization passes and updating tracked state.
+   */
+  SSATmp* add(IRInstruction* inst) {
+    return optimizeInst(inst, CloneFlag::No);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -300,7 +310,8 @@ private:
 
   SSATmp*   preOptimize(IRInstruction* inst);
   SSATmp*   optimizeWork(IRInstruction* inst);
-  SSATmp*   optimizeInst(IRInstruction* inst);
+  enum class CloneFlag { Yes, No };
+  SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
 
 private:
   static void appendInstruction(IRInstruction* inst, Block* block);

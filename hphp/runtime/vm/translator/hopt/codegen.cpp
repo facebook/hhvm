@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/translator/hopt/codegen.h"
 
 #include <cstring>
+#include <unwind.h>
 
 #include "folly/ScopeGuard.h"
 #include "folly/Format.h"
@@ -318,6 +319,12 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
   auto const start = m_as.code.frontier;
   m_rScratch = selectScratchReg(inst);
+  if (inst->taken() && inst->taken()->trace()->isCatch()) {
+    m_state.catchTrace = inst->taken()->trace();
+  } else {
+    m_state.catchTrace = nullptr;
+  }
+
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
@@ -778,6 +785,58 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   a.    jmp    (jccStub);
 }
 
+void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
+  auto srcReg = m_regs[inst->src(0)].getReg();
+  auto dstReg = m_regs[inst->dst()].getReg();
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    Label nonNull;
+    m_as.testq (srcReg, srcReg);
+    m_as.jne8  (nonNull);
+    m_as.ud2();
+    asm_label(m_as, nonNull);
+  }
+  emitMovRegReg(m_as, srcReg, dstReg);
+}
+
+void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
+  cgLoad(rVmTl, TargetCache::kUnwinderTvOff, inst);
+}
+
+void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
+  auto const& info = m_state.catches[inst->block()];
+  assert(info.afterCall);
+
+  m_tx64->registerCatchTrace(info.afterCall, m_as.code.frontier);
+
+  Stats::emitInc(m_as, Stats::TC_CatchTrace);
+
+  // We want to restore state as though the call had completed
+  // successfully, so skip over any stack arguments and pop any
+  // saved registers.
+  if (info.rspOffset) {
+    m_as.subq(info.rspOffset, rsp);
+  }
+  PhysRegSaverParity::emitPops(m_as, info.savedRegs);
+}
+
+void CodeGenerator::cgEndCatch(IRInstruction* inst) {
+  m_as.cmpb (0, rVmTl[TargetCache::kUnwinderSideExitOff]);
+  unlikelyIfBlock(CC_E,
+    [&](Asm& as) { // doSideExit == false, so call _Unwind_Resume
+      as.loadq(rVmTl[TargetCache::kUnwinderScratchOff], rdi);
+      as.call ((TCA)_Unwind_Resume); // pass control back to the unwinder
+      as.ud2();
+    });
+
+  // doSideExit == true, so fall through to the side exit code
+  Stats::emitInc(m_as, Stats::TC_CatchSideExit);
+}
+
+void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
+  m_as.loadq(rVmTl[TargetCache::kUnwinderScratchOff], rdi);
+  m_as.call ((TCA)_Unwind_DeleteException);
+}
+
 void CodeGenerator::cgJcc(IRInstruction* inst) {
   emitCompare(inst->src(0), inst->src(1));
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
@@ -1071,6 +1130,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
   m_tx64->emitCall(a, call);
   if (sync != kNoSyncPoint) {
     recordSyncPoint(a, sync);
+  }
+
+  if (m_state.catchTrace) {
+    auto& info = m_state.catches[m_state.catchTrace->front()];
+    assert(!info.afterCall);
+    info.afterCall = a.code.frontier;
+    info.savedRegs = toSave;
+    info.rspOffset = regSaver.rspAdjustment();
   }
 
   // copy the call result to the destination register(s)
@@ -3525,8 +3592,8 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   SSATmp* f             = inst->src(0);
-  auto args             = inst->srcs().subpiece(1);
-  int32_t numArgs         = args.size();
+  auto args             = inst->srcs().subpiece(2);
+  int32_t numArgs       = args.size();
   SSATmp* dst           = inst->dst();
   auto dstReg           = m_regs[dst].getReg(0);
   auto dstType          = m_regs[dst].getReg(1);
@@ -4133,18 +4200,28 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
+  auto const t     = inst->typeParam();
   auto const rData = m_regs[src].getReg(0);
   auto const rType = m_regs[src].getReg(1);
 
-  emitTypeTest(inst->typeParam(), rType, rData,
-    [&](ConditionCode cc) {
-      emitFwdJcc(ccNegate(cc), inst->taken());
+  auto doJcc = [&](ConditionCode cc) {
+    emitFwdJcc(ccNegate(cc), inst->taken());
+  };
 
-      auto const dstReg = m_regs[inst->dst()].getReg();
-      if (dstReg != InvalidReg) {
-        emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
-      }
-    });
+  if (t.equals(Type::Nullptr)) {
+    if (!src->type().equals(Type::Nullptr | Type::CountedStr)) {
+      CG_PUNT(CheckType-Nullptr-UnsupportedType);
+    }
+    m_as.testq (rData, rData);
+    doJcc(CC_E);
+  } else {
+    emitTypeTest(inst->typeParam(), rType, rData, doJcc);
+  }
+
+  auto const dstReg = m_regs[inst->dst()].getReg();
+  if (dstReg != InvalidReg) {
+    emitMovRegReg(m_as, rData, dstReg);
+  }
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
@@ -4502,11 +4579,15 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* cls   = inst->src(0);
-  SSATmp* prop  = inst->src(1);
-  SSATmp* cxt   = inst->src(2);
-  Block* target = inst->taken();
+  SSATmp* dst    = inst->dst();
+  SSATmp* cls    = inst->src(0);
+  SSATmp* prop   = inst->src(1);
+  SSATmp* ctx    = inst->src(2);
+  Block*  target = inst->taken();
+  // If our label is a catch trace we pretend we don't have one, to
+  // avoid emitting a jmp to it or calling the wrong helper.
+  if (target && target->trace()->isCatch()) target = nullptr;
+
   auto dstReg = m_regs[dst].getReg();
   if (dstReg == InvalidReg && target) {
     // result is unused but this instruction was not eliminated
@@ -4518,7 +4599,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
                       : (TCA)SPropCache::lookupSProp<true>, // raise on error
                dstReg,
                kSyncPoint, // could re-enter to initialize properties
-               ArgGroup(m_regs).ssa(cls).ssa(prop).ssa(cxt));
+               ArgGroup(m_regs).ssa(cls).ssa(prop).ssa(ctx));
   if (target) {
     m_as.testq(dstReg, dstReg);
     emitFwdJcc(m_as, CC_Z, target);
@@ -4804,12 +4885,13 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
   if (unsigned n = inst->numSrcs()) {
     // Parallel-copy sources to the label's destination registers.
     // TODO: t2040286: this only works if all destinations fit in registers.
-    SrcRange srcs = inst->srcs();
-    DstRange dsts = target->front()->dsts();
+    auto srcs = inst->srcs();
+    auto dsts = target->front()->dsts();
     ArgGroup args(m_regs);
     for (unsigned i = 0, j = 0; i < n; i++) {
       assert(srcs[i]->type().subtypeOf(dsts[i].type()));
-      SSATmp *dst = &dsts[i], *src = srcs[i];
+      auto dst = &dsts[i];
+      auto src = srcs[i];
       // Currently, full XMM registers cannot be assigned to SSATmps
       // passed from to Jmp_ to DefLabel. If this changes, it'll require
       // teaching shuffleArgs() how to handle full XMM values.
@@ -5290,6 +5372,7 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     IRInstruction* inst = &instr;
     if (inst->op() == Marker) {
       m_state.lastMarker = inst->extra<Marker>();
+      FTRACE(7, "lastMarker is now {}\n", inst->extra<Marker>()->show());
       if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
         bcMap->push_back((TransBCMapping){Offset(m_state.lastMarker->bcOff),
               m_as.code.frontier,

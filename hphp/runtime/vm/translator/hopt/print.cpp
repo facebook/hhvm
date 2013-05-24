@@ -132,10 +132,7 @@ void print(std::ostream& ostream, const IRInstruction* inst,
   if (inst->op() == Marker) {
     auto* marker = inst->extra<Marker>();
     ostream << color(ANSI_COLOR_BLUE)
-            << folly::format("--- bc {}, spOff {} ({})",
-                             marker->bcOff,
-                             marker->stackOff,
-                             marker->func->fullName()->data())
+            << marker->show()
             << color(ANSI_COLOR_END);
     return;
   }

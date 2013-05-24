@@ -44,8 +44,19 @@ Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
 
 namespace {
 
-Type vectorReturn(const IRInstruction* inst) {
-  return VectorEffects(inst).valType;
+Type setElemReturn(const IRInstruction* inst) {
+  assert(inst->op() == SetElem || inst->op() == SetElemStk);
+  auto baseType = inst->src(vectorBaseIdx(inst))->type().strip();
+
+  // If the base is a Str, the result will always be a CountedStr (or
+  // an exception). If the baes might be a str, the result wil be
+  // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
+  if (baseType.subtypeOf(Type::Str)) {
+    return Type::CountedStr;
+  } else if (baseType.maybe(Type::Str)) {
+    return Type::CountedStr | Type::Nullptr;
+  }
+  return Type::Nullptr;
 }
 
 Type builtinReturn(const IRInstruction* inst) {
@@ -107,6 +118,9 @@ Type binArithResultType(Opcode op, Type t1, Type t2) {
 }
 
 Type outputType(const IRInstruction* inst, int dstId) {
+#define IRT(name, ...) UNUSED static const Type name = Type::name;
+  IR_TYPES
+#undef IRT
 
 #define D(type)   return Type::type;
 #define DofS(n)   return inst->src(n)->type();
@@ -116,9 +130,10 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DMulti    return Type::None;
 #define DStk(in)  return stkReturn(inst, dstId,                         \
                                    [&]() -> Type { in not_reached(); });
-#define DVector   return vectorReturn(inst);
+#define DSetElem  return setElemReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
+#define DSubtract(n, t) return inst->src(n)->type() - t;
 #define DArith    return binArithResultType(inst->op(), \
                                             inst->src(0)->type(),  \
                                             inst->src(1)->type());
@@ -139,9 +154,10 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DParam
 #undef DMulti
 #undef DStk
-#undef DVector
+#undef DSetElem
 #undef ND
 #undef DBuiltin
+#undef DSubtract
 #undef DArith
 
 }
@@ -280,9 +296,11 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define ND
 #define DMulti
 #define DStk(...)
-#define DVector
+#define DSetElem
 #define D(...)
 #define DBuiltin
+#define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
+                             "invalid src num");
 #define DUnbox(src) checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DBox(src)   checkDst(src < inst->numSrcs(),  \
@@ -306,6 +324,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef O
 
 #undef NA
+#undef SAny
 #undef S
 #undef C
 #undef CStr
@@ -315,9 +334,12 @@ void assertOperandTypes(const IRInstruction* inst) {
 
 #undef ND
 #undef D
+#undef DBuiltin
+#undef DSubtract
 #undef DUnbox
 #undef DMulti
 #undef DStk
+#undef DSetElem
 #undef DBox
 #undef DofS
 #undef DParam

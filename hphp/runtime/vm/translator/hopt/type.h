@@ -70,7 +70,8 @@ namespace JIT {
   IRT(TCA,         1ULL << 50)                                          \
   IRT(ActRec,      1ULL << 51)                                          \
   IRT(None,        1ULL << 52)                                          \
-  IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */
+  IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */           \
+  IRT(Nullptr,     1ULL << 54)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -82,6 +83,7 @@ namespace JIT {
 // would be nonsense types.
 #define IRT_SPECIAL                                                 \
   IRT(Bottom,       0)                                              \
+  IRT(Top,          0xffffffffffffffffULL)                          \
   IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
   IRT(PtrToCounted, kCounted << kPtrShift)                          \
   IRT(Gen,          kCell|kBoxedCell)                               \

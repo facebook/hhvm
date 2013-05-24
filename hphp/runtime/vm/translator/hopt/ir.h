@@ -98,13 +98,15 @@ class FailedIRGen : public std::exception {
  *     DParam    single dst has type of the instruction's type parameter
  *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
- *     DVector   single dst depends on semantics of the vector instruction
+ *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
+ *               sources
  *     DStk(x)   up to two dests. x should be another D* macro and indicates
  *               the type of the first dest, if any. the second (or first,
  *               depending on the presence of a primary destination), will be
  *               of type Type::StkPtr. implies ModifiesStack.
  *     DBuiltin  single dst for CallBuiltin. This can return complex data
  *               types such as (Type::Str | Type::Null)
+ *     DSubtract(N,t) single dest has type of src N with t removed
  *
  * srcinfo:
  *
@@ -153,7 +155,7 @@ class FailedIRGen : public std::exception {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen,Nullptr),        C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
@@ -169,6 +171,10 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
+O(BeginCatch,                       ND, NA,                            E|Mem) \
+O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \
+O(LdUnwinderValue,              DParam, NA,                              PRc) \
+O(DeleteUnwinderException,          ND, NA,                          N|E|Mem) \
 O(OpAdd,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpSub,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpMul,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
@@ -269,10 +275,11 @@ O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                     N|E) \
-O(RaiseError,                       ND, S(Str),               E|N|Mem|Refs|T) \
+O(RaiseError,                       ND, S(Str),            E|N|Mem|Refs|T|Er) \
 O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
+O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
@@ -505,7 +512,7 @@ O_STK(BindProp,                     ND, C(TCA)                                \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
-O_STK(SetProp,                 DVector, C(TCA)                                \
+O_STK(SetProp,                      ND, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
@@ -570,7 +577,7 @@ O(ArraySetRef,                      ND, C(TCA)                                \
                                           S(Int,Str)                          \
                                           S(Cell)                             \
                                           S(BoxedArr),E|N|PRc|CRc|Refs|Mem|K) \
-O_STK(SetElem,                 DVector, C(TCA)                                \
+O_STK(SetElem,                DSetElem, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
@@ -591,7 +598,7 @@ O_STK(IncDecElem,              D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
-O_STK(SetNewElem,              DVector, S(PtrToGen)                           \
+O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
 O_STK(SetWithRefNewElem,            ND, C(TCA)                                \
                                           S(PtrToGen)                         \
@@ -899,13 +906,30 @@ struct VectorEffects {
   VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
 
   Type baseType;
-  Type valType;
   bool baseTypeChanged;
   bool baseValChanged;
-  bool valTypeChanged;
 
 private:
   void init(Opcode op, const Type base, const Type key, const Type val);
+};
+
+struct CatchInfo {
+  /* afterCall is the address after the call instruction that this catch trace
+   * belongs to. It's the key used to look up catch traces by the
+   * unwinder, since it's the value of %rip during unwinding. */
+  TCA afterCall;
+
+  /* savedRegs contains the caller-saved registers that were pushed onto the
+   * C++ stack at the time of the call. The catch trace will pop these
+   * registers (in the same order as PhysRegSaver's destructor) before doing
+   * any real work to restore the register state from before the call. */
+  RegSet savedRegs;
+
+  /* rspOffset is the number of bytes pushed on the C++ stack after the
+   * registers in savedRegs were saved, typically from function calls with >6
+   * arguments. The catch trace will adjust rsp by this amount before popping
+   * anything in savedRegs. */
+  Offset rspOffset;
 };
 
 typedef folly::Range<TCA> TcaRange;

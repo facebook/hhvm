@@ -259,12 +259,15 @@ struct PhysRegSaverParity {
   PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
   ~PhysRegSaverParity();
 
+  static void emitPops(X64Assembler& as, RegSet regs);
+
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) = default;
   PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 
   int rspAdjustment() const;
+  int rspTotalAdjustmentRegs() const;
   void bytesPushed(int64_t bytes);
 
 private:

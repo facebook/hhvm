@@ -3720,16 +3720,17 @@ inline void OPTBLD_INLINE VMExecutionContext::setHelperPost(
   }
 
   // NOTE: currently the only instructions using this that have return
-  // values on the stack also have more inputs than the K-vector, so
+  // values on the stack also have more inputs than the -vector, so
   // mdepth > 0.  They also always return the original top value of
   // the stack.
   if (mdepth > 0) {
     assert(mdepth == 1 &&
-      "We don't really support mdepth > 1 in setHelperPost");
+           "We don't really support mdepth > 1 in setHelperPost");
 
-    TypedValue* retSrc = m_stack.topTV();
     if (ndiscard > 0) {
+      TypedValue* retSrc = m_stack.topTV();
       TypedValue* dest = m_stack.indTV(ndiscard + mdepth - 1);
+      assert(dest != retSrc);
       memcpy(dest, retSrc, sizeof *dest);
     }
   }
@@ -5229,9 +5230,15 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
       case MEL:
       case MEC:
       case MET:
-      case MEI:
-        SetElem<true>(base, curMember, c1);
+      case MEI: {
+        StringData* result = SetElem<true>(base, curMember, c1);
+        if (result) {
+          tvRefcountedDecRefCell(c1);
+          c1->m_type = KindOfString;
+          c1->m_data.pstr = result;
+        }
         break;
+      }
       case MPL:
       case MPC:
       case MPT: {
@@ -5268,8 +5275,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetWithRefRM(PC& pc) {
     TypedValue* from = m_stack.top();
     tvAsVariant(base) = withRefBind(tvAsVariant(from));
   }
+  setHelperPost<0>(SETHELPERPOST_ARGS);
   m_stack.popTV();
-  setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpL(PC& pc) {

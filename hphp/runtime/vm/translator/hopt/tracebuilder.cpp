@@ -785,13 +785,13 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
+SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
   if (SSATmp* tmp = optimizeWork(inst)) {
     return tmp;
   }
   // Couldn't CSE or simplify the instruction; clone it and append.
   if (inst->op() != Nop) {
-    inst = inst->clone(&m_irFactory);
+    if (doClone == CloneFlag::Yes) inst = inst->clone(&m_irFactory);
     appendInstruction(inst);
     // returns nullptr if instruction has no dest, returns the first
     // (possibly only) dest otherwise

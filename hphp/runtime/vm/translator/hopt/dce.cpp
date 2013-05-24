@@ -122,6 +122,10 @@ void removeDeadInstructions(Trace* trace, const DceState& state) {
     auto cur = it; ++it;
     Block* block = *cur;
     block->remove_if([&] (const IRInstruction& inst) {
+      ONTRACE(7,
+              if (state[inst].isDead()) {
+                FTRACE(3, "Removing dead instruction {}\n", inst.toString());
+              });
       return state[inst].isDead();
     });
     // Marker and DefLabel instructions are marked live in reachable blocks
@@ -204,7 +208,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
 
 WorkList
 initInstructions(const BlockList& blocks, DceState& state) {
-  TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
+  TRACE(5, "DCE(initInstructions):vvvvvvvvvvvvvvvvvvvv\n");
   // mark reachable, essential, instructions live and enqueue them
   WorkList wl;
   for (Block* block : blocks) {

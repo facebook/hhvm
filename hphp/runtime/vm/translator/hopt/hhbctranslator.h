@@ -261,7 +261,8 @@ struct HhbcTranslator {
   void emitFPushCtorCommon(SSATmp* cls,
                            SSATmp* obj,
                            const Func* func,
-                           int32_t numParams);
+                           int32_t numParams,
+                           Trace* catchTrace);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
   void emitFCallArray(const Offset pcOffset, const Offset after);
   void emitFCall(uint32_t numParams,
@@ -394,6 +395,7 @@ private:
     void emitMPre();
     void emitFinalMOp();
     void emitMPost();
+    void emitSideExits(SSATmp* catchSp, int nStack);
     void emitMTrace();
 
     // Bases
@@ -455,13 +457,12 @@ private:
      * if appropriate.
      */
     template<typename... Srcs>
-    SSATmp* genStk(Opcode op, Srcs... srcs);
+    SSATmp* genStk(Opcode op, Trace* taken, Srcs... srcs);
 
     /* Various predicates about the current instruction */
     bool isSimpleArrayOp();
     bool isSimpleBase();
     bool isSingleMember();
-    bool usePredictedResult();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -482,6 +483,7 @@ private:
     const Transl::NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
     TraceBuilder& m_tb;
+    IRFactory& m_irf;
     const MInstrInfo& m_mii;
     hphp_hash_map<unsigned, unsigned> m_stackInputs;
 
@@ -490,10 +492,29 @@ private:
 
     bool m_needMIS;
 
+    /* The base for any accesses to the current MInstrState. */
     SSATmp* m_misBase;
+
+    /* The value of the base for the next member operation. Starts as the base
+     * for the whole instruction and is updated as the translator makes
+     * progress. */
     SSATmp* m_base;
+
+    /* The result of the vector instruction. nullptr if the current instruction
+     * doesn't produce a result. */
     SSATmp* m_result;
-    SSATmp* m_predictedResult;
+
+    /* If set, contains a value of type CountedStr|Nullptr. If a runtime test
+     * determines that the value is not Nullptr, we incorrectly predicted the
+     * output type of the instruction and must side exit. */
+    SSATmp* m_strTestResult;
+
+    /* If set, contains the catch trace for the final set operation of this
+     * instruction. The operations that set this member may need to return an
+     * unexpected type, in which case they'll throw an InvalidSetMException. To
+     * handle this, emitMPost adds code to the catch trace to fish the correct
+     * value out of the exception and side exit. */
+    Trace*  m_failedSetTrace;
   };
 
 private: // tracebuilder forwarding utilities
@@ -571,6 +592,7 @@ private:
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
+  IRInstruction* makeMarker(Offset bcOff);
   void emitMarker();
 
   // Exit trace creation routines.
@@ -581,6 +603,7 @@ private:
                           std::vector<SSATmp*>& spillValues,
                           const StringData* warning);
   Trace* getExitSlowTrace();
+  Trace* getCatchTrace();
 
   enum class ExitFlag {
     None,
@@ -636,6 +659,8 @@ private:
   SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
   std::vector<SSATmp*> getSpillValues() const;
+  SSATmp* emitSpillStack(Trace* t, SSATmp* sp,
+                         const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset);
@@ -650,7 +675,8 @@ private:
   SSATmp* ldLoc(uint32_t id);
   SSATmp* ldLocAddr(uint32_t id);
   SSATmp* ldLocInner(uint32_t id, Trace* exitTrace);
-  SSATmp* ldLocInnerWarn(uint32_t id, Trace* target);
+  SSATmp* ldLocInnerWarn(uint32_t id, Trace* target,
+                         Trace* catchTrace = nullptr);
   SSATmp* stLoc(uint32_t id, Trace* exitTrace, SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id, Trace* exitTrace, SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id, Trace*, SSATmp* newVal, bool doRefCount);

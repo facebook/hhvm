@@ -96,15 +96,16 @@ undefinedError(const char* msg, const char* name) {
 __thread void* tl_targetCaches = nullptr;
 __thread HphpArray* s_constants = nullptr;
 
-static_assert(kConditionFlagsOff + sizeof(ssize_t) <= 64,
-              "kConditionFlagsOff too large");
-size_t s_frontier = kConditionFlagsOff + 64;
+static const size_t kPreAllocatedBytes = 64;
+size_t s_frontier = kPreAllocatedBytes;
+
+static_assert(sizeof(TargetCacheHeader) <= kPreAllocatedBytes,
+              "TargetCacheHeader doesn't fit in kPreAllocatedBytes");
 size_t s_persistent_frontier = 0;
 size_t s_persistent_start = 0;
 static size_t s_next_bit;
 static size_t s_bits_to_go;
 static int s_tc_fd;
-static const size_t kPreAllocatedBytes = kConditionFlagsOff + 64;
 
 // Mapping from names to targetcache locations. Protected by the translator
 // write lease.

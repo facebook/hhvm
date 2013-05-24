@@ -15,17 +15,20 @@
 */
 
 #include "hphp/runtime/vm/translator/unwind-x64.h"
+
 #include <libunwind.h>
-#include <unwind.h>
 #include <vector>
 #include <memory>
+#include <cxxabi.h>
 #include <boost/mpl/identity.hpp>
 
-#include "hphp/runtime/vm/translator/translator-x64.h"
-#include "hphp/runtime/vm/translator/runtime-type.h"
 #include "hphp/runtime/vm/translator/abi-x64.h"
+#include "hphp/runtime/vm/translator/runtime-type.h"
+#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/member_operations.h"
 
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format
@@ -33,13 +36,9 @@
 extern "C" void __register_frame(void*);
 extern "C" void __deregister_frame(void*);
 
+TRACE_SET_MOD(tunwind);
+
 namespace HPHP { namespace Transl {
-
-//////////////////////////////////////////////////////////////////////
-
-const Trace::Module TRACEMOD = Trace::tunwind;
-
-//////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -55,8 +54,6 @@ void append_vec(std::vector<char>& v,
 
 void sync_regstate(_Unwind_Context* context) {
   assert(tl_regState == REGSTATE_DIRTY);
-
-  TRACE(1, "unwind: doing fixup sync\n");
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
   uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
@@ -79,44 +76,31 @@ void sync_regstate(_Unwind_Context* context) {
   tl_regState = REGSTATE_CLEAN;
 }
 
-void sync_callee_saved(_Unwind_Context* context) {
-  const CTCA frameIP = CTCA(_Unwind_GetGR(context, Debug::RIP));
-  const UnwindRegInfo* const uInfo = tx64->getUnwindInfo(frameIP);
-  if (!uInfo) return;
+bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
+                         InvalidSetMException* ism) {
+  const CTCA rip = (CTCA)_Unwind_GetIP(ctx);
+  TCA catchTrace = tx64->getCatchTrace(rip);
+  assert(IMPLIES(ism, catchTrace));
+  if (!catchTrace) return false;
 
-  ActRec* const frameAr = reinterpret_cast<ActRec*>(
-    _Unwind_GetGR(context, Debug::RBP));
+  FTRACE(1, "installing catch trace {} for call {} with ism {}, "
+         "returning _URC_INSTALL_CONTEXT\n",
+         catchTrace, rip, ism);
 
-  TRACE(1, "unwind: cleaning callee dirty regs\n");
-  for (int i = 0; i < UnwindRegInfo::kMaxCalleeSaved; ++i) {
-    UnwindRegInfo::Data cri = uInfo->m_regs[i];
-    if (!cri.dirty) break;
-
-    TRACE(1, "unwind: unwind reg %s (val: %p)\n", cri.pretty().c_str(),
-            (void*)_Unwind_GetGR(context, cri.reg));
-
-    uintptr_t contents = _Unwind_GetGR(context, cri.reg);
-    TypedValue* cell;
-    if (cri.exStack) {
-      /*
-       * We don't keep information about how to restore the value of
-       * rVmSp (rbx) generally in tc frames, however the only time
-       * we'll need to sync dirty regs here is if we are the first tc
-       * frame below a C++ frame.  In this case, rbx is properly
-       * restored for us by the unwinder, so we can use it here.
-       */
-      static_assert(rVmSp == reg::rbx,
-                    "unwind-x64.cpp expected rVmSp == rbx");
-      TypedValue* frameSp = reinterpret_cast<TypedValue*>(
-        _Unwind_GetGR(context, Debug::RBX));
-      cell = frameSp - (cri.locOffset + 1);
-    } else {
-      cell = frame_local(frameAr, cri.locOffset);
-    }
-
-    cell->m_type = DataType(cri.dataType);
-    cell->m_data.num = contents;
+  // In theory the unwind api will let us set registers in the frame before
+  // executing our landing pad. In practice, trying to use their recommended
+  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
+  // things to the handler using the target cache. This also simplifies the
+  // handler code because it doesn't have to worry about saving its arguments
+  // somewhere while executing the exit trace.
+  TargetCache::header()->unwinderScratch = (int64_t)exn;
+  TargetCache::header()->doSideExit = ism;
+  if (ism) {
+    TargetCache::header()->unwinderTv = ism->tv();
   }
+  _Unwind_SetIP(ctx, (uint64_t)catchTrace);
+
+  return true;
 }
 
 _Unwind_Reason_Code
@@ -125,10 +109,34 @@ tc_unwind_personality(int version,
                       uint64_t exceptionClass,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context) {
+  using namespace abi;
+  // Exceptions thrown by g++-generated code will have the class "GNUCC++"
+  // packed into a 64-bit int. For now we shouldn't be seeing exceptions from
+  // any other runtimes but this may change in the future.
+  DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
+  assert(exceptionClass == kMagicClass);
   assert(version == 1);
 
-  FTRACE(2, "unwind: tc_unwind_personality {}\n",
-         int(tl_regState));
+  auto const& ti = typeInfoFromUnwindException(exceptionObj);
+  InvalidSetMException* ism = nullptr;
+  if (ti == typeid(InvalidSetMException)) {
+    ism = static_cast<InvalidSetMException*>(
+      exceptionFromUnwindException(exceptionObj));
+  }
+
+
+  if (Trace::moduleEnabled(TRACEMOD, 1)) {
+    DEBUG_ONLY auto const* unwindType =
+      (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
+    int status;
+    auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
+    SCOPE_EXIT { free(exnType); };
+    assert(status == 0);
+    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}. ",
+           unwindType, exceptionObj,
+           tl_regState == REGSTATE_DIRTY ? "dirty" : "clean",
+           (TCA)_Unwind_GetIP(context), exnType);
+  }
 
   /*
    * We don't do anything during the search phase---before attempting
@@ -137,22 +145,30 @@ tc_unwind_personality(int version,
    * tl_regState) and spilled any values they may have been holding in
    * callee-saved regs.
    */
-  if (actions & _UA_SEARCH_PHASE) {}
+  if (actions & _UA_SEARCH_PHASE) {
+    if (ism) {
+      FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
+             ism->tv().pretty());
+      return _URC_HANDLER_FOUND;
+    }
+  }
 
   /*
-   * During the cleanup phase, we can either use a landing pad to
-   * perform cleanup (with _Unwind_SetIP and _URC_INSTALL_CONTEXT), or
-   * we can do it here.  We do it here currently so we can use unwind
-   * APIs to read the callee-saved register values instead of having
-   * to generate machine code that does it.
+   * During the cleanup phase, we can either use a landing pad to perform
+   * cleanup (with _Unwind_SetIP and _URC_INSTALL_CONTEXT), or we can do it
+   * here. We sync the VM registers here, then optionally use a landing pad,
+   * which is an exit traces from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
     if (tl_regState == REGSTATE_DIRTY) {
       sync_regstate(context);
     }
-    sync_callee_saved(context);
+    if (install_catch_trace(context, exceptionObj, ism)) {
+      return _URC_INSTALL_CONTEXT;
+    }
   }
 
+  FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;
 }
 
@@ -163,68 +179,11 @@ void deregister_unwind_region(std::vector<char>* p) {
 
 }
 
-//////////////////////////////////////////////////////////////////////
-
-UnwindRegInfo::UnwindRegInfo() {
-  clear();
-}
-
-std::string UnwindRegInfo::Data::pretty() const {
-  std::ostringstream out;
-  out << "(CRI r"
-      << reg << " dt:" << dataType << ' '
-      << (exStack ? "stack" : "local")
-      << '@' << locOffset
-      << ")";
-  return out.str();
-}
-
-void UnwindRegInfo::clear() {
-  memset(m_regs, 0, sizeof m_regs);
-}
-
-bool UnwindRegInfo::empty() const {
-  return !m_regs[0].dirty;
-}
-
-void UnwindRegInfo::add(RegNumber reg,
-                        DataType type,
-                        Location loc) {
-  assert(type >= -128 && type < 128 &&
-         "UnwindRegInfo has only 8 bits for DataType");
-  assert(loc.space == Location::Stack || loc.space == Location::Local);
-  assert(loc.offset >= std::numeric_limits<int16_t>::min() &&
-         loc.offset <= std::numeric_limits<int16_t>::max() &&
-         "UnwindRegInfo only has 16 bits for location offsets");
-
-  Data ent;
-  ent.dirty = true;
-  ent.dataType = type;
-  ent.exStack = loc.space == Location::Stack;
-  ent.locOffset = loc.offset;
-
-  /*
-   * Important note: this is using asm-x64.h register numbers,
-   * although they are not the same as what dwarf/unwind uses.
-   *
-   * They happen to be the same for the specific (callee-saved) regs
-   * we care about right now, so this is ok.  See kCalleeSaved.
-   */
-  ent.reg = int(reg);
-
-  for (int i = 0; i < kMaxCalleeSaved; ++i) {
-    if (!m_regs[i].dirty) {
-      m_regs[i] = ent;
-      return;
-    }
-  }
-
-  assert(false && "Too many callee saved registers for UnwindRegInfo");
-}
+///////////////////////////////////////////////////////////////////////////////
 
 UnwindInfoHandle
 register_unwind_region(unsigned char* startAddr, size_t size) {
-  std::auto_ptr<std::vector<char> > bufferMem(new std::vector<char>);
+  std::unique_ptr<std::vector<char>> bufferMem(new std::vector<char>);
   std::vector<char>& buffer = *bufferMem;
 
   {

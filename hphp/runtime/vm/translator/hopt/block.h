@@ -49,6 +49,13 @@ struct Block : boost::noncopyable {
     , m_hint(Neither)
   {}
 
+  const IRInstruction* beginCatch() const {
+    auto it = begin();
+    ++it;
+    assert(it->op() == BeginCatch);
+    return &*it;
+  }
+
   uint32_t    id() const         { return m_id; }
   Trace*      trace() const      { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
@@ -112,21 +119,30 @@ struct Block : boost::noncopyable {
   void setPostId(unsigned id) { m_postid = id; }
 
   /*
-   * Insert inst after this block's Marker, return an
-   * iterator to the newly inserted instruction.
+   * Insert inst after this block's optional DefLabel, optional
+   * BeginCatch, and Marker, return an iterator to the newly inserted
+   * instruction.
    *
    * Pre: the block contains a Marker after the optional DefLabel.
    */
   iterator prepend(IRInstruction* inst) {
-    auto it = skipLabel();
+    auto it = skipHeader();
     assert(it->op() == Marker);
     return insert(++it, inst);
   }
 
-  // return iterator to first instruction after the (optional) label
-  iterator skipLabel() {
+  // return iterator to first instruction after the DefLabel (if
+  // present) and BeginCatch (if present).
+  iterator skipHeader() {
     auto it = begin();
-    return it->op() == DefLabel ? ++it : it;
+    auto e = end();
+    if (it != e && it->op() == DefLabel) ++it;
+    if (it != e && it->op() == BeginCatch) ++it;
+    return it;
+  }
+
+  const_iterator skipHeader() const {
+    return const_cast<Block*>(this)->skipHeader();
   }
 
   // return iterator to last instruction

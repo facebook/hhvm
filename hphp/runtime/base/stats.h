@@ -134,6 +134,10 @@ namespace Stats {
   STAT(TC_TypePredMiss) \
   STAT(TC_TypePredUnneeded) \
   STAT(TC_TypePredOverridden) \
+  STAT(TC_CatchTrace) \
+  STAT(TC_CatchSideExit) \
+  STAT(TC_SetMStrGuess_Hit) \
+  STAT(TC_SetMStrGuess_Miss) \
   /* Fixup */ \
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \

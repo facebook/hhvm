@@ -246,7 +246,7 @@ array(6) {
     }
   }
 }
-object(ReflectionParameter)#9 (1) {
+object(ReflectionParameter)#9 (2) {
   ["info"]=>
   array(7) {
     ["index"]=>
@@ -265,4 +265,6 @@ object(ReflectionParameter)#9 (1) {
     array(0) {
     }
   }
+  ["name"]=>
+  string(1) "c"
 }

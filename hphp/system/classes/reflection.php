@@ -36,11 +36,13 @@ class ReflectionException extends Exception {
  */
 class ReflectionParameter implements Reflector {
   public $info;
+  public $name;
 
   public function __construct($func, $param) {
     if ($func && $param) {
       $params = $func->getParameters();
       $this->info = $params[$param]->info;
+      $this->name = $this->info['name'];
     }
   }
 
@@ -497,6 +499,7 @@ class ReflectionFunctionAbstract {
     foreach ($this->info['params'] as $name => $info) {
       $param = new ReflectionParameter(null, null);
       $param->info = $info;
+      $param->name = $info['name'];
       $ret[] = $param;
     }
     return $ret;

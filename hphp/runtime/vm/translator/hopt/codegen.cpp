@@ -2566,6 +2566,11 @@ int CodeGenerator::getIterOffset(SSATmp* tmp) {
   return -cellsToBytes(((index + 1) * kNumIterCells + func->numLocals()));
 }
 
+int CodeGenerator::getIterOffset(uint32_t id) {
+  const Func* func = getCurFunc();
+  return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
+}
+
 void CodeGenerator::cgStLoc(IRInstruction* inst) {
   cgStore(m_regs[inst->src(0)].getReg(),
           getLocalOffset(inst->extra<StLoc>()->locId),
@@ -3142,6 +3147,44 @@ void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
   cgDecRefWork(inst, true);
 }
 
+void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
+  auto const sp    = inst->src(0);
+  auto const fp    = inst->src(1);
+  auto const nArgs = inst->extra<CufIterSpillFrame>()->args;
+  auto const iterId = inst->extra<CufIterSpillFrame>()->iterId;
+  auto const itOff = getIterOffset(iterId);
+
+  const int64_t spOffset = -kNumActRecCells * sizeof(Cell);
+  auto spReg = m_regs[sp].getReg();
+  auto fpReg = m_regs[fp].getReg();
+
+  m_as.loadq   (fpReg[itOff + CufIter::funcOff()], m_rScratch);
+  m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_func))]);
+
+  m_as.loadq   (fpReg[itOff + CufIter::ctxOff()], m_rScratch);
+  m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_this))]);
+
+  m_as.shrq    (1, m_rScratch);
+  ifThen(m_as, CC_NBE, [this] {
+      m_as.shlq(1, m_rScratch);
+      emitIncRef(m_as, m_rScratch);
+    });
+  m_as.loadq   (fpReg[itOff + CufIter::nameOff()], m_rScratch);
+  m_as.testq    (m_rScratch, m_rScratch);
+  ifThen(m_as, CC_NZ, [this] {
+      m_as.cmpl(RefCountStaticValue, m_rScratch[FAST_REFCOUNT_OFFSET]);
+      ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, m_rScratch); });
+      m_as.orq (ActRec::kInvNameBit, m_rScratch);
+    });
+  m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
+  m_as.storeq  (fpReg, spReg[spOffset + int(AROFF(m_savedRbp))]);
+  m_as.storel  (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndCtorFlag))]);
+
+  emitAdjustSp(spReg,
+               m_regs[inst->dst()].getReg(),
+               spOffset);
+}
+
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   auto const sp        = inst->src(0);
   auto const fp        = inst->src(1);
@@ -3196,9 +3239,9 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   uintptr_t invName = !magicName
     ? 0
     : reinterpret_cast<uintptr_t>(magicName) | ActRec::kInvNameBit;
-  m_as.store_imm64_disp_reg64(invName,
-                              spOffset + int(AROFF(m_invName)),
-                              spReg);
+    m_as.store_imm64_disp_reg64(invName,
+                                spOffset + int(AROFF(m_invName)),
+                                spReg);
   // actRec->m_func  and possibly actRec->m_cls
   // Note m_cls is unioned with m_this and may overwrite previous value
   if (func->type().isNull()) {
@@ -5141,10 +5184,21 @@ void iterFreeHelper(Iter* iter) {
   iter->free();
 }
 
+void citerFreeHelper(Iter* iter) {
+  iter->cfree();
+}
+
 void CodeGenerator::cgIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].getReg();
-  int64_t  offset = getIterOffset(inst->src(1));
+  int64_t offset = getIterOffset(inst->extra<IterFree>()->iterId);
   cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, kSyncPoint,
+               ArgGroup(m_regs).addr(fpReg, offset));
+}
+
+void CodeGenerator::cgCIterFree(IRInstruction* inst) {
+  PhysReg fpReg = m_regs[inst->src(0)].getReg();
+  int64_t  offset = getIterOffset(inst->extra<CIterFree>()->iterId);
+  cgCallHelper(m_as, (TCA)citerFreeHelper, InvalidReg, kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 

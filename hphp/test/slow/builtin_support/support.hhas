@@ -24,70 +24,94 @@
 }
 
 .function fast_array_filter($arr, $func) {
-          .numiters 1;
+          .numiters 2;
 
           NewArray
           SetL $res
           PopC
 
-          CGetL $arr
-          WIterInitK 0 endloop $v $k
           IssetL $func
-          JmpZ loop_n
-          IsArrayL $func
-          JmpNZ loop_a
-loop_s:   CGetL $func
-          FPushFunc 1
-          FPassL 0 $v
-          FCall 1
-          UnboxR
-          JmpZ skip_s
-          SetWithRefLM <L:$res EL:$k> $v
-skip_s:   WIterNextK 0 loop_s $v $k
-          Jmp endloop
+          JmpZ null_func
 
-loop_n:   CGetL $v
-          JmpZ skip_n
-          SetWithRefLM <L:$res EL:$k> $v
-skip_n:   WIterNextK 0 loop_n $v $k
-          Jmp endloop
-
-loop_a:   CGetL $func
-          FPushCuf 1
+          CGetL $func
+          DecodeCufIter 0
+          JmpZ bad_func
+.try_fault kill_iter_0 {
+          CGetL $arr
+          WIterInitK 1 endloop_a $v $k
+.try_fault kill_iter_1 {
+loop_a:   FPushCufIter 1 0
           FPassL 0 $v
           FCall 1
           UnboxR
           JmpZ skip_a
           SetWithRefLM <L:$res EL:$k> $v
-skip_a:   WIterNextK 0 loop_a $v $k
-
-endloop:  CGetL $res
+skip_a:   WIterNextK 1 loop_a $v $k
+}
+}
+endloop_a:CIterFree 0
+endloop_n:CGetL $res
           RetC
+
+null_func:CGetL $arr
+          WIterInitK 1 endloop_n $v $k
+.try_fault kill_iter_1 {
+loop_n:   CGetL $v
+          JmpZ skip_n
+          SetWithRefLM <L:$res EL:$k> $v
+skip_n:   WIterNextK 1 loop_n $v $k
+}
+          Jmp endloop_n
+
+bad_func: Null
+          RetC
+
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 0
+          Unwind
 }
 
 .function fast_array_map($func, $arr) {
-          .numiters 1;
+          .numiters 2;
 
           IssetL $func
           JmpZ ident
+          CGetL $func
+          DecodeCufIter 0
+          JmpZ bad_func
 
+.try_fault kill_iter_0 {
           NewArray
           SetL $res
           PopC
 
           CGetL $arr
-          WIterInitK 0 endloop $v $k
+          WIterInitK 1 endloop $v $k
 
-loop_x:   CGetL $func
-          FPushCuf 1
+.try_fault kill_iter_1 {
+loop_x:   FPushCufIter 1 0
           FPassL 0 $v
           FCall 1
           SetWithRefRM <L:$res EL:$k>
-          WIterNextK 0 loop_x $v $k
-
-endloop:  CGetL $res
+          WIterNextK 1 loop_x $v $k
+}
+}
+endloop:  CIterFree 0
+          CGetL $res
           RetC
 
 ident:    CGetL $arr
           RetC
+
+bad_func: Null
+          RetC
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 0
+          Unwind
 }

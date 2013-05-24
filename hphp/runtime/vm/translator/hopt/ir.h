@@ -368,6 +368,8 @@ O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(Func,FuncCls,FuncCtx,Null)        \
                                           S(Ctx,Cls,InitNull),           CRc) \
+O(CufIterSpillFrame,         D(StkPtr), S(StkPtr)                             \
+                                          S(FramePtr),                    NF) \
 O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
 O(ReqBindJmp,                       ND, NA,                              T|E) \
 O(ReqBindJmpNoIR,                   ND, NA,                              T|E) \
@@ -471,7 +473,8 @@ O(WIterNext,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),        E|N|Mem|Refs) \
 O(WIterNextK,                  D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterFree,                         ND, S(FramePtr) C(Int),     E|N|Mem|Refs) \
+O(IterFree,                         ND, S(FramePtr),            E|N|Mem|Refs) \
+O(CIterFree,                        ND, S(FramePtr),            E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \
                                           S(Str)                              \

@@ -957,7 +957,11 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
 }
 
 void HhbcTranslator::emitIterFree(uint32_t iterId) {
-  gen(IterFree, m_tb->getFp(), cns(iterId));
+  gen(IterFree, IterId(iterId), m_tb->getFp());
+}
+
+void HhbcTranslator::emitCIterFree(uint32_t iterId) {
+  gen(CIterFree, IterId(iterId), m_tb->getFp());
 }
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
@@ -1537,6 +1541,15 @@ void HhbcTranslator::emitFPassV() {
   SSATmp* tmp = popV();
   pushIncRef(gen(Unbox, exit, tmp));
   gen(DecRef, tmp);
+}
+
+void HhbcTranslator::emitFPushCufIter(int32_t numParams,
+                                      int32_t itId) {
+  auto sp = spillStack();
+  m_fpiStack.emplace(sp, m_tb->getSpOffset());
+  gen(CufIterSpillFrame,
+      FPushCufData(numParams, itId),
+      sp, m_tb->getFp());
 }
 
 void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,

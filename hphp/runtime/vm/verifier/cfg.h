@@ -102,7 +102,7 @@ inline bool isRet(PC pc) {
 }
 
 inline bool isIter(PC pc) {
-  return Op(*pc) >= OpIterInit && Op(*pc) <= OpMIterFree;
+  return Op(*pc) >= OpIterInit && Op(*pc) <= OpCIterFree;
 }
 
 inline int getImmIva(PC pc) {

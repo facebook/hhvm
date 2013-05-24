@@ -457,6 +457,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == CallArray ||
                opc == SpillStack ||
                opc == SpillFrame ||
+               opc == CufIterSpillFrame ||
                opc == ExceptionBarrier ||
                opc == RetAdjustStack ||
                opc == InterpOne ||

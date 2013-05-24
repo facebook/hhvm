@@ -274,7 +274,7 @@ class NormalizedInstruction {
   vector<DynLocation*> inputs;
   DynLocation* outStack;
   DynLocation* outLocal;
-  DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK, and
+  DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK,
                           //   MIterNextK
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3

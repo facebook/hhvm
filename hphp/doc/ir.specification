@@ -918,6 +918,17 @@ D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
   Defines the fields for an activation record and writes them to the
   stack pointed to by S1.
 
+D:StkPtr = CufIterSpillFrame<numArgs,iterId> S0:StkPtr
+                                             S1:FramePtr
+
+  Operands:
+
+     S0 - caller stack pointer
+     S1 - caller frame pointer
+
+  Defines the fields for an activation record using data from
+  the iterator iterId, and writes them to the stack pointed to by S1
+
 D:FramePtr = FreeActRec S0:FramePtr
 
   Load the saved frame pointer from the activation record pointed to
@@ -1595,7 +1606,12 @@ D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
   The WIterInit and WIterInitK instructions copy referenced array
   elements by reference, and non-referenced array elements by value.
 
-IterFree S0:FramePtr S1:ConstInt
+IterFree<IterId> S0:FramePtr
+
+  Free the iterator variable whose index is given by S1 in the stack
+  frame pointed to by S0.
+
+CIterFree<IterId> S0:FramePtr
 
   Free the iterator variable whose index is given by S1 in the stack
   frame pointed to by S0.

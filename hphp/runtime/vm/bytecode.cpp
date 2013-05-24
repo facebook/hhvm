@@ -5902,6 +5902,72 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   ar->setVarEnv(nullptr);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopDecodeCufIter(PC& pc) {
+  NEXT();
+  DECODE_IA(itId);
+
+  Iter* it = frame_iter(m_fp, itId);
+  CufIter &cit = it->cuf();
+
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  TypedValue *func = m_stack.topTV();
+
+  ActRec* ar = m_fp;
+  if (m_fp->m_func->isBuiltin()) {
+    ar = getOuterVMFrame(ar);
+  }
+  const Func* f = vm_decode_function(tvAsVariant(func),
+                                     ar, false,
+                                     obj, cls, invName,
+                                     true);
+
+  bool ret = true;
+  if (f == nullptr) {
+    f = SystemLib::s_nullFunc;
+    obj = nullptr;
+    cls = nullptr;
+    invName = nullptr;
+    ret = false;
+  }
+
+  cit.setFunc(f);
+  if (obj) {
+    cit.setCtx(obj);
+    obj->incRefCount();
+  } else {
+    cit.setCtx(cls);
+  }
+  cit.setName(invName);
+  tvAsVariant(m_stack.top()) = ret;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFPushCufIter(PC& pc) {
+  NEXT();
+  DECODE_IVA(numArgs);
+  DECODE_IA(itId);
+
+  Iter* it = frame_iter(m_fp, itId);
+
+  auto f = it->cuf().func();
+  auto o = it->cuf().ctx();
+  auto n = it->cuf().name();
+
+  ActRec* ar = m_stack.allocA();
+  arSetSfp(ar, m_fp);
+  ar->m_func = f;
+  ar->m_this = (ObjectData*)o;
+  if (o && !(uintptr_t(o) & 1)) ar->m_this->incRefCount();
+  if (n) {
+    ar->setInvName(n);
+    n->incRefCount();
+  } else {
+    ar->setVarEnv(nullptr);
+  }
+  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
                                                          bool forward,
                                                          bool safe) {
@@ -6665,6 +6731,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterFree(PC& pc) {
   DECODE_IA(itId);
   Iter* it = frame_iter(m_fp, itId);
   it->mfree();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCIterFree(PC& pc) {
+  NEXT();
+  DECODE_IA(itId);
+  Iter* it = frame_iter(m_fp, itId);
+  it->cfree();
 }
 
 inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,

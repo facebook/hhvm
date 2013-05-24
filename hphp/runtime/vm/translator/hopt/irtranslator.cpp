@@ -1060,6 +1060,12 @@ TranslatorX64::irTranslateFPassV(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateFPushCufIter(const Tracelet& t,
+                                       const NormalizedInstruction& i) {
+  HHIR_EMIT(FPushCufIter, i.imm[0].u_IVA, i.imm[1].u_IA);
+}
+
+void
 TranslatorX64::irTranslateFPushCufOp(const Tracelet& t,
                                      const NormalizedInstruction& i) {
   Class* cls = nullptr;
@@ -1447,6 +1453,13 @@ TranslatorX64::irTranslateIterFree(const Tracelet& t,
                                    const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterFree, i.imm[0].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateCIterFree(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+
+  HHIR_EMIT(CIterFree, i.imm[0].u_IVA);
 }
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their

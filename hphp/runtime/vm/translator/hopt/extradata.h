@@ -126,6 +126,37 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct IterId : IRExtraData {
+  explicit IterId(uint32_t id)
+    : iterId(id)
+  {}
+
+  bool cseEquals(IterId o) const { return iterId == o.iterId; }
+  size_t cseHash() const { return std::hash<uint32_t>()(iterId); }
+  std::string show() const { return folly::to<std::string>(iterId); }
+
+  uint32_t iterId;
+};
+
+struct FPushCufData : IRExtraData {
+  FPushCufData(uint32_t a, int32_t id)
+    : args(a), iterId(id)
+  {}
+
+  bool cseEquals(FPushCufData o) const {
+    return iterId == o.iterId && args == o.args;
+  }
+  size_t cseHash() const {
+    return std::hash<uint32_t>()(iterId) ^ std::hash<uint32_t>()(args);
+  }
+  std::string show() const {
+    return folly::to<std::string>(iterId, ',', args);
+  }
+
+  uint32_t args;
+  uint32_t iterId;
+};
+
 struct ConstData : IRExtraData {
   template<class T>
   explicit ConstData(T data)
@@ -272,6 +303,9 @@ X(DecRefLoc,                    LocalId);
 X(LdLoc,                        LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
+X(IterFree,                     IterId);
+X(CIterFree,                    IterId);
+X(CufIterSpillFrame,            FPushCufData);
 X(DefConst,                     ConstData);
 X(LdConst,                      ConstData);
 X(SpillFrame,                   ActRecInfo);

@@ -235,10 +235,11 @@ struct HhbcTranslator {
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
+  void emitFPushCufIter(int32_t numParams, int32_t itId);
   void emitFPushCufOp(Op op, Class* cls, StringData* invName,
                       const Func* func, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
-                       const StringData* invName);
+                       const StringData* invName = nullptr);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
   void emitFPushFuncU(int32_t numParams,
                       int32_t funcId,
@@ -351,6 +352,7 @@ struct HhbcTranslator {
                       uint32_t keyLocalId);
 
   void emitIterFree(uint32_t iterId);
+  void emitCIterFree(uint32_t iterId);
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations

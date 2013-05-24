@@ -650,13 +650,14 @@ protected by a fault funclet that unsets i by calling IterFree or MIterFree so
 that when the unwinder or dispatcher pops the current frame, each iterator
 variable is uninitialized.
 
-13) The iterator variable referenced by IterInit* or MIterInit* must be in
-the uninitialized state when the instruction executes. An iterator variable
-referenced by IterNext* and IterFree must be in the "iter-initialized" state,
-and an iterator variable referenced by MIterNext* or MIterFree must be in the
-"miter-initialized" state. Note that IterInit* and MIterInit* conditionally
-initializes the iterator variable, and IterNext* and MIterNext* conditionally
-frees the iterator variable.
+13) The iterator variable referenced by IterInit* or MIterInit* or
+DecodeCufIter must be in the uninitialized state when the instruction
+executes. An iterator variable referenced by IterNext* and IterFree must be
+in the "iter-initialized" state, an iterator variable referenced by MIterNext*
+or MIterFree must be in the "miter-initialized" state, and an iterator variable
+referenced by FPushCufIter or CIterFree must be in the citer-initialized state.
+Note that IterInit* and MIterInit* conditionally initialize the iterator variable,
+and IterNext* and MIterNext* conditionally free the iterator variable.
 
 
 Instruction set
@@ -1702,6 +1703,17 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   entry on the FPI stack, initializing it with the number of parameters being
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
+
+DecodeCufIter <iterator id> [C] -> [C]
+  This instruction looks up $1 as a callable, and writes enough information
+  to iterator %1 for FPushDecoded to be able to push an actrec, as if it had
+  been given the callable.
+  If the function is successfully decoded, pushes true, otherwise, pushes
+  false, and sets up iter to call a function that does nothing, and returns
+  Null. No warning is raised.
+
+FPushCufIter <num params> <iterator id> [] -> []
+  FPI push the result of a previous DecodeCufIter. No warning is raised.
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
@@ -3463,6 +3475,11 @@ MIterFree <iterator id>    []  ->  []
   only needed for guarding against exceptions and implementing break and
   return control flow statements inside iterator loops.
 
+CIterFree <iterator id>    []  ->  []
+
+  Cuf iterator free. This instruction frees the specified iterator
+  variable.
+
 
 12. Include, eval, and define instructions
 ------------------------------------------
@@ -3782,8 +3799,8 @@ ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
 Simple break statements and continue statements are implemented using the Jmp*,
-IterFree, and MIterFree instructions. Dynamic break is implemented using an
-unnamed local (to store the 'break count') and a chain of basic blocks, where
+IterFree, MIterFree and CIterFree instructions. Dynamic break is implemented using
+an unnamed local (to store the 'break count') and a chain of basic blocks, where
 each block decrements the unnamed local variable and compares it with 0, and
 then decides where to jump next.
 

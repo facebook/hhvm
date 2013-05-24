@@ -567,6 +567,13 @@ MArrayIter::~MArrayIter() {
   }
 }
 
+CufIter::~CufIter() {
+  if (m_ctx && !(uintptr_t(m_ctx) & 1)) {
+    decRefObj((ObjectData*)m_ctx);
+  }
+  if (m_name) decRefStr(m_name);
+}
+
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
   bool hasElems = true;
@@ -699,6 +706,10 @@ void Iter::free() {
 
 void Iter::mfree() {
   marr().~MArrayIter();
+}
+
+void Iter::cfree() {
+  cuf().~CufIter();
 }
 
 /*

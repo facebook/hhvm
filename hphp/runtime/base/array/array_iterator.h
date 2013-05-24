@@ -444,6 +444,30 @@ class MArrayIter : public FullPos {
   friend struct Iter;
 };
 
+class CufIter {
+ public:
+  CufIter() {}
+  ~CufIter();
+  const Func* func() const { return m_func; }
+  void* ctx() const { return m_ctx; }
+  StringData* name() const { return m_name; }
+
+  void setFunc(const Func* f) { m_func = f; }
+  void setCtx(ObjectData* obj) { m_ctx = obj; }
+  void setCtx(const Class* cls) {
+    m_ctx = cls ? (void*)((char*)cls + 1) : nullptr;
+  }
+  void setName(StringData* name) { m_name = name; }
+
+  static uint32_t funcOff() { return offsetof(CufIter, m_func); }
+  static uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
+  static uint32_t nameOff() { return offsetof(CufIter, m_name); }
+ private:
+  const Func* m_func;
+  void* m_ctx;
+  StringData* m_name;
+};
+
 struct Iter {
   ArrayIter& arr() {
     return *(ArrayIter*)m_u;
@@ -451,16 +475,19 @@ struct Iter {
   MArrayIter& marr() {
     return *(MArrayIter*)m_u;
   }
+  CufIter& cuf() { return *(CufIter*)m_u; }
+
   bool init(TypedValue* c1);
   bool minit(TypedValue* v1);
   bool next();
   bool mnext();
   void free();
   void mfree();
+  void cfree();
   private:
   // C++ won't let you have union members with constructors. So we get to
   // implement unions by hand.
-  char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
+  char m_u[MAX(MAX(sizeof(ArrayIter), sizeof(MArrayIter)), sizeof(CufIter))];
 } __attribute__ ((aligned(16)));
 
 bool interp_init_iterator(Iter* it, TypedValue* c1);

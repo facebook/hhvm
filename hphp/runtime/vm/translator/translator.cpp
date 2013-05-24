@@ -1292,6 +1292,8 @@ static const struct {
                                                          kNumActRecCells }},
   { OpFPushCtorD,  {None,             Stack1|FStack,OutObject,
                                                      kNumActRecCells + 1 }},
+  { OpFPushCufIter,{None,             FStack,       OutFDesc,
+                                                         kNumActRecCells }},
   { OpFPushCuf,    {Stack1,           FStack,       OutFDesc,
                                                      kNumActRecCells - 1 }},
   { OpFPushCufF,   {Stack1,           FStack,       OutFDesc,
@@ -1325,6 +1327,7 @@ static const struct {
                                       Stack1,       OutArray,         -2 }},
   { OpCufSafeReturn,{StackTop3|DontGuardAny,
                                       Stack1,       OutUnknown,       -2 }},
+  { OpDecodeCufIter,{Stack1,          Stack1,       OutBoolean,        0 }},
 
   /*** 11. Iterator instructions ***/
 
@@ -1342,6 +1345,7 @@ static const struct {
   { OpWIterNextK,  {None,             Local,        OutUnknown,        0 }},
   { OpIterFree,    {None,             None,         OutNone,           0 }},
   { OpMIterFree,   {None,             None,         OutNone,           0 }},
+  { OpCIterFree,   {None,             None,         OutNone,           0 }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -3566,7 +3570,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       tas.varEnvTaint();
     }
 
-    DynLocation* outputs[] = { ni->outStack, ni->outLocal, ni->outLocal2,
+    DynLocation* outputs[] = { ni->outStack,
+                               ni->outLocal, ni->outLocal2,
                                ni->outStack2, ni->outStack3 };
     for (size_t i = 0; i < sizeof(outputs) / sizeof(*outputs); ++i) {
       if (outputs[i]) {

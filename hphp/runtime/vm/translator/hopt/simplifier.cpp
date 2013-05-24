@@ -129,6 +129,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   }
 
   case SpillFrame:
+  case CufIterSpillFrame:
     return getStackValue(inst->src(0),
                          // pushes an ActRec
                          index - kNumActRecCells);

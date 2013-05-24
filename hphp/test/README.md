@@ -41,6 +41,7 @@ These are the allowed extensions:
 * .hphp_opts - Options passed to hphp when generating a bytecode repo.
 * .diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
+* .norepo - don't run the test in repo mode
 
 You must have one `.php`; one and only one of `.expect`, `.expectf`, and
 `.expectregex`; and the rest are optional.

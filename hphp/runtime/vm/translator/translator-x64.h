@@ -556,7 +556,8 @@ private:
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(ArrayIdx) \
-
+  CASE(FPushCufIter) \
+  CASE(CIterFree) \
   // These are instruction-like functions which cover more than one
   // opcode.
 #define PSEUDOINSTRS \

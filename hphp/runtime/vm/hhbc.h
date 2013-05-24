@@ -505,6 +505,7 @@ enum SetOpOp {
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
+  O(FPushCufIter,    TWO(IVA,IA),     NOV,             NOV,        NF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
@@ -539,6 +540,8 @@ enum SetOpOp {
   O(WIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
+  O(DecodeCufIter,   ONE(IA),          ONE(CV),         ONE(CV),    NF) \
+  O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \

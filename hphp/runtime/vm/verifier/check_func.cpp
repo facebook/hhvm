@@ -707,7 +707,8 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
   bool ok = true;
   if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitK ||
       Op(*pc) == OpWIterInit || Op(*pc) == OpWIterInitK ||
-      Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK) {
+      Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK ||
+      Op(*pc) == OpDecodeCufIter) {
     if (cur->iters[id]) {
       verify_error(
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
@@ -718,7 +719,9 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
       verify_error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (Op(*pc) == OpIterFree || Op(*pc) == OpMIterFree) {
+    if (Op(*pc) == OpIterFree ||
+        Op(*pc) == OpMIterFree ||
+        Op(*pc) == OpCIterFree) {
       cur->iters[id] = false;
     }
   }

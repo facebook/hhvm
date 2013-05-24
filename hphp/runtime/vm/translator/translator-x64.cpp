@@ -11943,8 +11943,9 @@ bool TranslatorX64::dumpTCData() {
   INTERP_OP(SetOpM) \
   INTERP_OP(IncDecM) \
   INTERP_OP(BindM) \
-  INTERP_OP(UnsetM)
-
+  INTERP_OP(UnsetM) \
+  INTERP_OP(FPushCufIter) \
+  INTERP_OP(CIterFree)
 
 // Define the trivial analyze methods
 #define PLAN(Op, Spt) \

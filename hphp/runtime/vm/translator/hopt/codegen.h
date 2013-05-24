@@ -323,6 +323,7 @@ private:
   Address getDtorGeneric();
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
+  int getIterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);

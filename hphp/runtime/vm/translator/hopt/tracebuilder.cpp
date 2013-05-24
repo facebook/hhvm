@@ -229,6 +229,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   }
 
   case SpillFrame:
+  case CufIterSpillFrame:
     m_spValue = inst->dst();
     m_spOffset += kNumActRecCells;
     break;

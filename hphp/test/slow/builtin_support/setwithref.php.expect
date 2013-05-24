@@ -36,6 +36,22 @@ array(4) {
   [3]=>
   bool(false)
 }
+string(13) "X::__destruct"
+array(0) {
+}
+string(13) "X::__destruct"
+array(3) {
+  ["foo"]=>
+  &string(3) "bar"
+  [1]=>
+  int(0)
+  [2]=>
+  bool(true)
+}
+array(1) {
+  [2]=>
+  bool(true)
+}
 array(5) {
   [0]=>
   string(2) "11"

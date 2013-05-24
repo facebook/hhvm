@@ -43,6 +43,7 @@ public:
   Timer(Type type, const char *name = nullptr, ReportType r = Log);
   ~Timer();
 
+  static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
   const char *getName() const;
   int64_t getMicroSeconds() const;

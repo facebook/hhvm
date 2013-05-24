@@ -65,6 +65,16 @@ static int64_t to_usec(const timeval& tv) {
   return (int64_t(tv.tv_sec) * 1000000) + tv.tv_usec;
 }
 
+void Timer::GetMonotonicTime(timespec &ts) {
+#ifndef __APPLE__
+  gettime(CLOCK_MONOTONIC, &ts);
+#else
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  TIMEVAL_TO_TIMESPEC(&tv, &ts);
+#endif
+}
+
 int64_t Timer::GetCurrentTimeMicros() {
   struct timeval tv;
   gettimeofday(&tv, 0);

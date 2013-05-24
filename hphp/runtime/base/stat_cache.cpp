@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef __APPLE__
+
 #include "hphp/runtime/base/stat_cache.h"
 
 #include <sys/types.h>
@@ -900,3 +902,5 @@ std::string StatCache::realpath(const char* path) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif

@@ -135,7 +135,7 @@ bool SimpleArrayStore::update(K key, const Variant& val, uint length,
   auto const pos = find(key, length);
   if (pos != PosType::invalid) {
     // found, overwrite
-    assert(tvIsPlausible(m_vals + toUint32(pos)));
+    assert(tvIsPlausible(m_vals + toInt<uint32_t>(pos)));
     lval(pos) = val;
     return false;
   }
@@ -151,7 +151,7 @@ bool SimpleArrayStore::update(K key, const Variant& val, uint length,
 }
 
 void SimpleArrayStore::erase(PosType pos, uint length) {
-  auto const ipos = toUint32(pos);
+  auto const ipos = toInt<uint32_t>(pos);
   assert(ipos < length && length <= capacity());
   // Destroy data at pos
   if (hasStrKey(pos)) {
@@ -235,7 +235,7 @@ Variant ArrayShell::reset() {
   APILOG << "()";
   if (m_size) {
     auto const first = firstIndex(m_size);
-    m_pos = toUint32(first);
+    m_pos = toInt<uint32_t>(first);
     return val(first);
   }
   m_pos = invalid_index;
@@ -268,7 +268,7 @@ Variant ArrayShell::next() {
 Variant ArrayShell::end() {
   if (m_size) {
     auto const last = lastIndex(m_size);;
-    m_pos = toUint32(last);
+    m_pos = toInt<uint32_t>(last);
     return val(last);
   }
   m_pos = invalid_index;
@@ -304,7 +304,7 @@ Variant ArrayShell::each() {
   init.set(s_value, value, true);
   init.set(int64_t(0), key);
   init.set(s_key, key, true);
-  m_pos = toInt64(nextIndex(toPos(m_pos), m_size));
+  m_pos = toInt<int64_t>(nextIndex(toPos(m_pos), m_size));
   return Array(init.create());
 }
 
@@ -341,7 +341,7 @@ TypedValue* ArrayShell::nvGetCellImpl(K k) const {
 template <class K>
 ssize_t ArrayShell::getIndexImpl(K k) const {
   APILOG << "(" << keystr(k) << ")";
-  return toInt64(find(k, m_size));
+  return toInt<int64_t>(find(k, m_size));
 }
 
 template <class K>
@@ -367,7 +367,7 @@ ArrayData *ArrayShell::lvalImpl(K k, Variant*& ret,
   PosType pos = PosType::invalid;
 
   if (checkExist && (pos = find(k, m_size)) != PosType::invalid) {
-    assert(toUint32(pos) < m_size);
+    assert(toInt<uint32_t>(pos) < m_size);
     auto& e = lval(pos);
     if (e.isReferenced() || e.isObject()) {
       MYLOG << (void*)this << "->lval:" << "found1";
@@ -384,9 +384,9 @@ ArrayData *ArrayShell::lvalImpl(K k, Variant*& ret,
 
   if (pos != PosType::invalid) {
     // found, don't overwrite anything
-    assert(toUint32(pos) <= m_size);
+    assert(toInt<uint32_t>(pos) <= m_size);
     ret = &lval(pos);
-    MYLOG << (void*)this << "->lvalImpl:" << "found at " << toInt64(pos)
+    MYLOG << (void*)this << "->lvalImpl:" << "found at " << toInt<int64_t>(pos)
           << ", value=" << valstr(*ret) << ", size=" << m_size;
   } else {
     // not found, initialize
@@ -536,7 +536,7 @@ ArrayData *ArrayShell::removeImpl(K k, bool copy) {
 
 ssize_t ArrayShell::iter_begin() const {
   APILOG << "()";
-  return m_size ? toInt64(firstIndex(m_size)) : invalid_index;
+  return m_size ? toInt<int64_t>(firstIndex(m_size)) : invalid_index;
 }
 
 ssize_t ArrayShell::iter_end() const {
@@ -546,14 +546,14 @@ ssize_t ArrayShell::iter_end() const {
 
 ssize_t ArrayShell::iter_advance(ssize_t prev) const {
   APILOG << "(" << prev << ")";
-  auto const result = toInt64(nextIndex(toPos(prev), m_size));
+  auto const result = toInt<int64_t>(nextIndex(toPos(prev), m_size));
   MYLOG << "returning " << result;
   return result;
 }
 
 ssize_t ArrayShell::iter_rewind(ssize_t prev) const {
   APILOG << "(" << prev << ")";
-  return toInt64(prevIndex(toPos(prev), m_size));
+  return toInt<int64_t>(prevIndex(toPos(prev), m_size));
 }
 
 bool ArrayShell::validFullPos(const FullPos& fp) const {
@@ -571,13 +571,13 @@ bool ArrayShell::advanceFullPos(FullPos &fp) {
   } else if (fp.m_pos == invalid_index) {
     return false;
   }
-  fp.m_pos = toInt64(nextIndex(toPos(fp.m_pos), m_size));
+  fp.m_pos = toInt<int64_t>(nextIndex(toPos(fp.m_pos), m_size));
   if (fp.m_pos == invalid_index) {
     return false;
   }
   // To conform to PHP behavior, we need to set the internal
   // cursor to point to the next element.
-  m_pos = toInt64(nextIndex(toPos(fp.m_pos), m_size));
+  m_pos = toInt<int64_t>(nextIndex(toPos(fp.m_pos), m_size));
   return true;
 }
 
@@ -788,7 +788,7 @@ ArrayData* ArrayShell::pop(Variant &value) {
   --m_size;
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator.
-  m_pos = m_size ? toInt64(firstIndex(m_size)) : invalid_index;
+  m_pos = m_size ? toInt<int64_t>(firstIndex(m_size)) : invalid_index;
   return this;
 }
 
@@ -815,7 +815,7 @@ ArrayData *ArrayShell::dequeue(Variant &value) {
 
   // To match PHP-like semantics, the dequeue operation resets the array's
   // internal iterator
-  m_pos = m_size ? toInt64(firstIndex(m_size)) : invalid_index;
+  m_pos = m_size ? toInt<int64_t>(firstIndex(m_size)) : invalid_index;
   return this;
 }
 
@@ -835,7 +835,7 @@ ArrayData* ArrayShell::prepend(CVarRef v, bool copy) {
   renumber();
   // To match PHP-like semantics, the prepend operation resets the array's
   // internal iterator
-  m_pos = toInt64(first);
+  m_pos = toInt<int64_t>(first);
   return this;
 }
 
@@ -869,9 +869,9 @@ void ArrayShell::renumber() {
   if (m_pos != invalid_index) {
     // Update m_pos, now that compaction is complete.
     if (currentPosKey.isString()) {
-      m_pos = toInt64(find(currentPosKey.getStringData(), m_size));
+      m_pos = toInt<int64_t>(find(currentPosKey.getStringData(), m_size));
     } else if (currentPosKey.is(KindOfInt64)) {
-      m_pos = toInt64(find(currentPosKey.getInt64(), m_size));
+      m_pos = toInt<int64_t>(find(currentPosKey.getInt64(), m_size));
     } else {
       assert(false);
     }
@@ -886,10 +886,10 @@ void ArrayShell::renumber() {
     }
     auto& k = *i++;
     if (k.isString()) {
-      fp->m_pos = toInt64(find(k.getStringData(), m_size));
+      fp->m_pos = toInt<int64_t>(find(k.getStringData(), m_size));
     } else {
       assert(k.is(KindOfInt64));
-      fp->m_pos = toInt64(find(k.getInt64(), m_size));
+      fp->m_pos = toInt<int64_t>(find(k.getInt64(), m_size));
     }
   }
   assert(i == siKeys.cend());

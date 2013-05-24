@@ -92,7 +92,7 @@ public:
   };
   static const char **GetCommands();
 
-  typedef std::vector<std::string> LiveLists[DebuggerClient::AutoCompleteCount];
+  typedef std::vector<std::string> *LiveLists;
   typedef boost::shared_ptr<LiveLists> LiveListsPtr;
   static LiveListsPtr CreateNewLiveLists() {
     return LiveListsPtr(new LiveLists[DebuggerClient::AutoCompleteCount]());

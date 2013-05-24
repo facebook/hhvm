@@ -39,7 +39,9 @@
 #include "hphp/util/stack_trace.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/repo_schema.h"
+#ifdef __linux__
 #include "hphp/runtime/base/stat_cache.h"
+#endif
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_json.h"
@@ -640,7 +642,7 @@ static int start_server(const std::string &username) {
     HttpRequestHandler handler;
     ReplayTransport rt;
     timespec start;
-    gettime(CLOCK_MONOTONIC, &start);
+    Timer::GetMonotonicTime(start);
     std::string error;
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {
@@ -1185,7 +1187,11 @@ extern "C" void hphp_fatal_error(const char *s) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
+#ifndef __APPLE__
   pthread_getattr_np(pthread_self(), &attr);
+#else
+  pthread_attr_init(&attr);
+#endif
   Util::init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
@@ -1291,7 +1297,9 @@ void hphp_session_init() {
 
   // Ordering is sensitive; StatCache::requestInit produces work that
   // must be done in VMExecutionContext::requestInit.
+#ifdef __linux__
   StatCache::requestInit();
+#endif
 
   g_vmContext->requestInit();
 }

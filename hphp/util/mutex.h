@@ -22,6 +22,10 @@
 #include <pthread.h>
 #include <time.h>
 #include "tbb/concurrent_hash_map.h"
+#ifdef __APPLE__
+#include "pthread_spin_lock_shim.h"
+#include "pthread_timed_lock_shim.h"
+#endif
 
 #include "hphp/util/rank.h"
 

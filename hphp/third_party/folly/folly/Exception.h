@@ -19,93 +19,61 @@
 
 #include <errno.h>
 
-#include <cstdio>
 #include <stdexcept>
 #include <system_error>
 
 #include "folly/Conv.h"
-#include "folly/FBString.h"
 #include "folly/Likely.h"
 #include "folly/Portability.h"
 
 namespace folly {
 
-// Various helpers to throw appropriate std::system_error exceptions from C
-// library errors (returned in errno, as positive return values (many POSIX
-// functions), or as negative return values (Linux syscalls))
-//
-// The *Explicit functions take an explicit value for errno.
-
 // Helper to throw std::system_error
-void throwSystemErrorExplicit(int err, const char*) FOLLY_NORETURN;
-inline void throwSystemErrorExplicit(int err, const char* msg) {
+void throwSystemError(int err, const char* msg) FOLLY_NORETURN;
+inline void throwSystemError(int err, const char* msg) {
   throw std::system_error(err, std::system_category(), msg);
 }
 
-template <class... Args>
-void throwSystemErrorExplicit(int, Args&&... args) FOLLY_NORETURN;
-template <class... Args>
-void throwSystemErrorExplicit(int err, Args&&... args) {
-  throwSystemErrorExplicit(
-      err, to<fbstring>(std::forward<Args>(args)...).c_str());
+// Helper to throw std::system_error from errno
+void throwSystemError(const char* msg) FOLLY_NORETURN;
+inline void throwSystemError(const char* msg) {
+  throwSystemError(errno, msg);
 }
 
 // Helper to throw std::system_error from errno and components of a string
 template <class... Args>
-void throwSystemError(Args&&... args) FOLLY_NORETURN;
+void throwSystemError(Args... args) FOLLY_NORETURN;
 template <class... Args>
-void throwSystemError(Args&&... args) {
-  throwSystemErrorExplicit(errno, std::forward<Args>(args)...);
+inline void throwSystemError(Args... args) {
+  throwSystemError(errno, folly::to<std::string>(args...));
 }
 
 // Check a Posix return code (0 on success, error number on error), throw
 // on error.
-template <class... Args>
-void checkPosixError(int err, Args&&... args) {
+inline void checkPosixError(int err, const char* msg) {
   if (UNLIKELY(err != 0)) {
-    throwSystemErrorExplicit(err, std::forward<Args>(args)...);
+    throwSystemError(err, msg);
   }
 }
 
 // Check a Linux kernel-style return code (>= 0 on success, negative error
 // number on error), throw on error.
-template <class... Args>
-void checkKernelError(ssize_t ret, Args&&... args) {
+inline void checkKernelError(ssize_t ret, const char* msg) {
   if (UNLIKELY(ret < 0)) {
-    throwSystemErrorExplicit(-ret, std::forward<Args>(args)...);
+    throwSystemError(-ret, msg);
   }
 }
 
 // Check a traditional Unix return code (-1 and sets errno on error), throw
 // on error.
-template <class... Args>
-void checkUnixError(ssize_t ret, Args&&... args) {
+inline void checkUnixError(ssize_t ret, const char* msg) {
   if (UNLIKELY(ret == -1)) {
-    throwSystemError(std::forward<Args>(args)...);
+    throwSystemError(msg);
   }
 }
-
-template <class... Args>
-void checkUnixErrorExplicit(ssize_t ret, int savedErrno, Args&&... args) {
+inline void checkUnixError(ssize_t ret, int savedErrno, const char* msg) {
   if (UNLIKELY(ret == -1)) {
-    throwSystemErrorExplicit(savedErrno, std::forward<Args>(args)...);
-  }
-}
-
-// Check the return code from a fopen-style function (returns a non-nullptr
-// FILE* on success, nullptr on error, sets errno).  Works with fopen, fdopen,
-// freopen, tmpfile, etc.
-template <class... Args>
-void checkFopenError(FILE* fp, Args&&... args) {
-  if (UNLIKELY(!fp)) {
-    throwSystemError(std::forward<Args>(args)...);
-  }
-}
-
-template <class... Args>
-void checkFopenErrorExplicit(FILE* fp, int savedErrno, Args&&... args) {
-  if (UNLIKELY(!fp)) {
-    throwSystemErrorExplicit(savedErrno, std::forward<Args>(args)...);
+    throwSystemError(savedErrno, msg);
   }
 }
 

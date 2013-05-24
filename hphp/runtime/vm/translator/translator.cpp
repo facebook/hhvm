@@ -3125,7 +3125,7 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
     FTRACE(1, "analyzeCallee: target func not known\n");
     return false;
   }
-  if (target->isBuiltin()) {
+  if (target->info()) {
     FTRACE(1, "analyzeCallee: target func is a builtin\n");
     return false;
   }
@@ -3946,6 +3946,7 @@ ActRecState::getCurrentState() {
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup) {
   if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
+  if (cls->attrs() & AttrInterface) return nullptr;
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {

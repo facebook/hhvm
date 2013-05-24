@@ -114,7 +114,7 @@ ActRec* ActRec::arGetSfp() const {
 
 bool
 ActRec::skipFrame() const {
-  return m_func && m_func->isBuiltin();
+  return m_func && m_func->skipFrame();
 }
 
 template <>
@@ -879,7 +879,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     os << ">";
   }
 
-  assert(!func->isBuiltin() || func->numIterators() == 0);
+  assert(!func->info() || func->numIterators() == 0);
   if (func->numIterators() > 0) {
     os << "|";
     Iter* it = &((Iter*)&tv[1])[-1];
@@ -1788,7 +1788,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->isBuiltin()) {
+  if (raiseMissingArgumentWarnings && !func->info()) {
     // need to sync m_pc to pc for backtraces/re-entry
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
@@ -2282,7 +2282,7 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
 void VMExecutionContext::unwindBuiltinFrame() {
   // Unwind the frame for a builtin. Currently only used for
   // hphpd_break and fb_enable_code_coverage
-  assert(m_fp->m_func->isBuiltin());
+  assert(m_fp->m_func->info());
   assert(m_fp->m_func->name()->isame(s_hphpd_break.get()) ||
          m_fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
   // Free any values that may be on the eval stack
@@ -2839,7 +2839,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
     ar->setThis(nullptr);
   }
   Func* func = unit->getMain(cls);
-  assert(!func->isBuiltin());
+  assert(!func->info());
   assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
@@ -5974,7 +5974,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassCW(PC& pc) {
     TRACE(1, "FPassCW: function %s(%d) param %d is by reference, "
           "raising a strict warning (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->isBuiltin() ? func->info()->attribute : 0);
+          func->info() ? func->info()->attribute : 0);
     raise_strict_warning("Only variables should be passed by reference");
   }
 }
@@ -5985,7 +5985,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassCE(PC& pc) {
     TRACE(1, "FPassCE: function %s(%d) param %d is by reference, "
           "throwing a fatal error (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->isBuiltin() ? func->info()->attribute : 0);
+          func->info() ? func->info()->attribute : 0);
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
 }
@@ -6200,8 +6200,8 @@ static int makeNativeRefCall(const Func* f, Ret* ret,
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   NEXT();
-  DECODE_IA(numArgs);
-  DECODE_IA(numNonDefault);
+  DECODE_IVA(numArgs);
+  DECODE_IVA(numNonDefault);
   DECODE(Id, id);
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Func* func = Unit::lookupFunc(ne);
@@ -7591,12 +7591,14 @@ void VMExecutionContext::requestInit() {
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
+    if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
     SystemLib::s_nativeFuncUnit->merge();
     SystemLib::s_nativeClassUnit->merge();
   } else {
     // System units are always merge only, and
     // everything is persistent.
     assert(SystemLib::s_unit->isEmpty());
+    assert(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
     assert(SystemLib::s_nativeFuncUnit->isEmpty());
     assert(SystemLib::s_nativeClassUnit->isEmpty());
   }

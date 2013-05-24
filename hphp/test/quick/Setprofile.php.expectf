@@ -198,11 +198,7 @@ array(3) {
       [0]=>
       array(4) {
         [0]=>
-        array(6) {
-          ["file"]=>
-          string(%d) "%S"
-          ["line"]=>
-          int(42)
+        array(4) {
           ["function"]=>
           string(9) "initTrace"
           ["class"]=>

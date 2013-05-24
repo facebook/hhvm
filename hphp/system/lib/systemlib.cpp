@@ -34,6 +34,7 @@ namespace HPHP {
 
 bool SystemLib::s_inited = false;
 HPHP::Unit* SystemLib::s_unit = nullptr;
+HPHP::Unit* SystemLib::s_hhas_unit = nullptr;
 HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
 HPHP::Func* SystemLib::s_nullFunc = nullptr;

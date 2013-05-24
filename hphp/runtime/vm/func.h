@@ -204,8 +204,8 @@ struct Func {
   void prettyPrint(std::ostream& out) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
-  bool isBuiltin() const { return (bool)info(); }
-  bool isPHPBuiltin() const;
+  bool isBuiltin() const { return m_attrs & AttrBuiltin; }
+  bool skipFrame() const { return m_attrs & AttrSkipFrame; }
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
   }
@@ -352,7 +352,8 @@ struct Func {
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
-  bool isAllowOverride() const;
+  bool isAllowOverride() const { return m_attrs & AttrAllowOverride; }
+
   const BuiltinFunction& nativeFuncPtr() const {
     return shared()->m_nativeFuncPtr;
   }

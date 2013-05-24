@@ -516,7 +516,7 @@ enum SetOpOp {
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IA,IA,SA),  FMANY,           ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),FMANY,           ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \

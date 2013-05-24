@@ -174,7 +174,7 @@ frame_free_args(TypedValue* args, int count) {
 
 Unit*
 compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
-Unit* compile_string(const char* s, size_t sz);
+Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                  ssize_t numBuiltinFuncs);
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,

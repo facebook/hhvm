@@ -129,26 +129,35 @@ struct EagerVMRegAnchor {
   }
 };
 
-static inline ActRec* regAnchorFP() {
+inline ActRec* regAnchorFP() {
   // In builtins, m_fp points to the caller's frame if called
   // through FCallBuiltin, else it points to the builtin's frame,
   // in which case, getPrevVMState() gets the caller's frame.
+  // In addition, we need to skip over php-defined builtin functions
+  // in order to find the true context.
   VMExecutionContext* context = g_vmContext;
   ActRec* cur = context->getFP();
-  if (!cur) return nullptr;
-  if (cur->skipFrame()) {
-    ActRec* prev = context->getPrevVMState(cur);
-    if (prev == cur) return nullptr;
-    return prev;
-  } else {
-    return cur;
+  while (cur && cur->skipFrame()) {
+    cur = context->getPrevVMState(cur);
   }
+  return cur;
+}
+
+inline ActRec* regAnchorFPForArgs() {
+  // Like regAnchorFP, but only account for FCallBuiltin
+  VMExecutionContext* context = g_vmContext;
+  ActRec* cur = context->getFP();
+  if (cur && cur->m_func->info()) {
+    cur = context->getPrevVMState(cur);
+  }
+  return cur;
 }
 
 struct EagerCallerFrame : public EagerVMRegAnchor {
   ActRec* operator()() {
     return regAnchorFP();
   }
+  ActRec* actRecForArgs() { return regAnchorFPForArgs(); }
 };
 
 
@@ -158,6 +167,7 @@ struct CallerFrame : public VMRegAnchor {
   ActRec* operator()() {
     return regAnchorFP();
   }
+  ActRec* actRecForArgs() { return regAnchorFPForArgs(); }
 };
 
 #define SYNC_VM_REGS_SCOPED() \

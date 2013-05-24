@@ -80,7 +80,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
   // Support for systemlib functions implemented in PHP
   if (!m_method &&
       m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
-      setAllowOverride();
+    setAllowOverride();
   }
 }
 

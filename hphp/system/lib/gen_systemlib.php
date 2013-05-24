@@ -10,12 +10,15 @@ $outputPath = $argv[1];
 function processPhpFile($phpfile, $systemlib_php) {
   $firstchar = true;
   $contents = file_get_contents($phpfile);
-  $i = 0;
-  $k = strpos($contents, "\n") + 1;
-  $header = trim(substr($contents, 0, $k));
-  if ($header !== "<?php") {
-    echo "ERROR: Unexpected header in file $phpfile\n";
-    throw new Exception("Unexpected header in file $phpfile");
+  if (preg_match('/\.hhas$/', $phpfile)) {
+    $k = 0;
+  } else {
+    $k = strpos($contents, "\n") + 1;
+    $header = trim(substr($contents, 0, $k));
+    if ($header !== "<?php") {
+      echo "ERROR: Unexpected header in file $phpfile\n";
+      throw new Exception("Unexpected header in file $phpfile");
+    }
   }
   fwrite($systemlib_php, substr($contents, $k));
 }
@@ -24,7 +27,7 @@ function populatePhpFiles($input_files) {
   $php_files = array();
   foreach ($input_files as $file) {
     $key = strtolower(basename($file));
-    if (!preg_match('/\.php$/', $file)) {
+    if (!preg_match('/\.(php|hhas)$/', $file)) {
       $errMsg = "ERROR: Encountered non-php file ($file)";
       echo $errMsg . "\n";
       throw new Exception($errMsg);
@@ -66,11 +69,20 @@ function genSystemlib($input_files) {
         unset($phpfiles[$initialFile]);
       }
     }
-    foreach ($phpfiles as $phpfile) {
-      processPhpFile($phpfile, $systemlib_php);
+    foreach ($phpfiles as $key => $phpfile) {
+      if (preg_match('/\.php$/', $phpfile)) {
+        processPhpFile($phpfile, $systemlib_php);
+        unset($phpfiles[$key]);
+      }
     }
     fwrite($systemlib_php, "\n");
-
+    if (count($phpfiles)) {
+      fwrite($systemlib_php, "\n\n<?hhas\n\n");
+      foreach ($phpfiles as $key => $phpfile) {
+        processPhpFile($phpfile, $systemlib_php);
+        unset($phpfiles[$key]);
+      }
+    }
     fclose($systemlib_php);
     $systemlib_php = null;
     chmod($systemlib_php_tempnam, 0644);

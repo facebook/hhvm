@@ -5238,6 +5238,7 @@ void EmitterVisitor::emitPostponedMeths() {
     PostponedMeth& p = m_postponedMeths.front();
     FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     FuncEmitter* fe = p.m_fe;
+    bool allowOverride = false;
     if (!fe) {
       assert(p.m_top);
       const StringData* methName =
@@ -5253,6 +5254,10 @@ void EmitterVisitor::emitPostponedMeths() {
       funcScope->userAttributes();
     for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
          it != userAttrs.end(); ++it) {
+      if (it->first == "__Overridable") {
+        allowOverride = true;
+        continue;
+      }
       const StringData* uaName = StringData::GetStaticString(it->first);
       ExpressionPtr uaValue = it->second;
       assert(uaValue);
@@ -5393,6 +5398,8 @@ void EmitterVisitor::emitPostponedMeths() {
       StringData::GetStaticString(p.m_meth->getDocComment());
     ModifierExpressionPtr mod(p.m_meth->getModifiers());
     Attr attrs = buildAttrs(mod, p.m_meth->isRef());
+
+    if (allowOverride) attrs = attrs | AttrAllowOverride;
 
     if (funcScope->mayUseVV()) {
       attrs = attrs | AttrMayUseVV;
@@ -5925,6 +5932,10 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
     // in sandbox mode, don't emit FCallBuiltin for redefinable functions
     if (func->allowOverride() && !Option::WholeProgram) {
       return false;
+    }
+
+    if (Func* f = Unit::lookupFunc(StringData::GetStaticString(name))) {
+      if (!f->info()) return false;
     }
     return true;
   }
@@ -6974,20 +6985,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   MD5 md5("11111111111111111111111111111111");
   UnitEmitter* ue = new UnitEmitter(md5);
   ue->setFilepath(StringData::GetStaticString(""));
-  ue->initMain(0, 0);
-  FuncEmitter* mfe = ue->getMain();
-  ue->emitOp(OpInt);
-  ue->emitInt64(1);
-  ue->emitOp(OpRetC);
-  mfe->setMaxStackCells(1);
-  mfe->finish(ue->bcPos(), false);
-  ue->recordFunction(mfe);
-
-  TypedValue mainReturn;
-  mainReturn.m_data.num = 1;
-  mainReturn.m_type = KindOfInt64;
-  ue->setMainReturn(&mainReturn);
-  ue->setMergeOnly(true);
+  ue->addTrivialPseudoMain();
 
   /*
     Special function used by FPushCuf* when its argument
@@ -7011,6 +7009,11 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
+    if (Unit::lookupFunc(name)) {
+      // already provided by systemlib, rename to allow the php
+      // version to delegate if necessary
+      name = StringData::GetStaticString("__builtin_" + name->toCPPString());
+    }
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
@@ -7097,21 +7100,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
   UnitEmitter* ue = new UnitEmitter(md5);
   ue->setFilepath(StringData::GetStaticString(""));
-  ue->initMain(0, 0);
-  FuncEmitter* mfe = ue->getMain();
-  ue->emitOp(OpInt);
-  ue->emitInt64(1);
-  ue->emitOp(OpRetC);
-  Offset past = ue->bcPos();
-  mfe->setMaxStackCells(1);
-  mfe->finish(past, false);
-  ue->recordFunction(mfe);
-
-  TypedValue mainReturn;
-  mainReturn.m_data.num = 1;
-  mainReturn.m_type = KindOfInt64;
-  ue->setMainReturn(&mainReturn);
-  ue->setMergeOnly(true);
+  ue->addTrivialPseudoMain();
 
   MetaInfoBuilder metaInfo;
 
@@ -7400,41 +7389,6 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   ues.clear();
 }
 
-static void emitSystemLib() {
-  if (!Option::WholeProgram) return;
-
-  string slib = get_systemlib();
-  if (slib.empty()) return;
-
-  Option::WholeProgram = false;
-  SystemLib::s_inited = false;
-
-  SCOPE_EXIT {
-    SystemLib::s_inited = true;
-    Option::WholeProgram = true;
-  };
-
-  AnalysisResultPtr ar(new AnalysisResult());
-  Scanner scanner(slib.c_str(), slib.size(),
-                  RuntimeOption::GetScannerType(), "/:systemlib.php");
-  Parser parser(scanner, "/:systemlib.php", ar, slib.size());
-  parser.parse();
-  FileScopePtr fsp = parser.getFileScope();
-  fsp->setOuterScope(ar);
-
-  ar->loadBuiltins();
-  ar->setPhase(AnalysisResult::AnalyzeAll);
-  fsp->analyzeProgram(ar);
-
-  int md5len;
-  char* md5str = string_md5(slib.c_str(), slib.size(), false, md5len);
-  MD5 md5(md5str);
-  free(md5str);
-
-  UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
-  Repo::get().commitUnit(ue, UnitOriginFile);
-}
-
 /**
  * This is the entry point for offline bytecode generation.
  */
@@ -7489,8 +7443,6 @@ void emitAllHHBC(AnalysisResultPtr ar) {
         break;
       }
     }
-
-    emitSystemLib();
   } else {
     dispatcher.waitEmpty();
   }
@@ -7537,6 +7489,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
     SCOPE_EXIT { SymbolTable::Purge(); };
 
+    UnitEmitter* ue = nullptr;
     // Check if this file contains raw hip hop bytecode instead of php.
     // For now this is just dictated by file extension, and doesn't ever
     // commit to the repo.
@@ -7544,23 +7497,25 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          return assemble_file(filename, md5);
+          ue = assemble_string(code, codeLen, filename, md5);
         }
       }
     }
 
-    AnalysisResultPtr ar(new AnalysisResult());
-    Scanner scanner(code, codeLen, RuntimeOption::GetScannerType(), filename);
-    Parser parser(scanner, filename, ar, codeLen);
-    parser.parse();
-    FileScopePtr fsp = parser.getFileScope();
-    fsp->setOuterScope(ar);
+    if (!ue) {
+      AnalysisResultPtr ar(new AnalysisResult());
+      Scanner scanner(code, codeLen, RuntimeOption::GetScannerType(), filename);
+      Parser parser(scanner, filename, ar, codeLen);
+      parser.parse();
+      FileScopePtr fsp = parser.getFileScope();
+      fsp->setOuterScope(ar);
 
-    ar->loadBuiltins();
-    ar->setPhase(AnalysisResult::AnalyzeAll);
-    fsp->analyzeProgram(ar);
+      ar->loadBuiltins();
+      ar->setPhase(AnalysisResult::AnalyzeAll);
+      fsp->analyzeProgram(ar);
 
-    UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
+      ue = emitHHBCUnitEmitter(ar, fsp, md5);
+    }
     Repo::get().commitUnit(ue, unitOrigin);
     Unit* unit = ue->create();
     delete ue;

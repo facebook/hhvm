@@ -181,7 +181,7 @@ Array Unit::getUserFunctions() {
     for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
-      if (!func_ || func_->isBuiltin() || func_->isPHPBuiltin() ||
+      if (!func_ || func_->isBuiltin() ||
           isdigit(func_->name()->data()[0])) {
         continue;
       }
@@ -2236,6 +2236,23 @@ UnitEmitter::~UnitEmitter() {
   }
 }
 
+void UnitEmitter::addTrivialPseudoMain() {
+  initMain(0, 0);
+  FuncEmitter* mfe = getMain();
+  emitOp(OpInt);
+  emitInt64(1);
+  emitOp(OpRetC);
+  mfe->setMaxStackCells(1);
+  mfe->finish(bcPos(), false);
+  recordFunction(mfe);
+
+  TypedValue mainReturn;
+  mainReturn.m_data.num = 1;
+  mainReturn.m_type = KindOfInt64;
+  setMainReturn(&mainReturn);
+  setMergeOnly(true);
+}
+
 void UnitEmitter::setBc(const uchar* bc, size_t bclen) {
   m_bc = (uchar*)malloc(bclen);
   m_bcmax = bclen;
@@ -2277,6 +2294,7 @@ Id UnitEmitter::addPreConst(const StringData* name, const TypedValue& value) {
   m_preConsts.push_back(pc);
   return id;
 }
+
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   LitstrMap::const_iterator it = m_litstr2id.find(litstr);

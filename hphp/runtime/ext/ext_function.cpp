@@ -276,7 +276,7 @@ String f_create_function(CStrRef args, CStrRef code) {
 
 Variant f_func_get_arg(int arg_num) {
   CallerFrame cf;
-  ActRec* ar = cf();
+  ActRec* ar = cf.actRecForArgs();
 
   if (ar == NULL) {
     return false;
@@ -367,7 +367,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
 
 Variant f_func_get_args() {
   EagerCallerFrame cf;
-  ActRec* ar = cf();
+  ActRec* ar = cf.actRecForArgs();
   if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
     raise_warning(
       "func_get_args():  Called from the global scope - no function context"
@@ -399,7 +399,7 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
 
 int64_t f_func_num_args() {
   EagerCallerFrame cf;
-  ActRec* ar = cf();
+  ActRec* ar = cf.actRecForArgs();
   if (ar == NULL) {
     return -1;
   }

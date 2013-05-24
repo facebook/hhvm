@@ -39,10 +39,6 @@ static const Trace::Module TRACEMOD = Trace::bcinterp;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");
-static const StringData* sd___overridable =
-  StringData::GetStaticString("__Overridable");
-static const StringData* sd___PHPBuiltin =
-  StringData::GetStaticString("__PHPBuiltin");
 
 //=============================================================================
 // Func.
@@ -394,7 +390,7 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
 bool Func::byRef(int32_t arg) const {
   // Super special case. A handful of builtins are varargs functions where the
   // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
-  if (arg >= m_numParams && isBuiltin() &&
+  if (arg >= m_numParams && info() &&
       (info()->attribute & (ClassInfo::RefVariableArguments |
                             ClassInfo::MixedVariableArguments))) {
     return true;
@@ -408,7 +404,7 @@ bool Func::byRef(int32_t arg) const {
 bool Func::mustBeRef(int32_t arg) const {
   // return true if the argument is required to be a reference
   // (and thus should be an lvalue)
-  if (arg >= m_numParams && isBuiltin() &&
+  if (arg >= m_numParams && info() &&
       ((info()->attribute & (ClassInfo::RefVariableArguments |
                              ClassInfo::MixedVariableArguments)) ==
                                ClassInfo::RefVariableArguments)) {
@@ -512,11 +508,6 @@ void Func::prettyPrint(std::ostream& out) const {
     }
     out << std::endl;
   }
-}
-
-bool Func::isPHPBuiltin() const {
-  return shared()->m_userAttributes.find(sd___PHPBuiltin) !=
-         shared()->m_userAttributes.end();
 }
 
 HphpArray* Func::getStaticLocals() const {
@@ -667,13 +658,6 @@ void Func::setCached() {
   setCachedFunc(this, isDebuggerAttached());
 }
 
-bool Func::isAllowOverride() const {
-  return (shared()->m_info &&
-    (shared()->m_info->attribute & ClassInfo::AllowOverride)) ||
-    (shared()->m_userAttributes.find(sd___overridable) !=
-     shared()->m_userAttributes.end());
-}
-
 const Func* Func::getGeneratorBody(const StringData* name) const {
   if (isNonClosureMethod()) {
     return cls()->lookupMethod(name);
@@ -744,6 +728,10 @@ void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
   m_attrs = attrs;
   m_top = top;
   m_docComment = docComment;
+  if (!SystemLib::s_inited) {
+    m_attrs = m_attrs | AttrBuiltin;
+    if (!pce()) m_attrs = m_attrs | AttrSkipFrame;
+  }
 }
 
 void FuncEmitter::finish(Offset past, bool load) {
@@ -989,37 +977,39 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   m_docComment = StringData::GetStaticString(info->docComment);
   m_line1 = 0;
   m_line2 = 0;
-  m_attrs = AttrNone;
+  m_attrs = AttrBuiltin | AttrSkipFrame;
   // TODO: Task #1137917: See if we can avoid marking most builtins with
   // "MayUseVV" and still make things work
-  m_attrs = (Attr)(m_attrs | AttrMayUseVV);
+  m_attrs = m_attrs | AttrMayUseVV;
   if (info->attribute & (ClassInfo::RefVariableArguments |
                          ClassInfo::MixedVariableArguments)) {
-    m_attrs = Attr(m_attrs | AttrVariadicByRef);
+    m_attrs = m_attrs | AttrVariadicByRef;
   }
   if (info->attribute & ClassInfo::IsReference) {
-    m_attrs = (Attr)(m_attrs | AttrReference);
+    m_attrs = m_attrs | AttrReference;
   }
   if (info->attribute & ClassInfo::NoInjection) {
-    m_attrs = (Attr)(m_attrs | AttrNoInjection);
+    m_attrs = m_attrs | AttrNoInjection;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {
-      m_attrs = (Attr)(m_attrs | AttrStatic);
+      m_attrs = m_attrs | AttrStatic;
     }
     if (info->attribute & ClassInfo::IsFinal) {
-      m_attrs = (Attr)(m_attrs | AttrFinal);
+      m_attrs = m_attrs | AttrFinal;
     }
     if (info->attribute & ClassInfo::IsAbstract) {
-      m_attrs = (Attr)(m_attrs | AttrAbstract);
+      m_attrs = m_attrs | AttrAbstract;
     }
     if (info->attribute & ClassInfo::IsPrivate) {
-      m_attrs = (Attr)(m_attrs | AttrPrivate);
+      m_attrs = m_attrs | AttrPrivate;
     } else if (info->attribute & ClassInfo::IsProtected) {
-      m_attrs = (Attr)(m_attrs | AttrProtected);
+      m_attrs = m_attrs | AttrProtected;
     } else {
-      m_attrs = (Attr)(m_attrs | AttrPublic);
+      m_attrs = m_attrs | AttrPublic;
     }
+  } else if (info->attribute & ClassInfo::AllowOverride) {
+    m_attrs = m_attrs | AttrAllowOverride;
   }
 
   m_returnType = info->returnType;

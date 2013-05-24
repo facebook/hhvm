@@ -837,6 +837,9 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
+
+  // Turn off commits, because we don't want systemlib to get included
+  RuntimeOption::RepoCommit = false;
 }
 
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
@@ -868,7 +871,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
-
+  RuntimeOption::RepoCommit = true;
   Option::AutoInline = -1;
 
   if (po.optimizeLevel > 0) {

@@ -75,6 +75,8 @@
  * @author Jorden DeLong <delong.j@fb.com>
  */
 
+#include "hphp/runtime/vm/as.h"
+
 #include <cstdio>
 #include <iostream>
 #include <algorithm>
@@ -90,6 +92,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/system/lib/systemlib.h"
 
 TRACE_SET_MOD(hhas);
 
@@ -944,9 +947,11 @@ OpcodeParserMap opcode_parsers;
 #define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
 // FCall and NewTuple need to know the the first imm do POP_*MANY.
-#define IMM_IVA                                   \
-  immIVA = read_opcode_arg<int64_t>(as);          \
-  as.ue->emitIVA(immIVA);                         \
+#define IMM_IVA do {                            \
+    int imm = read_opcode_arg<int64_t>(as);     \
+    as.ue->emitIVA(imm);                        \
+    if (immIVA < 0) immIVA = imm;               \
+  } while (0)
 
 #define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
 #define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
@@ -1294,10 +1299,15 @@ enum AttrContext {
 };
 Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
   as.in.skipWhitespace();
-  if (as.in.peek() != '[') return AttrNone;
+  int ret = AttrNone;
+  if (ctx == ClassAttributes || ctx == FuncAttributes) {
+    if (!SystemLib::s_inited) {
+      ret |= AttrUnique | AttrPersistent;
+    }
+  }
+  if (as.in.peek() != '[') return Attr(ret);
   as.in.getc();
 
-  int ret = AttrNone;
   std::string word;
   for (;;) {
     as.in.skipWhitespace();
@@ -1752,6 +1762,13 @@ void parse_class(AsmState& as) {
  *                ;
  */
 void parse_main(AsmState& as) {
+  if (as.emittedPseudoMain) {
+    if (!SystemLib::s_inited) {
+      as.error(".main found in systemlib");
+    } else {
+      as.error("Multiple .main directives found");
+    }
+  }
   as.in.expectWs('{');
 
   as.ue->initMain(as.in.getLineNumber(),
@@ -1801,6 +1818,17 @@ void parse_adata(AsmState& as) {
 void parse(AsmState& as) {
   as.in.skipWhitespace();
   std::string directive;
+  if (!SystemLib::s_inited) {
+    /*
+     * The SystemLib::s_hhas_unit is required to be merge-only,
+     * and we create the source by concatenating separate .hhas files
+     * Rather than choosing one to have the .main directive, we just
+     * generate a trivial pseudoMain automatically.
+     */
+    as.ue->addTrivialPseudoMain();
+    as.emittedPseudoMain = true;
+  }
+
   while (as.in.readword(directive)) {
     if (directive == ".main")        { parse_main(as);     continue; }
     if (directive == ".function")    { parse_function(as); continue; }
@@ -1819,17 +1847,14 @@ void parse(AsmState& as) {
 
 //////////////////////////////////////////////////////////////////////
 
-Unit* assemble_file(const char* filename, const MD5& md5) {
-  boost::scoped_ptr<UnitEmitter> ue(new UnitEmitter(md5));
+UnitEmitter* assemble_string(const char*code, int codeLen,
+                             const char* filename, const MD5& md5) {
+  std::unique_ptr<UnitEmitter> ue(new UnitEmitter(md5));
   StringData* sd = StringData::GetStaticString(filename);
   ue->setFilepath(sd);
 
   try {
-    std::ifstream instr(filename);
-    if (!instr.is_open()) {
-      throw std::runtime_error(std::string("couldn't open file ") +
-            filename + ": " + strerror(errno));
-    }
+    std::istringstream instr(string(code, codeLen));
     AsmState as(instr);
     as.ue = ue.get();
     parse(as);
@@ -1847,7 +1872,7 @@ Unit* assemble_file(const char* filename, const MD5& md5) {
     ue->recordFunction(fe);
   }
 
-  return ue->create();
+  return ue.release();
 }
 
 //////////////////////////////////////////////////////////////////////

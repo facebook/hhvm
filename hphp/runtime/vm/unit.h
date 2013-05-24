@@ -717,6 +717,7 @@ class UnitEmitter {
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
+  void addTrivialPseudoMain();
   int repoId() const { return m_repoId; }
   void setRepoId(int repoId) { m_repoId = repoId; }
   int64_t sn() const { return m_sn; }

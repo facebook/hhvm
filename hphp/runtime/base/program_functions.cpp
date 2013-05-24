@@ -1151,16 +1151,26 @@ String canonicalize_path(CStrRef p, const char* root, int rootLen) {
   return path;
 }
 
+static string systemlib_split(string slib, string* hhas) {
+  auto pos = slib.find("\n<?hhas\n");
+  if (pos != string::npos) {
+    if (hhas) *hhas = slib.substr(pos + 8);
+    return slib.substr(0, pos);
+  }
+  return slib;
+}
+
 // Search for systemlib.php in the following places:
 // 1) ${HHVM_SYSTEMLIB}
 // 2) section "systemlib" in the current executable
 // and return its contents
-string get_systemlib() {
+string get_systemlib(string* hhas) {
   if (char *file = getenv("HHVM_SYSTEMLIB")) {
     std::ifstream ifs(file);
     if (ifs.good()) {
-      return std::string(std::istreambuf_iterator<char>(ifs),
-                         std::istreambuf_iterator<char>());
+      return systemlib_split(std::string(
+                               std::istreambuf_iterator<char>(ifs),
+                               std::istreambuf_iterator<char>()), hhas);
     }
   }
 
@@ -1172,8 +1182,7 @@ string get_systemlib() {
   ifs.seekg(desc.m_start, std::ios::beg);
   std::unique_ptr<char[]> data(new char[desc.m_len]);
   ifs.read(data.get(), desc.m_len);
-  string result(data.get(), desc.m_len);
-  return result;
+  return systemlib_split(string(data.get(), desc.m_len), hhas);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

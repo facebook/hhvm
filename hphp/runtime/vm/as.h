@@ -21,16 +21,17 @@
 
 namespace HPHP {
 
-class Unit;
+class UnitEmitter;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Assemble the contents of `filename' and return a Unit.
+ * Assemble the contents of `filename' and return a UnitEmitter.
  *
  * Minimal documentation is available in as.cpp.
  */
-Unit* assemble_file(const char* filename, const MD5&);
+UnitEmitter* assemble_string(const char* code, int codeLen,
+                             const char* filename, const MD5&);
 
 //////////////////////////////////////////////////////////////////////
 

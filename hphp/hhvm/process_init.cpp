@@ -105,47 +105,39 @@ void ProcessInit() {
   int db = RuntimeOption::EvalDumpBytecode;
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
+  bool ah = RuntimeOption::EvalAllowHhas;
   RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
+  RuntimeOption::EvalAllowHhas = true;
 
   Transl::TargetCache::requestInit();
 
-  Unit* nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
-                                                hhbc_ext_funcs_count);
-  SystemLib::s_nativeFuncUnit = nativeFuncUnit;
   String currentDir = g_vmContext->getCwd();
 
-  if (RuntimeOption::RepoAuthoritative) {
-    auto file = g_vmContext->lookupPhpFile(String("/:systemlib.php").get(),
-                                         currentDir.data(), nullptr);
-    if (!file) {
-      // Die a horrible death.
-      Logger::Error("Unable to find/load systemlib.php");
-      _exit(1);
-    }
-    file->incRef();
-    SystemLib::s_unit = file->unit();
-  } else {
-    string slib = get_systemlib();
+  string hhas;
+  string slib = get_systemlib(&hhas);
 
-    if (slib.empty()) {
-      // Die a horrible death.
-      Logger::Error("Unable to find/load systemlib.php");
-      _exit(1);
-    }
-    SystemLib::s_unit = compile_string(slib.c_str(), slib.size());
+  if (slib.empty()) {
+    // Die a horrible death.
+    Logger::Error("Unable to find/load systemlib.php");
+    _exit(1);
   }
-
-  // Restore most settings before merging anything,
-  // because of optimizations that depend on them
-  RuntimeOption::AlwaysUseRelativePath = rp;
-  RuntimeOption::SafeFileAccess = sf;
+  SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
+                                     "systemlib.php");
+  if (!hhas.empty()) {
+    SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
+                                            "systemlib.hhas");
+  }
 
   // Load the systemlib unit to build the Class objects
   SystemLib::s_unit->merge();
+  if (SystemLib::s_hhas_unit) {
+    SystemLib::s_hhas_unit->merge();
+  }
 
-  // load builtins
+  SystemLib::s_nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
+                                                       hhbc_ext_funcs_count);
   SystemLib::s_nativeFuncUnit->merge();
   SystemLib::s_nullFunc =
     Unit::lookupFunc(StringData::GetStaticString("86null"));
@@ -188,8 +180,10 @@ void ProcessInit() {
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;
 
-  // Restore last to avoid dumping system things
+  RuntimeOption::AlwaysUseRelativePath = rp;
+  RuntimeOption::SafeFileAccess = sf;
   RuntimeOption::EvalDumpBytecode = db;
+  RuntimeOption::EvalAllowHhas = ah;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

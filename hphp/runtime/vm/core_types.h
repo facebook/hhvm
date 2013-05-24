@@ -97,6 +97,15 @@ const Slot kInvalidSlot = Slot(-1);
  * to other php functions.  It may still call other user-level
  * functions via re-entry (e.g. for destructors or autoload), and it
  * may make calls to builtins using FCallBuiltin.
+ *
+ * AttrBuiltin is set on builtin functions - whether c++ or php
+ *
+ * AttrAllowOverride is set on builtin functions that can be replaced
+ *   by user implementations
+ *
+ * AttrSkipFrame is set to indicate that the frame should be ignored
+ *   when searching for the context (eg array_map evaluates its
+ *   callback in the context of its caller).
  */
 enum Attr {
   AttrNone      = 0,             // class  property  method  //
@@ -121,6 +130,9 @@ enum Attr {
   AttrPersistent= (1 << 17),     //    X                X    //
   AttrDeepInit = (1 << 18),      //            X             //
   AttrHot = (1 << 19),           //                     X    //
+  AttrBuiltin = (1 << 20),       //                     X    //
+  AttrAllowOverride = (1 << 21), //                     X    //
+  AttrSkipFrame = (1 << 22),     //                     X    //
 };
 
 static inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

@@ -2284,7 +2284,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   Fixup fixup(funcBody.m_offset - func->base(), frameCells);
 
   // Emit warnings for any missing arguments
-  if (!func->isBuiltin()) {
+  if (!func->info()) {
     for (int i = nPassed; i < numParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
         emitImmReg(a, (intptr_t)func->name()->data(), argNumToRegName[0]);
@@ -2315,7 +2315,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
 static bool
 isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->isBuiltin() && numArgs == funcd->numParams();
+  return funcd && funcd->info() && numArgs == funcd->numParams();
 }
 
 int32_t // returns the amount by which rVmSp should be adjusted
@@ -6626,17 +6626,19 @@ bool TranslatorX64::eagerRecord(const Func* func) {
     "func_num_args",
     "array_filter",
     "array_map",
+    "WaitHandle::join",
   };
 
+  assert(func->info());
+
+  const StringData* name = func->isMethod() ?
+    func->fullName() : func->info()->name.get();
   for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
-    if (!strcmp(func->name()->data(), list[i])) {
+    if (!strcmp(name->data(), list[i])) {
       return true;
     }
   }
-  if (func->cls() && !strcmp(func->cls()->name()->data(), "WaitHandle")
-      && !strcmp(func->name()->data(), "join")) {
-    return true;
-  }
+
   return false;
 }
 
@@ -6680,7 +6682,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    * contains only a single opcode (NativeImpl), and there are no
    * non-argument locals.
    */
-  assert(func->numIterators() == 0 && func->isBuiltin());
+  assert(func->numIterators() == 0 && func->info());
   assert(func->numLocals() == func->numParams());
   assert(*func->getEntry() == OpNativeImpl);
   assert(instrLen(func->getEntry()) == func->past() - func->base());
@@ -9681,7 +9683,7 @@ void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
 void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
                                           const NormalizedInstruction& ni) {
   int numArgs = ni.imm[0].u_IVA;
-  int numNonDefault = ni.imm[1].u_IA;
+  int numNonDefault = ni.imm[1].u_IVA;
   Id funcId = ni.imm[2].u_SA;
   const NamedEntity* ne = curUnit()->lookupNamedEntityId(funcId);
   const Func* func = Unit::lookupFunc(ne);

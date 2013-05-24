@@ -27,7 +27,12 @@ namespace JIT {
 static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assert(!definer->isBlockEnd());
   Block* block = definer->getBlock();
-  auto pos = block->iteratorTo(definer); ++pos;
+  auto pos = block->iteratorTo(definer);
+  if (pos->op() == DefLabel) {
+    ++pos;
+    assert(pos != block->end() && pos->op() == Marker);
+  }
+  ++pos;
   block->insert(pos, inst);
 }
 
@@ -100,43 +105,50 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
 
   auto finishPass = [&](const char* msg) {
-    dumpTrace(6, trace, msg);
-    assert(JIT::checkCfg(trace, *irFactory));
+    dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
+    assert(checkCfg(trace, *irFactory));
+    assert(checkTmpsSpanningCalls(trace, *irFactory));
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  if (RuntimeOption::EvalHHIRMemOpt) {
-    optimizeMemoryAccesses(trace, irFactory);
-    finishPass("after MemeLim");
-  }
+  auto doPass = [&](void (*fn)(Trace*, IRFactory*),
+                    const char* msg) {
+    fn(trace, irFactory);
+    finishPass(msg);
+  };
 
-  if (RuntimeOption::EvalHHIRDeadCodeElim) {
+  auto dce = [&](const char* which) {
+    if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
     eliminateDeadCode(trace, irFactory);
-    finishPass("after DCE");
+    finishPass(folly::format("after {} DCE", which).str().c_str());
+  };
+
+  if (false && RuntimeOption::EvalHHIRMemOpt) {
+    doPass(optimizeMemoryAccesses, "MemeLim");
+  }
+  dce("initial");
+  if (RuntimeOption::EvalHHIRPredictionOpts) {
+    doPass(optimizePredictions, "prediction opts");
   }
 
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
     traceBuilder->reoptimize();
-    finishPass("after CSE/Simplification");
+    finishPass("after reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary
-    if (RuntimeOption::EvalHHIRDeadCodeElim) {
-      eliminateDeadCode(trace, irFactory);
-      finishPass("after DCE");
-    }
+    dce("reoptimize");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {
-    optimizeJumps(trace, irFactory);
-    finishPass("jump opts");
+    doPass(optimizeJumps, "jumpopts");
+    dce("jump opts");
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    insertAsserts(trace, irFactory);
-    finishPass("RefCnt asserts");
+    doPass(insertAsserts, "RefCnt asserts");
   }
 }
 

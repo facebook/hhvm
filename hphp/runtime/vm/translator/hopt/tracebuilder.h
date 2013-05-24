@@ -19,13 +19,14 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include "folly/ScopeGuard.h"
+#include "folly/Optional.h"
+
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/cse.h"
 #include "hphp/runtime/vm/translator/hopt/simplifier.h"
 #include "hphp/runtime/vm/translator/hopt/state_vector.h"
-
-#include "folly/ScopeGuard.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -89,20 +90,10 @@ namespace HPHP {  namespace JIT {
  */
 struct TraceBuilder {
   TraceBuilder(Offset initialBcOffset,
-               uint32_t initialSpOffsetFromFp,
+               Offset initialSpOffsetFromFp,
                IRFactory&,
                const Func* func);
   ~TraceBuilder();
-
-  void beginInlining(const Func* target,
-                     SSATmp* calleeFP,
-                     SSATmp* calleeSP,
-                     SSATmp* prevSP,
-                     int32_t prevSPOff);
-  void endInlining();
-
-  // XXX: Accessible for inlining, for now.
-  void setLocalValue(unsigned id, SSATmp* value);
 
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
@@ -113,10 +104,6 @@ struct TraceBuilder {
   SSATmp* getSp() const { return m_spValue; }
   SSATmp* getFp() const { return m_fpValue; }
 
-  Trace* makeExitTrace(uint32_t bcOff) {
-    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
-                                           bcOff));
-  }
   bool isThisAvailable() const {
     return m_thisIsAvailable;
   }
@@ -146,12 +133,16 @@ struct TraceBuilder {
   /*
    * Create an IRInstruction, similar to gen(), except link it into
    * the Trace t instead of the current main trace.
+   *
+   * Also does not run optimization passes.
+   *
+   * TODO(#2404447): run simplifier?
    */
   template<class... Args>
-  IRInstruction* genFor(Trace* t, Args... args) {
+  SSATmp* genFor(Trace* t, Args... args) {
     auto instr = m_irFactory.gen(args...);
     t->back()->push_back(instr);
-    return instr;
+    return instr->getDst();
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -174,8 +165,8 @@ struct TraceBuilder {
     return gen(DefConst, type, ConstData(val));
   }
 
-  SSATmp* cns(Type t) {
-    return gen(DefConst, t, ConstData(0));
+  SSATmp* cns(Type type) {
+    return gen(DefConst, type, ConstData(0));
   }
 
   template<typename T>
@@ -185,8 +176,6 @@ struct TraceBuilder {
 
   //////////////////////////////////////////////////////////////////////
   // control flow
-
-  typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;
 
   // hint the execution frequency of the current block
   void hint(Block::Hint h) const {
@@ -236,22 +225,6 @@ struct TraceBuilder {
   }
 
   /*
-   * ifThenExit produces a conditional exit with user-supplied logic
-   * if the exit is taken.
-   */
-  Trace* ifThenExit(const Func* func,
-                    int stackDeficit,
-                    const std::vector<SSATmp*> &stackValues,
-                    ExitTraceCallback exit,
-                    Offset exitBcOff,
-                    Offset bcOff) {
-    return genExitTrace(exitBcOff, stackDeficit,
-                        stackValues.size(),
-                        stackValues.size() ? &stackValues[0] : nullptr,
-                        TraceExitType::NormalCc, bcOff /* notTakenOff */, exit);
-  }
-
-  /*
    * ifElse generates if-then-else blocks with an empty 'then' block
    * that do not produce values. Code emitted in the next lambda will
    * be executed iff the branch emitted in the branch lambda is not
@@ -267,37 +240,15 @@ struct TraceBuilder {
     appendBlock(done_block);
   }
 
-  Trace* getExitSlowTrace(uint32_t bcOff,
-                          int32_t stackDeficit,
-                          uint32_t numOpnds,
-                          SSATmp** opnds);
-
   /*
-   * Generates a trace exit that can be the target of a conditional
-   * or unconditional control flow instruction from the main trace.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
+   * Create a new "exit trace".  This is a Trace that is assumed to be
+   * a cold path, which always exits the tracelet without control flow
+   * rejoining the main line.
    */
-  Trace* genExitTrace(uint32_t bcOff,
-                      int32_t  stackDeficit,
-                      uint32_t numOpnds,
-                      SSATmp* const* opnds,
-                      TraceExitType::ExitType,
-                      uint32_t notTakenBcOff = 0,
-                      ExitTraceCallback beforeExit = ExitTraceCallback());
-
-  /*
-   * Generates a target exit trace for GuardFailure exits.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
-   */
-  Trace* genExitGuardFailure(uint32_t off);
-
-  // generates the ExitTrace instruction at the end of a trace
-  void genTraceEnd(uint32_t nextPc,
-                   TraceExitType::ExitType exitType = TraceExitType::Normal);
+  Trace* makeExitTrace(uint32_t bcOff) {
+    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
+                                           bcOff));
+  }
 
 private:
   // RAII disable of CSE; only restores if it used to be on.  Used for
@@ -330,10 +281,11 @@ private:
     std::vector<Type> localTypes;
     SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
+    MarkerData lastMarker;
   };
 
 private:
-  SSATmp*   preOptimizeGuardLoc(IRInstruction*);
+  SSATmp*   preOptimizeCheckLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
@@ -362,11 +314,14 @@ private:
   void      killLocalValue(uint32_t id);
   void      setLocalType(uint32_t id, Type type);
   Type      getLocalType(unsigned id) const;
+  void      setLocalValue(unsigned id, SSATmp* value);
   SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
-  bool      callerLocalHasValue(SSATmp*) const;
+  bool      callerHasValueAvailable(SSATmp*) const;
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
+  void      trackDefInlineFP(IRInstruction* inst);
+  void      trackInlineReturn(IRInstruction* inst);
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
   void      dropLocalRefsInnerTypes();
@@ -386,7 +341,6 @@ private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
-  Offset const m_initialBcOff; // offset of initial bytecode in trace
   boost::scoped_ptr<Trace> const m_trace; // generated trace
 
   // Flags that enable optimizations
@@ -446,6 +400,9 @@ private:
   // DecRefNZ transformations due to locals of the caller for an
   // inlined call.
   std::vector<SSATmp*> m_callerAvailableValues;
+
+  // The data for the last Marker instruction we've seen.
+  folly::Optional<MarkerData> m_lastMarker;
 
   // When we're building traces for an inlined callee, the state of
   // the caller needs to be preserved here.

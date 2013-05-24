@@ -46,7 +46,6 @@ Address allocSlab(size_t size) {
     panic("%s:%d: (%s) map of %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__, size, strerror(errno));
   }
-  hintHuge(result, size);
   return result;
 }
 

@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
+
+#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/variable_serializer.h"
@@ -48,21 +49,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-static StaticString s_offsetExists("offsetExists");
-static StaticString s___autoload("__autoload");
-static StaticString s___call("__call");
-static StaticString s___callStatic("__callStatic");
-static StaticString s_exception("exception");
-static StaticString s_previous("previous");
+const StaticString s_offsetExists("offsetExists");
+const StaticString s___autoload("__autoload");
+const StaticString s___call("__call");
+const StaticString s___callStatic("__callStatic");
+const StaticString s_exception("exception");
+const StaticString s_previous("previous");
 
-StaticString s_self("self");
-StaticString s_parent("parent");
-StaticString s_static("static");
-StaticString s_class("class");
-StaticString s_function("function");
-StaticString s_constant("constant");
-StaticString s_type("type");
-StaticString s_failure("failure");
+const StaticString s_self("self");
+const StaticString s_parent("parent");
+const StaticString s_static("static");
+const StaticString s_class("class");
+const StaticString s_function("function");
+const StaticString s_constant("constant");
+const StaticString s_type("type");
+const StaticString s_failure("failure");
+
+const StaticString s_Traversable("Traversable");
+const StaticString s_KeyedTraversable("KeyedTraversable");
+const StaticString s_Indexish("Indexish");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -453,7 +458,7 @@ void throw_collection_modified() {
 
 void throw_collection_property_exception() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Cannot access property on a collection"));
+    "Cannot access a property on a collection"));
   throw e;
 }
 
@@ -979,6 +984,19 @@ bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   return false;
 }
 
+bool interface_supports_array(const StringData* s) {
+  return (s->isame(s_Traversable.get()) ||
+          s->isame(s_KeyedTraversable.get()) ||
+          s->isame(s_Indexish.get()));
+}
+
+bool interface_supports_array(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 11 && !strcasecmp(s, "Traversable")) ||
+          (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")));
+}
+
 String get_source_filename(litstr path, bool dir_component /* = false */) {
   String ret;
   if (path[0] == '/') {
@@ -1018,27 +1036,7 @@ Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
   if (invoke_file_impl(r, s, once, currentDir)) {
     return r;
   }
-  if (!s.empty()) {
-    return throw_missing_file(s.c_str());
-  }
-  // The gross hack which follows is here so that "hhvm foo.php" works
-  // the same as "hhvm -f foo.php".
-  // TODO Task #2171414: Find a less hacky way to accomplish this; we probably
-  // should be handling this elsewhere at a higher level rather than within
-  // the bowels of the invoke/include machinery
-  SystemGlobals* g = (SystemGlobals*)get_global_variables();
-  Variant& v_argc = g->GV(argc);
-  Variant& v_argv = g->GV(argv);
-  if (!more(v_argc, int64_t(1))) {
-    return true;
-  }
-  v_argc--;
-  v_argv.dequeue();
-  String s2 = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
-  if (invoke_file_impl(r, s2, once, "")) {
-    return r;
-  }
-  return throw_missing_file(s2.c_str());
+  return throw_missing_file(s.c_str());
 }
 
 bool invoke_file_impl(Variant &res, CStrRef path, bool once,

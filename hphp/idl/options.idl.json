@@ -125,7 +125,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the current value of the PHP configuration variable specified by option, or FALSE if an error occurs."
             },
             "args": [
@@ -662,6 +662,19 @@
                     "value": "false",
                     "desc": "Set this to TRUE to get the real size of memory allocated from system. If not set or FALSE only the memory used by emalloc() is reported."
                 }
+            ]
+        },
+        {
+            "name": "php_ini_loaded_file",
+            "desc": "Retrieve a path to the loaded php.ini file.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Check if a php.ini file is loaded, and retrieve its path."
+            },
+            "args": [
             ]
         },
         {

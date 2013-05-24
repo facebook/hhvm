@@ -16,7 +16,6 @@ array(4) {
 }
 ================
 A_DOMImplementation
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_DOMImplementation)#3 (1) {
   ["___x"]=>
   NULL
@@ -26,15 +25,13 @@ object(A_DOMImplementation)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(4) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(14) "createDocument"
   [2]=>
-  string(5) "__set"
+  string(18) "createDocumentType"
   [3]=>
-  string(20) "createFromDateString"
-  [4]=>
-  string(6) "format"
+  string(10) "hasFeature"
 }

@@ -1508,6 +1508,24 @@
                     "value": "null"
                 }
             ]
+        },
+        {
+            "name": "dom_import_simplexml",
+            "desc": "This function takes the node node of class SimpleXML and makes it into a DOMElement node. This new object can then be used as a native DOMElement node.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The DOMElement node added or FALSE if any errors occur."
+            },
+            "args": [
+                {
+                    "name": "node",
+                    "type": "Object",
+                    "desc": "The SimpleXMLElement node."
+                }
+            ]
         }
     ],
     "classes": [

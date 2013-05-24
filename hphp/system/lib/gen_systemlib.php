@@ -3,7 +3,7 @@
 global $scriptPath, $outputPath;
 $scriptPath = dirname(__FILE__);
 if (!isset($argv[1])) {
-  throw new Exception("Usage: gen_systemlib.php <outputPath>");
+  throw new Exception("Usage: gen_systemlib.php <outputPath> [input files]");
 }
 $outputPath = $argv[1];
 
@@ -20,36 +20,28 @@ function processPhpFile($phpfile, $systemlib_php) {
   fwrite($systemlib_php, substr($contents, $k));
 }
 
-function searchDirForPhpFiles($searchPath, &$phpfiles) {
-  $list = scandir($searchPath);
-  $files = array();
-  foreach ($list as $name) {
-    if ($name === '.' || $name === '..') continue;
-    $files[] = $searchPath . '/' . $name;
-  }
-  for ($i = 0; $i < count($files); ++$i) {
-    $file = $files[$i];
-    if (is_dir($file)) {
-      $list = scandir($file);
-      foreach ($list as $name) {
-        if ($name === '.' || $name === '..') continue;
-        $files[] = $file . '/' . $name;
-      }
-      continue;
-    }
-    if (!preg_match('/\.php$/', $file)) continue;
+function populatePhpFiles($input_files) {
+  $php_files = array();
+  foreach ($input_files as $file) {
     $key = strtolower(basename($file));
-    if (isset($phpfiles[$key])) {
-      $errMsg = "ERROR: Encountered multiple php files with the same name (" .
-                $file . " vs " . $phpfiles[$key] . ")";
+    if (!preg_match('/\.php$/', $file)) {
+      $errMsg = "ERROR: Encountered non-php file ($file)";
       echo $errMsg . "\n";
       throw new Exception($errMsg);
     }
-    $phpfiles[$key] = $file;
+    if (isset($php_files[$key])) {
+      $errMsg = "ERROR: Encountered multiple php files with the same name (" .
+                $file . " vs " . $php_files[$key] . ")";
+      echo $errMsg . "\n";
+      throw new Exception($errMsg);
+    }
+    // calling Makefile machinery will use the truncated path, full is expected
+    $php_files[$key] = $_ENV['FBCODE_DIR'].'/'.$file;
   }
+  return $php_files;
 }
 
-function genSystemlib() {
+function genSystemlib($input_files) {
   global $scriptPath;
   global $outputPath;
 
@@ -59,14 +51,9 @@ function genSystemlib() {
   try {
     $systemlib_php_tempnam = tempnam('/tmp', 'systemlib.php.tmp');
     $systemlib_php = fopen($systemlib_php_tempnam, 'w');
-    // Build up a list of all the .php files in hphp/system/classes
-    $phpfiles = array();
-    $searchPath = realpath($scriptPath . '/../../system/classes');
-    searchDirForPhpFiles($searchPath, $phpfiles);
-    $searchPath = realpath($scriptPath . '/../../system/classes_hhvm');
-    searchDirForPhpFiles($searchPath, $phpfiles);
+    $phpfiles = populatePhpFiles($input_files);
 
-    fwrite($systemlib_php, "<?php\n");
+    fwrite($systemlib_php, "<?hh\n");
     fwrite($systemlib_php, '// @' . 'generated' . "\n\n");
     // There are some dependencies between files, so we output
     // the classes in a certain order so that all classes can be
@@ -95,6 +82,6 @@ function genSystemlib() {
   }
 }
 
-genSystemlib();
+genSystemlib(array_slice($argv,2));
 
 

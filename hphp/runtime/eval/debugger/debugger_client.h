@@ -30,9 +30,11 @@ namespace HPHP {
 class StringBuffer;
 
 namespace Eval {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(DebuggerCommand);
+DECLARE_BOOST_TYPES(CmdInterrupt);
 class DebuggerClient {
 public:
   static int LineWidth;
@@ -420,7 +422,12 @@ private:
   InstPointInfoPtrVec m_instPoints;
 
   // list command's current location, which may be different from m_breakpoint
+
+  // The file currently being listed. Set implicitly by breakpoints and
+  // explicitly by list commands issued to the client by a user or via the API.
   std::string m_listFile;
+
+  // The first line to list
   int m_listLine;
   int m_listLineFocus;
 
@@ -442,8 +449,8 @@ private:
   bool parse(const char *line);
   bool match(const char *cmd);
   int  checkEvalEnd();
-  bool processTakeCode();
-  bool processEval();
+  void processTakeCode();
+  void processEval();
   DebuggerCommand *createCommand();
 
   void updateLiveLists();
@@ -478,15 +485,8 @@ private:
   std::string m_nameForApi;
 
   // usage logging
-  FILE* m_usageLogFP;
-  std::string m_usageLogHeader;
-  void initUsageLogging();
-  void finiUsageLogging();
-  void usageLog(const std::string& cmd, const std::string& line);
-  void usageLogInit() { usageLog("init", ""); }
-  void usageLogSignal() { usageLog("signal", ""); }
-  void usageLogDone(const std::string& cmdType) { usageLog("done", cmdType); }
-  void usageLogInterrupt(DebuggerCommandPtr cmd);
+  const char *getUsageMode();
+  void usageLog(const std::string &cmd, const std::string &data = "");
 };
 
 ///////////////////////////////////////////////////////////////////////////////

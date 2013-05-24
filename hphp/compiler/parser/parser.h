@@ -304,6 +304,7 @@ private:
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
+  std::string m_containingFuncName;
   bool m_inTrait;
 
   // parser output
@@ -344,6 +345,7 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
+  void registerAlias(std::string name);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

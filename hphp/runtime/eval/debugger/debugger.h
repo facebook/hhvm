@@ -35,8 +35,12 @@ namespace HPHP { namespace Eval {
 // sandboxes with proxies. Interrupts get minimal handling before being handed
 // off to the proper proxy.
 
+DECLARE_BOOST_TYPES(CmdInterrupt);
+
 class Debugger {
 public:
+  Debugger() : m_usageLogger(nullptr) {}
+
   // Start/stop Debugger for remote debugging.
   static bool StartServer();
   static DebuggerProxyPtr StartClient(const DebuggerClientOptions &options);
@@ -96,6 +100,13 @@ public:
 
   static void LogShutdown(ShutdownKind shutdownKind);
 
+  // Usage logging
+  static void SetUsageLogger(DebuggerUsageLogger *usageLogger);
+  static void InitUsageLogging();
+  static void UsageLog(const std::string &mode, const std::string &cmd,
+                       const std::string &data = "");
+  static void UsageLogInterrupt(const std::string &mode, CmdInterrupt &cmd);
+
 private:
   static Debugger s_debugger;
   static bool s_clientStarted;
@@ -103,6 +114,8 @@ private:
   static void Interrupt(int type, const char *program,
                         InterruptSite *site = nullptr, const char *error = nullptr);
   static void InterruptWithUrl(int type, const char *url);
+
+  static const char *InterruptTypeName(CmdInterrupt &cmd);
 
   typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
                                    StringDataHashCompare> ProxyMap;
@@ -151,6 +164,10 @@ private:
                      bool force);
   void retireDummySandboxThread(DummySandbox* toRetire);
   void cleanupDummySandboxThreads();
+
+  // A usage logger which is set by a provider to an implementation-specific
+  // subclass if usage logging is enabled.
+  DebuggerUsageLogger *m_usageLogger;
 };
 
 class DebuggerDummyEnv {

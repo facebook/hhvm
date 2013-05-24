@@ -21,22 +21,22 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdException::list(DebuggerClient *client) {
-  if (client->argCount() == 0) {
-    client->addCompletion(DebuggerClient::AutoCompleteClasses);
-    client->addCompletion("error");
-    client->addCompletion("regex");
-    client->addCompletion("once");
-  } else if (client->arg(1, "regex") || client->arg(1, "once")) {
-    client->addCompletion(DebuggerClient::AutoCompleteClasses);
+void CmdException::list(DebuggerClient &client) {
+  if (client.argCount() == 0) {
+    client.addCompletion(DebuggerClient::AutoCompleteClasses);
+    client.addCompletion("error");
+    client.addCompletion("regex");
+    client.addCompletion("once");
+  } else if (client.arg(1, "regex") || client.arg(1, "once")) {
+    client.addCompletion(DebuggerClient::AutoCompleteClasses);
   } else {
-    client->addCompletion(DebuggerClient::AutoCompleteCode);
+    client.addCompletion(DebuggerClient::AutoCompleteCode);
   }
 }
 
-bool CmdException::help(DebuggerClient *client) {
-  client->helpTitle("Exception Command");
-  client->helpCmds(
+void CmdException::help(DebuggerClient &client) {
+  client.helpTitle("Exception Command");
+  client.helpCmds(
     "[e]xception {cls}",            "breaks if class of exception throws",
     "[e]xception {ns}::{cls}",      "breaks if class of exception throws",
     "[e]xception error",            "breaks on errors, warnings and notices",
@@ -49,7 +49,7 @@ bool CmdException::help(DebuggerClient *client) {
     "[e]xception {above} && {php}", "breaks and evaluates an expression",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Exception command is similar to '[b]reak' command, except it's used "
     "to specify how to break on (or catch) a throw of an exception. Program "
     "stops right before the exception is about to throw. Resuming program "
@@ -64,31 +64,31 @@ bool CmdException::help(DebuggerClient *client) {
     "An exception breakpoint can be listed, cleared or toggled with '[b]reak' "
     "commands."
   );
-  return true;
 }
 
-bool CmdException::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() == 0) {
-    return help(client);
+void CmdException::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() == 0) {
+    help(client);
+    return;
   }
 
   bool regex = false;
   BreakPointInfo::State state = BreakPointInfo::Always;
 
   int index = 1;
-  if (client->arg(1, "regex")) {
+  if (client.arg(1, "regex")) {
     regex = true;
     index++;
-  } else if (client->arg(1, "once")) {
+  } else if (client.arg(1, "once")) {
     state = BreakPointInfo::Once;
     index++;
   }
 
   BreakPointInfoPtr bpi(new BreakPointInfo(regex, state, ExceptionThrown,
-                                           client->argValue(index), ""));
+                                           client.argValue(index), ""));
   if (!addToBreakpointListAndUpdateServer(client, bpi, index)) {
-    client->tutorial(
+    client.tutorial(
       "This is the order of different arguments:\n"
       "\n"
       "\t[e]xception [r]egex|[o]nce {exp} if|&& {php}\n"
@@ -100,10 +100,9 @@ bool CmdException::onClientImpl(DebuggerClient *client) {
       "\n"
     );
   }
-  return true;
 }
 
-void CmdException::setClientOutput(DebuggerClient *client) {
+void CmdException::setClientOutput(DebuggerClient &client) {
   // Also output an array of all breakpoints which include exceptions
   CmdBreak().setClientOutput(client);
 }

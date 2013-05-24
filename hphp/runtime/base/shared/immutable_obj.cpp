@@ -82,7 +82,7 @@ ImmutableObj::~ImmutableObj() {
   if (m_props) {
     for (int i = 0; i < m_propCount; i++) {
       m_props[i].name->destruct();
-      if (m_props[i].val) m_props[i].val->decRef();
+      if (m_props[i].val) delete m_props[i].val;
     }
     free(m_props);
   }

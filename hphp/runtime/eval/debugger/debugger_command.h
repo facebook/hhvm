@@ -90,41 +90,19 @@ public:
       m_incomplete(false) {}
 
   bool is(Type type) const { return m_type == type;}
-
   Type getType() const { return m_type;}
-
   bool send(DebuggerThriftBuffer &thrift);
-
   bool recv(DebuggerThriftBuffer &thrift);
-
-  // Informs the client of all strings that may follow a break command.
-  // Used for auto completion. The client uses the prefix of the argument
-  // following the command to narrow down the list displayed to the user.
-  virtual void list(DebuggerClient *client);
-
-  // The text to display when the debugger client
-  // processes "help <this command name>".
-  virtual bool help(DebuggerClient *client);
-
-  // Carries out the command and returns true if the command completed.
-  // If the client is controlled via the API, the setClientOuput method
-  // is invoked to update the client with the command output for access
-  // via the API.
-  bool onClient(DebuggerClient *client);
-
-  // Updates the client with information about the execution of this command.
-  // This information is not used by the command line client, but can
-  // be accessed via the debugger client API exposed to PHP programs.
-  virtual void setClientOutput(DebuggerClient *client);
-
-  // Server-side work for a command. Returning false indicates a failure to
-  // communicate with the client (for commands that do so).
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
+  void onClient(DebuggerClient &client);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   // This seems to be confined to eval and print commands.
   // It is not clear that it belongs in this interface or that the
   // assert is safe.
-  virtual void handleReply(DebuggerClient *client) { assert(false); }
+  virtual void handleReply(DebuggerClient &client) { assert(false); }
 
   // Returns true if DebuggerProxy::processInterrupt() should return
   // to its caller instead of processing further commands from the client.
@@ -135,16 +113,11 @@ public:
   String getWireError() const { return m_wireError; }
 
 protected:
-  // Client-side work for a command. Returns true if the command completed
-  // successfully.
-  virtual bool onClientImpl(DebuggerClient *client);
+  // Carries out the command, possibly by sending it to the server.
+  virtual void onClientImpl(DebuggerClient &client) = 0;
 
-  // Always called from send and must implement the subclass specific
-  // logic for serializing a command to send via Thrift.
+  bool displayedHelp(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
-
-  // Always called from recv and must implement the subclass specific
-  // logic for deserializing a command received via Thrift.
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   Type m_type;

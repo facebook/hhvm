@@ -190,51 +190,51 @@ void c_DebuggerClientCmdUser::t_quit() {
   m_client->quit();
 }
 
-static String format_string(DebuggerClient *client,
+static String format_string(DebuggerClient &client,
                             int _argc, CStrRef format, CArrRef _argv) {
   Variant ret = f_sprintf(_argc, format, _argv);
   if (ret.isString()) {
     return ret;
   }
-  client->error("Debugger extension failed to format string: %s",
+  client.error("Debugger extension failed to format string: %s",
                  format.data());
   return "";
 }
 
 void c_DebuggerClientCmdUser::t_print(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
-  m_client->print(format_string(m_client, _argc, format, _argv));
+  m_client->print(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_help(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
-  m_client->help(format_string(m_client, _argc, format, _argv));
+  m_client->help(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_info(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
-  m_client->info(format_string(m_client, _argc, format, _argv));
+  m_client->info(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_output(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
-  m_client->output(format_string(m_client, _argc, format, _argv));
+  m_client->output(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_error(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
-  m_client->error(format_string(m_client, _argc, format, _argv));
+  m_client->error(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_code(CStrRef source, int highlight_line /* = 0 */,
                               int start_line_no /* = 0 */,
                               int end_line_no /* = 0 */) {
-  m_client->code(source, highlight_line, start_line_no, end_line_no);
+  m_client->code(source, start_line_no, end_line_no, highlight_line);
 }
 
 Variant c_DebuggerClientCmdUser::t_ask(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
-  String ret = format_string(m_client, _argc, format, _argv);
+  String ret = format_string(*m_client, _argc, format, _argv);
   return String::FromChar(m_client->ask("%s", ret.data()));
 }
 
@@ -550,11 +550,11 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
       raise_warning("not getting a command");
     } else if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      cmdInterrupt->onClient(m_client);
+      cmdInterrupt->onClient(*m_client);
     } else {
       // Previous pending commands
-      cmd->handleReply(m_client);
-      cmd->setClientOutput(m_client);
+      cmd->handleReply(*m_client);
+      cmd->setClientOutput(*m_client);
     }
     Logger::Info("debugger client ready for command");
   } catch (DebuggerClientExitException &e) {

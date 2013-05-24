@@ -377,6 +377,8 @@ public:
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
+  static const uint32_t kPCREInitialTableSize = 96 * 1024;
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \
@@ -399,6 +401,8 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           string(""))                      \
+  F(uint32_t, JitMaxTranslations,      12)                              \
+  F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \
   F(string, JitProfilePath,            string(""))                      \
   F(int32_t, JitStressTypePredPercent, 0)                               \
@@ -413,9 +417,7 @@ public:
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitMGeneric,                 true)                            \
-  F(bool, JitUseIR,                    true)                            \
   F(double, JitCompareHHIR,            0)                               \
-  F(bool, IRPuntDontInterp,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
@@ -432,18 +434,23 @@ public:
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIREnableRefCountOpt,       true)                            \
   F(bool, HHIREnableSinking,           true)                            \
+  F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
-  F(bool, HHIRDisableTx64,             true)                            \
-  F(uint64_t, MaxHHIRTrans,            -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
+  F(bool, HHIRPredictionOpts,          true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \
+  F(uint32_t, TCNumHugeHotMB,          16)                              \
+  F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
+  F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
+  F(uint32_t, InitialStaticStringTableSize, 100000)                     \
+  F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   /* */                                                                 \
 
 #define F(type, name, unused) \
@@ -485,6 +492,7 @@ public:
   // Debugger options
   static bool EnableDebugger;
   static bool EnableDebuggerServer;
+  static bool EnableDebuggerUsageLog;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
@@ -492,7 +500,6 @@ public:
   static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
-  static std::string DebuggerUsageLogFile;
 
   // Mail options
   static std::string SendmailPath;

@@ -37,10 +37,11 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
+  Debugger::UsageLog("server", "connnect", socket->getAddress());
 }
 
 DebuggerProxy::~DebuggerProxy() {
-  TRACE(2, "DebuggerProxy::~DebuggerProxy\n");
+  TRACE_RB(2, "DebuggerProxy::~DebuggerProxy starting\n");
   m_stopped = true;
   m_signalThread.waitForEnd();
 
@@ -49,6 +50,9 @@ DebuggerProxy::~DebuggerProxy() {
   }
 
   delete m_injTables;
+
+  Debugger::UsageLog("server", "disconnect");
+  TRACE_RB(2, "DebuggerProxy::~DebuggerProxy complete\n");
 }
 
 const char *DebuggerProxy::getThreadType() const {
@@ -242,7 +246,7 @@ bool DebuggerProxy::needVMInterrupts() {
 
 // Handle an interrupt from the VM.
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::interrupt\n");
+  TRACE_RB(2, "DebuggerProxy::interrupt\n");
   // Make any breakpoints that have passed breakable again.
   changeBreakPointDepth(cmd);
 
@@ -310,6 +314,9 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   }
 }
 
+// Sends a copy of the given command to the associated client
+// using the buffer in m_thrift. Returns false if an exception
+// occurs during the send (typically a socket error).
 bool DebuggerProxy::sendToClient(DebuggerCommand *cmd) {
   TRACE(2, "DebuggerProxy::sendToClient\n");
   return cmd->send(m_thrift);
@@ -328,7 +335,7 @@ void DebuggerProxy::startSignalThread() {
 // If another thread in the sandbox fails to stop and consume the signal then
 // it will be passed to the dummy sandbox instead.
 void DebuggerProxy::pollSignal() {
-  TRACE(2, "DebuggerProxy::pollSignal\n");
+  TRACE_RB(2, "DebuggerProxy::pollSignal: starting\n");
   while (!m_stopped) {
     sleep(1);
 
@@ -337,6 +344,7 @@ void DebuggerProxy::pollSignal() {
     if (m_signum != CmdSignal::SignalNone && m_dummySandbox) {
       Lock lock(m_signumMutex);
       if (m_signum != CmdSignal::SignalNone) {
+        TRACE_RB(2, "DebuggerProxy::pollSignal: sending to dummy sandbox\n");
         m_dummySandbox->notifySignal(m_signum);
         m_signum = CmdSignal::SignalNone;
       }
@@ -348,8 +356,9 @@ void DebuggerProxy::pollSignal() {
 
     // Send CmdSignal over to the client and wait for a response.
     CmdSignal cmd;
-    if (!cmd.onServer(this)) {
-      Logger::Error("Failed to send CmdSignal to client, socket error");
+    if (!cmd.onServer(*this)) {
+      TRACE_RB(2, "DebuggerProxy::pollSignal: "
+               "Failed to send CmdSignal to client\n");
       break;
     }
 
@@ -359,40 +368,45 @@ void DebuggerProxy::pollSignal() {
     while (!DebuggerCommand::Receive(m_thrift, res,
                                      "DebuggerProxy::pollSignal()")) {
       if (m_stopped) {
-        Logger::Warning("DebuggerProxy signal thread asked to stop while "
-                        "waiting for CmdSignal back from the client");
+        TRACE_RB(2, "DebuggerProxy::pollSignal: "
+                 "signal thread asked to stop while waiting "
+                 "for CmdSignal back from the client\n");
         break;
       }
     }
     if (!res) {
       if (!m_stopped) {
-        Logger::Error("Failed to get CmdSignal back from client, socket error");
+        TRACE_RB(2, "DebuggerProxy::pollSignal: "
+                 "Failed to get CmdSignal back from client\n");
       }
       break;
     }
 
     CmdSignalPtr sig = dynamic_pointer_cast<CmdSignal>(res);
     if (!sig) {
-      Logger::Error("bad response from signal polling: %d", res->getType());
+      TRACE_RB(2, "DebuggerProxy::pollSignal: "
+               "bad response from signal polling: %d", res->getType());
       break;
     }
 
     m_signum = sig->getSignal();
 
     if (m_signum != CmdSignal::SignalNone) {
-      TRACE(2, "DebuggerProxy::pollSignal got interrupt signal from client\n");
+      TRACE_RB(2, "DebuggerProxy::pollSignal: "
+               "got interrupt signal from client\n");
       Debugger::RequestInterrupt(shared_from_this());
     }
   }
   if (!m_stopped) {
-    Logger::Error("DebuggerProxy signal thread has lost communication with the "
-                  "client, stopping proxy.");
+    TRACE_RB(2, "DebuggerProxy::pollSignal: "
+             "lost communication with the client, stopping proxy\n");
     forceQuit();
   }
+  TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
 }
 
 void DebuggerProxy::forceQuit() {
-  TRACE(2, "DebuggerProxy::forceQuit\n");
+  TRACE_RB(2, "DebuggerProxy::forceQuit\n");
   DSandboxInfo invalid;
   Lock l(this);
   m_sandbox = invalid;
@@ -533,7 +547,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
        cmd.getInterruptType() == HardBreakPoint ||
        cmd.getInterruptType() == ExceptionThrown) && m_flow) {
     if (!m_flow->is(DebuggerCommand::KindOfContinue)) {
-      m_flow->onBeginInterrupt(this, cmd);
+      m_flow->onBeginInterrupt(*this, cmd);
       if (m_flow->complete()) {
         fcShouldBreak = true;
         m_flow.reset();
@@ -553,7 +567,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
-      m_flow->onBeginInterrupt(this, cmd);
+      m_flow->onBeginInterrupt(*this, cmd);
       if (m_flow->complete()) m_flow.reset();
       return false;
     }
@@ -571,13 +585,15 @@ void DebuggerProxy::checkStop() {
 }
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::processInterrupt\n");
+  TRACE_RB(2, "DebuggerProxy::processInterrupt\n");
   // Do the server-side work for this interrupt, which just notifies the client.
-  if (!cmd.onServer(this)) {
-    Logger::Error("Failed to send CmdInterrupt to client, socket error");
+  if (!cmd.onServer(*this)) {
+    TRACE_RB(1, "Failed to send CmdInterrupt to client\n");
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
+
+  Debugger::UsageLogInterrupt("server", cmd);
 
   // Wait for commands from the debugger client and process them. We'll stay
   // here until we get a command that should cause the thread to continue.
@@ -590,22 +606,28 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     }
     checkStop();
     if (res) {
+      TRACE_RB(2, "Proxy got cmd type %d\n", res->getType());
+      Debugger::UsageLog("server", boost::lexical_cast<string>(res->getType()));
       // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
-        m_flow->onSetup(this, cmd);
+        m_flow->onSetup(*this, cmd);
         if (!m_flow->complete()) {
+          TRACE_RB(2, "Incomplete flow command %d remaining on proxy for "
+                   "further processing\n", m_flow->getType());
           if (m_threadMode == Normal) {
             switchThreadMode(Sticky);
           }
         } else {
           // The flow cmd has determined that it is done with its work and
           // doesn't need to remain for later processing.
+          TRACE_RB(2, "Flow command %d completed\n", m_flow->getType());
           m_flow.reset();
         }
         return;
       }
       if (res->is(DebuggerCommand::KindOfQuit)) {
+        TRACE_RB(2, "Received quit command\n");
         Debugger::RemoveProxy(shared_from_this());
         forceQuit();
         throw DebuggerClientExitException();
@@ -615,20 +637,19 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     try {
       // Perform the server-side work for this command.
       if (res) {
-        if (!res->onServer(this)) {
-          Logger::Error("Failed to execute cmd %d from client, socket error",
-                        res->getType());
+        if (!res->onServer(*this)) {
+          TRACE_RB(1, "Failed to execute cmd %d from client\n", res->getType());
           cmdFailure = true;
         }
       } else {
-        Logger::Error("Failed to receive cmd from client, socket error");
+        TRACE_RB(1, "Failed to receive cmd from client\n");
         cmdFailure = true;
       }
     } catch (const DebuggerException &e) {
       throw;
     } catch (...) {
-      Logger::Error("Cmd type %d onServer() threw non DebuggerException",
-                    res->getType());
+      TRACE_RB(1, "Cmd type %d onServer() threw non DebuggerException",
+               res->getType());
       cmdFailure = true;
     }
     if (cmdFailure) {

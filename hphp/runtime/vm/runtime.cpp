@@ -67,14 +67,14 @@ void print_boolean(bool val) {
 
 HOT_FUNC_VM
 ArrayData* new_array(int capacity) {
-  ArrayData *a = NEW(HphpArray)(capacity);
+  ArrayData *a = ArrayData::Make(capacity);
   a->incRefCount();
   TRACE(2, "newArrayHelper: capacity %d\n", capacity);
   return a;
 }
 
 ArrayData* new_tuple(int n, const TypedValue* values) {
-  HphpArray* a = NEW(HphpArray)(n, values);
+  auto a = ArrayData::Make(n, values);
   a->incRefCount();
   TRACE(2, "new_tuple: size %d\n", n);
   return a;
@@ -342,7 +342,7 @@ Unit* compile_string(const char* s, size_t sz) {
 
 // Returned array has refcount zero! Caller must refcount.
 HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
-  HphpArray* argArray = NEW(HphpArray)(nargs);
+  HphpArray* argArray = ArrayData::Make(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
     argArray->HphpArray::appendWithRef(tvAsCVarRef(tv), false);
@@ -352,7 +352,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
     return argArray;
   }
   // This is a magic call, so we need to shuffle the args
-  HphpArray* magicArgs = NEW(HphpArray)(2);
+  HphpArray* magicArgs = ArrayData::Make(2);
   magicArgs->append(ar->getInvName(), false);
   magicArgs->append(argArray, false);
   return magicArgs;

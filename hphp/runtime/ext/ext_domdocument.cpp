@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 
 #include "hphp/system/lib/systemlib.h"
@@ -5834,6 +5835,20 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj,
                                            CVarRef funcs /* = null */) {
   DOM_GET_OBJ(XPath);
   return pobj->t_registerphpfunctions(funcs);
+}
+
+Variant f_dom_import_simplexml(CObjRef node) {
+
+  c_SimpleXMLElement *elem = node.getTyped<c_SimpleXMLElement>();
+  xmlNodePtr nodep = elem->m_node;
+
+  if (nodep && (nodep->type == XML_ELEMENT_NODE ||
+                nodep->type == XML_ATTRIBUTE_NODE)) {
+    return create_node_object(nodep, SystemLib::AllocDOMDocumentObject());
+  } else {
+    raise_warning("Invalid Nodetype to import");
+    return uninit_null();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

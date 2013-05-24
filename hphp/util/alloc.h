@@ -33,6 +33,8 @@
 #  include "malloc.h"
 # endif
 #else
+# undef ALLOCM_ZERO
+# undef ALLOCM_NO_MOVE
 # include <jemalloc/jemalloc.h>
 # ifndef ALLOCM_ARENA
 #  define ALLOCM_ARENA(a) 0

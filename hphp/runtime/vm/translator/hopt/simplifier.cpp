@@ -38,20 +38,24 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case DefSP:
     return {};
 
-  case ReDefGeneratorSP: {
-    auto srcInst = inst->getSrc(0)->inst();
-    assert(srcInst->op() == StashGeneratorSP);
-    return getStackValue(srcInst->getSrc(0), index);
-  }
+  case ReDefGeneratorSP:
+  case StashGeneratorSP:
+    return getStackValue(inst->getSrc(0), index);
+
   case ReDefSP:
     return getStackValue(inst->getSrc(1), index);
 
   case ExceptionBarrier:
     return getStackValue(inst->getSrc(0), index);
 
+  case SideExitGuardStk:
+    always_assert(0 && "simplifier is not tested for running after jumpopts");
+
   case AssertStk:
     // fallthrough
   case CastStk:
+    // fallthrough
+  case CheckStk:
     // fallthrough
   case GuardStk:
     // We don't have a value, but we may know the type due to guarding
@@ -148,6 +152,18 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   not_reached();
 }
 
+smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
+  smart::vector<SSATmp*> ret;
+  ret.reserve(stackDepth);
+  for (uint32_t i = 0; i < stackDepth; ++i) {
+    auto const value = getStackValue(sp, i).value;
+    if (value) {
+      ret.push_back(value);
+    }
+  }
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 static void copyPropSrc(IRInstruction* inst, int index) {
@@ -234,9 +250,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpAdd:       return simplifyAdd(src1, src2);
   case OpSub:       return simplifySub(src1, src2);
   case OpMul:       return simplifyMul(src1, src2);
-  case OpAnd:       return simplifyAnd(src1, src2);
-  case OpOr:        return simplifyOr(src1, src2);
-  case OpXor:       return simplifyXor(src1, src2);
+  case OpBitAnd:    return simplifyBitAnd(src1, src2);
+  case OpBitOr:     return simplifyBitOr(src1, src2);
+  case OpBitXor:    return simplifyBitXor(src1, src2);
+  case OpLogicXor:  return simplifyLogicXor(src1, src2);
 
   case OpGt:
   case OpGte:
@@ -304,7 +321,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
-  case GuardType:    return simplifyGuardType(inst);
+  case CheckType:    return simplifyCheckType(inst);
 
   case LdCls:        return simplifyLdCls(inst);
   case LdThis:       return simplifyLdThis(inst);
@@ -499,7 +516,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   Type type    = inst->getTypeParam();
   SSATmp* src  = inst->getSrc(0);
   Type srcType = src->type();
@@ -514,27 +531,29 @@ SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
     if (hoistGuardToLoad(src, type)) {
       return src;
     }
-  } else {
-    if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
-      // If we're guarding against Str and srcType has StaticStr or CountedStr
-      // in it, refine the output type. This can happen when we have a
-      // KindOfString guard from Translator but internally we know a more
-      // specific subtype of Str.
-      FTRACE(1, "Guarding {} to {}\n", srcType.toString(), type.toString());
-      inst->setTypeParam(type & srcType);
-    } else {
-      /*
-       * incompatible types!  We should just generate a jump here and
-       * return null.
-       *
-       * For now, this case should currently be impossible, but it may
-       * come up later due to other optimizations.  The assert is so
-       * we'll remember this spot ...
-       */
-      not_implemented();
-    }
+    return nullptr;
   }
-  return nullptr;
+  if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
+    /*
+     * If we're guarding against Str and srcType has StaticStr or CountedStr
+     * in it, refine the output type. This can happen when we have a
+     * KindOfString guard from Translator but internally we know a more
+     * specific subtype of Str.
+     */
+    FTRACE(1, "CheckType: refining {} to {}\n", srcType.toString(),
+           type.toString());
+    inst->setTypeParam(type & srcType);
+    return nullptr;
+  }
+
+  /*
+   * We got a predicted type that is wrong -- it's incompatible with
+   * the tracked type.  So throw the prediction away, since it would
+   * always fail.
+   */
+  FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
+         srcType.toString(), type.toString());
+  return src;
 }
 
 SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
@@ -866,13 +885,13 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_DISTRIBUTIVE(&, |, And, Or);
+SSATmp* Simplifier::simplifyBitAnd(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_DISTRIBUTIVE(&, |, BitAnd, BitOr);
   // X & X --> X
   if (src1 == src2) {
     return src1;
   }
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst()) {
     // X & 0 --> 0
     if (src2->getValInt() == 0) {
       return cns(0);
@@ -885,13 +904,13 @@ SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_DISTRIBUTIVE(|, &, Or, And);
+SSATmp* Simplifier::simplifyBitOr(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_DISTRIBUTIVE(|, &, BitOr, BitAnd);
   // X | X --> X
   if (src1 == src2) {
     return src1;
   }
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst()) {
     // X | 0 --> X
     if (src2->getValInt() == 0) {
       return src1;
@@ -904,23 +923,37 @@ SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_COMMUTATIVE(^, Xor);
+SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_COMMUTATIVE(^, BitXor);
   // X ^ X --> 0
   if (src1 == src2)
     return cns(0);
-  // X ^ 0 --> X
-  if (src2->isConst() && src2->type() == Type::Int) {
+  // X ^ 0 --> X; X ^ -1 --> ~X
+  if (src2->isConst()) {
     if (src2->getValInt() == 0) {
       return src1;
     }
+    if (src2->getValInt() == -1) {
+      return gen(OpBitNot, src1);
+    }
   }
-  // Bool(X) ^ 1    --> Int(!X)
-  // Bool(X) ^ true --> Int(!X)
-  if (src1->isA(Type::Bool) && src2->isConst() &&
-      ((src2->isA(Type::Int) && src2->getValInt() == 1) ||
-       (src2->isA(Type::Bool) && src2->getValBool() == true))) {
-    return gen(ConvBoolToInt, gen(OpNot, src1));
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
+  SIMPLIFY_COMMUTATIVE(^, LogicXor);
+  if (src1 == src2) {
+    return cns(false);
+  }
+
+  // SIMPLIFY_COMMUTATIVE takes care of the both-sides-const case, and
+  // canonicalizes a single const to the right
+  if (src2->isConst()) {
+    if (src2->getValBool()) {
+      return gen(OpNot, src1);
+    } else {
+      return src1;
+    }
   }
   return nullptr;
 }
@@ -1580,9 +1613,9 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
-        srcInst->getTypeParam(), // if it had a type param
-        inst->getTaken(),
-        std::make_pair(ssas.size(), ssas.begin())
+      srcInst->getTypeParam(), // if it had a type param
+      inst->getTaken(),
+      std::make_pair(ssas.size(), ssas.begin())
     );
   }
 
@@ -1670,9 +1703,14 @@ SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
+  if (inst->getTypeParam().notCounted()) {
+    inst->convertToNop();
+    return nullptr;
+  }
   auto const info = getStackValue(inst->getSrc(0),
                                   inst->getExtra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
+    inst->convertToNop();
     return gen(DecRef, info.knownType, info.value);
   }
   if (!info.knownType.equals(Type::None)) {

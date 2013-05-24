@@ -76,6 +76,12 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     }
     m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
   }
+
+  // Support for systemlib functions implemented in PHP
+  if (!m_method &&
+      m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
+      setAllowOverride();
+  }
 }
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,
@@ -302,8 +308,8 @@ bool FunctionScope::isVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::ignoreRedefinition() const {
-  return m_attribute & FileScope::IgnoreRedefinition;
+bool FunctionScope::allowOverride() const {
+  return m_attribute & FileScope::AllowOverride;
 }
 
 bool FunctionScope::isReferenceVariableArgument() const {
@@ -378,8 +384,8 @@ void FunctionScope::setVariableArgument(int reference) {
   }
 }
 
-void FunctionScope::setIgnoreRedefinition() {
-  m_attribute |= FileScope::IgnoreRedefinition;
+void FunctionScope::setAllowOverride() {
+  m_attribute |= FileScope::AllowOverride;
 }
 
 bool FunctionScope::hasEffect() const {
@@ -572,18 +578,6 @@ void FunctionScope::setPerfectVirtual() {
     m_paramTypes[i] = Type::Variant;
     m_variables->addLvalParam(m_paramNames[i]);
   }
-}
-
-bool FunctionScope::needsTypeCheckWrapper() const {
-  for (int i = 0; i < m_maxParam; i++) {
-    if (isRefParam(i)) continue;
-    if (TypePtr spec = m_paramTypeSpecs[i]) {
-      if (Type::SameType(spec, m_paramTypes[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 bool FunctionScope::needsClassParam() {

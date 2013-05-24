@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/alias_manager.h"
+
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/expression.h"
@@ -54,7 +56,6 @@
 #include "hphp/compiler/statement/try_statement.h"
 #include "hphp/compiler/statement/global_statement.h"
 #include "hphp/compiler/statement/static_statement.h"
-#include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/control_flow.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/data_flow.h"
@@ -2205,13 +2206,15 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
         SimpleVariablePtr name = dpc(SimpleVariable, fs->getNameExp());
         if (name) {
-          Symbol *sym = name->getSymbol();
-          sym->setNeeded();
+          if (Symbol *sym = name->getSymbol()) {
+            sym->setNeeded();
+          }
         }
         SimpleVariablePtr value = dpc(SimpleVariable, fs->getValueExp());
         if (value) {
-          Symbol *sym = value->getSymbol();
-          sym->setNeeded();
+          if (Symbol *sym = value->getSymbol()) {
+            sym->setNeeded();
+          }
         }
         break;
       }

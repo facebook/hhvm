@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -117,11 +117,9 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 // static analysis functions
 
 Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
-  bool ns = m_name[0] == '\\';
-  if (ns) m_name = m_name.substr(1);
   BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
   if (!block) {
-    if (ns) {
+    if (!hadBackslash() && Option::WholeProgram) {
       int pos = m_name.rfind('\\');
       m_name = m_name.substr(pos + 1);
       block = ar->findConstantDeclarer(m_name);

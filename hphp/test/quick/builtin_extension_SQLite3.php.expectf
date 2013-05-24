@@ -1,5 +1,5 @@
 SQLite3
-HipHop Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+HipHop Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
 object(SQLite3)#1 (0) {
 }
 string(18) "O:7:"SQLite3":0:{}"
@@ -45,7 +45,7 @@ array(18) {
 }
 ================
 A_SQLite3
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
 object(A_SQLite3)#3 (1) {
   ["___x"]=>
   NULL
@@ -55,15 +55,41 @@ object(A_SQLite3)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(18) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(4) "open"
   [2]=>
-  string(5) "__set"
+  string(11) "busytimeout"
   [3]=>
-  string(20) "createFromDateString"
+  string(5) "close"
   [4]=>
-  string(6) "format"
+  string(4) "exec"
+  [5]=>
+  string(7) "version"
+  [6]=>
+  string(15) "lastinsertrowid"
+  [7]=>
+  string(13) "lasterrorcode"
+  [8]=>
+  string(12) "lasterrormsg"
+  [9]=>
+  string(13) "loadextension"
+  [10]=>
+  string(7) "changes"
+  [11]=>
+  string(12) "escapestring"
+  [12]=>
+  string(7) "prepare"
+  [13]=>
+  string(5) "query"
+  [14]=>
+  string(11) "querysingle"
+  [15]=>
+  string(14) "createfunction"
+  [16]=>
+  string(15) "createaggregate"
+  [17]=>
+  string(8) "openblob"
 }

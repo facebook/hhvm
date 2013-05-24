@@ -38,6 +38,7 @@ These are the allowed extensions:
 * .expectregex - A regex that matches the output.
 * .out - When you run the test, the output will be stored here.
 * .opts - Runtime options to pass to hhvm.
+* .hphp_opts - Options passed to hphp when generating a bytecode repo.
 * .diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
 

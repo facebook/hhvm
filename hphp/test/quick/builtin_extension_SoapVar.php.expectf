@@ -1,5 +1,5 @@
 SoapVar
-HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s on line 5
+HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
 object(SoapVar)#1 (0) {
 }
 string(18) "O:7:"SoapVar":0:{}"
@@ -11,7 +11,7 @@ array(1) {
 }
 ================
 A_SoapVar
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
 object(A_SoapVar)#3 (1) {
   ["___x"]=>
   NULL
@@ -21,15 +21,7 @@ object(A_SoapVar)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(1) {
   [0]=>
   string(11) "__construct"
-  [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(20) "createFromDateString"
-  [4]=>
-  string(6) "format"
 }

@@ -97,6 +97,7 @@ Variant f_dom_xpath_register_ns(CVarRef obj, CStrRef prefix, CStrRef uri);
 Variant f_dom_xpath_query(CVarRef obj, CStrRef expr, CObjRef context = null_object);
 Variant f_dom_xpath_evaluate(CVarRef obj, CStrRef expr, CObjRef context = null_object);
 Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = uninit_null());
+Variant f_dom_import_simplexml(CObjRef node);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode

@@ -36,15 +36,36 @@ namespace HPHP { namespace Transl {
  * (e.g. store_reg##_disp_reg##).
  */
 struct PhysReg {
+  enum Type {
+    GP,
+    XMM,
+    kNumTypes,  // keep last
+  };
   explicit constexpr PhysReg(int n = -1) : n(n) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
+  constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kNumGPRegs) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
   explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 
-  constexpr /* implicit */ operator Reg64() const { return Reg64(n); }
-  constexpr /* implicit */ operator RegNumber() const { return RegNumber(n); }
+  /* implicit */ operator Reg64() const {
+    assert(isGP() || n == -1);
+    return Reg64(n);
+  }
+  constexpr /* implicit */ operator RegNumber() const {
+    return n < kNumGPRegs ? RegNumber(n) : RegNumber(n - kNumGPRegs);
+  }
+  /* implicit */ operator RegXMM() const {
+    assert(isXMM() || n == -1);
+    return RegXMM(n - kNumGPRegs);
+  }
 
+  Type type() const {
+    assert(n >= 0 && n < kNumRegs);
+    return n < kNumGPRegs ? GP : XMM;
+  }
+  bool isGP () const { return n >= 0 && n < kNumGPRegs; }
+  bool isXMM() const { return n >= kNumGPRegs && n < kNumRegs; }
   explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }
@@ -53,13 +74,24 @@ struct PhysReg {
   constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
   constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
 
-  MemoryRef operator[](intptr_t p) const { return *(*this + p); }
-  IndexedMemoryRef operator[](Reg64 i) const { return *(*this + i); }
-  IndexedMemoryRef operator[](ScaledIndex s) const { return *(*this + s); }
+  MemoryRef operator[](intptr_t p) const {
+    assert(type() == GP);
+    return *(*this + p);
+  }
+  IndexedMemoryRef operator[](Reg64 i) const {
+    assert(type() == GP);
+    return *(*this + i);
+  }
+  IndexedMemoryRef operator[](ScaledIndex s) const {
+    assert(type() == GP);
+    return *(*this + s);
+  }
   IndexedMemoryRef operator[](ScaledIndexDisp s) const {
+    assert(type() == GP);
     return *(*this + s.si + s.disp);
   }
   IndexedMemoryRef operator[](DispReg dr) const {
+    assert(type() == GP);
     return *(*this + ScaledIndex(dr.base, 0x1) + dr.disp);
   }
 

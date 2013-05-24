@@ -21,8 +21,8 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-void CmdHelp::HelpAll(DebuggerClient *client) {
-  client->helpCmds(
+void CmdHelp::HelpAll(DebuggerClient &client) {
+  client.helpCmds(
     "Session Commands", "",
     "[m]achine",    "connects to an HHVM server",
     "[t]hread",     "switches between different threads",
@@ -72,14 +72,14 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     nullptr
   );
 
-  client->helpBody("* These commands are replayable by just hitting return.\n"
+  client.helpBody("* These commands are replayable by just hitting return.\n"
       "** Type \"help help\" to get more help.");
 }
 
-void CmdHelp::HelpStarted(DebuggerClient *client) {
-  client->helpTitle("Getting Started with Debugger");
+void CmdHelp::HelpStarted(DebuggerClient &client) {
+  client.helpTitle("Getting Started with Debugger");
 
-  client->helpBody(
+  client.helpBody(
     "1. Quick Overview\n"
     "\n"
     "(1) from A to Z\n"
@@ -117,7 +117,7 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "documentation]] for more details."
   );
 
-  client->helpBody(
+  client.helpBody(
     "2. Debugging local script\n"
     "\n"
     "The command to run a script normally looks like this,\n"
@@ -169,7 +169,7 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "  hphpd> quit"
   );
 
-  client->helpBody(
+  client.helpBody(
     "3. Debugging sandbox\n"
     "\n"
     "Connect to an HHVM server from command line,\n"
@@ -196,7 +196,7 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "shared by all of them."
   );
 
-  client->helpBody(
+  client.helpBody(
     "4. Understanding dummy sandbox\n"
     "\n"
     "When a web request hits a breakpoint, debugger will run in a "
@@ -228,7 +228,7 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "  Ctrl-C"
   );
 
-  client->helpBody(
+  client.helpBody(
     "5. Colors and Configuration\n"
     "\n"
     "By default, it will use emacs colors for dark background. To change "
@@ -244,26 +244,26 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
   );
 }
 
-void CmdHelp::list(DebuggerClient *client) {
-  if (client->argCount() == 0) {
-    client->addCompletion(DebuggerClient::GetCommands());
-    client->addCompletion("tutorial");
-    client->addCompletion("start");
-  } else if (client->arg(1, "tutorial")) {
-    client->addCompletion("on");
-    client->addCompletion("off");
-    client->addCompletion("auto");
+void CmdHelp::list(DebuggerClient &client) {
+  if (client.argCount() == 0) {
+    client.addCompletion(DebuggerClient::GetCommands());
+    client.addCompletion("tutorial");
+    client.addCompletion("start");
+  } else if (client.arg(1, "tutorial")) {
+    client.addCompletion("on");
+    client.addCompletion("off");
+    client.addCompletion("auto");
   }
 }
 
-bool CmdHelp::help(DebuggerClient *client) {
-  client->helpTitle("Help Command");
-  client->helpCmds(
+void CmdHelp::help(DebuggerClient &client) {
+  client.helpTitle("Help Command");
+  client.helpCmds(
     "[h]elp [s]tart", "displays material for getting started",
     "[h]elp [t]utorial on|off|auto", "changing tutorial modes",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Please read \"Getting Started\" material with '[h]elp [s]tart' for "
     "first time use to get yourself familiar with basics.\n"
     "\n"
@@ -275,45 +275,34 @@ bool CmdHelp::help(DebuggerClient *client) {
     "To get detailed information of a command, type '{cmd} [h]elp' or '{cmd} "
     "?' or 'help {cmd}' or '? {cmd}'."
   );
-  return true;
 }
 
-bool CmdHelp::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-
-  if (client->argCount() == 0) {
+void CmdHelp::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() == 0) {
     HelpAll(client);
-    return true;
-  }
-
-  if (client->arg(1, "start")) {
+   } else if (client.arg(1, "start")) {
     HelpStarted(client);
-    return true;
-  }
-
-  if (client->arg(1, "tutorial")) {
+  } else if (client.arg(1, "tutorial")) {
     if (!processTutorial(client)) {
-      return help(client);
+      help(client);
     }
-    return true;
+  } else {
+    client.swapHelp();
+    if (!client.process()) {
+      help(client);
+    }
   }
-
-  client->swapHelp();
-  if (client->process()) {
-    return true;
-  }
-
-  return help(client);
 }
 
-bool CmdHelp::processTutorial(DebuggerClient *client) {
-  string mode = client->argValue(2);
+bool CmdHelp::processTutorial(DebuggerClient &client) {
+  string mode = client.argValue(2);
   if (mode == "off") {
-    client->setTutorial(-1);
+    client.setTutorial(-1);
   } else if (mode == "on") {
-    client->setTutorial(1);
+    client.setTutorial(1);
   } else if (mode == "auto") {
-    client->setTutorial(0);
+    client.setTutorial(0);
   } else {
     return false;
   }

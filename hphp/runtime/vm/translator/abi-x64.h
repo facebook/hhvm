@@ -67,6 +67,9 @@ constexpr PhysReg rVmTl      = reg::r12;
  */
 
 const RegSet kCallerSaved = RegSet()
+                          // ------------
+                          // GP registers
+                          // ------------
                           | RegSet(reg::rax)
                           | RegSet(reg::rcx)
                           | RegSet(reg::rdx)
@@ -74,18 +77,61 @@ const RegSet kCallerSaved = RegSet()
                           | RegSet(reg::rdi)
                           | RegSet(reg::r8)
                           | RegSet(reg::r9)
-                          // r10 is reserved by the assembler, and for
-                          // various extremely-specific scratch uses.
-                          | RegSet(reg::r11)
+                          // r10 is reserved for the assembler (rAsm), and for
+                          //     various extremely-specific scratch uses
+                          // r11 is reserved for CodeGenerator (rCgGP)
+                          //
+                          // -------------
+                          // XMM registers
+                          // -------------
+                          // xmm0 is reserved for CodeGenerator (rCgXMM0)
+                          // xmm1 is reserved for CodeGenerator (rCgXMM1)
+                          | RegSet(reg::xmm2)
+                          | RegSet(reg::xmm3)
+                          | RegSet(reg::xmm4)
+                          | RegSet(reg::xmm5)
+                          | RegSet(reg::xmm6)
+                          | RegSet(reg::xmm7)
+                          | RegSet(reg::xmm8)
+                          | RegSet(reg::xmm9)
+                          | RegSet(reg::xmm10)
+                          | RegSet(reg::xmm11)
+                          | RegSet(reg::xmm12)
+                          | RegSet(reg::xmm13)
+                          | RegSet(reg::xmm14)
+                          | RegSet(reg::xmm15)
                           ;
 
 const RegSet kCalleeSaved = RegSet()
                             // r12 is reserved for rVmTl
                           | RegSet(reg::r13)
                           | RegSet(reg::r14)
-                          | RegSet(reg::r15);
+                          | RegSet(reg::r15)
+                          ;
 
 const RegSet kAllRegs     = kCallerSaved | kCalleeSaved;
+
+const RegSet kMMXRegs     = RegSet()
+                          | RegSet(reg::xmm0)
+                          | RegSet(reg::xmm1)
+                          | RegSet(reg::xmm2)
+                          | RegSet(reg::xmm3)
+                          | RegSet(reg::xmm4)
+                          | RegSet(reg::xmm5)
+                          | RegSet(reg::xmm6)
+                          | RegSet(reg::xmm7)
+                          | RegSet(reg::xmm8)
+                          | RegSet(reg::xmm9)
+                          | RegSet(reg::xmm10)
+                          | RegSet(reg::xmm11)
+                          | RegSet(reg::xmm12)
+                          | RegSet(reg::xmm13)
+                          | RegSet(reg::xmm14)
+                          | RegSet(reg::xmm15)
+                          ;
+
+const RegSet kGPCallerSaved = kCallerSaved - kMMXRegs;
+const RegSet kGPCalleeSaved = kCalleeSaved - kMMXRegs;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -205,11 +251,8 @@ const int kNumServiceReqArgRegs =
   REQ(STACK_OVERFLOW) \
   \
   /*
-   * When HHIR is in use, this requests a retranslation that does not use HHIR.
-   * This is only used when HHIR is turned on.
-   *
-   * Note that, when EvalJitUseIR is enabled, RETRANSLATE requests will attempt
-   * to use HHIR.
+   * This requests a retranslation that does not use HHIR, meaning it
+   * will be an INTERPRET service request.
    */ \
   REQ(RETRANSLATE_NO_IR) \
   \
@@ -276,7 +319,6 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
 // Set of all the x64 registers.
 const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
                          | kSpecialCrossTraceRegs;
-const int kNumX64Regs = 16;
 
 /*
  * Some data structures are accessed often enough from translated code
@@ -299,8 +341,8 @@ const int kNumX64Regs = 16;
  * address).  It is used as spill locations by HHIR (see LinearScan),
  * and for MInstrState in both HHIR and translator-x64-vector.cpp.
  */
-const size_t kReservedRSPScratchSpace = 0x100;
-const size_t kReservedRSPSpillSpace = 0x80;
+const size_t kReservedRSPScratchSpace = 0x180;
+const size_t kReservedRSPSpillSpace   = 0x100;
 
 //////////////////////////////////////////////////////////////////////
 

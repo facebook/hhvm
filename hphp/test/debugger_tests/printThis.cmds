@@ -1,0 +1,4 @@
+break printThis.php:5
+run
+print $this
+quit

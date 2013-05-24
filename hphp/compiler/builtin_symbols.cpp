@@ -91,6 +91,7 @@ StringToClassScopePtrMap BuiltinSymbols::s_classes;
 VariableTablePtr BuiltinSymbols::s_variables;
 ConstantTablePtr BuiltinSymbols::s_constants;
 StringToTypePtrMap BuiltinSymbols::s_superGlobals;
+AnalysisResultPtr BuiltinSymbols::s_systemAr;
 void *BuiltinSymbols::s_handle_main = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,8 +204,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::NeedsActRec) {
     f->setNeedsActRec();
   }
-  if ((attrs & ClassInfo::IgnoreRedefinition) && !isMethod) {
-    f->setIgnoreRedefinition();
+  if ((attrs & ClassInfo::AllowOverride) && !isMethod) {
+    f->setAllowOverride();
   }
 
   FunctionScope::RecordFunctionInfo(f->getName(), f);
@@ -329,7 +330,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
 
   // parse all PHP files under system/classes
   if (!extOnly) {
-    ar = AnalysisResultPtr(new AnalysisResult());
+    s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
     ar->loadBuiltinFunctions();
     string slib = get_systemlib();
 

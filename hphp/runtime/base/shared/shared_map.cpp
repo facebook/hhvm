@@ -54,7 +54,6 @@ SharedMap::~SharedMap() {
     }
     smart_free(m_localCache);
   }
-  m_arr->decRef();
 }
 
 bool SharedMap::exists(const StringData* k) const {

@@ -30,31 +30,31 @@ public:
   // Informs the client of all strings that may follow a break command.
   // Used for auto completion. The client uses the prefix of the argument
   // following the command to narrow down the list displayed to the user.
-  virtual void list(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
 
   // The text to display when the debugger client processes "help break".
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient &client);
 
   // Updates the client with information about the execution of this command.
   // This information is not used by the command line client, but can
   // be accessed via the debugger client API exposed to PHP programs.
-  virtual void setClientOutput(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient &client);
 
   // Updates the breakpoint list in the proxy with the new list
   // received from the client. Then sends the command back to the
   // client as confirmation. Returns false if the confirmation message
   // send failed.
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   // Creates a new CmdBreak instance, sets its breakpoints to the client's
   // list, sends the command to the server and waits for a response.
-  static bool SendClientBreakpointListToServer(DebuggerClient *client);
+  static bool SendClientBreakpointListToServer(DebuggerClient &client);
 
 protected:
   // Carries out the Break command. This always involves an action on the
   // client and usually, but not always, involves the server by sending
   // this command to the server and waiting for its response.
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
 
   // Serializes this command into the given Thrift buffer.
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
@@ -67,7 +67,7 @@ protected:
   // to the server so that it too can update it's list.
   // Returns false if the breakpoint is not well formed.
   bool addToBreakpointListAndUpdateServer(
-      DebuggerClient *client, BreakPointInfoPtr bpi, int index);
+      DebuggerClient &client, BreakPointInfoPtr bpi, int index);
 
 private:
   // Either points to the breakpoint collection of a debugger client
@@ -84,34 +84,34 @@ private:
   // will update its breakpoint list with the one in this command.
   // The client will block until the server echoes
   // this command back to it. The echoed command is discarded.
-  bool updateServer(DebuggerClient *client);
+  bool updateServer(DebuggerClient &client);
 
   // Carries out the "break list" command.
-  bool processList(DebuggerClient *client);
+  void processList(DebuggerClient &client);
 
   // Carries out commands that change the status of a breakpoint.
-  bool processStatusChange(DebuggerClient *client);
+  void processStatusChange(DebuggerClient &client);
 
   // Returns true if the last command parsed by the client has
   // an argument that changes the status of a breakpoint.
   // I.e. clear, enable, disable or toggle.
-  bool hasStatusChangeArg(DebuggerClient *client);
+  bool hasStatusChangeArg(DebuggerClient &client);
 
   // Returns true if the last command parsed by the client has
   // the string "enable" in its first argument position.
-  bool hasEnableArg(DebuggerClient *client);
+  bool hasEnableArg(DebuggerClient &client);
 
   // Returns true if the last command parsed by the client has
   // the string "disable" in its first argument position.
-  bool hasDisableArg(DebuggerClient *client);
+  bool hasDisableArg(DebuggerClient &client);
 
   // Returns true if the last command parsed by the client has
   // the string "clear" in its first argument position.
-  bool hasClearArg(DebuggerClient *client);
+  bool hasClearArg(DebuggerClient &client);
 
   // Returns true if the last command parsed by the client has
   // the string "toggle" in its first argument position.
-  bool hasToggleArg(DebuggerClient *client);
+  bool hasToggleArg(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

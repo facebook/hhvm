@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/translator/types.h"
 #include "hphp/runtime/vm/translator/runtime-type.h"
 #include "hphp/runtime/vm/translator/translator-runtime.h"
+#include "hphp/runtime/vm/translator/hopt/type.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class.h"
@@ -59,6 +60,9 @@ using HPHP::Transl::PhysReg;
 using HPHP::Transl::ConditionCode;
 
 struct IRInstruction;
+struct SSATmp;
+struct Block;
+struct Trace;
 
 class FailedIRGen : public std::exception {
  public:
@@ -69,25 +73,10 @@ class FailedIRGen : public std::exception {
       file(_file), line(_line), func(_func) { }
 };
 
-// Flags to identify if a branch should go to a patchable jmp in astubs
-// happens when instructions have been moved off the main trace to the exit path.
-static const TCA kIRDirectJmpInactive = nullptr;
-// Fixup Jcc;Jmp branches out of trace using REQ_BIND_JMPCC_FIRST/SECOND
-static const TCA kIRDirectJccJmpActive = (TCA)0x01;
-// Optimize Jcc exit from trace when fall through path stays in trace
-static const TCA kIRDirectJccActive = (TCA)0x02;
-// Optimize guard exit from beginning of trace
-static const TCA kIRDirectGuardActive = (TCA)0x03;
-
 #define SPUNT(instr) do {                           \
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
 #define PUNT(instr) SPUNT(#instr)
-#define PUNT_WITH_TX64(instr) do {              \
-    if (!RuntimeOption::EvalHHIRDisableTx64) {  \
-      PUNT(inst);                               \
-    }                                           \
-  } while (false)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -164,22 +153,27 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
+O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
+O(CheckLoc,                         ND, S(FramePtr),                       E) \
+O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
-O(OpAdd,                        DArith, SNum SNum,                         C) \
-O(OpSub,                        DArith, SNum SNum,                         C) \
-O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
-O(OpOr,                         D(Int), SNum SNum,                         C) \
-O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
-O(OpMul,                        DArith, SNum SNum,                         C) \
-O(OpDiv,                        DArith, SNum SNum,                         C) \
-O(OpMod,                        D(Int), SNumInt SNumInt,                 C|N) \
+O(OpAdd,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpSub,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpMul,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpDiv,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpMod,                        DArith, S(Int,Dbl) S(Int,Dbl),           C|N) \
+O(OpBitAnd,                     D(Int), S(Int) S(Int),                     C) \
+O(OpBitOr,                      D(Int), S(Int) S(Int),                     C) \
+O(OpBitXor,                     D(Int), S(Int) S(Int),                     C) \
+O(OpBitNot,                     D(Int), S(Int),                            C) \
+O(OpLogicXor,                  D(Bool), S(Bool) S(Bool),                   C) \
 O(OpNot,                       D(Bool), S(Bool),                           C) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
@@ -221,8 +215,7 @@ O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
-                                                                              \
-  /* TODO(#2058842): order currently matters for the 'query ops' here */      \
+/*    name                      dstinfo srcinfo                      flags */ \
 O(OpGt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpGte,                       D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpLt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
@@ -248,12 +241,25 @@ O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                       E) \
 O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                       E) \
 O(JmpIsType,                   D(None), SUnk,                              E) \
 O(JmpIsNType,                  D(None), SUnk,                              E) \
-  /* TODO(#2058842) keep preceeding conditional branches contiguous */        \
-                                                                              \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
 O(Jmp_,                        D(None), SUnk,                            T|E) \
+O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
+O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
+O(ReqBindJmpZero,                   ND, SNum,                            T|E) \
+O(ReqBindJmpNZero,                  ND, SNum,                            T|E) \
+O(SideExitGuardLoc,                 ND, S(FramePtr),                       E) \
+O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
+/*    name                      dstinfo srcinfo                      flags */ \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
@@ -329,7 +335,7 @@ O(NativeImpl,                       ND, C(Func) S(FramePtr),    E|Mem|N|Refs) \
 O(RetCtrl,                          ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(RetAddr),                T|E|Mem) \
-O(RetVal,                           ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
+O(StRetVal,                         ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),      E|Mem|CRc|Refs) \
@@ -356,20 +362,18 @@ O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(Func,FuncCls,FuncCtx,Null)        \
                                           S(Ctx,Cls,InitNull),           CRc) \
 O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
-O(ExitTrace,                        ND, SUnk,                            T|E) \
-O(ExitTraceCc,                      ND, SUnk,                            T|E) \
-O(ExitSlow,                         ND, SUnk,                            T|E) \
-O(ExitSlowNoProgress,               ND, SUnk,                            T|E) \
-O(ExitGuardFailure,                 ND, SUnk,                            T|E) \
-O(SyncVMRegs,                       ND, S(FramePtr) S(StkPtr),             E) \
+O(ReqBindJmp,                       ND, NA,                              T|E) \
+O(ReqBindJmpNoIR,                   ND, NA,                              T|E) \
+O(ReqRetranslateNoIR,               ND, NA,                              T|E) \
+O(ReqRetranslate,                   ND, NA,                              T|E) \
+O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
 O(DecRefLoc,                        ND, S(FramePtr),            N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefThis,                       ND, S(FramePtr),            N|E|Mem|Refs) \
-O(GenericRetDecRefs,         D(StkPtr), S(FramePtr)                           \
-                                          S(Gen) C(Int),        E|N|Mem|Refs) \
+O(GenericRetDecRefs,         D(StkPtr), S(FramePtr) C(Int),     E|N|Mem|Refs) \
 O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
@@ -377,7 +381,7 @@ O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
-O(DefInlineFP,             D(FramePtr), S(StkPtr),                        NF) \
+O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr),              NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
@@ -417,8 +421,6 @@ O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
-O(AllocSpill,                       ND, C(Int),                        E|Mem) \
-O(FreeSpill,                        ND, C(Int),                        E|Mem) \
 O(CreateCont,                   D(Obj), C(TCA)                                \
                                           S(FramePtr)                         \
                                           C(Bool)                             \
@@ -582,8 +584,11 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(IncTransCounter,                  ND, NA,                                E) \
+O(ArrayIdx,                    D(Cell), C(TCA) S(Arr) S(Int,Str) S(Cell),     \
+                                                        E|N|CRc|PRc|Refs|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
+O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(Nop,                              ND, NA,                               NF) \
 /* */
 
@@ -592,394 +597,60 @@ enum Opcode : uint16_t {
   IR_OPCODES
 #undef O
 
-  // Agree with hhbc on the names of these, to ease macro implementations.
-  // TODO(2395841): this is totally bogus. Bitwise and logical ops have vastly
-  // different behavior. We need to give these their own opcodes.
-  OpBitAnd = OpAnd,
-  OpBitOr = OpOr,
-  OpBitXor = OpXor,
-
   IR_NUM_OPCODES
 };
 
-//////////////////////////////////////////////////////////////////////
+/*
+ * A "query op" is any instruction returning Type::Bool that is both
+ * branch-fusable and negateable.
+ */
+bool isQueryOp(Opcode opc);
 
 /*
- * Some IRInstructions with compile-time-only constants may carry
- * along extra data in the form of one of these structures.
+ * A "cmp ops" is query op that takes exactly two arguments of type
+ * Gen.
+ */
+bool isCmpOp(Opcode opc);
+
+/*
+ * A "query jump op" is a conditional jump instruction that
+ * corresponds to one of the query op instructions.
+ */
+bool isQueryJmpOp(Opcode opc);
+
+/*
+ * Translate a query op into a conditional jump that does the same
+ * test (a "query jump op").
  *
- * Note that this isn't really appropriate for compile-time constants
- * that are actually representing user values (we want them to be
- * visible to optimization passes, allocatable to registers, etc),
- * just compile-time metadata.
+ * Pre: isQueryOp(opc)
+ */
+Opcode queryToJmpOp(Opcode opc);
+
+/*
+ * Translate a "query jump op" to a query op.
  *
- * These types must:
+ * Pre: isQueryJmpOp(opc);
+ */
+Opcode queryJmpToQueryOp(Opcode opc);
+
+/*
+ * Convert a jump operation to its corresponding conditional
+ * ReqBindJmp.
  *
- *   - Derive from IRExtraData (for overloading purposes)
- *   - Be arena-allocatable (no non-trivial destructors)
- *   - Either CopyConstructible, or implement a clone member
- *     function that takes an arena to clone to
- *
- * In addition, for extra data used with a cse-able instruction:
- *
- *   - Implement an cseEquals() member that indicates equality for CSE
- *     purposes.
- *   - Implement a cseHash() method.
- *
- * Finally, optionally they may implement a show() method for use in
- * debug printouts.
+ * Pre: opc is a conditional jump.
  */
-
-/*
- * Traits that returns the type of the extra C++ data structure for a
- * given instruction, if it has one, along with some other information
- * about the type.
- */
-template<Opcode op> struct OpHasExtraData { enum { value = 0 }; };
-template<Opcode op> struct IRExtraDataType;
-
-//////////////////////////////////////////////////////////////////////
-
-struct IRExtraData {};
-
-struct LdSSwitchData : IRExtraData {
-  struct Elm {
-    const StringData* str;
-    Offset            dest;
-  };
-
-  explicit LdSSwitchData() = default;
-  LdSSwitchData(const LdSSwitchData&) = delete;
-  LdSSwitchData& operator=(const LdSSwitchData&) = delete;
-
-  LdSSwitchData* clone(Arena& arena) const {
-    LdSSwitchData* target = new (arena) LdSSwitchData;
-    target->func       = func;
-    target->numCases   = numCases;
-    target->defaultOff = defaultOff;
-    target->cases      = new (arena) Elm[numCases];
-    std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
-    return target;
-  }
-
-  const Func* func;
-  int64_t     numCases;
-  const Elm*  cases;
-  Offset      defaultOff;
-};
-
-struct JmpSwitchData : IRExtraData {
-  JmpSwitchData* clone(Arena& arena) const {
-    JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->func       = func;
-    sd->base       = base;
-    sd->bounded    = bounded;
-    sd->cases      = cases;
-    sd->defaultOff = defaultOff;
-    sd->targets    = new (arena) Offset[cases];
-    std::copy(targets, targets + cases, const_cast<Offset*>(sd->targets));
-    return sd;
-  }
-
-  const Func* func;
-  int64_t base;        // base of switch case
-  bool    bounded;     // whether switch is bounded or not
-  int32_t cases;       // number of cases
-  Offset  defaultOff;  // offset of default case
-  Offset* targets;     // offsets for all targets
-};
-
-struct MarkerData : IRExtraData {
-  uint32_t    bcOff;    // the bytecode offset in unit
-  int32_t     stackOff; // stack off from start of trace
-  const Func* func;     // which func are we in
-};
-
-struct LocalId : IRExtraData {
-  explicit LocalId(uint32_t id)
-    : locId(id)
-  {}
-
-  bool cseEquals(LocalId o) const { return locId == o.locId; }
-  size_t cseHash() const { return std::hash<uint32_t>()(locId); }
-  std::string show() const { return folly::to<std::string>(locId); }
-
-  uint32_t locId;
-};
-
-struct ConstData : IRExtraData {
-  template<class T>
-  explicit ConstData(T data)
-    : m_dataBits(0)
-  {
-    static_assert(sizeof(T) <= sizeof m_dataBits,
-                  "Constant data was larger than supported");
-    static_assert(std::is_pod<T>::value,
-                  "Constant data wasn't a pod?");
-    std::memcpy(&m_dataBits, &data, sizeof data);
-  }
-
-  template<class T>
-  T as() const {
-    T ret;
-    std::memcpy(&ret, &m_dataBits, sizeof ret);
-    return ret;
-  }
-
-  bool cseEquals(ConstData o) const { return m_dataBits == o.m_dataBits; }
-  size_t cseHash() const { return std::hash<uintptr_t>()(m_dataBits); }
-
-private:
-  uintptr_t m_dataBits;
-};
-
-struct CreateContData : IRExtraData {
-  const Func* origFunc;
-  const Func* genFunc;
-};
-
-/*
- * EdgeData is linked list node that tracks the set of Jmp_'s that pass values
- * to a particular block.  Each such Jmp_ has one node, and the block points
- * to the list head.
- */
-struct EdgeData : IRExtraData {
-  IRInstruction* jmp;    // owner of this edge
-  EdgeData* next;        // next edge to same target
-};
-
-/*
- * ExitData contains the address of a jmp instruction we can smash later
- * if we start a new tracelet at this exit point.
- */
-struct ExitData : IRExtraData {
-  explicit ExitData(IRInstruction* toSmash) : toSmash(toSmash) {}
-  IRInstruction* toSmash;
-
-  std::string show() const;
-};
-
-/*
- * Compile-time metadata about an ActRec allocation.
- */
-struct ActRecInfo : IRExtraData {
-  const StringData* invName;  // may be nullptr
-  int32_t numArgs;
-
-  std::string show() const {
-    return folly::to<std::string>(numArgs, invName ? " M" : "");
-  }
-};
-
-/*
- * Stack offsets.
- */
-struct StackOffset : IRExtraData {
-  explicit StackOffset(int32_t offset) : offset(offset) {}
-
-  std::string show() const { return folly::to<std::string>(offset); }
-
-  bool cseEquals(StackOffset o) const { return offset == o.offset; }
-  size_t cseHash() const { return std::hash<int32_t>()(offset); }
-
-  int32_t offset;
-};
-
-/*
- * Bytecode offsets.
- */
-struct BCOffset : IRExtraData {
-  explicit BCOffset(Offset offset) : offset(offset) {}
-  std::string show() const { return folly::to<std::string>(offset); }
-  Offset offset;
-};
-
-/*
- * FCallArray offsets
- */
-struct CallArrayData : IRExtraData {
-  explicit CallArrayData(Offset pcOffset, Offset aft)
-    : pc(pcOffset), after(aft) {}
-
-  std::string show() const { return folly::to<std::string>(pc, ",", after); }
-
-  Offset pc, after;
-};
-
-
-//////////////////////////////////////////////////////////////////////
-
-#define X(op, data)                                                   \
-  template<> struct IRExtraDataType<op> { typedef data type; };       \
-  template<> struct OpHasExtraData<op> { enum { value = 1 }; };       \
-  static_assert(boost::has_trivial_destructor<data>::value,           \
-                "IR extra data type must be trivially destructible")
-
-X(JmpSwitchDest,      JmpSwitchData);
-X(LdSSwitchDestFast,  LdSSwitchData);
-X(LdSSwitchDestSlow,  LdSSwitchData);
-X(Marker,             MarkerData);
-X(RaiseUninitLoc,     LocalId);
-X(GuardLoc,           LocalId);
-X(AssertLoc,          LocalId);
-X(OverrideLoc,        LocalId);
-X(LdLocAddr,          LocalId);
-X(DecRefLoc,          LocalId);
-X(LdLoc,              LocalId);
-X(StLoc,              LocalId);
-X(StLocNT,            LocalId);
-X(DefConst,           ConstData);
-X(LdConst,            ConstData);
-X(Jmp_,               EdgeData);
-X(ExitTrace,          ExitData);
-X(ExitTraceCc,        ExitData);
-X(SpillFrame,         ActRecInfo);
-X(GuardStk,           StackOffset);
-X(CastStk,            StackOffset);
-X(AssertStk,          StackOffset);
-X(ReDefSP,            StackOffset);
-X(ReDefGeneratorSP,   StackOffset);
-X(DefSP,              StackOffset);
-X(LdStack,            StackOffset);
-X(LdStackAddr,        StackOffset);
-X(DecRefStack,        StackOffset);
-X(DefInlineFP,        BCOffset);
-X(InlineCreateCont,   CreateContData);
-X(CallArray,          CallArrayData);
-
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
-template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
-  static void doassert() {
-    assert(!"called getExtra on an opcode without extra data");
-  }
-};
-
-template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
-  static void doassert() {
-    typedef typename IRExtraDataType<opc>::type ExtraType;
-    if (!std::is_same<ExtraType,T>::value) {
-      assert(!"getExtra<T> was called with an extra data "
-              "type that doesn't match the opcode type");
-    }
-  }
-};
-
-// Asserts that Opcode opc has extradata and it is of type T.
-template<class T> void assert_opcode_extra(Opcode opc) {
-#define O(opcode, dstinfo, srcinfo, flags)      \
-  case opcode:                                  \
-    AssertExtraTypes<                           \
-      OpHasExtraData<opcode>::value,opcode,T    \
-    >::doassert();                              \
-    break;
-  switch (opc) { IR_OPCODES default: not_reached(); }
-#undef O
-}
-
-std::string showExtra(Opcode opc, const IRExtraData* data);
-
-//////////////////////////////////////////////////////////////////////
-
-inline bool isCmpOp(Opcode opc) {
-  return (opc >= OpGt && opc <= OpNSame);
-}
-
-// A "query op" is any instruction returning Type::Bool that is both
-// branch-fusable and negateable.
-inline bool isQueryOp(Opcode opc) {
-  return (opc >= OpGt && opc <= IsNType);
-}
-
-inline Opcode queryToJmpOp(Opcode opc) {
-  assert(isQueryOp(opc));
-  return (Opcode)(JmpGt + (opc - OpGt));
-}
-
-inline bool isQueryJmpOp(Opcode opc) {
-  switch (opc) {
-    case JmpGt:
-    case JmpGte:
-    case JmpLt:
-    case JmpLte:
-    case JmpEq:
-    case JmpNeq:
-    case JmpSame:
-    case JmpNSame:
-    case JmpInstanceOfBitmask:
-    case JmpNInstanceOfBitmask:
-    case JmpIsType:
-    case JmpIsNType:
-    case JmpZero:
-    case JmpNZero:
-      return true;
-    default:
-      return false;
-  }
-}
-
-inline Opcode queryJmpToQueryOp(Opcode opc) {
-  assert(isQueryJmpOp(opc));
-  assert(opc != JmpZero && opc != JmpNZero);
-  return Opcode(OpGt + (opc - JmpGt));
-}
-
-inline ConditionCode queryJmpToCC(Opcode opc) {
-  assert(isQueryJmpOp(opc));
-
-  using namespace HPHP::Transl;
-
-  switch (opc) {
-    case JmpGt:                 return CC_G;
-    case JmpGte:                return CC_GE;
-    case JmpLt:                 return CC_L;
-    case JmpLte:                return CC_LE;
-    case JmpEq:                 return CC_E;
-    case JmpNeq:                return CC_NE;
-    case JmpSame:               return CC_E;
-    case JmpNSame:              return CC_NE;
-    case JmpInstanceOfBitmask:  return CC_NZ;
-    case JmpNInstanceOfBitmask: return CC_Z;
-    case JmpIsType:             return CC_NZ;
-    case JmpIsNType:            return CC_Z;
-    case JmpZero:               return CC_Z;
-    case JmpNZero:              return CC_NZ;
-    default:
-      not_reached();
-  }
-}
+Opcode jmpToReqBindJmp(Opcode opc);
 
 /*
  * Return the opcode that corresponds to negation of opc.
  */
 Opcode negateQueryOp(Opcode opc);
 
-extern Opcode queryCommuteTable[];
-
-inline Opcode commuteQueryOp(Opcode opc) {
-  assert(opc >= OpGt && opc <= OpNSame);
-  return queryCommuteTable[opc - OpGt];
-}
-
-namespace TraceExitType {
-// Must update in sync with ExitTrace entries in OPC table above
-enum ExitType {
-  Normal,
-  NormalCc,
-  Slow,
-  SlowNoProgress,
-  GuardFailure,
-};
-}
-
-TraceExitType::ExitType getExitType(Opcode opc);
-Opcode getExitOpcode(TraceExitType::ExitType);
-
-inline bool isExitSlow(TraceExitType::ExitType t) {
-  return t == TraceExitType::Slow || t == TraceExitType::SlowNoProgress;
-}
+/*
+ * Return the opcode that corresponds to commuting the arguments of
+ * opc.
+ */
+Opcode commuteQueryOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
 
@@ -1008,490 +679,6 @@ enum OpcodeFlag : uint64_t {
 
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 Opcode getStackModifyingOpcode(Opcode opc);
-
-#define IRT_BOXES(name, bit)                                            \
-  IRT(name,             (bit))                                          \
-  IRT(Boxed##name,      (bit) << kBoxShift)                             \
-  IRT(PtrTo##name,      (bit) << kPtrShift)                             \
-  IRT(PtrToBoxed##name, (bit) << kPtrBoxShift)
-
-#define IRT_PHP(c)                                                      \
-  c(Uninit,       1ULL << 0)                                            \
-  c(InitNull,     1ULL << 1)                                            \
-  c(Bool,         1ULL << 2)                                            \
-  c(Int,          1ULL << 3)                                            \
-  c(Dbl,          1ULL << 4)                                            \
-  c(StaticStr,    1ULL << 5)                                            \
-  c(CountedStr,   1ULL << 6)                                            \
-  c(StaticArr,    1ULL << 7)                                            \
-  c(CountedArr,   1ULL << 8)                                            \
-  c(Obj,          1ULL << 9)
-// Boxed*:       10-19
-// PtrTo*:       20-29
-// PtrToBoxed*:  30-39
-
-// This list should be in non-decreasing order of specificity
-#define IRT_PHP_UNIONS(c)                                               \
-  c(Null,          kUninit|kInitNull)                                   \
-  c(Str,           kStaticStr|kCountedStr)                              \
-  c(Arr,           kStaticArr|kCountedArr)                              \
-  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
-  c(Uncounted,     kUncountedInit|kUninit)                              \
-  c(Cell,          kUncounted|kStr|kArr|kObj)
-
-#define IRT_RUNTIME                                                     \
-  IRT(Cls,         1ULL << 40)                                          \
-  IRT(Func,        1ULL << 41)                                          \
-  IRT(VarEnv,      1ULL << 42)                                          \
-  IRT(NamedEntity, 1ULL << 43)                                          \
-  IRT(FuncCls,     1ULL << 44) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 45) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 46) /* Class* with the lowest bit set,  */   \
-                               /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 47) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 48) /* stack pointer */                      \
-  IRT(FramePtr,    1ULL << 49) /* frame pointer */                      \
-  IRT(TCA,         1ULL << 50)                                          \
-  IRT(ActRec,      1ULL << 51)                                          \
-  IRT(None,        1ULL << 52)                                          \
-  IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */
-
-// The definitions for these are in ir.cpp
-#define IRT_UNIONS                                                      \
-  IRT(Ctx,         kObj|kCctx)                                          \
-  IRT(FuncCtx,     kFuncCls|kFuncObj)
-
-// Gen, Counted, PtrToGen, and PtrToCounted are here instead of
-// IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)
-// would be nonsense types.
-#define IRT_SPECIAL                                                 \
-  IRT(Bottom,       0)                                              \
-  IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
-  IRT(PtrToCounted, kCounted << kPtrShift)                          \
-  IRT(Gen,          kCell|kBoxedCell)                               \
-  IRT(Init,         kGen & ~kUninit)                                \
-  IRT(PtrToGen,     kGen << kPtrShift)                              \
-  IRT(PtrToInit,    kInit << kPtrShift)
-
-// All types (including union types) that represent program values,
-// except Gen (which is special). Boxed*, PtrTo*, and PtrToBoxed* only
-// exist for these types.
-#define IRT_USERLAND(c) IRT_PHP(c) IRT_PHP_UNIONS(c)
-
-// All types with just a single bit set
-#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES) IRT_RUNTIME
-
-// All types
-#define IR_TYPES IRT_USERLAND(IRT_BOXES) IRT_RUNTIME IRT_UNIONS IRT_SPECIAL
-
-class Type {
-  typedef uint64_t bits_t;
-
-  static const size_t kBoxShift = 10;
-  static const size_t kPtrShift = kBoxShift * 2;
-  static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
-
-  enum TypeBits {
-#define IRT(name, bits) k##name = (bits),
-  IR_TYPES
-#undef IRT
-  };
-
-  union {
-    bits_t m_bits;
-    TypeBits m_typedBits;
-  };
-
-public:
-# define IRT(name, ...) static const Type name;
-  IR_TYPES
-# undef IRT
-
-  explicit Type(bits_t bits = kNone)
-    : m_bits(bits)
-  {}
-
-  size_t hash() const {
-    return hash_int64(m_bits);
-  }
-
-  bool operator==(Type other) const {
-    return m_bits == other.m_bits;
-  }
-
-  bool operator!=(Type other) const {
-    return !operator==(other);
-  }
-
-  Type operator|(Type other) const {
-    return Type(m_bits | other.m_bits);
-  }
-
-  Type operator&(Type other) const {
-    return Type(m_bits & other.m_bits);
-  }
-
-  Type operator-(Type other) const {
-    return Type(m_bits & ~other.m_bits);
-  }
-
-  std::string toString() const;
-  static std::string debugString(Type t);
-  static Type fromString(const std::string& str);
-
-  bool isBoxed() const {
-    return subtypeOf(BoxedCell);
-  }
-
-  bool notBoxed() const {
-    return subtypeOf(Cell);
-  }
-
-  bool maybeBoxed() const {
-    return (*this & BoxedCell) != Bottom;
-  }
-
-  bool isPtr() const {
-    return subtypeOf(PtrToGen);
-  }
-
-  bool notPtr() const {
-    return (*this & PtrToGen) == Bottom;
-  }
-
-  bool isCounted() const {
-    return subtypeOf(Counted);
-  }
-
-  bool maybeCounted() const {
-    return (*this & Counted) != Bottom;
-  }
-
-  bool notCounted() const {
-    return !maybeCounted();
-  }
-
-  /*
-   * Returns true iff this is a union type. Note that this is the
-   * plain old set definition of union, so Type::Str, Type::Arr, and
-   * Type::Null will all return true.
-   */
-  bool isUnion() const {
-    // This will return true iff more than 1 bit is set in
-    // m_bits.
-    return (m_bits & (m_bits - 1)) != 0;
-  }
-
-  /*
-   * Returns true if this value has a known constant DataType enum
-   * value, which allows us to avoid several checks.
-   */
-  bool isKnownDataType() const {
-    // Calling this function with a type that can't be in a TypedValue isn't
-    // meaningful
-    assert(subtypeOf(Gen | Cls));
-    // Str, Arr and Null are technically unions but can each be
-    // represented by one data type. Same for a union that consists of
-    // nothing but boxed types.
-    if (isString() || isArray() || isNull() || isBoxed()) {
-      return true;
-    }
-
-    return !isUnion();
-  }
-
-  /*
-   * Similar to isKnownDataType, with the added restriction that the
-   * type not be Boxed.
-   */
-  bool isKnownUnboxedDataType() const {
-    return isKnownDataType() && notBoxed();
-  }
-
-  /*
-   * Returns true if this requires a register to hold a DataType at
-   * runtime.
-   */
-  bool needsReg() const {
-    return subtypeOf(Gen) && !isKnownDataType();
-  }
-
-  bool needsStaticBitCheck() const {
-    return (*this & (StaticStr | StaticArr)) != Bottom;
-  }
-
-  // returns true if definitely not uninitialized
-  bool isInit() const {
-    return !Uninit.subtypeOf(*this);
-  }
-
-  bool maybeUninit() const {
-    return !isInit();
-  }
-
-  /*
-   * Returns true if this is a strict subtype of t2.
-   */
-  bool strictSubtypeOf(Type t2) const {
-    return *this != t2 && subtypeOf(t2);
-  }
-
-  /*
-   * Returns true if this is a non-strict subtype of any of the arguments.
-   */
-  bool subtypeOf(Type t2) const {
-    return (m_bits & t2.m_bits) == m_bits;
-  }
-
-  /*
-   * Returns true if this is a non-strict subtype of any of the arguments.
-   */
-  template<typename... Types>
-  bool subtypeOfAny(Type t2, Types... ts) const {
-    return subtypeOf(t2) || subtypeOfAny(ts...);
-  }
-
-  bool subtypeOfAny() const {
-    return false;
-  }
-
-  /*
-   * Returns true if any subtype of this is a subtype of t2.
-   */
-  bool maybe(Type t2) const {
-    return (*this & t2) != Bottom;
-  }
-
-  /*
-   * Returns true if no subtypes of this are subtypes of t2.
-   */
-  bool not(Type t2) const {
-    return !maybe(t2);
-  }
-
-  /*
-   * Returns true if this is exactly equal to t2. Be careful: you
-   * probably mean subtypeOf.
-   */
-  bool equals(Type t2) const {
-    return m_bits == t2.m_bits;
-  }
-
-  /*
-   * Returns the most refined of two types.
-   *
-   * Pre: the types must not be completely unrelated.
-   */
-  static Type mostRefined(Type t1, Type t2) {
-    assert(t1.subtypeOf(t2) || t2.subtypeOf(t1));
-    return t1.subtypeOf(t2) ? t1 : t2;
-  }
-
-  bool isArray() const {
-    return subtypeOf(Arr);
-  }
-
-  bool isBool() const {
-    return subtypeOf(Bool);
-  }
-
-  bool isDbl() const {
-    return subtypeOf(Dbl);
-  }
-
-  bool isInt() const {
-    return subtypeOf(Int);
-  }
-
-  bool isNull() const {
-    return subtypeOf(Null);
-  }
-
-  bool isObj() const {
-    return subtypeOf(Obj);
-  }
-
-  bool isString() const {
-    return subtypeOf(Str);
-  }
-
-  Type innerType() const {
-    assert(isBoxed());
-    return Type(m_bits >> kBoxShift);
-  }
-
-  /*
-   * unionOf: return the least common predefined supertype of t1 and
-   * t2, i.e.. the most refined type t3 such that t1 <: t3 and t2 <:
-   * t3. Note that arbitrary union types are possible, but this
-   * function always returns one of the predefined types.
-   */
-  static Type unionOf(Type t1, Type t2) {
-    assert(t1 != None && t2 != None);
-    if (t1 == t2) return t1;
-    if (t1.subtypeOf(t2)) return t2;
-    if (t2.subtypeOf(t1)) return t1;
-    static const Type union_types[] = {
-#   define IRT(name, ...) name,
-      IRT_PHP_UNIONS(IRT_BOXES)
-#   undef IRT
-      Gen,
-      PtrToGen,
-    };
-    Type t12 = t1 | t2;
-    for (auto u : union_types) {
-      if (t12.subtypeOf(u)) return u;
-    }
-    not_reached();
-  }
-
-  Type box() const {
-    assert(subtypeOf(Cell));
-    // Boxing Uninit returns InitNull but that logic doesn't belong
-    // here.
-    assert(not(Uninit) || equals(Cell));
-    return Type(m_bits << kBoxShift);
-  }
-
-  // This computes the type effects of the Unbox opcode.
-  Type unbox() const {
-    assert(subtypeOf(Gen));
-    return (*this & Cell) | (*this & BoxedCell).innerType();
-  }
-
-  Type deref() const {
-    assert(isPtr());
-    return Type(m_bits >> kPtrShift);
-  }
-
-  Type derefIfPtr() const {
-    assert(subtypeOf(Gen | PtrToGen));
-    return isPtr() ? deref() : *this;
-  }
-
-  // Returns the "stripped" version of this: dereferenced and unboxed,
-  // if applicable.
-  Type strip() const {
-    return derefIfPtr().unbox();
-  }
-
-  Type ptr() const {
-    assert(!isPtr());
-    assert(subtypeOf(Gen));
-    return Type(m_bits << kPtrShift);
-  }
-
-  bool canRunDtor() const {
-    return
-      (*this & (Obj | CountedArr | BoxedObj | BoxedCountedArr))
-      != Type::Bottom;
-  }
-
-  // translates a compiler Type to an HPHP::DataType
-  DataType toDataType() const {
-    assert(!isPtr());
-    if (isBoxed()) {
-      return KindOfRef;
-    }
-
-    // Order is important here: types must progress from more specific
-    // to less specific to return the most specific DataType.
-    if (subtypeOf(None))          return KindOfInvalid;
-    if (subtypeOf(Uninit))        return KindOfUninit;
-    if (subtypeOf(Null))          return KindOfNull;
-    if (subtypeOf(Bool))          return KindOfBoolean;
-    if (subtypeOf(Int))           return KindOfInt64;
-    if (subtypeOf(Dbl))           return KindOfDouble;
-    if (subtypeOf(StaticStr))     return KindOfStaticString;
-    if (subtypeOf(Str))           return KindOfString;
-    if (subtypeOf(Arr))           return KindOfArray;
-    if (subtypeOf(Obj))           return KindOfObject;
-    if (subtypeOf(Cls))           return KindOfClass;
-    if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
-    if (subtypeOf(Uncounted))     return KindOfUncounted;
-    if (subtypeOf(Gen))           return KindOfAny;
-    not_reached();
-  }
-
-  static Type fromDataType(DataType outerType,
-                           DataType innerType = KindOfInvalid) {
-    assert(innerType != KindOfRef);
-
-    switch (outerType) {
-      case KindOfInvalid       : return None;
-      case KindOfUninit        : return Uninit;
-      case KindOfNull          : return InitNull;
-      case KindOfBoolean       : return Bool;
-      case KindOfInt64         : return Int;
-      case KindOfDouble        : return Dbl;
-      case KindOfStaticString  : return StaticStr;
-      case KindOfString        : return Str;
-      case KindOfArray         : return Arr;
-      case KindOfObject        : return Obj;
-      case KindOfClass         : return Cls;
-      case KindOfUncountedInit : return UncountedInit;
-      case KindOfUncounted     : return Uncounted;
-      case KindOfAny           : return Gen;
-      case KindOfRef: {
-        if (innerType == KindOfInvalid) {
-          return BoxedCell;
-        } else {
-          return fromDataType(innerType).box();
-        }
-      }
-      default                  : not_reached();
-    }
-  }
-
-  // return true if this corresponds to a type that
-  // is passed by value in C++
-  bool isSimpleType() {
-    return subtypeOf(Type::Bool)
-           || subtypeOf(Type::Int)
-           || subtypeOf(Type::Dbl)
-           || subtypeOf(Type::Null);
-  }
-
-  // return true if this corresponds to a type that
-  // is passed by reference in C++
-  bool isReferenceType() {
-    return subtypeOf(Type::Str)
-           || subtypeOf(Type::Arr)
-           || subtypeOf(Type::Obj);
-  }
-
-  // In tx64, KindOfUnknown is used to represent Variants (Type::Cell).
-  // fromDataType() maps this to Type::None, which must be mapped
-  // back to Type::Cell. This is not the best place to handle this.
-  // See task #208726.
-  static Type fromDataTypeWithCell(DataType type) {
-    Type t = fromDataType(type);
-    return t.equals(Type::None) ? Type::Cell : t;
-  }
-
-  static Type fromDataTypeWithRef(DataType outerType, bool isRef) {
-    Type t = fromDataTypeWithCell(outerType);
-    return isRef ? t.box() : t;
-  }
-
-  static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
-    return fromDataType(rtt.outerType(), rtt.innerType());
-  }
-
-  static Type fromDynLocation(const Transl::DynLocation* dynLoc) {
-    if (!dynLoc) {
-      return JIT::Type::None;
-    }
-    DataType dt = dynLoc->rtt.outerType();
-    if (dt == KindOfUnknown) {
-      return JIT::Type::Gen;
-    }
-    return JIT::Type::fromDataType(dt, dynLoc->rtt.innerType());
-  }
-}; // class Type
-
-static_assert(sizeof(Type) <= sizeof(uint64_t),
-              "JIT::Type should fit in a register");
 
 /*
  * typeForConst(T)
@@ -1629,295 +816,6 @@ typedef Range<SSATmp**> SrcRange;
 typedef Range<SSATmp*> DstRange;
 
 /*
- * IRInstructions must be arena-allocatable.
- * (Destructors are not called when they come from IRFactory.)
- */
-struct IRInstruction {
-  enum Id { kTransient = 0xffffffff };
-
-  /*
-   * Create an IRInstruction for the opcode `op'.
-   *
-   * IRInstruction creation is usually done through IRFactory or
-   * TraceBuilder rather than directly.
-   */
-  explicit IRInstruction(Opcode op,
-                         uint32_t numSrcs = 0,
-                         SSATmp** srcs = nullptr)
-    : m_op(op)
-    , m_typeParam(Type::None)
-    , m_numSrcs(numSrcs)
-    , m_numDsts(0)
-    , m_id(kTransient)
-    , m_srcs(srcs)
-    , m_dst(nullptr)
-    , m_taken(nullptr)
-    , m_block(nullptr)
-    , m_tca(nullptr)
-    , m_extra(nullptr)
-  {}
-
-  IRInstruction(const IRInstruction&) = delete;
-  IRInstruction& operator=(const IRInstruction&) = delete;
-
-  /*
-   * Construct an IRInstruction as a deep copy of `inst', using
-   * arena to allocate memory for its srcs/dests.
-   */
-  explicit IRInstruction(Arena& arena, const IRInstruction* inst, Id id);
-
-  /*
-   * Initialize the source list for this IRInstruction.  We must not
-   * have already had our sources initialized before this function is
-   * called.
-   *
-   * Memory for `srcs' is owned outside of this class and must outlive
-   * it.
-   */
-  void initializeSrcs(uint32_t numSrcs, SSATmp** srcs) {
-    assert(!m_srcs && !m_numSrcs);
-    m_numSrcs = numSrcs;
-    m_srcs = srcs;
-  }
-
-  /*
-   * Return access to extra-data on this instruction, for the
-   * specified opcode type.
-   *
-   * Pre: op() == opc
-   */
-  template<Opcode opc>
-  const typename IRExtraDataType<opc>::type* getExtra() const {
-    assert(opc == op() && "getExtra type error");
-    assert(m_extra != nullptr);
-    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
-  }
-
-  template<Opcode opc>
-  typename IRExtraDataType<opc>::type* getExtra() {
-    assert(opc == op() && "getExtra type error");
-    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
-  }
-
-  /*
-   * Return access to extra-data of type T.  Requires that
-   * IRExtraDataType<opc>::type is T for this instruction's opcode.
-   *
-   * It's normally preferable to use the version of this function that
-   * takes the opcode instead of this one.  This is for writing code
-   * that is supposed to be able to handle multiple opcode types that
-   * share the same kind of extra data.
-   */
-  template<class T> const T* getExtra() const {
-    auto opcode = op();
-    if (debug) assert_opcode_extra<T>(opcode);
-    return static_cast<const T*>(m_extra);
-  }
-
-  /*
-   * Returns whether or not this opcode has an associated extra data
-   * struct.
-   */
-  bool hasExtra() const;
-
-  /*
-   * Set the extra-data for this IRInstruction to the given pointer.
-   * Lifetime is must outlast this IRInstruction (and any of its
-   * clones).
-   */
-  void setExtra(IRExtraData* data) { assert(!m_extra); m_extra = data; }
-
-  /*
-   * Return the raw extradata pointer, for pretty-printing.
-   */
-  const IRExtraData* rawExtra() const { return m_extra; }
-
-  /*
-   * Clear the extra data pointer in a IRInstruction.  Used during
-   * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
-   * memory.
-   */
-  void clearExtra() { m_extra = nullptr; }
-
-  /*
-   * Replace an instruction in place with a Nop.  This sometimes may
-   * be a result of a simplification pass.
-   */
-  void convertToNop();
-
-  /*
-   * Replace a branch with a Jmp; used when we have proven the branch
-   * is always taken.
-   */
-  void convertToJmp();
-
-  /*
-   * Replace an instruction in place with a Mov. Used when we have
-   * proven that the instruction's side effects are not needed.
-   *
-   * TODO: replace with become
-   */
-  void convertToMov();
-
-  /*
-   * Turns this instruction into the target instruction, without
-   * changing stable fields (id, current block, list fields).  The
-   * existing destination SSATmp(s) will continue to think they came
-   * from this instruction.
-   *
-   * The target instruction may be transient---we'll clone anything we
-   * need to keep, using factory for any needed memory.
-   *
-   * Note: if you want to use this to replace a CSE-able instruction
-   * you're probably going to have a bad time.  For now it's a
-   * precondition that the current instruction can't CSE.
-   *
-   * Pre: other->isTransient() || numDsts() == other->numDsts()
-   * Pre: !canCSE()
-   */
-  void become(IRFactory*, IRInstruction* other);
-
-  /*
-   * Deep-copy an IRInstruction, using factory to allocate memory for
-   * the IRInstruction itself, and its srcs/dests.
-   */
-  IRInstruction* clone(IRFactory* factory) const;
-
-  Opcode     op()   const       { return m_op; }
-  void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
-  Type       getTypeParam() const      { return m_typeParam; }
-  void       setTypeParam(Type t)      { m_typeParam = t; }
-  uint32_t   getNumSrcs()  const       { return m_numSrcs; }
-  void       setNumSrcs(uint32_t i)    {
-    assert(i <= m_numSrcs);
-    m_numSrcs = i;
-  }
-  SSATmp*    getSrc(uint32_t i) const;
-  void       setSrc(uint32_t i, SSATmp* newSrc);
-  SrcRange   getSrcs() const {
-    return SrcRange(m_srcs, m_numSrcs);
-  }
-  unsigned   getNumDsts() const     { return m_numDsts; }
-  SSATmp*    getDst() const         {
-    assert(!naryDst());
-    return m_dst;
-  }
-  void       setDst(SSATmp* newDst) {
-    assert(hasDst());
-    m_dst = newDst;
-    m_numDsts = newDst ? 1 : 0;
-  }
-
-  /*
-   * Returns the ith dest of this instruction. i == 0 is treated specially: if
-   * the instruction has no dests, getDst(0) will return nullptr, and if the
-   * instruction is not naryDest, getDst(0) will return the single dest.
-   */
-  SSATmp*    getDst(unsigned i) const;
-  DstRange   getDsts();
-  Range<const SSATmp*> getDsts() const;
-  void       setDsts(unsigned numDsts, SSATmp* newDsts) {
-    assert(naryDst());
-    m_numDsts = numDsts;
-    m_dst = newDsts;
-  }
-
-  TCA getTCA() const { return m_tca; }
-  void setTCA(TCA newTCA) { m_tca = newTCA; }
-
-  /*
-   * Instruction id is stable and useful as an array index.
-   */
-  uint32_t getId() const {
-    assert(m_id != kTransient);
-    return m_id;
-  }
-
-  /*
-   * Returns true if the instruction is in a transient state.  That
-   * is, it's allocated on the stack and we haven't yet committed to
-   * inserting it in any blocks.
-   */
-  bool       isTransient() const       { return m_id == kTransient; }
-
-  Block*     getBlock() const          { return m_block; }
-  void       setBlock(Block* b)        { m_block = b; }
-  Trace*     getTrace() const;
-  void       setTaken(Block* b);
-  Block*     getTaken() const          { return m_taken; }
-
-  bool isControlFlowInstruction() const { return m_taken != nullptr; }
-  bool isBlockEnd() const { return m_taken || isTerminal(); }
-
-  /*
-   * Comparison and hashing for the purposes of CSE-equality.
-   *
-   * Pre: canCSE()
-   */
-  bool cseEquals(IRInstruction* inst) const;
-  size_t cseHash() const;
-
-  std::string toString() const;
-
-  /*
-   * Helper accessors for the OpcodeFlag bits for this instruction.
-   *
-   * Note that these wrappers have additional logic beyond just
-   * checking the corresponding flags bit---you should generally use
-   * these when you have an actual IRInstruction instead of just an
-   * Opcode enum value.
-   */
-  bool canCSE() const;
-  bool hasDst() const;
-  bool naryDst() const;
-  bool hasMemEffects() const;
-  bool isRematerializable() const;
-  bool isNative() const;
-  bool consumesReferences() const;
-  bool consumesReference(int srcNo) const;
-  bool producesReference() const;
-  bool mayModifyRefs() const;
-  bool mayRaiseError() const;
-  bool isEssential() const;
-  bool isTerminal() const;
-  bool isPassthrough() const;
-  SSATmp* getPassthroughValue() const;
-  bool killsSources() const;
-  bool killsSource(int srcNo) const;
-
-  bool modifiesStack() const;
-  SSATmp* modifiedStkPtr() const;
-  // hasMainDst provides raw access to the HasDest flag, for instructions with
-  // ModifiesStack set.
-  bool hasMainDst() const;
-
-private:
-  bool mayReenterHelper() const;
-
-private:
-  Opcode            m_op;
-  Type              m_typeParam;
-  uint16_t          m_numSrcs;
-  uint16_t          m_numDsts;
-  const Id          m_id;
-  SSATmp**          m_srcs;
-  SSATmp*           m_dst;     // if HasDest or NaryDest
-  Block*            m_taken;   // for branches, guards, and jmp
-  Block*            m_block;   // block that owns this instruction
-  TCA               m_tca;
-  IRExtraData*      m_extra;
-public:
-  boost::intrusive::list_member_hook<> m_listNode; // for InstructionList
-};
-
-typedef boost::intrusive::member_hook<IRInstruction,
-                                      boost::intrusive::list_member_hook<>,
-                                      &IRInstruction::m_listNode>
-        IRInstructionHookOption;
-typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
-        InstructionList;
-
-/*
  * Given an SSATmp of type Cls, try to find the name of the class.
  * Returns nullptr if can't find it.
  */
@@ -1936,100 +834,17 @@ Type outputType(const IRInstruction*, int dstId = 0);
  */
 void assertOperandTypes(const IRInstruction*);
 
-class SSATmp {
-public:
-  uint32_t          getId() const { return m_id; }
-  IRInstruction*    inst() const { return m_inst; }
-  void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type              type() const { return m_type; }
-  void              setType(Type t) { m_type = t; }
-  bool              isBoxed() const { return type().isBoxed(); }
-  bool              isString() const { return isA(Type::Str); }
-  bool              isArray() const { return isA(Type::Arr); }
-  std::string       toString() const;
-
-  // XXX: false for Null, etc.  Would rather it returns whether we
-  // have a compile-time constant value.
-  bool isConst() const {
-    return m_inst->op() == DefConst ||
-      m_inst->op() == LdConst;
-  }
-
-  /*
-   * For SSATmps with a compile-time constant value, the following
-   * functions allow accessing it.
-   *
-   * Pre: inst() &&
-   *   (inst()->op() == DefConst ||
-   *    inst()->op() == LdConst)
-   */
-  bool               getValBool() const;
-  int64_t            getValInt() const;
-  int64_t            getValRawInt() const;
-  double             getValDbl() const;
-  const StringData*  getValStr() const;
-  const ArrayData*   getValArr() const;
-  const Func*        getValFunc() const;
-  const Class*       getValClass() const;
-  const NamedEntity* getValNamedEntity() const;
-  uintptr_t          getValBits() const;
-  Variant            getValVariant() const;
-  TCA                getValTCA() const;
-
-  /*
-   * Returns: Type::subtypeOf(type(), tag).
-   *
-   * This should be used for most checks on the types of IRInstruction
-   * sources.
-   */
-  bool isA(Type tag) const {
-    return type().subtypeOf(tag);
-  }
-
-  /*
-   * The maximum number of registers this SSATmp may need allocated.
-   * This is based on the type of the temporary (some types never have
-   * regs, some have two, etc).
-   */
-  int               numNeededRegs() const;
-
-private:
-  friend class IRFactory;
-  friend class TraceBuilder;
-
-  // May only be created via IRFactory.  Note that this class is never
-  // destructed, so don't add complex members.
-  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0)
-    : m_inst(i)
-    , m_type(outputType(i, dstId))
-    , m_id(opndId)
-  {}
-  SSATmp(const SSATmp&);
-  SSATmp& operator=(const SSATmp&);
-
-  IRInstruction*  m_inst;
-  Type            m_type; // type when defined
-  const uint32_t  m_id;
-};
 
 int vectorBaseIdx(Opcode opc);
 int vectorKeyIdx(Opcode opc);
 int vectorValIdx(Opcode opc);
-inline int vectorBaseIdx(const IRInstruction* inst) {
-  return vectorBaseIdx(inst->op());
-}
-inline int vectorKeyIdx(const IRInstruction* inst) {
-  return vectorKeyIdx(inst->op());
-}
-inline int vectorValIdx(const IRInstruction* inst) {
-  return vectorValIdx(inst->op());
-}
+int vectorBaseIdx(const IRInstruction* inst);
+int vectorKeyIdx(const IRInstruction* inst);
+int vectorValIdx(const IRInstruction* inst);
 
 struct VectorEffects {
   static bool supported(Opcode op);
-  static bool supported(const IRInstruction* inst) {
-    return supported(inst->op());
-  }
+  static bool supported(const IRInstruction* inst);
 
   /*
    * VectorEffects::get is used to allow multiple different consumers to deal
@@ -2047,34 +862,10 @@ struct VectorEffects {
                   StoreLocFunc storeLocValue,
                   SetLocTypeFunc setLocType);
 
-  explicit VectorEffects(const IRInstruction* inst) {
-    int keyIdx = vectorKeyIdx(inst);
-    int valIdx = vectorValIdx(inst);
-    init(inst->op(),
-         inst->getSrc(vectorBaseIdx(inst))->type(),
-         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->type(),
-         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->type());
-  }
-
-  template<typename Container>
-  VectorEffects(Opcode opc, const Container& srcs) {
-    int keyIdx = vectorKeyIdx(opc);
-    int valIdx = vectorValIdx(opc);
-    init(opc,
-         srcs[vectorBaseIdx(opc)]->type(),
-         keyIdx == -1 ? Type::None : srcs[keyIdx]->type(),
-         valIdx == -1 ? Type::None : srcs[valIdx]->type());
-  }
-
-  VectorEffects(Opcode op, Type base, Type key, Type val) {
-    init(op, base, key, val);
-  }
-
-  VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val) {
-    auto typeOrNone =
-      [](SSATmp* val){ return val ? val->type() : Type::None; };
-    init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
-  }
+  explicit VectorEffects(const IRInstruction* inst);
+  VectorEffects(Opcode op, Type base, Type key, Type val);
+  VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val);
+  VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
 
   Type baseType;
   Type valType;
@@ -2087,156 +878,6 @@ private:
 };
 
 typedef folly::Range<TCA> TcaRange;
-
-/**
- * A Block refers to a basic block: single-entry, single-exit, list of
- * instructions.  The instruction list is an intrusive list, so each
- * instruction can only be in one block at a time.  Likewise, a block
- * can only be owned by one trace at a time.
- *
- * Block owns the InstructionList, but exposes several list methods itself
- * so usually you can use Block directly.  These methods also update
- * IRInstruction::m_block transparently.
- */
-struct Block : boost::noncopyable {
-  typedef InstructionList::iterator iterator;
-  typedef InstructionList::const_iterator const_iterator;
-
-  // Execution frequency hint; codegen will put Unlikely blocks in astubs.
-  enum Hint { Neither, Likely, Unlikely };
-
-  Block(unsigned id, const Func* func, IRInstruction* label)
-    : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id)
-    , m_preds(nullptr), m_hint(Neither) {
-    push_back(label);
-  }
-
-  IRInstruction* getLabel() const {
-    assert(front()->op() == DefLabel);
-    return front();
-  }
-
-  uint32_t    getId() const      { return m_id; }
-  Trace*      getTrace() const   { return m_trace; }
-  void        setTrace(Trace* t) { m_trace = t; }
-  void        setHint(Hint hint) { m_hint = hint; }
-  Hint        getHint() const    { return m_hint; }
-
-  void        addEdge(IRInstruction* jmp);
-  void        removeEdge(IRInstruction* jmp);
-
-  bool isMain() const;
-
-  // return the last instruction in the block
-  IRInstruction* back() const {
-    assert(!m_instrs.empty());
-    auto it = m_instrs.end();
-    return const_cast<IRInstruction*>(&*(--it));
-  }
-
-  // return the first instruction in the block.
-  IRInstruction* front() const {
-    assert(!m_instrs.empty());
-    return const_cast<IRInstruction*>(&*m_instrs.begin());
-  }
-
-  // return the fallthrough block.  Should be nullptr if the last
-  // instruction is a Terminal.
-  Block* getNext() const { return m_next; }
-  void setNext(Block* b) { m_next = b; }
-
-  // return the target block if the last instruction is a branch.
-  Block* getTaken() const {
-    return back()->getTaken();
-  }
-
-  // return the postorder number of this block. (updated each time
-  // sortBlocks() is called.
-  unsigned postId() const { return m_postid; }
-  void setPostId(unsigned id) { m_postid = id; }
-
-  // insert inst after this block's label, return an iterator to the
-  // newly inserted instruction.
-  iterator prepend(IRInstruction* inst) {
-    assert(front()->op() == DefLabel);
-    auto it = begin();
-    return insert(++it, inst);
-  }
-
-  // return iterator to first instruction after the label
-  iterator skipLabel() { auto it = begin(); return ++it; }
-
-  // return iterator to last instruction
-  iterator backIter() { auto it = end(); return --it; }
-
-  // return an iterator to a specific instruction
-  iterator iteratorTo(IRInstruction* inst) {
-    assert(inst->getBlock() == this);
-    return m_instrs.iterator_to(*inst);
-  }
-
-  // visit each src that provides a value to label->dsts[i]. body
-  // should take an IRInstruction* and an SSATmp*.
-  template<typename L>
-  void forEachSrc(unsigned i, L body) {
-    for (const EdgeData* n = m_preds; n; n = n->next) {
-      assert(n->jmp->op() == Jmp_ && n->jmp->getTaken() == this);
-      body(n->jmp, n->jmp->getSrc(i));
-    }
-  }
-
-  // return the first src providing a value to label->dsts[i] for
-  // which body(src) returns true, or nullptr if none are found.
-  template<typename L>
-  SSATmp* findSrc(unsigned i, L body) {
-    for (const EdgeData* n = m_preds; n; n = n->next) {
-      SSATmp* src = n->jmp->getSrc(i);
-      if (body(src)) return src;
-    }
-    return nullptr;
-  }
-
-  // list-compatible interface; these delegate to m_instrs but also update
-  // inst.m_block
-  InstructionList& getInstrs()   { return m_instrs; }
-  bool             empty() const { return m_instrs.empty(); }
-  iterator         begin()       { return m_instrs.begin(); }
-  iterator         end()         { return m_instrs.end(); }
-  const_iterator   begin() const { return m_instrs.begin(); }
-  const_iterator   end()   const { return m_instrs.end(); }
-
-  iterator insert(iterator pos, IRInstruction* inst) {
-    inst->setBlock(this);
-    return m_instrs.insert(pos, *inst);
-  }
-  void splice(iterator pos, Block* from, iterator begin, iterator end) {
-    assert(from != this);
-    for (auto i = begin; i != end; ++i) (*i).setBlock(this);
-    m_instrs.splice(pos, from->getInstrs(), begin, end);
-  }
-  void push_back(IRInstruction* inst) {
-    inst->setBlock(this);
-    return m_instrs.push_back(*inst);
-  }
-  template <class Predicate> void remove_if(Predicate p) {
-    m_instrs.remove_if(p);
-  }
-  void erase(iterator pos) {
-    m_instrs.erase(pos);
-  }
-
- private:
-  InstructionList m_instrs; // instructions in this block
-  Trace* m_trace;           // owner of this block.
-  const Func* m_func;       // which func are we in
-  Block* m_next;            // fall-through path; null if back()->isTerminal().
-  const unsigned m_id;      // factory-assigned unique id of this block
-  unsigned m_postid;        // postorder number of this block
-  EdgeData* m_preds;        // head of list of predecessor Jmps
-  Hint m_hint;              // execution frequency hint
-};
-typedef std::list<Block*> BlockList;
-typedef std::forward_list<Block*> BlockPtrList;
 
 /*
  * Remove any instruction if live[iid] == false
@@ -2255,17 +896,7 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
  */
 int32_t spillValueCells(IRInstruction* spillStack);
 
-inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  switch (instr->op()) {
-    case ConvIntToBool:
-      return true;
-    case ConvCellToBool:
-      return instr->getSrc(0)->type().subtypeOfAny(
-        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
-    default:
-      return false;
-  }
-}
+bool isConvIntOrPtrToBool(IRInstruction* instr);
 
 }}
 

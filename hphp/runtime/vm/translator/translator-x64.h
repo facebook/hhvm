@@ -101,6 +101,32 @@ struct Label;
 
 static const int kNumFreeLocalsHelpers = 9;
 
+typedef X64Assembler Asm;
+
+constexpr size_t kJmpTargetAlign = 16;
+constexpr size_t kNonFallthroughAlign = 64;
+constexpr int kJmpLen = 5;
+constexpr int kCallLen = 5;
+constexpr int kJmpccLen = 6;
+constexpr int kJmpImmBytes = 4;
+constexpr int kJcc8Len = 3;
+constexpr int kLeaRipLen = 7;
+constexpr int kTestRegRegLen = 3;
+constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
+// Cache alignment is required for mutable instructions to make sure
+// mutations don't "tear" on remote cpus.
+constexpr size_t kX64CacheLineSize = 64;
+constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
+
+enum TestAndSmashFlags {
+  kAlignJccImmediate,
+  kAlignJcc,
+  kAlignJccAndJmp
+};
+void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
+void prepareForSmash(Asm&, int nBytes, int offset = 0);
+bool isSmashable(Address frontier, int nBytes, int offset = 0);
+
 class TranslatorX64 : public Translator
                     , SpillFill
                     , boost::noncopyable {
@@ -195,9 +221,9 @@ class TranslatorX64 : public Translator
   std::string            m_lastHHIRPunt;
   std::string            m_lastHHIRDump;
 
-  void hhirTraceStart(Offset bcStartOffset);
+  void hhirTraceStart(Offset bcStartOffset, Offset nextTraceOffset);
   void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);
-  void hhirTraceEnd(Offset bcSuccOffset);
+  void hhirTraceEnd();
   void hhirTraceFree();
 
 
@@ -309,6 +335,7 @@ private:
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
+  void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
   void recordIndirectFixup(CTCA addr, int dwordsPushed);
   template <bool reentrant>
   void recordCallImpl(Asm& a, const NormalizedInstruction& i,
@@ -329,6 +356,7 @@ private:
   void recordStubCall(const NormalizedInstruction& i) {
     recordCall(astubs, i);
   }
+  void recordEagerCall(Asm& a, const NormalizedInstruction& i);
   void emitSideExit(Asm& a, const NormalizedInstruction& dest, bool next);
   void emitStringToClass(const NormalizedInstruction& i);
   void emitKnownClassCheck(const NormalizedInstruction& i,
@@ -398,117 +426,9 @@ private:
                           const int* args);
 
  private:
-
-  MVecTransState* m_vecState;
   void invalidateOutStack(const NormalizedInstruction& ni);
   void cleanOutLocal(const NormalizedInstruction& ni);
   void invalidateOutLocal(const NormalizedInstruction& ni);
-  int mResultStackOffset(const NormalizedInstruction& ni) const;
-  bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii) const;
-  int firstDecrefInput(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii) const;
-  bool inputIsLiveForFinalOp(const NormalizedInstruction& ni, unsigned i,
-                           const MInstrInfo& mii) const;
-  bool logicalTeleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                           const MInstrInfo& mii) const;
-  bool teleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii) const;
-  bool useTvResult(const Tracelet& t, const NormalizedInstruction& ni,
-                   const MInstrInfo& mii) const;
-  bool forceMValIncDec(const NormalizedInstruction& ni, const DynLocation& base,
-                       const DynLocation& val) const;
-  bool forceMValIncDec(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii) const;
-  void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
-                   const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseH(unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseN(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseS(const Tracelet& t, const NormalizedInstruction& ni,
-                 unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
-                  const MInstrInfo& mii, unsigned iInd,
-                  LazyScratchReg& rBase);
-  void emitHphpArrayGetIntKey(const NormalizedInstruction& i,
-                              PhysReg rBase,
-                              const DynLocation& keyLoc,
-                              Location outLoc,
-                              void* fallbackFunc);
-  void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                LazyScratchReg& rBase);
-  void emitProp(const MInstrInfo& mii, unsigned mInd,
-                unsigned iInd, LazyScratchReg& rBase);
-  void emitPropGeneric(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd,
-                       unsigned iInd, LazyScratchReg& rBase);
-  void emitPropSpecialized(MInstrAttr, const Class*,
-                           int propOffset, unsigned mInd, unsigned iInd,
-                           LazyScratchReg& rBase);
-  void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                   unsigned mInd, LazyScratchReg& rBase);
-  void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd,
-                          unsigned& iInd, LazyScratchReg& rBase);
-  bool needFirstRatchet(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii) const;
-  bool needFinalRatchet(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii) const;
-  unsigned nLogicalRatchets(const Tracelet& t, const NormalizedInstruction& ni,
-                            const MInstrInfo& mii) const;
-  int ratchetInd(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii, unsigned mInd) const;
-  void emitRatchetRefs(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd,
-                       PhysReg rBase);
-  template <bool useEmpty>
-  void emitIssetEmptyElem(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                          PhysReg rBase);
-  template <bool useEmpty>
-  void emitIssetEmptyProp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd,
-                          unsigned iInd, PhysReg rBase);
-  void emitVGetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                       PhysReg rBase);
-  void emitSetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                      const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                      PhysReg rBase);
-  void emitSetOpNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                        const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                        PhysReg rBase);
-  void emitIncDecNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                         const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                         PhysReg rBase);
-  void emitBindNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                       PhysReg rBase);
-  void emitNotSuppNewElem(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                          PhysReg rBase);
-  bool needMInstrCtx(const Tracelet& t, const NormalizedInstruction& ni) const;
-  void emitMPre(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, unsigned& mInd,
-                unsigned& iInd, LazyScratchReg& rBase);
-  void emitMPost(const Tracelet& t, const NormalizedInstruction& ni,
-                 const MInstrInfo& mii);
-  void translateMInstr(Op op);
-  void emitFinalMOp(const Tracelet& t, const NormalizedInstruction& ni,
-                    const MInstrInfo& mii, unsigned mInd, unsigned iInd,
-                    LazyScratchReg& rBase);
-#define MII(instr, attrs, bS, iS, vC, fN) \
-  void emit##instr##Elem(const Tracelet& t, const NormalizedInstruction& ni, \
-                         const MInstrInfo& mii, unsigned mInd, unsigned iInd, \
-                         PhysReg rBase); \
-  void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
-                         const MInstrInfo& mii, unsigned mInd, \
-                         unsigned iInd, LazyScratchReg& rBase);
-MINSTRS
-#undef MII
 
 #define INSTRS \
   CASE(PopC) \
@@ -627,6 +547,7 @@ MINSTRS
   CASE(ContHandle) \
   CASE(Strlen) \
   CASE(IncStat) \
+  CASE(ArrayIdx) \
 
   // These are instruction-like functions which cover more than one
   // opcode.
@@ -818,8 +739,6 @@ private:
   void irTranslateInstrDefault(const Tracelet& t,
                                const NormalizedInstruction& i);
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  void translateTracelet(SrcKey sk, bool considerHHIR=true,
-                         bool dryRun = false);
   enum TranslateTraceletResult {
     Failure,
     Retry,
@@ -854,33 +773,9 @@ private:
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 
- public:
-  static const size_t kJmpTargetAlign = 16;
-  static const size_t kNonFallthroughAlign = 64;
-  static const int kJmpLen = 5;
-  static const int kCallLen = 5;
-  static const int kJmpccLen = 6;
-  static const int kJmpImmBytes = 4;
-  static const int kJcc8Len = 3;
-  static const int kLeaRipLen = 7;
-  static const int kTestRegRegLen = 3;
-  static const int kTestImmRegLen = 5;  // only for rax -- special encoding
-  // Cache alignment is required for mutable instructions to make sure
-  // mutations don't "tear" on remote cpus.
-  static const size_t kX64CacheLineSize = 64;
-  static const size_t kX64CacheLineMask = kX64CacheLineSize - 1;
  private:
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                    const bool unreachable = true);
-  enum TestAndSmashFlags {
-    kAlignJccImmediate,
-    kAlignJcc,
-    kAlignJccAndJmp
-  };
-  void prepareForTestAndSmash(int testBytes, TestAndSmashFlags flags);
-  void prepareForSmash(Asm &a, int nBytes, int offset = 0);
-  void prepareForSmash(int nBytes, int offset = 0);
-  static bool isSmashable(Address frontier, int nBytes, int offset = 0);
   static void smash(Asm &a, TCA src, TCA dest, bool isCall);
   static void smashJmp(Asm &a, TCA src, TCA dest) {
     smash(a, src, dest, false);
@@ -889,11 +784,13 @@ private:
     smash(a, src, dest, true);
   }
 
-  TCA getTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
-  TCA createTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
+  TCA getTranslation(const TranslArgs& args);
+  TCA createTranslation(const TranslArgs& args);
+  TCA retranslate(const TranslArgs& args);
+  TCA translate(const TranslArgs& args);
+  void translateTracelet(const TranslArgs& args);
+
   TCA lookupTranslation(SrcKey sk) const;
-  TCA translate(SrcKey sk, bool align, bool useHHIR);
-  TCA retranslate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslateOpt(TransID transId, bool align);
   TCA retranslateAndPatchNoIR(SrcKey sk,
                               bool   align,
@@ -960,6 +857,7 @@ private:
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
+  static bool eagerRecord(const Func* func);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);
@@ -1073,11 +971,9 @@ private:
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
-private: // Only for HackIR
-  void emitReqRetransNoIR(Asm& as, SrcKey& sk);
-  void emitRecordPunt(Asm& as, const std::string& name);
-
 public: // Only for HackIR
+  void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
+  void emitRecordPunt(Asm& as, const std::string& name);
 #define DECLARE_FUNC(nm) \
   void irTranslate ## nm(const Tracelet& t,               \
                          const NormalizedInstruction& i);
@@ -1191,8 +1087,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
                                 Class* contextClass,
                                 const MInstrInfo&);
 
-bool isSupportedCGetM_LE(const NormalizedInstruction& i);
-bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);

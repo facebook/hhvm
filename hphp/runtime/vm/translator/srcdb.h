@@ -70,8 +70,6 @@ private:
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec {
-  static const unsigned int kMaxTranslations = 12;
-
   SrcRec()
     : m_topTranslation(nullptr)
     , m_anchorTranslation(0)

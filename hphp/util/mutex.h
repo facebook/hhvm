@@ -142,21 +142,6 @@ public:
     return success;
   }
 
-  bool tryLockWait(long long ns) {
-#ifdef DEBUG
-    assert(m_magic == kMagic);
-#endif
-    struct timespec delta;
-    delta.tv_sec  = 0;
-    delta.tv_nsec = ns;
-    bool success = !pthread_mutex_timedlock(&m_mutex, &delta);
-    if (success) {
-      recordAcquisition();
-      assertOwnedBySelf();
-    }
-    return success;
-  }
-
   void lock() {
 #ifdef DEBUG
     assert(m_magic == kMagic);
@@ -206,42 +191,6 @@ class SimpleMutex : public BaseMutex<true> {
 public:
   explicit SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<true>(recursive, rank) {}
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class SpinLock {
-#ifdef DEBUG
-  Rank m_rank;
-#endif
-public:
-  explicit SpinLock(Rank rank = RankUnranked)
-#ifdef DEBUG
-    : m_rank(rank)
-#endif
-  {
-    pthread_spin_init(&m_spinlock, 0);
-  }
-  ~SpinLock() {
-    pthread_spin_destroy(&m_spinlock);
-  }
-
-  void lock() {
-    pushRank(m_rank);
-    pthread_spin_lock(&m_spinlock);
-  }
-  void unlock() {
-    popRank(m_rank);
-    pthread_spin_unlock(&m_spinlock);
-  }
-
-  pthread_spinlock_t &getRaw() { return m_spinlock;}
-
-private:
-  SpinLock(const SpinLock &); // suppress
-  SpinLock &operator=(const SpinLock &); // suppress
-
-  pthread_spinlock_t m_spinlock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

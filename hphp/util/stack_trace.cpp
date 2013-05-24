@@ -227,7 +227,8 @@ void StackTraceNoHeap::ClearAllExtraLogging() {
 }
 
 void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
-                           const char *pid, const char *buildId) const {
+                           const char *pid, const char *buildId,
+                           int debuggerCount) const {
   int fd = ::open(tracefn, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
   if (fd < 0) return;
 
@@ -239,6 +240,7 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
   dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
   dprintf(fd, "Runtime: hhvm\n");
   dprintf(fd, "Version: %s\n", buildId);
+  dprintf(fd, "DebuggerCount: %d\n", debuggerCount);
   dprintf(fd, "\n");
 
   for (auto const& pair : StackTraceLog::s_logData->data) {

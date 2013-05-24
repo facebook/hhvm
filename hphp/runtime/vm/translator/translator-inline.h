@@ -111,23 +111,52 @@ struct VMRegAnchor : private boost::noncopyable {
   }
 };
 
+struct EagerVMRegAnchor {
+  VMRegState m_old;
+  EagerVMRegAnchor() {
+    if (debug) {
+      DEBUG_ONLY const Cell* fp = vmfp();
+      DEBUG_ONLY const Cell* sp = vmsp();
+      DEBUG_ONLY const uchar* pc = vmpc();
+      VMRegAnchor _;
+      assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
+    }
+    m_old = tl_regState;
+    tl_regState = REGSTATE_CLEAN;
+  }
+  ~EagerVMRegAnchor() {
+    tl_regState = m_old;
+  }
+};
+
+static inline ActRec* regAnchorFP() {
+  // In builtins, m_fp points to the caller's frame if called
+  // through FCallBuiltin, else it points to the builtin's frame,
+  // in which case, getPrevVMState() gets the caller's frame.
+  VMExecutionContext* context = g_vmContext;
+  ActRec* cur = context->getFP();
+  if (!cur) return nullptr;
+  if (cur->skipFrame()) {
+    ActRec* prev = context->getPrevVMState(cur);
+    if (prev == cur) return nullptr;
+    return prev;
+  } else {
+    return cur;
+  }
+}
+
+struct EagerCallerFrame : public EagerVMRegAnchor {
+  ActRec* operator()() {
+    return regAnchorFP();
+  }
+};
+
+
 // VM helper to retrieve the frame pointer from the TC. This is
 // a common need for extensions.
 struct CallerFrame : public VMRegAnchor {
   ActRec* operator()() {
-    // In builtins, m_fp points to the caller's frame if called
-    // through FCallBuiltin, else it points to the builtin's frame,
-    // in which case, getPrevVMState() gets the caller's frame.
-    VMExecutionContext* context = g_vmContext;
-    ActRec* cur = context->getFP();
-    if (!cur) return nullptr;
-    if (cur->skipFrame()) {
-      ActRec* prev = context->getPrevVMState(cur);
-      if (prev == cur) return nullptr;
-      return prev;
-    } else {
-      return cur;
-    }
+    return regAnchorFP();
   }
 };
 

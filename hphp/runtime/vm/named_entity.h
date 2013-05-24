@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/complex_types.h"
 
 #include "hphp/util/atomic.h"
+#include "folly/AtomicHashMap.h"
 
 namespace HPHP {
 
@@ -112,11 +113,18 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-typedef tbb::concurrent_unordered_map<
+struct ahm_string_data_isame {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    // ahm uses -1, -2, -3 as magic values
+    return int64_t(s1) > 0 && s1->isame(s2);
+  }
+};
+
+typedef folly::AtomicHashMap<
   const StringData*,
   NamedEntity,
   string_data_hash,
-  string_data_isame
+  ahm_string_data_isame
 > NamedEntityMap;
 typedef std::pair<const StringData*,const NamedEntity*> NamedEntityPair;
 

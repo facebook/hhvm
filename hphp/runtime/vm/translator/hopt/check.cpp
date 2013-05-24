@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/translator/hopt/check.h"
+
+#include <boost/next_prior.hpp>
+
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 #include "hphp/runtime/vm/translator/hopt/linearscan.h"
@@ -22,15 +24,50 @@
 
 namespace HPHP {  namespace JIT {
 
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(hhir);
+
+enum Limits : unsigned {
+  kNumRegisters = Transl::kNumRegs,
+  kNumSlots = NumPreAllocatedSpillLocs
+};
+
+struct RegState {
+  RegState() {
+    memset(regs, 0, sizeof(regs));
+    memset(slots, 0, sizeof(slots));
+  }
+  SSATmp* regs[kNumRegisters];  // which tmp is in each register
+  SSATmp* slots[kNumSlots]; // which tmp is in each spill slot
+  SSATmp*& tmp(const RegisterInfo& info, int i) {
+    if (info.spilled()) {
+      auto slot = info.getSpillInfo(i).slot();
+      assert(unsigned(slot) < kNumSlots);
+      return slots[slot];
+    }
+    auto r = info.getReg(i);
+    assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
+    return regs[int(r)];
+  }
+};
+
 /*
  * Check one block for being well formed.  It must:
  * 1. have exactly one DefLabel as the first instruction
- * 2. if any instruction is isBlockEnd(), it must be last
- * 3. if the last instruction isTerminal(), block->next must be null.
+ * 2. have either no other instructions, or else at least one Marker
+ *    following the DefLabel before any other instructions.
+ * 3. if any instruction is isBlockEnd(), it must be last
+ * 4. if the last instruction isTerminal(), block->next must be null.
  */
 bool checkBlock(Block* b) {
   assert(!b->empty());
   assert(b->front()->op() == DefLabel);
+  if (b->skipLabel() != b->end()) {
+    assert(b->skipLabel()->op() == Marker);
+  }
   if (b->back()->isTerminal()) assert(!b->getNext());
   if (b->getTaken()) {
     // only Jmp_ can branch to a join block expecting values.
@@ -50,6 +87,10 @@ bool checkBlock(Block* b) {
   }
   return true;
 }
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Build the CFG, then the dominator tree, then use it to validate SSA.
@@ -93,29 +134,53 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
   return true;
 }
 
-enum Limits : unsigned {
-  kNumRegisters = Transl::kNumX64Regs,
-  kNumSlots = NumPreAllocatedSpillLocs
-};
+bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
+  auto const blocks   = sortCfg(trace, irFactory);
+  auto const children = findDomChildren(blocks);
 
-struct RegState {
-  RegState() {
-    memset(regs, 0, sizeof(regs));
-    memset(slots, 0, sizeof(slots));
-  }
-  SSATmp* regs[kNumRegisters];  // which tmp is in each register
-  SSATmp* slots[kNumSlots]; // which tmp is in each spill slot
-  SSATmp*& tmp(const RegisterInfo& info, int i) {
-    if (info.spilled()) {
-      auto slot = info.getSpillInfo(i).slot();
-      assert(unsigned(slot) < kNumSlots);
-      return slots[slot];
+  // CallBuiltin is ok because it is not a php-level call.  (It will
+  // call a C++ helper and we can push/pop around it normally.)
+  auto isCall = [&] (Opcode op) {
+    return op == Call || op == CallArray;
+  };
+
+  typedef StateVector<SSATmp,bool> State;
+
+  bool isValid = true;
+  forPreorderDoms(
+    blocks.front(), children, State(&irFactory, false),
+    [&] (Block* b, State& state) {
+      for (auto& inst : *b) {
+        for (auto& src : inst.getSrcs()) {
+          if (src->isA(Type::FramePtr)) continue;
+          if (src->isConst()) continue;
+          if (!state[src]) {
+            FTRACE(1, "checkTmpsSpanningCalls failed\n"
+                      "  instruction: {}\n"
+                      "  src:         {}\n",
+                      inst.toString(),
+                      src->toString());
+            isValid = false;
+          }
+        }
+
+        /*
+         * Php calls kill all live temporaries.  We can't keep them
+         * alive across the call because we currently have no
+         * callee-saved registers in our abi, and all translations
+         * share the same spill slots.
+         */
+        if (isCall(inst.op())) state.reset();
+
+        for (auto& d : inst.getDsts()) {
+          state[d] = true;
+        }
+      }
     }
-    auto r = info.getReg(i);
-    assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
-    return regs[int(r)];
-  }
-};
+  );
+
+  return isValid;
+}
 
 bool checkRegisters(Trace* trace, const IRFactory& factory,
                     const RegAllocInfo& regs) {
@@ -146,6 +211,7 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
       }
     }
   });
+
   return true;
 }
 

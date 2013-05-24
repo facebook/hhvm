@@ -25,13 +25,13 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdExtension);
 class CmdExtension : public CmdExtended {
 public:
-  virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -40,7 +40,7 @@ private:
   String m_out;
   String m_err;
 
-  bool processList(DebuggerProxy *proxy);
+  bool processList(DebuggerProxy &proxy);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -143,7 +143,9 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionStarted(file.c_str());
   }
-  hphp_invoke_simple(file);
+  if (!file.empty()) {
+    hphp_invoke_simple(file);
+  }
   {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionEnded(file.c_str());
@@ -243,7 +245,7 @@ void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
   assert(RuntimeOption::EnableDebugger);
-  TRACE(2, "Debugger::Interrupt\n");
+  TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();
   if (proxy) {
@@ -504,9 +506,11 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
 
 DebuggerProxyPtr Debugger::findProxy(const StringData* sandboxId) {
   TRACE(2, "Debugger::findProxy\n");
-  ProxyMap::const_accessor acc;
-  if (m_proxyMap.find(acc, sandboxId)) {
-    return acc->second;
+  if (sandboxId) {
+    ProxyMap::const_accessor acc;
+    if (m_proxyMap.find(acc, sandboxId)) {
+      return acc->second;
+    }
   }
   return DebuggerProxyPtr();
 }
@@ -582,6 +586,45 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
     DSandboxInfoPtr sb(new DSandboxInfo(sandboxId->toCPPString()));
     proxy->updateSandbox(sb);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Helpers for usage logging
+
+// NB: the usage logger is not owned by the Debugger. The caller will call this
+// again with nullptr before destroying the given usage logger.
+void Debugger::SetUsageLogger(DebuggerUsageLogger *usageLogger) {
+  TRACE(1, "Debugger::SetUsageLogger\n");
+  s_debugger.m_usageLogger = usageLogger;
+}
+
+void Debugger::InitUsageLogging() {
+  TRACE(1, "Debugger::InitUsageLogging\n");
+  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->init();
+}
+
+void Debugger::UsageLog(const std::string &mode, const std::string &cmd,
+                        const std::string &data) {
+  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->log(mode, cmd, data);
+}
+
+const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {
+  switch (cmd.getInterruptType()) {
+    case SessionStarted: return "SessionStarted";
+    case SessionEnded: return "SessionEnded";
+    case RequestStarted: return "RequestStarted";
+    case RequestEnded: return "RequestEnded";
+    case PSPEnded: return "PSPEnded";
+    case HardBreakPoint: return "HardBreakPoint";
+    case BreakPointReached: return "BreakPointReached";
+    case ExceptionThrown: return "ExceptionThrown";
+    default:
+      return "unknown";
+  }
+}
+
+void Debugger::UsageLogInterrupt(const std::string &mode, CmdInterrupt &cmd) {
+  UsageLog(mode, "interrupt", InterruptTypeName(cmd));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

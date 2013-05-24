@@ -27,29 +27,28 @@ void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
 }
 
-void CmdMachine::list(DebuggerClient *client) {
+void CmdMachine::list(DebuggerClient &client) {
 }
 
-bool CmdMachine::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
+bool CmdMachine::help(DebuggerClient &client) {
+  client.error("not implemented yet"); return true;
 
-  client->helpTitle("Machine Command");
-  client->help("machine: ");
-  client->helpBody(
+  client.helpTitle("Machine Command");
+  client.help("machine: ");
+  client.helpBody(
     ""
   );
-  return true;
 }
 
-bool CmdMachine::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+void CmdMachine::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return true;
 
   //TODO
 
-  return help(client);
+  help(client);
 }
 
-bool CmdMachine::onServer(DebuggerProxy *proxy) {
+bool CmdMachine::onServer(DebuggerProxy &proxy) {
   assert(false); // this command is processed entirely locally
   return false;
 }

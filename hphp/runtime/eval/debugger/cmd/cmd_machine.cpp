@@ -43,17 +43,17 @@ void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_succeed);
 }
 
-void CmdMachine::list(DebuggerClient *client) {
-  if (client->argCount() == 0) {
+void CmdMachine::list(DebuggerClient &client) {
+  if (client.argCount() == 0) {
     static const char *keywords[] =
       { "disconnect", "connect", "rpc", "list", "attach", nullptr };
-    client->addCompletion(keywords);
+    client.addCompletion(keywords);
   }
 }
 
-bool CmdMachine::help(DebuggerClient *client) {
-  client->helpTitle("Machine Command");
-  client->helpCmds(
+void CmdMachine::help(DebuggerClient &client) {
+  client.helpTitle("Machine Command");
+  client.helpCmds(
     "[m]achine [c]onnect {host}",         "debugging remote server natively",
     "[m]achine [c]onnect {host}:{port}",  "debugging remote server natively",
     "[m]achine [r]pc {host}",             "debugging remote server with RPC",
@@ -66,7 +66,7 @@ bool CmdMachine::help(DebuggerClient *client) {
     "attach to a sandbox by user and name",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command to switch between different machines or "
     "sandboxes.\n"
     "\n"
@@ -97,28 +97,27 @@ bool CmdMachine::help(DebuggerClient *client) {
     "method calls as well, except classes will have to be loaded on client "
     "side by '=include(\"file-containing-the-class.php\")'."
   );
-  return true;
 }
 
-bool CmdMachine::processList(DebuggerClient *client,
+bool CmdMachine::processList(DebuggerClient &client,
                              bool output /* = true */) {
   m_body = "list";
-  CmdMachinePtr res = client->xend<CmdMachine>(this);
-  client->updateSandboxes(res->m_sandboxes);
+  CmdMachinePtr res = client.xend<CmdMachine>(this);
+  client.updateSandboxes(res->m_sandboxes);
   if (!output) return true;
 
   if (res->m_sandboxes.empty()) {
-    client->info("(no sandbox was found)");
-    client->tutorial(
+    client.info("(no sandbox was found)");
+    client.tutorial(
       "Please hit the sandbox from browser at least once. Then run "
       "'[m]achine [l]ist' again."
     );
   } else {
     for (int i = 0; i < (int)res->m_sandboxes.size(); i++) {
-      client->print("  %d\t%s", i + 1,
+      client.print("  %d\t%s", i + 1,
                     res->m_sandboxes[i]->desc().c_str());
     }
-    client->tutorial(
+    client.tutorial(
       "Use '[m]achine [a]ttach {index}' to attach to one sandbox. For "
       "example, 'm a 1'. If desired sandbox is not on the list, please "
       "hit the sandbox from browser once. Then run '[m]achine [l]ist' "
@@ -129,16 +128,16 @@ bool CmdMachine::processList(DebuggerClient *client,
   return true;
 }
 
-bool CmdMachine::AttachSandbox(DebuggerClient *client,
+bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                const char *user /* = NULL */,
                                const char *name /* = NULL */,
                                bool force /* = false */) {
   string login;
   if (user == nullptr) {
-    login = client->getCurrentUser();
+    login = client.getCurrentUser();
     user = login.c_str();
   }
-  if (client->isApiMode()) {
+  if (client.isApiMode()) {
     force = true;
   }
 
@@ -148,11 +147,11 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
   return AttachSandbox(client, sandbox, force);
 }
 
-bool CmdMachine::AttachSandbox(DebuggerClient *client,
+bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                DSandboxInfoPtr sandbox,
                                bool force /* = false */) {
-  if (client->isLocal()) {
-    client->error("Local script doesn't have sandbox to attach to.");
+  if (client.isLocal()) {
+    client.error("Local script doesn't have sandbox to attach to.");
     return false;
   }
 
@@ -161,13 +160,13 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
   cmd.m_sandboxes.push_back(sandbox);
   cmd.m_force = force;
 
-  client->info("Attaching to %s and pre-loading, please wait...",
+  client.info("Attaching to %s and pre-loading, please wait...",
                sandbox->desc().c_str());
-  CmdMachinePtr cmdMachine = client->xend<CmdMachine>(&cmd);
+  CmdMachinePtr cmdMachine = client.xend<CmdMachine>(&cmd);
   if (cmdMachine->m_succeed) {
-    client->playMacro("startup");
+    client.playMacro("startup");
   } else {
-    client->error("failed to attach to sandbox, maybe another client is "
+    client.error("failed to attach to sandbox, maybe another client is "
                   "debugging, \nattach to another sandbox, exit the "
                   "attached hphpd client, or try \n"
                   "[m]achine [a]ttach [f]orce [%s] [%s]",
@@ -181,7 +180,7 @@ static const StaticString s_port("port");
 static const StaticString s_auth("auth");
 static const StaticString s_timeout("timeout");
 
-void CmdMachine::UpdateIntercept(DebuggerClient *client,
+void CmdMachine::UpdateIntercept(DebuggerClient &client,
                                  const std::string &host, int port) {
   CmdMachine cmd;
   cmd.m_body = "rpc";
@@ -190,104 +189,110 @@ void CmdMachine::UpdateIntercept(DebuggerClient *client,
      s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),
      s_timeout, RuntimeOption::DebuggerDefaultRpcTimeout);
-  client->xend<CmdMachine>(&cmd);
+  client.xend<CmdMachine>(&cmd);
 }
 
-bool CmdMachine::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() == 0) return help(client);
+void CmdMachine::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() == 0) {
+    help(client);
+    return;
+  }
 
-  bool rpc = client->arg(1, "rpc");
-  if (rpc || client->arg(1, "connect")) {
-    if (client->argCount() != 2) {
-      return help(client);
+  bool rpc = client.arg(1, "rpc");
+  if (rpc || client.arg(1, "connect")) {
+    if (client.argCount() != 2) {
+      help(client);
+      return;
     }
-    string host = client->argValue(2);
+    string host = client.argValue(2);
     int port = 0;
     size_t pos = host.find(":");
     if (pos != string::npos) {
       if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
-        client->error("Port needs to be a number");
-        return help(client);
+        client.error("Port needs to be a number");
+        help(client);
+        return;
       }
       port = atoi(host.substr(pos + 1).c_str());
       host = host.substr(0, pos);
     }
 
     if (rpc) {
-      if (client->connectRPC(host, port)) {
+      if (client.connectRPC(host, port)) {
         throw DebuggerConsoleExitException();
       }
     } else {
-      if (client->connect(host, port)) {
+      if (client.connect(host, port)) {
         throw DebuggerConsoleExitException();
       }
     }
-    client->initializeMachine();
-    return true;
+    client.initializeMachine();
+    return;
   }
 
-  if (client->arg(1, "disconnect")) {
-    if (client->disconnect()) {
+  if (client.arg(1, "disconnect")) {
+    if (client.disconnect()) {
       throw DebuggerConsoleExitException();
     }
-    client->initializeMachine();
-    return true;
+    client.initializeMachine();
+    return;
   }
 
-  if (client->arg(1, "list")) {
+  if (client.arg(1, "list")) {
     processList(client);
-    return true;
+    return;
   }
 
-  if (client->arg(1, "attach")) {
+  if (client.arg(1, "attach")) {
     DSandboxInfoPtr sandbox;
 
-    string snum = client->argValue(2);
+    string snum = client.argValue(2);
     if (DebuggerClient::IsValidNumber(snum)) {
       int num = atoi(snum.c_str());
-      sandbox = client->getSandbox(num);
+      sandbox = client.getSandbox(num);
       if (!sandbox) {
         processList(client, false);
-        sandbox = client->getSandbox(num);
+        sandbox = client.getSandbox(num);
         if (!sandbox) {
-          client->error("\"%s\" is not a valid sandbox index. Choose one from "
+          client.error("\"%s\" is not a valid sandbox index. Choose one from "
                         "this list:", snum.c_str());
           processList(client);
-          return true;
+          return;
         }
       }
     } else {
       int argBase = 2;
-      if (client->argCount() >= 2 && client->arg(2, "force")) {
+      if (client.argCount() >= 2 && client.arg(2, "force")) {
         m_force = true;
         argBase++;
       }
       sandbox = DSandboxInfoPtr(new DSandboxInfo());
-      if (client->argCount() < argBase) {
-        sandbox->m_user = client->getCurrentUser();
+      if (client.argCount() < argBase) {
+        sandbox->m_user = client.getCurrentUser();
         sandbox->m_name = "default";
-      } else if (client->argCount() == argBase) {
-        sandbox->m_user = client->getCurrentUser();
-        sandbox->m_name = client->argValue(argBase);
-      } else if (client->argCount() == argBase + 1) {
-        sandbox->m_user = client->argValue(argBase);
-        sandbox->m_name = client->argValue(argBase + 1);
+      } else if (client.argCount() == argBase) {
+        sandbox->m_user = client.getCurrentUser();
+        sandbox->m_name = client.argValue(argBase);
+      } else if (client.argCount() == argBase + 1) {
+        sandbox->m_user = client.argValue(argBase);
+        sandbox->m_name = client.argValue(argBase + 1);
       } else {
-        return help(client);
+        help(client);
+        return;
       }
     }
     if (AttachSandbox(client, sandbox, m_force)) {
       // Attach succeed, wait for next interrupt
       throw DebuggerConsoleExitException();
     }
-    return true;
+    return;
   }
 
-  return help(client);
+  help(client);
 }
 
-bool CmdMachine::onServer(DebuggerProxy *proxy) {
+bool CmdMachine::onServer(DebuggerProxy &proxy) {
   if (m_body == "rpc") {
     String host = m_rpcConfig[s_host].toString();
     if (host.empty()) {
@@ -297,19 +302,19 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
       LibEventHttpClient::SetCache(host.data(), port, 1);
       register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
     }
-    return proxy->sendToClient(this);
+    return proxy.sendToClient(this);
   }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
-    return proxy->sendToClient(this);
+    return proxy.sendToClient(this);
   }
   if (m_body == "attach" && !m_sandboxes.empty()) {
-    m_succeed = proxy->switchSandbox(m_sandboxes[0]->id(), m_force);
+    m_succeed = proxy.switchSandbox(m_sandboxes[0]->id(), m_force);
     if (m_succeed) {
-      proxy->notifyDummySandbox();
+      proxy.notifyDummySandbox();
       m_exitInterrupt = true;
     }
-    return proxy->sendToClient(this);
+    return proxy.sendToClient(this);
   }
   return false;
 }

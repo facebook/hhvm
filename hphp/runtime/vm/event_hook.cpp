@@ -109,7 +109,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 static Array get_frame_args_with_ref(const ActRec* ar) {
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = NEW(HphpArray)(numArgs);
+  HphpArray* retval = ArrayData::Make(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {
@@ -147,11 +147,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   try {
     Variant doneFlag = true;
-    Variant obj = ar->hasThis() ?
-      Variant(Object(ar->getThis())) : uninit_null();
+    Variant called_on;
+
+    if (ar->hasThis()) {
+      called_on = Variant(ar->getThis());
+    } else if (ar->hasClass()) {
+      // For static methods, give handler the name of called class
+      called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
+    }
     Array intArgs =
       CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                     obj,
+                     called_on,
                      get_frame_args_with_ref(ar),
                      h->asCArrRef()[1],
                      ref(doneFlag));

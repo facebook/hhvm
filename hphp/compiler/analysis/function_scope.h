@@ -222,10 +222,10 @@ public:
   void setNeedsActRec();
 
   /*
-   * If this is a builtin and can be redefined
+   * If this is a builtin (C++ or PHP) and can be redefined
    */
-  bool ignoreRedefinition() const;
-  void setIgnoreRedefinition();
+  bool allowOverride() const;
+  void setAllowOverride();
 
   /**
    * Whether this function is a runtime helper function
@@ -266,8 +266,6 @@ public:
   void addRetExprToFix(ExpressionPtr e);
   void clearRetExprs();
   void fixRetExprs();
-
-  bool needsTypeCheckWrapper() const;
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }

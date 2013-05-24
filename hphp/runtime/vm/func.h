@@ -205,6 +205,7 @@ struct Func {
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return (bool)info(); }
+  bool isPHPBuiltin() const;
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
   }
@@ -319,6 +320,10 @@ struct Func {
     return shared()->m_retTypeConstraint;
   }
 
+  const StringData* originalFilename() const {
+    return shared()->m_originalFilename;
+  }
+
   int numIterators() const { return shared()->m_numIterators; }
   const EHEntVec& ehtab() const { return shared()->m_ehtab; }
   const FPIEntVec& fpitab() const { return shared()->m_fpitab; }
@@ -347,10 +352,7 @@ struct Func {
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
-  bool isIgnoreRedefinition() const {
-    return shared()->m_info &&
-    (shared()->m_info->attribute & ClassInfo::IgnoreRedefinition);
-  }
+  bool isAllowOverride() const;
   const BuiltinFunction& nativeFuncPtr() const {
     return shared()->m_nativeFuncPtr;
   }
@@ -464,6 +466,8 @@ private:
     bool m_hasGeneratorAsBody : 1;
     UserAttributeMap m_userAttributes;
     const StringData* m_retTypeConstraint;
+    // per-func filepath for traits flattened during repo construction
+    const StringData* m_originalFilename;
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);
@@ -637,6 +641,10 @@ public:
   void setBuiltinFunc(const ClassInfo::MethodInfo* info,
       BuiltinFunction bif, BuiltinFunction nif, Offset base);
 
+  void setOriginalFilename(const StringData* name) {
+    m_originalFilename = name;
+  }
+
 private:
   void sortEHTab();
   void sortFPITab(bool load);
@@ -681,6 +689,8 @@ private:
   const ClassInfo::MethodInfo* m_info;
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
+
+  const StringData* m_originalFilename;
 };
 
 class FuncRepoProxy : public RepoProxy {

@@ -21,31 +21,30 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdOut::help(DebuggerClient *client) {
-  client->helpTitle("Out Command");
-  client->helpCmds(
+void CmdOut::help(DebuggerClient &client) {
+  client.helpTitle("Out Command");
+  client.helpCmds(
     "[o]ut {count=1}", "steps out function calls",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command at break to step out function calls. Specify a "
     "count to step out more than one level of function calls."
   );
-  return true;
 }
 
-void CmdOut::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdOut::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   CmdFlowControl::onSetup(proxy, interrupt);
-  m_stackDepth = proxy->getStackDepth();
+  m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_vmContext->m_nesting;
 
   // Simply setup a "step out breakpoint" and let the program run.
   setupStepOut();
 }
 
-void CmdOut::onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   if (interrupt.getInterruptType() == ExceptionThrown) {
@@ -57,7 +56,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
   }
 
   int currentVMDepth = g_vmContext->m_nesting;
-  int currentStackDepth = proxy->getStackDepth();
+  int currentStackDepth = proxy.getStackDepth();
   if (currentVMDepth < m_vmDepth) {
     // Cut corner here, just break when cross VM boundary no matter how
     // many levels we want to go out of

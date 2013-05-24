@@ -16,14 +16,15 @@ import os
 import sys
 
 suites = {
-    'Slow' : 'slow',
-    'Quick' : 'quick',
-    'Zend' : 'zend/good',
+    'Slow': 'slow',
+    'Quick': 'quick',
+    'Zend': 'zend/good',
+    'Facebook': '../facebook/test/',
 }
 modes = {
-    'JitIR' : 'hhir',
-    'Jit' : 'jit',
-    'VM' : 'interp',
+    'JitIR': 'hhir',
+    'Jit': 'jit',
+    'VM': 'interp',
 }
 
 home = os.getenv('HPHP_HOME')

@@ -28,7 +28,8 @@ struct TypeProfileKey {
   enum KeyType {
     MethodName,
     PropName,
-    EltName
+    EltName,
+    StaticPropName
   } m_kind;
   const StringData* m_name;
 

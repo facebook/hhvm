@@ -24,13 +24,3 @@ class B extends X {
 
 $b = new B;
 $b->foo();
-
-class C extends phpmcc {
-  protected $a;
-  public function __construct() {
-    $this->a = 1;
-  }
-}
-
-$c = new C;
-var_dump($c);

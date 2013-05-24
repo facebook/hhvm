@@ -118,8 +118,8 @@ Array f_get_extension_funcs(CStrRef module_name) {
   throw NotSupportedException(__func__, "extensions are built differently");
 }
 
-String f_get_cfg_var(CStrRef option) {
-  throw NotSupportedException(__func__, "global configurations not used");
+Variant f_get_cfg_var(CStrRef option) {
+  return false;
 }
 
 String f_get_current_user() {
@@ -702,6 +702,10 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
     return ret;
   }
   return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+}
+
+Variant f_php_ini_loaded_file() {
+  return false;
 }
 
 String f_php_ini_scanned_files() {

@@ -121,7 +121,7 @@ define('IsFinal',                        1 <<  5);
 define('IsPublic',                       1 <<  6);
 define('IsProtected',                    1 <<  7);
 define('IsPrivate',                      1 <<  8);
-define('IgnoreRedefinition',             1 <<  8);
+define('AllowOverride',                  1 <<  8);
 define('IsStatic',                       1 <<  9);
 // FIXME (#2163116): IsInherited = (1 << 10) in base_class.h
 define('IsCppAbstract',                  1 << 10);
@@ -162,7 +162,7 @@ function get_flag_names($arr, $name, $global_func) {
   if ($flag & IsPublic              ) $ret .= ' | IsPublic'              ;
   if ($flag & IsProtected           ) $ret .= ' | IsProtected'           ;
   if ($global_func) {
-    if ($flag & IgnoreRedefinition  ) $ret .= ' | IgnoreRedefinition'    ;
+    if ($flag & AllowOverride       ) $ret .= ' | AllowOverride'         ;
   } else {
     if ($flag & IsPrivate           ) $ret .= ' | IsPrivate'             ;
   }
@@ -370,6 +370,9 @@ function DefineFunction($func) {
 
 function ReadIDLFile($path) {
   $entries = json_decode(file_get_contents($path), /* use arrays */ true);
+  if (!$entries) {
+    throw new Exception("Unable to parse json from $path");
+  }
 
   if (!empty($entries['funcs'])) {
     foreach ($entries['funcs'] as $func) {
@@ -773,7 +776,7 @@ EOT
     fprintf($f, "  // constructor must call setAttributes(%s)\n",
             implode('|', $flags));
   }
-  fprintf($f, "  public: c_%s(VM::Class* cls = c_%s::s_cls);\n",
+  fprintf($f, "  public: c_%s(Class* cls = c_%s::s_cls);\n",
           $class['name'], $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
@@ -848,7 +851,10 @@ function generateFuncCPPImplementation($func, $f, $prefix = 'f_') {
   $output = '';
   $need_ret = false;
 
-  fprintf($f, '%s %s%s(', typename($func['return']), $prefix, $func['name']);
+  fprintf($f, '%s %s%s(',
+          typename($func['return']),
+          $prefix,
+          strtolower($func['name']));
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc');
   if ($var_arg && count($func['args']) > 0) fprintf($f, ', ');

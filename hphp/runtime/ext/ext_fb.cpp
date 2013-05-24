@@ -1416,10 +1416,10 @@ bool f_fb_intercept(CStrRef name, CVarRef handler,
 Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
                                        CArrRef params, CVarRef data,
                                        VRefParam done) {
-  if (obj.isNull()) {
-    return vm_call_user_func(data, params);
+  if (obj.isObject()) {
+    return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
   }
-  return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
+  return vm_call_user_func(data, params);
 }
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
@@ -1455,8 +1455,7 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   }
 
   if (function_exists(new_func_name)) {
-    if (new_func_name.data()[0] !=
-        ParserBase::CharCreateFunction) { // create_function
+    if (new_func_name.data()[0] != '1') {
       raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
                     orig_func_name.data(), new_func_name.data(),
                     new_func_name.data());
@@ -1659,7 +1658,7 @@ void const_load_set(CStrRef key, CVarRef value) {
   const_data.set(key, value, true);
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());

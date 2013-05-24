@@ -19,9 +19,6 @@
 
 #include <bitset>
 #include "tbb/concurrent_hash_map.h"
-#ifdef USE_JEMALLOC
-# include <jemalloc/jemalloc.h>
-#endif
 #include <atomic>
 
 #include "hphp/runtime/vm/core_types.h"
@@ -156,7 +153,7 @@ class PreClass : public AtomicCountable {
   struct Const {
     Const() {}
     Const(PreClass* preClass, const StringData* n,
-   	  const StringData* typeConstraint, const TypedValue& val,
+          const StringData* typeConstraint, const TypedValue& val,
       const StringData* phpCode);
 
     void prettyPrint(std::ostream& out) const;
@@ -421,7 +418,7 @@ class PreClassEmitter {
       , m_phpCode(0)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
-    	  TypedValue* val, const StringData* phpCode)
+          TypedValue* val, const StringData* phpCode)
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
       memcpy(&m_val, val, sizeof(TypedValue));
     }
@@ -467,7 +464,7 @@ class PreClassEmitter {
                    DataType hphpcType);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
-		           TypedValue* val, const StringData* phpCode);
+                   TypedValue* val, const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
@@ -516,7 +513,7 @@ class PreClassRepoProxy : public RepoProxy {
   friend class PreClass;
   friend class PreClassEmitter;
  public:
-  PreClassRepoProxy(Repo& repo);
+  explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
 
@@ -653,19 +650,20 @@ public:
   Avail avail(Class *&parent, bool tryAutoload = false) const;
   bool classof(const Class* cls) const {
     /*
-      If cls is an interface or trait, we're going to have
-      to do the slow search via classof(PreClass*).
-      Otherwise, if this is not an interface or trait,
+      If cls is an interface, we can simply check to
+      see if cls is in this->m_interfaces.
+      Otherwise, if this is not an interface,
       the classVec check will determine whether its
-      an instance of cls.
-      Otherwise, this is an interface or trait, and cls
+      an instance of cls (including the case where
+      this and cls are the same trait).
+      Otherwise, this is an interface, and cls
       is not, so we need to return false. But the classVec
       check can never return true in that case (cls's
-      classVec contains only non-interfaces and non-traits,
+      classVec contains only non-interfaces,
       while this->classVec is either empty, or contains
-      interfaces/traits).
+      interfaces).
     */
-    if (UNLIKELY(cls->attrs() & (AttrInterface | AttrTrait))) {
+    if (UNLIKELY(cls->attrs() & AttrInterface)) {
       return m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr)
         == cls;
     }

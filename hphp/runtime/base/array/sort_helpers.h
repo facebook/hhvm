@@ -273,7 +273,7 @@ struct ElmUCompare {
       Variant ret2;
       tvDup(acc.getValue(right).asTypedValue(), args+0);
       tvDup(acc.getValue(left).asTypedValue(), args+1);
-      g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx,
+      g_vmContext->invokeFuncFew(ret2.asTypedValue(), *ctx,
                                  2, args);
       if (ret2.isBoolean()) {
         return ret2.toBoolean();

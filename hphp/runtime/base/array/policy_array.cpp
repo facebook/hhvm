@@ -481,7 +481,8 @@ ArrayData *ArrayShell::addImpl(K k, const Variant& v, bool copy) {
   return this;
 }
 
-ArrayShell *ArrayShell::addLval(int64_t k, Variant*& ret, bool copy) {
+template <class K>
+ArrayShell *ArrayShell::addLvalImpl(K k, Variant*& ret, bool copy) {
   APILOG << "(" << k << ", " << ret << ", " << copy << ")";
   if (copy) {
     return ArrayShell::copy()->addLval(k, ret, false);
@@ -493,10 +494,6 @@ ArrayShell *ArrayShell::addLval(int64_t k, Variant*& ret, bool copy) {
   ret = appendNoGrow(k, Variant::nullInit);
   MYLOG << (void*)this << "->lval:" << "added";
   return this;
-}
-
-ArrayShell *ArrayShell::addLval(StringData* k, Variant *&ret, bool copy) {
-  NOT_IMPLEMENTED();
 }
 
 template <class K>
@@ -593,7 +590,7 @@ CVarRef ArrayShell::endRef() {
 }
 
 HphpArray* ArrayShell::toHphpArray() const {
-  auto result = NEW(HphpArray)(m_size);
+  auto result = ArrayData::Make(m_size);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
       result->add(key(toPos(i)).getStringData(), val(toPos(i)), false);

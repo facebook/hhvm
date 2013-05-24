@@ -112,14 +112,24 @@ struct CodegenState {
   AsmInfo* asmInfo;
 };
 
+constexpr Reg64  rCgGP  (reg::r11);
+constexpr RegXMM rCgXMM0(reg::xmm0);
+constexpr RegXMM rCgXMM1(reg::xmm1);
+
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
   CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
                 CodegenState& state)
-    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state),
-      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace),
-      m_curBcOff(-1){
+    : m_as(as)
+    , m_astubs(astubs)
+    , m_tx64(tx64)
+    , m_state(state)
+    , m_regs(state.regs)
+    , m_rScratch(InvalidReg)
+    , m_curInst(nullptr)
+    , m_curTrace(trace)
+    , m_curBcOff(-1) {
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -187,13 +197,10 @@ private:
   template<class OpndType>
   ConditionCode emitTypeTest(Type type, OpndType src, bool negate);
 
-  template<class OpndType>
-  ConditionCode emitTypeTest(IRInstruction* inst, OpndType src, bool negate);
-
-  template<class OpndType>
-  void emitGuardType(OpndType src, IRInstruction* instr);
-
-  void cgGuardTypeCell(PhysReg baseReg,int64_t offset,IRInstruction* instr);
+  template<class MemLoc>
+  void emitTypeCheck(Type type, MemLoc src, Block* taken);
+  template<class MemLoc>
+  void emitTypeGuard(Type type, MemLoc mem);
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
@@ -212,7 +219,6 @@ private:
                   void (Asm::*intRR)(RegType, RegType),
                   void (Asm::*mov)(RegType, RegType),
                   void (Asm::*fpRR)(RegXMM, RegXMM),
-                  void (*extend)(Asm&, const RegisterInfo&),
                   Oper,
                   RegType (*conv)(PhysReg),
                   Commutativity);
@@ -221,7 +227,6 @@ private:
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
                      void (Asm::*mov)(RegType, RegType),
-                     void (*extend)(Asm&, const RegisterInfo&),
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
@@ -238,8 +243,8 @@ private:
 
   void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 
-  void cgNegate(IRInstruction* inst); // helper
-  void cgJcc(IRInstruction* inst); // helper
+  void cgJcc(IRInstruction* inst);        // helper
+  void cgReqBindJcc(IRInstruction* inst); // helper
   void cgOpCmpHelper(
             IRInstruction* inst,
             void (Asm::*setter)(Reg8),
@@ -249,15 +254,28 @@ private:
             int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
             int64_t (*obj_cmp_int)(ObjectData*, int64_t),
             int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
-  void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
+
+  template<class MemLoc>
+  void emitSideExitGuard(Type type, MemLoc mem, Offset taken);
+  void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
+
+  void emitCompare(SSATmp*, SSATmp*);
+  void emitTestZero(SSATmp*);
   bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
                         void(Asm::*emitFunc)(Reg64));
   bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
   bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
 
 private:
+  PhysReg selectScratchReg(IRInstruction* inst);
+  void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg);
+  PhysReg prepXMMReg(const SSATmp* tmp,
+                     X64Assembler& as,
+                     const RegAllocInfo& allocInfo,
+                     RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
+  void doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
@@ -272,7 +290,6 @@ private:
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
-  void cgConvPrimitiveToDbl(IRInstruction* inst);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,
@@ -297,12 +314,6 @@ private:
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
   Address emitFwdJmp(Block* target);
-  Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
-                                   IRInstruction* toSmash);
-  void emitJccDirectExit(IRInstruction*, ConditionCode);
-  Address emitSmashableFwdJcc(ConditionCode cc, Block* target,
-                              IRInstruction* toSmash);
-  void emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurFunc() const;
   Class*      getCurClass() const { return getCurFunc()->cls(); }
@@ -313,6 +324,7 @@ private:
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
+  void emitConvBoolOrIntToDbl(IRInstruction* inst);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
@@ -359,6 +371,7 @@ private:
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
   const RegAllocInfo& m_regs;
+  Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   Trace*              m_curTrace;
   uint32_t            m_curBcOff; // offset of bytecode instr that produced
@@ -548,6 +561,10 @@ void genCodeForTrace(Trace*                  trace,
                      const RegAllocInfo&     regs,
                      const LifetimeInfo*     lifetime = nullptr,
                      AsmInfo*                asmInfo = nullptr);
+
+TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 }}
 

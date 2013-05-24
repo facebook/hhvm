@@ -36,6 +36,7 @@ bool SystemLib::s_inited = false;
 HPHP::Unit* SystemLib::s_unit = nullptr;
 HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
+HPHP::Func* SystemLib::s_nullFunc = nullptr;
 
 #define DEFINE_SYSTEMLIB_CLASS(cls)       \
   HPHP::Class* SystemLib::s_ ## cls ## Class = nullptr;
@@ -87,6 +88,11 @@ ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(CVarRef message) {
 
 ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
   CREATE_AND_CONSTRUCT(InvalidOperationException, CREATE_VECTOR1(message));
+}
+
+ObjectData* SystemLib::AllocDOMDocumentObject(CStrRef version,
+                                              CStrRef encoding) {
+  CREATE_AND_CONSTRUCT(DOMDocument, CREATE_VECTOR2(version, encoding));
 }
 
 ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
@@ -153,13 +159,6 @@ ObjectData* SystemLib::AllocKeyedIterableViewObject(CVarRef iterable) {
 }
 
 #undef CREATE_AND_CONSTRUCT
-
-Func*
-SystemLib::GetNullFunction() {
-  Func* f = s_nativeFuncUnit->firstHoistable();
-  assert(!strcmp(f->name()->data(), "86null"));
-  return f;
-}
 
 ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);

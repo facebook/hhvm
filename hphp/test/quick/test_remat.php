@@ -1,83 +1,67 @@
-<?
+<?php
 
-class KarmaMemcache {
-  private $keyScoreArr;
+class KM {
+  private $kSA;
   private $specs;
 
-  function getKeyScores() {
-    return $this->keyScoreArr;
+  function getKS() {
+    return $this->kSA;
   }
   function __construct() {
     $this->specs = array(
-      "login_bruteforce_protection_delta_vetted_datr:3600" =>
-      // A spec
-        array('on_block_lockout_time' => 0,
-          'max_score' => 10000000,
-          'time_to_decay_max_score' => 100)
+      "r:3600" =>
+        array('oblt' => 0,
+          'ms' => 10000000,
+          'ttdm' => 100)
       );
   }
 
-  private static function decayScore($a, $b, $c, $d) { return 0; }
-  /**
-   * Takes raw data fetched from memcache, applies necessary decay
-   * function.
-   */
+  private static function decay($a, $b, $c, $d) { return 0; }
 
-  private function getFetchedXXX() {
-    return array(1 /* score */, 0 /*last_occurrence*/, 0
-    /*last_blocked_time*/);
+  private function getXXX() {
+    return array(1, 0, 0);
   }
   public function getInfo() {
     $time = time();
-    $this->keyScoreArr = array();
+    $this->kSA = array();
     foreach ($this->specs as $key => $spec) {
-      $fetched = $this->getFetchedXXX();
-      list($score, $last_occurrence, $last_blocked_time) =
+      $fetched = $this->getXXX();
+      list($sc, $l_o, $l_b_t) =
         array(
-          idx($fetched, 0, 0),
-          idx($fetched, 1, 0),
-          idx($fetched, 2, 0)
+          $fetched[0],
+          $fetched[1],
+          $fetched[2]
         );
-      // FBLogger('test_remat')->warn("score starts $score\n");
 
-      if ($time - $last_blocked_time > $spec['on_block_lockout_time']) {
-        if ($score > $spec['max_score']) {
-          // Only possible if thresholds were reduced.
-          $score = 0.5 * $spec['max_score'];
-          // FBLogger('test_remat')->warn("score halved max case $score\n");
+      if ($time - $l_b_t > $spec['oblt']) {
+        if ($sc > $spec['ms']) {
+          $sc = 0.5 * $spec['ms'];
         } else {
-          $score = self::decayScore(
-            $spec['max_score'],
-            $spec['time_to_decay_max_score'],
-            $score,
-            $last_occurrence
+          $sc = self::decay(
+            $spec['ms'],
+            $spec['ttdm'],
+            $sc,
+            $l_o
           );
-          // FBLogger('test_remat')->warn("score decayed $score\n");
         }
-        $this->decayedKarmaVectors[$key] = array(
-          'score' => (double)$score,
-          'last_occurrence' => (int)$last_occurrence,
-          'last_blocked_time' => (int)$last_blocked_time
+        $this->dKV[$key] = array(
+          'sc' => (double)$sc,
+          'l_o' => (int)$l_o,
+          'l_b_t' => (int)$l_b_t
           );
-        // FBLogger('test_remat')->warn("decayed decayed $score: " .
-        //         print_r($this->decayedKarmaVectors[$key], true));
-      } else {
-        // In on-block-lockout-interval.
-        // Don't add to $this->decayedKarmaVectors. That would update the
-        // timestamp.
       }
 
-      $this->keyScoreArr[$key] = (double)$score;
+      $this->kSA[$key] = (double)$sc;
       if ($this) {
-        var_dump((double)$score, $this->keyScoreArr[$key]);
+        var_dump((double)$sc, $this->kSA[$key]);
       }
     }
   }
 }
 
 function main() {
-  $kc = new KarmaMemcache();
+  $kc = new KM();
   $kc->getInfo();
-  var_dump($kc->getKeyScores());
+  var_dump($kc->getKS());
 }
 main();

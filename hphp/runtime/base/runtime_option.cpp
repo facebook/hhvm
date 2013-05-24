@@ -435,6 +435,7 @@ std::string RuntimeOption::SandboxLogsRoot;
 
 bool RuntimeOption::EnableDebugger = false;
 bool RuntimeOption::EnableDebuggerServer = false;
+bool RuntimeOption::EnableDebuggerUsageLog = false;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
@@ -442,7 +443,6 @@ std::string RuntimeOption::DebuggerRpcHostDomain;
 int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
-std::string RuntimeOption::DebuggerUsageLogFile;
 
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1172,10 +1172,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       Hdf debugger = eval["Debugger"];
       EnableDebugger = debugger["EnableDebugger"].getBool();
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
+      EnableDebuggerUsageLog = debugger["EnableDebuggerUsageLog"].getBool();
       DebuggerServerPort = debugger["Port"].getUInt16(8089);
       DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
       DebuggerStartupDocument = debugger["StartupDocument"].getString();
-      DebuggerUsageLogFile = debugger["UsageLogFile"].getString();
 
       DebuggerDefaultRpcPort = debugger["RPC.DefaultPort"].getUInt16(8083);
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();

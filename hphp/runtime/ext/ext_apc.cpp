@@ -316,7 +316,7 @@ public:
 
 static size_t s_const_map_size = 0;
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load(int thread) {
   static void *handle = NULL;
   if (handle ||
@@ -422,7 +422,7 @@ static int count_items(const char **p, int step) {
   return count;
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load_impl(struct cache_info *info,
                      const char **int_keys, long long *int_values,
                      const char **char_keys, char *char_values,
@@ -518,7 +518,7 @@ void const_load_impl(struct cache_info *info,
   }
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load_impl(struct cache_info *info,
                    const char **int_keys, long long *int_values,
                    const char **char_keys, char *char_values,
@@ -643,7 +643,7 @@ void apc_load_impl(struct cache_info *info,
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with compressed data
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, long long *int_values,
@@ -781,7 +781,7 @@ void const_load_impl_compressed
   }
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, long long *int_values,

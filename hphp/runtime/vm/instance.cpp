@@ -122,7 +122,7 @@ Object Instance::FromArray(ArrayData *properties) {
 
 void Instance::initDynProps(int numDynamic /* = 0 */) {
   // Create o_properties with room for numDynamic
-  o_properties.asArray() = NEW(HphpArray)(numDynamic);
+  o_properties.asArray() = ArrayData::Make(numDynamic);
 }
 
 Slot Instance::declPropInd(TypedValue* prop) const {

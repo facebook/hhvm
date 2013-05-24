@@ -172,7 +172,15 @@ bad_tests = (
 
     # broken in contbuild
     '/ext-standard-strings/setlocale_variation1.php',
+    '/ext-standard-strings/setlocale_basic1.php',
+    '/ext-standard-strings/setlocale_basic2.php',
     '/ext-standard-strings/setlocale_basic3.php',
+    '/ext-standard-file/filetype_variation2.php',
+    '/ext-standard-file/filetype_variation3.php',
+    '/ext-sockets/ipv4loop.php',
+    '/ext-posix/posix_kill_basic.php',
+    '/ext-standard-file/005_variation-win32.php',
+    '/ext-json/fail001.php',
 
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',
@@ -186,6 +194,22 @@ bad_tests = (
     '/ext-sqlite3/sqlite3_08_udf.php',
     '/ext-sqlite3/sqlite3_25_create_aggregate.php',
     '/ext-sockets/socket_connect_params.php',
+    '/ext-sockets/socket_getpeername_ipv4loop.php',
+
+    # time tests are hard to write, these are poorly written
+    '/ext-date/bug48187.php',
+
+    # broken on unbuntu 12.04
+    '/ext-date/DateTimeZone_listAbbreviations_basic1.php',
+    '/ext-date/bug52290.php',
+    '/ext-date/timezone_abbreviations_list_basic1.php',
+    '/ext-gd/bug24155.php',
+    '/ext-gd/bug39366.php',
+    '/ext-gd/bug48732.php',
+    '/ext-mbstring/bug54494.php',
+    '/ext-openssl/openssl_x509_parse_basic.php',
+    '/ext-standard-streams/bug61115-2.php',
+    '/ext-standard-strings/moneyformat.php',
 )
 
 # Random other files that zend wants
@@ -390,6 +414,7 @@ def walk(filename, source):
 
             # PHP puts a newline in that we don't
             exp = exp.replace('\n\nFatal error:', '\nFatal error:')
+            exp = exp.replace('\n\nCatchable fatal error:', '\nCatchable fatal error:')
             exp = exp.replace('\n\nWarning:', '\nWarning:')
             exp = exp.replace('\n\nNotice:', '\nNotice:')
 

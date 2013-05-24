@@ -44,8 +44,8 @@ public:
   std::string desc() const;
   std::string error() const { return m_errorMsg;}
 
-  virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   bool shouldBreak(const BreakPointInfoPtrVec &bps);
   std::string getFileLine() const;
@@ -53,7 +53,7 @@ public:
   InterruptSite *getSite() { return m_site;}
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

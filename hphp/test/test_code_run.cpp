@@ -156,17 +156,12 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
 
       string jitarg = string("-vEval.Jit=") +
         (RuntimeOption::EvalJit ? "true" : "false");
-      string jit_use_ir = string("-vEval.JitUseIR=") +
-        (RuntimeOption::EvalJitUseIR ? "true" : "false");
       string jit_rename = string("-vEval.JitEnableRenameFunction=") +
         (RuntimeOption::EvalJit ? "true" : "false");
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/slow/config.hdf",
                             repoarg.c_str(),
                             jitarg.c_str(),
-                            jit_use_ir.c_str(),
-                            // Next arg only takes effect if JitUseIR=true also
-                            "-vEval.HHIRDisableTx64=true",
                             jit_rename.c_str(),
                             nullptr};
       Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);

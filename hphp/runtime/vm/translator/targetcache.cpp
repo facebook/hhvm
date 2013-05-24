@@ -539,6 +539,14 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
     ObjectData* arThis = ar->getThis();
     shouldBeObj->m_type = KindOfObject;
     shouldBeObj->m_data.pobj = arThis;
+
+    // There used to be a half-built ActRec on the stack that we need the
+    // unwinder to ignore. We overwrote 1/3 of it with the code above, but
+    // because of the emitMarker() in LdObjMethod we need the other two slots
+    // to not have any TypedValues.
+    tvWriteNull(shouldBeObj-1);
+    tvWriteNull(shouldBeObj-2);
+
     throw;
   }
 }
@@ -690,7 +698,8 @@ CacheHandle allocKnownClass(const Class* cls) {
   if (ne->m_cachedClassOffset) return ne->m_cachedClassOffset;
 
   return allocKnownClass(ne,
-                         RuntimeOption::RepoAuthoritative &&
+                         (!SystemLib::s_inited ||
+                          RuntimeOption::RepoAuthoritative) &&
                          cls->verifyPersistent());
 }
 
@@ -739,6 +748,8 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
 
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
+  assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
+
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
@@ -778,11 +789,17 @@ ClassCache::lookup(Handle handle, StringData *name,
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      c = Unit::loadMissingClass(ne, name);
+      String normName = normalizeNS(name);
+      if (normName) {
+        return lookup(handle, normName.get(), unused);
+      } else {
+        c = Unit::loadMissingClass(ne, name);
+      }
       if (UNLIKELY(!c)) {
         undefinedError(Strings::UNKNOWN_CLASS, name->data());
       }
     }
+
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;
     name->incRefCount();

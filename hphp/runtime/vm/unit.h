@@ -449,6 +449,7 @@ struct Unit {
 
   static NamedEntity* GetNamedEntity(const StringData *)
     __attribute__((__flatten__));
+  static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();
@@ -641,6 +642,7 @@ public:
   }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
+  bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
   void* replaceUnit() const;
 public:
   static Mutex s_classesMutex;
@@ -1091,5 +1093,17 @@ public:
   Class* popFront();
 };
 
- } // HPHP::VM
+/**
+ * If name starts with '\\', returns a new String with the leading
+ * slash stripped. Otherwise returns a null string.
+ */
+inline const String normalizeNS(const StringData* name) {
+  assert(name->data()[name->size()] == 0);
+  if (name->data()[0] == '\\') {
+    return String(name->data() + 1);
+  }
+  return null_string;
+}
+
+}
 #endif

@@ -60,9 +60,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-extern StaticString s_self;
-extern StaticString s_parent;
-extern StaticString s_static;
+extern const StaticString s_self;
+extern const StaticString s_parent;
+extern const StaticString s_static;
 
 // empty
 
@@ -296,6 +296,9 @@ inline bool is_object(CVarRef var) {
 inline bool is_empty_string(CVarRef v) {
   return v.isString() && v.getStringData()->empty();
 }
+
+bool interface_supports_array(const StringData* s);
+bool interface_supports_array(const std::string& n);
 
 ///////////////////////////////////////////////////////////////////////////////
 // special variable contexts

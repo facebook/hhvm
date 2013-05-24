@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/ext_misc.h"
+
 #include "hphp/runtime/base/server/server_stats.h"
 #include "hphp/runtime/base/util/exceptions.h"
 #include "hphp/runtime/base/zend/zend_pack.h"
@@ -23,7 +25,6 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/parser/scanner.h"
 #include "hphp/runtime/base/class_info.h"

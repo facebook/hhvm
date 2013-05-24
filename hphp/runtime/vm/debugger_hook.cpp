@@ -14,16 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/util.h"
-
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/eval/debugger/break_point.h"
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/runtime/eval/debugger/debugger_proxy.h"
-#include "hphp/runtime/eval/debugger/break_point.h"
 #include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 
@@ -51,7 +49,7 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
   // we don't need an interrupt for, e.g., stepping over a line of code.
   if (UNLIKELY(g_vmContext->m_lastLocFilter != nullptr) &&
       g_vmContext->m_lastLocFilter->checkPC(pc)) {
-    TRACE(5, "same location as last interrupt\n");
+    TRACE_RB(5, "same location as last interrupt\n");
     return;
   }
   // Are we hitting a breakpoint?
@@ -61,7 +59,7 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
     }
-    TRACE(5, "DEBUGGER_FORCE_INTR\n");
+    TRACE_RB(5, "DEBUGGER_FORCE_INTR\n");
   }
   Eval::Debugger::InterruptVMHook();
   TRACE(5, "out phpDebuggerOpcodeHook()\n");

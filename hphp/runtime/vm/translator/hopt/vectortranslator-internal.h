@@ -106,7 +106,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
                           bool nonLitInt) {
-  auto keyType = key->type();
+  auto DEBUG_ONLY keyType = key->type();
   assert(keyType.notBoxed());
   assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 

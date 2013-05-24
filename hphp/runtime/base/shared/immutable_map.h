@@ -63,8 +63,7 @@ public:
   }
 
   static ImmutableMap* Create(ArrayData* arr,
-                              bool unserializeObj,
-                              bool& shouldCache);
+                              bool unserializeObj);
   static void Destroy(ImmutableMap* im);
 private:
   ImmutableMap() {}

@@ -3625,6 +3625,11 @@ CreateCl <num args> <class name>  [F..F]  ->  [C]
   defined at the point of the CreateCl opcode, or the behavior is
   undefined.
 
+ArrayIdx    [C C C] -> [C]
+
+  Checks if array in $3 contains key in $2 and pushes the result onto the stack
+  if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
+  thrown if $3 is not an array.
 
 14. Continuation creation and execution
 ---------------------------------------

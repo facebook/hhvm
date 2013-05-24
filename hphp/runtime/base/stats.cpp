@@ -57,11 +57,11 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
     a.  jcc8  (ccNegate(cc), jcc);
   }
   a.    pushf ();
-  a.    push  (reg::rScratch);
-  a.    movq  (virtualAddress, reg::rScratch);
+  a.    push  (reg::rAsm);
+  a.    movq  (virtualAddress, reg::rAsm);
   a.    fs();
-  a.    addq  (n, *reg::rScratch);
-  a.    pop   (reg::rScratch);
+  a.    addq  (n, *reg::rAsm);
+  a.    pop   (reg::rAsm);
   a.    popf  ();
   if (havecc) {
     a.  patchJcc8(jcc, a.code.frontier);

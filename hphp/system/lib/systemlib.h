@@ -23,9 +23,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ObjectData;
-  class Unit;
-  class Class;
-  class Func;
+class Unit;
+class Class;
+class Func;
 namespace Eval {
   class PhpFile;
 }
@@ -46,9 +46,11 @@ namespace Eval {
   x(DirectoryIterator)                          \
   x(SplFileInfo)                                \
   x(SplFileObject)                              \
+  x(DOMDocument)                                \
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
+  x(Closure)                                    \
   x(Continuation)                               \
   x(Serializable)                               \
   x(ArrayAccess)                                \
@@ -79,8 +81,7 @@ class SystemLib {
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
-  static HPHP::Func* GetNullFunction();
-
+  static HPHP::Func* s_nullFunc;
 
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();
@@ -90,6 +91,8 @@ class SystemLib {
   static ObjectData* AllocRuntimeExceptionObject(CVarRef message);
   static ObjectData* AllocOutOfBoundsExceptionObject(CVarRef message);
   static ObjectData* AllocInvalidOperationExceptionObject(CVarRef message);
+  static ObjectData* AllocDOMDocumentObject(CStrRef version = null_string,
+                                            CStrRef encoding = null_string);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
   static ObjectData* AllocDirectoryObject();

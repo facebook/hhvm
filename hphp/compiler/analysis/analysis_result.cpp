@@ -14,12 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/analysis_result.h"
+
 #include <iomanip>
 #include <algorithm>
 #include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
-#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -169,7 +170,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   StringToFunctionScopePtrMap::const_iterator bit =
     m_functions.find(funcName);
-  if (bit != m_functions.end() && !bit->second->ignoreRedefinition()) {
+  if (bit != m_functions.end() && !bit->second->allowOverride()) {
     return bit->second;
   }
   StringToFunctionScopePtrMap::const_iterator iter =
@@ -345,7 +346,7 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   // System functions override
   auto it = m_functions.find(fname);
   if (it != m_functions.end()) {
-    if (!it->second->ignoreRedefinition()) {
+    if (!it->second->allowOverride()) {
       // we need someone to hold on to a reference to it
       // even though we're not going to do anything with it
       this->lock()->m_ignoredScopes.push_back(funcScope);

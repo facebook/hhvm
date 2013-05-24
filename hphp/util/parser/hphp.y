@@ -892,7 +892,7 @@ class_namespace_string_typeargs:
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),1));
                                          }
-                                         $$ = $1;}
+                                         _p->onTypeAnnotation($$, $1, $2);}
 ;
 constant_declaration:
     constant_declaration ','
@@ -1636,28 +1636,28 @@ expr_no_variable:
   | collection_literal                 { $$ = $1;}
 ;
 
+shape_keyname:
+    T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
+                                        _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
+
 non_empty_shape_pair_list:
     non_empty_shape_pair_list ','
-      T_CONSTANT_ENCAPSED_STRING
+      shape_keyname
       T_DOUBLE_ARROW
-      expr                            { validate_shape_keyname($3, _p);
-                                        _p->onArrayPair($$,&$1,&$3,$5,0); }
-  | T_CONSTANT_ENCAPSED_STRING
+      expr                            { _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | shape_keyname
       T_DOUBLE_ARROW
-      expr                            { validate_shape_keyname($1, _p);
-                                        _p->onArrayPair($$,  0,&$1,$3,0); }
+      expr                            { _p->onArrayPair($$,  0,&$1,$3,0); }
 ;
 
 non_empty_static_shape_pair_list:
     non_empty_static_shape_pair_list ','
-      T_CONSTANT_ENCAPSED_STRING
+      shape_keyname
       T_DOUBLE_ARROW
-      static_scalar                   { validate_shape_keyname($3, _p);
-                                        _p->onArrayPair($$,&$1,&$3,$5,0); }
-  | T_CONSTANT_ENCAPSED_STRING
+      static_scalar                   { _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | shape_keyname
       T_DOUBLE_ARROW
-      static_scalar                   { validate_shape_keyname($1, _p);
-                                        _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_scalar                   { _p->onArrayPair($$,  0,&$1,$3,0); }
 ;
 
 shape_pair_list:
@@ -2042,13 +2042,11 @@ static_shape_pair_list_ae:
 ;
 non_empty_static_shape_pair_list_ae:
     non_empty_static_shape_pair_list_ae
-      ',' T_CONSTANT_ENCAPSED_STRING
-      T_DOUBLE_ARROW static_scalar_ae  { validate_shape_keyname($3, _p);
-                                         _p->onArrayPair($$,&$1,&$3,$5,0); }
-  | T_CONSTANT_ENCAPSED_STRING
+      ',' shape_keyname
+      T_DOUBLE_ARROW static_scalar_ae  {  _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | shape_keyname
       T_DOUBLE_ARROW
-      static_scalar_ae                 { validate_shape_keyname($1, _p);
-                                         _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_scalar_ae                 { _p->onArrayPair($$,  0,&$1,$3,0); }
 ;
 
 static_scalar_list_ae:
@@ -2433,7 +2431,7 @@ hh_type:
   | '@' hh_type                        { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization($2, '@');
                                          $$ = $2; }
-  | namespace_string hh_typeargs_opt   { _p->onTypeAnnotation($$, $1, $2); }
+  | class_namespace_string_typeargs    { $$ = $1; }
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }

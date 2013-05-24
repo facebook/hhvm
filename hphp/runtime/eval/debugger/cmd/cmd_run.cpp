@@ -32,18 +32,18 @@ void CmdRun::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(*m_args);
 }
 
-void CmdRun::list(DebuggerClient *client) {
-  client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+void CmdRun::list(DebuggerClient &client) {
+  client.addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
-bool CmdRun::help(DebuggerClient *client) {
-  client->helpTitle("Run Command");
-  client->helpCmds(
+void CmdRun::help(DebuggerClient &client) {
+  client.helpTitle("Run Command");
+  client.helpCmds(
     "[r]un",                             "restarts program",
     "[r]un {file} {arg1} {arg2} ...",    "starts a new program",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Aborts current execution and restarts program with specified arguments. "
     "If no arguments are specified, it will reuse the PHP file and old "
     "arguments. If arguments are to be changed, please include file name, "
@@ -52,21 +52,20 @@ bool CmdRun::help(DebuggerClient *client) {
     "In server mode, this command will simply abort current page handling "
     "without restarting anything."
   );
-  return true;
 }
 
-bool CmdRun::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdRun::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
-  m_args = StringVecPtr(client->args(), null_deleter());
-  m_smallStep = client->getDebuggerSmallStep();
-  client->sendToServer(this);
-  client->clearCachedLocal();
-  client->setFrame(0);
+  m_args = StringVecPtr(client.args(), null_deleter());
+  m_smallStep = client.getDebuggerSmallStep();
+  client.sendToServer(this);
+  client.clearCachedLocal();
+  client.setFrame(0);
   throw DebuggerConsoleExitException();
 }
 
-bool CmdRun::onServer(DebuggerProxy *proxy) {
+bool CmdRun::onServer(DebuggerProxy &proxy) {
   g_context->setDebuggerSmallStep(m_smallStep);
   throw DebuggerRestartException(m_args);
 }

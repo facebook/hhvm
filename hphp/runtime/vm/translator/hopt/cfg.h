@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_CFG_H_
 #define incl_HPHP_VM_CFG_H_
 
-#include "hphp/runtime/vm/translator/hopt/ir.h"
+#include "hphp/runtime/vm/translator/hopt/block.h"
 #include "hphp/runtime/vm/translator/hopt/trace.h"
 
 namespace HPHP { namespace JIT {
@@ -32,9 +32,9 @@ namespace HPHP { namespace JIT {
  */
 template <class Visitor>
 struct PostorderSort {
-  PostorderSort(Visitor &visitor, unsigned num_blocks) :
-      m_visited(num_blocks), m_visitor(visitor) {
-  }
+  PostorderSort(Visitor &visitor, unsigned num_blocks)
+    : m_visited(num_blocks), m_visitor(visitor)
+  {}
 
   void walk(Block* block) {
     assert(!block->empty());
@@ -49,6 +49,7 @@ struct PostorderSort {
     if (taken) walk(taken);
     m_visitor(block);
   }
+
 private:
   boost::dynamic_bitset<> m_visited;
   Visitor &m_visitor;
@@ -64,8 +65,36 @@ void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
 }
 
 /*
- * Compute the postorder number of each immediate dominator of each block,
- * using the postorder numbers assigned by sortCfg().
+ * Compute a reverse postorder list of the basic blocks reachable from
+ * the first block in trace.
+ *
+ * Post: isRPOSorted(return value)
+ */
+BlockList sortCfg(Trace*, const IRFactory&);
+
+/*
+ * Returns: true if the supplied block list is sorted in reverse post
+ * order.
+ */
+bool isRPOSorted(const BlockList&);
+
+/*
+ * Compute predecessors for all blocks in a list, using a list
+ * produced by sortCfg().
+ *
+ * TODO(#2272599): we want to track this on the fly instead of
+ * recomputing it.
+ *
+ * Pre: isRPOSorted(blocks)
+ */
+typedef smart::vector<smart::vector<Block*>> PredVector;
+PredVector computePredecessors(const BlockList& blocks);
+
+/*
+ * Compute the postorder number of each immediate dominator of each
+ * block, using a list produced by sortCfg().
+ *
+ * Pre: isRPOSorted(blocks)
  */
 typedef std::vector<int> IdomVector;
 IdomVector findDominators(const BlockList& blocks);
@@ -76,7 +105,7 @@ IdomVector findDominators(const BlockList& blocks);
 typedef std::vector<BlockPtrList> DomChildren;
 
 /*
- * compute the dominator tree, then populate a list of dominator children
+ * Compute the dominator tree, then populate a list of dominator children
  * for each block.  Note that DomChildren is indexed by block->postId(),
  * not block->id(); that's why we don't use StateVector here.
  */
@@ -86,12 +115,6 @@ DomChildren findDomChildren(const BlockList& blocks);
  * return true if b1 == b2 or if b1 dominates b2.
  */
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
-
-/*
- * Compute a reverse postorder list of the basic blocks reachable from
- * the first block in trace.
- */
-BlockList sortCfg(Trace*, const IRFactory&);
 
 /*
  * Return true if trace has internal control flow (IE it has a branch
@@ -107,7 +130,7 @@ bool hasInternalFlow(Trace*);
  * as each block is processed.
  */
 template <class State, class Body>
-void forPreorderDoms(Block* block, const std::vector<BlockPtrList>& children,
+void forPreorderDoms(Block* block, const DomChildren& children,
                      State state, Body body) {
   body(block, state);
   for (Block* child : children[block->postId()]) {

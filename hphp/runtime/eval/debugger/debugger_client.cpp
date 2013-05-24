@@ -103,7 +103,7 @@ void DebuggerClient::onSignal(int sig) {
            "press Ctrl-C again to quit.", secWait);
     } else {
       info("Pausing program execution, please wait...");
-      usageLogSignal();
+      usageLog("signal");
       m_sigTime = now;
     }
     m_signum = CmdSignal::SignalBreak;
@@ -409,9 +409,9 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
       m_clientState(StateUninit), m_inApiUse(false),
-      m_nameForApi(name), m_usageLogFP(nullptr) {
+      m_nameForApi(name) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
-  initUsageLogging();
+  Debugger::InitUsageLogging();
 }
 
 DebuggerClient::~DebuggerClient() {
@@ -423,7 +423,6 @@ DebuggerClient::~DebuggerClient() {
     fclose(f);
     setLogFileHandler(nullptr);
   }
-  finiUsageLogging();
 }
 
 void DebuggerClient::reset() {
@@ -618,7 +617,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     m_options.user = Process::GetCurrentUser();
   }
 
-  usageLogInit();
+  usageLog("init");
 
   loadConfig();
 
@@ -658,6 +657,7 @@ void DebuggerClient::stop() {
 
 void DebuggerClient::run() {
   TRACE(2, "DebuggerClient::run\n");
+  StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
   // Make sure we don't run the interface thread for API mode
   assert(!isApiMode());
 
@@ -708,7 +708,7 @@ void DebuggerClient::run() {
 void DebuggerClient::updateLiveLists() {
   TRACE(2, "DebuggerClient::updateLiveLists\n");
   ReadlineWaitCursor waitCursor;
-  CmdInfo::UpdateLiveLists(this);
+  CmdInfo::UpdateLiveLists(*this);
   m_acLiveListsDirty = false;
 }
 
@@ -740,7 +740,7 @@ void DebuggerClient::promptFunctionPrototype() {
     }
   }
 
-  String output = highlight_code(CmdInfo::GetProtoType(this, cls, func));
+  String output = highlight_code(CmdInfo::GetProtoType(*this, cls, func));
   print("\n%s", output.data());
   rl_forced_update_display();
 }
@@ -891,7 +891,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
             if (cmd) {
               if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
               DebuggerCommandPtr deleter(cmd);
-              cmd->list(this);
+              cmd->list(*this);
             }
           }
           break;
@@ -943,14 +943,14 @@ bool DebuggerClient::initializeMachine() {
   if (!m_machine->m_initialized) {
     // set/clear intercept for RPC thread
     if (!m_machines.empty() && m_machine == m_machines[0]) {
-      CmdMachine::UpdateIntercept(this, m_machine->m_rpcHost,
+      CmdMachine::UpdateIntercept(*this, m_machine->m_rpcHost,
                                   m_machine->m_rpcPort);
     }
 
     // upload breakpoints
     if (!m_breakpoints.empty()) {
       info("Updating breakpoints...");
-      CmdBreak::SendClientBreakpointListToServer(this);
+      CmdBreak::SendClientBreakpointListToServer(*this);
     }
 
     // attaching to default sandbox
@@ -959,7 +959,7 @@ bool DebuggerClient::initializeMachine() {
       const char *user = m_options.user.empty() ?
                          nullptr : m_options.user.c_str();
       m_machine->m_sandboxAttached = (waitForgSandbox =
-        CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str()));
+        CmdMachine::AttachSandbox(*this, user, m_options.sandbox.c_str()));
       if (!m_machine->m_sandboxAttached) {
         Logger::Error("Unable to communicate with default sandbox.");
       }
@@ -985,10 +985,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         return DebuggerCommandPtr();
       }
       if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        if (!cmd->onClient(this)) {
-          Logger::Error("Unable to handle signal command.");
-          return DebuggerCommandPtr();
-        }
+        cmd->onClient(*this);
         continue;
       }
       if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1002,12 +999,14 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
                         expected);
           return DebuggerCommandPtr();
         }
+      } else {
+        CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
       }
       m_sigTime = 0;
       m_machine->m_interrupting = true;
       setClientState(StateReadyForCommand);
       m_inputState = TakingCommand;
-      usageLogInterrupt(cmd);
       return cmd;
     }
   }
@@ -1027,10 +1026,7 @@ void DebuggerClient::runImpl() {
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          if (!cmd->onClient(this)) {
-            Logger::Error("%s: unable to poll signal", func);
-            return;
-          }
+          cmd->onClient(*this);
           continue;
         }
         if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
@@ -1038,12 +1034,10 @@ void DebuggerClient::runImpl() {
           return;
         }
         m_sigTime = 0;
-        usageLogInterrupt(cmd);
+        CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
         {
-          if (!cmd->onClient(this)) {
-            Logger::Error("%s: unable to process %d", func, cmd->getType());
-            return;
-          }
+          cmd->onClient(*this);
         }
         m_machine->m_interrupting = true;
         setClientState(StateReadyForCommand);
@@ -1207,7 +1201,7 @@ Array DebuggerClient::getOutputArray() {
 void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   TRACE(2, "DebuggerClient::shortCode\n");
   if (bp && !bp->m_file.empty() && bp->m_line1) {
-    Variant source = CmdList::GetSourceFile(this, bp->m_file);
+    Variant source = CmdList::GetSourceFile(*this, bp->m_file);
     if (source.isString()) {
       // Line and column where highlight should start and end
       int beginHighlightLine = bp->m_line1;
@@ -1239,8 +1233,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
         }
       }
 
-      code(source, beginHighlightLine,
-           firstLine, lastLine,
+      code(source, firstLine, lastLine,
+           beginHighlightLine,
            beginHighlightColumn,
            endHighlightLine,
            endHighlightColumn);
@@ -1248,8 +1242,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   }
 }
 
-bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
-                          int line2 /* = 0 */, int charFocus0 /* = 0 */,
+bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
+                          int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(2, "DebuggerClient::code\n");
   if (line1 == 0 && line2 == 0) {
@@ -1257,7 +1251,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
     if (isApiMode()) {
       highlighted = source;
     } else {
-      highlighted = highlight_code(source, 0, lineFocus, charFocus0,
+      highlighted = highlight_code(source, 0, lineFocus0, charFocus0,
                                    lineFocus1, charFocus1);
     }
     if (!highlighted.empty()) {
@@ -1271,7 +1265,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
   if (isApiMode()) {
     highlighted = source;
   } else {
-    highlighted = highlight_php(source, 1, lineFocus, charFocus0,
+    highlighted = highlight_php(source, 1, lineFocus0, charFocus0,
                                 lineFocus1, charFocus1);
   }
   int line = 1;
@@ -1608,7 +1602,8 @@ do {                                         \
 #undef NEW_CMD_NAME
 }
 
-// Carries out the current command and returns true if the command completed.
+// Parses the current command string. If invalid return false.
+// Otherwise, carry out the command and return true.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
@@ -1626,17 +1621,25 @@ bool DebuggerClient::process() {
     case '@':
     case '=':
     case '$': {
-      return processTakeCode();
+      processTakeCode();
+      return true;
     }
     case '<': {
-      return match("<?php") && processTakeCode();
+      if (match("<?php")) {
+        processTakeCode();
+        return true;
+      }
     }
     case '?': {
       if (match("?")) {
         usageLog("help", m_line);
-        return CmdHelp().onClient(this);
+        CmdHelp().onClient(*this);
+        return true;
       }
-      if (match("?>")) return processEval();
+      if (match("?>")) {
+        processEval();
+        return true;
+      }
       break;
     }
     default: {
@@ -1645,11 +1648,11 @@ bool DebuggerClient::process() {
         usageLog(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
-        return cmd->onClient(this);
+        cmd->onClient(*this);
       } else {
-        return processTakeCode();
+        processTakeCode();
       }
-      break;
+      return true;
     }
   }
 
@@ -1828,7 +1831,7 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
       error("wire error: %s", res->getWireError().data());
     }
     if (res->is((DebuggerCommand::Type)expected)) {
-      usageLogDone(boost::lexical_cast<string>(expected));
+      usageLog("done", boost::lexical_cast<string>(expected));
       break;
     }
 
@@ -1837,7 +1840,8 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
       throw DebuggerProtocolException();
     }
 
-    usageLogInterrupt(res);
+    CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(res);
+    Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
 
     if (isApiMode()) {
       // Hit breakpoint during eval
@@ -1854,7 +1858,8 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
     }
 
     // eval() can cause more breakpoints
-    if (!res->onClient(this) || !console()) {
+    res->onClient(*this);
+    if (!console()) {
       if (m_quitting) {
         throw DebuggerClientExitException();
       } else {
@@ -1886,7 +1891,9 @@ int DebuggerClient::checkEvalEnd() {
   return pos;
 }
 
-bool DebuggerClient::processTakeCode() {
+// Parses the current command line as a code execution command
+// and carries out the command.
+void DebuggerClient::processTakeCode() {
   TRACE(2, "DebuggerClient::processTakeCode\n");
   assert(m_inputState == TakingCommand);
 
@@ -1894,7 +1901,8 @@ bool DebuggerClient::processTakeCode() {
   if (first == '@') {
     usageLog("@", m_line);
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
-    return processEval();
+    processEval();
+    return;
   } else if (first == '=') {
     usageLog("=", m_line);
     while (m_line.at(m_line.size() - 1) == ';') {
@@ -1902,14 +1910,16 @@ bool DebuggerClient::processTakeCode() {
       m_line = m_line.substr(0, m_line.size() - 1);
     }
     m_code = string("<?php $_=(") + m_line.substr(1) + "); " + m_printFunction;
-    return processEval();
+    processEval();
+    return;
   } else if (first != '<') {
     usageLog("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
     m_code = "<?php ";
     m_code += m_line + ";";
-    return processEval();
+    processEval();
+    return;
   }
   usageLog("<?php", m_line);
   m_code = "<?php ";
@@ -1919,18 +1929,16 @@ bool DebuggerClient::processTakeCode() {
   int pos = checkEvalEnd();
   if (pos >= 0) {
     m_code.resize(m_code.size() - m_line.size() + pos - 1);
-    return processEval();
+    processEval();
   }
-  return true;
 }
 
-bool DebuggerClient::processEval() {
+void DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClient(this);
-  return true;
+  CmdEval().onClient(*this);
 }
 
 void DebuggerClient::swapHelp() {
@@ -1987,11 +1995,14 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
   return DThreadInfoPtr();
 }
 
-// Retrieves a source location that is the current focus of the
-// debugger. The current focus is initially determined by the
+// Retrieves the current source location (file, line).
+// The current location is initially determined by the
 // breakpoint where the debugger is currently stopped and can
 // thereafter be modified by list commands and by switching the
-// the stack frame.
+// the stack frame. The lineFocus and and charFocus parameters
+// are non zero only when the source location comes from a breakpoint.
+// They can be used to highlight the location of the current breakpoint
+// in the edit window of an attached IDE, for example.
 void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus0, int &charFocus0,
                                      int &lineFocus1, int &charFocus1) {
@@ -2249,78 +2260,14 @@ void DebuggerClient::resetSmartAllocatedMembers() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers for usage logging
 
-void DebuggerClient::initUsageLogging() {
-  TRACE(2, "DebuggerClient::initUsageLogging\n");
-  // Usage log file is a runtime option instead of debugger config because
-  // it is for internal monitoring and we don't want users to modify this.
-  if (RuntimeOption::DebuggerUsageLogFile.empty()) {
-    return;
-  }
-  mode_t old = umask(0);
-  m_usageLogFP = fopen(RuntimeOption::DebuggerUsageLogFile.c_str(), "a");
-  if (!m_usageLogFP) {
-    Logger::Error("failed to open debugger usage log file %s",
-                  RuntimeOption::DebuggerUsageLogFile.c_str());
-  }
-  umask(old);
+const char *DebuggerClient::getUsageMode() {
+  return isApiMode() ? "api" : "terminal";
 }
 
-void DebuggerClient::finiUsageLogging() {
-  TRACE(2, "DebuggerClient::finiUsageLogging\n");
-  if (m_usageLogFP) {
-    fclose(m_usageLogFP);
-    m_usageLogFP = nullptr;
-  }
+void DebuggerClient::usageLog(const std::string &cmd, const std::string &data) {
+  Debugger::UsageLog(getUsageMode(), cmd, data);
 }
 
-void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
-  TRACE(2, "DebuggerClient::usageLog\n");
-  if (!m_usageLogFP) {
-    return;
-  }
-
-  if (m_usageLogHeader.empty()) {
-    std::string login = m_options.user;
-    std::string host = Process::GetHostName();
-    std::string clientMode = isApiMode() ? "api" : "terminal";
-    m_usageLogHeader = login + " " + host + " hhvm " + clientMode;
-  }
-
-  struct timespec tp;
-  gettime(CLOCK_REALTIME, &tp);
-
-#define MAX_LINE 1024
-  char buf[MAX_LINE];
-  int len = snprintf(buf, MAX_LINE, "%s %" PRId64 " %" PRId64 " %s #### %s",
-                     m_usageLogHeader.c_str(),
-                     (int64_t)tp.tv_sec, (int64_t)tp.tv_nsec,
-                     cmd.c_str(), line.c_str());
-  len = len >= MAX_LINE ? MAX_LINE - 1: len;
-  buf[len] = '\n';
-#undef MAX_LINE
-  fwrite(buf, len + 1, 1, m_usageLogFP);
-  fflush(m_usageLogFP);
-}
-
-void DebuggerClient::usageLogInterrupt(DebuggerCommandPtr cmd) {
-  TRACE(2, "DebuggerClient::usageLogInterrupt\n");
-  CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
-  if (!intr) {
-    return;
-  }
-  switch (intr->getInterruptType()) {
-    case SessionStarted: usageLog("interrupt", "SessionStarted"); break;
-    case SessionEnded: usageLog("interrupt", "SessionEnded"); break;
-    case RequestStarted: usageLog("interrupt", "RequestStarted"); break;
-    case RequestEnded: usageLog("interrupt", "RequestEnded"); break;
-    case PSPEnded: usageLog("interrupt", "PSPEnded"); break;
-    case HardBreakPoint: usageLog("interrupt", "HardBreakPoint"); break;
-    case BreakPointReached: usageLog("interrupt", "BreakPointReached"); break;
-    case ExceptionThrown: usageLog("interrupt", "ExceptionThrown"); break;
-    default:
-      usageLog("interrupt", "unknown");
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration

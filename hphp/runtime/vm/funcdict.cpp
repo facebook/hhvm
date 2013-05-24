@@ -14,12 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/funcdict.h"
+
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/util/base.h"
 
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-#include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/vm/translator/translator.h"
 #include "hphp/runtime/vm/translator/targetcache.h"
 #include "hphp/runtime/vm/unit.h"
@@ -57,7 +58,7 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   if (fnew && fnew != func) {
     // To match hphpc, we silently ignore functions defined in user code that
     // have the same name as a function defined in a separable extension
-    if (!fnew->isIgnoreRedefinition()) {
+    if (!fnew->isAllowOverride()) {
       raise_error("Function already defined: %s", n3w->data());
     } else {
       return false;

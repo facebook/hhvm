@@ -558,6 +558,106 @@ static uint32_t get_random()
 static const int kTooPolyPred = 2;
 static const int kTooPolyRet = 6;
 
+bool
+isNormalPropertyAccess(const NormalizedInstruction& i,
+                       int propInput,
+                       int objInput) {
+  const LocationCode lcode = i.immVec.locationCode();
+  return
+    i.immVecM.size() == 1 &&
+    (lcode == LC || lcode == LL || lcode == LR || lcode == LH) &&
+    mcodeMaybePropName(i.immVecM[0]) &&
+    i.inputs[propInput]->isString() &&
+    i.inputs[objInput]->valueType() == KindOfObject;
+}
+
+bool
+mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
+  const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
+  unsigned mi = 0;
+  unsigned ii = mii.valCount() + 1;
+  for (; mi < ni.immVecM.size(); ++mi) {
+    MemberCode mc = ni.immVecM[mi];
+    if (mcodeMaybePropName(mc)) {
+      const Class* cls = nullptr;
+      if (getPropertyOffset(ni, context, cls, mii, mi, ii).offset == -1) {
+        return true;
+      }
+      ++ii;
+    } else {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* ctx,
+                           const Class*& baseClass,
+                           const MInstrInfo& mii,
+                           unsigned mInd, unsigned iInd) {
+  if (mInd == 0) {
+    auto const baseIndex = mii.valCount();
+    baseClass = ni.inputs[baseIndex]->rtt.isObject()
+      ? ni.inputs[baseIndex]->rtt.valueClass()
+      : nullptr;
+  } else {
+    baseClass = ni.immVecClasses[mInd - 1];
+  }
+  if (!baseClass) return PropInfo();
+
+  if (!ni.inputs[iInd]->rtt.isString()) {
+    return PropInfo();
+  }
+  auto* const name = ni.inputs[iInd]->rtt.valueString();
+  if (!name) return PropInfo();
+
+  bool accessible;
+  // If we are not in repo-authoriative mode, we need to check that
+  // baseClass cannot change in between requests
+  if (!RuntimeOption::RepoAuthoritative ||
+      !(baseClass->preClass()->attrs() & AttrUnique)) {
+    if (!ctx) return PropInfo();
+    if (!ctx->classof(baseClass)) {
+      if (baseClass->classof(ctx)) {
+        // baseClass can change on us in between requests, but since
+        // ctx is an ancestor of baseClass we can make the weaker
+        // assumption that the object is an instance of ctx
+        baseClass = ctx;
+      } else {
+        // baseClass can change on us in between requests and it is
+        // not related to ctx, so bail out
+        return PropInfo();
+      }
+    }
+  }
+  // Lookup the index of the property based on ctx and baseClass
+  Slot idx = baseClass->getDeclPropIndex(ctx, name, accessible);
+  // If we couldn't find a property that is accessible in the current
+  // context, bail out
+  if (idx == kInvalidSlot || !accessible) {
+    return PropInfo();
+  }
+  // If it's a declared property we're good to go: even if a subclass
+  // redefines an accessible property with the same name it's guaranteed
+  // to be at the same offset
+  return PropInfo(
+    baseClass->declPropOffset(idx),
+    baseClass->declPropHphpcType(idx)
+  );
+}
+
+PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
+                                Class* context,
+                                const MInstrInfo& mii) {
+  unsigned mInd = ni.immVecM.size() - 1;
+  unsigned iInd = mii.valCount() + 1 + mInd;
+
+  const Class* cls = nullptr;
+  return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
+}
+
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
@@ -656,7 +756,17 @@ predictOutputs(const Tracelet& t,
   // lot. Get more conservative as evidence mounts that this is a
   // polymorphic tracelet.
   if (tx64->numTranslations(t.m_sk) >= kTooPolyPred) return KindOfInvalid;
-  if (hasImmVector(ni->op())) {
+  if (ni->op() == OpCGetS) {
+    const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
+    if (propName) {
+      pred = predictType(TypeProfileKey(TypeProfileKey::StaticPropName,
+                                        propName));
+      TRACE(1, "prediction for static fields named %s: %d, %f\n",
+            propName->data(),
+            pred.first,
+            pred.second);
+    }
+  } else if (hasImmVector(ni->op())) {
     pred = predictMVec(ni);
   }
   if (debug && pred.second < kAccept) {
@@ -1083,7 +1193,7 @@ static const struct {
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpCGetS,       {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpCGetS,       {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpCGetM,       {MVector,          Stack1,       OutPred,           1 }},
   { OpVGetL,       {Local,            Stack1,       OutVInputL,        1 }},
   { OpVGetN,       {Stack1,           Stack1,       OutVUnknown,       0 }},
@@ -1263,6 +1373,9 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClassRef,       1 }},
   { OpNativeImpl,  {None,             None,         OutNone,           0 }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject,         1 }},
+  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
+  { OpIncStat,     {None,             None,         OutNone,           0 }},
+  { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1280,8 +1393,6 @@ static const struct {
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
-  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
-  { OpIncStat,     {None,             None,         OutNone,           0 }},
 };
 
 static hphp_hash_map<Opcode, InstrInfo> instrInfo;
@@ -1715,7 +1826,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                    "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
+        DynLocation* dl = tas.recordRead(ii, true, (DataType)info.m_data);
         if (dl->rtt.outerType() != info.m_data &&
             (!dl->isString() || info.m_data != KindOfString)) {
           if (dl->rtt.outerType() != KindOfInvalid) {
@@ -1771,7 +1882,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfString);
+        DynLocation* dl = tas.recordRead(ii, true, KindOfString);
         assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
                dl->rtt.valueString() == sd);
         SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
@@ -1783,7 +1894,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
+        DynLocation* dl = tas.recordRead(ii, true);
         if (dl->rtt.valueType() != KindOfObject) {
           continue;
         }
@@ -2854,7 +2965,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       assert(opndIdx < 2);
       if (opndIdx == 0) { // stack value
         auto stackValUsage = instr->getOutputUsage(instr->outStack, true);
-        if ((instr->outStack && (!m_useHHIR || stackValUsage == kOutputUsed)) ||
+        if ((instr->outStack && stackValUsage == kOutputUsed) ||
             (instr->getOutputUsage(instr->outLocal) == kOutputUsed)) {
           return DataTypeSpecific;
         }
@@ -2928,7 +3039,7 @@ void Translator::reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc) {
 }
 
 
-/**
+/*
  * This method looks at all the uses of the tracelet dependencies in the
  * instruction stream and tries to relax the type associated with each location.
  */
@@ -2948,7 +3059,8 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
     }
   }
 
-  // Process the instruction stream, constraining the relaxed types along the way
+  // Process the instruction stream, constraining the relaxed types
+  // along the way
   for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
        instr = instr->next) {
     for (size_t i = 0; i < instr->inputs.size(); i++) {
@@ -2961,11 +3073,11 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
     }
   }
 
-  // For each dependency, if we found a more relaxed type for it, use such type.
-  for (auto mapIt = locRelxTypeMap.begin(); mapIt != locRelxTypeMap.end();
-       mapIt++) {
-    DynLocation* loc = mapIt->first;
-    const GuardType& relxType = mapIt->second;
+  // For each dependency, if we found a more relaxed type for it, use
+  // such type.
+  for (auto& kv : locRelxTypeMap) {
+    DynLocation* loc = kv.first;
+    const GuardType& relxType = kv.second;
     if (relxType.isRelaxed()) {
       TRACE(1, "relaxDeps: Loc: %s   oldType: %s   =>   newType: %s\n",
             loc->location.pretty().c_str(),
@@ -2985,17 +3097,6 @@ static bool checkTaintFuncs(StringData* name) {
   static const StringData* s_extract =
     StringData::GetStaticString("extract");
   return name->isame(s_extract);
-}
-
-static const NormalizedInstruction*
-findFPushForCall(const FPIEnt* fpi,
-                 const NormalizedInstruction* fcall) {
-  for (auto* ni = fcall->prev; ni; ni = ni->prev) {
-    if (ni->source.offset() == fpi->m_fpushOff) {
-      return ni;
-    }
-  }
-  return nullptr;
 }
 
 /*
@@ -3040,28 +3141,40 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
            numArgs, target->numParams());
     return false;
   }
-  if (numArgs != 0) {
-    FTRACE(1, "analyzeCallee: currently ignoring calls with parameters\n");
+  if (target->numLocals() != target->numParams()) {
+    FTRACE(1, "analyzeCallee: not inlining functions with more locals "
+              "than params\n");
     return false;
   }
 
-  if (!findFPushForCall(fpi, fcall)) {
-    FTRACE(1, "analyzeCallee: push instruction was in a different "
-              "tracelet\n");
-    return false;
+  // Find the fpush and ensure it's in this tracelet---refuse to
+  // inline if there are any calls in order to prepare arguments.
+  for (auto* ni = fcall->prev; ni; ni = ni->prev) {
+    if (ni->source.offset() == fpi->m_fpushOff) {
+      return true;
+    }
+    if (isFCallStar(ni->op()) || ni->op() == OpFCallBuiltin) {
+      FTRACE(1, "analyzeCallee: fpi region contained other calls\n");
+      return false;
+    }
   }
-
-  return true;
+  FTRACE(1, "analyzeCallee: push instruction was in a different "
+            "tracelet\n");
+  return false;
 }
+
+extern bool shouldIRInline(const Func* curFunc,
+                           const Func* func,
+                           const Tracelet& callee);
 
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
-  always_assert(m_useHHIR);
   if (!shouldAnalyzeCallee(fcall)) return;
 
-  auto const numArgs = fcall->imm[0].u_IVA;
-  auto const target  = fcall->funcd;
+  auto const numArgs     = fcall->imm[0].u_IVA;
+  auto const target      = fcall->funcd;
+  auto const callerFunc  = curFunc();
 
   /*
    * Prepare a map for all the known information about the argument
@@ -3165,6 +3278,16 @@ void Translator::analyzeCallee(TraceletContext& tas,
   }
 
   /*
+   * If the IR can't inline this, give up now.  Below we're going to
+   * start making changes to the traclet that is making the call
+   * (potentially increasing the specificity of guards), and we don't
+   * want to do that unnecessarily.
+   */
+  if (!shouldIRInline(callerFunc, target, *subTrace)) {
+    return;
+  }
+
+  /*
    * Disabled for now:
    *
    * Propagate the return type to our caller.  If the return type is
@@ -3195,18 +3318,17 @@ void Translator::analyzeCallee(TraceletContext& tas,
   }
 
   /*
-   * In order for relaxDeps not to relax guards on things we may
+   * In order for relaxDeps not to relax guards on some things we may
    * potentially have depended on here, we need to ensure that the
    * call instruction depends on all the inputs we've used.
    *
-   * What we probably want to do is modify getOutputUsage to be aware
-   * of callee-uses of parameters.
-   *
-   * For now this assert is just protecting the known breakage if we
-   * start doing analyzeCallee on things with parameters.
+   * (We could do better by letting relaxDeps look through the
+   * callee.)
    */
   restoreFrame();
-  assert(callerArgLocs.empty());
+  for (auto& loc : callerArgLocs) {
+    fcall->inputs.push_back(tas.recordRead(InputInfo(loc), true));
+  }
 
   FTRACE(1, "analyzeCallee: inline candidate\n");
   fcall->calleeTrace = std::move(subTrace);
@@ -3314,10 +3436,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       getInputs(t, ni, stackFrameOffset, inputInfos, tas);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
-        if (m_useHHIR) {
-          t.m_instrStream.append(ni);
-          ++t.m_numOpcodes;
-        }
+        t.m_instrStream.append(ni);
+        ++t.m_numOpcodes;
         stackFrameOffset = oldStackFrameOffset;
         continue;
       }
@@ -3340,7 +3460,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       for (unsigned int i = 0; i < inputInfos.size(); i++) {
         SKTRACE(2, sk, "typing input %d\n", i);
         const InputInfo& ii = inputInfos[i];
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
+        DynLocation* dl = tas.recordRead(ii, true);
         const RuntimeType& rtt = dl->rtt;
         // Some instructions are able to handle an input with an unknown type
         if (!ii.dontBreak && !ii.dontGuard) {
@@ -3469,7 +3589,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     }
 
     analyzeInstr(t, *ni);
-    if (m_useHHIR && ni->op() == OpFCall) {
+    if (ni->op() == OpFCall) {
       analyzeCallee(tas, t, ni);
     }
 
@@ -3583,12 +3703,6 @@ breakBB:
     }
   }
 
-  // Peephole optimizations may leave the bytecode stream in a state that is
-  // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
-  if (!m_useHHIR) {
-    analyzeSecondPass(t);
-  }
-
   relaxDeps(t, tas);
 
   // Mark the last instruction appropriately
@@ -3612,7 +3726,6 @@ breakBB:
 
 Translator::Translator()
   : m_resumeHelper(nullptr)
-  , m_useHHIR(false)
   , m_createdTime(Timer::GetCurrentTimeMicros())
   , m_analysisDepth(0)
 {

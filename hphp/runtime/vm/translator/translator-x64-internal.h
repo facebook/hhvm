@@ -656,8 +656,8 @@ emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
         a. store_imm64_disp_reg64(imm, off, r);
         return;
       }
-      emitImmReg(a, imm, rScratch);
-      immReg = rScratch;
+      emitImmReg(a, imm, rAsm);
+      immReg = rAsm;
     }
     a.   store_reg64_disp_reg64(immReg, off, r);
   } else if (size == sz::dword) {

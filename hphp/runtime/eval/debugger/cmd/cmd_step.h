@@ -27,9 +27,9 @@ class CmdStep : public CmdFlowControl {
 public:
   CmdStep() : CmdFlowControl(KindOfStep) {}
 
-  virtual bool help(DebuggerClient *client);
-  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+  virtual void help(DebuggerClient &client);
+  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

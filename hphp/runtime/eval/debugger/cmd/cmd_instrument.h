@@ -29,12 +29,12 @@ public:
   CmdInstrument() : DebuggerCommand(KindOfInstrument), m_type(ActionRead),
                     m_enabled(false), m_instPoints(nullptr) {}
 
-  virtual bool help(DebuggerClient *client);
-  virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual void help(DebuggerClient &client);
+  virtual void setClientOutput(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -49,13 +49,13 @@ private:
   InstPointInfoPtrVec *m_instPoints;
   InstPointInfoPtrVec m_ips;
 
-  void readFromTable(DebuggerProxy *proxy);
-  void validateAndWriteToTable(DebuggerProxy *proxy);
+  void readFromTable(DebuggerProxy &proxy);
+  void validateAndWriteToTable(DebuggerProxy &proxy);
 
-  void listInst(DebuggerClient *client);
-  void clearInst(DebuggerClient *client);
+  void listInst(DebuggerClient &client);
+  void clearInst(DebuggerClient &client);
 
-  static void PrintInstPoints(DebuggerClient *client);
+  static void PrintInstPoints(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

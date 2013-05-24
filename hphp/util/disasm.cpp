@@ -149,9 +149,9 @@ static const xed_syntax_enum_t s_xed_syntax =
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                     uint8_t* codeEndAddr) {
-  auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
 
 #ifdef HAVE_LIBXED
+  auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;

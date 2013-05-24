@@ -29,7 +29,7 @@ inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   Func** funcAddr = getCachedFuncAddr(func->getCachedOffset());
   if (UNLIKELY(*funcAddr != nullptr)) {
     if (*funcAddr == func) return;
-    if (!(*funcAddr)->isIgnoreRedefinition()) {
+    if (!(*funcAddr)->isAllowOverride()) {
       raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
     }
   }

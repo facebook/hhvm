@@ -91,12 +91,23 @@ NamedEntity* getNamedEntityHelper(const StringData* str) {
     str = StringData::GetStaticString(str);
   }
 
-  return &(*s_namedDataMap)[str];
+  auto res = s_namedDataMap->insert(str, NamedEntity());
+  return &res.first->second;
+}
+
+size_t Unit::GetNamedEntityTableSize() {
+  return s_namedDataMap ? s_namedDataMap->size() : 0;
 }
 
 NamedEntity* Unit::GetNamedEntity(const StringData* str) {
-  if (!s_namedDataMap) s_namedDataMap = new NamedEntityMap();
-  NamedEntityMap::const_iterator it = s_namedDataMap->find(str);
+  if (UNLIKELY(!s_namedDataMap)) {
+    NamedEntityMap::Config config;
+    config.growthFactor = 1;
+    s_namedDataMap =
+      new NamedEntityMap(RuntimeOption::EvalInitialNamedEntityTableSize,
+                         config);
+  }
+  NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
   return getNamedEntityHelper(str);
 }
@@ -170,7 +181,7 @@ Array Unit::getUserFunctions() {
     for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
-      if (!func_ || func_->isBuiltin() ||
+      if (!func_ || func_->isBuiltin() || func_->isPHPBuiltin() ||
           isdigit(func_->name()->data()[0])) {
         continue;
       }
@@ -228,7 +239,8 @@ class AllCachedClasses {
     Class* cls;
     while (!empty()) {
       cls = m_next->second.clsList();
-      if (cls && cls->getCached()) break;
+      if (cls && cls->getCached() &&
+          (cls->parent() != SystemLib::s_ClosureClass)) break;
       ++m_next;
     }
   }
@@ -622,10 +634,11 @@ void Unit::defTypedef(Id id) {
   assert(id < m_typedefs.size());
   auto thisType = &m_typedefs[id];
   auto nameList = GetNamedEntity(thisType->m_name);
+  const StringData* typeName = thisType->m_value;
 
   auto checkExistingClass = [&] (Class* cls) {
     if (thisType->m_kind != KindOfObject ||
-        !cls->name()->isame(thisType->m_value)) {
+        !cls->name()->isame(typeName)) {
       raise_error("The type %s is already defined to a different class (%s)",
                   thisType->m_name->data(),
                   cls->name()->data());
@@ -644,7 +657,7 @@ void Unit::defTypedef(Id id) {
     Typedef* td = current.asTypedef();
     assert(td);
     if (thisType->m_kind != td->m_kind ||
-        !td->m_value->isame(thisType->m_value)) {
+        !td->m_value->isame(typeName)) {
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->m_name->data());
     }
@@ -677,19 +690,28 @@ void Unit::defTypedef(Id id) {
     nameList->setCachedNameDef(NameDef(thisType));
     return;
   }
-  if (auto klass = Unit::loadClass(thisType->m_value)) {
+  if (auto klass = Unit::loadClass(typeName)) {
     nameList->setCachedNameDef(NameDef(klass));
     return;
   }
 
-  auto targetNameList = GetNamedEntity(thisType->m_value);
+  auto targetNameList = GetNamedEntity(typeName);
   NameDef target = targetNameList->getCachedNameDef();
   if (!target) {
-    AutoloadHandler::s_instance->autoloadType(thisType->m_value->data());
-    target = targetNameList->getCachedNameDef();
+    String normName = normalizeNS(typeName);
+    if (normName) {
+      typeName = normName.get();
+      targetNameList = GetNamedEntity(typeName);
+      target = targetNameList->getCachedNameDef();
+    }
+
     if (!target) {
-      raise_error("Unknown type or class %s", thisType->m_value->data());
-      return;
+      AutoloadHandler::s_instance->autoloadType(typeName->data());
+      target = targetNameList->getCachedNameDef();
+      if (!target) {
+        raise_error("Unknown type or class %s", typeName->data());
+        return;
+      }
     }
   }
   assert(target);
@@ -723,6 +745,16 @@ Class* Unit::loadClass(const NamedEntity* ne,
     return cls;
   }
   VMRegAnchor _;
+
+  String normName = normalizeNS(name);
+  if (normName) {
+    name = normName.get();
+    ne = GetNamedEntity(name);
+    if ((cls = ne->getCachedClass()) != nullptr) {
+      return cls;
+    }
+  }
+
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -738,8 +770,20 @@ Class* Unit::loadMissingClass(const NamedEntity* ne,
 Class* Unit::getClass(const NamedEntity* ne,
                       const StringData *name, bool tryAutoload) {
   Class *cls = lookupClass(ne);
-  if (UNLIKELY(!cls && tryAutoload)) {
-    return loadMissingClass(ne, name);
+  if (UNLIKELY(!cls)) {
+
+    String normName = normalizeNS(name);
+    if (normName) {
+      name = normName.get();
+      ne = GetNamedEntity(name);
+      if ((cls = lookupClass(ne)) != nullptr) {
+        return cls;
+      }
+    }
+
+    if (tryAutoload) {
+      return loadMissingClass(ne, name);
+    }
   }
   return cls;
 }
@@ -753,9 +797,9 @@ void Unit::loadFunc(const Func *func) {
   assert(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
-    Transl::TargetCache::allocFixedFunction(ne,
-                                            func->attrs() & AttrPersistent &&
-                                            RuntimeOption::RepoAuthoritative);
+    Transl::TargetCache::allocFixedFunction(
+      ne, func->attrs() & AttrPersistent &&
+      (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
   }
   const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
@@ -776,6 +820,7 @@ void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
   if (LIKELY(m_mergeState == UnitMergeStateUnmerged)) {
     int state = 0;
+    bool needsCompact = false;
     m_mergeState = UnitMergeStateMerging;
 
     bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
@@ -785,9 +830,12 @@ void Unit::initialMerge() {
         allFuncsUnique = (f->attrs() & AttrUnique);
       }
       loadFunc(f);
+      if (TargetCache::isPersistentHandle(f->m_cachedOffset)) {
+        needsCompact = true;
+      }
     }
     if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
-    if (!RuntimeOption::RepoAuthoritative) {
+    if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
       Transl::mergePreConsts(m_preConsts);
     } else {
       /*
@@ -808,7 +856,6 @@ void Unit::initialMerge() {
        * the pointer will be followed by a TypedValue representing
        * the value being defined/assigned.
        */
-      bool needsCompact = false;
       int ix = m_mergeInfo->m_firstHoistablePreClass;
       int end = m_mergeInfo->m_firstMergeablePreClass;
       while (ix < end) {
@@ -899,6 +946,14 @@ TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
 TypedValue* Unit::loadCns(const StringData* cnsName) {
   TypedValue* tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
+
+  String normName = normalizeNS(cnsName);
+  if (normName) {
+    cnsName = normName.get();
+    tv = lookupCns(cnsName);
+    if (tv != nullptr) return tv;
+  }
+
   if (!AutoloadHandler::s_instance->autoloadConstant(
         const_cast<StringData*>(cnsName))) {
     return nullptr;
@@ -918,7 +973,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * static string. Not worth presizing or otherwise
        * optimizing for.
        */
-      TargetCache::s_constants = NEW(HphpArray)(1);
+      TargetCache::s_constants = ArrayData::Make(1);
       TargetCache::s_constants->incRefCount();
     }
     if (TargetCache::s_constants->nvInsert(
@@ -1587,11 +1642,19 @@ Func* Unit::lookupFunc(const StringData* funcName) {
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
   Func* func = ne->getCachedFunc();
-  if (UNLIKELY(!func)) {
-    if (AutoloadHandler::s_instance->autoloadFunc(
-          const_cast<StringData*>(funcName))) {
-      func = ne->getCachedFunc();
-    }
+  if (LIKELY(func != nullptr)) return func;
+
+  String normName = normalizeNS(funcName);
+  if (normName) {
+    funcName = normName.get();
+    ne = GetNamedEntity(funcName);
+    func = ne->getCachedFunc();
+    if (func) return func;
+  }
+
+  if (AutoloadHandler::s_instance->autoloadFunc(
+        const_cast<StringData*>(funcName))) {
+    func = ne->getCachedFunc();
   }
   return func;
 }

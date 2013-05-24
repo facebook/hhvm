@@ -34,24 +34,24 @@ public:
 public:
   CmdExtended() : DebuggerCommand(KindOfExtended) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   // so CmdUser can override these functions
   virtual const ExtendedCommandMap &getCommandMap();
-  virtual void invokeList(DebuggerClient *client, const std::string &cls);
-  virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
-  virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+  virtual void invokeList(DebuggerClient &client, const std::string &cls);
+  virtual bool invokeHelp(DebuggerClient &client, const std::string &cls);
+  virtual bool invokeClient(DebuggerClient &client, const std::string &cls);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
-  void helpImpl(DebuggerClient *client, const char *name);
+  virtual void onClientImpl(DebuggerClient &client);
+  void helpImpl(DebuggerClient &client, const char *name);
 
 private:
-  ExtendedCommandMap match(DebuggerClient *client, int argIndex);
-  bool helpCommands(DebuggerClient *client, const ExtendedCommandMap &matches);
+  ExtendedCommandMap match(DebuggerClient &client, int argIndex);
+  void helpCommands(DebuggerClient &client, const ExtendedCommandMap &matches);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

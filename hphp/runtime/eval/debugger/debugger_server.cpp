@@ -110,6 +110,8 @@ void DebuggerServer::stop() {
 
 void DebuggerServer::accept() {
   TRACE(2, "DebuggerServer::accept\n");
+  // Setup server-side usage logging before accepting any connections.
+  Debugger::InitUsageLogging();
   // server loop
   while (!m_stopped) {
     struct pollfd fds[1];

@@ -65,6 +65,7 @@ public:
   static StringToClassScopePtrMap s_classes;
   static VariableTablePtr s_variables;
   static ConstantTablePtr s_constants;
+  static AnalysisResultPtr s_systemAr;
 
   static const char *const GlobalNames[];
   static int NumGlobalNames();

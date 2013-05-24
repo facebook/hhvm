@@ -64,6 +64,7 @@ const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
 using HPHP::Transl::CallerFrame;
+using HPHP::Transl::EagerCallerFrame;
 
 #define getCheckedArrayRetType(input, fail, type)                       \
   Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
@@ -175,7 +176,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     return ArrayUtil::Filter(arr_input);
   }
   CallCtx ctx;
-  CallerFrame cf;
+  EagerCallerFrame cf;
   vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
@@ -263,7 +264,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
-    CallerFrame cf;
+    EagerCallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
   if (ctx.func == NULL) {
@@ -1337,6 +1338,23 @@ bool f_i18n_loc_set_strength(int64_t strength) {
 Variant f_i18n_loc_get_error_code() {
   return s_collator->getErrorCode();
 }
+
+Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def) {
+  if (!key.isNull()) {
+    if (LIKELY(search.isArray())) {
+      ArrayData *arr = search.getArrayData();
+      VarNR index = key.toKey();
+      if (!index.isNull()) {
+        CVarRef ret = arr->get(index, false);
+        return (&ret != &null_variant) ? ret : def;
+      }
+    } else {
+      raise_error("hphp_array_idx: search must be an array");
+    }
+  }
+  return def;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

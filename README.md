@@ -1,4 +1,4 @@
-# HipHop VM for PHP
+# HipHop VM for PHP [![Build Status](https://travis-ci.org/facebook/hiphop-php.png?branch=master)](https://travis-ci.org/facebook/hiphop-php)
 
 HipHop VM (HHVM) is a new open-source virtual machine designed for executing programs written in PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. HipHop VM (and before it HPHPc) has realized > 5x increase in throughput for Facebook compared with Zend PHP 5.2.
 
@@ -18,7 +18,7 @@ HipHop bundles in a webserver. So if you want to run on port 80 with document ro
 sudo hhvm -m server /var/www
 ```
 
-For anything more complicated, you'll want to make a [`config.hdf`](https://github.com/facebook/hiphop-php/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.
+For anything more complicated, you'll want to make a [config.hdf](https://github.com/facebook/hiphop-php/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.
 
 ## Contributing
 

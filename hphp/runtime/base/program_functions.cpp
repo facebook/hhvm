@@ -447,6 +447,7 @@ static const StaticString
   s_HHVM_JIT("HHVM_JIT"),
   s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_REQUEST_TIME("REQUEST_TIME"),
+  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -482,13 +483,27 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
-  time_t now = time(nullptr);
+  time_t now;
+  struct timeval tp = {0};
+  double now_double;
+  if (!gettimeofday(&tp, nullptr)) {
+    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+    now = tp.tv_sec;
+  } else {
+    now = time(nullptr);
+    now_double = (double)now;
+  }
+  String file = empty_string;
+  if (argc > 0) {
+    file = NEW(StringData)(argv[0], AttachLiteral);
+  }
   server.set(s_REQUEST_START_TIME, now);
   server.set(s_REQUEST_TIME, now);
+  server.set(s_REQUEST_TIME_FLOAT, now_double);
   server.set(s_DOCUMENT_ROOT, empty_string);
-  server.set(s_SCRIPT_FILENAME, argv[0]);
-  server.set(s_SCRIPT_NAME, argv[0]);
-  server.set(s_PHP_SELF, argv[0]);
+  server.set(s_SCRIPT_FILENAME, file);
+  server.set(s_SCRIPT_NAME, file);
+  server.set(s_PHP_SELF, file);
   server.set(s_argv, g->GV(argv));
   server.set(s_argc, g->GV(argc));
   server.set(s_PWD, g_context->getCwd());
@@ -674,7 +689,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
                          const char *file) {
   argv = (char **)malloc((args.size() + 2) * sizeof(char*));
   argc = 0;
-  if (file) {
+  if (*file) {
     argv[argc++] = (char*)file;
   }
   for (int i = 0; i < (int)args.size(); i++) {
@@ -892,6 +907,9 @@ static int execute_program_impl(int argc, char **argv) {
 
   po.isTempFile = vm.count("temp-file");
 
+  // we need to initialize pcre cache table very early
+  pcre_init();
+
   Hdf config;
   if (!po.config.empty()) {
     config.open(po.config);
@@ -1022,14 +1040,20 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (!po.file.empty()) {
       Repo::setCliFile(po.file);
-    } else if (new_argc >= 2) {
-      Repo::setCliFile(new_argv[1]);
+    } else if (new_argc > 0) {
+      Repo::setCliFile(new_argv[0]);
     }
 
     int ret = 0;
     hphp_process_init();
 
+    string file;
+    if (new_argc > 0) {
+      file = new_argv[0];
+    }
+
     if (po.mode == "debug") {
+      StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       RuntimeOption::EnableDebugger = true;
       Eval::DebuggerProxyPtr proxy =
         Eval::Debugger::StartClient(po.debugger_options);
@@ -1039,7 +1063,6 @@ static int execute_program_impl(int argc, char **argv) {
       }
       Eval::Debugger::RegisterSandbox(proxy->getDummyInfo());
       Eval::Debugger::RegisterThread();
-      string file = po.file;
       StringVecPtr client_args;
       bool restart = false;
       ret = 0;
@@ -1071,10 +1094,10 @@ static int execute_program_impl(int argc, char **argv) {
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 1;
-        if (hphp_invoke_simple(po.file)) {
+        if (hphp_invoke_simple(file)) {
           ret = ExitException::ExitCode;
         }
-        execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
+        execute_command_line_end(po.xhprofFlags, true, file.c_str());
       }
     }
 
@@ -1175,6 +1198,9 @@ void hphp_process_init() {
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
+
+  // reinitialize pcre table
+  pcre_reinit();
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not
@@ -1292,9 +1318,10 @@ ExecutionContext *hphp_context_init() {
 
 bool hphp_invoke_simple(const std::string &filename,
                         bool warmupOnly /* = false */) {
-  bool error; string errorMsg;
-  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, uninit_null(),
-                     "", "", error, errorMsg, true, warmupOnly);
+  bool error;
+  string errorMsg;
+  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
+                     uninit_null(), "", "", error, errorMsg, true, warmupOnly);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,

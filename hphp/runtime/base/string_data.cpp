@@ -35,12 +35,19 @@ namespace HPHP {
 
 IMPLEMENT_SMART_ALLOCATION_HOT(StringData);
 ///////////////////////////////////////////////////////////////////////////////
-// constructor and destructor
+
+// equality checker for AtomicHashMap
+struct ahm_string_data_same {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    // ahm uses -1, -2, -3 as magic values
+    return int64_t(s1) > 0 && s1->same(s2);
+  }
+};
 
 // The uint32_t is used to hold TargetCache offsets for constants
-typedef tbb::concurrent_unordered_map<const StringData *, uint32_t,
-                                      string_data_hash,
-                                      string_data_same> StringDataMap;
+typedef folly::AtomicHashMap<const StringData *, uint32_t,
+                             string_data_hash,
+                             ahm_string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
 const StringData* StringData::convert_double_helper(double n) {
@@ -71,7 +78,13 @@ size_t StringData::GetStaticStringCount() {
 }
 
 StringData *StringData::GetStaticString(const StringData *str) {
-  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
+  if (UNLIKELY(!s_stringDataMap)) {
+    StringDataMap::Config config;
+    config.growthFactor = 1;
+    s_stringDataMap =
+      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                        config);
+  }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(it->first);
@@ -81,8 +94,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
   StringData *sd = (StringData*)Util::low_malloc(sizeof(StringData));
   new (sd) StringData(str->data(), str->size(), CopyMalloc);
   sd->setStatic();
-  auto pair = s_stringDataMap->insert(
-    std::pair<const StringData*,uint32_t>(sd, 0));
+  auto pair = s_stringDataMap->insert(sd, 0);
   if (!pair.second) {
     sd->~StringData();
     Util::low_free(sd);
@@ -91,13 +103,28 @@ StringData *StringData::GetStaticString(const StringData *str) {
   return const_cast<StringData*>(pair.first->first);
 }
 
+StringData *StringData::LookupStaticString(const StringData *str) {
+  if (UNLIKELY(!s_stringDataMap)) return nullptr;
+  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(it->first);
+  }
+  return nullptr;
+}
+
 StringData* StringData::GetStaticString(const String& str) {
   assert(!str.isNull());
   return GetStaticString(str.get());
 }
 
 StringData* StringData::FindStaticString(const StringData* str) {
-  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
+  if (UNLIKELY(!s_stringDataMap)) {
+    StringDataMap::Config config;
+    config.growthFactor = 1;
+    s_stringDataMap =
+      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                        config);
+  }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(it->first);
@@ -183,41 +210,6 @@ void StringData::initLiteral(const char* data, int len) {
   m_cdata = data;
   m_big.cap = len | IsLiteral;
   assert(checkSane());
-}
-
-void StringData::enlist() {
-  assert(isShared());
-  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
-  // insert after head
-  SweepNode* next = head.next;
-  assert(uintptr_t(next) != kMallocFreeWord);
-  m_big.node.next = next;
-  m_big.node.prev = &head;
-  next->prev = head.next = &m_big.node;
-}
-
-void StringData::delist() {
-  assert(isShared());
-  SweepNode* next = m_big.node.next;
-  SweepNode* prev = m_big.node.prev;
-  assert(uintptr_t(next) != kMallocFreeWord);
-  assert(uintptr_t(prev) != kMallocFreeWord);
-  next->prev = prev;
-  prev->next = next;
-}
-
-void StringData::sweepAll() {
-  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
-  for (SweepNode *next, *n = head.next; n != &head; n = next) {
-    next = n->next;
-    assert(next && uintptr_t(next) != kSmartFreeWord);
-    assert(next && uintptr_t(next) != kMallocFreeWord);
-    StringData* s = (StringData*)(uintptr_t(n) -
-                                  offsetof(StringData, m_big.node));
-    assert(s->isShared());
-    s->m_big.shared->decRef();
-  }
-  head.next = head.prev = &head;
 }
 
 HOT_FUNC
@@ -308,13 +300,11 @@ HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0) {
   assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
-  shared->incRef();
   m_hash = 0;
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
   m_big.shared = shared;
   m_big.cap = m_len | IsShared;
-  enlist();
 }
 
 HOT_FUNC
@@ -326,8 +316,6 @@ void StringData::releaseData() {
     break;
   case IsShared:
     assert(checkSane());
-    m_big.shared->decRef();
-    delist();
     break;
   case IsSmart:
     assert(checkSane());
@@ -407,10 +395,6 @@ void StringData::append(const char *s, int len) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
-    if (isShared()) {
-      m_big.shared->decRef();
-      delist();
-    }
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsSmart;

@@ -29,7 +29,7 @@ class IRFactory;
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
 // Be careful when changing this value.
-const int NumPreAllocatedSpillLocs = 16;
+const int NumPreAllocatedSpillLocs = 32;
 
 struct UseInfo {
   UseInfo() : lastUse(0), count(0) {}
@@ -86,7 +86,9 @@ class RegisterInfo {
   enum { kMaxNumRegs = 2 };
 
 public:
-  RegisterInfo() : m_isSpilled(false) {
+  RegisterInfo()
+      : m_isSpilled(false)
+      , m_fullXMM(false) {
     m_regs[0] = m_regs[1] = Transl::InvalidReg;
   }
 
@@ -128,8 +130,27 @@ public:
     m_regs[i] = reg;
   }
 
+  /*
+   * Used when the SSATmp needs two 64-bit registers and got assigned
+   * one 128-bit XMM register.
+   */
+  void setRegFullXMM(PhysReg reg) {
+    assert(reg.isXMM());
+    assert(!m_isSpilled);
+    m_regs[0] = reg;
+    m_fullXMM = true;
+  }
+
   bool spilled() const {
     return m_isSpilled;
+  }
+
+  /*
+   * Returns whether the SSATmp needed 2 regs and was allocated to a
+   * whole 128-bit XMM register.
+   */
+  bool isFullXMM() const {
+    return m_fullXMM;
   }
 
   /* Returns the set of registers in this RegisterInfo */
@@ -156,6 +177,7 @@ public:
 
 private:
   bool m_isSpilled;
+  bool m_fullXMM;
   union {
     PhysReg m_regs[kMaxNumRegs];
     SpillInfo m_spillInfo[kMaxNumRegs];
@@ -195,12 +217,8 @@ RegAllocInfo allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* = nullptr);
 // +---------------+
 // |  return addr  |
 // +---------------+
-// |    extra      |  <-- spill[2]
-// |    spill      |  <-- spill[1]
-// |  locations    |  <-- spill[0]
-// +---------------+  <-- %rsp
-// If a spill location falls into the pre-allocated region, we
-// need to increase its index by 1 to avoid overwriting the
+//
+// We need to increase spill indexes by 1 to avoid overwriting the
 // return address.
 
 /*
@@ -211,7 +229,6 @@ RegAllocInfo allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* = nullptr);
  * by the machine word size.
  */
 inline int SpillInfo::offset() const {
-  assert(m_val < NumPreAllocatedSpillLocs);
   return (m_val + 1) * sizeof(uint64_t);
 }
 

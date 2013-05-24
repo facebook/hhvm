@@ -23,33 +23,31 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdFrame::help(DebuggerClient *client) {
-  client->helpTitle("Frame Command");
-  client->helpCmds(
+void CmdFrame::help(DebuggerClient &client) {
+  client.helpTitle("Frame Command");
+  client.helpCmds(
     "[f]rame {index}",  "jumps to one particular frame",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use '[w]here' command to find out the frame number. Use 'f 0' to jump "
     "back to the most recent frame or the innermost frame. Use 'f 999' or "
     "some big number to jump to the outermost frame."
   );
-  return true;
 }
 
-bool CmdFrame::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() != 1) {
-    return help(client);
+void CmdFrame::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() != 1) {
+    help(client);
+  } else {
+    CmdWhere().fetchStackTrace(client);
+    client.moveToFrame(CmdUp::ParseNumber(client));
   }
-
-  CmdWhere().fetchStackTrace(client);
-  client->moveToFrame(CmdUp::ParseNumber(client));
-  return true;
 }
 
-void CmdFrame::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTStacktrace);
+void CmdFrame::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

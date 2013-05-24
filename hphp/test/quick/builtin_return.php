@@ -2,13 +2,13 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function foo(array $data) {
-  $duplicate_click = idx($data, 'duplicate_click');
-  if ($duplicate_click === 'false') {
-    $duplicate_click = false;
+  $ret = current($data);
+  if ($ret === 'false') {
+    $ret = false;
   } else {
-    $duplicate_click = (bool)$duplicate_click;
+    $ret = (bool)$ret;
   }
-  return $duplicate_click;
+  return $ret;
 }
 
 var_dump(foo(array()));

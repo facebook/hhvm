@@ -117,27 +117,30 @@ TranslatorX64::irCheckType(X64Assembler& a,
                            const Location& l,
                            const RuntimeType& rtt,
                            SrcRec& fail) {
-  assert(m_useHHIR);
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue()) return;
 
-  if (l.space == Location::Stack) {
-    // tx64LocPhysicalOffset returns:
-    // negative offsets for locals accessed via rVmFp
-    // positive offsets for stack values, relative to rVmSp
-    uint32_t stackOffset = tx64LocPhysicalOffset(l);
-    m_hhbcTrans->guardTypeStack(stackOffset, JIT::Type::fromRuntimeType(rtt));
-  } else if (l.space == Location::Local){
-    // Convert negative offset to a positive offset for convenience
-    m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
-  } else if (l.space == Location::Iter) {
-    assert(false); // should not happen
-  } else {
-    HHIR_UNIMPLEMENTED(Invalid_space);
-  }
+  switch (l.space) {
+  case Location::Stack:
+    {
+      uint32_t stackOffset = tx64LocPhysicalOffset(l);
+      m_hhbcTrans->guardTypeStack(stackOffset,
+                                  JIT::Type::fromRuntimeType(rtt));
+    }
+    break;
 
-  return;
+  case Location::Local:
+    m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
+    break;
+
+  case Location::Iter:
+  case Location::Invalid:
+  case Location::Litstr:
+  case Location::Litint:
+  case Location::This:
+    assert(false); // should not happen
+  }
 }
 
 void
@@ -228,6 +231,8 @@ TranslatorX64::irTranslateBranchOp(const Tracelet& t,
                                    const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpJmpZ || op == OpJmpNZ);
+  assert(!i.next);
+
   if (op == OpJmpZ) {
     HHIR_EMIT(JmpZ,  i.offset() + i.imm[0].u_BA);
   } else {
@@ -686,6 +691,11 @@ void TranslatorX64::irTranslateIncStat(const Tracelet& t,
   HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
+void TranslatorX64::irTranslateArrayIdx(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+  HHIR_EMIT(ArrayIdx);
+}
+
 void TranslatorX64::irTranslateClassExists(const Tracelet& t,
                                            const NormalizedInstruction& i) {
   const StringData* clsName = i.inputs[1]->rtt.valueStringOrNull();
@@ -877,9 +887,9 @@ TranslatorX64::irTranslateSetOpL(const Tracelet& t,
     case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
     case SetOpConcatEqual: opc = JIT::Concat;   break;
     case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpAndEqual:    opc = JIT::OpAnd; break;
-    case SetOpOrEqual:     opc = JIT::OpOr;  break;
-    case SetOpXorEqual:    opc = JIT::OpXor; break;
+    case SetOpAndEqual:    opc = JIT::OpBitAnd; break;
+    case SetOpOrEqual:     opc = JIT::OpBitOr;  break;
+    case SetOpXorEqual:    opc = JIT::OpBitXor; break;
     case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     default: not_reached();
@@ -1102,9 +1112,9 @@ TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
-static bool shouldIRInline(const Func* curFunc,
-                           const Func* func,
-                           const Tracelet& callee) {
+bool shouldIRInline(const Func* curFunc,
+                    const Func* func,
+                    const Tracelet& callee) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
   }
@@ -1121,7 +1131,7 @@ static bool shouldIRInline(const Func* curFunc,
   };
 
   if (func->numLocals() != func->numParams()) {
-    return refuse("locals");
+    return refuse("more locals than params (unsupported)");
   }
   if (func->numIterators() != 0) {
     return refuse("iterators");
@@ -1131,11 +1141,7 @@ static bool shouldIRInline(const Func* curFunc,
     return refuse("too many stack cells");
   }
 
-  // Disable anything with locals---specialized RetC generates stores
-  // that zero out the m_type's and depend on the frame.
-  if (func->numLocals() != 0) {
-    return refuse("has locals (would use frame)");
-  }
+  /////////////
 
   // Little pattern recognition helpers:
   const NormalizedInstruction* cursor;
@@ -1157,12 +1163,16 @@ static bool shouldIRInline(const Func* curFunc,
   };
   auto atRet = [&] { return current == OpRetC || current == OpRetV; };
 
-  // Simple operations that just put a Cell on the stack without any
-  // inputs.  For now avoid CreateCont because it depends on the
-  // frame.
+  // Simple operations that just put a Cell on the stack.  There must
+  // either be no inputs, or a single local as an input.  For now
+  // avoid CreateCont because it depends on the frame.
   auto simpleCell = [&]() -> bool {
-    if (cursor->outStack && cursor->inputs.empty() &&
-        current != OpCreateCont) {
+    if (current == OpCreateCont) return false;
+    if (cursor->outStack && cursor->inputs.empty()) {
+      next();
+      return true;
+    }
+    if (current == OpCGetL || current == OpVGetL) {
       next();
       return true;
     }
@@ -1193,14 +1203,9 @@ static bool shouldIRInline(const Func* curFunc,
     return atRet();
   };
 
-  /////////////
-
-  // Identity functions.
   resetCursor();
-  if (current == OpCGetL) {
-    next();
-    if (atRet()) return accept("returns parameter");
-  }
+
+  ////////////
 
   // Simple property accessors.
   resetCursor();
@@ -1241,7 +1246,8 @@ static bool shouldIRInline(const Func* curFunc,
    * Continuation allocation functions that take no arguments.
    */
   resetCursor();
-  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0) {
+  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0 &&
+      !func->numParams()) {
     next();
     if (atRet()) return accept("zero-arg continuation creator");
   }
@@ -1283,8 +1289,9 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
    * the call.
    */
   if (i.calleeTrace) {
-    if (!m_hhbcTrans->isInlining() &&
-        shouldIRInline(curFunc(), i.funcd, *i.calleeTrace)) {
+    if (!m_hhbcTrans->isInlining()) {
+      assert(shouldIRInline(curFunc(), i.funcd, *i.calleeTrace));
+
       m_hhbcTrans->beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&
                                      getenv("HHVM_STATS_INLINESHAPE");
@@ -1559,23 +1566,36 @@ TranslatorX64::irTranslateInstrWork(const Tracelet& t,
   }
 }
 
+static bool isPop(Opcode opc) {
+  return opc == OpPopC || opc == OpPopR;
+}
+
 void
 TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
-  assert(m_useHHIR);
-
   if (!i.outStack || i.breaksTracelet) return;
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
+  JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
 
-  if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted) ||
-      (u == NormalizedInstruction::OutputInferred)) {
-    JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
-    if (u == NormalizedInstruction::OutputInferred) {
-      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output inferred as %s\n",
+  if (u == NormalizedInstruction::OutputInferred) {
+    TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
+          jitType.toString().c_str());
+    m_hhbcTrans->assertTypeStack(0, jitType);
+
+  } else if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
+    // If the value was predicted statically by the front-end, it
+    // means that it's either the predicted type or null.  In this
+    // case, if the predicted value is not ref-counted and it's simply
+    // going to be popped, then pass the information as an assertion
+    // that the type is not ref-counted.  This avoid both generating a
+    // type check and dec-refing the value.
+    if (i.outputPredictionStatic && isPop(i.next->op()) &&
+        !jitType.isCounted()) {
+      TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
             jitType.toString().c_str());
-      m_hhbcTrans->assertTypeStack(0, jitType);
+      m_hhbcTrans->assertTypeStack(0, JIT::Type::Uncounted);
     } else {
-      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output predicted as %s\n",
+      TRACE(1, "irPassPredictedAndInferredTypes: output predicted as %s\n",
             jitType.toString().c_str());
       m_hhbcTrans->checkTypeTopOfStack(jitType, i.next->offset());
     }
@@ -1625,7 +1645,6 @@ void TranslatorX64::irInterpretInstr(const NormalizedInstruction& i) {
 
 void TranslatorX64::irTranslateInstr(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  assert(m_useHHIR);
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
@@ -1669,7 +1688,6 @@ void TranslatorX64::irTranslateInstr(const Tracelet& t,
 
 void TranslatorX64::irAssertType(const Location& l,
                                  const RuntimeType& rtt) {
-  assert(m_useHHIR);
   if (rtt.isVagueValue()) return;
 
   switch (l.space) {
@@ -1732,8 +1750,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
                                    const TCA               stubStart,
                                    vector<TransBCMapping>* bcMap) {
   auto transResult = Failure;
-  assert(m_useHHIR);
-
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   assert(srcRec.inProgressTailJumps().size() == 0);
@@ -1756,7 +1772,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);
-    m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
 
     // Profiling on function entry.
     if (m_curTrace->m_sk.offset() == curFunc()->base()) {
@@ -1791,14 +1806,13 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       } catch (JIT::FailedIRGen& fcg) {
         // If we haven't tried interpreting ni yet, flag it to be interpreted
         // and retry
-        if (RuntimeOption::EvalHHIRDisableTx64 && !ni->interp &&
-            supportedInterpOne(ni)) {
+        if (!ni->interp && supportedInterpOne(ni)) {
           ni->interp = true;
           transResult = Retry;
           break;
         }
-        if (!RuntimeOption::EvalHHIRDisableTx64 || !ni->prev) {
-          // Let tx64 handle the entire tracelet.
+        if (!ni->prev) {
+          // Let the interpreter handle the entire tracelet.
           throw;
         }
         // We've made forward progress. Proceed with the partial tracelet,
@@ -1818,7 +1832,7 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       if (ni->breaksTracelet) break;
     }
 
-    hhirTraceEnd(t.m_nextSk.offset());
+    hhirTraceEnd();
     if (transResult != Retry) {
       try {
         transResult = Success;
@@ -1874,7 +1888,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     assert(0);
   }
 
-  m_useHHIR = transResult != Failure;
   if (transResult != Success) {
     // The whole translation failed; give up on this BB. Since it is not
     // linked into srcDB yet, it is guaranteed not to be reachable.
@@ -1890,9 +1903,9 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
   return transResult;
 }
 
-void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
+void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
+                                   Offset nextTraceletOffset) {
   assert(!m_irFactory);
-  assert(m_useHHIR);
 
   Cell* fp = vmfp();
   if (curFunc()->isGenerator()) {
@@ -1903,15 +1916,13 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_useHHIR      = true;
   m_irFactory.reset(new JIT::IRFactory());
   m_hhbcTrans.reset(new JIT::HhbcTranslator(
-    *m_irFactory, bcStartOffset, fp - vmsp(), curFunc()));
+    *m_irFactory, bcStartOffset, nextTraceletOffset, fp - vmsp(), curFunc()));
 }
 
-void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
-  assert(m_useHHIR);
-  m_hhbcTrans->end(bcSuccOffset);
+void TranslatorX64::hhirTraceEnd() {
+  m_hhbcTrans->end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
          "",
@@ -1920,7 +1931,6 @@ void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
-  assert(m_useHHIR);
 
   HPHP::JIT::Trace* trace = m_hhbcTrans->getTrace();
   auto finishPass = [&](const char* msg, int level,

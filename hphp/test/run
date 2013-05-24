@@ -6,7 +6,7 @@
 
 function usage() {
   global $argv;
-  return "usage: $argv[0] [-m jit|hhir|interp] [-r] <test/directories>";
+  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
 }
 
 function help() {
@@ -29,9 +29,6 @@ Examples:
 
   # Quick tests in JIT mode:
   % $argv[0]
-
-  # Quick tests in HHIR mode:
-  % $argv[0] -m hhir
 
   # Slow tests in interp mode:
   % $argv[0] -m interp test/slow
@@ -90,6 +87,7 @@ function get_options($argv) {
     'm:' => 'mode:',
     '' => 'server',
     'h' => 'help',
+    '' => 'commands',
   );
   $options = array();
   $files = array();
@@ -123,18 +121,12 @@ function get_options($argv) {
  * suites are, to avoid typing 'hphp/test/foo'.
  */
 function map_convenience_filename($file) {
-  if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
-    error(
-      "I'm really sorry to change this, but now the mode is ".
-      "passed with '-m $file', and repo mode is turned on with '-r'"
-    );
-  }
-
   $mappage = array(
     'quick'    => 'hphp/test/quick',
     'slow'     => 'hphp/test/slow',
     'zend'     => 'hphp/test/zend/good',
     'zend_bad' => 'hphp/test/zend/bad',
+    'facebook' => 'hphp/facebook/test',
   );
 
   $m = null;
@@ -172,7 +164,7 @@ function find_config($tests, $name) {
     return find_config_for_dir($test, $name);
   }, $tests);
   $configs = array_unique($configs);
-  if (!count($configs) == 1) {
+  if (count($configs) != 1) {
     error(
       "These tests would use many different configs and we only support ".
       "using one for all the tests. Need these configs: ".
@@ -213,13 +205,11 @@ function mode_arg($options) {
   switch ($mode) {
     case '':
     case 'jit':
-      return "$jit_args -vEval.JitUseIR=0 -vEval.HHIRDisableTx64=0";
-    case 'hhir':
-      return "$jit_args -vEval.JitUseIR=1 -vEval.HHIRDisableTx64=1";
+      return "$jit_args";
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of hhir | jit | interp. Got: '$mode'");
+      error("-m must be one of jit | interp. Got: '$mode'");
   }
 }
 
@@ -293,7 +283,7 @@ if (isset($options['repo'])) {
 
 $return_value = run(implode(' ', $verify), $tests);
 
-if ($return_value) {
+if ($return_value || isset($options['commands'])) {
   $command = implode(' ', command_arg($options, $tests));
   $filename = 'FILENAME';
   $extra_help = ' change FILENAME to the test you want';

@@ -141,7 +141,9 @@ void c_Continuation::t_raise(CVarRef v) {
 void c_Continuation::t_raised() {
   if (m_should_throw) {
     m_should_throw = false;
-    throw_exception(m_received);
+    Variant e(Variant::nullInit);
+    m_received.swap(e);
+    throw_exception(e);
   }
 }
 
@@ -171,7 +173,7 @@ Variant c_Continuation::t___clone() {
 
 HphpArray* c_Continuation::getStaticLocals() {
   if (m_VMStatics.get() == NULL) {
-    m_VMStatics = NEW(HphpArray)(1);
+    m_VMStatics = ArrayData::Make(1);
   }
   return m_VMStatics.get();
 }

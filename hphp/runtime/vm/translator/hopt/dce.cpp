@@ -62,9 +62,7 @@ struct DceFlags {
    */
   void incWeakUse() {
     if (m_weakUseCount + 1 > kMaxWeakUseCount) {
-      always_assert(!"currently there's only two instructions "
-                    "using this machinery, so this shouldn't "
-                    "happen ... ");
+      // Too many weak uses for us to know we can optimize it away.
       return;
     }
     ++m_weakUseCount;
@@ -392,6 +390,17 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       }
       break;
 
+    // We don't need to generate stores to a frame if it can be
+    // eliminated.
+    case StLoc:
+      {
+        auto const frameInst = inst->getSrc(0)->inst();
+        if (frameInst->op() == DefInlineFP) {
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
     case InlineReturn:
       {
         auto frameUses = uses[inst->getSrc(0)];
@@ -446,11 +455,13 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
       }
       break;
 
-    case InlineReturn:
+    case StLoc: case InlineReturn:
       {
         auto const fp = inst->getSrc(0);
         if (state[fp->inst()].isDead()) {
-          FTRACE(5, "InlineReturn ({}) setDead\n", inst->getId());
+          FTRACE(5, "{} ({}) setDead\n",
+                 opcodeName(inst->op()),
+                 inst->getId());
           state[inst].setDead();
         }
       }
@@ -471,7 +482,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
 // Assuming that the 'consumer' instruction consumes 'src', trace back through
 // src's instruction to the real origin of the value. Currently this traces
-// through GuardType and DefLabel.
+// through CheckType and DefLabel.
 void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
                    DceState& state, SSACache& ssas, SSASet visitedSrcs) {
   assert(!visitedSrcs.count(src) && "Cycle detected in dataflow graph");
@@ -486,11 +497,11 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
   const IRInstruction* srcInst = src->inst();
   visitedSrcs.insert(src);
-  if (srcInst->op() == GuardType &&
+  if (srcInst->op() == CheckType &&
       srcInst->getTypeParam().maybeCounted()) {
-    // srcInst is a GuardType that guards to a refcounted type. We need to
-    // trace through to its source. If the GuardType guards to a non-refcounted
-    // type then the reference is consumed by GuardType itself.
+    // srcInst is a CheckType that guards to a refcounted type. We need to
+    // trace through to its source. If the CheckType guards to a non-refcounted
+    // type then the reference is consumed by CheckType itself.
     consumeIncRef(consumer, srcInst->getSrc(0), state, ssas, visitedSrcs);
   } else if (srcInst->op() == DefLabel) {
     // srcInst is a DefLabel that may be a join node. We need to find

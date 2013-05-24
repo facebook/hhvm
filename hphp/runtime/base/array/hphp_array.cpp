@@ -154,8 +154,8 @@ HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
 }
 
 // Empty constructor for internal use by nonSmartCopy() and copyImpl()
-HphpArray::HphpArray(CopyMode mode) :
-  ArrayData(kHphpArray, /*nonsmart*/ mode == kNonSmartCopy) {
+HphpArray::HphpArray(AllocMode mode) :
+    ArrayData(kHphpArray, /*nonsmart*/ mode == kMalloc) {
 }
 
 HOT_FUNC_VM
@@ -1394,65 +1394,6 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
   return true;
 }
 
-inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
-  target->m_pos = m_pos;
-  target->m_data = nullptr;
-  target->m_nextKI = m_nextKI;
-  target->m_tableMask = m_tableMask;
-  target->m_size = m_size;
-  target->m_hLoad = m_hLoad;
-  target->m_lastE = m_lastE;
-  size_t tableSize = computeTableSize(m_tableMask);
-  size_t maxElms = computeMaxElms(m_tableMask);
-  target->allocData(maxElms, tableSize);
-  // Copy the hash.
-  memcpy(target->m_hash, m_hash, tableSize * sizeof(ElmInd));
-  // Copy the elements and bump up refcounts as needed.
-  if (m_size > 0) {
-    Elm* elms = m_data;
-    Elm* targetElms = target->m_data;
-    ssize_t lastE = (ssize_t)m_lastE;
-    for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
-      Elm* e = &elms[pos];
-      Elm* te = &targetElms[pos];
-      if (e->data.m_type != KindOfTombstone) {
-        te->key = e->key;
-        te->data.hash() = e->data.hash();
-        if (te->hasStrKey()) te->key->incRefCount();
-        tvDupFlattenVars(&e->data, &te->data, this);
-        assert(te->hash() == e->hash()); // ensure not clobbered.
-      } else {
-        // Tombstone.
-        te->setIntKey(0);
-        te->data.m_type = KindOfTombstone;
-      }
-    }
-    // It's possible that there were indirect elements at the end that were
-    // converted to tombstones, so check if we should adjust target->m_lastE
-    while (target->m_lastE >= 0) {
-      Elm* te = &targetElms[target->m_lastE];
-      if (te->data.m_type != KindOfTombstone) {
-        break;
-      }
-      --(target->m_lastE);
-    }
-    // If the element density dropped below 50% due to indirect elements
-    // being converted into tombstones, we should do a compaction
-    if (target->m_size < (uint32_t)((target->m_lastE+1) >> 1)) {
-      target->compact();
-    }
-  }
-  return target;
-}
-
-NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
-  return copyImpl(new HphpArray(kNonSmartCopy));
-}
-
-NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
-  return copyImpl(NEW(HphpArray)(kSmartCopy));
-}
-
 ArrayData* HphpArray::append(CVarRef v, bool copy) {
   HphpArray *a = !copy ? this : copyImpl();
   a->nextInsert(v);
@@ -1893,6 +1834,96 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
 }
 
 //=============================================================================
+
+ALWAYS_INLINE HphpArray* HphpArray::clone(AllocMode am) const {
+  const auto p = am == kSmart
+    ? HphpArray::AllocatorType::getNoCheck()->alloc(sizeof(HphpArray))
+    : operator new(sizeof(HphpArray));
+  auto target = new(p) HphpArray(am);
+
+  if (m_size) {
+    cloneNonEmpty(target);
+    return target;
+  }
+
+  // Over-optimize for empty arrays; this case seems to be exceedingly
+  // frequent. Do this only for arrays that actually don't allocate
+  // data so the copied array doesn't lose capacity.
+  target->ArrayData::m_pos = invalid_index;
+  target->ArrayData::m_allocMode = kInline;
+  // Conservatively copy m_nextKI
+  target->m_nextKI = m_nextKI;
+  target->m_tableMask = SmallHashSize - 1;
+  target->m_size = 0;
+  target->m_hLoad = 0;
+  target->m_lastE = ElmIndEmpty;
+  target->m_data = target->m_inline_data.slots;
+  auto const ht = target->m_inline_data.hash;
+  target->m_hash = ht;
+  static_assert(SmallHashSize == 4, "review code below");
+  ht[0] = ElmIndEmpty;
+  ht[1] = ElmIndEmpty;
+  ht[2] = ElmIndEmpty;
+  ht[3] = ElmIndEmpty;
+  return target;
+}
+
+NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
+  return clone(kMalloc);
+}
+
+NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
+  return clone(kSmart);
+}
+
+NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
+  target->m_pos = m_pos;
+  target->m_data = nullptr;
+  target->m_nextKI = m_nextKI;
+  target->m_tableMask = m_tableMask;
+  target->m_size = m_size;
+  target->m_hLoad = m_hLoad;
+  target->m_lastE = m_lastE;
+  const auto tableSize = computeTableSize(m_tableMask);
+  const auto maxElms = computeMaxElms(m_tableMask);
+  target->allocData(maxElms, tableSize);
+  // Copy the hash.
+  memcpy(target->m_hash, m_hash, tableSize * sizeof(ElmInd));
+
+  // Copy the elements and bump up refcounts as needed.
+  Elm* elms = m_data;
+  Elm* targetElms = target->m_data;
+  ssize_t lastE = (ssize_t)m_lastE;
+  for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
+    Elm* e = &elms[pos];
+    Elm* te = &targetElms[pos];
+    if (e->data.m_type != KindOfTombstone) {
+      te->key = e->key;
+      te->data.hash() = e->data.hash();
+      if (te->hasStrKey()) te->key->incRefCount();
+      tvDupFlattenVars(&e->data, &te->data, this);
+      assert(te->hash() == e->hash()); // ensure not clobbered.
+    } else {
+      // Tombstone.
+      te->setIntKey(0);
+      te->data.m_type = KindOfTombstone;
+    }
+  }
+  // It's possible that there were indirect elements at the end that were
+  // converted to tombstones, so check if we should adjust target->m_lastE
+  while (target->m_lastE >= 0) {
+    Elm* te = &targetElms[target->m_lastE];
+    if (te->data.m_type != KindOfTombstone) {
+      break;
+    }
+    --(target->m_lastE);
+  }
+  // If the element density dropped below 50% due to indirect elements
+  // being converted into tombstones, we should do a compaction
+  if (target->m_size < (uint32_t)((target->m_lastE+1) >> 1)) {
+    target->compact();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

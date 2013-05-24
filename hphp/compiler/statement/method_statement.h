@@ -62,6 +62,7 @@ public:
   std::string getFullName() const;
   std::string getOriginalFullName() const;
   std::string getOriginalFullNameForInjection() const;
+  std::string getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
     return m_retTypeConstraint;
@@ -120,6 +121,12 @@ public:
     m_originalClassName = name;
   }
 
+  // for flattened traits
+  void setOriginalFilename(const std::string &name) {
+    assert(m_method);
+    m_originalFilename = name;
+  }
+
   void addTraitMethodToScope(AnalysisResultConstPtr ar,
                              ClassScopePtr classScope);
 
@@ -133,6 +140,7 @@ protected:
   std::string m_originalName;
   std::string m_className;
   std::string m_originalClassName;
+  std::string m_originalFilename;
   ExpressionListPtr m_params;
   std::string m_retTypeConstraint;
   StatementListPtr m_stmt;

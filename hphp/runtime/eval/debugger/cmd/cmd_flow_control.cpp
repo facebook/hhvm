@@ -39,40 +39,41 @@ void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_smallStep);
 }
 
-bool CmdFlowControl::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
+void CmdFlowControl::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
 
-  client->setFrame(0);
+  client.setFrame(0);
 
-  if (client->argCount() > 1) {
-    return help(client);
+  if (client.argCount() > 1) {
+    help(client);
+    return;
   }
 
-  if (client->argCount() == 1) {
-    string snum = client->argValue(1);
+  if (client.argCount() == 1) {
+    string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("Count needs to be a number.");
-      return true;
+      client.error("Count needs to be a number.");
+      return;
     }
 
     m_count = atoi(snum.c_str());
     if (m_count < 1) {
-      client->error("Count needs to be a positive number.");
-      return true;
+      client.error("Count needs to be a positive number.");
+      return;
     }
   }
-  m_smallStep = client->getDebuggerSmallStep();
-  client->sendToServer(this);
+  m_smallStep = client.getDebuggerSmallStep();
+  client.sendToServer(this);
   throw DebuggerConsoleExitException();
 }
 
-bool CmdFlowControl::onServer(DebuggerProxy *proxy) {
+bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
   // Flow control cmds do their work in onSetup() and onBeginInterrupt(), so
   // there is no real work to do in here.
   return true;
 }
 
-void CmdFlowControl::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+void CmdFlowControl::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   // Should only do setting and nothing else
   g_context->setDebuggerSmallStep(m_smallStep);
 }

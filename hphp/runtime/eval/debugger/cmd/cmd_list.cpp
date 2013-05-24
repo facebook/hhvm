@@ -24,7 +24,8 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-// Serializes this command into the given Thrift buffer.
+// Always called from send and implements specific
+// logic for serializing a list command to send via Thrift.
 void CmdList::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_file);
@@ -33,7 +34,8 @@ void CmdList::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_code);
 }
 
-// Deserializes a CmdList from the given Thrift buffer.
+// Always called from recv and implements specific
+// logic for deserializing a list command received via Thrift.
 void CmdList::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_file);
@@ -45,14 +47,14 @@ void CmdList::recvImpl(DebuggerThriftBuffer &thrift) {
 // Informs the client of all strings that may follow a list command.
 // Used for auto completion. The client uses the prefix of the argument
 // following the command to narrow down the list displayed to the user.
-void CmdList::list(DebuggerClient *client) {
-  client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+void CmdList::list(DebuggerClient &client) {
+  client.addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
-// The text to display when the debugger client processes "help break".
-bool CmdList::help(DebuggerClient *client) {
-  client->helpTitle("List Command");
-  client->helpCmds(
+// The text to display when the debugger client processes "help list".
+void CmdList::help(DebuggerClient &client) {
+  client.helpTitle("List Command");
+  client.helpCmds(
     "list",                   "displays current block of source code",
     "list {line}",            "displays code around specified line",
     "list {line1}-{line2}",   "displays specified block of source code",
@@ -69,7 +71,7 @@ bool CmdList::help(DebuggerClient *client) {
     "list {directory}",       "sets PHP source root directory",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use list command to display PHP source code. In remote debugging, this "
     "is displaying source code on server side. When server side cannot find "
     "the file, it will fall back to local files.\n"
@@ -81,34 +83,58 @@ bool CmdList::help(DebuggerClient *client) {
     "will not be affected by this setting. This directory will be stored "
     "in configuration file for future sessions as well."
   );
-  return true;
 }
 
-bool CmdList::listCurrent(DebuggerClient *client, int &line,
+// Retrieves the current source location (file, line).
+// The current location is initially determined by the location
+// where execution was interrupted to hand control back to
+// the debugger client and can thereafter be modified by list
+// commands and by switching the the stack frame.
+//
+// The lineFocus and and charFocus parameters
+// are non zero only when the source location comes from a breakpoint.
+// They can be used to highlight the location of the current breakpoint
+// in the edit window of an attached IDE, for example.
+//
+// If m_line1 and m_line2 are currently 0 (because they have not been specified
+// as parameters to the list command), they are updated to point to a block of
+// code one line beyond the current line maintained by the client.
+// This has the effect that a succession of list commands that specify no
+// parameters will scroll sequentially through the source code in blocks
+// of DebuggerClient::CodeBlockSize.
+void CmdList::getListLocation(DebuggerClient &client, int &lineFocus0,
                           int &charFocus0, int &lineFocus1,
                           int &charFocus1) {
-  int linePrev = 0;
-  client->getListLocation(m_file, linePrev, line, charFocus0, lineFocus1,
-                          charFocus1);
+  int currentLine = 0;
+  client.getListLocation(m_file, currentLine, lineFocus0, charFocus0,
+                         lineFocus1, charFocus1);
   if (m_line1 == 0 && m_line2 == 0) {
-    m_line1 = linePrev + 1;
+    m_line1 = currentLine + 1;
     m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
   }
-  if (m_file.empty()) {
-    string code = client->getCode();
-    if (code.empty()) {
-      client->error("There is no current source file.");
-      return true;
-    }
-    client->print(highlight_php(code));
-    return true;
-  }
-  return false;
 }
 
-bool CmdList::listFileRange(DebuggerClient *client, int line,
-                            int charFocus0, int lineFocus1,
-                            int charFocus1) {
+// If there is no current file, print the desired range of eval code
+// or give an error message if the debugger is not currently performing
+// an eval command.
+void CmdList::listEvalCode(DebuggerClient &client) {
+  assert(m_file.empty());
+
+  string evalCode = client.getCode();
+  if (evalCode.empty()) {
+    client.error("There is no current source file.");
+  } else {
+    client.print(highlight_php(evalCode));
+  }
+}
+
+// Sends this list command to the server to retrieve the source to be listed
+// and then displays the source on the client. The client's current line
+// is then updated to point to the last listed line.
+// Returns false if the server was unable to return source for this command.
+bool CmdList::listFileRange(DebuggerClient &client,
+                            int lineFocus0, int charFocus0,
+                            int lineFocus1, int charFocus1) {
   if (m_line1 <= 0) m_line1 = 1;
   if (m_line2 <= 0) m_line2 = 1;
   if (m_line1 > m_line2) {
@@ -117,13 +143,13 @@ bool CmdList::listFileRange(DebuggerClient *client, int line,
     m_line2 = tmp;
   }
 
-  CmdListPtr res = client->xend<CmdList>(this);
+  CmdListPtr res = client.xend<CmdList>(this);
   if (res->m_code.isString()) {
-    if (!client->code(res->m_code, line, m_line1, m_line2, charFocus0,
+    if (!client.code(res->m_code, m_line1, m_line2, lineFocus0, charFocus0,
                       lineFocus1, charFocus1)) {
-      client->info("No more lines in %s to display.", m_file.c_str());
+      client.info("No more lines in %s to display.", m_file.c_str());
     }
-    client->setListLocation(m_file, m_line2, false);
+    client.setListLocation(m_file, m_line2, false);
     return true;
   }
   return false;
@@ -135,13 +161,20 @@ static const StaticString
   s_line1("line2"),
   s_line2("line2");
 
-bool CmdList::listFunctionOrClass(DebuggerClient *client) {
-  assert(client->argCount() == 1);
+// Sends an Info command to the server to retrieve source location
+// information for the function or class specified by the command
+// argument. Then updates this command with the source information
+// and sends it to the server in order to retrieve the source
+// text from the server.
+// Returns false if the server was unable to return the information
+// needed for this command.
+bool CmdList::listFunctionOrClass(DebuggerClient &client) {
+  assert(client.argCount() == 1);
   CmdInfoPtr cmdInfo(new CmdInfo());
   DebuggerCommandPtr deleter(cmdInfo);
   string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);
-  CmdInfoPtr cmd = client->xend<CmdInfo>(cmdInfo.get());
+  CmdInfoPtr cmd = client.xend<CmdInfo>(cmdInfo.get());
   Array info = cmd->getInfo();
   if (info.empty()) return false;
   always_assert(info.size() == 1);
@@ -157,53 +190,57 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   int line2 = funcInfo[s_line2].toInt32();
   int line = line1 ? line1 : line2;
   if (file.empty() || !line) return false;
-  client->setListLocation(file.data(), line - 1, false);
+  client.setListLocation(file.data(), line - 1, false);
   line = 0;
   int charFocus0 = 0;
   int lineFocus1 = 0;
   int charFocus1 = 0;
   m_file.clear();
   m_line1 = m_line2 = 0;
-  if (listCurrent(client, line, charFocus0, lineFocus1, charFocus1)) {
+  getListLocation(client, line, charFocus0, lineFocus1, charFocus1);
+  if (m_file.empty()) {
+    listEvalCode(client);
     return true;
   }
-  if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
-    return true;
-  }
-  return false;
+  return listFileRange(client, line, charFocus0, lineFocus1, charFocus1);
 }
 
-bool CmdList::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() > 1) {
-    return help(client);
+// Checks the command arguments, report errors and returning as appropriate.
+// Then communicates with the server to retrieve source information. Also
+// retrieves and updates location information stored in the client.
+void CmdList::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() > 1) {
+    help(client);
+    return;
   }
 
   int line = 0;
   m_line1 = m_line2 = 0;
-  if (client->argCount() == 1) {
-    string arg = client->argValue(1);
+  if (client.argCount() == 1) {
+    string arg = client.argValue(1);
     if (DebuggerClient::IsValidNumber(arg)) {
       line = atoi(arg.c_str());
       if (line <= 0) {
-        client->error("A line number has to be a positive integer.");
-        return help(client);
+        client.error("A line number has to be a positive integer.");
+        help(client);
+        return;
       }
       m_line1 = line - DebuggerClient::CodeBlockSize/2;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
     } else if (arg.find("::") != string::npos) {
       if (!listFunctionOrClass(client)) {
-        client->error("Unable to read specified method.");
+        client.error("Unable to read specified method.");
       }
-      return true;
+      return;
     } else {
-
       size_t pos = arg.find(':');
       if (pos != string::npos) {
         m_file = arg.substr(0, pos);
         if (m_file.empty()) {
-          client->error("File name cannot be empty.");
-          return help(client);
+          client.error("File name cannot be empty.");
+          help(client);
+          return;
         }
         arg = arg.substr(pos + 1);
       }
@@ -218,8 +255,9 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
             m_line1 = 1;
             m_line2 = DebuggerClient::CodeBlockSize;
           } else {
-            client->error("Line numbers have to be integers.");
-            return help(client);
+            client.error("Line numbers have to be integers.");
+            help(client);
+            return;
           }
         } else {
           m_line1 = atoi(line1.c_str());
@@ -231,8 +269,9 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
             m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
           }
           if (m_line1 <= 0 || m_line2 <= 0) {
-            client->error("Line numbers have to be positive integers.");
-            return help(client);
+            client.error("Line numbers have to be positive integers.");
+            help(client);
+            return;
           }
         }
       } else {
@@ -242,14 +281,16 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
             m_line1 = 1;
             m_line2 = DebuggerClient::CodeBlockSize;
           } else {
-            client->error("A line number has to be an integer.");
-            return help(client);
+            client.error("A line number has to be an integer.");
+            help(client);
+            return;
           }
         } else {
           int line = atoi(arg.c_str());
           if (line <= 0) {
-            client->error("A line number has to be a positive integer.");
-            return help(client);
+            client.error("A line number has to be a positive integer.");
+            help(client);
+            return;
           }
           m_line1 = line - DebuggerClient::CodeBlockSize/2;
           m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
@@ -263,33 +304,40 @@ bool CmdList::onClientImpl(DebuggerClient *client) {
   int charFocus1 = 0;
 
   if (m_file.empty()) {
-    if (listCurrent(client, line, charFocus0, lineFocus1, charFocus1)) {
-      return true;
+    getListLocation(client, line, charFocus0, lineFocus1, charFocus1);
+    if (m_file.empty()) {
+      listEvalCode(client);
+      return;
     }
   } else if (m_file[0] == '/') {
     struct stat sb;
     stat(m_file.c_str(), &sb);
     if ((sb.st_mode & S_IFMT) == S_IFDIR) {
-      client->setSourceRoot(m_file);
-      client->info("PHP source root directory is set to %s", m_file.c_str());
-      return true;
+      client.setSourceRoot(m_file);
+      client.info("PHP source root directory is set to %s", m_file.c_str());
+      return;
     }
   }
 
   if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
-    return true;
-  } else if (client->argCount() != 1 || !listFunctionOrClass(client)) {
-    client->error(
+    return;
+  } else if (client.argCount() != 1 || !listFunctionOrClass(client)) {
+    client.error(
       "Unable to read specified function, class or source file location.");
-    return true;
+    return;
   }
-  return true;
 }
 
-bool CmdList::onServer(DebuggerProxy *proxy) {
+// Tries to read the contents of the file whose path is specified in m_file.
+// If the path cannot be resolved and is relative, the path of the sandbox
+// is used to qualify the relative path. If the contents cannot be retrieved
+// m_code will be an empty string.
+// The function returns false if the reply to the client fails during the
+// sending process.
+bool CmdList::onServer(DebuggerProxy &proxy) {
   m_code = f_file_get_contents(m_file.c_str());
   if (!m_code && m_file[0] != '/') {
-    DSandboxInfo info = proxy->getSandbox();
+    DSandboxInfo info = proxy.getSandbox();
     if (info.m_path.empty()) {
       raise_warning("path for sandbox %s is not setup, run a web request",
                     info.desc().c_str());
@@ -298,17 +346,17 @@ bool CmdList::onServer(DebuggerProxy *proxy) {
       m_code = f_file_get_contents(full_path.c_str());
     }
   }
-  return proxy->sendToClient(this);
+  return proxy.sendToClient((DebuggerCommand*)this);
 }
 
 // Sends a "list file" command to the proxy attached to the given client.
 // Returns false if the file does not exist or could not be read or an
 // HPHP::String instance containing the contents of the file.
-Variant CmdList::GetSourceFile(DebuggerClient *client,
+Variant CmdList::GetSourceFile(DebuggerClient &client,
                                const std::string &file) {
   CmdList cmd;
   cmd.m_file = file;
-  CmdListPtr res = client->xend<CmdList>(&cmd);
+  CmdListPtr res = client.xend<CmdList>(&cmd);
   return res->m_code;
 }
 

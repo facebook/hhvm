@@ -23,9 +23,9 @@
 
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/cfg.h"
+#include "hphp/runtime/vm/translator/hopt/ssatmp.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 /*
  * Hashtable used for common subexpression elimination.  The table maps

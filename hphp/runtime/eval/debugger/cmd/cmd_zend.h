@@ -27,10 +27,10 @@ class CmdZend : public DebuggerCommand {
 public:
   CmdZend() : DebuggerCommand(KindOfZend) {}
 
-  virtual bool help(DebuggerClient *client);
+  virtual void help(DebuggerClient &client);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

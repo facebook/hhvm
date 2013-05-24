@@ -2036,7 +2036,7 @@ Variant c_SoapServer::t_getfunctions() {
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
                            CStrRef fn_name) {
-  HPHP::Class* cls;
+  HPHP::Class* cls = nullptr;
   if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
     cls = server->m_soap_object->getVMClass();
   } else if (server->m_soap_functions.functions_all) {

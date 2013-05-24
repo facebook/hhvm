@@ -66,9 +66,10 @@ private:
   SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyAnd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyOr(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitOr(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyBitXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyLogicXor(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);
@@ -105,7 +106,7 @@ private:
   SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
-  SSATmp* simplifyGuardType(IRInstruction* inst);
+  SSATmp* simplifyCheckType(IRInstruction* inst);
   SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
@@ -165,6 +166,15 @@ struct StackValueInfo {
  * value.
  */
 StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
+
+/*
+ * Return this list of all values that are known to be on the stack
+ * given the particular depth.
+ *
+ * This function is used for computing available value for
+ * DecRef->DecRefNZ conversions in tracebuilder.
+ */
+smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 
 /*
  * Propagate very simple copies on the given instruction.

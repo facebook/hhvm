@@ -15,37 +15,11 @@
 */
 
 #include "hphp/compiler/analysis/emitter.h"
-
-#include "folly/ScopeGuard.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
-
-#include "hphp/util/logger.h"
-#include "hphp/util/util.h"
-#include "hphp/util/job_queue.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/peephole.h"
-
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -70,7 +44,6 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
-
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -99,10 +72,33 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
-
 #include "hphp/compiler/parser/parser.h"
 
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+#include "hphp/util/job_queue.h"
+#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+
 #include "hphp/system/lib/systemlib.h"
+
+#include "folly/ScopeGuard.h"
+
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
 
 namespace HPHP {
 namespace Compiler {
@@ -1145,9 +1141,11 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   free(meta);
 }
 
+EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
+
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue), m_curFunc(ue.getMain()), m_evalStackIsUnknown(false),
-    m_actualStackHighWater(0), m_fdescHighWater(0), m_closureCounter(0) {
+    m_actualStackHighWater(0), m_fdescHighWater(0) {
   m_prevOpcode = OpLowInvalid;
   m_evalStack.m_actualStackHighWaterPtr = &m_actualStackHighWater;
   m_evalStack.m_fdescHighWaterPtr = &m_fdescHighWater;
@@ -2491,8 +2489,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ExpressionListPtr exps(
           static_pointer_cast<UnsetStatement>(node)->getExps());
         for (int i = 0, n = exps->getCount(); i < n; i++) {
-          visit((*exps)[i]);
-          emitUnset(e);
+          emitVisitAndUnset(e, (*exps)[i]);
         }
         return false;
       }
@@ -2598,15 +2595,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               static_pointer_cast<ExpressionList>(exp));
             if (exps->getListKind() == ExpressionList::ListKindParam) {
               for (int i = 0, n = exps->getCount(); i < n; i++) {
-                visit((*exps)[i]);
-                emitUnset(e);
+                emitVisitAndUnset(e, (*exps)[i]);
               }
               e.Null();
               return true;
             }
           }
-          visit(exp);
-          emitUnset(e);
+          emitVisitAndUnset(e, exp);
           e.Null();
           return true;
         }
@@ -3169,6 +3164,17 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.AKExists();
             return true;
           }
+        } else if (call->isCallToFunction("hphp_array_idx")) {
+          if (params && params->getCount() == 3) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            visit((*params)[1]);
+            emitConvertToCell(e);
+            visit((*params)[2]);
+            emitConvertToCell(e);
+            e.ArrayIdx();
+            return true;
+          }
         } else if (call->isCallToFunction("strlen")) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
@@ -3423,12 +3429,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         e.FCall(numParams);
-        if (Option::WholeProgram) {
+        bool inferred = false;
+        if (Option::WholeProgram && Option::GenerateInferredTypes) {
           FunctionScopePtr fs = ne->getFuncScope();
           if (fs && !fs->getReturnType()) {
-            m_evalStack.setKnownType(KindOfNull, false /* inferred */);
+            m_evalStack.setKnownType(KindOfNull, false /* it's inferred */);
             m_evalStack.setNotRef();
+            inferred = true;
           }
+        }
+        if (!inferred) {
+          m_evalStack.setKnownType(KindOfNull, true /* it's predicted */);
+          m_evalStack.setNotRef();
         }
         e.PopR();
         return true;
@@ -3816,14 +3828,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        StringData* className = newClosureName();
-        const static StringData* parentName =
-          StringData::GetStaticString("Closure");
-        const Location* sLoc = ce->getLocation().get();
-        PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          className, PreClass::AlwaysHoistable);
-        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  AttrUnique | AttrPersistent, parentName, nullptr);
+        // The parser generated a unique name for the function,
+        // use that for the class
+        std::string clsName = ce->getClosureFunction()->getOriginalName();
+        StringData* className = StringData::GetStaticString(clsName);
 
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
@@ -3831,9 +3839,35 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         for (int i = 0; i < useCount; ++i) {
           emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
+
+        if (Option::WholeProgram) {
+          int my_id;
+          {
+            EmittedClosures::accessor acc;
+            s_emittedClosures.insert(acc, className);
+            my_id = ++acc->second;
+          }
+          if (my_id > 1) {
+            // The closure was from a trait, so we need a unique name in the
+            // implementing class
+            className = StringData::GetStaticString(
+              // _ is different from the #, which is used for many closures in
+              // the same func in ParserBase::newClosureName
+              className->toCPPString() + '_' + std::to_string(my_id)
+            );
+          }
+        }
+
         e.CreateCl(useCount, className);
 
-        // From here on out, we're just building metadata for the closure.
+        // From here on out, we're creating a new class to hold the closure.
+        const static StringData* parentName =
+          StringData::GetStaticString("Closure");
+        const Location* sLoc = ce->getLocation().get();
+        PreClassEmitter* pce = m_ue.newPreClassEmitter(
+          className, PreClass::AlwaysHoistable);
+        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
+                  AttrUnique | AttrPersistent, parentName, nullptr);
 
         // Instance variables.
         TypedValue uninit;
@@ -4509,7 +4543,8 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
   }
 }
 
-void EmitterVisitor::emitUnset(Emitter& e) {
+void EmitterVisitor::emitUnset(Emitter& e,
+                               ExpressionPtr exp /* = ExpressionPtr() */) {
   if (checkIfStackEmpty("Unset*")) return;
 
   emitClsIfSPropBase(e);
@@ -4527,8 +4562,10 @@ void EmitterVisitor::emitUnset(Emitter& e) {
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
       case StackSym::CS:
+        assert(exp);
         e.String(
-          StringData::GetStaticString("Attempt to unset static property")
+          StringData::GetStaticString("Attempt to unset static property " +
+                                      exp->getText())
         );
         e.Fatal(0);
         break;
@@ -4543,6 +4580,11 @@ void EmitterVisitor::emitUnset(Emitter& e) {
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.UnsetM(vectorImm);
   }
+}
+
+void EmitterVisitor::emitVisitAndUnset(Emitter& e, ExpressionPtr exp) {
+  visit(exp);
+  emitUnset(e, exp);
 }
 
 void EmitterVisitor::emitSet(Emitter& e) {
@@ -5316,17 +5358,25 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->setReturnTypeConstraint(
         StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
 
+    // add the original filename for flattened traits
+    auto const originalFilename = p.m_meth->getOriginalFilename();
+    if (!originalFilename.empty()) {
+      fe->setOriginalFilename(StringData::GetStaticString(originalFilename));
+    }
+
     m_curFunc = fe;
 
-    if (fe->isClosureBody()) {
+    if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
       // We are going to keep the closure as the first local
       fe->allocVarId(StringData::GetStaticString("0Closure"));
 
-      ClosureUseVarVec* useVars = p.m_closureUseVars;
-      for (auto& useVar : *useVars) {
-        // These are all locals. I want them right after the params so I don't
-        // have to keep track of which one goes where at runtime.
-        fe->allocVarId(useVar.first);
+      if (fe->isClosureBody()) {
+        ClosureUseVarVec* useVars = p.m_closureUseVars;
+        for (auto& useVar : *useVars) {
+          // These are all locals. I want them right after the params so I don't
+          // have to keep track of which one goes where at runtime.
+          fe->allocVarId(useVar.first);
+        }
       }
     }
 
@@ -5687,6 +5737,13 @@ void EmitterVisitor::emitVirtualLocal(int localId,
   }
 }
 
+static bool isNormalLocalVariable(const ExpressionPtr& expr) {
+  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
+  return (expr->is(Expression::KindOfSimpleVariable) &&
+          !sv->isSuperGlobal() &&
+          !sv->isThis());
+}
+
 template<class Expr>
 void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
@@ -5697,10 +5754,8 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
   } else if (node->getClass()) {
     const ExpressionPtr& expr = node->getClass();
-    SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
-    if (expr->is(Expression::KindOfSimpleVariable) &&
-        !sv->isSuperGlobal() &&
-        !sv->isThis()) {
+    if (isNormalLocalVariable(expr)) {
+      SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
       StringData* name = StringData::GetStaticString(sv->getName());
       Id locId = m_curFunc->lookupVarId(name);
       m_evalStack.setClsBaseType(SymbolicStack::CLS_NAMED_LOCAL);
@@ -5868,7 +5923,7 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
       return false;
     }
     // in sandbox mode, don't emit FCallBuiltin for redefinable functions
-    if (func->ignoreRedefinition() && !Option::WholeProgram) {
+    if (func->allowOverride() && !Option::WholeProgram) {
       return false;
     }
     return true;
@@ -5883,7 +5938,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   int numParams = params ? params->getCount() : 0;
   bool useFCallBuiltin = false;
   StringData* nLiteral = nullptr;
-  Offset fpiStart;
+  Offset fpiStart = 0;
   if (node->getClass() || !node->getClassName().empty()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
     if (!node->isStatic() && !isSelfOrParent &&
@@ -6431,8 +6486,8 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
   ForeachIterGuard fig(*this, itId, strong);
-  bool simpleCase = (!key || key->is(Expression::KindOfSimpleVariable)) &&
-                             val->is(Expression::KindOfSimpleVariable);
+  bool simpleCase = (!key || isNormalLocalVariable(key)) &&
+                    isNormalLocalVariable(val);
 
   if (simpleCase) {
     SimpleVariablePtr svVal(static_pointer_cast<SimpleVariable>(val));
@@ -6734,30 +6789,6 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   e.getUnitEmitter().recordFunction(fe);
 }
 
-StringData* EmitterVisitor::newClosureName() {
-  std::ostringstream str;
-  str << "Closure" << '$';
-  if (m_curFunc->pce() != nullptr) {
-    str << m_curFunc->pce()->name()->data();
-  }
-  str << '$';
-  if (m_curFunc->isPseudoMain()) {
-    str << "__pseudoMain";
-  } else {
-    str << m_curFunc->name()->data();
-  }
-  /*
-   * Uniquify the name
-   */
-  str << '$'
-      << std::hex
-      << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
-      << std::dec
-      << '$' << m_closureCounter++;
-
-  return StringData::GetStaticString(str.str());
-}
-
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
   assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
@@ -6804,7 +6835,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        auto a = NEW(HphpArray)(0);
+        auto a = ArrayData::Make(0);
         a->incRefCount();
         m_staticArrays.push_back(a);
 
@@ -6952,18 +6983,19 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   mfe->finish(ue->bcPos(), false);
   ue->recordFunction(mfe);
 
+  TypedValue mainReturn;
+  mainReturn.m_data.num = 1;
+  mainReturn.m_type = KindOfInt64;
+  ue->setMainReturn(&mainReturn);
+  ue->setMergeOnly(true);
+
   /*
     Special function used by FPushCuf* when its argument
     is not callable.
   */
   StringData* name = StringData::GetStaticString("86null");
   FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
-  /*
-    Dont mark it AttrPersistent, because it would be
-    deleted, and we need to be able to find it in the
-    unit's m_mergeInfo
-  */
-  fe->init(0, 0, ue->bcPos(), AttrUnique,
+  fe->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
            true, empty_string.get());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
@@ -7077,7 +7109,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
-  mainReturn.m_type = KindOfBoolean;
+  mainReturn.m_type = KindOfInt64;
   ue->setMainReturn(&mainReturn);
   ue->setMergeOnly(true);
 

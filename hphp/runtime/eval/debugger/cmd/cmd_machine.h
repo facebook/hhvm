@@ -25,25 +25,25 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdMachine);
 class CmdMachine : public DebuggerCommand {
 public:
-  static bool AttachSandbox(DebuggerClient *client, const char *user = nullptr,
+  static bool AttachSandbox(DebuggerClient &client, const char *user = nullptr,
                             const char *name = nullptr, bool force = false);
-  static bool AttachSandbox(DebuggerClient *client,
+  static bool AttachSandbox(DebuggerClient &client,
                             DSandboxInfoPtr sandbox,
                             bool force = false);
-  static void UpdateIntercept(DebuggerClient *client,
+  static void UpdateIntercept(DebuggerClient &client,
                               const std::string &host, int port);
 
 public:
   CmdMachine() : DebuggerCommand(KindOfMachine),
                  m_force(false), m_succeed(false) {}
 
-  virtual void list(DebuggerClient *client);
-  virtual bool help(DebuggerClient *client);
+  virtual void list(DebuggerClient &client);
+  virtual void help(DebuggerClient &client);
 
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
@@ -53,7 +53,7 @@ private:
   bool m_force;
   bool m_succeed;
 
-  bool processList(DebuggerClient *client, bool output = true);
+  bool processList(DebuggerClient &client, bool output = true);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

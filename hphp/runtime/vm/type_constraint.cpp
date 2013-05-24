@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/type_constraint.h"
+
 #include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -23,7 +25,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/type_constraint.h"
 
 namespace HPHP {
 
@@ -175,6 +176,12 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return !selfOrParentOrCallable && checkTypedefObj(tv);
   }
 
+  if (tv->m_type == KindOfArray &&
+      isObjectOrTypedef() &&
+      interface_supports_array(m_typeName)) {
+    return true;
+  }
+
   return isObjectOrTypedef() && !isCallable()
     ? checkTypedefNonObj(tv)
     : equivDataTypes(m_type.m_dt, tv->m_type);
@@ -192,12 +199,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   Transl::VMRegAnchor _;
   std::ostringstream fname;
-  if (func->preClass() != nullptr) {
-    fname << func->preClass()->name()->data() << "::"
-      << func->name()->data() << "()";
-  } else {
-    fname << func->name()->data() << "()";
-  }
+  fname << func->fullName()->data() << "()";
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);

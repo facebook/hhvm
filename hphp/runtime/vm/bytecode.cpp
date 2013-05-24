@@ -31,7 +31,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/shared/shared_variant.h"
 
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/php_debug.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -857,13 +859,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   const Func* func = fp->m_func;
   assert(func);
   func->validate();
-  string funcName;
-  if (func->isMethod()) {
-    funcName = string(func->preClass()->name()->data()) + "::" +
-      string(func->name()->data());
-  } else {
-    funcName = string(func->name()->data());
-  }
+  string funcName(func->fullName()->data());
   os << "{func:" << funcName
      << ",soff:" << fp->m_soff
      << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : nullptr)
@@ -2245,7 +2241,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   assert(f);
   assert(this_);
 
-  VMRegAnchor _;
+  EagerVMRegAnchor _;
 
   this_->incRefCount();
 
@@ -2405,6 +2401,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         Unit *unit = fp->m_func->unit();
         assert(unit);
         const char* filename = unit->filepath()->data();
+        if (fp->m_func->originalFilename()) {
+          filename = fp->m_func->originalFilename()->data();
+        }
         assert(filename);
         Offset off = pc;
 
@@ -2439,9 +2438,12 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
       auto const prevUnit = prevFp->m_func->unit();
-      frame.set(s_file,
-                const_cast<StringData*>(prevUnit->filepath()),
-                true);
+      auto prevFile = prevUnit->filepath();
+      if (prevFp->m_func->originalFilename()) {
+        prevFile = prevFp->m_func->originalFilename();
+      }
+      assert(prevFile);
+      frame.set(s_file, const_cast<StringData*>(prevFile), true);
 
       // In the normal method case, the "saved pc" for line number printing is
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call
@@ -2897,6 +2899,25 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   }
 }
 
+void VMExecutionContext::enqueueSharedVar(SharedVariant* svar) {
+  m_freedSvars.push_back(svar);
+}
+
+class FreedSVars : public Treadmill::WorkItem {
+  SVarVector m_svars;
+public:
+  explicit FreedSVars(SVarVector&& svars) : m_svars(std::move(svars)) {}
+  virtual void operator()() {
+    for (auto it = m_svars.begin(); it != m_svars.end(); it++) {
+      delete *it;
+    }
+  }
+};
+
+void VMExecutionContext::treadmillSharedVars() {
+  Treadmill::WorkItem::enqueue(new FreedSVars(std::move(m_freedSvars)));
+}
+
 void VMExecutionContext::destructObjects() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     while (!m_liveBCObjs.empty()) {
@@ -3138,9 +3159,9 @@ void VMExecutionContext::preventReturnsToTC() {
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
           (tx64->isValidCodeAddress((TCA)ar->m_savedRip))) {
-        TRACE(2, "Replace RIP with RetFromInterpretedFrame helper in fp %p"
-              ", savedRip 0x%lx, func %s\n", ar, ar->m_savedRip,
-              ar->m_func->fullName()->data());
+        TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%lx, "
+                 "func %s\n", ar, ar->m_savedRip,
+                 ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {
           ar->m_savedRip =
             (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
@@ -3831,7 +3852,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopArray(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
   // Clever sizing avoids extra work in HphpArray construction.
-  ArrayData* arr = NEW(HphpArray)(size_t(3U) << (HphpArray::MinLgTableSize-2));
+  auto arr = ArrayData::Make(size_t(3U) << (HphpArray::MinLgTableSize-2));
   m_stack.pushArray(arr);
 }
 
@@ -3839,7 +3860,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNewTuple(PC& pc) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  HphpArray* arr = NEW(HphpArray)(n, m_stack.topC());
+  HphpArray* arr = ArrayData::Make(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArray(arr);
 }
@@ -4288,6 +4309,11 @@ inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
   if (tv->m_type == KindOfObject) {
     Class* cls = Unit::lookupClass(ne);
     if (cls) return tv->m_data.pobj->instanceof(cls);
+  } else if (tv->m_type == KindOfArray) {
+    Class* cls = Unit::lookupClass(ne);
+    if (cls && interface_supports_array(cls->name())) {
+      return true;
+    }
   }
   return false;
 }
@@ -4775,7 +4801,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   TypedValue* clsref = m_stack.topTV();                   \
   TypedValue* nameCell = m_stack.indTV(1);                \
   TypedValue* output = nameCell;                          \
-  StringData* name;                                       \
   TypedValue* val;                                        \
   bool visible, accessible;                               \
   lookup_sprop(m_fp, clsref, name, nameCell, val, visible, \
@@ -4804,7 +4829,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
 } while (0)
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetS(PC& pc) {
+  StringData* name;
   GETS(false);
+  if (shouldProfile() && name && name->isStatic()) {
+    recordType(TypeProfileKey(TypeProfileKey::StaticPropName, name),
+               m_stack.top()->m_type);
+  }
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
@@ -4864,6 +4894,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetS(PC& pc) {
+  StringData* name;
   GETS(true);
 }
 #undef GETS
@@ -4923,6 +4954,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   bool e;
   if (!(visible && accessible)) {
@@ -5051,6 +5083,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   bool e;
   if (!(visible && accessible)) {
@@ -5102,6 +5135,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAKExists(PC& pc) {
   tvRefcountedDecRef(key);
   key->m_data.num = result;
   key->m_type = KindOfBoolean;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopArrayIdx(PC& pc) {
+  NEXT();
+  TypedValue* def = m_stack.topTV();
+  TypedValue* arr = m_stack.indTV(1);
+  TypedValue* key = m_stack.indTV(2);
+
+  Variant result = f_hphp_array_idx(tvAsCVarRef(key),
+                                    tvAsCVarRef(arr),
+                                    tvAsCVarRef(def));
+  m_stack.popTV();
+  m_stack.popTV();
+  tvAsVariant(key) = result;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetL(PC& pc) {
@@ -5340,6 +5387,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncDecS(PC& pc) {
+  StringData* name;
   SPROP_OP_PRELUDE
   DECODE(unsigned char, op);
   if (!(visible && accessible)) {
@@ -5843,7 +5891,7 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   if (safe) m_stack.topTV()[1] = m_stack.topTV()[0];
   m_stack.ndiscard(1);
   if (f == nullptr) {
-    f = SystemLib::GetNullFunction();
+    f = SystemLib::s_nullFunc;
     if (safe) {
       m_stack.pushFalse();
     }
@@ -7088,7 +7136,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   TypedValue* fr = cont->m_received.asTypedValue();
   TypedValue* to = m_stack.allocTV();
   memcpy(to, fr, sizeof(TypedValue));
-  tvWriteUninit(fr);
+  tvWriteNull(fr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
@@ -7536,10 +7584,18 @@ void VMExecutionContext::requestInit() {
   tx64 = nextTx64;
   tx64->requestInit();
 
-  // Merge the systemlib unit into the ExecutionContext
-  SystemLib::s_unit->merge();
-  SystemLib::s_nativeFuncUnit->merge();
-  SystemLib::s_nativeClassUnit->merge();
+  if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
+    SystemLib::s_unit->merge();
+    SystemLib::s_nativeFuncUnit->merge();
+    SystemLib::s_nativeClassUnit->merge();
+  } else {
+    // System units are always merge only, and
+    // everything is persistent.
+    assert(SystemLib::s_unit->isEmpty());
+    assert(SystemLib::s_nativeFuncUnit->isEmpty());
+    assert(SystemLib::s_nativeClassUnit->isEmpty());
+  }
+
   profileRequestStart();
 
 #ifdef DEBUG
@@ -7550,6 +7606,7 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
+  treadmillSharedVars();
   destructObjects();
   syncGdbState();
   tx64->requestExit();

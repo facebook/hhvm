@@ -22,26 +22,25 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-bool CmdUp::help(DebuggerClient *client) {
-  client->helpTitle("Up Command");
-  client->helpCmds(
+void CmdUp::help(DebuggerClient &client) {
+  client.helpTitle("Up Command");
+  client.helpCmds(
     "[u]p {num=1}", "moves to outer frames (callers) on stacktrace",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use this command to walk up on stacktrace to find out outer callers of "
     "current frame. By default it moves up by one level. Specify a number "
     "to move up several levels a time."
   );
-  return true;
 }
 
-int CmdUp::ParseNumber(DebuggerClient *client) {
-  if (client->argCount() == 1) {
-    string snum = client->argValue(1);
+int CmdUp::ParseNumber(DebuggerClient &client) {
+  if (client.argCount() == 1) {
+    string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("Please specify a number.");
-      client->tutorial(
+      client.error("Please specify a number.");
+      client.tutorial(
         "Run '[w]here' command to see the entire stacktrace."
       );
       return true;
@@ -51,19 +50,18 @@ int CmdUp::ParseNumber(DebuggerClient *client) {
   return 1;
 }
 
-bool CmdUp::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() > 1) {
-    return help(client);
+void CmdUp::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() > 1) {
+    help(client);
+  } else {
+    CmdWhere().fetchStackTrace(client);
+    client.moveToFrame(client.getFrame() + ParseNumber(client));
   }
-
-  CmdWhere().fetchStackTrace(client);
-  client->moveToFrame(client->getFrame() + ParseNumber(client));
-  return true;
 }
 
-void CmdUp::setClientOutput(DebuggerClient *client) {
-  client->setOutputType(DebuggerClient::OTStacktrace);
+void CmdUp::setClientOutput(DebuggerClient &client) {
+  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

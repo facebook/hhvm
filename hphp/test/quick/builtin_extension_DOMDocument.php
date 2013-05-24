@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_DOMDocument extends DateInterval {
+class A_DOMDocument extends DOMDocument {
   public $___x;
 }
 test("DOMDocument");

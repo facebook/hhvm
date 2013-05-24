@@ -36,17 +36,17 @@ void CmdThread::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_threads);
 }
 
-void CmdThread::list(DebuggerClient *client) {
-  if (client->argCount() == 0) {
+void CmdThread::list(DebuggerClient &client) {
+  if (client.argCount() == 0) {
     static const char *keywords[] =
       { "list", "normal", "sticky", "exclusive", nullptr };
-    client->addCompletion(keywords);
+    client.addCompletion(keywords);
   }
 }
 
-bool CmdThread::help(DebuggerClient *client) {
-  client->helpTitle("Thread Command");
-  client->helpCmds(
+void CmdThread::help(DebuggerClient &client) {
+  client.helpTitle("Thread Command");
+  client.helpCmds(
     "[t]hread",                 "displays current thread's information",
     "[t]hread [l]ist",          "lists all threads at break",
     "[t]hread {index}",         "switches to the specified thread",
@@ -55,7 +55,7 @@ bool CmdThread::help(DebuggerClient *client) {
     "[t]hread [e]xclusive",     "only break current thread",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "Use '[t]hread' alone to display information of current thread.\n"
     "\n"
     "When a thread is at break, you may specify how other threads should "
@@ -80,93 +80,91 @@ bool CmdThread::help(DebuggerClient *client) {
     "[l]ist' command to display their indices, which can be used to switch "
     "between them with '[t]hread {index}'."
   );
-  return true;
 }
 
-void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
+void CmdThread::processList(DebuggerClient &client, bool output /* = true */) {
   m_body = "list";
-  CmdThreadPtr res = client->xend<CmdThread>(this);
-  client->updateThreads(res->m_threads);
+  CmdThreadPtr res = client.xend<CmdThread>(this);
+  client.updateThreads(res->m_threads);
   if (!output) return;
 
   for (int i = 0; i < (int)res->m_threads.size(); i++) {
     DThreadInfoPtr thread = res->m_threads[i];
     const char *flag = " ";
-    if (thread->m_id == client->getCurrentThreadId()) {
+    if (thread->m_id == client.getCurrentThreadId()) {
       flag = "*";
     }
-    client->print("%4d %s %s (%lld) %s\n     %s", thread->m_index,
+    client.print("%4d %s %s (%lld) %s\n     %s", thread->m_index,
                   flag, thread->m_type.c_str(), thread->m_id,
                   thread->m_url.c_str(), thread->m_desc.c_str());
   }
 }
 
-bool CmdThread::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-  if (client->argCount() > 1) {
-    return help(client);
+void CmdThread::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  if (client.argCount() > 1) {
+    help(client);
+    return;
   }
 
-  if (client->argCount() == 0) {
+  if (client.argCount() == 0) {
     m_body = "info";
-    CmdThreadPtr res = client->xend<CmdThread>(this);
-    client->print(res->m_out);
-  } else if (client->arg(1, "list")) {
+    CmdThreadPtr res = client.xend<CmdThread>(this);
+    client.print(res->m_out);
+  } else if (client.arg(1, "list")) {
     processList(client);
-  } else if (client->arg(1, "normal")) {
+  } else if (client.arg(1, "normal")) {
     m_body = "normal";
-    client->sendToServer(this);
-    client->info("Thread is running in normal mode now. Other threads will "
+    client.sendToServer(this);
+    client.info("Thread is running in normal mode now. Other threads will "
                  "interleave when they hit breakpoints as well.");
-  } else if (client->arg(1, "sticky")) {
+  } else if (client.arg(1, "sticky")) {
     m_body = "sticky";
-    client->sendToServer(this);
-    client->info("Thread is running in sticky mode now. All other threads "
+    client.sendToServer(this);
+    client.info("Thread is running in sticky mode now. All other threads "
                  "will wait until this thread finishes, when they hit "
                  "breakpoints.");
-  } else if (client->arg(1, "exclusive")) {
+  } else if (client.arg(1, "exclusive")) {
     m_body = "exclusive";
-    client->sendToServer(this);
-    client->info("Thread is running in exclusive mode now. All other threads "
+    client.sendToServer(this);
+    client.info("Thread is running in exclusive mode now. All other threads "
                  "will not break, even when they hit breakpoints.");
   } else {
-    string snum = client->argValue(1);
+    string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("'[t]hread {index}' needs a numeric argument.");
-      client->tutorial(
+      client.error("'[t]hread {index}' needs a numeric argument.");
+      client.tutorial(
         "You will have to run '[t]hread [l]ist' first to see a list of valid "
         "numbers or indices to specify. Thread 1 is always your current "
         "thread. If that's the only thread on the list, you do not have "
         "another thread at break to switch to."
       );
-      return true;
+      return;
     }
 
     int num = atoi(snum.c_str());
-    DThreadInfoPtr thread = client->getThread(num);
+    DThreadInfoPtr thread = client.getThread(num);
     if (!thread) {
       processList(client, false);
-      thread = client->getThread(num);
+      thread = client.getThread(num);
       if (!thread) {
-        client->error("\"%s\" is not a valid thread index. Choose one from "
+        client.error("\"%s\" is not a valid thread index. Choose one from "
                       "this list:", snum.c_str());
         processList(client);
-        return true;
+        return;
       }
     }
 
-    if (thread->m_id == client->getCurrentThreadId()) {
-      client->info("This is your current thread already.");
-      return true;
+    if (thread->m_id == client.getCurrentThreadId()) {
+      client.info("This is your current thread already.");
+      return;
     }
 
     m_body = "switch";
     m_threads.push_back(thread);
-    client->sendToServer(this);
+    client.sendToServer(this);
     throw DebuggerConsoleExitException();
   }
-
-  return true;
 }
 
 void CmdThread::debuggerInfo(InfoVec &info) {
@@ -177,7 +175,7 @@ void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
 }
 
-bool CmdThread::onServer(DebuggerProxy *proxy) {
+bool CmdThread::onServer(DebuggerProxy &proxy) {
   if (m_body == "info") {
     // collect info
     InfoVec info;
@@ -186,36 +184,36 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
     if (transport) {
       transport->debuggerInfo(info);
     } else {
-      Add(info, "Thread Type", proxy->getThreadType());
+      Add(info, "Thread Type", proxy.getThreadType());
     }
     g_context->debuggerInfo(info);
 
     m_out = DebuggerClient::FormatInfoVec(info);
-    return proxy->sendToClient(this);
+    return proxy.sendToClient(this);
   }
 
   if (m_body == "list") {
-    proxy->getThreads(m_threads);
-    return proxy->sendToClient(this);
+    proxy.getThreads(m_threads);
+    return proxy.sendToClient(this);
   }
   if (m_body == "switch") {
     if (!m_threads.empty()) {
-      proxy->switchThread(m_threads[0]);
+      proxy.switchThread(m_threads[0]);
       m_exitInterrupt = true;
       return true;
     }
   }
 
   if (m_body == "normal") {
-    proxy->switchThreadMode(DebuggerProxy::Normal);
+    proxy.switchThreadMode(DebuggerProxy::Normal);
     return true;
   }
   if (m_body == "sticky") {
-    proxy->switchThreadMode(DebuggerProxy::Sticky);
+    proxy.switchThreadMode(DebuggerProxy::Sticky);
     return true;
   }
   if (m_body == "exclusive") {
-    proxy->switchThreadMode(DebuggerProxy::Exclusive);
+    proxy.switchThreadMode(DebuggerProxy::Exclusive);
     return true;
   }
 

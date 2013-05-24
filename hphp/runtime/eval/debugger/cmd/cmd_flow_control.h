@@ -47,13 +47,13 @@ public:
       m_count(1) { }
   virtual ~CmdFlowControl();
 
-  virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServer(DebuggerProxy &proxy);
 
   // Work done to setup a new flow command, after receiving it from the client.
-  virtual void onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt);
+  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
 
   // Work done when a VM thread interrupts the proxy.
-  virtual void onBeginInterrupt(DebuggerProxy *proxy,
+  virtual void onBeginInterrupt(DebuggerProxy &proxy,
                                 CmdInterrupt &interrupt) = 0;
 
   // A completed flow cmd has done all its work and can be deleted.
@@ -63,7 +63,7 @@ public:
   bool needsVMInterrupt() { return m_needsVMInterrupt; }
 
 protected:
-  virtual bool onClientImpl(DebuggerClient *client);
+  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

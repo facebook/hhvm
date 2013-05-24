@@ -80,7 +80,7 @@ void SrcRec::emitFallbackJump(TCA from, int cc /* = -1 */) {
 void SrcRec::newTranslation(TCA newStart) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  assert(m_translations.size() <= kMaxTranslations);
+  assert(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 
@@ -190,10 +190,8 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
 
   case IncomingBranch::JCC: {
     // patch destination, but preserve the condition code
-    int32_t delta = safe_cast<int32_t>((dest - branch.toSmash()) -
-                                       TranslatorX64::kJmpccLen);
-    int32_t* addr = (int32_t*)(branch.toSmash() +
-      TranslatorX64::kJmpccLen - 4);
+    int32_t delta = safe_cast<int32_t>((dest - branch.toSmash()) - kJmpccLen);
+    int32_t* addr = (int32_t*)(branch.toSmash() + kJmpccLen - 4);
     atomic_release_store(addr, delta);
     break;
   }

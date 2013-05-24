@@ -39,11 +39,11 @@ void CmdExtension::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_err);
 }
 
-void CmdExtension::list(DebuggerClient *client) {
-  if (client->argCount() == 2) {
-    client->addCompletion("dump");
-  } else if (client->argCount() > 2) {
-    client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+void CmdExtension::list(DebuggerClient &client) {
+  if (client.argCount() == 2) {
+    client.addCompletion("dump");
+  } else if (client.argCount() > 2) {
+    client.addCompletion(DebuggerClient::AutoCompleteFileNames);
   } else {
     // This is cheating, assuming server has same list of extensions.
     Array exts = Extension::GetLoadedExtensions();
@@ -51,43 +51,39 @@ void CmdExtension::list(DebuggerClient *client) {
     for (ArrayIter iter(exts); iter; ++iter) {
       items.push_back(iter.second().toString()->toCPPString());
     }
-    client->addCompletion(items);
+    client.addCompletion(items);
   }
 }
 
-bool CmdExtension::help(DebuggerClient *client) {
-  client->helpTitle("Extension Command");
-  client->helpCmds(
+void CmdExtension::help(DebuggerClient &client) {
+  client.helpTitle("Extension Command");
+  client.helpCmds(
     "x [t]ension",                 "lists all extensions",
     "x [t]ension {name}",          "shows summary info of the extension",
     "x [t]ension {name} dump",     "shows detailed info of the extension",
     "x [t]ension {name} {verb} {args} ...",   "executes an action",
     nullptr
   );
-  client->helpBody(
+  client.helpBody(
     "In PHP, a lot of library functions are implemented as \"extensions\". "
     "This command allows extensions to support debugger by providing their "
     "version numbers, current status and cached data and by providing "
     "additional verbs to update runtime states for debugging purposes."
   );
-  return true;
 }
 
-bool CmdExtension::onClientImpl(DebuggerClient *client) {
-  if (DebuggerCommand::onClientImpl(client)) return true;
-
-  m_args = *client->args();
-
-  CmdExtensionPtr cmd = client->xend<CmdExtension>(this);
+void CmdExtension::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return;
+  m_args = *client.args();
+  CmdExtensionPtr cmd = client.xend<CmdExtension>(this);
   if (cmd->m_out.empty()) {
-    client->error(cmd->m_err);
+    client.error(cmd->m_err);
   } else {
-    client->print(cmd->m_out);
+    client.print(cmd->m_out);
   }
-  return true;
 }
 
-bool CmdExtension::processList(DebuggerProxy *proxy) {
+bool CmdExtension::processList(DebuggerProxy &proxy) {
   IDebuggable::InfoVec info;
 
   Array exts = Extension::GetLoadedExtensions();
@@ -124,10 +120,10 @@ bool CmdExtension::processList(DebuggerProxy *proxy) {
   for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
 
   m_out = sb.detach();
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
-bool CmdExtension::onServer(DebuggerProxy *proxy) {
+bool CmdExtension::onServer(DebuggerProxy &proxy) {
   if (m_args.size() <= 1) {
     return processList(proxy);
   }
@@ -167,7 +163,7 @@ bool CmdExtension::onServer(DebuggerProxy *proxy) {
     m_err = "Unable to find the specified extension: ";
     m_err += String(name);
   }
-  return proxy->sendToClient(this);
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

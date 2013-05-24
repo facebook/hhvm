@@ -22,6 +22,10 @@
 
 #include "hphp/util/base.h"
 
+#ifdef DEPRECATED
+ #undef DEPRECATED
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -42,16 +42,13 @@
 
 namespace folly {
 
-template <class KeyT, class ValueT,
-          class HashFcn = std::hash<KeyT>, class EqualFcn = std::equal_to<KeyT>>
+template <class KeyT, class ValueT, class HashFcn = std::hash<KeyT>>
 class AtomicHashMap;
 
-template <class KeyT, class ValueT,
-          class HashFcn = std::hash<KeyT>, class EqualFcn = std::equal_to<KeyT>>
+template <class KeyT, class ValueT, class HashFcn = std::hash<KeyT>>
 class AtomicHashArray : boost::noncopyable {
   static_assert((std::is_convertible<KeyT,int32_t>::value ||
-                 std::is_convertible<KeyT,int64_t>::value ||
-                 std::is_convertible<KeyT,const void*>::value),
+                 std::is_convertible<KeyT,int64_t>::value),
              "You are trying to use AtomicHashArray with disallowed key "
              "types.  You must use atomically compare-and-swappable integer "
              "keys, or a different container class.");
@@ -120,15 +117,13 @@ class AtomicHashArray : boost::noncopyable {
     KeyT   lockedKey;
     KeyT   erasedKey;
     double maxLoadFactor;
-    double growthFactor;
     int    entryCountThreadCacheSize;
     size_t capacity; // if positive, overrides maxLoadFactor
 
-    constexpr Config() : emptyKey((KeyT)-1),
-                         lockedKey((KeyT)-2),
-                         erasedKey((KeyT)-3),
+    constexpr Config() : emptyKey(static_cast<KeyT>(-1ul)),
+                         lockedKey(static_cast<KeyT>(-2ul)),
+                         erasedKey(static_cast<KeyT>(-3ul)),
                          maxLoadFactor(0.8),
-                         growthFactor(-1),
                          entryCountThreadCacheSize(1000),
                          capacity(0) {}
   };
@@ -215,7 +210,7 @@ class AtomicHashArray : boost::noncopyable {
   /* Private data and helper functions... */
 
  private:
-  friend class AtomicHashMap<KeyT,ValueT,HashFcn,EqualFcn>;
+  friend class AtomicHashMap<KeyT,ValueT,HashFcn>;
 
   struct SimpleRetT { size_t idx; bool success;
     SimpleRetT(size_t i, bool s) : idx(i), success(s) {}

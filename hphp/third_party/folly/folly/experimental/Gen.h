@@ -21,9 +21,6 @@
 #include <type_traits>
 #include <utility>
 #include <algorithm>
-#include <random>
-#include <vector>
-#include <unordered_set>
 
 #include "folly/Range.h"
 #include "folly/Optional.h"
@@ -211,16 +208,10 @@ class Until;
 
 class Take;
 
-template<class Rand>
-class Sample;
-
 class Skip;
 
 template<class Selector, class Comparer = Less>
 class Order;
-
-template<class Selector>
-class Distinct;
 
 template<class First, class Second>
 class Composed;
@@ -303,7 +294,7 @@ From from(std::initializer_list<Value> source) {
 
 template<class Container,
          class From = detail::CopiedSource<typename Container::value_type,
-                                           Container>>
+                                         Container>>
 From from(Container&& source) {
   return From(std::move(source));
 }
@@ -387,12 +378,6 @@ template<class Selector,
          class Order = detail::Order<Selector, Greater>>
 Order orderByDescending(Selector selector = Identity()) {
   return Order(std::move(selector));
-}
-
-template<class Selector,
-         class Distinct = detail::Distinct<Selector>>
-Distinct distinctBy(Selector selector = Identity()) {
-  return Distinct(std::move(selector));
 }
 
 template<int n,

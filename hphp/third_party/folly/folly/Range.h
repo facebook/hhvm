@@ -20,7 +20,7 @@
 #ifndef FOLLY_RANGE_H_
 #define FOLLY_RANGE_H_
 
-#include "folly/Portability.h"
+#include "folly/folly-config.h"
 #include "folly/FBString.h"
 #include <glog/logging.h>
 #include <algorithm>
@@ -33,7 +33,6 @@
 #include <bits/c++config.h>
 #include "folly/CpuId.h"
 #include "folly/Traits.h"
-#include "folly/Likely.h"
 
 namespace folly {
 
@@ -144,9 +143,7 @@ public:
       : b_(str.data()), e_(b_ + str.size()) {}
   // Works only for Range<const char*>
   Range(const std::string& str, std::string::size_type startFrom) {
-    if (UNLIKELY(startFrom > str.size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(startFrom, str.size());
     b_ = str.data() + startFrom;
     e_ = str.data() + str.size();
   }
@@ -154,52 +151,32 @@ public:
   Range(const std::string& str,
         std::string::size_type startFrom,
         std::string::size_type size) {
-    if (UNLIKELY(startFrom > str.size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(startFrom + size, str.size());
     b_ = str.data() + startFrom;
-    if (str.size() - startFrom < size) {
-      e_ = str.data() + str.size();
-    } else {
-      e_ = b_ + size;
-    }
+    e_ = b_ + size;
   }
   Range(const Range<Iter>& str,
         size_t startFrom,
         size_t size) {
-    if (UNLIKELY(startFrom > str.size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(startFrom + size, str.size());
     b_ = str.b_ + startFrom;
-    if (str.size() - startFrom < size) {
-      e_ = str.e_;
-    } else {
-      e_ = b_ + size;
-    }
+    e_ = b_ + size;
   }
   // Works only for Range<const char*>
   /* implicit */ Range(const fbstring& str)
     : b_(str.data()), e_(b_ + str.size()) { }
   // Works only for Range<const char*>
   Range(const fbstring& str, fbstring::size_type startFrom) {
-    if (UNLIKELY(startFrom > str.size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(startFrom, str.size());
     b_ = str.data() + startFrom;
     e_ = str.data() + str.size();
   }
   // Works only for Range<const char*>
   Range(const fbstring& str, fbstring::size_type startFrom,
         fbstring::size_type size) {
-    if (UNLIKELY(startFrom > str.size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(startFrom + size, str.size());
     b_ = str.data() + startFrom;
-    if (str.size() - startFrom < size) {
-      e_ = str.data() + str.size();
-    } else {
-      e_ = b_ + size;
-    }
+    e_ = b_ + size;
   }
 
   // Allow implicit conversion from Range<const char*> (aka StringPiece) to
@@ -322,16 +299,12 @@ public:
   }
 
   void advance(size_type n) {
-    if (UNLIKELY(n > size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(n, size());
     b_ += n;
   }
 
   void subtract(size_type n) {
-    if (UNLIKELY(n > size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(n, size());
     e_ -= n;
   }
 
@@ -347,9 +320,7 @@ public:
 
   Range subpiece(size_type first,
                  size_type length = std::string::npos) const {
-    if (UNLIKELY(first > size())) {
-      throw std::out_of_range("index out of range");
-    }
+    CHECK_LE(first, size());
     return Range(b_ + first,
                  std::min<std::string::size_type>(length, size() - first));
   }

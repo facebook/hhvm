@@ -61,7 +61,6 @@
 
 #include <boost/operators.hpp>
 
-
 namespace folly {
 
 namespace detail { struct NoneHelper {}; }
@@ -82,7 +81,10 @@ const None none = nullptr;
 #endif // __GNUC__
 
 template<class Value>
-class Optional {
+class Optional : boost::totally_ordered<Optional<Value>,
+                 boost::totally_ordered<Optional<Value>, Value>> {
+  typedef void (Optional::*bool_type)() const;
+  void truthy() const {};
  public:
   static_assert(!std::is_reference<Value>::value,
                 "Optional may not be used with reference types");
@@ -108,7 +110,7 @@ class Optional {
     }
   }
 
-  /* implicit */ Optional(const None&)
+  /* implicit */ Optional(const None& empty)
     : hasValue_(false) {
   }
 
@@ -177,6 +179,32 @@ class Optional {
     return *this;
   }
 
+  bool operator<(const Optional& other) const {
+    if (hasValue() != other.hasValue()) {
+      return hasValue() < other.hasValue();
+    }
+    if (hasValue()) {
+      return value() < other.value();
+    }
+    return false; // both empty
+  }
+
+  bool operator<(const Value& other) const {
+    return !hasValue() || value() < other;
+  }
+
+  bool operator==(const Optional& other) const {
+    if (hasValue()) {
+      return other.hasValue() && value() == other.value();
+    } else {
+      return !other.hasValue();
+    }
+  }
+
+  bool operator==(const Value& other) const {
+    return hasValue() && value() == other;
+  }
+
   template<class... Args>
   void emplace(Args&&... args) {
     clear();
@@ -202,8 +230,9 @@ class Optional {
 
   bool hasValue() const { return hasValue_; }
 
-  explicit operator bool() const {
-    return hasValue();
+  /* safe bool idiom */
+  operator bool_type() const {
+    return hasValue() ? &Optional::truthy : nullptr;
   }
 
   const Value& operator*() const { return value(); }
@@ -256,54 +285,6 @@ template<class T,
 Opt make_optional(T&& v) {
   return Opt(std::forward<T>(v));
 }
-
-template<class V>
-bool operator< (const Optional<V>& a, const Optional<V>& b) {
-  if (a.hasValue() != b.hasValue()) { return a.hasValue() < b.hasValue(); }
-  if (a.hasValue())                 { return a.value()    < b.value(); }
-  return false;
-}
-
-template<class V>
-bool operator==(const Optional<V>& a, const Optional<V>& b) {
-  if (a.hasValue() != b.hasValue()) { return false; }
-  if (a.hasValue())                 { return a.value() == b.value(); }
-  return true;
-}
-
-template<class V>
-bool operator<=(const Optional<V>& a, const Optional<V>& b) {
-  return !(b < a);
-}
-
-template<class V>
-bool operator!=(const Optional<V>& a, const Optional<V>& b) {
-  return !(b == a);
-}
-
-template<class V>
-bool operator>=(const Optional<V>& a, const Optional<V>& b) {
-  return !(a < b);
-}
-
-template<class V>
-bool operator> (const Optional<V>& a, const Optional<V>& b) {
-  return b < a;
-}
-
-// To supress comparability of Optional<T> with T, despite implicit conversion.
-template<class V> bool operator< (const Optional<V>&, const V& other) = delete;
-template<class V> bool operator<=(const Optional<V>&, const V& other) = delete;
-template<class V> bool operator==(const Optional<V>&, const V& other) = delete;
-template<class V> bool operator!=(const Optional<V>&, const V& other) = delete;
-template<class V> bool operator>=(const Optional<V>&, const V& other) = delete;
-template<class V> bool operator> (const Optional<V>&, const V& other) = delete;
-template<class V> bool operator< (const V& other, const Optional<V>&) = delete;
-template<class V> bool operator<=(const V& other, const Optional<V>&) = delete;
-template<class V> bool operator==(const V& other, const Optional<V>&) = delete;
-template<class V> bool operator!=(const V& other, const Optional<V>&) = delete;
-template<class V> bool operator>=(const V& other, const Optional<V>&) = delete;
-template<class V> bool operator> (const V& other, const Optional<V>&) = delete;
 
 } // namespace folly
 

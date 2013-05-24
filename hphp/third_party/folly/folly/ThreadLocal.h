@@ -42,6 +42,22 @@
 #include "folly/Likely.h"
 #include <type_traits>
 
+// Use noexcept on gcc 4.6 or higher
+#undef FOLLY_NOEXCEPT
+#ifdef __GNUC__
+# ifdef HAVE_FEATURES_H
+#  include <features.h>
+#  if __GNUC_PREREQ(4,6)
+#    define FOLLY_NOEXCEPT noexcept
+#    define FOLLY_ASSERT(x) x
+#  endif
+# endif
+#endif
+
+#ifndef FOLLY_NOEXCEPT
+#  define FOLLY_NOEXCEPT
+#  define FOLLY_ASSERT(x) /**/
+#endif
 
 namespace folly {
 enum class TLPDestructionMode {
@@ -267,7 +283,7 @@ class ThreadLocalPtr {
     Accessor(const Accessor&) = delete;
     Accessor& operator=(const Accessor&) = delete;
 
-    Accessor(Accessor&& other) noexcept
+    Accessor(Accessor&& other) FOLLY_NOEXCEPT
       : meta_(other.meta_),
         lock_(other.lock_),
         id_(other.id_) {
@@ -275,7 +291,7 @@ class ThreadLocalPtr {
       other.lock_ = nullptr;
     }
 
-    Accessor& operator=(Accessor&& other) noexcept {
+    Accessor& operator=(Accessor&& other) FOLLY_NOEXCEPT {
       // Each Tag has its own unique meta, and accessors with different Tags
       // have different types.  So either *this is empty, or this and other
       // have the same tag.  But if they have the same tag, they have the same
@@ -315,8 +331,8 @@ class ThreadLocalPtr {
   // accessor allows a client to iterate through all thread local child
   // elements of this ThreadLocal instance.  Holds a global lock for each <Tag>
   Accessor accessAllThreads() const {
-    static_assert(!std::is_same<Tag, void>::value,
-                  "Must use a unique Tag to use the accessAllThreads feature");
+    FOLLY_ASSERT(static_assert(!std::is_same<Tag, void>::value,
+                 "Must use a unique Tag to use the accessAllThreads feature"));
     return Accessor(id_);
   }
 
@@ -333,6 +349,8 @@ class ThreadLocalPtr {
 
   int id_;  // every instantiation has a unique id
 };
+
+#undef FOLLY_NOEXCEPT
 
 }  // namespace folly
 

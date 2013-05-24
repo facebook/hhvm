@@ -34,10 +34,6 @@ DEF_TYPE(dynamic::ObjectImpl, "object",  dynamic::OBJECT);
 
 #undef DEF_TYPE
 
-const char* dynamic::typeName() const {
-  return typeName(type_);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

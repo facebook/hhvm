@@ -145,14 +145,9 @@ class ProcessReturnCode {
 };
 
 /**
- * Base exception thrown by the Subprocess methods.
- */
-class SubprocessError : public std::exception {};
-
-/**
  * Exception thrown by *Checked methods of Subprocess.
  */
-class CalledProcessError : public SubprocessError {
+class CalledProcessError : public std::exception {
  public:
   explicit CalledProcessError(ProcessReturnCode rc);
   ~CalledProcessError() throw() { }
@@ -160,21 +155,6 @@ class CalledProcessError : public SubprocessError {
   ProcessReturnCode returnCode() const { return returnCode_; }
  private:
   ProcessReturnCode returnCode_;
-  std::string what_;
-};
-
-/**
- * Exception thrown if the subprocess cannot be started.
- */
-class SubprocessSpawnError : public SubprocessError {
- public:
-  SubprocessSpawnError(const char* executable, int errCode, int errnoValue);
-  ~SubprocessSpawnError() throw() {}
-  const char* what() const throw() FOLLY_OVERRIDE { return what_.c_str(); }
-  int errnoValue() const { return errnoValue_; }
-
- private:
-  int errnoValue_;
   std::string what_;
 };
 
@@ -477,34 +457,16 @@ class Subprocess : private boost::noncopyable {
   static const int RV_RUNNING = ProcessReturnCode::RV_RUNNING;
   static const int RV_NOT_STARTED = ProcessReturnCode::RV_NOT_STARTED;
 
-  // spawn() sets up a pipe to read errors from the child,
-  // then calls spawnInternal() to do the bulk of the work.  Once
-  // spawnInternal() returns it reads the error pipe to see if the child
-  // encountered any errors.
   void spawn(
       std::unique_ptr<const char*[]> argv,
       const char* executable,
       const Options& options,
       const std::vector<std::string>* env);
-  void spawnInternal(
-      std::unique_ptr<const char*[]> argv,
-      const char* executable,
-      Options& options,
-      const std::vector<std::string>* env,
-      int errFd);
 
-  // Actions to run in child.
+  // Action to run in child.
   // Note that this runs after vfork(), so tread lightly.
-  // Returns 0 on success, or an errno value on failure.
-  int prepareChild(const Options& options, const sigset_t* sigmask) const;
-  int runChild(const char* executable, char** argv, char** env,
-               const Options& options) const;
-
-  /**
-   * Read from the error pipe, and throw SubprocessSpawnError if the child
-   * failed before calling exec().
-   */
-  void readChildErrorPipe(int pfd, const char* executable);
+  void runChild(const char* executable, char** argv, char** env,
+                const Options& options) const;
 
   /**
    * Close all file descriptors.

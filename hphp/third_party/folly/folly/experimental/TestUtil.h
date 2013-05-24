@@ -18,8 +18,6 @@
 #define FOLLY_TESTUTIL_H_
 
 #include <string>
-#include "folly/Range.h"
-#include "folly/experimental/io/FsUtil.h"
 
 namespace folly {
 namespace test {
@@ -29,7 +27,8 @@ namespace test {
  *
  * By default, the file is created in a system-specific location (the value
  * of the TMPDIR environment variable, or /tmp), but you can override that
- * with a different (non-empty) directory passed to the constructor.
+ * by making "prefix" be a path (containing a '/'; use a prefix starting with
+ * './' to create a file in the current directory).
  *
  * By default, the file is closed and deleted when the TemporaryFile object
  * is destroyed, but both these behaviors can be overridden with arguments
@@ -42,50 +41,19 @@ class TemporaryFile {
     UNLINK_IMMEDIATELY,
     UNLINK_ON_DESTRUCTION
   };
-  explicit TemporaryFile(StringPiece namePrefix = StringPiece(),
-                         fs::path dir = fs::path(),
-                         Scope scope = Scope::UNLINK_ON_DESTRUCTION,
-                         bool closeOnDestruction = true);
+  explicit TemporaryFile(const char* prefix=nullptr,
+                         Scope scope=Scope::UNLINK_ON_DESTRUCTION,
+                         bool closeOnDestruction=true);
   ~TemporaryFile();
 
   int fd() const { return fd_; }
-  const fs::path& path() const;
+  const std::string& path() const;
 
  private:
   Scope scope_;
   bool closeOnDestruction_;
   int fd_;
-  fs::path path_;
-};
-
-/**
- * Temporary directory.
- *
- * By default, the temporary directory is created in a system-specific
- * location (the value of the TMPDIR environment variable, or /tmp), but you
- * can override that with a non-empty directory passed to the constructor.
- *
- * By default, the directory is recursively deleted when the TemporaryDirectory
- * object is destroyed, but that can be overridden with an argument
- * to the constructor.
- */
-
-class TemporaryDirectory {
- public:
-  enum class Scope {
-    PERMANENT,
-    DELETE_ON_DESTRUCTION
-  };
-  explicit TemporaryDirectory(StringPiece namePrefix = StringPiece(),
-                              fs::path dir = fs::path(),
-                              Scope scope = Scope::DELETE_ON_DESTRUCTION);
-  ~TemporaryDirectory();
-
-  const fs::path& path() const { return path_; }
-
- private:
-  Scope scope_;
-  fs::path path_;
+  std::string path_;
 };
 
 }  // namespace test

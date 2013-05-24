@@ -325,7 +325,6 @@ inline dynamic::const_iterator dynamic::end() const {
 template <class It>
 struct dynamic::IterableProxy {
   typedef It const_iterator;
-  typedef typename It::value_type value_type;
 
   /* implicit */ IterableProxy(const dynamic::ObjectImpl* o) : o_(o) { }
 

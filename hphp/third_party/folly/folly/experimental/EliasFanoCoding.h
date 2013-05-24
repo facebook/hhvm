@@ -33,6 +33,7 @@
 #endif
 
 #include <cstdlib>
+#include <endian.h>
 #include <algorithm>
 #include <limits>
 #include <type_traits>
@@ -43,7 +44,7 @@
 #include "folly/Likely.h"
 #include "folly/Range.h"
 
-#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#if __BYTE_ORDER != __LITTLE_ENDIAN
 #error EliasFanoCoding.h requires little endianness
 #endif
 

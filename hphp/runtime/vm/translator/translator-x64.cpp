@@ -31,6 +31,8 @@
 
 #ifdef __FreeBSD__
 # define RIP_REGISTER(v) (v).mc_rip
+#elif defined(__APPLE__)
+# define RIP_REGISTER(v) (v)->__ss.__rip
 #else
 #  if defined(__x86_64__)
 #    define RIP_REGISTER(v) (v).gregs[REG_RIP]

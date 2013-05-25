@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -64,6 +65,19 @@ Array f_get_declared_interfaces() {
 
 Array f_get_declared_traits() {
   return ClassInfo::GetTraits();
+}
+
+bool f_class_alias(CStrRef original,
+                   CStrRef alias,
+                   bool autoload /* = true */) {
+  auto const origClass =
+    autoload ? Unit::loadClass(original.get())
+             : Unit::lookupClass(original.get());
+  if (!origClass) {
+    raise_warning("Class %s not found", original->data());
+    return false;
+  }
+  return Unit::aliasClass(origClass, alias.get());
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {

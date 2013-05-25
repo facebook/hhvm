@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
 
+#include <map>
+
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/analysis/code_error.h"
@@ -135,6 +137,14 @@ public:
   void addConstantDependency(AnalysisResultPtr ar,
                              const std::string &decname);
 
+  void addClassAlias(const std::string& target, const std::string& alias) {
+    m_classAliasMap.insert(std::make_pair(target, alias));
+  }
+
+  std::multimap<std::string,std::string> const& getClassAliases() const {
+    return m_classAliasMap;
+  }
+
   /**
    * Called only by World
    */
@@ -180,6 +190,7 @@ public:
     return boost::static_pointer_cast<FileScope>
       (BlockScope::shared_from_this());
   }
+
 private:
   int m_size;
   MD5 m_md5;
@@ -201,6 +212,10 @@ private:
   std::set<std::string> m_pseudoMainVariables;
   BlockScopeSet m_providedDefs;
   std::set<std::string> m_redecBases;
+
+  // Map from class alias names to the class they are aliased to.
+  // This is only needed in WholeProgram mode.
+  std::multimap<std::string,std::string> m_classAliasMap;
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void setFileLevel(StatementListPtr stmt);

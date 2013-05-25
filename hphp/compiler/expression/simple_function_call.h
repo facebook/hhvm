@@ -93,6 +93,7 @@ protected:
     GetDefinedVars,
     FBCallUserFuncSafe,
     ThrowFatal,
+    ClassAlias,
   };
 
   static std::map<std::string,FunType> FunctionTypeMap;

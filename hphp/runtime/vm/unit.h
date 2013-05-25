@@ -470,6 +470,7 @@ struct Unit {
 
   static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
+  static bool aliasClass(Class* original, const StringData* alias);
   void defTypedef(Id id);
 
   static TypedValue* lookupCns(const StringData* cnsName);

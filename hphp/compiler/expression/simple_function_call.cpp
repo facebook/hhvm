@@ -53,6 +53,7 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
   if (FunctionTypeMap.empty()) {
     FunctionTypeMap["define"]               = FunType::Define;
     FunctionTypeMap["create_function"]      = FunType::Create;
+    FunctionTypeMap["class_alias"]          = FunType::ClassAlias;
 
     FunctionTypeMap["func_get_arg"]         = FunType::VariableArgument;
     FunctionTypeMap["func_get_args"]        = FunType::VariableArgument;
@@ -183,6 +184,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
         }
       }
       break;
+
     case FunType::Create:
       if (Option::ParseTimeOpts &&
           m_params->getCount() == 2 &&
@@ -197,6 +199,25 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
         ar->appendExtraCode(fs->getName(), code);
       }
       break;
+
+    // The class_alias builtin can create new names for other classes;
+    // we need to mark some of these classes redeclaring to avoid
+    // making incorrect assumptions during WholeProgram mode.  See
+    // AnalysisResult::collectFunctionsAndClasses.
+    case FunType::ClassAlias:
+      if ((m_params->getCount() == 2 || m_params->getCount() == 3) &&
+          Option::WholeProgram) {
+        if (!(*m_params)[0]->isLiteralString() ||
+            !(*m_params)[1]->isLiteralString()) {
+          parseTimeFatal(Compiler::NoError,
+            "class_alias with non-literal parameters is not allowed when "
+            "WholeProgram optimizations are turned on");
+        }
+        fs->addClassAlias((*m_params)[0]->getLiteralString(),
+                          (*m_params)[1]->getLiteralString());
+      }
+      break;
+
     case FunType::VariableArgument:
       /*
         Note:
@@ -209,10 +230,12 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       */
       fs->setAttribute(FileScope::VariableArgument);
       break;
+
     case FunType::Extract:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
       fs->setAttribute(FileScope::ContainsExtract);
       break;
+
     case FunType::Compact: {
       // If all the parameters in the compact() call are statically known,
       // there is no need to create a variable table.
@@ -229,13 +252,16 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       fs->setAttribute(FileScope::ContainsCompact);
       break;
     }
+
     case FunType::GetDefinedVars:
       fs->setAttribute(FileScope::ContainsDynamicVariable);
       fs->setAttribute(FileScope::ContainsGetDefinedVars);
       fs->setAttribute(FileScope::ContainsCompact);
       break;
+
     case FunType::Unknown:
       break;
+
     default:
       break;
   }

@@ -300,6 +300,7 @@ public:
   void addNamedScalarVarArray(const std::string &s);
   StringToClassScopePtrVecMap getExtensionClasses();
   void addInteger(int64_t n);
+
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -319,6 +320,10 @@ private:
   StringToClassScopePtrVecMap m_methodToClassDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
+
+  // Map names of class aliases to the class names they will alias.
+  // Only in WholeProgram mode.  See markRedeclaringClasses.
+  std::multimap<std::string,std::string> m_classAliases;
 
   bool m_classForcedVariants[2];
 
@@ -353,6 +358,11 @@ private:
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
 
+  /*
+   * Find the names of all functions and classes in the program; mark
+   * functions with duplicate names as redeclaring, but duplicate
+   * classes aren't yet marked.  See markRedeclaringClasses.
+   */
   void collectFunctionsAndClasses(FileScopePtr fs);
 
   /**
@@ -360,6 +370,13 @@ private:
    * to make sure generated code are consistent every time.
    */
   void canonicalizeSymbolOrder();
+
+  /*
+   * After all the class names have been collected and symbol order is
+   * canonicalized, this passes through and marks duplicate class
+   * names as redeclaring.
+   */
+  void markRedeclaringClasses();
 
   /**
    * Checks circular class derivations that can cause stack overflows for

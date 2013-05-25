@@ -408,7 +408,9 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 void AnalysisResult::canonicalizeSymbolOrder() {
   getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
+}
 
+void AnalysisResult::markRedeclaringClasses() {
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
@@ -419,6 +421,43 @@ void AnalysisResult::canonicalizeSymbolOrder() {
         classes[i]->setRedeclaring(ar, i);
       }
     }
+  }
+
+  /*
+   * In WholeProgram mode, during parse time we collected all
+   * class_alias calls so we can mark the targets of such calls
+   * redeclaring if necessary.
+   *
+   * Two cases here that definitely require this:
+   *
+   *  - If an alias name has the same name as another class, we need
+   *    to mark *that* class as redeclaring, since it may mean
+   *    different things in different requests now.
+   *
+   *  - If an alias name can refer to more than one class, each of
+   *    those classes must be marked redeclaring.
+   *
+   * In the simple case of a unique alias name and a unique target
+   * name, we might be able to get away with manipulating the target
+   * classes' volatility.
+   *
+   * Rather than work through the various cases here, though, we've
+   * just decided to just play it safe and mark all the names involved
+   * as redeclaring for now.
+   */
+  for (auto& kv : m_classAliases) {
+    auto markRedeclaring = [&] (const std::string& name) {
+      auto it = m_classDecs.find(name);
+      if (it != m_classDecs.end()) {
+        auto& classes = it->second;
+        for (unsigned int i = 0; i < classes.size(); ++i) {
+          classes[i]->setRedeclaring(ar, i);
+        }
+      }
+    };
+
+    markRedeclaring(Util::toLower(kv.first));
+    markRedeclaring(Util::toLower(kv.second));
   }
 }
 
@@ -606,6 +645,9 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     ClassScopePtrVec &clsVec = m_classDecs[iter->first];
     clsVec.insert(clsVec.end(), iter->second.begin(), iter->second.end());
   }
+
+  m_classAliases.insert(fs->getClassAliases().begin(),
+                        fs->getClassAliases().end());
 }
 
 static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
@@ -630,6 +672,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
 
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
+
+  markRedeclaringClasses();
 
   // Analyze some special cases
   for (set<string>::const_iterator it = Option::VolatileClasses.begin();
@@ -800,8 +844,14 @@ void AnalysisResult::analyzeProgramFinal() {
   for (uint i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
+
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
+
+  // XXX: this is only here because canonicalizeSymbolOrder used to do
+  // it---is it necessary to repeat at this phase?  (Probably not ...)
+  markRedeclaringClasses();
+
   setPhase(AnalysisResult::CodeGen);
 }
 

@@ -26,6 +26,7 @@ namespace HPHP {
 Array f_get_declared_classes();
 Array f_get_declared_interfaces();
 Array f_get_declared_traits();
+bool f_class_alias(CStrRef original, CStrRef alias, bool autoload = true);
 bool f_class_exists(CStrRef class_name, bool autoload = true);
 bool f_interface_exists(CStrRef interface_name, bool autoload = true);
 bool f_trait_exists(CStrRef trait_name, bool autoload = true);

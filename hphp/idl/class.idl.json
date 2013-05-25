@@ -43,6 +43,35 @@
             ]
         },
         {
+            "name": "class_alias",
+            "desc": "Creates an alias named alias based on the defined class original. The aliased class is exactly the same as the original class.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "original",
+                    "type": "String",
+                    "desc": "The original class."
+                },
+                {
+                    "name": "alias",
+                    "type": "String",
+                    "desc": "The alias name for the class."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether do autoload if the original class is not found."
+                }
+            ]
+        },
+        {
             "name": "class_exists",
             "desc": "This function checks whether or not the given class has been defined.",
             "flags": [

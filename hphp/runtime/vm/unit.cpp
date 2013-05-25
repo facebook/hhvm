@@ -628,6 +628,26 @@ Class* Unit::defClass(const PreClass* preClass,
   }
 }
 
+bool Unit::aliasClass(Class* original, const StringData* alias) {
+  auto const aliasNe = Unit::GetNamedEntity(alias);
+
+  if (!aliasNe->m_cachedClassOffset) {
+    Lock lk(s_classesMutex);
+    if (!aliasNe->m_cachedClassOffset) {
+      aliasNe->m_cachedClassOffset =
+        Transl::TargetCache::allocKnownClass(alias);
+    }
+  }
+
+  auto const aliasClass = aliasNe->getCachedClass();
+  if (aliasClass) {
+    raise_warning("Cannot redeclare class %s", alias->data());
+    return false;
+  }
+  aliasNe->setCachedClass(original);
+  return true;
+}
+
 void Unit::defTypedef(Id id) {
   assert(id < m_typedefs.size());
   auto thisType = &m_typedefs[id];

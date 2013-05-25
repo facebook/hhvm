@@ -1089,14 +1089,15 @@ function format_doc_arg($name, $type, $desc) {
   return $ret;
 }
 
-function format_doc_comment($text) {
+function format_doc_comment($text, $indent_spaces = 0) {
   $lines = explode("\n", $text);
-  $ret = "/**\n";
+  $indent = str_repeat(' ', $indent_spaces);
+  $ret = "$indent/**\n";
   for ($i = 0; $i < count($lines) - 1; $i++) {
     $line = $lines[$i];
-    $ret .= rtrim(" * $line")."\n";
+    $ret .= rtrim("$indent * $line")."\n";
   }
-  $ret .= " */";
+  $ret .= "$indent */";
   return $ret;
 }
 
@@ -1120,7 +1121,7 @@ function get_function_doc_comments($func, $clsname) {
     $text .= format_doc_arg('return', $func['return'], $func['ret_desc']);
   }
 
-  return format_doc_comment($text);
+  return format_doc_comment($text, empty($clsname) ? 0 : 2);
 }
 
 function get_class_doc_comments($class) {

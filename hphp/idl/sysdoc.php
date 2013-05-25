@@ -13,7 +13,7 @@ for ($i = 0; $i < count($lines) - 1; $i++) {
   $line = $lines[$i];
 
   if (preg_match("#$sig#", $line)) {
-    while (!preg_match('#^ \*/$#', $line)) {
+    while (!preg_match('#^ +\*/$#', $line)) {
       $line = $lines[++$i];
     }
     $line = $lines[++$i];
@@ -56,6 +56,9 @@ for ($i = 0; $i < count($lines) - 1; $i++) {
       }
       $info['args'] = $args;
       $info['return'] = null;
+      if ($class) {
+        $file .= '  ';
+      }
       $file .= "$sig\n";
       $file .= get_function_doc_comments($info, $class)."\n";
     }

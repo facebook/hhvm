@@ -27,10 +27,9 @@
 #include <string>
 #include <queue>
 #include <unwind.h>
+#include <signal.h>
 
 #ifdef __FreeBSD__
-# include <ucontext.h>
-typedef __sighandler_t *sighandler_t;
 # define RIP_REGISTER(v) (v).mc_rip
 #else
 #  if defined(__x86_64__)
@@ -303,7 +302,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
     // continues normally.
     g_vmContext->m_stack.unprotect();
   } else {
-    sighandler_t handler = (sighandler_t)self->m_segvChain;
+    sig_t handler = (sig_t)self->m_segvChain;
     if (handler == SIG_DFL || handler == SIG_IGN) {
       signal(signum, handler);
       raise(signum);

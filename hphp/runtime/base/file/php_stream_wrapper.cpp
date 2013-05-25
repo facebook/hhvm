@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 File *PhpStreamWrapper::openFD(const char *sFD) {
-  if (!RuntimeOption::clientExecutionMode()) {
+  if (!RuntimeOption::ClientExecutionMode()) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
     return nullptr;

@@ -493,7 +493,7 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalPath.empty()) {
       attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
     } else {
-      if (RuntimeOption::clientExecutionMode()) {
+      if (RuntimeOption::ClientExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {
           cliRepo += ".hhbc";

@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/server/http_request_handler.h"
 #include "hphp/runtime/base/server/rpc_request_handler.h"
+
+#include "hphp/runtime/base/server/http_request_handler.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/server/server_stats.h"
@@ -35,7 +36,7 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
   : m_count(0), m_reset(false),
   m_returnEncodeType(Json) {
   hphp_session_init();
-  bool isServer = RuntimeOption::serverExecutionMode();
+  bool isServer = RuntimeOption::ServerExecutionMode();
   if (isServer) {
     m_context = hphp_context_init();
   } else {

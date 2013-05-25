@@ -13,7 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-// Get SIZE_MAX definition.  Do this before including any other files, to make
+
+#include "hphp/runtime/base/runtime_option.h"
+
+// Get SIZE_MAX definition.  Do this before including any more files, to make
 // sure that this is the first place that stdint.h is included.
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
@@ -21,7 +24,6 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/shared/shared_store_base.h"
@@ -382,7 +384,7 @@ int RuntimeOption::GetScannerType() {
 static inline bool evalJitDefault() {
   // --mode server or --mode daemon
   // run long enough to justify JIT
-  if (RuntimeOption::serverExecutionMode()) {
+  if (RuntimeOption::ServerExecutionMode()) {
     return true;
   }
 

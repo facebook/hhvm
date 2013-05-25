@@ -1322,7 +1322,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool &error, string &errorMsg,
                  bool once /* = true */, bool warmupOnly /* = false */,
                  bool richErrorMsg /* = false */) {
-  bool isServer = RuntimeOption::serverExecutionMode();
+  bool isServer = RuntimeOption::ServerExecutionMode();
   error = false;
 
   String oldCwd;

@@ -60,7 +60,7 @@ static int precompute_integers() {
     (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));
   String::converted_integers = String::converted_integers_raw
     - String::MinPrecomputedInteger;
-  if (RuntimeOption::serverExecutionMode()) {
+  if (RuntimeOption::ServerExecutionMode()) {
     // Proactively populate, in order to increase cache locality for sequential
     // access patterns.
     for (int n = String::MinPrecomputedInteger;

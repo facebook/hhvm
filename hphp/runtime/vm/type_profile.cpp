@@ -159,13 +159,13 @@ static int64_t numRequests;
 
 static inline bool warmedUp() {
   return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
-    (RuntimeOption::clientExecutionMode() &&
+    (RuntimeOption::ClientExecutionMode() &&
      !RuntimeOption::EvalJitProfileRecord);
 }
 
 static inline bool profileThisRequest() {
   if (warmedUp()) return false;
-  if (RuntimeOption::serverExecutionMode()) return true;
+  if (RuntimeOption::ServerExecutionMode()) return true;
   return RuntimeOption::EvalJitProfileRecord;
 }
 

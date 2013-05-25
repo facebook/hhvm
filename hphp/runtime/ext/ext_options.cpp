@@ -780,7 +780,7 @@ void f_set_time_limit(int seconds) {
   TimeoutThread::DeferTimeout(seconds);
   // Just for ini_get
   g_context->setRequestTimeLimit(seconds);
-  if (RuntimeOption::clientExecutionMode() &&
+  if (RuntimeOption::ClientExecutionMode() &&
       seconds != 0) {
     raise_warning("set_time_limit is not supported in client mode");
   }

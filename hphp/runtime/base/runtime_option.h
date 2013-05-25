@@ -36,11 +36,11 @@ public:
 
   static bool Loaded;
 
-  static bool serverExecutionMode() {
+  static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;
   }
 
-  static bool clientExecutionMode() {
+  static bool ClientExecutionMode() {
     return strcmp(ExecutionMode, "cli") == 0;
   }
 

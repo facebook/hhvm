@@ -108,7 +108,7 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
   std::string line(message.data(),
                    // Truncate to 512k
                    message.size() > (1<<19) ? (1<<19) : message.size());
-  if (RuntimeOption::serverExecutionMode() ||
+  if (RuntimeOption::ServerExecutionMode() ||
       RuntimeOption::AlwaysEscapeLog) {
     Logger::Error(line);
   } else {

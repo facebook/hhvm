@@ -254,6 +254,10 @@ double math_combined_lcg() {
 }
 
 int64_t math_generate_seed() {
+#ifdef VALGRIND
+  // valgrind treats memory from RAND_bytes as uninitialized
+  return GENERATE_SEED();
+#endif
   int64_t value;
   if (RAND_bytes((unsigned char *)&value, sizeof(value)) < 1) {
     return GENERATE_SEED();

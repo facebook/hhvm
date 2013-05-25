@@ -470,7 +470,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
   if (wd == -1 && errno != ENOTDIR) {
     TRACE(2, "StatCache: getNode('%s', follow=%s) failed\n",
              path.c_str(), follow ? "true" : "false");
-    return nullptr;
+    return NodePtr(nullptr);
   }
   NodePtr node;
   if (wd != -1) {

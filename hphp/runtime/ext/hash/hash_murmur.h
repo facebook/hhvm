@@ -30,7 +30,7 @@ uint64_t murmur_rehash_64A(uint64_t k);
 /* Seed constant for MurmurHash64A selected by search for optimum diffusion
  * including recursive application.
  */
-static const int SEED = 4193360111ul;
+const int SEED = 4193360111ul;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

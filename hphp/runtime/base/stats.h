@@ -199,44 +199,44 @@ extern __thread uint64_t tl_counters[kNumStatCounters];
 extern __thread uint64_t tl_helper_counters[];
 extern const char* volatile helperNames[];
 
-static inline bool enabled() {
+inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
 }
 
-static inline bool enabledAny() {
+inline bool enabledAny() {
   return enabled() || Trace::moduleEnabled(Trace::statgroups);
 }
 
-static inline bool enableInstrCount() {
+inline bool enableInstrCount() {
   return Trace::moduleEnabled(Trace::stats, 2);
 }
 
-static inline void inc(StatCounter stat, int n = 1) {
+inline void inc(StatCounter stat, int n = 1) {
   if (enabled()) {
     tl_counters[stat] += n;
   }
 }
 
-static inline StatCounter opcodeToStatCounter(Opcode opc) {
+inline StatCounter opcodeToStatCounter(Opcode opc) {
   assert(OpLowInvalid == 0);
   return StatCounter(Instr_InterpBBLowInvalid + STATS_PER_OPCODE * opc);
 }
 
-static inline void incOp(Opcode opc) {
+inline void incOp(Opcode opc) {
   inc(opcodeToStatCounter(opc));
 }
 
-static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
+inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
   assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
 }
 
-static inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
+inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
   assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
 }
 
-static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
+inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
   assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
 }

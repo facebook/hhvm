@@ -2272,7 +2272,7 @@ void Class::setInterfaces() {
   for (PreClass::InterfaceVec::const_iterator it =
          m_preClass->interfaces().begin();
        it != m_preClass->interfaces().end(); ++it) {
-    ClassPtr cp = Unit::loadClass(*it);
+    auto cp = ClassPtr(Unit::loadClass(*it));
     if (cp.get() == nullptr) {
       raise_error("Undefined interface: %s", (*it)->data());
     }
@@ -2302,7 +2302,7 @@ void Class::setUsedTraits() {
   for (PreClass::UsedTraitVec::const_iterator
        it = m_preClass->usedTraits().begin();
        it != m_preClass->usedTraits().end(); it++) {
-    ClassPtr classPtr = Unit::loadClass(*it);
+    auto classPtr = ClassPtr(Unit::loadClass(*it));
     if (classPtr.get() == nullptr) {
       raise_error("Trait '%s' not found", (*it)->data());
     }

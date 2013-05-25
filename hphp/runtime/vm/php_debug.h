@@ -23,7 +23,7 @@ namespace HPHP {
 bool phpBreakpointEnabled(const char* sourceName);
 
 #else
-static inline bool phpBreakpointEnabled(const char* sourceName) {
+inline bool phpBreakpointEnabled(const char* sourceName) {
   return false;
 }
 

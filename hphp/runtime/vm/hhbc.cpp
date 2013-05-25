@@ -981,6 +981,42 @@ int instrSpToArDelta(const Opcode* opcode) {
   return delta;
 }
 
+const MInstrInfo& getMInstrInfo(Op op) {
+  static const MInstrInfo mInstrInfo[] = {
+#define MII(instr, attrs, bS, iS, vC, fN)                               \
+    {MI_##instr##M,                                                     \
+     {MIA_none, MIA_none, MInstrAttr((attrs) & MIA_base),               \
+      MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base),   \
+      MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base),   \
+        MIA_none,                                                       \
+      MIA_none},                                                        \
+     {MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_intermediate),                           \
+      MInstrAttr((attrs) & MIA_final)},                                 \
+     unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
+     #instr},
+    MINSTRS
+#undef MII
+  };
+
+  switch (op) {
+#define MII(instr_, attrs, bS, iS, vC, fN) \
+  case Op##instr_##M: { \
+    const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
+    assert(mii.instr() == MI_##instr_##M); \
+    return mii; \
+  }
+  MINSTRS
+#undef MII
+  default: not_reached();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

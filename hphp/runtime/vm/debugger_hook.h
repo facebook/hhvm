@@ -55,7 +55,7 @@ void phpAddBreakPoint(const Unit* unit, Offset offset);
 void phpRemoveBreakPoint(const Unit* unit, Offset offset);
 
 // Is this thread being debugged?
-static inline bool isDebuggerAttached() {
+inline bool isDebuggerAttached() {
   return ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getDebugger();
 }

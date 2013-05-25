@@ -88,22 +88,23 @@ enum TType {
 };
 
 
-static StaticString s_getTransport("getTransport");
-static StaticString s_flush("flush");
-static StaticString s_write("write");
-static StaticString s_putBack("putBack");
-static StaticString s_read("read");
-static StaticString s_class("class");
-static StaticString s_key("key");
-static StaticString s_val("val");
-static StaticString s_elem("elem");
-static StaticString s_var("var");
-static StaticString s_type("type");
-static StaticString s_ktype("ktype");
-static StaticString s_vtype("vtype");
-static StaticString s_etype("etype");
-
 class PHPTransport {
+public:
+  static StaticString s_getTransport;
+  static StaticString s_flush;
+  static StaticString s_write;
+  static StaticString s_putBack;
+  static StaticString s_read;
+  static StaticString s_class;
+  static StaticString s_key;
+  static StaticString s_val;
+  static StaticString s_elem;
+  static StaticString s_var;
+  static StaticString s_type;
+  static StaticString s_ktype;
+  static StaticString s_vtype;
+  static StaticString s_etype;
+
 public:
   Object protocol() { return p; }
   Object transport() { return t; }

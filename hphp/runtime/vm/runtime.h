@@ -182,7 +182,7 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
 
-static inline Instance*
+inline Instance*
 newInstance(Class* cls) {
   assert(cls);
   auto* inst = Instance::newInstance(cls);

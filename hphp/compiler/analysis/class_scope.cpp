@@ -1330,7 +1330,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   ms.add("parent");
   if (m_parent.empty()) {
-    out << JSON::Null;
+    out << JSON::Null();
   } else {
     out << GetDocName(out.analysisResult(), self, m_parent);
   }

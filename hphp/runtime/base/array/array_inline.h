@@ -26,15 +26,15 @@ namespace HPHP {
 namespace {
 typedef Variant::TypedValueAccessor TypedValueAccessor;
 
-inline static bool isIntKey(TypedValueAccessor tva) {
+inline bool isIntKey(TypedValueAccessor tva) {
     return Variant::GetAccessorType(tva) <= KindOfInt64;
 }
 
-inline static int64_t getIntKey(TypedValueAccessor tva) {
+inline int64_t getIntKey(TypedValueAccessor tva) {
     return Variant::GetInt64(tva);
 }
 
-inline static StringData *getStringKey(TypedValueAccessor tva) {
+inline StringData *getStringKey(TypedValueAccessor tva) {
     return Variant::GetStringData(tva);
 }
 }

@@ -28,7 +28,7 @@ namespace HPHP {
 #define PHP_ROUND_HALF_EVEN 3
 #define PHP_ROUND_HALF_ODD 4
 
-static inline double php_round_helper(double value, int mode) {
+inline double php_round_helper(double value, int mode) {
   double tmp_value;
 
   if (value >= 0.0) {
@@ -52,7 +52,7 @@ static inline double php_round_helper(double value, int mode) {
   return tmp_value;
 }
 
-static inline double php_math_round(double value, int places,
+inline double php_math_round(double value, int places,
                                     int mode = PHP_ROUND_HALF_UP) {
   double tmp_value;
 

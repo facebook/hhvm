@@ -63,7 +63,7 @@ namespace MurmurHash3 {
 // It is tempting to make useHash128 depend on whether the architecture is 32-
 // or 64-bit, but changing which hash function is used also requires
 // regenerating system files, so this setting is hardcoded here.
-static const bool useHash128 = true;
+const bool useHash128 = true;
 
 #define ROTL32(x,y) rotl32(x,y)
 #define ROTL64(x,y) rotl64(x,y)

@@ -78,13 +78,13 @@ inline void atomic_release_store(T* address, U val) {
 }
 
 template<typename T>
-static inline T atomic_inc(T &count) {
+inline T atomic_inc(T &count) {
   assert_address_is_atomically_accessible(&count);
   return __sync_fetch_and_add(&count, 1) + 1;
 }
 
 template<typename T>
-static inline T atomic_dec(T &count) {
+inline T atomic_dec(T &count) {
   assert_address_is_atomically_accessible(&count);
   return __sync_fetch_and_add(&count, -1) - 1;
 }

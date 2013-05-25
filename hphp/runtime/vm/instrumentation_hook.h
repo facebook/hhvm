@@ -22,21 +22,21 @@
 
 namespace HPHP {
 
-static inline void instHookInt64Impl(InjectionTableInt64* table, int64_t val) {
+inline void instHookInt64Impl(InjectionTableInt64* table, int64_t val) {
   if (!table) return;
   InjectionTableInt64::const_iterator it = table->find(val);
   if (LIKELY(it == table->end())) return;
   it->second->execute();
 }
 
-static inline void instHookInt64(int type, int64_t val) {
+inline void instHookInt64(int type, int64_t val) {
   assert(type < InstHookTypeInt64Count);
   InjectionTableInt64* injTable = g_vmContext->m_injTables ?
     g_vmContext->m_injTables->getInt64Table(type) : nullptr;
   instHookInt64Impl(injTable, val);
 }
 
-static inline void instHookSD(int type, const StringData* sd) {
+inline void instHookSD(int type, const StringData* sd) {
   assert(type < InstHookTypeSDCount);
   InjectionTableSD* injTable = g_vmContext->m_injTables ?
     g_vmContext->m_injTables->getSDTable(type) : nullptr;
@@ -46,7 +46,7 @@ static inline void instHookSD(int type, const StringData* sd) {
   it->second->execute();
 }
 
-static inline void instHookStr(int type, const char* str) {
+inline void instHookStr(int type, const char* str) {
   StackStringData sd(str, AttachLiteral);
   instHookSD(type, &sd);
 }

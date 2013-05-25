@@ -59,7 +59,7 @@ namespace HPHP {
 class ActRec;
 
 // max number of arguments for direct call to builtin
-static const int kMaxBuiltinArgs = 5;
+const int kMaxBuiltinArgs = 5;
 
 
 struct ExtraArgs : private boost::noncopyable {

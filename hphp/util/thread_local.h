@@ -108,7 +108,7 @@ struct ThreadLocalManager {
 // delete
 
 template<typename T>
-static void ThreadLocalOnThreadExit(void * p) {
+void ThreadLocalOnThreadExit(void * p) {
   ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
   delete pNode->m_p;
   pNode->m_p = nullptr;
@@ -209,7 +209,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
 // Singleton thread-local storage for T
 
 template<typename T>
-static void ThreadLocalSingletonOnThreadExit(void *obj) {
+void ThreadLocalSingletonOnThreadExit(void *obj) {
   T::OnThreadExit((T*)obj);
 }
 
@@ -338,7 +338,7 @@ struct ThreadLocalProxy {
 // ThreadLocal allocates by calling new() without parameters
 
 template<typename T>
-static void ThreadLocalOnThreadExit(void *p) {
+void ThreadLocalOnThreadExit(void *p) {
   delete (T*)p;
 }
 
@@ -441,7 +441,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
 // Singleton thread-local storage for T
 
 template<typename T>
-static void ThreadLocalSingletonOnThreadExit(void *obj) {
+void ThreadLocalSingletonOnThreadExit(void *obj) {
   T::OnThreadExit((T*)obj);
   free(obj);
 }

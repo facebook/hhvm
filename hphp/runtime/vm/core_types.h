@@ -135,9 +135,9 @@ enum Attr {
   AttrSkipFrame = (1 << 22),     //                     X    //
 };
 
-static inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
+inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
 
-static inline const char * attrToVisibilityStr(Attr attr) {
+inline const char * attrToVisibilityStr(Attr attr) {
   return (attr & AttrPrivate)   ? "private"   :
          (attr & AttrProtected) ? "protected" : "public";
 }

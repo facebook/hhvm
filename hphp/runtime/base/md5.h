@@ -26,14 +26,13 @@ namespace HPHP {
  * are 128-bits, though, and fit economically in a fixed-size struct.
  */
 
-static const char* kDefaultMD5 = "00000000000000000000000000000000";
 struct MD5 {
   uint64_t q[2];
-  MD5(const char* str = kDefaultMD5) {
-    if (str == kDefaultMD5) {
-      q[0] = q[1] = 0;
-      return;
-    }
+  MD5() {
+    q[0] = q[1] = 0;
+  }
+
+  explicit MD5(const char* str) {
     // We expect our input to be null-terminated output from PHP::md5().
     assert(strlen(str) == 32);
     const int kQWordAsciiLen = 16;
@@ -56,7 +55,7 @@ struct MD5 {
   }
 
   // blob is assumed to be in network byte order.
-  MD5(const void* blob) {
+  explicit MD5(const void* blob) {
     q[0] = ntohq(((const uint64_t*)blob)[0]);
     q[1] = ntohq(((const uint64_t*)blob)[1]);
   }

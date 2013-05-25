@@ -17,7 +17,7 @@
 
 /* $Id: php_hash_snefru_tables.h,v 1.3.2.3.2.1 2007/01/01 09:36:01 sebastian Exp $ */
 
-static const unsigned int tables[16][256]= {
+const unsigned int tables[16][256]= {
 
  {  /* Start of S Box 0  */
 

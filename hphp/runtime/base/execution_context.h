@@ -155,12 +155,12 @@ enum InclOpFlags {
   InclOpRelative = 16
 };
 
-static inline InclOpFlags
+inline InclOpFlags
 operator|(const InclOpFlags &l, const InclOpFlags &r) {
   return InclOpFlags(int(l) | int(r));
 }
 
-static inline InclOpFlags
+inline InclOpFlags
 operator&(const InclOpFlags &l, const InclOpFlags &r) {
   return InclOpFlags(int(l) & int(r));
 }

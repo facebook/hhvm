@@ -40,14 +40,14 @@ static_assert(ssize_t(PosType::invalid) == ArrayData::invalid_index,
               " ArrayData::invalid_index mean distinct things.");
 
 // Change of type, no effect on representation
-static int64_t toInt64(PosType pos) {
+inline int64_t toInt64(PosType pos) {
   static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
   return static_cast<int64_t>(pos);
 }
 
 // Assumes a valid position, convert to an uint32_t. Useful for array
 // indices because they can't be larger than 32 bits anyway.
-static uint32_t toUint32(PosType pos) {
+inline uint32_t toUint32(PosType pos) {
   static_assert(uint32_t(PosType::invalid) == uint32_t(-1), "");
   assert(pos != PosType::invalid);
   return static_cast<uint32_t>(pos);
@@ -58,13 +58,13 @@ inline PosType toPos(int32_t n) {
   static_assert(sizeof(int64_t) == sizeof(PosType), "");
   return static_cast<PosType>(n);
 }
-static PosType toPos(int64_t n) {
+inline PosType toPos(int64_t n) {
   static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
   return static_cast<PosType>(n);
 }
 
 // Unsigned to pos.
-static PosType toPos(uint32_t n) {
+inline PosType toPos(uint32_t n) {
   // If this fails it's weird - uint max doesn't become
   // PosType::invalid; instead, it'll be 4 billion something, which is
   // unhelpful.
@@ -408,7 +408,7 @@ private:
   const Variant& getImpl(K k, bool error) const;
 
 public:
-  // Andrei: this API forces storage to store variants in the
+  // aalexandre: this API forces storage to store variants in the
   // TypedValue/Variant layout, thus disallowing e.g. implementations
   // that store type tags and values separately.
   virtual const Variant&

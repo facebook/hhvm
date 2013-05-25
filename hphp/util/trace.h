@@ -175,7 +175,7 @@ void traceRingBufferRelease(const char* fmt, ...);
 
 extern int levels[NumModules];
 const char* moduleName(Module mod);
-static inline bool moduleEnabledRelease(Module tm, int level = 1) {
+inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] >= level;
 }
 
@@ -183,15 +183,15 @@ static inline bool moduleEnabledRelease(Module tm, int level = 1) {
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
-static inline bool moduleEnabled(Module tm, int level = 1) {
+inline bool moduleEnabled(Module tm, int level = 1) {
   return moduleEnabledRelease(tm, level);
 }
 
-static inline int moduleLevel(Module tm) { return levels[tm]; }
+inline int moduleLevel(Module tm) { return levels[tm]; }
 
 #define HPHP_TRACE
 
-static const bool enabled = true;
+const bool enabled = true;
 
 #define ONTRACE_MOD(module, n, x) do {    \
   if (HPHP::Trace::moduleEnabled(module, n)) {  \
@@ -217,7 +217,7 @@ void trace(const char *, ...)
 void trace(const std::string&);
 
 template<typename Pretty>
-static inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
+inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
 void vtrace(const char *fmt, va_list args);
 void dumpRingbuffer();
@@ -234,13 +234,13 @@ void dumpRingbuffer();
 #define TRACE_SET_MOD(name) \
   DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-static const bool enabled = false;
+const bool enabled = false;
 
-static inline void trace(const char*, ...)      { }
-static inline void trace(const std::string&)    { }
-static inline void vtrace(const char*, va_list) { }
-static inline bool moduleEnabled(Module t, int level = 1) { return false; }
-static inline int moduleLevel(Module tm) { return 0; }
+inline void trace(const char*, ...)      { }
+inline void trace(const std::string&)    { }
+inline void vtrace(const char*, va_list) { }
+inline bool moduleEnabled(Module t, int level = 1) { return false; }
+inline int moduleLevel(Module tm) { return 0; }
 #endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 //////////////////////////////////////////////////////////////////////

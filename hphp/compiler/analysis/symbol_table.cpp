@@ -285,9 +285,9 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
     assert(valueExp);
     const string &init = ExtractInitializer(out.analysisResult(), valueExp);
     if (!init.empty()) out << init;
-    else               out << JSON::Null;
+    else               out << JSON::Null();
   } else {
-    out << JSON::Null;
+    out << JSON::Null();
   }
 
   ms.done();
@@ -336,9 +336,9 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
     assert(initExp);
     const string &init = ExtractInitializer(out.analysisResult(), initExp);
     if (!init.empty()) out << init;
-    else               out << JSON::Null;
+    else               out << JSON::Null();
   } else {
-    out << JSON::Null;
+    out << JSON::Null();
   }
 
   const string &docs = ExtractDocComment(

@@ -35,12 +35,12 @@ inline int futex(int* uaddr, int op, int val, const timespec* timeout,
   return syscall(SYS_futex, uaddr, op, val, timeout, uaddr2, val3);
 }
 
-static void futex_wait(std::atomic<int>* value, int expected) {
+inline void futex_wait(std::atomic<int>* value, int expected) {
   futex(reinterpret_cast<int*>(value), FUTEX_WAIT_PRIVATE, expected,
         nullptr, nullptr, 0);
 }
 
-static void futex_wake(std::atomic<int>* value, int nwake) {
+inline void futex_wake(std::atomic<int>* value, int nwake) {
   futex(reinterpret_cast<int*>(value), FUTEX_WAKE_PRIVATE, nwake, nullptr,
         nullptr, 0);
 }

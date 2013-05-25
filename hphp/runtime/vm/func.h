@@ -25,7 +25,7 @@
 
 namespace HPHP {
 
-static const int kNumFixedPrologues = 6;
+const int kNumFixedPrologues = 6;
 
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 

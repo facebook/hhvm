@@ -31,7 +31,7 @@ namespace HPHP {
  * we want to assert that offsetof(T, m_px) is a specific value in all
  * these classes.
  */
-static const std::size_t kExpectedMPxOffset = 0;
+const std::size_t kExpectedMPxOffset = 0;
 
 /**
  * Work with Countable to implement reference counting. For example,
@@ -48,7 +48,7 @@ template<typename T>
 class SmartPtr {
 public:
   SmartPtr() : m_px(nullptr) {}
-  SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
+  explicit SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
   }
@@ -165,11 +165,11 @@ template<typename T>
 class AtomicSmartPtr {
 public:
   AtomicSmartPtr() : m_px(nullptr) {}
-  AtomicSmartPtr(T* px) : m_px(px) {
+  explicit AtomicSmartPtr(T* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
   template<class Y>
-  AtomicSmartPtr(Y* px) : m_px(px) {
+  explicit AtomicSmartPtr(Y* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
   AtomicSmartPtr(const AtomicSmartPtr<T>& src) : m_px(nullptr) {

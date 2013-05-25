@@ -65,7 +65,7 @@ union ArgUnion {
 #undef ARGTYPEVEC
 };
 
-static const Offset InvalidAbsoluteOffset = -1;
+const Offset InvalidAbsoluteOffset = -1;
 
 enum FlavorDesc {
   NOV = 0, // None
@@ -267,27 +267,6 @@ struct MInstrInfo {
   const char* name() const {
     return m_name;
   }
-};
-
-static const MInstrInfo mInstrInfo[] = {
-#define MII(instr, attrs, bS, iS, vC, fN) \
-  {MI_##instr##M, \
-   {MIA_none, MIA_none, MInstrAttr((attrs) & MIA_base), \
-    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), \
-    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), MIA_none, \
-    MIA_none}, \
-   {MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_final)}, \
-   unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
-   #instr},
-  MINSTRS
-#undef MII
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
@@ -592,19 +571,7 @@ enum Op {
   Op_count
 };
 
-inline const MInstrInfo& getMInstrInfo(Op op) {
-  switch (op) {
-#define MII(instr_, attrs, bS, iS, vC, fN) \
-  case Op##instr_##M: { \
-    const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
-    assert(mii.instr() == MI_##instr_##M); \
-    return mii; \
-  }
-  MINSTRS
-#undef MII
-  default: not_reached();
-  }
-}
+const MInstrInfo& getMInstrInfo(Op op);
 
 enum AstubsOp {
   OpAstubStart = Op_count-1,
@@ -725,7 +692,7 @@ ArgType immType(Opcode opcode, int idx);
 int immSize(const Opcode* opcode, int idx);
 bool immIsVector(Opcode opcode, int idx);
 bool hasImmVector(Opcode opcode);
-static inline bool isTypePred(const Opcode op) {
+inline bool isTypePred(const Opcode op) {
   return op >= OpIsNullC && op <= OpIsObjectL;
 }
 int instrLen(const Opcode* opcode);

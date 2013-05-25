@@ -119,7 +119,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
-static const bool debug =
+const bool debug =
 #ifdef DEBUG
   true
 #else
@@ -127,7 +127,7 @@ static const bool debug =
 #endif
   ;
 
-static const bool use_jemalloc =
+const bool use_jemalloc =
 #ifdef USE_JEMALLOC
   true
 #else
@@ -135,7 +135,7 @@ static const bool use_jemalloc =
 #endif
   ;
 
-static const bool packed_tv =
+const bool packed_tv =
 #ifdef PACKED_TV
   true
 #else
@@ -146,7 +146,7 @@ static const bool packed_tv =
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
  */
-static const bool hphpiCompat = true;
+const bool hphpiCompat = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // system includes

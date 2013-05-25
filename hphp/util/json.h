@@ -68,8 +68,9 @@ private:
   std::string m_name;
 };
 
-struct _Null {};
-static _Null Null;
+// struct _Null {};
+// _Null Null;
+enum class Null {};
 
 template <typename Type>
 class _OutputStream {
@@ -101,7 +102,7 @@ public:
     return *this;
   }
 
-  _OutputStream &operator<< (const _Null &n) {
+  _OutputStream &operator<< (const Null &n) {
     m_out << "null";
     return *this;
   }
@@ -116,7 +117,7 @@ public:
     if (v) {
       *this << *v;
     } else {
-      *this << Null;
+      *this << Null();
     }
     return *this;
   }

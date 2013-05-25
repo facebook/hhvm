@@ -202,7 +202,7 @@ size_t dirname_helper(char *path, int len);
  * Check if value is a power of two.
  */
 template<typename Int>
-static inline bool isPowerOfTwo(Int value) {
+inline bool isPowerOfTwo(Int value) {
   return (value > 0 && (value & (value-1)) == 0);
 }
 
@@ -210,7 +210,7 @@ static inline bool isPowerOfTwo(Int value) {
  * Round up value to the nearest power of two
  */
 template<typename Int>
-static inline Int roundUpToPowerOfTwo(Int value) {
+inline Int roundUpToPowerOfTwo(Int value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
@@ -226,25 +226,25 @@ static inline Int roundUpToPowerOfTwo(Int value) {
 /**
  * Return log-base-2 of the next power of 2, i.e. CLZ
  */
-static inline int lgNextPower2(uint64_t value) {
+inline int lgNextPower2(uint64_t value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
   return 64 - __builtin_clzll(value - 1);
 }
 
-static inline int lgNextPower2(uint32_t value) {
+inline int lgNextPower2(uint32_t value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
   return 32 - __builtin_clz(value - 1);
 }
 
-static inline uint64_t nextPower2(uint64_t value) {
+inline uint64_t nextPower2(uint64_t value) {
   return uint64_t(1) << lgNextPower2(value);
 }
 
-static inline uint32_t nextPower2(uint32_t value) {
+inline uint32_t nextPower2(uint32_t value) {
   return uint32_t(1) << lgNextPower2(value);
 }
 
@@ -293,7 +293,7 @@ void find(std::vector<std::string> &out,
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
-static inline void compiler_membar( ) {
+inline void compiler_membar( ) {
   asm volatile("" : : :"memory");
 }
 
@@ -363,7 +363,7 @@ constexpr void* getMethodPtr(MethodPtr meth) {
  * Read typed data from an offset relative to a base address
  */
 template <class T>
-static T& getDataRef(void* base, unsigned offset) {
+T& getDataRef(void* base, unsigned offset) {
   return *(T*)((char*)base + offset);
 }
 

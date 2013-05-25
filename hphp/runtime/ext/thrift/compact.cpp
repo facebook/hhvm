@@ -223,9 +223,9 @@ class CompactWriter {
         Array fieldSpec = specIter.second().toArray();
 
         String fieldName = fieldSpec
-          .rvalAt(s_var, AccessFlags::Error_Key).toString();
+          .rvalAt(PHPTransport::s_var, AccessFlags::Error_Key).toString();
         TType fieldType = (TType)fieldSpec
-          .rvalAt(s_type, AccessFlags::Error_Key).toByte();
+          .rvalAt(PHPTransport::s_type, AccessFlags::Error_Key).toByte();
 
         Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
 
@@ -362,12 +362,14 @@ class CompactWriter {
 
     void writeMap(Array arr, CArrRef spec) {
       TType keyType = (TType)spec
-        .rvalAt(s_ktype, AccessFlags::Error_Key).toByte();
+        .rvalAt(PHPTransport::s_ktype, AccessFlags::Error_Key).toByte();
       TType valueType = (TType)spec
-        .rvalAt(s_vtype, AccessFlags::Error_Key).toByte();
+        .rvalAt(PHPTransport::s_vtype, AccessFlags::Error_Key).toByte();
 
-      Array keySpec = spec.rvalAt(s_key, AccessFlags::Error_Key).toArray();
-      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error_Key).toArray();
+      Array keySpec = spec.rvalAt(PHPTransport::s_key, AccessFlags::Error_Key)
+        .toArray();
+      Array valueSpec = spec.rvalAt(PHPTransport::s_val, AccessFlags::Error_Key)
+        .toArray();
 
       writeMapBegin(keyType, valueType, arr.size());
 
@@ -381,9 +383,9 @@ class CompactWriter {
 
     void writeList(Array arr, CArrRef spec, CListType listType) {
       TType valueType = (TType)spec
-        .rvalAt(s_etype, AccessFlags::Error_Key).toByte();
+        .rvalAt(PHPTransport::s_etype, AccessFlags::Error_Key).toByte();
       Array valueSpec = spec
-        .rvalAt(s_elem, AccessFlags::Error_Key).toArray();
+        .rvalAt(PHPTransport::s_elem, AccessFlags::Error_Key).toArray();
 
       writeListBegin(valueType, arr.size());
 
@@ -540,8 +542,9 @@ class CompactReader {
         if (!fieldSpecVariant.isNull()) {
           Array fieldSpec = fieldSpecVariant.toArray();
 
-          String fieldName = fieldSpec.rvalAt(s_var).toString();
-          TType expectedType = (TType)fieldSpec.rvalAt(s_type).toInt64();
+          String fieldName = fieldSpec.rvalAt(PHPTransport::s_var).toString();
+          auto expectedType = (TType)fieldSpec.rvalAt(PHPTransport::s_type)
+            .toInt64();
 
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
@@ -614,7 +617,7 @@ class CompactReader {
           return uninit_null();
 
         case T_STRUCT: {
-            Variant className = spec.rvalAt(s_class);
+            Variant className = spec.rvalAt(PHPTransport::s_class);
             if (className.isNull()) {
               thrift_error("no class type in spec", ERR_INVALID_DATA);
             }
@@ -784,8 +787,8 @@ class CompactReader {
       uint32_t size;
       readMapBegin(keyType, valueType, size);
 
-      Array keySpec = spec.rvalAt(s_key, AccessFlags::Error);
-      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error);
+      Array keySpec = spec.rvalAt(PHPTransport::s_key, AccessFlags::Error);
+      Array valueSpec = spec.rvalAt(PHPTransport::s_val, AccessFlags::Error);
       Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {
@@ -803,7 +806,8 @@ class CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(s_elem, AccessFlags::Error_Key);
+      Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
+                                    AccessFlags::Error_Key);
       Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {

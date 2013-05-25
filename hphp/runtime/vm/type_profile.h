@@ -50,7 +50,7 @@ std::pair<DataType, double> predictType(TypeProfileKey key);
 bool isProfileOpcode(const PC& pc);
 
 extern __thread bool profileOn;
-static inline bool shouldProfile() {
+inline bool shouldProfile() {
   return profileOn;
 }
 

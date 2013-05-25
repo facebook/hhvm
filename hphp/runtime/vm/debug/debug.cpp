@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-#include "hphp/runtime/vm/debug/elfwriter.h"
 
 #include "hphp/runtime/base/execution_context.h"
 

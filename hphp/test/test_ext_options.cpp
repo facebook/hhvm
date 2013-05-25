@@ -105,7 +105,6 @@ bool TestExtOptions::test_dl() {
 bool TestExtOptions::test_extension_loaded() {
   VERIFY(f_extension_loaded("phpmcc"));
   VERIFY(f_extension_loaded("bcmath"));
-  VERIFY(f_extension_loaded("spl"));
   VERIFY(f_extension_loaded("curl"));
   VERIFY(f_extension_loaded("simplexml"));
   VERIFY(f_extension_loaded("mysql"));

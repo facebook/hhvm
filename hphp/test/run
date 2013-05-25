@@ -311,7 +311,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = file_get_contents("$test.diff");
+      $end['details'] = @file_get_contents("$test.diff");
     }
     self::say($start, $end);
   }
@@ -484,7 +484,9 @@ function main($argv) {
 
   $threads = min(count($tests), idx($options, 'threads', 20));
 
-  print "Running ".count($tests)." tests in $threads threads\n";
+  if (!isset($options['fbmake'])) {
+    print "Running ".count($tests)." tests in $threads threads\n";
+  }
 
   # Try to construct the buckets so the test results are ready in approximately
   # alphabetical order
@@ -519,8 +521,16 @@ function main($argv) {
     $return_value |= pcntl_wexitstatus($status);
   }
 
-  if (!$return_value) {
-    print "\nAll tests passed.\n\n".<<<SHIP
+  $results = array();
+  foreach ($bad_test_files as $bad_test_file) {
+    $results = array_merge($results, 
+      json_decode(file_get_contents($bad_test_file), true));
+  }
+  if (isset($options['fbmake'])) {
+    Status::say(array('op' => 'all_done', 'results' => $results));
+  } else {
+    if (!$return_value) {
+      print "\nAll tests passed.\n\n".<<<SHIP
               |    |    |
              )_)  )_)  )_)
             )___))___))___)\
@@ -532,14 +542,6 @@ function main($argv) {
          ^^^^      ^^^
 SHIP
 ."\n";
-  } else {
-    $results = array();
-    foreach ($bad_test_files as $bad_test_file) {
-      $results = array_merge($results, 
-        json_decode(file_get_contents($bad_test_file), true));
-    }
-    if (isset($options['fbmake'])) {
-      Status::say(array('op' => 'all_done', 'results' => $results));
     } else {
       $failed = array();
       foreach ($results as $result) {

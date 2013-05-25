@@ -584,6 +584,12 @@
                     "type": "String",
                     "value": "\"\\\"\"",
                     "desc": "Set the field enclosure character (one character only)."
+                },
+                {
+                    "name": "escape",
+                    "type": "String",
+                    "value": "\"\\\\\"",
+                    "desc": "Set the escape character (one character only)."
                 }
             ]
         },

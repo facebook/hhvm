@@ -11,17 +11,17 @@ array(5) {
   [4]=>
   string(7) "symlink"
 }
-BEGIN: empty
-
+BEGIN:
+empty
 END
-BEGIN: file
-
+BEGIN:
+file
 END
-BEGIN: fix_mtimes.inc
-
+BEGIN:
+fix_mtimes.inc
 END
-BEGIN: symlink
-
+BEGIN:
+symlink
 END
 empty
 file

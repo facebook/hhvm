@@ -315,9 +315,11 @@ Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
                   CStrRef enclosure /* = "\"" */) {
   if (delimiter.size() != 1) {
     throw_invalid_argument("delimiter: %s", delimiter.data());
+    return false;
   }
   if (enclosure.size() != 1) {
     throw_invalid_argument("enclosure: %s", enclosure.data());
+    return false;
   }
   CHECK_HANDLE(handle, f);
   return f->writeCSV(fields, delimiter.charAt(0), enclosure.charAt(0));
@@ -325,15 +327,23 @@ Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
 
 Variant f_fgetcsv(CObjRef handle, int64_t length /* = 0 */,
                   CStrRef delimiter /* = "," */,
-                  CStrRef enclosure /* = "\"" */) {
+                  CStrRef enclosure /* = "\"" */,
+                  CStrRef escape /* = "\\" */) {
   if (delimiter.size() != 1) {
     throw_invalid_argument("delimiter: %s", delimiter.data());
+    return false;
   }
   if (enclosure.size() != 1) {
     throw_invalid_argument("enclosure: %s", enclosure.data());
+    return false;
+  }
+  if (escape.size() != 1) {
+    throw_invalid_argument("escape: %s", enclosure.data());
+    return false;
   }
   CHECK_HANDLE(handle, f);
-  Array ret = f->readCSV(length, delimiter.charAt(0), enclosure.charAt(0));
+  Array ret = f->readCSV(length, delimiter.charAt(0), enclosure.charAt(0),
+                         escape.charAt(0));
   if (!ret.isNull()) {
     return ret;
   }

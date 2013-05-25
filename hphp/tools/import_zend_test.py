@@ -66,24 +66,10 @@ no_import = (
     # too large input
     '/tests/lang/024.phpt',
 
+    # conscious decision not to match these
+    '/ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt',
+
     # spews files until they work
-    '/ext/spl/tests/SplFileInfo_getExtension_basic.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_basic.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_delimiter_basic.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_delimiter_error.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_enclosure_basic.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_enclosure_error.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_escape_basic.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_escape_default.phpt',
-    '/ext/spl/tests/SplFileObject_fgetcsv_escape_error.phpt',
-    '/ext/spl/tests/SplFileObject_getflags_basic.phpt',
-    '/ext/spl/tests/SplFileObject_getflags_error001.phpt',
-    '/ext/spl/tests/SplFileObject_getflags_error002.phpt',
-    '/ext/spl/tests/SplFileObject_rewind_error001.phpt',
-    '/ext/spl/tests/SplFileObject_setCsvControl_basic.phpt',
-    '/ext/spl/tests/SplFileObject_setCsvControl_error001.phpt',
-    '/ext/spl/tests/SplFileObject_setCsvControl_error002.phpt',
-    '/ext/spl/tests/SplFileObject_setCsvControl_variation001.phpt',
     '/ext/standard/tests/file/fopen_variation14-win32.phpt',
     '/ext/standard/tests/file/fopen_variation15-win32.phpt',
     '/ext/standard/tests/file/mkdir_variation5-win32.phpt',
@@ -261,6 +247,9 @@ other_files = (
     '/ext-soap-soap12/soap12-test.inc',
     '/ext-soap-soap12/soap12-test.wsdl',
     '/ext-spl/testclass.class.inc',
+    '/ext-spl/SplFileObject_testinput.csv',
+    '/ext-spl/fileobject_001a.txt',
+    '/ext-spl/fileobject_001b.txt',
     '/ext-sqlite3/new_db.inc',
     '/ext-sqlite3/stream_test.inc',
     '/ext-standard-general_functions/004.data',
@@ -484,6 +473,8 @@ def walk(filename, source):
                     '<?php\n$_ENV[%s] = %s;\n' % (boom[0], boom[1])
                 )
     if sections.has_key('CLEAN'):
+        if not test.strip().endswith('?>'):
+            test += '?>\n'
         test += sections['CLEAN']
 
     # If you put an exception in here, please send a pull request upstream to 
@@ -579,6 +570,9 @@ def walk(filename, source):
     if '/ext-standard-file/bug24482.php' in full_dest_filename:
         test = test.replace('"*"', '__DIR__."/../../../sample_dir/("')
         test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../sample_dir/")')
+    if '/ext-spl/SplFileObject_fgetcsv_' in full_dest_filename:
+        test = test.replace('SplFileObject__fgetcsv.csv',
+            os.path.basename(full_dest_filename).replace('.php', '.csv'))
 
     file(full_dest_filename, 'w').write(test)
 
@@ -624,10 +618,10 @@ file('test/zend/config.hdf', 'w').write(
 stdout = subprocess.Popen(
     [
         'test/run',
-        'test/zend/all',
+        '--fbmake',
         '-m',
         'interp',
-        '--fbmake',
+        'test/zend/all',
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT
@@ -669,11 +663,10 @@ for test in results:
 
     source_file_exp = exps[0]
     _, dest_ext = os.path.splitext(source_file_exp)
-    os.rename(filename, dest_file)
+    shutil.copyfile(filename, dest_file)
     file(dest_file+dest_ext, 'w').write(
         file(source_file_exp).read().replace('/all', '/' + subpath)
     )
-    os.unlink(source_file_exp)
     for f in glob.glob(delete_file+"*"):
         os.unlink(f)
 

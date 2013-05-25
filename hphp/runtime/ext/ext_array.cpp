@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_iterator.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"

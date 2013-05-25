@@ -41,10 +41,6 @@ namespace Eval {
   x(pinitSentinel)                              \
   x(resource)                                   \
   x(Directory)                                  \
-  x(RecursiveDirectoryIterator)                 \
-  x(RecursiveIteratorIterator)                  \
-  x(DirectoryIterator)                          \
-  x(FilesystemIterator)                         \
   x(SplFileInfo)                                \
   x(SplFileObject)                              \
   x(DOMDocument)                                \
@@ -98,12 +94,6 @@ class SystemLib {
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
   static ObjectData* AllocDirectoryObject();
-  static ObjectData* AllocRecursiveDirectoryIteratorObject();
-  static ObjectData* AllocSplFileInfoObject(CVarRef filename);
-  static ObjectData* AllocSplFileObjectObject(CVarRef filename,
-                                              CVarRef open_mode,
-                                              CVarRef use_include_path,
-                                              CVarRef context);
   static ObjectData* AllocPDOExceptionObject();
   static ObjectData* AllocSoapFaultObject(CVarRef code,
                                           CVarRef message,

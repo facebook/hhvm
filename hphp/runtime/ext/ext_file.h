@@ -58,7 +58,7 @@ bool f_flock(CObjRef handle, int operation, VRefParam wouldblock = uninit_null()
 Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",",
                   CStrRef enclosure = "\"");
 Variant f_fgetcsv(CObjRef handle, int64_t length = 0, CStrRef delimiter = ",",
-                  CStrRef enclosure = "\"");
+                  CStrRef enclosure = "\"", CStrRef escape = "\\");
 
 ///////////////////////////////////////////////////////////////////////////////
 // file name based file operations

@@ -570,7 +570,8 @@ static const char *lookup_trailing_spaces(const char *ptr, int len) {
 }
 
 Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
-                    char enclosure_char /* = '"' */) {
+                    char enclosure_char /* = '"' */,
+                    char escape_char /* = '\\' */) {
   String line = readLine(length);
   if (line.empty()) {
     return Array();
@@ -582,7 +583,6 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
   char *temp, *tptr, *line_end, *limit;
   const char *bptr;
-  const char escape_char = '\\';
 
   int64_t temp_len, line_end_len;
   bool first_field = true;

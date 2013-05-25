@@ -57,7 +57,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  string(%d) "%s/sample_dir/dir/empty empty
+  string(%d) "%s/sample_dir/dir dir
 "
   [1]=>
   string(%d) "%s/sample_dir/empty empty
@@ -69,6 +69,38 @@ array(5) {
   string(%d) "%s/sample_dir/fix_mtimes.inc fix_mtimes.inc
 "
   [4]=>
+  string(%d) "%s/sample_dir/symlink symlink
+"
+}
+array(10) {
+  [0]=>
+  string(%d) "%s/sample_dir/dir/empty empty
+"
+  [1]=>
+  string(%d) "%s/sample_dir/dir/empty empty
+"
+  [2]=>
+  string(%d) "%s/sample_dir/empty empty
+"
+  [3]=>
+  string(%d) "%s/sample_dir/empty empty
+"
+  [4]=>
+  string(%d) "%s/sample_dir/file file
+"
+  [5]=>
+  string(%d) "%s/sample_dir/file file
+"
+  [6]=>
+  string(%d) "%s/sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  [7]=>
+  string(%d) "%s/sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  [8]=>
+  string(%d) "%s/sample_dir/symlink symlink
+"
+  [9]=>
   string(%d) "%s/sample_dir/symlink symlink
 "
 }

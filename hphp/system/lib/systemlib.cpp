@@ -111,20 +111,6 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
                                                  detail, name, header));
 }
 
-ObjectData* SystemLib::AllocSplFileObjectObject(CVarRef filename,
-                                                CVarRef open_mode,
-                                                CVarRef use_include_path,
-                                                CVarRef context) {
-  CREATE_AND_CONSTRUCT(SplFileObject, CREATE_VECTOR4(filename,
-                                                     open_mode,
-                                                     use_include_path,
-                                                     context));
-}
-
-ObjectData* SystemLib::AllocSplFileInfoObject(CVarRef filename) {
-  CREATE_AND_CONSTRUCT(SplFileInfo, CREATE_VECTOR1(filename));
-}
-
 ObjectData* SystemLib::AllocKeysIterableObject(CVarRef mp) {
   CREATE_AND_CONSTRUCT(KeysIterable, CREATE_VECTOR1(mp));
 }
@@ -162,7 +148,6 @@ ObjectData* SystemLib::AllocKeyedIterableViewObject(CVarRef iterable) {
 #undef CREATE_AND_CONSTRUCT
 
 ALLOC_OBJECT_STUB(Directory);
-ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);
 ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////

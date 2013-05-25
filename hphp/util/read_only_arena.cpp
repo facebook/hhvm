@@ -21,6 +21,10 @@
 
 #include "hphp/util/assertions.h"
 
+#ifndef MAP_ANONYMOUS
+# define MAP_ANONYMOUS MAP_ANON
+#endif
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

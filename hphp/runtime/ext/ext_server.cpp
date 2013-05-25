@@ -241,7 +241,7 @@ void f_xbox_schedule_thread_reset() {
 int64_t f_xbox_get_thread_time() {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
-    return time(NULL) - handler->getCreationTime();
+    return time(nullptr) - handler->getLastResetTime();
   }
   throw Exception("Not an xbox worker!");
 }

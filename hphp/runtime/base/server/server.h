@@ -21,6 +21,8 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 
+#include <memory>
+
 /**
  * (1) For people who want to quickly come up with an HTTP server handling
  *     their specific requests, we really want to minimize writing an HTTP
@@ -35,8 +37,8 @@
  *
  *     Then, run a server like this,
  *
- *       ServerPtr server(new TypedServer<LibEventServer, MyRequestHandler>
- *          ("127.0.0.1", 80, 20));
+ *       ServerPtr server = make_shared<LibEventServer>("127.0.0.1", 80, 20);
+ *       server->setRequestHandlerFactory<MyRequestHandler>();
  *       Server::InstallStopSignalHandlers(server);
  *       server->start();
  *
@@ -83,6 +85,8 @@ public:
   virtual void handleRequest(Transport *transport) = 0;
 };
 
+typedef std::function<std::unique_ptr<RequestHandler>()> RequestHandlerFactory;
+
 /**
  * Base class of an HTTP server. Defining minimal interface an HTTP server
  * needs to implement.
@@ -112,6 +116,24 @@ public:
    * Constructor.
    */
   Server(const std::string &address, int port, int threadCount);
+
+  /**
+   * Set the RequestHandlerFactory that this server will use.
+   * This must be called before start().
+   */
+  void setRequestHandlerFactory(RequestHandlerFactory f) {
+    m_handlerFactory = f;
+  }
+  /**
+   * Helper function to set the RequestHandlerFactory to a
+   * GenericRequestHandlerFactory for the specified handler type.
+   */
+  template<class TRequestHandler>
+  void setRequestHandlerFactory() {
+    setRequestHandlerFactory([] {
+      return std::unique_ptr<RequestHandler>(new TRequestHandler());
+    });
+  }
 
   /**
    * Informational.
@@ -163,11 +185,11 @@ public:
   virtual int getLibEventConnectionCount() = 0;
 
   /**
-   * This is for TypedServer to specialize a worker class to use.
+   * Create a new RequestHandler.
    */
-  virtual RequestHandler *createRequestHandler() = 0;
-  virtual void releaseRequestHandler(RequestHandler *handler) = 0;
-  virtual void onThreadExit(RequestHandler *handler) {}
+  std::unique_ptr<RequestHandler> createRequestHandler() {
+    return m_handlerFactory();
+  }
 
   /**
    * Overwrite for URL blocking.
@@ -185,36 +207,10 @@ protected:
   int m_port;
   int m_threadCount;
   mutable Mutex m_mutex;
+  RequestHandlerFactory m_handlerFactory;
 
 private:
   RunStatus m_status;
-};
-
-/**
- * Binding different types together to form a concrete HTTP server that we
- * can run. By conforming to their owns interfaces, RequestHandler and
- * Server classes should be able to get mixed up and continue to work.
- */
-template<class TServer, class TRequestHandler>
-class TypedServer : public TServer {
-public:
-  TypedServer(const std::string &address, int port, int threadCount,
-              int timeoutSeconds)
-    : TServer(address, port, threadCount, timeoutSeconds) {
-  }
-
-  virtual RequestHandler *createRequestHandler() {
-    return new TRequestHandler();
-  }
-
-  virtual void releaseRequestHandler(RequestHandler *handler) {
-    delete handler;
-  }
-
-  virtual void onThreadExit(RequestHandler *handler) {
-    TServer::onThreadExit(handler);
-    delete handler;
-  }
 };
 
 /**
@@ -236,14 +232,14 @@ public:
 
 class InvalidUrlException : public ServerException {
 public:
-  InvalidUrlException(const char *part)
+  explicit InvalidUrlException(const char *part)
     : ServerException("Invalid URL: %s", part) {
   }
 };
 
 class InvalidMethodException : public ServerException {
 public:
-  InvalidMethodException(const char *msg)
+  explicit InvalidMethodException(const char *msg)
     : ServerException("Invalid method: %s", msg) {
   }
 };

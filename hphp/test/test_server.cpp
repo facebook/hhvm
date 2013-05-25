@@ -29,6 +29,8 @@
 #include "hphp/runtime/base/util/http_client.h"
 #include "hphp/runtime/base/runtime_option.h"
 
+#include <boost/make_shared.hpp>
+
 using namespace HPHP;
 
 #define PORT_MIN 7300
@@ -186,8 +188,9 @@ public:
 static int find_server_port(int port_min, int port_max) {
   for (int port = port_min; ; port++) {
     try {
-      ServerPtr server(new TypedServer<LibEventServer, TestServerRequestHandler>
-                       ("127.0.0.1", port, 50, -1));
+      ServerPtr server = boost::make_shared<LibEventServer>(
+          "127.0.0.1", port, 50, -1);
+      server->setRequestHandlerFactory<TestServerRequestHandler>();
       server->start();
       server->stop();
       server->waitForEnd();
@@ -563,8 +566,9 @@ bool TestServer::TestHttpClient() {
   ServerPtr server;
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      server = ServerPtr(new TypedServer<LibEventServer, EchoHandler>
-                         ("127.0.0.1", s_server_port, 50, -1));
+      server = boost::make_shared<LibEventServer>(
+          "127.0.0.1", s_server_port, 50, -1);
+      server->setRequestHandlerFactory<EchoHandler>();
       server->start();
       break;
     } catch (const FailedToListenException& e) {

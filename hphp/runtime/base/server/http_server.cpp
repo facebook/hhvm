@@ -33,10 +33,12 @@
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/db_conn.h"
+#include "hphp/util/ssl_init.h"
 #include "hphp/runtime/ext/ext_apc.h"
+
+#include <boost/make_shared.hpp>
 #include <sys/types.h>
 #include <signal.h>
-#include "hphp/util/ssl_init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,44 +77,43 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
     : kNumProcessors;
 
   if (RuntimeOption::ServerPortFd != -1 || RuntimeOption::SSLPortFd != -1) {
-    LibEventServerWithFd* server =
-      (new TypedServer<LibEventServerWithFd, HttpRequestHandler>
-       (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        startingThreadCount,
-        RuntimeOption::RequestTimeoutSeconds));
-    maybeEnableThrottle(server);
-    server->setServerSocketFd(RuntimeOption::ServerPortFd);
-    server->setSSLSocketFd(RuntimeOption::SSLPortFd);
-    m_pageServer = ServerPtr(server);
-  } else if (RuntimeOption::TakeoverFilename.empty()) {
-    auto const server = new TypedServer<LibEventServer, HttpRequestHandler>
-       (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
+    auto const server = boost::make_shared<LibEventServerWithFd>(
+        RuntimeOption::ServerIP, RuntimeOption::ServerPort,
         startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds);
-    maybeEnableThrottle(server);
-    m_pageServer = ServerPtr(server);
-  } else {
-    LibEventServerWithTakeover* server =
-      (new TypedServer<LibEventServerWithTakeover, HttpRequestHandler>
-       (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
+    maybeEnableThrottle(server.get());
+    server->setServerSocketFd(RuntimeOption::ServerPortFd);
+    server->setSSLSocketFd(RuntimeOption::SSLPortFd);
+    m_pageServer = server;
+  } else if (RuntimeOption::TakeoverFilename.empty()) {
+    auto const server = boost::make_shared<LibEventServer>(
+        RuntimeOption::ServerIP, RuntimeOption::ServerPort,
         startingThreadCount,
-        RuntimeOption::RequestTimeoutSeconds));
-    maybeEnableThrottle(server);
+        RuntimeOption::RequestTimeoutSeconds);
+    maybeEnableThrottle(server.get());
+    m_pageServer = server;
+  } else {
+    auto const server = boost::make_shared<LibEventServerWithTakeover>(
+        RuntimeOption::ServerIP, RuntimeOption::ServerPort,
+        startingThreadCount,
+        RuntimeOption::RequestTimeoutSeconds);
+    maybeEnableThrottle(server.get());
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
     server->addTakeoverListener(this);
-    m_pageServer = ServerPtr(server);
+    m_pageServer = server;
   }
+  m_pageServer->setRequestHandlerFactory<HttpRequestHandler>();
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
     assert(SSLInit::IsInited());
     m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
   }
 
-  m_adminServer = ServerPtr
-    (new TypedServer<LibEventServer, AdminRequestHandler>
-     (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
+  m_adminServer = boost::make_shared<LibEventServer>(
+      RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
       RuntimeOption::AdminThreadCount,
-      RuntimeOption::RequestTimeoutSeconds));
+      RuntimeOption::RequestTimeoutSeconds);
+  m_adminServer->setRequestHandlerFactory<AdminRequestHandler>();
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {

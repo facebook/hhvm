@@ -33,8 +33,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
-  : m_count(0), m_reset(false),
-  m_returnEncodeType(Json) {
+  : m_requestsSinceReset(0),
+    m_reset(false),
+    m_logResets(info),
+    m_returnEncodeType(Json) {
+  initState();
+}
+
+RPCRequestHandler::~RPCRequestHandler() {
+  cleanupState();
+}
+
+void RPCRequestHandler::initState() {
   hphp_session_init();
   bool isServer = RuntimeOption::ServerExecutionMode();
   if (isServer) {
@@ -45,25 +55,36 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
     m_context = g_context.getNoCheck();
     m_context->obSetImplicitFlush(true);
   }
-  m_created = time(0);
+  m_lastReset = time(0);
 
   Logger::ResetRequestCount();
-  if (info) {
-    Logger::Info("creating new RPC request handler");
+  if (m_logResets) {
+    Logger::Info("initializing RPC request handler");
   }
+
+  m_reset = false;
+  m_requestsSinceReset = 0;
 }
 
-RPCRequestHandler::~RPCRequestHandler() {
+void RPCRequestHandler::cleanupState() {
   hphp_context_exit(m_context, false);
   hphp_session_exit();
 }
 
 bool RPCRequestHandler::needReset() const {
-  if (m_reset || m_serverInfo->alwaysReset()) return true;
-  return (time(0) - m_created) > m_serverInfo->getMaxDuration();
+  return (m_reset ||
+          m_serverInfo->alwaysReset() ||
+          ((time(0) - m_lastReset) > m_serverInfo->getMaxDuration()) ||
+          (m_requestsSinceReset >= m_serverInfo->getMaxRequest()));
 }
 
 void RPCRequestHandler::handleRequest(Transport *transport) {
+  if (needReset()) {
+    cleanupState();
+    initState();
+  }
+  ++m_requestsSinceReset;
+
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
@@ -110,8 +131,9 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   }
 
   // return encoding type
+  ReturnEncodeType returnEncodeType = m_returnEncodeType;
   if (transport->getParam("return") == "serialize") {
-    setReturnEncodeType(Serialize);
+    returnEncodeType = Serialize;
   }
 
   // resolve virtual host
@@ -143,7 +165,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // record request for debugging purpose
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
-  bool ret = executePHPFunction(transport, sourceRootInfo);
+  bool ret = executePHPFunction(transport, sourceRootInfo, returnEncodeType);
   HttpRequestHandler::GetAccessLog().log(transport, vhost);
   /*
    * HPHP logs may need to access data in ServerStats, so we have to
@@ -159,7 +181,8 @@ static const StaticString
   s_HPHP_RPC("HPHP_RPC");
 
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
-                                           SourceRootInfo &sourceRootInfo) {
+                                           SourceRootInfo &sourceRootInfo,
+                                           ReturnEncodeType returnEncodeType) {
   // reset timeout counter
   ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0);
 
@@ -271,11 +294,11 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       String response;
       switch (output) {
         case 0: {
-          assert(m_returnEncodeType == Json ||
-                 m_returnEncodeType == Serialize);
+          assert(returnEncodeType == Json ||
+                 returnEncodeType == Serialize);
           try {
-            response = (m_returnEncodeType == Json) ? f_json_encode(funcRet)
-                                                    : f_serialize(funcRet);
+            response = (returnEncodeType == Json) ?  f_json_encode(funcRet)
+                                                  : f_serialize(funcRet);
           } catch (...) {
             serializeFailed = true;
           }

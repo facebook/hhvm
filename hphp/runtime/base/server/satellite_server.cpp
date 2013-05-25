@@ -22,7 +22,11 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/util.h"
+#include "folly/Memory.h"
 
+#include <boost/make_shared.hpp>
+
+using folly::make_unique;
 using std::set;
 
 namespace HPHP {
@@ -100,10 +104,10 @@ private:
 class InternalPageServer : public SatelliteServer {
 public:
   explicit InternalPageServer(SatelliteServerInfoPtr info) {
-    InternalPageServerImplPtr server
-      (new TypedServer<InternalPageServerImpl, HttpRequestHandler>
-       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
-        info->getTimeoutSeconds()));
+    auto const server = boost::make_shared<InternalPageServerImpl>(
+        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
+        info->getTimeoutSeconds());
+    server->setRequestHandlerFactory<HttpRequestHandler>();
     server->create(info->getURLs());
     m_server = server;
   }
@@ -125,10 +129,10 @@ private:
 class DanglingPageServer : public SatelliteServer {
 public:
   explicit DanglingPageServer(SatelliteServerInfoPtr info) {
-    m_server = ServerPtr
-      (new TypedServer<LibEventServer, HttpRequestHandler>
-       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
-        info->getTimeoutSeconds()));
+    m_server = boost::make_shared<LibEventServer>(
+        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
+        info->getTimeoutSeconds());
+    m_server->setRequestHandlerFactory<HttpRequestHandler>();
   }
 
   virtual void start() {
@@ -145,48 +149,17 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // RPCServer: LibEventServer + RPCRequestHandler
 
-static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_rpc_request_handler);
-
-class RPCServerImpl : public LibEventServer {
-public:
-  RPCServerImpl(const std::string &address, SatelliteServerInfoPtr info)
-    : LibEventServer(address, info->getPort(), info->getThreadCount(),
-                     info->getTimeoutSeconds()),
-      m_serverInfo(info) {
-  }
-
-  virtual RequestHandler *createRequestHandler() {
-    if (s_rpc_request_handler.isNull()) {
-      s_rpc_request_handler->setServerInfo(m_serverInfo);
-      return s_rpc_request_handler.get();
-    }
-    if (s_rpc_request_handler->needReset() ||
-        s_rpc_request_handler->incRequest() > m_serverInfo->getMaxRequest()) {
-      s_rpc_request_handler.destroy();
-      s_rpc_request_handler->setServerInfo(m_serverInfo);
-      s_rpc_request_handler->incRequest();
-    }
-    return s_rpc_request_handler.get();
-  }
-
-  virtual void releaseRequestHandler(RequestHandler *handler) {
-    // do nothing
-  }
-
-  virtual void onThreadExit(RequestHandler *handler) {
-    s_rpc_request_handler.destroy();
-  }
-
-  virtual bool supportReset() { return true; }
-
-private:
-  SatelliteServerInfoPtr m_serverInfo;
-};
-
 class RPCServer : public SatelliteServer {
 public:
   explicit RPCServer(SatelliteServerInfoPtr info) {
-    m_server = ServerPtr(new RPCServerImpl(RuntimeOption::ServerIP, info));
+    m_server = boost::make_shared<LibEventServer>(
+        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
+        info->getTimeoutSeconds());
+    m_server->setRequestHandlerFactory([info] {
+      auto handler = make_unique<RPCRequestHandler>();
+      handler->setServerInfo(info);
+      return handler;
+    });
   }
 
   virtual void start() {

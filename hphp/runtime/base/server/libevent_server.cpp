@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/base/server/libevent_server.h"
 
-#include <atomic>
-
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/base/server/server_stats.h"
@@ -78,7 +76,7 @@ void LibEventJob::stopTimer() {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventWorker
 
-LibEventWorker::LibEventWorker() : m_handler(nullptr) {
+LibEventWorker::LibEventWorker() {
 }
 
 LibEventWorker::~LibEventWorker() {
@@ -91,11 +89,6 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   LibEventServer *server = (LibEventServer*)m_opaque;
 
   server->bumpReqCount();
-
-  if (m_handler == nullptr || server->supportReset()) {
-    m_handler = server->createRequestHandler();
-    assert(m_handler);
-  }
 
   LibEventTransport transport(server, request, m_id);
 #ifdef _EVENT_USE_OPENSSL
@@ -144,12 +137,14 @@ void LibEventWorker::onThreadEnter() {
   if (RuntimeOption::EnableDebugger) {
     Eval::Debugger::RegisterThread();
   }
+  m_handler = server->createRequestHandler();
 }
 
 void LibEventWorker::onThreadExit() {
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
-  server->onThreadExit(m_handler);
+  server->onThreadExit();
+  m_handler.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -401,7 +396,7 @@ void LibEventServer::onThreadEnter() {
     (&ThreadInfo::s_threadInfo->m_reqInjectionData);
 }
 
-void LibEventServer::onThreadExit(RequestHandler *handler) {
+void LibEventServer::onThreadExit() {
   m_timeoutThreadData.removeRequestThread
     (&ThreadInfo::s_threadInfo->m_reqInjectionData);
 }

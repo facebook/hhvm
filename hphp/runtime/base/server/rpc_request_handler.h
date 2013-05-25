@@ -35,7 +35,7 @@ public:
     Serialize = 2,
   };
 
-  RPCRequestHandler(bool info = true);
+  explicit RPCRequestHandler(bool info = true);
   virtual ~RPCRequestHandler();
 
   void setServerInfo(SatelliteServerInfoPtr info) { m_serverInfo = info;}
@@ -44,30 +44,29 @@ public:
   virtual void handleRequest(Transport *transport);
 
   /**
-   * Count how many requests have been processed on this handler.
+   * Force a reset before the next request.
    */
-  int incRequest() { return ++m_count;}
-
-  /**
-   * Whether state has been dirtied.
-   */
-  bool needReset() const;
   void setReset() { m_reset = true; }
 
-  time_t getCreationTime() const { return m_created; }
+  time_t getLastResetTime() const { return m_lastReset; }
 
   void setReturnEncodeType(ReturnEncodeType et) { m_returnEncodeType = et; }
-  ReturnEncodeType getReturnEncodeType() { return m_returnEncodeType; }
+  ReturnEncodeType getReturnEncodeType() const { return m_returnEncodeType; }
 private:
   ExecutionContext *m_context;
   SatelliteServerInfoPtr m_serverInfo;
-  int m_count;
+  int m_requestsSinceReset;
   bool m_reset;
+  bool m_logResets;
   ReturnEncodeType m_returnEncodeType;
-  time_t m_created;
+  time_t m_lastReset;
 
+  void initState();
+  void cleanupState();
+  bool needReset() const;
   bool executePHPFunction(Transport *transport,
-                          SourceRootInfo &sourceRootInfo);
+                          SourceRootInfo &sourceRootInfo,
+                          ReturnEncodeType returnEncodeType);
 
   std::string getSourceFilename(const std::string &path,
                                 SourceRootInfo &sourceRootInfo);

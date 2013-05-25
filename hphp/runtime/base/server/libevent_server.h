@@ -34,7 +34,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(LibEventJob);
 class LibEventJob {
 public:
-  LibEventJob(evhttp_request *req);
+  explicit LibEventJob(evhttp_request *req);
 
   const timespec &getStartTimer() const { return start;}
   void stopTimer();
@@ -68,7 +68,7 @@ struct LibEventWorker
   virtual void onThreadExit();
 
 private:
-  RequestHandler *m_handler;
+  std::unique_ptr<RequestHandler> m_handler;
 };
 
 /**
@@ -152,7 +152,7 @@ public:
   int getLibEventConnectionCount();
 
   void onThreadEnter();
-  virtual void onThreadExit(RequestHandler *handler);
+  void onThreadExit();
 
   /**
    * Request handler called by evhttp library.
@@ -175,9 +175,6 @@ public:
    * port as specified in parameter.
    */
   virtual bool enableSSL(void *sslCTX, int port);
-
-  // Whether the server may reset the request handler, e.g., the RPC server.
-  virtual bool supportReset() { return false; }
 
 protected:
   virtual int getAcceptSocket();

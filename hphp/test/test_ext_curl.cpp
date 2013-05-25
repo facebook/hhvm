@@ -20,6 +20,8 @@
 #include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/base/server/libevent_server.h"
 
+#include <boost/make_shared.hpp>
+
 #define PORT_MIN 7100
 #define PORT_MAX 7120
 
@@ -53,8 +55,9 @@ static std::string get_request_uri() {
 static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      ServerPtr server(new TypedServer<LibEventServer, TestCurlRequestHandler>
-                       ("127.0.0.1", s_server_port, 4, -1));
+      ServerPtr server = boost::make_shared<LibEventServer>(
+          "127.0.0.1", s_server_port, 4, -1);
+      server->setRequestHandlerFactory<TestCurlRequestHandler>();
       server->start();
       return server;
 

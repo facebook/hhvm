@@ -151,7 +151,7 @@ struct JEMallocInitializer {
   }
 };
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__APPLE__)
 // Construct this object before any others.
 // 101 is the highest priority allowed by the init_priority attribute.
 // http://gcc.gnu.org/onlinedocs/gcc-4.0.4/gcc/C_002b_002b-Attributes.html

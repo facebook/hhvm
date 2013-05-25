@@ -1542,7 +1542,7 @@ TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest, bool isCall) {
    */
   CodeCursor cg(a, src);
   assert(isSmashable(a.code.frontier, kJmpLen));
-  if (dest > src && dest - src <= 7) {
+  if (dest > src && dest - src <= kJmpLen) {
     assert(!isCall);
     a.    emitNop(dest - src);
   } else if (!isCall) {

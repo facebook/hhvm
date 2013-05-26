@@ -15,21 +15,31 @@
 #if defined(__x86_64__)
   .byte 0
   .align 16
+#ifndef __APPLE__
   .section .text
+#else
+  .section .text,
+#endif
   .globl enterTCHelper
 enterTCHelper:
   // Prologue
+#ifndef __APPLE__
   .cfi_startproc
+#endif
   push %rbp
+#ifndef __APPLE__
   .cfi_adjust_cfa_offset 8  // offset to previous frame relative to %rsp
   .cfi_offset rbp, -16      // Where to find previous value of rbp
+#endif
 
   // Set firstAR->m_savedRbp to point to this frame.
   mov %rsp, (%r8)
 
   // Save infoPtr
   push %rcx
+#ifndef __APPLE__
   .cfi_adjust_cfa_offset 8
+#endif
 
   // Set up special registers used for translated code.
   mov %rdi, %rbx          // rVmSp
@@ -66,20 +76,28 @@ enterTCHelper:
   add $0x180, %rsp // kReservedRSPScratchSpace
   // Restore infoPtr into %rbx
   pop %rbx
+#ifndef __APPLE__
   .cfi_adjust_cfa_offset -8
+#endif
 
   // Copy the values passed from jitted code into *infoPtr
   mov %rdi, 0x0(%rbx)
   test %rdi,%rdi
   jnz .LenterTCHelper$copyReqArgs
+#ifndef __APPLE__
   .cfi_remember_state
+#endif
   pop %rbp
+#ifndef __APPLE__
   .cfi_restore rbp
   .cfi_adjust_cfa_offset -8
+#endif
   ret
 
 .LenterTCHelper$copyReqArgs:
+#ifndef __APPLE__
   .cfi_restore_state
+#endif
   mov %rsi, 0x8(%rbx)
   mov %rdx, 0x10(%rbx)
   mov %rcx, 0x18(%rbx)
@@ -94,10 +112,14 @@ enterTCHelper:
 
   // Epilogue
   pop %rbp
+#ifndef __APPLE__
   .cfi_restore rbp
   .cfi_adjust_cfa_offset -8
+#endif
   ret
+#ifndef __APPLE__
   .cfi_endproc
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

@@ -66,7 +66,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
   auto const sortedBlocks = folly::lazy([&]{
-    return sortCfg(trace, *irFactory);
+    return rpoSortCfg(trace, *irFactory);
   });
 
   /*

@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_CFG_H_
 #define incl_HPHP_VM_CFG_H_
 
+#include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/vm/translator/hopt/block.h"
 #include "hphp/runtime/vm/translator/hopt/trace.h"
 
@@ -70,7 +71,18 @@ void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
  *
  * Post: isRPOSorted(return value)
  */
-BlockList sortCfg(Trace*, const IRFactory&);
+BlockList rpoSortCfg(Trace*, const IRFactory&);
+
+/*
+ * Return an iterator into an rpo-sorted BlockList for a given Block.
+ * Uses the postId() assigned by rpoSortCfg.
+ *
+ * Pre: isRPOSorted(cfg)
+ */
+inline BlockList::const_iterator
+rpoIteratorTo(const BlockList& cfg, Block* b) {
+  return cfg.end() - (b->postId() + 1);
+}
 
 /*
  * Returns: true if the supplied block list is sorted in reverse post
@@ -80,17 +92,17 @@ bool isRPOSorted(const BlockList&);
 
 /*
  * Compute the postorder number of each immediate dominator of each
- * block, using a list produced by sortCfg().
+ * block, using a list produced by rpoSortCfg().
  *
  * Pre: isRPOSorted(blocks)
  */
-typedef std::vector<int> IdomVector;
+typedef smart::vector<int> IdomVector;
 IdomVector findDominators(const BlockList& blocks);
 
 /*
  * A vector of children lists, indexed by block->postId()
  */
-typedef std::vector<BlockPtrList> DomChildren;
+typedef smart::vector<BlockList> DomChildren;
 
 /*
  * Compute the dominator tree, then populate a list of dominator children

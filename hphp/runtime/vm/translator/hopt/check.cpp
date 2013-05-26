@@ -136,7 +136,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
   forEachTraceBlock(trace, checkBlock);
 
   // Check valid successor/predecessor edges.
-  auto const blocks = sortCfg(trace, factory);
+  auto const blocks = rpoSortCfg(trace, factory);
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -157,7 +157,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
   }
 
   // visit dom tree in preorder, checking all tmps
-  std::vector<BlockPtrList> children = findDomChildren(blocks);
+  auto const children = findDomChildren(blocks);
   boost::dynamic_bitset<> defined0(factory.numTmps());
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, boost::dynamic_bitset<>& defined) {
@@ -185,7 +185,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
 }
 
 bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
-  auto const blocks   = sortCfg(trace, irFactory);
+  auto const blocks   = rpoSortCfg(trace, irFactory);
   auto const children = findDomChildren(blocks);
 
   // CallBuiltin is ok because it is not a php-level call.  (It will
@@ -236,7 +236,7 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
                     const RegAllocInfo& regs) {
   assert(checkCfg(trace, factory));
 
-  auto blocks = sortCfg(trace, factory);
+  auto blocks = rpoSortCfg(trace, factory);
   auto children = findDomChildren(blocks);
   forPreorderDoms(blocks.front(), children, RegState(),
                   [&] (Block* block, RegState& state) {

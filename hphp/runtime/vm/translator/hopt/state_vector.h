@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 

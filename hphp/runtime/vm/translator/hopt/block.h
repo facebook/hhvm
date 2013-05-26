@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_BLOCK_H_
 #define incl_HPHP_VM_BLOCK_H_
 
+#include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/vm/translator/hopt/ir.h"
 #include "hphp/runtime/vm/translator/hopt/edge.h"
 #include "hphp/runtime/vm/translator/hopt/irinstruction.h"
@@ -228,8 +229,8 @@ struct Block : boost::noncopyable {
   EdgeList m_preds;         // Edges that point to this block
   Hint m_hint;              // execution frequency hint
 };
-typedef std::list<Block*> BlockList;
-typedef std::forward_list<Block*> BlockPtrList;
+
+typedef smart::vector<Block*> BlockList;
 
 inline void Edge::setTo(Block* to) {
   m_to = Block::updatePreds(this, to);

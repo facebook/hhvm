@@ -168,7 +168,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
   // 2. get a list of reachable blocks by sorting them, and erase any
   //    blocks that are unreachable.
   bool needsReflow = false;
-  BlockList blocks = sortCfg(trace, *factory);
+  BlockList blocks = rpoSortCfg(trace, *factory);
   StateVector<Block, bool> reachable(factory, false);
   for (Block* b : blocks) reachable[b] = true;
   for (Block* b : blocks) {

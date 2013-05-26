@@ -1066,18 +1066,20 @@ bool isConvIntOrPtrToBool(IRInstruction* instr) {
   }
 }
 
-BlockList sortCfg(Trace* trace, const IRFactory& factory) {
+BlockList rpoSortCfg(Trace* trace, const IRFactory& factory) {
   assert(trace->isMain());
   BlockList blocks;
+  blocks.reserve(factory.numBlocks());
   unsigned next_id = 0;
   postorderWalk(
     [&](Block* block) {
       block->setPostId(next_id++);
-      blocks.push_front(block);
+      blocks.push_back(block);
     },
     factory.numBlocks(),
     trace->front()
   );
+  std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= factory.numBlocks());
   assert(next_id <= factory.numBlocks());
   return blocks;
@@ -1154,10 +1156,10 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
 
 DomChildren findDomChildren(const BlockList& blocks) {
   IdomVector idom = findDominators(blocks);
-  DomChildren children(blocks.size(), BlockPtrList());
+  DomChildren children(blocks.size(), BlockList());
   for (Block* block : blocks) {
     int idom_id = idom[block->postId()];
-    if (idom_id != -1) children[idom_id].push_front(block);
+    if (idom_id != -1) children[idom_id].push_back(block);
   }
   return children;
 }

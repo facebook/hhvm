@@ -187,8 +187,8 @@ private:
   smart::list<RegState*> m_allocatedRegs;
 
   smart::vector<SlotInfo> m_slots;  // Spill info indexed by slot id
-  BlockList m_blocks;             // all basic blocks in reverse postorder
-  IdomVector m_idoms;             // immediate dominator vector
+  BlockList m_blocks;               // all basic blocks in reverse postorder
+  IdomVector m_idoms;               // immediate dominator vector
 
   // any tmp that has been spilled has an entry in this array with
   // the spill-slot number, which is an index into m_slots[]. tmps that
@@ -1087,7 +1087,7 @@ RegAllocInfo LinearScan::allocRegs(Trace* trace, LifetimeInfo* lifetime) {
     coalesce(trace);
   }
 
-  m_blocks = sortCfg(trace, *m_irFactory);
+  m_blocks = rpoSortCfg(trace, *m_irFactory);
   m_idoms = findDominators(m_blocks);
 
   if (!packed_tv) {

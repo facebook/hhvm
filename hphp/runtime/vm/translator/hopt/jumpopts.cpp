@@ -70,7 +70,7 @@ Block* findMainExitBlock(Trace* trace, IRFactory* irFactory) {
    * something like the assert below to find the main exit.)
    */
   if (debug) {
-    auto const sorted = sortCfg(trace, *irFactory);
+    auto const sorted = rpoSortCfg(trace, *irFactory);
     auto it = sorted.rbegin();
     while (it != sorted.rend() && !(*it)->isMain()) {
       ++it;
@@ -143,7 +143,7 @@ void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
   auto const mainExit     = findMainExitBlock(trace, irFactory);
   if (!isNormalExit(mainExit)) return;
 
-  auto const &mainPreds = mainExit->preds();
+  auto const& mainPreds = mainExit->preds();
   if (mainPreds.size() != 1) return;
 
   auto const jccBlock = mainPreds.front().from();

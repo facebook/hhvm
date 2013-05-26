@@ -840,7 +840,7 @@ void TraceBuilder::reoptimize() {
     return;
   }
 
-  BlockList sortedBlocks = sortCfg(m_trace.get(), m_irFactory);
+  BlockList sortedBlocks = rpoSortCfg(m_trace.get(), m_irFactory);
   IdomVector idoms = findDominators(sortedBlocks);
   clearTrackedState();
 

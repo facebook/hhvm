@@ -62,8 +62,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
     targetIt = ++target->iteratorTo(newInst);
   }
 
-  // TODO(#2424504): don't use linear search
-  auto it = std::find(rpoBlocks.begin(), rpoBlocks.end(), target);
+  auto it = rpoIteratorTo(rpoBlocks, target);
   for (; it != rpoBlocks.end(); ++it) {
     FTRACE(5, "cloneToBlock: rewriting block {}\n", (*it)->getId());
     for (auto& inst : **it) {
@@ -129,8 +128,7 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
     }
   };
 
-  // TODO(#2424504): don't use linear search
-  auto it = std::find(blocks.begin(), blocks.end(), changed);
+  auto it = rpoIteratorTo(blocks, changed);
   assert(it != blocks.end());
   for (; it != blocks.end(); ++it) {
     FTRACE(5, "reflowTypes: visiting block {}\n", (*it)->getId());

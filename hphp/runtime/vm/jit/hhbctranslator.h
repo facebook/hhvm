@@ -595,25 +595,63 @@ private:
   IRInstruction* makeMarker(Offset bcOff);
   void emitMarker();
 
-  // Exit trace creation routines.
+private: // Exit trace creation routines.
   Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(Offset targetBcOff,
                       std::vector<SSATmp*>& spillValues);
   Trace* getExitTraceWarn(Offset targetBcOff,
                           std::vector<SSATmp*>& spillValues,
                           const StringData* warning);
+
+  /*
+   * Create a custom side exit---that is, an exit that does some
+   * amount work before leaving the trace.
+   *
+   * The exit trace will spill things with a Marker for the current bytecode.
+   *
+   * Then it will do an ExceptionBarrier, followed by whatever is done
+   * by the CustomExit(Trace*) function.  The custom exit may add
+   * instructions to the exit trace, and optionally may return an
+   * additional SSATmp* to spill on the stack.  If there is no
+   * additional SSATmp*, it should return nullptr.
+   *
+   * TODO(#2447661): this should be way better than this, should allow
+   * using gen/push/spillStack/etc.
+   */
+  template<class ExitLambda>
+  Trace* makeSideExit(Offset targetBcOff, ExitLambda exit);
+
+  /*
+   * Generates an exit trace which will continue execution without HHIR.
+   * This should be used in situations that HHIR cannot handle -- ideally
+   * only in slow paths.
+   */
   Trace* getExitSlowTrace();
   Trace* getCatchTrace();
 
+  /*
+   * Implementation for the above.  Takes spillValues, target offset,
+   * and a flag for whether to make a no-IR exit.
+   *
+   * Also takes a CustomExit(Trace*) function that may perform more
+   * operations and optionally return a single additional SSATmp*
+   * (otherwise nullptr) to spill on the stack before exiting.
+   */
   enum class ExitFlag {
     None,
     NoIR,
+
+    // DelayedMarker means to use the current instruction marker
+    // instead of one for targetBcOff.
+    DelayedMarker,
   };
+  typedef std::function<SSATmp* (Trace*)> CustomExit;
   Trace* getExitTraceImpl(Offset targetBcOff,
                           ExitFlag noIRExit,
                           std::vector<SSATmp*>& spillValues,
-                          const StringData* warning);
+                          const CustomExit&);
 
+private:
   /*
    * Accessors for the current function being compiled and its
    * class and unit.
@@ -633,6 +671,12 @@ private:
     srcKey.advance(curFunc()->unit());
     return srcKey;
   }
+
+  /*
+   * Return the bcOffset of the next instruction (whether it is in
+   * this tracelet or not).
+   */
+  Offset nextBcOff() const { return nextSrcKey().offset(); }
 
   /*
    * Helpers for resolving bytecode immediate ids.

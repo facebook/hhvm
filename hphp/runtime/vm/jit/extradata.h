@@ -288,6 +288,23 @@ struct CallArrayData : IRExtraData {
   Offset pc, after;
 };
 
+/*
+ * Name of a class constant.
+ */
+struct ClsCnsName : IRExtraData {
+  explicit ClsCnsName(const StringData* cls, const StringData* cns)
+    : clsName(cls)
+    , cnsName(cns)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(clsName->data(), "::", cnsName->data());
+  }
+
+  const StringData* clsName;
+  const StringData* cnsName;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -333,6 +350,8 @@ X(ReqBindJmpNoIR,               BCOffset);
 X(ReqRetranslateNoIR,           BCOffset);
 X(InlineCreateCont,             CreateContData);
 X(CallArray,                    CallArrayData);
+X(LdClsCns,                     ClsCnsName);
+X(LookupClsCns,                 ClsCnsName);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);

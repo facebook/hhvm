@@ -2119,8 +2119,8 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
 
 void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
                                                      int nStack) {
-  const Offset nextOff = m_ht.nextSrcKey().offset();
-  auto op = m_ni.mInstrOp();
+  auto const nextOff = m_ht.nextBcOff();
+  auto const op = m_ni.mInstrOp();
   const bool isSetWithRef = op == OpSetWithRefLM || op == OpSetWithRefRM;
 
   if (m_failedSetTrace) {

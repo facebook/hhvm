@@ -107,12 +107,6 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
       //
       // FIXME: I think most of these shouldn't be possible still
       // (except LdStack?).
-      //
-      // XXX These are possible once we remove the inferred/predicted
-      // type from emitCGetProp etc in HhbcTranslator. We need to
-      // delete label on these instructions if this is due to an
-      // assertType and also handled LdClsCns.
-      // TODO(#2035446): fix this for LdClsCns
       assert(opc == LdLoc || opc == LdStack ||
              opc == LdMem || opc == LdProp  ||
              opc == LdRef);
@@ -272,7 +266,7 @@ IRInstruction* HhbcTranslator::makeMarker(Offset bcOff) {
   int32_t stackOff = m_tb->spOffset() +
     m_evalStack.numCells() - m_stackDeficit;
 
-  FTRACE(2, "emitMarker: bc {} sp {} fn {}\n",
+  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
   MarkerData marker;
@@ -1521,40 +1515,25 @@ void HhbcTranslator::emitCmp(Opcode opc) {
   gen(DecRef, src1);
 }
 
-void HhbcTranslator::emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId) {
-  // This bytecode re-enters if there is no class with the given name
-  // and can throw a fatal error.
-  const StringData* cnsNameStr = lookupStringId(cnsNameStrId);
-  const StringData* clsNameStr = lookupStringId(clsNameStrId);
-  SSATmp* cnsNameTmp = cns(cnsNameStr);
-  SSATmp* clsNameTmp = cns(clsNameStr);
-  if (0) {
-    // TODO: 2068502 pick one of these two implementations and remove the other.
-    Trace* exitTrace = getExitSlowTrace();
-    SSATmp* cns = gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
-    gen(CheckInit, exitTrace, cns);
-    push(cns);
-  } else {
-    // if-then-else
-    // todo: t2068502: refine the type? hhbc spec says null|bool|int|dbl|str
-    //       and, str should always be static-str.
-    Type cnsType = Type::Cell;
-    SSATmp* c1 = gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
-    SSATmp* result = m_tb->cond(curFunc(),
-      [&] (Block* taken) { // branch
-        gen(CheckInit, taken, c1);
-      },
-      [&] { // Next: LdClsCns hit in TC
-        return c1;
-      },
-      [&] { // Taken: miss in TC, do lookup & init
-        m_tb->hint(Block::Unlikely);
-        return gen(LookupClsCns, getCatchTrace(),
-                   cnsType, cnsNameTmp, clsNameTmp);
-      }
-    );
-    push(result);
-  }
+void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
+  auto const clsCnsName = ClsCnsName { lookupStringId(clsNameId),
+                                       lookupStringId(cnsNameId) };
+
+  // If we have to side exit, do the target cache lookup before
+  // chaining to another Tracelet so forward progress still happens.
+  auto const sideExit = makeSideExit(
+    nextBcOff(),
+    [&] (Trace* t) {
+      return genFor(t, LookupClsCns, Type::Cell, clsCnsName);
+    }
+  );
+
+  // TODO: ideally we'd load Uncounted here without guarding, since we
+  // know this value has to be a non-refcounted type, but the register
+  // allocator doesn't understand what we mean right now.
+  auto const cns = gen(LdClsCns, clsCnsName, Type::Cell);
+  gen(CheckInit, sideExit, cns);
+  push(cns);
 }
 
 void HhbcTranslator::emitAKExists() {
@@ -2822,7 +2801,7 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
   pushIncRef(src);
   gen(StMem, ptr, cns(0), src);
   if (isRefCounted(src) && src->type().canRunDtor()) {
-    Block* exitBlock = getExitTrace(nextSrcKey().offset())->front();
+    Block* exitBlock = getExitTrace(nextBcOff())->front();
     exitBlock->prepend(m_irFactory.gen(DecRef, prevValue));
     gen(DecRefNZOrBranch, exitBlock, prevValue);
   } else {
@@ -3076,7 +3055,7 @@ void HhbcTranslator::emitMod() {
   // will raise a notice and produce the boolean false.  Punch out
   // here and resume after the Mod instruction; this should be rare.
   auto const exit = getExitTraceWarn(
-    nextSrcKey().offset(),
+    nextBcOff(),
     exitSpillValues,
     StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
   );
@@ -3173,30 +3152,41 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
 Trace* HhbcTranslator::getExitTrace(Offset targetBcOff,
                                     std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
-  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues, nullptr);
+  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
+    CustomExit{});
 }
 
 Trace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
                                         std::vector<SSATmp*>& spillValues,
                                         const StringData* warning) {
   assert(targetBcOff != -1);
-  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues, warning);
+  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
+    [&](Trace* t) -> SSATmp* {
+      genFor(t, RaiseWarning, cns(warning));
+      return nullptr;
+    }
+  );
 }
 
-/*
- * Generates an exit trace which will continue execution without HHIR.
- * This should be used in situations that HHIR cannot handle -- ideally
- * only in slow paths.
- */
+template<class ExitLambda>
+Trace* HhbcTranslator::makeSideExit(Offset targetBcOff, ExitLambda exit) {
+  auto spillValues = peekSpillValues();
+  return getExitTraceImpl(targetBcOff,
+                          ExitFlag::DelayedMarker,
+                          spillValues,
+                          exit);
+}
+
 Trace* HhbcTranslator::getExitSlowTrace() {
   auto spillValues = peekSpillValues();
-  return getExitTraceImpl(bcOff(), ExitFlag::NoIR, spillValues, nullptr);
+  return getExitTraceImpl(bcOff(), ExitFlag::NoIR, spillValues,
+    CustomExit{});
 }
 
 Trace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
                                         ExitFlag flag,
                                         std::vector<SSATmp*>& stackValues,
-                                        const StringData* warning) {
+                                        const CustomExit& customFn) {
   auto const exit = m_tb->makeExitTrace(targetBcOff);
 
   MarkerData exitMarker;
@@ -3204,25 +3194,46 @@ Trace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
   exitMarker.stackOff = m_tb->spOffset() +
                           stackValues.size() - m_stackDeficit;
   exitMarker.func     = curFunc();
-  genFor(exit, Marker, exitMarker);
 
-  if (warning) {
-    genFor(exit, RaiseWarning, cns(warning));
+  MarkerData currentMarker;
+  currentMarker.bcOff     = bcOff();
+  currentMarker.func      = curFunc();
+  currentMarker.stackOff  = m_tb->spOffset() +
+                              m_evalStack.numCells() - m_stackDeficit;
+
+  genFor(exit, Marker,
+         flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
+
+  // The value we use for stack is going to depend on whether we have
+  // to spillstack or what.
+  auto stack = m_tb->sp();
+
+  // TODO(#2404447) move this conditional to the simplifier?
+  if (m_stackDeficit != 0 || !stackValues.empty()) {
+    stackValues.insert(
+      stackValues.begin(),
+      { m_tb->sp(), cns(int64_t(m_stackDeficit)) }
+    );
+    stack = genFor(exit,
+      SpillStack, std::make_pair(stackValues.size(), &stackValues[0])
+    );
   }
 
-  auto const stack = [&]{
-    // TODO(#2404447) move this conditional to the simplifier?
-    if (m_stackDeficit != 0 || !stackValues.empty()) {
-      stackValues.insert(
-        stackValues.begin(),
-        { m_tb->sp(), cns(int64_t(m_stackDeficit)) }
+  if (customFn) {
+    stack = genFor(exit, ExceptionBarrier, stack);
+    auto const customTmp = customFn(exit);
+    if (customTmp) {
+      SSATmp* spill2[] = { stack, cns(0), customTmp };
+      stack = genFor(exit,
+        SpillStack, std::make_pair(sizeof spill2 / sizeof spill2[0], spill2)
       );
-      return genFor(exit,
-        SpillStack, std::make_pair(stackValues.size(), &stackValues[0])
-      );
+      exitMarker.stackOff += 1;
     }
-    return m_tb->sp();
-  }();
+  }
+
+  if (flag == ExitFlag::DelayedMarker) {
+    genFor(exit, Marker, exitMarker);
+  }
 
   genFor(exit, SyncABIRegs, m_tb->fp(), stack);
 

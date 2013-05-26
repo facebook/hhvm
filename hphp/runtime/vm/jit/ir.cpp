@@ -773,6 +773,7 @@ bool isRefCounted(SSATmp* tmp) {
   }
   IRInstruction* inst = tmp->inst();
   Opcode opc = inst->op();
+  // TODO(#2448005): we shouldn't have to list LdClsCns here.
   if (opc == DefConst || opc == LdConst || opc == LdClsCns) {
     return false;
   }

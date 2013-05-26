@@ -4643,43 +4643,36 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
                ArgGroup(m_regs).imm(ch).ssa(className));
 }
 
-static StringData* fullConstName(SSATmp* cls, SSATmp* cnsName) {
+static StringData* fullConstName(const StringData* cls,
+                                 const StringData* cnsName) {
   return StringData::GetStaticString(
-      Util::toLower(cls->getValStr()->data()) + "::" +
-      cnsName->getValStr()->data());
+    Util::toLower(cls->data()) + "::" + cnsName->data()
+  );
 }
 
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  SSATmp* cnsName = inst->src(0);
-  SSATmp* cls     = inst->src(1);
-
-  StringData* fullName = fullConstName(cls, cnsName);
-  TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
-  // note that we bail from the trace if the target cache entry is empty
-  // for this class constant or if the type assertion fails.
-  // TODO: handle the slow case helper call.
+  auto const extra    = inst->extra<LdClsCns>();
+  auto const fullName = fullConstName(extra->clsName, extra->cnsName);
+  auto const ch       = TargetCache::allocClassConstant(fullName);
   cgLoad(rVmTl, ch, inst);
 }
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
-  SSATmp*   cnsName = inst->src(0);
-  SSATmp*   cls     = inst->src(1);
-
-  assert(inst->typeParam() == Type::Cell);
-  assert(cnsName->isConst() && cnsName->type() == Type::StaticStr);
-  assert(cls->isConst() && cls->type() == Type::StaticStr);
-
-  StringData* fullName = fullConstName(cls, cnsName);
-  TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
-
-  ArgGroup args(m_regs);
-  args.addr(rVmTl, ch)
-      .immPtr(Unit::GetNamedEntity(cls->getValStr()))
-      .immPtr(cls->getValStr())
-      .immPtr(cnsName->getValStr());
-
-  cgCallHelper(m_as, TCA(TargetCache::lookupClassConstantTv),
-               inst->dst(), kSyncPoint, args, DestType::TV);
+  auto const extra    = inst->extra<LookupClsCns>();
+  auto const fullName = fullConstName(extra->clsName, extra->cnsName);
+  auto const ch       = TargetCache::allocClassConstant(fullName);
+  cgCallHelper(
+    m_as,
+    TCA(TargetCache::lookupClassConstantTv),
+    inst->dst(),
+    kSyncPoint,
+    ArgGroup(m_regs)
+      .addr(rVmTl, ch)
+      .immPtr(Unit::GetNamedEntity(extra->clsName))
+      .immPtr(extra->clsName)
+      .immPtr(extra->cnsName),
+    DestType::TV
+  );
 }
 
 void CodeGenerator::cgLdCns(IRInstruction* inst) {

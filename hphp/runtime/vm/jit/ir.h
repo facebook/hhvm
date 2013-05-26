@@ -302,8 +302,8 @@ O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
 O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
 O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
-O(LdClsCns,                     DParam, CStr CStr,                        NF) \
-O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
+O(LdClsCns,                     DParam, NA,                               NF) \
+O(LookupClsCns,                 DParam, NA,                  E|Refs|Er|N|Mem) \
 O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), C(Str)                                \

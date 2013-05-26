@@ -757,16 +757,25 @@ D:Cls = LdClsCachedSafe S0:ConstStr [ -> L ]
   Loads the class whose name is S0 out of the target cache. If the class is not
   defined, returns null and optionally branches to L.
 
-D:T = LdClsCns<T> S0:ConstStr S1:ConstStr [ -> L ]
+D:T = LdClsCns<T,className,constName> [ -> L ]
 
-  Loads the class constant named S0 from a class named S1 via the
-  target cache. This instruction should generally be followed by
-  CheckInit, unless we know the class is already loaded.  If the
-  optional label L is specified and the loaded value's type does not
-  match T, this instruction does not load into D and transfers control
-  to L. The result may be uninitialized if the class is not defined.
-  Note that no decref of the result is necessary because class
-  constants will always be static.
+  Loads the named class constant for a class via the target cache.
+  This instruction should generally be followed by CheckInit, unless
+  we know the class is already loaded.
+
+  If the optional label L is specified and the loaded value's type
+  does not match T, this instruction does not load into D and
+  transfers control to L.
+
+  The result may be uninitialized if the class is not defined.  Note
+  that no decref of the result is necessary because class constants
+  will always be static.
+
+D:T = LookupClsCns<T,className,constName>
+
+  Load a class constant for a class via the target cache, invoking
+  autoload if it is not defined.  This instruction may raise an
+  undefined constant error if autoload cannot define the constant.
 
 D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
                               S2:{Obj|Cls|Ctx} L:Label

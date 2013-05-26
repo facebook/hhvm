@@ -59,7 +59,7 @@ void ExprDict::getTypes(ExpressionPtr e, TypePtrIdxPairVec &types) {
 
 class TypeFunc { public:
   bool operator()(const TypePtrIdxPair& entry) const {
-    return entry.first;
+    return static_cast<bool>(entry.first);
   }
 };
 static TypeFunc s_type_func;

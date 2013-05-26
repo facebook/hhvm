@@ -210,7 +210,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
           Variant v;
           bool ret1 = name->getScalarValue(n);
           bool ret2 = val->getScalarValue(v);
-          if (!(ret1 && ret2)) return ExpressionPtr();
+          if (!(ret1 && ret2)) return static_cast<bool>(ExpressionPtr());
           init.set(n, v);
         }
       }

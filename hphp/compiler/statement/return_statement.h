@@ -29,7 +29,7 @@ public:
   ReturnStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasRetExp() const { return m_exp; }
+  virtual bool hasRetExp() const { return static_cast<bool>(m_exp); }
   ExpressionPtr getRetExp() const { return m_exp; }
 
   // During analysis we tag ReturnStatement with a list of the locals

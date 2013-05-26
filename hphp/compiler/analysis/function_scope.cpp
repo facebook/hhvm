@@ -464,7 +464,7 @@ bool FunctionScope::hasImpl() const {
   }
   if (m_stmt) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
-    return stmt->getStmts();
+    return static_cast<bool>(stmt->getStmts());
   }
   return false;
 }

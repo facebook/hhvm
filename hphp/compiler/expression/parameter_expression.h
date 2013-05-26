@@ -39,7 +39,7 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   bool isRef() const { return m_ref;}
-  bool isOptional() const { return m_defaultValue;}
+  bool isOptional() const { return static_cast<bool>(m_defaultValue); }
   const std::string &getName() const { return m_name; }
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}

@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_STATE_VECTOR_H_
 #define incl_HPHP_JIT_STATE_VECTOR_H_
 
+#include <type_traits>
+
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/vm/translator/hopt/irfactory.h"
 
@@ -38,6 +40,13 @@ struct StateVector {
   typedef typename InfoVector::const_iterator const_iterator;
   typedef typename InfoVector::reference reference;
   typedef typename InfoVector::const_reference const_reference;
+
+  static_assert(
+    std::is_same<Key,Block>::value ||
+    std::is_same<Key,IRInstruction>::value ||
+    std::is_same<Key,SSATmp>::value,
+    "StateVector can only be used with Block, IRInstruction, or SSATmp"
+  );
 
   StateVector(const IRFactory* factory, Info init)
     : m_factory(factory)

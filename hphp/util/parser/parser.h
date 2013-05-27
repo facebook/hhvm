@@ -199,6 +199,7 @@ protected:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
+  hphp_string_imap<int> m_seenClosures;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -53,8 +53,7 @@ std::string ParserBase::newClosureName(
   }
   name += funcName;
 
-  static std::map<std::string, int> s_seenClosures;
-  int id = ++s_seenClosures[name];
+  int id = ++m_seenClosures[name];
   if (id > 1) {
     // we've seen the same name before, uniquify
     name = name + '#' + std::to_string(id);

@@ -347,55 +347,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   }
 }
 
-/*
- * Looks for whether the value in tmp was defined by a load, and if
- * so, changes that load into a load that guards on the given
- * type. Returns true if it succeeds.
- */
-static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
-  IRInstruction* inst = tmp->inst();
-  switch (inst->op()) {
-    case Mov:
-    case IncRef:
-    {
-      // if inst is an incref or move, then chase down its src
-      if (hoistGuardToLoad(inst->getSrc(0), type)) {
-        // guard was successfully attached to a load instruction
-        // refine the type of this mov/incref
-        // Note: We can also further simplify incref's here if type is not
-        // ref-counted
-        tmp->setType(type);
-        inst->setTypeParam(type);
-        return true;
-      }
-      break;
-    }
-    case LdLoc:
-    case LdStack:
-    case LdMem:
-    case LdProp:
-    case LdRef:
-    case LdClsCns:
-    {
-      if (!inst->getTaken()) {
-        // Not a control flow instruction, so can't give it check semantics
-        break;
-      }
-      Type instType = tmp->type();
-      if (instType == Type::Gen ||
-          (instType == Type::Cell && !type.isBoxed())) {
-        tmp->setType(type);
-        inst->setTypeParam(type);
-        return true;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-  return false;
-}
-
 SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   auto const sp           = inst->getSrc(0);
   auto const spDeficit    = inst->getSrc(1)->getValInt();
@@ -520,19 +471,18 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   Type type    = inst->getTypeParam();
   SSATmp* src  = inst->getSrc(0);
   Type srcType = src->type();
+
   if (srcType.subtypeOf(type)) {
     /*
-     * the type of the src is the same or more refined than type, so the
+     * The type of the src is the same or more refined than type, so the
      * guard is unnecessary.
      */
     return src;
   }
   if (type.strictSubtypeOf(srcType)) {
-    if (hoistGuardToLoad(src, type)) {
-      return src;
-    }
     return nullptr;
   }
+
   if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
     /*
      * If we're guarding against Str and srcType has StaticStr or CountedStr

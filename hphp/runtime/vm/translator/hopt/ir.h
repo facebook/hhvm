@@ -161,7 +161,12 @@ O(CheckLoc,                         ND, S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
-O(GuardRefs,                        ND, SUnk,                              E) \
+O(GuardRefs,                        ND, S(Func)                               \
+                                          S(Int)                              \
+                                          S(Int)                              \
+                                          S(Int)                              \
+                                          S(Int)                              \
+                                          S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OpAdd,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
@@ -294,7 +299,9 @@ O(LdClsCns,                     DParam, CStr CStr,                        NF) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
 O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
-O(LdClsMethodCache,         D(FuncCls), SUnk,              N|C|E|Refs|Er|Mem) \
+O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
+                                          C(Str)                              \
+                                          C(NamedEntity),  N|C|E|Refs|Er|Mem) \
 O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx), N|C|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) S(Func),                    C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
@@ -309,7 +316,7 @@ O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
 O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
-O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                            C) \
+O(LdContLocalsPtr,         D(PtrToGen), S(Obj),                            C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
 O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
@@ -323,7 +330,7 @@ O(CreateCl,                     D(Obj), C(Cls)                                \
                                           C(Int)                              \
                                           S(FramePtr)                         \
                                           S(StkPtr),                   Mem|N) \
-O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
+O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,                D(FramePtr), S(FramePtr),                   Mem) \
@@ -379,7 +386,7 @@ O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
-O(DefLabel,                     DMulti, SUnk,                              E) \
+O(DefLabel,                     DMulti, NA,                                E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr),              NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
@@ -411,9 +418,7 @@ O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(DefCns,                      D(Bool), C(Str) S(Cell),          E|N|Mem|CRc) \
 O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
-O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
-O(DefCls,                           ND, SUnk,                          C|E|N) \
-O(DefFunc,                          ND, SUnk,                       C|E|N|Er) \
+O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr)                 \
                                           C(Int) C(Int),     E|N|Mem|Refs|Er) \
@@ -432,7 +437,7 @@ O(FillContLocals,                   ND, S(FramePtr)                           \
                                           C(Func)                             \
                                           S(Obj),                    E|N|Mem) \
 O(FillContThis,                     ND, S(Obj)                                \
-                                          S(PtrToCell) C(Int),         E|Mem) \
+                                          S(PtrToGen) C(Int),         E|Mem) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(UnlinkContVarEnv,                 ND, S(FramePtr),                 E|N|Mem) \
@@ -584,9 +589,11 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(IncTransCounter,                  ND, NA,                                E) \
-O(ArrayIdx,                    D(Cell), C(TCA) S(Arr) S(Int,Str) S(Cell),     \
-                                                        E|N|CRc|PRc|Refs|Mem) \
-O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
+O(ArrayIdx,                    D(Cell), C(TCA)                                \
+                                          S(Arr)                              \
+                                          S(Int,Str)                          \
+                                          S(Cell),      E|N|CRc|PRc|Refs|Mem) \
+O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(Nop,                              ND, NA,                               NF) \

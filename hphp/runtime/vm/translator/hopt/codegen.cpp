@@ -335,17 +335,12 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define NOOP_OPCODE(opcode) \
   void CodeGenerator::cg##opcode(IRInstruction*) {}
 
-#define PUNT_OPCODE(opcode) \
-  void CodeGenerator::cg##opcode(IRInstruction*) { CG_PUNT(opcode); }
-
 #define CALL_OPCODE(opcode) \
   void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(i); }
 
 #define CALL_STK_OPCODE(opcode) \
   CALL_OPCODE(opcode)           \
   CALL_OPCODE(opcode ## Stk)
-
-PUNT_OPCODE(DefCls)
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
@@ -453,7 +448,6 @@ CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
 #undef NOOP_OPCODE
-#undef PUNT_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
 static void prependPatchAddr(CodegenState& state,
@@ -4971,13 +4965,6 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
                  Stack::topOfStackOffset()], rVmSp);
 
   m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME, 0ull);
-}
-
-void CodeGenerator::cgDefFunc(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* func  = inst->getSrc(0);
-  cgCallHelper(m_as, (TCA)defFuncHelper, dst, kSyncPoint,
-               ArgGroup(m_regs).ssa(func), DestType::None);
 }
 
 void CodeGenerator::cgFillContThis(IRInstruction* inst) {

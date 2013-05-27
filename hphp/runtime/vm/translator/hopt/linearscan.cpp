@@ -816,9 +816,6 @@ void LinearScan::computePreColoringHint() {
     case AKExists:
       normalHint(2);
       break;
-    case DefFunc:
-      normalHint(1);
-      break;
     case OpEq:
     case OpNeq:
     case OpSame:

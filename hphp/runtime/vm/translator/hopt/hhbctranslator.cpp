@@ -442,8 +442,7 @@ void HhbcTranslator::emitArrayAdd() {
   }
   SSATmp* tr = popC();
   SSATmp* tl = popC();
-  // the ArrrayAdd helper decrefs its args, so don't decref pop'ed values
-  // TODO task 1805916: verify that ArrayAdd increfs its result
+  // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
   push(gen(ArrayAdd, tl, tr));
 }
 
@@ -468,10 +467,10 @@ void HhbcTranslator::emitAddElemC() {
 }
 
 void HhbcTranslator::emitAddNewElemC() {
+  // TODO(#2437059): this is broken
   SSATmp* val = popC();
   SSATmp* arr = popC();
-  // the AddNewElem helper decrefs its args, so don't decref pop'ed values
-  // TODO task 1805916: verify that NewElem increfs its result
+  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
   push(gen(AddNewElem, arr, val));
 }
 

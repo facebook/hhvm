@@ -1423,11 +1423,13 @@ ArrayData* HphpArray::append(CVarRef v, bool copy) {
  */
 static NEVER_INLINE
 ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
-  assert(a->getCount() <= 1);
-  ArrayData* UNUSED r = a->append(tvAsCVarRef(&value), false);
+  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
+  if (UNLIKELY(r != a)) {
+    r->incRefCount();
+    decRefArr(a);
+  }
   tvRefcountedDecRef(value);
-  assert(r == a);
-  return a;
+  return r;
 }
 
 /*
@@ -1436,12 +1438,13 @@ ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
  * hphp_array.h.
  */
 ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
-  assert(a->getCount() <= 1 && value.m_type != KindOfRef);
+  assert(value.m_type != KindOfRef);
   HphpArray* h;
   ElmInd* ei;
   int64_t k;
   if (LIKELY(a->isHphpArray()) &&
       ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
+      LIKELY(h->getCount() <= 1) &&
       LIKELY(!h->isFull()) &&
       ((k = h->m_nextKI), LIKELY(k >= 0)) &&
       ((ei = &h->m_hash[k & h->m_tableMask]), LIKELY(!validElmInd(*ei)))) {

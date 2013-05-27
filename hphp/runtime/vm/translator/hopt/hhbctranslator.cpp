@@ -467,9 +467,12 @@ void HhbcTranslator::emitAddElemC() {
 }
 
 void HhbcTranslator::emitAddNewElemC() {
-  // TODO(#2437059): this is broken
-  SSATmp* val = popC();
-  SSATmp* arr = popC();
+  if (!topC(1)->isA(Type::Arr)) {
+    return emitInterpOneOrPunt(Type::Arr, 2, 0);
+  }
+
+  auto const val = popC();
+  auto const arr = popC();
   // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
   push(gen(AddNewElem, arr, val));
 }

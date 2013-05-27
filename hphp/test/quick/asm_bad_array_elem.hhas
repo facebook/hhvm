@@ -1,0 +1,18 @@
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main() {
+  String "asd"
+  String "asd"
+  AddNewElemC
+  Print
+  PopC
+  Int 1
+  RetC
+}

@@ -69,6 +69,7 @@ UNUSED static bool statEquiv(const struct stat* stA, const struct stat* stB) {
           && stA->st_ctime == stB->st_ctime);
 }
 
+#ifdef __linux__
 UNUSED static std::string eventToString(const struct inotify_event* ie) {
   bool first = true;
   std::ostringstream os;
@@ -106,6 +107,7 @@ UNUSED static std::string eventToString(const struct inotify_event* ie) {
   os << "}";
   return os.str();
 }
+#endif
 
 static int statSyscall(const std::string& path, struct stat* buf) {
   int ret = ::stat(path.c_str(), buf);
@@ -421,6 +423,7 @@ StatCache::~StatCache() {
 bool StatCache::init() {
   // inotify_init1() directly supports the fcntl() settings, but it's only
   // available starting in Linux 2.6.27.
+#ifdef __linux__
   if ((m_ifd = inotify_init()) == -1
       || fcntl(m_ifd, F_SETFD, FD_CLOEXEC) == -1
       || fcntl(m_ifd, F_SETFL, O_NONBLOCK) == -1
@@ -429,6 +432,9 @@ bool StatCache::init() {
     return true;
   }
   return false;
+#else
+  return true;
+#endif
 }
 
 void StatCache::clear() {
@@ -457,6 +463,7 @@ void StatCache::reset() {
 }
 
 StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
+#ifdef __linux__
   int wd = inotify_add_watch(m_ifd, path.c_str(),
                              0
                              | IN_MODIFY
@@ -490,6 +497,9 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
   }
   node->setPath(path);
   return node;
+#else
+  return NULL;
+#endif
 }
 
 bool StatCache::mergePath(const std::string& path, bool follow) {
@@ -530,6 +540,7 @@ bool StatCache::mergePath(const std::string& path, bool follow) {
   return false;
 }
 
+#ifdef __linux__
 bool StatCache::handleEvent(const struct inotify_event* event) {
   if (event->mask & IN_Q_OVERFLOW) {
     // The event queue overflowed, so all bets are off.  Start over.
@@ -599,9 +610,12 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
   }
   return false;
 }
+#endif
 
 void StatCache::removeWatch(int wd) {
+#ifdef __linux__
   inotify_rm_watch(m_ifd, wd);
+#endif
 }
 
 void StatCache::removePath(const std::string& path, Node* node) {
@@ -621,6 +635,7 @@ void StatCache::removeLPath(const std::string& path, Node* node) {
 }
 
 void StatCache::refresh() {
+#ifdef __linux__
   SimpleLock lock(m_lock);
 
   if (m_ifd == -1) {
@@ -648,6 +663,7 @@ void StatCache::refresh() {
       p += sizeof(struct inotify_event) + event->len;
     }
   }
+#endif
 }
 
 time_t StatCache::lastRefresh() {

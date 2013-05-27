@@ -468,7 +468,7 @@ void HhbcTranslator::emitAddElemC() {
 
 void HhbcTranslator::emitAddNewElemC() {
   if (!topC(1)->isA(Type::Arr)) {
-    return emitInterpOneOrPunt(Type::Arr, 2, 0);
+    return emitInterpOne(Type::Arr, 2, 0);
   }
 
   auto const val = popC();
@@ -478,15 +478,15 @@ void HhbcTranslator::emitAddNewElemC() {
 }
 
 void HhbcTranslator::emitNewCol(int type, int numElems) {
-  emitInterpOneOrPunt(Type::Obj, 0);
+  emitInterpOne(Type::Obj, 0);
 }
 
 void HhbcTranslator::emitColAddElemC() {
-  emitInterpOneOrPunt(Type::Obj, 3);
+  emitInterpOne(Type::Obj, 3);
 }
 
 void HhbcTranslator::emitColAddNewElemC() {
-  emitInterpOneOrPunt(Type::Obj, 2);
+  emitInterpOne(Type::Obj, 2);
 }
 
 void HhbcTranslator::emitCns(uint32_t id) {
@@ -559,11 +559,11 @@ void HhbcTranslator::emitConcat() {
 }
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
-  emitInterpOneOrPunt(Type::None, 0);
+  emitInterpOne(Type::None, 0);
 }
 
 void HhbcTranslator::emitDefFunc(int fid) {
-  emitInterpOneOrPunt(Type::None, 0);
+  emitInterpOne(Type::None, 0);
 }
 
 void HhbcTranslator::emitLateBoundCls() {
@@ -774,7 +774,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
 }
 
 void HhbcTranslator::emitClassExists(const StringData* clsName) {
-  emitInterpOneOrPunt(Type::Bool, 2);
+  emitInterpOne(Type::Bool, 2);
 }
 
 void HhbcTranslator::emitInterfaceExists(const StringData* ifaceName) {
@@ -1157,7 +1157,7 @@ void HhbcTranslator::emitArrayIdx() {
   }
   if (UNLIKELY(
         !(keyType.subtypeOf(Type::Int) || keyType.subtypeOf(Type::Str)))) {
-    emitInterpOneOrPunt(Type::Cell, 3);
+    emitInterpOne(Type::Cell, 3);
     return;
   }
 
@@ -2410,7 +2410,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
    * For now we just interp that case.
    */
   if (!locType.isObj()) {
-    emitInterpOneOrPunt(Type::None, 0);
+    emitInterpOne(Type::None, 0);
     return;
   }
 
@@ -3023,11 +3023,6 @@ void HhbcTranslator::emitInterpOneCF(int numPopped) {
   gen(InterpOneCF, m_tb->getFp(), m_tb->getSp(), cns(bcOff()));
   m_stackDeficit = 0;
   m_hasExit = true;
-}
-
-void HhbcTranslator::emitInterpOneOrPunt(Type type, int numPopped,
-                                         int numExtraPushed) {
-  emitInterpOne(type, numPopped, numExtraPushed);
 }
 
 /*

@@ -554,7 +554,6 @@ private:
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  void emitInterpOneOrPunt(Type type, int numPopped, int numExtraPushed = 0);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);

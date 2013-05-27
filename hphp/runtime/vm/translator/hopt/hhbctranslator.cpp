@@ -674,22 +674,13 @@ void HhbcTranslator::emitUnsetL(int32_t id) {
 
 void HhbcTranslator::emitBindL(int32_t id) {
   auto const newValue = popV();
-  // XXX: does this cause user-visible semantic differences?  What
-  // about the stack being different when we re-enter the dtor?  What
-  // is this for?
-  if (getCurFunc()->isPseudoMain()) {
-    // in pseudo mains, the value of locals could change in functions
-    // called explicitly (or implicitly via exceptions or destructors)
-    // so we need to incref eagerly in case one of these functions
-    // changes the value of our local and makes src dead.
-    pushIncRef(newValue);
-  }
+  // Note that the IncRef must happen first, for correctness in a
+  // pseudo-main: the destructor could decref the value again after
+  // we've stored it into the local.
+  pushIncRef(newValue);
   auto const oldValue = ldLoc(id);
   gen(StLoc, LocalId(id), m_tb->getFp(), newValue);
   gen(DecRef, oldValue);
-  if (!getCurFunc()->isPseudoMain()) {
-    pushIncRef(newValue);
-  }
 }
 
 void HhbcTranslator::emitSetL(int32_t id) {

@@ -20,13 +20,9 @@
 
 namespace HPHP {  namespace JIT {
 
-IRInstruction* IRFactory::defLabel() {
-  IRInstruction inst(DefLabel);
-  return cloneInstruction(&inst);
-}
-
 IRInstruction* IRFactory::defLabel(unsigned numDst) {
-  IRInstruction* label = defLabel();
+  IRInstruction inst(DefLabel);
+  IRInstruction* label = cloneInstruction(&inst);
   if (numDst > 0) {
     SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
     for (unsigned i = 0; i < numDst; ++i) {
@@ -37,8 +33,8 @@ IRInstruction* IRFactory::defLabel(unsigned numDst) {
   return label;
 }
 
-Block* IRFactory::defBlock(const Func* func, IRInstruction* label) {
-  return new (m_arena) Block(m_nextBlockId++, func, label);
+Block* IRFactory::defBlock(const Func* func) {
+  return new (m_arena) Block(m_nextBlockId++, func);
 }
 
 IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {

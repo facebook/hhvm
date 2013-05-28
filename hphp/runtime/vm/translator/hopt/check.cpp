@@ -55,36 +55,45 @@ struct RegState {
   }
 };
 
+// Return the number of parameters required for this block
+DEBUG_ONLY static int numBlockParams(Block* b) {
+  return b->empty() || b->front()->op() != DefLabel ? 0 :
+         b->front()->numDsts();
+}
+
 /*
  * Check one block for being well formed.  It must:
- * 1. have exactly one DefLabel as the first instruction
- * 2. have either no other instructions, or else at least one Marker
+ * 1. Optionally start with DefLabel.  DefLabel may not appear anywhere else.
+ * 2. Have either no other instructions, or else at least one Marker
  *    following the DefLabel before any other instructions.
- * 3. if any instruction is isBlockEnd(), it must be last
- * 4. if the last instruction isTerminal(), block->next must be null.
- * 5. All the incoming edges to the DefLabel must be from blocks listed
- *    in the block list for this block's Trace.
+ * 3. If any instruction is isBlockEnd(), it must be last.
+ * 4. If the last instruction isTerminal(), block->next must be null.
+ * 5. If the block starts with a DefLabel with >=1 destinations, all the
+ *    incoming must be from blocks listed in this block's trace.
  */
 bool checkBlock(Block* b) {
-  assert(!b->empty());
-  assert(b->front()->op() == DefLabel);
   if (b->skipLabel() != b->end()) {
     assert(b->skipLabel()->op() == Marker);
   }
-  if (b->back()->isTerminal()) assert(!b->next());
-  if (b->taken()) {
-    // only Jmp_ can branch to a join block expecting values.
-    assert(b->back()->op() == Jmp_ ||
-           b->taken()->front()->numDsts() == 0);
-  }
-  if (b->next()) {
+  if (Block* next DEBUG_ONLY = b->next()) {
     // cannot fall-through to join block expecting values
-    assert(b->next()->front()->numDsts() == 0);
+    assert(numBlockParams(next) == 0);
+  }
+  if (b->empty()) {
+    return true;
+  }
+  if (b->back()->isTerminal()) {
+    assert(!b->next());
+  }
+  if (Block* taken DEBUG_ONLY = b->taken()) {
+    // only Jmp_ can branch to a join block expecting values.
+    DEBUG_ONLY IRInstruction* branch = b->back();
+    DEBUG_ONLY auto numArgs = branch->op() == Jmp_ ? branch->numSrcs() : 0;
+    assert(numBlockParams(taken) == numArgs);
   }
 
   {
-    auto i = b->begin(), e = b->end();
-    ++i;
+    auto i = b->skipLabel(), e = b->end();
     if (b->back()->isBlockEnd()) --e;
     for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(i, e)) {
       assert(inst.op() != DefLabel);
@@ -95,12 +104,14 @@ bool checkBlock(Block* b) {
     }
   }
 
-  for (int i = 0; i < b->front()->numDsts(); ++i) {
-    auto const traceBlocks = b->trace()->blocks();
-    b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
-      assert(std::find(traceBlocks.begin(), traceBlocks.end(),
-                       inst->block()) != traceBlocks.end());
-    });
+  if (b->front()->op() == DefLabel) {
+    for (int i = 0; i < b->front()->numDsts(); ++i) {
+      auto const traceBlocks = b->trace()->blocks();
+      b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
+        assert(std::find(traceBlocks.begin(), traceBlocks.end(),
+                         inst->block()) != traceBlocks.end());
+      });
+    }
   }
 
   return true;

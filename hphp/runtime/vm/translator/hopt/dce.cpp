@@ -209,11 +209,6 @@ initInstructions(const BlockList& blocks, DceState& state) {
   WorkList wl;
   for (Block* block : blocks) {
     for (IRInstruction& inst : *block) {
-      if (inst.isControlFlowInstruction()) {
-        // mark the destination label so that the destination trace
-        // is marked reachable
-        state[inst.taken()->label()].setLive();
-      }
       if (inst.isEssential()) {
         state[inst].setLive();
         wl.push_back(&inst);

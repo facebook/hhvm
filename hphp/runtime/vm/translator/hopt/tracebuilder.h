@@ -191,7 +191,9 @@ struct TraceBuilder {
   template <class Branch, class Next, class Taken>
   SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_irFactory.defBlock(func);
-    Block* done_block = m_irFactory.defBlock(func, 1);
+    Block* done_block = m_irFactory.defBlock(func);
+    IRInstruction* label = m_irFactory.defLabel(1);
+    done_block->push_back(label);
     DisableCseGuard guard(*this);
     branch(taken_block);
     SSATmp* v1 = next();
@@ -200,7 +202,7 @@ struct TraceBuilder {
     SSATmp* v2 = taken();
     gen(Jmp_, done_block, v2);
     appendBlock(done_block);
-    SSATmp* result = done_block->label()->dst(0);
+    SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
     return result;
   }

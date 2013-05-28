@@ -66,9 +66,7 @@ struct Trace : private boost::noncopyable {
     Block* b = *it;
     it = m_blocks.erase(it);
     b->setTrace(nullptr);
-    if (b->back()->op() == Jmp_) {
-      b->back()->setTaken(nullptr);
-    }
+    if (!b->empty()) b->back()->setTaken(nullptr);
     b->setNext(nullptr);
     return it;
   }

@@ -220,21 +220,14 @@ public:
   /*
    * Some helpers for creating specific instruction patterns.
    */
-  IRInstruction* defLabel();
   IRInstruction* defLabel(unsigned numDst);
+  Block* defBlock(const Func* f);
   template<typename T> SSATmp* cns(T val) {
     Type type = typeForConst(val);
     // Normalize bool values to 0 or 1
     if (type.equals(Type::Bool)) val = (T)(val != 0);
     ConstData cdata(val);
     return findConst(cdata, type);
-  }
-  Block* defBlock(const Func* f, IRInstruction*);
-  Block* defBlock(const Func* f) {
-    return defBlock(f, defLabel());
-  }
-  Block* defBlock(const Func* f, unsigned numDst) {
-    return defBlock(f, defLabel(numDst));
   }
 
   /*

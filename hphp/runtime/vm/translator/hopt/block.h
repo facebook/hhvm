@@ -41,20 +41,13 @@ struct Block : boost::noncopyable {
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
   enum Hint { Neither, Likely, Unlikely };
 
-  Block(unsigned id, const Func* func, IRInstruction* label)
+  Block(unsigned id, const Func* func)
     : m_trace(nullptr)
     , m_func(func)
     , m_next(this, nullptr)
     , m_id(id)
     , m_hint(Neither)
-  {
-    push_back(label);
-  }
-
-  IRInstruction* label() const {
-    assert(front()->op() == DefLabel);
-    return front();
-  }
+  {}
 
   uint32_t    id() const         { return m_id; }
   Trace*      trace() const      { return m_trace; }
@@ -110,7 +103,7 @@ struct Block : boost::noncopyable {
 
   // return the target block if the last instruction is a branch.
   Block* taken() const {
-    return back()->taken();
+    return empty() ? nullptr : back()->taken();
   }
 
   // return the postorder number of this block. (updated each time
@@ -119,19 +112,22 @@ struct Block : boost::noncopyable {
   void setPostId(unsigned id) { m_postid = id; }
 
   /*
-   * Insert inst after this block's DefLabel/Marker, return an
+   * Insert inst after this block's Marker, return an
    * iterator to the newly inserted instruction.
    *
-   * Pre: the block contains a Marker after the DefLabel.
+   * Pre: the block contains a Marker after the optional DefLabel.
    */
   iterator prepend(IRInstruction* inst) {
-    assert(front()->op() == DefLabel);
     auto it = skipLabel();
+    assert(it->op() == Marker);
     return insert(++it, inst);
   }
 
-  // return iterator to first instruction after the label
-  iterator skipLabel() { auto it = begin(); return ++it; }
+  // return iterator to first instruction after the (optional) label
+  iterator skipLabel() {
+    auto it = begin();
+    return it->op() == DefLabel ? ++it : it;
+  }
 
   // return iterator to last instruction
   iterator backIter() { auto it = end(); return --it; }

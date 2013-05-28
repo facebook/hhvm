@@ -325,6 +325,11 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
 
     TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
                           TcaRange(nullptr, nullptr);
+
+    os << std::string(kIndent - 2, ' ');
+    printLabel(os, block);
+    os << punc(":") << "\n";
+
     for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it; ++it;
 
@@ -355,9 +360,6 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
       }
 
       if (inst.op() == DefLabel) {
-        os << std::string(kIndent - 2, ' ');
-        printLabel(os, inst.block());
-        os << punc(":") << "\n";
         // print phi pseudo-instructions
         for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
           os << std::string(kIndent +

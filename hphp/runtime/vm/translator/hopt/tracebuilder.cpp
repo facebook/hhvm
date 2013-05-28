@@ -489,18 +489,20 @@ void TraceBuilder::appendInstruction(IRInstruction* inst, Block* block) {
 
 void TraceBuilder::appendInstruction(IRInstruction* inst) {
   Block* block = m_trace->back();
-  IRInstruction* prev = block->back();
-  if (prev->isBlockEnd()) {
-    // start a new block
-    Block* next = m_irFactory.defBlock(m_curFunc->getValFunc());
-    m_trace->push_back(next);
-    if (!prev->isTerminal()) {
-      // new block is reachable from old block so link it.
-      block->setNext(next);
+  if (!block->empty()) {
+    IRInstruction* prev = block->back();
+    if (prev->isBlockEnd()) {
+      // start a new block
+      Block* next = m_irFactory.defBlock(m_curFunc->getValFunc());
+      m_trace->push_back(next);
+      if (!prev->isTerminal()) {
+        // new block is reachable from old block so link it.
+        block->setNext(next);
+      }
+      block = next;
+      assert(m_lastMarker.hasValue());
+      gen(Marker, *m_lastMarker);
     }
-    block = next;
-    assert(m_lastMarker.hasValue());
-    gen(Marker, *m_lastMarker);
   }
   appendInstruction(inst, block);
   updateTrackedState(inst);

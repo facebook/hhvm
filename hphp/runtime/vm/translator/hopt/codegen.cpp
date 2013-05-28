@@ -4757,12 +4757,12 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
-  assert(inst->numSrcs() == inst->taken()->label()->numDsts());
+  Block* target = inst->taken();
   if (unsigned n = inst->numSrcs()) {
     // Parallel-copy sources to the label's destination registers.
     // TODO: t2040286: this only works if all destinations fit in registers.
     SrcRange srcs = inst->srcs();
-    DstRange dsts = inst->taken()->label()->dsts();
+    DstRange dsts = target->front()->dsts();
     ArgGroup args(m_regs);
     for (unsigned i = 0, j = 0; i < n; i++) {
       assert(srcs[i]->type().subtypeOf(dsts[i].type()));
@@ -4794,7 +4794,7 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     shuffleArgs(m_as, args);
   }
   if (!m_state.noTerminalJmp_) {
-    emitFwdJmp(m_as, inst->taken(), m_state);
+    emitFwdJmp(m_as, target, m_state);
   }
 }
 

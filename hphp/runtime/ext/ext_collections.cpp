@@ -531,11 +531,41 @@ Object c_Vector::t_map(CVarRef callback) {
   }
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(m_size);
-  for (uint i = 0; i < m_size; ++i) {
+  uint sz = m_size;
+  vec->reserve(sz);
+  for (uint i = 0; i < sz; ++i) {
     TypedValue* tv = &vec->m_data[i];
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(tv, ctx, 1, &m_data[i]);
+    if (UNLIKELY(version != m_version)) {
+      tvRefcountedDecRef(tv);
+      throw_collection_modified();
+    }
+    ++vec->m_size;
+  }
+  return obj;
+}
+
+Object c_Vector::t_mapwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_Vector* vec;
+  Object obj = vec = NEWOBJ(c_Vector)();
+  uint sz = m_size;
+  vec->reserve(sz);
+  for (uint i = 0; i < sz; ++i) {
+    TypedValue* tv = &vec->m_data[i];
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      make_tv<KindOfInt64>(i),
+      m_data[i]
+    };
+    g_vmContext->invokeFuncFew(tv, ctx, 2, args);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -555,7 +585,8 @@ Object c_Vector::t_filter(CVarRef callback) {
   }
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
-  for (uint i = 0; i < m_size; ++i) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
     Variant ret;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &m_data[i]);
@@ -569,13 +600,43 @@ Object c_Vector::t_filter(CVarRef callback) {
   return obj;
 }
 
-Object c_Vector::t_zip(CVarRef iterable) {
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
+Object c_Vector::t_filterwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(std::min(sz, size_t(m_size)));
-  for (uint i = 0; i < m_size && iter; ++i, ++iter) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    Variant ret;
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      make_tv<KindOfInt64>(i),
+      m_data[i]
+    };
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (ret.toBoolean()) {
+      vec->add(&m_data[i]);
+    }
+  }
+  return obj;
+}
+
+Object c_Vector::t_zip(CVarRef iterable) {
+  size_t itSize;
+  ArrayIter iter = getArrayIterHelper(iterable, itSize);
+  c_Vector* vec;
+  Object obj = vec = NEWOBJ(c_Vector)();
+  uint sz = m_size;
+  vec->reserve(std::min(itSize, size_t(sz)));
+  for (uint i = 0; i < sz && iter; ++i, ++iter) {
     Variant v = iter.second();
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
@@ -1389,7 +1450,8 @@ Object c_Map::t_map(CVarRef callback) {
   // is thrown during the first iteration, because ~c_Map()
   // will decRef all slots up to (and including) m_nLastSlot.
   mp->m_data[0].data.m_type = (DataType)0;
-  for (uint i = 0; i <= m_nLastSlot; mp->m_nLastSlot = i++) {
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
     Bucket& p = m_data[i];
     Bucket& np = mp->m_data[i];
     if (!p.validValue()) {
@@ -1399,6 +1461,55 @@ Object c_Map::t_map(CVarRef callback) {
     TypedValue* tv = &np.data;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
+    if (UNLIKELY(version != m_version)) {
+      tvRefcountedDecRef(tv);
+      throw_collection_modified();
+    }
+    if (p.hasStrKey()) {
+      p.skey->incRefCount();
+    }
+    np.ikey = p.ikey;
+    np.data.hash() = p.data.hash();
+  }
+  return obj;
+}
+
+Object c_Map::t_mapwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_Map* mp;
+  Object obj = mp = NEWOBJ(c_Map)();
+  if (!m_size) return obj;
+  assert(m_nLastSlot != 0);
+  mp->m_size = m_size;
+  mp->m_load = m_load;
+  mp->m_nLastSlot = 0;
+  mp->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
+  // We need to zero out the first slot in case an exception
+  // is thrown during the first iteration, because ~c_Map()
+  // will decRef all slots up to (and including) m_nLastSlot.
+  mp->m_data[0].data.m_type = (DataType)0;
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
+    Bucket& p = m_data[i];
+    Bucket& np = mp->m_data[i];
+    if (!p.validValue()) {
+      np.data.m_type = p.data.m_type;
+      continue;
+    }
+    TypedValue* tv = &np.data;
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
+                     : make_tv<KindOfString>(p.skey)),
+      p.data
+    };
+    g_vmContext->invokeFuncFew(tv, ctx, 2, args);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1423,12 +1534,49 @@ Object c_Map::t_filter(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     Variant ret;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (!ret.toBoolean()) continue;
+    if (p.hasIntKey()) {
+      mp->update(p.ikey, &p.data);
+    } else {
+      mp->update(p.skey, &p.data);
+    }
+  }
+  return obj;
+}
+
+Object c_Map::t_filterwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_Map* mp;
+  Object obj = mp = NEWOBJ(c_Map)();
+  if (!m_size) return obj;
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (!p.validValue()) continue;
+    Variant ret;
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
+                     : make_tv<KindOfString>(p.skey)),
+      p.data
+    };
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -1448,7 +1596,8 @@ Object c_Map::t_zip(CVarRef iterable) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   mp->reserve(std::min(sz, size_t(m_size)));
-  for (uint i = 0; i <= m_nLastSlot && iter; ++i) {
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot && iter; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     Variant v = iter.second();
@@ -2511,6 +2660,57 @@ Object c_StableMap::t_map(CVarRef callback) {
   return obj;
 }
 
+Object c_StableMap::t_mapwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_StableMap* smp;
+  Object obj = smp = NEWOBJ(c_StableMap)();
+  if (!m_size) return obj;
+  smp->m_size = m_size;
+  smp->m_nTableSize = m_nTableSize;
+  smp->m_nTableMask = m_nTableMask;
+  smp->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
+  Bucket *last = nullptr;
+  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
+    Variant ret;
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      (p->hasIntKey() ? make_tv<KindOfInt64>(p->ikey)
+                      : make_tv<KindOfString>(p->skey)),
+      p->data
+    };
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    Bucket *np = NEW(Bucket)(ret.asTypedValue());
+    uint nIndex;
+    if (p->hasIntKey()) {
+      np->setIntKey(p->ikey);
+      nIndex = p->ikey & smp->m_nTableMask;
+    } else {
+      np->setStrKey(p->skey, p->hash());
+      nIndex = p->hash() & smp->m_nTableMask;
+    }
+    np->pNext = smp->m_arBuckets[nIndex];
+    smp->m_arBuckets[nIndex] = np;
+    if (last) {
+      last->pListNext = np;
+      np->pListLast = last;
+    } else {
+      smp->m_pListHead = np;
+    }
+    last = np;
+  }
+  smp->m_pListTail = last;
+  return obj;
+}
+
 Object c_StableMap::t_filter(CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -2526,6 +2726,39 @@ Object c_StableMap::t_filter(CVarRef callback) {
     Variant ret;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (!ret.toBoolean()) continue;
+    if (p->hasIntKey()) {
+      smp->update(p->ikey, &p->data);
+    } else {
+      smp->update(p->skey, &p->data);
+    }
+  }
+  return obj;
+}
+
+Object c_StableMap::t_filterwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_StableMap* smp;
+  Object obj = smp = NEWOBJ(c_StableMap)();
+  if (!m_size) return obj;
+  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
+    Variant ret;
+    int32_t version = m_version;
+    TypedValue args[2] = {
+      (p->hasIntKey() ? make_tv<KindOfInt64>(p->ikey)
+                      : make_tv<KindOfString>(p->skey)),
+      p->data
+    };
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -3439,7 +3672,8 @@ Object c_Set::t_map(CVarRef callback) {
   // is thrown during the first iteration, because ~c_Set()
   // will decRef all slots up to (and including) m_nLastSlot.
   st->m_data[0].data.m_type = (DataType)0;
-  for (uint i = 0; i <= m_nLastSlot; st->m_nLastSlot = i++) {
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; st->m_nLastSlot = i++) {
     Bucket& p = m_data[i];
     Bucket& np = st->m_data[i];
     if (!p.validValue()) {
@@ -3469,7 +3703,8 @@ Object c_Set::t_filter(CVarRef callback) {
   c_Set* st;
   Object obj = st = NEWOBJ(c_Set)();
   if (!m_size) return obj;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
+  uint nLastSlot = m_nLastSlot;
+  for (uint i = 0; i <= nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     Variant ret;
@@ -4144,6 +4379,25 @@ Object c_Pair::t_map(CVarRef callback) {
   return obj;
 }
 
+Object c_Pair::t_mapwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_Vector* vec;
+  Object obj = vec = NEWOBJ(c_Vector)();
+  vec->reserve(2);
+  for (uint64_t i = 0; i < 2; ++i) {
+    TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
+    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
+    ++vec->m_size;
+  }
+  return obj;
+}
+
 Object c_Pair::t_filter(CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -4157,6 +4411,27 @@ Object c_Pair::t_filter(CVarRef callback) {
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
+    if (ret.toBoolean()) {
+      vec->add(&getElms()[i]);
+    }
+  }
+  return obj;
+}
+
+Object c_Pair::t_filterwithkey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  c_Vector* vec;
+  Object obj = vec = NEWOBJ(c_Vector)();
+  for (uint64_t i = 0; i < 2; ++i) {
+    Variant ret;
+    TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }

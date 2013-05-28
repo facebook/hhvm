@@ -146,10 +146,24 @@ trait StrictKeyedIterable {
     }
     return $res;
   }
+  public function mapWithKey($callback) {
+    $res = StableMap {};
+    foreach ($this as $k => $v) {
+      $res[$k] = $callback($k, $v);
+    }
+    return $res;
+  }
   public function filter($callback) {
     $res = StableMap {};
     foreach ($this as $k => $v) {
       if ($callback($v)) $res[$k] = $v;
+    }
+    return $res;
+  }
+  public function filterWithKey($callback) {
+    $res = StableMap {};
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) $res[$k] = $v;
     }
     return $res;
   }
@@ -223,8 +237,14 @@ trait LazyKeyedIterable {
   public function map($callback) {
     return new LazyMapKeyedIterable($this, $callback);
   }
+  public function mapWithKey($callback) {
+    return new LazyMapWithKeyIterable($this, $callback);
+  }
   public function filter($callback) {
     return new LazyFilterKeyedIterable($this, $callback);
+  }
+  public function filterWithKey($callback) {
+    return new LazyFilterWithKeyIterable($this, $callback);
   }
   public function zip($iterable) {
     return new LazyZipKeyedIterable($this, $iterable);
@@ -333,6 +353,50 @@ class LazyMapKeyedIterable implements KeyedIterable {
   }
 }
 
+class LazyMapWithKeyIterator implements KeyedIterator {
+  private $it;
+  private $fn;
+
+  public function __construct($it, $fn) {
+    $this->it = $it;
+    $this->fn = $fn;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+  }
+  public function valid() {
+    return $this->it->valid();
+  }
+  public function next() {
+    $this->it->next();
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return ($this->fn)($this->it->key(), $this->it->current());
+  }
+}
+
+class LazyMapWithKeyIterable implements KeyedIterable {
+  use LazyKeyedIterable;
+
+  private $iterable;
+  private $fn;
+
+  public function __construct($iterable, $fn) {
+    $this->iterable = $iterable;
+    $this->fn = $fn;
+  }
+  public function getIterator() {
+    return new LazyMapWithKeyIterator($this->iterable->getIterator(),
+                                      $this->fn);
+  }
+}
+
 class LazyFilterIterator implements Iterator {
   private $it;
   private $fn;
@@ -437,6 +501,60 @@ class LazyFilterKeyedIterable implements KeyedIterable {
   public function getIterator() {
     return
       new LazyFilterKeyedIterator($this->iterable->getIterator(), $this->fn);
+  }
+}
+
+class LazyFilterWithKeyIterator implements KeyedIterator {
+  private $it;
+  private $fn;
+
+  public function __construct($it, $fn) {
+    $this->it = $it;
+    $this->fn = $fn;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $it = $this->it;
+    $fn = $this->fn;
+    $it->rewind();
+    while ($it->valid() && !$fn($it->key(), $it->current())) {
+      $it->next();
+    }
+  }
+  public function valid() {
+    return $this->it->valid();
+  }
+  public function next() {
+    $it = $this->it;
+    $fn = $this->fn;
+    $it->next();
+    while ($it->valid() && !$fn($it->key(), $it->current())) {
+      $it->next();
+    }
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyFilterWithKeyIterable implements KeyedIterable {
+  use LazyKeyedIterable;
+
+  private $iterable;
+  private $fn;
+
+  public function __construct($iterable, $fn) {
+    $this->iterable = $iterable;
+    $this->fn = $fn;
+  }
+  public function getIterator() {
+    return
+      new LazyFilterWithKeyIterator($this->iterable->getIterator(), $this->fn);
   }
 }
 
@@ -656,8 +774,14 @@ class LazyKeyedIterableView implements KeyedIterable {
   public function map($callback) {
     return new LazyMapKeyedIterable($this->iterable, $callback);
   }
+  public function mapWithKey($callback) {
+    return new LazyMapWithKeyIterable($this->iterable, $callback);
+  }
   public function filter($callback) {
     return new LazyFilterKeyedIterable($this->iterable, $callback);
+  }
+  public function filterWithKey($callback) {
+    return new LazyFilterWithKeyIterable($this->iterable, $callback);
   }
   public function zip($iterable) {
     return new LazyZipKeyedIterable($this->iterable, $iterable);

@@ -73,7 +73,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void t_shuffle();
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -256,7 +258,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -558,7 +562,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -1030,7 +1036,9 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   Array t_toarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);

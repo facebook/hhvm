@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include <thread>
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
@@ -32,6 +32,7 @@ AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
 void AsioExternalThreadEvent::abandon() {
   assert(m_state.load() == Waiting);
   assert(m_waitHandle->getCount() == 1);
+  m_state.store(Abandoned);
   m_waitHandle->abandon(false);
 }
 

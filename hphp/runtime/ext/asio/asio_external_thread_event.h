@@ -214,7 +214,11 @@ class AsioExternalThreadEvent {
      * is eventually called.
      */
     virtual ~AsioExternalThreadEvent() {
-      assert(m_state.load() == Finished || m_state.load() == Canceled);
+      assert(
+        m_state.load() == Finished ||
+        m_state.load() == Canceled ||
+        m_state.load() == Abandoned
+      );
     };
 
     /**
@@ -267,6 +271,14 @@ class AsioExternalThreadEvent {
        * eventually calling markAsFinished() that will destruct this object.
        */
       Canceled,
+
+      /**
+       * Web request thread abandoned event before passing to processing thread.
+       *
+       * This object is owned by web request thread, which is trying to abandon
+       * it prior to passing ownership to processing thread.
+       */
+      Abandoned,
     };
 
     AsioSession* m_session;

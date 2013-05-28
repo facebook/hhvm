@@ -1,4 +1,5 @@
 <?php
+
 // Array of available fruits
 $fruits = array("lemons" => 1, "oranges" => 4, "bananas" => 5, "apples" => 10);
 

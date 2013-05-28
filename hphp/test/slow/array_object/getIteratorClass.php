@@ -1,4 +1,5 @@
 <?php
+
 // Custom ArrayIterator (inherits from ArrayIterator)
 class MyArrayIterator extends ArrayIterator {
     // custom implementation

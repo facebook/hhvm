@@ -1,6 +1,5 @@
 <?php
 
-
 trait Too {
   function gen() {
     $abc = $this->input();
@@ -8,21 +7,34 @@ trait Too {
       var_dump($arg);
       var_dump($abc);
       return $this->output();
-    };
+    }
+;
     return $a;
   }
-  function input() { return 1; }
-  function output() { return 2; }
+  function input() {
+ return 1;
+ }
+  function output() {
+ return 2;
+ }
 }
 class Foo {
   use Too;
-  function input() { return "str1"; }
-  function output() { return "str2"; }
+  function input() {
+ return "str1";
+ }
+  function output() {
+ return "str2";
+ }
 }
 class Goo {
   use Too;
-  function input() { return false; }
-  function output() { return true; }
+  function input() {
+ return false;
+ }
+  function output() {
+ return true;
+ }
 }
 $of = new Foo;
 $f = $of->gen();

@@ -1,3 +1,7 @@
 <?php
 
- function test() { print 'ok';} $a = 'Test'; $a();
+function test() {
+ print 'ok';
+}
+ $a = 'Test';
+ $a();

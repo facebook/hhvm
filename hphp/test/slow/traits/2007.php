@@ -1,23 +1,33 @@
 <?php
 
-
 echo "*** Testing class_uses() : basic ***\n";
 
 
-trait foo { }
-class fooUser { use foo; }
+trait foo {
+ }
+class fooUser {
+ use foo;
+ }
 
-trait bar { }
-class barUser { use bar; }
+trait bar {
+ }
+class barUser {
+ use bar;
+ }
 
-class foobarUser { use foo, bar; }
+class foobarUser {
+ use foo, bar;
+ }
 
 /** There is no semantics for traits in the inheritance chain.
     Traits are flattend into a class, and that semantics is nothing
     like a type, or interface, and thus, not propergated. */
-class fooViaBarUser extends barUser { use foo; }
+class fooViaBarUser extends barUser {
+ use foo;
+ }
 
-class fooExtended extends fooUser {}
+class fooExtended extends fooUser {
+}
 
 s_var_dump(class_uses(new foobarUser));
 s_var_dump(class_uses('foobarUser'));

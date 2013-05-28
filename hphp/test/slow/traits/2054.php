@@ -1,6 +1,5 @@
 <?php
 
-
 trait my_trait {
   abstract function foo();
   public function bar() {

@@ -1,6 +1,5 @@
 <?php
 
-
 trait T1 {
   public function inc($who) {
     static $x=0;
@@ -8,9 +7,14 @@ trait T1 {
     echo $who . " (" . __class__ . "): " . $x . "\n";
   }
 }
-class B { use T1; }
-class C { use T1; }
-class D extends C {}
+class B {
+ use T1;
+ }
+class C {
+ use T1;
+ }
+class D extends C {
+}
 $c1 = new C;
 $c2 = new C;
 $d1 = new D;

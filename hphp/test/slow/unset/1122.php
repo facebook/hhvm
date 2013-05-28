@@ -1,7 +1,7 @@
 <?php
 
-
-class cls {}
+class cls {
+}
 $obj = new cls;
 $a = array(1,2);
 unset($a[$obj]);

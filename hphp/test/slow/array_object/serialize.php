@@ -1,4 +1,5 @@
 <?php
+
 $o = new ArrayObject();
 
 $s1 = serialize($o);

@@ -1,3 +1,6 @@
 <?php
 
- $b = 't'; $a = 10; $b = 2; var_dump($a >> $b);
+$b = 't';
+ $a = 10;
+ $b = 2;
+ var_dump($a >> $b);

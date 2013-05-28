@@ -1,3 +1,8 @@
 <?php
 
- function str() { return 'test';} function test() { var_dump(str() - $a);}
+function str() {
+ return 'test';
+}
+ function test() {
+ var_dump(str() - $a);
+}

@@ -1,4 +1,5 @@
 <?php
+
 // Make sure that we can tell which class was called for intercepted static
 // methods
 
@@ -8,11 +9,13 @@ class A {
   }
 }
 
-class B extends A { }
+class B extends A {
+ }
 
 fb_intercept('A::foo', function($_, $called_on) {
   var_dump($called_on);
-});
+}
+);
 
 A::foo();
 B::foo();

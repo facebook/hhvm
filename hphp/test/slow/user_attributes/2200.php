@@ -1,21 +1,26 @@
 <?php
 
-
 class A {
   <<W(1),X(2)>>
-  private function foo() {}
+  private function foo() {
 }
-class B extends A {}
+}
+class B extends A {
+}
 class C extends B {
   <<X(3),Y(4)>>
-  protected function foo() {}
+  protected function foo() {
 }
-class D extends C {}
+}
+class D extends C {
+}
 class E extends D {
   <<Y(5),Z(6)>>
-  public function foo() {}
+  public function foo() {
 }
-class F extends E {}
+}
+class F extends E {
+}
 
 $rm = new ReflectionMethod('F', 'foo');
 

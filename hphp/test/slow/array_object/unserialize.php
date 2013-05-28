@@ -1,4 +1,5 @@
 <?php
+
 $a = new ArrayObject(array(1,2,3));
 $b = $a->serialize();
 $c = new ArrayObject;

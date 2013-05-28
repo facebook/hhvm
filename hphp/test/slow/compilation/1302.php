@@ -1,3 +1,7 @@
 <?php
 
- function foo() {}function test() {  foo()->bar();}
+function foo() {
+}
+function test() {
+  foo()->bar();
+}

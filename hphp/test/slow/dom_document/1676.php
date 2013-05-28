@@ -47,7 +47,9 @@ foreach ($nots AS $key=>$node) {
 }
 print "
 ";
-for($x=0; $x < $length; $x++) {
+for($x=0;
+ $x < $length;
+ $x++) {
   echo "Index $x: ".$nots->item($x)->nodeName." (".
        $nots->item($x)->systemId.") (".$nots->item($x)->publicId.")\n";
 }

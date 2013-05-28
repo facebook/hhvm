@@ -1,3 +1,3 @@
 <?php
 
- my_lbl: print 'here';
+my_lbl: print 'here';

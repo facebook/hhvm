@@ -1,3 +1,5 @@
 <?php
 
- function test() {} true ? test() : 1;
+function test() {
+}
+ true ? test() : 1;

@@ -1,6 +1,5 @@
 <?php
 
-
 // with var args
 class C9 {
   public function __invoke() {

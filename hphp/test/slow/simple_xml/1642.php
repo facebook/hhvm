@@ -1,6 +1,5 @@
 <?php
 
-
 function convert_simplexml_to_array($sxml) {
   $arr = array();
   if ($sxml) {
@@ -8,17 +7,20 @@ function convert_simplexml_to_array($sxml) {
       if ($sxml['list']) {
         if (isset($v['key'])) {
           $arr[(string)$v['key']] = convert_simplexml_to_array($v);
-        } else {
+        }
+ else {
           $arr[] = convert_simplexml_to_array($v);
         }
-      } else {
+      }
+ else {
         $arr[$k] = convert_simplexml_to_array($v);
       }
     }
   }
   if (sizeof($arr) > 0) {
     return $arr;
-  } else {
+  }
+ else {
     return (string)$sxml;
   }
 }

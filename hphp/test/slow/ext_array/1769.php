@@ -1,6 +1,5 @@
 <?php
 
-
 function f($val,$key) {
   echo "k=$key v=$val\n";
 }

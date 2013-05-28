@@ -1,2 +1,3 @@
 <?hh
-function foo(): Map<int, ?Vector<int>> {}
+function foo(): Map<int, ?Vector<int>> {
+}

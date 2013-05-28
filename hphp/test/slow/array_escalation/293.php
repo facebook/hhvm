@@ -1,3 +1,5 @@
 <?php
 
- $a = array('test'); $a[] = 1;              var_dump($a);
+$a = array('test');
+ $a[] = 1;
+              var_dump($a);

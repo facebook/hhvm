@@ -1,2 +1,3 @@
 <?hh
-function foo(array<string, int> $x) {}
+function foo(array<string, int> $x) {
+}

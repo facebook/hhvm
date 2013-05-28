@@ -1,8 +1,7 @@
 <?php
 
-
-
-trait foo {	
+trait foo {
+	
 	public function __toString() {
 		return '123';
 	}

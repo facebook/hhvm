@@ -1,6 +1,5 @@
 <?php
 
-
 $a = array(1, 2, 3);
 $o = new ArrayIterator($a);
 var_dump($o->next());

@@ -1,3 +1,9 @@
 <?php
 
- function test() { function inner() { print 'test';} inner();} test();
+function test() {
+ function inner() {
+ print 'test';
+}
+ inner();
+}
+ test();

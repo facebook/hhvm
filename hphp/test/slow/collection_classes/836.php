@@ -1,5 +1,8 @@
 <?php
-$x = Set {1, 2, 3};
+
+$x = Set {
+1, 2, 3}
+;
 var_dump($x);
 echo print_r($x, true);
 debug_zval_dump($x);

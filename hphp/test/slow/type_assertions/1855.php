@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x) {
   $r = is_array($x) ? $x[0] : false;
   var_dump($r);

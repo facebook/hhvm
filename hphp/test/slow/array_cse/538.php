@@ -1,6 +1,8 @@
+<?php
+
 function f1($x) {
-  if (count($x) > 0) { 
-    var_dump($x); 
+  if (count($x) > 0) {
+    var_dump($x);
   } else if (count($x[0]) > 0) {
     var_dump($x[0]);
   }
@@ -8,7 +10,9 @@ function f1($x) {
 f1(array(array(0, 1, 2)));
 f1('abc');
 
-function id($x) { return $x; }
+function id($x) {
+  return $x;
+}
 function f2($x) {
   if ($x[0]) var_dump(id($x), $x[0]);
 }

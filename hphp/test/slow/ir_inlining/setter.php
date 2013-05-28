@@ -1,6 +1,7 @@
 <?php
 
-class Bar{}
+class Bar{
+}
 
 class Foo {
   private $x;

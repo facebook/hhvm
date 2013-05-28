@@ -1,6 +1,5 @@
 <?php
 
-
 $dom = new domdocument;
 $html = <<<EOM
 <html><head>

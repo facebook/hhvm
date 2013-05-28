@@ -1,6 +1,5 @@
 <?php
 
-
 // as a private/protected method
 class C6 {
   private function __invoke($a0) {
@@ -13,6 +12,8 @@ class C7 {
   }
 }
 $c = new C6;
-$c(10); // still works...
+$c(10);
+ // still works...
 $c = new C7;
-$c(20); // still works...
+$c(20);
+ // still works...

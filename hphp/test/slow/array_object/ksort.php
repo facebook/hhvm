@@ -1,4 +1,5 @@
 <?php
+
 $fruits = array(
   "d" => "lemon",
   "a" => "orange",

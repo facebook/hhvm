@@ -2,7 +2,9 @@
 
 class NonExistProp {
   private $x;
-  public function __construct() { $x = "str"; }
+  public function __construct() {
+ $x = "str";
+ }
   public function unsetIt() {
     unset($this->x);
   }
@@ -25,7 +27,9 @@ function test7() {
     $k = new Dtor();
     echo $obj->getX();
     echo "\n";
-  } catch (Exception $x) {}
+  }
+ catch (Exception $x) {
+}
 }
 
 test7();

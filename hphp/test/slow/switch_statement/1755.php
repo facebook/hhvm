@@ -1,84 +1,84 @@
 <?php
 
-
 class Evil {
   private $x;
-  public function __construct() { $this->x = 0; }
+  public function __construct() {
+ $this->x = 0;
+ }
   public function __toString() {
     return sprintf("Evil%d", $this->x++);
   }
 }
 function f_1($x) {
   switch ($x) {
-  case "123": print '"123"' . "
-"; break;
-  case "4abc": print '"4abc"' . "
-"; break;
-  default: print "default
-"; break;
-  case "0": print '"0"' . "
-"; break;
-  case "": print '""' . "
-"; break; 
-  case "Evil4": print '"Evil4"' . "
-"; break;
+  case "123": print '"123"' . "";
+ break;
+  case "4abc": print '"4abc"' . "";
+ break;
+  default: print "default";
+ break;
+  case "0": print '"0"' . "";
+ break;
+  case "": print '""' . "";
+ break;
+
+  case "Evil4": print '"Evil4"' . "";
+ break;
   }
 }
 function f_2($x) {
-  var_dump($x); print "  goes to:";
+  var_dump($x);
+ print "  goes to:";
   switch ($x) {
-  case "foo": print "foo
-"; break;
-  case "1": print "1
-"; break;
-  case "2.0": print "2.0
-"; break;
-  case "2ab": print "2ab
-"; break;
-  case "3.212": print "3.212
-"; break;
-  case "0": print "0
-"; break;
-  case "": print "{empty str}
-"; break;
-  default: print "default
-"; break;
+  case "foo": print "foo";
+ break;
+  case "1": print "1";
+ break;
+  case "2.0": print "2.0";
+ break;
+  case "2ab": print "2ab";
+ break;
+  case "3.212": print "3.212";
+ break;
+  case "0": print "0";
+ break;
+  case "": print "{empty str}";
+ break;
+  default: print "default";
+ break;
   }
 }
 function g_2($x) {
-  var_dump($x); print "  goes to:";
+  var_dump($x);
+ print "  goes to:";
   switch ($x) {
-  case "": print "{empty str}
-"; break;
-  case "0": print "0
-"; break;
-  default: print "default
-"; break;
+  case "": print "{empty str}";
+ break;
+  case "0": print "0";
+ break;
+  default: print "default";
+ break;
   }
 }
 function h_2($x) {
-  var_dump($x); print "  goes to:";
+  var_dump($x);
+ print "  goes to:";
   switch ($x) {
-  case "3.0": print "3.0
-"; break;
-  case "3.0abc": print "3.0abc
-"; break;
-  case "3": print "3
-"; break;
-  default: print "
-";
+  case "3.0": print "3.0";
+ break;
+  case "3.0abc": print "3.0abc";
+ break;
+  case "3": print "3";
+ break;
+  default: print "";
   }
 }
 function f_3($x) {
   switch ($x) {
-  default: print "default
-";
-  case "bar": print "bar
-";
-  case "foo": print "foo
-";
-  case "baz": print "baz
-";
+  default: print "default";
+  case "bar": print "bar";
+  case "foo": print "foo";
+  case "baz": print "baz";
   }
 }
 f_1("");

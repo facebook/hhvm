@@ -1,14 +1,22 @@
 <?php
 
-function foo() { return "asd"; }
-function bar() { return "bar"; }
+function foo() {
+ return "asd";
+ }
+function bar() {
+ return "bar";
+ }
 
 class Bar {
-  public function asd() { return $this; }
+  public function asd() {
+ return $this;
+ }
 }
 
 class Baz {
-  public function k() { return 12; }
+  public function k() {
+ return 12;
+ }
 }
 
 function main() {

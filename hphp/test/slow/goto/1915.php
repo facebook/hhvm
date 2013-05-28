@@ -1,7 +1,8 @@
 <?php
 
-
-function fcn() { return true; }
+function fcn() {
+ return true;
+ }
 class X {
   function f($x) {
     goto over_switch;

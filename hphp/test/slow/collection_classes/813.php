@@ -1,6 +1,5 @@
 <?php
 
-
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';

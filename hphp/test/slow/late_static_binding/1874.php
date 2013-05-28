@@ -1,6 +1,5 @@
 <?php
 
-
 class B {
   public static $a = 100;
   static function f() {

@@ -1,3 +1,6 @@
 <?php
 
- function test() { return array();} reset(test());
+function test() {
+ return array();
+}
+ reset(test());

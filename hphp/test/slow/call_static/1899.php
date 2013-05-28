@@ -1,6 +1,5 @@
 <?php
 
-
 class a2 {
   public static function __callStatic($func, $args) {
     var_dump('a2::__callStatic');

@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   function F(&$a, $b="default") {
     $a .= " = " . $b;

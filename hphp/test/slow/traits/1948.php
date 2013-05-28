@@ -1,6 +1,5 @@
 <?php
 
-
 trait SayWorld {
   public function sayHello() {
     echo 'Hello from trait!';

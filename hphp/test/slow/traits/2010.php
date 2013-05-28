@@ -1,7 +1,5 @@
 <?php
 
-
-
 trait Singleton {
   protected static $instances=array();
   abstract protected function __construct($config);

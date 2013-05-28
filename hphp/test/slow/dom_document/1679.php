@@ -1,6 +1,5 @@
 <?php
 
-
 $dom = new DOMDocument();
 $dom->loadXML('<a><b><c /></b></a>');
 $remove = array();

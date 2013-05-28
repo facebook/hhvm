@@ -39,6 +39,7 @@ function foo() {
 }
 
 function main() {
-  foreach (foo() as $k) {}
+  foreach (foo() as $k) {
+}
 }
 main();

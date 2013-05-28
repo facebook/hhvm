@@ -4,7 +4,7 @@ array(1) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
-    int(12)
+    int(11)
     ["function"]=>
     string(7) "thrower"
     ["args"]=>
@@ -12,4 +12,4 @@ array(1) {
     }
   }
 }
-int(9)
+int(8)

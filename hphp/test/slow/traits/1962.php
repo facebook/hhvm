@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   public static function who() {
     echo "A: " . __CLASS__;
@@ -9,7 +8,8 @@ class A {
 }
 trait T {
   public static function test() {
-    static::who(); // Here comes Late Static Bindings
+    static::who();
+ // Here comes Late Static Bindings
   }
 }
 class B extends A {

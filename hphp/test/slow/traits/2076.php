@@ -1,6 +1,5 @@
 <?php
 
-
 trait U {
   public function test() {
     echo __CLASS__ . "\n";
@@ -16,4 +15,5 @@ class D {
 }
 $obj = new D;
 $x = $obj->test();
-foreach ($x as $v) {}
+foreach ($x as $v) {
+}

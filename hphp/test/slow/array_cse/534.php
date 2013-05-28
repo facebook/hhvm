@@ -1,6 +1,5 @@
 <?php
 
-
 function f(array $a = null, $e) {
   $a[$e]['foo'] = 30;
   $x = $a[$e]['baz'];

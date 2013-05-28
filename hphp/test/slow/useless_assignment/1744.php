@@ -1,3 +1,9 @@
 <?php
 
- function bar() {}function foo() {  $foo = bar();  unset($foo);}foo();
+function bar() {
+}
+function foo() {
+  $foo = bar();
+  unset($foo);
+}
+foo();

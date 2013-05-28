@@ -1,9 +1,10 @@
 <?php
 
-
 $nullherequote= <<<fail
 fail;
-echo "--$nullherequote--\n";$x="foo";$threestops= <<<pass
+echo "--$nullherequote--\n";
+$x="foo";
+$threestops= <<<pass
 passable $x
 pass;x
 ss;

@@ -1,6 +1,5 @@
 <?php
 
-
 trait T1 {
   function fruit() {
     yield 'apple';

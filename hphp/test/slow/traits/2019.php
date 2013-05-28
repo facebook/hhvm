@@ -1,8 +1,6 @@
 <?php
 
-
-
-	trait TestTrait {
+trait TestTrait {
 		public static function test() {
 			return get_called_class();
 		}
@@ -12,7 +10,8 @@
 		use TestTrait;
 	}
 
-	class B extends A { }
+	class B extends A {
+ }
 
 	echo B::test();
 

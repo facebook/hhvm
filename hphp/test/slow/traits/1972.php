@@ -1,6 +1,5 @@
 <?php
 
-
 trait MY_TRAIT {
   public $x;
 }

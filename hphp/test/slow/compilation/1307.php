@@ -1,3 +1,5 @@
 <?php
 
- function test($a) { return null * $a; }
+function test($a) {
+ return null * $a;
+ }

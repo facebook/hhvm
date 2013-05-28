@@ -9,7 +9,8 @@ foreach (new DirectoryIterator($sample_dir.'/') as $file) {
 var_dump(count($files));
 
 $dir = new DirectoryIterator($sample_dir.'/');
-$files = array(); // order changes per machine
+$files = array();
+ // order changes per machine
 foreach ($dir as $fileinfo) {
   if (!$fileinfo->isDot()) {
     $files[] = $fileinfo->getFilename();
@@ -19,7 +20,8 @@ asort($files);
 var_dump(array_values($files));
 
 $iterator = new DirectoryIterator($sample_dir);
-$files = array(); // order changes per machine
+$files = array();
+ // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
     $files[$fileinfo->getFilename()] = $fileinfo;
@@ -49,7 +51,8 @@ foreach ($files as $name => $fileinfo) {
 }
 
 $iterator = new RecursiveDirectoryIterator($sample_dir);
-$files = array(); // order changes per machine
+$files = array();
+ // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
     $files[$fileinfo->getFilename()] = $fileinfo;

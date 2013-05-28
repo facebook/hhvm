@@ -1,6 +1,5 @@
 <?php
 
-
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
  * Description: Checks if the trait exists 
  * Source code: Zend/zend_builtin_functions.c
@@ -13,7 +12,8 @@ function __autoload($traitName) {
 	echo "In __autoload($traitName)\n";
 }
 
-trait MyTrait {}
+trait MyTrait {
+}
 
 echo "Calling trait_exists() on non-existent trait with autoload explicitly enabled:\n";
 var_dump( trait_exists('C', true) );

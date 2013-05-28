@@ -1,6 +1,5 @@
 <?php
 
-
 $v = 42;
 $o1 = new stdclass;
 $o2 = new stdclass;

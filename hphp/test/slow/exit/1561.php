@@ -1,3 +1,6 @@
 <?php
 
- function foo() { return false; }foo() or exit("foobar");
+function foo() {
+ return false;
+ }
+foo() or exit("foobar");

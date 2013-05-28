@@ -35,7 +35,8 @@ class DummyProtocol {
 class DummyTransport {
   public $buff = '';
   public $pos = 0;
-  function flush() { }
+  function flush() {
+ }
   function write($buff) {
     $this->buff .= $buff;
   }

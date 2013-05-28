@@ -10,7 +10,9 @@ function main($num) {
   $start = microtime(true);
 
   echo "Starting $num procs\n";
-  for ($i = 0; $i < $num; $i++) {
+  for ($i = 0;
+ $i < $num;
+ $i++) {
     $handles[] = proc_open($cmd." $i", array(), $pipes);
   }
   while ($handles) {
@@ -27,7 +29,8 @@ function main($num) {
 }
 if (count($argv) > 1) {
   foobar($argv[1]);
-} else {
+}
+ else {
   $x10 = main(10);
   $x200 = main(200);
   echo $x10 * 20 < $x200 ? "Failed" : "Passed", "\n";

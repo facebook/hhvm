@@ -32,7 +32,7 @@ int(0)
 int(0)
 int(1)
 float(1.2)
-int(3)
+int(37)
 int(0)
 int(16)
 int(8)
@@ -52,7 +52,7 @@ int(0)
 int(0)
 int(-1)
 float(-1.2)
-int(-3)
+int(-57)
 int(0)
 int(-16)
 int(-8)
@@ -69,7 +69,7 @@ string(0) ""
 string(1) "о"
 string(1) "н"
 string(3) "ням"
-int(-4)
+int(-75)
 string(0) ""
 int(-17)
 int(-9)
@@ -89,7 +89,7 @@ string(0) ""
 string(1) "0"
 string(1) "1"
 string(3) "1.2"
-int(3)
+int(94)
 string(0) ""
 int(16)
 int(8)
@@ -109,7 +109,7 @@ int(0)
 int(0)
 int(1)
 int(1)
-int(3)
+int(114)
 int(0)
 int(16)
 int(8)
@@ -129,7 +129,7 @@ int(0)
 int(0)
 int(1)
 int(1)
-int(3)
+int(134)
 int(0)
 int(16)
 int(8)
@@ -189,7 +189,7 @@ float(0)
 float(0)
 float(1)
 float(1.2)
-float(3)
+float(194)
 float(0)
 float(16)
 float(8)
@@ -209,7 +209,7 @@ float(0)
 float(0)
 float(1)
 float(1.2)
-float(3)
+float(214)
 float(0)
 float(16)
 float(8)
@@ -229,7 +229,7 @@ float(0)
 float(0)
 float(1)
 float(1.2)
-float(3)
+float(234)
 float(0)
 float(16)
 float(8)
@@ -249,7 +249,7 @@ string(0) ""
 string(1) "0"
 string(1) "1"
 string(3) "1.2"
-string(1) "3"
+string(3) "254"
 string(0) ""
 string(2) "16"
 string(1) "8"

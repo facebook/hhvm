@@ -1,6 +1,5 @@
 <?php
 
-
 function gen(int $mode) {
   yield $mode;
   switch ($mode) {
@@ -11,7 +10,9 @@ function gen(int $mode) {
   yield 47;
 }
 
-for ($mode = 0; $mode < 3; ++$mode) {
+for ($mode = 0;
+ $mode < 3;
+ ++$mode) {
   echo "Testing mode $mode:\n";
   $gen = gen($mode);
   try {
@@ -20,7 +21,8 @@ for ($mode = 0; $mode < 3; ++$mode) {
       var_dump($gen->current());
       $gen->next();
     }
-  } catch (Exception $ex) {
+  }
+ catch (Exception $ex) {
     echo "EXCEPTION\n";
   }
   var_dump($gen->valid());

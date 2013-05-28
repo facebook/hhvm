@@ -1,7 +1,5 @@
 <?php
 
-
-
 class dom {
   public $kid;
   public function __destruct() {

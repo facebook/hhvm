@@ -1,6 +1,5 @@
 <?php
 
-
 $str = '';
 $arr1 = array('a', 'b');
 $arr2 = $arr1;

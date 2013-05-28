@@ -1,7 +1,8 @@
 <?php
 
-
-class A { var $i = 10; }
+class A {
+ var $i = 10;
+ }
 $a = array(new A);
 apc_store('key1', $a);
 $b = apc_fetch('key1');

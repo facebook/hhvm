@@ -1,6 +1,5 @@
 <?php
 
-
 function f1() {
   $i = 0;
   $foo = array(1,2,3,4);
@@ -8,9 +7,11 @@ function f1() {
     echo "key=$key val=$val\n";
     if($val == 2) {
       $foo[$key] = 0;
-    } else if($val == 3) {
+    }
+ else if($val == 3) {
       unset($foo[$key]);
-    } else {
+    }
+ else {
       $val++;
     }
     ++$i;

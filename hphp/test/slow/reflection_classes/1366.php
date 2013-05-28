@@ -137,14 +137,16 @@ class TC {
 }
 $rc = new ReflectionClass('TC');
 printClass($rc);
-function ff(Vector<int> $i, ?string $s, @C $c, array $a) {}
+function ff(Vector<int> $i, ?string $s, @C $c, array $a) {
+}
 $rf = new ReflectionFunction('ff');
 $rps = $rf->getParameters();
 foreach ($rps as $rp) {
   var_dump($rp->getTypeText());
   if ($rp->getClass() != null) {
       var_dump($rp->getClass()->getName());
-    } else {
+    }
+ else {
       var_dump("");
     }
 }

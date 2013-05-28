@@ -1,7 +1,5 @@
 <?php
 
-
-
 trait T1 {
   abstract function bar();
   public function foo() {

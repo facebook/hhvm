@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x, $y) {
   var_dump($x[$y]);
   if ($x[$y]) print 'HI';

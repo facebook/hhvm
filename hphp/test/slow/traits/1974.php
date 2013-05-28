@@ -1,6 +1,5 @@
 <?php
 
-
 trait A {
   function p() {
     echo "A\n";

@@ -1,12 +1,17 @@
 <?php
 
-
 trait T {
   public static $x=1;
-  public function printX() { var_dump(self::$x); }
+  public function printX() {
+ var_dump(self::$x);
+ }
 }
-class C1 { use T; }
-class C2 { use T; }
+class C1 {
+ use T;
+ }
+class C2 {
+ use T;
+ }
 $o1 = new C1;
 $o2 = new C2;
 var_dump(T::$x);

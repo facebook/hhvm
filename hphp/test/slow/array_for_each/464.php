@@ -1,6 +1,5 @@
 <?php
 
-
 function f9() {
   $i = 0;
   $arr = array(1,1,1);
@@ -23,4 +22,5 @@ function f9() {
       break;
   }
 }
-foreach (f9() as $_) {}
+foreach (f9() as $_) {
+}

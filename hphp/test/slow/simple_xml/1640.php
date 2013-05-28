@@ -1,6 +1,5 @@
 <?php
 
-
 $sxe = new SimpleXMLElement('<image-definition />');
 $sxe->addChild('path', 'some/path/to/my.file');
 $sxe->addChild('options');

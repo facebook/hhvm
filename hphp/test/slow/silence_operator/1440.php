@@ -1,3 +1,3 @@
 <?php
 
- @define( 'MARKDOWN_EMPTY_ELEMENT_SUFFIX',  " />");
+@define( 'MARKDOWN_EMPTY_ELEMENT_SUFFIX',  " />");

@@ -1,6 +1,5 @@
 <?php
 
-
 function f(&$elem) {
 $elem = 44;
 }

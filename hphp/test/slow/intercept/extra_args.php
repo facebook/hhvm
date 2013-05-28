@@ -1,6 +1,8 @@
 <?hh
 
-function foo() { var_dump('failed'); }
+function foo() {
+ var_dump('failed');
+ }
 
 fb_intercept('foo', 'bar', "hello");
 

@@ -1,6 +1,5 @@
 <?php
 
-
 class A implements Serializable {
   public $__foo = true;
   public function serialize() {
@@ -8,4 +7,5 @@ class A implements Serializable {
   }
   public function unserialize($serialized) {
   }
-} var_dump(unserialize(serialize(new A())));
+}
+ var_dump(unserialize(serialize(new A())));

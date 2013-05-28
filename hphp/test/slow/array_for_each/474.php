@@ -1,6 +1,6 @@
 <?php
 
- function g5() {
+function g5() {
   $arr = array(0,1,2,3);
   $arr2 = $arr;
   $b = true;
@@ -13,4 +13,5 @@
     }
   }
 }
-foreach (g5() as $_) {}
+foreach (g5() as $_) {
+}

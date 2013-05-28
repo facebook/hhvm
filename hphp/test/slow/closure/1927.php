@@ -1,6 +1,5 @@
 <?php
 
-
 class Foo {
   function bar() {
     $abc = 123;
@@ -8,7 +7,8 @@ class Foo {
       $n = func_num_args();
       $args = func_get_args();
       var_dump($n, $args);
-    };
+    }
+;
     return $a;
   }
 

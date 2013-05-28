@@ -1,6 +1,5 @@
 <?php
 
-
 // standard execution
 class C1 {
   public function __invoke($a0, $a1) {
@@ -8,7 +7,8 @@ class C1 {
     var_dump($a0, $a1);
   }
 }
-class D1 extends C1 {}
+class D1 extends C1 {
+}
 class E1 extends D1 {
   public function __invoke($a0, $a1) {
     var_dump('D2');
@@ -38,7 +38,9 @@ $e->__invoke(0, 1);
 C1::__invoke(0, 1);
 D1::__invoke(0, 1);
 E1::__invoke(0, 1);
-function mk($n) { return $n . '::__invoke'; }
+function mk($n) {
+ return $n . '::__invoke';
+ }
 call_user_func(mk('C1'), 0, 1);
 call_user_func(mk('D1'), 0, 1);
 call_user_func(mk('E1'), 0, 1);

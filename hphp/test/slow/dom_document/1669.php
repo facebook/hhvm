@@ -1,3 +1,4 @@
 <?php
 
- $obj = new DOMText(); var_dump($obj instanceof DOMNode);
+$obj = new DOMText();
+ var_dump($obj instanceof DOMNode);

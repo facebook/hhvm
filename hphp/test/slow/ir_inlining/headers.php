@@ -11,7 +11,8 @@ final class HTTPHeaders {
     $this->headers = Map {
       'foo' => 'bar',
       'baz' => 'quux',
-    };
+    }
+;
   }
 
   public function getAllHeaders(): Map<string,string> {

@@ -1,3 +1,5 @@
 <?php
 
- define('FOO', 1);if (defined('FOO')) echo 'defined'; else echo 'undefined';
+define('FOO', 1);
+if (defined('FOO')) echo 'defined';
+ else echo 'undefined';

@@ -1,6 +1,5 @@
 <?php
 
-
 function parse_callback() {
   var_dump(func_get_args());
 }

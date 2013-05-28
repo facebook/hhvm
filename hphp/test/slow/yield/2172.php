@@ -1,6 +1,5 @@
 <?php
 
-
 $x = 0;
 function f() {
   global $x;
@@ -8,7 +7,9 @@ function f() {
   yield $x++;
   yield $y++;
 }
-for ($i = 0; $i < 5; $i++) {
+for ($i = 0;
+ $i < 5;
+ $i++) {
   foreach (f() as $value) {
     var_dump($value);
   }

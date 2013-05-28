@@ -1,7 +1,8 @@
 <?php
 
 $path = __DIR__."/../../sample_dir/";
-$files = array(); // order changes per machine
+$files = array();
+ // order changes per machine
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($path,
       RecursiveDirectoryIterator::KEY_AS_PATHNAME),

@@ -1,3 +1,9 @@
 <?php
 
- function g() {}function h() {}class C {}new C(g(), h());
+function g() {
+}
+function h() {
+}
+class C {
+}
+new C(g(), h());

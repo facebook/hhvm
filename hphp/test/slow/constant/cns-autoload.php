@@ -1,8 +1,13 @@
 <?php
+
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function def() { define('FOO', 1); }
-function show($a,$b) { var_dump($a,$b); }
+function def() {
+ define('FOO', 1);
+ }
+function show($a,$b) {
+ var_dump($a,$b);
+ }
 function test() {
   show(FOO, FOO);
 }

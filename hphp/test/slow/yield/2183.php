@@ -1,13 +1,12 @@
 <?php
 
-
-
 class Evil {
   public function __destruct() {
     echo "in __destruct()\n";
     try {
       dumpCurrent();
-    } catch (Exception $e) {
+    }
+ catch (Exception $e) {
       printf("Caught: %s\n", $e->getMessage());
     }
   }

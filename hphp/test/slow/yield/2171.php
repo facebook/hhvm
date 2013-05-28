@@ -1,6 +1,5 @@
 <?php
 
-
 $x = 32;
 $SOME_VAR = 'foo';
 function f($a0, $a1, $a2, $a3) {

@@ -1,6 +1,5 @@
 <?php
 
-
 trait MY_TRAIT2 {
   protected function sayGoodbye() {
     echo "Goodbye from MY_TRAIT2!\n";

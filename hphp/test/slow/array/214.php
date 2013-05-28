@@ -1,3 +1,4 @@
 <?php
 
- $a[] = 3; var_dump($a);
+$a[] = 3;
+ var_dump($a);

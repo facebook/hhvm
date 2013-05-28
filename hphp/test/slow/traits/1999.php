@@ -1,6 +1,5 @@
 <?php
 
-
 function get_declared_user_traits() {
   $ret = array();
   foreach (get_declared_traits() as $v) {

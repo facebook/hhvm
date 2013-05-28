@@ -1,6 +1,5 @@
 <?php
 
-
 function show_without_extra_vardump_nonsense($arr) {
   echo 'array (' . count($arr) . ") {\n";
   foreach ($arr as $val) {
@@ -34,21 +33,29 @@ trait T {
   protected static $prot_st;
   public static $pub_st;
 
-  private function fpriv() {}
-  protected function fprot() {}
-  public function fpub() {}
+  private function fpriv() {
+}
+  protected function fprot() {
+}
+  public function fpub() {
+}
 
-  private static function fpriv_st() {}
-  protected static function fprot_st() {}
-  public static function fpub_st() {}
+  private static function fpriv_st() {
+}
+  protected static function fprot_st() {
+}
+  public static function fpub_st() {
+}
 }
 
 trait U {
   public $foo;
   public static $static;
 
-  public function ffoo() {}
-  public static function fstatic() {}
+  public function ffoo() {
+}
+  public static function fstatic() {
+}
 }
 
 class C {
@@ -61,7 +68,8 @@ class D extends C {
   use U;
 
   public $class_prop;
-  public function class_method() {}
+  public function class_method() {
+}
 
 }
 

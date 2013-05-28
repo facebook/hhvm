@@ -1,6 +1,5 @@
 <?php
 
-
 trait Hello {
   public function say() {
     echo 'Hello ';

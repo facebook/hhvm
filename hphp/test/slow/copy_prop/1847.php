@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x, $y) {
   $z = 32;
   return $x && $y ?: $z;

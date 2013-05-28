@@ -1,8 +1,9 @@
 <?php
 
-
 function f() {
-  $a = yield 1; list($a, $b) = yield $a; yield $b;
+  $a = yield 1;
+ list($a, $b) = yield $a;
+ yield $b;
 }
 $c = f();
 $c->next();

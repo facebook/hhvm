@@ -1,4 +1,8 @@
-function id($x) { return $x; }
+<?php
+
+function id($x) {
+  return $x;
+}
 function f1($x) {
   $z = id($x[0]);
   foreach ($x[0] as $a) {

@@ -1,3 +1,5 @@
 <?php
 
- $a = 'zzz'; $b = 'test'; var_dump($a | $b);
+$a = 'zzz';
+ $b = 'test';
+ var_dump($a | $b);

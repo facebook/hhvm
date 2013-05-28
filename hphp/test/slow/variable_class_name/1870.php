@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   const C = 123;
   static public $foo = 456;
@@ -10,13 +9,18 @@ class A {
 }
 $cls = 'a';
 
-var_dump($cls::C); // ClassConstant
+var_dump($cls::C);
+ // ClassConstant
 
-var_dump($cls::$foo); // StaticMember
+var_dump($cls::$foo);
+ // StaticMember
 $cls::$foo = 'test';
-var_dump($cls::$foo); // l-value
+var_dump($cls::$foo);
+ // l-value
 
-var_dump($cls::bar()); // SimpleFunctionCall
+var_dump($cls::bar());
+ // SimpleFunctionCall
 
 $func = 'bar';
-var_dump($cls::$func()); // DynamicFunctionCall
+var_dump($cls::$func());
+ // DynamicFunctionCall

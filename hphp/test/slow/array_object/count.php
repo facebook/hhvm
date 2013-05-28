@@ -1,4 +1,5 @@
 <?php
+
 class Example {
     public $public = 'prop:public';
     private $prv   = 'prop:private';

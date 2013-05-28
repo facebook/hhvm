@@ -1,3 +1,5 @@
 <?php
 
- $a = 'test'; $b = 'zzz'; var_dump($a ^ $b);
+$a = 'test';
+ $b = 'zzz';
+ var_dump($a ^ $b);

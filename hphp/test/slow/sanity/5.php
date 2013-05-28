@@ -1,3 +1,7 @@
 <?php
 
- if (true) { ?>#<?php } ?>
+if (true) {
+ ?>#<?php
+
+}
+ ?>

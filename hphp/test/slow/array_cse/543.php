@@ -1,6 +1,5 @@
 <?php
 
-
 function f1($x) {
   if ($x[1]) goto x_t;
   var_dump($x[0]);
@@ -17,7 +16,8 @@ function f2($x) {
 function f3($x, $y) {
   do {
     var_dump($x[0]);
-  } while ($x[0] && $y);
+  }
+ while ($x[0] && $y);
   var_dump($x[0]);
 }
 function f4($x) {
@@ -34,7 +34,9 @@ function f5($x) {
 }
 function f6($x, $y, $z) {
   if ($z) goto my_clause;
-  if ($y) { var_dump($y); }
+  if ($y) {
+ var_dump($y);
+ }
   else if ($x[0]) {
     var_dump($x[0]);
     my_clause:

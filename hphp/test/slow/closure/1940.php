@@ -1,11 +1,11 @@
 <?php
 
-
 function mkC() {
   return function () {
     static $x = 0;
     return $x++;
-  };
+  }
+;
 }
 $c0 = mkC();
 var_dump($c0());

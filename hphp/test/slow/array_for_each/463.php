@@ -1,6 +1,5 @@
 <?php
 
-
 function f9() {
   $i = 0;
   $arr = array(1,1,1);

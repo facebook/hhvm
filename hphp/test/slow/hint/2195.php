@@ -1,29 +1,44 @@
 <?php
 
-
 function f1() {
-  $a = Vector {};
+  $a = Vector {
+}
+;
   $a->resize(4, null);
-  $b = Vector {42, 73};
+  $b = Vector {
+42, 73}
+;
   $a->setAll($b);
   var_dump($a);
 }
 function f2() {
-  $a = Vector {};
+  $a = Vector {
+}
+;
   $a->resize(4, null);
-  $b = Map {3 => 42, 2 => 73};
+  $b = Map {
+3 => 42, 2 => 73}
+;
   $a->setAll($b);
   var_dump($a);
 }
 function f3() {
-  $a = StableMap {};
-  $b = Vector {42, 73};
+  $a = StableMap {
+}
+;
+  $b = Vector {
+42, 73}
+;
   $a->setAll($b);
   var_dump($a);
 }
 function f4() {
-  $a = StableMap {};
-  $b = StableMap {3 => 42, 2 => 73};
+  $a = StableMap {
+}
+;
+  $b = StableMap {
+3 => 42, 2 => 73}
+;
   $a->setAll($b);
   var_dump($a);
 }

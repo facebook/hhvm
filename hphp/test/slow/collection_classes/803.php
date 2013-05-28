@@ -1,6 +1,5 @@
 <?php
 
-
 $v = new Vector;
 $v[] = 123;
 var_dump($v->toArray());

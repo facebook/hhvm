@@ -1,7 +1,5 @@
 <?php
 
-
-
 class Exception1 extends Exception {
   public function __Construct() {
     parent::__construct();
@@ -21,8 +19,10 @@ function foo() {
 function bar() {
   try {
     foo();
-  } catch (Exception $exn) {
-    $a = $exn->getTrace(); foreach ($a as &$b) $b['file'] = 'string';
+  }
+ catch (Exception $exn) {
+    $a = $exn->getTrace();
+ foreach ($a as &$b) $b['file'] = 'string';
     var_dump($a);
     var_dump($exn->getLine());
   }

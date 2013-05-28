@@ -1,6 +1,5 @@
 <?php
 
-
 class Foo {
   static function Bar() {
     if (isset($this) && isset($this->bar)) {
@@ -8,4 +7,7 @@ class Foo {
     }
     var_dump($this);
   }
-} Foo::Bar(); $obj = new Foo(); $obj->Bar();
+}
+ Foo::Bar();
+ $obj = new Foo();
+ $obj->Bar();

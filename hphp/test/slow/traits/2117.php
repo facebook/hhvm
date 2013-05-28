@@ -1,6 +1,5 @@
 <?php
 
-
 class Foo {
   protected function f() {
     return 'Foo';

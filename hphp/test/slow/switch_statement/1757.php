@@ -1,23 +1,26 @@
 <?php
 
-
 class X {
   function foo() {
     switch ($this) {
-    case 'foo': echo 'foo'; break;
-    case 'bar': echo 'bar'; break;
+    case 'foo': echo 'foo';
+ break;
+    case 'bar': echo 'bar';
+ break;
     default: echo 'def';
     }
   }
   function bar($arg) {
     switch ($this) {
-    case $arg: echo 'arg'; break;
+    case $arg: echo 'arg';
+ break;
     default: echo 'def';
     }
   }
   function baz($arg) {
     switch ($this) {
-    case $arg: echo 'arg'; break;
+    case $arg: echo 'arg';
+ break;
     default: echo 'def';
     }
     yield $arg;

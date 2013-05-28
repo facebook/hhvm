@@ -1,6 +1,5 @@
 <?php
 
-
 class a1 {
   public function __call($func, $args) {
     var_dump('a1::__call');

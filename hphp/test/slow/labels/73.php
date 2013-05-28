@@ -1,4 +1,4 @@
 <?php
 
-
-define('modalité', 123); var_dump(modalité);
+define('modalité', 123);
+ var_dump(modalité);

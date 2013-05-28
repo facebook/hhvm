@@ -1,3 +1,5 @@
 <?php
 
- $a = 't'; $a = 1; print $a + 2;
+$a = 't';
+ $a = 1;
+ print $a + 2;

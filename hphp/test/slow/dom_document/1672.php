@@ -1,6 +1,5 @@
 <?php
 
-
 $xmlstr = "<?xml version='1.0' standalone='yes'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
 [ <!ENTITY sp \"spanish\">
@@ -29,7 +28,8 @@ function print_node($node)
 Node Type: " . $node->nodeType;
   if ($node->nodeType != 3) {
       $child_count = $node->childNodes->length;
-  } else {
+  }
+ else {
       $child_count = 0;
   }
   print "

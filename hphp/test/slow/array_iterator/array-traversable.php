@@ -1,5 +1,7 @@
 <?php
-interface IFoo {}
+
+interface IFoo {
+}
 function trav(Traversable $x) {
   echo "Traversable " . $x . " \n";
   var_dump($x);

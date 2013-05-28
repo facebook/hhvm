@@ -1,6 +1,5 @@
 <?php
 
-
 function f2() {
   $i = 0;
   $foo = array(1,2,3,4);
@@ -9,9 +8,11 @@ function f2() {
     echo "key=$key val=$val\n";
     if($val == 2) {
       $foo[$key] = 0;
-    } else if($val == 3) {
+    }
+ else if($val == 3) {
       $foo['a'] = 7;
-    } else {
+    }
+ else {
       $val++;
     }
     ++$i;
@@ -20,4 +21,5 @@ function f2() {
   }
   var_dump($foo);
 }
-foreach (f2() as $_) {}
+foreach (f2() as $_) {
+}

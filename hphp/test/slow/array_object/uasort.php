@@ -1,4 +1,5 @@
 <?php
+
 // Comparison function
 function cmp($a, $b) {
     if ($a == $b) {

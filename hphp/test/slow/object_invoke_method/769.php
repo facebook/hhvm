@@ -1,6 +1,5 @@
 <?php
 
-
 // with type hints
 class C8 {
   public function __invoke(array $a0) {

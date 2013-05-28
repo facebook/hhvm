@@ -1,8 +1,6 @@
 <?php
 
-
-
-	trait TestTrait {
+trait TestTrait {
 		public static function __callStatic($name, $arguments) {
 			return $name;
 		}

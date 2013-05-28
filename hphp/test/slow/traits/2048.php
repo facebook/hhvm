@@ -1,6 +1,5 @@
 <?php
 
-
 error_reporting(E_ALL);
 
 trait A {
@@ -23,7 +22,8 @@ trait C {
 
 class Foo {
     use C, A, B {
-		B::foo insteadof A, C; 
+		B::foo insteadof A, C;
+
 	}
 }
 

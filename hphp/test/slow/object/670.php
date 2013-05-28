@@ -1,6 +1,5 @@
 <?php
 
-
 $x = null;
 $y = 0;
 class C {

@@ -1,7 +1,10 @@
 <?php
 
-
-class c { function f(&$a, $b) { $a = $b; } }
+class c {
+ function f(&$a, $b) {
+ $a = $b;
+ }
+ }
 function setNullVariantHelper($f, $value) {
   $a = array();
   $obj = new c;

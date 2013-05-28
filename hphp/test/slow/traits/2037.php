@@ -1,7 +1,5 @@
 <?php
 
-
-
 trait foo {
 	public function abc() {
 	}

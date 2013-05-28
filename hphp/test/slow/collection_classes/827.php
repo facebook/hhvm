@@ -1,10 +1,15 @@
 <?php
 
-
 function f() {
-  $mp1 = StableMap {'a' => 1, 2 => 'b', 'c' => array()};
-  $mp2 = StableMap {};
-  $mp3 = StableMap {};
+  $mp1 = StableMap {
+'a' => 1, 2 => 'b', 'c' => array()}
+;
+  $mp2 = StableMap {
+}
+;
+  $mp3 = StableMap {
+}
+;
   foreach ($mp1->items() as $t) {
     $mp2->add($t);
   }

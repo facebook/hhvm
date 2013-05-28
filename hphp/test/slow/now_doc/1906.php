@@ -1,6 +1,5 @@
 <?php
 
-
 $b = 'bad';
 $a = <<<'NOWDOC'
 $b

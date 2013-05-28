@@ -1,8 +1,9 @@
 <?php
 
-
 trait T1 {
-  private function Func1() { echo "Hello"; }
+  private function Func1() {
+ echo "Hello";
+ }
 }
 class C {
   use T1 {

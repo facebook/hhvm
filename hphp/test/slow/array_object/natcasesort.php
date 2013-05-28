@@ -1,4 +1,5 @@
 <?php
+
 $array = array(
   'IMG0.png',
   'img12.png',

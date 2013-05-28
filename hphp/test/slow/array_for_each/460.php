@@ -1,6 +1,5 @@
 <?php
 
-
 function f7() {
   $i = 0;
   $bar = array();
@@ -18,4 +17,5 @@ function f7() {
       break;
   }
 }
-foreach (f7() as $_) {}
+foreach (f7() as $_) {
+}

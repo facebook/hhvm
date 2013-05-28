@@ -1,10 +1,12 @@
 <?php
 
-
 if (true) {
-  class c extends AppendIterator {}
-} else {
-  class c {}
+  class c extends AppendIterator {
+}
+}
+ else {
+  class c {
+}
 }
 class d extends c {
   public function rewind() {
@@ -12,4 +14,5 @@ class d extends c {
   }
 }
 $obj = new d;
-foreach ($obj as $k => $v) {}
+foreach ($obj as $k => $v) {
+}

@@ -1,7 +1,7 @@
 <?php
 
-
-class X {}
+class X {
+}
 function f($a0,
            $a1,
            $a2,
@@ -11,7 +11,8 @@ function f($a0,
   $r0 = $a0 ?: 0;
   $r1 = $a1 ?: 0.0;
   $r2 = $a2 ?: false;
-  $r3 = $a3 ?: ''; 
+  $r3 = $a3 ?: '';
+
   $r4 = $a4 ?: array();
   $r5 = $a5 ?: new X;
   return array(

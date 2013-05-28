@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   public $a = 'apple';
   public $b = 'banana';

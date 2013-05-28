@@ -1,7 +1,5 @@
 <?php
 
-
-
 class MyIterator implements Iterator{
   private $var = array();
   public function __construct($array) {
@@ -42,8 +40,14 @@ class MyIterator implements Iterator{
   }
 }
 
-function f() { var_dump('f'); return 0; }
-function g() { var_dump('g'); return 0; }
+function f() {
+ var_dump('f');
+ return 0;
+ }
+function g() {
+ var_dump('g');
+ return 0;
+ }
 
 $a = array(1, 2);
 $values = array('a' => 1, 'b' => 2, 'c' => 3);

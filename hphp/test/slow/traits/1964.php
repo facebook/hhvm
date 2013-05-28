@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   public $y = 3;
 }

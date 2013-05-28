@@ -1,3 +1,3 @@
 <?php
 
- $a = -date('w');
+$a = -date('w');

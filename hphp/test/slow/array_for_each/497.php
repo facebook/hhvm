@@ -1,6 +1,6 @@
 <?php
 
- function k3() {
+function k3() {
   $arr = array(0,1,2,3,4);
   reset($arr);
   $b = true;

@@ -1,3 +1,4 @@
 <?php
 
- $a = array(); foreach ($a as $item) print '['.$item.']';
+$a = array();
+ foreach ($a as $item) print '['.$item.']';

@@ -1,7 +1,6 @@
 <?php
 
-
-    function foo() {
+function foo() {
     }
     function main() {
       var_dump(is_null(foo()));

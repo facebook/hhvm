@@ -1,6 +1,8 @@
 <?php
 
-function less($a, $b) { return $a < $b; }
+function less($a, $b) {
+ return $a < $b;
+ }
 
 function main($a) {
   usort($a, 'less');

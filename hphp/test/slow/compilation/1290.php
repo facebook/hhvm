@@ -1,3 +1,7 @@
 <?php
 
- function g() {}function test1() {  return '' . g();}
+function g() {
+}
+function test1() {
+  return '' . g();
+}

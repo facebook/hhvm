@@ -1,4 +1,5 @@
 <?php
+
 class Example {
   public $property = 'prop:public';
 }

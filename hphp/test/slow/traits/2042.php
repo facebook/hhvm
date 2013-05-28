@@ -1,6 +1,5 @@
 <?php
 
-
 function get_declared_user_traits() {
   $ret = array();
   foreach (get_declared_traits() as $v) {
@@ -12,11 +11,16 @@ function get_declared_user_traits() {
   return $ret;
 }
 
-class a { }
-interface b { }
-trait c { }
-abstract class d { }
-final class e { }
+class a {
+ }
+interface b {
+ }
+trait c {
+ }
+abstract class d {
+ }
+final class e {
+ }
 
 var_dump(get_declared_user_traits());
 

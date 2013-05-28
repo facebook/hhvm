@@ -1,6 +1,5 @@
 <?php
 
-
 trait Foo {
     public function Foo() {
     }

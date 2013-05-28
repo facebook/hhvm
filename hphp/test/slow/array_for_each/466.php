@@ -1,6 +1,6 @@
 <?php
 
- function g1() {
+function g1() {
   $arr = array(0,1,2,3);
   $b = true;
   foreach ($arr as &$v) {
@@ -12,4 +12,5 @@
      }
   }
 }
-foreach (g1() as $_) {}
+foreach (g1() as $_) {
+}

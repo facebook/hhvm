@@ -1,10 +1,12 @@
 <?php
 
-
-
 trait A {
-   protected static function foo() { echo "abc\n"; }
-   private static function bar() { echo "def\n"; }
+   protected static function foo() {
+ echo "abc\n";
+ }
+   private static function bar() {
+ echo "def\n";
+ }
 }
 
 

@@ -1,6 +1,5 @@
 <?php
 
-
 class EvensOnly extends FilterIterator {
   function __construct($it) {
     parent::__construct($it);

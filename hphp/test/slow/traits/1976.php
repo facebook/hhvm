@@ -1,6 +1,5 @@
 <?php
 
-
 trait Counter {
   public function inc() {
     static $c = 0;

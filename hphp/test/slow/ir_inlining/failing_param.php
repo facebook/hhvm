@@ -7,7 +7,10 @@ function wat(string $x) {
 function main() {
   try {
     wat(12);
-  } catch (Exception $x) { echo "ok\n"; }
+  }
+ catch (Exception $x) {
+ echo "ok\n";
+ }
 }
 
 main();

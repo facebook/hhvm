@@ -1,6 +1,5 @@
 <?php
 
-
 class Base {
   public function sayHello() {
     echo 'Hello ';

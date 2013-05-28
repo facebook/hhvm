@@ -1,6 +1,5 @@
 <?php
 
-
 trait A {
   public function smallTalk() {
     echo "a\n";

@@ -1,6 +1,5 @@
 <?php
 
-
 $arr = array(0,1,2);
 function f($val,$key) {
   global $arr;

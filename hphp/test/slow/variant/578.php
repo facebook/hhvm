@@ -1,3 +1,5 @@
 <?php
 
- $a = 't'; $a = 10; print 2 * $a;
+$a = 't';
+ $a = 10;
+ print 2 * $a;

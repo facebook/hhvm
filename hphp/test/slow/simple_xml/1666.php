@@ -1,6 +1,5 @@
 <?php
 
-
 class MyElement extends SimpleXMLElement {
   public function asUcWordString() {
     return ucwords((string)$this);

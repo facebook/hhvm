@@ -1,13 +1,13 @@
 <?php
 
-
 function f() {
   var_dump(func_get_arg(-1));
   var_dump(func_get_arg(0));
   var_dump(func_get_arg(1));
   if (func_get_arg(2)) {
     $x = 0;
-  } else {
+  }
+ else {
     $x = 1;
   }
   var_dump(func_get_arg($x++));

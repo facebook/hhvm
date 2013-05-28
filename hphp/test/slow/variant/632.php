@@ -1,3 +1,5 @@
 <?php
 
- $a = 1; $a = 'test'; var_dump(~$a);
+$a = 1;
+ $a = 'test';
+ var_dump(~$a);

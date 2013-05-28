@@ -1,6 +1,5 @@
 <?php
 
-
 $WHICH = 0;
 function decide() {
   global $WHICH;
@@ -13,7 +12,8 @@ if (decide()) {
       yield 1;
     }
   }
-} else {
+}
+ else {
   class X {
     public function generator() {
       yield 1;

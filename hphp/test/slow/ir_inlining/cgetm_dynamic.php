@@ -4,7 +4,9 @@ class CGetMDynProp {
   public function __construct() {
     $this->str = "yolo";
   }
-  public function getString() { return $this->str; }
+  public function getString() {
+ return $this->str;
+ }
 }
 
 function test6() {

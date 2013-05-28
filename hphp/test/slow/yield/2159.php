@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x) {
   switch ($x++ + ++$x) {
   case 1:
@@ -13,5 +12,9 @@ function f($x) {
     yield 4;
   }
 }
-foreach (f(0) as $x) { var_dump($x); }
-foreach (f(1) as $x) { var_dump($x); }
+foreach (f(0) as $x) {
+ var_dump($x);
+ }
+foreach (f(1) as $x) {
+ var_dump($x);
+ }

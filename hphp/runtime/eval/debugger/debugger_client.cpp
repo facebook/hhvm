@@ -332,7 +332,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
     try {
       VariableSerializer::Type t = vardump ?
                                    VariableSerializer::VarDump :
-                                   VariableSerializer::PrintR;
+                                   VariableSerializer::DebuggerDump;
       VariableSerializer vs(t, 0, 2);
       value = vs.serialize(v, true);
     } catch (StringBufferLimitException &e) {

@@ -13,8 +13,7 @@ hphpd> run
 hphpd> print $this
 [22;36mFoo Object
 (
-    [prop] => Hello
-
+    [prop] => "Hello\n"
 )
 [0m
 hphpd> quit

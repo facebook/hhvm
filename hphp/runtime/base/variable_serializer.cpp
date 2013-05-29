@@ -268,7 +268,6 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->append(v, len);
     break;
   }
-  case DebuggerDump:
   case VarExport: {
     m_buf->append('\'');
     const char *p = v;
@@ -325,6 +324,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->appendJsonEscape(v, len, m_option);
     break;
   }
+  case DebuggerDump:
   case PHPOutput: {
     m_buf->append('"');
     for (int i = 0; i < len; ++i) {
@@ -519,6 +519,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   info.indent_delta = 0;
 
   switch (m_type) {
+  case DebuggerDump:
   case PrintR:
     if (!m_rsrcName.empty()) {
       m_buf->append("Resource id #");
@@ -608,7 +609,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
     break;
   case JSON:
-  case DebuggerDump:
     info.is_vector =
       (m_objClass.empty() || m_objCode == 'V' || m_objCode == 'K') &&
       isVectorData;
@@ -664,7 +664,7 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
     }
   } else {
     m_buf->append(prop);
-    if (m_type != PrintR) m_buf->append('"');
+    if (m_type != PrintR && m_type != DebuggerDump) m_buf->append('"');
   }
 }
 
@@ -678,6 +678,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
   }
   ArrayInfo &info = m_arrayInfos.back();
   switch (m_type) {
+  case DebuggerDump:
   case PrintR: {
     indent();
     m_buf->append('[');
@@ -718,7 +719,6 @@ void VariableSerializer::writeArrayKey(Variant key) {
     write(key);
     break;
   case JSON:
-  case DebuggerDump:
     if (!info.first_element) {
       m_buf->append(',');
     }
@@ -824,8 +824,10 @@ void VariableSerializer::writeArrayFooter() {
 
   m_indent -= info.indent_delta;
   switch (m_type) {
+  case DebuggerDump:
   case PrintR:
     if (m_rsrcName.empty()) {
+      if (m_type == DebuggerDump) m_buf->append("\n");
       indent();
       m_buf->append(")\n");
       if (m_indent > 0) {
@@ -860,7 +862,6 @@ void VariableSerializer::writeArrayFooter() {
     m_buf->append('}');
     break;
   case JSON:
-  case DebuggerDump:
     if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
       m_buf->append("\n");
       indent();

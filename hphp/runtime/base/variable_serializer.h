@@ -29,8 +29,7 @@ class ClassInfo;
 
 /**
  * Maintaining states during serialization of a variable. We use this single
- * class to uniformly serialize variables according to different formats:
- * print_r(), var_export(), var_dump(), debug_zval_dump() or serialize().
+ * class to uniformly serialize variables according to different formats.
  */
 class VariableSerializer {
 public:
@@ -38,16 +37,16 @@ public:
    * Supported formats.
    */
   enum Type {
-    PrintR,
-    VarExport,
-    VarDump,
-    DebugDump,
-    DebuggerDump,
-    Serialize,
-    JSON,
-    APCSerialize,
-    DebuggerSerialize,
-    PHPOutput,
+    PrintR, //print_r()
+    VarExport, //var_export()
+    VarDump, //var_dump()
+    DebugDump, //debug_zval_dump()
+    DebuggerDump, //used by hphp debugger to obtain user visible output
+    Serialize, // serialize()
+    JSON, //json_encode()
+    APCSerialize, //used in APC serialization (controlled by switch)
+    DebuggerSerialize, //used by hphp debugger for client<->proxy communication
+    PHPOutput, //used by compiler to output scalar values into byte code
   };
 
   /**

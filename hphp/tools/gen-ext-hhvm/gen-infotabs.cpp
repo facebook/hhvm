@@ -27,7 +27,7 @@
 
 using folly::fbstring;
 using folly::fbvector;
-
+using namespace HPHP::IDL;
 
 int main(int argc, const char* argv[]) {
   if (argc < 3) {
@@ -64,16 +64,15 @@ int main(int argc, const char* argv[]) {
   // Declare the fg_ and tg_ stubs
 
   for (auto const& func : funcs) {
-    cpp << "TypedValue* fg_" << func.name << "(ActRec* ar);\n";
+    cpp << "TypedValue* fg_" << func.name() << "(ActRec* ar);\n";
   }
 
   for (auto const& klass : classes) {
-    if (std::find(klass.flags.begin(), klass.flags.end(), "IsCppAbstract")
-        == klass.flags.end()) {
-      cpp << "Instance* new_" << klass.name << "_Instance(Class*);\n";
-      classesWithCtors.insert(klass.name);
+    if (!(klass.flags() & IsCppAbstract)) {
+      cpp << "Instance* new_" << klass.name() << "_Instance(Class*);\n";
+      classesWithCtors.insert(klass.name());
     }
-    for (auto const& func : klass.methods) {
+    for (auto const& func : klass.methods()) {
       cpp << "TypedValue* tg_" << func.getUniqueName()
           << "(ActRec* ar);\n";
     }
@@ -89,7 +88,7 @@ int main(int argc, const char* argv[]) {
 
   bool first = true;
   for (auto const& func : funcs) {
-    if (!func.className.empty()) {
+    if (func.isMethod()) {
       continue;
     }
     if (!first) {
@@ -97,24 +96,24 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    cpp << "{ \"" << func.name << "\", fg_" << func.name
-        << ", (void *)&fh_" << func.name << " }";
+    cpp << "{ \"" << func.name() << "\", fg_" << func.name()
+        << ", (void *)&fh_" << func.name() << " }";
   }
   cpp << "\n};\n\n";
 
   for (auto const& klass : classes) {
-    cpp << "static const long long hhbc_ext_method_count_" << klass.name
-        << " = " << klass.methods.size() << ";\n";
-    cpp << "static const HhbcExtMethodInfo hhbc_ext_methods_" << klass.name
+    cpp << "static const long long hhbc_ext_method_count_" << klass.name()
+        << " = " << klass.numMethods() << ";\n";
+    cpp << "static const HhbcExtMethodInfo hhbc_ext_methods_" << klass.name()
         << "[] = {\n  ";
     first = true;
-    for (auto const& method : klass.methods) {
+    for (auto const& method : klass.methods()) {
       if (!first) {
         cpp << ",\n  ";
       }
       first = false;
 
-      cpp << "{ \"" << method.name << "\", tg_" << method.getUniqueName()
+      cpp << "{ \"" << method.name() << "\", tg_" << method.getUniqueName()
           << " }";
     }
     cpp << "\n};\n\n";
@@ -129,15 +128,15 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    auto ctor = (classesWithCtors.count(klass.name) > 0
-                 ? fbstring("new_") + klass.name + "_Instance"
+    auto ctor = (classesWithCtors.count(klass.name()) > 0
+                 ? fbstring("new_") + klass.name() + "_Instance"
                  : fbstring("nullptr"));
 
-    cpp << "{ \"" << klass.name << "\", " << ctor
-        << ", sizeof(c_" << klass.name << ')'
-        << ", hhbc_ext_method_count_" << klass.name
-        << ", hhbc_ext_methods_" << klass.name
-        << ", &c_" << klass.name << "::s_cls }";
+    cpp << "{ \"" << klass.name() << "\", " << ctor
+        << ", sizeof(c_" << klass.name() << ')'
+        << ", hhbc_ext_method_count_" << klass.name()
+        << ", hhbc_ext_methods_" << klass.name()
+        << ", &c_" << klass.name() << "::s_cls }";
   }
   cpp << "\n};\n\n";
   cpp << "} // namespace HPHP\n";

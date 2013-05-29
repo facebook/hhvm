@@ -30,6 +30,8 @@
 #include "hphp/tools/gen-ext-hhvm/idl.h"
 
 using folly::fbstring;
+using namespace HPHP::IDL;
+using namespace HPHP;
 
 std::unordered_map<fbstring, const PhpFunc*> g_mangleMap;
 std::unordered_map<fbstring, const PhpClass*> g_classMap;
@@ -75,22 +77,24 @@ void emitRemappedFuncDecl(const PhpFunc& func,
                           const fbstring& mangled,
                           const fbstring& prefix,
                           std::ostream& out) {
-  if (isTypeCppIndirectPass(func.returnCppType)) {
-    if (func.returnCppType == "HPHP::Variant") {
+  int returnKindOf = func.returnKindOf();
+  bool indirectReturn = func.isIndirectReturn();
+  if (indirectReturn) {
+    if (returnKindOf == KindOfAny) {
       out << "TypedValue* ";
     } else {
       out << "Value* ";
     }
   } else {
-    out << func.returnCppType << ' ';
+    out << func.returnCppType() << ' ';
   }
 
   out << prefix << func.getUniqueName() << '(';
 
   bool isFirstParam = true;
 
-  if (!g_armMode && isTypeCppIndirectPass(func.returnCppType)) {
-    if (func.returnCppType == "HPHP::Variant") {
+  if (!g_armMode && indirectReturn) {
+    if (func.returnKindOf() == KindOfAny) {
       out << "TypedValue* _rv";
     } else {
       out << "Value* _rv";
@@ -98,7 +102,7 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     isFirstParam = false;
   }
 
-  if (!func.className.empty() && !func.isStatic) {
+  if (func.usesThis()) {
     if (!isFirstParam) {
       out << ", ";
     }
@@ -106,7 +110,7 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     isFirstParam = false;
   }
 
-  if (func.isVarargs) {
+  if (func.isVarArgs()) {
     if (!isFirstParam) {
       out << ", ";
     }
@@ -114,26 +118,25 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     isFirstParam = false;
   }
 
-  for (auto const& param : func.params) {
+  for (auto const& param : func.params()) {
     if (!isFirstParam) {
       out << ", ";
     }
-    if (isTypeCppIndirectPass(param.cppType)) {
-      if (param.cppType == "HPHP::Variant" ||
-          param.cppType == "HPHP::Variant const&" ||
-          param.cppType == "HPHP::VRefParamValue const&") {
+    auto kindof = param.kindOf();
+    if (param.isIndirectPass()) {
+      if (kindof == KindOfAny || kindof == KindOfRef) {
         out << "TypedValue*";
       } else {
         out << "Value*";
       }
     } else {
-      out << param.cppType;
+      out << param.getCppType();
     }
-    out << ' ' << param.name;
+    out << ' ' << param.name();
     isFirstParam = false;
   }
 
-  if (func.isVarargs) {
+  if (func.isVarArgs()) {
     assert(!isFirstParam);
     out << ", Value* _argv";
   }
@@ -147,41 +150,20 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
               const char* ind, bool doCheck) {
   if (doCheck) {
     out << ind << "if (";
-    if (param.cppType == "HPHP::String const&") {
+    if (param.kindOf() == KindOfString) {
       out << "!IS_STRING_TYPE((args-" << index << ")->m_type)";
     } else {
-      out << "(args-" << index << ")->m_type != ";
-      if (param.cppType == "bool") {
-        out << "KindOfBoolean";
-      } else if (param.cppType == "int" || param.cppType == "long") {
-        out << "KindOfInt64";
-      } else if (param.cppType == "double") {
-        out << "KindOfDouble";
-      } else if (param.cppType == "HPHP::Array const&") {
-        out << "KindOfArray";
-      } else if (param.cppType == "HPHP::Object const&") {
-        out << "KindOfObject";
-      }
+      out << "(args-" << index << ")->m_type != KindOf"
+          << kindOfString(param.kindOf());
     }
     out << ") {\n";
     ind -= 2;
   }
 
-  out << ind << "tvCastTo";
-  if (param.cppType == "bool") {
-    out << "Boolean";
-  } else if (param.cppType == "int" || param.cppType == "long") {
-    out << "Int64";
-  } else if (param.cppType == "double") {
-    out << "Double";
-  } else if (param.cppType == "HPHP::String const&") {
-    out << "String";
-  } else if (param.cppType == "HPHP::Array const&") {
-    out << "Array";
-  } else if (param.cppType == "HPHP::Object const&") {
-    out << "Object";
+  if (param.kindOf() != KindOfAny) {
+    out << ind << "tvCastTo" << kindOfString(param.kindOf())
+        << "InPlace(args-" << index << ");\n";
   }
-  out << "InPlace(args-" << index << ");\n";
 
   if (doCheck) {
     ind += 2;
@@ -195,11 +177,10 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
  */
 void emitTypechecks(const PhpFunc& func, std::ostream& out, const char* ind) {
   bool isFirstParam = true;
-  for (int k = func.maxNumParams - 1; k >= 0; --k) {
-    auto const& param = func.params[k];
-    if (param.cppType == "HPHP::Variant" ||
-        param.cppType == "HPHP::Variant const&" ||
-        param.cppType == "HPHP::VRefParamValue const&") {
+  for (int k = func.numParams() - 1; k >= 0; --k) {
+    auto const& param = func.param(k);
+    auto kindof = param.kindOf();
+    if (kindof == KindOfAny || kindof == KindOfRef) {
       continue;
     }
 
@@ -208,25 +189,14 @@ void emitTypechecks(const PhpFunc& func, std::ostream& out, const char* ind) {
     }
     isFirstParam = false;
 
-    bool isOptional = (k >= func.minNumParams);
+    bool isOptional = (k >= func.minNumParams());
     if (isOptional) {
       out << "(count <= " << k << " || ";
     }
-    if (param.cppType == "HPHP::String const&") {
+    if (kindof == KindOfString) {
       out << "IS_STRING_TYPE((args - " << k << ")->m_type)";
     } else {
-      out << "(args - " << k << ")->m_type == ";
-      if (param.cppType == "bool") {
-        out << "KindOfBoolean";
-      } else if (param.cppType == "int" || param.cppType == "long") {
-        out << "KindOfInt64";
-      } else if (param.cppType == "double") {
-        out << "KindOfDouble";
-      } else if (param.cppType == "HPHP::Array const&") {
-        out << "KindOfArray";
-      } else if (param.cppType == "HPHP::Object const&") {
-        out << "KindOfObject";
-      }
+      out << "(args - " << k << ")->m_type == KindOf" << kindOfString(kindof);
     }
 
     if (isOptional) {
@@ -258,7 +228,7 @@ void emitBuildExtraArgs(const PhpFunc& func, std::ostream& out,
 {0}}}
 )",
     ind,
-    func.maxNumParams
+    func.numParams()
   );
 }
 
@@ -268,16 +238,16 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
   out << prefix << func.getUniqueName() << '(';
 
   bool isFirstParam = true;
-  if (!g_armMode && isTypeCppIndirectPass(func.returnCppType)) {
+  if (!g_armMode && func.isIndirectReturn()) {
     isFirstParam = false;
-    if (func.returnCppType == "HPHP::Variant") {
+    if (func.returnKindOf() == KindOfAny) {
       out << "rv";
     } else {
       out << "&(rv->m_data)";
     }
   }
 
-  if (!func.className.empty() && !func.isStatic) {
+  if (func.usesThis()) {
     if (!isFirstParam) {
       out << ", ";
     }
@@ -285,7 +255,7 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
     out << "(this_)";
   }
 
-  if (func.isVarargs) {
+  if (func.isVarArgs()) {
     if (!isFirstParam) {
       out << ", ";
     }
@@ -293,58 +263,54 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
     out << "count";
   }
 
-  for (auto k = 0; k < func.params.size(); ++k) {
-    auto const& param = func.params[k];
+  for (auto k = 0; k < func.numParams(); ++k) {
+    auto const& param = func.param(k);
     if (!isFirstParam) {
       out << ", ";
     }
     isFirstParam = false;
 
-    if (!param.defVal.empty()) {
+    if (param.hasDefault()) {
       out << "(count > " << k << ") ? ";
     }
 
-    if (isTypeCppIndirectPass(param.cppType)) {
-      if (param.cppType == "HPHP::Variant" ||
-          param.cppType == "HPHP::Variant const&" ||
-          param.cppType == "HPHP::VRefParamValue const&") {
+    if (param.isIndirectPass()) {
+      auto kindof = param.kindOf();
+      if (kindof == KindOfAny || kindof == KindOfRef) {
         out << "(args-" << k << ')';
       } else {
         out << "&args[-" << k << "].m_data";
       }
     } else {
-      if (param.cppType == "double") {
+      if (param.kindOf() == KindOfDouble) {
         out << "(args[-" << k << "].m_data.dbl)";
       } else {
-        out << '(' << param.cppType << ")(args[-" << k << "].m_data.num)";
+        out << '(' << param.getCppType() << ")(args[-" << k << "].m_data.num)";
       }
     }
 
-    if (!param.defVal.empty()) {
+    if (param.hasDefault()) {
       out << " : ";
-      if (param.defValNeedsVariable()) {
-        if (param.cppType == "HPHP::Variant" ||
-            param.cppType == "HPHP::Variant const&" ||
-            param.cppType == "HPHP::VRefParamValue const&") {
+      auto kindof = param.kindOf();
+      if (param.defValueNeedsVariable()) {
+        if (kindof == KindOfAny || kindof == KindOfRef) {
           out << "(TypedValue*)(&defVal" << k << ')';
         } else {
           out << "(Value*)(&defVal" << k << ')';
         }
-      } else if (isTypeCppIndirectPass(param.cppType)) {
-        if (param.cppType == "HPHP::Variant" ||
-            param.cppType == "HPHP::Variant const&" ||
-            param.cppType == "HPHP::VRefParamValue const&") {
-          out << "(TypedValue*)(&" << param.defVal << ')';
+      } else if (param.isIndirectPass()) {
+        if (kindof == KindOfAny || kindof == KindOfRef) {
+          out << "(TypedValue*)(&" << param.getDefault() << ')';
         } else {
-          out << "(Value*)(&" << param.defVal << ')';
+          out << "(Value*)(&" << param.getDefault() << ')';
         }
       } else {
-        out << '(' << param.cppType << ")(" << param.defVal << ')';
+        out << '(' << param.getCppType() << ")(" << param.getDefault() << ')';
       }
     }
   }
 
-  if (func.isVarargs) {
+  if (func.isVarArgs()) {
     assert(!isFirstParam);
     out << ", (Value*)(&extraArgs)";
   }
@@ -364,60 +330,56 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
 
   // Set up the type of the return value, and emit post-call code to normalize
   // return types and values
-  if (func.returnCppType == "bool") {
+  auto returnKindOf = func.returnKindOf();
+  if (returnKindOf == KindOfBoolean) {
     out << ind << "rv->m_type = KindOfBoolean;\n";
     call_prefix = "rv->m_data.num = (";
     call_suffix = ") ? 1LL : 0LL;\n";
-  } else if (func.returnCppType == "int" || func.returnCppType == "long") {
+  } else if (returnKindOf == KindOfInt64) {
     out << ind << "rv->m_type = KindOfInt64;\n";
     call_prefix = "rv->m_data.num = (int64_t)";
     call_suffix = ";\n";
-  } else if (func.returnCppType == "double") {
+  } else if (returnKindOf == KindOfDouble) {
     out << ind << "rv->m_type = KindOfDouble;\n";
     call_prefix = "rv->m_data.dbl = ";
     call_suffix = ";\n";
-  } else if (func.returnCppType == "void") {
+  } else if (returnKindOf == KindOfInvalid || returnKindOf == KindOfNull) {
     out << ind << "rv->m_type = KindOfNull;\n";
     call_suffix = ";\n";
-  } else if (func.returnCppType == "HPHP::String") {
+  } else if (returnKindOf == KindOfString) {
     out << ind << "rv->m_type = KindOfString;\n";
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
-  } else if (func.returnCppType == "HPHP::Array") {
+  } else if (returnKindOf == KindOfArray) {
     out << ind << "rv->m_type = KindOfArray;\n";
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
-  } else if (func.returnCppType == "HPHP::Object") {
+  } else if (returnKindOf == KindOfObject) {
     out << ind << "rv->m_type = KindOfObject;\n";
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
-  } else if (func.returnCppType == "HPHP::Variant") {
+  } else {
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_type == KindOfUninit) "
                    "rv->m_type = KindOfNull;\n");
   }
 
-  if (func.isVarargs) {
+  if (func.isVarArgs()) {
     emitBuildExtraArgs(func, out, ind);
   }
 
   // If any default values need variables (because they have nontrivial values),
   // declare and initialize those
-  for (auto k = 0; k < func.params.size(); ++k) {
-    auto const& param = func.params[k];
-    if (param.defValNeedsVariable()) {
-      auto type = param.cppType;
-      if (type.compare(type.length() - 7, 7, " const&") == 0) {
-        type = type.substr(0, type.length() - 7);
-      }
-      if (type.compare(0, 6, "HPHP::") == 0) {
-        type = type.substr(6);
-      }
-      out << ind << type << " defVal" << k;
-      if (type != "Variant" ||
-          (param.defVal != "null" && param.defVal != "null_variant")) {
+  for (auto k = 0; k < func.numParams(); ++k) {
+    auto const& param = func.param(k);
+    if (param.defValueNeedsVariable()) {
+      DataType kindof = param.kindOf();
+      out << ind << param.getStrippedCppType() << " defVal" << k;
+      fbstring defVal = param.getDefault();
+      if (kindof != KindOfAny ||
+          (defVal != "null" && defVal != "null_variant")) {
         out << " = ";
-        out << (param.defVal == "null" ? "uninit_null()" : param.defVal);
+        out << (defVal == "null" ? "uninit_null()" : defVal);
       }
       out << ";\n";
     }
@@ -426,7 +388,7 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
   // Put the return-value-space pointer into x8
   if (g_armMode) {
     out << ind << "asm volatile (\"mov x8, %0\\n\" : : \"r\"(";
-    if (func.returnCppType == "HPHP::Variant") {
+    if (func.returnKindOf() == KindOfAny) {
       out << "rv";
     } else {
       out << "&(rv->m_data)";
@@ -435,29 +397,29 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
   }
 
   out << ind << call_prefix;
-  emitCallExpression(func, func.className.empty() ? "fh_" : "th_", out);
+  emitCallExpression(func, func.isMethod() ? "th_" : "fh_", out);
   out << call_suffix;
 }
 
 void emitCasts(const PhpFunc& func, std::ostream& out, const char* ind) {
-  assert(func.numTypeChecks > 0);
+  assert(func.numTypeChecks() > 0);
 
-  if (func.numTypeChecks == 1) {
-    for (auto i = func.maxNumParams - 1; i >= 0; --i) {
-      if (func.params[i].isCheckedType()) {
-        emitCast(func.params[i], i, out, ind, false);
+  if (func.numTypeChecks() == 1) {
+    for (auto i = func.numParams() - 1; i >= 0; --i) {
+      if (func.param(i).isCheckedType()) {
+        emitCast(func.param(i), i, out, ind, false);
         return;
       }
     }
     assert(false); // not reached
   }
 
-  if (func.minNumParams != func.maxNumParams) {
+  if (func.minNumParams() != func.numParams()) {
     out << ind << "switch (count) {\n";
-    for (auto i = func.maxNumParams - 1; i >= func.minNumParams; --i) {
-      auto const& param = func.params[i];
-      if (i == func.maxNumParams - 1) {
-        out << ind << "default: // count >= " << func.maxNumParams << '\n';
+    for (auto i = func.numParams() - 1; i >= func.minNumParams(); --i) {
+      auto const& param = func.param(i);
+      if (i == func.numParams() - 1) {
+        out << ind << "default: // count >= " << func.numParams() << '\n';
       } else {
         out << ind << "case " << (i + 1) << ":\n";
       }
@@ -465,12 +427,12 @@ void emitCasts(const PhpFunc& func, std::ostream& out, const char* ind) {
         emitCast(param, i, out, ind - 2, true);
       }
     }
-    out << ind << "case " << func.minNumParams << ":\n";
+    out << ind << "case " << func.minNumParams() << ":\n";
     out << ind << "  break;\n";
     out << ind << "}\n";
   }
-  for (auto i = func.minNumParams - 1; i >= 0; --i) {
-    auto const& param = func.params[i];
+  for (auto i = func.minNumParams() - 1; i >= 0; --i) {
+    auto const& param = func.param(i);
     if (param.isCheckedType()) {
       emitCast(param, i, out, ind, true);
     }
@@ -487,14 +449,14 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
                         std::ostream& out) {
   out << "void " << prefix << func.getUniqueName()
       << "(TypedValue* rv, ActRec* ar, int32_t count";
-  if (func.isMethod() && !func.isStatic) {
+  if (func.usesThis()) {
     out << ", ObjectData* this_";
   }
   out << ") __attribute__((noinline,cold));\n";
 
   out << "void " << prefix << func.getUniqueName()
       << "(TypedValue* rv, ActRec* ar, int32_t count";
-  if (func.isMethod() && !func.isStatic) {
+  if (func.usesThis()) {
     out << ", ObjectData* this_";
   }
   out << ") {\n";
@@ -539,22 +501,19 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   }
 
   auto& func = *idlIt->second;
-  bool isMethod = !func.className.empty();
+  bool isMethod = func.isMethod();
 
-  auto classIt = g_classMap.find(func.className);
-  if (isMethod && func.name == "__construct" &&
-      classIt != g_classMap.end()) {
+  auto classIt = g_classMap.find(func.className());
+  if (func.isCtor() && classIt != g_classMap.end()) {
     auto& klass = *classIt->second;
-    auto& flags = klass.flags;
 
-    if (std::find(flags.begin(), flags.end(), "IsCppAbstract") == flags.end()) {
-      emitCtorHelper(klass.name, cpp);
+    if (!(klass.flags() & IsCppAbstract)) {
+      emitCtorHelper(klass.name(), cpp);
     }
-    if (std::find(flags.begin(), flags.end(), "NoDefaultSweep")
-        != flags.end()) {
-      cpp << "IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(" << klass.name << ");\n";
+    if (klass.flags() & NoDefaultSweep) {
+      cpp << "IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(" << klass.name() << ");\n";
     } else {
-      cpp << "IMPLEMENT_CLASS(" << klass.name << ");\n";
+      cpp << "IMPLEMENT_CLASS(" << klass.name() << ");\n";
     }
   }
 
@@ -569,7 +528,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   }
   cpp << decl.str();
 
-  if (func.numTypeChecks > 0) {
+  if (func.numTypeChecks() > 0) {
     emitSlowPathHelper(func, slowPathPrefix, cpp);
   }
 
@@ -584,7 +543,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   cpp << in << "int32_t count = ar->numArgs();\n";
   cpp << in << "TypedValue* args UNUSED = ((TypedValue*)ar) - 1;\n";
 
-  if (func.isMethod() && !func.isStatic) {
+  if (func.usesThis()) {
     cpp << in
         << "ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);\n";
     cpp << in << "if (this_) {\n";
@@ -593,27 +552,27 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   // Check the arg count
   bool needArgMiscountClause = false;
-  if (func.isVarargs) {
-    if (func.minNumParams > 0) {
-      cpp << in << "if (count >= " << func.minNumParams << ") {\n";
+  if (func.isVarArgs()) {
+    if (func.minNumParams() > 0) {
+      cpp << in << "if (count >= " << func.minNumParams() << ") {\n";
       needArgMiscountClause = true;
       in -= 2;
     }
   } else {
-    if (func.minNumParams == func.maxNumParams) {
-      cpp << in << "if (count == " << func.minNumParams << ") {\n";
-    } else if (func.minNumParams == 0) {
-      cpp << in << "if (count <= " << func.maxNumParams << ") {\n";
+    if (func.minNumParams() == func.numParams()) {
+      cpp << in << "if (count == " << func.minNumParams() << ") {\n";
+    } else if (func.minNumParams() == 0) {
+      cpp << in << "if (count <= " << func.numParams() << ") {\n";
     } else {
-      cpp << in << "if (count >= " << func.minNumParams
-          << " && count <= "<< func.maxNumParams << ") {\n";
+      cpp << in << "if (count >= " << func.minNumParams()
+          << " && count <= "<< func.numParams() << ") {\n";
     }
     needArgMiscountClause = true;
     in -= 2;
   }
 
   // Count is OK. Check arg types
-  if (func.numTypeChecks > 0) {
+  if (func.numTypeChecks() > 0) {
     cpp << in << "if (";
     emitTypechecks(func, cpp, in);
     cpp << ") {\n";
@@ -624,10 +583,10 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   emitExtCall(func, cpp, in);
 
   // Deal with type mismatches: punt to fg1_
-  if (func.numTypeChecks > 0) {
+  if (func.numTypeChecks() > 0) {
     cpp << in + 2 << "} else {\n";
     cpp << in << slowPathPrefix << func.getUniqueName() << "(rv, ar, count";
-    if (func.isMethod() && !func.isStatic) {
+    if (func.usesThis()) {
       cpp << ", this_";
     }
     cpp << ");\n";
@@ -637,17 +596,17 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   if (needArgMiscountClause) {
     cpp << in + 2 << "} else {\n";
-    if (func.isVarargs) {
+    if (func.isVarArgs()) {
       cpp << in << "throw_missing_arguments_nr(\"" << func.getPrettyName()
-          << "\", " << func.minNumParams << ", count, 1);\n";
+          << "\", " << func.minNumParams() << ", count, 1);\n";
     } else {
-      if (func.minNumParams == 0) {
+      if (func.minNumParams() == 0) {
         cpp << in << "throw_toomany_arguments_nr(\"" << func.getPrettyName()
-            << "\", " << func.maxNumParams << ", 1);\n";
+            << "\", " << func.numParams() << ", 1);\n";
       } else {
         cpp << in << "throw_wrong_arguments_nr(\"" << func.getPrettyName()
-            << "\", count, " << func.minNumParams << ", "
-            << func.maxNumParams << ", 1);\n";
+            << "\", count, " << func.minNumParams() << ", "
+            << func.numParams() << ", 1);\n";
       }
     }
     cpp << in << "rv->m_data.num = 0LL;\n";
@@ -656,18 +615,17 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
     cpp << in << "}\n";
   }
 
-  if (func.isMethod() && !func.isStatic) {
+  if (func.isMethod() && !func.isStatic()) {
     cpp << in + 2 << "} else {\n";
-    cpp << in << "throw_instance_method_fatal(\"" << func.className
-        << "::" << func.name << "\");\n";
+    cpp << in << "throw_instance_method_fatal(\"" << func.className()
+        << "::" << func.name() << "\");\n";
     in += 2;
     cpp << in << "}\n";
   }
 
-  auto numLocals = func.maxNumParams;
-  bool noThis = (func.className.empty() || func.isStatic);
+  auto numLocals = func.numParams();
   auto frameFree =
-    (noThis ? "frame_free_locals_no_this_inl" : "frame_free_locals_inl");
+    func.usesThis() ? "frame_free_locals_inl" : "frame_free_locals_no_this_inl";
   cpp << in << frameFree << "(ar, " << numLocals << ");\n";
   cpp << in << "memcpy(&ar->m_r, rv, sizeof(TypedValue));\n";
   cpp << in << "return &ar->m_r;\n";
@@ -703,8 +661,8 @@ int main(int argc, const char* argv[]) {
     g_mangleMap[func.getCppSig()] = &func;
   }
   for (auto const& klass : classes) {
-    g_classMap[klass.name] = &klass;
-    for (auto const& func : klass.methods) {
+    g_classMap[klass.name()] = &klass;
+    for (auto const& func : klass.methods()) {
       g_mangleMap[func.getCppSig()] = &func;
     }
   }

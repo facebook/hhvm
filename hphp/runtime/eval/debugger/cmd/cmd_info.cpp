@@ -60,7 +60,7 @@ void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
     thrift.write(true);
     thrift.write((int8_t)DebuggerClient::AutoCompleteCount);
     for (int i = 0; i < DebuggerClient::AutoCompleteCount; i++) {
-      thrift.write((*m_acLiveLists)[i]);
+      thrift.write(m_acLiveLists[i]);
     }
   } else {
     thrift.write(false);
@@ -80,7 +80,7 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(count);
     for (int i = 0; i < count; i++) {
       if (i < DebuggerClient::AutoCompleteCount) {
-        thrift.read((*m_acLiveLists)[i]);
+        thrift.read(m_acLiveLists[i]);
       } else {
         vector<std::string> future;
         thrift.read(future);
@@ -240,7 +240,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
 
     for (unsigned int i = 0 ; i < sizeof(tempList)/sizeof(int); ++i) {
       for (unsigned int j = 0 ; j < tmpAcLiveLists[tempList[i]].size(); ++j) {
-        (*m_acLiveLists)[tempList[i]].push_back(
+        m_acLiveLists[tempList[i]].push_back(
           tmpAcLiveLists[tempList[i]][j]->toCPPString());
       }
     }
@@ -248,7 +248,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
     Array variables = g_vmContext->getLocalDefinedVariables(0);
     variables += CmdVariable::GetGlobalVariables();
     vector<std::string> &vars =
-      (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
+      m_acLiveLists[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());
     for (ArrayIter iter(variables); iter; ++iter) {
       vars.push_back("$" + iter.first().toString()->toCPPString());

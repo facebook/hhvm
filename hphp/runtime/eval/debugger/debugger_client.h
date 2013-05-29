@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 
+#include <boost/smart_ptr/shared_array.hpp>
+
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/runtime/eval/debugger/debugger_client_settings.h"
 #include "hphp/runtime/eval/debugger/inst_point.h"
@@ -92,10 +94,10 @@ public:
   };
   static const char **GetCommands();
 
-  typedef std::vector<std::string> LiveLists[DebuggerClient::AutoCompleteCount];
-  typedef boost::shared_ptr<LiveLists> LiveListsPtr;
+  typedef std::vector<std::string> LiveList;
+  typedef boost::shared_array<LiveList> LiveListsPtr;
   static LiveListsPtr CreateNewLiveLists() {
-    return LiveListsPtr(new LiveLists[DebuggerClient::AutoCompleteCount]());
+    return LiveListsPtr(new LiveList[DebuggerClient::AutoCompleteCount]);
   }
   std::vector<std::string> getAllCompletions(std::string const &text);
 
@@ -276,7 +278,7 @@ public:
   void addCompletion(const char **list);
   void addCompletion(const char *name);
   void addCompletion(const std::vector<std::string> &items);
-  void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
+  void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists; }
 
   /**
    * For DebuggerClient API

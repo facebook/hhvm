@@ -227,7 +227,7 @@ ConstructPtr VariableTable::getStaticInitVal(string varName) {
 bool VariableTable::setStaticInitVal(string varName,
                                      ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
-  bool exists = sym->getStaticInitVal();
+  bool exists = (sym->getStaticInitVal() != nullptr);
   sym->setStaticInitVal(value);
   return exists;
 }
@@ -241,7 +241,7 @@ ConstructPtr VariableTable::getClassInitVal(string varName) {
 
 bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
-  bool exists = sym->getClassInitVal();
+  bool exists = (sym->getClassInitVal() != nullptr);
   sym->setClassInitVal(value);
   return exists;
 }

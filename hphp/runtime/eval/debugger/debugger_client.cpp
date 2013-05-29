@@ -826,7 +826,7 @@ std::vector<std::string> DebuggerClient::getAllCompletions(
   }
 
   for (int i = 0; i < AutoCompleteCount; ++i) {
-    const std::vector<std::string> &items = (*m_acLiveLists)[i];
+    const std::vector<std::string> &items = m_acLiveLists[i];
     for (size_t j = 0; j < items.size(); ++j) {
       const char *p = items[j].c_str();
       if (strncasecmp(p, text.c_str(), text.length()) == 0) {
@@ -917,7 +917,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
         updateLiveLists();
         assert(!m_acLiveListsDirty);
       }
-      char *p = getCompletion((*m_acLiveLists)[(int64_t)list], text);
+      char *p = getCompletion(m_acLiveLists[(int64_t)list], text);
       if (p) return p;
     } else {
       for (const char *p = list[++m_acPos]; p; p = list[++m_acPos]) {

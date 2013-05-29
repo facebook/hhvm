@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/expr_dict.h"
+#include "hphp/compiler/analysis/alias_manager.h"
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -59,7 +59,7 @@ void ExprDict::getTypes(ExpressionPtr e, TypePtrIdxPairVec &types) {
 
 class TypeFunc { public:
   bool operator()(const TypePtrIdxPair& entry) const {
-    return entry.first;
+    return entry.first != nullptr;
   }
 };
 static TypeFunc s_type_func;

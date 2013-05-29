@@ -71,7 +71,7 @@ void TypeAnnotation::functionTypeName(std::string &name) const {
   // return value of function types is the first element of type list
   TypeAnnotationPtr retType = m_typeArgs;
   TypeAnnotationPtr typeEl = m_typeArgs->m_typeList;
-  bool hasArgs = typeEl;
+  bool hasArgs = (typeEl != nullptr);
   while (typeEl) {
     name += typeEl->fullName();
     typeEl = typeEl->m_typeList;

@@ -1681,7 +1681,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     while (v->getCanonPtr() && v->getCanonPtr() != op0) {
                       v = v->getCanonPtr();
                     }
-                    ok = v->getCanonPtr();
+                    ok = (v->getCanonPtr() != nullptr);
                   }
                   if (ok) {
                     b2->setContext(Expression::DeadStore);

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/server/http_request_handler.h"
 #include "hphp/runtime/base/server/admin_request_handler.h"
 #include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/server/warmup_request_handler.h"
 #include "hphp/runtime/base/server/xbox_server.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/server/static_content_cache.h"
@@ -58,30 +59,20 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
-  bool const useWarmupThrottle =
-    RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
-    RuntimeOption::ServerThreadCount > kNumProcessors;
-
-  auto maybeEnableThrottle = [&] (LibEventServer* s) {
-    if (!useWarmupThrottle) return;
-
-    s->enableWarmupThrottle(RuntimeOption::ServerThreadCount - kNumProcessors,
-                            RuntimeOption::ServerWarmupThrottleRequestCount);
-    Logger::Info("Starting with %d threads for the first %d requests\n",
-                 kNumProcessors,
-                 RuntimeOption::ServerWarmupThrottleRequestCount);
-  };
-
-  int const startingThreadCount = !useWarmupThrottle
-    ? RuntimeOption::ServerThreadCount
-    : kNumProcessors;
+  int startingThreadCount = RuntimeOption::ServerThreadCount;
+  uint32_t additionalThreads = 0;
+  RequestHandlerFactory handlerFactory;
+  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
+      RuntimeOption::ServerThreadCount > kNumProcessors) {
+    startingThreadCount = kNumProcessors;
+    additionalThreads = RuntimeOption::ServerThreadCount - startingThreadCount;
+  }
 
   if (RuntimeOption::ServerPortFd != -1 || RuntimeOption::SSLPortFd != -1) {
     auto const server = boost::make_shared<LibEventServerWithFd>(
         RuntimeOption::ServerIP, RuntimeOption::ServerPort,
         startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds);
-    maybeEnableThrottle(server.get());
     server->setServerSocketFd(RuntimeOption::ServerPortFd);
     server->setSSLSocketFd(RuntimeOption::SSLPortFd);
     m_pageServer = server;
@@ -90,19 +81,27 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
         RuntimeOption::ServerIP, RuntimeOption::ServerPort,
         startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds);
-    maybeEnableThrottle(server.get());
     m_pageServer = server;
   } else {
     auto const server = boost::make_shared<LibEventServerWithTakeover>(
         RuntimeOption::ServerIP, RuntimeOption::ServerPort,
         startingThreadCount,
         RuntimeOption::RequestTimeoutSeconds);
-    maybeEnableThrottle(server.get());
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
     m_pageServer = server;
   }
-  m_pageServer->setRequestHandlerFactory<HttpRequestHandler>();
   m_pageServer->addTakeoverListener(this);
+
+  if (additionalThreads) {
+    auto handlerFactory = boost::make_shared<WarmupRequestHandlerFactory>(
+        m_pageServer, additionalThreads,
+        RuntimeOption::ServerWarmupThrottleRequestCount);
+    m_pageServer->setRequestHandlerFactory([handlerFactory] {
+      return handlerFactory->createHandler();
+    });
+  } else {
+    m_pageServer->setRequestHandlerFactory<HttpRequestHandler>();
+  }
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
     assert(SSLInit::IsInited());

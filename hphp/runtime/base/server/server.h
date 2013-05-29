@@ -165,6 +165,11 @@ public:
   virtual void removeTakeoverListener(TakeoverListener* lisener) {}
 
   /**
+   * Add additional worker threads
+   */
+  virtual void addWorkers(int numWorkers) = 0;
+
+  /**
    * Informational.
    */
   std::string getAddress() const { return m_address;}

@@ -88,8 +88,6 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
 
-  server->bumpReqCount();
-
   LibEventTransport transport(server, request, m_id);
 #ifdef _EVENT_USE_OPENSSL
   if (evhttp_is_connection_ssl(job->request->evcon)) {
@@ -153,9 +151,6 @@ void LibEventWorker::onThreadExit() {
 LibEventServer::LibEventServer(const std::string &address, int port,
                                int thread, int timeoutSeconds)
   : Server(address, port, thread),
-    m_warmup_thread_slack(0),
-    m_req_number(0),
-    m_warmup_req_threshold(0),
     m_accept_sock(-1),
     m_accept_sock_ssl(-1),
     m_timeoutThreadData(timeoutSeconds),
@@ -205,24 +200,6 @@ int LibEventServer::getAcceptSocket() {
 
 int LibEventServer::getLibEventConnectionCount() {
   return evhttp_get_connection_count(m_server);
-}
-
-void LibEventServer::enableWarmupThrottle(int threadSlack, int reqCount) {
-  m_warmup_thread_slack = threadSlack;
-  const_cast<int&>(m_warmup_req_threshold) = reqCount;
-}
-
-void LibEventServer::bumpReqCount() {
-  auto const oldReqNum = m_req_number.fetch_add(1, std::memory_order_relaxed);
-  if (oldReqNum == m_warmup_req_threshold) {
-    if (auto const num = m_warmup_thread_slack.load()) {
-      Logger::Info("Finished warmup; adding %d new worker threads\n", num);
-      m_dispatcher.addWorkers(num);
-
-      // Set to zero so we can't do it if the req counter wraps.
-      m_warmup_thread_slack.store(0);
-    }
-  }
 }
 
 void LibEventServer::start() {

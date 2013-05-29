@@ -131,20 +131,15 @@ public:
                  int timeoutSeconds);
   ~LibEventServer();
 
-  /*
-   * Function to enable reducing the thread count during initial
-   * warmup requests.
-   *
-   * See RuntimeOption::ServerWarmupThrottleRequestCount.
-   */
-  void enableWarmupThrottle(int threadSlack, int reqCount);
-
   // implementing Server
   virtual void start();
   virtual void waitForEnd();
   virtual void stop();
   virtual int getActiveWorker() {
     return m_dispatcher.getActiveWorker();
+  }
+  virtual void addWorkers(int numWorkers) {
+    m_dispatcher.addWorkers(numWorkers);
   }
   virtual int getQueuedJobs() {
     return m_dispatcher.getQueuedJobs();
@@ -179,17 +174,6 @@ public:
 protected:
   virtual int getAcceptSocket();
   virtual int getAcceptSocketSSL();
-
-private:
-  // Number of threads to start when warmup request counter passes the
-  // throttled request threshold.
-  friend class LibEventWorker;
-  void bumpReqCount();
-
-private:
-  std::atomic<int> m_warmup_thread_slack;
-  std::atomic<int32_t> m_req_number;
-  int const m_warmup_req_threshold;
 
 protected:
   int m_accept_sock;

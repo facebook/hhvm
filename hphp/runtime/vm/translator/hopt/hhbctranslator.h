@@ -107,8 +107,8 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  Trace* getTrace() const { return m_tb->getTrace(); }
-  TraceBuilder* getTraceBuilder() const { return m_tb.get(); }
+  Trace* trace() const { return m_tb->trace(); }
+  TraceBuilder* traceBuilder() const { return m_tb.get(); }
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
@@ -591,7 +591,7 @@ private:
    * Return the SrcKey for the next HHBC (whether it is in this
    * tracelet or not).
    */
-  SrcKey getNextSrcKey() const {
+  SrcKey nextSrcKey() const {
     SrcKey srcKey(getCurFunc(), bcOff());
     srcKey.advance(getCurFunc()->unit());
     return srcKey;

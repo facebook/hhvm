@@ -1869,7 +1869,7 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     StackTraceNoHeap::AddExtraLogging(
       "Assertion failure",
       folly::format("{}\n\nActive Trace:\n{}\n",
-                    fa.summary, m_hhbcTrans->getTrace()->toString()).str());
+                    fa.summary, m_hhbcTrans->trace()->toString()).str());
     abort();
   } catch (const std::exception& e) {
     transResult = Failure;
@@ -1921,7 +1921,7 @@ void TranslatorX64::hhirTraceEnd() {
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
 
-  HPHP::JIT::Trace* trace = m_hhbcTrans->getTrace();
+  HPHP::JIT::Trace* trace = m_hhbcTrans->trace();
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs = nullptr,
                         const LifetimeInfo* lifetime = nullptr) {
@@ -1930,7 +1930,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   };
 
   finishPass(" after initial translation ", kIRLevel);
-  optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
+  optimizeTrace(trace, m_hhbcTrans->traceBuilder());
   finishPass(" after optimizing ", kOptLevel);
 
   auto* factory = m_irFactory.get();

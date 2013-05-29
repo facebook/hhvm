@@ -98,7 +98,7 @@ struct TraceBuilder {
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
-  Trace* getTrace() const { return m_trace.get(); }
+  Trace* trace() const { return m_trace.get(); }
   IRFactory* getIrFactory() { return &m_irFactory; }
   int32_t getSpOffset() { return m_spOffset; }
   SSATmp* getSp() const { return m_spValue; }
@@ -200,7 +200,7 @@ struct TraceBuilder {
     SSATmp* v2 = taken();
     gen(Jmp_, done_block, v2);
     appendBlock(done_block);
-    SSATmp* result = done_block->getLabel()->dst(0);
+    SSATmp* result = done_block->label()->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
     return result;
   }
@@ -216,7 +216,7 @@ struct TraceBuilder {
     Block* done_block = m_irFactory.defBlock(func);
     DisableCseGuard guard(*this);
     branch(taken_block);
-    assert(!m_trace->back()->getNext());
+    assert(!m_trace->back()->next());
     m_trace->back()->setNext(done_block);
     appendBlock(taken_block);
     taken();

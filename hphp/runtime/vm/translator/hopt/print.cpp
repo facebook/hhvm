@@ -41,7 +41,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst) {
      << color(ANSI_COLOR_END)
      ;
 
-  auto type_param = inst->getTypeParam();
+  auto type_param = inst->typeParam();
   if (type_param == Type::None && !inst->hasExtra()) {
     return;
   }
@@ -118,7 +118,7 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
   os << "L" << block->id();
-  switch (block->getHint()) {
+  switch (block->hint()) {
   case Block::Unlikely:    os << "<Unlikely>"; break;
   case Block::Likely:      os << "<Likely>"; break;
   default:
@@ -130,7 +130,7 @@ void printLabel(std::ostream& os, const Block* block) {
 void print(std::ostream& ostream, const IRInstruction* inst,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   if (inst->op() == Marker) {
-    auto* marker = inst->getExtra<Marker>();
+    auto* marker = inst->extra<Marker>();
     ostream << color(ANSI_COLOR_BLUE)
             << folly::format("--- bc {}, spOff {} ({})",
                              marker->bcOff,
@@ -154,7 +154,7 @@ void print(std::ostream& ostream, const IRInstruction* inst,
   printOpcode(ostream, inst);
   printSrcs(ostream, inst, regs, lifetime);
 
-  if (Block* taken = inst->getTaken()) {
+  if (Block* taken = inst->taken()) {
     ostream << punc(" -> ");
     printLabel(ostream, taken);
   }
@@ -169,8 +169,8 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
   os << color(ANSI_COLOR_LIGHT_BLUE);
   SCOPE_EXIT { os << color(ANSI_COLOR_END); };
 
-  auto t = inst->getTypeParam();
-  auto c = inst->getExtra<DefConst>();
+  auto t = inst->typeParam();
+  auto c = inst->extra<DefConst>();
   if (t == Type::Int) {
     os << c->as<int64_t>();
   } else if (t == Type::Dbl) {
@@ -183,7 +183,7 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
        << Util::escapeStringForCPP(str->data(), str->size())
        << "\"";
   } else if (t.isArray()) {
-    auto arr = inst->getExtra<DefConst>()->as<const ArrayData*>();
+    auto arr = inst->extra<DefConst>()->as<const ArrayData*>();
     if (arr->empty()) {
       os << "array()";
     } else {
@@ -272,14 +272,14 @@ void print(const Trace* trace) {
 
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
-static smart::vector<Block*> getBlocks(const Trace* trace,
-                                       const AsmInfo* asmInfo) {
+static smart::vector<Block*> blocks(const Trace* trace,
+                                    const AsmInfo* asmInfo) {
   smart::vector<Block*> blocks;
 
   if (!asmInfo) {
     smart::vector<Block*> unlikely;
-    for (Block* block : trace->getBlocks()) {
-      if (block->getHint() == Block::Unlikely) {
+    for (Block* block : trace->blocks()) {
+      if (block->hint() == Block::Unlikely) {
         unlikely.push_back(block);
       } else {
         blocks.push_back(block);
@@ -287,16 +287,16 @@ static smart::vector<Block*> getBlocks(const Trace* trace,
     }
     for (Trace* e : trace->getExitTraces()) {
       unlikely.insert(unlikely.end(),
-                      e->getBlocks().begin(),
-                      e->getBlocks().end());
+                      e->blocks().begin(),
+                      e->blocks().end());
     }
     blocks.insert(blocks.end(), unlikely.begin(), unlikely.end());
     return blocks;
   }
 
-  blocks.assign(trace->getBlocks().begin(), trace->getBlocks().end());
+  blocks.assign(trace->blocks().begin(), trace->blocks().end());
   for (Trace* e : trace->getExitTraces()) {
-    blocks.insert(blocks.end(), e->getBlocks().begin(), e->getBlocks().end());
+    blocks.insert(blocks.end(), e->blocks().begin(), e->blocks().end());
   }
   std::sort(
     blocks.begin(),
@@ -316,7 +316,7 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
                                  .printEncoding(dumpIREnabled(kExtraLevel))
                                  .color(color(ANSI_COLOR_BROWN)));
 
-  for (Block* block : getBlocks(trace, asmInfo)) {
+  for (Block* block : blocks(trace, asmInfo)) {
     if (!block->isMain()) {
       os << "\n" << color(ANSI_COLOR_GREEN)
          << "    -------  Exit Trace  -------"
@@ -336,7 +336,7 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
         // Don't print bytecode in a non-main trace.
         if (!trace->isMain()) continue;
 
-        auto* marker = inst.getExtra<Marker>();
+        auto* marker = inst.extra<Marker>();
         uint32_t bcOffset = marker->bcOff;
         if (const auto* func = marker->func) {
           std::ostringstream uStr;
@@ -356,7 +356,7 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
 
       if (inst.op() == DefLabel) {
         os << std::string(kIndent - 2, ' ');
-        printLabel(os, inst.getBlock());
+        printLabel(os, inst.block());
         os << punc(":") << "\n";
         // print phi pseudo-instructions
         for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
@@ -367,12 +367,12 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
           os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
              << color(ANSI_COLOR_END);
           bool first = true;
-          inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+          inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
             printSrc(os, jmp, i, regs, lifetime);
             os << punc("@");
-            printLabel(os, jmp->getBlock());
+            printLabel(os, jmp->block());
           });
           os << '\n';
         }

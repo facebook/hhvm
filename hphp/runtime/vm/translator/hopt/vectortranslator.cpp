@@ -54,7 +54,7 @@ void VectorEffects::get(const IRInstruction* inst,
     UNUSED Type baseType = locInstr->dst()->type();
     assert(baseType.equals(base->type()));
     assert(baseType.isPtr() || baseType.isKnownDataType());
-    int loc = locInstr->getExtra<LdLocAddr>()->locId;
+    int loc = locInstr->extra<LdLocAddr>()->locId;
 
     VectorEffects ve(inst);
     if (ve.baseTypeChanged || ve.baseValChanged) {
@@ -2049,7 +2049,7 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
 
     gen(CheckType,
         m_predictedResult->type(),
-        m_ht.getExitTrace(m_ht.getNextSrcKey().offset(), spillValues),
+        m_ht.getExitTrace(m_ht.nextSrcKey().offset(), spillValues),
         m_result);
   }
 }

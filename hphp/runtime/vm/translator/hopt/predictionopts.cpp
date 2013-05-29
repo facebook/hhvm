@@ -87,15 +87,15 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
     auto const ldMem = incRef->src(0)->inst();
     if (ldMem->op() != LdMem) return;
     if (ldMem->src(1)->getValInt() != 0) return;
-    if (!ldMem->getTypeParam().equals(Type::Cell)) return;
+    if (!ldMem->typeParam().equals(Type::Cell)) return;
 
     FTRACE(5, "candidate: {}\n", ldMem->toString());
 
-    auto const mainBlock   = ldMem->getBlock();
-    auto const exit        = checkType->getTaken();
-    auto const specialized = checkType->getBlock()->getNext();
+    auto const mainBlock   = ldMem->block();
+    auto const exit        = checkType->taken();
+    auto const specialized = checkType->block()->next();
 
-    if (mainBlock != checkType->getBlock()) return;
+    if (mainBlock != checkType->block()) return;
     if (exit->numPreds() != 1) return;
     if (exit->isMain()) return;
 
@@ -115,8 +115,8 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
      */
     auto const newCheckType = irFactory->gen(
       CheckTypeMem,
-      checkType->getTypeParam(),
-      checkType->getTaken(),
+      checkType->typeParam(),
+      checkType->taken(),
       ldMem->src(0)
     );
     mainBlock->insert(mainBlock->iteratorTo(ldMem), newCheckType);
@@ -130,7 +130,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
      * generic version to the exit.  We'll reflowTypes in a sec to get
      * everything downstream specialized.
      */
-    ldMem->setTypeParam(checkType->getTypeParam());
+    ldMem->setTypeParam(checkType->typeParam());
 
     /*
      * Replace the old CheckType with a Mov from the result of the
@@ -160,7 +160,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
    * visiting.
    */
   if (!trace->isMain()) return;
-  for (Block* b : trace->getBlocks()) {
+  for (Block* b : trace->blocks()) {
     IRInstruction* lastMarker = nullptr;
     for (auto& inst : *b) {
       if (inst.op() == Marker) {

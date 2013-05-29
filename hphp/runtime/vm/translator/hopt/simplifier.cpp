@@ -60,8 +60,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case GuardStk:
     // We don't have a value, but we may know the type due to guarding
     // on it.
-    if (inst->getExtra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst->getTypeParam() };
+    if (inst->extra<StackOffset>()->offset == index) {
+      return StackValueInfo { inst->typeParam() };
     }
     return getStackValue(inst->src(0), index);
 
@@ -121,7 +121,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case InterpOne: {
     SSATmp* prevSp = inst->src(1);
     int64_t spAdjustment = inst->src(3)->getValInt(); // # popped - # pushed
-    Type resultType = inst->getTypeParam();
+    Type resultType = inst->typeParam();
     if (index == 0 && !resultType.equals(Type::None)) {
       return StackValueInfo { resultType };
     }
@@ -139,7 +139,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       // vectorBaseIdx if not.
       auto const base = inst->src(vectorBaseIdx(inst));
       assert(base->inst()->op() == LdStackAddr);
-      if (base->inst()->getExtra<LdStackAddr>()->offset == index) {
+      if (base->inst()->extra<LdStackAddr>()->offset == index) {
         VectorEffects ve(inst);
         assert(ve.baseTypeChanged || ve.baseValChanged);
         return StackValueInfo { ve.baseType.derefIfPtr() };
@@ -365,7 +365,7 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
     const int64_t offset = cellOff + adjustment;
     auto* srcInst = spillVals[i]->inst();
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
-        srcInst->getExtra<LdStack>()->offset == offset) {
+        srcInst->extra<LdStack>()->offset == offset) {
       spillVals[i] = m_tb->genDefNone();
     }
     cellOff++;
@@ -394,7 +394,7 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
     // If our value came from a LdStack on the same sp and offset,
     // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
-        srcInst->getExtra<LdStack>()->offset == offset) {
+        srcInst->extra<LdStack>()->offset == offset) {
       spillVals[i] = m_tb->genDefNone();
     }
   }
@@ -468,7 +468,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
-  Type type    = inst->getTypeParam();
+  Type type    = inst->typeParam();
   SSATmp* src  = inst->src(0);
   Type srcType = src->type();
 
@@ -526,7 +526,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
       return nullptr;
     },
     JmpNZero,
-    inst->getTaken(),
+    inst->taken(),
     newCmp);
   if (!newQueryJmp) return nullptr;
   return newQueryJmp;
@@ -1178,7 +1178,7 @@ SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
   assert(res->isConst());
   if (res->getValBool()) {
     // Taken jump
-    return gen(Jmp_, inst->getTaken());
+    return gen(Jmp_, inst->taken());
   } else {
     // Not taken jump; turn jump into a nop
     inst->convertToNop();
@@ -1189,7 +1189,7 @@ SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   bool trueSense =
     inst->op() == IsType || inst->op() == JmpIsType;
-  auto    type = inst->getTypeParam();
+  auto    type = inst->typeParam();
   auto    src  = inst->src(0);
   auto srcType = src->type();
 
@@ -1420,7 +1420,7 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
     const StringData* clsNameStr = findClassName(cls);
 
     return gen(LdClsPropAddrCached,
-               inst->getTaken(),
+               inst->taken(),
                cls,
                propName,
                cns(clsNameStr),
@@ -1462,7 +1462,7 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   if (srcType.isBoxed()) {
     srcType = srcType.innerType();
     assert(type.equals(srcType));
-    return gen(LdRef, type, inst->getTaken()->getTrace(), src);
+    return gen(LdRef, type, inst->taken()->trace(), src);
   }
   return nullptr;
 }
@@ -1479,7 +1479,7 @@ SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
   Type srcType = inst->src(0)->type();
   srcType = inst->op() == CheckInitMem ? srcType.deref() : srcType;
   assert(srcType.notPtr());
-  assert(inst->getTaken());
+  assert(inst->taken());
   if (srcType.isInit()) {
     inst->convertToNop();
   }
@@ -1526,7 +1526,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       val = !val;
     }
     if (val) {
-      return gen(Jmp_, inst->getTaken());
+      return gen(Jmp_, inst->taken());
     }
     inst->convertToNop();
     return nullptr;
@@ -1535,7 +1535,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   // Pull negations into the jump.
   if (src->inst()->op() == OpNot) {
     return gen(inst->op() == JmpZero ? JmpNZero : JmpZero,
-               inst->getTaken(),
+               inst->taken(),
                srcInst->src(0));
   }
 
@@ -1552,7 +1552,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   // If the source is conversion of an int or pointer to boolean, we
   // can test the int/ptr value directly.
   if (isConvIntOrPtrToBool(srcInst)) {
-    return gen(inst->op(), inst->getTaken(), srcInst->src(0));
+    return gen(inst->op(), inst->taken(), srcInst->src(0));
   }
 
   // Fuse jumps with query operators.
@@ -1563,8 +1563,8 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
-      srcInst->getTypeParam(), // if it had a type param
-      inst->getTaken(),
+      srcInst->typeParam(), // if it had a type param
+      inst->taken(),
       std::make_pair(ssas.size(), ssas.begin())
     );
   }
@@ -1574,8 +1574,8 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
-                                  inst->getExtra<CastStk>()->offset);
-  if (info.knownType.subtypeOf(inst->getTypeParam())) {
+                                  inst->extra<CastStk>()->offset);
+  if (info.knownType.subtypeOf(inst->typeParam())) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -1584,13 +1584,13 @@ SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
-                                  inst->getExtra<AssertStk>()->offset);
+                                  inst->extra<AssertStk>()->offset);
 
   // AssertStk indicated that we knew the type from static analysis,
   // so this assert just double checks.
-  if (info.value) assert(info.value->isA(inst->getTypeParam()));
+  if (info.value) assert(info.value->isA(inst->typeParam()));
 
-  if (info.knownType.subtypeOf(inst->getTypeParam())) {
+  if (info.knownType.subtypeOf(inst->typeParam())) {
     inst->convertToNop();
   }
   return nullptr;
@@ -1598,7 +1598,7 @@ SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
-                                  inst->getExtra<LdStack>()->offset);
+                                  inst->extra<LdStack>()->offset);
 
   // We don't want to extend live ranges of tmps across calls, so we
   // don't get the value if spansCall is true; however, we can use
@@ -1609,22 +1609,22 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
   }
   if (!info.knownType.equals(Type::None)) {
     inst->setTypeParam(
-      Type::mostRefined(inst->getTypeParam(), info.knownType)
+      Type::mostRefined(inst->typeParam(), info.knownType)
     );
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
-  if (inst->getTypeParam().notCounted()) {
+  if (inst->typeParam().notCounted()) {
     inst->convertToNop();
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
-  if (inst->getTypeParam().isNull()) {
-    return cns(inst->getTypeParam());
+  if (inst->typeParam().isNull()) {
+    return cns(inst->typeParam());
   }
   return nullptr;
 }
@@ -1643,29 +1643,29 @@ SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
-                                  inst->getExtra<StackOffset>()->offset);
+                                  inst->extra<StackOffset>()->offset);
   if (!info.knownType.equals(Type::None)) {
     inst->setTypeParam(
-      Type::mostRefined(inst->getTypeParam(), info.knownType.ptr())
+      Type::mostRefined(inst->typeParam(), info.knownType.ptr())
     );
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
-  if (inst->getTypeParam().notCounted()) {
+  if (inst->typeParam().notCounted()) {
     inst->convertToNop();
     return nullptr;
   }
   auto const info = getStackValue(inst->src(0),
-                                  inst->getExtra<StackOffset>()->offset);
+                                  inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
     inst->convertToNop();
     return gen(DecRef, info.knownType, info.value);
   }
   if (!info.knownType.equals(Type::None)) {
     inst->setTypeParam(
-      Type::mostRefined(inst->getTypeParam(), info.knownType)
+      Type::mostRefined(inst->typeParam(), info.knownType)
     );
   }
   return nullptr;

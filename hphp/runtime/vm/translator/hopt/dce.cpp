@@ -117,7 +117,7 @@ typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef std::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(Trace* trace, const DceState& state) {
-  auto &blocks = trace->getBlocks();
+  auto &blocks = trace->blocks();
   for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
     auto cur = it; ++it;
     Block* block = *cur;
@@ -187,7 +187,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
         continue;
       }
       FTRACE(5, "erasing block {}\n", (*bit)->id());
-      if ((*bit)->getTaken() && (*bit)->back()->op() == Jmp_) {
+      if ((*bit)->taken() && (*bit)->back()->op() == Jmp_) {
         needsReflow = true;
       }
       bit = t->erase(bit);
@@ -212,7 +212,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
       if (inst.isControlFlowInstruction()) {
         // mark the destination label so that the destination trace
         // is marked reachable
-        state[inst.getTaken()->getLabel()].setLive();
+        state[inst.taken()->label()].setLive();
       }
       if (inst.isEssential()) {
         state[inst].setLive();
@@ -374,10 +374,10 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
         toSink.remove(srcInst);
       }
     }
-    if (Block* target = inst->getTaken()) {
+    if (Block* target = inst->taken()) {
       if (!pushedTo[target->id()]) {
         pushedTo[target->id()] = 1;
-        Trace* exit = target->getTrace();
+        Trace* exit = target->trace();
         if (exit != trace) processExit(exit);
       }
     }
@@ -526,7 +526,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
   const IRInstruction* srcInst = src->inst();
   visitedSrcs.insert(src);
   if (srcInst->op() == CheckType &&
-      srcInst->getTypeParam().maybeCounted()) {
+      srcInst->typeParam().maybeCounted()) {
     // srcInst is a CheckType that guards to a refcounted type. We need to
     // trace through to its source. If the CheckType guards to a non-refcounted
     // type then the reference is consumed by CheckType itself.
@@ -537,7 +537,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
     // providing a value for it.
     for (unsigned i = 0, n = srcInst->numDsts(); i < n; ++i) {
       if (srcInst->dst(i) == src) {
-        srcInst->getBlock()->forEachSrc(i,
+        srcInst->block()->forEachSrc(i,
           [&](IRInstruction* jmp, SSATmp* val) {
             consumeIncRef(consumer, val, state, ssas, visitedSrcs);
           }
@@ -559,7 +559,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
     if (srcInst->op() == IncRef) {
       // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
       // REFCOUNT_CONSUMED.
-      if (consumer->getTrace()->isMain() || !srcInst->getTrace()->isMain()) {
+      if (consumer->trace()->isMain() || !srcInst->trace()->isMain()) {
         // <srcInst> is consumed from its own trace.
         state[srcInst].setCountConsumed();
       } else {
@@ -579,7 +579,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 // Publicly exported functions:
 
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
-  auto &blocks = trace->getBlocks();
+  auto &blocks = trace->blocks();
   for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
     auto cur = it; ++it;
     Block* block = *cur;
@@ -594,7 +594,7 @@ void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   auto removeEmptyExitTraces = [&] {
     trace->getExitTraces().remove_if([](Trace* exit) {
-      return exit->getBlocks().empty();
+      return exit->blocks().empty();
     });
   };
 

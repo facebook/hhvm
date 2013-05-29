@@ -2090,7 +2090,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
    * matter.  This will need to be revisted then.
    */
   int retValLocId = (!isInlining() && retValSrcLoc && retValSrcOpc == LdLoc) ?
-    retValSrcLoc->inst()->getExtra<LocalId>()->locId : -1;
+    retValSrcLoc->inst()->extra<LocalId>()->locId : -1;
   for (int id = getCurFunc()->numLocals() - 1; id >= 0; --id) {
     if (retValLocId == id) {
       gen(DecRef, retVal);
@@ -2700,7 +2700,7 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
   pushIncRef(src);
   gen(StMem, ptr, cns(0), src);
   if (isRefCounted(src) && src->type().canRunDtor()) {
-    Block* exitBlock = getExitTrace(getNextSrcKey().offset())->front();
+    Block* exitBlock = getExitTrace(nextSrcKey().offset())->front();
     Block::iterator markerInst = exitBlock->skipLabel();
     exitBlock->insert(++markerInst, m_irFactory.gen(DecRef, prevValue));
     gen(DecRefNZOrBranch, exitBlock, prevValue);
@@ -2955,7 +2955,7 @@ void HhbcTranslator::emitMod() {
   // will raise a notice and produce the boolean false.  Punch out
   // here and resume after the Mod instruction; this should be rare.
   auto const exit = getExitTraceWarn(
-    getNextSrcKey().offset(),
+    nextSrcKey().offset(),
     exitSpillValues,
     StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
   );

@@ -303,7 +303,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
-  setTaken(inst->getTaken());
+  setTaken(inst->taken());
 }
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
@@ -319,8 +319,8 @@ Opcode getStackModifyingOpcode(Opcode opc) {
   return opc;
 }
 
-Trace* IRInstruction::getTrace() const {
-  return getBlock()->getTrace();
+Trace* IRInstruction::trace() const {
+  return block()->trace();
 }
 
 bool IRInstruction::hasExtra() const {
@@ -378,7 +378,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
   // to a notCounted type.
   if (m_op == CheckType) {
     assert(srcNo == 0);
-    return src(0)->type().maybeCounted() && getTypeParam().notCounted();
+    return src(0)->type().maybeCounted() && typeParam().notCounted();
   }
   // SpillStack consumes inputs 2 and onward
   if (m_op == SpillStack) return srcNo >= 2;
@@ -811,14 +811,14 @@ void IRInstruction::convertToNop() {
 
 void IRInstruction::convertToJmp() {
   assert(isControlFlowInstruction());
-  assert(getBlock()->back() == this);
+  assert(block()->back() == this);
   m_op = Jmp_;
   m_typeParam = Type::None;
   m_numSrcs = 0;
   m_numDsts = 0;
   m_srcs = nullptr;
   m_dst = nullptr;
-  getBlock()->setNext(nullptr);
+  block()->setNext(nullptr);
 }
 
 void IRInstruction::convertToMov() {
@@ -841,7 +841,7 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
-  setTaken(other->getTaken());
+  setTaken(other->taken());
 }
 
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
@@ -867,7 +867,7 @@ bool Block::isMain() const {
 }
 
 bool Block::isExit() const {
-  return !getTaken() && !getNext();
+  return !taken() && !next();
 }
 
 bool IRInstruction::cseEquals(IRInstruction* inst) const {
@@ -947,83 +947,83 @@ int SSATmp::numNeededRegs() const {
 
 bool SSATmp::getValBool() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Bool));
-  return m_inst->getExtra<ConstData>()->as<bool>();
+  assert(m_inst->typeParam().equals(Type::Bool));
+  return m_inst->extra<ConstData>()->as<bool>();
 }
 
 int64_t SSATmp::getValInt() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Int));
-  return m_inst->getExtra<ConstData>()->as<int64_t>();
+  assert(m_inst->typeParam().equals(Type::Int));
+  return m_inst->extra<ConstData>()->as<int64_t>();
 }
 
 int64_t SSATmp::getValRawInt() const {
   assert(isConst());
-  return m_inst->getExtra<ConstData>()->as<int64_t>();
+  return m_inst->extra<ConstData>()->as<int64_t>();
 }
 
 double SSATmp::getValDbl() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Dbl));
-  return m_inst->getExtra<ConstData>()->as<double>();
+  assert(m_inst->typeParam().equals(Type::Dbl));
+  return m_inst->extra<ConstData>()->as<double>();
 }
 
 const StringData* SSATmp::getValStr() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::StaticStr));
-  return m_inst->getExtra<ConstData>()->as<const StringData*>();
+  assert(m_inst->typeParam().equals(Type::StaticStr));
+  return m_inst->extra<ConstData>()->as<const StringData*>();
 }
 
 const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
   // TODO: Task #2124292, Reintroduce StaticArr
-  assert(m_inst->getTypeParam().subtypeOf(Type::Arr));
-  return m_inst->getExtra<ConstData>()->as<const ArrayData*>();
+  assert(m_inst->typeParam().subtypeOf(Type::Arr));
+  return m_inst->extra<ConstData>()->as<const ArrayData*>();
 }
 
 const Func* SSATmp::getValFunc() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Func));
-  return m_inst->getExtra<ConstData>()->as<const Func*>();
+  assert(m_inst->typeParam().equals(Type::Func));
+  return m_inst->extra<ConstData>()->as<const Func*>();
 }
 
 const Class* SSATmp::getValClass() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Cls));
-  return m_inst->getExtra<ConstData>()->as<const Class*>();
+  assert(m_inst->typeParam().equals(Type::Cls));
+  return m_inst->extra<ConstData>()->as<const Class*>();
 }
 
 const NamedEntity* SSATmp::getValNamedEntity() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::NamedEntity));
-  return m_inst->getExtra<ConstData>()->as<const NamedEntity*>();
+  assert(m_inst->typeParam().equals(Type::NamedEntity));
+  return m_inst->extra<ConstData>()->as<const NamedEntity*>();
 }
 
 uintptr_t SSATmp::getValBits() const {
   assert(isConst());
-  return m_inst->getExtra<ConstData>()->as<uintptr_t>();
+  return m_inst->extra<ConstData>()->as<uintptr_t>();
 }
 
 Variant SSATmp::getValVariant() const {
-  switch (m_inst->getTypeParam().toDataType()) {
+  switch (m_inst->typeParam().toDataType()) {
   case KindOfUninit:
   case KindOfNull:
     return uninit_null();
   case KindOfBoolean:
-    return m_inst->getExtra<ConstData>()->as<bool>();
+    return m_inst->extra<ConstData>()->as<bool>();
   case KindOfInt64:
-    return m_inst->getExtra<ConstData>()->as<int64_t>();
+    return m_inst->extra<ConstData>()->as<int64_t>();
   case KindOfDouble:
-    return m_inst->getExtra<ConstData>()->as<double>();
+    return m_inst->extra<ConstData>()->as<double>();
   case KindOfString:
   case KindOfStaticString:
-    return (litstr)m_inst->getExtra<ConstData>()
+    return (litstr)m_inst->extra<ConstData>()
         ->as<const StringData*>()->data();
   case KindOfArray:
-    return Array(ArrayData::GetScalarArray(m_inst->getExtra<ConstData>()
+    return Array(ArrayData::GetScalarArray(m_inst->extra<ConstData>()
       ->as<ArrayData*>()));
   case KindOfObject:
-    return m_inst->getExtra<ConstData>()->as<const Object*>();
+    return m_inst->extra<ConstData>()->as<const Object*>();
   default:
     assert(false);
     return uninit_null();
@@ -1032,8 +1032,8 @@ Variant SSATmp::getValVariant() const {
 
 TCA SSATmp::getValTCA() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::TCA));
-  return m_inst->getExtra<ConstData>()->as<TCA>();
+  assert(m_inst->typeParam().equals(Type::TCA));
+  return m_inst->extra<ConstData>()->as<TCA>();
 }
 
 std::string SSATmp::toString() const {
@@ -1165,9 +1165,9 @@ DomChildren findDomChildren(const BlockList& blocks) {
 }
 
 bool hasInternalFlow(Trace* trace) {
-  for (Block* block : trace->getBlocks()) {
-    if (Block* taken = block->getTaken()) {
-      if (taken->getTrace() == trace) return true;
+  for (Block* block : trace->blocks()) {
+    if (Block* taken = block->taken()) {
+      if (taken->trace() == trace) return true;
     }
   }
   return false;

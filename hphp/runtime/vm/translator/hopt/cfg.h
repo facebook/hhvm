@@ -41,12 +41,12 @@ struct PostorderSort {
     assert(!block->empty());
     if (m_visited.test(block->id())) return;
     m_visited.set(block->id());
-    Block* taken = block->getTaken();
-    if (taken && taken->getTrace()->isMain() != block->getTrace()->isMain()) {
+    Block* taken = block->taken();
+    if (taken && taken->trace()->isMain() != block->trace()->isMain()) {
       walk(taken);
       taken = nullptr;
     }
-    if (Block* next = block->getNext()) walk(next);
+    if (Block* next = block->next()) walk(next);
     if (taken) walk(taken);
     m_visitor(block);
   }
@@ -154,11 +154,11 @@ void forEachTrace(Trace* main, Body body) {
  */
 template <class Body>
 void forEachTraceBlock(Trace* main, Body body) {
-  for (Block* block : main->getBlocks()) {
+  for (Block* block : main->blocks()) {
     body(block);
   }
   for (Trace* exit : main->getExitTraces()) {
-    for (Block* block : exit->getBlocks()) {
+    for (Block* block : exit->blocks()) {
       body(block);
     }
   }
@@ -178,7 +178,7 @@ void forEachInst(const BlockList& blocks, Body body) {
 
 template <class Body>
 void forEachInst(Trace* trace, Body body) {
-  forEachInst(trace->getBlocks(), body);
+  forEachInst(trace->blocks(), body);
 }
 
 /*

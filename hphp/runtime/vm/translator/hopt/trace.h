@@ -43,20 +43,20 @@ struct Trace : private boost::noncopyable {
                   boost::checked_deleter<Trace>());
   }
 
-  std::list<Block*>& getBlocks() { return m_blocks; }
-  const std::list<Block*>& getBlocks() const { return m_blocks; }
+  std::list<Block*>& blocks() { return m_blocks; }
+  const std::list<Block*>& blocks() const { return m_blocks; }
 
   Block* front() { return *m_blocks.begin(); }
   Block* back() { auto it = m_blocks.end(); return *(--it); }
   const Block* front() const { return *m_blocks.begin(); }
   const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
 
-  const_iterator cbegin() const { return getBlocks().cbegin(); }
-  const_iterator cend()   const { return getBlocks().cend(); }
-  const_iterator begin()  const { return getBlocks().begin(); }
-  const_iterator end()    const { return getBlocks().end(); }
-        iterator begin()        { return getBlocks().begin(); }
-        iterator end()          { return getBlocks().end(); }
+  const_iterator cbegin() const { return blocks().cbegin(); }
+  const_iterator cend()   const { return blocks().cend(); }
+  const_iterator begin()  const { return blocks().begin(); }
+  const_iterator end()    const { return blocks().end(); }
+        iterator begin()        { return blocks().begin(); }
+        iterator end()          { return blocks().end(); }
 
   /*
    * Unlink a block from a trace.  Updates any successor blocks that

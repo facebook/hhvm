@@ -26,7 +26,7 @@ namespace JIT {
 // insert inst after the point dst is defined
 static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assert(!definer->isBlockEnd());
-  Block* block = definer->getBlock();
+  Block* block = definer->block();
   auto pos = block->iteratorTo(definer);
   if (pos->op() == DefLabel) {
     ++pos;
@@ -57,7 +57,7 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
 static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
   SSATmp* sp = inst.dst();
   auto const vals = inst.srcs().subpiece(2);
-  auto* block = inst.getBlock();
+  auto* block = inst.block();
   auto pos = block->iteratorTo(&inst); ++pos;
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();

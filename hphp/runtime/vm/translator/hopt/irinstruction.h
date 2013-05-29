@@ -79,15 +79,15 @@ struct IRInstruction {
    * Pre: op() == opc
    */
   template<Opcode opc>
-  const typename IRExtraDataType<opc>::type* getExtra() const {
-    assert(opc == op() && "getExtra type error");
+  const typename IRExtraDataType<opc>::type* extra() const {
+    assert(opc == op() && "ExtraData type error");
     assert(m_extra != nullptr);
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
   template<Opcode opc>
-  typename IRExtraDataType<opc>::type* getExtra() {
-    assert(opc == op() && "getExtra type error");
+  typename IRExtraDataType<opc>::type* extra() {
+    assert(opc == op() && "ExtraData type error");
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
@@ -100,7 +100,7 @@ struct IRInstruction {
    * that is supposed to be able to handle multiple opcode types that
    * share the same kind of extra data.
    */
-  template<class T> const T* getExtra() const {
+  template<class T> const T* extra() const {
     auto opcode = op();
     if (debug) assert_opcode_extra<T>(opcode);
     return static_cast<const T*>(m_extra);
@@ -172,7 +172,7 @@ struct IRInstruction {
 
   Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
-  Type       getTypeParam() const      { return m_typeParam; }
+  Type       typeParam() const         { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
   void       setNumSrcs(uint32_t i)    {
@@ -223,21 +223,21 @@ struct IRInstruction {
    * inserting it in any blocks.
    */
   bool       isTransient() const       { return m_id == kTransient; }
-  Trace*     getTrace() const;
+  Trace*     trace() const;
 
   /*
-   * getBlock() and setBlock() keep track of the block that contains this
+   * block() and setBlock() keep track of the block that contains this
    * instruction, as well as where the taken edge is coming from, if there
    * is a taken edge.
    */
-  Block*     getBlock() const { return m_taken.from(); }
+  Block*     block() const { return m_taken.from(); }
   void       setBlock(Block* b) { m_taken.setFrom(b); }
 
   /*
    * Optional control flow edge.  If present, this instruction must
    * be the last one in the block.
    */
-  Block*     getTaken() const { return m_taken.to(); }
+  Block*     taken() const { return m_taken.to(); }
   void       setTaken(Block* b) {
     if (isTransient()) m_taken.setTransientTo(b);
     else m_taken.setTo(b);

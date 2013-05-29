@@ -32,8 +32,8 @@ void postorderWalk(smart::vector<Block*>& out,
                    Block* block) {
   if (visited[block]) return;
   visited[block] = true;
-  if (auto t = block->getTaken()) postorderWalk(out, visited, t);
-  if (auto n = block->getNext())  postorderWalk(out, visited, n);
+  if (auto t = block->taken()) postorderWalk(out, visited, t);
+  if (auto n = block->next())  postorderWalk(out, visited, n);
   out.push_back(block);
 }
 
@@ -57,7 +57,7 @@ smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
  */
 LayoutInfo layoutBlocks(Trace* trace, const IRFactory& irFactory) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(irFactory, trace->getBlocks().front());
+  ret.blocks = rpoForCodegen(irFactory, trace->blocks().front());
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {
@@ -71,7 +71,7 @@ LayoutInfo layoutBlocks(Trace* trace, const IRFactory& irFactory) {
   ret.astubsIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
     [&] (Block* b) {
-      return b->isMain() && b->getHint() != Block::Unlikely;
+      return b->isMain() && b->hint() != Block::Unlikely;
     }
   );
 

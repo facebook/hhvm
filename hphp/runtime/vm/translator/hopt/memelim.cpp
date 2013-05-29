@@ -419,7 +419,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     // access info for any refs that may alias
 
     case LdLoc: {
-      auto id = inst->getExtra<LdLoc>()->locId;
+      auto id = inst->extra<LdLoc>()->locId;
 
       // locals never alias, so no access info needs to be killed
       if (m_locs.count(id) > 0) {
@@ -497,7 +497,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
     case StLoc:
     case StLocNT: {
-      storeLocal(inst->getExtra<LocalId>()->locId, inst->src(1));
+      storeLocal(inst->extra<LocalId>()->locId, inst->src(1));
       break;
     }
     case StRef:
@@ -675,10 +675,10 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
   const Func* curFunc = nullptr;
 
-  for (Block* block : trace->getBlocks()) {
+  for (Block* block : trace->blocks()) {
     for (IRInstruction& inst : *block) {
       if (inst.op() == Marker) {
-        curFunc = inst.getExtra<Marker>()->func;
+        curFunc = inst.extra<Marker>()->func;
       }
       // initialize each instruction as live
       setLive(inst, true);
@@ -702,7 +702,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
         // if we see a store, first check if its last available access is a store
         // if it is, then the last access is a dead store
         auto access = inst.op() == StLoc || inst.op() == StLocNT
-          ? lastLocalAccess(inst.getExtra<LocalId>()->locId)
+          ? lastLocalAccess(inst.extra<LocalId>()->locId)
           : getLastAccess(inst.src(0), offset);
         if (access && isStore(access->op())) {
           // if a dead St* is followed by a St*NT, then the second store needs to
@@ -737,7 +737,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
       // if the current instruction is guarded, make sure all of our stores that
       // are not yet dead know about it
-      if (inst.getTaken()) {
+      if (inst.taken()) {
         for (auto& entry : tracking) {
           if (isLive(entry.first)) {
             entry.second.push_back(&inst);
@@ -759,7 +759,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // check if we still know the value at this memory location. if we do,
   // then replace the load with a Mov
   auto value = inst->op() == LdLoc
-    ? getLocalValue(inst->getExtra<LocalId>()->locId)
+    ? getLocalValue(inst->extra<LocalId>()->locId)
     : getValue(inst->src(0), offset);
   if (value == nullptr) {
     return;
@@ -769,7 +769,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   Type valTy = value->type();
 
   // check for loads that have a guard that will definitely fail
-  if (inst->getTaken() && instTy.not(valTy)) {
+  if (inst->taken() && instTy.not(valTy)) {
     return inst->convertToJmp();
   }
 
@@ -799,7 +799,7 @@ void MemMap::sinkStores(StoreList& stores) {
     if (isLive(store)) continue;
 
     for (IRInstruction* guard : it->second) {
-      Block* exit = guard->getTaken();
+      Block* exit = guard->taken();
       exit->prepend(store->clone(m_factory));
     }
 

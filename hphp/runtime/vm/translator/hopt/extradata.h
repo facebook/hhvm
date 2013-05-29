@@ -312,7 +312,7 @@ X(SideExitGuardStk,             SideExitGuardData);
 
 template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
   static void doassert() {
-    assert(!"called getExtra on an opcode without extra data");
+    assert(!"called extra on an opcode without extra data");
   }
 };
 
@@ -320,7 +320,7 @@ template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
   static void doassert() {
     typedef typename IRExtraDataType<opc>::type ExtraType;
     if (!std::is_same<ExtraType,T>::value) {
-      assert(!"getExtra<T> was called with an extra data "
+      assert(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }

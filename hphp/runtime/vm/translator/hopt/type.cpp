@@ -51,7 +51,7 @@ Type vectorReturn(const IRInstruction* inst) {
 Type builtinReturn(const IRInstruction* inst) {
   assert(inst->op() == CallBuiltin);
 
-  Type t = inst->getTypeParam();
+  Type t = inst->typeParam();
   if (t.isSimpleType() || t.equals(Type::Cell)) {
     return t;
   }
@@ -112,7 +112,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxReturn(inst, n);
-#define DParam    return inst->getTypeParam();
+#define DParam    return inst->typeParam();
 #define DMulti    return Type::None;
 #define DStk(in)  return stkReturn(inst, dstId,                         \
                                    [&]() -> Type { in not_reached(); });
@@ -289,10 +289,10 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DParam      checkDst(inst->getTypeParam() != Type::None ||      \
+#define DParam      checkDst(inst->typeParam() != Type::None ||      \
                              inst->op() == DefConst /* for DefNone */, \
                              "DParam with paramType None");
-#define DArith      checkDst(inst->getTypeParam() == Type::None, \
+#define DArith      checkDst(inst->typeParam() == Type::None, \
                              "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \

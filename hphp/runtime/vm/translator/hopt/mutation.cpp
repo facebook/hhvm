@@ -77,7 +77,7 @@ void moveToBlock(Block::iterator const first,
                  Block* const target) {
   if (first == last) return;
 
-  auto const srcBlock = first->getBlock();
+  auto const srcBlock = first->block();
 
   auto targetIt = target->skipLabel();
   for (auto it = first; it != last;) {
@@ -106,7 +106,7 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
      */
     if (inst->op() == DefLabel) {
       Type type = Type::Bottom;
-      inst->getBlock()->forEachSrc(num, [&](IRInstruction*, SSATmp* tmp) {
+      inst->block()->forEachSrc(num, [&](IRInstruction*, SSATmp* tmp) {
         type = Type::unionOf(type, tmp->type());
       });
       ssa->setType(type);

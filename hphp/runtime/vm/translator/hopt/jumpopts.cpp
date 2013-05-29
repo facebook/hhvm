@@ -36,14 +36,14 @@ namespace {
 void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   boost::dynamic_bitset<> isJoin(irFactory->numBlocks());
   boost::dynamic_bitset<> havePred(irFactory->numBlocks());
-  for (Block* block : trace->getBlocks()) {
-    if (block->getTaken()) {
-      auto id = block->getTaken()->id();
+  for (Block* block : trace->blocks()) {
+    if (block->taken()) {
+      auto id = block->taken()->id();
       isJoin[id] = havePred[id];
       havePred[id] = 1;
     }
-    if (block->getNext()) {
-      auto id = block->getNext()->id();
+    if (block->next()) {
+      auto id = block->next()->id();
       isJoin[id] = havePred[id];
       havePred[id] = 1;
     }
@@ -51,8 +51,8 @@ void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp_ && !isJoin[jmp.getTaken()->id()]) {
-    Block* target = jmp.getTaken();
+  if (jmp.op() == Jmp_ && !isJoin[jmp.taken()->id()]) {
+    Block* target = jmp.taken();
     lastBlock->splice(lastInst, target, target->skipLabel(), target->end());
     lastBlock->erase(lastInst); // delete the jmp
   }
@@ -152,14 +152,14 @@ void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
          opcodeName(jccBlock->back()->op()));
 
   auto const jccInst = jccBlock->back();
-  auto const jccExitTrace = jccInst->getTaken();
+  auto const jccExitTrace = jccInst->taken();
   if (!isNormalExit(jccExitTrace)) return;
   FTRACE(5, "exit trace is side-effect free\n");
 
   auto const newOpcode = jmpToReqBindJmp(jccBlock->back()->op());
   ReqBindJccData data;
-  data.taken = jccExitTrace->back()->getExtra<ReqBindJmp>()->offset;
-  data.notTaken = mainExit->back()->getExtra<ReqBindJmp>()->offset;
+  data.taken = jccExitTrace->back()->extra<ReqBindJmp>()->offset;
+  data.notTaken = mainExit->back()->extra<ReqBindJmp>()->offset;
 
   FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
   irFactory->replace(
@@ -183,7 +183,7 @@ void optimizeSideExits(Trace* trace, IRFactory* irFactory) {
 
   forEachInst(trace, [&] (IRInstruction* inst) {
     if (inst->op() != CheckStk && inst->op() != CheckLoc) return;
-    auto const exitBlock = inst->getTaken();
+    auto const exitBlock = inst->taken();
     if (!isNormalExit(exitBlock)) return;
 
     auto const syncABI = &*boost::prior(exitBlock->backIter());
@@ -198,18 +198,18 @@ void optimizeSideExits(Trace* trace, IRFactory* irFactory) {
 
     SideExitGuardData data;
     data.checkedSlot = isStack
-      ? inst->getExtra<CheckStk>()->offset
-      : inst->getExtra<CheckLoc>()->locId;
-    data.taken = exitBlock->back()->getExtra<ReqBindJmp>()->offset;
+      ? inst->extra<CheckStk>()->offset
+      : inst->extra<CheckLoc>()->locId;
+    data.taken = exitBlock->back()->extra<ReqBindJmp>()->offset;
 
-    auto const block = inst->getBlock();
+    auto const block = inst->block();
     block->insert(block->iteratorTo(inst),
                   irFactory->cloneInstruction(syncABI));
 
     irFactory->replace(
       inst,
       isStack ? SideExitGuardStk : SideExitGuardLoc,
-      inst->getTypeParam(),
+      inst->typeParam(),
       data,
       isStack ? sp : fp
     );

@@ -104,8 +104,8 @@ SSATmp* TraceBuilder::genDefNone() {
 }
 
 void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
-  auto const target     = inst->getExtra<DefInlineFP>()->target;
-  auto const savedSPOff = inst->getExtra<DefInlineFP>()->retSPOff;
+  auto const target     = inst->extra<DefInlineFP>()->target;
+  auto const savedSPOff = inst->extra<DefInlineFP>()->retSPOff;
   auto const calleeFP   = inst->dst();
   auto const calleeSP   = inst->src(0);
   auto const savedSP    = inst->src(1);
@@ -172,7 +172,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case InlineReturn:   trackInlineReturn(inst); break;
 
   case Marker:
-    m_lastMarker = *inst->getExtra<Marker>();
+    m_lastMarker = *inst->extra<Marker>();
     break;
 
   case Call:
@@ -208,7 +208,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case DefSP:
   case ReDefSP:
     m_spValue = inst->dst();
-    m_spOffset = inst->getExtra<StackOffset>()->offset;
+    m_spOffset = inst->extra<StackOffset>()->offset;
     break;
 
   case AssertStk:
@@ -267,25 +267,24 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case StLocNT:
   case StLoc:
-    setLocalValue(inst->getExtra<LocalId>()->locId,
-                  inst->src(1));
+    setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
     break;
 
   case LdLoc:
-    setLocalValue(inst->getExtra<LdLoc>()->locId, inst->dst());
+    setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
     break;
 
   case OverrideLoc:
     // If changing the inner type of a boxed local, also drop the
     // information about inner types for any other boxed locals.
-    if (inst->getTypeParam().isBoxed()) {
+    if (inst->typeParam().isBoxed()) {
       dropLocalRefsInnerTypes();
     }
     // fallthrough
   case AssertLoc:
   case GuardLoc:
-    setLocalType(inst->getExtra<LocalId>()->locId,
-                 inst->getTypeParam());
+    setLocalType(inst->extra<LocalId>()->locId,
+                 inst->typeParam());
     break;
 
   case IterInitK:
@@ -348,7 +347,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   }
 
   // save a copy of the current state for each successor.
-  if (Block* target = inst->getTaken()) saveState(target);
+  if (Block* target = inst->taken()) saveState(target);
 }
 
 std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
@@ -536,12 +535,12 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
-  auto const locId = inst->getExtra<CheckLoc>()->locId;
+  auto const locId = inst->extra<CheckLoc>()->locId;
 
   if (auto const prevValue = getLocalValue(locId)) {
     always_assert(false && "WTF");
     return gen(
-      CheckType, inst->getTypeParam(), inst->getTaken(), prevValue
+      CheckType, inst->typeParam(), inst->taken(), prevValue
     );
   }
 
@@ -550,7 +549,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
     always_assert(false && "WTF2");
     // It doesn't make sense to be checking something that's deemed to
     // fail.
-    assert(prevType == inst->getTypeParam());
+    assert(prevType == inst->typeParam());
     inst->convertToNop();
   }
 
@@ -558,9 +557,9 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
-  auto const locId = inst->getExtra<AssertLoc>()->locId;
+  auto const locId = inst->extra<AssertLoc>()->locId;
   auto const prevType = getLocalType(locId);
-  auto const typeParam = inst->getTypeParam();
+  auto const typeParam = inst->typeParam();
 
   if (!prevType.equals(Type::None) && !typeParam.strictSubtypeOf(prevType)) {
     assert(prevType.subtypeOf(typeParam));
@@ -637,7 +636,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
-  auto const locId = inst->getExtra<DecRefLoc>()->locId;
+  auto const locId = inst->extra<DecRefLoc>()->locId;
 
   /*
    * Refine the type if we can.
@@ -652,7 +651,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   }
   if (knownType != Type::None) { // TODO(#2135185)
     inst->setTypeParam(
-      Type::mostRefined(knownType, inst->getTypeParam())
+      Type::mostRefined(knownType, inst->typeParam())
     );
   }
 
@@ -669,33 +668,33 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
-  auto const locId = inst->getExtra<LdLoc>()->locId;
+  auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = getLocalValue(locId)) {
     return tmp;
   }
   if (getLocalType(locId) != Type::None) { // TODO(#2135185)
     inst->setTypeParam(
-      Type::mostRefined(getLocalType(locId), inst->getTypeParam())
+      Type::mostRefined(getLocalType(locId), inst->typeParam())
     );
   }
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
-  auto const locId = inst->getExtra<LdLocAddr>()->locId;
+  auto const locId = inst->extra<LdLocAddr>()->locId;
   if (getLocalType(locId) != Type::None) { // TODO(#2135185)
     inst->setTypeParam(
-      Type::mostRefined(getLocalType(locId).ptr(), inst->getTypeParam())
+      Type::mostRefined(getLocalType(locId).ptr(), inst->typeParam())
     );
   }
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
-  auto const curType = getLocalType(inst->getExtra<StLoc>()->locId);
+  auto const curType = getLocalType(inst->extra<StLoc>()->locId);
   auto const newType = inst->src(1)->type();
 
-  assert(inst->getTypeParam().equals(Type::None));
+  assert(inst->typeParam().equals(Type::None));
 
   // There's no need to store the type if it's going to be the same
   // KindOfFoo.  We still have to store string types because we don't
@@ -797,7 +796,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
 void CSEHash::filter(Block* block, IdomVector& idoms) {
   for (auto it = map.begin(), end = map.end(); it != end;) {
     auto next = it; ++next;
-    if (!dominates(it->second->inst()->getBlock(), block, idoms)) {
+    if (!dominates(it->second->inst()->block(), block, idoms)) {
       map.erase(it);
     }
     it = next;
@@ -833,7 +832,7 @@ void TraceBuilder::reoptimize() {
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
-  if (m_trace->getBlocks().size() >
+  if (m_trace->blocks().size() >
       RuntimeOption::EvalHHIRSimplificationMaxBlocks) {
     // TODO CSEHash::filter is very slow for large block sizes
     // t2135219 should address that
@@ -844,12 +843,12 @@ void TraceBuilder::reoptimize() {
   IdomVector idoms = findDominators(sortedBlocks);
   clearTrackedState();
 
-  auto blocks = std::move(m_trace->getBlocks());
-  assert(m_trace->getBlocks().empty());
+  auto blocks = std::move(m_trace->blocks());
+  assert(m_trace->blocks().empty());
   while (!blocks.empty()) {
     Block* block = blocks.front();
     blocks.pop_front();
-    assert(block->getTrace() == m_trace.get());
+    assert(block->trace() == m_trace.get());
     FTRACE(5, "Block: {}\n", block->id());
 
     m_trace->push_back(block);
@@ -858,7 +857,7 @@ void TraceBuilder::reoptimize() {
       m_cseHash.filter(block, idoms);
     }
 
-    auto instructions = std::move(block->getInstrs());
+    auto instructions = std::move(block->instrs());
     assert(block->empty());
     while (!instructions.empty()) {
       auto *inst = &instructions.front();
@@ -883,7 +882,7 @@ void TraceBuilder::reoptimize() {
         updateTrackedState(mov);
       }
       // Not re-adding inst; remove the inst->taken edge
-      if (inst->getTaken()) inst->setTaken(nullptr);
+      if (inst->taken()) inst->setTaken(nullptr);
     }
     if (block->back()->isTerminal()) {
       // Could have converted a conditional branch to Jmp; clear next.
@@ -892,7 +891,7 @@ void TraceBuilder::reoptimize() {
       // if the last instruction was a branch, we already saved state
       // for the target in updateTrackedState().  Now save state for
       // the fall-through path.
-      saveState(block->getNext());
+      saveState(block->next());
     }
   }
 }

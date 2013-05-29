@@ -51,16 +51,16 @@ struct Block : boost::noncopyable {
     push_back(label);
   }
 
-  IRInstruction* getLabel() const {
+  IRInstruction* label() const {
     assert(front()->op() == DefLabel);
     return front();
   }
 
   uint32_t    id() const         { return m_id; }
-  Trace*      getTrace() const   { return m_trace; }
+  Trace*      trace() const      { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
+  Hint        hint() const       { return m_hint; }
   void        setHint(Hint hint) { m_hint = hint; }
-  Hint        getHint() const    { return m_hint; }
 
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
@@ -80,7 +80,7 @@ struct Block : boost::noncopyable {
   bool isMain() const;
 
   /*
-   * Returns: !getTaken() && !getNext().
+   * Returns: !taken() && !next().
    */
   bool isExit() const;
 
@@ -105,12 +105,12 @@ struct Block : boost::noncopyable {
 
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
-  Block* getNext() const { return m_next.to(); }
+  Block* next() const { return m_next.to(); }
   void setNext(Block* b) { m_next.setTo(b); }
 
   // return the target block if the last instruction is a branch.
-  Block* getTaken() const {
-    return back()->getTaken();
+  Block* taken() const {
+    return back()->taken();
   }
 
   // return the postorder number of this block. (updated each time
@@ -138,7 +138,7 @@ struct Block : boost::noncopyable {
 
   // return an iterator to a specific instruction
   iterator iteratorTo(IRInstruction* inst) {
-    assert(inst->getBlock() == this);
+    assert(inst->block() == this);
     return m_instrs.iterator_to(*inst);
   }
 
@@ -163,7 +163,7 @@ struct Block : boost::noncopyable {
   void forEachSrc(unsigned i, L body) {
     for (Edge& e : m_preds) {
       IRInstruction* jmp = e.from()->back();
-      assert(jmp->op() == Jmp_ && jmp->getTaken() == this);
+      assert(jmp->op() == Jmp_ && jmp->taken() == this);
       body(jmp, jmp->src(i));
     }
   }
@@ -190,7 +190,7 @@ struct Block : boost::noncopyable {
 
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
-  InstructionList& getInstrs()   { return m_instrs; }
+  InstructionList& instrs()      { return m_instrs; }
   bool             empty() const { return m_instrs.empty(); }
   iterator         begin()       { return m_instrs.begin(); }
   iterator         end()         { return m_instrs.end(); }
@@ -204,7 +204,7 @@ struct Block : boost::noncopyable {
   void splice(iterator pos, Block* from, iterator begin, iterator end) {
     assert(from != this);
     for (auto i = begin; i != end; ++i) (*i).setBlock(this);
-    m_instrs.splice(pos, from->getInstrs(), begin, end);
+    m_instrs.splice(pos, from->instrs(), begin, end);
   }
   void push_back(IRInstruction* inst) {
     inst->setBlock(this);

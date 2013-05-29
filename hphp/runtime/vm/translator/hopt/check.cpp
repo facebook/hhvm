@@ -71,15 +71,15 @@ bool checkBlock(Block* b) {
   if (b->skipLabel() != b->end()) {
     assert(b->skipLabel()->op() == Marker);
   }
-  if (b->back()->isTerminal()) assert(!b->getNext());
-  if (b->getTaken()) {
+  if (b->back()->isTerminal()) assert(!b->next());
+  if (b->taken()) {
     // only Jmp_ can branch to a join block expecting values.
     assert(b->back()->op() == Jmp_ ||
-           b->getTaken()->front()->numDsts() == 0);
+           b->taken()->front()->numDsts() == 0);
   }
-  if (b->getNext()) {
+  if (b->next()) {
     // cannot fall-through to join block expecting values
-    assert(b->getNext()->front()->numDsts() == 0);
+    assert(b->next()->front()->numDsts() == 0);
   }
 
   {
@@ -91,15 +91,15 @@ bool checkBlock(Block* b) {
       assert(!inst.isBlockEnd());
     }
     for (DEBUG_ONLY IRInstruction& inst : *b) {
-      assert(inst.getBlock() == b);
+      assert(inst.block() == b);
     }
   }
 
   for (int i = 0; i < b->front()->numDsts(); ++i) {
-    auto const traceBlocks = b->getTrace()->getBlocks();
+    auto const traceBlocks = b->trace()->blocks();
     b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
       assert(std::find(traceBlocks.begin(), traceBlocks.end(),
-                       inst->getBlock()) != traceBlocks.end());
+                       inst->block()) != traceBlocks.end());
     });
   }
 

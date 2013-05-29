@@ -111,7 +111,7 @@ const RegSet kCalleeSaved = RegSet()
 
 const RegSet kAllRegs     = kCallerSaved | kCalleeSaved;
 
-const RegSet kMMXRegs     = RegSet()
+const RegSet kXMMRegs     = RegSet()
                           | RegSet(reg::xmm0)
                           | RegSet(reg::xmm1)
                           | RegSet(reg::xmm2)
@@ -130,8 +130,8 @@ const RegSet kMMXRegs     = RegSet()
                           | RegSet(reg::xmm15)
                           ;
 
-const RegSet kGPCallerSaved = kCallerSaved - kMMXRegs;
-const RegSet kGPCalleeSaved = kCalleeSaved - kMMXRegs;
+const RegSet kGPCallerSaved = kCallerSaved - kXMMRegs;
+const RegSet kGPCalleeSaved = kCalleeSaved - kXMMRegs;
 
 //////////////////////////////////////////////////////////////////////
 /*

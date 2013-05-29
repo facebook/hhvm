@@ -112,7 +112,7 @@ struct MoveInfo {
 };
 
 template <int N>
-static bool cycleHasMMXReg(const CycleInfo& cycle,
+static bool cycleHasXMMReg(const CycleInfo& cycle,
                            const int (&moves)[N]) {
   int first = cycle.node;
   int node = first;
@@ -198,13 +198,13 @@ pathloop:
   }
   // Deal with any cycles we encountered
   for (int i = 0; i < numCycles; ++i) {
-    // can't use xchg if one of the registers is MMX
-    bool hasMMXReg = cycleHasMMXReg(cycles[i], moves);
-    if (cycles[i].length == 2 && !hasMMXReg) {
+    // can't use xchg if one of the registers is XMM
+    bool hasXMMReg = cycleHasXMMReg(cycles[i], moves);
+    if (cycles[i].length == 2 && !hasXMMReg) {
       int v = cycles[i].node;
       int w = moves[v];
       howTo.push_back(MoveInfo(MoveInfo::Xchg, w, v));
-    } else if (cycles[i].length == 3 && !hasMMXReg) {
+    } else if (cycles[i].length == 3 && !hasXMMReg) {
       int v = cycles[i].node;
       int w = moves[v];
       howTo.push_back(MoveInfo(MoveInfo::Xchg, w, v));
@@ -500,15 +500,15 @@ emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
   if (srcReg.isGP()) {
     if (dstReg.isGP()) {                 // GP => GP
       as.movq(srcReg, dstReg);
-    } else {                             // GP => MMX
+    } else {                             // GP => XMM
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
       as.mov_reg64_xmm(srcReg, dstReg);
     }
   } else {
-    if (dstReg.isGP()) {                 // MMX => GP
+    if (dstReg.isGP()) {                 // XMM => GP
       as.mov_xmm_reg64(srcReg, dstReg);
-    } else {                             // MMX => MMX
+    } else {                             // XMM => XMM
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
       as.movdqa(srcReg, dstReg);

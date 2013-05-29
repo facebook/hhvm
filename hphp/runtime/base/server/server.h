@@ -86,6 +86,7 @@ public:
 };
 
 typedef std::function<std::unique_ptr<RequestHandler>()> RequestHandlerFactory;
+typedef std::function<bool(const std::string&)> URLChecker;
 
 /**
  * Base class of an HTTP server. Defining minimal interface an HTTP server
@@ -133,6 +134,16 @@ public:
     setRequestHandlerFactory([] {
       return std::unique_ptr<RequestHandler>(new TRequestHandler());
     });
+  }
+
+  /**
+   * Set the URLChecker function which determines which paths this server is
+   * allowed to server.
+   *
+   * Defaults to SatelliteServerInfo::checkURL()
+   */
+  void setUrlChecker(const URLChecker& checker) {
+    m_urlChecker = checker;
   }
 
   /**
@@ -192,9 +203,11 @@ public:
   }
 
   /**
-   * Overwrite for URL blocking.
+   * Check whether a request to the specified server path is allowed.
    */
-  virtual bool shouldHandle(const std::string &cmd);
+  bool shouldHandle(const std::string &path) {
+    return m_urlChecker(path);
+  }
 
   /**
    * To enable SSL of the current server, it will listen to an additional
@@ -208,6 +221,7 @@ protected:
   int m_threadCount;
   mutable Mutex m_mutex;
   RequestHandlerFactory m_handlerFactory;
+  URLChecker m_urlChecker;
 
 private:
   RunStatus m_status;

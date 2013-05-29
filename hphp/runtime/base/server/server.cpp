@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/server/server.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/server/satellite_server.h"
 #include "hphp/runtime/base/preg.h"
 #include <signal.h>
@@ -50,21 +50,8 @@ void Server::InstallStopSignalHandlers(ServerPtr server) {
 
 Server::Server(const std::string &address, int port, int threadCount)
   : m_address(address), m_port(port), m_threadCount(threadCount),
+    m_urlChecker(SatelliteServerInfo::checkMainURL),
     m_status(NOT_YET_STARTED) {
-}
-
-bool Server::shouldHandle(const std::string &cmd) {
-  String url(cmd.c_str(), cmd.size(), AttachLiteral);
-  for (std::set<string>::const_iterator iter =
-         SatelliteServerInfo::InternalURLs.begin();
-       iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
-    Variant ret = preg_match
-      (String(iter->c_str(), iter->size(), AttachLiteral), url);
-    if (ret.toInt64() > 0) {
-      return false;
-    }
-  }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

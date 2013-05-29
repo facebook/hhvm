@@ -70,46 +70,33 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   }
 }
 
+bool SatelliteServerInfo::checkMainURL(const std::string& path) {
+  String url(path.c_str(), path.size(), AttachLiteral);
+  for (std::set<string>::const_iterator iter =
+         SatelliteServerInfo::InternalURLs.begin();
+       iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
+    Variant ret = preg_match
+      (String(iter->c_str(), iter->size(), AttachLiteral), url);
+    if (ret.toInt64() > 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // InternalPageServer: LibEventServer + allowed URL checking
 
-DECLARE_BOOST_TYPES(InternalPageServerImpl);
-class InternalPageServerImpl : public LibEventServer {
-public:
-  InternalPageServerImpl(const std::string &address, int port, int thread,
-                         int timeoutSeconds) :
-    LibEventServer(address, port, thread, timeoutSeconds) {
-  }
-  void create(const std::set<std::string> &urls) {
-    m_allowedURLs = urls;
-  }
-
-  virtual bool shouldHandle(const std::string &cmd) {
-    String url(cmd.c_str(), cmd.size(), AttachLiteral);
-    for (set<string>::const_iterator iter = m_allowedURLs.begin();
-         iter != m_allowedURLs.end(); ++iter) {
-      Variant ret = preg_match
-        (String(iter->c_str(), iter->size(), AttachLiteral), url);
-      if (ret.toInt64() > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-private:
-  std::set<std::string> m_allowedURLs;
-};
-
 class InternalPageServer : public SatelliteServer {
 public:
-  explicit InternalPageServer(SatelliteServerInfoPtr info) {
-    auto const server = boost::make_shared<InternalPageServerImpl>(
+  explicit InternalPageServer(SatelliteServerInfoPtr info)
+    : m_allowedURLs(info->getURLs()) {
+    m_server = boost::make_shared<LibEventServer>(
         RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
         info->getTimeoutSeconds());
-    server->setRequestHandlerFactory<HttpRequestHandler>();
-    server->create(info->getURLs());
-    m_server = server;
+    m_server->setRequestHandlerFactory<HttpRequestHandler>();
+    m_server->setUrlChecker(std::bind(&InternalPageServer::checkURL, this,
+                                      std::placeholders::_1));
   }
 
   virtual void start() {
@@ -119,8 +106,22 @@ public:
     m_server->stop();
     m_server->waitForEnd();
   }
+
 private:
+  bool checkURL(const std::string &path) const {
+    String url(path.c_str(), path.size(), AttachLiteral);
+    for (const auto &allowed : m_allowedURLs) {
+      Variant ret = preg_match
+        (String(allowed.c_str(), allowed.size(), AttachLiteral), url);
+      if (ret.toInt64() > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   ServerPtr m_server;
+  std::set<std::string> m_allowedURLs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -62,8 +62,13 @@ public:
   static std::set<std::string> InternalURLs;
   static int DanglingServerPort;
 
+  /**
+   * Check whether a requested path should be allowed on the main server.
+   */
+  static bool checkMainURL(const std::string& path);
+
 public:
-  SatelliteServerInfo(Hdf hdf);
+  explicit SatelliteServerInfo(Hdf hdf);
 
   const std::string &getName() const { return m_name;}
   SatelliteServer::Type getType() const { return m_type;}

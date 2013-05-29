@@ -49,6 +49,7 @@ class TestExtProcess : public TestCppExt {
   bool test_proc_open();
   bool test_proc_terminate();
   bool test_proc_close();
+  bool test_proc_open_env_inh();
   bool test_proc_get_status();
   bool test_proc_nice();
   bool test_escapeshellarg();

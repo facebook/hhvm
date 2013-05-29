@@ -34,6 +34,7 @@
 # define _NSIG NSIG
 #endif
 
+extern char **environ;
 
 namespace HPHP {
 
@@ -761,6 +762,38 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     scwd = g_context->getCwd().c_str();
   }
 
+  Array enva;
+
+  if (env.isNull()) {
+    // Build out an environment that conceptually matches what we'd
+    // see if we were to iterate the environment and call getenv()
+    // for each name.
+
+    // Env vars defined in the hdf file go in first
+    for (std::map<string, string>::const_iterator iter =
+        RuntimeOption::EnvVariables.begin();
+        iter != RuntimeOption::EnvVariables.end(); ++iter) {
+      enva.set(String(iter->first), String(iter->second));
+    }
+
+    // global environment overrides the hdf
+    for (char **env = environ; env && *env; env++) {
+      char *p = strchr(*env, '=');
+      if (p) {
+        String name(*env, p - *env, CopyString);
+        String val(p + 1, CopyString);
+        enva.set(name, val);
+      }
+    }
+
+    // and then any putenv() changes take precedence
+    for (ArrayIter iter(g_context->getEnvs()); iter; ++iter) {
+      enva.set(iter.first(), iter.second());
+    }
+  } else {
+    enva = env.toArray();
+  }
+
   pid_t child;
 
   if (LightProcess::Available()) {
@@ -776,7 +809,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     }
 
     std::vector<std::string> envs;
-    for (ArrayIter iter(env.toArray()); iter; ++iter) {
+    for (ArrayIter iter(enva); iter; ++iter) {
       StringBuffer nvpair;
       nvpair += iter.first().toString();
       nvpair += '=';
@@ -787,7 +820,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
     assert(child);
-    return post_proc_open(cmd, pipes, env, items, child);
+    return post_proc_open(cmd, pipes, enva, items, child);
   } else {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
@@ -795,7 +828,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     child = fork();
     if (child) {
       // the parent process
-      return post_proc_open(cmd, pipes, env, items, child);
+      return post_proc_open(cmd, pipes, enva, items, child);
     }
   }
 
@@ -811,14 +844,10 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
-  if (!env.isNull()) {
-    vector<String> senvs; // holding those char *
-    char **envp = build_envp(env.toArray(), senvs);
-    execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
-    free(envp);
-  } else {
-    execl("/bin/sh", "sh", "-c", cmd.data(), NULL);
-  }
+  vector<String> senvs; // holding those char *
+  char **envp = build_envp(enva, senvs);
+  execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
+  free(envp);
   _exit(127);
 }
 

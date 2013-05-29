@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class TakeoverListener;
-
 /**
  * LibEventServer that adds the ability to take over an accept socket
  * from another process, and give its accept socket up.
@@ -42,10 +40,10 @@ public:
     m_transfer_fname = fname;
   }
 
-  void addTakeoverListener(TakeoverListener* lisener) {
+  virtual void addTakeoverListener(TakeoverListener* lisener) {
     m_takeover_listeners.insert(lisener);
   }
-  void removeTakeoverListener(TakeoverListener* lisener) {
+  virtual void removeTakeoverListener(TakeoverListener* lisener) {
     m_takeover_listeners.erase(lisener);
   }
 
@@ -65,12 +63,6 @@ protected:
   std::string m_transfer_fname;
   std::set<TakeoverListener*> m_takeover_listeners;
   bool m_took_over;
-};
-
-class TakeoverListener {
-public:
-  virtual ~TakeoverListener();
-  virtual void takeoverShutdown(LibEventServerWithTakeover* server) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,7 +34,7 @@ public:
   static time_t StartTime;
 
 public:
-  HttpServer(void *sslCTX = nullptr);
+  explicit HttpServer(void *sslCTX = nullptr);
   ~HttpServer();
 
   void run();
@@ -47,7 +47,7 @@ public:
   void flushLog();
   void watchDog();
 
-  void takeoverShutdown(LibEventServerWithTakeover* server);
+  void takeoverShutdown(HPHP::Server* server);
 
   ServerPtr getPageServer() { return m_pageServer;}
 

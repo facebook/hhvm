@@ -99,10 +99,10 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
         RuntimeOption::RequestTimeoutSeconds);
     maybeEnableThrottle(server.get());
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
-    server->addTakeoverListener(this);
     m_pageServer = server;
   }
   m_pageServer->setRequestHandlerFactory<HttpRequestHandler>();
+  m_pageServer->addTakeoverListener(this);
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
     assert(SSLInit::IsInited());
@@ -215,7 +215,7 @@ void HttpServer::onServerShutdown() {
   }
 }
 
-void HttpServer::takeoverShutdown(LibEventServerWithTakeover* server) {
+void HttpServer::takeoverShutdown(HPHP::Server* server) {
   assert(server == m_pageServer.get());
   // We want to synchronously shut down our satellite servers to free up ports,
   // then asynchronously shut down everything else.

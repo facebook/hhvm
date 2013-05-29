@@ -85,6 +85,16 @@ public:
   virtual void handleRequest(Transport *transport) = 0;
 };
 
+/**
+ * A callback to be informed when a server is shutting down because its socket
+ * has been taken over by a new process.
+ */
+class TakeoverListener {
+public:
+  virtual ~TakeoverListener();
+  virtual void takeoverShutdown(Server* server) = 0;
+};
+
 typedef std::function<std::unique_ptr<RequestHandler>()> RequestHandlerFactory;
 typedef std::function<bool(const std::string&)> URLChecker;
 
@@ -145,6 +155,14 @@ public:
   void setUrlChecker(const URLChecker& checker) {
     m_urlChecker = checker;
   }
+
+  /**
+   * Add or remove a TakeoverListener to this server.
+   *
+   * This is a no-op for servers that do not support socket takeover.
+   */
+  virtual void addTakeoverListener(TakeoverListener* lisener) {}
+  virtual void removeTakeoverListener(TakeoverListener* lisener) {}
 
   /**
    * Informational.

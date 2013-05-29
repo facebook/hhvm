@@ -1135,215 +1135,38 @@ class c_PairIterator : public ExtObjectData {
   friend class c_Pair;
 };
 
+TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
+void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+bool collectionIsset(ObjectData* obj, TypedValue* key);
+bool collectionEmpty(ObjectData* obj, TypedValue* key);
+void collectionUnset(ObjectData* obj, TypedValue* key);
+void collectionAppend(ObjectData* obj, TypedValue* val);
+Variant& collectionOffsetGet(ObjectData* obj, int64_t offset);
+Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset);
+Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset);
+void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val);
+void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val);
+void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val);
+bool collectionOffsetContains(ObjectData* obj, CVarRef offset);
+bool collectionOffsetIsset(ObjectData* obj, CVarRef offset);
+bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset);
+int64_t collectionSize(ObjectData* obj);
+void collectionReserve(ObjectData* obj, int64_t sz);
+void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
+                           int64_t sz, char type);
+bool collectionEquals(ObjectData* obj1, ObjectData* obj2);
+void collectionDeepCopyTV(TypedValue* tv);
+ArrayData* collectionDeepCopyArray(ArrayData* arr);
+ObjectData* collectionDeepCopyVector(c_Vector* vec);
+ObjectData* collectionDeepCopyMap(c_Map* mp);
+ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
+ObjectData* collectionDeepCopySet(c_Set* st);
+ObjectData* collectionDeepCopyPair(c_Pair* pair);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline TypedValue* cvarToCell(const Variant* v) {
   return const_cast<TypedValue*>(tvToCell(v->asTypedValue()));
-}
-
-inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetGet(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetGet(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetGet(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetGet(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetGet(obj, key);
-    default:
-      assert(false);
-      return NULL;
-  }
-}
-
-inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assert(key->m_type != KindOfRef);
-  assert(val->m_type != KindOfRef);
-  assert(val->m_type != KindOfUninit);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      c_Vector::OffsetSet(obj, key, val);
-      break;
-    case Collection::MapType:
-      c_Map::OffsetSet(obj, key, val);
-      break;
-    case Collection::StableMapType:
-      c_StableMap::OffsetSet(obj, key, val);
-      break;
-    case Collection::SetType:
-      c_Set::OffsetSet(obj, key, val);
-      break;
-    case Collection::PairType:
-      c_Pair::OffsetSet(obj, key, val);
-      break;
-    default:
-      assert(false);
-  }
-}
-
-inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetIsset(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetIsset(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetIsset(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetIsset(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetIsset(obj, key);
-    default:
-      assert(false);
-      return false;
-  }
-}
-
-inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetEmpty(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetEmpty(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetEmpty(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetEmpty(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetEmpty(obj, key);
-    default:
-      assert(false);
-      return false;
-  }
-}
-
-inline void collectionUnset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      c_Vector::OffsetUnset(obj, key);
-      break;
-    case Collection::MapType:
-      c_Map::OffsetUnset(obj, key);
-      break;
-    case Collection::StableMapType:
-      c_StableMap::OffsetUnset(obj, key);
-      break;
-    case Collection::SetType:
-      c_Set::OffsetUnset(obj, key);
-      break;
-    case Collection::PairType:
-      c_Pair::OffsetUnset(obj, key);
-      break;
-    default:
-      assert(false);
-  }
-}
-
-inline void collectionAppend(ObjectData* obj, TypedValue* val) {
-  assert(val->m_type != KindOfRef);
-  assert(val->m_type != KindOfUninit);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      c_Vector::OffsetAppend(obj, val);
-      break;
-    case Collection::MapType:
-      c_Map::OffsetAppend(obj, val);
-      break;
-    case Collection::StableMapType:
-      c_StableMap::OffsetAppend(obj, val);
-      break;
-    case Collection::SetType:
-      c_Set::OffsetAppend(obj, val);
-      break;
-    case Collection::PairType:
-      c_Pair::OffsetAppend(obj, val);
-      break;
-    default:
-      assert(false);
-  }
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      return tvAsVariant(vec->at(offset));
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      return tvAsVariant(mp->at(offset));
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      return tvAsVariant(smp->at(offset));
-    }
-    case Collection::SetType: {
-      c_Set::throwNoIndexAccess();
-    }
-    case Collection::PairType: {
-      c_Pair* pair = static_cast<c_Pair*>(obj);
-      return tvAsVariant(pair->at(offset));
-    }
-    default:
-      assert(false);
-      return tvAsVariant(NULL);
-  }
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
-  StringData* key = offset.get();
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      return tvAsVariant(mp->at(key));
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      return tvAsVariant(smp->at(key));
-    }
-    case Collection::SetType: {
-      c_Set::throwNoIndexAccess();
-    }
-    case Collection::PairType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Pairs"));
-      throw e;
-    }
-    default:
-      assert(false);
-      return tvAsVariant(NULL);
-  }
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = cvarToCell(&offset);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return tvAsVariant(c_Vector::OffsetGet(obj, key));
-    case Collection::MapType:
-      return tvAsVariant(c_Map::OffsetGet(obj, key));
-    case Collection::StableMapType:
-      return tvAsVariant(c_StableMap::OffsetGet(obj, key));
-    case Collection::SetType:
-      return tvAsVariant(c_Set::OffsetGet(obj, key));
-    case Collection::PairType:
-      return tvAsVariant(c_Pair::OffsetGet(obj, key));
-    default:
-      assert(false);
-      return tvAsVariant(NULL);
-  }
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, bool offset) {
@@ -1358,107 +1181,6 @@ inline Variant& collectionOffsetGet(ObjectData* obj, litstr offset) {
   return collectionOffsetGet(obj, Variant(offset));
 }
 
-inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->set(offset, tv);
-      break;
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      mp->set(offset, tv);
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->set(offset, tv);
-      break;
-    }
-    case Collection::SetType: {
-      c_Set::throwNoIndexAccess();
-    }
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
-    default:
-      assert(false);
-  }
-}
-
-inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
-  StringData* key = offset.get();
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      mp->set(key, tv);
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->set(key, tv);
-      break;
-    }
-    case Collection::SetType: {
-      c_Set::throwNoIndexAccess();
-    }
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
-    default:
-      assert(false);
-  }
-}
-
-inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
-  TypedValue* key = cvarToCell(&offset);
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      c_Vector::OffsetSet(obj, key, tv);
-      break;
-    }
-    case Collection::MapType: {
-      c_Map::OffsetSet(obj, key, tv);
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap::OffsetSet(obj, key, tv);
-      break;
-    }
-    case Collection::SetType: {
-      c_Set::OffsetSet(obj, key, tv);
-      break;
-    }
-    case Collection::PairType: {
-      c_Pair::OffsetSet(obj, key, tv);
-      break;
-    }
-    default:
-      assert(false);
-  }
-}
-
 inline void collectionOffsetSet(ObjectData* obj, bool offset, CVarRef val) {
   collectionOffsetSet(obj, Variant(offset), val);
 }
@@ -1471,63 +1193,6 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
   collectionOffsetSet(obj, Variant(offset), val);
 }
 
-inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = cvarToCell(&offset);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetContains(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetContains(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetContains(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetContains(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetContains(obj, key);
-    default:
-      assert(false);
-      return false;
-  }
-}
-
-inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = cvarToCell(&offset);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetIsset(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetIsset(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetIsset(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetIsset(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetIsset(obj, key);
-    default:
-      assert(false);
-      return false;
-  }
-}
-
-inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = cvarToCell(&offset);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return c_Vector::OffsetEmpty(obj, key);
-    case Collection::MapType:
-      return c_Map::OffsetEmpty(obj, key);
-    case Collection::StableMapType:
-      return c_StableMap::OffsetEmpty(obj, key);
-    case Collection::SetType:
-      return c_Set::OffsetEmpty(obj, key);
-    case Collection::PairType:
-      return c_Pair::OffsetEmpty(obj, key);
-    default:
-      assert(false);
-      return true;
-  }
-}
-
 inline void collectionOffsetUnset(ObjectData* obj, CVarRef offset) {
   TypedValue* key = cvarToCell(&offset);
   collectionUnset(obj, key);
@@ -1538,101 +1203,7 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
   collectionAppend(obj, tv);
 }
 
-inline int64_t collectionSize(ObjectData* obj) {
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return static_cast<c_Vector*>(obj)->t_count();
-    case Collection::MapType:
-      return static_cast<c_Map*>(obj)->t_count();
-    case Collection::StableMapType:
-      return static_cast<c_StableMap*>(obj)->t_count();
-    case Collection::SetType:
-      return static_cast<c_Set*>(obj)->t_count();
-    case Collection::PairType:
-      return static_cast<c_Pair*>(obj)->t_count();
-    default:
-      assert(false);
-      return 0;
-  }
-}
-
-inline void collectionReserve(ObjectData* obj, int64_t sz) {
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      static_cast<c_Vector*>(obj)->reserve(sz);
-      break;
-    case Collection::MapType:
-      static_cast<c_Map*>(obj)->reserve(sz);
-      break;
-    case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->reserve(sz);
-      break;
-    case Collection::SetType:
-      static_cast<c_Set*>(obj)->reserve(sz);
-      break;
-    case Collection::PairType:
-      // do nothing
-      break;
-    default:
-      assert(false);
-  }
-}
-
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
-
-inline void collectionUnserialize(ObjectData* obj,
-                                  VariableUnserializer* uns,
-                                  int64_t sz,
-                                  char type) {
-  assert(obj->isCollection());
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      c_Vector::Unserialize(obj, uns, sz, type);
-      break;
-    case Collection::MapType:
-      c_Map::Unserialize(obj, uns, sz, type);
-      break;
-    case Collection::StableMapType:
-      c_StableMap::Unserialize(obj, uns, sz, type);
-      break;
-    case Collection::SetType:
-      c_Set::Unserialize(obj, uns, sz, type);
-      break;
-    case Collection::PairType:
-      c_Pair::Unserialize(obj, uns, sz, type);
-      break;
-    default:
-      assert(false);
-  }
-}
-
-inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
-  int ct = obj1->getCollectionType();
-  assert(ct == obj2->getCollectionType());
-  switch (ct) {
-    case Collection::VectorType:
-      return c_Vector::Equals(obj1, obj2);
-    case Collection::MapType:
-      return c_Map::Equals(obj1, obj2);
-    case Collection::StableMapType:
-      return c_StableMap::Equals(obj1, obj2);
-    case Collection::SetType:
-      return c_Set::Equals(obj1, obj2);
-    case Collection::PairType:
-      return c_Pair::Equals(obj1, obj2);
-    default:
-      assert(false);
-      return false;
-  }
-}
-
-void collectionDeepCopyTV(TypedValue* tv);
-ArrayData* collectionDeepCopyArray(ArrayData* arr);
-ObjectData* collectionDeepCopyVector(c_Vector* vec);
-ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
-ObjectData* collectionDeepCopySet(c_Set* st);
-ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ///////////////////////////////////////////////////////////////////////////////
 

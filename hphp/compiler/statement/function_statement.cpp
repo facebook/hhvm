@@ -66,6 +66,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
       }
     }
   }
+
   // note it's important to add to scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.

@@ -236,12 +236,14 @@ public:
   ClassScopePtr findClass(const std::string &className) const;
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by);
+
   /**
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.
    */
   const ClassScopePtrVec &findRedeclaredClasses(
     const std::string &className) const;
+
   /**
    * Find all the classes by the name, including system classes.
    */

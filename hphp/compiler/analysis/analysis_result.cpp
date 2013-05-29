@@ -236,8 +236,8 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
   return ClassScopePtr();
 }
 
-const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
-(const std::string &name) const {
+const ClassScopePtrVec &
+AnalysisResult::findRedeclaredClasses(const std::string &name) const {
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
   if (iter == m_classDecs.end()) {
     static ClassScopePtrVec empty;

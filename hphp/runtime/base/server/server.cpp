@@ -55,4 +55,52 @@ Server::Server(const std::string &address, int port, int threadCount)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+ServerPtr ServerFactory::createServer(const std::string &address,
+                                      uint16_t port,
+                                      int numThreads,
+                                      std::chrono::seconds timeout) {
+  ServerOptions options(address, port, numThreads, timeout);
+  return createServer(options);
+}
+
+ServerFactoryRegistry::ServerFactoryRegistry()
+  : m_lock(false) {
+  }
+
+ServerFactoryRegistry *ServerFactoryRegistry::getInstance() {
+  static ServerFactoryRegistry singleton;
+  return &singleton;
+}
+
+ServerPtr ServerFactoryRegistry::createServer(const std::string &type,
+                                              const std::string &address,
+                                              uint16_t port,
+                                              int numThreads,
+                                              std::chrono::seconds timeout) {
+  auto factory = getInstance()->getFactory(type);
+  ServerOptions options(address, port, numThreads, timeout);
+  return factory->createServer(options);
+}
+
+void ServerFactoryRegistry::registerFactory(const std::string &name,
+                                            const ServerFactoryPtr &factory) {
+  Lock lock(m_lock);
+  auto ret = m_factories.insert(std::make_pair(name, factory));
+  if (!ret.second) {
+    throw ServerException("a factory already exists for server type \"%s\"",
+                          name.c_str());
+  }
+}
+
+ServerFactoryPtr ServerFactoryRegistry::getFactory(const std::string &name) {
+  Lock lock(m_lock);
+  auto it = m_factories.find(name);
+  if (it == m_factories.end()) {
+    throw ServerException("no factory for server type \"%s\"", name.c_str());
+  }
+  return it->second;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

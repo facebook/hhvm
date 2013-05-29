@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/server/server.h"
 #include "hphp/runtime/base/server/satellite_server.h"
-#include "hphp/runtime/base/server/libevent_server_with_takeover.h"
 #include "hphp/util/async_func.h"
 #include "hphp/runtime/base/server/service_thread.h"
 

@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_ADMIN_REQUEST_HANDLER_H_
 #define incl_HPHP_ADMIN_REQUEST_HANDLER_H_
 
-#include "hphp/runtime/base/server/libevent_server.h"
 #include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/base/server/server.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

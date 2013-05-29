@@ -19,6 +19,8 @@
 
 #include "hphp/util/hdf.h"
 
+#include <chrono>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +78,7 @@ public:
   int getThreadCount() const { return m_threadCount;}
 
   // for all libevent servers
-  int getTimeoutSeconds() const { return m_timeoutSeconds;}
+  std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
 
   // only for InternalPageServer
   const std::set<std::string> &getURLs() const { return m_urls;}
@@ -97,7 +99,7 @@ protected:
   int m_threadCount;
   int m_maxRequest;
   int m_maxDuration;
-  int m_timeoutSeconds;
+  std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;

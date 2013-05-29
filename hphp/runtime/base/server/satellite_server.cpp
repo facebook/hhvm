@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/server/satellite_server.h"
-#include "hphp/runtime/base/server/libevent_server.h"
 #include "hphp/runtime/base/server/http_request_handler.h"
 #include "hphp/runtime/base/server/rpc_request_handler.h"
 #include "hphp/runtime/base/server/virtual_host.h"
@@ -41,8 +40,8 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_threadCount = hdf["ThreadCount"].getInt32(5);
   m_maxRequest = hdf["MaxRequest"].getInt32(500);
   m_maxDuration = hdf["MaxDuration"].getInt32(120);
-  m_timeoutSeconds =
-    hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds);
+  m_timeoutSeconds = std::chrono::seconds
+    (hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds));
   m_reqInitFunc = hdf["RequestInitFunction"].getString("");
   m_reqInitDoc = hdf["RequestInitDocument"].getString("");
   m_password = hdf["Password"].getString("");
@@ -85,15 +84,15 @@ bool SatelliteServerInfo::checkMainURL(const std::string& path) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// InternalPageServer: LibEventServer + allowed URL checking
+// InternalPageServer: Server + allowed URL checking
 
 class InternalPageServer : public SatelliteServer {
 public:
   explicit InternalPageServer(SatelliteServerInfoPtr info)
     : m_allowedURLs(info->getURLs()) {
-    m_server = boost::make_shared<LibEventServer>(
-        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
-        info->getTimeoutSeconds());
+    m_server = ServerFactoryRegistry::createServer
+      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
+       info->getThreadCount(), info->getTimeoutSeconds());
     m_server->setRequestHandlerFactory<HttpRequestHandler>();
     m_server->setUrlChecker(std::bind(&InternalPageServer::checkURL, this,
                                       std::placeholders::_1));
@@ -125,14 +124,14 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// DanglingPageServer: same as LibEventServer
+// DanglingPageServer: same as Server
 
 class DanglingPageServer : public SatelliteServer {
 public:
   explicit DanglingPageServer(SatelliteServerInfoPtr info) {
-    m_server = boost::make_shared<LibEventServer>(
-        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
-        info->getTimeoutSeconds());
+    m_server = ServerFactoryRegistry::createServer
+      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
+       info->getThreadCount(), info->getTimeoutSeconds());
     m_server->setRequestHandlerFactory<HttpRequestHandler>();
   }
 
@@ -148,14 +147,14 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// RPCServer: LibEventServer + RPCRequestHandler
+// RPCServer: Server + RPCRequestHandler
 
 class RPCServer : public SatelliteServer {
 public:
   explicit RPCServer(SatelliteServerInfoPtr info) {
-    m_server = boost::make_shared<LibEventServer>(
-        RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
-        info->getTimeoutSeconds());
+    m_server = ServerFactoryRegistry::createServer
+      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
+       info->getThreadCount(), info->getTimeoutSeconds());
     m_server->setRequestHandlerFactory([info] {
       auto handler = make_unique<RPCRequestHandler>();
       handler->setServerInfo(info);

@@ -21,6 +21,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 
+#include <chrono>
 #include <memory>
 
 /**
@@ -67,6 +68,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(Server);
+DECLARE_BOOST_TYPES(ServerFactory);
 
 /**
  * Base class of an HTTP request handler. Defining minimal interface an
@@ -248,6 +250,73 @@ protected:
 
 private:
   RunStatus m_status;
+};
+
+class ServerOptions {
+public:
+  ServerOptions(const std::string &address,
+                uint16_t port,
+                int numThreads,
+                std::chrono::seconds timeout)
+    : m_address(address),
+      m_port(port),
+      m_numThreads(numThreads),
+      m_timeout(timeout),
+      m_serverFD(-1),
+      m_sslFD(-1),
+      m_takeoverFilename() {
+  }
+
+  std::string m_address;
+  uint16_t m_port;
+  int m_numThreads;
+  std::chrono::seconds m_timeout;
+  int m_serverFD;
+  int m_sslFD;
+  std::string m_takeoverFilename;
+};
+
+/**
+ * A ServerFactory knows how to create Server objects.
+ */
+class ServerFactory : private boost::noncopyable {
+public:
+  virtual ~ServerFactory() {}
+
+  virtual ServerPtr createServer(const ServerOptions &options) = 0;
+
+  ServerPtr createServer(const std::string &address,
+                         uint16_t port,
+                         int numThreads,
+                         std::chrono::seconds timeout);
+};
+
+/**
+ * A registry mapping server type names to ServerFactory objects.
+ *
+ * This allows new server types to be plugged in dynamically, without having to
+ * hard code the list of all possible server types.
+ */
+class ServerFactoryRegistry : private boost::noncopyable {
+public:
+  ServerFactoryRegistry();
+
+  static ServerFactoryRegistry *getInstance();
+
+  static ServerPtr createServer(const std::string &type,
+                                const std::string &address,
+                                uint16_t port,
+                                int numThreads,
+                                std::chrono::seconds timeout);
+
+  void registerFactory(const std::string &name,
+                       const ServerFactoryPtr &factory);
+
+  ServerFactoryPtr getFactory(const std::string &name);
+
+private:
+  Mutex m_lock;
+  std::map<std::string, ServerFactoryPtr> m_factories;
 };
 
 /**

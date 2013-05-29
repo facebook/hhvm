@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array/array_init.h"
 #include "hphp/util/json.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/process.h"
 #include "hphp/runtime/base/hardware_counter.h"
 
 using std::list;
@@ -307,7 +308,7 @@ void ServerStats::FreeSlots(list<TimeSlot*> &slots) {
 
 class Writer {
 public:
-  Writer(ostream &out) : m_out(out), m_indent(0) {}
+  explicit Writer(ostream &out) : m_out(out), m_indent(0) {}
   virtual ~Writer() {}
 
   virtual void writeFileHeader() = 0;
@@ -350,7 +351,7 @@ protected:
 
 class XMLWriter : public Writer {
 public:
-  XMLWriter(ostream &out) : Writer(out) {}
+  explicit XMLWriter(ostream &out) : Writer(out) {}
 
 
   virtual void writeFileHeader() {
@@ -484,7 +485,7 @@ protected:
 
 public:
 
-  JSONWriter(ostream &out) : Writer(out),
+  explicit JSONWriter(ostream &out) : Writer(out),
       m_justIndented(true) {
 
     // A valid json object begins in the nameless context. See
@@ -535,7 +536,7 @@ public:
 class HTMLWriter : public Writer {
 
 public:
-  HTMLWriter(ostream &out) : Writer(out) {}
+  explicit HTMLWriter(ostream &out) : Writer(out) {}
 
   virtual void writeFileHeader() {
     m_out << "<!doctype html>\n<html>\n<head>\n"

@@ -94,6 +94,7 @@ std::string RuntimeOption::AdminLogSymLink;
 std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
 std::string RuntimeOption::DefaultServerNameSuffix;
+std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
@@ -670,6 +671,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Hdf server = config["Server"];
     Host = server["Host"].getString();
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
+    ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);

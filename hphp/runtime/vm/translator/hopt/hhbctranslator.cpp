@@ -95,7 +95,7 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
     // If tmp is incref or move, then chase down its src
     Opcode opc = inst->op();
     if (opc == Mov || opc == IncRef) {
-      refineType(inst->getSrc(0), type);
+      refineType(inst->src(0), type);
       tmp->setType(outputType(inst));
     } else if (tmp->type().isNull() && type.isNull()) {
       // Refining Null to Uninit or InitNull is supported
@@ -2067,7 +2067,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
    * IncRef/DecRef pair in the main trace.
    */
   if (retValSrcInstr->op() == IncRef) {
-    retValSrcLoc = retValSrcInstr->getSrc(0);
+    retValSrcLoc = retValSrcInstr->src(0);
     retValSrcOpc = retValSrcLoc->inst()->op();
     if (retValSrcOpc != LdLoc && retValSrcOpc != LdThis) {
       retValSrcLoc = nullptr;

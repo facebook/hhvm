@@ -106,9 +106,9 @@ SSATmp* TraceBuilder::genDefNone() {
 void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
   auto const target     = inst->getExtra<DefInlineFP>()->target;
   auto const savedSPOff = inst->getExtra<DefInlineFP>()->retSPOff;
-  auto const calleeFP   = inst->getDst();
-  auto const calleeSP   = inst->getSrc(0);
-  auto const savedSP    = inst->getSrc(1);
+  auto const calleeFP   = inst->dst();
+  auto const calleeSP   = inst->src(0);
+  auto const savedSP    = inst->src(1);
 
   // Saved tracebuilder state will include the "return" fp/sp.
   // Whatever the current fpValue is is good enough, but we have to be
@@ -176,7 +176,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case Call:
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     // A call pops the ActRec and pushes a return value.
     m_spOffset -= kNumActRecCells;
     m_spOffset += 1;
@@ -186,7 +186,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case CallArray:
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     // A CallArray pops the ActRec an array arg and pushes a return value.
     m_spOffset -= kNumActRecCells;
     assert(m_spOffset >= 0);
@@ -201,13 +201,13 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case DefFP:
   case FreeActRec:
-    m_fpValue = inst->getDst();
+    m_fpValue = inst->dst();
     break;
 
   case ReDefGeneratorSP:
   case DefSP:
   case ReDefSP:
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     m_spOffset = inst->getExtra<StackOffset>()->offset;
     break;
 
@@ -216,26 +216,26 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case CheckStk:
   case GuardStk:
   case ExceptionBarrier:
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     break;
 
   case SpillStack: {
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     // Push the spilled values but adjust for the popped values
-    int64_t stackAdjustment = inst->getSrc(1)->getValInt();
+    int64_t stackAdjustment = inst->src(1)->getValInt();
     m_spOffset -= stackAdjustment;
     m_spOffset += spillValueCells(inst);
     break;
   }
 
   case SpillFrame:
-    m_spValue = inst->getDst();
+    m_spValue = inst->dst();
     m_spOffset += kNumActRecCells;
     break;
 
   case InterpOne: {
-    m_spValue = inst->getDst();
-    int64_t stackAdjustment = inst->getSrc(3)->getValInt();
+    m_spValue = inst->dst();
+    int64_t stackAdjustment = inst->src(3)->getValInt();
     // push the return value if any and adjust for the popped values
     m_spOffset -= stackAdjustment;
     break;
@@ -246,20 +246,20 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     // fall through to StMem; stored value is the same arg number (2)
   case StMem:
   case StMemNT:
-    m_refCountedMemValue = inst->getSrc(2);
+    m_refCountedMemValue = inst->src(2);
     break;
 
   case LdMem:
   case LdProp:
   case LdRef:
-    m_refCountedMemValue = inst->getDst();
+    m_refCountedMemValue = inst->dst();
     break;
 
   case StRefNT:
   case StRef: {
-    m_refCountedMemValue = inst->getSrc(2);
-    SSATmp* newRef = inst->getDst();
-    SSATmp* prevRef = inst->getSrc(0);
+    m_refCountedMemValue = inst->src(2);
+    SSATmp* newRef = inst->dst();
+    SSATmp* prevRef = inst->src(0);
     // update other tracked locals that also contain prevRef
     updateLocalRefValues(prevRef, newRef);
     break;
@@ -268,11 +268,11 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case StLocNT:
   case StLoc:
     setLocalValue(inst->getExtra<LocalId>()->locId,
-                  inst->getSrc(1));
+                  inst->src(1));
     break;
 
   case LdLoc:
-    setLocalValue(inst->getExtra<LdLoc>()->locId, inst->getDst());
+    setLocalValue(inst->getExtra<LdLoc>()->locId, inst->dst());
     break;
 
   case OverrideLoc:
@@ -290,24 +290,24 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case IterInitK:
     // kill the locals to which this instruction stores iter's key and value
-    killLocalValue(inst->getSrc(3)->getValInt());
-    killLocalValue(inst->getSrc(4)->getValInt());
+    killLocalValue(inst->src(3)->getValInt());
+    killLocalValue(inst->src(4)->getValInt());
     break;
 
   case IterInit:
     // kill the local to which this instruction stores iter's value
-    killLocalValue(inst->getSrc(3)->getValInt());
+    killLocalValue(inst->src(3)->getValInt());
     break;
 
   case IterNextK:
     // kill the locals to which this instruction stores iter's key and value
-    killLocalValue(inst->getSrc(2)->getValInt());
-    killLocalValue(inst->getSrc(3)->getValInt());
+    killLocalValue(inst->src(2)->getValInt());
+    killLocalValue(inst->src(3)->getValInt());
     break;
 
   case IterNext:
     // kill the local to which this instruction stores iter's value
-    killLocalValue(inst->getSrc(2)->getValInt());
+    killLocalValue(inst->src(2)->getValInt());
     break;
 
   case LdThis:
@@ -340,9 +340,9 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   // if the instruction kills any of its sources, remove them from the
   // CSE table
   if (inst->killsSources()) {
-    for (int i = 0; i < inst->getNumSrcs(); ++i) {
+    for (int i = 0; i < inst->numSrcs(); ++i) {
       if (inst->killsSource(i)) {
-        cseKill(inst->getSrc(i));
+        cseKill(inst->src(i));
       }
     }
   }
@@ -520,7 +520,7 @@ CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
 }
 
 void TraceBuilder::cseInsert(IRInstruction* inst) {
-  getCSEHashTable(inst)->insert(inst->getDst());
+  getCSEHashTable(inst)->insert(inst->dst());
 }
 
 void TraceBuilder::cseKill(SSATmp* src) {
@@ -592,9 +592,9 @@ SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
    * available.  I.e. by the time they get to the DecRef we won't see
    * it in isValueAvailable anymore and won't convert to DecRefNZ.
    */
-  auto const srcInst = inst->getSrc(0)->inst();
+  auto const srcInst = inst->src(0)->inst();
   if (srcInst->op() == IncRef) {
-    if (isValueAvailable(srcInst->getSrc(0))) {
+    if (isValueAvailable(srcInst->src(0))) {
       inst->setOpcode(DecRefNZ);
     }
   }
@@ -621,13 +621,13 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
      * frame, so debug_backtrace() can't see a non-live pointer value.
      */
     if (thisInst->op() == IncRef &&
-        callerHasValueAvailable(thisInst->getSrc(0))) {
+        callerHasValueAvailable(thisInst->src(0))) {
       gen(DecRefNZ, thiss);
       inst->convertToNop();
       return nullptr;
     }
 
-    assert(inst->getSrc(0) == m_fpValue);
+    assert(inst->src(0) == m_fpValue);
     gen(DecRef, thiss);
     inst->convertToNop();
     return nullptr;
@@ -693,7 +693,7 @@ SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto const curType = getLocalType(inst->getExtra<StLoc>()->locId);
-  auto const newType = inst->getSrc(1)->type();
+  auto const newType = inst->src(1)->type();
 
   assert(inst->getTypeParam().equals(Type::None));
 
@@ -789,7 +789,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
     appendInstruction(inst);
     // returns nullptr if instruction has no dest, returns the first
     // (possibly only) dest otherwise
-    return inst->getDst(0);
+    return inst->dst(0);
   }
   return nullptr;
 }
@@ -850,7 +850,7 @@ void TraceBuilder::reoptimize() {
     Block* block = blocks.front();
     blocks.pop_front();
     assert(block->getTrace() == m_trace.get());
-    FTRACE(5, "Block: {}\n", block->getId());
+    FTRACE(5, "Block: {}\n", block->id());
 
     m_trace->push_back(block);
     if (m_snapshots[block]) {
@@ -871,7 +871,7 @@ void TraceBuilder::reoptimize() {
         updateTrackedState(inst);
         continue;
       }
-      SSATmp* dst = inst->getDst();
+      SSATmp* dst = inst->dst();
       if (dst->type() != Type::None && dst != tmp) {
         // The result of optimization has a different destination than the inst.
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
@@ -990,7 +990,7 @@ void TraceBuilder::killLocals() {
       // make the new DefConst instruction
       IRInstruction* clone = t->inst()->clone(&m_irFactory);
       clone->setOpcode(DefConst);
-      m_localValues[i] = clone->getDst();
+      m_localValues[i] = clone->dst();
       continue;
     }
     assert(!t->isConst());

@@ -42,7 +42,7 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  * to check the _count field.
  */
 static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
-  for (SSATmp& dst : inst.getDsts()) {
+  for (SSATmp& dst : inst.dsts()) {
     Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
       insertAfter(&inst, factory->gen(DbgAssertRefCount, &dst));
@@ -55,8 +55,8 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
  * a SpillStack instruction.
  */
 static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
-  SSATmp* sp = inst.getDst();
-  auto const vals = inst.getSrcs().subpiece(2);
+  SSATmp* sp = inst.dst();
+  auto const vals = inst.srcs().subpiece(2);
   auto* block = inst.getBlock();
   auto pos = block->iteratorTo(&inst); ++pos;
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
@@ -67,7 +67,7 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
                                          StackOffset(i),
                                          sp);
       block->insert(pos, addr);
-      IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
+      IRInstruction* check = factory->gen(DbgAssertPtr, addr->dst());
       block->insert(pos, check);
     }
   }
@@ -87,13 +87,13 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
         continue;
       }
       if (inst.op() == Call) {
-        SSATmp* sp = inst.getDst();
+        SSATmp* sp = inst.dst();
         IRInstruction* addr = factory->gen(LdStackAddr,
                                            Type::PtrToGen,
                                            StackOffset(0),
                                            sp);
         insertAfter(&inst, addr);
-        insertAfter(addr, factory->gen(DbgAssertPtr, addr->getDst()));
+        insertAfter(addr, factory->gen(DbgAssertPtr, addr->dst()));
         continue;
       }
       if (!inst.isBlockEnd()) insertRefCountAsserts(inst, factory);

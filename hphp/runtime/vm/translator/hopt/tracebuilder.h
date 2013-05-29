@@ -142,7 +142,7 @@ struct TraceBuilder {
   SSATmp* genFor(Trace* t, Args... args) {
     auto instr = m_irFactory.gen(args...);
     t->back()->push_back(instr);
-    return instr->getDst();
+    return instr->dst();
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ struct TraceBuilder {
     SSATmp* v2 = taken();
     gen(Jmp_, done_block, v2);
     appendBlock(done_block);
-    SSATmp* result = done_block->getLabel()->getDst(0);
+    SSATmp* result = done_block->getLabel()->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
     return result;
   }

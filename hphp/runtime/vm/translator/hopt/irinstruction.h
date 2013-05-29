@@ -174,18 +174,18 @@ struct IRInstruction {
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
   Type       getTypeParam() const      { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
-  uint32_t   getNumSrcs()  const       { return m_numSrcs; }
+  uint32_t   numSrcs()  const          { return m_numSrcs; }
   void       setNumSrcs(uint32_t i)    {
     assert(i <= m_numSrcs);
     m_numSrcs = i;
   }
-  SSATmp*    getSrc(uint32_t i) const;
+  SSATmp*    src(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);
-  SrcRange   getSrcs() const {
+  SrcRange   srcs() const {
     return SrcRange(m_srcs, m_numSrcs);
   }
-  unsigned   getNumDsts() const     { return m_numDsts; }
-  SSATmp*    getDst() const         {
+  unsigned   numDsts() const { return m_numDsts; }
+  SSATmp*    dst() const {
     assert(!naryDst());
     return m_dst;
   }
@@ -197,12 +197,12 @@ struct IRInstruction {
 
   /*
    * Returns the ith dest of this instruction. i == 0 is treated specially: if
-   * the instruction has no dests, getDst(0) will return nullptr, and if the
-   * instruction is not naryDest, getDst(0) will return the single dest.
+   * the instruction has no dests, dst(0) will return nullptr, and if the
+   * instruction is not naryDest, dst(0) will return the single dest.
    */
-  SSATmp*    getDst(unsigned i) const;
-  DstRange   getDsts();
-  Range<const SSATmp*> getDsts() const;
+  SSATmp*    dst(unsigned i) const;
+  DstRange   dsts();
+  Range<const SSATmp*> dsts() const;
   void       setDsts(unsigned numDsts, SSATmp* newDsts) {
     assert(naryDst());
     m_numDsts = numDsts;
@@ -212,7 +212,7 @@ struct IRInstruction {
   /*
    * Instruction id is stable and useful as an array index.
    */
-  uint32_t getId() const {
+  uint32_t id() const {
     assert(m_id != kTransient);
     return m_id;
   }

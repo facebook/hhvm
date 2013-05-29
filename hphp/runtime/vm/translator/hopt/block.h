@@ -56,7 +56,7 @@ struct Block : boost::noncopyable {
     return front();
   }
 
-  uint32_t    getId() const      { return m_id; }
+  uint32_t    id() const         { return m_id; }
   Trace*      getTrace() const   { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
   void        setHint(Hint hint) { m_hint = hint; }
@@ -88,7 +88,7 @@ struct Block : boost::noncopyable {
    * Returns whether this block is the initial entry block for the
    * tracelet.
    */
-  bool isEntry() const { return getId() == 0; }
+  bool isEntry() const { return id() == 0; }
 
   // return the last instruction in the block
   IRInstruction* back() const {
@@ -164,7 +164,7 @@ struct Block : boost::noncopyable {
     for (Edge& e : m_preds) {
       IRInstruction* jmp = e.from()->back();
       assert(jmp->op() == Jmp_ && jmp->getTaken() == this);
-      body(jmp, jmp->getSrc(i));
+      body(jmp, jmp->src(i));
     }
   }
 
@@ -173,7 +173,7 @@ struct Block : boost::noncopyable {
   template<typename L>
   SSATmp* findSrc(unsigned i, L body) {
     for (Edge& e : m_preds) {
-      SSATmp* src = e.from()->back()->getSrc(i);
+      SSATmp* src = e.from()->back()->src(i);
       if (body(src)) return src;
     }
     return nullptr;

@@ -48,10 +48,10 @@ void VectorEffects::get(const IRInstruction* inst,
                         SetLocTypeFunc setLocalType) {
   // If the base for this instruction is a local address, the
   // helper call might have side effects on the local's value
-  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
+  SSATmp* base = inst->src(vectorBaseIdx(inst));
   IRInstruction* locInstr = base->inst();
   if (locInstr->op() == LdLocAddr) {
-    UNUSED Type baseType = locInstr->getDst()->type();
+    UNUSED Type baseType = locInstr->dst()->type();
     assert(baseType.equals(base->type()));
     assert(baseType.isPtr() || baseType.isKnownDataType());
     int loc = locInstr->getExtra<LdLocAddr>()->locId;
@@ -94,9 +94,9 @@ VectorEffects::VectorEffects(const IRInstruction* inst) {
   int keyIdx = vectorKeyIdx(inst);
   int valIdx = vectorValIdx(inst);
   init(inst->op(),
-       inst->getSrc(vectorBaseIdx(inst))->type(),
-       keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->type(),
-       valIdx == -1 ? Type::None : inst->getSrc(valIdx)->type());
+       inst->src(vectorBaseIdx(inst))->type(),
+       keyIdx == -1 ? Type::None : inst->src(keyIdx)->type(),
+       valIdx == -1 ? Type::None : inst->src(valIdx)->type());
 }
 
 VectorEffects::VectorEffects(Opcode op, Type base, Type key, Type val) {
@@ -2068,8 +2068,8 @@ bool HhbcTranslator::VectorTranslator::usePredictedResult() {
   // where the result of a SetM might have the same type as its input without
   // being the same value.
   IRInstruction* inst = m_result->inst();
-  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
-  SSATmp* value = inst->getSrc(vectorValIdx(inst));
+  SSATmp* base = inst->src(vectorBaseIdx(inst));
+  SSATmp* value = inst->src(vectorValIdx(inst));
   return base->type().strip().not(Type::Str) ||
     value->type().strip().not(Type::Str);
 }

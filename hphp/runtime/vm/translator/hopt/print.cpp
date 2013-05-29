@@ -67,10 +67,10 @@ void printOpcode(std::ostream& os, const IRInstruction* inst) {
 
 void printDst(std::ostream& os, const IRInstruction* inst,
               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
-  if (inst->getNumDsts() == 0) return;
+  if (inst->numDsts() == 0) return;
 
   const char* sep = "";
-  for (const SSATmp& dst : inst->getDsts()) {
+  for (const SSATmp& dst : inst->dsts()) {
     os << punc(sep);
     print(os, &dst, regs, lifetime, true);
     sep = ", ";
@@ -80,7 +80,7 @@ void printDst(std::ostream& os, const IRInstruction* inst,
 
 void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
-  SSATmp* src = inst->getSrc(i);
+  SSATmp* src = inst->src(i);
   if (src != nullptr) {
     if (lifetime && lifetime->linear[inst] != 0 && !src->isConst() &&
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
@@ -100,11 +100,11 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
                const LifetimeInfo* lifetime) {
   bool first = true;
   if (inst->op() == IncStat) {
-    os << " " << Stats::g_counterNames[inst->getSrc(0)->getValInt()]
-       << ", " << inst->getSrc(1)->getValInt();
+    os << " " << Stats::g_counterNames[inst->src(0)->getValInt()]
+       << ", " << inst->src(1)->getValInt();
     return;
   }
-  for (uint32_t i = 0, n = inst->getNumSrcs(); i < n; i++) {
+  for (uint32_t i = 0, n = inst->numSrcs(); i < n; i++) {
     if (!first) {
       os << punc(", ");
     } else {
@@ -117,7 +117,7 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
-  os << "L" << block->getId();
+  os << "L" << block->id();
   switch (block->getHint()) {
   case Block::Unlikely:    os << "<Unlikely>"; break;
   case Block::Likely:      os << "<Likely>"; break;
@@ -143,9 +143,9 @@ void print(std::ostream& ostream, const IRInstruction* inst,
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
     if (!lifetime || !lifetime->linear[inst]) {
-      ostream << folly::format("({:02d}) ", inst->getId());
+      ostream << folly::format("({:02d}) ", inst->id());
     } else {
-      ostream << folly::format("({:02d}@{:02d}) ", inst->getId(),
+      ostream << folly::format("({:02d}@{:02d}) ", inst->id(),
                                lifetime->linear[inst]);
     }
     ostream << color(ANSI_COLOR_END);
@@ -224,7 +224,7 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
     return;
   }
   os << color(ANSI_COLOR_WHITE);
-  os << "t" << tmp->getId();
+  os << "t" << tmp->id();
   os << color(ANSI_COLOR_END);
   if (printLastUse && lifetime && lifetime->uses[tmp].lastUse != 0) {
     os << color(ANSI_COLOR_GRAY)
@@ -359,11 +359,11 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
         printLabel(os, inst.getBlock());
         os << punc(":") << "\n";
         // print phi pseudo-instructions
-        for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
+        for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
           os << std::string(kIndent +
-                            folly::format("({}) ", inst.getId()).str().size(),
+                            folly::format("({}) ", inst.id()).str().size(),
                             ' ');
-          JIT::print(os, inst.getDst(i), regs, lifetime, false);
+          JIT::print(os, inst.dst(i), regs, lifetime, false);
           os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
              << color(ANSI_COLOR_END);
           bool first = true;

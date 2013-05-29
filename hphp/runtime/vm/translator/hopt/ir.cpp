@@ -378,7 +378,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
   // to a notCounted type.
   if (m_op == CheckType) {
     assert(srcNo == 0);
-    return getSrc(0)->type().maybeCounted() && getTypeParam().notCounted();
+    return src(0)->type().maybeCounted() && getTypeParam().notCounted();
   }
   // SpillStack consumes inputs 2 and onward
   if (m_op == SpillStack) return srcNo >= 2;
@@ -407,7 +407,7 @@ bool IRInstruction::mayModifyRefs() const {
   // DecRefNZ does not have side effects other than decrementing the ref
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
-    auto type = getSrc(0)->type();
+    auto type = src(0)->type();
     if (isControlFlowInstruction()) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
@@ -433,7 +433,7 @@ bool IRInstruction::isEssential() const {
     // If the ref count optimization is turned off, mark all DecRefNZ as
     // essential.
     if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
-        getSrc(0)->inst()->op() != IncRef) {
+        src(0)->inst()->op() != IncRef) {
       return true;
     }
   }
@@ -517,13 +517,13 @@ bool IRInstruction::stores(uint32_t srcIdx) const {
       return srcIdx == 4;
 
     case SpillStack:
-      return srcIdx >= 2 && srcIdx < getNumSrcs();
+      return srcIdx >= 2 && srcIdx < numSrcs();
 
     case Call:
-      return srcIdx >= 3 && srcIdx < getNumSrcs();
+      return srcIdx >= 3 && srcIdx < numSrcs();
 
     case CallBuiltin:
-      return srcIdx >= 1 && srcIdx < getNumSrcs();
+      return srcIdx >= 1 && srcIdx < numSrcs();
 
     default:
       return false;
@@ -533,7 +533,7 @@ bool IRInstruction::stores(uint32_t srcIdx) const {
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(m_op == IncRef || m_op == CheckType || m_op == Mov);
-  return getSrc(0);
+  return src(0);
 }
 
 bool IRInstruction::killsSources() const {
@@ -573,7 +573,7 @@ bool IRInstruction::modifiesStack() const {
 SSATmp* IRInstruction::modifiedStkPtr() const {
   assert(modifiesStack());
   assert(VectorEffects::supported(this));
-  SSATmp* sp = getDst(hasMainDst() ? 1 : 0);
+  SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;
 }
@@ -585,26 +585,26 @@ bool IRInstruction::hasMainDst() const {
 bool IRInstruction::mayReenterHelper() const {
   if (isCmpOp(op())) {
     return cmpOpTypesMayReenter(op(),
-                                getSrc(0)->type(),
-                                getSrc(1)->type());
+                                src(0)->type(),
+                                src(1)->type());
   }
   // Not necessarily actually false; this is just a helper for other
   // bits.
   return false;
 }
 
-SSATmp* IRInstruction::getDst(unsigned i) const {
+SSATmp* IRInstruction::dst(unsigned i) const {
   if (i == 0 && m_numDsts == 0) return nullptr;
   assert(i < m_numDsts);
   assert(naryDst() || i == 0);
-  return hasDst() ? getDst() : &m_dst[i];
+  return hasDst() ? dst() : &m_dst[i];
 }
 
-DstRange IRInstruction::getDsts() {
+DstRange IRInstruction::dsts() {
   return Range<SSATmp*>(m_dst, m_numDsts);
 }
 
-Range<const SSATmp*> IRInstruction::getDsts() const {
+Range<const SSATmp*> IRInstruction::dsts() const {
   return Range<const SSATmp*>(m_dst, m_numDsts);
 }
 
@@ -617,7 +617,7 @@ const StringData* findClassName(SSATmp* cls) {
   // Try to get the class name from a LdCls
   IRInstruction* clsInst = cls->inst();
   if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
-    SSATmp* clsName = clsInst->getSrc(0);
+    SSATmp* clsName = clsInst->src(0);
     assert(clsName->isA(Type::Str));
     if (clsName->isConst()) {
       return clsName->getValStr();
@@ -848,13 +848,13 @@ IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
-SSATmp* IRInstruction::getSrc(uint32_t i) const {
-  if (i >= getNumSrcs()) return nullptr;
+SSATmp* IRInstruction::src(uint32_t i) const {
+  if (i >= numSrcs()) return nullptr;
   return m_srcs[i];
 }
 
 void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
-  assert(i < getNumSrcs());
+  assert(i < numSrcs());
   m_srcs[i] = newSrc;
 }
 
@@ -878,8 +878,8 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
       m_numSrcs != inst->m_numSrcs) {
     return false;
   }
-  for (uint32_t i = 0; i < getNumSrcs(); i++) {
-    if (getSrc(i) != inst->getSrc(i)) {
+  for (uint32_t i = 0; i < numSrcs(); i++) {
+    if (src(i) != inst->src(i)) {
       return false;
     }
   }
@@ -900,8 +900,8 @@ size_t IRInstruction::cseHash() const {
   assert(canCSE());
 
   size_t srcHash = 0;
-  for (unsigned i = 0; i < getNumSrcs(); ++i) {
-    srcHash = CSEHash::hashCombine(srcHash, getSrc(i));
+  for (unsigned i = 0; i < numSrcs(); ++i) {
+    srcHash = CSEHash::hashCombine(srcHash, src(i));
   }
   if (hasExtra()) {
     srcHash = CSEHash::hashCombine(srcHash,
@@ -1050,7 +1050,7 @@ std::string Trace::toString() const {
 
 int32_t spillValueCells(IRInstruction* spillStack) {
   assert(spillStack->op() == SpillStack);
-  int32_t numSrcs = spillStack->getNumSrcs();
+  int32_t numSrcs = spillStack->numSrcs();
   return numSrcs - 2;
 }
 
@@ -1059,7 +1059,7 @@ bool isConvIntOrPtrToBool(IRInstruction* instr) {
     case ConvIntToBool:
       return true;
     case ConvCellToBool:
-      return instr->getSrc(0)->type().subtypeOfAny(
+      return instr->src(0)->type().subtypeOfAny(
         Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
     default:
       return false;

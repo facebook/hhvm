@@ -123,13 +123,13 @@ private:
     void update(IRInstruction* inst) {
       assert(inst != nullptr);
 
-      int offset = inst->getSrc(1)->getValInt();
+      int offset = inst->src(1)->getValInt();
 
       PropList::iterator it, end;
       for (it = accesses.begin(), end = accesses.end(); it != end; ++it) {
         if (it->offset == offset) {
           it->access = inst;
-          it->value = inst->getSrc(2);
+          it->value = inst->src(2);
         }
       }
 
@@ -216,13 +216,13 @@ private:
 
     Opcode op = inst->op();
     if (isLoad(op)) {
-      return inst->getDst();
+      return inst->dst();
     }
     if (isStore(op)) {
       if (op == StProp || op == StPropNT) {
-        return inst->getSrc(2);
+        return inst->src(2);
       }
-      return inst->getSrc(1);
+      return inst->src(1);
     }
     if (isVectorOp(op)) {
       // Vector instructions may change boxes such that the new value
@@ -230,7 +230,7 @@ private:
       return nullptr;
     }
     if (op == Box) {
-      return inst->getSrc(0);
+      return inst->src(0);
     }
 
     // no support for extracting the value from this instruction, so return NULL
@@ -241,12 +241,12 @@ private:
     assert(inst != nullptr);
     switch (inst->op()) {
       case LdRef:
-        return inst->getDst();
+        return inst->dst();
       case StRef:
       case StRefNT:
-        return inst->getSrc(1);
+        return inst->src(1);
       case Box:
-        return inst->getSrc(0);
+        return inst->src(0);
       default:
         // no support for extracting the value from this instruction
         return nullptr;
@@ -267,13 +267,13 @@ private:
   }
 
   bool isLive(IRInstruction* inst) const {
-    assert(inst->getId() < m_liveInsts.size());
-    return m_liveInsts.test(inst->getId());
+    assert(inst->id() < m_liveInsts.size());
+    return m_liveInsts.test(inst->id());
   }
 
   void setLive(IRInstruction& inst, bool live) {
-    assert(inst.getId() < m_liveInsts.size());
-    m_liveInsts.set(inst.getId(), live);
+    assert(inst.id() < m_liveInsts.size());
+    m_liveInsts.set(inst.id(), live);
   }
 
 private:
@@ -293,7 +293,7 @@ void MemMap::killRefInfo(IRInstruction* save) {
     // if 'save' is a load, then don't kill access info of refs that have a
     // different type than 'save'
     if ((isLoad(save->op()) || save->op() == LdMem)) {
-      auto saveType = save->getDst()->type();
+      auto saveType = save->dst()->type();
       if (it->second->value != nullptr &&
           it->second->value->type() != saveType &&
           it->second->value->type().isKnownDataType() &&
@@ -320,7 +320,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
   assert(save != nullptr);
 
   PropInfoList* propInfoList = nullptr;
-  PropMap::iterator find = m_props.find(save->getSrc(0));
+  PropMap::iterator find = m_props.find(save->src(0));
   if (find != m_props.end()) {
     propInfoList = find->second;
   }
@@ -329,7 +329,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
   // of a LdMem or StMem), otherwise -1
   Opcode op = save->op();
   int offset = (op == LdProp || op == StProp || op == StPropNT) ?
-               save->getSrc(1)->getValInt() : -1;
+               save->src(1)->getValInt() : -1;
 
   for (PropMap::iterator it = m_props.begin(), end = m_props.end();
        it != end; ++it) {
@@ -350,9 +350,9 @@ void MemMap::killPropInfo(IRInstruction* save) {
         // have a different type than 'save'
         if ((isLoad(save->op()) || save->op() == LdMem) &&
             copy->value != nullptr &&
-            copy->value->type() != save->getDst()->type() &&
+            copy->value->type() != save->dst()->type() &&
             copy->value->type().isKnownDataType() &&
-            save->getDst()->type().isKnownDataType()) {
+            save->dst()->type().isKnownDataType()) {
           continue;
         }
         // TODO consider doing the same with the type of the base ref pointer
@@ -411,7 +411,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
   switch (op) {
     case Box: {
-      m_unescaped[inst->getDst()] = new RefInfo(inst);
+      m_unescaped[inst->dst()] = new RefInfo(inst);
       break;
     }
 
@@ -431,7 +431,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     }
     case Unbox:
     case LdRef: {
-      SSATmp* ref = inst->getSrc(0);
+      SSATmp* ref = inst->src(0);
 
       // only need to kill access info of possibly escaped refs
       if (m_unescaped.count(ref) > 0) {
@@ -453,8 +453,8 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
     case Mov:
     case IncRef: {
-      SSATmp* dest = inst->getDst();
-      SSATmp* source = inst->getSrc(0);
+      SSATmp* dest = inst->dst();
+      SSATmp* source = inst->src(0);
 
       // figure out which map the new alias is supposed to be inserted into
       if (source->type().isBoxed()) {
@@ -497,13 +497,13 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
     case StLoc:
     case StLocNT: {
-      storeLocal(inst->getExtra<LocalId>()->locId, inst->getSrc(1));
+      storeLocal(inst->getExtra<LocalId>()->locId, inst->src(1));
       break;
     }
     case StRef:
     case StRefNT: {
-      SSATmp* ref = inst->getSrc(0);
-      SSATmp* alias = inst->getDst();
+      SSATmp* ref = inst->src(0);
+      SSATmp* alias = inst->dst();
 
       // StRef* instructions create a new alias that doesn't affect our tracked
       // ref count. after a StRef, the source temp is no longer used, so it just
@@ -543,18 +543,18 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     case LdProp:
     case StProp:
     case StPropNT: {
-      SSATmp* obj = inst->getSrc(0);
+      SSATmp* obj = inst->src(0);
 
       // if we're storing out an unescaped ref, then it has now escaped
-      if (op != LdProp && m_unescaped.count(inst->getSrc(2)) > 0) {
-        escapeRef(inst->getSrc(2));
+      if (op != LdProp && m_unescaped.count(inst->src(2)) > 0) {
+        escapeRef(inst->src(2));
       }
 
       if (m_props.count(obj) > 0) {
         m_props[obj]->update(inst);
       } else {
         PropInfoList* list = new PropInfoList;
-        int offset = inst->getSrc(1)->getValInt();
+        int offset = inst->src(1)->getValInt();
         list->accesses.push_back(PropInfo(inst, offset));
         m_props[obj] = list;
       }
@@ -564,8 +564,8 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     }
     case DecRef:
     case DecRefNZ: {
-      SSATmp* ref = inst->getSrc(0);
-      Type ty = inst->getSrc(0)->type();
+      SSATmp* ref = inst->src(0);
+      Type ty = inst->src(0)->type();
 
       if (ref->isConst()) {
         // cannot be ref-counted
@@ -613,7 +613,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
         // escape any boxes that are on the right hand side of the current
         // instruction
         RefMap::iterator end = m_unescaped.end();
-        for (SSATmp* src : inst->getSrcs()) {
+        for (SSATmp* src : inst->srcs()) {
           RefMap::iterator find = m_unescaped.find(src);
           if (find != end) {
             escapeRef(find->first);
@@ -688,7 +688,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
       if (isLoad(op)) {
         if (op == LdProp) {
-          offset = inst.getSrc(1)->getValInt();
+          offset = inst.src(1)->getValInt();
         }
         // initialize each instruction as live
         setLive(inst, true);
@@ -696,14 +696,14 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
         optimizeLoad(&inst, offset);
       } else if (isStore(op)) {
         if (op == StProp || op == StPropNT) {
-          offset = inst.getSrc(1)->getValInt();
+          offset = inst.src(1)->getValInt();
         }
 
         // if we see a store, first check if its last available access is a store
         // if it is, then the last access is a dead store
         auto access = inst.op() == StLoc || inst.op() == StLocNT
           ? lastLocalAccess(inst.getExtra<LocalId>()->locId)
-          : getLastAccess(inst.getSrc(0), offset);
+          : getLastAccess(inst.src(0), offset);
         if (access && isStore(access->op())) {
           // if a dead St* is followed by a St*NT, then the second store needs to
           // now write in the type because the first store will be removed
@@ -760,12 +760,12 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // then replace the load with a Mov
   auto value = inst->op() == LdLoc
     ? getLocalValue(inst->getExtra<LocalId>()->locId)
-    : getValue(inst->getSrc(0), offset);
+    : getValue(inst->src(0), offset);
   if (value == nullptr) {
     return;
   }
 
-  Type instTy = inst->getDst()->type();
+  Type instTy = inst->dst()->type();
   Type valTy = value->type();
 
   // check for loads that have a guard that will definitely fail
@@ -781,7 +781,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
     inst->setSrc(1, nullptr);
     inst->setNumSrcs(1);
   } else {
-    assert(inst->getNumSrcs() == 1);
+    assert(inst->numSrcs() == 1);
   }
   inst->setTaken(nullptr);
 

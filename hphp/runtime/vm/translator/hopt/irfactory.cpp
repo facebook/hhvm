@@ -56,7 +56,7 @@ SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
     assert(tmp->type().equals(ctype));
     return tmp;
   }
-  return m_constTable.insert(cloneInstruction(&inst)->getDst());
+  return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
 }}

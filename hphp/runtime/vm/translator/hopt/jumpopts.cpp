@@ -38,12 +38,12 @@ void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   boost::dynamic_bitset<> havePred(irFactory->numBlocks());
   for (Block* block : trace->getBlocks()) {
     if (block->getTaken()) {
-      auto id = block->getTaken()->getId();
+      auto id = block->getTaken()->id();
       isJoin[id] = havePred[id];
       havePred[id] = 1;
     }
     if (block->getNext()) {
-      auto id = block->getNext()->getId();
+      auto id = block->getNext()->id();
       isJoin[id] = havePred[id];
       havePred[id] = 1;
     }
@@ -51,7 +51,7 @@ void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp_ && !isJoin[jmp.getTaken()->getId()]) {
+  if (jmp.op() == Jmp_ && !isJoin[jmp.getTaken()->id()]) {
     Block* target = jmp.getTaken();
     lastBlock->splice(lastInst, target, target->skipLabel(), target->end());
     lastBlock->erase(lastInst); // delete the jmp
@@ -161,12 +161,12 @@ void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
   data.taken = jccExitTrace->back()->getExtra<ReqBindJmp>()->offset;
   data.notTaken = mainExit->back()->getExtra<ReqBindJmp>()->offset;
 
-  FTRACE(5, "replacing {} with {}\n", jccInst->getId(), opcodeName(newOpcode));
+  FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
   irFactory->replace(
     mainExit->back(),
     newOpcode,
     data,
-    std::make_pair(jccInst->getNumSrcs(), jccInst->getSrcs().begin())
+    std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
   );
 
   jccInst->convertToNop();
@@ -190,11 +190,11 @@ void optimizeSideExits(Trace* trace, IRFactory* irFactory) {
     assert(syncABI->op() == SyncABIRegs);
 
     FTRACE(5, "converting jump ({}) to side exit\n",
-           inst->getId());
+           inst->id());
 
     auto const isStack = inst->op() == CheckStk;
-    auto const fp      = syncABI->getSrc(0);
-    auto const sp      = syncABI->getSrc(1);
+    auto const fp      = syncABI->src(0);
+    auto const sp      = syncABI->src(1);
 
     SideExitGuardData data;
     data.checkedSlot = isStack

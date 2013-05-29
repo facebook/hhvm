@@ -391,8 +391,8 @@ public:
     None,    // Nothing: register will contain garbage
   };
 
-  PhysReg getDstReg() const { return m_dstReg; }
-  PhysReg getSrcReg() const { return m_srcReg; }
+  PhysReg dstReg() const { return m_dstReg; }
+  PhysReg srcReg() const { return m_srcReg; }
   Kind getKind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Immed getImm() const { return m_imm; }
@@ -484,7 +484,7 @@ struct ArgGroup {
   }
 
   ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
-    for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
+    for (SSATmp* s : inst->srcs().subpiece(begin, count)) {
       push_arg(ArgDesc(s, m_regs[s]));
     }
     return *this;

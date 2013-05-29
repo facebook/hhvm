@@ -62,7 +62,7 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type boxReturn(const IRInstruction* inst, int srcId) {
-  auto t = inst->getSrc(srcId)->type();
+  auto t = inst->src(srcId)->type();
   // If t contains Uninit, replace it with InitNull.
   t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
   // We don't try to track when a BoxedStaticStr might be converted to
@@ -109,8 +109,8 @@ Type binArithResultType(Opcode op, Type t1, Type t2) {
 Type outputType(const IRInstruction* inst, int dstId) {
 
 #define D(type)   return Type::type;
-#define DofS(n)   return inst->getSrc(n)->type();
-#define DUnbox(n) return inst->getSrc(n)->type().unbox();
+#define DofS(n)   return inst->src(n)->type();
+#define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxReturn(inst, n);
 #define DParam    return inst->getTypeParam();
 #define DMulti    return Type::None;
@@ -120,8 +120,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DArith    return binArithResultType(inst->op(), \
-                                            inst->getSrc(0)->type(),  \
-                                            inst->getSrc(1)->type());
+                                            inst->src(0)->type(),  \
+                                            inst->src(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -186,9 +186,9 @@ void assertOperandTypes(const IRInstruction* inst) {
     always_assert(false && "instruction operand type check failure");
   };
 
-  auto getSrc = [&]() -> SSATmp* {
-    if (curSrc < inst->getNumSrcs()) {
-      return inst->getSrc(curSrc);
+  auto src = [&]() -> SSATmp* {
+    if (curSrc < inst->numSrcs()) {
+      return inst->src(curSrc);
     }
 
     bail(folly::format(
@@ -211,13 +211,13 @@ void assertOperandTypes(const IRInstruction* inst) {
         curSrc,
         inst->toString(),
         expected,
-        inst->getSrc(curSrc)->type().toString()
+        inst->src(curSrc)->type().toString()
       ).str()
     );
   };
 
   auto checkNoArgs = [&]{
-    if (inst->getNumSrcs() == 0) return;
+    if (inst->numSrcs() == 0) return;
     bail(folly::format(
       "Error: instruction expected no operands\n"
       "   instruction: {}\n",
@@ -227,7 +227,7 @@ void assertOperandTypes(const IRInstruction* inst) {
   };
 
   auto countCheck = [&]{
-    if (inst->getNumSrcs() == curSrc) return;
+    if (inst->numSrcs() == curSrc) return;
     bail(folly::format(
       "Error: instruction had too many operands\n"
       "   instruction: {}\n"
@@ -249,10 +249,10 @@ void assertOperandTypes(const IRInstruction* inst) {
   };
 
   auto checkSpills = [&] {
-    for (; curSrc < inst->getNumSrcs(); ++curSrc) {
+    for (; curSrc < inst->numSrcs(); ++curSrc) {
       // SpillStack slots may be stack types or None, if the
       // simplifier removed some.
-      auto const valid = inst->getSrc(curSrc)->type()
+      auto const valid = inst->src(curSrc)->type()
         .subtypeOfAny(Type::Gen, Type::Cls, Type::None);
       check(valid, "Gen|Cls|None");
     }
@@ -265,11 +265,11 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define NA       return checkNoArgs();
 #define S(...)   {                                        \
                    Type t = buildUnion(__VA_ARGS__);      \
-                   check(getSrc()->isA(t), t.toString()); \
+                   check(src()->isA(t), t.toString());    \
                    ++curSrc;                              \
                  }
-#define C(type)  check(getSrc()->isConst() &&       \
-                       getSrc()->isA(type),         \
+#define C(type)  check(src()->isConst() &&          \
+                       src()->isA(type),            \
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
@@ -283,11 +283,11 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DVector
 #define D(...)
 #define DBuiltin
-#define DUnbox(src) checkDst(src < inst->getNumSrcs(),  \
+#define DUnbox(src) checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DBox(src)   checkDst(src < inst->getNumSrcs(),  \
+#define DBox(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DofS(src)   checkDst(src < inst->getNumSrcs(),  \
+#define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DParam      checkDst(inst->getTypeParam() != Type::None ||      \
                              inst->op() == DefConst /* for DefNone */, \

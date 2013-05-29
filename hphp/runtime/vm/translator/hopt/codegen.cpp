@@ -301,10 +301,10 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
     | RegSet(reg::rdi)
     ;
   RegSet liveRegs = m_state.liveRegs[inst];
-  for (const auto& tmp : inst->getSrcs()) {
+  for (const auto& tmp : inst->srcs()) {
     liveRegs |= m_regs[tmp].getRegs();
   }
-  for (const auto& tmp : inst->getDsts()) {
+  for (const auto& tmp : inst->dsts()) {
     liveRegs |= m_regs[tmp].getRegs();
   }
   PhysReg selectedReg;
@@ -777,13 +777,13 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {
-  emitCompare(inst->getSrc(0), inst->getSrc(1));
+  emitCompare(inst->src(0), inst->src(1));
   emitFwdJcc(opToConditionCode(inst->op()), inst->getTaken());
 }
 
 void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitCompare(inst->getSrc(0), inst->getSrc(1));
+  emitCompare(inst->src(0), inst->src(1));
   emitReqBindJcc(opToConditionCode(inst->op()),
                  inst->getExtra<ReqBindJccData>());
 }
@@ -825,8 +825,8 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
           kind == ArgDesc::TypeReg)) {
       continue;
     }
-    auto dstReg = args[i].getDstReg();
-    auto srcReg = args[i].getSrcReg();
+    auto dstReg = args[i].dstReg();
+    auto srcReg = args[i].srcReg();
     if (dstReg != srcReg) {
       moves[int(dstReg)] = int(srcReg);
       argDescs[int(dstReg)] = &args[i];
@@ -875,7 +875,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
   for (size_t i = 0; i < args.numRegArgs(); ++i) {
     if (!args[i].done()) {
       ArgDesc::Kind kind = args[i].getKind();
-      PhysReg dst = args[i].getDstReg();
+      PhysReg dst = args[i].dstReg();
       assert(dst.isGP());
       if (kind == ArgDesc::Imm) {
         a.emitImmReg(args[i].getImm().q(), dst);
@@ -895,8 +895,8 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
   // Store any remaining arguments to the stack
   for (int i = args.numStackArgs() - 1; i >= 0; --i) {
     auto& arg = args.stk(i);
-    auto srcReg = arg.getSrcReg();
-    assert(arg.getDstReg() == InvalidReg);
+    auto srcReg = arg.srcReg();
+    assert(arg.dstReg() == InvalidReg);
     switch (arg.getKind()) {
       case ArgDesc::Reg:
         if (arg.isZeroExtend()) {
@@ -958,7 +958,7 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
   const CallInfo& info = CallMap::getInfo(opc);
   ArgGroup argGroup(m_regs);
   for (auto const& arg : info.args) {
-    SSATmp* src = inst->getSrc(arg.srcIdx);
+    SSATmp* src = inst->src(arg.srcIdx);
     switch (arg.type) {
       case SSA:
         argGroup.ssa(src);
@@ -984,12 +984,12 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
       addr = info.func.ptr;
       break;
     case FSSA:
-      addr = inst->getSrc(info.func.srcIdx)->getValTCA();
+      addr = inst->src(info.func.srcIdx)->getValTCA();
       break;
   }
   cgCallHelper(a,
                addr,
-               info.dest != DestType::None ? inst->getDst(0) : nullptr,
+               info.dest != DestType::None ? inst->dst(0) : nullptr,
                info.sync,
                argGroup,
                info.dest);
@@ -1098,9 +1098,9 @@ void CodeGenerator::cgMarker(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
-  assert(!m_regs[inst->getSrc(0)].hasReg(1));//TODO: t2082361: handle Gen & Cell
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
+  assert(!m_regs[inst->src(0)].hasReg(1));//TODO: t2082361: handle Gen & Cell
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
   auto dstReg = m_regs[dst].getReg();
   if (!m_regs[src].hasReg(0)) {
     assert(src->isConst());
@@ -1155,9 +1155,9 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
               Oper oper,
               RegType (*convertReg)(PhysReg),
               Commutativity commuteFlag) {
-  const SSATmp* dst   = inst->getDst();
-  const SSATmp* src1  = inst->getSrc(0);
-  const SSATmp* src2  = inst->getSrc(1);
+  const SSATmp* dst   = inst->dst();
+  const SSATmp* src1  = inst->src(0);
+  const SSATmp* src2  = inst->src(1);
   if (!(src1->isA(Type::Bool) || src1->isA(Type::Int)) ||
       !(src2->isA(Type::Bool) || src2->isA(Type::Int))) {
     CG_PUNT(cgBinaryIntOp);
@@ -1242,9 +1242,9 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
                  Oper oper,
                  RegType (*convertReg)(PhysReg),
                  Commutativity commuteFlag) {
-  const SSATmp* dst   = inst->getDst();
-  const SSATmp* src1  = inst->getSrc(0);
-  const SSATmp* src2  = inst->getSrc(1);
+  const SSATmp* dst   = inst->dst();
+  const SSATmp* src1  = inst->src(0);
+  const SSATmp* src2  = inst->src(1);
   if (!(src1->isA(Type::Bool) || src1->isA(Type::Int) || src1->isA(Type::Dbl))
       ||
       !(src2->isA(Type::Bool) || src2->isA(Type::Int) || src2->isA(Type::Dbl)) )
@@ -1303,9 +1303,9 @@ bool CodeGenerator::emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
 }
 
 void CodeGenerator::cgOpAdd(IRInstruction* inst) {
-  SSATmp* dst  = inst->getDst();
-  SSATmp* src1 = inst->getSrc(0);
-  SSATmp* src2 = inst->getSrc(1);
+  SSATmp* dst  = inst->dst();
+  SSATmp* src1 = inst->src(0);
+  SSATmp* src2 = inst->src(1);
 
   // Special cases: x = y + 1
   if (emitInc(dst, src1, src2) || emitInc(dst, src2, src1)) return;
@@ -1321,9 +1321,9 @@ void CodeGenerator::cgOpAdd(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgOpSub(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src1  = inst->src(0);
+  SSATmp* src2  = inst->src(1);
 
   if (emitDec(dst, src1, src2)) return;
 
@@ -1378,8 +1378,8 @@ void CodeGenerator::cgOpBitXor(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgOpBitNot(IRInstruction* inst) {
-  cgUnaryIntOp(inst->getDst(),
-               inst->getSrc(0),
+  cgUnaryIntOp(inst->dst(),
+               inst->src(0),
                &Asm::not,
                [](int64_t i) { return ~i; });
 }
@@ -1406,8 +1406,8 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgOpNot(IRInstruction* inst) {
-  auto const src = inst->getSrc(0);
-  auto const dstReg = m_regs[inst->getDst()].getReg();
+  auto const src = inst->src(0);
+  auto const dstReg = m_regs[inst->dst()].getReg();
   auto& a = m_as;
 
   if (src->isConst()) {
@@ -1480,9 +1480,9 @@ void CodeGenerator::cgOpCmpHelper(
           int64_t (*obj_cmp_int)(ObjectData*, int64_t),
           int64_t (*arr_cmp_arr)( ArrayData*, ArrayData*)
         ) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src1  = inst->src(0);
+  SSATmp* src2  = inst->src(1);
 
   Type type1 = src1->type();
   Type type2 = src2->type();
@@ -1703,7 +1703,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
 
 template<class JmpFn>
 void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
-  auto const src = inst->getSrc(0);
+  auto const src = inst->src(0);
 
   // punt if specialized object for now
   if (inst->getTypeParam().strictSubtypeOf(Type::Obj)) {
@@ -1776,7 +1776,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
 }
 
 void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
-  m_as.setcc(cc, rbyte(m_regs[inst->getDst()].getReg()));
+  m_as.setcc(cc, rbyte(m_regs[inst->dst()].getReg()));
 }
 
 void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
@@ -1842,11 +1842,11 @@ HOT_FUNC_VM static bool instanceOfHelper(const Class* objClass,
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   cgCallHelper(m_as,
                TCA(instanceOfHelper),
-               inst->getDst(),
+               inst->dst(),
                kNoSyncPoint,
                ArgGroup(m_regs)
-                 .ssa(inst->getSrc(0))
-                 .ssa(inst->getSrc(1)));
+                 .ssa(inst->src(0))
+                 .ssa(inst->src(1)));
 }
 
 /*
@@ -1857,8 +1857,8 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
  * and will fail this check.
  */
 void CodeGenerator::emitInstanceBitmaskCheck(IRInstruction* inst) {
-  auto const rObjClass     = m_regs[inst->getSrc(0)].getReg(0);
-  auto const testClassName = inst->getSrc(1)->getValStr();
+  auto const rObjClass     = m_regs[inst->src(0)].getReg(0);
+  auto const testClassName = inst->src(1)->getValStr();
   auto& a = m_as;
 
   int offset;
@@ -1872,13 +1872,13 @@ void CodeGenerator::emitInstanceBitmaskCheck(IRInstruction* inst) {
 void CodeGenerator::cgInstanceOfBitmask(IRInstruction* inst) {
   auto& a = m_as;
   emitInstanceBitmaskCheck(inst);
-  a.    setnz  (rbyte(m_regs[inst->getDst()].getReg()));
+  a.    setnz  (rbyte(m_regs[inst->dst()].getReg()));
 }
 
 void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
   auto& a = m_as;
   emitInstanceBitmaskCheck(inst);
-  a.    setz   (rbyte(m_regs[inst->getDst()].getReg()));
+  a.    setz   (rbyte(m_regs[inst->dst()].getReg()));
 }
 
 void CodeGenerator::cgJmpInstanceOfBitmask(IRInstruction* inst) {
@@ -1908,10 +1908,10 @@ void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
  * Class entry.
  */
 void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
-  auto const rObjClass     = m_regs[inst->getSrc(0)].getReg();
-  auto const testClass     = inst->getSrc(1)->getValClass();
-  auto rTestClass          = m_regs[inst->getSrc(1)].getReg();
-  auto const rdst          = rbyte(m_regs[inst->getDst()].getReg());
+  auto const rObjClass     = m_regs[inst->src(0)].getReg();
+  auto const testClass     = inst->src(1)->getValClass();
+  auto rTestClass          = m_regs[inst->src(1)].getReg();
+  auto const rdst          = rbyte(m_regs[inst->dst()].getReg());
   auto& a = m_as;
 
   Label out;
@@ -1955,10 +1955,10 @@ asm_label(a, out);
 }
 
 void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
   auto dstReg = m_regs[dst].getReg();
   assert(dstReg != InvalidReg);
-  SSATmp* src = inst->getSrc(0);
+  SSATmp* src = inst->src(0);
   auto srcReg = m_regs[src].getReg();
   if (srcReg == InvalidReg) {
     assert(src->isConst());
@@ -1977,10 +1977,10 @@ void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
   auto dstReg = m_regs[dst].getReg();
   assert(dstReg != InvalidReg);
-  SSATmp* src = inst->getSrc(0);
+  SSATmp* src = inst->src(0);
   auto srcReg = m_regs[src].getReg();
 
   if (srcReg == InvalidReg) {
@@ -1999,8 +1999,8 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
 }
 
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
-  SSATmp* src = inst->getSrc(0);
-  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->src(0);
+  SSATmp* dst = inst->dst();
   PhysReg dstReg = m_regs[dst].getReg();
   assert(src->isA(Type::Bool) || src->isA(Type::Int));
   assert(dstReg != InvalidReg);
@@ -2031,10 +2031,10 @@ void CodeGenerator::cgConvIntToDbl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
   auto dstReg = m_regs[dst].getReg();
   assert(dstReg != InvalidReg);
-  SSATmp* src = inst->getSrc(0);
+  SSATmp* src = inst->src(0);
   auto srcReg = m_regs[src].getReg();
   assert(src->isConst() == (srcReg == InvalidReg));
   if (srcReg == InvalidReg) {
@@ -2050,10 +2050,10 @@ void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
   auto dstReg = m_regs[dst].getReg();
   assert(dstReg != InvalidReg);
-  SSATmp* src = inst->getSrc(0);
+  SSATmp* src = inst->src(0);
   auto srcReg = m_regs[src].getReg();
   assert(src->isConst() == (srcReg == InvalidReg));
   if (srcReg == InvalidReg) {
@@ -2072,8 +2072,8 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
 
   auto srcReg = m_regs[src].getReg();
   auto dstReg = m_regs[dst].getReg();
@@ -2086,8 +2086,8 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgUnbox(IRInstruction* inst) {
-  SSATmp* dst     = inst->getDst();
-  SSATmp* src     = inst->getSrc(0);
+  SSATmp* dst     = inst->dst();
+  SSATmp* src     = inst->src(0);
   auto dstValReg  = m_regs[dst].getReg(0);
   auto dstTypeReg = m_regs[dst].getReg(1);
   auto srcValReg  = m_regs[src].getReg(0);
@@ -2117,8 +2117,8 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
-  SSATmp* dst        = inst->getDst();
-  SSATmp* methodName = inst->getSrc(0);
+  SSATmp* dst        = inst->dst();
+  SSATmp* methodName = inst->src(0);
 
   const StringData* name = methodName->getValStr();
   CacheHandle ch = TargetCache::allocFixedFunction(name);
@@ -2151,8 +2151,8 @@ void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
-  SSATmp*        dst = inst->getDst();
-  SSATmp* methodName = inst->getSrc(0);
+  SSATmp*        dst = inst->dst();
+  SSATmp* methodName = inst->src(0);
 
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
   // raises an error if function not found
@@ -2167,17 +2167,17 @@ static void emitLdObjClass(CodeGenerator::Asm& a,
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
-  auto dstReg = m_regs[inst->getDst()].getReg();
-  auto objReg = m_regs[inst->getSrc(0)].getReg();
+  auto dstReg = m_regs[inst->dst()].getReg();
+  auto objReg = m_regs[inst->src(0)].getReg();
 
   emitLdObjClass(m_as, objReg, dstReg);
 }
 
 void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
-  auto cls       = inst->getSrc(0);
+  auto cls       = inst->src(0);
   auto clsReg    = m_regs[cls].getReg();
-  auto name      = inst->getSrc(1);
-  auto actRec    = inst->getSrc(2);
+  auto name      = inst->src(1);
+  auto actRec    = inst->src(2);
   auto actRecReg = m_regs[actRec].getReg();
   CacheHandle handle = Transl::TargetCache::MethodCache::alloc();
 
@@ -2209,20 +2209,20 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgStRetVal(IRInstruction* inst) {
-  auto  const rFp = m_regs[inst->getSrc(0)].getReg();
-  auto* const val = inst->getSrc(1);
+  auto  const rFp = m_regs[inst->src(0)].getReg();
+  auto* const val = inst->src(1);
   cgStore(rFp, AROFF(m_r), val);
 }
 
 void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
-  auto const rFp   = m_regs[inst->getSrc(0)].getReg();
-  auto const dstSp = m_regs[inst->getDst()].getReg();
+  auto const rFp   = m_regs[inst->src(0)].getReg();
+  auto const dstSp = m_regs[inst->dst()].getReg();
   auto& a = m_as;
   a.    lea   (rFp[AROFF(m_r)], dstSp);
 }
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
-  auto fpReg = m_regs[inst->getSrc(0)].getReg(0);
+  auto fpReg = m_regs[inst->src(0)].getReg(0);
   assert(fpReg != InvalidReg);
   m_as.push(fpReg[AROFF(m_savedRip)]);
 }
@@ -2270,8 +2270,8 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
 }
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
-  SSATmp* sp = inst->getSrc(0);
-  SSATmp* fp = inst->getSrc(1);
+  SSATmp* sp = inst->src(0);
+  SSATmp* fp = inst->src(1);
 
   // Make sure rVmFp and rVmSp are set appropriately
   emitMovRegReg(m_as, m_regs[sp].getReg(), rVmSp);
@@ -2299,7 +2299,7 @@ void CodeGenerator::emitReqBindAddr(const Func* func,
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   JmpSwitchData* data = inst->getExtra<JmpSwitchDest>();
-  SSATmp* index       = inst->getSrc(0);
+  SSATmp* index       = inst->src(0);
   auto indexReg       = m_regs[index].getReg();
 
   if (!index->isConst()) {
@@ -2363,10 +2363,10 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
 
   cgCallHelper(m_as,
                TCA(sswitchHelperFast),
-               inst->getDst(),
+               inst->dst(),
                kNoSyncPoint,
                ArgGroup(m_regs)
-                 .ssa(inst->getSrc(0))
+                 .ssa(inst->src(0))
                  .immPtr(table)
                  .immPtr(def));
 }
@@ -2397,10 +2397,10 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
 
   cgCallHelper(m_as,
                TCA(sswitchHelperSlow),
-               inst->getDst(),
+               inst->dst(),
                kSyncPoint,
                ArgGroup(m_regs)
-                 .typedValue(inst->getSrc(0))
+                 .typedValue(inst->src(0))
                  .immPtr(strtab)
                  .imm(data->numCases)
                  .immPtr(jmptab));
@@ -2417,7 +2417,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  * anyway.
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
-  auto const fp       = m_regs[inst->getSrc(0)].getReg();
+  auto const fp       = m_regs[inst->src(0)].getReg();
   auto const fakeRet  = m_tx64->getRetFromInlinedFrame();
   auto const retBCOff = inst->getExtra<DefInlineFP>()->retBCOff;
 
@@ -2428,7 +2428,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
-  auto fpReg = m_regs[inst->getSrc(0)].getReg();
+  auto fpReg = m_regs[inst->src(0)].getReg();
   assert(fpReg == rVmFp);
   m_as.    loadq  (fpReg[AROFF(m_savedRbp)], rVmFp);
 }
@@ -2438,8 +2438,8 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // non-generator frames) when we don't track rVmSp independently
   // from rVmFp.  In generator frames we'll have to track offsets from
   // a DefGeneratorSP or something similar.
-  auto fp  = m_regs[inst->getSrc(0)].getReg();
-  auto dst = m_regs[inst->getDst()].getReg();
+  auto fp  = m_regs[inst->src(0)].getReg();
+  auto dst = m_regs[inst->dst()].getReg();
   auto off = -inst->getExtra<ReDefSP>()->offset * sizeof(Cell);
   emitLea(m_as, fp[off], dst);
 }
@@ -2453,13 +2453,13 @@ void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
-  m_as.loadq(m_regs[inst->getSrc(0)].getReg()[AROFF(m_savedRbp)],
-             m_regs[inst->getDst()].getReg());
+  m_as.loadq(m_regs[inst->src(0)].getReg()[AROFF(m_savedRbp)],
+             m_regs[inst->dst()].getReg());
 }
 
 void CodeGenerator::cgSpill(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
 
   assert(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < m_regs[src].numAllocatedRegs();
@@ -2484,8 +2484,8 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReload(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
 
   assert(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < m_regs[dst].numAllocatedRegs();
@@ -2510,9 +2510,9 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStPropWork(IRInstruction* inst, bool genTypeStore) {
-  SSATmp* obj   = inst->getSrc(0);
-  SSATmp* prop  = inst->getSrc(1);
-  SSATmp* src   = inst->getSrc(2);
+  SSATmp* obj   = inst->src(0);
+  SSATmp* prop  = inst->src(1);
+  SSATmp* src   = inst->src(2);
   cgStore(m_regs[obj].getReg(), prop->getValInt(), src, genTypeStore);
 }
 void CodeGenerator::cgStProp(IRInstruction* inst) {
@@ -2523,9 +2523,9 @@ void CodeGenerator::cgStPropNT(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStMemWork(IRInstruction* inst, bool genStoreType) {
-  SSATmp* addr = inst->getSrc(0);
-  SSATmp* offset  = inst->getSrc(1);
-  SSATmp* src  = inst->getSrc(2);
+  SSATmp* addr = inst->src(0);
+  SSATmp* offset  = inst->src(1);
+  SSATmp* src  = inst->src(2);
   cgStore(m_regs[addr].getReg(), offset->getValInt(), src, genStoreType);
 }
 void CodeGenerator::cgStMem(IRInstruction* inst) {
@@ -2536,9 +2536,9 @@ void CodeGenerator::cgStMemNT(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
-  auto destReg = m_regs[inst->getDst()].getReg();
-  auto addrReg = m_regs[inst->getSrc(0)].getReg();
-  SSATmp* src  = inst->getSrc(1);
+  auto destReg = m_regs[inst->dst()].getReg();
+  auto addrReg = m_regs[inst->src(0)].getReg();
+  SSATmp* src  = inst->src(1);
   cgStore(addrReg, RefData::tvOffset(), src, genStoreType);
   if (destReg != InvalidReg)  emitMovRegReg(m_as, addrReg, destReg);
 }
@@ -2565,22 +2565,22 @@ int CodeGenerator::getIterOffset(SSATmp* tmp) {
 }
 
 void CodeGenerator::cgStLoc(IRInstruction* inst) {
-  cgStore(m_regs[inst->getSrc(0)].getReg(),
+  cgStore(m_regs[inst->src(0)].getReg(),
           getLocalOffset(inst->getExtra<StLoc>()->locId),
-          inst->getSrc(1),
+          inst->src(1),
           true /* store type */);
 }
 
 void CodeGenerator::cgStLocNT(IRInstruction* inst) {
-  cgStore(m_regs[inst->getSrc(0)].getReg(),
+  cgStore(m_regs[inst->src(0)].getReg(),
           getLocalOffset(inst->getExtra<StLocNT>()->locId),
-          inst->getSrc(1),
+          inst->src(1),
           false /* store type */);
 }
 
 void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
-  emitMovRegReg(m_as, m_regs[inst->getSrc(0)].getReg(), rVmFp);
-  emitMovRegReg(m_as, m_regs[inst->getSrc(1)].getReg(), rVmSp);
+  emitMovRegReg(m_as, m_regs[inst->src(0)].getReg(), rVmFp);
+  emitMovRegReg(m_as, m_regs[inst->src(1)].getReg(), rVmSp);
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
@@ -2677,8 +2677,8 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* dst    = inst->getDst();
-  SSATmp* src    = inst->getSrc(0);
+  SSATmp* dst    = inst->dst();
+  SSATmp* src    = inst->src(0);
   Type type = src->type();
 
   cgIncRefWork(type, src);
@@ -2688,13 +2688,13 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
   cgDecRefMem(inst->getTypeParam(),
-              m_regs[inst->getSrc(0)].getReg(),
+              m_regs[inst->src(0)].getReg(),
               cellsToBytes(inst->getExtra<DecRefStack>()->offset),
               nullptr);
 }
 
 void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
-  SSATmp* fp    = inst->getSrc(0);
+  SSATmp* fp    = inst->src(0);
   Block* exit   = inst->getTaken();
   auto fpReg = m_regs[fp].getReg();
   auto scratchReg = m_rScratch;
@@ -2726,15 +2726,15 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
   cgDecRefMem(inst->getTypeParam(),
-              m_regs[inst->getSrc(0)].getReg(),
+              m_regs[inst->src(0)].getReg(),
               getLocalOffset(inst->getExtra<DecRefLoc>()->locId),
               inst->getTaken());
 }
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
-  auto const rFp       = m_regs[inst->getSrc(0)].getReg();
-  auto const numLocals = inst->getSrc(1)->getValInt();
-  auto const rDest     = m_regs[inst->getDst()].getReg();
+  auto const rFp       = m_regs[inst->src(0)].getReg();
+  auto const numLocals = inst->src(1)->getValInt();
+  auto const rDest     = m_regs[inst->dst()].getReg();
   auto& a = m_as;
 
   assert(rFp == rVmFp &&
@@ -3099,15 +3099,15 @@ void CodeGenerator::cgDecRefMem(Type type,
 }
 
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
-  assert(inst->getSrc(0)->type().isPtr());
+  assert(inst->src(0)->type().isPtr());
   cgDecRefMem(inst->getTypeParam(),
-              m_regs[inst->getSrc(0)].getReg(),
-              inst->getSrc(1)->getValInt(),
+              m_regs[inst->src(0)].getReg(),
+              inst->src(1)->getValInt(),
               inst->getTaken());
 }
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
-  SSATmp* src   = inst->getSrc(0);
+  SSATmp* src   = inst->src(0);
   if (!isRefCounted(src)) return;
   Block* exit = inst->getTaken();
   Type type = src->type();
@@ -3141,10 +3141,10 @@ void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
-  auto const sp        = inst->getSrc(0);
-  auto const fp        = inst->getSrc(1);
-  auto const func      = inst->getSrc(2);
-  auto const objOrCls  = inst->getSrc(3);
+  auto const sp        = inst->src(0);
+  auto const fp        = inst->src(1);
+  auto const func      = inst->src(2);
+  auto const objOrCls  = inst->src(3);
   auto const magicName = inst->getExtra<SpillFrame>()->invName;
   auto const nArgs     = inst->getExtra<SpillFrame>()->numArgs;
 
@@ -3236,7 +3236,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
                             spReg);
 
   emitAdjustSp(spReg,
-               m_regs[inst->getDst()].getReg(),
+               m_regs[inst->dst()].getReg(),
                spOffset);
 }
 
@@ -3258,8 +3258,8 @@ Instance* createClHelper(Class* cls, int numArgs, ActRec* ar, TypedValue* sp) {
 }
 
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
-  const Class* cls = inst->getSrc(0)->getValClass();
-  auto dstReg = m_regs[inst->getDst()].getReg();
+  const Class* cls = inst->src(0)->getValClass();
+  auto dstReg = m_regs[inst->dst()].getReg();
 
   // First, make sure our property init vectors are all set up
   bool props = cls->pinitVec().size() > 0;
@@ -3383,12 +3383,12 @@ void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
   cgCallHelper(
     m_as,
     reinterpret_cast<TCA>(helper),
-    inst->getDst(),
+    inst->dst(),
     kSyncPoint,
     ArgGroup(m_regs)
       .immPtr(data.origFunc)
       .immPtr(data.genFunc)
-      .ssa(inst->getSrc(0))
+      .ssa(inst->src(0))
       .immPtr(nullptr) // getArgs array
       // Deliberately ignoring frameStaticClass parameter, because
       // it's unused if we have a $this pointer, and we don't inline
@@ -3396,7 +3396,7 @@ void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
   );
   if (data.origFunc->isMethod()) {
     // We can't support a null $this.
-    assert(inst->getSrc(0)->isA(Type::Obj));
+    assert(inst->src(0)->isA(Type::Obj));
   }
 }
 
@@ -3413,10 +3413,10 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  SSATmp* actRec         = inst->getSrc(0);
-  SSATmp* returnBcOffset = inst->getSrc(1);
-  SSATmp* func           = inst->getSrc(2);
-  SrcRange args          = inst->getSrcs().subpiece(3);
+  SSATmp* actRec         = inst->src(0);
+  SSATmp* returnBcOffset = inst->src(1);
+  SSATmp* func           = inst->src(2);
+  SrcRange args          = inst->srcs().subpiece(3);
   int32_t numArgs        = args.size();
 
   auto spReg = m_regs[actRec].getReg();
@@ -3449,7 +3449,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {
   Type type       = inst->getTypeParam();
-  SSATmp* sp      = inst->getSrc(0);
+  SSATmp* sp      = inst->src(0);
   uint32_t offset = inst->getExtra<CastStk>()->offset;
   PhysReg spReg   = m_regs[sp].getReg();
 
@@ -3479,10 +3479,10 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
-  SSATmp* f             = inst->getSrc(0);
-  auto args             = inst->getSrcs().subpiece(1);
+  SSATmp* f             = inst->src(0);
+  auto args             = inst->srcs().subpiece(1);
   int32_t numArgs         = args.size();
-  SSATmp* dst           = inst->getDst();
+  SSATmp* dst           = inst->dst();
   auto dstReg           = m_regs[dst].getReg(0);
   auto dstType          = m_regs[dst].getReg(1);
   Type returnType       = inst->getTypeParam();
@@ -3574,10 +3574,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSpillStack(IRInstruction* inst) {
-  SSATmp* dst             = inst->getDst();
-  SSATmp* sp              = inst->getSrc(0);
-  auto const spDeficit    = inst->getSrc(1)->getValInt();
-  auto const spillVals    = inst->getSrcs().subpiece(2);
+  SSATmp* dst             = inst->dst();
+  SSATmp* sp              = inst->src(0);
+  auto const spDeficit    = inst->src(1)->getValInt();
+  auto const spillVals    = inst->srcs().subpiece(2);
   auto const numSpillSrcs = spillVals.size();
   auto const dstReg       = m_regs[dst].getReg();
   auto const spReg        = m_regs[sp].getReg();
@@ -3599,7 +3599,7 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     }
     // If our value came from a LdStack on the same sp and offset,
     // we don't need to spill it.
-    if (inst->op() == LdStack && inst->getSrc(0) == sp &&
+    if (inst->op() == LdStack && inst->src(0) == sp &&
         inst->getExtra<LdStack>()->offset * sizeof(Cell) == offset) {
       FTRACE(6, "{}: Not spilling spill value {} from {}\n",
              __func__, i, inst->toString());
@@ -3626,8 +3626,8 @@ void CodeGenerator::emitAdjustSp(PhysReg spReg,
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
-  SSATmp* func  = inst->getSrc(0);
-  SSATmp* fp    = inst->getSrc(1);
+  SSATmp* func  = inst->src(0);
+  SSATmp* fp    = inst->src(1);
 
   assert(func->isConst());
   assert(func->type() == Type::Func);
@@ -3643,8 +3643,8 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdThis(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
   Block* label = inst->getTaken();
   // mov dst, [fp + 0x20]
   auto dstReg = m_regs[dst].getReg();
@@ -3676,8 +3676,8 @@ static void emitLdClsCctx(CodeGenerator::Asm& a,
 }
 
 void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
-  PhysReg srcReg = m_regs[inst->getSrc(0)].getReg();
-  PhysReg dstReg = m_regs[inst->getDst()].getReg();
+  PhysReg srcReg = m_regs[inst->src(0)].getReg();
+  PhysReg dstReg = m_regs[inst->dst()].getReg();
   // Context could be either a this object or a class ptr
   m_as.   testb(1, rbyte(srcReg));
   ifThenElse(CC_NZ,
@@ -3687,14 +3687,14 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
-  PhysReg srcReg = m_regs[inst->getSrc(0)].getReg();
-  PhysReg dstReg = m_regs[inst->getDst()].getReg();
+  PhysReg srcReg = m_regs[inst->src(0)].getReg();
+  PhysReg dstReg = m_regs[inst->dst()].getReg();
   emitLdClsCctx(m_as, srcReg, dstReg);
 }
 
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
-  PhysReg dstReg = m_regs[inst->getDst()].getReg();
-  PhysReg srcReg = m_regs[inst->getSrc(0)].getReg();
+  PhysReg dstReg = m_regs[inst->dst()].getReg();
+  PhysReg srcReg = m_regs[inst->src(0)].getReg();
   if (dstReg != InvalidReg) {
     m_as.loadq(srcReg[AROFF(m_this)], dstReg);
   }
@@ -3705,16 +3705,16 @@ void CodeGenerator::cgLdCctx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  auto const dstReg   = m_regs[inst->getDst()].getReg();
+  auto const dstReg   = m_regs[inst->dst()].getReg();
   auto const val      = inst->getExtra<LdConst>()->as<uintptr_t>();
   if (dstReg == InvalidReg) return;
   emitLoadImm(m_as, val, dstReg);
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* baseAddr = inst->getSrc(0);
-  SSATmp* offset   = inst->getSrc(1);
+  SSATmp* dst   = inst->dst();
+  SSATmp* baseAddr = inst->src(0);
+  SSATmp* offset   = inst->src(1);
 
   auto dstReg  = m_regs[dst].getReg();
   auto baseReg = m_regs[baseAddr].getReg();
@@ -3727,8 +3727,8 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContLocalsPtr(IRInstruction* inst) {
-  auto rCont = m_regs[inst->getSrc(0)].getReg();
-  auto rLocals = m_regs[inst->getDst()].getReg();
+  auto rCont = m_regs[inst->src(0)].getReg();
+  auto rLocals = m_regs[inst->dst()].getReg();
   m_as.  loadl  (rCont[CONTOFF(m_localsOffset)], r32(rLocals));
   m_as.  addq   (rCont, rLocals);
 }
@@ -3740,9 +3740,9 @@ static int getNativeTypeSize(Type type) {
 }
 
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  SSATmp* dest   = inst->getDst();
-  SSATmp* addr   = inst->getSrc(0);
-  SSATmp* offset = inst->getSrc(1);
+  SSATmp* dest   = inst->dst();
+  SSATmp* addr   = inst->src(0);
+  SSATmp* offset = inst->src(1);
 
   assert(!(dest->isConst()));
 
@@ -3782,9 +3782,9 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStRaw(IRInstruction* inst) {
-  auto baseReg = m_regs[inst->getSrc(0)].getReg();
-  int64_t kind = inst->getSrc(1)->getValInt();
-  SSATmp* value = inst->getSrc(2);
+  auto baseReg = m_regs[inst->src(0)].getReg();
+  int64_t kind = inst->src(1)->getValInt();
+  SSATmp* value = inst->src(2);
 
   RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
   assert(value->type().equals(slot.type()));
@@ -3814,8 +3814,8 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
-  auto ch = inst->getSrc(0)->getValRawInt();
-  auto outReg = m_regs[inst->getDst()].getReg();
+  auto ch = inst->src(0)->getValRawInt();
+  auto outReg = m_regs[inst->dst()].getReg();
 
   m_as.loadq (rVmTl[ch], outReg);
   m_as.testq (outReg, outReg);
@@ -3829,7 +3829,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
                                      IRInstruction* inst) {
   Block* label = inst->getTaken();
   Type type   = inst->getTypeParam();
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
 
   assert(type == dst->type());
   assert(type.needsReg());
@@ -3943,7 +3943,7 @@ void CodeGenerator::cgLoad(PhysReg base,
                   inst->getTaken());
   }
   if (type.isNull()) return; // these are constants
-  auto dstReg = m_regs[inst->getDst()].getReg();
+  auto dstReg = m_regs[inst->dst()].getReg();
   // if dstReg == InvalidReg then the value of this load is dead
   if (dstReg == InvalidReg) return;
 
@@ -3955,15 +3955,15 @@ void CodeGenerator::cgLoad(PhysReg base,
 }
 
 void CodeGenerator::cgLdProp(IRInstruction* inst) {
-  cgLoad(m_regs[inst->getSrc(0)].getReg(), inst->getSrc(1)->getValInt(), inst);
+  cgLoad(m_regs[inst->src(0)].getReg(), inst->src(1)->getValInt(), inst);
 }
 
 void CodeGenerator::cgLdMem(IRInstruction * inst) {
-  cgLoad(m_regs[inst->getSrc(0)].getReg(), inst->getSrc(1)->getValInt(), inst);
+  cgLoad(m_regs[inst->src(0)].getReg(), inst->src(1)->getValInt(), inst);
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
-  cgLoad(m_regs[inst->getSrc(0)].getReg(), RefData::tvOffset(), inst);
+  cgLoad(m_regs[inst->src(0)].getReg(), RefData::tvOffset(), inst);
 }
 
 void CodeGenerator::recordSyncPoint(Asm& as,
@@ -3989,40 +3989,40 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 }
 
 void CodeGenerator::cgLdAddr(IRInstruction* inst) {
-  auto base = m_regs[inst->getSrc(0)].getReg();
-  int64_t offset = inst->getSrc(1)->getValInt();
-  m_as.lea (base[offset], m_regs[inst->getDst()].getReg());
+  auto base = m_regs[inst->src(0)].getReg();
+  int64_t offset = inst->src(1)->getValInt();
+  m_as.lea (base[offset], m_regs[inst->dst()].getReg());
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
-  cgLoad(m_regs[inst->getSrc(0)].getReg(),
+  cgLoad(m_regs[inst->src(0)].getReg(),
          getLocalOffset(inst->getExtra<LdLoc>()->locId),
          inst);
 }
 
 void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
-  auto const fpReg  = m_regs[inst->getSrc(0)].getReg();
+  auto const fpReg  = m_regs[inst->src(0)].getReg();
   auto const offset = getLocalOffset(inst->getExtra<LdLocAddr>()->locId);
-  if (m_regs[inst->getDst()].hasReg()) {
-    m_as.lea(fpReg[offset], m_regs[inst->getDst()].getReg());
+  if (m_regs[inst->dst()].hasReg()) {
+    m_as.lea(fpReg[offset], m_regs[inst->dst()].getReg());
   }
 }
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
-  auto const base   = m_regs[inst->getSrc(0)].getReg();
+  auto const base   = m_regs[inst->src(0)].getReg();
   auto const offset = cellsToBytes(inst->getExtra<LdStackAddr>()->offset);
-  m_as.lea (base[offset], m_regs[inst->getDst()].getReg());
+  m_as.lea (base[offset], m_regs[inst->dst()].getReg());
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
   assert(inst->getTaken() == nullptr);
-  cgLoad(m_regs[inst->getSrc(0)].getReg(),
+  cgLoad(m_regs[inst->src(0)].getReg(),
          cellsToBytes(inst->getExtra<LdStack>()->offset),
          inst);
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  auto const rSP = m_regs[inst->getSrc(0)].getReg();
+  auto const rSP = m_regs[inst->src(0)].getReg();
   auto const baseOff = cellsToBytes(inst->getExtra<GuardStk>()->offset);
   emitTypeGuard(inst->getTypeParam(),
                 rSP[baseOff + TVOFF(m_type)],
@@ -4030,14 +4030,14 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
-  auto const rbase = m_regs[inst->getSrc(0)].getReg();
+  auto const rbase = m_regs[inst->src(0)].getReg();
   auto const baseOff = cellsToBytes(inst->getExtra<CheckStk>()->offset);
   emitTypeCheck(inst->getTypeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  auto const rFP = m_regs[inst->getSrc(0)].getReg();
+  auto const rFP = m_regs[inst->src(0)].getReg();
   auto const baseOff = getLocalOffset(inst->getExtra<GuardLoc>()->locId);
   emitTypeGuard(inst->getTypeParam(),
                 rFP[baseOff + TVOFF(m_type)],
@@ -4045,7 +4045,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
-  auto const rbase = m_regs[inst->getSrc(0)].getReg();
+  auto const rbase = m_regs[inst->src(0)].getReg();
   auto const baseOff = getLocalOffset(inst->getExtra<CheckLoc>()->locId);
   emitTypeCheck(inst->getTypeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->getTaken());
@@ -4064,7 +4064,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
 }
 
 void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
-  auto const fp    = m_regs[inst->getSrc(0)].getReg();
+  auto const fp    = m_regs[inst->src(0)].getReg();
   auto const extra = inst->getExtra<SideExitGuardLoc>();
   emitSideExitGuard(inst->getTypeParam(),
                     fp[getLocalOffset(extra->checkedSlot) + TVOFF(m_type)],
@@ -4073,7 +4073,7 @@ void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
-  auto const sp    = m_regs[inst->getSrc(0)].getReg();
+  auto const sp    = m_regs[inst->src(0)].getReg();
   auto const extra = inst->getExtra<SideExitGuardStk>();
   emitSideExitGuard(inst->getTypeParam(),
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
@@ -4082,12 +4082,12 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
-  assert(inst->getDst()->type() == Type::PtrToCell);
-  assert(m_regs[inst->getDst()].getReg() == rsp);
+  assert(inst->dst()->type() == Type::PtrToCell);
+  assert(m_regs[inst->dst()].getReg() == rsp);
 }
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
-  auto const src   = inst->getSrc(0);
+  auto const src   = inst->src(0);
   auto const rData = m_regs[src].getReg(0);
   auto const rType = m_regs[src].getReg(1);
 
@@ -4095,7 +4095,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     [&](ConditionCode cc) {
       emitFwdJcc(ccNegate(cc), inst->getTaken());
 
-      auto const dstReg = m_regs[inst->getDst()].getReg();
+      auto const dstReg = m_regs[inst->dst()].getReg();
       if (dstReg != InvalidReg) {
         emitMovRegReg(m_as, m_regs[src].getReg(0), dstReg);
       }
@@ -4103,20 +4103,20 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
-  auto const reg = m_regs[inst->getSrc(0)].getReg();
+  auto const reg = m_regs[inst->src(0)].getReg();
   emitTypeCheck(inst->getTypeParam(), reg[TVOFF(m_type)],
                 reg[TVOFF(m_data)], inst->getTaken());
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  assert(inst->getNumSrcs() == 6);
+  assert(inst->numSrcs() == 6);
 
-  SSATmp* funcPtrTmp = inst->getSrc(0);
-  SSATmp* nParamsTmp = inst->getSrc(1);
-  SSATmp* bitsPtrTmp = inst->getSrc(2);
-  SSATmp* firstBitNumTmp = inst->getSrc(3);
-  SSATmp* mask64Tmp  = inst->getSrc(4);
-  SSATmp* vals64Tmp  = inst->getSrc(5);
+  SSATmp* funcPtrTmp = inst->src(0);
+  SSATmp* nParamsTmp = inst->src(1);
+  SSATmp* bitsPtrTmp = inst->src(2);
+  SSATmp* firstBitNumTmp = inst->src(3);
+  SSATmp* mask64Tmp  = inst->src(4);
+  SSATmp* vals64Tmp  = inst->src(5);
 
   // Get values in place
   assert(funcPtrTmp->type() == Type::Func);
@@ -4185,9 +4185,9 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
-  SSATmp*   dst   = inst->getDst();
-  SSATmp*   obj   = inst->getSrc(0);
-  SSATmp*   prop  = inst->getSrc(1);
+  SSATmp*   dst   = inst->dst();
+  SSATmp*   obj   = inst->src(0);
+  SSATmp*   prop  = inst->src(1);
 
   assert(prop->isConst() && prop->type() == Type::Int);
 
@@ -4202,9 +4202,9 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* cls   = inst->getSrc(0);
-  SSATmp* mSlot = inst->getSrc(1);
+  SSATmp* dst   = inst->dst();
+  SSATmp* cls   = inst->src(0);
+  SSATmp* mSlot = inst->src(1);
 
   assert(cls->type() == Type::Cls);
   assert(mSlot->isConst() && mSlot->type() == Type::Int);
@@ -4231,10 +4231,10 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
-  SSATmp* dst        = inst->getDst();
-  SSATmp* className  = inst->getSrc(0);
-  SSATmp* methodName = inst->getSrc(1);
-  SSATmp* baseClass  = inst->getSrc(2);
+  SSATmp* dst        = inst->dst();
+  SSATmp* className  = inst->src(0);
+  SSATmp* methodName = inst->src(1);
+  SSATmp* baseClass  = inst->src(2);
   Block*  label      = inst->getTaken();
 
   // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
@@ -4327,9 +4327,9 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
 }
 
 void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
-  PhysReg destCtxReg = m_regs[inst->getDst()].getReg(0);
-  SSATmp*  srcCtxTmp = inst->getSrc(0);
-  const Func* callee = inst->getSrc(1)->getValFunc();
+  PhysReg destCtxReg = m_regs[inst->dst()].getReg(0);
+  SSATmp*  srcCtxTmp = inst->src(0);
+  const Func* callee = inst->src(1)->getValFunc();
   bool      withThis = srcCtxTmp->isA(Type::Obj);
 
   // Eagerly move src into the dest reg
@@ -4350,11 +4350,11 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
-  PhysReg         funcDestReg = m_regs[inst->getDst()].getReg(0);
-  PhysReg          destCtxReg = m_regs[inst->getDst()].getReg(1);
-  const Class*            cls = inst->getSrc(0)->getValClass();
-  const StringData*  methName = inst->getSrc(1)->getValStr();
-  SSATmp*           srcCtxTmp = inst->getSrc(2);
+  PhysReg         funcDestReg = m_regs[inst->dst()].getReg(0);
+  PhysReg          destCtxReg = m_regs[inst->dst()].getReg(1);
+  const Class*            cls = inst->src(0)->getValClass();
+  const StringData*  methName = inst->src(1)->getValStr();
+  SSATmp*           srcCtxTmp = inst->src(2);
   PhysReg           srcCtxReg = m_regs[srcCtxTmp].getReg(0);
   Block*            exitLabel = inst->getTaken();
   const StringData*   clsName = cls->name();
@@ -4411,11 +4411,11 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
 void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   using namespace Transl::TargetCache;
-  SSATmp* dst      = inst->getDst();
-  SSATmp* cls      = inst->getSrc(0);
-  SSATmp* propName = inst->getSrc(1);
-  SSATmp* clsName  = inst->getSrc(2);
-  SSATmp* cxt      = inst->getSrc(3);
+  SSATmp* dst      = inst->dst();
+  SSATmp* cls      = inst->src(0);
+  SSATmp* propName = inst->src(1);
+  SSATmp* clsName  = inst->src(2);
+  SSATmp* cxt      = inst->src(3);
   Block* target    = inst->getTaken();
 
   const StringData* propNameString = propName->getValStr();
@@ -4457,10 +4457,10 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* cls   = inst->getSrc(0);
-  SSATmp* prop  = inst->getSrc(1);
-  SSATmp* cxt   = inst->getSrc(2);
+  SSATmp* dst   = inst->dst();
+  SSATmp* cls   = inst->src(0);
+  SSATmp* prop  = inst->src(1);
+  SSATmp* cxt   = inst->src(2);
   Block* target = inst->getTaken();
   auto dstReg = m_regs[dst].getReg();
   if (dstReg == InvalidReg && target) {
@@ -4482,8 +4482,8 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
 
 TargetCache::CacheHandle CodeGenerator::cgLdClsCachedCommon(
   IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  const StringData* className = inst->getSrc(0)->getValStr();
+  SSATmp* dst = inst->dst();
+  const StringData* className = inst->src(0)->getValStr();
   auto ch = TargetCache::allocKnownClass(className);
   auto dstReg = m_regs[dst].getReg();
   if (dstReg == InvalidReg) {
@@ -4503,7 +4503,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     // third is ignored in the checkOnly==false case.
     cgCallHelper(a,
                  (TCA)TargetCache::lookupKnownClass<false>,
-                 inst->getDst(),
+                 inst->dst(),
                  kSyncPoint,
                  ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
   });
@@ -4517,8 +4517,8 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
-  SSATmp* dst       = inst->getDst();
-  SSATmp* className = inst->getSrc(0);
+  SSATmp* dst       = inst->dst();
+  SSATmp* className = inst->src(0);
 
   CacheHandle ch = ClassCache::alloc();
   cgCallHelper(m_as, (TCA)ClassCache::lookup, dst, kSyncPoint,
@@ -4532,8 +4532,8 @@ static StringData* fullConstName(SSATmp* cls, SSATmp* cnsName) {
 }
 
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  SSATmp* cnsName = inst->getSrc(0);
-  SSATmp* cls     = inst->getSrc(1);
+  SSATmp* cnsName = inst->src(0);
+  SSATmp* cls     = inst->src(1);
 
   StringData* fullName = fullConstName(cls, cnsName);
   TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
@@ -4544,8 +4544,8 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
-  SSATmp*   cnsName = inst->getSrc(0);
-  SSATmp*   cls     = inst->getSrc(1);
+  SSATmp*   cnsName = inst->src(0);
+  SSATmp*   cls     = inst->src(1);
 
   assert(inst->getTypeParam() == Type::Cell);
   assert(cnsName->isConst() && cnsName->type() == Type::StaticStr);
@@ -4561,11 +4561,11 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
       .immPtr(cnsName->getValStr());
 
   cgCallHelper(m_as, TCA(TargetCache::lookupClassConstantTv),
-               inst->getDst(), kSyncPoint, args, DestType::TV);
+               inst->dst(), kSyncPoint, args, DestType::TV);
 }
 
 void CodeGenerator::cgLdCns(IRInstruction* inst) {
-  const StringData* cnsName = inst->getSrc(0)->getValStr();
+  const StringData* cnsName = inst->src(0)->getValStr();
 
   TargetCache::CacheHandle ch = StringData::DefCnsHandle(cnsName, false);
   // Has an unlikely branch to a LookupCns
@@ -4601,7 +4601,7 @@ static TypedValue lookupCnsHelper(const TypedValue* tv, StringData* nm) {
 }
 
 void CodeGenerator::cgLookupCns(IRInstruction* inst) {
-  SSATmp* cnsNameTmp = inst->getSrc(0);
+  SSATmp* cnsNameTmp = inst->src(0);
 
   assert(inst->getTypeParam() == Type::Cell);
   assert(cnsNameTmp->isConst() && cnsNameTmp->type() == Type::StaticStr);
@@ -4614,7 +4614,7 @@ void CodeGenerator::cgLookupCns(IRInstruction* inst) {
       .immPtr(cnsName);
 
   cgCallHelper(m_as, TCA(lookupCnsHelper),
-               inst->getDst(), kSyncPoint, args, DestType::TV);
+               inst->dst(), kSyncPoint, args, DestType::TV);
 }
 
 HOT_FUNC_VM
@@ -4659,18 +4659,18 @@ static int64_t ak_exist_int_obj(int64_t key, ObjectData* obj) {
 }
 
 void CodeGenerator::cgAKExists(IRInstruction* inst) {
-  SSATmp* arr = inst->getSrc(0);
-  SSATmp* key = inst->getSrc(1);
+  SSATmp* arr = inst->src(0);
+  SSATmp* key = inst->src(1);
 
   if (key->type().isNull()) {
     if (arr->isA(Type::Arr)) {
       cgCallHelper(m_as,
                    (TCA)ak_exist_string,
-                   inst->getDst(),
+                   inst->dst(),
                    kNoSyncPoint,
                    ArgGroup(m_regs).immPtr(empty_string.get()).ssa(arr));
     } else {
-      m_as.mov_imm64_reg(0, m_regs[inst->getDst()].getReg());
+      m_as.mov_imm64_reg(0, m_regs[inst->dst()].getReg());
     }
     return;
   }
@@ -4682,7 +4682,7 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
 
   cgCallHelper(m_as,
                helper_func,
-               inst->getDst(),
+               inst->dst(),
                kNoSyncPoint,
                ArgGroup(m_regs).ssa(key).ssa(arr));
 }
@@ -4698,16 +4698,16 @@ HOT_FUNC_VM static TypedValue* ldGblAddrDefHelper(StringData* name) {
 }
 
 void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
-  auto dstReg = m_regs[inst->getDst()].getReg();
+  auto dstReg = m_regs[inst->dst()].getReg();
   cgCallHelper(m_as, (TCA)ldGblAddrHelper, dstReg, kNoSyncPoint,
-               ArgGroup(m_regs).ssa(inst->getSrc(0)));
+               ArgGroup(m_regs).ssa(inst->src(0)));
   m_as.testq(dstReg, dstReg);
   emitFwdJcc(CC_Z, inst->getTaken());
 }
 
 void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
-  cgCallHelper(m_as, (TCA)ldGblAddrDefHelper, inst->getDst(), kNoSyncPoint,
-               ArgGroup(m_regs).ssa(inst->getSrc(0)));
+  cgCallHelper(m_as, (TCA)ldGblAddrDefHelper, inst->dst(), kNoSyncPoint,
+               ArgGroup(m_regs).ssa(inst->src(0)));
 }
 
 void CodeGenerator::emitTestZero(SSATmp* src) {
@@ -4733,34 +4733,34 @@ void CodeGenerator::emitTestZero(SSATmp* src) {
 }
 
 void CodeGenerator::cgJmpZero(IRInstruction* inst) {
-  emitTestZero(inst->getSrc(0));
+  emitTestZero(inst->src(0));
   emitFwdJcc(CC_Z, inst->getTaken());
 }
 
 void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
-  emitTestZero(inst->getSrc(0));
+  emitTestZero(inst->src(0));
   emitFwdJcc(CC_NZ, inst->getTaken());
 }
 
 void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitTestZero(inst->getSrc(0));
+  emitTestZero(inst->src(0));
   emitReqBindJcc(CC_Z, inst->getExtra<ReqBindJmpZero>());
 }
 
 void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitTestZero(inst->getSrc(0));
+  emitTestZero(inst->src(0));
   emitReqBindJcc(CC_NZ, inst->getExtra<ReqBindJmpNZero>());
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
-  assert(inst->getNumSrcs() == inst->getTaken()->getLabel()->getNumDsts());
-  if (unsigned n = inst->getNumSrcs()) {
+  assert(inst->numSrcs() == inst->getTaken()->getLabel()->numDsts());
+  if (unsigned n = inst->numSrcs()) {
     // Parallel-copy sources to the label's destination registers.
     // TODO: t2040286: this only works if all destinations fit in registers.
-    SrcRange srcs = inst->getSrcs();
-    DstRange dsts = inst->getTaken()->getLabel()->getDsts();
+    SrcRange srcs = inst->srcs();
+    DstRange dsts = inst->getTaken()->getLabel()->dsts();
     ArgGroup args(m_regs);
     for (unsigned i = 0, j = 0; i < n; i++) {
       assert(srcs[i]->type().subtypeOf(dsts[i].type()));
@@ -4797,13 +4797,13 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
-  m_as.jmp(m_regs[inst->getSrc(0)].getReg());
+  m_as.jmp(m_regs[inst->src(0)].getReg());
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {
   Block* label = inst->getTaken();
   assert(label);
-  SSATmp* src = inst->getSrc(0);
+  SSATmp* src = inst->src(0);
 
   if (src->type().isInit()) return;
 
@@ -4818,8 +4818,8 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
 void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   Block* label = inst->getTaken();
   assert(label);
-  SSATmp* base = inst->getSrc(0);
-  int64_t offset = inst->getSrc(1)->getValInt();
+  SSATmp* base = inst->src(0);
+  int64_t offset = inst->src(1)->getValInt();
   Type t = base->type().deref();
   if (t.isInit()) return;
   auto basereg = m_regs[base].getReg();
@@ -4834,7 +4834,7 @@ void CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
-  SSATmp* fp    = inst->getSrc(0);
+  SSATmp* fp    = inst->src(0);
   Block*  label = inst->getTaken();
 
   assert(!(fp->isConst()));
@@ -4846,7 +4846,7 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
 
 void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   auto* const label = inst->getTaken();
-  auto const rFp = m_regs[inst->getSrc(0)].getReg();
+  auto const rFp = m_regs[inst->src(0)].getReg();
 
   m_as.    cmpq   (0, rFp[AROFF(m_varEnv)]);
   unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
@@ -4864,8 +4864,8 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
-  SSATmp* dst  = inst->getDst();
-  SSATmp* addr = inst->getSrc(0);
+  SSATmp* dst  = inst->dst();
+  SSATmp* addr = inst->src(0);
   auto base    = m_regs[addr].getReg();
   auto dstReg  = m_regs[dst].getReg();
   emitMovRegReg(m_as, base, dstReg);
@@ -4880,9 +4880,9 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefCns(IRInstruction* inst) {
-  UNUSED SSATmp* dst     = inst->getDst();
-  UNUSED SSATmp* cnsName = inst->getSrc(0);
-  UNUSED SSATmp* val     = inst->getSrc(1);
+  UNUSED SSATmp* dst     = inst->dst();
+  UNUSED SSATmp* cnsName = inst->src(0);
+  UNUSED SSATmp* val     = inst->src(1);
   using namespace TargetCache;
   CG_PUNT(DefCns);
 }
@@ -4893,9 +4893,9 @@ static StringData* concat_value(TypedValue tv1, TypedValue tv2) {
 }
 
 void CodeGenerator::cgConcat(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* tl    = inst->getSrc(0);
-  SSATmp* tr    = inst->getSrc(1);
+  SSATmp* dst   = inst->dst();
+  SSATmp* tl    = inst->src(0);
+  SSATmp* tr    = inst->src(1);
 
   Type lType = tl->type();
   Type rType = tr->type();
@@ -4923,10 +4923,10 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
-  SSATmp* fp = inst->getSrc(0);
-  SSATmp* sp = inst->getSrc(1);
-  SSATmp* pcOffTmp  = inst->getSrc(2);
-  SSATmp* spAdjustmentTmp = inst->getSrc(3);
+  SSATmp* fp = inst->src(0);
+  SSATmp* sp = inst->src(1);
+  SSATmp* pcOffTmp  = inst->src(2);
+  SSATmp* spAdjustmentTmp = inst->src(3);
   int64_t pcOff = pcOffTmp->getValInt();
 
   auto opc = *(getCurFunc()->unit()->at(pcOff));
@@ -4936,7 +4936,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, kSyncPoint,
                ArgGroup(m_regs).ssa(fp).ssa(sp).imm(pcOff));
 
-  auto newSpReg = m_regs[inst->getDst()].getReg();
+  auto newSpReg = m_regs[inst->dst()].getReg();
   assert(newSpReg == m_regs[sp].getReg());
 
   int64_t spAdjustBytes = cellsToBytes(spAdjustmentTmp->getValInt());
@@ -4946,9 +4946,9 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
-  SSATmp* fp = inst->getSrc(0);
-  SSATmp* sp = inst->getSrc(1);
-  int64_t pcOff = inst->getSrc(2)->getValInt();
+  SSATmp* fp = inst->src(0);
+  SSATmp* sp = inst->src(1);
+  int64_t pcOff = inst->src(2)->getValInt();
 
   auto opc = *(getCurFunc()->unit()->at(pcOff));
   void* interpOneHelper = interpOneEntryPoints[opc];
@@ -4968,9 +4968,9 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgFillContThis(IRInstruction* inst) {
-  SSATmp* cont = inst->getSrc(0);
-  auto baseReg = m_regs[inst->getSrc(1)].getReg();
-  int64_t offset = inst->getSrc(2)->getValInt();
+  SSATmp* cont = inst->src(0);
+  auto baseReg = m_regs[inst->src(1)].getReg();
+  int64_t offset = inst->src(2)->getValInt();
   auto scratch = m_rScratch;
   auto contReg = m_regs[cont].getReg();
 
@@ -4984,10 +4984,10 @@ void CodeGenerator::cgFillContThis(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
-  auto contAR = inst->getSrc(0);
-  auto addr = inst->getSrc(1);
-  auto returnOff = inst->getSrc(2);
-  auto curFp = m_regs[inst->getSrc(3)].getReg();
+  auto contAR = inst->src(0);
+  auto addr = inst->src(1);
+  auto returnOff = inst->src(2);
+  auto curFp = m_regs[inst->src(3)].getReg();
   auto contARReg = m_regs[contAR].getReg();
 
   m_as.  storel (returnOff->getValInt(), contARReg[AROFF(m_soff)]);
@@ -5010,25 +5010,25 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
 
 void CodeGenerator::cgUnlinkContVarEnv(IRInstruction* inst) {
   emitContVarEnvHelperCall(
-    inst->getSrc(0),
+    inst->src(0),
     (TCA)VMExecutionContext::packContVarEnvLinkage);
 }
 
 void CodeGenerator::cgLinkContVarEnv(IRInstruction* inst) {
   emitContVarEnvHelperCall(
-    inst->getSrc(0),
+    inst->src(0),
     (TCA)VMExecutionContext::unpackContVarEnvLinkage);
 }
 
 void CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {
-  SSATmp* cont = inst->getSrc(0);
+  SSATmp* cont = inst->src(0);
   m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw),
                              m_regs[cont].getReg());
   emitFwdJcc(CC_NZ, inst->getTaken());
 }
 
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
-  auto contReg = m_regs[inst->getSrc(0)].getReg();
+  auto contReg = m_regs[inst->src(0)].getReg();
 
   const Offset doneOffset = CONTOFF(m_done);
   static_assert((doneOffset + 1) == CONTOFF(m_running),
@@ -5045,7 +5045,7 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   m_as.cmp_imm64_disp_reg64(0, CONTOFF(m_index),
-                            m_regs[inst->getSrc(0)].getReg());
+                            m_regs[inst->src(0)].getReg());
   emitFwdJcc(CC_L, inst->getTaken());
 }
 
@@ -5058,15 +5058,15 @@ void CodeGenerator::cgIterNext(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIterNextCommon(IRInstruction* inst, bool isNextK) {
-  PhysReg fpReg = m_regs[inst->getSrc(0)].getReg();
+  PhysReg fpReg = m_regs[inst->src(0)].getReg();
   ArgGroup args(m_regs);
-  args.addr(fpReg, getIterOffset(inst->getSrc(1)))
-      .addr(fpReg, getLocalOffset(inst->getSrc(2)));
+  args.addr(fpReg, getIterOffset(inst->src(1)))
+      .addr(fpReg, getLocalOffset(inst->src(2)));
   if (isNextK) {
-    args.addr(fpReg, getLocalOffset(inst->getSrc(3)));
+    args.addr(fpReg, getLocalOffset(inst->src(3)));
   }
   TCA helperAddr = isNextK ? (TCA)iter_next_key : (TCA)iter_next;
-  cgCallHelper(m_as, helperAddr, inst->getDst(), kSyncPoint, args);
+  cgCallHelper(m_as, helperAddr, inst->dst(), kSyncPoint, args);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {
@@ -5078,8 +5078,8 @@ void iterFreeHelper(Iter* iter) {
 }
 
 void CodeGenerator::cgIterFree(IRInstruction* inst) {
-  PhysReg fpReg = m_regs[inst->getSrc(0)].getReg();
-  int64_t  offset = getIterOffset(inst->getSrc(1));
+  PhysReg fpReg = m_regs[inst->src(0)].getReg();
+  int64_t  offset = getIterOffset(inst->src(1));
   cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
@@ -5089,24 +5089,24 @@ void CodeGenerator::cgIterInitK(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
-  PhysReg        fpReg = m_regs[inst->getSrc(1)].getReg();
-  int64_t     iterOffset = getIterOffset(inst->getSrc(2));
-  int64_t valLocalOffset = getLocalOffset(inst->getSrc(3));
-  SSATmp*          src = inst->getSrc(0);
+  PhysReg        fpReg = m_regs[inst->src(1)].getReg();
+  int64_t     iterOffset = getIterOffset(inst->src(2));
+  int64_t valLocalOffset = getLocalOffset(inst->src(3));
+  SSATmp*          src = inst->src(0);
   ArgGroup args(m_regs);
   args.addr(fpReg, iterOffset).ssa(src);
   if (src->isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, getLocalOffset(inst->getSrc(4)));
+      args.addr(fpReg, getLocalOffset(inst->src(4)));
     }
     TCA helperAddr = isInitK ? (TCA)new_iter_array_key : (TCA)new_iter_array;
-    cgCallHelper(m_as, helperAddr, inst->getDst(), kSyncPoint, args);
+    cgCallHelper(m_as, helperAddr, inst->dst(), kSyncPoint, args);
   } else {
     assert(src->type() == Type::Obj);
     args.imm(uintptr_t(getCurClass())).addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, getLocalOffset(inst->getSrc(4)));
+      args.addr(fpReg, getLocalOffset(inst->src(4)));
     } else {
       args.imm(0);
     }
@@ -5114,17 +5114,17 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
     // exception out, so we use kSyncPointAdjustOne, which adjusts the
     // stack pointer by 1 stack element on an unwind, skipping over
     // the src object.
-    cgCallHelper(m_as, (TCA)new_iter_object, inst->getDst(),
+    cgCallHelper(m_as, (TCA)new_iter_object, inst->dst(),
                  kSyncPointAdjustOne, args);
   }
 }
 
 void CodeGenerator::cgIncStat(IRInstruction *inst) {
   Stats::emitInc(m_as,
-                 Stats::StatCounter(inst->getSrc(0)->getValInt()),
-                 inst->getSrc(1)->getValInt(),
+                 Stats::StatCounter(inst->src(0)->getValInt()),
+                 inst->src(1)->getValInt(),
                  Transl::CC_None,
-                 inst->getSrc(2)->getValBool());
+                 inst->src(2)->getValBool());
 }
 
 void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
@@ -5132,7 +5132,7 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  emitAssertRefCount(m_as, m_regs[inst->getSrc(0)].getReg());
+  emitAssertRefCount(m_as, m_regs[inst->src(0)].getReg());
 }
 
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
@@ -5144,18 +5144,18 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
   emitTypeTest(inst->getTypeParam(),
-               m_regs[inst->getSrc(0)].getReg(1),
-               m_regs[inst->getSrc(0)].getReg(0),
+               m_regs[inst->src(0)].getReg(1),
+               m_regs[inst->src(0)].getReg(0),
                [&](ConditionCode cc) {
                  ifThen(m_as, ccNegate(cc), [&] { m_as.ud2(); });
                });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
-  SSATmp* objClass = inst->getSrc(0);
+  SSATmp* objClass = inst->src(0);
   assert(!objClass->isConst());
   auto objClassReg = m_regs[objClass].getReg();
-  SSATmp* constraint = inst->getSrc(1);
+  SSATmp* constraint = inst->src(1);
 
   if (constraint->isConst()) {
     m_as.  cmpq(constraint->getValClass(), objClassReg);
@@ -5201,7 +5201,7 @@ static void patchJumps(Asm& as, CodegenState& state, Block* block) {
 }
 
 void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
-  FTRACE(6, "cgBlock: {}\n", block->getId());
+  FTRACE(6, "cgBlock: {}\n", block->id());
 
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
@@ -5239,11 +5239,11 @@ LiveRegs computeLiveRegs(const IRFactory* factory, const RegAllocInfo& regs,
       if (Block* next = block->getNext()) live |= liveMap[next];
       for (auto it = block->end(); it != block->begin(); ) {
         IRInstruction& inst = *--it;
-        for (const SSATmp& dst : inst.getDsts()) {
+        for (const SSATmp& dst : inst.dsts()) {
           live -= regs[dst].getRegs();
         }
         live_regs[inst] = live;
-        for (SSATmp* src : inst.getSrcs()) {
+        for (SSATmp* src : inst.srcs()) {
           live |= regs[src].getRegs();
         }
       }
@@ -5279,7 +5279,7 @@ void genCodeForTrace(Trace* trace,
   auto emitBlock = [&](Asm& a, Block* block, Block* nextBlock) {
     assert(!isEmitted(block));
 
-    FTRACE(6, "cgBlock {} on {}\n", block->getId(),
+    FTRACE(6, "cgBlock {} on {}\n", block->id(),
            &a == &astubs ? "astubs" : "a");
 
     auto const aStart      = a.code.frontier;

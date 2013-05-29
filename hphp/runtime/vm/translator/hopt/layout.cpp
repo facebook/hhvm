@@ -83,7 +83,7 @@ LayoutInfo layoutBlocks(Trace* trace, const IRFactory& irFactory) {
                             smart::vector<Block*>::iterator stop) {
       folly::toAppend(what, &str);
       for (; it != stop; ++it) {
-        folly::toAppend((*it)->getId(), &str);
+        folly::toAppend((*it)->id(), &str);
         folly::toAppend(" ", &str);
       }
     };

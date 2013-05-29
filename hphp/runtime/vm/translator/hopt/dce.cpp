@@ -109,7 +109,7 @@ private:
 };
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
-// DCE state indexed by instr->getId().
+// DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef hphp_hash_set<const SSATmp*, pointer_hash<SSATmp>> SSASet;
 typedef StateVector<SSATmp, SSASet> SSACache;
@@ -130,15 +130,15 @@ void removeDeadInstructions(Trace* trace, const DceState& state) {
 }
 
 bool isUnguardedLoad(IRInstruction* inst) {
-  if (!inst->hasDst() || !inst->getDst()) return false;
+  if (!inst->hasDst() || !inst->dst()) return false;
   Opcode opc = inst->op();
-  SSATmp* dst = inst->getDst();
+  SSATmp* dst = inst->dst();
   Type type = dst->type();
   return ((opc == LdStack && (type == Type::Gen || type == Type::Cell)) ||
           (opc == LdLoc && type == Type::Gen) ||
           (opc == LdRef && type == Type::Cell) ||
           (opc == LdMem && type == Type::Cell &&
-           inst->getSrc(0)->type() == Type::PtrToCell) ||
+           inst->src(0)->type() == Type::PtrToCell) ||
           (opc == Unbox && type == Type::Cell));
 }
 
@@ -186,7 +186,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
         ++bit;
         continue;
       }
-      FTRACE(5, "erasing block {}\n", (*bit)->getId());
+      FTRACE(5, "erasing block {}\n", (*bit)->id());
       if ((*bit)->getTaken() && (*bit)->back()->op() == Jmp_) {
         needsReflow = true;
       }
@@ -219,7 +219,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
         wl.push_back(&inst);
       }
       if (inst.op() == DecRefNZ) {
-        auto* srcInst = inst.getSrc(0)->inst();
+        auto* srcInst = inst.src(0)->inst();
         Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
           assert(srcInst->op() == IncRef);
@@ -257,7 +257,7 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
       s.setDead();
     }
     if (inst->op() == DecRefNZ) {
-      SSATmp* src = inst->getSrc(0);
+      SSATmp* src = inst->src(0);
       IRInstruction* srcInst = src->inst();
       if (state[srcInst].countConsumedAny()) {
         state[inst].setLive();
@@ -265,7 +265,7 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
       }
     }
     if (inst->op() == DecRef) {
-      SSATmp* src = inst->getSrc(0);
+      SSATmp* src = inst->src(0);
       if (uses[src] == 1 && !src->type().canRunDtor()) {
         IRInstruction* srcInst = src->inst();
         if (srcInst->op() == IncRef) {
@@ -279,7 +279,7 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
   });
   for (const IRInstruction* decref : decrefs) {
     assert(decref->op() == DecRef);
-    SSATmp* src = decref->getSrc(0);
+    SSATmp* src = decref->src(0);
     assert(src->inst()->op() == IncRef);
     assert(!src->type().canRunDtor());
     if (uses[src] == 1) {
@@ -325,19 +325,19 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
     for (auto* inst : boost::adaptors::reverse(toSink)) {
       // prepend inserts an instruction to the beginning of a block, after
       // the label. Therefore, we iterate through toSink in the reversed order.
-      IRInstruction* sunkInst = irFactory->gen(IncRef, inst->getSrc(0));
+      IRInstruction* sunkInst = irFactory->gen(IncRef, inst->src(0));
       state[sunkInst].setLive();
       exit->front()->prepend(sunkInst);
 
-      auto dstId = inst->getDst()->getId();
+      auto dstId = inst->dst()->id();
       assert(!sunkTmps[dstId]);
-      sunkTmps[dstId] = sunkInst->getDst();
+      sunkTmps[dstId] = sunkInst->dst();
     }
     forEachInst(exit, [&](IRInstruction* inst) {
       // Replace the original tmps with the sunk tmps.
-      for (uint32_t i = 0; i < inst->getNumSrcs(); ++i) {
-        SSATmp* src = inst->getSrc(i);
-        if (SSATmp* sunkTmp = sunkTmps[src->getId()]) {
+      for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
+        SSATmp* src = inst->src(i);
+        if (SSATmp* sunkTmp = sunkTmps[src->id()]) {
           inst->setSrc(i, sunkTmp);
         }
       }
@@ -366,7 +366,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
       }
     }
     if (inst->op() == DecRefNZ) {
-      IRInstruction* srcInst = inst->getSrc(0)->inst();
+      IRInstruction* srcInst = inst->src(0)->inst();
       if (state[srcInst].isDead()) {
         state[inst].setDead();
         // This may take O(I) time where I is the number of IncRefs
@@ -375,8 +375,8 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
       }
     }
     if (Block* target = inst->getTaken()) {
-      if (!pushedTo[target->getId()]) {
-        pushedTo[target->getId()] = 1;
+      if (!pushedTo[target->id()]) {
+        pushedTo[target->id()] = 1;
         Trace* exit = target->getTrace();
         if (exit != trace) processExit(exit);
       }
@@ -404,14 +404,14 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
     switch (inst->op()) {
     case CreateCont:
       {
-        auto const frameInst = inst->getSrc(1)->inst();
+        auto const frameInst = inst->src(1)->inst();
         if (frameInst->op() == DefInlineFP) {
-          auto const spInst = frameInst->getSrc(0)->inst();
+          auto const spInst = frameInst->src(0)->inst();
           if (spInst->op() == SpillFrame &&
-              spInst->getSrc(3)->type().subtypeOfAny(Type::Obj, Type::Null)) {
+              spInst->src(3)->type().subtypeOfAny(Type::Obj, Type::Null)) {
             FTRACE(5, "CreateCont ({}): weak use of frame {}\n",
-                   inst->getId(),
-                   frameInst->getId());
+                   inst->id(),
+                   frameInst->id());
             state[frameInst].incWeakUse();
           }
         }
@@ -422,7 +422,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
     // eliminated.
     case StLoc:
       {
-        auto const frameInst = inst->getSrc(0)->inst();
+        auto const frameInst = inst->src(0)->inst();
         if (frameInst->op() == DefInlineFP) {
           state[frameInst].incWeakUse();
         }
@@ -431,14 +431,14 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
     case InlineReturn:
       {
-        auto frameUses = uses[inst->getSrc(0)];
-        auto srcInst = inst->getSrc(0)->inst();
+        auto frameUses = uses[inst->src(0)];
+        auto srcInst = inst->src(0)->inst();
         if (srcInst->op() == DefInlineFP) {
           auto weakUses = state[srcInst].weakUseCount();
           // We haven't counted this InlineReturn as a weak use yet,
           // which is where this '1' comes from.
           if (frameUses - weakUses == 1) {
-            FTRACE(5, "killing frame {}\n", srcInst->getId());
+            FTRACE(5, "killing frame {}\n", srcInst->id());
             killedFrames = true;
             state[srcInst].setDead();
           }
@@ -463,16 +463,16 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
     switch (inst->op()) {
     case CreateCont:
       {
-        auto const fp = inst->getSrc(1);
+        auto const fp = inst->src(1);
         if (state[fp->inst()].isDead()) {
-          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->getId());
+          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->id());
 
           CreateContData data;
-          data.origFunc = inst->getSrc(3)->getValFunc();
-          data.genFunc  = inst->getSrc(4)->getValFunc();
+          data.origFunc = inst->src(3)->getValFunc();
+          data.genFunc  = inst->src(4)->getValFunc();
 
-          assert(fp->inst()->getSrc(0)->inst()->op() == SpillFrame);
-          auto const thisPtr = fp->inst()->getSrc(0)->inst()->getSrc(3);
+          assert(fp->inst()->src(0)->inst()->op() == SpillFrame);
+          auto const thisPtr = fp->inst()->src(0)->inst()->src(3);
           factory->replace(
             inst,
             InlineCreateCont,
@@ -485,11 +485,11 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
     case StLoc: case InlineReturn:
       {
-        auto const fp = inst->getSrc(0);
+        auto const fp = inst->src(0);
         if (state[fp->inst()].isDead()) {
           FTRACE(5, "{} ({}) setDead\n",
                  opcodeName(inst->op()),
-                 inst->getId());
+                 inst->id());
           state[inst].setDead();
         }
       }
@@ -497,9 +497,9 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
     case DefInlineFP:
       FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-             inst->getId(),
+             inst->id(),
              state[inst].weakUseCount(),
-             uses[inst->getDst()]);
+             uses[inst->dst()]);
       break;
 
     default:
@@ -530,13 +530,13 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
     // srcInst is a CheckType that guards to a refcounted type. We need to
     // trace through to its source. If the CheckType guards to a non-refcounted
     // type then the reference is consumed by CheckType itself.
-    consumeIncRef(consumer, srcInst->getSrc(0), state, ssas, visitedSrcs);
+    consumeIncRef(consumer, srcInst->src(0), state, ssas, visitedSrcs);
   } else if (srcInst->op() == DefLabel) {
     // srcInst is a DefLabel that may be a join node. We need to find
     // the dst index of src in srcInst and trace through to each jump
     // providing a value for it.
-    for (unsigned i = 0, n = srcInst->getNumDsts(); i < n; ++i) {
-      if (srcInst->getDst(i) == src) {
+    for (unsigned i = 0, n = srcInst->numDsts(); i < n; ++i) {
+      if (srcInst->dst(i) == src) {
         srcInst->getBlock()->forEachSrc(i,
           [&](IRInstruction* jmp, SSATmp* val) {
             consumeIncRef(consumer, val, state, ssas, visitedSrcs);
@@ -584,8 +584,8 @@ void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
     auto cur = it; ++it;
     Block* block = *cur;
     block->remove_if([&] (const IRInstruction& inst) {
-      assert(inst.getId() < live.size());
-      return !live.test(inst.getId());
+      assert(inst.id() < live.size());
+      return !live.test(inst.id());
     });
     if (block->empty()) blocks.erase(cur);
   }
@@ -614,8 +614,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   while (!wl.empty()) {
     auto* inst = wl.front();
     wl.pop_front();
-    for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
-      SSATmp* src = inst->getSrc(i);
+    for (uint32_t i = 0; i < inst->numSrcs(); i++) {
+      SSATmp* src = inst->src(i);
       IRInstruction* srcInst = src->inst();
       if (srcInst->op() == DefConst) {
         continue;

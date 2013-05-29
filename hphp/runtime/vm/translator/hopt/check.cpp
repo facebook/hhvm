@@ -75,11 +75,11 @@ bool checkBlock(Block* b) {
   if (b->getTaken()) {
     // only Jmp_ can branch to a join block expecting values.
     assert(b->back()->op() == Jmp_ ||
-           b->getTaken()->front()->getNumDsts() == 0);
+           b->getTaken()->front()->numDsts() == 0);
   }
   if (b->getNext()) {
     // cannot fall-through to join block expecting values
-    assert(b->getNext()->front()->getNumDsts() == 0);
+    assert(b->getNext()->front()->numDsts() == 0);
   }
 
   {
@@ -95,7 +95,7 @@ bool checkBlock(Block* b) {
     }
   }
 
-  for (int i = 0; i < b->front()->getNumDsts(); ++i) {
+  for (int i = 0; i < b->front()->numDsts(); ++i) {
     auto const traceBlocks = b->getTrace()->getBlocks();
     b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
       assert(std::find(traceBlocks.begin(), traceBlocks.end(),
@@ -158,14 +158,14 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);
-  boost::dynamic_bitset<> defined0(factory.numTmps());
+  StateVector<SSATmp, bool> defined0(&factory, false);
   forPreorderDoms(blocks.front(), children, defined0,
-                  [] (Block* block, boost::dynamic_bitset<>& defined) {
+                  [] (Block* block, StateVector<SSATmp, bool>& defined) {
     for (IRInstruction& inst : *block) {
-      for (DEBUG_ONLY SSATmp* src : inst.getSrcs()) {
+      for (DEBUG_ONLY SSATmp* src : inst.srcs()) {
         assert(src->inst() != &inst);
         assert_log(src->inst()->op() == DefConst ||
-                   defined[src->getId()],
+                   defined[src],
                    [&]{ return folly::format(
                        "src '{}' in '{}' came from '{}', which is not a "
                        "DefConst and is not defined at this use site",
@@ -173,11 +173,10 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
                        src->inst()->toString()).str();
                    });
       }
-      for (SSATmp& dst : inst.getDsts()) {
-        assert(dst.inst() == &inst &&
-               inst.op() != DefConst);
-        assert(!defined[dst.getId()]);
-        defined[dst.getId()] = 1;
+      for (SSATmp& dst : inst.dsts()) {
+        assert(dst.inst() == &inst && inst.op() != DefConst);
+        assert(!defined[dst]);
+        defined[dst] = true;
       }
     }
   });
@@ -201,7 +200,7 @@ bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
     blocks.front(), children, State(&irFactory, false),
     [&] (Block* b, State& state) {
       for (auto& inst : *b) {
-        for (auto& src : inst.getSrcs()) {
+        for (auto& src : inst.srcs()) {
           if (src->isA(Type::FramePtr)) continue;
           if (src->isConst()) continue;
           if (!state[src]) {
@@ -222,7 +221,7 @@ bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
          */
         if (isCall(inst.op())) state.reset();
 
-        for (auto& d : inst.getDsts()) {
+        for (auto& d : inst.dsts()) {
           state[d] = true;
         }
       }
@@ -241,7 +240,7 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
   forPreorderDoms(blocks.front(), children, RegState(),
                   [&] (Block* block, RegState& state) {
     for (IRInstruction& inst : *block) {
-      for (SSATmp* src : inst.getSrcs()) {
+      for (SSATmp* src : inst.srcs()) {
         auto const &info = regs[src];
         if (!info.spilled() &&
             (info.getReg(0) == Transl::rVmSp ||
@@ -253,7 +252,7 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
           assert(state.tmp(info, i) == src);
         }
       }
-      for (SSATmp& dst : inst.getDsts()) {
+      for (SSATmp& dst : inst.dsts()) {
         auto const &info = regs[dst];
         for (unsigned i = 0, n = info.numAllocatedRegs(); i < n; ++i) {
           state.tmp(info, i) = &dst;

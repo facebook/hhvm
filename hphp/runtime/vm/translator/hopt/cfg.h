@@ -39,8 +39,8 @@ struct PostorderSort {
 
   void walk(Block* block) {
     assert(!block->empty());
-    if (m_visited.test(block->getId())) return;
-    m_visited.set(block->getId());
+    if (m_visited.test(block->id())) return;
+    m_visited.set(block->id());
     Block* taken = block->getTaken();
     if (taken && taken->getTrace()->isMain() != block->getTrace()->isMain()) {
       walk(taken);

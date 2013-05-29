@@ -23,7 +23,7 @@ namespace HPHP { namespace JIT {
 
 class SSATmp {
 public:
-  uint32_t          getId() const { return m_id; }
+  uint32_t          id() const { return m_id; }
   IRInstruction*    inst() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              type() const { return m_type; }

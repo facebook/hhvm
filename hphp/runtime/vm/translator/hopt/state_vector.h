@@ -28,7 +28,7 @@ namespace HPHP { namespace JIT {
 
 /*
  * Utility to keep a vector of state about each key, indexed by
- * key->getId(), where key can be an IRInstruction, Block, or SSATmp.
+ * key->id(), where key can be an IRInstruction, Block, or SSATmp.
  *
  * Takes an `init' element, which everything is defaulted to.  Calls
  * to reset() restore all entries to this state.
@@ -61,7 +61,7 @@ struct StateVector {
 
   reference operator[](const Key& k) { return (*this)[&k]; }
   reference operator[](const Key* k) {
-    auto id = k->getId();
+    auto id = k->id();
     if (id >= m_info.size()) grow();
     assert(id < m_info.size());
     return m_info[id];
@@ -69,8 +69,8 @@ struct StateVector {
 
   const_reference operator[](const Key& k) const { return (*this)[&k]; }
   const_reference operator[](const Key* k) const {
-    assert(k->getId() < numIds(m_factory, (Key*)nullptr));
-    auto id = k->getId();
+    assert(k->id() < numIds(m_factory, (Key*)nullptr));
+    auto id = k->id();
     return id < m_info.size() ? m_info[id] : m_init;
   }
 

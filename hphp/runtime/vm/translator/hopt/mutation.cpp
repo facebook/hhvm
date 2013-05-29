@@ -32,10 +32,10 @@ void cloneToBlock(const BlockList& rpoBlocks,
   StateVector<SSATmp,SSATmp*> rewriteMap(irFactory, nullptr);
 
   auto rewriteSources = [&] (IRInstruction* inst) {
-    for (int i = 0; i < inst->getNumSrcs(); ++i) {
-      if (auto newTmp = rewriteMap[inst->getSrc(i)]) {
+    for (int i = 0; i < inst->numSrcs(); ++i) {
+      if (auto newTmp = rewriteMap[inst->src(i)]) {
         FTRACE(5, "  rewrite: {} -> {}\n",
-               inst->getSrc(i)->toString(),
+               inst->src(i)->toString(),
                newTmp->toString());
         inst->setSrc(i, newTmp);
       }
@@ -46,15 +46,15 @@ void cloneToBlock(const BlockList& rpoBlocks,
   for (auto it = first; it != last; ++it) {
     assert(!it->isControlFlowInstruction());
 
-    FTRACE(5, "cloneToBlock({}): {}\n", target->getId(), it->toString());
+    FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
     auto const newInst = irFactory->cloneInstruction(&*it);
 
-    if (auto const numDests = newInst->getNumDsts()) {
+    if (auto const numDests = newInst->numDsts()) {
       for (int i = 0; i < numDests; ++i) {
         FTRACE(5, "  add rewrite: {} -> {}\n",
-               it->getDst(i)->toString(),
-               newInst->getDst(i)->toString());
-        rewriteMap[it->getDst(i)] = newInst->getDst(i);
+               it->dst(i)->toString(),
+               newInst->dst(i)->toString());
+        rewriteMap[it->dst(i)] = newInst->dst(i);
       }
     }
 
@@ -64,7 +64,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
 
   auto it = rpoIteratorTo(rpoBlocks, target);
   for (; it != rpoBlocks.end(); ++it) {
-    FTRACE(5, "cloneToBlock: rewriting block {}\n", (*it)->getId());
+    FTRACE(5, "cloneToBlock: rewriting block {}\n", (*it)->id());
     for (auto& inst : **it) {
       FTRACE(5, " rewriting {}\n", inst.toString());
       rewriteSources(&inst);
@@ -85,7 +85,7 @@ void moveToBlock(Block::iterator const first,
     assert(!inst->isControlFlowInstruction());
 
     FTRACE(5, "moveToBlock({}): {}\n",
-           target->getId(),
+           target->id(),
            inst->toString());
 
     it = srcBlock->erase(it);
@@ -98,7 +98,7 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
   assert(isRPOSorted(blocks));
 
   auto retypeDst = [&] (IRInstruction* inst, int num) {
-    auto ssa = inst->getDst(num);
+    auto ssa = inst->dst(num);
 
     /*
      * The type of a tmp defined by DefLabel is the union of the
@@ -117,8 +117,8 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
   };
 
   auto visit = [&] (IRInstruction* inst) {
-    for (int i = 0; i < inst->getNumDsts(); ++i) {
-      auto const ssa = inst->getDst(i);
+    for (int i = 0; i < inst->numDsts(); ++i) {
+      auto const ssa = inst->dst(i);
       auto const oldType = ssa->type();
       retypeDst(inst, i);
       if (ssa->type() != oldType) {
@@ -131,7 +131,7 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
   auto it = rpoIteratorTo(blocks, changed);
   assert(it != blocks.end());
   for (; it != blocks.end(); ++it) {
-    FTRACE(5, "reflowTypes: visiting block {}\n", (*it)->getId());
+    FTRACE(5, "reflowTypes: visiting block {}\n", (*it)->id());
     for (auto& inst : **it) visit(&inst);
   }
 }

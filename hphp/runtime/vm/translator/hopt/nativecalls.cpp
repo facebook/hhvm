@@ -45,7 +45,7 @@ static const DestType DNone = DestType::None;
  * Func
  *   A value describing the function to call:
  *     (TCA)<function pointer> - Raw function pointer
- *     {FSSA, idx} - Use a const TCA from inst->getSrc(idx)
+ *     {FSSA, idx} - Use a const TCA from inst->src(idx)
  *
  * Dest
  *   DSSA - The helper returns a single-register value
@@ -59,8 +59,8 @@ static const DestType DNone = DestType::None;
  *
  * Args
  *   A list of tuples describing the arguments to pass to the helper
- *     {SSA, idx} - Pass the value in inst->getSrc(idx)
- *     {TV, idx} - Pass the value in inst->getSrc(idx) as a
+ *     {SSA, idx} - Pass the value in inst->src(idx)
+ *     {TV, idx} - Pass the value in inst->src(idx) as a
  *                 TypedValue, in two registers
  *     {VecKeyS, idx} - Like TV, but Str values are passed as a raw
  *                      StringData*, in a single register

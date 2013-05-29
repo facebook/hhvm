@@ -82,11 +82,11 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
    * type-specialized versions.
    */
   auto optLdMem = [&] (IRInstruction* checkType, IRInstruction* lastMarker) {
-    auto const incRef = checkType->getSrc(0)->inst();
+    auto const incRef = checkType->src(0)->inst();
     if (incRef->op() != IncRef) return;
-    auto const ldMem = incRef->getSrc(0)->inst();
+    auto const ldMem = incRef->src(0)->inst();
     if (ldMem->op() != LdMem) return;
-    if (ldMem->getSrc(1)->getValInt() != 0) return;
+    if (ldMem->src(1)->getValInt() != 0) return;
     if (!ldMem->getTypeParam().equals(Type::Cell)) return;
 
     FTRACE(5, "candidate: {}\n", ldMem->toString());
@@ -117,7 +117,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
       CheckTypeMem,
       checkType->getTypeParam(),
       checkType->getTaken(),
-      ldMem->getSrc(0)
+      ldMem->src(0)
     );
     mainBlock->insert(mainBlock->iteratorTo(ldMem), newCheckType);
 
@@ -140,7 +140,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
     irFactory->replace(
       checkType,
       Mov,
-      incRef->getDst()
+      incRef->dst()
     );
 
     // Move the fallthrough case to specialized.
@@ -169,7 +169,7 @@ void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
       }
 
       if (inst.op() == CheckType &&
-          inst.getSrc(0)->type().equals(Type::Cell)) {
+          inst.src(0)->type().equals(Type::Cell)) {
         assert(lastMarker);
         optLdMem(&inst, lastMarker);
         break;

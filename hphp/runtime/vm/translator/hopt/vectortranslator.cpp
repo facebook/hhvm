@@ -832,7 +832,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
 
   if (!needsCheck) return propAddr;
 
-  return m_tb.cond(m_ht.getCurFunc(),
+  return m_tb.cond(m_ht.curFunc(),
     [&] (Block* taken) {
       gen(CheckInitMem, taken, propAddr, cns(0));
     },
@@ -861,7 +861,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
 }
 
 Class* HhbcTranslator::VectorTranslator::contextClass() const {
-  return m_ht.getCurFunc()->cls();
+  return m_ht.curFunc()->cls();
 }
 
 void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
@@ -889,7 +889,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
     SSATmp* baseAsObj = nullptr;
-    m_base = m_tb.cond(m_ht.getCurFunc(),
+    m_base = m_tb.cond(m_ht.curFunc(),
       [&] (Block* taken) {
         // baseAsObj is only available in the Next branch
         baseAsObj = gen(LdMem, Type::Obj, taken, m_base, cns(0));
@@ -1037,7 +1037,7 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
     return;
   }
 
-  m_base = m_tb.cond(m_ht.getCurFunc(),
+  m_base = m_tb.cond(m_ht.curFunc(),
     [&] (Block* taken) {
       gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
     },
@@ -2158,7 +2158,7 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
     // exit trace to side exit to the next instruction, replacing our guess
     // with the correct stack output.
 
-    auto toSpill = m_ht.getSpillValues();
+    auto toSpill = m_ht.peekSpillValues();
     assert(toSpill.size());
     assert(toSpill[0] == m_result);
     SSATmp* str = m_irf.gen(AssertNonNull, m_strTestResult)->dst();

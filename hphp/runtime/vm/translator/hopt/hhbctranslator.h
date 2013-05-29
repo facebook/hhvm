@@ -246,7 +246,7 @@ struct HhbcTranslator {
                       int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFunc(int32_t numParams, SSATmp* funcName);
-  SSATmp* getClsMethodCtx(const Func* callee, const Class* cls);
+  SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
@@ -588,7 +588,6 @@ private:
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
-  SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
@@ -618,19 +617,19 @@ private:
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* getCurFunc()   const { return m_bcStateStack.back().func; }
-  Class*      getCurClass()  const { return getCurFunc()->cls(); }
-  Unit*       getCurUnit()   const { return getCurFunc()->unit(); }
-  Offset      bcOff()        const { return m_bcStateStack.back().bcOff; }
-  SrcKey      getCurSrcKey() const { return SrcKey(getCurFunc(), bcOff()); }
+  const Func* curFunc()   const { return m_bcStateStack.back().func; }
+  Class*      curClass()  const { return curFunc()->cls(); }
+  Unit*       curUnit()   const { return curFunc()->unit(); }
+  Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
+  SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
 
   /*
    * Return the SrcKey for the next HHBC (whether it is in this
    * tracelet or not).
    */
   SrcKey nextSrcKey() const {
-    SrcKey srcKey(getCurFunc(), bcOff());
-    srcKey.advance(getCurFunc()->unit());
+    SrcKey srcKey(curFunc(), bcOff());
+    srcKey.advance(curFunc()->unit());
     return srcKey;
   }
 
@@ -658,7 +657,7 @@ private:
   SSATmp* popA() { return pop(Type::Cls);       }
   SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
-  std::vector<SSATmp*> getSpillValues() const;
+  std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(Trace* t, SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();

@@ -241,7 +241,7 @@ public:
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
-  CSEHash& getConstTable()       { return m_constTable; }
+  CSEHash& constTable()          { return m_constTable; }
 
 private:
   SSATmp* findConst(ConstData& cdata, Type t);

@@ -45,11 +45,11 @@ struct RegState {
   SSATmp* slots[kNumSlots]; // which tmp is in each spill slot
   SSATmp*& tmp(const RegisterInfo& info, int i) {
     if (info.spilled()) {
-      auto slot = info.getSpillInfo(i).slot();
+      auto slot = info.spillInfo(i).slot();
       assert(unsigned(slot) < kNumSlots);
       return slots[slot];
     }
-    auto r = info.getReg(i);
+    auto r = info.reg(i);
     assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
     return regs[int(r)];
   }
@@ -287,8 +287,8 @@ bool checkRegisters(Trace* trace, const IRFactory& factory,
       for (SSATmp* src : inst.srcs()) {
         auto const &info = regs[src];
         if (!info.spilled() &&
-            (info.getReg(0) == Transl::rVmSp ||
-             info.getReg(0) == Transl::rVmFp)) {
+            (info.reg(0) == Transl::rVmSp ||
+             info.reg(0) == Transl::rVmFp)) {
           // hack - ignore rbx and rbp
           continue;
         }

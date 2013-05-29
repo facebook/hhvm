@@ -47,10 +47,10 @@ int RegisterInfo::numAllocatedRegs() const {
   return i;
 }
 
-RegSet RegisterInfo::getRegs() const {
+RegSet RegisterInfo::regs() const {
   RegSet regs;
   for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
-    if (hasReg(i)) regs.add(getReg(i));
+    if (hasReg(i)) regs.add(reg(i));
   }
   return regs;
 }
@@ -259,7 +259,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
     if (reg->isAllocated()) {
       SSATmp* tmp = reg->m_ssaTmp;
       for (int r = 0; r < ls->m_allocInfo[tmp].numAllocatedRegs(); r++) {
-        if (ls->m_allocInfo[tmp].getReg(r) == PhysReg(i)) {
+        if (ls->m_allocInfo[tmp].reg(r) == PhysReg(i)) {
           ls->assignRegToTmp(reg, tmp, r);
         }
       }
@@ -378,7 +378,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
     }
     if (!needsReloading[i]) {
       for (int i = 0, n = m_allocInfo[tmp].numAllocatedRegs(); i < n; ++i) {
-        m_regs[int(m_allocInfo[tmp].getReg(i))].m_pinned = true;
+        m_regs[int(m_allocInfo[tmp].reg(i))].m_pinned = true;
       }
     }
   }
@@ -723,7 +723,7 @@ void LinearScan::collectInfo(BlockList::iterator it, Trace* trace) {
     bool offTrace = block->trace() != trace;
     if (offTrace) {
       if (!trace->isMain()) return;
-      int lastId = block->trace()->getData();
+      int lastId = block->trace()->data();
       for (IRInstruction& inst : *block) {
         for (auto* src : inst.srcs()) {
           if (lastId > m_uses[src].lastUse) {
@@ -760,7 +760,7 @@ void LinearScan::computePreColoringHint() {
   using namespace NativeCalls;
   if (CallMap::hasInfo(opc)) {
     unsigned reg = 0;
-    for (auto const& arg : CallMap::getInfo(opc).args) {
+    for (auto const& arg : CallMap::info(opc).args) {
       switch (arg.type) {
         case SSA:
           m_preColoringHint.add(inst->src(arg.srcIdx), 0, reg++);
@@ -872,10 +872,10 @@ static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
                                  unsigned dstIdx, uint32_t regIndex) {
   assert(label->op() == DefLabel);
   SSATmp* withReg = label->block()->findSrc(dstIdx, [&](SSATmp* src) {
-    return regs[src].getReg(regIndex) != InvalidReg &&
+    return regs[src].reg(regIndex) != InvalidReg &&
       src->inst()->block()->hint() != Block::Unlikely;
   });
-  return withReg ? regs[withReg].getReg(regIndex) : reg::noreg;
+  return withReg ? regs[withReg].reg(regIndex) : reg::noreg;
 }
 
 // This function attempts to find a pre-coloring hint from two
@@ -893,7 +893,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
     // If we're precoloring a Reload of a temp that we'd normally find
     // a hint for, just return the register allocated to the spilled
     // temp.
-    auto reg = m_allocInfo[tmp].getReg(regIndex);
+    auto reg = m_allocInfo[tmp].reg(regIndex);
     assert(reg != reg::noreg);
     return reg;
   }
@@ -930,7 +930,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
       if (tmp == src) {
         // For now, a DefLabel should never have a register assigned
         // to it before any of its incoming Jmp_ instructions.
-        always_assert(m_allocInfo[label->dst(si)].getReg(regIndex) ==
+        always_assert(m_allocInfo[label->dst(si)].reg(regIndex) ==
                       reg::noreg);
         auto reg = findLabelSrcReg(m_allocInfo, label, si, regIndex);
         if (reg != reg::noreg) return reg;
@@ -1269,7 +1269,7 @@ bool srcsAreLive(const RegAllocInfo& regs, IRInstruction* inst,
   // instruction that uses them.
   for (SSATmp* src : inst->srcs()) {
     if (!regs[src].hasReg(0) && src->inst()->op() != DefConst) return false;
-    auto reg = regs[src].getReg(0);
+    auto reg = regs[src].reg(0);
     if (reg != rVmSp && reg != rVmFp) return false;
   }
   return true;
@@ -1335,7 +1335,7 @@ void LinearScan::rematerializeAux() {
       IRInstruction& inst = *it;
       Opcode opc = inst.op();
       if (opc == DefFP || opc == FreeActRec) {
-        assert(m_allocInfo[inst.dst()].getReg() == rVmFp);
+        assert(m_allocInfo[inst.dst()].reg() == rVmFp);
         curFp = inst.dst();
       } else if (opc == Reload) {
         // s = Spill t0
@@ -1383,7 +1383,7 @@ void LinearScan::rematerializeAux() {
       }
 
       // Updating curSp and localValues
-      if (inst.hasDst() && m_allocInfo[inst.dst()].getReg() == rVmSp) {
+      if (inst.hasDst() && m_allocInfo[inst.dst()].reg() == rVmSp) {
         // inst modifies the stack pointer.
         curSp = inst.dst();
       }

@@ -235,7 +235,7 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
       if (!info.spilled()) {
         for (int i = 0, sz = info.numAllocatedRegs(); i < sz; ++i) {
           if (i != 0) os << ",";
-          PhysReg reg = info.getReg(i);
+          PhysReg reg = info.reg(i);
           if (reg.type() == PhysReg::GP) {
             os << reg::regname(Reg64(reg));
           } else {
@@ -245,7 +245,7 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
       } else {
         for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
           if (i != 0) os << ",";
-          os << info.getSpillInfo(i);
+          os << info.spillInfo(i);
         }
       }
       os << ')' << color(ANSI_COLOR_END);
@@ -282,7 +282,7 @@ static smart::vector<Block*> blocks(const Trace* trace,
         blocks.push_back(block);
       }
     }
-    for (Trace* e : trace->getExitTraces()) {
+    for (Trace* e : trace->exitTraces()) {
       unlikely.insert(unlikely.end(),
                       e->blocks().begin(),
                       e->blocks().end());
@@ -292,7 +292,7 @@ static smart::vector<Block*> blocks(const Trace* trace,
   }
 
   blocks.assign(trace->blocks().begin(), trace->blocks().end());
-  for (Trace* e : trace->getExitTraces()) {
+  for (Trace* e : trace->exitTraces()) {
     blocks.insert(blocks.end(), e->blocks().begin(), e->blocks().end());
   }
   std::sort(

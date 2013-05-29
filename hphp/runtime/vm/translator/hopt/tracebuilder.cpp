@@ -520,23 +520,23 @@ void TraceBuilder::appendBlock(Block* block) {
   gen(Marker, *m_lastMarker);
 }
 
-CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
-  return inst->op() == DefConst ? &m_irFactory.getConstTable() :
+CSEHash* TraceBuilder::cseHashTable(IRInstruction* inst) {
+  return inst->op() == DefConst ? &m_irFactory.constTable() :
          &m_cseHash;
 }
 
 void TraceBuilder::cseInsert(IRInstruction* inst) {
-  getCSEHashTable(inst)->insert(inst->dst());
+  cseHashTable(inst)->insert(inst->dst());
 }
 
 void TraceBuilder::cseKill(SSATmp* src) {
   if (src->inst()->canCSE()) {
-    getCSEHashTable(src->inst())->erase(src);
+    cseHashTable(src->inst())->erase(src);
   }
 }
 
 SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
-  return getCSEHashTable(inst)->lookup(inst);
+  return cseHashTable(inst)->lookup(inst);
 }
 
 //////////////////////////////////////////////////////////////////////

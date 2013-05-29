@@ -270,7 +270,7 @@ bool CallMap::hasInfo(Opcode op) {
   return mapContains(s_callMap.m_map, op);
 }
 
-const CallInfo& CallMap::getInfo(Opcode op) {
+const CallInfo& CallMap::info(Opcode op) {
   auto it = s_callMap.m_map.find(op);
   assert(it != s_callMap.m_map.end());
   return it->second;

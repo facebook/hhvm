@@ -85,10 +85,10 @@ struct Trace : private boost::noncopyable {
   // Used by LinearScan as a "fake" instruction id, that comes
   // between the id of the last instruction that branches to
   // this exit trace, and the next instruction on the main trace.
-  uint32_t getData() const { return m_data; }
+  uint32_t data() const { return m_data; }
   void setData(uint32_t d) { m_data = d; }
 
-  uint32_t getBcOff() const { return m_bcOff; }
+  uint32_t bcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
     exit->setMain(this);
@@ -108,15 +108,15 @@ struct Trace : private boost::noncopyable {
     assert(m_main == nullptr);
     m_main = t;
   }
-  Trace* getMain() {
+  Trace* main() {
     return m_main;
   }
 
   typedef std::list<Trace*> ExitList;
   typedef std::list<Trace*>::iterator ExitIterator;
 
-  ExitList& getExitTraces() { return m_exitTraces; }
-  const ExitList& getExitTraces() const { return m_exitTraces; }
+  ExitList& exitTraces() { return m_exitTraces; }
+  const ExitList& exitTraces() const { return m_exitTraces; }
   std::string toString() const;
 
 private:

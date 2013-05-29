@@ -115,12 +115,12 @@ public:
    *
    * Returns InvalidReg for slots that aren't allocated.
    */
-  PhysReg getReg() const {
+  PhysReg reg() const {
     assert(!m_isSpilled);
     return m_regs[0];
   }
 
-  PhysReg getReg(uint32_t i) const {
+  PhysReg reg(uint32_t i) const {
     assert(!m_isSpilled);
     return m_regs[i];
   }
@@ -154,7 +154,7 @@ public:
   }
 
   /* Returns the set of registers in this RegisterInfo */
-  RegSet getRegs() const;
+  RegSet regs() const;
 
   /*
    * Returns information about how to spill/fill a SSATmp.
@@ -170,7 +170,7 @@ public:
     m_isSpilled = true;
   }
 
-  SpillInfo getSpillInfo(int idx) const {
+  SpillInfo spillInfo(int idx) const {
     assert(m_isSpilled);
     return m_spillInfo[idx];
   }

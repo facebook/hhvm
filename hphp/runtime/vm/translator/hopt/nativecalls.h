@@ -75,7 +75,7 @@ public:
   explicit CallMap(CallInfoList infos);
 
   static bool hasInfo(Opcode op);
-  static const CallInfo& getInfo(Opcode op);
+  static const CallInfo& info(Opcode op);
 
 private:
   CallInfoMap m_map;

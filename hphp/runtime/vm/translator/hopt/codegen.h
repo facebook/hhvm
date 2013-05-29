@@ -327,13 +327,13 @@ private:
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
-  const Func* getCurFunc() const;
-  Class*      getCurClass() const { return getCurFunc()->cls(); }
+  const Func* curFunc() const;
+  Class*      curClass() const { return curFunc()->cls(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = kSyncPoint);
   Address getDtorGeneric();
   Address getDtorTyped();
-  int getIterOffset(SSATmp* tmp);
-  int getIterOffset(uint32_t id);
+  int iterOffset(SSATmp* tmp);
+  int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
@@ -404,9 +404,9 @@ public:
 
   PhysReg dstReg() const { return m_dstReg; }
   PhysReg srcReg() const { return m_srcReg; }
-  Kind getKind() const { return m_kind; }
+  Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed getImm() const { return m_imm; }
+  Immed imm() const { return m_imm; }
   bool isZeroExtend() const {return m_zeroExtend;}
   bool done() const { return m_done; }
   void markDone() { m_done = true; }

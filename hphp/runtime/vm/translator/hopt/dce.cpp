@@ -247,7 +247,7 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
       always_assert_log(s.decRefNZed(), [&]{
-        Trace* mainTrace = trace->isMain() ? trace : trace->getMain();
+        Trace* mainTrace = trace->isMain() ? trace : trace->main();
         return folly::format("\n{} has state {} in trace:\n{}{}\n",
                inst->toString(), s.toString(), mainTrace->toString(),
                trace == mainTrace ? "" : trace->toString()).str();
@@ -579,7 +579,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   auto removeEmptyExitTraces = [&] {
-    trace->getExitTraces().remove_if([](Trace* exit) {
+    trace->exitTraces().remove_if([](Trace* exit) {
       return exit->blocks().empty();
     });
   };
@@ -634,7 +634,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);
-  for (Trace* exit : trace->getExitTraces()) {
+  for (Trace* exit : trace->exitTraces()) {
     removeDeadInstructions(exit, state);
   }
 

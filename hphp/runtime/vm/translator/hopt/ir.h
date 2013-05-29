@@ -778,10 +778,10 @@ class RawMemSlot {
     }
   }
 
-  int64_t getOffset()   const { return m_offset; }
-  int32_t getSize()     const { return m_size; }
+  int64_t offset() const { return m_offset; }
+  int32_t size() const { return m_size; }
   Type type() const { return m_type; }
-  bool allowExtra()   const { return m_allowExtra; }
+  bool allowExtra() const { return m_allowExtra; }
 
  private:
   RawMemSlot(int64_t offset, int32_t size, Type type, bool allowExtra = false)

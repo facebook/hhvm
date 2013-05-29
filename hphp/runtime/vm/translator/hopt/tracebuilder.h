@@ -321,7 +321,7 @@ private:
   SSATmp*   cseLookup(IRInstruction* inst);
   void      cseInsert(IRInstruction* inst);
   void      cseKill(SSATmp* src);
-  CSEHash*  getCSEHashTable(IRInstruction* inst);
+  CSEHash*  cseHashTable(IRInstruction* inst);
   void      killCse();
   void      killLocals();
   void      killLocalValue(uint32_t id);

@@ -144,7 +144,7 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 template <class Body>
 void forEachTrace(Trace* main, Body body) {
   body(main);
-  for (Trace* exit : main->getExitTraces()) {
+  for (Trace* exit : main->exitTraces()) {
     body(exit);
   }
 }
@@ -157,7 +157,7 @@ void forEachTraceBlock(Trace* main, Body body) {
   for (Block* block : main->blocks()) {
     body(block);
   }
-  for (Trace* exit : main->getExitTraces()) {
+  for (Trace* exit : main->exitTraces()) {
     for (Block* block : exit->blocks()) {
       body(block);
     }

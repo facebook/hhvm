@@ -10,3 +10,6 @@ $object = new Foo;
 $object->prop = "Hello\n";
 
 $object->method();
+
+$object->prop2 = "\tThere";
+$object->method();

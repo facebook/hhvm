@@ -16,4 +16,17 @@ hphpd> print $this
     [prop] => "Hello\n"
 )
 [0m
+hphpd> continue
+[22;32mBreakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php[0m
+[22;37m   4 [0m  [22;36mfunction[0m [22;34mmethod[0m() {[0m
+[22;31;47m   5 [0m    [22;31;47m$[0m[22;31;47mother[0m[22;31;47m [0m[22;31;47m=[0m[22;31;47m [0m[22;31;47m$[0m[22;31;47mthis[0m[22;31;47m;[0m[0m
+[22;37m   6 [0m  }[0m
+[0m
+hphpd> print $this
+[22;36mFoo Object
+(
+    [prop] => "Hello\n"
+    [prop2] => "\tThere"
+)
+[0m
 hphpd> quit

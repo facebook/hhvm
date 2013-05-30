@@ -804,6 +804,7 @@ void VariableSerializer::writeArrayValue(CVarRef value) {
 
   write(value);
   switch (m_type) {
+  case DebuggerDump:
   case PrintR:
     m_buf->append('\n');
     break;
@@ -827,7 +828,6 @@ void VariableSerializer::writeArrayFooter() {
   case DebuggerDump:
   case PrintR:
     if (m_rsrcName.empty()) {
-      if (m_type == DebuggerDump) m_buf->append("\n");
       indent();
       m_buf->append(")\n");
       if (m_indent > 0) {

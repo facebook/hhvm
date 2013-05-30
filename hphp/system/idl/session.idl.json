@@ -97,45 +97,19 @@
             ]
         },
         {
-            "name": "session_set_save_handler",
-            "desc": "session_set_save_handler() sets the user-level session storage functions which are used for storing and retrieving data associated with a session. This is most useful when a storage method other than those supplied by PHP sessions is preferred. i.e. Storing the session data in a local database.",
-            "flags": [
-                "HasDocComment"
-            ],
+            "name": "hphp_session_set_save_handler",
             "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
+                "type": "Boolean"
             },
             "args": [
                 {
-                    "name": "open",
-                    "type": "String",
-                    "desc": "Open function, this works like a constructor in classes and is executed when the session is being opened. The open function expects two parameters, where the first is the save path and the second is the session name."
+                    "name": "sessionhandler",
+                    "type": "Object"
                 },
                 {
-                    "name": "close",
-                    "type": "String",
-                    "desc": "Close function, this works like a destructor in classes and is executed when the session operation is done."
-                },
-                {
-                    "name": "read",
-                    "type": "String",
-                    "desc": "Read function must return string value always to make save handler work as expected. Return empty string if there is no data to read. Return values from other handlers are converted to boolean expression. TRUE for success, FALSE for failure."
-                },
-                {
-                    "name": "write",
-                    "type": "String",
-                    "desc": "Write function that is called when session data is to be saved. This function expects two parameters: an identifier and the data associated with it.\n\nThe \"write\" handler is not executed until after the output stream is closed. Thus, output from debugging statements in the \"write\" handler will never be seen in the browser. If debugging output is necessary, it is suggested that the debug output be written to a file instead."
-                },
-                {
-                    "name": "destroy",
-                    "type": "String",
-                    "desc": "The destroy handler, this is executed when a session is destroyed with session_destroy() and takes the session id as its only parameter."
-                },
-                {
-                    "name": "gc",
-                    "type": "String",
-                    "desc": "The garbage collector, this is executed when the session garbage collector is executed and takes the max session lifetime as its only parameter."
+                    "name": "register_shutdown",
+                    "type": "Boolean",
+                    "value": "true"
                 }
             ]
         },
@@ -384,5 +358,104 @@
         }
     ],
     "classes": [
+        {
+            "name": "SessionHandler",
+            "desc": "",
+            "ifaces": [
+                "SessionHandlerInterface"
+            ],
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "open",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "save_path",
+                            "type": "String"
+                        },
+                        {
+                            "name": "session_id",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "close",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "read",
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                        {
+                            "name": "session_id",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "write",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "session_id",
+                            "type": "String"
+                        },
+                        {
+                            "name": "session_data",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "destroy",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "session_id",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "gc",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "maxlifetime",
+                            "type": "Int32"
+                        }
+                    ]
+                }
+            ]
+        }
     ]
 }

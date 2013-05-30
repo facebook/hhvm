@@ -29,7 +29,7 @@ void f_session_set_cookie_params(int64_t lifetime, CStrRef path = null_string, C
 Array f_session_get_cookie_params();
 String f_session_name(CStrRef newname = null_string);
 Variant f_session_module_name(CStrRef newname = null_string);
-bool f_session_set_save_handler(CStrRef open, CStrRef close, CStrRef read, CStrRef write, CStrRef destroy, CStrRef gc);
+bool f_session_set_save_handler(CObjRef sessionhandler, bool register_shutdown = true);
 String f_session_save_path(CStrRef newname = null_string);
 String f_session_id(CStrRef newid = null_string);
 bool f_session_regenerate_id(bool delete_old_session = false);
@@ -45,6 +45,33 @@ void f_session_commit();
 bool f_session_register(int _argc, CVarRef var_names, CArrRef _argv = null_array);
 bool f_session_unregister(CStrRef varname);
 bool f_session_is_registered(CStrRef varname);
+
+///////////////////////////////////////////////////////////////////////////////
+// class SessionHandler
+
+class SessionModule;
+
+FORWARD_DECLARE_CLASS_BUILTIN(SessionHandler);
+class c_SessionHandler : public ExtObjectData {
+ public:
+  DECLARE_CLASS(SessionHandler, SessionHandler, ObjectData)
+
+  // need to implement
+  public: c_SessionHandler(Class* cls = c_SessionHandler::s_cls);
+  public: ~c_SessionHandler();
+  public: void t___construct();
+  public: bool t_open(CStrRef save_path, CStrRef session_id);
+  public: bool t_close();
+  public: String t_read(CStrRef session_id);
+  public: bool t_write(CStrRef session_id, CStrRef session_data);
+  public: bool t_destroy(CStrRef session_id);
+  public: bool t_gc(int maxlifetime);
+
+  // implemented by HPHP
+  public: c_SessionHandler *create();
+
+  private: SessionModule* m_mod;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

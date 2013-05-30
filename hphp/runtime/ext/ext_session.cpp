@@ -78,12 +78,7 @@ public:
   int    m_module_number;
   int64_t  m_cache_expire;
 
-  std::string m_ps_open;
-  std::string m_ps_close;
-  std::string m_ps_read;
-  std::string m_ps_write;
-  std::string m_ps_destroy;
-  std::string m_ps_gc;
+  Object m_ps_session_handler;
 
   SessionSerializer *m_serializer;
 
@@ -717,21 +712,24 @@ public:
   UserSessionModule() : SessionModule("user") {}
 
   virtual bool open(const char *save_path, const char *session_name) {
-    return vm_call_user_func
-      (String(PS(ps_open)),
+    return vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("open")),
        CREATE_VECTOR2(String(save_path, CopyString),
                       String(session_name, CopyString)));
   }
 
   virtual bool close() {
-    return vm_call_user_func
-      (String(PS(ps_close)),
+    return vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("close")),
        Array::Create());
   }
 
   virtual bool read(const char *key, String &value) {
-    Variant ret = vm_call_user_func
-      (String(PS(ps_read)),
+    Variant ret = vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("read")),
        CREATE_VECTOR1(String(key, CopyString)));
     if (ret.isString()) {
       value = ret.toString();
@@ -741,20 +739,23 @@ public:
   }
 
   virtual bool write(const char *key, CStrRef value) {
-    return vm_call_user_func
-      (String(PS(ps_write)),
+    return vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("write")),
        CREATE_VECTOR2(String(key, CopyString), value));
   }
 
   virtual bool destroy(const char *key) {
-    return vm_call_user_func
-      (String(PS(ps_destroy)),
+    return vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("destroy")),
        CREATE_VECTOR1(String(key, CopyString)));
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
-    return vm_call_user_func
-      (String(PS(ps_gc)),
+    return vm_call_user_func(
+       CREATE_VECTOR2(PS(ps_session_handler),
+                      String("gc")),
        CREATE_VECTOR1((int64_t)maxlifetime));
   }
 };
@@ -1360,27 +1361,17 @@ Variant f_session_module_name(CStrRef newname /* = null_string */) {
   return oldname;
 }
 
-static bool check_handler(const char *name, std::string &member) {
-  if (!f_is_callable(name)) {
-    raise_warning("Argument '%s' is not a valid callback", name);
-    return false;
-  }
-  member = name;
-  return true;
-}
+bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
+    bool register_shutdown /* = true */) {
 
-bool f_session_set_save_handler(CStrRef open, CStrRef close, CStrRef read,
-                                CStrRef write, CStrRef destroy, CStrRef gc) {
   if (PS(session_status) != Session::None) {
     return false;
   }
 
-  if (!check_handler(open.data(),    PS(ps_open)))    return false;
-  if (!check_handler(close.data(),   PS(ps_close)))   return false;
-  if (!check_handler(read.data(),    PS(ps_read)))    return false;
-  if (!check_handler(write.data(),   PS(ps_write)))   return false;
-  if (!check_handler(destroy.data(), PS(ps_destroy))) return false;
-  if (!check_handler(gc.data(),      PS(ps_gc)))      return false;
+  PS(ps_session_handler) = sessionhandler;
+  if (register_shutdown) {
+    f_register_shutdown_function(1, String("session_write_close"));
+  }
 
   IniSetting::Set("session.save_handler", "user");
   return true;
@@ -1647,6 +1638,43 @@ bool f_session_is_registered(CStrRef varname) {
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");
 }
+
+void c_SessionHandler::t___construct() { }
+c_SessionHandler::c_SessionHandler(Class* cb) : ExtObjectData(cb) {
+  m_mod = PS(mod);
+}
+c_SessionHandler::~c_SessionHandler() { }
+
+bool c_SessionHandler::t_open(CStrRef save_path, CStrRef session_id) {
+  return m_mod->open(save_path->data(), session_id->data());
+}
+
+bool c_SessionHandler::t_close() {
+  return m_mod->close();
+}
+
+String c_SessionHandler::t_read(CStrRef session_id) {
+  String value;
+  if (m_mod->read(PS(id).data(), value)) {
+    php_session_decode(value);
+    return value;
+  }
+  return uninit_null();
+}
+
+bool c_SessionHandler::t_write(CStrRef session_id, CStrRef session_data) {
+  return m_mod->write(session_id->data(), session_data->data());
+}
+
+bool c_SessionHandler::t_destroy(CStrRef session_id) {
+  return m_mod->destroy(session_id->data());
+}
+
+bool c_SessionHandler::t_gc(int maxlifetime) {
+  int nrdels = -1;
+  return m_mod->gc(maxlifetime, &nrdels);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

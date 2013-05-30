@@ -626,9 +626,8 @@ static int start_server(const std::string &username) {
     Capability::ChangeUnixUser(username);
     LightProcess::ChangeUser(username);
   }
-#endif
-
   Capability::SetDumpable();
+#endif
 
   // Create the HttpServer before any warmup requests to properly
   // initialize the process

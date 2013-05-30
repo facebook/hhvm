@@ -153,7 +153,7 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
       out << "(args-" << index << ")->m_type != ";
       if (param.cppType == "bool") {
         out << "KindOfBoolean";
-      } else if (param.cppType == "int" || param.cppType == "long") {
+      } else if (param.cppType == "int" || param.cppType == "long long") {
         out << "KindOfInt64";
       } else if (param.cppType == "double") {
         out << "KindOfDouble";
@@ -170,7 +170,7 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
   out << ind << "tvCastTo";
   if (param.cppType == "bool") {
     out << "Boolean";
-  } else if (param.cppType == "int" || param.cppType == "long") {
+  } else if (param.cppType == "int" || param.cppType == "long long") {
     out << "Int64";
   } else if (param.cppType == "double") {
     out << "Double";
@@ -218,7 +218,7 @@ void emitTypechecks(const PhpFunc& func, std::ostream& out, const char* ind) {
       out << "(args - " << k << ")->m_type == ";
       if (param.cppType == "bool") {
         out << "KindOfBoolean";
-      } else if (param.cppType == "int" || param.cppType == "long") {
+      } else if (param.cppType == "int" || param.cppType == "long long") {
         out << "KindOfInt64";
       } else if (param.cppType == "double") {
         out << "KindOfDouble";
@@ -368,7 +368,7 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
     out << ind << "rv->m_type = KindOfBoolean;\n";
     call_prefix = "rv->m_data.num = (";
     call_suffix = ") ? 1LL : 0LL;\n";
-  } else if (func.returnCppType == "int" || func.returnCppType == "long") {
+  } else if (func.returnCppType == "int" || func.returnCppType == "long long") {
     out << ind << "rv->m_type = KindOfInt64;\n";
     call_prefix = "rv->m_data.num = (int64_t)";
     call_suffix = ";\n";

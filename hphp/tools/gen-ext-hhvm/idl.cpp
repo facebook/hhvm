@@ -28,7 +28,7 @@ const std::unordered_map<fbstring, fbstring> g_typeMap =
 {
   {"Boolean",     "bool"},
   {"Int32",       "int"},
-  {"Int64",       "long"},
+  {"Int64",       "long long"},
   {"Double",      "double"},
   {"String",      "HPHP::String"},
   {"Int64Vec",    "HPHP::Array"},
@@ -54,7 +54,7 @@ const std::unordered_set<fbstring> g_knownStringConstants =
 bool isTypeCppIndirectPass(const fbstring& type) {
   return (type != "bool" &&
           type != "int" &&
-          type != "long" &&
+          type != "long long" &&
           type != "double" &&
           type != "void");
 }

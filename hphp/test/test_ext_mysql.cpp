@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/test/test_mysql_info.h"
-#include "mysql/errmsg.h"
+#include "errmsg.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

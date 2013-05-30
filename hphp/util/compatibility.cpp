@@ -58,23 +58,14 @@ int dprintf(int fd, const char *format, ...) {
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp) {
-#if defined(__APPLE__)
-  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
-    tp->tv_sec = 0;
-    tp->tv_nsec = mach_absolute_time();
-    return 0;
-  }
-  struct timeval tv;
-  int ret = gettimeofday(&tv, nullptr);
-  tp->tv_sec = tv.tv_sec;
-  tp->tv_nsec = tv.tv_usec * 1000;
-  return ret;
-#else
+#ifndef __APPLE__
   static int vdso_usable =
     Util::Vdso::ClockGetTime(which_clock, tp);
   if (vdso_usable == 0)
     return Util::Vdso::ClockGetTime(which_clock, tp);
   return clock_gettime(which_clock, tp);
+#else
+  return 0;
 #endif
 }
 

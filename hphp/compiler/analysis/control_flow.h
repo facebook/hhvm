@@ -65,6 +65,8 @@ struct graph_traits<HPHP::ControlFlowGraph> {
   typedef int vertices_size_type;
   typedef int edges_size_type;
   typedef std::list<HPHP::ControlEdge*>::size_type degree_size_type;
+
+  static vertex_descriptor null_vertex() { return nullptr; }
 };
 
 template<>

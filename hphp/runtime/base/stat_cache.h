@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_STAT_CACHE_H_
 #define incl_HPHP_STAT_CACHE_H_
 
-#include <sys/inotify.h>
+#ifdef __linux__
+ #include <sys/inotify.h>
+#endif
 
 #include "tbb/concurrent_hash_map.h"
 
@@ -101,7 +103,9 @@ class StatCache {
   void reset();
   NodePtr getNode(const std::string& path, bool follow);
   bool mergePath(const std::string& path, bool follow);
+#ifdef __linux__
   bool handleEvent(const struct inotify_event* event);
+#endif
   void removeWatch(int wd);
   void removePath(const std::string& path, Node* node);
   void removeLPath(const std::string& path, Node* node);
@@ -119,9 +123,11 @@ class StatCache {
 
   SimpleMutex m_lock;       // Protects the following fields.
   int m_ifd;
+#ifdef __linux__
   static const size_t kReadBufSize = 10 * (sizeof(struct inotify_event)
                                            + NAME_MAX + 1);
   char m_readBuf[kReadBufSize];
+#endif
   time_t m_lastRefresh; // Used for debugging.
   WatchNodeMap m_watch2Node;
   NodePtr m_root;

@@ -24,6 +24,7 @@
 #include "hphp/util/job_queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 #include "hphp/system/lib/systemlib.h"
 
 namespace HPHP {
@@ -33,7 +34,7 @@ class XboxTransport : public Transport, public Synchronizable {
 public:
   explicit XboxTransport(CStrRef message, CStrRef reqInitDoc = "")
       : m_refCount(0), m_done(false), m_code(0) {
-    gettime(CLOCK_MONOTONIC, &m_queueTime);
+    Timer::GetMonotonicTime(m_queueTime);
 
     m_message.append(message.data(), message.size());
     m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());

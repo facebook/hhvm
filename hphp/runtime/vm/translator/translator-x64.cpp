@@ -27,11 +27,12 @@
 #include <string>
 #include <queue>
 #include <unwind.h>
+#include <signal.h>
 
 #ifdef __FreeBSD__
-# include <ucontext.h>
-typedef __sighandler_t *sighandler_t;
 # define RIP_REGISTER(v) (v).mc_rip
+#elif defined(__APPLE__)
+# define RIP_REGISTER(v) (v)->__ss.__rip
 #else
 #  if defined(__x86_64__)
 #    define RIP_REGISTER(v) (v).gregs[REG_RIP]
@@ -303,7 +304,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
     // continues normally.
     g_vmContext->m_stack.unprotect();
   } else {
-    sighandler_t handler = (sighandler_t)self->m_segvChain;
+    sig_t handler = (sig_t)self->m_segvChain;
     if (handler == SIG_DFL || handler == SIG_IGN) {
       signal(signum, handler);
       raise(signum);
@@ -11630,7 +11631,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     return false;
   }
   struct timespec tsBegin, tsEnd;
-  gettime(CLOCK_MONOTONIC, &tsBegin);
+  Timer::GetMonotonicTime(tsBegin);
   // Doc says even find _could_ invalidate iterator, in pactice it should
   // be very rare, so go with it now.
   for (SrcDB::iterator it = m_srcDB.begin(); it != m_srcDB.end(); ++it) {
@@ -11643,7 +11644,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     }
   }
   s_writeLease.drop();
-  gettime(CLOCK_MONOTONIC, &tsEnd);
+  Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
     Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);

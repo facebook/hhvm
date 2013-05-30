@@ -323,9 +323,15 @@ struct ThreadLocalProxy {
   __thread ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
   __thread ThreadLocalNoCheck<T> f
+#ifndef __APPLE__
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) \
   __attribute((section(".tbss.hot")))             \
   __thread ThreadLocalNoCheck<T> f
+#else
+#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) \
+  __attribute((section(".tbss.hot,")))             \
+  __thread ThreadLocalNoCheck<T> f
+#endif
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
   __thread ThreadLocalProxy<T, N> f

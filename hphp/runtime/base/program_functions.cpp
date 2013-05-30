@@ -626,9 +626,8 @@ static int start_server(const std::string &username) {
     Capability::ChangeUnixUser(username);
     LightProcess::ChangeUser(username);
   }
-#endif
-
   Capability::SetDumpable();
+#endif
 
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
@@ -640,7 +639,7 @@ static int start_server(const std::string &username) {
     HttpRequestHandler handler;
     ReplayTransport rt;
     timespec start;
-    gettime(CLOCK_MONOTONIC, &start);
+    Timer::GetMonotonicTime(start);
     std::string error;
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {
@@ -1185,7 +1184,11 @@ extern "C" void hphp_fatal_error(const char *s) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
+#ifndef __APPLE__
   pthread_getattr_np(pthread_self(), &attr);
+#else
+  pthread_attr_init(&attr);
+#endif
   Util::init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 

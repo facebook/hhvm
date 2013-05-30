@@ -39,13 +39,16 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 if(NOT LINUX)
 	add_definitions(-DNO_HARDWARE_COUNTERS)
 	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/base/hardware_counter.cpp)
+	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/vm/debug/elfwriter.cpp)
 endif()
 
-# remove ext_hhvm, and anything in a test folder
 foreach (file ${CXX_SOURCES})
-       	if (${file} MATCHES "ext_hhvm")
+	# remove ext_hhvm
+	if (${file} MATCHES "ext_hhvm")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
+
+	# remove anything in a test folder.
 	if (${file} MATCHES "/test/")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()

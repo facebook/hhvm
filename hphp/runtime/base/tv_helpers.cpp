@@ -22,6 +22,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void tvDecRefHelper(DataType type, uint64_t datum) {
+  assert(type >= KindOfString && type <= KindOfRef);
+  if (((RefData*)datum)->decRefCount() == 0) {
+    g_destructors[typeToDestrIndex(type)]((void*)datum);
+  }
+}
+
 void tvCastToBooleanInPlace(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);

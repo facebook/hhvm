@@ -283,17 +283,18 @@ class Status {
     array_push(self::$results, array('name' => $test, 'status' => 'failed'));
     switch (self::$mode) {
       case self::MODE_NORMAL:
+        $diff = file_get_contents($test.'.diff');
         if (self::hasColor()) {
-          print "\033[0;31mF\033[0m";
+          print "\n\033[0;31m$test\033[0m\n$diff";
         } else {
-          print 'F';
+          print "\nFAILED: $test\n$diff";
         }
         break;
       case self::MODE_VERBOSE:
         if (self::hasColor()) {
           print "$test \033[0;31mFAILED\033[0m\n";
         } else {
-          print "FAILED";
+          print "$test FAILED\n";
         }
         break;
       case self::MODE_FBMAKE:
@@ -543,13 +544,16 @@ SHIP
         }
       }
       asort($failed);
-      print "\n\n".count($failed)." tests failed:\n".implode("\n", $failed)."\n";
+      $header_start = "\n\033[0;33m";
+      $header_end = "\033[0m\n";
+      print "\n".count($failed)." tests failed\n";
       
-      print "\nSee the diffs:\n".implode("\n", array_map(
-        function($test) { return 'cat '.$test.'.diff'; },
+      print $header_start."See the diffs:".$header_end.
+        implode("\n", array_map(
+          function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
       
-      print "\nTo run these by hand:\n";
+      print $header_start."Run these by hand:".$header_end;
 
       foreach ($failed as $test) {
         $command = hhvm_cmd($options, $test);
@@ -560,6 +564,9 @@ SHIP
         }
         print "$command\n";
       }
+      
+      print $header_start."Re-run just the failing tests:".$header_end.
+            "$argv[0] ".implode(' ', $failed)."\n";
     }
   }
 

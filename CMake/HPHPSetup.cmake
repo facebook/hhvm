@@ -117,6 +117,9 @@ add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
 # build folly without autoconf
 add_definitions(-DFOLLY_NO_CONFIG=1)
+if(APPLE)
+	add_definitions(-DFOLLY_HAVE_SCHED_H=1)
+endif()
 
 IF($ENV{CXX} MATCHES "icpc")
 	set(CMAKE_C_FLAGS "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")

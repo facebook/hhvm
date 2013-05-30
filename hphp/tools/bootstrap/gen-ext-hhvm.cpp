@@ -487,7 +487,11 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
 void processSymbol(const fbstring& symbol, std::ostream& header,
                    std::ostream& cpp) {
   int status;
-  auto demangled = abi::__cxa_demangle(symbol.c_str(), nullptr, 0, &status);
+  char *mangledSymbol = symbol.c_str();
+#ifdef __APPLE__
+  mangledSymbol++;
+#endif
+  auto demangled = abi::__cxa_demangle(mangledSymbol, nullptr, 0, &status);
   SCOPE_EXIT { free(demangled); };
 
   if (status != 0) {

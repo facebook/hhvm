@@ -515,7 +515,18 @@ function main($argv) {
   }
 
   if (!$return_value) {
-    print "\nAll tests passed. Ship it!\n";
+    print "\nAll tests passed.\n\n".<<<SHIP
+              |    |    |
+             )_)  )_)  )_)
+            )___))___))___)\
+           )____)____)_____)\\
+         _____|____|____|____\\\__
+---------\      SHIP IT      /---------
+  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^      ^^^^     ^^^    ^^
+         ^^^^      ^^^
+SHIP
+."\n";
   } else {
     $results = array();
     foreach ($bad_test_files as $bad_test_file) {

@@ -92,8 +92,13 @@ namespace HPHP { namespace Util {
  * Note: this may not work properly with LTO. We'll revisit when/if we
  * move to it.
  */
+#ifndef __APPLE__
 #define KEEP_SECTION \
   __attribute__((section(".text.keep")))
+#else
+#define KEEP_SECTION \
+  __attribute__((section(".text.keep,")))
+#endif
 
 /**
  * Split a string into a list of tokens by character delimiter.

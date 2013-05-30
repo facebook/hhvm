@@ -14,13 +14,18 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH)
 	set(f_OBJ "${HPHP_HOME}/hphp/CMakeFiles/hphp_runtime_static.dir/${REL}.o")
 	list(APPEND ${SOURCES} "${f_SRC}.ext_hhvm.cpp")
 	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
+	set(f_CMD "${HPHP_HOME}/hphp/tools/gen-ext-hhvm")
+	if (NOT APPLE)
+		set(f_CMD "${f_CMD}/gen-ext-hhvm.sh")
+	else()
+		set(f_CMD "${f_CMD}/gen-ext-hhvm-osx.sh")
+	endif()
 	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
-	                   DEPENDS ${f_SRC} gen-ext-hhvm
-	                   COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-ext-hhvm.sh"
-	                   ARGS ${EHHVM_ARCH} ${f_OBJ}
-                               "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
-	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/gen-ext-hhvm"
-	                   COMMENT "Generating ext_hhvm wrapper for ${REL}")
+					   DEPENDS ${f_SRC} gen-ext-hhvm
+					   COMMAND "${f_CMD}"
+					   ARGS ${EHHVM_ARCH} ${f_OBJ} "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
+					   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/gen-ext-hhvm"
+					   COMMENT "Generating ext_hhvm wrapper for ${REL}")
 endmacro()
 
 string(LENGTH "${HPHP_HOME}/hphp/" HPHP_DIR_LEN)

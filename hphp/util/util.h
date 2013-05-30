@@ -67,7 +67,7 @@ namespace HPHP { namespace Util {
 #else
 // OSX requires a comma after segment name.
 // The segment name must also not be longer than 16 characters.
-# define HOT_FUNC          __attribute__ ((section (".text.hot.built,")))
+# define HOT_FUNC
 #endif
 #define EXTERNALLY_VISIBLE __attribute__((externally_visible))
 

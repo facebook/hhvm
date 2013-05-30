@@ -131,8 +131,8 @@ public:
 
 public:
   CodeGenerator() {} // only for creating a dummy code generator
-  CodeGenerator(std::ostream *primary, Output output = PickledPHP,
-                const std::string *filename = nullptr);
+  explicit CodeGenerator(std::ostream *primary, Output output = PickledPHP,
+                         const std::string *filename = nullptr);
 
   /**
    * ...if it was passed in from constructor.
@@ -314,21 +314,16 @@ private:
   std::string getFormattedName(const std::string &file);
 };
 
-#define STR(x) #x
-#define XSTR(x) STR(x)
-#define FLANN(stream,func,nl) (Option::FlAnnotate ?                           \
-               stream.printf("/* %s:" XSTR(__LINE__) "*/" nl, __func__):       \
-               void()), stream.func
-#define cg_printf FLANN(cg,printf,"")
-#define m_cg_printf FLANN(m_cg,printf,"")
-#define cg_print FLANN(cg,print,"")
-#define m_cg_print FLANN(m_cg,print,"")
-#define cg_indentBegin FLANN(cg,indentBegin,"")
-#define m_cg_indentBegin FLANN(m_cg,indentBegin,"")
-#define cg_indentEnd FLANN(cg,indentEnd,"")
-#define m_cg_indentEnd FLANN(m_cg,indentEnd,"")
-#define cg_printInclude FLANN(cg,printInclude,"\n")
-#define cg_printString FLANN(cg,printString,"")
+#define cg_printf cg.printf
+#define m_cg_printf m_cg.printf
+#define cg_print cg.print
+#define m_cg_print m_cg.print
+#define cg_indentBegin cg.indentBegin
+#define m_cg_indentBegin m_cg.indentBegin
+#define cg_indentEnd cg.indentEnd
+#define m_cg_indentEnd cg.indentEnd
+#define cg_printInclude cg.printInclude
+#define cg_printString cg.printString
 
 ///////////////////////////////////////////////////////////////////////////////
 }

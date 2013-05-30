@@ -63,7 +63,6 @@ struct CompilerOptions {
   string target;
   string format;
   string outputDir;
-  string outputFile;
   string syncDir;
   vector<string> config;
   string configDir;
@@ -84,8 +83,6 @@ struct CompilerOptions {
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
-  vector<string> parseOnDemandDirs; // parse these directories on-demand
-                                    // when parseOnDemand=false
   string program;
   string programArgs;
   string branch;
@@ -94,21 +91,15 @@ struct CompilerOptions {
   bool keepTempDir;
   string dbStats;
   bool noTypeInference;
-  bool noMinInclude;
-  bool noMetaInfo;
   int logLevel;
   bool force;
-  int clusterCount;
   int optimizeLevel;
   string filecache;
-  string javaRoot;
   bool dump;
   string docjson;
   bool coredump;
   bool nofork;
-  bool fl_annotate;
   string optimizations;
-  string ppp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -235,9 +226,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
      "run: cluster (default) | file")
-    ("cluster-count", value<int>(&po.clusterCount)->default_value(0),
-     "Cluster by file sizes and output roughly these many number of files. "
-     "Use 0 for no clustering.")
     ("input-dir", value<string>(&po.inputDir), "input directory")
     ("program", value<string>(&po.program)->default_value("program"),
      "final program name to use")
@@ -284,7 +272,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("branch", value<string>(&po.branch), "SVN branch")
     ("revision", value<int>(&po.revision), "SVN revision")
     ("output-dir,o", value<string>(&po.outputDir), "output directory")
-    ("output-file", value<string>(&po.outputFile), "output file")
     ("sync-dir", value<string>(&po.syncDir),
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
@@ -301,13 +288,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("no-type-inference",
      value<bool>(&po.noTypeInference)->default_value(false),
      "turn off type inference for C++ code generation")
-    ("no-min-include",
-     value<bool>(&po.noMinInclude)->default_value(false),
-     "turn off minimium include analysis when target is \"analyze\"")
-    ("no-meta-info",
-     value<bool>(&po.noMetaInfo)->default_value(false),
-     "do not generate class map, function jump table and macros "
-     "when generating code; good for demo purposes")
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "config file name")
     ("config-dir", value<string>(&po.configDir),
@@ -339,19 +319,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      value<bool>(&po.nofork)->default_value(false),
      "forking is needed for large compilation to release memory before g++"
      "compilation. turning off forking can help gdb debugging.")
-    ("fl-annotate",
-     value<bool>(&po.fl_annotate)->default_value(false),
-     "Annotate emitted source with compiler file-line info")
     ("opts",
      value<string>(&po.optimizations)->default_value(""),
      "Set optimizations to enable/disable")
-    ("ppp",
-     value<string>(&po.ppp)->default_value(""),
-     "Preprocessed partition configuration. To speed up distcc compilation, "
-     "bin/ppp.php can pre-compute better partition between different .cpp "
-     "files according to preprocessed file sizes, instead of original file "
-     "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
-     "to specify here.")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
     ;
@@ -421,8 +391,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
-  Option::FlAnnotate = po.fl_annotate;
-
   Hdf config;
   for (vector<string>::const_iterator it = po.config.begin();
        it != po.config.end(); ++it) {
@@ -479,7 +447,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   Option::ProgramName = po.program;
-  Option::PreprocessedPartitionConfig = po.ppp;
 
   if (po.format.empty()) {
     if (po.target == "php") {

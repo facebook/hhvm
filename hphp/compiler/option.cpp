@@ -110,7 +110,6 @@ int Option::CodeErrorMaxProgram = 1;
 Option::EvalLevel Option::EnableEval = NoEval;
 
 std::string Option::ProgramName;
-std::string Option::PreprocessedPartitionConfig;
 
 bool Option::ParseTimeOpts = true;
 bool Option::EnableHipHopSyntax = false;
@@ -156,7 +155,6 @@ StringBag Option::OptionStrings;
 bool Option::GenerateCppLibCode = false;
 bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
-bool Option::FlAnnotate = false;
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);

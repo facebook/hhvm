@@ -158,10 +158,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     }
 
     ExpressionPtr rep = Clone(value, getScope());
-    bool annotate = Option::FlAnnotate;
-    Option::FlAnnotate = false; // avoid nested comments on getText
     rep->setComment(getText());
-    Option::FlAnnotate = annotate;
     rep->setLocation(getLocation());
     return replaceValue(rep);
   }

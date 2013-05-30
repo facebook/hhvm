@@ -910,11 +910,6 @@ private:
 
 typedef folly::Range<TCA> TcaRange;
 
-/*
- * Remove any instruction if live[iid] == false
- */
-void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
-
 /**
  * Run all optimization passes on this trace
  */

@@ -122,10 +122,6 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     eliminateDeadCode(trace, irFactory);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
-
-  if (false && RuntimeOption::EvalHHIRMemOpt) {
-    doPass(optimizeMemoryAccesses, "MemeLim");
-  }
   dce("initial");
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(optimizePredictions, "prediction opts");

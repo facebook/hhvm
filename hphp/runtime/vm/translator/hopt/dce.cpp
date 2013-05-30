@@ -573,19 +573,6 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 // Publicly exported functions:
 
-void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
-  auto &blocks = trace->blocks();
-  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
-    auto cur = it; ++it;
-    Block* block = *cur;
-    block->remove_if([&] (const IRInstruction& inst) {
-      assert(inst.id() < live.size());
-      return !live.test(inst.id());
-    });
-    if (block->empty()) blocks.erase(cur);
-  }
-}
-
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   auto removeEmptyExitTraces = [&] {
     trace->getExitTraces().remove_if([](Trace* exit) {

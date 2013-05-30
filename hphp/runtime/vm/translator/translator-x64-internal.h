@@ -22,11 +22,6 @@
 
 #include "hphp/runtime/vm/translator/abi-x64.h"
 
-using namespace HPHP::Transl::reg;
-using namespace HPHP::Util;
-using namespace HPHP::Trace;
-using std::max;
-
 namespace HPHP {
 namespace Transl {
 
@@ -270,6 +265,8 @@ static void recordJmpProfile(litstr key, int64_t take) {
 
 template<Trace::Module mod>
 void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
+  using namespace reg;
+
   if (!Trace::moduleEnabledRelease(mod)) return;
   const ssize_t sz = 1024;
   char key[sz];
@@ -649,6 +646,8 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
 static void
 emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
              int size = sz::qword, RegAlloc* regAlloc = nullptr) {
+  using namespace reg;
+
   if (size == sz::qword) {
     PhysReg immReg = regAlloc ? regAlloc->getImmReg(imm) : InvalidReg;
     if (immReg == InvalidReg) {
@@ -903,6 +902,8 @@ inline void emitCopyToAligned(X64Assembler& a,
                               int srcOff,
                               Reg64 dest,
                               int destOff) {
+  using namespace reg;
+
   static_assert(sizeof(TypedValue) == 16,
                 "emitCopyToAligned assumes sizeof(TypedValue) is 128 bits");
   a.    movdqa  (src[srcOff], xmm0);

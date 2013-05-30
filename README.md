@@ -12,10 +12,10 @@ You can install a [prebuilt package](https://github.com/facebook/hiphop-php/wiki
 
 You can run standalone programs just by passing them to hhvm: `hhvm my_script.php`.
 
-HipHop bundles in a webserver. So if you want to run on port 80 with document root `/var/www`:
+HipHop bundles in a webserver. So if you want to run on port 80 in the current directory:
 
 ```
-sudo hhvm -m server /var/www
+sudo hhvm -m server
 ```
 
 For anything more complicated, you'll want to make a [config.hdf](https://github.com/facebook/hiphop-php/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.

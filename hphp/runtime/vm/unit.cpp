@@ -71,7 +71,7 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
       get_readonly_arena().allocate(bc, bclen)
     );
   }
-  auto mem = static_cast<unsigned char*>(std::malloc(bclen));
+  auto mem = static_cast<unsigned char*>(malloc(bclen));
   std::copy(bc, bc + bclen, mem);
   return mem;
 }

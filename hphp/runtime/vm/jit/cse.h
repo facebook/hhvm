@@ -53,10 +53,6 @@ struct CSEHash {
     map.clear();
   }
 
-  // Remove entries that do not dominate block.
-  // TODO: t2135219 use scoped tables instead
-  void filter(Block* block, IdomVector& idoms);
-
   template<class... Args>
   static size_t instHash(Args&&... args) {
     return folly::hash::hash_combine(std::forward<Args>(args)...);

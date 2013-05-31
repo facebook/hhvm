@@ -307,9 +307,11 @@ private:
   SSATmp*   preOptimizeLdLoc(IRInstruction*);
   SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
-
   SSATmp*   preOptimize(IRInstruction* inst);
-  SSATmp*   optimizeWork(IRInstruction* inst);
+
+  SSATmp*   optimizeWork(IRInstruction* inst,
+                         const folly::Optional<IdomVector>&);
+
   enum class CloneFlag { Yes, No };
   SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
 
@@ -318,7 +320,7 @@ private:
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
   enum      CloneInstMode { kCloneInst, kUseInst };
-  SSATmp*   cseLookup(IRInstruction* inst);
+  SSATmp*   cseLookup(IRInstruction* inst, const folly::Optional<IdomVector>&);
   void      cseInsert(IRInstruction* inst);
   void      cseKill(SSATmp* src);
   CSEHash*  cseHashTable(IRInstruction* inst);

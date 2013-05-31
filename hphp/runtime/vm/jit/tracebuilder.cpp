@@ -22,8 +22,7 @@
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/jit/irfactory.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
@@ -535,8 +534,18 @@ void TraceBuilder::cseKill(SSATmp* src) {
   }
 }
 
-SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
-  return cseHashTable(inst)->lookup(inst);
+SSATmp* TraceBuilder::cseLookup(IRInstruction* inst,
+                                const folly::Optional<IdomVector>& idoms) {
+  auto tmp = cseHashTable(inst)->lookup(inst);
+  if (tmp && idoms) {
+    // During a reoptimize pass, we need to make sure that any values
+    // we want to reuse for CSE are only reused in blocks dominated by
+    // the block that defines it.
+    if (!dominates(tmp->inst()->block(), inst->block(), *idoms)) {
+      return nullptr;
+    }
+  }
+  return tmp;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -739,7 +748,8 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
+SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
+                                   const folly::Optional<IdomVector>& idoms) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
@@ -763,7 +773,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
 
   SSATmp* result = nullptr;
   if (m_enableCse && inst->canCSE()) {
-    result = cseLookup(inst);
+    result = cseLookup(inst, idoms);
     if (result) {
       // Found a dominating instruction that can be used instead of inst
       FTRACE(1, "  {}cse found: {}\n",
@@ -792,7 +802,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
-  if (SSATmp* tmp = optimizeWork(inst)) {
+  if (auto const tmp = optimizeWork(inst, folly::none)) {
     return tmp;
   }
   // Couldn't CSE or simplify the instruction; clone it and append.
@@ -804,16 +814,6 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
     return inst->dst(0);
   }
   return nullptr;
-}
-
-void CSEHash::filter(Block* block, IdomVector& idoms) {
-  for (auto it = map.begin(), end = map.end(); it != end;) {
-    auto next = it; ++next;
-    if (!dominates(it->second->inst()->block(), block, idoms)) {
-      map.erase(it);
-    }
-    it = next;
-  }
 }
 
 /*
@@ -853,7 +853,7 @@ void TraceBuilder::reoptimize() {
   }
 
   BlockList sortedBlocks = rpoSortCfg(m_trace.get(), m_irFactory);
-  IdomVector idoms = findDominators(sortedBlocks);
+  auto const idoms = findDominators(sortedBlocks);
   clearTrackedState();
 
   auto blocks = std::move(m_trace->blocks());
@@ -867,7 +867,6 @@ void TraceBuilder::reoptimize() {
     m_trace->push_back(block);
     if (m_snapshots[block]) {
       useState(block);
-      m_cseHash.filter(block, idoms);
     }
 
     auto instructions = std::move(block->instrs());
@@ -876,7 +875,7 @@ void TraceBuilder::reoptimize() {
       auto *inst = &instructions.front();
       instructions.pop_front();
 
-      SSATmp* tmp = optimizeWork(inst); // Can generate new instrs!
+      auto const tmp = optimizeWork(inst, idoms); // Can generate new instrs!
       if (!tmp) {
         // Could not optimize; keep the old instruction
         appendInstruction(inst, block);
@@ -1010,4 +1009,4 @@ void TraceBuilder::killLocals() {
   }
 }
 
-}} // namespace HPHP::JIT
+}}

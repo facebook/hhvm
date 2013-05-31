@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/file/user_file.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/instance.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 

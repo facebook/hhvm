@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/ext/ext_function.h"

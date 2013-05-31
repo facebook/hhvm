@@ -23,8 +23,8 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_function.h"
 
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"

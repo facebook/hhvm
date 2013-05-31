@@ -21,8 +21,8 @@
 
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/system/lib/systemlib.h"

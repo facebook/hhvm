@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/object_allocator_sizes.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/system/lib/systemlib.h"
 

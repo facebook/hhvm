@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/trace.h"
 
 #include <string.h>

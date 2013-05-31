@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_icu_ucnv.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

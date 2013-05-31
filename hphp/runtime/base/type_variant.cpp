@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/instance.h"
 #include "hphp/system/lib/systemlib.h"

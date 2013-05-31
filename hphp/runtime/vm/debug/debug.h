@@ -17,7 +17,7 @@
 #define TRANSLATOR_DEBUG_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/debug/dwarf.h"
 

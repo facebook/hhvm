@@ -27,7 +27,7 @@
 #include "hphp/util/asm-x64.h"
 
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 using namespace HPHP::Transl;
 

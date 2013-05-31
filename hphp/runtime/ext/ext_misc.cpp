@@ -28,8 +28,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/parser/scanner.h"
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 

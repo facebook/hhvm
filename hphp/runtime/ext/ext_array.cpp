@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/zend/zend_collator.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/sort_flags.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/array/hphp_array.h"
 #include "hphp/util/logger.h"
 

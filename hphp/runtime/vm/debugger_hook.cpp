@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/debugger_hook.h"
-#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/eval/debugger/break_point.h"
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/runtime/eval/debugger/debugger_proxy.h"

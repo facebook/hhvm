@@ -20,7 +20,7 @@
 #include "hphp/runtime/eval/debugger/cmd/cmd_user.h"
 #include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/vm/debugger_hook.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/logger.h"
 #include "hphp/system/lib/systemlib.h"

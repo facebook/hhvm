@@ -24,7 +24,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/vm/translator/hooks.h"
+#include "hphp/runtime/vm/jit/hooks.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

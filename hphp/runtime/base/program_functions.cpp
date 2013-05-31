@@ -64,7 +64,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
 
 using namespace boost::program_options;

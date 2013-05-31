@@ -39,8 +39,8 @@
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/runtime/eval/runtime/file_repository.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
-#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/event_hook.h"
 

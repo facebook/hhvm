@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/jit/targetcache.h"
 #include "tbb/concurrent_hash_map.h"
 
 namespace HPHP {

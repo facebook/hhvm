@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/lib/systemlib.h"
 

@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {  namespace Treadmill {
 

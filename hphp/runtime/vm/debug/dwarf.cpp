@@ -21,8 +21,8 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 using namespace HPHP::Transl;
 

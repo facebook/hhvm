@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/base.h"
-#include "hphp/runtime/vm/translator/x64-util.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/x64-util.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {

@@ -22,8 +22,8 @@
 #include "hphp/runtime/base/stat_cache.h"
 #include "hphp/runtime/base/server/source_root_info.h"
 
-#include "hphp/runtime/vm/translator/targetcache.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/repo.h"

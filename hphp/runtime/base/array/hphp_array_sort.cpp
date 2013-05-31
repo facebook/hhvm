@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array/sort_helpers.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

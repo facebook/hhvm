@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/ext/ext_string.h"

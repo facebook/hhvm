@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 using namespace HPHP::Transl;
 

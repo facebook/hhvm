@@ -33,7 +33,7 @@
 #include "hphp/runtime/base/string_data.h"
 #include "hphp/runtime/base/zend/zend_url.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/lib/systemlib.h"
 

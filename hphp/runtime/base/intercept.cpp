@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event_hook.h"
 
@@ -27,7 +27,7 @@
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;

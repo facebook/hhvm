@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/stat_cache.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

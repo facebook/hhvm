@@ -23,8 +23,8 @@
 #include "hphp/runtime/base/util/libevent_http_client.h"
 #include "hphp/runtime/base/server/http_protocol.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/util.h"
 

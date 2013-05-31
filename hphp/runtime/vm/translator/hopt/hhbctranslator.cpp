@@ -2797,7 +2797,7 @@ template<class CheckSupportedFun, class EmitLdAddrFun>
 void HhbcTranslator::emitBind(const StringData* name,
                               CheckSupportedFun checkSupported,
                               EmitLdAddrFun emitLdAddr) {
-  if (!(this->*checkSupported)(name, topC(0)->type(), 1)) return;
+  if (!(this->*checkSupported)(name, topV(0)->type(), 1)) return;
   SSATmp* src = popV();
   emitBindMem((this->*emitLdAddr)(name), src);
 }

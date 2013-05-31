@@ -657,6 +657,7 @@ private:
   SSATmp* popA() { return pop(Type::Cls);       }
   SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
+  SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(Trace* t, SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

@@ -102,7 +102,7 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
 }
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
-  IRFactory* irFactory = traceBuilder->getIrFactory();
+  IRFactory* irFactory = traceBuilder->factory();
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());

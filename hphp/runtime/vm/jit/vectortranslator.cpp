@@ -536,7 +536,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       return cns(l.offset);
 
     case Location::This:
-      return gen(LdThis, m_tb.getFp());
+      return gen(LdThis, m_tb.fp());
 
     default: not_reached();
   }
@@ -559,7 +559,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
         gen(
           StLoc,
           LocalId(base.location.offset),
-          m_tb.getFp(),
+          m_tb.fp(),
           m_tb.genDefInitNull()
         );
         baseType = Type::InitNull;
@@ -631,7 +631,7 @@ bool HhbcTranslator::VectorTranslator::isSingleMember() {
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseH() {
-  m_base = gen(LdThis, m_tb.getFp());
+  m_base = gen(LdThis, m_tb.fp());
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseN() {
@@ -1748,7 +1748,7 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
     if (base.location.space == Location::Local) {
       // We know it's not boxed (setRef above handles that), and
       // newArr has already been incref'd in the helper.
-      gen(StLoc, LocalId(base.location.offset), m_tb.getFp(), newArr);
+      gen(StLoc, LocalId(base.location.offset), m_tb.fp(), newArr);
     } else if (base.location.space == Location::Stack) {
       VectorEffects ve(newArr->inst());
       assert(ve.baseValChanged);
@@ -2148,7 +2148,7 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
     SSATmp* sp = m_ht.genFor(m_failedSetTrace, SpillStack,
                              std::make_pair(args.size(), &args[0]));
     m_ht.genFor(m_failedSetTrace, DeleteUnwinderException);
-    m_ht.genFor(m_failedSetTrace, SyncABIRegs, m_tb.getFp(), sp);
+    m_ht.genFor(m_failedSetTrace, SyncABIRegs, m_tb.fp(), sp);
     m_ht.genFor(m_failedSetTrace, ReqBindJmp, BCOffset(nextOff));
   }
 

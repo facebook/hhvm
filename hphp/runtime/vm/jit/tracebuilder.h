@@ -99,10 +99,10 @@ struct TraceBuilder {
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
   Trace* trace() const { return m_trace.get(); }
-  IRFactory* getIrFactory() { return &m_irFactory; }
-  int32_t getSpOffset() { return m_spOffset; }
-  SSATmp* getSp() const { return m_spValue; }
-  SSATmp* getFp() const { return m_fpValue; }
+  IRFactory* factory() { return &m_irFactory; }
+  int32_t spOffset() { return m_spOffset; }
+  SSATmp* sp() const { return m_spValue; }
+  SSATmp* fp() const { return m_fpValue; }
 
   bool isThisAvailable() const {
     return m_thisIsAvailable;

@@ -521,9 +521,7 @@ private:
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
   int m_actualStackHighWater;
   int m_fdescHighWater;
-  typedef tbb::concurrent_hash_map<const StringData*, int,
-                                   StringDataHashCompare> EmittedClosures;
-  static EmittedClosures s_emittedClosures;
+  int m_closureCounter;  // used to uniquify closures' mangled names
   std::deque<ControlTargets> m_controlTargets;
   std::deque<Funclet> m_funclets;
   std::deque<ExnHandlerRegion*> m_exnHandlers;
@@ -657,6 +655,7 @@ public:
   void copyOverFPIRegions(FuncEmitter* fe);
   void saveMaxStackCells(FuncEmitter* fe);
   void finishFunc(Emitter& e, FuncEmitter* fe);
+  StringData* newClosureName();
 
   void initScalar(TypedValue& tvVal, ExpressionPtr val);
   bool requiresDeepInit(ExpressionPtr initExpr) const;

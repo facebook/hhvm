@@ -56,6 +56,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
   bool ret = true;
   {
     AnalysisResultPtr ar(new AnalysisResult());
+    Compiler::Parser::Reset();
     StatementListPtr tree = Compiler::Parser::ParseString(input, ar);
     std::ostringstream code;
     CodeGenerator cg(&code);

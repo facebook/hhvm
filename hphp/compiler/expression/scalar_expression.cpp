@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sstream>
+#include <cmath>
+#include <limits.h>
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/util/util.h"
@@ -31,10 +34,6 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
-
-#include <sstream>
-#include <cmath>
-#include <limits.h>
 
 using namespace HPHP;
 
@@ -158,21 +157,16 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
             if (b && b->is(BlockScope::ClassScope)) {
               m_translated += "::";
             }
-            if (func->isClosure()) {
-              m_translated += "{closure}";
-            } else {
-              m_translated += func->getOriginalName();
-            }
+            m_translated += func->getOriginalName();
           }
         }
         break;
       }
       case T_FUNC_C:
-        if (FunctionScopePtr func = getFunctionScope()) {
-          if (func->isClosure()) {
+        if (getFunctionScope()) {
+          m_translated = getFunctionScope()->getOriginalName();
+          if (m_translated[0] == '0') {
             m_translated = "{closure}";
-          } else {
-            m_translated = func->getOriginalName();
           }
         }
         break;

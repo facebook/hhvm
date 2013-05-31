@@ -14,8 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/analysis/class_scope.h"
+#include <boost/foreach.hpp>
+#include <boost/tuple/tuple.hpp>
 #include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -43,9 +45,6 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/util/util.h"
-
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
 
 using namespace HPHP;
 using std::map;
@@ -758,9 +757,8 @@ const string& ClassScope::getNewGeneratorName(
   if (mapIt != genRenameMap.end()) {
     return mapIt->second;
   }
-  string newName = ParserBase::newContinuationName(
-    oldName + "_" + lexical_cast<string>(genFuncScope->getNewID())
-  );
+  string newName = oldName + "_" +
+    lexical_cast<string>(genFuncScope->getNewID());
   genRenameMap[oldName] = newName;
   return genRenameMap[oldName];
 }
@@ -783,7 +781,7 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
     const string &oldGenName =
       dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
 
-    MethodStatementPtr origGenStmt = importedMethods[Util::toLower(oldGenName)];
+    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
     assert(origGenStmt);
 
     const string &newGenName = origGenStmt->getOriginalName();

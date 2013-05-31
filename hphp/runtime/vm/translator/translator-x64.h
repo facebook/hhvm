@@ -445,8 +445,6 @@ private:
   CASE(IterFree) \
   CASE(FPassV) \
   CASE(UnsetN) \
-  CASE(BPassC) \
-  CASE(BPassV) \
 
   // These are instruction-like functions which cover more than one
   // opcode.

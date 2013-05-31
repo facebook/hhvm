@@ -1320,8 +1320,6 @@ static const struct {
   { OpFPassS,      {StackTop2|FuncdRef,
                                       Stack1,       OutUnknown,       -1 }},
   { OpFPassM,      {MVector|FuncdRef, Stack1,       OutUnknown,        1 }},
-  { OpBPassC,      {None,             None,         OutNull,           0 }},
-  { OpBPassV,      {None,             None,         OutNull,           0 }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.

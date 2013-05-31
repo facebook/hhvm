@@ -527,7 +527,8 @@ static char stkflav(FlavorDesc f) {
 bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
                            const FlavorDesc* sig) {
   for (int i = 0; i < len; ++i) {
-    if (args[i] != (FlavorDesc)sig[i]) {
+    if (args[i] != (FlavorDesc)sig[i] &&
+        !((FlavorDesc)sig[i] == CVV && (args[i] == CV || args[i] == VV))) {
       verify_error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
@@ -575,6 +576,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][3] = {
   #define NOV { },
   #define FMANY { },
+  #define CVMANY { },
   #define CMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { b, a },
@@ -592,6 +594,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef R_LMANY
   #undef LMANY
   #undef FMANY
+  #undef CVMANY
   #undef CMANY
   #undef FOUR
   #undef THREE
@@ -619,10 +622,14 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return vectorSig(pc, RV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
-  case OpFCallBuiltin: //TWO(IVA, SA) FMANY,  ONE(RV)
-  case OpCreateCl:  // TWO(IVA,SA),  FMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
+    }
+    return m_tmp_sig;
+  case OpFCallBuiltin: //TWO(IVA, SA) CVMANY,  ONE(RV)
+  case OpCreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
   case OpNewTuple:  // ONE(IVA),     CMANY,   ONE(CV)

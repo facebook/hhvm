@@ -366,6 +366,7 @@ int instrNumPops(const Opcode* opcode) {
 #define V_LMANY(...) -2
 #define R_LMANY(...) -2
 #define FMANY -3
+#define CVMANY -3
 #define CMANY -3
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
@@ -379,6 +380,7 @@ int instrNumPops(const Opcode* opcode) {
 #undef V_LMANY
 #undef R_LMANY
 #undef FMANY
+#undef CVMANY
 #undef CMANY
 #undef O
   };

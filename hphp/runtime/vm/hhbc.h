@@ -74,6 +74,7 @@ enum FlavorDesc {
   AV = 3,  // Classref
   RV = 4,  // Return value (cell or var)
   FV = 5,  // Function parameter (cell or var)
+  CVV =  6, // Cell or Var argument
 };
 
 enum InstrFlags {
@@ -510,11 +511,9 @@ enum SetOpOp {
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
   O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(BPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
-  O(BPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
   O(FPassR,          ONE(IVA),         ONE(RV),         ONE(FV),    FF) \
   O(FPassL,          TWO(IVA,HA),      NOV,             ONE(FV),    FF) \
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
@@ -523,7 +522,7 @@ enum SetOpOp {
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),FMANY,           ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVMANY,          ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \
@@ -567,7 +566,7 @@ enum SetOpOp {
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,SA),      FMANY,           ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
   O(CreateCont,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(ContEnter,       NA,               NOV,             NOV,        CF) \
   O(ContExit,        NA,               NOV,             NOV,        CF) \

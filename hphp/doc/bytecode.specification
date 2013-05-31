@@ -320,8 +320,8 @@ dispatcher to call the function.
 
 Calls to builtin functions may be optimized to avoid pusing an entry on the FPI
 stack if it is known that the builtin function does not need access to the call
-stack. In this case, the arguments to the builtin are passed with the BPass*
-instructions, and the builtin can be invoked with the FCallBuiltin instruction.
+stack. In this case, the arguments to the builtin are pushed on stack as Cells
+and Vars, and the builtin can be invoked with the FCallBuiltin instruction.
 Unless otherwise noted, subsequent references to FCall* instructions should be
 meant to refer to non-optimized FCall instructions, i.e. all FCall instructions
 other than FCallBuiltin.
@@ -1805,18 +1805,6 @@ FCallArray    [F]  ->  [R]
   the current FPI off of the FPI stack, and then invokes the dispatcher to
   call the callee. When the callee returns, it will transfer the return value
   onto the caller's evaluation stack using the R flavor.
-
-BPassC <param id>    [C]  ->  [F]
-
-  Pass parameter to builtin call. This opcode is expected to be emitted
-  only when parameter %1 is pass by value. The instruction pushes $1
-  onto the stack as a cell.
-
-BPassV <param id>    [V]  ->  [F]
-
-  Pass parameter to builtin call. This opcode is expected to be emitted
-  only when parameter %1 is pass by reference. The instruction pushes $1
-  onto the stack as a var.
 
 FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
 

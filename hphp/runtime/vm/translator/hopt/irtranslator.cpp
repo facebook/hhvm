@@ -1044,18 +1044,6 @@ TranslatorX64::irTranslateFPushFuncD(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateBPassC(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  // No-op
-}
-
-void
-TranslatorX64::irTranslateBPassV(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  // No-op
-}
-
-void
 TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const Opcode op = i.op();

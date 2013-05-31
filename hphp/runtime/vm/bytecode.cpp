@@ -6030,16 +6030,6 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Opcode* pc) {
   return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopBPassC(PC& pc) {
-  NEXT();
-  DECODE_IVA(paramId);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopBPassV(PC& pc) {
-  NEXT();
-  DECODE_IVA(paramId);
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
 #ifdef DEBUG
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);

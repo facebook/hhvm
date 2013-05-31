@@ -286,6 +286,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_R_LMANY() 0
 #define COUNT_V_LMANY() 0
 #define COUNT_FMANY 0
+#define COUNT_CVMANY 0
 #define COUNT_CMANY 0
 
 #define ONE(t) \
@@ -338,6 +339,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackLMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
+#define POP_CVMANY \
+  getEmitterVisitor().popEvalStackCVMany(a1)
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 
@@ -562,6 +565,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_FV
 #undef POP_LREST
 #undef POP_FMANY
+#undef POP_CVMANY
 #undef POP_CMANY
 #undef POP_HA_ONE
 #undef POP_HA_TWO
@@ -1311,6 +1315,32 @@ void EmitterVisitor::popEvalStackLMany() {
 void EmitterVisitor::popEvalStackMany(int len, char symFlavor) {
   for (int i = 0; i < len; ++i) {
     popEvalStack(symFlavor);
+  }
+}
+
+void EmitterVisitor::popEvalStackCVMany(int len) {
+  for (int i = 0; i < len; i++) {
+    if (m_evalStack.size() == 0) {
+      InvariantViolation("Emitter emitted an instruction that tries to consume "
+                         "a value from the stack when the stack is empty "
+                         "(expected symbolic flavor C or V at offset %d)",
+                         m_ue.bcPos());
+      return;
+    }
+
+    char sym = m_evalStack.top();
+    char actual = StackSym::GetSymFlavor(sym);
+    m_evalStack.pop();
+    if (actual != StackSym::C && actual != StackSym::V) {
+      InvariantViolation(
+        "Emitter emitted an instruction that tries to consume a "
+        "value from the stack when the top of the stack does not "
+        "match the symbolic flavor that the instruction expects "
+        "(expected symbolic flavor C or V, actual symbolic flavor \"%s\" "
+        "at offset %d)",
+        StackSym::ToString(actual).c_str(),
+        m_ue.bcPos());
+    }
   }
 }
 
@@ -4291,15 +4321,11 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
                                          int paramId,
                                          bool byRef) {
   visit(exp);
-  if (checkIfStackEmpty("BPass*")) return;
+  if (checkIfStackEmpty("Builtin arg*")) return;
   if (byRef) {
     emitVGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-    e.BPassV(paramId);
   } else {
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-    e.BPassC(paramId);
   }
   return;
 }
@@ -4344,8 +4370,6 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
     default:
       not_reached();
   }
-  m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-  e.BPassC(paramId);
 }
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,

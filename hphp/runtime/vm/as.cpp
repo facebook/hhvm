@@ -1023,6 +1023,7 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_R_LMANY() (1 + vecImmStackValues)
 #define NUM_POP_C_LMANY() (1 + vecImmStackValues)
 #define NUM_POP_FMANY immIVA /* number of arguments */
+#define NUM_POP_CVMANY immIVA /* number of arguments */
 #define NUM_POP_CMANY immIVA /* number of arguments */
 
 #define O(name, imm, pop, push, flags)                            \
@@ -1098,6 +1099,7 @@ OPCODES
 #undef NUM_POP_R_LMANY
 #undef NUM_POP_C_LMANY
 #undef NUM_POP_FMANY
+#undef NUM_POP_CVMANY
 #undef NUM_POP_CMANY
 
 void initialize_opcode_map() {

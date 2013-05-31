@@ -32,7 +32,6 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/immstack.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/writelease.h"

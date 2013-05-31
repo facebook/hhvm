@@ -3228,7 +3228,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
 
   TRACE(1, "Translator::analyze %s:%d %s\n", file, lineNum, funcName);
   TraceletContext tas(&t, initialTypes);
-  ImmStack immStack;
   int stackFrameOffset = 0;
   int oldStackFrameOffset = 0;
 

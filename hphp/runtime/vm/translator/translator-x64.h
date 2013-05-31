@@ -25,7 +25,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/translator/srcdb.h"
 #include "hphp/runtime/vm/translator/unwind-x64.h"
-#include "hphp/runtime/vm/translator/regalloc.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -128,11 +127,9 @@ void prepareForSmash(Asm&, int nBytes, int offset = 0);
 bool isSmashable(Address frontier, int nBytes, int offset = 0);
 
 class TranslatorX64 : public Translator
-                    , SpillFill
                     , boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
-  friend class ArgManager;
   friend class WithCounters;
   friend class DiamondGuard;
   friend class DiamondReturn;
@@ -151,7 +148,6 @@ class TranslatorX64 : public Translator
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
 
   typedef X64Assembler Asm;
-  typedef std::map<int, int> ContParamMap;
   static const int kMaxInlineContLocals = 10;
 
   class AHotSelector {
@@ -185,10 +181,6 @@ class TranslatorX64 : public Translator
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
   size_t                 m_trampolineSize; // size of each trampoline
-  // spillFillCode points to one of a or astubs. We need it to produce
-  // reconciliation code to the alternate buffer. Don't directly manipulate;
-  // use DiamondGuard instead.
-  Asm*                   m_spillFillCode;
 
   SrcDB                  m_srcDB;
   SignalStubMap          m_segvStubs;
@@ -227,18 +219,6 @@ class TranslatorX64 : public Translator
   void hhirTraceFree();
 
 
-  struct SavedRegState {
-    explicit SavedRegState(void* saver, const RegAlloc& state)
-      : saver(saver)
-      , savedState(state)
-    {}
-
-    void* saver; // For debugging: ensure these are popped in the right order
-    RegAlloc savedState;
-  };
-
-  RegAlloc                   m_regMap;
-  std::stack<SavedRegState>  m_savedRegMaps;
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
   CatchTraceMap              m_catchTraceMap;
@@ -266,33 +246,12 @@ private:
   void drawCFG(std::ofstream& out) const;
   static vector<PhysReg> x64TranslRegs();
 
-  PhysReg getReg(const Location& loc) {
-    return m_regMap.getReg(loc);
-  }
-
-  PhysReg getReg(const DynLocation& dl) {
-    return m_regMap.getReg(dl.location);
-  }
-
   Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, ahot, astubs); }
   void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
-  void emitIncRefGeneric(PhysReg base, int disp = 0);
-  void emitDecRef(Asm& a, const NormalizedInstruction& i, PhysReg rDatum,
-                  DataType type);
-  void emitDecRef(const NormalizedInstruction& i, PhysReg rDatum,
-                  DataType type);
-  void emitDecRefGeneric(const NormalizedInstruction& i, PhysReg srcReg,
-                         int disp = 0);
-  void emitDecRefGenericReg(PhysReg rData, PhysReg rType);
-  void emitDecRefInput(Asm& a, const NormalizedInstruction& i, int input);
   static Call getDtorCall(DataType type);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
-  void emitCopyToStack(Asm& a,
-                       const NormalizedInstruction& ni,
-                       PhysReg src,
-                       int off);
   void emitCopyToStackRegSafe(Asm& a,
                               const NormalizedInstruction& ni,
                               PhysReg src,
@@ -300,32 +259,11 @@ private:
                               PhysReg tmpReg);
 
   void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
-  void emitPushAR(const NormalizedInstruction& i, const Func* func,
-                  const int bytesPopped = 0, bool isCtor = false,
-                  bool clearThis = true, uintptr_t varEnvInvName = 0);
 
-  void emitCallSaveRegs();
-  void prepareCallSaveRegs() { not_reached(); }
-  void emitCallStaticLocHelper(X64Assembler& as,
-                               const NormalizedInstruction& i,
-                               ScratchReg& output,
-                               ptrdiff_t ch);
 public:
-  void emitCall(Asm& a, TCA dest, bool killRegs=false);
-  void emitCall(Asm& a, Call call, bool killRegs=false);
+  void emitCall(Asm& a, TCA dest);
+  void emitCall(Asm& a, Call call);
 private:
-
-  /* Continuation-related helpers */
-  static bool mapContParams(ContParamMap& map, const Func* origFunc,
-                            const Func* genFunc);
-  void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
-  void emitCallPack(Asm& a, const NormalizedInstruction& i);
-  void emitContRaiseCheck(Asm& a, const NormalizedInstruction& i);
-  void emitContExit();
-  void emitContPreNext(const NormalizedInstruction& i, ScratchReg&  rCont);
-  void emitContStartedCheck(const NormalizedInstruction& i, ScratchReg& rCont);
-  template<bool raise>
-  void translateContSendImpl(const NormalizedInstruction& i);
 
   void translateClassExistsImpl(const Tracelet& t,
                                 const NormalizedInstruction& i,
@@ -333,39 +271,11 @@ private:
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
   void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
   void recordIndirectFixup(CTCA addr, int dwordsPushed);
-  template <bool reentrant>
-  void recordCallImpl(Asm& a, const NormalizedInstruction& i,
-                      bool advance = false, int adjust = 0);
-  void recordReentrantCall(Asm& a, const NormalizedInstruction& i,
-                           bool advance = false, int adjust = 0) {
-    recordCallImpl<true>(a, i, advance, adjust);
-  }
-  void recordReentrantCall(const NormalizedInstruction& i) {
-    recordCallImpl<true>(a, i);
-  }
-  void recordReentrantStubCall(const NormalizedInstruction& i,
-                               bool advance = false) {
-    recordCallImpl<true>(astubs, i, advance);
-  }
-  void recordCall(Asm& a, const NormalizedInstruction& i);
-  void recordCall(const NormalizedInstruction& i);
-  void recordStubCall(const NormalizedInstruction& i) {
-    recordCall(astubs, i);
-  }
-  void recordEagerCall(Asm& a, const NormalizedInstruction& i);
-  void emitSideExit(Asm& a, const NormalizedInstruction& dest, bool next);
   void emitStringToClass(const NormalizedInstruction& i);
-  void emitKnownClassCheck(const NormalizedInstruction& i,
-                           const StringData* clssName,
-                           RegNumber reg);
   void emitStringToKnownClass(const NormalizedInstruction& i,
                               const StringData* clssName);
   void emitObjToClass(const NormalizedInstruction& i);
   void emitClsAndPals(const NormalizedInstruction& i);
-  void emitStaticPropInlineLookup(const NormalizedInstruction& i,
-                                  int classInputIdx,
-                                  const DynLocation& propInput,
-                                  PhysReg scr);
 
   template<int Arity> TCA emitNAryStub(Asm& a, Call c);
   TCA emitUnaryStub(Asm& a, Call c);
@@ -377,36 +287,13 @@ private:
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
   template <bool reentrant>
-  void callUnaryStubImpl(Asm& a, const NormalizedInstruction& i, TCA stub,
-                         PhysReg arg, int disp = 0);
-  void callUnaryReentrantStub(Asm& a, const NormalizedInstruction& i, TCA stub,
-                              PhysReg arg, int disp = 0) {
-    callUnaryStubImpl<true>(a, i, stub, arg, disp);
-  }
-  void callUnaryStub(Asm& a, const NormalizedInstruction& i, TCA stub,
-                     PhysReg arg, int disp = 0) {
-    callUnaryStubImpl<false>(a, i, stub, arg, disp);
-  }
-  void callBinaryStub(Asm& a, const NormalizedInstruction& i, TCA stub,
-                      PhysReg arg1, PhysReg arg2);
   void emitDerefStoreToLoc(PhysReg srcReg, const Location& destLoc);
 
   void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
                             PhysReg lr, PhysReg rr,
                             RegXMM lxmm, RegXMM rxmm);
-  void binaryIntegerArith(const NormalizedInstruction &i,
-                          Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void binaryMixedArith(const NormalizedInstruction &i,
                          Opcode op, PhysReg srcReg, PhysReg srcDestReg);
-  void binaryArithCell(const NormalizedInstruction &i,
-                       Opcode op,
-                       const DynLocation& in1,
-                       const DynLocation& inout);
-  void binaryArithLocal(const NormalizedInstruction &i,
-                        Opcode op,
-                        const DynLocation& in1,
-                        const DynLocation& in2,
-                        const DynLocation& out);
   void fpEq(const NormalizedInstruction& i, PhysReg lr, PhysReg rr);
   void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
               RegSet toSave = RegSet());
@@ -418,14 +305,8 @@ private:
     ArgDontAllocate = -1,
     ArgAnyReg = -2
   };
-  void allocInputsForCall(const NormalizedInstruction& i,
-                          const int* args);
 
  private:
-  void invalidateOutStack(const NormalizedInstruction& ni);
-  void cleanOutLocal(const NormalizedInstruction& ni);
-  void invalidateOutLocal(const NormalizedInstruction& ni);
-
 #define INSTRS \
   CASE(PopC) \
   CASE(PopV) \
@@ -658,17 +539,6 @@ private:
 private:
   virtual void syncWork();
 
-  void spillTo(DataType t, PhysReg reg, bool writeType,
-               PhysReg base, int disp);
-
-  // SpillFill interface
-  void spill(const Location& loc, DataType t, PhysReg reg,
-             bool writeType);
-  void fill(const Location& loc, PhysReg reg);
-  void fillByMov(PhysReg src, PhysReg dst);
-  void loadImm(int64_t immVal, PhysReg reg);
-  void poison(PhysReg dest);
-
 public:
   bool acquireWriteLease(bool blocking) {
     return s_writeLease.acquire(blocking);
@@ -689,8 +559,6 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
 private:
-  void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
-  void translateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
   void irInterpretInstr(const NormalizedInstruction& i);
   void irTranslateInstr(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
@@ -712,10 +580,6 @@ private:
                            vector<TransBCMapping>* bcMap);
   void irPassPredictedAndInferredTypes(const NormalizedInstruction& i);
 
-  void emitStringCheck(Asm& _a, PhysReg base, int offset);
-  void emitTypeCheck(Asm& _a, DataType dt,
-                     PhysReg base, int offset,
-                     SrcRec* fail = nullptr);
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
     SrcRec& fail);
@@ -724,9 +588,6 @@ private:
 
   void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
 
-  void emitDecRefThis(const ScratchReg& tmpReg);
-  void emitVVRet(const ScratchReg&, Label& extraArgsReturn,
-                 Label& varEnvReturn);
   void emitInlineReturn(Location retvalSrcLoc, int retvalSrcDisp);
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
@@ -770,14 +631,6 @@ private:
                       PhysReg = reg::r13,
                       PhysReg = reg::r14,
                       PhysReg = reg::rax);
-  void emitCheckUncounted(X64Assembler& a,
-                          PhysReg       baseReg,
-                          int           offset,
-                          SrcRec&       fail);
-  void emitCheckUncountedInit(X64Assembler& a,
-                              PhysReg       baseReg,
-                              int           offset,
-                              SrcRec&       fail);
 
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
@@ -802,7 +655,7 @@ private:
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
   void emitTestSurpriseFlags(Asm& a);
-  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup f);
+  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup);
   TCA  emitTransCounterInc(Asm& a);
 
   static void trimExtraArgs(ActRec* ar);
@@ -919,7 +772,6 @@ private:
 
 public: // Only for HackIR
   void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
-  void emitRecordPunt(Asm& as, const std::string& name);
 #define DECLARE_FUNC(nm) \
   void irTranslate ## nm(const Tracelet& t,               \
                          const NormalizedInstruction& i);

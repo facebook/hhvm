@@ -2678,15 +2678,6 @@ static void emitExitNoIRStats(Asm& a,
                    Transl::CC_None,
                    true);
   }
-
-  if (HPHP::Trace::moduleEnabled(HPHP::Trace::punt, 1)) {
-    auto const op = Op(*func->unit()->at(dest.m_offset));
-    auto const name = folly::format(
-      "exitSlow-{}",
-      opcodeToName(op)
-    ).str();
-    tx64->emitRecordPunt(a, name);
-  }
 }
 
 void CodeGenerator::cgReqBindJmpNoIR(IRInstruction* inst) {

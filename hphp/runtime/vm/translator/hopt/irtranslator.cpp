@@ -1868,7 +1868,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     }
   } catch (JIT::FailedCodeGen& fcg) {
     transResult = Failure;
-    if (Trace::moduleEnabled(Trace::punt, 1)) m_lastHHIRPunt = fcg.func;
     TRACE(1, "HHIR: FAILED to generate code for Translation %d "
           "@ %s:%d (%s)\n", getCurrentTransID(),
           fcg.file, fcg.line, fcg.func);
@@ -1877,7 +1876,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
           fcg.file, fcg.line, fcg.func);
   } catch (JIT::FailedIRGen& x) {
     transResult = Failure;
-    if (Trace::moduleEnabled(Trace::punt, 1)) m_lastHHIRPunt = x.func;
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           x.file, x.line, x.func);
   } catch (TranslationFailedExc& tfe) {

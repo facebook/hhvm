@@ -39,334 +39,6 @@ void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 
 // RAII aids to machine code.
 
-// Put FreezeRegs in a scope around any emit calls where the caller needs
-// to be sure the callee will not modify the state of the register
-// map.  (Arises in situations with conditional code often.)
-struct FreezeRegs : private boost::noncopyable {
-  explicit FreezeRegs(RegAlloc& regs) : m_regs(regs) { m_regs.freeze(); }
-  ~FreezeRegs() { m_regs.defrost(); }
-
-private:
-  RegAlloc& m_regs;
-};
-
-class RedirectSpillFill : boost::noncopyable {
-  X64Assembler* const m_oldSpf;
-public:
-  explicit RedirectSpillFill(X64Assembler* newCode)
-    : m_oldSpf(tx64->m_spillFillCode)
-  {
-    tx64->m_spillFillCode = newCode;
-  }
-  ~RedirectSpillFill() {
-    tx64->m_spillFillCode = m_oldSpf;
-  }
-};
-
-// DiamondGuard is a scoped way to protect register allocator state around
-// control flow. When we enter some optional code that may affect the state
-// of the register file, we copy the register file's state, and redirect any
-// spills and fills to the branch's body.
-//
-// When we're ready to rejoin the main control flow, we bring the registers
-// back into the state they were in, and restore the old spill/fill
-// destinations.
-class DiamondGuard : boost::noncopyable {
-  RedirectSpillFill m_spfChanger;
-public:
-  explicit DiamondGuard(X64Assembler& a) : m_spfChanger(&a) {
-    tx64->m_savedRegMaps.push(
-      TranslatorX64::SavedRegState(this, tx64->m_regMap));
-  }
-  ~DiamondGuard() {
-    assert(!tx64->m_savedRegMaps.empty());
-    assert(tx64->m_savedRegMaps.top().saver == this);
-
-    // Bring the register state back to its state in the main body.
-    //
-    // Note: it's important that tx64->m_regMap is the branch
-    // RegAlloc during this.  See RegAlloc::reconcile.
-    tx64->m_savedRegMaps.top().savedState.reconcile(tx64->m_regMap);
-    tx64->m_regMap = tx64->m_savedRegMaps.top().savedState;
-    tx64->m_savedRegMaps.pop();
-  }
-};
-
-// Helper for use with UnlikelyIfBlock when you have a complex else
-// branch that needs to make changes to the register file.
-//
-// For an example usage see UnlikelyIfBlock.
-class DiamondReturn : boost::noncopyable {
-  X64Assembler* m_branchA;
-  X64Assembler* m_mainA;
-  TCA m_branchJmp;
-  TCA m_finishBranchFrontier;
-
-private:
-  friend class UnlikelyIfBlock;
-
-  void initBranch(X64Assembler* branchA, X64Assembler* mainA) {
-    /*
-     * DiamondReturn must be used with branches going to different
-     * code regions.
-     */
-    assert(branchA != mainA);
-
-    m_branchA = branchA;
-    m_mainA = mainA;
-    tx64->m_savedRegMaps.push(
-      TranslatorX64::SavedRegState(this, tx64->m_regMap));
-  }
-
-  void finishBranch(TCA jmp, TCA frontier) {
-    m_branchJmp = jmp;
-    m_finishBranchFrontier = frontier;
-
-    // If there's some reason to do something other than this we have
-    // to change the way this class works.
-    const int UNUSED kJumpSize = 5;
-    assert(m_finishBranchFrontier == m_branchJmp + kJumpSize);
-
-    // We're done with the branch, so save the branch's state and
-    // switch back to the main line's state.
-    swapRegMaps();
-  }
-
-  bool finishedBranch() const { return m_branchJmp != 0; }
-
-  void swapRegMaps() {
-    assert(!tx64->m_savedRegMaps.empty());
-    assert(tx64->m_savedRegMaps.top().saver == this);
-    std::swap(tx64->m_savedRegMaps.top().savedState, tx64->m_regMap);
-  }
-
-  void emitReconciliation() {
-    assert(!tx64->m_savedRegMaps.empty());
-    assert(tx64->m_savedRegMaps.top().saver == this);
-
-    RedirectSpillFill spfRedir(m_branchA);
-
-    if (finishedBranch()) {
-      // We need tx64->m_regMap to point at the branch during
-      // reconciliation.  See RegAlloc::reconcile().
-      swapRegMaps();
-    }
-    RegAlloc& branchState = tx64->m_regMap;
-    RegAlloc& currentState = tx64->m_savedRegMaps.top().savedState;
-    currentState.reconcile(branchState);
-    tx64->m_regMap = currentState;
-    tx64->m_savedRegMaps.pop();
-  }
-
-public:
-  explicit DiamondReturn()
-    : m_branchA(0)
-    , m_branchJmp(0)
-  {}
-
-  void kill() {
-    m_mainA = nullptr;
-  }
-
-  ~DiamondReturn() {
-    assert(m_branchA &&
-      "DiamondReturn was created without being passed to UnlikelyIfBlock");
-
-    if (!m_mainA) {
-      /*
-       * We were killed. eg the UnlikelyIfBlock took a side exit, so
-       * no reconciliation/branch back to a is required.
-       */
-      return;
-    }
-
-    if (!finishedBranch()) {
-      /*
-       * In this case, we're reconciling the branch even though it
-       * isn't really finished (no one ever called finishBranch()), so
-       * we just need to emit spills/fills now and not be as clever as
-       * below.  See UnlikelyIfBlock::reconcileEarly.
-       */
-      emitReconciliation();
-      return;
-    }
-
-    const TCA currentBranchFrontier = m_branchA->code.frontier;
-    const bool branchFrontierMoved =
-      currentBranchFrontier != m_finishBranchFrontier;
-
-    /*
-     * If the branch frontier hasn't moved since the branch was
-     * finished, we don't need the jmp that was already emitted
-     * anymore, so rewind so we can potentially overwrite it with
-     * spills/fills.
-     */
-    if (!branchFrontierMoved) {
-      m_branchA->code.frontier = m_branchJmp;
-    }
-
-    // Send out reconciliation code to the branch area.  We want to
-    // bring the state of the branch's register file into sync with
-    // the main-line.
-    const TCA spfStart = m_branchA->code.frontier;
-    emitReconciliation();
-    const bool hadAnySpf = spfStart != m_branchA->code.frontier;
-
-    if (branchFrontierMoved) {
-      /*
-       * In this case, more than one DiamondReturn is being used and
-       * there are multiple unlikely branches.
-       *
-       * If there was no reconciliation code it's not big deal, we'll
-       * just patch the existing jmp to go to the return in m_mainA.
-       * But if we needed reconciliation code, we'll instead want to
-       * patch it to jump there.
-       */
-      if (hadAnySpf) {
-        m_branchA->patchJmp(m_branchJmp, spfStart);
-        m_branchA->jmp(m_mainA->code.frontier);
-      } else {
-        m_branchA->patchJmp(m_branchJmp, m_mainA->code.frontier);
-      }
-    } else {
-      assert(spfStart == m_branchJmp);
-      m_branchA->jmp(m_mainA->code.frontier);
-    }
-  }
-};
-
-// Code to profile how often our UnlikelyIfBlock branches are taken in
-// practice. Enable with TRACE=unlikely:1
-struct JmpHitRate {
-  litstr key;
-  uint64_t check;
-  uint64_t take;
-  JmpHitRate() : key(nullptr), check(0), take(0) {}
-
-  float rate() const {
-    return 100.0 * take / check;
-  }
-  bool operator<(const JmpHitRate& b) const {
-    return rate() > b.rate();
-  }
-};
-typedef hphp_hash_map<litstr, JmpHitRate, pointer_hash<const char>> JmpHitMap;
-extern __thread JmpHitMap* tl_unlikelyHits;
-extern __thread JmpHitMap* tl_jccHits;
-
-template<Trace::Module mod>
-static void recordJmpProfile(litstr key, int64_t take) {
-  JmpHitMap& map = mod == Trace::unlikely ? *tl_unlikelyHits : *tl_jccHits;
-  JmpHitRate& r = map[key];
-  r.key = key;
-  r.check++;
-  if (take) r.take++;
-}
-
-template<Trace::Module mod>
-void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
-  using namespace reg;
-
-  if (!Trace::moduleEnabledRelease(mod)) return;
-  const ssize_t sz = 1024;
-  char key[sz];
-
-  // Clean up filename
-  std::string file =
-    boost::filesystem::path(tx64->m_curFile).filename().string();
-
-  // Get instruction if wanted
-  const NormalizedInstruction* ni = tx64->m_curNI;
-  std::string inst;
-  if (Trace::moduleEnabledRelease(mod, 2)) {
-    inst = std::string(", ") + (ni ? opcodeToName(ni->op()) : "<none>");
-  }
-  const char* fmt = Trace::moduleEnabledRelease(mod, 3) ?
-    "%-25s:%-5d, %-28s%s" :
-    "%-25s:%-5d (%-28s%s)";
-  if (snprintf(key, sz, fmt,
-               file.c_str(), tx64->m_curLine, tx64->m_curFunc,
-               inst.c_str()) >= sz) {
-    key[sz-1] = '\0';
-  }
-  litstr data = StringData::GetStaticString(key)->data();
-
-  RegSet allRegs = kAllX64Regs;
-  allRegs.remove(rsi);
-
-  a.  pushf  ();
-  a.  push   (rsi);
-  a.  setcc  (cc, sil);
-  a.  movzbl (sil, esi);
-  {
-    PhysRegSaver regs(a, allRegs);
-    a.emitImmReg((intptr_t)data, rdi);
-    if (false) {
-      recordJmpProfile<mod>("", 0);
-    }
-    a.call   ((TCA)recordJmpProfile<mod>);
-  }
-  a.  pop    (rsi);
-  a.  popf   ();
-}
-
-inline void initJmpProfile() {
-  if (Trace::moduleEnabledRelease(Trace::unlikely)) {
-    tl_unlikelyHits = new JmpHitMap();
-  }
-  if (Trace::moduleEnabledRelease(Trace::jcc)) {
-    tl_jccHits = new JmpHitMap();
-  }
-}
-
-inline void dumpProfileImpl(Trace::Module mod) {
-  JmpHitMap*& table = mod == Trace::jcc ? tl_jccHits : tl_unlikelyHits;
-  if (!table) return;
-
-  std::vector<JmpHitRate> hits;
-  JmpHitRate overall;
-  overall.key = "total";
-  for (auto& item : *table) {
-    overall.check += item.second.check;
-    overall.take += item.second.take;
-    hits.push_back(item.second);
-  }
-  if (hits.empty()) return;
-  auto cmp = [&](const JmpHitRate& a, const JmpHitRate& b) {
-    return a.take > b.take ? true
-    : a.take == b.take ? a.check > b.check
-    : false;
-  };
-  std::sort(hits.begin(), hits.end(), cmp);
-  Trace::traceRelease("%s hit rates for %s:\n",
-                      mod == Trace::jcc ? "JccBlock" : "UnlikelyIfBlock",
-                      g_context->getRequestUrl(50).c_str());
-  const char* fmt = Trace::moduleEnabledRelease(mod, 3) ?
-    "%6.2f, %8llu, %8llu, %5.1f, %s\n" :
-    "%6.2f%% (%8llu / %8llu, %5.1f%% of total): %s\n";
-  auto printRate = [&](const JmpHitRate& hr) {
-    Trace::traceRelease(fmt,
-                        hr.rate(), hr.take, hr.check, hr.key,
-                        100.0 * hr.take / overall.take);
-  };
-  printRate(overall);
-  std::for_each(hits.begin(), hits.end(), printRate);
-  Trace::traceRelease("\n");
-
-  delete table;
-  table = nullptr;
-}
-
-inline void dumpJmpProfile() {
-  if (!Trace::moduleEnabledRelease(Trace::unlikely) &&
-      !Trace::moduleEnabledRelease(Trace::jcc)) {
-    return;
-  }
-  dumpProfileImpl(Trace::unlikely);
-  dumpProfileImpl(Trace::jcc);
-}
-
-
 // UnlikelyIfBlock:
 //
 //  Branch to distant code (that we presumably don't expect to
@@ -408,58 +80,20 @@ struct UnlikelyIfBlock {
   X64Assembler& m_unlikely;
   TCA m_likelyPostBranch;
 
-  DiamondReturn* m_returnDiamond;
-  bool m_externalDiamond;
-  boost::optional<FreezeRegs> m_ice;
-
   explicit UnlikelyIfBlock(ConditionCode cc,
                            X64Assembler& likely,
-                           X64Assembler& unlikely,
-                           DiamondReturn* returnDiamond = 0)
+                           X64Assembler& unlikely)
     : m_likely(likely)
     , m_unlikely(unlikely)
-    , m_returnDiamond(returnDiamond ? returnDiamond : new DiamondReturn())
-    , m_externalDiamond(!!returnDiamond)
   {
-    emitJmpProfile<Trace::unlikely>(m_likely, cc);
     m_likely.jcc(cc, m_unlikely.code.frontier);
     m_likelyPostBranch = m_likely.code.frontier;
-    m_returnDiamond->initBranch(&unlikely, &likely);
-    tx64->m_spillFillCode = &unlikely;
   }
 
   ~UnlikelyIfBlock() {
-    TCA jmpAddr = m_unlikely.code.frontier;
     m_unlikely.jmp(m_likelyPostBranch);
-    if (m_returnDiamond) {
-      m_returnDiamond->finishBranch(jmpAddr, m_unlikely.code.frontier);
-      if (!m_externalDiamond) {
-        delete m_returnDiamond;
-      }
-    }
-    tx64->m_spillFillCode = &m_likely;
-  }
-
-  /*
-   * Force early reconciliation between the branch and main line.
-   * Using this has some tricky cases, part of which is that you can't
-   * allocate registers anymore in the branch if you do this (so we'll
-   * freeze until ~UnlikelyIfBlock).
-   *
-   * It's also almost certainly error if we have m_externalDiamond, so
-   * for now that's an assert.
-   */
-  void reconcileEarly() {
-    assert(!m_externalDiamond);
-    delete m_returnDiamond;
-    m_returnDiamond = 0;
-    m_ice = boost::in_place<FreezeRegs>(boost::ref(tx64->m_regMap));
   }
 };
-
-#define UnlikelyIfBlock                                                 \
-  m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
-  UnlikelyIfBlock
 
 // Helper structs for jcc vs. jcc8.
 struct Jcc8 {
@@ -487,19 +121,15 @@ template <ConditionCode Jcc, typename J=Jcc8>
 struct JccBlock {
   mutable X64Assembler* m_a;
   TCA m_jcc;
-  mutable DiamondGuard* m_dg;
 
   explicit JccBlock(X64Assembler& a)
-    : m_a(&a),
-      m_dg(new DiamondGuard(a)) {
-    emitJmpProfile<Trace::jcc>(a, Jcc);
+    : m_a(&a) {
     m_jcc = a.code.frontier;
     J::branch(a, Jcc, m_a->code.frontier);
   }
 
   ~JccBlock() {
     if (m_a) {
-      delete m_dg;
       J::patch(*m_a, m_jcc, m_a->code.frontier);
     }
   }
@@ -509,54 +139,13 @@ private:
   JccBlock& operator=(const JccBlock&);
 };
 
-#define JccBlock                                                        \
-  m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
-  JccBlock
-
-template<class Lambda>
-void guardDiamond(X64Assembler& a, Lambda body) {
-  DiamondGuard dg(a);
-  body();
-}
-
 template<ConditionCode Jcc, class Lambda>
 void jccBlock(X64Assembler& a, Lambda body) {
   Label exit;
-
-  guardDiamond(a, [&] {
-    exit.jcc8(a, Jcc);
-    body();
-  });
-asm_label(a, exit);
+  exit.jcc8(a, Jcc);
+  body();
+ asm_label(a, exit);
 }
-
-/*
- * semiLikelyIfBlock is a conditional block of code that is expected
- * to be unlikely, but not so unlikely that we should shove it into
- * astubs.
- *
- * Usage example:
- *
- * a. test_reg64_reg64(*rFoo, *rFoo);
- * semiLikelyIfBlock(CC_Z, a, [&]{
- *   EMIT_CALL(a, some_helper);
- *   emitMovRegReg(a, rax, *rFoo);
- * });
- */
-template<class Lambda>
-void semiLikelyIfBlock(ConditionCode Jcc, X64Assembler& a, Lambda body) {
-  Label likely;
-  Label unlikely;
-
-  guardDiamond(a, [&] {
-    unlikely.jcc8(a, Jcc);
-    likely.jmp8(a);
-  asm_label(a, unlikely);
-    body();
-  });
-asm_label(a, likely);
-}
-
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and
 // conditionally branches over the enclosing block of assembly on the
@@ -578,10 +167,10 @@ struct CondBlock {
   X64Assembler& m_a;
   int m_off;
   TCA m_jcc8;
-  DiamondGuard* m_dg;
 
   CondBlock(X64Assembler& a, PhysReg reg, int offset = 0)
-      : m_a(a), m_off(offset), m_dg(new DiamondGuard(a)) {
+      : m_a(a)
+      , m_off(offset) {
     int typeDisp = m_off + FieldOffset;
     static_assert(sizeof(FieldType) == 1 || sizeof(FieldType) == 4,
                   "CondBlock of unimplemented field size");
@@ -596,7 +185,6 @@ struct CondBlock {
   }
 
   ~CondBlock() {
-    delete m_dg;
     m_a.patchJcc8(m_jcc8, m_a.code.frontier);
   }
 };
@@ -641,33 +229,6 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
 
 // Common code emission patterns.
 
-// emitStoreImm --
-//   Try to use a nice encoding for the size and value.
-static void
-emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
-             int size = sz::qword, RegAlloc* regAlloc = nullptr) {
-  using namespace reg;
-
-  if (size == sz::qword) {
-    PhysReg immReg = regAlloc ? regAlloc->getImmReg(imm) : InvalidReg;
-    if (immReg == InvalidReg) {
-      if (deltaFits(imm, sz::dword)) {
-        a. store_imm64_disp_reg64(imm, off, r);
-        return;
-      }
-      emitImmReg(a, imm, rAsm);
-      immReg = rAsm;
-    }
-    a.   store_reg64_disp_reg64(immReg, off, r);
-  } else if (size == sz::dword) {
-    a.   store_imm32_disp_reg(imm, off, r);
-  } else if (size == sz::byte) {
-    a.   store_imm8_disp_reg(imm, off, r);
-  } else {
-    not_implemented();
-  }
-}
-
 // vstackOffset --
 // emitVStackStore --
 //
@@ -679,15 +240,7 @@ emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
 //   to be a hardware size: 1, 2, 4, or 8 bytes.
 static inline int
 vstackOffset(const NormalizedInstruction& ni, COff off) {
-  return off - cellsToBytes(ni.stackOff);
-}
-
-static inline void
-emitVStackStoreImm(X64Assembler &a, const NormalizedInstruction &ni,
-                   uint64_t imm, int off, int size = sz::qword,
-                   RegAlloc *regAlloc = nullptr) {
-  int hwOff = vstackOffset(ni, off);
-  emitStoreImm(a, imm, rVmSp, hwOff, size, regAlloc);
+  not_reached();
 }
 
 static inline void
@@ -909,107 +462,6 @@ inline void emitCopyToAligned(X64Assembler& a,
   a.    movdqa  (src[srcOff], xmm0);
   a.    movdqa  (xmm0, dest[destOff]);
 }
-
-// ArgManager -- support for passing VM-level data to helper functions.
-class ArgManager {
-  typedef HPHP::Transl::X64Assembler& A;
-public:
-  ArgManager(TranslatorX64 &tx64, A& a) : m_tx64(tx64), m_a(a) { }
-
-  void addImm(uint64_t imm);
-
-  void addLoc(const Location &loc);
-
-  void addLocRef(const Location &loc);
-
-  void addDeref(const Location &loc);
-
-  void addReg(PhysReg reg);
-
-  void addRegPlus(PhysReg reg, int32_t off);
-
-  void addReg(const LazyScratchReg& l) { addReg(r(l)); }
-  void addRegPlus(const LazyScratchReg& l, int32_t off) {
-    addRegPlus(r(l), off);
-  }
-
-  void addLocAddr(const Location &loc);
-
-  void emitArguments() {
-    size_t n = m_args.size();
-    assert((int)n <= kNumRegisterArgs);
-    cleanLocs();
-    std::map<PhysReg, size_t> used;
-    std::vector<PhysReg> actual(n, InvalidReg);
-    computeUsed(used, actual);
-    shuffleRegisters(used, actual);
-    emitValues(actual);
-  }
-
-private:
-  struct ArgContent {
-    enum ArgKind {
-      ArgImm, ArgLoc, ArgLocRef, ArgDeref, ArgReg, ArgRegPlus, ArgLocAddr
-    } m_kind;
-    PhysReg m_reg;
-    const Location *m_loc;
-    uint64_t m_imm;
-
-    ArgContent(ArgKind kind, PhysReg reg, uint64_t imm) :
-      m_kind(kind), m_reg(reg), m_loc(nullptr), m_imm(imm) { }
-    ArgContent(ArgKind kind, const Location &loc) :
-      m_kind(kind), m_reg(InvalidReg), m_loc(&loc), m_imm(0) { }
-  };
-
-  TranslatorX64& m_tx64;
-  A& m_a;
-  std::vector<ArgContent> m_args;
-
-  ArgManager(); // Don't build without reference to translator
-
-  void cleanLocs();
-  void computeUsed(std::map<PhysReg, size_t> &used,
-                   std::vector<PhysReg> &actual);
-  void shuffleRegisters(std::map<PhysReg, size_t> &used,
-                     std::vector<PhysReg> &actual);
-  void emitValues(std::vector<PhysReg> &actual);
-};
-
-// Some macros to make writing calls palatable. You have to "type" the
-// arguments
-#define IMM(i)       _am.addImm(i)
-#define V(loc)       _am.addLoc(loc)
-#define VREF(loc)    _am.addLocRef(loc)
-#define DEREF(loc)   _am.addDeref(loc)
-#define R(r)         _am.addReg(r)
-#define RPLUS(r,off) _am.addRegPlus(r, off)
-#define A(loc)       _am.addLocAddr(loc)
-#define IE(cond, argIf, argElse) \
-  ((cond) ? (argIf) : (argElse))
-static inline void voidFunc() {}
-#define ID(argDbg) IE(debug, (argDbg), voidFunc())
-
-#define EMIT_CALL_PROLOGUE(a) do {         \
-  SpaceRecorder sr("_HCallInclusive", a);  \
-  ArgManager _am(*this, a);                \
-  prepareCallSaveRegs();
-
-#define EMIT_CALL_EPILOGUE(a, dest)             \
-  _am.emitArguments();                          \
-  {                                             \
-    SpaceRecorder sr("_HCallExclusive", a);     \
-    emitCall(a, (TCA)(dest), true);             \
-  }                                             \
-} while(0)
-
-#define EMIT_CALL(a, dest, ...) \
-  EMIT_CALL_PROLOGUE(a)         \
-  __VA_ARGS__ ;                 \
-  EMIT_CALL_EPILOGUE(a, dest)
-
-#define EMIT_RCALL(a, ni, dest, ...) \
-  EMIT_CALL(a, dest, __VA_ARGS__);   \
-  recordReentrantCall(a, ni);
 
 // supportedPlan --
 // nativePlan --

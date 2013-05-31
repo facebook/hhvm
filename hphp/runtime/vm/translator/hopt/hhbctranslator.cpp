@@ -967,6 +967,29 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
   gen(CIterFree, IterId(iterId), m_tb->getFp());
 }
 
+typedef std::map<int, int> ContParamMap;
+/*
+ * mapContParams determines if every named local in origFunc has a
+ * corresponding named local in genFunc. If this step succeeds and
+ * there's no VarEnv at runtime, the continuation's variables can be
+ * filled completely inline in the TC (assuming there aren't too
+ * many).
+ */
+static
+bool mapContParams(ContParamMap& map,
+                   const Func* origFunc, const Func* genFunc) {
+  const StringData* const* varNames = origFunc->localNames();
+  for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
+    Id id = genFunc->lookupVarId(varNames[i]);
+    if (id != kInvalidId) {
+      map[i] = id;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     Id funNameStrId) {
   gen(ExitOnVarEnv, getExitSlowTrace()->front(), m_tb->getFp());
@@ -990,9 +1013,9 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     cns(genFunc)
   );
 
-  TranslatorX64::ContParamMap params;
+  ContParamMap params;
   if (origLocals <= TranslatorX64::kMaxInlineContLocals &&
-      TranslatorX64::mapContParams(params, origFunc, genFunc)) {
+      mapContParams(params, origFunc, genFunc)) {
     static auto const thisStr = StringData::GetStaticString("this");
     Id thisId = kInvalidId;
     const bool fillThis = origFunc->isNonClosureMethod() &&

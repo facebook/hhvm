@@ -308,15 +308,13 @@ class NormalizedInstruction {
   unsigned checkedInputs;
   // StackOff: logical delta at *start* of this instruction to
   // stack at tracelet entry.
-  int stackOff;
+  int stackOffset;
   int sequenceNum;
-  bool hasConstImm:1;
   bool startsBB:1;
   bool breaksTracelet:1;
   bool changesPC:1;
   bool fuseBranch:1;
   bool preppedByRef:1;    // For FPass*; indicates parameter reffiness
-  bool manuallyAllocInputs:1;
   bool outputPredicted:1;
   bool outputPredictionStatic:1;
   bool ignoreInnerType:1;
@@ -363,8 +361,6 @@ class NormalizedInstruction {
   // or decrefs).
   boost::dynamic_bitset<> nonRefCountedLocals;
 
-  ArgUnion constImm;
-
   Op op() const;
   Op mInstrOp() const;
   PC pc() const;
@@ -380,7 +376,6 @@ class NormalizedInstruction {
     , outStack2(nullptr)
     , outStack3(nullptr)
     , checkedInputs(0)
-    , hasConstImm(false)
     , ignoreInnerType(false)
     , guardedThis(false)
     , guardedCls(false)
@@ -813,8 +808,6 @@ private:
   void produceStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
   void produceDataRef(Tracelet* tlet, NormalizedInstruction* ni,
                                       Location loc);
-
-  void findImmable(ImmStack &stack, NormalizedInstruction* ni);
 
   virtual void syncWork() = 0;
   virtual void invalidateSrcKey(SrcKey sk) = 0;

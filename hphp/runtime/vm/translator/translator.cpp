@@ -2358,69 +2358,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
 }
 
 void
-Translator::findImmable(ImmStack &stack,
-                        NormalizedInstruction* ni) {
-  switch (ni->op()) {
-  case OpInt:
-    stack.pushInt(getImm(ni->pc(), 0).u_I64A);
-    return;
-
-  case OpString:
-    stack.pushLitstr(getImm(ni->pc(), 0).u_SA);
-    return;
-
-  // For binary ops we assume that only one of the two is an immediate
-  //   because if both were immediates then hopefully the second pass
-  //   optimized away this instruction. However, if a binary op has two
-  //   immediates, we won't generate incorrect code: instead it will
-  //   merely be suboptimal.
-
-  // we can only handle an immediate if it's the second immediate
-  case OpAdd:
-  case OpSub:
-    if (stack.isInt(0)) {
-      SKTRACE(1, ni->source, "marking for immediate elision\n");
-      ni->hasConstImm = true;
-      ni->constImm.u_I64A = stack.get(0).i64a;
-      // We don't currently remove the OpInt instruction that produced
-      // this integer. We should update the translator to correctly support
-      // removing instructions from the tracelet.
-    }
-    break;
-
-  case OpFPassM:
-  case OpCGetM:
-  case OpSetM:
-  case OpIssetM: {
-    // If this is "<VecInstr>M <... EC>"
-    const ImmVector& iv = ni->immVec;
-    assert(iv.isValid());
-    MemberCode mc;
-    StringData* str;
-    int64_t strId;
-    if (iv.size() > 1 &&
-        iv.decodeLastMember(curUnit(), str, mc, &strId) &&
-        mc == MET) {
-      /*
-       * If the operand takes a literal string that's not strictly an
-       * integer, we can call into array-access helper functions that
-       * don't bother with the integer check.
-       */
-      int64_t lval;
-      if (LIKELY(!str->isStrictlyInteger(lval))) {
-        ni->hasConstImm = true;
-        ni->constImm.u_SA = strId;
-      }
-    }
-  } break;
-
-  default: ;
-  }
-
-  stack.processOpcode(ni->pc());
-}
-
-void
 Translator::requestResetHighLevelTranslator() {
   if (dbgTranslateCoin) {
     dbgTranslateCoin->reset();
@@ -3135,7 +3072,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   TypeMap initialMap;
   LocationSet callerArgLocs;
   for (int i = 0; i < numArgs; ++i) {
-    auto callerLoc = Location(Location::Stack, fcall->stackOff - i - 1);
+    auto callerLoc = Location(Location::Stack, fcall->stackOffset - i - 1);
     auto calleeLoc = Location(Location::Local, numArgs - i - 1);
     auto type      = tas.currentType(callerLoc);
 
@@ -3340,14 +3277,13 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
   head:
     NormalizedInstruction* ni = t.newNormalizedInstruction();
     ni->source = sk;
-    ni->stackOff = stackFrameOffset;
+    ni->stackOffset = stackFrameOffset;
     ni->funcd = (t.m_arState.getCurrentState() == ActRecState::KNOWN) ?
       t.m_arState.getCurrentFunc() : nullptr;
     ni->m_unit = unit;
     ni->preppedByRef = false;
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
-    ni->manuallyAllocInputs = false;
     ni->fuseBranch = false;
     ni->outputPredicted = false;
     ni->outputPredictionStatic = false;
@@ -3363,9 +3299,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     if (ni->op() == OpFCallArray) {
       ni->imm[0].u_IVA = 1;
     }
-
-    // Use the basic block analyzer to follow the flow of immediate values.
-    findImmable(immStack, ni);
 
     SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackFrameOffset);
 
@@ -3390,7 +3323,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         // beginning of the instruction, but getReffiness() wants the delta
         // relative to the sp at the beginning of the tracelet, so we adjust
         // by subtracting ni->stackOff
-        int entryArDelta = instrSpToArDelta(ni->pc()) - ni->stackOff;
+        int entryArDelta = instrSpToArDelta(ni->pc()) - ni->stackOffset;
         ni->preppedByRef = t.m_arState.getReffiness(argNum,
                                                     entryArDelta,
                                                     &t.m_refDeps);

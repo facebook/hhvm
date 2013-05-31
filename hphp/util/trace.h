@@ -89,11 +89,8 @@ namespace Trace {
       TM(printir)     \
       TM(hhirTracelets) \
       TM(gc)          \
-      TM(unlikely)    \
-      TM(jcc)         \
       TM(instancebits)\
       TM(hhas)        \
-      TM(punt)        \
       TM(statgroups)  \
       TM(minstr)      \
       /* Stress categories, to exercise rare paths */ \

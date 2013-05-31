@@ -27,7 +27,7 @@
 #define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/runtime/vm/translator/regalloc.h"
+#include "hphp/runtime/vm/translator/physreg.h"
 
 namespace HPHP { namespace Transl {
 

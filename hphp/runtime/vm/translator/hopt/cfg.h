@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_CFG_H_
 #define incl_HPHP_VM_CFG_H_
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/vm/translator/hopt/block.h"
 #include "hphp/runtime/vm/translator/hopt/trace.h"

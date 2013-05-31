@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/ini_setting.h"
@@ -553,13 +554,11 @@ String f_write_hdf_string(CArrRef data) {
 }
 
 Variant f_md5_file(CStrRef filename, bool raw_output /* = false */) {
-  String str = f_file_get_contents(filename);
-  return StringUtil::MD5(str, raw_output);
+  return f_hash_file("md5", filename, raw_output);
 }
 
 Variant f_sha1_file(CStrRef filename, bool raw_output /* = false */) {
-  String str = f_file_get_contents(filename);
-  return StringUtil::SHA1(str, raw_output);
+  return f_hash_file("sha1", filename, raw_output);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -363,7 +363,6 @@ bool IRInstruction::canCSE() const {
   // count or consume reference counts. CheckType is special because it can
   // refine a maybeCounted type to a notCounted type, so it logically consumes
   // and produces a reference without doing any work.
-  assert(!canCSE || !producesReference() || m_op == CheckType);
   assert(!canCSE || !consumesReferences() || m_op == CheckType);
   return canCSE && !mayReenterHelper();
 }

@@ -554,7 +554,7 @@ O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
-                                          S(Int,Str),    E|N|PRc|Refs|Mem|Er) \
+                                          S(Int,Str),     C|N|PRc|Refs|Mem|Er)\
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \

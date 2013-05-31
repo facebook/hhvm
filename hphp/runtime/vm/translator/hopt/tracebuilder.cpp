@@ -768,7 +768,13 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
       // Found a dominating instruction that can be used instead of inst
       FTRACE(1, "  {}cse found: {}\n",
              indent(), result->inst()->toString());
-      return result;
+      if (inst->producesReference()) {
+        // Replace with an IncRef
+        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
+        return gen(IncRef, result);
+      } else {
+        return result;
+      }
     }
   }
 

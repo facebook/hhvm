@@ -15,33 +15,34 @@
 */
 
 #define __STDC_LIMIT_MACROS
-#include <stdint.h>
 
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/resource_data.h"
+
+#include <stdint.h>
+
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/text_color.h"
 #include "hphp/runtime/base/array/array_init.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/base/memory/sweepable.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/eval/debugger/debugger.h"
-#include "hphp/runtime/vm/event_hook.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/process.h"
-#include "hphp/util/text_color.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
-#include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/translator/translator.h"
+#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/event_hook.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,14 +138,6 @@ VMExecutionContext::~VMExecutionContext() {
   delete m_injTables;
   delete m_breakPointFilter;
   delete m_lastLocFilter;
-
-  if (UNLIKELY(!m_preConsts.empty())) {
-    Transl::unmergePreConsts(m_preConsts, this);
-    for (PreConstVec::iterator i = m_preConsts.begin();
-         i != m_preConsts.end(); ++i) {
-      decRefStr(const_cast<StringData*>(i->name));
-    }
-  }
 }
 
 void BaseExecutionContext::backupSession() {

@@ -46,8 +46,6 @@ enum Rank {
   RankEvaledUnits,
   RankWriteLease,
 
-  RankPreConstDep,
-
   RankStatCache,
 
   RankFileRepo,

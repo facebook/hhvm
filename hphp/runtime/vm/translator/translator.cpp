@@ -37,7 +37,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/translator/targetcache.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/vm/translator/annotation.h"

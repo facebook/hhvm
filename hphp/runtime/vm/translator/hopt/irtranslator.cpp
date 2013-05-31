@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/translator/targetcache.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/base/stats.h"

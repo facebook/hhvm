@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/shared/shared_store_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
@@ -212,7 +211,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcspace:      show space used by translator caches\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
-        "/vm-preconsts:    show information about preconsts\n"
         "/vm-tcreset:      throw away translations and start over\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
         ;
@@ -967,34 +965,6 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     std::ostringstream result;
     result << Unit::GetNamedEntityTableSize();
     transport->sendString(result.str());
-    return true;
-  }
-  if (cmd == "vm-preconsts") {
-    InfoMap counts;
-    using namespace HPHP::Transl;
-    for (PreConstDepMap::iterator i = gPreConsts.begin(); i != gPreConsts.end();
-         ++i) {
-      PreConstDep& dep = i->second;
-      PCInfo& info = counts[dep.preConsts.size()];
-      info.count++;
-      if (preConstVecHasUnique(dep.preConsts)) {
-        info.unique++;
-      }
-    }
-
-    using std::setw;
-    using std::right;
-    using std::setfill;
-    std::stringstream out;
-    const int width = 10;
-    out << setfill(' ') << right;
-    out << setw(width) << "size" << setw(width) << "count"
-        << setw(width) << "unique" << endl;
-    for (InfoMap::iterator i = counts.begin(); i != counts.end(); ++i) {
-      out << setw(width) << i->first << setw(width) << i->second.count
-          << setw(width) << i->second.unique << endl;
-    }
-    transport->sendString(out.str());
     return true;
   }
   if (cmd == "vm-dump-tc") {

@@ -30,7 +30,7 @@ namespace Verifier {
 
 /**
  * Check one whole unit, including its internal string, array, sourceLoc,
- * preConst, preClass, and func tables.
+ * preClass, and func tables.
  *
  * Checked:
  * -- string table may not contain null pointers, but strings can contain
@@ -42,7 +42,6 @@ namespace Verifier {
  *
  * Not Checked:
  * -- SourceLocs
- * -- PreConsts
  * -- PreClasses
  * -- Metadata
  */

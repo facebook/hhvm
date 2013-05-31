@@ -3192,15 +3192,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (p0->getScalarValue(v0) && v0.isString()) {
               const StringData* cname =
                 StringData::GetStaticString(v0.toString());
-              ExpressionPtr p1 = (*params)[1];
-              Variant v1;
-              if (p1->getScalarValue(v1) && v1.isAllowedAsConstantValue()) {
-                m_ue.addPreConst(cname, *v1.getTypedAccessor());
-              } else {
-                m_ue.addPreConst(cname, *null_variant.getTypedAccessor());
-              }
-
-              visit(p1);
+              visit((*params)[1]);
               emitConvertToCell(e);
               e.DefCns(cname);
               return true;

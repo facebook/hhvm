@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/base/code_coverage.h"
@@ -1556,14 +1555,6 @@ Array VMExecutionContext::getCallerInfo() {
     ar = getPrevVMState(ar, &pc);
   }
   return result;
-}
-
-void VMExecutionContext::newPreConst(StringData* name,
-                                     const TypedValue& val) {
-  name->incRefCount();
-  PreConst pc = { val, this, name };
-  m_preConsts.push_back(pc);
-  Transl::mergePreConst(m_preConsts.back());
 }
 
 bool VMExecutionContext::renameFunction(const StringData* oldName,

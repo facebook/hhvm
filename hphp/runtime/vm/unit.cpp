@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob_helper.h"
 #include "hphp/runtime/vm/translator/targetcache.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 #include "hphp/runtime/vm/verifier/check.h"
@@ -404,11 +403,6 @@ Unit::~Unit() {
         }
       }
     }
-  }
-
-  if (!RuntimeOption::RepoAuthoritative &&
-      (m_mergeState & UnitMergeStateMerged)) {
-    Transl::unmergePreConsts(m_preConsts, this);
   }
 
   free(m_mergeInfo);
@@ -835,9 +829,7 @@ void Unit::initialMerge() {
       }
     }
     if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
-    if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
-      Transl::mergePreConsts(m_preConsts);
-    } else {
+    if (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) {
       /*
        * The mergeables array begins with the hoistable Func*s,
        * followed by the (potenitally) hoistable Class*s.
@@ -1708,13 +1700,6 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
   {
     std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitPreConst")
-             << "(unitSn INTEGER, name TEXT, value BLOB, preConstId INTEGER,"
-                " PRIMARY KEY (unitSn, preConstId));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitMergeables")
              << "(unitSn INTEGER, mergeableIx INTEGER,"
                 " mergeableKind INTEGER, mergeableId INTEGER,"
@@ -1750,7 +1735,6 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   try {
     getUnitLitstrs(repoId).get(ue);
     getUnitArrays(repoId).get(ue);
-    getUnitPreConsts(repoId).get(ue);
     m_repo.pcrp().getPreClasses(repoId).get(ue);
     getUnitMergeables(repoId).get(ue);
     m_repo.frp().getFuncs(repoId).get(ue);
@@ -1921,48 +1905,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       Variant v = unserialize_from_string(s);
       Id id UNUSED = ue.mergeArray(v.asArrRef().get(), array);
       assert(id == arrayId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void UnitRepoProxy::InsertUnitPreConstStmt
-                  ::insert(RepoTxn& txn, int64_t unitSn, const PreConst& pc,
-                           Id id) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitPreConst")
-             << " VALUES(@unitSn, @name, @value, @preConstId);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindStaticString("@name", pc.name);
-  query.bindTypedValue("@value", pc.value);
-  query.bindId("@preConstId", id);
-  query.exec();
-}
-
-void UnitRepoProxy::GetUnitPreConstsStmt
-                  ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name,value,preconstId FROM "
-             << m_repo.table(m_repoId, "UnitPreConst")
-             << " WHERE unitSn == @unitSn ORDER BY preConstId ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", ue.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name; /**/ query.getStaticString(0, name);
-      TypedValue value; /**/ query.getTypedValue(1, value);
-      Id id;            /**/ query.getId(2, id);
-      UNUSED Id addedId = ue.addPreConst(name, value);
-      assert(id == addedId);
     }
   } while (!query.done());
   txn.commit();
@@ -2281,21 +2223,6 @@ void UnitEmitter::setLines(const LineTable& lines) {
   }
 }
 
-Id UnitEmitter::addPreConst(const StringData* name, const TypedValue& value) {
-  assert(value.m_type != KindOfObject && value.m_type != KindOfArray);
-  PreConst pc = { value, nullptr, name };
-  if (pc.value.m_type == KindOfString && !pc.value.m_data.pstr->isStatic()) {
-    pc.value.m_data.pstr = StringData::GetStaticString(pc.value.m_data.pstr);
-    pc.value.m_type = KindOfStaticString;
-  }
-  assert(!IS_REFCOUNTED_TYPE(pc.value.m_type));
-
-  Id id = m_preConsts.size();
-  m_preConsts.push_back(pc);
-  return id;
-}
-
-
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   LitstrMap::const_iterator it = m_litstr2id.find(litstr);
   if (it == m_litstr2id.end()) {
@@ -2515,9 +2442,6 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       urp.insertUnitArray(repoId).insert(txn, usn, i, m_arrays[i].serialized);
     }
-    for (size_t i = 0; i < m_preConsts.size(); ++i) {
-      urp.insertUnitPreConst(repoId).insert(txn, usn, m_preConsts[i], i);
-    }
     for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
       (*it)->commit(txn);
     }
@@ -2720,12 +2644,6 @@ Unit* UnitEmitter::create() {
   std::sort(u->m_funcTable.begin(), u->m_funcTable.end());
 
   m_fMap.clear();
-
-  u->m_preConsts = m_preConsts;
-  for (PreConstVec::iterator i = u->m_preConsts.begin();
-       i != u->m_preConsts.end(); ++i) {
-    i->owner = u;
-  }
 
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.

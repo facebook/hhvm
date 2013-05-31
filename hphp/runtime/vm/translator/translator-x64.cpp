@@ -75,7 +75,6 @@ typedef __sighandler_t *sighandler_t;
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/translator/targetcache.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/srcdb.h"
 #include "hphp/runtime/vm/translator/x64-util.h"

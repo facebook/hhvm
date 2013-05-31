@@ -753,8 +753,6 @@ public:
   const ClassInfo* findTraitInfo(CStrRef name);
   const ClassInfo::ConstantInfo* findConstantInfo(CStrRef name);
 
-  void newPreConst(StringData* name, const TypedValue& val);
-
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \
   void op##name();
@@ -777,7 +775,6 @@ OPCODES
   void dispatchBB();
 
 private:
-  PreConstVec m_preConsts;
   static Mutex s_threadIdxLock;
   static hphp_hash_map<pid_t, int64_t> s_threadIdxMap;
 

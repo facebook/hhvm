@@ -239,27 +239,6 @@ typedef TableEntry<const Func*> FuncEntry;
 typedef std::vector<FuncEntry> FuncTable;
 
 /*
- * Each Unit has one of these structs for each DefCns instruction. If
- * the value is not known at Unit emission time, the 'value' field
- * will be KindOfUninit. The 'owner' field is an opaque blob used by
- * Units and ExecutionContexes to identify which PreConsts belong to
- * them on destruction.
- *
- * If user code contains a call to define($s, ...) where $s is not a
- * string known at compile time, it will be left as a normal call to
- * the function define. If that code is ever executed, a PreConst will
- * be created by that request's g_vmContext and destroyed at the end
- * of the request.
- */
-struct PreConst {
-  TypedValue value;
-  void* owner;
-  const StringData* name;
-};
-
-typedef std::vector<PreConst> PreConstVec;
-
-/*
  * This is the runtime representation of a typedef.  Typedefs are only
  * allowed when hip hop extensions are enabled.
  *
@@ -573,11 +552,6 @@ struct Unit {
   static bool classExists(const StringData* name, bool autoload,
                           Attr typeAttrs);
 
-  const PreConst* lookupPreConstId(Id id) const {
-    assert(id < Id(m_preConsts.size()));
-    return &m_preConsts[id];
-  }
-
   bool compileTimeFatal(const StringData*& msg, int& line) const;
   const TypedValue *getMainReturn() const {
     return &m_mainReturn;
@@ -706,7 +680,6 @@ private:
   bool m_mergeOnly;
   LineTable m_lineTable;
   FuncTable m_funcTable;
-  PreConstVec m_preConsts;
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
@@ -730,7 +703,6 @@ class UnitEmitter {
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
-  Id addPreConst(const StringData* name, const TypedValue& value);
   Id addTypedef(const Typedef& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
@@ -878,7 +850,6 @@ class UnitEmitter {
    */
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
-  PreConstVec m_preConsts;
   std::vector<Typedef> m_typedefs;
 };
 
@@ -900,8 +871,6 @@ class UnitRepoProxy : public RepoProxy {
   URP_GOP(UnitLitstrs) \
   URP_IOP(UnitArray) \
   URP_GOP(UnitArrays) \
-  URP_IOP(UnitPreConst) \
-  URP_GOP(UnitPreConsts) \
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
@@ -944,17 +913,6 @@ class UnitRepoProxy : public RepoProxy {
   class GetUnitArraysStmt : public RepoProxy::Stmt {
    public:
     GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-  class InsertUnitPreConstStmt : public RepoProxy::Stmt {
-  public:
-    InsertUnitPreConstStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, const PreConst& pc,
-                Id id);
-  };
-  class GetUnitPreConstsStmt : public RepoProxy::Stmt {
-  public:
-    GetUnitPreConstsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
   class InsertUnitMergeableStmt : public RepoProxy::Stmt {

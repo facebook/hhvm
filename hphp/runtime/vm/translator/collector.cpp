@@ -29,7 +29,6 @@
 #include "hphp/runtime/eval/runtime/file_repository.h"
 #include "hphp/system/lib/systemlib.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/translator/translator-deps.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/vm/translator/translator-x64.h"
 

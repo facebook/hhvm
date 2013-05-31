@@ -34,7 +34,6 @@ class UnitChecker {
   bool checkStrings();
   bool checkArrays();
   bool checkSourceLocs();
-  bool checkPreConsts();
   bool checkPreClasses();
   bool checkFuncs();
   bool checkBytecode();
@@ -58,7 +57,6 @@ bool checkUnit(const Unit* unit, bool verbose) {
 // 4. UnitLitStr table
 // 5. UnitArray table
 // 6. UnitSourceLoc table
-// 7. UnitPreConst table
 // 8. Classes
 // 9. Functions
 
@@ -70,7 +68,6 @@ bool UnitChecker::verify() {
   return checkStrings() &&
          checkArrays() &&
          //checkSourceLocs() &&
-         //checkPreConsts() &&
          //checkPreClasses() &&
          checkBytecode() &&
          //checkMetadata() &&

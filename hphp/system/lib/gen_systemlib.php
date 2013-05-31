@@ -62,7 +62,7 @@ function genSystemlib($input_files) {
     // the classes in a certain order so that all classes can be
     // hoisted.
     $initialFiles = array('stdclass.php', 'exception.php', 'arrayaccess.php',
-                          'iterator.php', 'splfile.php');
+                          'iterator.php', 'splfile.php', 'splheap.php');
     foreach ($initialFiles as $initialFile) {
       if (isset($phpfiles[$initialFile])) {
         processPhpFile($phpfiles[$initialFile], $systemlib_php);

@@ -132,6 +132,21 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 
 void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   StaticClassName::onParse(ar, fs);
+  mungeIfSpecialFunction(ar, fs);
+
+  if (m_type == FunType::Unknown && !m_class && m_className.empty()) {
+    ar->parseOnDemandByFunction(m_name);
+    int pos = m_name.rfind('\\');
+    std::string short_name = m_name.substr(pos + 1);
+    auto iter = FunctionTypeMap.find(short_name);
+    if (iter != FunctionTypeMap.end()) {
+      ar->lock()->addNSFallbackFunc(shared_from_this(), fs);
+    }
+  }
+}
+
+void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
+                                                FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   switch (m_type) {
     case FunType::Define:
@@ -220,14 +235,27 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       fs->setAttribute(FileScope::ContainsCompact);
       break;
     case FunType::Unknown:
-      if (!m_class && m_className.empty()) {
-        ar->parseOnDemandByFunction(m_name);
-      }
       break;
     default:
       break;
   }
 }
+
+void SimpleFunctionCall::resolveNSFallbackFunc(
+    AnalysisResultConstPtr ar, FileScopePtr fs) {
+  if (ar->findFunction(m_name)) {
+    // the fully qualified name for this function exists, nothing to do
+    return;
+  }
+
+  int pos = m_name.rfind('\\');
+  std::string short_name = m_name.substr(pos + 1);
+  auto iter = FunctionTypeMap.find(m_name);
+  assert(iter != FunctionTypeMap.end());
+  m_type = iter->second;
+  mungeIfSpecialFunction(ar, fs);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions

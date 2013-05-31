@@ -148,6 +148,8 @@ public:
   void addEntryPoint(const std::string &name);
   void addEntryPoints(const std::vector<std::string> &names);
 
+  void addNSFallbackFunc(ConstructPtr c, FileScopePtr fs);
+
   void loadBuiltinFunctions();
   void loadBuiltins();
   void analyzeProgram(bool system = false);
@@ -302,6 +304,7 @@ private:
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
+  std::set<std::pair<ConstructPtr, FileScopePtr> > m_nsFallbackFuncs;
   Phase m_phase;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
@@ -363,6 +366,8 @@ private:
    * subsequent analysis. Also checks to make sure no two redundant parents.
    */
   void checkClassDerivations();
+
+  void resolveNSFallbackFuncs();
 
   int getFileSize(FileScopePtr fs);
 

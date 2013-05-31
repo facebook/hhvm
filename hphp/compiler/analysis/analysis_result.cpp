@@ -44,6 +44,7 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/base/zend/zend_printf.h"
 #include "hphp/runtime/base/program_functions.h"
@@ -156,6 +157,10 @@ void AnalysisResult::parseOnDemandBy(const string &name,
       parseOnDemand(Option::AutoloadRoot + it->second);
     }
   }
+}
+
+void AnalysisResult::addNSFallbackFunc(ConstructPtr c, FileScopePtr fs) {
+  m_nsFallbackFuncs.insert(std::make_pair(c, fs));
 }
 
 FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
@@ -541,6 +546,17 @@ void AnalysisResult::checkClassDerivations() {
   }
 }
 
+void AnalysisResult::resolveNSFallbackFuncs() {
+  for (auto &pair : m_nsFallbackFuncs) {
+    SimpleFunctionCallPtr sfc =
+      static_pointer_cast<SimpleFunctionCall>(pair.first);
+    sfc->resolveNSFallbackFunc(
+      shared_from_this(),
+      pair.second
+    );
+  }
+}
+
 void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
   const StringToFunctionScopePtrMap &funcs = fs->getFunctions();
 
@@ -625,6 +641,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   }
 
   checkClassDerivations();
+  resolveNSFallbackFuncs();
 
   // Analyze All
   Logger::Verbose("Analyzing All");

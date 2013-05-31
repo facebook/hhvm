@@ -73,6 +73,7 @@ public:
   void setLocalThis(const std::string &name) { m_localThis = name; }
   bool isCallToFunction(const char *name) const;
   bool isCompilerCallToFunction(const char *name) const;
+  void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
 protected:
   enum class FunType {
     Unknown,
@@ -118,6 +119,8 @@ private:
                          ExpressionPtr funcName,
                          ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
+  void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
+
   std::string m_localThis;
   void *m_extra; // e.g., raw pointer to the symbol defined
 };

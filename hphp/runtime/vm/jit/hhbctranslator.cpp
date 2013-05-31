@@ -1526,10 +1526,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
     }
   );
 
-  // TODO: ideally we'd load Uncounted here without guarding, since we
-  // know this value has to be a non-refcounted type, but the register
-  // allocator doesn't understand what we mean right now.
-  auto const cns = gen(LdClsCns, clsCnsName, Type::Cell);
+  auto const cns = gen(LdClsCns, clsCnsName, Type::Uncounted);
   gen(CheckInit, sideExit, cns);
   push(cns);
 }

@@ -768,16 +768,7 @@ bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
 }
 
 bool isRefCounted(SSATmp* tmp) {
-  if (tmp->type().notCounted()) {
-    return false;
-  }
-  IRInstruction* inst = tmp->inst();
-  Opcode opc = inst->op();
-  // TODO(#2448005): we shouldn't have to list LdClsCns here.
-  if (opc == DefConst || opc == LdConst || opc == LdClsCns) {
-    return false;
-  }
-  return true;
+  return tmp->type().maybeCounted() && !tmp->isConst();
 }
 
 void IRInstruction::convertToNop() {

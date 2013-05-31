@@ -32,12 +32,14 @@ DebuggerServer DebuggerServer::s_debugger_server;
 bool DebuggerServer::Start() {
   TRACE(2, "DebuggerServer::Start\n");
   if (RuntimeOption::EnableDebuggerServer) {
-    Debugger::SetTextColors();
+    if (RuntimeOption::EnableDebuggerColor) {
+      Debugger::SetTextColors();
 
-    // Some server commands pre-formatted texts with color for clients. Loading
-    // a set of default colors for better display.
-    Hdf hdf;
-    DebuggerClient::LoadColors(hdf);
+      // Some server commands pre-formatted texts with color for clients.
+      // Loading a set of default colors for better display.
+      Hdf hdf;
+      DebuggerClient::LoadColors(hdf);
+    }
 
     return s_debugger_server.start();
   }

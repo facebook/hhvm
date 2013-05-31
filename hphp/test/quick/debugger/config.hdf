@@ -5,6 +5,7 @@ Eval {
   EnableObjDestructCall = true
   Debugger {
     EnableDebugger = true
+    EnableDebuggerColor = false
   }
 }
 

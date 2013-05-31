@@ -436,6 +436,7 @@ std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
 
 bool RuntimeOption::EnableDebugger = false;
+bool RuntimeOption::EnableDebuggerColor = true;
 bool RuntimeOption::EnableDebuggerServer = false;
 bool RuntimeOption::EnableDebuggerUsageLog = false;
 int RuntimeOption::DebuggerServerPort = 8089;
@@ -1173,6 +1174,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     {
       Hdf debugger = eval["Debugger"];
       EnableDebugger = debugger["EnableDebugger"].getBool();
+      EnableDebuggerColor = debugger["EnableDebuggerColor"].getBool(true);
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
       EnableDebuggerUsageLog = debugger["EnableDebuggerUsageLog"].getBool();
       DebuggerServerPort = debugger["Port"].getUInt16(8089);

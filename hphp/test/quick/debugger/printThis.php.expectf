@@ -1,32 +1,32 @@
-[22;32mWelcome to HipHop Debugger![0m
-[22;32mType "help" or "?" for a complete list of commands.
-[0m
-[22;32mProgram %sprintThis.php loaded. Type '[r]un' or '[c]ontinue' to go.[0m
+Welcome to HipHop Debugger!
+Type "help" or "?" for a complete list of commands.
+
+Program %sprintThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
 hphpd> break printThis.php:5
-[22;32mBreakpoint 1 set on line 5 of printThis.php[0m
+Breakpoint 1 set on line 5 of printThis.php
 hphpd> run
-[22;32mBreakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php[0m
-[22;37m   4 [0m  [22;36mfunction[0m [22;34mmethod[0m() {[0m
-[22;31;47m   5 [0m    [22;31;47m$[0m[22;31;47mother[0m[22;31;47m [0m[22;31;47m=[0m[22;31;47m [0m[22;31;47m$[0m[22;31;47mthis[0m[22;31;47m;[0m[0m
-[22;37m   6 [0m  }[0m
-[0m
+Breakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php
+   4   function method() {
+   5     $other = $this;
+   6   }
+
 hphpd> print $this
-[22;36mFoo Object
+Foo Object
 (
     [prop] => "Hello\n"
 )
-[0m
+
 hphpd> continue
-[22;32mBreakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php[0m
-[22;37m   4 [0m  [22;36mfunction[0m [22;34mmethod[0m() {[0m
-[22;31;47m   5 [0m    [22;31;47m$[0m[22;31;47mother[0m[22;31;47m [0m[22;31;47m=[0m[22;31;47m [0m[22;31;47m$[0m[22;31;47mthis[0m[22;31;47m;[0m[0m
-[22;37m   6 [0m  }[0m
-[0m
+Breakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php
+   4   function method() {
+   5     $other = $this;
+   6   }
+
 hphpd> print $this
-[22;36mFoo Object
+Foo Object
 (
     [prop] => "Hello\n"
     [prop2] => "\tThere"
 )
-[0m
+
 hphpd> quit

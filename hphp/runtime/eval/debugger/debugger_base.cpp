@@ -436,7 +436,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
       if (*p == '\n') {
         ++line;
         sb.append(begin, p - begin);
-        sb.append(ANSI_COLOR_END);
+        if (color) sb.append(ANSI_COLOR_END);
         sb.append('\n');
         if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                        colorLineNo);

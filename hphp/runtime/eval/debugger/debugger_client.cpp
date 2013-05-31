@@ -283,7 +283,6 @@ void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::Start\n");
-  Debugger::SetTextColors();
   SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
   return ret;
@@ -632,6 +631,9 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     NoPrompt = true;
     m_outputBuf.clear();
   }
+
+  UseColor &= RuntimeOption::EnableDebuggerColor;
+  if (UseColor) Debugger::SetTextColors();
 
   if (!NoPrompt) {
     info("Welcome to HipHop Debugger!");
@@ -1281,7 +1283,7 @@ bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
     }
   }
   if (!sb.empty()) {
-    print("%s%s", sb.data(), isApiMode() ? "\0" : ANSI_COLOR_END);
+    print("%s%s", sb.data(), !UseColor ? "\0" : ANSI_COLOR_END);
     return true;
   }
   return false;
@@ -2298,7 +2300,7 @@ void DebuggerClient::loadConfig() {
   m_config["UTF8"] = s_use_utf8; // for starter
 
   Hdf color = m_config["Color"];
-  UseColor = color.getBool(true);
+  UseColor = color.getBool(true) && RuntimeOption::EnableDebuggerColor;
   color = UseColor; // for starter
   if (UseColor) {
     defineColors(); // (1) no one can overwrite, (2) for starter

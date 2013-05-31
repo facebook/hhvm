@@ -33,18 +33,19 @@ you to easily run the .php file without first running the test suite.
 These are the allowed extensions:
 
 * .php - The source of the test.
-* .expect - The exact string expected output.
-* .expectf - The exact string expected output with formating characters.
-* .expectregex - A regex that matches the output.
-* .out - When you run the test, the output will be stored here.
-* .opts - Runtime options to pass to hhvm.
-* .hphp_opts - Options passed to hphp when generating a bytecode repo.
-* .diff - The diff for .expect tests.
+* .php.expect - The exact string expected output.
+* .php.expectf - The exact string expected output with formating characters.
+* .php.expectregex - A regex that matches the output.
+* .php.in - When you run the test, the input will be obtained from here.
+* .php.out - When you run the test, the output will be stored here.
+* .php.opts - Runtime options to pass to hhvm.
+* .php.hphp_opts - Options passed to hphp when generating a bytecode repo.
+* .php.diff or hhas.diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
-* .norepo - don't run the test in repo mode
+* .php.norepo - don't run the test in repo mode
 
-You must have one `.php`; one and only one of `.expect`, `.expectf`, and
-`.expectregex`; and the rest are optional.
+You must have one `.php`; one and only one of `.php.expect`, `.php.expectf`, and
+`.php.expectregex`; and the rest are optional.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't
 present, then the parent suite it checked recusrivly until we use

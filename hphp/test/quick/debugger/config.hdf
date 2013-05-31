@@ -1,0 +1,39 @@
+Eval {
+  EnableXHP = true
+  AllowHhas = true
+  EnableHipHopSyntax = true
+  EnableObjDestructCall = true
+  Debugger {
+    EnableDebugger = true
+  }
+}
+
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli_%{schema}.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = true
+}
+
+MySQL {
+  ReadTimeout = 5000
+}
+
+EnvVariables {
+  HPHP_INTERPRETER = 1
+}
+
+ServerVariables {
+  ALPHA_CONSOLE = 1
+  TFBENV = 16777216
+}
+
+ErrorHandling {
+  NoticeFrequency = 1
+  WarningFrequency = 1
+}
+
+ResourceLimit {
+  SerializationSizeLimit=134217728
+}

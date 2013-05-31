@@ -51,7 +51,6 @@ bool TestDebugger::RunTests(const std::string &which) {
 
   unlink("/tmp/hphpd_test_error.log");
 
-  RUN_TEST(TestCommandLine);
   AsyncFunc<TestDebugger> func(this, &TestDebugger::runServer);
   func.start();
 
@@ -109,35 +108,6 @@ bool TestDebugger::getResponse(const string& path, string& result,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool TestDebugger::runCommandLineTestCase(string testName) {
-  string path = Process::GetCurrentDirectory()+"/test/debugger_tests/";
-  string pathAndName = path+testName;
-  String s = f_file_get_contents((pathAndName+".expectf").c_str());
-  string expected = string(s.data(), s.size());
-  string::size_type pos = 0;
-  while ((pos = expected.find("%s")) != string::npos) {
-    expected.replace(pos, 2, path);
-  }
-  s = f_file_get_contents((pathAndName+".cmds").c_str());
-  string cmds = string(s.data(), s.size());
-  string actual, err;
-  string filearg = "--file="+pathAndName+".php";
-  const char *argv[] = {"", "-mdebug", filearg.c_str(), nullptr};
-  bool ret = Process::Exec(HHVM_PATH, argv, cmds.c_str(),
-                           actual, &err, false);
-  if (ret && expected != actual) {
-    f_file_put_contents(pathAndName+".expected", expected);
-    f_file_put_contents(pathAndName+".out", actual);
-    ret = false;
-  }
-  return Count(ret);
-}
-
-bool TestDebugger::TestCommandLine() {
-  if (!runCommandLineTestCase("printThis")) return false;
-  return true;
-}
 
 bool TestDebugger::TestSanity() {
   // first test, server might not be ready yet

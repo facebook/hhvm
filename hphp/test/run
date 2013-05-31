@@ -222,7 +222,7 @@ function mode_cmd($options) {
 }
 
 function hhvm_cmd($options, $test) {
-  return implode(" ", array(
+  $cmd = implode(" ", array(
     idx_file($_ENV, 'HHVM', bin_root().'/hphp/hhvm/hhvm'),
     '--config',
     find_config($test, 'config.hdf'),
@@ -232,6 +232,10 @@ function hhvm_cmd($options, $test) {
     '--file',
     $test
   ));
+  if (file_exists("$test.in")) {
+    $cmd .= " <$test.in";
+  }
+  return $cmd;
 }
 
 function hphp_cmd($options, $test) {

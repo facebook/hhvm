@@ -537,9 +537,9 @@ enum SetOpOp {
   O(IterNextK,       FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(MIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(WIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
+  O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
-  O(DecodeCufIter,   ONE(IA),          ONE(CV),         ONE(CV),    NF) \
   O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \

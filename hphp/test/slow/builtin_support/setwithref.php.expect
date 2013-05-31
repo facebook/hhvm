@@ -1,6 +1,8 @@
 array(1) {
   ["foo"]=>
-  object(X)#1 (0) {
+  object(X)#1 (1) {
+    ["p":"X":private]=>
+    bool(true)
   }
 }
 string(13) "X::__destruct"
@@ -12,6 +14,7 @@ array(1) {
   [0]=>
   &string(3) "bar"
 }
+string(11) "No function"
 array(3) {
   [0]=>
   int(1)
@@ -20,12 +23,14 @@ array(3) {
   [2]=>
   bool(true)
 }
+string(7) "Closure"
 array(2) {
   [1]=>
   int(0)
   [3]=>
   bool(false)
 }
+string(13) "Static Method"
 array(4) {
   [0]=>
   int(1)
@@ -37,9 +42,13 @@ array(4) {
   bool(false)
 }
 string(13) "X::__destruct"
-array(0) {
+string(14) "Dynamic Method"
+array(1) {
+  [2]=>
+  bool(true)
 }
 string(13) "X::__destruct"
+string(6) "__call"
 array(3) {
   ["foo"]=>
   &string(3) "bar"
@@ -48,6 +57,7 @@ array(3) {
   [2]=>
   bool(true)
 }
+string(6) "string"
 array(1) {
   [2]=>
   bool(true)

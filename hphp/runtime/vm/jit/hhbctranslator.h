@@ -353,6 +353,7 @@ struct HhbcTranslator {
                       uint32_t keyLocalId);
 
   void emitIterFree(uint32_t iterId);
+  void emitDecodeCufIter(uint32_t iterId, int targetOffset);
   void emitCIterFree(uint32_t iterId);
   void emitVerifyParamType(uint32_t paramId);
 

@@ -1462,6 +1462,13 @@ TranslatorX64::irTranslateIterFree(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateDecodeCufIter(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+
+  HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA);
+}
+
+void
 TranslatorX64::irTranslateCIterFree(const Tracelet& t,
                                     const NormalizedInstruction& i) {
 

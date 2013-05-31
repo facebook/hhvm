@@ -5903,6 +5903,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopDecodeCufIter(PC& pc) {
   NEXT();
   DECODE_IA(itId);
+  DECODE(Offset, offset);
 
   Iter* it = frame_iter(m_fp, itId);
   CufIter &cit = it->cuf();
@@ -5919,26 +5920,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDecodeCufIter(PC& pc) {
   const Func* f = vm_decode_function(tvAsVariant(func),
                                      ar, false,
                                      obj, cls, invName,
-                                     true);
+                                     false);
 
-  bool ret = true;
   if (f == nullptr) {
-    f = SystemLib::s_nullFunc;
-    obj = nullptr;
-    cls = nullptr;
-    invName = nullptr;
-    ret = false;
-  }
-
-  cit.setFunc(f);
-  if (obj) {
-    cit.setCtx(obj);
-    obj->incRefCount();
+    pc += offset;
   } else {
-    cit.setCtx(cls);
+    cit.setFunc(f);
+    if (obj) {
+      cit.setCtx(obj);
+      obj->incRefCount();
+    } else {
+      cit.setCtx(cls);
+    }
+    cit.setName(invName);
   }
-  cit.setName(invName);
-  tvAsVariant(m_stack.top()) = ret;
+  m_stack.popC();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushCufIter(PC& pc) {

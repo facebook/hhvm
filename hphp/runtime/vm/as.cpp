@@ -1160,7 +1160,7 @@ void parse_numiters(AsmState& as) {
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
- * directive-fault : identifier '{' function-body
+ * directive-fault : identifier integer? '{' function-body
  *                 ;
  */
 void parse_fault(AsmState& as, int nestLevel) {
@@ -1170,6 +1170,11 @@ void parse_fault(AsmState& as, int nestLevel) {
   if (!as.in.readword(label)) {
     as.error("expected label name after .try_fault");
   }
+  int iterId = -1;
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    iterId = read_opcode_arg<int32_t>(as);
+  }
   as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
@@ -1177,7 +1182,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   eh.m_ehtype = EHEnt::EHType_Fault;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
-  eh.m_iterId = -1; // only used for debug printing
+  eh.m_iterId = iterId;
 
   as.addLabelEHFault(label, as.fe->ehtab().size() - 1);
 }

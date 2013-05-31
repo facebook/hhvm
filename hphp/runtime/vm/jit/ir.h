@@ -481,6 +481,8 @@ O(WIterNext,                   D(Bool), S(FramePtr)                           \
 O(WIterNextK,                  D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(IterFree,                         ND, S(FramePtr),            E|N|Mem|Refs) \
+O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
+                                          S(FramePtr),          E|N|Mem|Refs) \
 O(CIterFree,                        ND, S(FramePtr),            E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \

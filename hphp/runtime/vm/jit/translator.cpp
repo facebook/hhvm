@@ -1333,7 +1333,7 @@ static const struct {
                                       Stack1,       OutArray,         -2 }},
   { OpCufSafeReturn,{StackTop3|DontGuardAny,
                                       Stack1,       OutUnknown,       -2 }},
-  { OpDecodeCufIter,{Stack1,          Stack1,       OutBoolean,        0 }},
+  { OpDecodeCufIter,{Stack1,          None,         OutNone,          -1 }},
 
   /*** 11. Iterator instructions ***/
 

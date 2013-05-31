@@ -963,6 +963,20 @@ void HhbcTranslator::emitIterFree(uint32_t iterId) {
   gen(IterFree, IterId(iterId), m_tb->getFp());
 }
 
+void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
+  SSATmp* src = popC();
+  Type type = src->type();
+  if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
+    SSATmp* res = gen(DecodeCufIter, Type::Bool,
+                      IterId(iterId), src, m_tb->getFp());
+    gen(DecRef, src);
+    emitJmpCondHelper(offset, true, res);
+  } else {
+    gen(DecRef, src);
+    emitJmp(offset, true, false);
+  }
+}
+
 void HhbcTranslator::emitCIterFree(uint32_t iterId) {
   gen(CIterFree, IterId(iterId), m_tb->getFp());
 }

@@ -730,9 +730,6 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
       ok = false;
     }
-    if (Op(*pc) == OpDecodeCufIter) {
-      cur->iters[id] = true;
-    }
   } else {
     if (!cur->iters[id]) {
       verify_error("Cannot access un-initialized iter %d\n", id);

@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/eval/runtime/file_repository.h"
 #include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
@@ -267,6 +268,35 @@ void functionEnterHelper(const ActRec* ar) {
   framePtr->m_savedRip = savedRip;
   framePtr->m_savedRbp = savedRbp;
   sp = g_vmContext->m_stack.top();
+}
+
+HOT_FUNC_VM
+int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
+  DECLARE_FRAME_POINTER(framePtr);
+
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+
+  auto ar = (ActRec*)framePtr->m_savedRbp;
+  if (LIKELY(ar->m_func->isBuiltin())) {
+    ar = g_vmContext->getOuterVMFrame(ar);
+  }
+  const Func* f = vm_decode_function(tvAsVariant(&func),
+                                     ar, false,
+                                     obj, cls, invName,
+                                     false);
+  if (UNLIKELY(!f)) return false;
+  CufIter &cit = it->cuf();
+  cit.setFunc(f);
+  if (obj) {
+    cit.setCtx(obj);
+    obj->incRefCount();
+  } else {
+    cit.setCtx(cls);
+  }
+  cit.setName(invName);
+  return true;
 }
 
 } } // HPHP::Transl

@@ -445,6 +445,7 @@ private:
   CASE(IterFree) \
   CASE(FPassV) \
   CASE(UnsetN) \
+  CASE(DecodeCufIter) \
 
   // These are instruction-like functions which cover more than one
   // opcode.
@@ -828,6 +829,7 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
 void functionEnterHelper(const ActRec* ar);
+int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);

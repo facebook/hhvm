@@ -479,8 +479,9 @@ void Func::prettyPrint(std::ostream& out) const {
     if (params[i].funcletOff() != InvalidAbsoluteOffset) {
       out << " DV for parameter " << i << " at " << params[i].funcletOff();
       if (params[i].phpCode()) {
-        out << " = " << params[i].phpCode()->data() << std::endl;
+        out << " = " << params[i].phpCode()->data();
       }
+      out << std::endl;
     }
   }
   const EHEntVec& ehtab = shared()->m_ehtab;

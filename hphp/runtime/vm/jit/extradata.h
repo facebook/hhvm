@@ -312,6 +312,7 @@ X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
 X(CIterFree,                    IterId);
+X(DecodeCufIter,                IterId);
 X(CufIterSpillFrame,            FPushCufData);
 X(DefConst,                     ConstData);
 X(LdConst,                      ConstData);

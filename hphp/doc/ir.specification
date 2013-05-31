@@ -1616,9 +1616,15 @@ IterFree<IterId> S0:FramePtr
   Free the iterator variable whose index is given by S1 in the stack
   frame pointed to by S0.
 
+D:Bool = DecodeCufIter<IterId> S0:{Arr|Obj|Str} S1:FramePtr
+
+  Decode S0 as a callable, and write the decoded values to the iterator
+  specified by IterId. Returns true iff it successfully decoded the
+  callable. Does not raise warnings, or throw exceptions.
+
 CIterFree<IterId> S0:FramePtr
 
-  Free the iterator variable whose index is given by S1 in the stack
+  Free the iterator variable whose index is given by IterId in the stack
   frame pointed to by S0.
 
 

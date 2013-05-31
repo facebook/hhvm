@@ -5269,6 +5269,13 @@ void CodeGenerator::cgIterFree(IRInstruction* inst) {
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 
+void CodeGenerator::cgDecodeCufIter(IRInstruction* inst) {
+  PhysReg fpReg = m_regs[inst->src(1)].reg();
+  int64_t offset = iterOffset(inst->extra<DecodeCufIter>()->iterId);
+  cgCallHelper(m_as, (TCA)decodeCufIterHelper, inst->dst(), kSyncPoint,
+               ArgGroup(m_regs).addr(fpReg, offset).typedValue(inst->src(0)));
+}
+
 void CodeGenerator::cgCIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t  offset = iterOffset(inst->extra<CIterFree>()->iterId);

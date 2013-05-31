@@ -6320,7 +6320,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
     raise_warning("Process tag(x%04X=%s): Illegal byte_count(%ld)",
                     tag, exif_get_tagname(tag, tagname, -12, tag_table),
                     byte_count);
-    return 0;
+    return 1; // ignore that field, but don't abort parsing
   }
 
   if (byte_count > 4) {

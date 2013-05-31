@@ -118,7 +118,9 @@ class FuncChecker {
 bool checkFunc(const Func* func, bool verbose) {
   if (verbose) {
     func->prettyPrint(std::cout);
-    printf("  FuncId %d\n", func->getFuncId());
+    if (func->cls() || !func->preClass()) {
+      printf("  FuncId %d\n", func->getFuncId());
+    }
     printFPI(func);
   }
   FuncChecker v(func, verbose);
@@ -507,6 +509,9 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
           ok = false;
         }
         break;
+      case OpBareThis:
+        if (op > 1) ok = false;
+        break;
       }
       break;
     }}
@@ -543,7 +548,11 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
 const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
   ImmVecRange vr(pc);
   int n = 0;
-  if (vr.loc_local != -1) {
+  if (vr.loc_local != -1 ||
+      vr.loc == LH ||
+      vr.loc == LGL ||
+      vr.loc == LNL ||
+      vr.loc == LSL) {
     /* nothing on stack for loc */
   } else if (vr.loc == LR) {
     m_tmp_sig[n++] = RV;
@@ -713,6 +722,9 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
       verify_error(
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
       ok = false;
+    }
+    if (Op(*pc) == OpDecodeCufIter) {
+      cur->iters[id] = true;
     }
   } else {
     if (!cur->iters[id]) {
@@ -916,7 +928,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     cur->stklen = save_stklen;
     cur->fpilen = save_fpilen;
   }
-  if (isIter(b->last)) {
+  if (isIter(b->last) && numSuccBlocks(b) == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
@@ -929,7 +941,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     cur->iters[id] = taken_state;
     if (m_verbose) {
       std::cout << "        " << stateToString(*cur) <<
-                   " -> B" << b->succs[1]->id << std::endl;
+        " -> B" << b->succs[1]->id << std::endl;
     }
     ok &= checkEdge(b, *cur, b->succs[1]);
     cur->iters[id] = !taken_state;

@@ -5,4 +5,5 @@ before_script:
   - ./configure_ubuntu_12.04.sh
 # for some tests  
   - sudo locale-gen de_DE
-script: HPHP_HOME=`pwd` make -j 8
+  - HPHP_HOME=`pwd` make -j 8
+script: hphp/hhvm/hhvm hphp/test/run quick

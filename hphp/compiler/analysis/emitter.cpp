@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/compiler/analysis/emitter.h"
+
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -6448,16 +6448,24 @@ EmitterVisitor::emitBreakHandler(Emitter& e,
   }
 }
 
+namespace {
+
 class ForeachIterGuard {
   EmitterVisitor& m_ev;
  public:
-  ForeachIterGuard(EmitterVisitor& ev, Id iterId, bool itRef) : m_ev(ev) {
-    m_ev.pushIterScope(iterId, itRef);
+  ForeachIterGuard(EmitterVisitor& ev,
+                   Id iterId,
+                   EmitterVisitor::IterKind kind)
+    : m_ev(ev)
+  {
+    m_ev.pushIterScope(iterId, kind);
   }
   ~ForeachIterGuard() {
     m_ev.popIterScope();
   }
 };
+
+}
 
 void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   ExpressionPtr ae(fe->getArrayExp());
@@ -6474,7 +6482,7 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   Label start;
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
-  ForeachIterGuard fig(*this, itId, strong);
+  ForeachIterGuard fig(*this, itId, strong ? KindOfMIter : KindOfIter);
   bool simpleCase = (!key || isNormalLocalVariable(key)) &&
                     isNormalLocalVariable(val);
 
@@ -6612,7 +6620,7 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
     }
   }
   newFaultRegion(bIterStart, m_ue.bcPos(), new IterFreeThunklet(itId, strong),
-                 itId);
+                 { itId, strong ? KindOfMIter : KindOfIter });
   if (needBreakHandler) {
     e.Jmp(exit);
     IterKind itKind = strong ? KindOfMIter : KindOfIter;
@@ -6686,6 +6694,7 @@ void EmitterVisitor::emitMakeUnitFatal(Emitter& e, const std::string& msg) {
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {
   m_funclets.push_back(Funclet(body, entry));
 }
+
 void EmitterVisitor::emitFunclets(Emitter& e) {
   while (!m_funclets.empty()) {
     Funclet& f = m_funclets.front();
@@ -6697,9 +6706,11 @@ void EmitterVisitor::emitFunclets(Emitter& e) {
   m_funclets.clear();
 }
 
-void EmitterVisitor::newFaultRegion(Offset start, Offset end, Thunklet* t,
-                                    Id iterId) {
-  FaultRegion* r = new FaultRegion(start, end, iterId);
+void EmitterVisitor::newFaultRegion(Offset start,
+                                    Offset end,
+                                    Thunklet* t,
+                                    FaultIterInfo iter) {
+  auto r = new FaultRegion(start, end, iter.iterId, iter.kind);
   m_faultRegions.push_back(r);
   addFunclet(t, &r->m_func);
 }
@@ -6727,15 +6738,16 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
     delete *it;
   }
   m_exnHandlers.clear();
-  for (std::deque<FaultRegion*>::iterator it = m_faultRegions.begin();
-      it != m_faultRegions.end(); ++it) {
+
+  for (auto& fr : m_faultRegions) {
     EHEnt& e = fe->addEHEnt();
     e.m_ehtype = EHEnt::EHType_Fault;
-    e.m_base = (*it)->m_start;
-    e.m_past = (*it)->m_end;
-    e.m_iterId = (*it)->m_iterId;
-    e.m_fault = (*it)->m_func.getAbsoluteOffset();
-    delete *it;
+    e.m_base = fr->m_start;
+    e.m_past = fr->m_end;
+    e.m_iterId = fr->m_iterId;
+    e.m_itRef = fr->m_iterKind == KindOfMIter;
+    e.m_fault = fr->m_func.getAbsoluteOffset();
+    delete fr;
   }
   m_faultRegions.clear();
 }

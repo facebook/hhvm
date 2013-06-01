@@ -17,16 +17,17 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/type_constraint.h"
 #include "hphp/runtime/vm/repo_helpers.h"
 #include "hphp/runtime/vm/indexed_string_map.h"
 #include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/class_info.h"
 
 namespace HPHP {
 
 const int kNumFixedPrologues = 6;
 
+struct ActRec;
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 
 /*
@@ -163,9 +164,7 @@ struct Func {
   void setNewFuncId();
 
   void rename(const StringData* name);
-  int numSlotsInFrame() const {
-    return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-  }
+  int numSlotsInFrame() const;
   Id lookupVarId(const StringData* name) const;
 
   /*

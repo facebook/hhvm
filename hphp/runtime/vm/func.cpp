@@ -32,10 +32,11 @@
 #include "hphp/runtime/vm/blob_helper.h"
 #include "hphp/runtime/vm/func_inline.h"
 #include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::bcinterp;
+static const Trace::Module TRACEMOD = Trace::hhbc;
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");
@@ -294,6 +295,10 @@ void Func::rename(const StringData* name) {
   setFullName();
   // load the renamed function
   Unit::loadFunc(this);
+}
+
+int Func::numSlotsInFrame() const {
+  return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
 }
 
 bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {

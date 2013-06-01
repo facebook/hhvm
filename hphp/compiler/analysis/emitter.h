@@ -379,15 +379,19 @@ public:
     KindOfMIter = 1
   };
 
-  void pushIterScope(Id id, bool itRef = false) {
-    IterKind itKind = itRef ? KindOfMIter : KindOfIter;
-    m_pendingIters.push_back(std::pair<Id,IterKind>(id,itKind));
+  void pushIterScope(Id id, IterKind kind) {
+    m_pendingIters.emplace_back(id, kind);
   }
   void popIterScope() { m_pendingIters.pop_back(); }
+
 private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
   typedef std::vector<std::pair<Id,IterKind> > PendingIterVec;
+  typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
+  typedef std::vector<NonScalarPair> NonScalarVec;
+  typedef std::pair<Id, int> StrCase;
+
   class PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
@@ -398,6 +402,7 @@ private:
     bool m_top;
     ClosureUseVarVec* m_closureUseVars;
   };
+
   class PostponedCtor {
   public:
     PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
@@ -405,8 +410,7 @@ private:
     InterfaceStatementPtr m_is;
     FuncEmitter* m_fe;
   };
-  typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
-  typedef std::vector<NonScalarPair> NonScalarVec;
+
   class PostponedNonScalars {
   public:
     PostponedNonScalars(InterfaceStatementPtr is, FuncEmitter* fe,
@@ -419,6 +423,7 @@ private:
     FuncEmitter* m_fe;
     NonScalarVec* m_vec;
   };
+
   class PostponedClosureCtor {
   public:
     PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e,
@@ -428,6 +433,7 @@ private:
     ClosureExpressionPtr m_expr;
     FuncEmitter* m_fe;
   };
+
   class ControlTargets {
   public:
     ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg,
@@ -441,6 +447,7 @@ private:
     Label& m_brkHand;  // Push N and jump here for "break N;"
     Label& m_cntHand;  // Push N and jump here for "continue N;"
   };
+
   class ControlTargetPusher {
   public:
     ControlTargetPusher(EmitterVisitor* e, Id itId, bool itRef, Label& brkTarg,
@@ -454,6 +461,7 @@ private:
   private:
     EmitterVisitor* m_e;
   };
+
   class ExnHandlerRegion {
   public:
     ExnHandlerRegion(Offset start, Offset end) : m_start(start),
@@ -469,15 +477,23 @@ private:
     std::set<StringData*, string_data_lt> m_names;
     std::vector<std::pair<StringData*, Label*> > m_catchLabels;
   };
+
   class FaultRegion {
   public:
-    FaultRegion(Offset start, Offset end, Id iterId)
-     : m_start(start), m_end(end), m_iterId(iterId) {}
+    FaultRegion(Offset start, Offset end, Id iterId, IterKind kind)
+      : m_start(start)
+      , m_end(end)
+      , m_iterId(iterId)
+      , m_iterKind(kind)
+    {}
+
     Offset m_start;
     Offset m_end;
     Id m_iterId;
-    Label m_func;
+    IterKind m_iterKind;
+    Label m_func; // note: a pointer to this is handed out to the Funclet
   };
+
   class FPIRegion {
     public:
       FPIRegion(Offset start, Offset end, Offset fpOff)
@@ -486,7 +502,7 @@ private:
       Offset m_end;
       Offset m_fpOff;
   };
-  typedef std::pair<Id, int> StrCase;
+
   struct SwitchState : private boost::noncopyable {
     SwitchState() : nonZeroI(-1), defI(-1) {}
     std::map<int64_t, int> cases; // a map from int (or litstr id) to case index
@@ -650,7 +666,14 @@ public:
 
   void addFunclet(Thunklet* body, Label* entry);
   void emitFunclets(Emitter& e);
-  void newFaultRegion(Offset start, Offset end, Thunklet* t, Id iter = -1);
+
+  struct FaultIterInfo {
+    Id iterId;
+    IterKind kind;
+  };
+  void newFaultRegion(Offset start, Offset end, Thunklet* t,
+                      FaultIterInfo = FaultIterInfo { -1, KindOfIter });
+
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
   void copyOverExnHandlers(FuncEmitter* fe);
   void copyOverFPIRegions(FuncEmitter* fe);

@@ -469,13 +469,12 @@ class CufIter {
 };
 
 struct Iter {
-  ArrayIter& arr() {
-    return *(ArrayIter*)m_u;
-  }
-  MArrayIter& marr() {
-    return *(MArrayIter*)m_u;
-  }
-  CufIter& cuf() { return *(CufIter*)m_u; }
+  const ArrayIter&   arr() const { return m_u.aiter; }
+  const MArrayIter& marr() const { return m_u.maiter; }
+  const CufIter&     cuf() const { return m_u.cufiter; }
+        ArrayIter&   arr()       { return m_u.aiter; }
+        MArrayIter& marr()       { return m_u.maiter; }
+        CufIter&     cuf()       { return m_u.cufiter; }
 
   bool init(TypedValue* c1);
   bool minit(TypedValue* v1);
@@ -484,10 +483,14 @@ struct Iter {
   void free();
   void mfree();
   void cfree();
-  private:
-  // C++ won't let you have union members with constructors. So we get to
-  // implement unions by hand.
-  char m_u[MAX(MAX(sizeof(ArrayIter), sizeof(MArrayIter)), sizeof(CufIter))];
+
+private:
+  union Data {
+    Data() {}
+    ArrayIter aiter;
+    MArrayIter maiter;
+    CufIter cufiter;
+  } m_u;
 } __attribute__ ((aligned(16)));
 
 bool interp_init_iterator(Iter* it, TypedValue* c1);

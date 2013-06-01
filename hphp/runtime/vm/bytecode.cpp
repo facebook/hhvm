@@ -13,8 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/bytecode.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <sstream>
+
+#include "folly/String.h"
+
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -654,27 +661,28 @@ void flush_evaluation_stack() {
   }
 }
 
-void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
-  const {
+static std::string toStringElm(const TypedValue* tv) {
+  std::ostringstream os;
+
   if (tv->m_type < MinDataType || tv->m_type > MaxNumDataTypes) {
     os << " ??? type " << tv->m_type << "\n";
-    return;
+    return os.str();
   }
+
   assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
   if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->_count <= 0) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.pref->_count << " ";
-    return;
+    return os.str();
   }
+
   switch (tv->m_type) {
   case KindOfRef:
     os << "V:(";
     os << "@" << tv->m_data.pref;
-    tv = tv->m_data.pref->tv();  // Unbox so contents get printed below
-    assert(tv->m_type != KindOfRef);
-    toStringElm(os, tv, fp);
+    os << toStringElm(tv->m_data.pref->tv());
     os << ")";
-    return;
+    return os.str();
   case KindOfClass:
     os << "A:";
     break;
@@ -682,161 +690,83 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     os << "C:";
     break;
   }
+
   switch (tv->m_type) {
-  case KindOfUninit: {
-    os << "Undefined";
+  case KindOfUninit:
+    os << "Uninit";
     break;
-  }
-  case KindOfNull: {
+  case KindOfNull:
     os << "Null";
     break;
-  }
-  case KindOfBoolean: {
+  case KindOfBoolean:
     os << (tv->m_data.num ? "True" : "False");
     break;
-  }
-  case KindOfInt64: {
+  case KindOfInt64:
     os << "0x" << std::hex << tv->m_data.num << std::dec;
     break;
-  }
-  case KindOfDouble: {
+  case KindOfDouble:
     os << tv->m_data.dbl;
     break;
-  }
   case KindOfStaticString:
-  case KindOfString: {
-    int len = tv->m_data.pstr->size();
-    bool truncated = false;
-    if (len > 128) {
-      len = 128;
-      truncated = true;
+  case KindOfString:
+    {
+      int len = tv->m_data.pstr->size();
+      bool truncated = false;
+      if (len > 128) {
+        len = 128;
+        truncated = true;
+      }
+      os << tv->m_data.pstr
+         << "c(" << tv->m_data.pstr->getCount() << ")"
+         << ":\""
+         << Util::escapeStringForCPP(tv->m_data.pstr->data(), len)
+         << "\"" << (truncated ? "..." : "");
     }
-    os << tv->m_data.pstr
-       << "c(" << tv->m_data.pstr->getCount() << ")"
-       << ":\""
-       << Util::escapeStringForCPP(tv->m_data.pstr->data(), len)
-       << "\"" << (truncated ? "..." : "");
     break;
-  }
-  case KindOfArray: {
+  case KindOfArray:
     assert(tv->m_data.parr->getCount() > 0);
     os << tv->m_data.parr
        << "c(" << tv->m_data.parr->getCount() << ")"
        << ":Array";
      break;
-  }
-  case KindOfObject: {
+  case KindOfObject:
     assert(tv->m_data.pobj->getCount() > 0);
     os << tv->m_data.pobj
        << "c(" << tv->m_data.pobj->getCount() << ")"
        << ":Object("
-       << tvAsVariant(tv).asObjRef().get()->o_getClassName().get()->data()
+       << tvAsCVarRef(tv).asCObjRef().get()->o_getClassName().get()->data()
        << ")";
     break;
-  }
-  case KindOfRef: {
+  case KindOfRef:
     not_reached();
-  }
-  case KindOfClass: {
+  case KindOfClass:
     os << tv->m_data.pcls
        << ":" << tv->m_data.pcls->name()->data();
     break;
-  }
-  default: {
+  default:
     os << "?";
     break;
   }
-  }
+
+  return os.str();
 }
 
-void Stack::toStringIter(std::ostream& os, Iter* it, bool itRef) const {
-  if (itRef) {
-    os << "I:MutableArray";
-    return;
-  }
+static std::string toStringIter(const Iter* it, bool itRef) {
+  if (itRef) return "I:MutableArray";
+
+  // TODO(#2458166): it might be a CufIter, but we're just lucky that
+  // the bit pattern for the CufIter is going to have a 0 in
+  // getIterType for now.
   switch (it->arr().getIterType()) {
-  case ArrayIter::TypeUndefined: {
-    os << "I:Undefined";
-    break;
+  case ArrayIter::TypeUndefined:
+    return "I:Undefined";
+  case ArrayIter::TypeArray:
+    return "I:Array";
+  case ArrayIter::TypeIterator:
+    return "I:Iterator";
   }
-  case ArrayIter::TypeArray: {
-    os << "I:Array";
-    break;
-  }
-  case ArrayIter::TypeIterator: {
-    os << "I:Iterator";
-    break;
-  }
-  default: {
-    assert(false);
-    os << "I:?";
-    break;
-  }
-  }
-}
-
-void Stack::toStringFrag(std::ostream& os, const ActRec* fp,
-                         const TypedValue* top) const {
-  TypedValue* tv;
-
-  // The only way to figure out which stack elements are activation records is
-  // to follow the frame chain. However, the goal for each stack frame is to
-  // print stack fragments from deepest to shallowest -- a then b in the
-  // following example:
-  //
-  //   {func:foo,soff:51}<C:8> {func:bar} C:8 C:1 {func:biz} C:0
-  //                           aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbb
-  //
-  // Use depth-first recursion to get the output order correct.
-
-  if (LIKELY(!fp->m_func->isGenerator())) {
-    tv = frameStackBase(fp);
-  } else {
-    tv = generatorStackBase(fp);
-  }
-
-  for (tv--; (uintptr_t)tv >= (uintptr_t)top; tv--) {
-    os << " ";
-    toStringElm(os, tv, fp);
-  }
-}
-
-void Stack::toStringAR(std::ostream& os, const ActRec* fp,
-                       const FPIEnt *fe, const TypedValue* top) const {
-  ActRec *ar;
-  if (LIKELY(!fp->m_func->isGenerator())) {
-    ar = arAtOffset(fp, -fe->m_fpOff);
-  } else {
-    // Deal with generators' split stacks. See unwindAR for reasoning.
-    TypedValue* genStackBase = generatorStackBase(fp);
-    ActRec* fakePrevFP =
-      (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
-    ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
-  }
-
-  if (fe->m_parentIndex != -1) {
-    toStringAR(os, fp, &fp->m_func->fpitab()[fe->m_parentIndex],
-      (TypedValue*)&ar[1]);
-  } else {
-    toStringFrag(os, fp, (TypedValue*)&ar[1]);
-  }
-
-  os << " {func:" << ar->m_func->fullName()->data() << "}";
-  TypedValue* tv = (TypedValue*)ar;
-  for (tv--; (uintptr_t)tv >= (uintptr_t)top; tv--) {
-    os << " ";
-    toStringElm(os, tv, fp);
-  }
-}
-
-void Stack::toStringFragAR(std::ostream& os, const ActRec* fp,
-                           int offset, const TypedValue* top) const {
-  const FPIEnt *fe = fp->m_func->findFPI(offset);
-  if (fe != nullptr) {
-    toStringAR(os, fp, fe, top);
-  } else {
-    toStringFrag(os, fp, top);
-  }
+  assert(false);
+  return "I:?";
 }
 
 void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
@@ -874,7 +804,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
       if (i > 0) {
         os << " ";
       }
-      toStringElm(os, tv, fp);
+      os << toStringElm(tv);
     }
     os << ">";
   }
@@ -889,7 +819,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
       }
       bool itRef;
       if (func->checkIterScope(offset, i, itRef)) {
-        toStringIter(os, it, itRef);
+        os << toStringIter(it, itRef);
       } else {
         os << "I:Undefined";
       }
@@ -897,13 +827,36 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     os << "|";
   }
 
-  toStringFragAR(os, fp, offset, ftop);
+  std::vector<std::string> stackElems;
+  visitStackElems(
+    fp, ftop, offset,
+    [&](const ActRec* ar) {
+      stackElems.push_back(
+        folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
+      );
+    },
+    [&](const TypedValue* tv) {
+      stackElems.push_back(toStringElm(tv));
+    }
+  );
+  std::reverse(stackElems.begin(), stackElems.end());
+  os << ' ' << folly::join(' ', stackElems);
 
-  os << std::endl;
+  os << '\n';
 }
 
 string Stack::toString(const ActRec* fp, int offset,
                        const string prefix/* = "" */) const {
+  // The only way to figure out which stack elements are activation records is
+  // to follow the frame chain. However, the goal for each stack frame is to
+  // print stack fragments from deepest to shallowest -- a then b in the
+  // following example:
+  //
+  //   {func:foo,soff:51}<C:8> {func:bar} C:8 C:1 {func:biz} C:0
+  //                           aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbb
+  //
+  // Use depth-first recursion to get the output order correct.
+
   std::ostringstream os;
   os << prefix << "=== Stack at " << curUnit()->filepath()->data() << ":" <<
     curUnit()->getLineNumber(curUnit()->offsetOf(vmpc())) << " func " <<
@@ -1054,9 +1007,7 @@ void Stack::unwindAR(ActRec* fp, const FPIEnt* fe) {
     if (LIKELY(!fp->m_func->isGenerator())) {
       ar = arAtOffset(fp, -fe->m_fpOff);
     } else {
-      // fp is pointing into the continuation object. Since fpOff is given as an
-      // offset from the frame pointer as if it were in the normal place on the
-      // main stack, we have to reconstruct that "normal place".
+      // FIXME: duplicated logic from visitStackElems
       TypedValue* genStackBase = generatorStackBase(fp);
       ActRec* fakePrevFP =
         (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
@@ -4645,7 +4596,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
 #ifdef HPHP_TRACE
     {
       std::ostringstream os;
-      m_stack.toStringElm(os, m_stack.topTV(), m_fp);
+      os << toStringElm(m_stack.topTV());
       ONTRACE(1,
               Trace::trace("Return %s from VMExecutionContext::dispatch("
                            "%p)\n", os.str().c_str(), m_fp));
@@ -6975,7 +6926,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNativeImpl(PC& pc) {
 #ifdef HPHP_TRACE
     {
       std::ostringstream os;
-      m_stack.toStringElm(os, m_stack.topTV(), m_fp);
+      os << toStringElm(m_stack.topTV());
       ONTRACE(1,
               Trace::trace("Return %s from VMExecutionContext::dispatch("
                            "%p)\n", os.str().c_str(), m_fp));

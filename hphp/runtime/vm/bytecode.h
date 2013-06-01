@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_BYTECODE_H_
 #define incl_HPHP_VM_BYTECODE_H_
 
+#include <type_traits>
+
 #include <boost/optional.hpp>
 
 #include "hphp/util/util.h"
@@ -28,6 +30,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/instance.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name_value_table.h"
 #include "hphp/runtime/vm/request_arena.h"
 
@@ -55,12 +58,11 @@ namespace HPHP {
   }                                                                           \
 } while (0)
 
- class Func;
+class Func;
 class ActRec;
 
 // max number of arguments for direct call to builtin
 const int kMaxBuiltinArgs = 5;
-
 
 struct ExtraArgs : private boost::noncopyable {
   /*
@@ -194,7 +196,7 @@ class VarEnv {
   TypedValue* getExtraArg(unsigned argInd) const;
 };
 
-/**
+/*
  * An "ActRec" is a call activation record. The ordering of the fields assumes
  * that stacks grow toward lower addresses.
  *
@@ -494,7 +496,6 @@ enum UnwindStatus {
 
 // Interpreter evaluation stack.
 class Stack {
-private:
   TypedValue* m_elms;
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of
@@ -506,20 +507,12 @@ public:
   bool isValidAddress(uintptr_t v) {
     return v >= uintptr_t(m_elms) && v < uintptr_t(m_base);
   }
-  void toStringElm(std::ostream& os, TypedValue* vv, const ActRec* fp)
-    const;
-  void toStringIter(std::ostream& os, Iter* it, bool itRef) const;
   void protect();
   void unprotect();
   void requestInit();
   void requestExit();
+
 private:
-  void toStringFrag(std::ostream& os, const ActRec* fp,
-                    const TypedValue* top) const;
-  void toStringAR(std::ostream& os, const ActRec* fp,
-                  const FPIEnt *fe, const TypedValue* top) const;
-  void toStringFragAR(std::ostream& os, const ActRec* fp,
-                    int offset, const TypedValue* top) const;
   void toStringFrame(std::ostream& os, const ActRec* fp,
                      int offset, const TypedValue* ftop,
                      const std::string& prefix) const;
@@ -827,7 +820,71 @@ public:
   }
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Visit all the slots and pre-live ActRecs on a live eval stack,
+ * handling FPI regions and generators correctly, and stopping when we
+ * reach the supplied activation record.
+ *
+ * The stack elements are visited from lower address to higher, with
+ * ActRecs visited after the stack slots below them.
+ *
+ * This will not read the VM registers (pc, fp, sp), so it will
+ * perform the requested visitation independent of modifications to
+ * the VM stack or frame pointer.
+ */
+template<class MaybeConstTVPtr, class ARFun, class TVFun>
+typename std::enable_if<
+  std::is_same<MaybeConstTVPtr,const TypedValue*>::value ||
+  std::is_same<MaybeConstTVPtr,      TypedValue*>::value
+>::type
+visitStackElems(const ActRec* const fp,
+                MaybeConstTVPtr const stackTop,
+                Offset const bcOffset,
+                ARFun arFun,
+                TVFun tvFun) {
+  const TypedValue* const base =
+    fp->m_func->isGenerator() ? Stack::generatorStackBase(fp)
+                              : Stack::frameStackBase(fp);
+  MaybeConstTVPtr cursor = stackTop;
+  assert(cursor <= base);
+
+  if (auto fe = fp->m_func->findFPI(bcOffset)) {
+    for (;;) {
+      ActRec* ar;
+      if (!fp->m_func->isGenerator()) {
+        ar = arAtOffset(fp, -fe->m_fpOff);
+      } else {
+        // fp is pointing into the continuation object. Since fpOff is
+        // given as an offset from the frame pointer as if it were in
+        // the normal place on the main stack, we have to reconstruct
+        // that "normal place".
+        auto const fakePrevFP = reinterpret_cast<const ActRec*>(
+          base + fp->m_func->numSlotsInFrame()
+        );
+        ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
+      }
+
+      assert(cursor <= reinterpret_cast<TypedValue*>(ar));
+      while (cursor < reinterpret_cast<TypedValue*>(ar)) {
+        tvFun(cursor++);
+      }
+      arFun(ar);
+
+      cursor += kNumActRecCells;
+      if (fe->m_parentIndex == -1) break;
+      fe = &fp->m_func->fpitab()[fe->m_parentIndex];
+    }
+  }
+
+  while (cursor < base) {
+    tvFun(cursor++);
+  }
 }
 
-#endif // __VM_BYTECODE_H__
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+#endif

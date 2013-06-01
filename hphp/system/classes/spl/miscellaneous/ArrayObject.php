@@ -456,5 +456,4 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
     return $this->flags & self::ARRAY_AS_PROPS;
   }
 
-
 }

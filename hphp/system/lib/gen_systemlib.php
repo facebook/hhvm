@@ -58,17 +58,6 @@ function genSystemlib($input_files) {
 
     fwrite($systemlib_php, "<?hh\n");
     fwrite($systemlib_php, '// @' . 'generated' . "\n\n");
-    // There are some dependencies between files, so we output
-    // the classes in a certain order so that all classes can be
-    // hoisted.
-    $initialFiles = array('stdclass.php', 'exception.php', 'arrayaccess.php',
-                          'iterator.php', 'splfile.php', 'splheap.php');
-    foreach ($initialFiles as $initialFile) {
-      if (isset($phpfiles[$initialFile])) {
-        processPhpFile($phpfiles[$initialFile], $systemlib_php);
-        unset($phpfiles[$initialFile]);
-      }
-    }
     foreach ($phpfiles as $key => $phpfile) {
       if (preg_match('/\.php$/', $phpfile)) {
         processPhpFile($phpfile, $systemlib_php);

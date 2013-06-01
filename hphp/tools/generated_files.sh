@@ -40,7 +40,7 @@ if [ "$1" = "systemlib" -o "$1" = "all" ]; then
   cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Generating bin/systemlib.php"
   FBCODE_DIR=$HPHP_HOME $HHVM hphp/system/lib/gen_systemlib.php bin/ \
-        `find hphp/system/classes hphp/system/classes_hhvm -name '*.php'`
+        `cat hphp/system/classes.txt | sed -e 's/#.*$//'`
   check_err $? "Failed generating bin/systemlib.php"
 fi
 

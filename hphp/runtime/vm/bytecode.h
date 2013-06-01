@@ -509,7 +509,6 @@ public:
   void toStringElm(std::ostream& os, TypedValue* vv, const ActRec* fp)
     const;
   void toStringIter(std::ostream& os, Iter* it, bool itRef) const;
-  void clearEvalStack(ActRec* fp, int32_t numLocals);
   void protect();
   void unprotect();
   void requestInit();

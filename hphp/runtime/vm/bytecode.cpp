@@ -913,9 +913,6 @@ string Stack::toString(const ActRec* fp, int offset,
   return os.str();
 }
 
-void Stack::clearEvalStack(ActRec *fp, int32_t numLocals) {
-}
-
 UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
                                PC& pc, Fault& fault) {
   const Func* func = fp->m_func;

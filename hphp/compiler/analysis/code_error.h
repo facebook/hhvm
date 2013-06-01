@@ -31,7 +31,7 @@ namespace Compiler {
 
 enum ErrorType {
 #define CODE_ERROR_ENTRY(x) x,
-#include "compiler/analysis/core_code_error.inc"
+#include "hphp/compiler/analysis/core_code_error.inc"
 #undef CODE_ERROR_ENTRY
   ErrorCount,
   NoError

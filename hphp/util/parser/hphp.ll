@@ -1,5 +1,5 @@
 %{ /* -*- mode: c++ -*- */
-#include <util/parser/scanner.h>
+#include "hphp/util/parser/scanner.h"
 
 // macros for flex
 #define YYSTYPE HPHP::ScannerToken

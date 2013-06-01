@@ -48,15 +48,15 @@ foreach ($files as $file) {
 
   switch ($format) {
   case 'test_ext':
-    $path = $prefix ?: "hphp/test";
-    fwrite($f, "#include \"$path/test_ext_$name.h\"\n");
+    $path = $prefix ? "hphp/$prefix" : "hphp/test/";
+    fwrite($f, "#include \"${path}test_ext_$name.h\"\n");
     break;
   case 'test_suites':
     fwrite($f, "RUN_TESTSUITE(TestExt$ucname);\n");
     break;
   case 'ext':
-    $path = $prefix ?: "hphp/runtime/ext";
-    fwrite($f, "#include \"$path/ext_$name.h\"\n");
+    $path = $prefix ? "hphp/$prefix" : "hphp/runtime/ext/";
+    fwrite($f, "#include \"${path}ext_$name.h\"\n");
     break;
   }
 }

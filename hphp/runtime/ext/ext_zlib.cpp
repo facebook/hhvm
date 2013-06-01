@@ -380,7 +380,7 @@ namespace QuickLZ1 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 1
 #define QLZ_STREAMING_BUFFER 0
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ2 {
@@ -392,7 +392,7 @@ namespace QuickLZ2 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 2
 #define QLZ_STREAMING_BUFFER 100000
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ3 {
@@ -404,7 +404,7 @@ namespace QuickLZ3 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 3
 #define QLZ_STREAMING_BUFFER 1000000
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 #endif // HAVE_QUICKLZ

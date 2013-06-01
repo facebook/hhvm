@@ -18,6 +18,9 @@
 #define incl_HPHP_MEMORY_MANAGER_H_
 
 #include <boost/noncopyable.hpp>
+
+#include "folly/Memory.h"
+
 #include "hphp/util/thread_local.h"
 #include "hphp/runtime/base/memory/memory_usage_stats.h"
 
@@ -395,137 +398,6 @@ void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
 
-namespace smart {
-namespace do_not_use_directly {
-/*
- * We are deriving from the std::collection classes to get
- * smart::collection classes that use smart allocation.
- * To avoid the various issues involved with deriving
- * from value types, we want to make sure that there are
- * no references to std::collection<...,SmartStlAlloc<>>
- * other than the ones below. That way we know that
- * a pointer to a smart::collection can never decay
- * to a pointer to a std::collection.
- *
- * The namespace do_not_use_directly should remind us
- * of that.
- *
- */
-template <class T>
-class SmartStlAlloc {
- public:
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
-
-  template <class U>
-  struct rebind {
-    typedef SmartStlAlloc<U> other;
-  };
-
-  pointer address (reference value) const {
-    return &value;
-  }
-  const_pointer address (const_reference value) const {
-    return &value;
-  }
-
-  SmartStlAlloc() throw() {}
-  SmartStlAlloc(const SmartStlAlloc&) {}
-  template <class U>
-  SmartStlAlloc (const SmartStlAlloc<U>&) {}
-  ~SmartStlAlloc() {}
-
-  size_type max_size () const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate (size_type num, const void* = 0) {
-    pointer ret = (pointer)smart_malloc(num * sizeof(T));
-    return ret;
-  }
-
-  void construct (pointer p, const T& value) {
-    new ((void*)p) T(value);
-  }
-
-  void construct (pointer p) {
-    new ((void*)p) T();
-  }
-
-  void destroy (pointer p) {
-    p->~T();
-  }
-
-  void deallocate (pointer p, size_type num) {
-    smart_free(p);
-  }
-};
-
-template <class T1, class T2>
-bool operator== (const SmartStlAlloc<T1>&,
-                 const SmartStlAlloc<T2>&) {
-  return true;
-}
-template <class T1, class T2>
-bool operator!= (const SmartStlAlloc<T1>&,
-                 const SmartStlAlloc<T2>&) {
-  return false;
-}
-
-}
-/*
- * Derivation from value types is generally bad.
- * Here, we derive from classes that do not exist anywhere
- * else in the code base (see comments above).
- *
- * We also add no functionality to the derived class. Your
- * code will not get past code review if you try to do so.
- */
-template <class Key, class T, class Compare = std::less<Key> >
-class map : public std::map<
-  Key, T, Compare,
-  do_not_use_directly::SmartStlAlloc<std::pair<const Key, T> > > {};
-
-template <class T>
-class deque : public std::deque<T, do_not_use_directly::SmartStlAlloc<T> > {};
-
-template <class T>
-class vector : public std::vector<T, do_not_use_directly::SmartStlAlloc<T> > {
-  typedef std::vector<T, do_not_use_directly::SmartStlAlloc<T> > Base_;
- public:
-  template <typename... A>
-  explicit vector(A &&... args) : Base_(std::forward<A>(args)...) {}
-};
-
-template <class T>
-class list : public std::list<T, do_not_use_directly::SmartStlAlloc<T> > {};
-
-template <class T>
-class queue : public std::queue<T, deque<T> > {};
-
-template <class _T, class _U,
-          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hash_map : std::tr1::unordered_map<
-  _T, _U, _V, _W, do_not_use_directly::SmartStlAlloc<std::pair<_T, _U> > > {
-  hash_map() : std::tr1::unordered_map<
-    _T, _U, _V, _W, do_not_use_directly::SmartStlAlloc<std::pair<_T, _U> >
-    >(0) {}
-};
-
-template <class _T,
-          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hash_set : std::tr1::unordered_set<
-  _T, _V, _W, do_not_use_directly::SmartStlAlloc<_T> > {
-  hash_set() : std::tr1::unordered_set<
-    _T, _V, _W, do_not_use_directly::SmartStlAlloc<_T> >(0) {}
-};
-
-}
 ///////////////////////////////////////////////////////////////////////////////
 }
 

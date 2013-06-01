@@ -19,7 +19,7 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/jit/irfactory.h"
 
 namespace HPHP { namespace JIT {

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/linearscan.h"
 
+#include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/jit/irfactory.h"
 #include "hphp/runtime/vm/jit/nativecalls.h"
 #include "hphp/runtime/vm/jit/print.h"

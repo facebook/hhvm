@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -107,6 +108,7 @@ public:
   void setResourceInfo(CStrRef rsrcName, int rsrcId);
   void getResourceInfo(String &rsrcName, int &rsrcId);
   Type getType() const { return m_type; }
+
 private:
   typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
   Type m_type;

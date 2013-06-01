@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_JIT_LAYOUT_H_
 #define incl_HPHP_JIT_LAYOUT_H_
 
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/block.h"
 

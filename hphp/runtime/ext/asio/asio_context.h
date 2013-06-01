@@ -21,6 +21,7 @@
 #include <functional>
 #include <queue>
 #include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

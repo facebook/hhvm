@@ -14,9 +14,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/ext/asio/asio_context.h"
 
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/lib/systemlib.h"
 

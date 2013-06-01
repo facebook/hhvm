@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/tracebuilder.h"
+#include "hphp/runtime/vm/srckey.h"
 
-using HPHP::Transl::SrcKey;
 using HPHP::Transl::NormalizedInstruction;
 
 namespace HPHP {

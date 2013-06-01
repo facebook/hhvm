@@ -205,55 +205,23 @@ void Tracelet::print(std::ostream& out) const {
   }
 }
 
-void
-SrcKey::trace(const char *fmt, ...) const {
+void sktrace(SrcKey sk, const char *fmt, ...) {
   if (!Trace::enabled) {
     return;
   }
   // We don't want to print string literals, so don't pass the unit
-  string s = instrToString(curUnit()->at(m_offset));
+  string s = instrToString(curUnit()->at(sk.offset()));
   const char *filepath = "*anonFile*";
   if (curUnit()->filepath()->data() &&
       strlen(curUnit()->filepath()->data()) > 0)
     filepath = curUnit()->filepath()->data();
   Trace::trace("%s:%llx %6d: %20s ",
-               filepath, (unsigned long long)getFuncId(),
-               m_offset, s.c_str());
+               filepath, (unsigned long long)sk.getFuncId(),
+               sk.offset(), s.c_str());
   va_list a;
   va_start(a, fmt);
   Trace::vtrace(fmt, a);
   va_end(a);
-}
-
-void
-SrcKey::print(int ninstrs) const {
-  const Unit* u = curUnit();
-  Opcode* op = (Opcode*)u->at(m_offset);
-  std::cerr << u->filepath()->data() << ':' << u->getLineNumber(m_offset)
-            << std::endl;
-  for (int i = 0;
-       i < ninstrs && (uintptr_t)op < ((uintptr_t)u->entry() + u->bclen());
-       op += instrLen(op), ++i) {
-    std::cerr << "  " << u->offsetOf(op) << ": " << instrToString(op, u)
-              << std::endl;
-  }
-}
-
-std::string
-SrcKey::pretty() const {
-  std::ostringstream result;
-  const char* filepath = tl_regState == REGSTATE_CLEAN ?
-    curUnit()->filepath()->data() : "unknown";
-  result << filepath << ':' << getFuncId() << ':' << m_offset;
-  return result.str();
-}
-
-// advance --
-//
-//  Move over the current instruction pointer.
-void
-Translator::advance(const Opcode** instrs) {
-  (*instrs) += instrLen(*instrs);
 }
 
 /*
@@ -2981,7 +2949,7 @@ static bool checkTaintFuncs(StringData* name) {
 static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
   auto const numArgs = fcall->imm[0].u_IVA;
   auto const target  = fcall->funcd;
-  auto const fpi     = curFunc()->findFPI(fcall->source.m_offset);
+  auto const fpi     = curFunc()->findFPI(fcall->source.offset());
   auto const pushOp  = curUnit()->getOpcode(fpi->m_fpushOff);
 
   if (!RuntimeOption::RepoAuthoritative) return false;
@@ -3387,7 +3355,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
 
     if (isFCallStar(ni->op())) {
       if (!doVarEnvTaint) {
-        const FPIEnt *fpi = curFunc()->findFPI(ni->source.m_offset);
+        const FPIEnt *fpi = curFunc()->findFPI(ni->source.offset());
         assert(fpi);
         Offset fpushOff = fpi->m_fpushOff;
         PC fpushPc = curUnit()->at(fpushOff);
@@ -3480,7 +3448,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
               tas.m_numJmps, ni->imm[0].u_IA);
       tas.recordJmp();
-      sk = SrcKey(curFunc(), sk.m_offset + ni->imm[0].u_IA);
+      sk = SrcKey(curFunc(), sk.offset() + ni->imm[0].u_IA);
       goto head; // don't advance sk
     } else if (opcodeBreaksBB(ni->op()) ||
                (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
@@ -3571,7 +3539,7 @@ Translator::isSrcKeyInBL(const Unit* unit, const SrcKey& sk) {
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
   }
-  for (PC pc = unit->at(sk.m_offset); !opcodeBreaksBB(*pc);
+  for (PC pc = unit->at(sk.offset()); !opcodeBreaksBB(*pc);
        pc += instrLen(pc)) {
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
@@ -3616,6 +3584,34 @@ uint64_t* Translator::getTransCounterAddr() {
            [id % transCountersPerChunk]);
 }
 
+uint32_t Translator::addTranslation(const TransRec& transRec) {
+  if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
+    // Log the translation's size, creation time, SrcKey, and size
+    Trace::traceRelease("New translation: %lld %s %u %u %d\n",
+                        Timer::GetCurrentTimeMicros() - m_createdTime,
+                        folly::format("{}:{}:{}",
+                          curUnit()->filepath()->data(),
+                          transRec.src.getFuncId(),
+                          transRec.src.offset()).str().c_str(),
+                        transRec.aLen,
+                        transRec.astubsLen,
+                        transRec.kind);
+  }
+
+  if (!isTransDBEnabled()) return -1u;
+  uint32_t id = getCurrentTransID();
+  m_translations.push_back(transRec);
+  m_translations[id].setID(id);
+
+  if (transRec.aLen > 0) {
+    m_transDB[transRec.aStart] = id;
+  }
+  if (transRec.astubsLen > 0) {
+    m_transDB[transRec.astubsStart] = id;
+  }
+
+  return id;
+}
 
 uint64_t Translator::getTransCounter(TransID transId) const {
   if (!isTransDBEnabled()) return -1ul;

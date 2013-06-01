@@ -30,6 +30,12 @@ static const int kNumFixedPrologues = 6;
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 
 /*
+ * Unique identifier for a Func*.
+ */
+typedef uint32_t FuncId;
+constexpr FuncId InvalidFuncId = FuncId(-1LL);
+
+/*
  * Metadata about a php function or object method.
  */
 struct Func {
@@ -130,9 +136,6 @@ struct Func {
   typedef FixedVector<EHEnt> EHEntVec;
   typedef FixedVector<FPIEnt> FPIEntVec;
 
-  typedef uint32_t FuncId;
-  static const FuncId InvalidId = -1LL;
-
   Func(Unit& unit, Id id, int line1, int line2, Offset base,
        Offset past, const StringData* name, Attr attrs, bool top,
        const StringData* docComment, int numParams, bool isGenerator);
@@ -153,7 +156,7 @@ struct Func {
   }
 
   FuncId getFuncId() const {
-    assert(m_funcId != InvalidId);
+    assert(m_funcId != InvalidFuncId);
     return m_funcId;
   }
   void setFuncId(FuncId id);

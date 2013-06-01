@@ -2673,7 +2673,7 @@ static void emitExitNoIRStats(Asm& a,
       HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
     Stats::emitInc(a,
                    Stats::opcodeToIRPreStatCounter(
-                     Op(*func->unit()->at(dest.m_offset))),
+                     Op(*func->unit()->at(dest.offset()))),
                    -1,
                    Transl::CC_None,
                    true);

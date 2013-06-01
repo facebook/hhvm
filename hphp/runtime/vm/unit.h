@@ -609,7 +609,14 @@ public:
     return (Opcode)m_bc[instrOffset];
   }
 
+  /*
+   * Return the Func* for the code at offset off.
+   *
+   * Returns nullptr if the offset is not in a func body (but this
+   * should be impossible).
+   */
   const Func* getFunc(Offset pc) const;
+
   void setCacheId(unsigned id) {
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);

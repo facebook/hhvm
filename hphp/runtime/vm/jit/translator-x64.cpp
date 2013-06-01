@@ -339,7 +339,7 @@ TranslatorX64::emitRB(X64Assembler& a,
   int arg = 0;
   emitImmReg(a, t, argNumToRegName[arg++]);
   emitImmReg(a, sk.getFuncId(), argNumToRegName[arg++]);
-  emitImmReg(a, sk.m_offset, argNumToRegName[arg++]);
+  emitImmReg(a, sk.offset(), argNumToRegName[arg++]);
   a.    call((TCA)ringbufferEntry);
 }
 
@@ -1654,7 +1654,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
   }
 
-  Fixup fixup(funcBody.m_offset - func->base(), frameCells);
+  Fixup fixup(funcBody.offset() - func->base(), frameCells);
 
   // Emit warnings for any missing arguments
   if (!func->info()) {
@@ -2476,7 +2476,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
      * axiom.
      */
     assert(numInstrs >= 0);
-    ONTRACE(5, SrcKey(curFunc(), off).trace("interp: enter\n"));
+    SKTRACE(5, SrcKey(curFunc(), off), "interp: enter\n");
     if (numInstrs) {
       s_perfCounters[tpc_interp_instr] += numInstrs;
       g_vmContext->dispatchN(numInstrs);
@@ -3451,7 +3451,7 @@ TranslatorX64::translateTracelet(const TranslArgs& args) {
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
-      start, sk.getFuncId(), sk.m_offset);
+      start, sk.getFuncId(), sk.offset());
   srcRec.newTranslation(start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {

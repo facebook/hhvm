@@ -40,7 +40,7 @@ struct CallRecord {
   };
 };
 
-typedef hphp_hash_map<SrcKey, CallRecord, SrcKey> CallDB;
+typedef hphp_hash_map<SrcKey,CallRecord,SrcKey::Hasher> CallDB;
 static CallDB s_callDB;
 /* record the max number of args to enable invalidation */
 static int s_maxNumArgs;
@@ -110,8 +110,7 @@ static void recordActRecPush(NormalizedInstruction& i,
   assert(fpi);
   assert(name->isStatic());
   assert(sk.offset() == fpi->m_fpushOff);
-  SrcKey fcall = sk;
-  fcall.m_offset = fpi->m_fcallOff;
+  auto const fcall = SrcKey { curFunc(), fpi->m_fcallOff };
   assert(isFCallStar(*unit->at(fcall.offset())));
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);

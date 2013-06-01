@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/writelease.h"
 #include "hphp/runtime/vm/jit/trans-data.h"
 #include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
@@ -63,98 +64,9 @@ enum VMRegState {
 };
 extern __thread VMRegState tl_regState;
 
-/*
- * A SrcKey is a logical source instruction, currently a unit/instruction pair.
- * The units are identified by contents rather than Unit; Unit's are
- * ephemeral, and we want to reuse SrcKey's when we encounter Unit's with
- * the same contents.
- */
-struct SrcKey {
-  private:
-  Func::FuncId m_funcId;
-
-  public:
-  Offset m_offset;
-
-  SrcKey() : m_funcId(Func::InvalidId), m_offset(0) { }
-
-  SrcKey(const Func* f, Offset off) :
-    m_funcId(f->getFuncId()), m_offset(off) { }
-
-  SrcKey(const Func* f, const Opcode* i) :
-    m_funcId(f->getFuncId()), m_offset(f->unit()->offsetOf(i)) { }
-
-  int cmp(const SrcKey &r) const {
-    // Can't use memcmp because of pad bytes. Frowny.
-#define CMP(field) \
-    if (field < r.field) return -1; \
-    if (field > r.field) return 1
-    CMP(getFuncId());
-    CMP(m_offset);
-#undef CMP
-    return 0;
-  }
-  bool operator==(const SrcKey& r) const {
-    return cmp(r) == 0;
-  }
-  bool operator!=(const SrcKey& r) const {
-    return cmp(r) != 0;
-  }
-  bool operator<(const SrcKey& r) const {
-    return cmp(r) < 0;
-  }
-  bool operator>(const SrcKey& r) const {
-    return cmp(r) > 0;
-  }
-  // Hash function for both hash_map and tbb conventions.
-  static size_t hash(const SrcKey &sk) {
-    return HPHP::hash_int64_pair(sk.getFuncId(), uint64_t(sk.m_offset));
-  }
-  size_t operator()(const SrcKey& sk) const {
-    return hash(sk);
-  }
-  static bool equal(const SrcKey& sk1, const SrcKey& sk2) {
-    return sk1 == sk2;
-  }
-
-  // Packed representation of SrcKeys for use in contexts where we
-  // want atomicity.  (SrcDB.)
-  typedef uint64_t AtomicInt;
-
-  AtomicInt toAtomicInt() const {
-    return uint64_t(getFuncId()) << 32 | uint64_t(m_offset);
-  }
-
-  static SrcKey fromAtomicInt(AtomicInt in) {
-    SrcKey k;
-    k.setFuncId(in >> 32);
-    k.m_offset = in & 0xffffffff;
-    return k;
-  }
-
-  void setFuncId(Func::FuncId id) {
-    assert(id != Func::InvalidId);
-    m_funcId = id;
-  }
-  Func::FuncId getFuncId() const {
-    assert(m_funcId != Func::InvalidId);
-    return m_funcId;
-  }
-
-  void trace(const char *fmt, ...) const;
-  void print(int ninstr) const;
-  std::string pretty() const;
-  int offset() const {
-    return m_offset;
-  }
-  void advance(const Unit* u) {
-    m_offset += instrLen(u->at(offset()));
-  }
-};
-
-typedef hphp_hash_set<SrcKey, SrcKey> SrcKeySet;
+void sktrace(SrcKey sk, const char *fmt, ...);
 #define SKTRACE(level, sk, ...) \
-  ONTRACE(level, (sk).trace(__VA_ARGS__))
+  ONTRACE(level, sktrace(sk, __VA_ARGS__))
 
 struct NormalizedInstruction;
 
@@ -893,34 +805,10 @@ public:
   }
 
   uint64_t* getTransCounterAddr();
-
   uint64_t getTransCounter(TransID transId) const;
-
   void setTransCounter(TransID transId, uint64_t value);
 
-  uint32_t addTranslation(const TransRec& transRec) {
-    if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
-      // Log the translation's size, creation time, SrcKey, and size
-      Trace::traceRelease("New translation: %lld %s %u %u %d\n",
-                          Timer::GetCurrentTimeMicros() - m_createdTime,
-                          transRec.src.pretty().c_str(), transRec.aLen,
-                          transRec.astubsLen, transRec.kind);
-    }
-
-    if (!isTransDBEnabled()) return -1u;
-    uint32_t id = getCurrentTransID();
-    m_translations.push_back(transRec);
-    m_translations[id].setID(id);
-
-    if (transRec.aLen > 0) {
-      m_transDB[transRec.aStart] = id;
-    }
-    if (transRec.astubsLen > 0) {
-      m_transDB[transRec.astubsStart] = id;
-    }
-
-    return id;
-  }
+  uint32_t addTranslation(const TransRec& transRec);
 
   /*
    * Create a Tracelet for the given SrcKey, which must actually be
@@ -933,7 +821,6 @@ public:
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
-  void advance(Opcode const **instrs);
   static int locPhysicalOffset(Location l, const Func* f = nullptr);
   static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
   static bool typeIsString(DataType type) {
@@ -963,7 +850,7 @@ public:
 
 protected:
   PCFilter m_dbgBLPC;
-  SrcKeySet m_dbgBLSrcKey;
+  hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;
   bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
 

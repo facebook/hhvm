@@ -82,16 +82,17 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
   }
 }
 
-static Func::FuncId s_nextFuncId = 0;
+static FuncId s_nextFuncId = 0;
+
 void Func::setFuncId(FuncId id) {
-  assert(m_funcId == InvalidId);
-  assert(id != InvalidId);
+  assert(m_funcId == InvalidFuncId);
+  assert(id != InvalidFuncId);
   m_funcId = id;
 }
 
 void Func::setNewFuncId() {
-  assert(m_funcId == InvalidId);
-  m_funcId = __sync_fetch_and_add(&s_nextFuncId, 1);
+  assert(m_funcId == InvalidFuncId);
+  m_funcId = static_cast<FuncId>(__sync_fetch_and_add(&s_nextFuncId, 1));
 }
 
 void Func::setFullName() {
@@ -188,7 +189,7 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
-  , m_funcId(InvalidId)
+  , m_funcId(InvalidFuncId)
   , m_hasPrivateAncestor(false)
 {
   m_shared = new SharedData(nullptr, id, base, past, line1, line2,
@@ -211,7 +212,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
-  , m_funcId(InvalidId)
+  , m_funcId(InvalidFuncId)
   , m_hasPrivateAncestor(false)
 {
   Id id = -1;
@@ -247,7 +248,7 @@ Func* Func::clone() const {
         isClosureBody() || isGeneratorFromClosure()
   )) Func(*this);
   f->initPrologues(m_numParams, isGenerator());
-  f->m_funcId = InvalidId;
+  f->m_funcId = InvalidFuncId;
   return f;
 }
 

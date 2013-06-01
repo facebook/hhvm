@@ -18,6 +18,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/eval/runtime/file_repository.h"
@@ -1831,7 +1832,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
       assert(start);
       tx64->enterTCAfterProlog(start);
     } else {
-      Transl::SrcKey sk(curFunc(), m_pc);
+      SrcKey sk(curFunc(), m_pc);
       tx64->enterTCAtSrcKey(sk);
     }
   } else {

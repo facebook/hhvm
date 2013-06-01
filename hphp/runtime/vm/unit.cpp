@@ -1498,8 +1498,7 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
 
 const Func* Unit::getFunc(Offset pc) const {
   FuncEntry key = FuncEntry(pc, nullptr);
-  FuncTable::const_iterator it =
-    upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
+  auto it = std::upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
   if (it != m_funcTable.end()) {
     assert(pc < it->pastOffset());
     return it->val();

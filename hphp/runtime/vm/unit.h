@@ -402,10 +402,12 @@ struct Unit {
 
   PC entry() const { return m_bc; }
   Offset bclen() const { return m_bclen; }
+
   PC at(const Offset off) const {
     assert(off >= 0 && off <= Offset(m_bclen));
     return m_bc + off;
   }
+
   Offset offsetOf(const Opcode* op) const {
     assert(op >= m_bc && op <= (m_bc + m_bclen));
     return op - m_bc;

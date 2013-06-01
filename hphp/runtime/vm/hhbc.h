@@ -762,6 +762,7 @@ struct StackTransInfo {
 
 bool isValidOpcode(Opcode opcode);
 bool instrIsControlFlow(Opcode opcode);
+bool instrIsNonCallControlFlow(Opcode opcode);
 bool instrAllowsFallThru(Opcode opcode);
 bool instrReadsCurrentFpi(Opcode opcode);
 

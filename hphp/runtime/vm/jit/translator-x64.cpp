@@ -88,6 +88,7 @@ typedef __sighandler_t *sighandler_t;
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/jit/hhbctranslator.h"
+#include "hphp/runtime/vm/jit/region_selection.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
@@ -754,6 +755,47 @@ TranslatorX64::numTranslations(SrcKey sk) const {
   return 0;
 }
 
+static void populateLiveContext(JIT::RegionContext& ctx) {
+  typedef JIT::RegionDesc::Location L;
+
+  const ActRec*     const fp {g_vmContext->getFP()};
+  const TypedValue* const sp {g_vmContext->getStack().top()};
+
+  for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
+    ctx.liveTypes.push_back(
+      { L::Local{i}, JIT::liveTVType(frame_local(fp, i)) }
+    );
+  }
+
+  uint32_t stackOff = 0;
+  visitStackElems(
+    fp, sp, ctx.offset,
+    [&](const ActRec* ar) {
+      // TODO(#2466980): when it's a Cls, we should pass the Class* in
+      // the Type.
+      using JIT::Type;
+      auto const objOrCls =
+        ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
+        ar->hasClass() ? Type::Cls
+                       : Type::Nullptr;
+
+      ctx.preLiveARs.push_back(
+        { stackOff,
+          ar->m_func,
+          objOrCls
+        }
+      );
+
+      stackOff += kNumActRecCells;
+    },
+    [&](const TypedValue* tv) {
+      ctx.liveTypes.push_back(
+        { L::Stack{stackOff++}, JIT::liveTVType(tv) }
+      );
+    }
+  );
+}
+
 TCA
 TranslatorX64::createTranslation(const TranslArgs& args) {
   /*
@@ -781,6 +823,18 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
       // replaceOldTranslations)
       return retransl();
     }
+  }
+
+  /*
+   * First test if we have a region-selector that can handle this
+   * SrcKey.
+   */
+  JIT::RegionContext rContext { curFunc(), sk.offset() };
+  populateLiveContext(rContext);
+  if (auto UNUSED rd = JIT::selectRegion(rContext)) {
+    /*
+     * WIP.  Unimplemented.
+     */
   }
 
   // We put retranslate requests at the end of our slab to more frequently

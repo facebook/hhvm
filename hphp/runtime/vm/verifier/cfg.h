@@ -85,9 +85,7 @@ inline bool isTF(PC pc) {
 }
 
 inline bool isCF(PC pc) {
-  // exclude call-like opcodes marked with CF flag.
-  return instrIsControlFlow(*pc) && !isFCallStar(*pc) &&
-    *pc != OpContEnter && *pc != OpFCallBuiltin;
+  return instrIsNonCallControlFlow(*pc);
 }
 
 inline bool isFF(PC pc) {

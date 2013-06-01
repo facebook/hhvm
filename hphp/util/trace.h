@@ -94,6 +94,7 @@ namespace Trace {
       TM(hhas)        \
       TM(statgroups)  \
       TM(minstr)      \
+      TM(region)      \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

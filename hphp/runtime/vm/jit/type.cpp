@@ -30,6 +30,8 @@ namespace HPHP {  namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
+//////////////////////////////////////////////////////////////////////
+
 Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
   if (!dynLoc) {
     return Type::None;
@@ -39,6 +41,14 @@ Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
     return Type::Gen;
   }
   return Type::fromDataType(dt, dynLoc->rtt.innerType());
+}
+
+Type liveTVType(const TypedValue* tv) {
+  if (tv->m_type == KindOfObject) {
+    return Type::fromDataType(KindOfObject, KindOfInvalid,
+      tv->m_data.pobj->getVMClass());
+  }
+  return Type::fromDataType(tv->m_type);
 }
 
 //////////////////////////////////////////////////////////////////////

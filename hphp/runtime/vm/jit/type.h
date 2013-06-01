@@ -537,6 +537,12 @@ public:
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
               "JIT::Type should fit in (2 * sizeof(uint64_t))");
 
+/*
+ * Return the most refined type that can be used to represent the type
+ * in a live TypedValue.
+ */
+Type liveTVType(const TypedValue* tv);
+
 }}
 
 #endif

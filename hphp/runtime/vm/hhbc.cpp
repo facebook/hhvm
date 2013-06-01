@@ -893,6 +893,14 @@ bool instrIsControlFlow(Opcode opcode) {
   return (opFlags & CF) != 0;
 }
 
+bool instrIsNonCallControlFlow(Opcode opcode) {
+  return
+    instrIsControlFlow(opcode) &&
+    !isFCallStar(opcode) &&
+    opcode != OpContEnter &&
+    opcode != OpFCallBuiltin;
+}
+
 bool instrAllowsFallThru(Opcode opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & TF) == 0;

@@ -70,17 +70,17 @@ function idx_file($array, $key, $default = null) {
 }
 
 function bin_root() {
-  return idx($_ENV, 'FBMAKE_BIN_ROOT',
-    is_dir(hphp_home().'/_bin') ?
-      hphp_home().'/_bin' : # fbmake
-      hphp_home() # github
-  );
+  $dir = hphp_home() . '/' . idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
+  return is_dir($dir) ?
+    $dir :      # fbmake
+    hphp_home() # github
+  ;
 }
 
 function verify_hhbc() {
   return idx($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
 }
-    
+
 function read_file($file) {
   return file_exists($file) ? preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
 }
@@ -455,15 +455,15 @@ function run_test($options, $test) {
     $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
     $wanted_re = str_replace('%c', '.', $wanted_re);
     // %f allows two points "-.0.0" but that is the best *simple* expression
-            
+
     # a poor mans aide for debugging
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
-  
+
     return preg_match("/^$wanted_re\$/s", $output);
 
   } else if (file_exists("$test.expectregex")) {
     $wanted_re = file_get_contents("$test.expectregex");
-    
+
     # a poor mans aide for debugging
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
 
@@ -523,7 +523,7 @@ function main($argv) {
 
   $results = array();
   foreach ($bad_test_files as $bad_test_file) {
-    $results = array_merge($results, 
+    $results = array_merge($results,
       json_decode(file_get_contents($bad_test_file), true));
   }
   if (isset($options['fbmake'])) {
@@ -553,12 +553,12 @@ SHIP
       $header_start = "\n\033[0;33m";
       $header_end = "\033[0m\n";
       print "\n".count($failed)." tests failed\n";
-      
+
       print $header_start."See the diffs:".$header_end.
         implode("\n", array_map(
           function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
-      
+
       print $header_start."Run these by hand:".$header_end;
 
       foreach ($failed as $test) {
@@ -570,7 +570,7 @@ SHIP
         }
         print "$command\n";
       }
-      
+
       print $header_start."Re-run just the failing tests:".$header_end.
             "$argv[0] ".implode(' ', $failed)."\n";
     }

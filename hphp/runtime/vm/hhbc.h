@@ -506,7 +506,7 @@ enum SetOpOp {
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
-  O(FPushCufIter,    TWO(IVA,IA),     NOV,             NOV,        NF) \
+  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        NF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \

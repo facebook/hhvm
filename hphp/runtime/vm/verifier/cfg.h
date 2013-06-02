@@ -64,16 +64,14 @@ public:
  * Iteration over blocks can be done directly if necessary but when
  * you can, use a predefined Range, like LinearBlocks or RpoBlocks.
  */
-class Graph {
-public:
+struct Graph {
   Graph() : first_linear(0), first_rpo(0), entries(0), block_count(0),
       exn_cap(0) {
   }
-private:
-  // Never copy Graphs.
-  explicit Graph(const Graph&);
-  Graph& operator=(const Graph&);
-public:
+
+  explicit Graph(const Graph&) = delete;
+  Graph& operator=(const Graph&) = delete;
+
   Block* first_linear; // blocks in linear order
   Block* first_rpo;    // blocks in reverse postorder
   Block** entries; // entry points indexed by arg count [0:param_count]
@@ -88,9 +86,8 @@ inline bool isTF(PC pc) {
 
 inline bool isCF(PC pc) {
   // exclude call-like opcodes marked with CF flag.
-  return instrIsControlFlow(*pc) &&
-         (isSwitch(*pc) ||
-          instrJumpOffset(const_cast<Opcode*>(pc)) != nullptr);
+  return instrIsControlFlow(*pc) && !isFCallStar(*pc) &&
+    *pc != OpContEnter && *pc != OpFCallBuiltin;
 }
 
 inline bool isFF(PC pc) {

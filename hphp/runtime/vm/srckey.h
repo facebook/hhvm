@@ -60,7 +60,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     return uint64_t(getFuncId()) << 32 | uint64_t(offset());
   }
   static SrcKey fromAtomicInt(AtomicInt in) {
-    return SrcKey { uint32_t(in >> 32), uint32_t(in & 0xffffffff) };
+    return SrcKey { uint32_t(in >> 32), (Offset) int32_t(in & 0xffffffff) };
   }
 
   void setFuncId(FuncId id) {

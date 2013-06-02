@@ -139,45 +139,40 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   PC savePc = g_vmContext->m_pc;
 
-  Offset pcOff;
-  ActRec* outer = g_vmContext->getPrevVMState(ar, &pcOff);
-  assert(outer);
-  g_vmContext->m_fp = outer;
-  g_vmContext->m_pc = outer->m_func->unit()->at(pcOff);
+  Variant doneFlag = true;
+  Variant called_on;
 
-  try {
-    Variant doneFlag = true;
-    Variant called_on;
-
-    if (ar->hasThis()) {
-      called_on = Variant(ar->getThis());
-    } else if (ar->hasClass()) {
-      // For static methods, give handler the name of called class
-      called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
-    }
-    Array intArgs =
-      CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                     called_on,
-                     get_frame_args_with_ref(ar),
-                     h->asCArrRef()[1],
-                     ref(doneFlag));
-
-    Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
-    if (doneFlag.toBoolean()) {
-      frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
-      Stack& stack = g_vmContext->getStack();
-      stack.top() = (Cell*)(ar + 1);
-      tvDup(ret.asTypedValue(), stack.allocTV());
-      return false;
-    }
-    g_vmContext->m_fp = ar;
-    g_vmContext->m_pc = savePc;
-  } catch (...) {
-    g_vmContext->m_fp = ar;
-    g_vmContext->m_pc = savePc;
-    g_vmContext->m_stack.top() = Stack::frameStackBase(ar);
-    throw;
+  if (ar->hasThis()) {
+    called_on = Variant(ar->getThis());
+  } else if (ar->hasClass()) {
+    // For static methods, give handler the name of called class
+    called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
+  Array intArgs =
+    CREATE_VECTOR5(ar->m_func->fullNameRef(),
+                   called_on,
+                   get_frame_args_with_ref(ar),
+                   h->asCArrRef()[1],
+                   ref(doneFlag));
+
+  Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
+  if (doneFlag.toBoolean()) {
+    Offset pcOff;
+    ActRec* outer = g_vmContext->getPrevVMState(ar, &pcOff);
+    assert(outer);
+
+    frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
+    Stack& stack = g_vmContext->getStack();
+    stack.top() = (Cell*)(ar + 1);
+    tvDup(ret.asTypedValue(), stack.allocTV());
+
+    g_vmContext->m_fp = outer;
+    g_vmContext->m_pc = outer->m_func->unit()->at(pcOff);
+
+    return false;
+  }
+  g_vmContext->m_fp = ar;
+  g_vmContext->m_pc = savePc;
 
   return true;
 }

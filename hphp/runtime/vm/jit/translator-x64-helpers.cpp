@@ -149,7 +149,13 @@ asm(
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
   "1: pop 0x8(%r15)\n"
+  // There is a brief span from enterTCAtProlog until the function
+  // is entered where rbp is *below* the new actrec, and is missing
+  // a number of c++ frames. The new actrec is linked onto the c++
+  // frames, however, so switch it into rbp in case fcallHelper throws.
+  "xchg %r15,%rbp\n"
   "call fcallHelper\n"
+  "xchg %r15,%rbp\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
   "ud2\n"

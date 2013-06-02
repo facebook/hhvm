@@ -111,6 +111,7 @@ void AsioSession::enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wa
     wait_handle->setNextToProcess(nullptr);
     if (m_readyExternalThreadEvents.compare_exchange_weak(next, wait_handle)) {
       // succeeded, notify condition
+      std::unique_lock<std::mutex> lock(m_readyExternalThreadEventsMutex);
       m_readyExternalThreadEventsCondition.notify_one();
       return;
     }

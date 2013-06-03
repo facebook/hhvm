@@ -3700,25 +3700,19 @@ ContExit    []  ->  []
   flow to the caller of the continuation body, which must be a non-static method
   of the Continuation class.
 
-UnpackCont    []  ->  [C:Int]
+UnpackCont    []  ->  [C:Int C]
 
   Unpack continuation. Unpacks variables from the Continuation object in local
-  0 into the containing environment. The current label of the continuation is
-  pushed on the stack.
-
+  0 into the containing environment. The stack will contain the current label of
+  the continuation in $1 and the value sent to the continuation in $2. The value
+  will be no longer referenced by the Continuation object.
+  
 PackCont <label id>    [C]  ->  []
 
   Pack continuation. Packs all defined local variables into the Continuation
   object in local 0. The value on the top of the stack is stored in the
   continuation as the result of the current iteration and the continuation's
   label is set to <label id>.
-
-ContReceive    []  ->  [C]
-
-  Receive continuation value. If the continuation in local 0 has a pending
-  exception, this instruction will throw that exception. Otherwise, the value
-  sent to the continuation will be pushed on the stack. The value will be no
-  longer referenced by the Continuation object.
 
 ContRetC    [C]  ->  []
 

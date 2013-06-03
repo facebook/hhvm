@@ -364,7 +364,6 @@ struct HhbcTranslator {
   void emitContExit();
   void emitUnpackCont();
   void emitPackCont(int64_t labelId);
-  void emitContReceive();
   void emitContRetC();
   void emitContNext();
   void emitContSendImpl(bool raise);

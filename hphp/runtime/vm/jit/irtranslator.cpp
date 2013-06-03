@@ -630,11 +630,6 @@ void TranslatorX64::irTranslatePackCont(const Tracelet& t,
   HHIR_EMIT(PackCont, i.imm[0].u_IVA);
 }
 
-void TranslatorX64::irTranslateContReceive(const Tracelet& t,
-                                           const NormalizedInstruction& i) {
-  HHIR_EMIT(ContReceive);
-}
-
 void TranslatorX64::irTranslateContRetC(const Tracelet& t,
                                         const NormalizedInstruction& i) {
   HHIR_EMIT(ContRetC);

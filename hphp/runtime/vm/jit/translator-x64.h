@@ -419,7 +419,6 @@ private:
   CASE(ContExit) \
   CASE(UnpackCont) \
   CASE(PackCont) \
-  CASE(ContReceive) \
   CASE(ContRetC) \
   CASE(ContNext) \
   CASE(ContSend) \

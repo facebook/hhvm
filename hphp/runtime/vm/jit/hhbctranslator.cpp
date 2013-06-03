@@ -1101,6 +1101,11 @@ void HhbcTranslator::emitUnpackCont() {
   gen(LinkContVarEnv, m_tb->fp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
+
+  auto const valOffset = cns(CONTOFF(m_received));
+  push(gen(LdProp, Type::Cell, cont, valOffset));
+  gen(StProp, cont, valOffset, m_tb->genDefNull());
+
   push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
 }
 
@@ -1115,14 +1120,6 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
   gen(
     StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId)
   );
-}
-
-void HhbcTranslator::emitContReceive() {
-  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
-  auto const cont = ldLoc(0);
-  auto const valOffset = cns(CONTOFF(m_received));
-  push(gen(LdProp, Type::Cell, cont, valOffset));
-  gen(StProp, cont, valOffset, m_tb->genDefNull());
 }
 
 void HhbcTranslator::emitContRetC() {

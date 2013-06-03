@@ -7251,10 +7251,16 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
 
   unpackContVarEnvLinkage(m_fp);
 
+  // Return the received value
+  TypedValue* recv_to = m_stack.allocTV();
+  TypedValue* recv_fr = cont->m_received.asTypedValue();
+  memcpy(recv_to, recv_fr, sizeof(TypedValue));
+  tvWriteNull(recv_fr);
+
   // Return the label in a stack cell
-  TypedValue* ret = m_stack.allocTV();
-  ret->m_type = KindOfInt64;
-  ret->m_data.num = cont->m_label;
+  TypedValue* label = m_stack.allocTV();
+  label->m_type = KindOfInt64;
+  label->m_data.num = cont->m_label;
 }
 
 void VMExecutionContext::packContVarEnvLinkage(ActRec* fp) {
@@ -7271,15 +7277,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
   packContVarEnvLinkage(m_fp);
   cont->c_Continuation::t_update(label, tvAsCVarRef(m_stack.topTV()));
   m_stack.popTV();
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
-  NEXT();
-  c_Continuation* cont = frame_continuation(m_fp);
-  TypedValue* fr = cont->m_received.asTypedValue();
-  TypedValue* to = m_stack.allocTV();
-  memcpy(to, fr, sizeof(TypedValue));
-  tvWriteNull(fr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {

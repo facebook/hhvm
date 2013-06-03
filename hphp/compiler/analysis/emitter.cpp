@@ -3913,24 +3913,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.ContExit();
 
         // emit return label for ContRaise
+        e.Null();
         m_yieldLabels[2 * y->getLabel() - 1].set(e);
 
-        // retrieve and throw exception
-        assert(m_evalStack.size() == 0);
-        m_metaInfo.addKnownDataType(
-          KindOfObject, false, m_ue.bcPos(), false, 0);
-        e.ContReceive();
+        // throw received exception on the stack
+        assert(m_evalStack.size() == 1);
         e.Throw();
 
         // emit return label for ContNext/ContSend
+        e.Null();
         m_yieldLabels[2 * y->getLabel()].set(e);
 
-        // retrieve result
-        assert(m_evalStack.size() == 0);
-        m_metaInfo.addKnownDataType(
-          KindOfObject, false, m_ue.bcPos(), false, 0);
-        e.ContReceive();
-
+        // continue with the received result on the stack
         assert(m_evalStack.size() == 1);
         return true;
       }
@@ -4910,6 +4904,7 @@ void EmitterVisitor::emitContinuationSwitch(Emitter& e, int ncase) {
     // fall-through to the label 0
     e.UnpackCont();
     e.PopC();
+    e.PopC();
     return;
   }
 
@@ -4923,6 +4918,7 @@ void EmitterVisitor::emitContinuationSwitch(Emitter& e, int ncase) {
   e.UnpackCont();
   e.Switch(targets, 0, 0);
   m_yieldLabels[0].set(e);
+  e.PopC();
 }
 
 DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,

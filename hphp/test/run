@@ -287,7 +287,11 @@ class Status {
   }
 
   public static function fail($test) {
-    array_push(self::$results, array('name' => $test, 'status' => 'failed'));
+    array_push(self::$results, array(
+        'name' => $test, 
+        'status' => 'failed', 
+        'details' => @file_get_contents("$test.diff")
+    ));
     switch (self::$mode) {
       case self::MODE_NORMAL:
         $diff = file_get_contents($test.'.diff');
@@ -362,13 +366,14 @@ function run($options, $tests, $bad_test_file) {
 
 function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
+  $output = "";
   if (isset($options['repo'])) {
     if (strpos($test, '.hhas') !== false || is_file($test.'.norepo')) {
       # We don't have a way to skip, I guess run non-repo?
     } else {
       unlink("$test.repo/hhvm.hhbc");
       $hphp = hphp_cmd($options, $test);
-      shell_exec($hphp);
+      $output .= shell_exec("$hphp 2>&1");
       $opts .= " -v Repo.Authoritative=true -v Repo.Central.Path=$test.repo/hhvm.hhbc";
     }
   }
@@ -379,14 +384,27 @@ function run_test($options, $test) {
      2 => array("pipe", "w"),
   );
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes);
-  if (is_resource($process)) {
-    fclose($pipes[0]);
-    $output = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    proc_close($process);
+  if (!is_resource($process)) {
+    file_put_contents("$test.diff", "Couldn't invoke $hhvm");
+    return false;
   }
 
+  fclose($pipes[0]);
+  $output .= stream_get_contents($pipes[1]);
   file_put_contents("$test.out", $output);
+  fclose($pipes[1]);
+ 
+  // hhvm redirects errors to stdout, so anything on stderr is really bad
+  $stderr = stream_get_contents($pipes[2]);
+  if ($stderr) {
+    file_put_contents(
+      "$test.diff", 
+      "Test failed because the process wrote on stderr:\n$stderr"
+    );
+    return false;
+  }
+  fclose($pipes[2]);
+  proc_close($process);
 
   // Needed for testing non-hhvm binaries that don't actually run the code
   // e.g. util/parser/test/parse_tester.cpp
@@ -465,7 +483,7 @@ function run_test($options, $test) {
     $wanted_re = str_replace('%c', '.', $wanted_re);
     // %f allows two points "-.0.0" but that is the best *simple* expression
 
-    # a poor mans aide for debugging
+    # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
 
     return preg_match("/^$wanted_re\$/s", $output);
@@ -473,8 +491,8 @@ function run_test($options, $test) {
   } else if (file_exists("$test.expectregex")) {
     $wanted_re = file_get_contents("$test.expectregex");
 
-    # a poor mans aide for debugging
-    shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
+    # a poor man's aide for debugging
+    shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");
 
     return preg_match("/^$wanted_re\$/s", $output);
   }

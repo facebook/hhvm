@@ -788,15 +788,17 @@ class RawMemSlot {
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
-    static RawMemSlot m(CONTOFF(m_label), Transl::sz::qword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_label), Transl::sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContDone() {
-    static RawMemSlot m(CONTOFF(m_done), Transl::sz::byte, Type::Bool);
+    static RawMemSlot m(c_Continuation::doneOffset(), Transl::sz::byte,
+                        Type::Bool);
     return m;
   }
   static RawMemSlot& GetContRunning() {
-    static RawMemSlot m(CONTOFF(m_running), Transl::sz::byte, Type::Bool);
+    static RawMemSlot m(c_Continuation::runningOffset(), Transl::sz::byte,
+                        Type::Bool);
     return m;
   }
   static RawMemSlot& GetContARPtr() {

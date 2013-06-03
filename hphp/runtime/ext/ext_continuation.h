@@ -38,22 +38,18 @@ class c_Continuation : public ExtObjectData {
   virtual void sweep();
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
-    DELETEOBJSZ(sizeForLocalsAndIters(this_->m_vmFunc->numLocals(),
-                                      this_->m_vmFunc->numIterators()))(this_);
+    DELETEOBJSZ((char*)(this_->m_arPtr + 1) - (char*)p)(this_);
   }
 
   explicit c_Continuation(Class* cls = c_Continuation::s_cls);
   ~c_Continuation();
 
 public:
-  void init(const Func* vmFunc,
-            const StringData* origFuncName,
+  void init(const Func* origFunc,
             ObjectData* thisPtr,
             ArrayData* args) noexcept {
-    m_vmFunc = const_cast<Func*>(vmFunc);
-    assert(m_vmFunc);
-    m_origFuncName = origFuncName;
-    assert(m_origFuncName->isStatic());
+    m_origFunc = const_cast<Func*>(origFunc);
+    assert(m_origFunc);
 
     if (thisPtr != nullptr) {
       m_obj = thisPtr;
@@ -62,6 +58,17 @@ public:
     }
 
     m_args = args;
+  }
+
+  bool done() const { return o_subclassData.u8[0]; }
+  bool running() const { return o_subclassData.u8[1]; }
+  void setDone(bool done) { o_subclassData.u8[0] = done; }
+  void setRunning(bool running) { o_subclassData.u8[1] = running; }
+  static constexpr uint doneOffset() {
+    return offsetof(c_Continuation, o_subclassData);
+  }
+  static constexpr uint runningOffset() {
+    return offsetof(c_Continuation, o_subclassData) + 1;
   }
 
   void t___construct();
@@ -101,15 +108,15 @@ public:
   void call_raise(ObjectData* e);
 
   inline void preNext() {
-    if (m_done) {
+    if (done()) {
       throw_exception(Object(SystemLib::AllocExceptionObject(
                                "Continuation is already finished")));
     }
-    if (m_running) {
+    if (running()) {
       throw_exception(Object(SystemLib::AllocExceptionObject(
                                "Continuation is already running")));
     }
-    m_running = true;
+    setRunning(true);
     ++m_index;
   }
 
@@ -126,13 +133,10 @@ public:
   int64_t m_index;
   Variant m_value;
   Variant m_received;
-  const StringData* m_origFuncName;
-  bool m_done;
-  bool m_running;
+  Func *m_origFunc;
 
+  int32_t m_label;
   int m_localsOffset;
-  Func *m_vmFunc;
-  int64_t m_label;
   ActRec* m_arPtr;
 
   p_ContinuationWaitHandle m_waitHandle;

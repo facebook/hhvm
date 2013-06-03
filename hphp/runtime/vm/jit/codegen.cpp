@@ -5135,17 +5135,17 @@ void CodeGenerator::cgLinkContVarEnv(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = m_regs[inst->src(0)].reg();
 
-  const Offset doneOffset = CONTOFF(m_done);
-  static_assert((doneOffset + 1) == CONTOFF(m_running),
-                "m_done should immediately precede m_running");
-  // Check m_done and m_running at the same time
-  m_as.test_imm32_disp_reg32(0x0101, doneOffset, contReg);
+  const Offset doneOffset = c_Continuation::doneOffset();
+  static_assert((doneOffset + 1) == c_Continuation::runningOffset(),
+                "done should immediately precede running");
+  // Check done and running at the same time
+  m_as.test_imm16_disp_reg16(0x0101, doneOffset, contReg);
   emitFwdJcc(CC_NZ, inst->taken());
 
   // ++m_index
   m_as.add_imm64_disp_reg64(0x1, CONTOFF(m_index), contReg);
-  // m_running = true
-  m_as.store_imm8_disp_reg(0x1, CONTOFF(m_running), contReg);
+  // running = true
+  m_as.store_imm8_disp_reg(0x1, c_Continuation::runningOffset(), contReg);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {

@@ -7036,12 +7036,7 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
   );
   cont->incRefCount();
   cont->setNoDestruct();
-
-  static auto const closureName = StringData::GetStaticString("{closure}");
-  auto const origName = origFunc->isClosureBody() ? closureName
-                                                  : origFunc->name();
-
-  cont->init(genFunc, origName, thisPtr, args);
+  cont->init(origFunc, thisPtr, args);
 
   // The ActRec corresponding to the generator body lives as long as the object
   // does. We set it up once, here, and then just change FP to point to it when
@@ -7290,7 +7285,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-  cont->m_done = true;
+  cont->setDone(true);
   tvSetIgnoreRef(m_stack.topC(), cont->m_value.asTypedValue());
   m_stack.popC();
 
@@ -7333,7 +7328,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
   tvWriteUninit(tv);
-  tvAsVariant(tv) = !this_continuation(m_fp)->m_done;
+  tvAsVariant(tv) = !this_continuation(m_fp)->done();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
@@ -7348,14 +7343,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContStopped(PC& pc) {
   NEXT();
-  this_continuation(m_fp)->m_running = false;
+  this_continuation(m_fp)->setRunning(false);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->m_running = false;
-  cont->m_done = true;
+  cont->setRunning(false);
+  cont->setDone(true);
   cont->m_value.setNull();
 
   Variant exn = tvAsVariant(m_stack.topTV());

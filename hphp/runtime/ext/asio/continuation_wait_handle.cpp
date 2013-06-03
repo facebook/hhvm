@@ -98,7 +98,7 @@ void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
 
   if (UNLIKELY(continuation->m_index != -1)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      continuation->m_running
+      continuation->running()
       ? "Encountered an attempt to start currently running continuation"
       : "Encountered an attempt to start tainted continuation"));
     throw e;
@@ -159,7 +159,7 @@ void c_ContinuationWaitHandle::run() {
       }
 
       // continuation finished, retrieve result from its m_value
-      if (m_continuation->m_done) {
+      if (m_continuation->done()) {
         markAsSucceeded(m_continuation->m_value.asTypedValue());
         return;
       }

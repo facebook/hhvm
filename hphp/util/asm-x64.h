@@ -1794,6 +1794,12 @@ struct X64Assembler {
             sz::byte);
   }
 
+  void emitIM16(X64Instr op, RegNumber br, RegNumber ir, int s,
+                int disp, ssize_t imm) ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true,
+            sz::word);
+  }
+
   void emitIM32(X64Instr op, RegNumber br, RegNumber ir, int s,
                 int disp, ssize_t imm) ALWAYS_INLINE {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true,
@@ -2038,6 +2044,12 @@ public:
   /* op imm32, edest */                                                 \
   inline void name ## _imm32_reg32(int64_t imm, RegNumber rdest) { \
     emitIR32(instr_ ## name, rdest, safe_cast<int32_t>(imm));           \
+  }                                                                     \
+  /* op imm, disp(rdest) */ \
+  inline void name ## _imm16_disp_reg16(int64_t imm, int disp,          \
+                                        RegNumber rdest) {        \
+    emitIM16(instr_ ## name, rdest, reg::noreg,                         \
+             sz::byte, disp, safe_cast<int16_t>(imm));                  \
   }                                                                     \
   /* opl imm, disp(rdest) */                                            \
   inline void name ## _imm32_disp_reg32(int64_t imm, int disp,          \

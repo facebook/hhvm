@@ -49,8 +49,9 @@ c_Continuation::c_Continuation(Class* cb) :
     m_index(-1LL),
     m_value(Variant::NullInit()),
     m_received(Variant::NullInit()),
-    m_done(false), m_running(false),
-    m_vmFunc(nullptr), m_label(0ll) {
+    m_origFunc(nullptr),
+    m_label(0) {
+  o_subclassData.u16 = 0;
 }
 
 c_Continuation::~c_Continuation() {
@@ -66,7 +67,7 @@ c_Continuation::~c_Continuation() {
   if (ar->hasVarEnv()) {
     ar->getVarEnv()->detach(ar);
   } else {
-    frame_free_locals_inl(ar, m_vmFunc->numLocals());
+    frame_free_locals_inl(ar, ar->m_func->numLocals());
   }
 }
 
@@ -74,6 +75,7 @@ void c_Continuation::t___construct() {}
 
 void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
+  assert(m_label == label); // check m_label for truncation
   m_value.assignVal(value);
 }
 
@@ -128,7 +130,7 @@ void c_Continuation::t_rewind() {
 
 bool c_Continuation::t_valid() {
   const_assert(false);
-  return !m_done;
+  return !done();
 }
 
 void c_Continuation::t_send(CVarRef v) {
@@ -140,7 +142,11 @@ void c_Continuation::t_raise(CVarRef v) {
 }
 
 String c_Continuation::t_getorigfuncname() {
-  return String(const_cast<StringData*>(m_origFuncName));
+  static auto const closureName = StringData::GetStaticString("{closure}");
+  auto const origName = m_origFunc->isClosureBody() ? closureName
+                                                    : m_origFunc->name();
+  assert(origName->isStatic());
+  return String(const_cast<StringData*>(origName));
 }
 
 String c_Continuation::t_getcalledclass() {

@@ -229,9 +229,9 @@ function hhvm_cmd($options, $test) {
     idx_file($_ENV, 'HHVM', bin_root().'/hphp/hhvm/hhvm'),
     '--config',
     find_config($test, 'config.hdf'),
-    read_file("$test.opts"),
     mode_cmd($options),
     '-v Eval.EnableArgsInBacktraces=true',
+    read_file("$test.opts"),
     '--file',
     $test
   ));

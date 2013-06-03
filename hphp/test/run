@@ -28,7 +28,7 @@ If you work with hhvm a lot, you might consider a bash alias:
 Examples:
 
   # Quick tests in JIT mode:
-  % $argv[0]
+  % $argv[0] test/quick
 
   # Slow tests in interp mode:
   % $argv[0] -m interp test/slow
@@ -172,7 +172,10 @@ function map_convenience_filename($file) {
 
 function find_tests($files) {
   if (!$files) {
-    $files = array(hphp_home().'/hphp/test/quick');
+    $files = array('quick');
+  }
+  if ($files == array('all')) {
+    $files = array('quick', 'slow', 'zend');
   }
   foreach ($files as &$file) {
     $file = map_convenience_filename($file);

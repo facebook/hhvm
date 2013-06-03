@@ -2737,7 +2737,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
     assert(IS_REFCOUNTED_TYPE(type.toDataType()));
     increfMaybeStatic();
   } else {
-    m_as.cmpl(KindOfRefCountThreshold, r32(m_regs[src].reg(1)));
+    emitCmpTVType(m_as, KindOfRefCountThreshold, m_regs[src].reg(1));
     ifThen(m_as, CC_NLE, [&] { increfMaybeStatic(); });
   }
 }

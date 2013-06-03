@@ -49,7 +49,7 @@ c_Continuation::c_Continuation(Class* cb) :
     m_index(-1LL),
     m_value(Variant::NullInit()),
     m_received(Variant::NullInit()),
-    m_done(false), m_running(false), m_should_throw(false),
+    m_done(false), m_running(false),
     m_vmFunc(nullptr), m_label(0ll) {
 }
 
@@ -137,15 +137,6 @@ void c_Continuation::t_send(CVarRef v) {
 
 void c_Continuation::t_raise(CVarRef v) {
   const_assert(false);
-}
-
-void c_Continuation::t_raised() {
-  if (m_should_throw) {
-    m_should_throw = false;
-    Variant e((Variant::NullInit()));
-    m_received.swap(e);
-    throw_exception(e);
-  }
 }
 
 String c_Continuation::t_getorigfuncname() {

@@ -1120,7 +1120,6 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
 void HhbcTranslator::emitContReceive() {
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
-  gen(ContRaiseCheck, getExitSlowTrace(), cont);
   auto const valOffset = cns(CONTOFF(m_received));
   push(gen(LdProp, Type::Cell, cont, valOffset));
   gen(StProp, cont, valOffset, m_tb->genDefNull());
@@ -1167,7 +1166,9 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   }
   gen(StProp, cont, cns(CONTOFF(m_received)), newVal);
   if (raise) {
-    gen(StRaw, cont, cns(RawMemSlot::ContShouldThrow), cns(true));
+    SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
+    label = gen(OpSub, label, cns(1));
+    gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
   }
 }
 

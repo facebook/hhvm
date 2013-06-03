@@ -3906,16 +3906,26 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
         m_metaInfo.addKnownDataType(
           KindOfObject, false, m_ue.bcPos(), false, 1);
-        e.PackCont(y->getLabel());
+        e.PackCont(2 * y->getLabel());
 
         // transfer control
         assert(m_evalStack.size() == 0);
         e.ContExit();
 
-        // emit return label
-        m_yieldLabels[y->getLabel()].set(e);
+        // emit return label for ContRaise
+        m_yieldLabels[2 * y->getLabel() - 1].set(e);
 
-        // check for exception and retrieve result
+        // retrieve and throw exception
+        assert(m_evalStack.size() == 0);
+        m_metaInfo.addKnownDataType(
+          KindOfObject, false, m_ue.bcPos(), false, 0);
+        e.ContReceive();
+        e.Throw();
+
+        // emit return label for ContNext/ContSend
+        m_yieldLabels[2 * y->getLabel()].set(e);
+
+        // retrieve result
         assert(m_evalStack.size() == 0);
         m_metaInfo.addKnownDataType(
           KindOfObject, false, m_ue.bcPos(), false, 0);
@@ -4904,17 +4914,10 @@ void EmitterVisitor::emitContinuationSwitch(Emitter& e, int ncase) {
   }
 
   // make sure the labels are available
-  m_yieldLabels.resize(ncase + 1);
+  m_yieldLabels.resize(2 * ncase + 1);
 
-  if (ncase == 1) {
-    // Don't bother with the jump table when there are only two targets
-    e.UnpackCont();
-    e.JmpNZ(m_yieldLabels[1]);
-    return;
-  }
-
-  std::vector<Label*> targets(ncase + 1);
-  for (int i = 0; i <= ncase; ++i) {
+  std::vector<Label*> targets(2 * ncase + 1);
+  for (int i = 0; i <= 2 * ncase; ++i) {
     targets[i] = &m_yieldLabels[i];
   }
   e.UnpackCont();

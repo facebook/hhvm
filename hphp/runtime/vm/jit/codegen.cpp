@@ -5132,13 +5132,6 @@ void CodeGenerator::cgLinkContVarEnv(IRInstruction* inst) {
     (TCA)VMExecutionContext::unpackContVarEnvLinkage);
 }
 
-void CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {
-  SSATmp* cont = inst->src(0);
-  m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw),
-                             m_regs[cont].reg());
-  emitFwdJcc(CC_NZ, inst->taken());
-}
-
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = m_regs[inst->src(0)].reg();
 

@@ -7281,7 +7281,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-  cont->t_raised();
   TypedValue* fr = cont->m_received.asTypedValue();
   TypedValue* to = m_stack.allocTV();
   memcpy(to, fr, sizeof(TypedValue));
@@ -7315,7 +7314,8 @@ inline void VMExecutionContext::contSendImpl() {
   cont->preNext();
   cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
   if (raise) {
-    cont->m_should_throw = true;
+    assert(cont->m_label);
+    --cont->m_label;
   }
 }
 

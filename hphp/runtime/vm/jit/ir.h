@@ -451,7 +451,6 @@ O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(UnlinkContVarEnv,                 ND, S(FramePtr),                 E|N|Mem) \
 O(LinkContVarEnv,                   ND, S(FramePtr),                 E|N|Mem) \
-O(ContRaiseCheck,                   ND, S(Obj),                            E) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
 O(ContStartedCheck,                 ND, S(Obj),                            E) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
@@ -759,7 +758,7 @@ class RawMemSlot {
  public:
 
   enum Kind {
-    ContLabel, ContDone, ContShouldThrow, ContRunning, ContARPtr,
+    ContLabel, ContDone, ContRunning, ContARPtr,
     StrLen, FuncNumParams, FuncRefBitVec, ContEntry, MisCtx,
     MaxKind
   };
@@ -768,7 +767,6 @@ class RawMemSlot {
     switch (k) {
       case ContLabel:       return GetContLabel();
       case ContDone:        return GetContDone();
-      case ContShouldThrow: return GetContShouldThrow();
       case ContRunning:     return GetContRunning();
       case ContARPtr:       return GetContARPtr();
       case StrLen:          return GetStrLen();
@@ -795,10 +793,6 @@ class RawMemSlot {
   }
   static RawMemSlot& GetContDone() {
     static RawMemSlot m(CONTOFF(m_done), Transl::sz::byte, Type::Bool);
-    return m;
-  }
-  static RawMemSlot& GetContShouldThrow() {
-    static RawMemSlot m(CONTOFF(m_should_throw), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContRunning() {

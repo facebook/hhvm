@@ -78,7 +78,6 @@ public:
   bool t_valid();
   void t_send(CVarRef v);
   void t_raise(CVarRef v);
-  void t_raised();
   String t_getorigfuncname();
   String t_getcalledclass();
   Variant t___clone();
@@ -130,7 +129,6 @@ public:
   const StringData* m_origFuncName;
   bool m_done;
   bool m_running;
-  bool m_should_throw;
 
   int m_localsOffset;
   Func *m_vmFunc;

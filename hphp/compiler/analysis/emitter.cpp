@@ -1688,7 +1688,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             goto fail;
           } else {
             ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
-            Variant v(Variant::nullInit);
+            Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
               tvWriteUninit(&mainReturn);

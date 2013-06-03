@@ -90,9 +90,9 @@ class Variant : private TypedValue {
     setUninitNull();
   }
 
-  enum NullInit { nullInit };
+  enum class NullInit {};
   explicit Variant(NullInit) { m_type = KindOfNull; }
-  enum NoInit { noInit };
+  enum class NoInit {};
   explicit Variant(NoInit) {}
 
   void destruct();
@@ -247,7 +247,7 @@ class Variant : private TypedValue {
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
 
-    Variant goner(noInit);
+    Variant goner((NoInit()));
     goner.m_data = lhs.m_data;
     goner.m_type = lhs.m_type;
 
@@ -1147,7 +1147,7 @@ class Variant : private TypedValue {
     if (UNLIKELY(self == other)) {
       return;
     }
-    Variant scopy(noInit);
+    Variant scopy((NoInit()));
     scopy.m_data = self->m_data;
     scopy.m_type = self->m_type;
 
@@ -1310,7 +1310,7 @@ class VRefParamValue {
 public:
   template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
 
-  /* implicit */ VRefParamValue() : m_var(Variant::nullInit) {}
+  /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
   /* implicit */ VRefParamValue(RefResult v) : m_var(strongBind(v)) {}
   template <typename T>
   Variant &operator=(const T &v) const {

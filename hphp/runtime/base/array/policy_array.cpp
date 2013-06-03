@@ -394,7 +394,7 @@ ArrayData *ArrayShell::lvalImpl(K k, Variant*& ret,
       grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
     }
     assert(m_size < capacity());
-    ret = appendNoGrow(k, Variant::nullInit);
+    ret = appendNoGrow(k, Variant::NullInit());
   }
 
   return this;
@@ -459,7 +459,7 @@ ArrayData *ArrayShell::setRefImpl(K k, CVarRef v, bool copy) {
       MYLOG << "grow";
       grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
     }
-    appendNoGrow(k, Variant::noInit)->constructRefHelper(v);
+    appendNoGrow(k, Variant::NoInit())->constructRefHelper(v);
   }
   return this;
 }
@@ -491,7 +491,7 @@ ArrayShell *ArrayShell::addLvalImpl(K k, Variant*& ret, bool copy) {
   if (m_size == capacity()) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
   }
-  ret = appendNoGrow(k, Variant::nullInit);
+  ret = appendNoGrow(k, Variant::NullInit());
   MYLOG << (void*)this << "->lval:" << "added";
   return this;
 }
@@ -680,7 +680,7 @@ ArrayShell *ArrayShell::appendRef(const Variant& v, bool copy) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
   }
   assert(m_size < capacity());
-  appendNoGrow(k, Variant::noInit)->constructRefHelper(v);
+  appendNoGrow(k, Variant::NoInit())->constructRefHelper(v);
   return this;
 }
 
@@ -696,7 +696,7 @@ ArrayData *ArrayShell::appendWithRef(CVarRef v, bool copy) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
   }
   assert(m_size < capacity());
-  appendNoGrow(nextKeyBump(), Variant::nullInit)->setWithRef(v);
+  appendNoGrow(nextKeyBump(), Variant::NullInit())->setWithRef(v);
   return this;
 }
 
@@ -713,7 +713,7 @@ void ArrayShell::addValWithRef(K k, const Variant& v) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
   }
   assert(m_size < capacity());
-  appendNoGrow(k, Variant::nullInit)->setWithRef(v);
+  appendNoGrow(k, Variant::NullInit())->setWithRef(v);
 }
 
 void ArrayShell::nextInsertWithRef(const Variant& v) {
@@ -733,7 +733,7 @@ void ArrayShell::nextInsertWithRef(const Variant& v) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
   }
   assert(m_size < capacity());
-  appendNoGrow(k, Variant::nullInit)->setWithRef(v);
+  appendNoGrow(k, Variant::NullInit())->setWithRef(v);
 }
 
 ArrayData *ArrayShell::append(const ArrayData *elems, ArrayOp op, bool copy) {

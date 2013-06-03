@@ -36,7 +36,7 @@
 namespace HPHP {
 
 const Variant null_variant;                         // uninitialized variant
-const Variant init_null_variant(Variant::nullInit); // php null
+const Variant init_null_variant((Variant::NullInit())); // php null
 const VarNR null_varNR;
 const VarNR true_varNR(true);
 const VarNR false_varNR(false);

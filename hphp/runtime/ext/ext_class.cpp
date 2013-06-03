@@ -270,7 +270,7 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
     raise_warning(
       "First parameter must either be an object or the name of an existing class"
     );
-    return Variant(Variant::nullInit);
+    return Variant(Variant::NullInit());
   }
 
   Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
@@ -291,7 +291,7 @@ Variant f_get_object_vars(CVarRef object) {
     return object.toObject()->o_toIterArray(ctxClassName());
   }
   raise_warning("get_object_vars() expects parameter 1 to be object");
-  return Variant(Variant::nullInit);
+  return Variant(Variant::NullInit());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

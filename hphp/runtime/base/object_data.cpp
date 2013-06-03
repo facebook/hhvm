@@ -502,7 +502,9 @@ static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
                              bool fatal /* = true */) {
   CallCtx ctx;
-  if (!decode_invoke(s, this, fatal, ctx)) return Variant(Variant::nullInit);
+  if (!decode_invoke(s, this, fatal, ctx)) {
+    return Variant(Variant::NullInit());
+  }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, ctx, params);
   return ret;
@@ -512,7 +514,9 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
 
   CallCtx ctx;
-  if (!decode_invoke(s, this, true, ctx)) return Variant(Variant::nullInit);
+  if (!decode_invoke(s, this, true, ctx)) {
+    return Variant(Variant::NullInit());
+  }
 
   TypedValue args[INVOKE_FEW_ARGS_COUNT];
   switch(count) {

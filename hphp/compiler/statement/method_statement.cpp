@@ -549,7 +549,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
       if (!lastIsReturn) {
         ExpressionPtr constant =
           makeScalarExpression(ar, funcScope->inPseudoMain() ?
-                               Variant(1) : Variant(Variant::nullInit));
+                               Variant(1) :
+                               Variant(Variant::NullInit()));
         ReturnStatementPtr returnStmt =
           ReturnStatementPtr(
             new ReturnStatement(getScope(), getLocation(), constant));

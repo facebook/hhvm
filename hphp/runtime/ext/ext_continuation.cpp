@@ -47,7 +47,8 @@ static StaticString s___cont__("__cont__");
 c_Continuation::c_Continuation(Class* cb) :
     ExtObjectData(cb),
     m_index(-1LL),
-    m_value(Variant::nullInit), m_received(Variant::nullInit),
+    m_value(Variant::NullInit()),
+    m_received(Variant::NullInit()),
     m_done(false), m_running(false), m_should_throw(false),
     m_vmFunc(nullptr), m_label(0ll) {
 }
@@ -141,7 +142,7 @@ void c_Continuation::t_raise(CVarRef v) {
 void c_Continuation::t_raised() {
   if (m_should_throw) {
     m_should_throw = false;
-    Variant e(Variant::nullInit);
+    Variant e((Variant::NullInit()));
     m_received.swap(e);
     throw_exception(e);
   }

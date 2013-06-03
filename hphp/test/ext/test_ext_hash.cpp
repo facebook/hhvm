@@ -143,7 +143,7 @@ bool TestExtHash::test_hash_init() {
 }
 
 bool TestExtHash::test_hash_file() {
-  VS(f_hash_file("md5", "test/test_hash_file.txt"),
+  VS(f_hash_file("md5", "test/ext/test_hash_file.txt"),
      "5c6ffbdd40d9556b73a21e63c3e0e904");
   return Count(true);
 }
@@ -153,7 +153,7 @@ bool TestExtHash::test_hash_final() {
 }
 
 bool TestExtHash::test_hash_hmac_file() {
-  VS(f_hash_hmac_file("md5", "test/test_hash_file.txt", "secret"),
+  VS(f_hash_hmac_file("md5", "test/ext/test_hash_file.txt", "secret"),
      "7eb2b5c37443418fc77c136dd20e859c");
   return Count(true);
 }

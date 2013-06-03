@@ -322,7 +322,7 @@ bool TestExtOpenssl::test_openssl_pkey_export() {
 }
 
 bool TestExtOpenssl::test_openssl_pkey_free() {
-  Variant fkey = f_file_get_contents("test/test_public.pem");
+  Variant fkey = f_file_get_contents("test/ext/test_public.pem");
   Variant k = f_openssl_pkey_get_public(fkey);
   VERIFY(!same(k, false));
   VERIFY(!k.isNull());
@@ -333,14 +333,14 @@ bool TestExtOpenssl::test_openssl_pkey_free() {
 bool TestExtOpenssl::test_openssl_pkey_get_details() {
   static const StaticString s_bits("bits");
   {
-    Variant fkey = f_file_get_contents("test/test_public.pem");
+    Variant fkey = f_file_get_contents("test/ext/test_public.pem");
     Variant k = f_openssl_pkey_get_public(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
     VS(f_openssl_pkey_get_details(k)[s_bits], 1024);
   }
   {
-    Variant fkey = f_file_get_contents("test/test_private.pem");
+    Variant fkey = f_file_get_contents("test/ext/test_private.pem");
     Variant k = f_openssl_pkey_get_private(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
@@ -474,7 +474,7 @@ bool TestExtOpenssl::test_openssl_x509_check_private_key() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_checkpurpose() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   VS(f_openssl_x509_checkpurpose(cert, k_X509_PURPOSE_SSL_CLIENT), 0);
   VS(f_openssl_x509_checkpurpose(cert, k_X509_PURPOSE_SSL_SERVER), 0);
@@ -482,7 +482,7 @@ bool TestExtOpenssl::test_openssl_x509_checkpurpose() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_export_to_file() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
 
   const char *tmp = "test/test_x509.tmp";
@@ -500,7 +500,7 @@ bool TestExtOpenssl::test_openssl_x509_export_to_file() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_export() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   Variant out;
   VERIFY(f_openssl_x509_export(cert, ref(out)));
@@ -511,7 +511,7 @@ bool TestExtOpenssl::test_openssl_x509_export() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_free() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   VERIFY(!cert.toObject().isNull());
   f_openssl_x509_free(cert);
@@ -519,7 +519,7 @@ bool TestExtOpenssl::test_openssl_x509_free() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_parse() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   Variant info = f_openssl_x509_parse(cert);
   VS(info[s_subject][s_O], "RSA Data Security, Inc.");
@@ -527,7 +527,7 @@ bool TestExtOpenssl::test_openssl_x509_parse() {
 }
 
 bool TestExtOpenssl::test_openssl_x509_read() {
-  Variant fcert = f_file_get_contents("test/test_x509.crt");
+  Variant fcert = f_file_get_contents("test/ext/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   VERIFY(!cert.toObject().isNull());
   return Count(true);

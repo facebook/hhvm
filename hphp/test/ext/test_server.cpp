@@ -144,7 +144,7 @@ void TestServer::RunServer() {
   string fd = lexical_cast<string>(inherit_fd);
 
   const char *argv[] = {
-    "", "--mode=server", "--config=test/config-server.hdf",
+    "", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
     "--port-fd", fd.c_str(),
     NULL

@@ -124,7 +124,7 @@ bool TestExtStream::test_stream_context_set_param() {
 }
 
 bool TestExtStream::test_stream_copy_to_stream() {
-  Variant src = f_fopen("test/test_ext_file.txt", "r");
+  Variant src = f_fopen("test/ext/test_ext_file.txt", "r");
   Variant dest = f_fopen("test/test_ext_file.tmp", "w");
   f_stream_copy_to_stream(src, dest);
   f_fclose(dest);
@@ -217,7 +217,7 @@ bool TestExtStream::test_stream_filter_prepend() {
 
 bool TestExtStream::test_stream_get_contents() {
   {
-    Variant f = f_fopen("test/test_ext_file.txt", "r");
+    Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
     VS(f_stream_get_contents(f), "Testing Ext File\n");
   }
 
@@ -250,7 +250,7 @@ bool TestExtStream::test_stream_get_filters() {
 
 bool TestExtStream::test_stream_get_line() {
   {
-    Variant f = f_fopen("test/test_ext_file.txt", "r");
+    Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
     VS(f_stream_get_line(f), "Testing Ext File\n");
   }
 
@@ -328,28 +328,28 @@ bool TestExtStream::test_stream_resolve_include_path() {
   String old_include_path = f_get_include_path();
   f_set_include_path(".:test/");
   String filename = f_getcwd();
-  filename += "/test/test_ext_file.txt";
-  VS(filename, f_stream_resolve_include_path("test_ext_file.txt"));
+  filename += "/test/ext/test_ext_file.txt";
+  VS(filename, f_stream_resolve_include_path("ext/test_ext_file.txt"));
   VS(uninit_null(), f_stream_resolve_include_path("some-nonexistant-file.ext"));
   f_set_include_path(old_include_path);
   return Count(true);
 }
 
 bool TestExtStream::test_stream_select() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
+  Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
   Variant reads = CREATE_VECTOR1(f);
   VERIFY(!same(f_stream_select(ref(reads), uninit_null(), uninit_null(), 0, 0), false));
   return Count(true);
 }
 
 bool TestExtStream::test_stream_set_blocking() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
+  Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
   VERIFY(f_stream_set_blocking(f, 0));
   return Count(true);
 }
 
 bool TestExtStream::test_stream_set_timeout() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
+  Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
   f_stream_set_timeout(f, 0);
   return Count(true);
 }

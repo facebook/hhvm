@@ -370,10 +370,10 @@ void TestDebugger::runServer() {
                       boost::lexical_cast<string>(m_serverPort);
   string srcRootConfig = "-vServer.SourceRoot=" +
                          Process::GetCurrentDirectory() +
-                         "/test/debugger_tests";
+                         "/test/ext/debugger_tests";
   string includePathConfig = "-vServer.IncludeSearchPaths.0=" +
                              Process::GetCurrentDirectory() +
-                             "/test/debugger_tests";
+                             "/test/ext/debugger_tests";
   string adminPortConfig = "-vAdminServer.Port=" +
                            boost::lexical_cast<string>(m_adminPort);
   string debugPortConfig = "-vEval.Debugger.Port=" +
@@ -381,13 +381,13 @@ void TestDebugger::runServer() {
   string jitConfig = "-vEval.Jit=" +
                      boost::lexical_cast<string>(RuntimeOption::EvalJit);
 
-  // To emulate sandbox setup, let home to be "hphp/test", and user name to be
+  // To emulate sandbox setup, let home to be "hphp/test/ext", and user name to be
   // "debugger_tests", so that it can find the sandbox_conf there
   string sandboxHomeConfig = "-vSandbox.Home=" +
                              Process::GetCurrentDirectory() +
-                             "/test";
+                             "/test/ext";
   const char *argv[] = {"hphpd_test", "--mode=server",
-                        "--config=test/config-debugger-server.hdf",
+                        "--config=test/ext/config-debugger-server.hdf",
                         "-vEval.JitWarmupRequests=0",
                         portConfig.c_str(),
                         srcRootConfig.c_str(),

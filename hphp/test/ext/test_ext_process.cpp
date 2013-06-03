@@ -97,7 +97,7 @@ bool TestExtProcess::test_pcntl_alarm() {
 
 bool TestExtProcess::test_pcntl_exec() {
   f_pcntl_exec("/bin/sh",
-               CREATE_VECTOR1("test/test_pcntl_exec.sh"),
+               CREATE_VECTOR1("test/ext/test_pcntl_exec.sh"),
                CREATE_MAP1("name", "value"));
   return Count(true);
 }

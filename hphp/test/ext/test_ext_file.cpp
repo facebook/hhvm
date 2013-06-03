@@ -153,13 +153,13 @@ bool TestExtFile::VerifyFile(CVarRef f, CStrRef contents) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtFile::test_fopen() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
+  Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
   VERIFY(!same(f, false));
   return Count(true);
 }
 
 bool TestExtFile::test_fpassthru() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
+  Variant f = f_fopen("test/ext/test_ext_file.txt", "r");
   f_ob_start();
   VS(f_fpassthru(f), 17);
   VS(f_ob_get_clean(), "Testing Ext File\n");
@@ -169,52 +169,52 @@ bool TestExtFile::test_fpassthru() {
 
 bool TestExtFile::test_fputcsv() {
   Array fields = CREATE_VECTOR2("apple", "\"banana\"");
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputcsv(f, fields);
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VF(f, "apple,\"\"\"banana\"\"\"\n");
   return Count(true);
 }
 
 bool TestExtFile::test_fputs() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fputs");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VF(f, "testing fputs");
   return Count(true);
 }
 
 bool TestExtFile::test_fread() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fread");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 7), "testing");
   VS(f_fread(f, 100), " fread");
   return Count(true);
 }
 
 bool TestExtFile::test_fscanf() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fscanf");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fscanf(2, f, "%s %s"), CREATE_VECTOR2("testing", "fscanf"));
   return Count(true);
 }
 
 bool TestExtFile::test_fseek() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fseek");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   f_fseek(f, -5, k_SEEK_END);
   VS(f_fread(f, 7), "fseek");
 
@@ -226,56 +226,56 @@ bool TestExtFile::test_fseek() {
 static const StaticString s_size("size");
 
 bool TestExtFile::test_fstat() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fstat");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fstat(f)[s_size], 13);
   return Count(true);
 }
 
 bool TestExtFile::test_ftell() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing ftell");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   f_fseek(f, -5, k_SEEK_END);
   VS(f_ftell(f), 8);
   return Count(true);
 }
 
 bool TestExtFile::test_ftruncate() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing ftruncate");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r+");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r+");
   f_ftruncate(f, 7);
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 20), "testing");
   return Count(true);
 }
 
 bool TestExtFile::test_fwrite() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fwrite(f, "testing fwrite", 7);
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VF(f, "testing");
   return Count(true);
 }
 
 bool TestExtFile::test_read_write() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fwrite(f, "testing read/write");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r+");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r+");
   f_fseek(f, 8);
   f_fwrite(f, "succeeds");
   f_fseek(f, 8);
@@ -284,37 +284,37 @@ bool TestExtFile::test_read_write() {
 }
 
 bool TestExtFile::test_fprintf() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fprintf(4, f, "%s %s", CREATE_VECTOR2("testing", "fprintf"));
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VF(f, "testing fprintf");
   return Count(true);
 }
 
 bool TestExtFile::test_vfprintf() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_vfprintf(f, "%s %s", CREATE_VECTOR2("testing", "vfprintf"));
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VF(f, "testing vfprintf");
   return Count(true);
 }
 
 bool TestExtFile::test_fclose() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fclose(f);
   return Count(true);
 }
 
 bool TestExtFile::test_feof() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing feof");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VERIFY(!f_feof(f));
   VS(f_fread(f, 20), "testing feof");
   VERIFY(f_feof(f));
@@ -322,22 +322,22 @@ bool TestExtFile::test_feof() {
 }
 
 bool TestExtFile::test_fflush() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fflush");
   f_fflush(f);
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 20), "testing fflush");
   return Count(true);
 }
 
 bool TestExtFile::test_fgetc() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing fgetc");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fgetc(f), "t");
   VS(f_fgetc(f), "e");
   VS(f_fgetc(f), "s");
@@ -347,22 +347,22 @@ bool TestExtFile::test_fgetc() {
 
 bool TestExtFile::test_fgetcsv() {
   Array fields = CREATE_VECTOR2("a", "b");
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputcsv(f, fields);
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   Array read = f_fgetcsv(f);
   VS(read, fields);
   return Count(true);
 }
 
 bool TestExtFile::test_fgets() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing\nfgets\n\n");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fgets(f), "testing\n");
   VS(f_fgets(f), "fgets\n");
   VS(f_fgets(f), "\n");
@@ -370,28 +370,28 @@ bool TestExtFile::test_fgets() {
 }
 
 bool TestExtFile::test_fgetss() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "<html><head>testing</head><body> fgetss</body></html>\n");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fgetss(f), "testing fgetss\n");
   return Count(true);
 }
 
 bool TestExtFile::test_flock() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w+");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w+");
   VERIFY(f_flock(f, k_LOCK_EX));
   f_flock(f, k_LOCK_UN);
   return Count(true);
 }
 
 bool TestExtFile::test_rewind() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing rewind");
   f_fclose(f);
 
-  f = f_fopen("test/test_ext_file.tmp", "r");
+  f = f_fopen("test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 7), "testing");
   VS(f_fread(f, 100), " rewind");
   VS(f_fread(f, 7), "");
@@ -402,65 +402,69 @@ bool TestExtFile::test_rewind() {
 }
 
 bool TestExtFile::test_popen() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing popen");
   f_fclose(f);
 
-  f = f_popen("cat test/test_ext_file.tmp", "r");
+  f = f_popen("cat test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 20), "testing popen");
   return Count(true);
 }
 
 bool TestExtFile::test_pclose() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing pclose");
   f_fclose(f);
 
-  f = f_popen("cat test/test_ext_file.tmp", "r");
+  f = f_popen("cat test/ext/test_ext_file.tmp", "r");
   VS(f_fread(f, 20), "testing pclose");
   f_pclose(f);
   return Count(true);
 }
 
 bool TestExtFile::test_file_exists() {
-  VERIFY(f_file_exists("test/test_ext_file.txt"));
+  VERIFY(f_file_exists("test/ext/test_ext_file.txt"));
   VERIFY(!f_file_exists(""));
   return Count(true);
 }
 
 bool TestExtFile::test_file_get_contents() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing file_get_contents");
   f_fclose(f);
 
-  VS(f_file_get_contents("test/test_ext_file.tmp"),
+  VS(f_file_get_contents("test/ext/test_ext_file.tmp"),
      "testing file_get_contents");
 
-  VS(unserialize_from_string(f_file_get_contents("compress.zlib://test/test_zlib_file")),
-     CREATE_VECTOR1("rblock:216105"));
+  VS(
+    unserialize_from_string(
+      f_file_get_contents("compress.zlib://test/ext/test_zlib_file")
+    ),
+    CREATE_VECTOR1("rblock:216105")
+  );
   return Count(true);
 }
 
 bool TestExtFile::test_file_put_contents() {
-  f_file_put_contents("test/test_ext_file.tmp", "testing file_put_contents");
-  VS(f_file_get_contents("test/test_ext_file.tmp"),
+  f_file_put_contents("test/ext/test_ext_file.tmp", "testing file_put_contents");
+  VS(f_file_get_contents("test/ext/test_ext_file.tmp"),
      "testing file_put_contents");
   return Count(true);
 }
 
 bool TestExtFile::test_file() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing\nfile\n");
   f_fclose(f);
 
-  Variant items = f_file("test/test_ext_file.tmp");
+  Variant items = f_file("test/ext/test_ext_file.tmp");
   VS(items, CREATE_VECTOR2("testing\n", "file\n"));
   return Count(true);
 }
 
 bool TestExtFile::test_readfile() {
   f_ob_start();
-  VS(f_readfile("test/test_ext_file.txt"), 17);
+  VS(f_readfile("test/ext/test_ext_file.txt"), 17);
   VS(f_ob_get_clean(), "Testing Ext File\n");
   f_ob_end_clean();
   return Count(true);
@@ -567,73 +571,73 @@ bool TestExtFile::test_write_hdf_string() {
 }
 
 bool TestExtFile::test_md5_file() {
-  VS(f_md5_file("test/test_ext_file.txt"),
+  VS(f_md5_file("test/ext/test_ext_file.txt"),
      "f53a9b64dc3846f27ee10848d0493320");
   return Count(true);
 }
 
 bool TestExtFile::test_sha1_file() {
-  VS(f_sha1_file("test/test_ext_file.txt"),
+  VS(f_sha1_file("test/ext/test_ext_file.txt"),
      "3f0f6cb904835174e35697d8262170aa060be3a5");
   return Count(true);
 }
 
 bool TestExtFile::test_chmod() {
-  VERIFY(f_chmod("test/test_ext_file.txt", 0777));
+  VERIFY(f_chmod("test/ext/test_ext_file.txt", 0777));
   return Count(true);
 }
 
 bool TestExtFile::test_chown() {
-  Variant f = f_fopen("test/test_ext_file.tmp", "w");
+  Variant f = f_fopen("test/ext/test_ext_file.tmp", "w");
   f_fputs(f, "testing\nchown\n");
   f_fclose(f);
-  VERIFY(f_chmod("test/test_ext_file.txt", 0777));
-  //VERIFY(f_chown("test/test_ext_file.tmp", "hzhao"));
-  f_unlink("test/test_ext_file.tmp");
+  VERIFY(f_chmod("test/ext/test_ext_file.txt", 0777));
+  //VERIFY(f_chown("test/ext/test_ext_file.tmp", "hzhao"));
+  f_unlink("test/ext/test_ext_file.tmp");
   return Count(true);
 }
 
 bool TestExtFile::test_touch() {
-  if (f_file_exists("test/test_ext_file.tmp")) {
-    f_unlink("test/test_ext_file.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file.tmp"));
+  if (f_file_exists("test/ext/test_ext_file.tmp")) {
+    f_unlink("test/ext/test_ext_file.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  VERIFY(f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
 bool TestExtFile::test_copy() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  if (f_file_exists("test/test_ext_file3.tmp")) {
-    f_unlink("test/test_ext_file3.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file3.tmp"));
+  if (f_file_exists("test/ext/test_ext_file3.tmp")) {
+    f_unlink("test/ext/test_ext_file3.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file3.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_copy("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  VERIFY(f_file_exists("test/test_ext_file2.tmp"));
-  VERIFY(f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  f_copy("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file2.tmp"));
+  VERIFY(f_file_exists("test/ext/test_ext_file.tmp"));
 
   // XXX disabled until we work out flaky network issues. t2183444
 #if 0
-  f_copy("http://facebook.com", "test/test_ext_file3.tmp");
-  VERIFY(f_file_exists("test/test_ext_file3.tmp"));
+  f_copy("http://facebook.com", "test/ext/test_ext_file3.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file3.tmp"));
 #endif
   return Count(true);
 }
 
 bool TestExtFile::test_rename() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_rename("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  VERIFY(f_file_exists("test/test_ext_file2.tmp"));
-  VERIFY(!f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  f_rename("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file2.tmp"));
+  VERIFY(!f_file_exists("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
@@ -643,70 +647,70 @@ bool TestExtFile::test_umask() {
 }
 
 bool TestExtFile::test_unlink() {
-  f_touch("test/test_ext_file.tmp");
-  VERIFY(f_file_exists("test/test_ext_file.tmp"));
-  f_unlink("test/test_ext_file.tmp");
-  VERIFY(!f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file.tmp"));
+  f_unlink("test/ext/test_ext_file.tmp");
+  VERIFY(!f_file_exists("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
 bool TestExtFile::test_chgrp() {
-  f_touch("test/test_ext_file.tmp");
-  f_chgrp("test/test_ext_file.tmp", "root");
-  f_unlink("test/test_ext_file.tmp");
+  f_touch("test/ext/test_ext_file.tmp");
+  f_chgrp("test/ext/test_ext_file.tmp", "root");
+  f_unlink("test/ext/test_ext_file.tmp");
   return Count(true);
 }
 
 bool TestExtFile::test_link() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_link("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  VERIFY(f_file_exists("test/test_ext_file2.tmp"));
-  VERIFY(f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  f_link("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file2.tmp"));
+  VERIFY(f_file_exists("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
 bool TestExtFile::test_symlink() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_symlink("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  VERIFY(f_file_exists("test/test_ext_file2.tmp"));
-  VERIFY(f_file_exists("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  f_symlink("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  VERIFY(f_file_exists("test/ext/test_ext_file2.tmp"));
+  VERIFY(f_file_exists("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
 bool TestExtFile::test_lchgrp() {
-  f_touch("test/test_ext_file.tmp");
-  f_lchgrp("test/test_ext_file.tmp", "root");
+  f_touch("test/ext/test_ext_file.tmp");
+  f_lchgrp("test/ext/test_ext_file.tmp", "root");
   return Count(true);
 }
 
 bool TestExtFile::test_lchown() {
-  f_touch("test/test_ext_file.tmp");
-  f_lchown("test/test_ext_file.tmp", "root");
+  f_touch("test/ext/test_ext_file.tmp");
+  f_lchown("test/ext/test_ext_file.tmp", "root");
   return Count(true);
 }
 
 bool TestExtFile::test_basename() {
-  VS(f_basename("test/test_ext_file.tmp"), "test_ext_file.tmp");
-  VS(f_basename("test/test_ext_file.tmp", ".tmp"), "test_ext_file");
+  VS(f_basename("test/ext/test_ext_file.tmp"), "test_ext_file.tmp");
+  VS(f_basename("test/ext/test_ext_file.tmp", ".tmp"), "test_ext_file");
   return Count(true);
 }
 
 bool TestExtFile::test_fnmatch() {
-  VERIFY(f_fnmatch("test/test_*_file.tmp", "test/test_ext_file.tmp"));
+  VERIFY(f_fnmatch("test/ext/test_*_file.tmp", "test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
 bool TestExtFile::test_glob() {
-  f_touch("test/test_ext_file.tmp");
-  VS(f_glob("test/test_*_file.tmp"), CREATE_VECTOR1("test/test_ext_file.tmp"));
+  f_touch("test/ext/test_ext_file.tmp");
+  VS(f_glob("test/ext/test_*_file.tmp"), CREATE_VECTOR1("test/ext/test_ext_file.tmp"));
   return Count(true);
 }
 
@@ -732,137 +736,137 @@ bool TestExtFile::test_clearstatcache() {
 }
 
 bool TestExtFile::test_stat() {
-  VS(f_stat("test/test_ext_file.txt")[s_size], 17);
+  VS(f_stat("test/ext/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 
 bool TestExtFile::test_lstat() {
-  VS(f_lstat("test/test_ext_file.txt")[s_size], 17);
+  VS(f_lstat("test/ext/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 
 bool TestExtFile::test_is_dir() {
-  f_mkdir("test/tmp_dir");
-  VERIFY(!f_is_dir("test/test_ext_file.txt"));
-  VERIFY(f_is_dir("test/tmp_dir"));
+  f_mkdir("test/ext/tmp_dir");
+  VERIFY(!f_is_dir("test/ext/test_ext_file.txt"));
+  VERIFY(f_is_dir("test/ext/tmp_dir"));
   VERIFY(!f_is_dir("tmp_dir"));
-  f_chdir("test");
-  VERIFY(!f_is_dir("test/tmp_dir"));
+  f_chdir("test/ext");
+  VERIFY(!f_is_dir("test/ext/tmp_dir"));
   VERIFY(f_is_dir("tmp_dir"));
-  f_rmdir("test/tmp_dir");
-  f_chdir("..");
+  f_chdir("../..");
+  f_rmdir("test/ext/tmp_dir");
   return Count(true);
 }
 
 bool TestExtFile::test_is_executable() {
-  VERIFY(f_chmod("test/test_ext_file.txt", 0777));
-  VERIFY(f_is_executable("test/test_ext_file.txt"));
+  VERIFY(f_chmod("test/ext/test_ext_file.txt", 0777));
+  VERIFY(f_is_executable("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_is_file() {
-  VERIFY(f_is_file("test/test_ext_file.txt"));
+  VERIFY(f_is_file("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_is_link() {
-  VERIFY(!f_is_link("test/test_ext_file.txt"));
+  VERIFY(!f_is_link("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_is_readable() {
-  VERIFY(f_is_readable("test/test_ext_file.txt"));
+  VERIFY(f_is_readable("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_is_uploaded_file() {
-  VS(f_is_uploaded_file("test/test_ext_file.txt"), false);
+  VS(f_is_uploaded_file("test/ext/test_ext_file.txt"), false);
   return Count(true);
 }
 
 bool TestExtFile::test_is_writable() {
-  VERIFY(f_is_writable("test/test_ext_file.txt"));
+  VERIFY(f_is_writable("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_is_writeable() {
-  VERIFY(f_is_writeable("test/test_ext_file.txt"));
+  VERIFY(f_is_writeable("test/ext/test_ext_file.txt"));
   return Count(true);
 }
 
 bool TestExtFile::test_fileatime() {
-  VERIFY(more(f_fileatime("test/test_ext_file.txt"), 0));
+  VERIFY(more(f_fileatime("test/ext/test_ext_file.txt"), 0));
   return Count(true);
 }
 
 bool TestExtFile::test_filectime() {
-  VERIFY(more(f_filectime("test/test_ext_file.txt"), 0));
+  VERIFY(more(f_filectime("test/ext/test_ext_file.txt"), 0));
   return Count(true);
 }
 
 bool TestExtFile::test_filegroup() {
-  f_filegroup("test/test_ext_file.txt");
+  f_filegroup("test/ext/test_ext_file.txt");
   return Count(true);
 }
 
 bool TestExtFile::test_fileinode() {
-  VERIFY(more(f_fileinode("test/test_ext_file.txt"), 0));
+  VERIFY(more(f_fileinode("test/ext/test_ext_file.txt"), 0));
   return Count(true);
 }
 
 bool TestExtFile::test_filemtime() {
-  VERIFY(more(f_filemtime("test/test_ext_file.txt"), 0));
+  VERIFY(more(f_filemtime("test/ext/test_ext_file.txt"), 0));
   return Count(true);
 }
 
 bool TestExtFile::test_fileowner() {
-  f_fileowner("test/test_ext_file.txt");
+  f_fileowner("test/ext/test_ext_file.txt");
   return Count(true);
 }
 
 bool TestExtFile::test_fileperms() {
-  VERIFY(more(f_fileperms("test/test_ext_file.txt"), 0));
+  VERIFY(more(f_fileperms("test/ext/test_ext_file.txt"), 0));
   return Count(true);
 }
 
 bool TestExtFile::test_filesize() {
-  VS(f_filesize("test/test_ext_file.txt"), 17);
+  VS(f_filesize("test/ext/test_ext_file.txt"), 17);
   return Count(true);
 }
 
 bool TestExtFile::test_filetype() {
-  VS(f_filetype("test/test_ext_file.txt"), "file");
+  VS(f_filetype("test/ext/test_ext_file.txt"), "file");
   return Count(true);
 }
 
 bool TestExtFile::test_readlink() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_symlink("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  String resolved = f_readlink("test/test_ext_file2.tmp");
-  VS(resolved.substr(resolved.size() - 22), "test/test_ext_file.tmp");
+  f_touch("test/ext/test_ext_file.tmp");
+  f_symlink("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  String resolved = f_readlink("test/ext/test_ext_file2.tmp");
+  VS(resolved.substr(resolved.size() - 26), "test/ext/test_ext_file.tmp");
   return Count(true);
 }
 
 bool TestExtFile::test_realpath() {
-  f_touch("test/test_ext_file.tmp");
-  String resolved = f_realpath("test/test_ext_file.tmp");
+  f_touch("test/ext/test_ext_file.tmp");
+  String resolved = f_realpath("test/ext/test_ext_file.tmp");
   VERIFY(resolved.size() > 22);
-  VS(resolved.substr(resolved.size() - 22), "test/test_ext_file.tmp");
+  VS(resolved.substr(resolved.size() - 26), "test/ext/test_ext_file.tmp");
   return Count(true);
 }
 
 bool TestExtFile::test_linkinfo() {
-  if (f_file_exists("test/test_ext_file2.tmp")) {
-    f_unlink("test/test_ext_file2.tmp");
-    VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
+  if (f_file_exists("test/ext/test_ext_file2.tmp")) {
+    f_unlink("test/ext/test_ext_file2.tmp");
+    VERIFY(!f_file_exists("test/ext/test_ext_file2.tmp"));
   }
-  f_touch("test/test_ext_file.tmp");
-  f_symlink("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
-  VERIFY(more(f_linkinfo("test/test_ext_file2.tmp"), 0));
+  f_touch("test/ext/test_ext_file.tmp");
+  f_symlink("test/ext/test_ext_file.tmp", "test/ext/test_ext_file2.tmp");
+  VERIFY(more(f_linkinfo("test/ext/test_ext_file2.tmp"), 0));
   return Count(true);
 }
 
@@ -882,10 +886,10 @@ bool TestExtFile::test_disk_total_space() {
 }
 
 bool TestExtFile::test_pathinfo() {
-  VS(f_print_r(f_pathinfo("test/test_ext_file.txt"), true),
+  VS(f_print_r(f_pathinfo("test/ext/test_ext_file.txt"), true),
      "Array\n"
      "(\n"
-     "    [dirname] => test\n"
+     "    [dirname] => test/ext\n"
      "    [basename] => test_ext_file.txt\n"
      "    [extension] => txt\n"
      "    [filename] => test_ext_file\n"
@@ -894,19 +898,19 @@ bool TestExtFile::test_pathinfo() {
 }
 
 bool TestExtFile::test_mkdir() {
-  f_mkdir("test/tmp_dir");
-  f_rmdir("test/tmp_dir");
+  f_mkdir("test/ext/tmp_dir");
+  f_rmdir("test/ext/tmp_dir");
   return Count(true);
 }
 
 bool TestExtFile::test_rmdir() {
-  f_mkdir("test/tmp_dir");
-  f_rmdir("test/tmp_dir");
+  f_mkdir("test/ext/tmp_dir");
+  f_rmdir("test/ext/tmp_dir");
   return Count(true);
 }
 
 bool TestExtFile::test_dirname() {
-  VS(f_dirname("test/test_ext_file.txt"), "test");
+  VS(f_dirname("test/ext/test_ext_file.txt"), "test/ext");
   return Count(true);
 }
 
@@ -923,10 +927,9 @@ bool TestExtFile::test_chroot() {
 
 bool TestExtFile::test_dir() {
   static const StaticString s_handle("handle");
-  static const StaticString s_test_ext_file_txt("test_ext_file.txt");
   static const StaticString s_path("path");
-  Variant d = f_dir("test");
-  VS(d.toArray()[s_path], "test");
+  Variant d = f_dir("test/ext");
+  VS(d.toArray()[s_path], "test/ext");
   Variant entry;
   bool seen = false;
   while (!same(entry = f_readdir(d.toArray()[s_handle]), false)) {
@@ -945,7 +948,7 @@ bool TestExtFile::test_getcwd() {
 }
 
 bool TestExtFile::test_opendir() {
-  Variant d = f_opendir("test");
+  Variant d = f_opendir("test/ext");
   Variant entry;
   bool seen = false;
   while (!same(entry = f_readdir(d), false)) {
@@ -959,7 +962,7 @@ bool TestExtFile::test_opendir() {
 }
 
 bool TestExtFile::test_readdir() {
-  Variant d = f_opendir("test");
+  Variant d = f_opendir("test/ext");
   Variant entry;
   bool seen = false;
   while (!same(entry = f_readdir(d), false)) {
@@ -973,7 +976,7 @@ bool TestExtFile::test_readdir() {
 }
 
 bool TestExtFile::test_rewinddir() {
-  Variant d = f_opendir("test");
+  Variant d = f_opendir("test/ext");
   Variant entry;
   bool seen = false;
   while (!same(entry = f_readdir(d), false)) {

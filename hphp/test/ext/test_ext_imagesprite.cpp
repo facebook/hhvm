@@ -57,19 +57,20 @@ bool TestExtImagesprite::test_ImageSprite() {
 }
 
 bool TestExtImagesprite::test_addFile() {
-  sprite->t_addfile("test/images/php.gif");
+  std::string path = "test/slow/ext_image/images";
+  sprite->t_addfile(path+"/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
-  sprite->t_addfile("test/images/php.gif");
+  sprite->t_addfile(path+"/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
-  sprite->t_addfile("test/images/246x247.png");
+  sprite->t_addfile(path+"/246x247.png");
   VS((int) sprite->m_image_data.size(), 2);
-  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_loadimages(true);
@@ -157,20 +158,21 @@ bool TestExtImagesprite::test_addUrl() {
   return Count(true);
 }
 bool TestExtImagesprite::test_clear() {
+  std::string path = "test/slow/ext_image/images";
   VS((int) sprite->m_image_data.size(), 0);
-  sprite->t_addfile("test/images/php.gif");
+  sprite->t_addfile(path+"/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
-  sprite->t_clear("test/images/php.gif");
+  sprite->t_clear(path+"/php.gif");
   VS((int) sprite->m_image_data.size(), 0);
 
-  sprite->t_addfile("test/images/php.gif");
-  sprite->t_addfile("test/images/246x247.png");
+  sprite->t_addfile(path+"/php.gif");
+  sprite->t_addfile(path+"/246x247.png");
   VS((int) sprite->m_image_data.size(), 2);
 
-  sprite->t_clear("test/images/php.gif");
+  sprite->t_clear(path+"/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
 
-  sprite->t_addfile("test/images/php.gif");
+  sprite->t_addfile(path+"/php.gif");
   sprite->t_clear();
   VS((int) sprite->m_image_data.size(), 0);
 
@@ -182,21 +184,22 @@ static const StaticString
   s_height("height");
 
 bool TestExtImagesprite::test_loadDims() {
-  sprite->t_addfile("test/images/php.gif");
+  std::string path = "test/slow/ext_image/images";
+  sprite->t_addfile(path+"/php.gif");
   sprite->t_loaddims(true);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_width, 120);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_height, 67);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_image == nullptr, false);
 
   sprite->t_clear();
   Array dims = Array::Create();
   dims.set(s_width, 1);
   dims.set(s_height, 1);
-  sprite->t_addfile("test/images/php.gif", dims);
+  sprite->t_addfile(path+"/php.gif", dims);
   sprite->t_loaddims(true);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_width, 1);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_height, 1);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, true);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_width, 1);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_height, 1);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_image == nullptr, true);
 
   sprite->t_clear();
   sprite->t_addurl("http://www.facebook.com/images/icons/like.png", -1, dims);
@@ -217,21 +220,22 @@ bool TestExtImagesprite::test_loadDims() {
   return Count(true);
 }
 bool TestExtImagesprite::test_loadImages() {
-  sprite->t_addfile("test/images/php.gif");
+  std::string path = "test/slow/ext_image/images";
+  sprite->t_addfile(path+"/php.gif");
   sprite->t_loadimages(true);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_width, 120);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_height, 67);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_image == nullptr, false);
 
   sprite->t_clear();
   Array dims = Array::Create();
   dims.set(s_width, 1);
   dims.set(s_height, 1);
-  sprite->t_addfile("test/images/php.gif", dims);
+  sprite->t_addfile(path+"/php.gif", dims);
   sprite->t_loadimages(true);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_width, 120);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_height, 67);
+  VS(sprite->m_image_data[path+"/php.gif"]->m_image == nullptr, false);
 
   // XXX disabled until we work out flaky network issues. t2183444
 #if 0
@@ -255,13 +259,14 @@ bool TestExtImagesprite::test_loadImages() {
   return Count(true);
 }
 bool TestExtImagesprite::test_map() {
+  std::string path = "test/slow/ext_image/images";
   static const StaticString
     s_images("images"),
     s_width("width"),
     s_height("height"),
     s_x("x"),
     s_y("y"),
-    testpath("test/images/php.gif");
+    testpath(path+"/php.gif");
 
   sprite->t_addfile(testpath);
   VS(sprite->m_current, false);

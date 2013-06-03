@@ -17,7 +17,7 @@
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_options.h"
-#include "hphp/test/test_memcached_info.inc"
+#include "hphp/test/ext/test_memcached_info.inc"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Memcached);
 ///////////////////////////////////////////////////////////////////////////////

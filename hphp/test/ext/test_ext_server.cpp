@@ -28,7 +28,7 @@ bool TestExtServer::RunTests(const std::string &which) {
 
   DECLARE_TEST_FUNCTIONS("");
 
-  std::string root = std::string(f_getcwd().toString().c_str()) + "/test/";
+  std::string root = std::string(f_getcwd().toString().c_str()) + "/test/ext/";
 
   RuntimeOption::SourceRoot = root;
   RuntimeOption::PageletServerThreadCount = 10;
@@ -78,7 +78,7 @@ bool TestExtServer::test_pagelet_server_task_status() {
 bool TestExtServer::test_pagelet_server_task_result() {
   const int TEST_SIZE = 20;
 
-  String baseurl("pageletserver?getparam=");
+  String baseurl("ext/pageletserver?getparam=");
   String baseheader("MyHeader: ");
   String basepost("postparam=");
 

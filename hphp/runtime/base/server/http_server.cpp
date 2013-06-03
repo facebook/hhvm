@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/util/http_client.h"
 #include "hphp/runtime/base/server/replay_transport.h"
 #include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/db_conn.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include <sys/types.h>

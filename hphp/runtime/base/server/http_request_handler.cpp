@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/server/request_uri.h"
 #include "hphp/runtime/base/server/http_protocol.h"
 #include "hphp/runtime/base/time/datetime.h"
-#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
 
 namespace HPHP {

@@ -18,7 +18,7 @@
 #define incl_HPHP_SOURCE_ROOT_INFO_H_
 
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/eval/debugger/debugger_base.h"
+#include "hphp/runtime/debugger/debugger_base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ class Transport;
 
 class SourceRootInfo {
 public:
-  SourceRootInfo(const char *host);
+  explicit SourceRootInfo(const char *host);
   SourceRootInfo(const std::string &user, const std::string &sandbox);
   void createFromUserConfig();
   void createFromCommonRoot(const String &sandboxName);

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/ext/ext_error.h"
-#include "hphp/runtime/eval/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger.h"
 
 namespace HPHP {
 

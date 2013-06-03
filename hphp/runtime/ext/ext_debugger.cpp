@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/ext_debugger.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/eval/debugger/cmd/cmd_user.h"
-#include "hphp/runtime/eval/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/debugger/cmd/cmd_user.h"
+#include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "tbb/concurrent_hash_map.h"

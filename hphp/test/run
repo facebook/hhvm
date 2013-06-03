@@ -226,7 +226,7 @@ function mode_cmd($options) {
 
 function hhvm_cmd($options, $test) {
   $cmd = implode(" ", array(
-    idx_file($_ENV, 'HHVM', bin_root().'/hphp/hhvm/hhvm'),
+    idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
     '--config',
     find_config($test, 'config.hdf'),
     mode_cmd($options),
@@ -243,7 +243,7 @@ function hhvm_cmd($options, $test) {
 
 function hphp_cmd($options, $test) {
   return implode(" ", array(
-    idx_file($_ENV, 'HPHP', bin_root().'/hphp/hhvm/hphp'),
+    idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hphp'),
     '--config',
     find_config($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),
@@ -387,6 +387,12 @@ function run_test($options, $test) {
   }
 
   file_put_contents("$test.out", $output);
+
+  // Needed for testing non-hhvm binaries that don't actually run the code
+  // e.g. util/parser/test/parse_tester.cpp
+  if ($output == "FORCE PASS") {
+    return true;
+  }
 
   if (file_exists("$test.expect")) {
     $diff_cmds = "--text -u";

@@ -34,42 +34,36 @@ namespace HPHP { namespace Test {
  * If a parse error occurs, it says why.
  */
 int main(int argc, char** argv) try {
-  if (argc >= 2 && !strcmp(argv[1], "--verify")) {
-    HPHP::Test::g_verifyMode = true;
-    --argc, ++argv;
-  }
+  HPHP::Test::g_verifyMode = true;
 
-  if (argc != 2) {
-    std::cerr << "usage: " << argv[0] << " [--verify] filename\n";
-    std::exit(1);
-  }
-
-  std::ifstream in(argv[1]);
-  if (!in.is_open()) {
-    std::cerr << argv[0] << ": couldn't open file: "
-              << strerror(errno) << '\n';
-  }
-
-  std::cout << "1..1\n";
-
-  try {
-    using HPHP::Scanner;
-    using HPHP::Test::Parser;
-    Scanner scan(in, Scanner::AllowShortTags |
-                     Scanner::AllowHipHopSyntax);
-    Parser parser(scan, argv[1]);
-    parser.parse();
-  } catch (const std::exception& e) {
-    if (HPHP::Test::g_verifyMode) {
-      std::cout << "not ";
-    } else {
-      throw;
+  char* filename = nullptr;
+  for (int i = 1; i < argc - 1; i++) {
+    if (!strcmp(argv[i], "--file")) {
+      filename = argv[i+1];
     }
   }
-  std::cout << "ok 1\n";
+  if (filename == nullptr) {
+    std::cerr << argv[0] << ": no --file 'filename' passed" << '\n';
+    return 1;
+  }
+
+  std::ifstream in(filename);
+  if (!in.is_open()) {
+    std::cerr << argv[0] << ": couldn't open file " << filename << " "
+              << strerror(errno) << '\n';
+    return 1;
+  }
+
+  using HPHP::Scanner;
+  using HPHP::Test::Parser;
+  Scanner scan(in, Scanner::AllowShortTags |
+                   Scanner::AllowHipHopSyntax);
+  Parser parser(scan, argv[1]);
+  parser.parse();
+  std::cout << "FORCE PASS";
 }
 
-catch (const std::runtime_error& e) {
+catch (const std::exception& e) {
   std::cerr << argv[0] << ": " << e.what() << '\n';
   return 1;
 }

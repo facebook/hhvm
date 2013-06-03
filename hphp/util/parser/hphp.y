@@ -2389,18 +2389,12 @@ hh_opt_return_type:
 ;
 
 hh_typevar_list:
-    namespace_string ','
-    hh_typevar_list                    { _p->addTypeVar($1.text()); }
- |  namespace_string                   { _p->addTypeVar($1.text()); }
- |  namespace_string T_AS
-    hh_shape_type hh_typevar_list
- |  namespace_string T_AS
-    namespace_string ','
-    hh_typevar_list                    { _p->addTypeVar($1.text()); }
- |  namespace_string T_AS
-    namespace_string                   { _p->addTypeVar($1.text()); }
- |  namespace_string T_AS
-    hh_shape_type
+    hh_typevar_list ','
+    ident                              { _p->addTypeVar($3.text()); }
+ |  ident                              { _p->addTypeVar($1.text()); }
+ |  hh_typevar_list ','
+    ident T_AS hh_type                 { _p->addTypeVar($3.text()); }
+ |  ident T_AS hh_type                 { _p->addTypeVar($1.text()); }
 ;
 
 hh_shape_member_type:

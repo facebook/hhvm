@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/targetcache.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/blob_helper.h"
 #include "hphp/runtime/vm/func_inline.h"

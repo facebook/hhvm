@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/eval/debugger/debugger.h"
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_class.h"

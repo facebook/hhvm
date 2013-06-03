@@ -37,7 +37,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/eval/debugger/debugger.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"

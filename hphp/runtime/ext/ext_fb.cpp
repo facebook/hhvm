@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/backup_gc.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 
 #include "hphp/util/parser/parser.h"
 

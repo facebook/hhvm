@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_option.h"

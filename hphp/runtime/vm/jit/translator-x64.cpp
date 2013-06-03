@@ -86,7 +86,7 @@ typedef __sighandler_t *sighandler_t;
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/jit/hhbctranslator.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"

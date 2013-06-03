@@ -60,7 +60,7 @@
 #include <oniguruma.h>
 #include "libxml/parser.h"
 
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"

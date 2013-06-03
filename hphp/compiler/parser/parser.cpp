@@ -89,7 +89,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 
 #ifdef FACEBOOK
 #include "hphp/facebook/src/compiler/fb_compiler_hooks.h"

@@ -88,7 +88,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 
 #include "hphp/system/lib/systemlib.h"

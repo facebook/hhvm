@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STREAM_H_
 
 #include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/server/admin_request_handler.h"
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/base/server/http_server.h"
 #include "hphp/runtime/base/server/pagelet_server.h"
 #include "hphp/runtime/base/util/http_client.h"

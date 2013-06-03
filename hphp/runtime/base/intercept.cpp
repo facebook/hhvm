@@ -26,7 +26,7 @@
 #include "hphp/util/parser/parser.h"
 #include "hphp/util/lock.h"
 
-#include "hphp/runtime/eval/runtime/file_repository.h"
+#include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/util/trace.h"
 

@@ -164,6 +164,7 @@ void f_hphp_clear_unflushed() {
 bool f_trigger_error(CStrRef error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
+  if (g_context->getThrowAllErrors()) throw error_type;
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ThrowIfUnhandled,

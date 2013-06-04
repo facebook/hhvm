@@ -5900,6 +5900,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopDecodeCufIter(PC& pc) {
+  PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
@@ -5922,7 +5923,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDecodeCufIter(PC& pc) {
                                      false);
 
   if (f == nullptr) {
-    pc += offset;
+    pc = origPc + offset;
   } else {
     cit.setFunc(f);
     if (obj) {

@@ -15,6 +15,9 @@
 */
 #include "hphp/runtime/vm/jit/layout.h"
 
+#include <chrono>
+#include <random>
+
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state_vector.h"

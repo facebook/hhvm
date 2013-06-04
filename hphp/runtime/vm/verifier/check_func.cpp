@@ -16,7 +16,8 @@
 
 #include <iomanip>
 #include <list>
-#include <stdio.h>
+#include <cstdio>
+#include <limits>
 
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -250,13 +251,15 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     m_instrs.set(offset(pc) - m_func->base());
     if (isSwitch(*pc) ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (*pc == OpSwitch) {
+      if (*pc == OpSwitch && getImm(pc, 2).u_IVA != 0) {
         int64_t switchBase = getImm(pc, 1).u_I64A;
         int32_t len = getImmVector(pc).size();
-        int64_t limit = base + len - 2;
-        if (limit < switchBase) {
-          error("Overflow in Switch bounds [%d:%d]\n",
-                       base, past);
+        if (len <= 2) {
+          error("Bounded switch must have a vector of length > 2 [%d:%d]\n",
+                base, past);
+        }
+        if (switchBase > std::numeric_limits<int64_t>::max() - len + 2) {
+          error("Overflow in Switch bounds [%d:%d]\n", base, past);
         }
       } else if (*pc == OpSSwitch) {
         foreachSwitchString((Opcode*)pc, [&](Id& id) {

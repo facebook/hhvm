@@ -366,8 +366,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     server.set(s_PATH_INFO, r.pathInfo());
   }
 
-  server.set(s_argv, r.queryString());
-  server.set(s_argc, 0);
+  server.set(s_argv, CREATE_VECTOR1(r.queryString()));
+  server.set(s_argc, 1);
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
   server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
   server.set(s_SERVER_NAME, hostName);

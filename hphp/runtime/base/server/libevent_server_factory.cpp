@@ -41,7 +41,7 @@ ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-namespace {
+extern "C" {
 
 /*
  * Automatically register LibEventServerFactory on program start

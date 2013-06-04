@@ -573,6 +573,9 @@ def walk(filename, source):
     if '/ext-spl/SplFileObject_fgetcsv_' in full_dest_filename:
         test = test.replace('SplFileObject__fgetcsv.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
+    if '/ext-spl/SplFileObject_' in full_dest_filename:
+        test = test.replace('testdata.csv',
+            os.path.basename(full_dest_filename).replace('.php', '.csv'))
 
     file(full_dest_filename, 'w').write(test)
 

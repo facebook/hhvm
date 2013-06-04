@@ -250,7 +250,7 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
 
   int pos = m_name.rfind('\\');
   std::string short_name = m_name.substr(pos + 1);
-  auto iter = FunctionTypeMap.find(m_name);
+  auto iter = FunctionTypeMap.find(short_name);
   assert(iter != FunctionTypeMap.end());
   m_type = iter->second;
   mungeIfSpecialFunction(ar, fs);

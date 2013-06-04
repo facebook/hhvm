@@ -65,11 +65,14 @@ void printGml(const Unit*);
 /*
  * Called to indicate a verification error.
  *
- * Currently just prints to stdout, but we might eventually want to
+ * Currently just prints to stderr, but we might eventually want to
  * support other ways of reporting the error.
+ *
+ * The Func* may be nullptr.
  */
-void verify_error(const char* fmt, ...) __attribute__((format(printf,1,2)));
+void verify_error(const Unit*, const Func*, const char* fmt, ...)
+  __attribute__((format(printf,3,4)));
 
-}} // HPHP::Verifier
+}}
 
-#endif // incl_HPHP_VM_VERIFIER_PRETTY_H
+#endif

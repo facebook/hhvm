@@ -19,6 +19,8 @@
 #include <iomanip>
 #include <stdio.h>
 
+#include "folly/Format.h"
+
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -143,13 +145,22 @@ void printGml(const Unit* unit) {
   fclose(file);
 }
 
-void verify_error(const char* fmt, ...) {
+void verify_error(const Unit* unit,
+                  const Func* func,
+                  const char* fmt,
+                  ...) {
   char buf[1024];
   va_list args;
   va_start(args, fmt);
   vsnprintf(buf, sizeof buf, fmt, args);
   va_end(args);
-  fprintf(stderr, "Verification: %s", buf);
+  fprintf(stderr,
+          "Verification Error (unit %s%s): %s",
+          unit->filepath()->data(),
+          func != nullptr
+            ? folly::format(" func {}", func->fullName()->data()).str().c_str()
+            : "",
+          buf);
 }
 
 }} // namespace HPHP::VM

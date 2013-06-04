@@ -65,6 +65,7 @@ class FuncChecker {
   FuncChecker(const Func* func, bool verbose);
   bool checkOffsets();
   bool checkFlow();
+
  private:
   bool checkEdge(Block* b, const State& cur, Block* t);
   bool checkSuccEdges(Block* b, State* cur);
@@ -105,6 +106,13 @@ class FuncChecker {
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->numParams(); }
   const Unit* unit() const { return m_func->unit(); }
+
+ private:
+  template<class... Args>
+  void error(const char* fmt, Args&&... args) {
+    verify_error(unit(), m_func, fmt, std::forward<Args>(args)...);
+  }
+
  private:
   Arena m_arena;
   BlockInfo* m_info; // one per block
@@ -247,7 +255,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         int32_t len = getImmVector(pc).size();
         int64_t limit = base + len - 2;
         if (limit < switchBase) {
-          verify_error("Overflow in Switch bounds [%d:%d]\n",
+          error("Overflow in Switch bounds [%d:%d]\n",
                        base, past);
         }
       } else if (*pc == OpSSwitch) {
@@ -259,20 +267,20 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     }
     if (i.empty()) {
       if (offset(pc + instrLen(pc)) != past) {
-        verify_error("Last instruction in %s at %d overflows [%d:%d]\n",
+        error("Last instruction in %s at %d overflows [%d:%d]\n",
                name, offset(pc), base, past);
         ok = false;
       }
       if (!isTF(pc)) {
-        verify_error("Last instruction in %s is not teriminal %d:%s\n",
+        error("Last instruction in %s is not teriminal %d:%s\n",
                name, offset(pc), instrToString(pc, unit()).c_str());
         ok = false;
       } else {
         if (isRet(pc) && !is_main) {
-          verify_error("Ret* may not appear in %s\n", name);
+          error("Ret* may not appear in %s\n", name);
           ok = false;
         } else if (Op(*pc) == OpUnwind && is_main) {
-          verify_error("Unwind may not appear in %s\n", name);
+          error("Unwind may not appear in %s\n", name);
           ok = false;
         }
       }
@@ -362,7 +370,7 @@ class ImmVecRange {
 
 bool FuncChecker::checkLocal(PC pc, int k) {
   if (k < 0 || k >= numLocals()) {
-    verify_error("invalid local variable id %d at Offset %d\n",
+    error("invalid local variable id %d at Offset %d\n",
            k, offset(pc));
     return false;
   }
@@ -371,7 +379,7 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 
 bool FuncChecker::checkString(PC pc, Id id) {
   if (id < 0 || unsigned(id) >= unit()->numLitstrs()) {
-    verify_error("invalid string id %d at %d\n", id, offset(pc));
+    error("invalid string id %d at %d\n", id, offset(pc));
     return false;
   }
   return true;
@@ -383,7 +391,7 @@ bool FuncChecker::checkString(PC pc, Id id) {
  */
 bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
   if (!isValidOpcode(*instr)) {
-    verify_error("Invalid opcode %d in section %s at offset %d\n",
+    error("Invalid opcode %d in section %s at offset %d\n",
            *instr, name, offset(instr));
     return false;
   }
@@ -397,12 +405,12 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       ImmVecRange vr(instr);
       if (vr.size() < 2) {
         // vector must at least have a LocationCode and 1+ MemberCodes
-        verify_error("invalid vector size %d at %d\n",
+        error("invalid vector size %d at %d\n",
                vr.size(), offset(instr));
         return false;
       } else {
         if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
-          verify_error("invalid location code %d in vector at %d\n",
+          error("invalid location code %d in vector at %d\n",
                  (int)vr.loc, offset(instr));
           ok = false;
         }
@@ -410,7 +418,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
         for (; !vr.empty(); vr.popFront()) {
           MemberCode member = vr.frontMember();
           if (member < 0 || member >= NumMemberCodes) {
-            verify_error("invalid member code %d in vector at %d\n",
+            error("invalid member code %d in vector at %d\n",
                    (int) member, offset((PC)instr));
             ok = false;
           }
@@ -433,7 +441,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       PC ia_pc = pc;
       int32_t k = decodeVariableSizeImm(&ia_pc);
       if (k >= numIters()) {
-        verify_error("invalid iterator variable id %d at %d\n",
+        error("invalid iterator variable id %d at %d\n",
                k, offset((PC)instr));
         ok = false;
       }
@@ -449,7 +457,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
         break;
       case OpVerifyParamType:
         if (k >= numParams()) {
-          verify_error("invalid parameter id %d at %d\n",
+          error("invalid parameter id %d at %d\n",
                  k, offset((PC)instr));
           ok = false;
         }
@@ -460,7 +468,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     case SLA: { // vec of offsets for Switch/SSwitch
       int len = *(int*)pc;
       if (len < 1) {
-        verify_error("invalid length of jump table %d at Offset %d\n",
+        error("invalid length of jump table %d at Offset %d\n",
                len, offset(pc));
         return false;
       }
@@ -480,7 +488,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       PC aa_pc = pc;
       Id id = decodeId(&aa_pc);
       if (id < 0 || id >= (Id)unit()->numArrays()) {
-        verify_error("invalid array id %d\n", id);
+        error("invalid array id %d\n", id);
         ok = false;
       }
       break;
@@ -498,14 +506,14 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
         if (op >= IncDec_invalid) {
-          verify_error("invalid operation for IncDec*: %d\n", op);
+          error("invalid operation for IncDec*: %d\n", op);
           ok = false;
         }
         break;
       case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:
       case OpSetOpM:
         if (op >= SetOp_invalid) {
-          verify_error("invalid operation for SetOp*: %d\n", op);
+          error("invalid operation for SetOp*: %d\n", op);
           ok = false;
         }
         break;
@@ -529,7 +537,7 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
   for (int i = 0; i < len; ++i) {
     if (args[i] != (FlavorDesc)sig[i] &&
         !((FlavorDesc)sig[i] == CVV && (args[i] == CV || args[i] == VV))) {
-      verify_error("flavor mismatch at %d, got %s expected %s\n",
+      error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
       return false;
@@ -657,7 +665,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
   if (isRet(pc) || Op(*pc) == OpUnwind) {
     if (cur->stklen != 0) {
-      verify_error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
+      error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
       return false;
     }
@@ -667,7 +675,7 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
 
 bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   if (cur->fpilen <= 0) {
-    verify_error("cannot access empty FPI stack\n");
+    error("%s", "cannot access empty FPI stack\n");
     return false;
   }
   bool ok = true;
@@ -677,17 +685,17 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     int call_params = Op(*pc) == OpFCall ? getImmIva(pc) : 1;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
-      verify_error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
+      error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
              call_params, push_params);
       ok = false;
     }
     if (fpi.next != push_params) {
-      verify_error("wrong # of params were passed; got %d expected %d\n",
+      error("wrong # of params were passed; got %d expected %d\n",
              fpi.next, push_params);
       ok = false;
     }
     if (cur->stklen != fpi.stkmin) {
-      verify_error("FCall didn't consume the proper param count\n");
+      error("%s", "FCall didn't consume the proper param count\n");
       ok = false;
     }
   } else {
@@ -695,12 +703,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     int param_id = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (param_id >= push_params) {
-      verify_error("param_id %d out of range [0:%d)\n", param_id,
+      error("param_id %d out of range [0:%d)\n", param_id,
              push_params);
       return false;
     }
     if (param_id != fpi.next) {
-      verify_error("FPass* out of order; got id %d expected %d\n",
+      error("FPass* out of order; got id %d expected %d\n",
              param_id, fpi.next);
       ok = false;
     }
@@ -708,7 +716,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     // so this check doesn't count the F result of this FPush, but does
     // count the previous FPush*s.
     if (cur->stklen != fpi.stkmin + param_id) {
-      verify_error("Stack depth incorrect after FPush; got %d expected %d\n",
+      error("Stack depth incorrect after FPush; got %d expected %d\n",
              cur->stklen, fpi.stkmin + param_id);
       ok = false;
     }
@@ -726,13 +734,13 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
       Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK ||
       Op(*pc) == OpDecodeCufIter) {
     if (cur->iters[id]) {
-      verify_error(
+      error(
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
       ok = false;
     }
   } else {
     if (!cur->iters[id]) {
-      verify_error("Cannot access un-initialized iter %d\n", id);
+      error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
     if (Op(*pc) == OpIterFree ||
@@ -797,7 +805,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       outs[i] = outputSigs[*pc][i];
     if (isFPush(Op(*pc))) {
       if (cur->fpilen >= maxFpi()) {
-        verify_error("more FPush* instructions than FPI regions\n");
+        error("%s", "more FPush* instructions than FPI regions\n");
         return false;
       }
       FpiState& fpi = cur->fpi[cur->fpilen];
@@ -973,12 +981,12 @@ bool FuncChecker::checkEmptyStack(const EHEnt& handler, Block* b) {
   const State& state = m_info[b->id].state_in;
   if (!state.stk) return true; // ignore unreachable block
   if (state.stklen != 0) {
-    verify_error("EH region starts with non-empty stack at B%d\n",
+    error("EH region starts with non-empty stack at B%d\n",
            b->id);
     return false;
   }
   if (state.fpilen != 0) {
-    verify_error("EH region starts with non-empty FPI stack at B%d\n",
+    error("EH region starts with non-empty FPI stack at B%d\n",
            b->id);
     return false;
   }
@@ -1004,7 +1012,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   for (int i = 0, n = cur.stklen; i < n; i++) {
     if (state.stk[i] != cur.stk[i]) {
-      verify_error("mismatch on edge B%d->B%d, current %s target %s\n",
+      error("mismatch on edge B%d->B%d, current %s target %s\n",
              b->id, t->id, stkToString(n, cur.stk).c_str(),
              stkToString(n, state.stk).c_str());
       return false;
@@ -1012,13 +1020,13 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   // Check FPI stack.
   if (state.fpilen != cur.fpilen) {
-    verify_error("FPI stack depth mismatch on edge B%d->B%d, "
+    error("FPI stack depth mismatch on edge B%d->B%d, "
            "current %d target %d\n", b->id, t->id, cur.fpilen, state.fpilen);
     return false;
   }
   for (int i = 0, n = cur.fpilen; i < n; i++) {
     if (state.fpi[i] != cur.fpi[i]) {
-      verify_error("FPI mismatch on edge B%d->B%d, current %s target %s\n",
+      error("FPI mismatch on edge B%d->B%d, current %s target %s\n",
              b->id, t->id, fpiToString(cur.fpi[i]).c_str(),
              fpiToString(state.fpi[i]).c_str());
       return false;
@@ -1028,7 +1036,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   if (false /* TODO(#1097182): Iterator verification disabled */) {
     for (int i = 0, n = numIters(); i < n; i++) {
       if (state.iters[i] != cur.iters[i]) {
-        verify_error("mismatched iterator state on edge B%d->B%d, "
+        error("mismatched iterator state on edge B%d->B%d, "
                "current %s target %s\n", b->id, t->id,
                iterToString(cur).c_str(), iterToString(state).c_str());
         return false;
@@ -1040,22 +1048,22 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
   int min = cur.fpilen > 0 ? cur.fpi[cur.fpilen - 1].stkmin : 0;
-  verify_error("Rule2: Stack underflow at PC %d, min depth %d\n",
+  error("Rule2: Stack underflow at PC %d, min depth %d\n",
          offset(pc), min);
 }
 
 void FuncChecker::reportStkOverflow(Block*, const State& cur, PC pc) {
-  verify_error("Rule2: Stack overflow at PC %d\n", offset(pc));
+  error("Rule2: Stack overflow at PC %d\n", offset(pc));
 }
 
 void FuncChecker::reportStkMismatch(Block* b, Block* t, const State& cur) {
   const State& st = m_info[t->id].state_in;
-  verify_error("Rule1: Stack mismatch on edge B%d->B%d; depth %d->%d\n",
+  error("Rule1: Stack mismatch on edge B%d->B%d; depth %d->%d\n",
           b->id, t->id, cur.stklen, st.stklen);
 }
 
 void FuncChecker::reportEscapeEdge(Block* b, Block* s) {
-  verify_error("Edge from B%d to offset %d escapes function\n",
+  error("Edge from B%d to offset %d escapes function\n",
          b->id, offset(s->start));
 }
 
@@ -1068,12 +1076,12 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
                               Offset past, bool check_instrs) {
   assert(past >= base);
   if (off < base || off >= past) {
-    verify_error("Offset %s %d is outside region %s %d:%d\n",
+    error("Offset %s %d is outside region %s %d:%d\n",
            name, off, regionName, base, past);
     return false;
   }
   if (check_instrs && !m_instrs.get(off - m_func->base())) {
-    verify_error("label %s %d is not on a valid instruction boundary\n",
+    error("label %s %d is not on a valid instruction boundary\n",
            name, off);
     return false;
   }
@@ -1089,18 +1097,18 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
                                Offset past, bool check_instrs) {
   assert(past >= base);
   if (p < b) {
-    verify_error("region %s %d:%d has negative length\n",
+    error("region %s %d:%d has negative length\n",
            name, b, p);
     return false;
   }
   if (b < base || p > past) {
-    verify_error("region %s %d:%d is not inside region %s %d:%d\n",
+    error("region %s %d:%d is not inside region %s %d:%d\n",
            name, b, p, regionName, base, past);
     return false;
   } else if (check_instrs &&
              (!m_instrs.get(b - m_func->base()) ||
               !m_instrs.get(p - m_func->base()))) {
-    verify_error("region %s %d:%d boundaries are inbetween instructions\n",
+    error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;
   }

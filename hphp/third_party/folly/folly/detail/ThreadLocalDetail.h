@@ -23,7 +23,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 #include <glog/logging.h>
 

@@ -34,22 +34,29 @@ namespace folly {
  * we have std::make_unique().
  *
  * @author Louis Brandy (ldbrandy@fb.com)
+ * @author Xu Ning (xning@fb.com)
  */
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+template<typename T, typename Dp = std::default_delete<T>, typename... Args>
+std::unique_ptr<T, Dp> make_unique(Args&&... args) {
+  return std::unique_ptr<T, Dp>(new T(std::forward<Args>(args)...));
 }
 
-/**
- * Wrap a SimpleAllocator into a STL-compliant allocator.
+/*
+ * StlAllocator wraps a SimpleAllocator into a STL-compliant
+ * allocator, maintaining an instance pointer to the simple allocator
+ * object.  The underlying SimpleAllocator object must outlive all
+ * instances of StlAllocator using it.
  *
- * The SimpleAllocator must provide two methods:
+ * A SimpleAllocator must provide two methods:
+ *
  *    void* allocate(size_t size);
  *    void deallocate(void* ptr);
- * which, respectively, allocate a block of size bytes (aligned to the maximum
- * alignment required on your system), throwing std::bad_alloc if the
- * allocation can't be satisfied, and free a previously allocated block.
+ *
+ * which, respectively, allocate a block of size bytes (aligned to the
+ * maximum alignment required on your system), throwing std::bad_alloc
+ * if the allocation can't be satisfied, and free a previously
+ * allocated block.
  *
  * Note that the following allocator resembles the standard allocator
  * quite well:
@@ -66,11 +73,15 @@ std::unique_ptr<T> make_unique(Args&&... args) {
  *   }
  * };
  *
+ * But note that if you pass StlAllocator<MallocAllocator,...> to a
+ * standard container it will be larger due to the contained state
+ * pointer.
+ *
  * author: Tudor Bosman <tudorb@fb.com>
  */
 
 // This would be so much simpler with std::allocator_traits, but gcc 4.6.2
-// doesn't support it
+// doesn't support it.
 template <class Alloc, class T> class StlAllocator;
 
 template <class Alloc> class StlAllocator<Alloc, void> {
@@ -176,54 +187,53 @@ class StlAllocator {
  */
 template <typename T, typename Allocator>
 typename Allocator::template rebind<T>::other rebind_allocator(
-  Allocator const &allocator
+  Allocator const& allocator
 ) {
   return typename Allocator::template rebind<T>::other(allocator);
 }
 
 /*
- * Helper classes/functions for creating a unique_ptr using a custom allocator
+ * Helper classes/functions for creating a unique_ptr using a custom
+ * allocator.
  *
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 
-// A deleter implementation based on std::default_delete,
-// which uses a custom allocator to free memory
+// Derives from the allocator to take advantage of the empty base
+// optimization when possible.
 template <typename Allocator>
-class allocator_delete {
+class allocator_delete
+  : private std::remove_reference<Allocator>::type
+{
   typedef typename std::remove_reference<Allocator>::type allocator_type;
 
 public:
+  typedef typename Allocator::pointer pointer;
+
   allocator_delete() = default;
 
-  explicit allocator_delete(const allocator_type& allocator):
-    allocator_(allocator)
+  explicit allocator_delete(const allocator_type& allocator)
+    : allocator_type(allocator)
   {}
 
-  explicit allocator_delete(allocator_type&& allocator):
-    allocator_(std::move(allocator))
+  explicit allocator_delete(allocator_type&& allocator)
+    : allocator_type(std::move(allocator))
   {}
 
   template <typename U>
-  allocator_delete(const allocator_delete<U>& other):
-    allocator_(other.get_allocator())
+  allocator_delete(const allocator_delete<U>& other)
+    : allocator_type(other.get_allocator())
   {}
 
   allocator_type& get_allocator() const {
-    return allocator_;
+    return *const_cast<allocator_delete*>(this);
   }
 
-  void operator()(typename allocator_type::pointer p) const {
-    if (!p) {
-      return;
-    }
-
-    allocator_.destroy(p);
-    allocator_.deallocate(p, 1);
+  void operator()(pointer p) const {
+    if (!p) return;
+    const_cast<allocator_delete*>(this)->destroy(p);
+    const_cast<allocator_delete*>(this)->deallocate(p, 1);
   }
-
-private:
-  mutable allocator_type allocator_;
 };
 
 template <typename T, typename Allocator>

@@ -2654,7 +2654,8 @@ Unit* UnitEmitter::create() {
   static const bool kVerifyVerbose = getenv("HHVM_VERIFY_VERBOSE");
   const bool doVerify = kAlwaysVerify ||
      (kVerifyNonSystem && !u->filepath()->empty() &&
-      !boost::ends_with(u->filepath()->data(), "systemlib.php"));
+      !boost::ends_with(u->filepath()->data(), "systemlib.php")) ||
+     boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
     Verifier::checkUnit(u, kVerifyVerbose);
   }

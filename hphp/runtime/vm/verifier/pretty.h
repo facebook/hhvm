@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_VM_VERIFIER_PRETTY_H_
 #define incl_HPHP_VM_VERIFIER_PRETTY_H_
 
+#include <string>
+
+#include "hphp/runtime/vm/core_types.h"
+
 namespace HPHP {
 
 class Func;

@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/verifier/pretty.h"
 
 #include <iostream>
 #include <iomanip>
@@ -20,7 +21,6 @@
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
-#include "hphp/runtime/vm/verifier/pretty.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP {
@@ -149,7 +149,7 @@ void verify_error(const char* fmt, ...) {
   va_start(args, fmt);
   vsnprintf(buf, sizeof buf, fmt, args);
   va_end(args);
-  printf("Verification: %s", buf);
+  fprintf(stderr, "Verification: %s", buf);
 }
 
 }} // namespace HPHP::VM

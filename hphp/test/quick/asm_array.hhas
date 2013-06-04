@@ -54,7 +54,7 @@
 .function main() {
   FPushFuncD 0 "ArrayMember"
   FCall 0
-  PopC
+  PopR
 
   Array @my_array
   SetL $arr

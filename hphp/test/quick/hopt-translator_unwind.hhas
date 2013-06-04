@@ -4,6 +4,7 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
+    FPassC 0
   FCall 1
   PopR
 
@@ -32,6 +33,7 @@ handler:
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
+    FPassC 0
   FCall 1
   PopR
   Throw
@@ -71,7 +73,7 @@ handler:
 
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
-    CGetL $id
+    FPassL 0 $id
   FCall 1
   PopR
   RetC
@@ -87,17 +89,23 @@ handler:
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
+    FPassC 0
   FCall 1
+  UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
+    FPassC 0
   FCall 1
+  UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
+    FPassC 0
   FCall 1
+  UnboxR
   SetL $k_2
   PopC
 

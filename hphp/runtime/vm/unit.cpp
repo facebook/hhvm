@@ -2665,18 +2665,23 @@ Unit* UnitEmitter::create() {
     Trace::traceRelease("%s", u->toString().c_str());
   }
 
-  static const bool kVerify        = getenv("HHVM_VERIFY");
-  static const bool kVerifyVerbose = getenv("HHVM_VERIFY_VERBOSE");
+  static const bool kVerify = debug || getenv("HHVM_VERIFY");
+  static const bool kVerifyVerboseSystem =
+    getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
+  static const bool kVerifyVerbose =
+    kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
+  const bool isSystemLib = u->filepath()->empty() ||
+    boost::ends_with(u->filepath()->data(), "systemlib.php");
   const bool doVerify =
-    kVerify ||
-    boost::ends_with(u->filepath()->data(), "hhas") ||
-    (debug && (u->filepath()->empty() ||
-               boost::ends_with(u->filepath()->data(), "systemlib.php")));
-
+    kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
-    Verifier::checkUnit(u, kVerifyVerbose);
+    Verifier::checkUnit(
+      u,
+      isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose
+    );
   }
+
   return u;
 }
 

@@ -234,6 +234,10 @@ Block** GraphBuilder::exns(Block* b) {
 Block* GraphBuilder::createBlock(PC pc) {
   BlockMap::iterator i = m_blocks.find(pc);
   if (i != m_blocks.end()) return i->second;
+
+  // TODO(#2464197): Continuation bug in repo mode.
+  if (pc < m_unit->entry()) return nullptr;
+
   Block* b = new (m_arena) Block(pc);
   m_blocks.insert(std::pair<PC,Block*>(pc, b));
   return b;

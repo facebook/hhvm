@@ -621,19 +621,18 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   loadConfig();
 
   if (!options.cmds.empty()) {
-    UseColor = false;
+    RuntimeOption::EnableDebuggerColor = false;
     s_use_utf8 = false;
     NoPrompt = true;
   }
 
   if (options.apiMode) {
-    UseColor = false;
+    RuntimeOption::EnableDebuggerColor = false;
     NoPrompt = true;
     m_outputBuf.clear();
   }
 
-  UseColor &= RuntimeOption::EnableDebuggerColor;
-  if (UseColor) Debugger::SetTextColors();
+  if (UseColor && RuntimeOption::EnableDebuggerColor) Debugger::SetTextColors();
 
   if (!NoPrompt) {
     info("Welcome to HipHop Debugger!");
@@ -1283,7 +1282,8 @@ bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
     }
   }
   if (!sb.empty()) {
-    print("%s%s", sb.data(), !UseColor ? "\0" : ANSI_COLOR_END);
+    print("%s%s", sb.data(),
+      UseColor && RuntimeOption::EnableDebuggerColor ? ANSI_COLOR_END : "\0");
     return true;
   }
   return false;
@@ -1296,7 +1296,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   Util::string_vsnprintf(msg, fmt, ap); va_end(ap);
-  if (UseColor && InfoColor) {
+  if (UseColor && InfoColor && RuntimeOption::EnableDebuggerColor) {
     msg = InfoColor + msg + ANSI_COLOR_END;
   }
   fwrite(msg.data(), 1, msg.length(), stdout);
@@ -1345,7 +1345,7 @@ void DebuggerClient::print(CStrRef msg) {
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
   void DebuggerClient::name(CStrRef msg) {                              \
-    if (UseColor && color) {                                            \
+    if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       FWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
     FWRITE(msg.data(), 1, msg.length(), where);                         \
@@ -2300,9 +2300,9 @@ void DebuggerClient::loadConfig() {
   m_config["UTF8"] = s_use_utf8; // for starter
 
   Hdf color = m_config["Color"];
-  UseColor = color.getBool(true) && RuntimeOption::EnableDebuggerColor;
+  UseColor = color.getBool(true);
   color = UseColor; // for starter
-  if (UseColor) {
+  if (UseColor && RuntimeOption::EnableDebuggerColor) {
     defineColors(); // (1) no one can overwrite, (2) for starter
     LoadColors(color);
   }

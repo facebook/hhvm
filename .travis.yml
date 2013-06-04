@@ -6,4 +6,4 @@ before_script:
 # for some tests  
   - sudo locale-gen de_DE
   - HPHP_HOME=`pwd` make -j 8
-script: hphp/hhvm/hhvm hphp/test/run --arg --threads 2 quick zend
+script: hphp/hhvm/hhvm hphp/test/run --arg --threads 2 quick zend slow

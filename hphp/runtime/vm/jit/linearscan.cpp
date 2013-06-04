@@ -321,7 +321,7 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
 
   if (packed_tv) return PhysReg::GP;
 
-  Type tmpType = tmp->type();
+  DEBUG_ONLY Type tmpType = tmp->type();
 
   uint32_t tmpId = tmp->id();
 

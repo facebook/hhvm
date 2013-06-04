@@ -5419,7 +5419,9 @@ void genCodeForTrace(Trace* trace,
   CodegenState state(irFactory, regs, live_regs, lifetime, asmInfo);
 
   // Returns: whether a block has already been emitted.
-  auto isEmitted = [&](Block* block) { return state.addresses[block]; };
+  DEBUG_ONLY auto isEmitted = [&](Block* block) {
+    return state.addresses[block];
+  };
 
   /*
    * Emit the given block on the supplied assembler.  The `nextBlock'

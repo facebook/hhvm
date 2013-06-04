@@ -182,14 +182,6 @@ void VectorEffects::init(Opcode op, const Type origBase,
     }
   }
 
-  // Setting an element with a base of one of these types will either succeed
-  // (with possible promotion) or fatal
-  const Type okBase = Type::Str | Type::Arr | Type::Obj;
-
-  // Setting an element with one of these types as the key will fail, issue a
-  // warning, and evaulate to null.
-  const Type badArrKey = Type::Arr | Type::Obj;
-
   // The final baseType should be a pointer/box iff the input was
   baseType = baseBoxed ? baseType.box() : baseType;
   baseType = basePtr   ? baseType.ptr() : baseType;

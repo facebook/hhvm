@@ -943,10 +943,6 @@ getDynLocType(const vector<DynLocation*>& inputs,
         }
 
         const bool setElem = mcodeMaybeArrayKey(ni->immVecM[0]);
-        const bool setNewElem = ni->immVecM[0] == MW;
-        const Type keyType =
-          setNewElem ? Type::None
-                     : Type::fromRuntimeType(inputs[2]->rtt);
         const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
         if (setElem && baseType.maybe(Type::Str)) {
           if (baseType.isString()) {

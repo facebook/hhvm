@@ -335,8 +335,10 @@ void CmdList::onClientImpl(DebuggerClient &client) {
 // The function returns false if the reply to the client fails during the
 // sending process.
 bool CmdList::onServer(DebuggerProxy &proxy) {
+  auto savedWarningFrequency = RuntimeOption::WarningFrequency;
+  RuntimeOption::WarningFrequency = 0;
   m_code = f_file_get_contents(m_file.c_str());
-  if (!m_code && m_file[0] != '/') {
+  if (!proxy.isLocal() && !m_code && m_file[0] != '/') {
     DSandboxInfo info = proxy.getSandbox();
     if (info.m_path.empty()) {
       raise_warning("path for sandbox %s is not setup, run a web request",
@@ -346,11 +348,12 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
       m_code = f_file_get_contents(full_path.c_str());
     }
   }
+  RuntimeOption::WarningFrequency = savedWarningFrequency;
   return proxy.sendToClient((DebuggerCommand*)this);
 }
 
 // Sends a "list file" command to the proxy attached to the given client.
-// Returns false if the file does not exist or could not be read or an
+// Returns false if the file does not exist or could not be read as an
 // HPHP::String instance containing the contents of the file.
 Variant CmdList::GetSourceFile(DebuggerClient &client,
                                const std::string &file) {

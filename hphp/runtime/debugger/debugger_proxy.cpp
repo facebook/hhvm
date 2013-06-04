@@ -625,6 +625,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
       if (res->is(DebuggerCommand::KindOfQuit)) {
         TRACE_RB(2, "Received quit command\n");
+        res->onServer(*this); // acknowledge receipt so that client can quit.
         Debugger::RemoveProxy(shared_from_this());
         forceQuit();
         throw DebuggerClientExitException();

@@ -41,11 +41,22 @@ void CmdQuit::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client.argCount() == 0) {
-    client.sendToServer(this);
+    client.xend<CmdQuit>(this); // Wait for server ack before closing pipe.
     client.quit();
   } else {
     help(client);
   }
+}
+
+// Sends an acknowledgment back to the client so that
+// it can go ahead and terminate. It it were to do so
+// before the server has received the command, the pipe
+// will be closed and the proxy will carry on as if there
+// were a communication failure, which is not as clean
+// explicitly quitting.
+bool CmdQuit::onServer(DebuggerProxy &proxy) {
+  TRACE(2, "CmdQuit::onServer\n");
+  return proxy.sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

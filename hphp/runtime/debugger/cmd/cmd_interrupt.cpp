@@ -209,7 +209,9 @@ void CmdInterrupt::onClientImpl(DebuggerClient &client) {
                            m_bpi->m_exceptionClass.c_str(),
                            m_bpi->site().c_str());
               client.shortCode(m_bpi);
-              client.output(m_bpi->m_exceptionObject);
+              if (client.isApiMode() || client.getLogFileHandler()) {
+                client.output(m_bpi->m_exceptionObject);
+              }
             }
           }
           if (!bpm->m_output.empty()) {

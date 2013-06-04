@@ -57,21 +57,19 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 
   int currentVMDepth = g_vmContext->m_nesting;
   int currentStackDepth = proxy.getStackDepth();
-  if (currentVMDepth < m_vmDepth) {
-    // Cut corner here, just break when cross VM boundary no matter how
-    // many levels we want to go out of
-    TRACE(2, "CmdOut: shallower VM depth, done.\n");
-    cleanupStepOuts();
-    m_complete = true;
-  } else if ((currentVMDepth == m_vmDepth) &&
-             (currentStackDepth < m_stackDepth)) {
-    TRACE(2, "CmdOut: same VM depth, shallower stack depth, done.\n");
-    cleanupStepOuts();
-    m_complete = (decCount() == 0);
-    if (!m_complete) {
-      TRACE(2, "CmdOut: not complete, step out again.\n");
-      setupStepOuts();
-    }
+
+  // Deeper or same depth? Keep running.
+  if ((currentVMDepth > m_vmDepth) ||
+      ((currentVMDepth == m_vmDepth) && (currentStackDepth >= m_stackDepth))) {
+    return;
+  }
+
+  TRACE(2, "CmdOut: shallower stack depth, done.\n");
+  cleanupStepOuts();
+  m_complete = (decCount() == 0);
+  if (!m_complete) {
+    TRACE(2, "CmdOut: not complete, step out again.\n");
+    onSetup(proxy, interrupt);
   }
   m_needsVMInterrupt = false;
 }

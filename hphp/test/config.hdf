@@ -3,9 +3,9 @@ Eval {
   AllowHhas = true
   EnableHipHopSyntax = true
   EnableObjDestructCall = true
-  JitASize = 300000000
-  JitAStubsSize = 300000000
-  JitGlobalDataSize = 3000000
+  JitASize = 10485760
+  JitAStubsSize = 10485760
+  JitGlobalDataSize = 2097152
 }
 
 MySQL {

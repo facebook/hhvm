@@ -49,6 +49,10 @@ using Util::getDataRef;
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
+static const StaticString s_stdin("STDIN");
+static const StaticString s_stdout("STDOUT");
+static const StaticString s_stderr("STDERR");
+
 ReadOnlyArena& get_readonly_arena() {
   static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
   return arena;
@@ -999,6 +1003,14 @@ uint64_t Unit::defCnsHelper(uint64_t ch,
 
 void Unit::defDynamicSystemConstant(const StringData* cnsName,
                                     const void* data) {
+  static const bool kServer = RuntimeOption::ServerExecutionMode();
+  // Zend doesn't define the STD* streams in server mode so we don't either
+  if (UNLIKELY(kServer &&
+       (s_stdin.equal(cnsName) ||
+        s_stdout.equal(cnsName) ||
+        s_stderr.equal(cnsName)))) {
+    return;
+  }
   TargetCache::CacheHandle handle =
     StringData::DefCnsHandle(cnsName, true);
   assert(handle);

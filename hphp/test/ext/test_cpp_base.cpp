@@ -243,7 +243,7 @@ bool TestCppBase::TestArray() {
     arr = Array::Create("test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY(arr[0] == "test");
+    VERIFY(equal(arr[0], String("test")));
     VS(arr, Array(ArrayInit(1).set("test").create()));
 
     Array arrCopy = arr;
@@ -263,7 +263,7 @@ bool TestCppBase::TestArray() {
     arr = Array::Create(s_name, "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY(arr[s_name] == "test");
+    VERIFY(equal(arr[s_name], String("test")));
     VS(arr, Array(ArrayInit(1).set(s_name, "test").create()));
 
     arrCopy = arr;
@@ -281,11 +281,11 @@ bool TestCppBase::TestArray() {
     int i = 0;
     for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
       if (i == 0) {
-        VERIFY(iter.first() == "n1");
-        VERIFY(iter.second() == "v1");
+        VERIFY(equal(iter.first(), String("n1")));
+        VERIFY(equal(iter.second(), String("v1")));
       } else {
-        VERIFY(iter.first() == "n2");
-        VERIFY(iter.second() == "v2");
+        VERIFY(equal(iter.first(), String("n2")));
+        VERIFY(equal(iter.second(), String("v2")));
       }
     }
     VERIFY(i == 2);
@@ -646,7 +646,7 @@ bool TestCppBase::TestVariant() {
     v += 20;
     VERIFY(v.isNumeric());
     VERIFY(v.is(KindOfInt64));
-    VERIFY(v == Variant(35));
+    VERIFY(equal(v, Variant(35)));
   }
 
   // conversions
@@ -664,8 +664,8 @@ bool TestCppBase::TestVariant() {
     Variant v;
     v.lvalAt(0) = String("v0");
     v.lvalAt(1) = String("v1");
-    VERIFY(v[0] == "v0");
-    VERIFY(v[1] == "v1");
+    VERIFY(equal(v[0], String("v0")));
+    VERIFY(equal(v[1], String("v1")));
   }
   {
     Variant v;
@@ -753,13 +753,13 @@ bool TestCppBase::TestVariant() {
     Variant v1("original");
     Variant v2 = v1;
     v2 = String("changed");
-    VERIFY(v1 == "original");
+    VERIFY(equal(v1, String("original")));
   }
   {
     Variant v1("original");
     Variant v2 = strongBind(v1);
     v2 = String("changed");
-    VERIFY(v1 == "changed");
+    VERIFY(equal(v1, String("changed")));
   }
   {
     Variant v1 = 10;

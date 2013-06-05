@@ -84,6 +84,8 @@ void throw_tprotocolexception(CStrRef what, long errorcode) {
   throw ex;
 }
 
+static const StaticString s_TSPEC("_TSPEC");
+
 Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                            CArrRef fieldspec) {
   Variant ret;
@@ -105,7 +107,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         skip_element(T_STRUCT, transport);
         return uninit_null();
       }
-      Variant spec = f_hphp_get_static_property(structType, "_TSPEC");
+      Variant spec = f_hphp_get_static_property(structType, s_TSPEC);
       if (!spec.is(KindOfArray)) {
         char errbuf[128];
         snprintf(errbuf, 128, "spec for %s is wrong type: %d\n",
@@ -357,7 +359,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       binary_serialize_spec(value, transport,
                             f_hphp_get_static_property(toObject(value)->
                                                        o_getClassName(),
-                                                       "_TSPEC").toArray());
+                                                       s_TSPEC).toArray());
     } return;
     case T_BOOL:
       transport.writeI8(value.toBoolean() ? 1 : 0);
@@ -488,7 +490,7 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
   }
 
   Variant spec = f_hphp_get_static_property(request_struct->o_getClassName(),
-                                            "_TSPEC");
+                                            s_TSPEC);
   binary_serialize_spec(request_struct, transport, spec.toArray());
 
   transport.flush();
@@ -524,13 +526,13 @@ Variant f_thrift_protocol_read_binary(CObjRef transportobj,
 
   if (messageType == T_EXCEPTION) {
     Object ex = createObject("TApplicationException");
-    Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC");
+    Variant spec = f_hphp_get_static_property("TApplicationException", s_TSPEC);
     binary_deserialize_spec(ex, transport, spec.toArray());
     throw ex;
   }
 
   Object ret_val = createObject(obj_typename);
-  Variant spec = f_hphp_get_static_property(obj_typename, "_TSPEC");
+  Variant spec = f_hphp_get_static_property(obj_typename, s_TSPEC);
   binary_deserialize_spec(ret_val, transport, spec.toArray());
   return ret_val;
 }

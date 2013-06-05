@@ -1633,17 +1633,18 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   if (fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }
-  Array ret = Array::Create();
   const Func *func = fp->m_func;
-  for (Id id = 0; id < func->numNamedLocals(); ++id) {
+  auto numLocals = func->numNamedLocals();
+  ArrayInit ret(numLocals);
+  for (Id id = 0; id < numLocals; ++id) {
     TypedValue* ptv = frame_local(fp, id);
     if (ptv->m_type == KindOfUninit) {
       continue;
     }
-    Variant name(func->localVarName(id)->data());
+    Variant name(func->localVarName(id));
     ret.add(name, tvAsVariant(ptv));
   }
-  return ret;
+  return ret.toArray();
 }
 
 void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {

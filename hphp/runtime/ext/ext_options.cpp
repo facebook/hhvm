@@ -657,7 +657,7 @@ Array f_ini_get_all(CStrRef extension /* = null_string */) {
 }
 
 String f_ini_get(CStrRef varname) {
-  String value("");
+  String value = empty_string;
   IniSetting::Get(varname, value);
   return value;
 }

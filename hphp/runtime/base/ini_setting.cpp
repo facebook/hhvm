@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/ini_setting.h"
+
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
@@ -208,64 +209,83 @@ void IniSetting::Unbind(const char *name) {
   s_callbacks->erase(name);
 }
 
+static const StaticString
+  s_error_reporting("error_reporting"),
+  s_memory_limit("memory_limit"),
+  s_max_execution_time("max_execution_time"),
+  s_maximum_execution_time("maximum_execution_time"),
+  s_hphp_build_id("hphp.build_id"),
+  s_hphp_compiler_version("hphp.compiler_version"),
+  s_hphp_compiler_id("hphp.compiler_id"),
+  s_arg_separator_output("arg_separator.output"),
+  s_upload_max_filesize("upload_max_filesize"),
+  s_post_max_size("post_max_size"),
+  s_log_errors("log_errors"),
+  s_error_log("error_log"),
+  s_notice_frequency("notice_frequency"),
+  s_warning_frequency("warning_frequency"),
+  s_include_path("include_path"),
+  s_1("1"),
+  s_0("0");
+
 bool IniSetting::Get(CStrRef name, String &value) {
-  if (name == "error_reporting") {
+  if (name == s_error_reporting) {
     value = String((int64_t)g_context->getErrorReportingLevel());
     return true;
   }
-  if (name == "memory_limit") {
+  if (name == s_memory_limit) {
     int64_t v = g_context->getRequestMemoryMaxBytes();
     if (v == INT64_MAX) v = -1;
     value = String(v);
     return true;
   }
-  if (name == "max_execution_time" || name == "maximum_execution_time") {
+  if (name == s_max_execution_time || name == s_maximum_execution_time) {
     value = String((int64_t)g_context->getRequestTimeLimit());
     return true;
   }
-  if (name == "hphp.build_id") {
+  if (name == s_hphp_build_id) {
     value = String(RuntimeOption::BuildId);
     return true;
   }
-  if (name == "hphp.compiler_version") {
+  if (name == s_hphp_compiler_version) {
     value = String(getHphpCompilerVersion());
     return true;
   }
-  if (name == "hphp.compiler_id") {
+  if (name == s_hphp_compiler_id) {
     value = String(getHphpCompilerId());
     return true;
   }
-  if (name == "arg_separator.output") {
+  if (name == s_arg_separator_output) {
     value = g_context->getArgSeparatorOutput();
     return true;
   }
-  if (name == "upload_max_filesize") {
+  if (name == s_upload_max_filesize) {
     int uploadMaxFilesize = VirtualHost::GetUploadMaxFileSize() / (1 << 20);
     value = String(uploadMaxFilesize) + "M";
     return true;
   }
-  if (name == "post_max_size") {
+  if (name == s_post_max_size) {
     int postMaxSize = VirtualHost::GetMaxPostSize();
     value = String(postMaxSize);
     return true;
   }
-  if (name == "log_errors") {
-    value = g_context->getLogErrors() ? "1" : "0";
+  if (name == s_log_errors) {
+    value = g_context->getLogErrors() ? s_1 : s_0;
     return true;
   }
-  if (name == "error_log") {
+  if (name == s_error_log) {
     value = g_context->getErrorLog();
     return true;
   }
-  if (name == "notice_frequency") {
+  if (name == s_notice_frequency) {
     value = String((int64_t)RuntimeOption::NoticeFrequency);
     return true;
   }
-  if (name == "warning_frequency") {
+  if (name == s_warning_frequency) {
     value = String((int64_t)RuntimeOption::WarningFrequency);
     return true;
   }
-  if (name == "include_path") {
+  if (name == s_include_path) {
     value = g_context->getIncludePath();
     return true;
   }

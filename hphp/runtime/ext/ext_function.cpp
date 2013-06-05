@@ -52,7 +52,8 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
 
 static const StaticString
   s__invoke("__invoke"),
-  s_Closure__invoke("Closure::__invoke");
+  s_Closure__invoke("Closure::__invoke"),
+  s_colon2("::");
 
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
@@ -106,7 +107,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
       return false;
     }
 
-    name = concat3(name, "::", Variant::GetAsString(tv_meth));
+    name = concat3(name, s_colon2, Variant::GetAsString(tv_meth));
     return ret;
   }
 
@@ -255,17 +256,11 @@ Variant f_forward_static_call(int _argc, CVarRef function,
 Variant f_get_called_class() {
   EagerCallerFrame cf;
   ActRec* ar = cf();
-  if (ar == NULL) {
-    return Variant(false);
+  if (ar) {
+    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
+    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
   }
-  if (ar->hasThis()) {
-    ObjectData* obj = ar->getThis();
-    return obj->o_getClassName();
-  } else if (ar->hasClass()) {
-    return ar->getClass()->preClass()->name()->data();
-  } else {
-    return Variant(false);
-  }
+  return Variant(false);
 }
 
 String f_create_function(CStrRef args, CStrRef code) {

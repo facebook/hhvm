@@ -1574,9 +1574,11 @@ String f_image_type_to_extension(int imagetype,
   }
 }
 
-static const StaticString s_bits("bits");
-static const StaticString s_channels("channels");
-static const StaticString s_mime("mime");
+static const StaticString
+  s_bits("bits"),
+  s_channels("channels"),
+  s_mime("mime"),
+  s_linespacing("linespacing");
 
 Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   int itype = 0;
@@ -2872,7 +2874,7 @@ static Variant php_imagettftext_common(int mode, int extended,
       Variant key = iter.first();
       if (!key.isString()) continue;
       Variant item = iter.second();
-      if (key == "linespacing") {
+      if (equal(key, s_linespacing)) {
         strex.flags |= gdFTEX_LINESPACE;
         strex.linespacing = toDouble(item);
       }

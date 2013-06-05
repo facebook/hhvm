@@ -317,10 +317,10 @@ void ObjectData::o_setArray(CArrRef properties) {
     Class* ctx = nullptr;
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
-    if (!k.empty() && k.charAt(0) == '\0') {
+    if (!k.empty() && k[0] == '\0') {
       int subLen = k.find('\0', 1) + 1;
       String cls = k.substr(1, subLen - 2);
-      if (cls == "*") {
+      if (cls.size() == 1 && cls[0] == '*') {
         // Protected.
         ctx = m_cls;
       } else {

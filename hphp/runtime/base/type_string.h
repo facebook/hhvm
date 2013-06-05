@@ -87,17 +87,6 @@ public:
     if (it != integer_string_data_map.end()) return it->second;
     return nullptr;
   }
-  static const StringData *GetIntegerStringData(int n) {
-    return GetIntegerStringData((int64_t)n);
-  }
-  static const char *GetIntegerString(int64_t n) {
-    const StringData *sd = GetIntegerStringData(n);
-    if (sd) return sd->data();
-    return nullptr;
-  }
-  static const char *GetIntegerString(int n) {
-    return GetIntegerString((int64_t)n);
-  }
 
 public:
   String() {}

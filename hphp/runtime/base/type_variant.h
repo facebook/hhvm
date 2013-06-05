@@ -138,6 +138,9 @@ class Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(RefData *r);
 
+  // for static strings only
+  explicit Variant(const StringData *v);
+
   // Move ctor for strings
   /* implicit */ Variant(String&& v) {
     StringData *s = v.get();
@@ -179,7 +182,6 @@ class Variant : private TypedValue {
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
-  /* implicit */ Variant(const StringData *v) = delete;
   /* implicit */ Variant(const ArrayData *v) = delete;
   /* implicit */ Variant(const ObjectData *v) = delete;
   /* implicit */ Variant(const RefData *v) = delete;
@@ -597,18 +599,6 @@ class Variant : private TypedValue {
   Variant  operator ++ (int);
   Variant &operator -- ();
   Variant  operator -- (int);
-
-  /**
-   * These are convenient functions for writing extensions, since code
-   * generation always uses explicit functions like same(), less() etc. that
-   * are type specialized and unambiguous.
-   */
-  bool operator == (CVarRef v) const;
-  bool operator != (CVarRef v) const;
-  bool operator >= (CVarRef v) const;
-  bool operator <= (CVarRef v) const;
-  bool operator >  (CVarRef v) const;
-  bool operator <  (CVarRef v) const;
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().

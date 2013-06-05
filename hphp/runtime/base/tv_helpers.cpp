@@ -142,6 +142,10 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   tv->m_type = KindOfDouble;
 }
 
+static const StaticString
+  s_1("1"),
+  s_Array("Array");
+
 void tvCastToStringInPlace(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
@@ -149,23 +153,33 @@ void tvCastToStringInPlace(TypedValue* tv) {
   StringData * s;
   switch (tv->m_type) {
   case KindOfUninit:
-  case KindOfNull:    s = buildStringData(""); break;
-  case KindOfBoolean: s = buildStringData(tv->m_data.num ? "1" : ""); break;
+  case KindOfNull:    s = empty_string.get(); goto static_string;
+  case KindOfBoolean:
+    s = tv->m_data.num ? s_1.get() : empty_string.get();
+    goto static_string;
   case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
   case KindOfStaticString:
   case KindOfString:  return;
-  case KindOfArray:   s = buildStringData("Array"); tvDecRefArr(tv); break;
-  case KindOfObject:  {
+  case KindOfArray:
+    s = s_Array.get();
+    tvDecRefArr(tv);
+    goto static_string;
+  case KindOfObject:
     // For objects, we fall back on the Variant machinery
     tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
     return;
+  default:
+    not_reached();
   }
-  default:            not_reached();
-  }
+
+  s->incRefCount();
   tv->m_data.pstr = s;
   tv->m_type = KindOfString;
-  tv->m_data.pstr->incRefCount();
+  return;
+static_string:
+  tv->m_data.pstr = s;
+  tv->m_type = KindOfStaticString;
 }
 
 StringData* tvCastToString(TypedValue* tv) {
@@ -176,13 +190,13 @@ StringData* tvCastToString(TypedValue* tv) {
   StringData* s;
   switch (tv->m_type) {
   case KindOfUninit:
-  case KindOfNull:    s = buildStringData(""); break;
-  case KindOfBoolean: s = buildStringData(tv->m_data.num ? "1" : ""); break;
+  case KindOfNull:    return empty_string.get();
+  case KindOfBoolean: return tv->m_data.num ? s_1.get() : empty_string.get();
   case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
-  case KindOfStaticString:
+  case KindOfStaticString: return tv->m_data.pstr;
   case KindOfString:  s = tv->m_data.pstr; break;
-  case KindOfArray:   return StringData::GetStaticString("Array");
+  case KindOfArray:   return s_Array.get();
   case KindOfObject:  return tv->m_data.pobj->t___tostring().detach();
   default:            not_reached();
   }

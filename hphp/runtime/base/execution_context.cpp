@@ -53,6 +53,8 @@ int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
+const StaticString BaseExecutionContext::s_amp("&");
+
 BaseExecutionContext::BaseExecutionContext() :
     m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),

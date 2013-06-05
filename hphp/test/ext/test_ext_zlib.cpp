@@ -279,7 +279,7 @@ bool TestExtZlib::test_nzcompress() {
 bool TestExtZlib::test_nzuncompress() {
   String s("garbage stuff", AttachLiteral);
   Variant v = f_nzuncompress(s);
-  if (v != Variant(false)) {
+  if (!equal(v, Variant(false))) {
     return Count(false);
   }
 
@@ -309,13 +309,13 @@ bool TestExtZlib::test_lz4uncompress() {
   // first test uncompressing invalid string
   String s("invalid compressed string", AttachLiteral);
   Variant v = f_lz4uncompress(s);
-  if (v != Variant(false)) {
+  if (!equal(v, Variant(false))) {
     return Count(false);
   }
   // try uncompressing empty string
   String empty("", AttachLiteral);
   v = f_lz4uncompress(empty);
-  if (v != Variant(false)) {
+  if (!equal(v, Variant(false))) {
     return Count(false);
   }
 

@@ -66,7 +66,7 @@ bool TestExtNetwork::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtNetwork::test_gethostname() {
-  VERIFY(f_gethostname() != Variant(false));
+  VERIFY(!equal(f_gethostname(), Variant(false)));
   return Count(true);
 }
 

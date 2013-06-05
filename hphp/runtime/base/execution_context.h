@@ -324,7 +324,7 @@ public:
   void setTimeZone(CStrRef timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
   String getArgSeparatorOutput() const {
-    if (m_argSeparatorOutput.isNull()) return "&";
+    if (m_argSeparatorOutput.isNull()) return s_amp;
     return m_argSeparatorOutput;
   }
   void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
@@ -353,6 +353,7 @@ private:
   };
 
 private:
+  static const StaticString s_amp;
   // system settings
   Transport *m_transport;
   int64_t m_maxMemory;

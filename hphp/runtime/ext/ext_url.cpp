@@ -171,6 +171,8 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
   }
 }
 
+static const StaticString s_arg_separator_output("arg_separator.output");
+
 Variant f_http_build_query(CVarRef formdata,
                            CStrRef numeric_prefix /* = null_string */,
                            CStrRef arg_separator /* = null_string */) {
@@ -181,7 +183,7 @@ Variant f_http_build_query(CVarRef formdata,
 
   String arg_sep;
   if (arg_separator.isNull()) {
-    arg_sep = f_ini_get("arg_separator.output");
+    arg_sep = f_ini_get(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;
   }

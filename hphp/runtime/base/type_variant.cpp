@@ -131,14 +131,24 @@ Variant::Variant(CObjRef v) {
 
 HOT_FUNC
 Variant::Variant(StringData *v) {
-  m_type = KindOfString;
   if (v) {
     m_data.pstr = v;
     if (v->isStatic()) {
       m_type = KindOfStaticString;
     } else {
+      m_type = KindOfString;
       v->incRefCount();
     }
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(const StringData *v) {
+  if (v) {
+    assert(v->isStatic());
+    m_data.pstr = const_cast<StringData*>(v);
+    m_type = KindOfStaticString;
   } else {
     m_type = KindOfNull;
   }
@@ -1789,33 +1799,6 @@ bool Variant::more(CStrRef v2) const { UNWRAP_STR(less);}
 bool Variant::more(CArrRef v2) const { UNWRAP_ARR(more,less);}
 bool Variant::more(CObjRef v2) const { UNWRAP(less);}
 bool Variant::more(CVarRef v2) const { UNWRAP_VAR(more,less);}
-
-///////////////////////////////////////////////////////////////////////////////
-// comparison operators
-
-bool Variant::operator==(CVarRef v) const {
-  return HPHP::equal(*this, v);
-}
-
-bool Variant::operator!=(CVarRef v) const {
-  return !HPHP::equal(*this, v);
-}
-
-bool Variant::operator>=(CVarRef v) const {
-  return more_or_equal(*this, v);
-}
-
-bool Variant::operator<=(CVarRef v) const {
-  return less_or_equal(*this, v);
-}
-
-bool Variant::operator>(CVarRef v) const {
-  return HPHP::more(*this, v);
-}
-
-bool Variant::operator<(CVarRef v) const {
-  return HPHP::less(*this, v);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions

@@ -213,9 +213,9 @@ bool TestExtCurl::test_curl_error() {
   f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_exec(c);
   Variant err = f_curl_error(c);
-  VERIFY(err == "Couldn't resolve host 'www.thereisnosuchanurl'" ||
-         err == "Could not resolve host: www.thereisnosuchanurl"
-                " (Domain name not found)");
+  VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'")) ||
+         equal(err, String("Could not resolve host: www.thereisnosuchanurl"
+                " (Domain name not found)")));
   return Count(true);
 }
 

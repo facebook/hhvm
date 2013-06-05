@@ -107,7 +107,8 @@ static const StaticString
 bool TestExtOpenssl::test_openssl_csr_get_subject() {
   Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
-  VERIFY(f_openssl_csr_get_subject(csr)[s_O] == "Internet Widgits Pty Ltd");
+  VERIFY(equal(f_openssl_csr_get_subject(csr)[s_O],
+               String("Internet Widgits Pty Ltd")));
   return Count(true);
 }
 

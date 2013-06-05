@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/base/base_includes.h"
@@ -5917,29 +5918,56 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   }
   TypedValue* args = m_stack.indTV(numArgs-1);
   assert(numArgs == func->numParams());
+  bool zendParamMode = func->info()->attribute & ClassInfo::ZendParamMode;
+  TypedValue ret;
+
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
+
+    if (zendParamMode) {
+#define CASE(kind) case KindOf ## kind : do {           \
+  if (!tvCoerceParamTo ## kind ## InPlace(&args[-i])) { \
+    ret.m_type = KindOfNull;                            \
+    goto free_frame;                                    \
+  }                                                     \
+  break;                                                \
+} while (0); break;
+      switch (pi.builtinType()) {
+        CASE(Boolean)
+        CASE(Int64)
+        CASE(Double)
+        CASE(String)
+        CASE(Array)
+        CASE(Object)
+        case KindOfUnknown:
+                  break;
+        default:
+                  not_reached();
+      }
+#undef CASE
+
+    } else {
 
 #define CASE(kind) case KindOf ## kind : do { \
   tvCastTo ## kind ## InPlace(&args[-i]); break; \
 } while (0); break;
-
-    switch (pi.builtinType()) {
-      CASE(Boolean)
-      CASE(Int64)
-      CASE(Double)
-      CASE(String)
-      CASE(Array)
-      CASE(Object)
-      case KindOfUnknown:
-                break;
-      default:
-                not_reached();
-    }
-  }
+      switch (pi.builtinType()) {
+        CASE(Boolean)
+        CASE(Int64)
+        CASE(Double)
+        CASE(String)
+        CASE(Array)
+        CASE(Object)
+        case KindOfUnknown:
+                  break;
+        default:
+                  not_reached();
+      }
 #undef CASE
 
-  TypedValue ret;
+    }
+  }
+
   ret.m_type = func->returnType();
   switch (func->returnType()) {
   case KindOfBoolean:
@@ -5968,10 +5996,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
     not_reached();
   }
 
+free_frame:
   frame_free_args(args, numNonDefault);
-  m_stack.ndiscard(numArgs - 1);
-
-  memcpy(m_stack.top(), &ret, sizeof(TypedValue));
+  m_stack.ndiscard(numArgs);
+  memcpy(m_stack.allocTV(), &ret, sizeof(TypedValue));
 }
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,

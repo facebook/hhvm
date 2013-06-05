@@ -21,6 +21,7 @@
 #include <string>
 
 #include "hphp/util/base.h"
+#include "hphp/runtime/base/datatype.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,6 +74,11 @@ void raise_notice(const std::string &msg);
 void raise_notice(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_debugging(const std::string &msg);
 void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_param_type_warning(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type);
 
 template<bool Error>
 void

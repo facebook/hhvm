@@ -16,16 +16,21 @@
 
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/zend/zend_functions.h"
 
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void tvCastToBooleanInPlace(TypedValue* tv) {
+inline void tvUnboxIfNeeded(TypedValue *tv) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
+}
+
+void tvCastToBooleanInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
   bool b;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -44,9 +49,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 }
 
 void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
+  tvUnboxIfNeeded(tv);
   int64_t i;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -114,9 +117,7 @@ int64_t tvCastToInt64(TypedValue* tv, int base /* = 10 */) {
 }
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
+  tvUnboxIfNeeded(tv);
   double d;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -147,9 +148,7 @@ const StaticString
   s_Array("Array");
 
 void tvCastToStringInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
+  tvUnboxIfNeeded(tv);
   StringData * s;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -206,9 +205,7 @@ StringData* tvCastToString(TypedValue* tv) {
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
+  tvUnboxIfNeeded(tv);
   ArrayData * a;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -236,9 +233,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
+  tvUnboxIfNeeded(tv);
   ObjectData* o;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -269,6 +264,90 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   tv->m_type = KindOfObject;
   tv->m_data.pobj->incRefCount();
 }
+
+bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  if (tv->m_type == KindOfArray || tv->m_type == KindOfObject) {
+    return false;
+  }
+  tvCastToBooleanInPlace(tv);
+  return true;
+}
+
+bool tvCanBeCoercedToNumber(TypedValue* tv) {
+  switch (tv->m_type) {
+  case KindOfStaticString:
+  case KindOfString:
+    StringData* s;
+    DataType type;
+    s = tv->m_data.pstr;
+    type = is_numeric_string(s->data(), s->size(), nullptr, nullptr);
+    if (type != KindOfDouble && type != KindOfInt64) {
+      return false;
+    }
+    break;
+  case KindOfArray:
+  case KindOfObject:
+    return false;
+  default:
+    break;
+  }
+  return true;
+}
+
+bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  if (!tvCanBeCoercedToNumber(tv)) {
+    return false;
+  }
+  tvCastToInt64InPlace(tv);
+  return true;
+}
+
+bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  if (!tvCanBeCoercedToNumber(tv)) {
+    return false;
+  }
+  tvCastToDoubleInPlace(tv);
+  return true;
+}
+
+bool tvCoerceParamToStringInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  switch (tv->m_type) {
+  case KindOfArray:
+    return false;
+  case KindOfObject:
+    try {
+      tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
+      return true;
+    } catch (BadTypeConversionException &e) {
+    }
+    return false;
+  default:
+    break;
+  }
+  tvCastToStringInPlace(tv);
+  return true;
+}
+
+bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  if (tv->m_type == KindOfArray) {
+    return true;
+  } else if (tv->m_type == KindOfObject) {
+    tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
+    return true;
+  }
+  return false;
+}
+
+bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
+  tvUnboxIfNeeded(tv);
+  return tv->m_type == KindOfObject;
+}
+
 
 bool tvIsPlausible(const TypedValue* tv) {
   if (!tv) return false;

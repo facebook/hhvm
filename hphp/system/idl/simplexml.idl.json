@@ -87,7 +87,8 @@
             "name": "simplexml_import_dom",
             "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
             "flags": [
-                "HasDocComment"
+                "HasDocComment",
+                "ZendParamMode"
             ],
             "return": {
                 "type": "Variant",
@@ -96,12 +97,12 @@
             "args": [
                 {
                     "name": "node",
-                    "type": "Variant",
+                    "type": "Object",
                     "desc": "A DOM Element node"
                 },
                 {
                     "name": "class_name",
-                    "type": "Variant",
+                    "type": "String",
                     "value": "\"SimpleXMLElement\"",
                     "desc": "You may use this optional parameter so that simplexml_load_file() will return an object of the specified class. That class should extend the SimpleXMLElement class."
                 }

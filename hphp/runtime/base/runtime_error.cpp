@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/runtime_error.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,6 +194,28 @@ void raise_notice(const char *fmt, ...) {
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
                          "HipHop Notice: ");
+}
+
+void raise_param_type_warning(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type) {
+  // slice off fg1_
+  if (strncmp(func_name, "fg1_", 4) == 0) {
+    func_name += 4;
+  } else if (strncmp(func_name, "tg1_", 4) == 0) {
+    func_name += 4;
+  }
+  assert(param_num > 0);
+
+  raise_warning(
+    "%s() expects parameter %d to be %s, %s given",
+    func_name,
+    param_num,
+    getDataTypeString(expected_type),
+    getDataTypeString(actual_type)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

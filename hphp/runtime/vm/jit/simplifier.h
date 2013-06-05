@@ -123,6 +123,7 @@ private:
   SSATmp* simplifyQueryJmp(IRInstruction*);
   SSATmp* simplifyExitOnVarEnv(IRInstruction*);
   SSATmp* simplifyCastStk(IRInstruction*);
+  SSATmp* simplifyCoerceStk(IRInstruction*);
   SSATmp* simplifyAssertStk(IRInstruction*);
   SSATmp* simplifyLdStack(IRInstruction*);
   SSATmp* simplifyLdStackAddr(IRInstruction*);

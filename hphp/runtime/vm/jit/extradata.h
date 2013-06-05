@@ -349,6 +349,7 @@ X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
+X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(AssertStkVal,                 StackOffset);
 X(ReDefSP,                      StackOffset);

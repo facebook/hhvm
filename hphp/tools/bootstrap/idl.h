@@ -31,6 +31,7 @@ namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
 enum FuncFlags {
+  ZendParamMode                 = (1 <<  0),
   IsAbstract                    = (1 <<  4),
   IsFinal                       = (1 <<  5),
   IsPublic                      = (1 <<  6),
@@ -123,6 +124,11 @@ static inline fbstring strtolower(const fbstring& str) {
 
 fbstring phpSerialize(const folly::dynamic& d);
 
+enum class ParamMode {
+  CoerceAndCall,
+  Zend
+};
+
 class PhpConst {
  public:
   explicit PhpConst(const folly::dynamic& cns, fbstring cls = "");
@@ -160,7 +166,8 @@ class PhpConst {
 
 class PhpParam {
  public:
-  explicit PhpParam(const folly::dynamic& param, bool isMagicMethod = false);
+  explicit PhpParam(const folly::dynamic& param, bool isMagicMethod = false,
+                    ParamMode paramMode = ParamMode::CoerceAndCall);
 
   fbstring name() const { return m_name; }
   fbstring getDesc() const { return m_desc; }
@@ -196,6 +203,8 @@ class PhpParam {
 
   bool isIndirectPass() const { return isKindOfIndirect(kindOf()); }
 
+  ParamMode getParamMode() const { return m_paramMode; }
+
  private:
   fbstring m_name;
   folly::dynamic m_param;
@@ -203,6 +212,7 @@ class PhpParam {
   DataType m_kindOf;
   fbstring m_cppType;
   fbstring m_phpType;
+  ParamMode m_paramMode;
 };
 
 class PhpFunc {

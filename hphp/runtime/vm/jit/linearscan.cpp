@@ -466,6 +466,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == GuardStk ||
                opc == AssertStk ||
                opc == CastStk ||
+               opc == CoerceStk ||
                opc == SideExitGuardStk  ||
                VectorEffects::supported(opc));
         assignRegToTmp(&m_regs[int(rVmSp)], &dst, 0);

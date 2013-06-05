@@ -446,6 +446,8 @@ inline bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }
 
+void tvUnboxIfNeeded(TypedValue* tv);
+
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
 int64_t tvCastToInt64(TypedValue* tv, int base = 10);
@@ -454,6 +456,14 @@ void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
+
+bool tvCanBeCoercedToNumber(TypedValue* tv);
+bool tvCoerceParamToBooleanInPlace(TypedValue* tv);
+bool tvCoerceParamToInt64InPlace(TypedValue* tv);
+bool tvCoerceParamToDoubleInPlace(TypedValue* tv);
+bool tvCoerceParamToStringInPlace(TypedValue* tv);
+bool tvCoerceParamToArrayInPlace(TypedValue* tv);
+bool tvCoerceParamToObjectInPlace(TypedValue* tv);
 
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];

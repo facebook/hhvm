@@ -1756,7 +1756,8 @@
             "name": "pathinfo",
             "desc": "pathinfo() returns an associative array containing information about path.",
             "flags": [
-                "HasDocComment"
+                "HasDocComment",
+                "ZendParamMode"
             ],
             "return": {
                 "type": "Variant",

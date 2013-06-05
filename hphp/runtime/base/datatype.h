@@ -163,6 +163,24 @@ inline std::string tname(DataType t) {
   }
 }
 
+inline const char* getDataTypeString(DataType t) {
+  switch (t) {
+    case KindOfUninit:
+    case KindOfNull:    return "NULL";
+    case KindOfBoolean: return "boolean";
+    case KindOfInt64:   return "integer";
+    case KindOfDouble:  return "double";
+    case KindOfStaticString:
+    case KindOfString:  return "string";
+    case KindOfArray:   return "array";
+    case KindOfObject:  return "object";
+    default:
+      assert(false);
+      break;
+  }
+  return "";
+}
+
 inline int getDataTypeIndex(DataType type) {
   switch (type) {
     case KindOfUninit       : return 0;

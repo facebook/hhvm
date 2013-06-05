@@ -25,21 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_gettype(CVarRef v) {
-  switch (v.getType()) {
-  case KindOfUninit:
-  case KindOfNull:    return "NULL";
-  case KindOfBoolean: return "boolean";
-  case KindOfInt64:   return "integer";
-  case KindOfDouble:  return "double";
-  case KindOfStaticString:
-  case KindOfString:  return "string";
-  case KindOfArray:   return "array";
-  case KindOfObject:  return "object";
-  default:
-    assert(false);
-    break;
-  }
-  return "";
+  return getDataTypeString(v.getType());
 }
 
 String f_get_resource_type(CObjRef handle) {

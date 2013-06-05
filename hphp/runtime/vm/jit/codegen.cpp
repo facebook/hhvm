@@ -3573,6 +3573,41 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
                kSyncPoint, args, DestType::None);
 }
 
+void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
+  Type type       = inst->typeParam();
+  SSATmp* sp      = inst->src(0);
+  uint32_t offset = inst->extra<CoerceStk>()->offset;
+  Block* exit     = inst->taken();
+  PhysReg spReg   = m_regs[sp].reg();
+
+  ArgGroup args(m_regs);
+  args.addr(spReg, cellsToBytes(offset));
+
+  TCA tvCoerceHelper;
+  if (type.subtypeOf(Type::Bool)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToBooleanInPlace;
+  } else if (type.subtypeOf(Type::Int)) {
+    // if casting to integer, pass 10 as the base for the conversion
+    args.imm(10);
+    tvCoerceHelper = (TCA)tvCoerceParamToInt64InPlace;
+  } else if (type.subtypeOf(Type::Dbl)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToDoubleInPlace;
+  } else if (type.subtypeOf(Type::Arr)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToArrayInPlace;
+  } else if (type.subtypeOf(Type::Str)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToStringInPlace;
+  } else if (type.subtypeOf(Type::Obj)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToObjectInPlace;
+  } else {
+    not_reached();
+  }
+
+  auto tmpReg = PhysReg(m_rScratch);
+  cgCallHelper(m_as, tvCoerceHelper, tmpReg, kSyncPoint, args);
+  m_as.testb(1, rbyte(tmpReg));
+  emitFwdJcc(m_as, CC_E, exit);
+}
+
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   SSATmp* f             = inst->src(0);
   auto args             = inst->srcs().subpiece(2);

@@ -169,6 +169,7 @@ O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                         ND, S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
+O(CoerceStk,                 D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(AssertStkVal,              D(StkPtr), S(StkPtr) S(Gen),                  E) \
 O(CheckDefinedClsEq,                ND, NA,                                E) \

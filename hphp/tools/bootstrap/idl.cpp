@@ -77,6 +77,7 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
 
 static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
 {
+  {"ZendParamMode",                  ZendParamMode},
   {"IsAbstract",                     IsAbstract},
   {"IsFinal",                        IsFinal},
   {"IsPublic",                       IsPublic},
@@ -481,10 +482,12 @@ PhpConst::PhpConst(const folly::dynamic& cns,
 // PhpParam
 
 PhpParam::PhpParam(const folly::dynamic& param,
-                   bool isMagicMethod /*= false */) :
+                   bool isMagicMethod /*= false */,
+                   ParamMode paramMode /*= CoerceAndCall */) :
     m_name(param["name"].asString()),
     m_param(param),
-    m_desc(getFollyDynamicDefaultString(param, "desc", "")) {
+    m_desc(getFollyDynamicDefaultString(param, "desc", "")),
+    m_paramMode(paramMode) {
   if (isMagicMethod) {
     m_kindOf = KindOfAny;
     m_cppType = "HPHP::Variant";
@@ -576,8 +579,14 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
   }
 
   bool magic = isMagicMethod();
+
+  m_flags = parseFlags(m_func["flags"]);
+
+  ParamMode paramMode = (m_flags & ZendParamMode) ?
+    ParamMode::Zend : ParamMode::CoerceAndCall;
+
   for (auto &p : args->second) {
-    PhpParam param(p, magic);
+    PhpParam param(p, magic, paramMode);
     m_params.push_back(param);
     if (!param.hasDefault()) {
       ++m_minNumParams;
@@ -586,8 +595,6 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
       ++m_numTypeChecks;
     }
   }
-
-  m_flags = parseFlags(m_func["flags"]);
 }
 
 fbstring PhpFunc::getCppSig() const {

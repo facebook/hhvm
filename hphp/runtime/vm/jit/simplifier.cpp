@@ -56,6 +56,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // fallthrough
   case CastStk:
     // fallthrough
+  case CoerceStk:
+    // fallthrough
   case CheckStk:
     // fallthrough
   case GuardStk:
@@ -343,6 +345,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case SpillStack:   return simplifySpillStack(inst);
   case Call:         return simplifyCall(inst);
   case CastStk:      return simplifyCastStk(inst);
+  case CoerceStk:    return simplifyCoerceStk(inst);
   case AssertStk:    return simplifyAssertStk(inst);
   case LdStack:      return simplifyLdStack(inst);
   case LdStackAddr:  return simplifyLdStackAddr(inst);
@@ -1604,6 +1607,16 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
+  if (info.knownType.subtypeOf(inst->typeParam())) {
+    // No need to cast---the type was as good or better.
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
+  auto const info = getStackValue(inst->src(0),
+                                  inst->extra<CoerceStk>()->offset);
   if (info.knownType.subtypeOf(inst->typeParam())) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();

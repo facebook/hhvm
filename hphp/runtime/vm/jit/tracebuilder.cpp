@@ -213,6 +213,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case AssertStk:
   case AssertStkVal:
   case CastStk:
+  case CoerceStk:
   case CheckStk:
   case GuardStk:
   case ExceptionBarrier:

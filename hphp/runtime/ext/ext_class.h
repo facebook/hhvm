@@ -42,7 +42,7 @@ bool f_is_a(CVarRef class_or_object, CStrRef class_name, bool allow_string = fal
 bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_string = true);
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name);
 Variant f_property_exists(CVarRef class_or_object, CStrRef property);
-Variant f_get_object_vars(CVarRef object);
+Variant f_get_object_vars(CObjRef object);
 
 ///////////////////////////////////////////////////////////////////////////////
 

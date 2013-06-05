@@ -116,6 +116,7 @@ function get_php_name($type, $null = 'mixed') {
 // flags
 
 // ClassInfo attributes, and these numbers need to be consistent with them!
+define('ZendParamMode',                  1 <<  0);
 define('IsAbstract',                     1 <<  4);
 define('IsFinal',                        1 <<  5);
 define('IsPublic',                       1 <<  6);

@@ -2105,6 +2105,8 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   //    would be overkill.
   spillStack();
 
+  bool zendParamMode = callee->info()->attribute & ClassInfo::ZendParamMode;
+
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = callee->params()[i];
@@ -2114,12 +2116,22 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
       case KindOfArray:
       case KindOfObject:
       case KindOfString:
-        gen(
-          CastStk,
-          Type::fromDataType(pi.builtinType(), KindOfInvalid),
-          StackOffset(numArgs - i - 1),
-          m_tb->sp()
-        );
+        if (zendParamMode) {
+          gen(
+            CoerceStk,
+            Type::fromDataType(pi.builtinType(), KindOfInvalid),
+            StackOffset(numArgs - i - 1),
+            getExitSlowTrace(),
+            m_tb->sp()
+          );
+        } else {
+          gen(
+            CastStk,
+            Type::fromDataType(pi.builtinType(), KindOfInvalid),
+            StackOffset(numArgs - i - 1),
+            m_tb->sp()
+          );
+        }
         break;
       case KindOfDouble: not_reached();
       case KindOfUnknown: break;

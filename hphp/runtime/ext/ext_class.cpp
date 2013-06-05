@@ -301,12 +301,8 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
   return (propInd != kInvalidSlot);
 }
 
-Variant f_get_object_vars(CVarRef object) {
-  if (object.isObject()) {
-    return object.toObject()->o_toIterArray(ctxClassName());
-  }
-  raise_warning("get_object_vars() expects parameter 1 to be object");
-  return Variant(Variant::NullInit());
+Variant f_get_object_vars(CObjRef object) {
+  return object->o_toIterArray(ctxClassName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

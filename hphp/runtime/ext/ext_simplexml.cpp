@@ -244,23 +244,10 @@ static void add_registered_namespaces(Array &out, xmlNodePtr node,
 
 static StaticString s_SimpleXMLElement("SimpleXMLElement");
 
-Variant f_simplexml_import_dom(CVarRef node,
-                               CVarRef class_name /* = "SimpleXMLElement" */) {
+Variant f_simplexml_import_dom(CObjRef node,
+                               CStrRef class_name /* = "SimpleXMLElement" */) {
 
-  if (!node.isObject()) {
-    raise_warning(
-      "simplexml_import_dom() expects parameter 1 to be object"
-    );
-    return uninit_null();
-  }
-  if (!class_name.isString()) {
-    raise_warning(
-      "simplexml_import_dom() expects parameter 2 to be string"
-    );
-    return uninit_null();
-  }
-
-  c_DOMNode *domnode = node.asCObjRef().getTyped<c_DOMNode>();
+  c_DOMNode *domnode = node.getTyped<c_DOMNode>();
   xmlNodePtr nodep = domnode->m_node;
 
   if (nodep) {

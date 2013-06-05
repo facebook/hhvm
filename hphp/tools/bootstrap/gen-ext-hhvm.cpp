@@ -160,7 +160,18 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
     ind -= 2;
   }
 
-  if (param.kindOf() != KindOfAny) {
+
+  if (param.getParamMode() == ParamMode::Zend) {
+    out << ind << "if (!"
+          << "tvCoerceParamTo" << kindOfString(param.kindOf())
+          << "InPlace(args-" << index << ")) {\n"
+        << ind << "  raise_param_type_warning(__func__, " << index << " + 1, "
+          << "KindOf" << kindOfString(param.kindOf()) << ", "
+          << "(args-" << index << ")->m_type);\n"
+        << ind << "  rv->m_type = KindOfUninit;\n"
+        << ind << "  return;\n"
+        << ind << "}\n";
+  } else if (param.kindOf() != KindOfAny) {
     out << ind << "tvCastTo" << kindOfString(param.kindOf())
         << "InPlace(args-" << index << ");\n";
   }

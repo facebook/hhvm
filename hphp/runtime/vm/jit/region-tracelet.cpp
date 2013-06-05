@@ -195,7 +195,7 @@ RegionDescPtr regionTraceletImpl(const RegionContext& ctx,
  * attempts to consume an input with an insufficiently precise type.
  *
  */
-RegionDescPtr regionTracelet(const RegionContext& ctx) {
+RegionDescPtr selectTracelet(const RegionContext& ctx) {
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;

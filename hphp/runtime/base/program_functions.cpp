@@ -533,7 +533,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
-  if (RuntimeOption::EvalJit && RuntimeOption::EvalDumpTC) {
+  if (RuntimeOption::EvalDumpTC) {
     HPHP::Transl::tc_dump();
   }
 

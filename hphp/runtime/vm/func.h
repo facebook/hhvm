@@ -38,6 +38,11 @@ typedef uint32_t FuncId;
 constexpr FuncId InvalidFuncId = FuncId(-1LL);
 
 /*
+ * Vector of pairs (param number, offset of corresponding DV funclet).
+ */
+typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
+
+/*
  * Metadata about a php function or object method.
  */
 struct Func {
@@ -248,6 +253,7 @@ struct Func {
 
   HphpArray* getStaticLocals() const;
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
+  DVFuncletsVec getDVFunclets() const;
 
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }

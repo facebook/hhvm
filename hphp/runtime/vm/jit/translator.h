@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/base/md5.h"
@@ -59,6 +60,7 @@ namespace Transl {
 using JIT::Type;
 using JIT::RegionDesc;
 using JIT::HhbcTranslator;
+using JIT::ProfData;
 static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
@@ -235,6 +237,8 @@ class NormalizedInstruction {
   // stack at tracelet entry.
   int stackOffset;
   int sequenceNum;
+  Offset nextOffset; // for intra-trace* non-call control-flow instructions,
+                     // this is the offset of the next instruction in the trace*
   bool breaksTracelet:1;
   bool changesPC:1;
   bool fuseBranch:1;
@@ -578,13 +582,6 @@ struct Tracelet : private boost::noncopyable {
   SrcKey nextSk() const;
 };
 
-enum TransKind {
-  TransInterp   = 0,
-  TransNormalIR = 1,
-  TransAnchor   = 2,
-  TransProlog   = 3,
-};
-
 const char* getTransKindName(TransKind kind);
 
 /*
@@ -613,8 +610,6 @@ struct TransRec {
   TCA                     counterStart;
   uint8_t                   counterLen;
   vector<TransBCMapping>  bcMapping;
-
-  static const TransID InvalidID = -1LL;
 
   TransRec() {}
 
@@ -663,6 +658,8 @@ struct TranslArgs {
       , m_src(nullptr)
       , m_align(align)
       , m_interp(false)
+      , m_setFuncBody(false)
+      , m_transId(InvalidID)
     {}
 
   TranslArgs& sk(const SrcKey& sk) {
@@ -681,11 +678,21 @@ struct TranslArgs {
     m_interp = interp;
     return *this;
   }
+  TranslArgs& setFuncBody() {
+    m_setFuncBody = true;
+    return *this;
+  }
+  TranslArgs& transId(TransID transId) {
+    m_transId = transId;
+    return *this;
+  }
 
   SrcKey m_sk;
   TCA m_src;
   bool m_align;
   bool m_interp;
+  bool m_setFuncBody;
+  TransID m_transId;
 };
 
 /*
@@ -863,7 +870,7 @@ public:
   uint64_t getTransCounter(TransID transId) const;
   void setTransCounter(TransID transId, uint64_t value);
 
-  uint32_t addTranslation(const TransRec& transRec);
+  void addTranslation(const TransRec& transRec);
 
   // helpers for srcDB.
   SrcRec* getSrcRec(SrcKey sk) {
@@ -871,6 +878,10 @@ public:
     if (SrcRec* r = m_srcDB.find(sk)) return r;
     assert(s_writeLease.amOwner());
     return m_srcDB.insert(sk);
+  }
+
+  const SrcDB& getSrcDB() const {
+    return m_srcDB;
   }
 
   /*
@@ -909,6 +920,9 @@ protected:
   Mutex m_dbgBlacklistLock;
   bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
 
+  TransKind m_mode;
+  ProfData* m_profData;
+
 private:
   int m_analysisDepth;
 
@@ -921,8 +935,17 @@ public:
   TCA getResumeHelper() {
     return m_resumeHelper;
   }
+
   TCA getResumeHelperRet() {
     return m_resumeHelperRet;
+  }
+
+  ProfData* profData() const {
+    return m_profData;
+  }
+
+  TransKind mode() const {
+    return m_mode;
   }
 
   int analysisDepth() const {

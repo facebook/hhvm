@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP { namespace JIT {
 
@@ -287,6 +288,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     // fallthrough
   case AssertLoc:
   case GuardLoc:
+  case CheckLoc:
     setLocalType(inst->extra<LocalId>()->locId,
                  inst->typeParam());
     break;
@@ -572,21 +574,39 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst,
 
 SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
+  Type typeParam = inst->typeParam();
 
   if (auto const prevValue = getLocalValue(locId)) {
-    always_assert(false && "WTF");
-    return gen(
-      CheckType, inst->typeParam(), inst->taken(), prevValue
-    );
+    return gen(CheckType, typeParam, inst->taken(), prevValue);
   }
 
   auto const prevType = getLocalType(locId);
-  if (prevType != Type::None) {
-    always_assert(false && "WTF2");
-    // It doesn't make sense to be checking something that's deemed to
-    // fail.
-    assert(prevType == inst->typeParam());
+
+  if (prevType == Type::None) {
+    return nullptr;
+  }
+
+  if (prevType.subtypeOf(typeParam)) {
     inst->convertToNop();
+  } else {
+    //
+    // Normally, it doesn't make sense to be checking something that's
+    // deemed to fail.  Incompatible boxed types are ok though, since
+    // we don't track them precisely, but instead check them at every
+    // use.
+    //
+    // However, in JitPGO mode right now, this pathological case can
+    // happen, because profile counters are not accurate and we
+    // currently don't analyze Block post-conditions when picking its
+    // successors during region selection.  This can lead to
+    // incompatible types in blocks selected for the same region.
+    //
+    if (!typeParam.isBoxed() || !prevType.isBoxed()) {
+      if ((typeParam & prevType) == Type::Bottom) {
+        assert(RuntimeOption::EvalJitPGO);
+        return gen(Jmp_, inst->taken());
+      }
+    }
   }
 
   return nullptr;
@@ -599,12 +619,22 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 
   if (!prevType.equals(Type::None) && !typeParam.strictSubtypeOf(prevType)) {
     if (!prevType.subtypeOf(typeParam)) {
+      /* Task #2553746
+       * This is triggering for a case where the tracked state says the local is
+       * InitNull but the AssertLoc says it's Str. */
       static auto const error =
         StringData::GetStaticString("Internal error: static analysis was "
                                     "wrong about a local variable's type.");
       auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
       inst->become(&m_irFactory, errorInst);
-      assert(false && "Incorrect local type from static analysis");
+      assert_log(false,  [&]{
+          IRTrace& mainTrace = trace()->isMain() ? *trace()
+                                                 : *(trace()->main());
+          return folly::format("\npreOptimizeAssertLoc: prevType: {} "
+                               "typeParam: {}\nin instr: {}\nin trace: {}\n",
+                               prevType.toString(), typeParam.toString(),
+                               inst->toString(), mainTrace.toString()).str();
+        });
     } else {
       inst->convertToNop();
     }
@@ -810,6 +840,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
       // Found a dominating instruction that can be used instead of inst
       FTRACE(1, "  {}cse found: {}\n",
              indent(), result->inst()->toString());
+      assert(!inst->consumesReferences());
       if (inst->producesReference()) {
         // Replace with an IncRef
         FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());

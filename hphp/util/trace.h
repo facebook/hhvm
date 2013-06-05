@@ -89,6 +89,7 @@ namespace Trace {
       TM(typeProfile) \
       TM(hhir)        \
       TM(printir)     \
+      TM(pgo)         \
       TM(hhirTracelets) \
       TM(gc)          \
       TM(instancebits)\

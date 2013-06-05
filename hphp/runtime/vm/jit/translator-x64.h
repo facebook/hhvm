@@ -99,6 +99,8 @@ static const int kNumFreeLocalsHelpers = 9;
 
 typedef X64Assembler Asm;
 
+typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
+
 constexpr size_t kJmpTargetAlign = 16;
 constexpr size_t kNonFallthroughAlign = 64;
 constexpr int kJmpLen = 5;
@@ -150,26 +152,32 @@ class TranslatorX64 : public Translator
   class AHotSelector {
    public:
     AHotSelector(TranslatorX64* tx, bool hot) :
-        m_tx(tx), m_hot(hot &&
-                        tx->ahot.available() > 8192 &&
-                        tx->a.base() != tx->ahot.base()) {
-      if (m_hot) {
-        m_save = tx->a;
-        tx->a = tx->ahot;
+        m_tx(tx), m_swap(hot &&
+                         tx->ahot.available() > 8192 &&
+                         // Only swap if a and ahot aren't swapped yet.
+                         // This assumes ahot area is in lower address.
+                         tx->a.base() > tx->ahot.base()) {
+      if (m_swap) {
+        // Swap a and ahot, so that 'a' contains the hot code region.
+        // Note that, although we don't write to tx->ahot directly, we
+        // still need to make  sure that all assembler code areas are
+        // available in a, astubs, and ahot, for example when we call
+        // asmChoose(addr, a, ahot, astubs).
+        std::swap(m_tx->a, m_tx->ahot);
       }
     }
     ~AHotSelector() {
-      if (m_hot) {
-        m_tx->ahot = m_tx->a;
-        m_tx->a = m_save;
+      if (m_swap) {
+        // Swap a and ahot back.
+        std::swap(m_tx->a, m_tx->ahot);
       }
     }
    private:
     TranslatorX64* m_tx;
-    Asm            m_save;
-    bool           m_hot;
+    bool           m_swap;
   };
 
+  TCA                    tcStart;
   Asm                    ahot;
   Asm                    a;
   Asm                    astubs;
@@ -196,6 +204,9 @@ class TranslatorX64 : public Translator
   TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
 
   DataBlock              m_globalData;
+
+  TcaTransIDMap          m_jmpToTransID; // maps jump addresses to the ID
+                                         // of translation containing them
 
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
@@ -224,7 +235,12 @@ private:
   void drawCFG(std::ofstream& out) const;
   static vector<PhysReg> x64TranslRegs();
 
-  Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, ahot, astubs); }
+  Asm& getAsmFor(TCA addr) {
+    assert(a.base()    != ahot.base()   &&
+           a.base()    != astubs.base() &&
+           ahot.base() != astubs.base());
+    return asmChoose(addr, a, ahot, astubs, atrampolines);
+  }
   void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
@@ -239,7 +255,8 @@ public:
   TCA getCallArrayProlog(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 private:
-
+  TCA emitCallArrayProlog(const Func* func,
+                          const DVFuncletsVec& dvs);
   void translateClassExistsImpl(const Tracelet& t,
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
@@ -304,6 +321,14 @@ private:
   void fixup(VMExecutionContext* ec) const;
   TCA getTranslatedCaller() const;
 
+  const TcaTransIDMap& getJmpToTransIDMap() const {
+    return m_jmpToTransID;
+  }
+
+  void setJmpTransID(TCA jmp);
+
+  bool profileSrcKey(const SrcKey& sk) const;
+
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
   }
@@ -325,7 +350,7 @@ private:
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= ahot.base() && tca < astubs.base() + astubs.capacity();
+    return tca >= tcStart && tca < astubs.base() + astubs.capacity();
   }
 
   // If we were to shove every little helper function into this class
@@ -364,7 +389,7 @@ public:
   FreeStubList m_freeStubs;
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
-  bool checkTranslationLimit(SrcKey, const SrcRec&) const;
+  bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   TranslateResult translateTracelet(Tracelet& t);
 
   void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
@@ -436,7 +461,6 @@ public:
   TCA emitRetFromInterpretedGeneratorFrame();
   void emitPopRetIntoActRec(Asm& a);
   int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
-  void emitCondJmp(SrcKey skTrue, SrcKey skFalse, ConditionCode cc);
 
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
@@ -581,6 +605,7 @@ private:
 
 public: // Only for HackIR
   void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
+  void emitReqRetransOpt(Asm& as, const SrcKey& sk, TransID transId);
 
 private:
   // asize + astubssize + gdatasize + trampolinesblocksize

@@ -355,16 +355,24 @@ struct HhbcTranslator {
   void emitReqDoc(const StringData* name);
 
   // iterators
-  void emitIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitIterInit(uint32_t iterId,
+                    int targetOffset,
+                    uint32_t valLocalId,
+                    bool invertCond);
   void emitIterInitK(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
-                     uint32_t keyLocalId);
-  void emitIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+                     uint32_t keyLocalId,
+                     bool invertCond);
+  void emitIterNext(uint32_t iterId,
+                    int targetOffset,
+                    uint32_t valLocalId,
+                    bool invertCond);
   void emitIterNextK(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
-                     uint32_t keyLocalId);
+                     uint32_t keyLocalId,
+                     bool invertCond);
   void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
   void emitMIterInitK(uint32_t iterId,
                      int targetOffset,
@@ -375,16 +383,24 @@ struct HhbcTranslator {
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId);
-  void emitWIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitWIterInit(uint32_t iterId,
+                     int targetOffset,
+                     uint32_t valLocalId,
+                     bool invertCond);
   void emitWIterInitK(uint32_t iterId,
                       int targetOffset,
                       uint32_t valLocalId,
-                      uint32_t keyLocalId);
-  void emitWIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+                      uint32_t keyLocalId,
+                      bool invertCond);
+  void emitWIterNext(uint32_t iterId,
+                     int targetOffset,
+                     uint32_t valLocalId,
+                     bool invertCond);
   void emitWIterNextK(uint32_t iterId,
                       int targetOffset,
                       uint32_t valLocalId,
-                      uint32_t keyLocalId);
+                      uint32_t keyLocalId,
+                      bool invertCond);
 
   void emitIterFree(uint32_t iterId);
   void emitMIterFree(uint32_t iterId);
@@ -414,6 +430,7 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
+  void emitCheckCold(Transl::TransID transId);
   void emitArrayIdx();
 
 private:
@@ -682,7 +699,7 @@ private:
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitBinaryArith(Opcode);
   template<class Lambda>
-  SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
+  SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
   BCMarker makeMarker(Offset bcOff);
   void updateMarker();
   template<class Lambda>
@@ -724,6 +741,7 @@ private: // Exit trace creation routines.
    */
   IRTrace* getExitSlowTrace();
   IRTrace* getCatchTrace();
+  IRTrace* getExitOptTrace(Transl::TransID transId);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
@@ -734,16 +752,15 @@ private: // Exit trace creation routines.
    * on the stack before exiting.
    */
   enum class ExitFlag {
-    None,
-    NoIR,
-
+    Interp,     // will bail to the interpreter to execute at least one BC instr
+    JIT,        // will attempt to use the JIT to create a new translation
     // DelayedMarker means to use the current instruction marker
     // instead of one for targetBcOff.
     DelayedMarker,
   };
   typedef std::function<SSATmp* ()> CustomExit;
   IRTrace* getExitTraceImpl(Offset targetBcOff,
-                            ExitFlag noIRExit,
+                            ExitFlag flag,
                             std::vector<SSATmp*>& spillValues,
                             const CustomExit&);
 

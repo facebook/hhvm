@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-// Expects that runtime/vm/core_types.h is already included.
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/complex_types.h"

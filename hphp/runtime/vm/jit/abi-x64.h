@@ -228,6 +228,12 @@ const int kNumServiceReqArgRegs =
   REQ(RETRANSLATE) \
   \
   /*
+   * When PGO is enabled, this retranslates previous translations leveraging
+   * profiling data.
+   */ \
+  REQ(RETRANSLATE_OPT) \
+  \
+  /*
    * If the max translations is reached for a SrcKey, the last
    * translation in the chain will jump to an interpret request stub.
    * This instructs enterTC to punt to the interpreter.

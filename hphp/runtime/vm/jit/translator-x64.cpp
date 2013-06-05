@@ -582,6 +582,19 @@ asm_label(a, release);
         size_t(a.frontier() - m_dtorGenericStub));
 }
 
+bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  if (profData()->optimized(sk)) return false;
+
+  // The TCA of closure bodies is stored in the func's prologue
+  // tables.  So, to support retranslating them, we need to reset the
+  // prologue tables and the prologue cache appropriately.
+  // (test/quick/floatcmp.php exposes this problem)
+  if (curFunc()->isClosureBody()) return false;
+
+  return true;
+}
 
 TCA TranslatorX64::retranslate(const TranslArgs& args) {
   if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), args.m_sk)) {
@@ -593,6 +606,9 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
   SKTRACE(1, args.m_sk, "retranslate\n");
+  if (m_mode == TransInvalid) {
+    m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
+  }
   return translate(args);
 }
 
@@ -617,11 +633,60 @@ TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
     // interpretation of this BB.
     return nullptr;
   }
+  m_mode = TransLive;
   TCA start = translate(TranslArgs(sk, align).interp(true));
   if (start != nullptr) {
     smashJmp(getAsmFor(toSmash), toSmash, start);
   }
   return start;
+}
+
+TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
+  LeaseHolder writer(s_writeLease);
+  if (!writer) return nullptr;
+
+  TRACE(1, "retranslateOpt: transId = %u\n", transId);
+
+  Func* func = nullptr;
+  if (m_profData->transBlock(transId) == nullptr) {
+    // This can happen for profiling translations that have some
+    // feature not supported by translateRegion yet.  For such translations,
+    // we don't have a Func* (since it's grabbed from the Block).
+    // Anyway, in this case, the region translator resorts generates a
+    // TransLive translation, corresponding to the current live VM context.
+    func = const_cast<Func*>(curFunc());
+  } else {
+    func = m_profData->transFunc(transId);
+  }
+
+  // We may get here multiple times because different translations of
+  // the same SrcKey hit the optimization threshold.  Only the first
+  // time around we want to invalidate the existing translations.
+  const SrcKey& sk = m_profData->transSrcKey(transId);
+  bool alreadyOptimized = m_profData->optimized(sk);
+  m_profData->setOptimized(sk);
+
+  bool setFuncBody = (!alreadyOptimized &&
+                      func->base() == sk.offset() &&
+                      func->getDVFunclets().size() == 0);
+
+  if (!alreadyOptimized) {
+    if (setFuncBody) func->setFuncBody((TCA)funcBodyHelperThunk);
+    invalidateSrcKey(sk);
+  } else {
+    // Bail if we already reached the maximum number of translations per SrcKey.
+    // Note that this can only happen with multi-threading.
+    SrcRec* srcRec = getSrcRec(sk);
+    assert(srcRec);
+    size_t nTrans = srcRec->translations().size();
+    if (nTrans >= RuntimeOption::EvalJitMaxTranslations + 1) return nullptr;
+  }
+
+  m_mode = TransOptimize;
+  auto translArgs = TranslArgs(sk, align).transId(transId);
+  if (setFuncBody) translArgs.setFuncBody();
+
+  return retranslate(translArgs);
 }
 
 /*
@@ -772,6 +837,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   auto sk = args.m_sk;
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
+
   if (SrcRec* sr = m_srcDB.find(sk)) {
     TCA tca = sr->getTopTranslation();
     if (tca) {
@@ -803,9 +869,12 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   size_t asize = a.frontier() - astart;
   size_t stubsize = astubs.frontier() - stubstart;
   assert(asize == 0);
-  if (stubsize) {
+  if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
     addTranslation(TransRec(sk, curUnit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
+    if (m_profData) {
+      m_profData->addTransAnchor(sk);
+    }
     assert(!isTransDBEnabled() || getTransRec(stubstart)->kind == TransAnchor);
   }
 
@@ -825,6 +894,8 @@ TranslatorX64::translate(const TranslArgs& args) {
   INC_TPC(translate);
   assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assert(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
+  assert(m_mode != TransInvalid);
+  SCOPE_EXIT{ m_mode = TransInvalid; };
 
   if (!args.m_interp) {
     if (m_numHHIRTrans == RuntimeOption::EvalJitGlobalTranslationLimit) {
@@ -834,7 +905,8 @@ TranslatorX64::translate(const TranslArgs& args) {
     }
   }
 
-  AHotSelector ahs(this, curFunc()->attrs() & AttrHot);
+  Func* func = const_cast<Func*>(curFunc());
+  AHotSelector ahs(this, func->attrs() & AttrHot);
 
   if (args.m_align) {
     moveToAlign(a, kNonFallthroughAlign);
@@ -844,6 +916,9 @@ TranslatorX64::translate(const TranslArgs& args) {
 
   translateWork(args);
 
+  if (args.m_setFuncBody) {
+    func->setFuncBody(start);
+  }
   SKTRACE(1, args.m_sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.m_sk), start);
   return start;
@@ -1096,40 +1171,42 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
 }
 
 TCA
+TranslatorX64::emitCallArrayProlog(const Func* func,
+                                   const DVFuncletsVec& dvs) {
+  TCA start = a.frontier();
+  if (dvs.size() == 1) {
+    a.   cmp_imm32_disp_reg32(dvs[0].first,
+                              AROFF(m_numArgsAndCtorFlag), rVmFp);
+    emitBindJcc(a, CC_LE, SrcKey(func, dvs[0].second));
+    emitBindJmp(a, SrcKey(func, func->base()));
+  } else {
+    a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
+    for (unsigned i = 0; i < dvs.size(); i++) {
+      a.   cmp_imm32_reg32(dvs[i].first, rax);
+      emitBindJcc(a, CC_LE, SrcKey(func, dvs[i].second));
+    }
+    emitBindJmp(a, SrcKey(func, func->base()));
+  }
+  return start;
+}
+
+TCA
 TranslatorX64::getCallArrayProlog(Func* func) {
   TCA tca = func->getFuncBody();
   if (tca != (TCA)funcBodyHelperThunk) return tca;
 
-  int numParams = func->numParams();
-  std::vector<std::pair<int,Offset> > dvs;
-  for (int i = 0; i < numParams; ++i) {
-    const Func::ParamInfo& pi = func->params()[i];
-    if (pi.hasDefaultValue()) {
-      dvs.push_back(std::make_pair(i, pi.funcletOff()));
-    }
-  }
+  DVFuncletsVec dvs = func->getDVFunclets();
+
   if (dvs.size()) {
     LeaseHolder writer(s_writeLease);
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != (TCA)funcBodyHelperThunk) return tca;
-    tca = a.frontier();
-    if (dvs.size() == 1) {
-      a.   cmp_imm32_disp_reg32(dvs[0].first,
-                                AROFF(m_numArgsAndCtorFlag), rVmFp);
-      emitBindJcc(a, CC_LE, SrcKey(func, dvs[0].second));
-      emitBindJmp(a, SrcKey(func, func->base()));
-    } else {
-      a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
-      for (unsigned i = 0; i < dvs.size(); i++) {
-        a.   cmp_imm32_reg32(dvs[i].first, rax);
-        emitBindJcc(a, CC_LE, SrcKey(func, dvs[i].second));
-      }
-      emitBindJmp(a, SrcKey(func, func->base()));
-    }
+    tca = emitCallArrayProlog(func, dvs);
+    func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());
-    tca = tx64->getTranslation(TranslArgs(sk, false));
+    tca = tx64->getTranslation(TranslArgs(sk, false).setFuncBody());
   }
 
   return tca;
@@ -1511,6 +1588,10 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
                           TransProlog, aStart, a.frontier() - aStart,
                           stubStart, astubs.frontier() - stubStart));
 
+  if (m_profData) {
+    m_profData->addTransProlog(skFuncBody);
+  }
+
   recordGdbTranslation(skFuncBody, func,
                        a, aStart,
                        false, true);
@@ -1852,27 +1933,6 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
 }
 
-// for documentation see bindJmpccFirst below
-void
-TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
-                           ConditionCode cc) {
-  // should be true for SrcKeys generated via OpJmpZ/OpJmpNZ
-  assert(skTaken.getFuncId() == skNotTaken.getFuncId());
-
-  // reserve space for a smashable jnz/jmp pair; both initially point
-  // to our stub.
-  prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
-  TCA old = a.frontier();
-  TCA stub = emitServiceReq(REQ_BIND_JMPCC_FIRST,
-                            old,
-                            skTaken.offset(),
-                            skNotTaken.offset(),
-                            cc,
-                            ccArgInfo(cc));
-  a.jcc(cc, stub);
-  a.jmp(stub);
-}
-
 /*
  * bindJmp --
  *
@@ -2020,6 +2080,8 @@ TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
     emitJmpOrJcc(_a, cc, toSmash);
   }
 
+  setJmpTransID(toSmash);
+
   TCA sr = emitServiceReq(SRFlags::None, req,
                           toSmash, dest.offset());
 
@@ -2096,6 +2158,12 @@ void TranslatorX64::emitReqRetransNoIR(Asm& as, const SrcKey& sk) {
   } else {
     as.jmp(sr);
   }
+}
+
+void TranslatorX64::emitReqRetransOpt(Asm& as, const SrcKey& sk,
+                                      TransID transId) {
+  emitServiceReq(REQ_RETRANSLATE_OPT,
+                 sk.getFuncId(), sk.offset(), transId);
 }
 
 void
@@ -2442,6 +2510,17 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     start = retranslateAndPatchNoIR(sk, true, toSmash);
     SKTRACE(1, sk, "retranslated (without IR) @%p\n", start);
   } break;
+
+  case REQ_RETRANSLATE_OPT: {
+    FuncId  funcId  = (FuncId) args[0];
+    Offset  offset  = (Offset) args[1];
+    TransID transId = (TransID)args[2];
+    sk = SrcKey(funcId, offset);
+    start = retranslateOpt(transId, false);
+    SKTRACE(2, sk, "retranslated-OPT: transId = %d  start: @%p\n", transId,
+            start);
+    break;
+  }
 
   case REQ_RETRANSLATE: {
     INC_TPC(retranslate);
@@ -3059,8 +3138,8 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 }
 
 bool
-TranslatorX64::checkTranslationLimit(SrcKey sk,
-                                     const SrcRec& srcRec) const {
+TranslatorX64::reachedTranslationLimit(SrcKey sk,
+                                       const SrcRec& srcRec) const {
   if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
     INC_TPC(max_trans);
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
@@ -3211,12 +3290,24 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(srcRec.inProgressTailJumps().empty());
   };
 
-  if (!args.m_interp && !checkTranslationLimit(sk, srcRec)) {
+  if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
-    JIT::RegionContext rContext { curFunc(), args.m_sk.offset(), curSpOff() };
-    FTRACE(2, "populating live context for region\n");
-    populateLiveContext(rContext);
-    auto region = JIT::selectRegion(rContext, &t);
+    JIT::RegionDescPtr region;
+    if (RuntimeOption::EvalJitPGO) {
+      if (m_mode == TransOptimize) {
+        TransID transId = args.m_transId;
+        assert(transId != InvalidID);
+        region = JIT::selectHotRegion(transId, this);
+        if (region && region->blocks.size() == 0) region = nullptr;
+      } else {
+        // We always go through the tracelet translator in this case
+      }
+    } else {
+      JIT::RegionContext rContext { curFunc(), sk.offset(), curSpOff() };
+      FTRACE(2, "populating live context for region\n");
+      populateLiveContext(rContext);
+      region = JIT::selectRegion(rContext, &t);
+    }
 
     TranslateResult result = Retry;
     RegionBlacklist regionInterps;
@@ -3244,6 +3335,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       if (!region || result == Failure) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
+        if (m_mode == TransOptimize) {
+          m_mode = TransLive;
+        }
         result = translateTracelet(t);
         DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
         assert(IMPLIES(region && reqRegion, result != Success));
@@ -3258,8 +3352,10 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     }
 
     if (result == Success) {
-      // Translation succeeded. Mark it as such.
-      transKind = TransNormalIR;
+      assert(m_mode == TransLive    ||
+             m_mode == TransProfile ||
+             m_mode == TransOptimize);
+      transKind = m_mode;
     }
   }
 
@@ -3295,11 +3391,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                        false, false);
   recordGdbTranslation(sk, curFunc(), astubs, stubStart,
                        false, false);
+  if (RuntimeOption::EvalJitPGO) {
+    m_profData->addTrans(t, transKind);
+  }
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
-      start, sk.getFuncId(), sk.offset());
+        start, sk.getFuncId(), sk.offset());
   srcRec.newTranslation(start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.frontier() - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
@@ -3324,6 +3423,10 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     // after guards, add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
       ht.emitIncTransCounter();
+    }
+
+    if (m_mode == TransProfile) {
+      ht.emitCheckCold(m_profData->curTransID());
     }
 
     emitRB(a, RBTypeTraceletBody, t.m_sk);
@@ -3357,6 +3460,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
          ni = ni->next) {
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
+        assert(!(m_mode == TransProfile && ni->outputPredicted && ni->next));
         m_irTrans->translateInstr(*ni);
       } catch (JIT::FailedIRGen& fcg) {
         always_assert(!ni->interp);
@@ -3600,6 +3704,7 @@ TranslatorX64::TranslatorX64()
     }
   }
   assert(base);
+  tcStart = base;
   base += -(uint64_t)base & (kRoundUp - 1);
   enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
   TRACE(1, "init atrampolines @%p\n", base);
@@ -4139,7 +4244,7 @@ bool TranslatorX64::dumpTC(bool ignoreLease) {
 
 // Returns true on success
 bool tc_dump(void) {
-  return TranslatorX64::Get()->dumpTC();
+  return TranslatorX64::Get() && TranslatorX64::Get()->dumpTC();
 }
 
 // Returns true on success
@@ -4176,7 +4281,7 @@ bool TranslatorX64::dumpTCData() {
 }
 
 void TranslatorX64::invalidateSrcKey(SrcKey sk) {
-  assert(!RuntimeOption::RepoAuthoritative);
+  assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   assert(s_writeLease.amOwner());
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
@@ -4190,6 +4295,14 @@ void TranslatorX64::invalidateSrcKey(SrcKey sk) {
    * to reclaim this.
    */
   sr->replaceOldTranslations();
+}
+
+void TranslatorX64::setJmpTransID(TCA jmp) {
+  if (m_mode != TransProfile) return;
+
+  TransID transId = m_profData->curTransID();
+  FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
+  m_jmpToTransID[jmp] = transId;
 }
 
 } // HPHP::Transl

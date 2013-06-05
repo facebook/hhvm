@@ -466,6 +466,7 @@ const Id kInvalidId = Id(-1);
 // offsets.
 typedef int32_t Offset;
 constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
+typedef hphp_hash_set<Offset> OffsetSet;
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed

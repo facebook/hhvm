@@ -26,11 +26,15 @@
 #include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
+
 namespace Transl {
 struct Tracelet;
+struct TranslatorX64;
 }
+
 namespace JIT {
 
 using boost::container::flat_map;
@@ -52,7 +56,7 @@ struct RegionDesc {
   struct Location;
   struct TypePred;
   struct ReffinessPred;
-  typedef smart::unique_ptr<Block>::type BlockPtr;
+  typedef std::shared_ptr<Block> BlockPtr;
   enum class ParamByRef : uint8_t {
     Yes,
     No,
@@ -158,7 +162,6 @@ public:
     if (debug) checkInvariants();
   }
 
-  Block(const Block&) = delete;
   Block& operator=(const Block&) = delete;
 
   /*
@@ -270,16 +273,34 @@ struct RegionContext::PreLiveAR {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Define a compilation region that starts with sk.
+ * Select a compilation region corresponding to the given context.
+ * The shape of the region selected is controlled by
+ * RuntimeOption::EvalJitRegionSelector.  If the specified shape is
+ * 'tracelet', then the input argument t is used to build the region.
  *
- * May return nullptr.
+ * This function may return nullptr.
  *
  * For now this is hooked up in TranslatorX64::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like analyze to occur underneath this as
  * well.
  */
-RegionDescPtr selectRegion(const RegionContext&, const Transl::Tracelet*);
+RegionDescPtr selectRegion(const RegionContext& context,
+                           const Transl::Tracelet* t);
+
+/*
+ * Select a compilation region based on profiling information.  This
+ * is used in JitPGO mode.  Argument transId specifies the profiling
+ * translation that triggered the profiling-based region selection.
+ */
+RegionDescPtr selectHotRegion(Transl::TransID transId,
+                              Transl::TranslatorX64* tx64);
+
+/*
+ * Creates a Block corresponding to tracelet tlet. This function
+ * assumes that tlet contains a single block.
+ */
+RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet);
 
 /*
  * Debug stringification for various things.

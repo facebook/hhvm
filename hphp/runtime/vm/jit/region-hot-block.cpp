@@ -14,30 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP {
+namespace JIT {
 
-//////////////////////////////////////////////////////////////////////
+RegionDescPtr selectHotBlock(TransID transId,
+                             const ProfData* profData,
+                             const TransCFG& cfg) {
+  RegionDescPtr region = smart::make_unique<JIT::RegionDesc>();
 
-/*
- * A dummy (debugging) region selector that just uses a single HHBC
- * opcode as the region, and guards on everything.
- */
-RegionDescPtr selectOneBC(const RegionContext& ctx) {
-  auto ret = smart::make_unique<RegionDesc>();
-  auto blk = smart::make_unique<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
+  RegionDesc::BlockPtr block = profData->transBlock(transId);
 
-  for (auto& live : ctx.liveTypes) {
-    blk->addPredicted(SrcKey{ctx.func, ctx.bcOffset},
-                      {live.location, live.type});
+  if (block != nullptr) {
+    region->blocks.emplace_back(block);
   }
 
-  ret->blocks.emplace_back(std::move(blk));
-  return ret;
+  return region;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-}}
+} }

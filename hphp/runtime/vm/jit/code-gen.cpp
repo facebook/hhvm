@@ -782,7 +782,11 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                            extra->notTaken,
                            cc,
                            m_tx64->ccArgInfo(cc));
+
+  tx64->setJmpTransID(a.frontier());
   a.    jcc    (cc, jccStub);
+
+  tx64->setJmpTransID(a.frontier());
   a.    jmp    (jccStub);
 }
 
@@ -2580,6 +2584,8 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::emitReqBindAddr(const Func* func,
                                     TCA& dest,
                                     Offset offset) {
+  tx64->setJmpTransID((TCA)&dest);
+
   dest = m_tx64->emitServiceReq(REQ_BIND_ADDR,
                                 &dest,
                                 offset);
@@ -2600,6 +2606,8 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND,
                                        m_as.frontier(), data->defaultOff,
                                        CC_AE);
+      tx64->setJmpTransID(m_as.frontier());
+
       m_as.    jae(def);
     }
 
@@ -2911,6 +2919,12 @@ void CodeGenerator::cgReqRetranslateNoIR(IRInstruction* inst) {
                            inst->extra<ReqRetranslateNoIR>()->offset);
   emitExitNoIRStats(m_as, m_tx64, curFunc(), dest);
   m_tx64->emitReqRetransNoIR(m_as, dest);
+}
+
+void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
+  auto extra = inst->extra<ReqRetranslateOpt>();
+  auto sk    = SrcKey(curFunc(), extra->offset);
+  m_tx64->emitReqRetransOpt(m_as, sk, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
@@ -5249,6 +5263,16 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
   auto fpReg = m_regs[fp].reg();
   m_as.    cmpq   (0, fpReg[AROFF(m_varEnv)]);
   emitFwdJcc(CC_NE, label);
+}
+
+void CodeGenerator::cgCheckCold(IRInstruction* inst) {
+  Block*     label = inst->taken();
+  TransID  transId = inst->extra<CheckCold>()->transId;
+  auto counterAddr = m_tx64->profData()->transCounterAddr(transId);
+
+  emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
+  m_as.decq(m_rScratch[0]);
+  emitFwdJcc(CC_LE, label);
 }
 
 void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {

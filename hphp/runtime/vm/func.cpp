@@ -666,6 +666,19 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   }
 }
 
+DVFuncletsVec Func::getDVFunclets() const {
+ DVFuncletsVec dvs;
+  int nParams = numParams();
+  for (int i = 0; i < nParams; ++i) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      dvs.push_back(std::make_pair(i, pi.funcletOff()));
+    }
+  }
+  return dvs;
+}
+
+
 Func::SharedData::SharedData(PreClass* preClass, Id id,
                              Offset base, Offset past, int line1, int line2,
                              bool top, const StringData* docComment)

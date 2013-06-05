@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_EXTRADATA_H_
 
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace JIT {
 
@@ -256,6 +257,29 @@ struct BCOffset : IRExtraData {
 };
 
 /*
+ * Translation IDs.
+ */
+struct TransIDData : IRExtraData {
+  explicit TransIDData(Transl::TransID transId) : transId(transId) {}
+  std::string show() const { return folly::to<std::string>(transId); }
+  Transl::TransID transId;
+};
+
+/*
+ * Information needed to generate a REQ_RETRANSLATE_OPT service request.
+ */
+struct ReqRetransOptData : IRExtraData {
+  explicit ReqRetransOptData(Transl::TransID transId, Offset offset)
+      : transId(transId)
+      , offset(offset) {}
+  std::string show() const {
+    return folly::to<std::string>(transId, ", ", offset);
+  }
+  Transl::TransID transId;
+  Offset offset;
+};
+
+/*
  * DefInlineFP is present when we need to create a frame for inlining.
  * This instruction also carries some metadata used by tracebuilder to
  * track state during an inlined call.
@@ -401,6 +425,8 @@ X(DefInlineFP,                  DefInlineFPData);
 X(ReqBindJmp,                   BCOffset);
 X(ReqBindJmpNoIR,               BCOffset);
 X(ReqRetranslateNoIR,           BCOffset);
+X(ReqRetranslateOpt,            ReqRetransOptData);
+X(CheckCold,                    TransIDData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);

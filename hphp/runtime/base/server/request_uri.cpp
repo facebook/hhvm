@@ -68,13 +68,11 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
 
   // Fast path for files that exist
-  String canon = Util::canonicalize(string(m_originalURL.c_str(),
-                                           m_originalURL.size()));
-  String relUrl(canon.charAt(0) == '/' ? canon.substr(1) : canon);
-  if (virtualFileExists(vhost, sourceRoot, pathTranslation, relUrl)) {
-    m_rewrittenURL = relUrl;
-    m_resolvedURL =  std::move(relUrl);
-    PrependSlash(m_resolvedURL);
+  String canon(Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
+               AttachString);
+  if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
+    m_rewrittenURL = canon;
+    m_resolvedURL = canon;
     return true;
   }
 
@@ -142,8 +140,9 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
     }
     splitURL(m_rewrittenURL, m_rewrittenURL, m_queryString);
   }
-  m_rewrittenURL = Util::canonicalize(string(m_rewrittenURL.c_str(),
-                                             m_rewrittenURL.size()));
+  m_rewrittenURL = String(
+      Util::canonicalize(m_rewrittenURL.c_str(), m_rewrittenURL.size()),
+      AttachString);
   if (!m_rewritten && m_rewrittenURL.charAt(0) == '/') {
     // A un-rewritten URL is always relative, so remove prepending /
     m_rewrittenURL = m_rewrittenURL.substr(1);
@@ -184,31 +183,43 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
 bool RequestURI::resolveURL(const VirtualHost *vhost,
                             const string &pathTranslation,
                             const string &sourceRoot) {
-  m_resolvedURL = m_rewrittenURL;
+
+  String startURL;
+  if (m_rewritten) {
+    startURL = m_rewrittenURL;
+  } else {
+    startURL = m_originalURL;
+  }
+  startURL = String(
+      Util::canonicalize(startURL.c_str(), startURL.size(), false),
+      AttachString);
+  m_resolvedURL = startURL;
+
   while (!virtualFileExists(vhost, sourceRoot, pathTranslation,
                             m_resolvedURL)) {
     int pos = m_resolvedURL.rfind('/');
     if (pos <= 0) {
       // when none of the <subpath> exists, we give up, and try default doc
-      m_resolvedURL = m_rewrittenURL;
+      m_resolvedURL = startURL;
       if (!m_resolvedURL.empty() &&
           m_resolvedURL.charAt(m_resolvedURL.length() - 1) != '/') {
         m_resolvedURL += "/";
       }
       m_resolvedURL += String(RuntimeOption::DefaultDocument);
-      m_pathInfo.reset();
+      m_origPathInfo.reset();
       if (virtualFileExists(vhost, sourceRoot, pathTranslation,
                             m_resolvedURL)) {
         m_defaultDoc = true;
-        PrependSlash(m_resolvedURL);
         return true;
       }
       return false;
     }
-    m_resolvedURL = m_rewrittenURL.substr(0, pos);
-    m_pathInfo = m_rewrittenURL.substr(pos);
+    m_resolvedURL = startURL.substr(0, pos);
+    m_origPathInfo = startURL.substr(pos);
   }
-  PrependSlash(m_resolvedURL);
+  m_pathInfo = String(
+      Util::canonicalize(m_origPathInfo.c_str(), m_origPathInfo.size()),
+      AttachString);
   return true;
 }
 
@@ -219,13 +230,14 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
   if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
   }
+  String canon(Util::canonicalize(filename.c_str(), filename.size()),
+               AttachString);
   if (!vhost->getDocumentRoot().empty()) {
-    string fullname = filename.data();
-    if (fullname[0] == '/') {
+    string fullname = canon.data();
+    while (fullname[0] == '/') {
       fullname = fullname.substr(1);
-    } else {
-      fullname = pathTranslation + fullname;
     }
+    fullname = pathTranslation + fullname;
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();
@@ -241,8 +253,8 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       (stat(m_absolutePath.c_str(), &st) == 0 &&
        (st.st_mode & S_IFMT) == S_IFREG);
   }
-  m_path = filename;
-  m_absolutePath = String(sourceRoot) + filename;
+  m_path = canon;
+  m_absolutePath = String(sourceRoot) + canon;
   processExt();
   return true;
 }
@@ -327,6 +339,7 @@ void RequestURI::dump() {
   m_rewrittenURL.dump();
   m_resolvedURL.dump();
   m_pathInfo.dump();
+  m_origPathInfo.dump();
   m_absolutePath.dump();
   m_path.dump();
 }
@@ -337,6 +350,7 @@ void RequestURI::clear() {
   m_rewrittenURL.reset();
   m_resolvedURL.reset();
   m_pathInfo.reset();
+  m_origPathInfo.reset();
   m_absolutePath.reset();
   m_path.reset();
 }

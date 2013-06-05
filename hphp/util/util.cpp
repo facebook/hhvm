@@ -552,7 +552,9 @@ std::string Util::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-const char *Util::canonicalize(const char *addpath, size_t addlen) {
+const char *Util::canonicalize(const char *addpath, size_t addlen,
+                               bool collapse_slashes /* = true */) {
+  assert(strlen(addpath) == addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;
@@ -566,7 +568,7 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
 
   char *path = (char *)malloc(maxlen);
 
-  if (addpath[0] == '/') {
+  if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading
      * '/'s to a single leading '/' from the addpath,
      * and leave addpath at the first non-'/' character.
@@ -586,9 +588,13 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
     }
     seglen = next - addpath;
 
-    if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
-      /* noop segment (/ or ./) so skip it
-       */
+    if (seglen == 0) {
+      /* / */
+      if (!collapse_slashes) {
+        path[pathlen++] = '/';
+      }
+    } else if (seglen == 1 && addpath[0] == '.') {
+      /* ./ */
     } else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
       /* backpath (../) */
       if (pathlen == 1 && path[0] == '/') {
@@ -603,15 +609,13 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
         memcpy(path + pathlen, "../", *next ? 3 : 2);
         pathlen += *next ? 3 : 2;
       } else {
-        /* otherwise crop the prior segment
-         */
+        /* otherwise crop the prior segment */
         do {
           --pathlen;
         } while (pathlen && path[pathlen - 1] != '/');
       }
     } else {
-      /* An actual segment, append it to the destination path
-       */
+      /* An actual segment, append it to the destination path */
       if (*next) {
         seglen++;
       }
@@ -619,8 +623,7 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
       pathlen += seglen;
     }
 
-    /* Skip over trailing slash to the next segment
-     */
+    /* Skip over trailing slash to the next segment */
     if (*next) {
       ++next;
     }

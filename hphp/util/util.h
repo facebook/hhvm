@@ -174,7 +174,8 @@ std::string relativePath(const std::string fromDir, const std::string toFile);
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
 std::string canonicalize(const std::string &path);
-const char *canonicalize(const char *path, size_t len);
+const char *canonicalize(const char *path, size_t len,
+                         bool collapse_slashes = true);
 
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".

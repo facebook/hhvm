@@ -31,7 +31,7 @@ public:
   RequestURI(const VirtualHost *vhost, Transport *transport,
              const std::string &pathTranslation,
              const std::string &sourceRoot);
-  RequestURI(const std::string & rpcFunc);
+  explicit RequestURI(const std::string & rpcFunc);
 
   CStrRef originalURL() const { return m_originalURL; }
   CStrRef resolvedURL() const { return m_resolvedURL; }
@@ -41,6 +41,7 @@ public:
   const char *ext() const { return m_ext; }
   CStrRef absolutePath() const { return m_absolutePath; }
   CStrRef pathInfo() const { return m_pathInfo; }
+  CStrRef origPathInfo() const { return m_origPathInfo; }
 
   bool rewritten() const { return m_rewritten; }
   bool defaultDoc() const { return m_defaultDoc; }
@@ -59,6 +60,7 @@ private:
                          // without pathinfo
 
   String m_pathInfo;
+  String m_origPathInfo;
   String m_absolutePath;
   String m_path;  // path relative to SourceRoot
 

@@ -362,11 +362,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   } else {
     server.set(s_SCRIPT_NAME, r.resolvedURL());
   }
-  if (!r.rewritten() && r.pathInfo().empty()) {
-    server.set(s_PHP_SELF, r.resolvedURL());
-  } else {
-    // when URL is rewritten, or pathinfo is not empty, use original URL
+  if (r.rewritten()) {
     server.set(s_PHP_SELF, r.originalURL());
+  } else {
+    server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
   }
 
   server.set(s_SCRIPT_FILENAME, r.absolutePath());

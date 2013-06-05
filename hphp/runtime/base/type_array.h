@@ -320,59 +320,45 @@ class Array : protected SmartPtr<ArrayData> {
 
   // defined in type_variant.h
   template<typename T>
-  CVarRef setImpl(const T &key, CVarRef v);
+  void setImpl(const T &key, CVarRef v);
   template<typename T>
-  CVarRef setRefImpl(const T &key, CVarRef v);
+  void setRefImpl(const T &key, CVarRef v);
 
-  CVarRef set(int     key, CVarRef v) {
-    return set((int64_t)key, v);
-  }
-  CVarRef set(int64_t   key, CVarRef v);
-  CVarRef set(double  key, CVarRef v) {
-    return set(ToKey(key), v);
-  }
+  void set(int key, CVarRef v) { set(int64_t(key), v); }
+  void set(int64_t key, CVarRef v);
+  void set(double  key, CVarRef v) = delete;
 
-  CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
-  CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
+  void set(CStrRef key, CVarRef v, bool isKey = false);
+  void set(CVarRef key, CVarRef v, bool isKey = false);
 
-  CVarRef set(char    key, RefResult v) { return setRef(key,variant(v)); }
-  CVarRef set(short   key, RefResult v) { return setRef(key,variant(v)); }
-  CVarRef set(int     key, RefResult v) { return setRef(key,variant(v)); }
-  CVarRef set(int64_t   key, RefResult v) { return setRef(key,variant(v)); }
-  CVarRef set(double  key, RefResult v) { return setRef(key,variant(v)); }
+  void set(char    key, RefResult v) { setRef(key,variant(v)); }
+  void set(short   key, RefResult v) { setRef(key,variant(v)); }
+  void set(int     key, RefResult v) { setRef(key,variant(v)); }
+  void set(int64_t key, RefResult v) { setRef(key,variant(v)); }
+  void set(double  key, RefResult v) = delete;
 
-  CVarRef set(CStrRef key, RefResult v, bool isKey = false) {
+  void set(CStrRef key, RefResult v, bool isKey = false) {
     return setRef(key,variant(v), isKey);
   }
-  CVarRef set(CVarRef key, RefResult v, bool isKey = false) {
+  void set(CVarRef key, RefResult v, bool isKey = false) {
     return setRef(key,variant(v), isKey);
   }
 
-  CVarRef setRef(int     key, CVarRef v) {
-    return setRef((int64_t)key, v);
-  }
-  CVarRef setRef(int64_t   key, CVarRef v);
-  CVarRef setRef(double  key, CVarRef v) {
-    return setRef(ToKey(key), v);
-  }
-
-  CVarRef setRef(CStrRef key, CVarRef v, bool isKey = false);
-  CVarRef setRef(CVarRef key, CVarRef v, bool isKey = false);
+  void setRef(int     key, CVarRef v) { setRef(int64_t(key), v); }
+  void setRef(int64_t key, CVarRef v);
+  void setRef(double  key, CVarRef v) = delete;
+  void setRef(CStrRef key, CVarRef v, bool isKey = false);
+  void setRef(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
-  CVarRef addImpl(const T &key, CVarRef v);
+  void addImpl(const T &key, CVarRef v);
 
-  CVarRef add(int     key, CVarRef v) {
-    return add((int64_t)key, v);
-  }
-  CVarRef add(int64_t   key, CVarRef v);
-  CVarRef add(double  key, CVarRef v) {
-    return add(ToKey(key), v);
-  }
-
-  CVarRef add(CStrRef key, CVarRef v, bool isKey = false);
-  CVarRef add(CVarRef key, CVarRef v, bool isKey = false);
+  void add(int     key, CVarRef v) { add(int64_t(key), v); }
+  void add(int64_t key, CVarRef v);
+  void add(double  key, CVarRef v) = delete;
+  void add(CStrRef key, CVarRef v, bool isKey = false);
+  void add(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>

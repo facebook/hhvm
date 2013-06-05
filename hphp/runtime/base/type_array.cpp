@@ -538,7 +538,7 @@ Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
 
 template<typename T>
 inline ALWAYS_INLINE
-CVarRef Array::setImpl(const T &key, CVarRef v) {
+void Array::setImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
@@ -546,12 +546,11 @@ CVarRef Array::setImpl(const T &key, CVarRef v) {
     ArrayData *escalated = m_px->set(key, v, (m_px->getCount() > 1));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
-  return v;
 }
 
 template<typename T>
 inline ALWAYS_INLINE
-CVarRef Array::setRefImpl(const T &key, CVarRef v) {
+void Array::setRefImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::CreateRef(key, v);
     ArrayBase::operator=(data);
@@ -560,12 +559,11 @@ CVarRef Array::setRefImpl(const T &key, CVarRef v) {
     ArrayData *escalated = m_px->setRef(key, v, (m_px->getCount() > 1));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
-  return v;
 }
 
 template<typename T>
 inline ALWAYS_INLINE
-CVarRef Array::addImpl(const T &key, CVarRef v) {
+void Array::addImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
@@ -573,70 +571,54 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
     ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
-  return v;
 }
 
-CVarRef Array::set(int64_t   key, CVarRef v) {
-  return setImpl(key, v);
+void Array::set(int64_t key, CVarRef v) {
+  setImpl(key, v);
 }
 
-CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
-  return setImpl(key.toKey(), v);
+  setImpl(key.toKey(), v);
 }
 
-CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) {
-    return setImpl(key.getNumData(), v);
-  }
+void Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
+  if (key.getRawType() == KindOfInt64) return setImpl(key.getNumData(), v);
   if (isKey) return setImpl(key, v);
   VarNR k(key.toKey());
-  if (!k.isNull()) {
-    return setImpl(k, v);
-  }
-  return Variant::lvalBlackHole();
+  if (!k.isNull()) setImpl(k, v);
 }
 
-CVarRef Array::setRef(int64_t   key, CVarRef v) {
-  return setRefImpl(key, v);
+void Array::setRef(int64_t key, CVarRef v) {
+  setRefImpl(key, v);
 }
 
-CVarRef Array::setRef(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::setRef(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
-  return setRefImpl(key.toKey(), v);
+  setRefImpl(key.toKey(), v);
 }
 
-CVarRef Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) {
-    return setRefImpl(key.getNumData(), v);
-  }
+void Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
+  if (key.getRawType() == KindOfInt64) return setRefImpl(key.getNumData(), v);
   if (isKey) return setRefImpl(key, v);
   VarNR k(key.toKey());
-  if (!k.isNull()) {
-    return setRefImpl<Variant>(k, v);
-  }
-  return Variant::lvalBlackHole();
+  if (!k.isNull()) setRefImpl<Variant>(k, v);
 }
 
-CVarRef Array::add(int64_t   key, CVarRef v) {
-  return addImpl(key, v);
+void Array::add(int64_t key, CVarRef v) {
+  addImpl(key, v);
 }
 
-CVarRef Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
-  return addImpl(key.toKey(), v);
+  addImpl(key.toKey(), v);
 }
 
-CVarRef Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) {
-    return addImpl(key.getNumData(), v);
-  }
+void Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
+  if (key.getRawType() == KindOfInt64) return addImpl(key.getNumData(), v);
   if (isKey) return addImpl(key, v);
   VarNR k(key.toKey());
-  if (!k.isNull()) {
-    return addImpl(k, v);
-  }
-  return Variant::lvalBlackHole();
+  if (!k.isNull()) addImpl(k, v);
 }
 
 Variant &Array::addLval(CStrRef key, bool isKey /* = false */) {

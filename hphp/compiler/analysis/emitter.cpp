@@ -2586,7 +2586,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           postponeMeth(m, nullptr, true);
         } else {
           assert(!node->getClassScope()); // Handled directly by emitClass().
-          FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
+          FuncEmitter* fe = m_ue.newFuncEmitter(nName);
           e.DefFunc(fe->id());
           postponeMeth(m, fe, false);
         }
@@ -7023,7 +7023,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     is not callable.
   */
   StringData* name = StringData::GetStaticString("86null");
-  FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
+  FuncEmitter* fe = ue->newFuncEmitter(name);
   fe->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
            true, empty_string.get());
   ue->emitOp(OpNull);
@@ -7045,7 +7045,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
       // version to delegate if necessary
       name = StringData::GetStaticString("__builtin_" + name->toCPPString());
     }
-    FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
+    FuncEmitter* fe = ue->newFuncEmitter(name);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
     ue->emitOp(OpNativeImpl);

@@ -718,7 +718,7 @@ class UnitEmitter {
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
-  FuncEmitter* newFuncEmitter(const StringData* n, bool top);
+  FuncEmitter* newFuncEmitter(const StringData* n);
   void appendTopEmitter(FuncEmitter* func);
   FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
   PreClassEmitter* newPreClassEmitter(const StringData* n,
@@ -829,9 +829,6 @@ class UnitEmitter {
   bool m_mergeOnly;
   typedef std::vector<FuncEmitter*> FeVec;
   FeVec m_fes;
-  typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
-                        string_data_isame> FuncEmitterMap;
-  FuncEmitterMap m_feMap;
   typedef hphp_hash_map<const FuncEmitter*, const Func*,
                         pointer_hash<FuncEmitter> > FMap;
   FMap m_fMap;

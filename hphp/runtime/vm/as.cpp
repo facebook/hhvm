@@ -1438,7 +1438,7 @@ void parse_function(AsmState& as) {
     as.error(".function must have a name");
   }
 
-  as.fe = as.ue->newFuncEmitter(StringData::GetStaticString(name), true);
+  as.fe = as.ue->newFuncEmitter(StringData::GetStaticString(name));
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
 

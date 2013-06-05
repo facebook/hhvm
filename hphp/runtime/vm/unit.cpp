@@ -2301,21 +2301,15 @@ FuncEmitter* UnitEmitter::getMain() {
 void UnitEmitter::initMain(int line1, int line2) {
   assert(m_fes.size() == 0);
   StringData* name = StringData::GetStaticString("");
-  FuncEmitter* pseudomain = newFuncEmitter(name, false);
+  FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
   pseudomain->init(line1, line2, 0, attrs, false, name);
 }
 
-FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* n, bool top) {
+FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* n) {
   assert(m_fes.size() > 0 || !strcmp(n->data(), "")); // Pseudomain comes first.
   FuncEmitter* fe = new FuncEmitter(*this, m_nextFuncSn++, m_fes.size(), n);
   m_fes.push_back(fe);
-  if (top) {
-    if (m_feMap.find(n) != m_feMap.end()) {
-      raise_error("Function already defined: %s", n->data());
-    }
-    m_feMap[n] = fe;
-  }
   return fe;
 }
 

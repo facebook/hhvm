@@ -1141,7 +1141,7 @@ void FuncRepoProxy::GetFuncsStmt
 
       FuncEmitter* fe;
       if (preClassId < 0) {
-        fe = ue.newFuncEmitter(name, top);
+        fe = ue.newFuncEmitter(name);
       } else {
         PreClassEmitter* pce = ue.pce(preClassId);
         fe = ue.newMethodEmitter(name, pce);

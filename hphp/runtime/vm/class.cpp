@@ -33,7 +33,6 @@
 #include "hphp/system/lib/systemlib.h"
 #include "hphp/util/logger.h"
 
-#include <boost/checked_delete.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
@@ -157,8 +156,7 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
 }
 
 PreClass::~PreClass() {
-  std::for_each(methods(), methods() + numMethods(),
-                boost::checked_deleter<Func>());
+  std::for_each(methods(), methods() + numMethods(), Func::destroy);
 }
 
 void PreClass::atomicRelease() {

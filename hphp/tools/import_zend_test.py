@@ -134,7 +134,7 @@ no_import = (
     '/sapi',
 )
 
-# For mark these as failing
+# For marking tests as always failing. Used to keep flaky tests in bad/.
 bad_tests = (
     # SESSION is bused on husdon
     '/zend/unset_cv05.php',
@@ -170,6 +170,8 @@ bad_tests = (
     '/ext-posix/posix_kill_basic.php',
     '/ext-standard-file/005_variation-win32.php',
     '/ext-json/fail001.php',
+    '/ext-standard-network/getmxrr.php',
+    '/ext-standard-network/gethostbyname_error004.php',
 
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',
@@ -188,7 +190,7 @@ bad_tests = (
     # time tests are hard to write, these are poorly written
     '/ext-date/bug48187.php',
 
-    # broken on unbuntu 12.04
+    # broken on ubuntu 12.04
     '/ext-date/DateTimeZone_listAbbreviations_basic1.php',
     '/ext-date/bug52290.php',
     '/ext-date/timezone_abbreviations_list_basic1.php',

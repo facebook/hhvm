@@ -121,6 +121,9 @@ struct DynLocation {
   bool isRef() const {
     return rtt.isRef();
   }
+  bool isRefToObject() const {
+    return rtt.isRef() && innerType() == KindOfObject;
+  }
   bool isValue() const {
     return rtt.isValue();
   }
@@ -856,6 +859,10 @@ private:
                     NormalizedInstruction* firstInstr,
                     GuardType specType,
                     GuardType& relxType);
+  void specializeDeps(Tracelet& tclet, TraceletContext& tctxt);
+  void specializeCollections(NormalizedInstruction* instr,
+                             int index,
+                             TraceletContext& tctxt);
   DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
                                                 size_t opndIdx);
   GuardType getOperandConstraintType(NormalizedInstruction* instr,
@@ -868,8 +875,10 @@ private:
                             const GuardType&       specType);
 
 
-  RuntimeType liveType(Location l, const Unit &u);
-  RuntimeType liveType(const Cell* outer, const Location& l);
+  RuntimeType liveType(Location l, const Unit &u, bool specialize = false);
+  RuntimeType liveType(const Cell* outer,
+                       const Location& l,
+                       bool specialize = false);
 
   void consumeStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
   void produceStackEntry(Tracelet* tlet, NormalizedInstruction* ni);

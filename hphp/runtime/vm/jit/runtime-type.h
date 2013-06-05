@@ -229,7 +229,9 @@ class RuntimeType {
       assert(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
       assert(m_value.knownClass == nullptr ||
-             m_value.outerType == KindOfObject);
+             m_value.outerType == KindOfObject ||
+             (m_value.outerType == KindOfRef &&
+                 m_value.innerType == KindOfObject));
     }
   }
 

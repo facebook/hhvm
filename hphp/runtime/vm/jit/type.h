@@ -358,7 +358,7 @@ public:
 
   Type innerType() const {
     assert(isBoxed());
-    return Type(m_bits >> kBoxShift);
+    return Type(m_bits >> kBoxShift, m_class);
   }
 
   /*
@@ -391,18 +391,21 @@ public:
     // Boxing Uninit returns InitNull but that logic doesn't belong
     // here.
     assert(not(Uninit) || equals(Cell));
-    return Type(m_bits << kBoxShift);
+    return Type(m_bits << kBoxShift, m_class);
   }
 
   // This computes the type effects of the Unbox opcode.
   Type unbox() const {
     assert(subtypeOf(Gen));
-    return (*this & Cell) | (*this & BoxedCell).innerType();
+    const Class* klass = m_class;
+    Type t = (*this & Cell) | (*this & BoxedCell).innerType();
+    t.m_class = klass; // keep the Class* if one was set
+    return t;
   }
 
   Type deref() const {
     assert(isPtr());
-    return Type(m_bits >> kPtrShift);
+    return Type(m_bits >> kPtrShift, m_class);
   }
 
   Type derefIfPtr() const {
@@ -419,7 +422,7 @@ public:
   Type ptr() const {
     assert(!isPtr());
     assert(subtypeOf(Gen));
-    return Type(m_bits << kPtrShift);
+    return Type(m_bits << kPtrShift, m_class);
   }
 
   Type specialize(const Class* klass) const {

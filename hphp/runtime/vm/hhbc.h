@@ -816,7 +816,7 @@ mcodeMaybePropName(MemberCode mcode) {
 }
 
 inline bool
-mcodeMaybeArrayKey(MemberCode mcode) {
+mcodeMaybeArrayOrMapKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 
@@ -830,7 +830,12 @@ mcodeMaybeArrayIntKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 
+inline bool
+mcodeMaybeVectorKey(MemberCode mcode) {
+    return mcode == MEC || mcode == MEL || mcode == MEI;
+}
 
- }
+
+}
 
 #endif

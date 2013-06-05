@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/annotation.h"
@@ -249,7 +250,9 @@ Translator::locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
-RuntimeType Translator::liveType(Location l, const Unit& u) {
+RuntimeType Translator::liveType(Location l,
+                                 const Unit& u,
+                                 bool specialize) {
   Cell *outer;
   switch (l.space) {
     case Location::Stack:
@@ -284,11 +287,13 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
     }
   }
   assert(IS_REAL_TYPE(outer->m_type));
-  return liveType(outer, l);
+  return liveType(outer, l, specialize);
 }
 
 RuntimeType
-Translator::liveType(const Cell* outer, const Location& l) {
+Translator::liveType(const Cell* outer,
+                     const Location& l,
+                     bool specialize) {
   always_assert(analysisDepth() == 0);
 
   if (!outer) {
@@ -298,26 +303,30 @@ Translator::liveType(const Cell* outer, const Location& l) {
   DataType outerType = (DataType)outer->m_type;
   assert(IS_REAL_TYPE(outerType));
   DataType valueType = outerType;
+  DataType innerType = KindOfInvalid;
   const Cell* valCell = outer;
   if (outerType == KindOfRef) {
     // Variant. Pick up the inner type, too.
     valCell = outer->m_data.pref->tv();
-    DataType innerType = valCell->m_type;
+    innerType = valCell->m_type;
     assert(IS_REAL_TYPE(innerType));
     valueType = innerType;
     assert(innerType != KindOfRef);
     TRACE(2, "liveType Var -> %d\n", innerType);
-    return RuntimeType(KindOfRef, innerType);
+  } else {
+    TRACE(2, "liveType %d\n", outerType);
   }
   const Class *klass = nullptr;
   if (valueType == KindOfObject) {
-    // TODO: Infer the class, too.
-    if (false) {
+    // Only infer the class if specialization requested
+    if (specialize) {
       klass = valCell->m_data.pobj->getVMClass();
     }
   }
-  TRACE(2, "liveType %d\n", outerType);
-  RuntimeType retval = RuntimeType(outerType, KindOfInvalid, klass);
+  RuntimeType retval = RuntimeType(outerType, innerType);
+  if (klass != nullptr) {
+    retval = retval.setKnownClass(klass);
+  }
   return retval;
 }
 
@@ -948,7 +957,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
             baseType = Type::fromRuntimeType(inputs[1]->rtt);
         }
 
-        const bool setElem = mcodeMaybeArrayKey(ni->immVecM[0]);
+        const bool setElem = mcodeMaybeArrayOrMapKey(ni->immVecM[0]);
         const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
         if (setElem && baseType.maybe(Type::Str)) {
           if (baseType.isString()) {
@@ -2936,6 +2945,44 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   }
 }
 
+/*
+ * This method looks at all the uses of the tracelet dependencies in the
+ * instruction stream and tries to specialize the type associated
+ * with each location.
+ */
+void Translator::specializeDeps(Tracelet& tclet, TraceletContext& tctxt) {
+  // Process the instruction stream, look for CGetM/SetM/IssetM and if the
+  // instructions are for Vector types and consistent with Vector usage
+  // specialize the guard
+  for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
+       instr = instr->next) {
+    auto op = instr->op();
+    if ((op == OpCGetM || op == OpIssetM) && instr->inputs.size() == 2) {
+      specializeCollections(instr, 0, tctxt);
+    } else if (op == OpSetM && instr->inputs.size() == 3) {
+      specializeCollections(instr, 1, tctxt);
+    }
+  }
+}
+
+void Translator::specializeCollections(NormalizedInstruction* instr,
+                                       int index,
+                                       TraceletContext& tctxt) {
+  if (instr->inputs[index]->isObject()
+      || instr->inputs[index]->isRefToObject()) {
+    Location l = instr->inputs[index]->location;
+    auto dep = tctxt.m_dependencies.find(l);
+    if (dep != tctxt.m_dependencies.end()) {
+      RuntimeType specialized = liveType(l, *curUnit(), true);
+      const Class* klass = specialized.knownClass();
+      if (klass != nullptr
+          && (klass == c_Vector::s_cls || klass == c_Map::s_cls)) {
+        tctxt.m_dependencies[l]->rtt = specialized;
+      }
+    }
+  }
+}
+
 static bool checkTaintFuncs(StringData* name) {
   static const StringData* s_extract =
     StringData::GetStaticString("extract");
@@ -3491,6 +3538,7 @@ breakBB:
   }
 
   relaxDeps(t, tas);
+  specializeDeps(t, tas);
 
   // Mark the last instruction appropriately
   assert(t.m_instrStream.last);

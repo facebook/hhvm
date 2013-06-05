@@ -476,6 +476,8 @@ bool IRInstruction::isLoad() const {
     case VGetProp:
     case VGetPropStk:
     case ArrayGet:
+    case VectorGet:
+    case MapGet:
     case CGetElem:
     case VGetElem:
     case VGetElemStk:

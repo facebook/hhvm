@@ -433,6 +433,12 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     void emitArrayGet(SSATmp* key);
     void emitArrayIsset();
+    void emitVectorSet(SSATmp* key, SSATmp* value);
+    void emitVectorGet(SSATmp* key);
+    void emitVectorIsset();
+    void emitMapSet(SSATmp* key, SSATmp* value);
+    void emitMapGet(SSATmp* key);
+    void emitMapIsset();
 
     // Misc Helpers
     void numberStackInputs();
@@ -460,9 +466,20 @@ private:
     SSATmp* genStk(Opcode op, IRTrace* taken, Srcs... srcs);
 
     /* Various predicates about the current instruction */
-    bool isSimpleArrayOp();
     bool isSimpleBase();
     bool isSingleMember();
+
+    enum class SimpleOp {
+      // the opcode is not in a simple form or not on a proper collection type
+      None,
+      // simple opcode on Array
+      Array,
+      // simple opcode on Vector* (c_Vector*)
+      Vector,
+      // simple opcode on Map* (c_Map*)
+      Map
+    };
+    SimpleOp isSimpleCollectionOp();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;

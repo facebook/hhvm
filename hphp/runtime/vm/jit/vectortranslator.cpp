@@ -330,7 +330,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
     mcodeMaybePropName(m_ni.immVecM[0]);
 
   // Array access with one element in the vector
-  const bool singleElem = isSingle && mcodeMaybeArrayKey(m_ni.immVecM[0]);
+  const bool singleElem = isSingle && mcodeMaybeArrayOrMapKey(m_ni.immVecM[0]);
 
   // SetM with one vector array element
   const bool simpleArraySet = isSetM && singleElem;
@@ -338,6 +338,11 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   // IssetM with one vector array element and an Arr base
   const bool simpleArrayIsset = isIssetM && singleElem &&
     baseType.subtypeOf(Type::Arr);
+  // IssetM with one vector array element and a collection type
+  const bool simpleCollectionIsset = isIssetM && singleElem &&
+    baseType.strictSubtypeOf(Type::Obj) &&
+    (baseType.getClass() == c_Vector::s_cls ||
+        baseType.getClass() == c_Map::s_cls );
 
   // UnsetM on an array with one vector element
   const bool simpleArrayUnset = isUnsetM && singleElem;
@@ -349,10 +354,14 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
     baseType.not(Type::Str | Type::Obj);
+  const bool simpleCollectionGet = isCGetM && singleElem &&
+    baseType.strictSubtypeOf(Type::Obj) &&
+    (baseType.getClass() == c_Vector::s_cls ||
+        baseType.getClass() == c_Map::s_cls );
 
   if (simpleProp || singlePropSet ||
-      simpleArraySet || simpleArrayGet ||
-      simpleArrayUnset || badUnset ||
+      simpleArraySet || simpleArrayGet || simpleCollectionGet ||
+      simpleArrayUnset || badUnset || simpleCollectionIsset ||
       simpleArrayIsset) {
     setNoMIState();
   }
@@ -409,7 +418,7 @@ void HhbcTranslator::VectorTranslator::emitMTrace() {
     shape << separator;
     if (mcode == MW) {
       shape << "MW";
-    } else if (mcodeMaybeArrayKey(mcode)) {
+    } else if (mcodeMaybeArrayOrMapKey(mcode)) {
       shape << "ME:" << rttStr(iInd);
     } else if (mcodeMaybePropName(mcode)) {
       shape << "MP:" << rttStr(iInd);
@@ -568,7 +577,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   IRTrace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
-      isSimpleArrayOp()) {
+      isSimpleCollectionOp() != SimpleOp::None) {
     // In these cases we can pass the base by value, after unboxing if needed.
     m_base = gen(Unbox, failedRef, getBase());
     assert(m_base->isA(baseType.unbox()));
@@ -596,20 +605,43 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   }
 }
 
-// Is the current instruction a 1-element vector, with an Arr base and Int or
-// Str key?
-bool HhbcTranslator::VectorTranslator::isSimpleArrayOp() {
+// Is the current instruction a 1-element simple collection (includes Array),
+// operation?
+HhbcTranslator::VectorTranslator::SimpleOp
+HhbcTranslator::VectorTranslator::isSimpleCollectionOp() {
   SSATmp* base = getInput(m_mii.valCount());
+  auto baseType = base->type().unbox();
   HPHP::Op op = m_ni.mInstrOp();
   if ((op == OpSetM || op == OpCGetM || op == OpIssetM) &&
       isSimpleBase() &&
-      isSingleMember() &&
-      mcodeMaybeArrayKey(m_ni.immVecM[0]) &&
-      base->type().subtypeOfAny(Type::Arr, Type::BoxedArr)) {
-    SSATmp* key = getInput(m_mii.valCount() + 1);
-    return key->isA(Type::Int) || key->isA(Type::Str);
+      isSingleMember()) {
+
+    if (baseType.subtypeOf(Type::Arr)) {
+      if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
+        SSATmp* key = getInput(m_mii.valCount() + 1);
+        if (key->isA(Type::Int) || key->isA(Type::Str)) {
+          return SimpleOp::Array;
+        }
+      }
+    } else if (baseType.strictSubtypeOf(Type::Obj)) {
+      if (baseType.getClass() == c_Vector::s_cls) {
+        if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
+          SSATmp* key = getInput(m_mii.valCount() + 1);
+          if (key->isA(Type::Int)) {
+            return SimpleOp::Vector;
+          }
+        }
+      } else if (baseType.getClass() == c_Map::s_cls) {
+        if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
+          SSATmp* key = getInput(m_mii.valCount() + 1);
+          if (key->isA(Type::Int) || key->isA(Type::Str)) {
+            return SimpleOp::Map;
+          }
+        }
+      }
+    }
   }
-  return false;
+  return SimpleOp::None;
 }
 
 // "Simple" bases are stack cells and locals.
@@ -1479,6 +1511,53 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
 }
 #undef HELPER_TABLE
 
+namespace VectorHelpers {
+inline TypedValue vectorGet(c_Vector* vec, int64_t key) {
+  TypedValue* ret = vec->at(key);
+  return *ret;
+}
+}
+
+void HhbcTranslator::VectorTranslator::emitVectorGet(SSATmp* key) {
+  SSATmp* value = gen(VectorGet, m_ht.getCatchTrace(),
+                      cns((TCA)VectorHelpers::vectorGet), m_base, key);
+  m_result = gen(IncRef, value);
+}
+
+template<KeyType keyType>
+static inline TypedValue mapGetImpl(
+    c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
+  TypedValue* ret = map->at(key);
+  return *ret;
+}
+
+#define HELPER_TABLE(m)                     \
+  /* name        hot        keyType  */     \
+  m(mapGetS,   HOT_FUNC_VM, StrKey)         \
+  m(mapGetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                              \
+hot                                                         \
+TypedValue nm(c_Map* map, TypedValue* key) {          \
+  return mapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitMapGet(SSATmp* key) {
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  SSATmp* value = gen(MapGet, m_ht.getCatchTrace(),
+                      cns((TCA)opFunc), m_base, key);
+  m_result = gen(IncRef, value);
+}
+#undef HELPER_TABLE
+
 template <KeyType keyType>
 static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
                                       MInstrState* mis) {
@@ -1512,15 +1591,24 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitCGetElem() {
   SSATmp* key = getKey();
 
-  if (isSimpleArrayOp()) {
+  SimpleOp simpleOpType = isSimpleCollectionOp();
+  switch (simpleOpType) {
+  case SimpleOp::Array:
     emitArrayGet(key);
-    return;
+    break;
+  case SimpleOp::Vector:
+    emitVectorGet(key);
+    break;
+  case SimpleOp::Map:
+    emitMapGet(key);
+    break;
+  default:
+    typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
+    BUILD_OPTAB_HOT(getKeyTypeIS(key));
+    m_result = gen(CGetElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
+                   m_base, key, genMisPtr());
+    break;
   }
-
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-  BUILD_OPTAB_HOT(getKeyTypeIS(key));
-  m_result = gen(CGetElem, m_ht.getCatchTrace(), cns((TCA)opFunc),
-                 m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1651,13 +1739,69 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitIssetElem() {
-  if (isSimpleArrayOp()) {
-    emitArrayIsset();
-    return;
-  }
+namespace VectorHelpers {
+static inline uint64_t vectorIsset(c_Vector* vec, int64_t index) {
+  return vec->get(index) != nullptr;
+}
+}
 
-  emitIssetEmptyElem(false);
+void HhbcTranslator::VectorTranslator::emitVectorIsset() {
+  SSATmp* key = getKey();
+  assert(key->isA(Type::Int));
+  m_result = gen(VectorIsset,
+                 cns((TCA)VectorHelpers::vectorIsset),
+                 m_base,
+                 key);
+}
+
+template<KeyType keyType>
+static inline uint64_t mapIssetImpl(
+  c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
+  return map->get(key) != nullptr;
+}
+
+#define HELPER_TABLE(m)                     \
+  /* name        hot        keyType  */     \
+  m(mapIssetS,   HOT_FUNC_VM, StrKey)         \
+  m(mapIssetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                              \
+hot                                                         \
+uint64_t nm(c_Map* map, TypedValue* key) {          \
+  return mapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitMapIsset() {
+  SSATmp* key = getKey();
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  m_result = gen(MapIsset, cns((TCA)opFunc), m_base, key);
+}
+#undef HELPER_TABLE
+
+void HhbcTranslator::VectorTranslator::emitIssetElem() {
+  SimpleOp simpleOpType = isSimpleCollectionOp();
+  switch (simpleOpType) {
+  case SimpleOp::Array:
+    emitArrayIsset();
+    break;
+  case SimpleOp::Vector:
+    emitVectorIsset();
+    break;
+  case SimpleOp::Map:
+    emitMapIsset();
+    break;
+  default:
+    emitIssetEmptyElem(false);
+    break;
+  }
 }
 
 void HhbcTranslator::VectorTranslator::emitEmptyElem() {
@@ -1817,6 +1961,57 @@ void HhbcTranslator::VectorTranslator::emitSetWithRefNewElem() {
   m_result = nullptr;
 }
 
+namespace VectorHelpers {
+static inline void vectorSet(c_Vector* vec,
+                            int64_t key,
+                            Cell value) {
+  vec->set(key, &value);
+}
+}
+
+void HhbcTranslator::VectorTranslator::emitVectorSet(
+    SSATmp* key, SSATmp* value) {
+  gen(VectorSet, m_ht.getCatchTrace(),
+      cns((TCA)VectorHelpers::vectorSet), m_base, key, value);
+  m_result = value;
+}
+
+template<KeyType keyType>
+static inline void mapSetImpl(
+    c_Map* map,
+    typename KeyTypeTraits<keyType>::rawType key,
+    Cell value) {
+  map->set(key, &value);
+}
+
+#define HELPER_TABLE(m)                     \
+  /* name        hot        keyType  */     \
+  m(mapSetS,   HOT_FUNC_VM, StrKey)         \
+  m(mapSetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                                      \
+hot                                                                 \
+void nm(c_Map* map, TypedValue* key, Cell value) {            \
+  mapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);         \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitMapSet(
+    SSATmp* key, SSATmp* value) {
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_Map*, TypedValue*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  gen(MapSet, m_ht.getCatchTrace(),
+      cns((TCA)opFunc), m_base, key, value);
+  m_result = value;
+}
+#undef HELPER_TABLE
+
 template <KeyType keyType>
 static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
                                       Cell val) {
@@ -1844,32 +2039,41 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   SSATmp* value = getValue();
   SSATmp* key = getKey();
 
-  if (isSimpleArrayOp()) {
+  SimpleOp simpleOpType = isSimpleCollectionOp();
+  switch (simpleOpType) {
+  case SimpleOp::Array:
     emitArraySet(key, value);
-    return;
-  }
-
-  // Emit the appropriate helper call.
-  typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
-  BUILD_OPTAB_HOT(getKeyTypeIS(key));
-  m_failedSetTrace = m_ht.getCatchTrace();
-  SSATmp* result = genStk(SetElem, m_failedSetTrace, cns((TCA)opFunc),
-                          m_base, key, value);
-  auto t = result->type();
-  if (t.equals(Type::Nullptr)) {
-    // Base is not a string. Result is always value.
-    m_result = value;
-  } else if (t.equals(Type::CountedStr)) {
-    // Base is a string. Stack result is a new string so we're responsible for
-    // decreffing value.
-    m_result = result;
-    gen(DecRef, value);
-  } else {
-    assert(t.equals(Type::CountedStr | Type::Nullptr));
-    // Base might be a string. Assume the result is value, then inform
-    // emitMPost that it needs to test the actual result.
-    m_result = value;
-    m_strTestResult = result;
+    break;
+  case SimpleOp::Vector:
+    emitVectorSet(key, value);
+    break;
+  case SimpleOp::Map:
+    emitMapSet(key, value);
+    break;
+  default:
+    // Emit the appropriate helper call.
+    typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
+    BUILD_OPTAB_HOT(getKeyTypeIS(key));
+    m_failedSetTrace = m_ht.getCatchTrace();
+    SSATmp* result = genStk(SetElem, m_failedSetTrace, cns((TCA)opFunc),
+                            m_base, key, value);
+    auto t = result->type();
+    if (t.equals(Type::Nullptr)) {
+      // Base is not a string. Result is always value.
+      m_result = value;
+    } else if (t.equals(Type::CountedStr)) {
+      // Base is a string. Stack result is a new string so we're responsible for
+      // decreffing value.
+      m_result = result;
+      gen(DecRef, value);
+    } else {
+      assert(t.equals(Type::CountedStr | Type::Nullptr));
+      // Base might be a string. Assume the result is value, then inform
+      // emitMPost that it needs to test the actual result.
+      m_result = value;
+      m_strTestResult = result;
+    }
+    break;
   }
 }
 #undef HELPER_TABLE

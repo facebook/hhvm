@@ -223,10 +223,11 @@ RuntimeType::setValueType(DataType newInner) const {
 
 RuntimeType
 RuntimeType::setKnownClass(const Class* klass) const {
-  assert(isObject());
+  assert(isObject() || (isRef() && innerType() == KindOfObject));
   RuntimeType rtt;
-  rtt.m_kind = VALUE;
+  rtt.m_kind = this->m_kind;
   rtt.m_value.outerType = outerType();
+  rtt.m_value.innerType = innerType();
   rtt.m_value.klass = m_value.klass;
   rtt.m_value.knownClass = klass;
   rtt.consistencyCheck();

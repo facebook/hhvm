@@ -553,6 +553,12 @@ O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),     C|N|PRc|Refs|Mem|Er)\
+O(VectorGet,                   D(Cell), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int),            E|N|Mem|Refs|Er) \
+O(MapGet,                      D(Cell), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str),        E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -570,6 +576,14 @@ O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
                                           S(Cell),    E|N|PRc|CRc|Refs|Mem|K) \
+O(VectorSet,                        ND, C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int)                              \
+                                          S(Cell),           E|N|Mem|Refs|Er) \
+O(MapSet,                           ND, C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str)                          \
+                                          S(Cell),           E|N|Mem|Refs|Er) \
 O(ArraySetRef,                      ND, C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
@@ -608,6 +622,12 @@ O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
 O(ArrayIsset,                  D(Bool), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),        E|N|Mem|Refs|Er) \
+O(VectorIsset,                 D(Bool), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int),            E|N|Mem|Refs)    \
+O(MapIsset,                    D(Bool), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str),        E|N|Mem|Refs)    \
 O(IssetElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \

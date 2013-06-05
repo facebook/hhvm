@@ -793,25 +793,29 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
   }                                                               \
 } while (false)
 
-#define READSVEC() do {                     \
-  int sz = readData<int>(it);               \
-  out << " <";                              \
-  const char* sep = "";                     \
-  for (int i = 0; i < sz; ++i) {            \
-    out << sep;                             \
-    if (op == OpSSwitch) {                  \
-      READLITSTR("");                       \
-      out << ":";                           \
-    }                                       \
-    Offset o = readData<Offset>(it);        \
-    if (u != nullptr) {                        \
-      out << u->offsetOf(iStart + o);       \
-    } else {                                \
-      out << o;                             \
-    }                                       \
-    sep = " ";                              \
-  }                                         \
-  out << ">";                               \
+#define READSVEC() do {                         \
+  int sz = readData<int>(it);                   \
+  out << " <";                                  \
+  const char* sep = "";                         \
+  for (int i = 0; i < sz; ++i) {                \
+    out << sep;                                 \
+    if (op == OpSSwitch) {                      \
+      READLITSTR("");                           \
+      out << ":";                               \
+    }                                           \
+    Offset o = readData<Offset>(it);            \
+    if (u != nullptr) {                         \
+      if (iStart + o == u->entry() - 1) {       \
+        out << "Invalid";                       \
+      } else {                                  \
+        out << u->offsetOf(iStart + o);         \
+      }                                         \
+    } else {                                    \
+      out << o;                                 \
+    }                                           \
+    sep = " ";                                  \
+  }                                             \
+  out << ">";                                   \
 } while (false)
 
 #define ONE(a) H_##a

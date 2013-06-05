@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_error.h"
@@ -101,14 +102,6 @@ using Transl::tx64;
 #endif
 TRACE_SET_MOD(bcinterp);
 
-namespace {
-
-struct VMPrepareUnwind : std::exception {
-  const char* what() const throw() { return "VMPrepareUnwind"; }
-};
-
-}
-
 ActRec* ActRec::arGetSfp() const {
   ActRec* prevFrame = (ActRec*)m_savedRbp;
   if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
@@ -154,8 +147,6 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
 
 const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
-const StaticString s_hphpd_break("hphpd_break");
-const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 const StaticString s_stdclass("stdclass");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
@@ -867,225 +858,6 @@ string Stack::toString(const ActRec* fp, int offset,
   return os.str();
 }
 
-UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
-                               PC& pc, Fault& fault) {
-  const Func* func = fp->m_func;
-  FTRACE(1, "unwindFrag: func {} ({})\n",
-         func->fullName()->data(), func->unit()->filepath()->data());
-
-  const bool unwindingGeneratorFrame = func->isGenerator();
-  auto const curOp = *reinterpret_cast<const Opcode*>(pc);
-  using namespace HPHP;
-  const bool unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
-  TypedValue* evalTop;
-  if (UNLIKELY(unwindingGeneratorFrame)) {
-    assert(!isValidAddress((uintptr_t)fp));
-    evalTop = generatorStackBase(fp);
-  } else {
-    assert(isValidAddress((uintptr_t)fp));
-    evalTop = frameStackBase(fp);
-  }
-  assert(isValidAddress((uintptr_t)evalTop));
-  assert(evalTop >= m_top);
-
-  while (m_top < evalTop) {
-    popTV();
-  }
-
-  /*
-   * This code is repeatedly called with the same offset when an
-   * exception is raised and rethrown by fault handlers.  This
-   * `faultNest' iterator is here to skip the EHEnt handlers that have
-   * already been run for this in-flight exception.
-   */
-  if (const EHEnt* eh = func->findEH(offset)) {
-    int faultNest = 0;
-    for (;;) {
-      assert(faultNest <= fault.m_handledCount);
-      if (faultNest == fault.m_handledCount) {
-        ++fault.m_handledCount;
-
-        switch (eh->m_ehtype) {
-        case EHEnt::EHType_Fault:
-          FTRACE(1, "unwindFrag: entering fault at {}: save {}\n",
-                 eh->m_fault,
-                 func->unit()->offsetOf(pc));
-          fault.m_savedRaiseOffset = func->unit()->offsetOf(pc);
-          pc = (uchar*)(func->unit()->entry() + eh->m_fault);
-          DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-          return UnwindResumeVM;
-        case EHEnt::EHType_Catch:
-          // Note: we skip catch clauses if we have a pending C++ exception
-          // as part of our efforts to avoid running more PHP code in the
-          // face of such exceptions.
-          if ((fault.m_faultType == Fault::UserException) &&
-              (ThreadInfo::s_threadInfo->m_pendingException == nullptr)) {
-            ObjectData* obj = fault.m_userException;
-            for (auto& idOff : eh->m_catches) {
-              auto handler = func->unit()->at(idOff.second);
-              FTRACE(1, "unwindFrag: catch candidate {}\n", handler);
-              Class* cls = Unit::lookupClass(
-                func->unit()->lookupNamedEntityId(idOff.first)
-              );
-              if (cls && obj->instanceof(cls)) {
-                pc = handler;
-                FTRACE(1, "unwindFrag: entering catch at {}\n", pc);
-                DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-                return UnwindResumeVM;
-              }
-            }
-          }
-          break;
-        }
-      }
-
-      if (eh->m_parentIndex != -1) {
-        eh = &func->ehtab()[eh->m_parentIndex];
-      } else {
-        break;
-      }
-      ++faultNest;
-    }
-  }
-
-  // We found no more handlers in this frame, so the nested fault
-  // count starts over for the caller frame.
-  fault.m_handledCount = 0;
-
-  if (fp->isFromFPushCtor() && fp->hasThis()) {
-    fp->getThis()->setNoDestruct();
-  }
-
-  // A generator's locals don't live on this stack.
-  if (LIKELY(!unwindingGeneratorFrame)) {
-    /*
-     * If we're unwinding through a frame that's returning, it's only
-     * possible that its locals have already been decref'd.
-     *
-     * Here's why:
-     *
-     *   - If a destructor for any of these things throws a php
-     *     exception, it's swallowed at the dtor boundary and we keep
-     *     running php.
-     *
-     *   - If the destructor for any of these things throws a fatal,
-     *     it's swallowed, and we set surprise flags to throw a fatal
-     *     from now on.
-     *
-     *   - If the second case happened and we have to run another
-     *     destructor, its enter hook will throw, but it will be
-     *     swallowed again.
-     *
-     *   - Finally, the exit hook for the returning function can
-     *     throw, but this happens last so everything is destructed.
-     *
-     */
-    if (!unwindingReturningFrame) {
-      try {
-        // Note that we must convert locals and the $this to
-        // uninit/zero during unwind.  This is because a backtrace
-        // from another destructing object during this unwind may try
-        // to read them.
-        frame_free_locals_unwind(fp, func->numLocals());
-      } catch (...) {}
-    }
-    ndiscard(func->numSlotsInFrame());
-  }
-  FTRACE(1, "unwindFrag: propagate\n");
-  return UnwindPropagate;
-}
-
-void Stack::unwindARFrag(ActRec* ar) {
-  while (m_top < (TypedValue*)ar) {
-    popTV();
-  }
-}
-
-void Stack::unwindAR(ActRec* fp, const FPIEnt* fe) {
-  while (true) {
-    TRACE(1, "unwindAR: function %s, pIdx %d\n",
-          fp->m_func->name()->data(), fe->m_parentIndex);
-    ActRec* ar;
-    if (LIKELY(!fp->m_func->isGenerator())) {
-      ar = arAtOffset(fp, -fe->m_fpOff);
-    } else {
-      // FIXME: duplicated logic from visitStackElems
-      TypedValue* genStackBase = generatorStackBase(fp);
-      ActRec* fakePrevFP =
-        (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
-      ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
-    }
-    assert((TypedValue*)ar >= m_top);
-    unwindARFrag(ar);
-
-    if (ar->isFromFPushCtor()) {
-      assert(ar->hasThis());
-      ar->getThis()->setNoDestruct();
-    }
-
-    popAR();
-    if (fe->m_parentIndex != -1) {
-      fe = &fp->m_func->fpitab()[fe->m_parentIndex];
-    } else {
-      return;
-    }
-  }
-}
-
-UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault fault) {
-  VMExecutionContext* context = g_vmContext;
-
-  while (true) {
-    SrcKey sk(fp->m_func, offset);
-    SKTRACE(1, sk, "unwindFrame: func %s, offset %d fp %p\n",
-            fp->m_func->name()->data(),
-            offset, fp);
-
-    // If the exception is already propagating, if it was in any FPI
-    // region we already handled unwinding it the first time around.
-    if (fault.m_handledCount == 0) {
-      if (const FPIEnt *fe = fp->m_func->findFPI(offset)) {
-        unwindAR(fp, fe);
-      }
-    }
-
-    if (unwindFrag(fp, offset, pc, fault) == UnwindResumeVM) {
-      // We've kept our own copy of the Fault, because m_faults may
-      // change if we have a reentry during unwinding.  When we're
-      // ready to resume, we need to replace the current fault to
-      // reflect any state changes we've made (handledCount, etc).
-      assert(!context->m_faults.empty());
-      context->m_faults.back() = fault;
-      return UnwindResumeVM;
-    }
-
-    ActRec *prevFp = fp->arGetSfp();
-    SKTRACE(1, sk, "unwindFrame: fp %p prevFp %p\n",
-            fp, prevFp);
-    if (LIKELY(!fp->m_func->isGenerator())) {
-      // We don't need to refcount the AR's refcounted members; that was
-      // taken care of in frame_free_locals, called from unwindFrag().
-      // If it's a generator, the AR doesn't live on this stack.
-      discardAR();
-    }
-
-    if (prevFp == fp) {
-      TRACE(1, "unwindFrame: reached the end of this nesting's ActRec "
-               "chain\n");
-      break;
-    }
-    // Keep the pc up to date while unwinding.
-    Offset prevOff = fp->m_soff + prevFp->m_func->base();
-    const Func *prevF = prevFp->m_func;
-    assert(isValidAddress((uintptr_t)prevFp) || prevF->isGenerator());
-    pc = prevF->unit()->at(prevOff);
-    fp = prevFp;
-    offset = prevOff;
-  }
-
-  return UnwindPropagate;
-}
-
 bool Stack::wouldOverflow(int numCells) const {
   // The funny approach here is to validate the translator's assembly
   // technique. We've aligned and sized the stack so that the high order
@@ -1792,132 +1564,57 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   }
 }
 
-// Enumeration codes for the handling of VM exceptions.
-enum {
-  EXCEPTION_START = 0,
-  EXCEPTION_PROPAGATE,
-  EXCEPTION_RESUMEVM,
-  EXCEPTION_DEBUGGER
-};
-
-static void pushFault(Fault::Type t, Exception* e, const Object* o = nullptr) {
-  FTRACE(1, "pushing new fault: {} {} {}\n",
-         t == Fault::UserException ? "[user exception]" : "[cpp exception]",
-         e, o);
-
-  VMExecutionContext* ec = g_vmContext;
-  Fault fault;
-  fault.m_faultType = t;
-  if (t == Fault::UserException) {
-    // User object.
-    assert(o);
-    fault.m_userException = o->get();
-    fault.m_userException->incRefCount();
-  } else {
-    fault.m_cppException = e;
-  }
-  ec->m_faults.push_back(fault);
-}
-
-static int exception_handler() {
-  int longJmpType;
-  try {
-    throw;
-  } catch (const Object& e) {
-    pushFault(Fault::UserException, nullptr, &e);
-    longJmpType = g_vmContext->hhvmPrepareThrow();
-  } catch (VMSwitchModeException &e) {
-    longJmpType = g_vmContext->switchMode(e.unwindBuiltin());
-  } catch (Exception &e) {
-    pushFault(Fault::CppException, e.clone());
-    longJmpType = g_vmContext->hhvmPrepareThrow();
-  } catch (std::exception& e) {
-    pushFault(Fault::CppException,
-              new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
-    longJmpType = g_vmContext->hhvmPrepareThrow();
-  } catch (...) {
-    pushFault(Fault::CppException,
-              new Exception("unknown exception"));
-    longJmpType = g_vmContext->hhvmPrepareThrow();
-  }
-  return longJmpType;
-}
-
 void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
+  DEBUG_ONLY int faultDepth = m_faults.size();
+  SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
+
   m_firstAR = ar;
-  ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->getCallToExit());
   assert(isReturnHelper(ar->m_savedRip));
 
-  DEBUG_ONLY int faultDepth = m_faults.size();
-  SCOPE_EXIT {
-    if (debug) assert(m_faults.size() == faultDepth);
-  };
-
   /*
-   * TODO(#1343044): some of the structure of this code dates back to
-   * when it used to be setjmp/longjmp based.  It is probable we could
-   * simplify it a little more, and maybe combine some of the logic
-   * with exception_handler().
-   *
    * When an exception is propagating, each nesting of the VM is
    * responsible for unwinding its portion of the execution stack, and
    * finding user handlers if it is a catchable exception.
    *
    * This try/catch is where all this logic is centered.  The actual
-   * unwinding happens under hhvmPrepareThrow, which returns a new
-   * "jumpCode" here to indicate what to do next.  Either we'll enter
-   * the VM loop again at a user error/fault handler, or propagate the
-   * exception to a less-nested VM.
+   * unwinding happens under exception_handler in unwind.cpp, which
+   * returns a UnwindAction here to indicate what to do next.
+   *
+   * Either we'll enter the VM loop again at a user error/fault
+   * handler, or propagate the exception to a less-nested VM.
    */
-  int jumpCode = EXCEPTION_START;
-short_jump:
+  bool first = true;
+resume:
   try {
-    switch (jumpCode) {
-    case EXCEPTION_START:
+    if (first) {
+      first = false;
       if (m_fp && !ar->m_varEnv) {
         enterVMPrologue(ar);
-      } else {
-        if (prepareFuncEntry(ar, m_pc)) {
-          enterVMWork(ar);
-        }
+      } else if (prepareFuncEntry(ar, m_pc)) {
+        enterVMWork(ar);
       }
-      break;
-    case EXCEPTION_PROPAGATE:
-      // Jump out of this try/catch before throwing.
-      goto propagate;
-    case EXCEPTION_DEBUGGER:
-      // Triggered by switchMode() to switch VM mode
-      // do nothing but reenter the VM with same VM stack
-      /* Fallthrough */
-    case EXCEPTION_RESUMEVM:
+    } else {
       enterVMWork(0);
-      break;
-    default:
-      NOT_REACHED();
     }
-  } catch (const VMPrepareUnwind&) {
-    // This is slightly different from VMPrepareThrow, because we need
-    // to re-raise the exception as if it came from the same offset.
-    Fault fault = m_faults.back();
-    Offset faultPC = fault.m_savedRaiseOffset;
-    FTRACE(1, "unwind: restoring offset {}\n", faultPC);
-    assert(faultPC != kInvalidOffset);
-    fault.m_savedRaiseOffset = kInvalidOffset;
-    UnwindStatus unwindType = m_stack.unwindFrame(m_fp, faultPC, m_pc, fault);
-    jumpCode = handleUnwind(unwindType);
-    goto short_jump;
+
+    // Everything succeeded with no exception---return to the previous
+    // VM nesting level.
+    *retval = *m_stack.topTV();
+    m_stack.discard();
+    return;
+
   } catch (...) {
-    assert(tl_regState == REGSTATE_CLEAN);
-    jumpCode = exception_handler();
-    assert(jumpCode != EXCEPTION_START);
-    goto short_jump;
+    always_assert(tl_regState == REGSTATE_CLEAN);
+    auto const action = exception_handler();
+    if (action == UnwindAction::ResumeVM) {
+      goto resume;
+    }
+    always_assert(action == UnwindAction::Propagate);
   }
 
-  *retval = *m_stack.topTV();
-  m_stack.discard();
-  return;
-
-propagate:
+  // Here we have to propagate an exception out of this VM's nesting
+  // level.
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
@@ -1955,17 +1652,6 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
     throw;
   }
   TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
-}
-
-int VMExecutionContext::switchMode(bool unwindBuiltin) {
-  if (unwindBuiltin) {
-    // from Jit calling a builtin, should unwind a frame, and push a
-    // return value on stack
-    tx64->sync(); // just to set tl_regState
-    unwindBuiltinFrame();
-    m_stack.pushNull();
-  }
-  return EXCEPTION_DEBUGGER;
 }
 
 void VMExecutionContext::invokeFunc(TypedValue* retval,
@@ -2218,39 +1904,6 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
   invokeFunc(retval, func, null_array, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
-}
-
-void VMExecutionContext::unwindBuiltinFrame() {
-  // Unwind the frame for a builtin. Currently only used for
-  // hphpd_break and fb_enable_code_coverage
-  assert(m_fp->m_func->info());
-  assert(m_fp->m_func->name()->isame(s_hphpd_break.get()) ||
-         m_fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
-  // Free any values that may be on the eval stack
-  TypedValue *evalTop = (TypedValue*)getFP();
-  while (m_stack.topTV() < evalTop) {
-    m_stack.popTV();
-  }
-  // Free the locals and VarEnv if there is one
-  frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
-  // Tear down the frame
-  Offset pc = -1;
-  ActRec* sfp = getPrevVMState(m_fp, &pc);
-  assert(pc != -1);
-  m_fp = sfp;
-  m_pc = m_fp->m_func->unit()->at(pc);
-  m_stack.discardAR();
-}
-
-int VMExecutionContext::hhvmPrepareThrow() {
-  Fault& fault = m_faults.back();
-  tx64->sync();
-  TRACE(2, "hhvmPrepareThrow: %p(\"%s\") {\n", m_fp,
-           m_fp->m_func->name()->data());
-  UnwindStatus unwindType;
-  unwindType = m_stack.unwindFrame(m_fp, pcOff(),
-                                   m_pc, fault);
-  return handleUnwind(unwindType);
 }
 
 /*
@@ -4325,22 +3978,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClone(PC& pc) {
   m_stack.pushNull();
   tv->m_type = KindOfObject;
   tv->m_data.pobj = newobj;
-}
-
-inline int OPTBLD_INLINE
-VMExecutionContext::handleUnwind(UnwindStatus unwindType) {
-  int longJumpType;
-  if (unwindType == UnwindPropagate) {
-    longJumpType = EXCEPTION_PROPAGATE;
-    if (m_nestedVMs.empty()) {
-      m_fp = nullptr;
-      m_pc = nullptr;
-    }
-  } else {
-    assert(unwindType == UnwindResumeVM);
-    longJumpType = EXCEPTION_RESUMEVM;
-  }
-  return longJumpType;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopExit(PC& pc) {
@@ -7553,7 +7190,7 @@ void VMExecutionContext::dispatchN(int numInstrs) {
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
   if (DEBUGGER_FORCE_INTR) {
-    throw VMSwitchModeException(false);
+    throw VMSwitchMode();
   }
 }
 
@@ -7563,7 +7200,7 @@ void VMExecutionContext::dispatchBB() {
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
   if (DEBUGGER_FORCE_INTR) {
-    throw VMSwitchModeException(false);
+    throw VMSwitchMode();
   }
 }
 

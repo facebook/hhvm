@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/backup_gc.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"
 #include "hphp/runtime/base/file_repository.h"
@@ -1550,7 +1551,7 @@ void f_fb_enable_code_coverage() {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
   }
-  throw VMSwitchModeException(true);
+  throw VMSwitchModeBuiltin();
 }
 
 Variant f_fb_disable_code_coverage() {

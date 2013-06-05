@@ -21,6 +21,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/logger.h"
 #include "hphp/system/lib/systemlib.h"
@@ -78,7 +79,7 @@ void f_hphpd_break(bool condition /* = true */) {
   if (RuntimeOption::EvalJit && !g_vmContext->m_interpreting &&
       DEBUGGER_FORCE_INTR) {
     TRACE(5, "switch mode\n");
-    throw VMSwitchModeException(true);
+    throw VMSwitchModeBuiltin();
   }
   TRACE(5, "out f_hphpd_break()\n");
 }

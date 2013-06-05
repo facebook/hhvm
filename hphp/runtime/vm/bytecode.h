@@ -498,11 +498,6 @@ struct Fault {
   Offset m_savedRaiseOffset;
 };
 
-enum UnwindStatus {
-  UnwindResumeVM,
-  UnwindPropagate,
-};
-
 // Interpreter evaluation stack.
 class Stack {
   TypedValue* m_elms;
@@ -526,17 +521,6 @@ private:
                      int offset, const TypedValue* ftop,
                      const std::string& prefix) const;
 
-  UnwindStatus unwindFrag(ActRec* fp, int offset, PC& pc, Fault& f);
-
-  // Pops everything between the current stack pointer and the passed ActRec*.
-  // It assumes everything there is values, not ActRecs.
-  void unwindARFrag(ActRec* ar);
-
-  // Pops everything up to and including the outermost unactivated ActRec. Since
-  // it's impossible to have more than one chain of nested unactivated ActRecs
-  // on the stack, this means that after this function returns, everything
-  // between the stack pointer and frame pointer is a value, Iter or local.
-  void unwindAR(ActRec* fp, const FPIEnt* fe);
 public:
   static const int sSurprisePageSize;
   static const uint sMinStackElms;
@@ -546,8 +530,6 @@ public:
 
   std::string toString(const ActRec* fp, int offset,
                        std::string prefix="") const;
-
-  UnwindStatus unwindFrame(ActRec*& fp, int offset, PC& pc, Fault f);
 
   bool wouldOverflow(int numCells) const;
 

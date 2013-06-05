@@ -36,7 +36,7 @@
 extern "C" void __register_frame(void*);
 extern "C" void __deregister_frame(void*);
 
-TRACE_SET_MOD(tunwind);
+TRACE_SET_MOD(unwind);
 
 namespace HPHP { namespace Transl {
 

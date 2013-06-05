@@ -650,7 +650,6 @@ public:
   void pushVMState(VMState &savedVM, const ActRec* reentryAR);
   void popVMState();
 
-  int hhvmPrepareThrow();
   ActRec* getPrevVMState(const ActRec* fp,
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
@@ -659,7 +658,6 @@ public:
                        bool withSelf = false,
                        bool withThis = false,
                        VMParserFrame* parserFrame = nullptr);
-  int handleUnwind(UnwindStatus unwindType);
   VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
@@ -667,7 +665,6 @@ public:
   HPHP::PCFilter* m_lastLocFilter;
   bool m_interpreting;
   bool m_dbgNoBreak;
-  int switchMode(bool unwindBuiltin);
   void doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   CVarRef getEvaledArg(const StringData* val);
@@ -677,7 +674,6 @@ private:
   void enterVM(TypedValue* retval, ActRec* ar);
   void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
   void doFPushCuf(PC& pc, bool forward, bool safe);
-  void unwindBuiltinFrame();
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);

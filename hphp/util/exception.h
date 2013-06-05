@@ -32,9 +32,6 @@ namespace HPHP {
     throw *this; \
   }
 
-/**
- * Base class for all exceptions.
- */
 class Exception : public std::exception {
 public:
   Exception(const char *fmt, ...);
@@ -87,19 +84,6 @@ public:
   }
 
   EXCEPTION_COMMON_IMPL(FileOpenException);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class VMSwitchModeException : public Exception {
-private:
-  bool m_unwindBuiltin;
-public:
-  explicit VMSwitchModeException(bool unwindBuiltin)
-    : m_unwindBuiltin(unwindBuiltin) {}
-  bool unwindBuiltin() const { return m_unwindBuiltin; }
-
-  EXCEPTION_COMMON_IMPL(VMSwitchModeException);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

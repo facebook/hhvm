@@ -223,7 +223,7 @@ bool canUseSPropCache(SSATmp* clsTmp,
   // initialized yet.  getSProp() below will trigger initialization,
   // but that's only valid to do earlier if it doesn't require any
   // property initializer ([sp]init methods).
-  if (cls->needInitialization()) return false;
+  if (cls->hasInitMethods()) return false;
 
   bool visible, accessible;
   cls->getSProp(const_cast<Class*>(ctx), propName, visible, accessible);

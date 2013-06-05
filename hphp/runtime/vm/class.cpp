@@ -2197,6 +2197,7 @@ void Class::setInitializers() {
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
+  m_hasInitMethods = (m_pinitVec.size() > 0 || m_sinitVec.size() > 0);
 
   // The __init__ method defined in the Exception class gets special treatment
   static StringData* sd__init__ = StringData::GetStaticString("__init__");

@@ -515,8 +515,8 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  typedef std::map<const StringData*, Label*, string_data_lt> LabelMap;
-  LabelMap m_methLabels;
+  hphp_hash_set<std::string> m_generatorEmitted;
+  hphp_hash_set<std::string> m_topMethodEmitted;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;

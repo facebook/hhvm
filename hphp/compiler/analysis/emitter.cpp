@@ -1159,10 +1159,6 @@ EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
 }
 
 EmitterVisitor::~EmitterVisitor() {
-  for (LabelMap::const_iterator it = m_methLabels.begin();
-       it != m_methLabels.end(); it++) {
-    delete it->second;
-  }
   // If a fatal occurs during emission, some extra cleanup is necessary.
   for (std::deque<ExnHandlerRegion*>::const_iterator it = m_exnHandlers.begin();
        it != m_exnHandlers.end(); ++it) {
@@ -1641,10 +1637,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
   for (i = 0; i < nk; i++) {
     StatementPtr s = (*stmts)[i];
     if (MethodStatementPtr meth = dynamic_pointer_cast<MethodStatement>(s)) {
-      // Create label for use with fast calls
-      const StringData* methName =
-        StringData::GetStaticString(meth->getOriginalName());
-      m_methLabels[methName] = new Label();
       // Emit afterwards
       postponeMeth(meth, nullptr, true);
     }
@@ -2574,11 +2566,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             // with its own file.
             return false;
           }
-          Label*& label = m_methLabels[nName];
-          if (!label) {
+          if (!m_generatorEmitted.insert(m->getOriginalName()).second) {
             // its possible to see the same generator more than once
-            label = new Label();
-          } else {
             return false;
           }
 
@@ -5264,18 +5253,11 @@ void EmitterVisitor::emitPostponedMeths() {
     }
     Emitter e(p.m_meth, m_ue, *this);
     if (p.m_top) {
-      StringData* methName =
-        StringData::GetStaticString(p.m_meth->getOriginalName());
-      auto entry = m_methLabels.find(methName);
-      if (entry != m_methLabels.end() && entry->second->isSet()) {
-        // According to Zend, this is include-time; Zend doesn't appear
-        // to execute the pseudomain that redeclares.
-        throw IncludeTimeFatalException(p.m_meth,
-                                        (string("Function already defined: ") +
-                                         string(methName->data())).c_str());
-      } else {
-        // Set label
-        m_methLabels[methName]->set(e);
+      if (!m_topMethodEmitted.insert(p.m_meth->getOriginalName()).second) {
+        throw IncludeTimeFatalException(
+          p.m_meth,
+          (string("Function already defined: ") +
+           p.m_meth->getOriginalName()).c_str());
       }
     }
     typedef std::pair<Id, ConstructPtr> DVInitializer;

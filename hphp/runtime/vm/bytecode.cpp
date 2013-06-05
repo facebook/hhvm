@@ -1613,26 +1613,35 @@ resume:
     always_assert(action == UnwindAction::Propagate);
   }
 
-  // Here we have to propagate an exception out of this VM's nesting
-  // level.
+  /*
+   * Here we have to propagate an exception out of this VM's nesting
+   * level.
+   */
+
+  if (g_vmContext->m_nestedVMs.empty()) {
+    m_fp = nullptr;
+    m_pc = nullptr;
+  }
+
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
+
   switch (fault.m_faultType) {
-  case Fault::UserException: {
-    Object obj = fault.m_userException;
-    fault.m_userException->decRefCount();
-    throw obj;
-  }
+  case Fault::UserException:
+    {
+      Object obj = fault.m_userException;
+      fault.m_userException->decRefCount();
+      throw obj;
+    }
   case Fault::CppException:
     // throwException() will take care of deleting heap-allocated
     // exception object for us
     fault.m_cppException->throwException();
-    NOT_REACHED();
-  default:
-    not_implemented();
+    not_reached();
   }
-  NOT_REACHED();
+
+  not_reached();
 }
 
 void VMExecutionContext::reenterVM(TypedValue* retval,

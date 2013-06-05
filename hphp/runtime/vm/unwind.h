@@ -16,15 +16,11 @@
 #ifndef incl_HPHP_UNWIND_H_
 #define incl_HPHP_UNWIND_H_
 
-#include "hphp/runtime/vm/core_types.h"
+#include <stdexcept>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-struct Stack;
-struct ActRec;
-struct Fault;
 
 /*
  * Enumerates actions that should be taken by the enterVM loop after

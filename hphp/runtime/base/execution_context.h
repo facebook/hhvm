@@ -602,6 +602,10 @@ public:
   const Stack&  getStack() const { checkRegState(); return m_stack; }
         Stack&  getStack()       { checkRegState(); return m_stack; }
 
+  Offset pcOff() const {
+    return getFP()->m_func->unit()->offsetOf(m_pc);
+  }
+
   ActRec* m_firstAR;
   std::vector<Fault> m_faults;
 
@@ -772,10 +776,6 @@ public:
   static int64_t s_threadIdxCounter;
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
-  inline Offset pcOff() const {
-    return m_fp->m_func->unit()->offsetOf(m_pc);
-  }
-
 };
 
 class ExecutionContext : public VMExecutionContext {};

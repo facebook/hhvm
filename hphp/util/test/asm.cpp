@@ -495,8 +495,6 @@ TEST(Asm, RandomJunk) {
   a.    pop    (rbp);
   a.    ret    ();
 
-// NB: There is a piece of trailing whitespace after retq that is needed for the
-// test to pass
   expect_asm(a, R"(
 push %rbp
 mov %rsp,%rbp
@@ -506,8 +504,7 @@ inc %rax
 mov %rax,0x8(%rsp)
 mov 0x8(%rsp),%rdi
 pop %rbp
-retq 
-)");
+retq )" "\n"); // string concat to avoid space at end of line after retq
 }
 
 TEST(Asm, AluBytes) {
@@ -587,8 +584,12 @@ TEST(Asm, SimpleLabelTest) {
   auto function = reinterpret_cast<int (*)(int, int*)>(a.code.frontier);
   a.    push   (rbp);
   a.    movq   (rsp, rbp);
+  a.    push   (r15);
+  a.    push   (r12);
+  a.    push   (r10);
+  a.    push   (rbx);
 
-  a.    movl   (edi, r11d);
+  a.    movl   (edi, r12d);
   a.    movq   (rsi, r15);
   a.    movl   (0, ebx);
 
@@ -596,9 +597,13 @@ asm_label(a, loop);
   a.    movq   (r15, rdi);
   a.    call   (CodeAddress(static_cast<void (*)(int*)>(loopCallee)));
   a.    incl   (ebx);
-  a.    cmpl   (ebx, r11d);
+  a.    cmpl   (ebx, r12d);
   a.    jne    (loop);
 
+  a.    pop    (rbx);
+  a.    pop    (r10);
+  a.    pop    (r12);
+  a.    pop    (r15);
   a.    pop    (rbp);
   a.    ret    ();
 

@@ -541,16 +541,16 @@ struct AsmState : private boost::noncopyable {
     labelMap[label].stackDepth.setBase(*this, 0);
   }
 
-  void beginFpi() {
+  void beginFpi(Offset fpushOff) {
     if (currentStackDepth == nullptr) {
       error("beginFpi called from unreachable instruction");
     }
 
     fpiRegs.push_back(FPIReg());
     FPIReg& fpi = fpiRegs.back();
-    fpi.fpushOff = ue->bcPos();
+    fpi.fpushOff = fpushOff;
     fpi.stackDepth = currentStackDepth;
-    fpi.fpOff = currentStackDepth->currentOffset;
+    fpi.fpOff = currentStackDepth->currentOffset + fdescDepth;
     fdescDepth += kNumActRecCells;
     fdescHighWater = std::max(fdescDepth, fdescHighWater);
   }
@@ -562,7 +562,6 @@ struct AsmState : private boost::noncopyable {
     FPIReg& reg = fpiRegs.back();
     ent.m_fpushOff = reg.fpushOff;
     ent.m_fcallOff = ue->bcPos();
-
     ent.m_fpOff = reg.fpOff;
     if (reg.stackDepth->baseValue) {
       ent.m_fpOff += reg.stackDepth->baseValue.get();
@@ -1041,17 +1040,20 @@ OpcodeParserMap opcode_parsers;
       #name                                                       \
     );                                                            \
                                                                   \
-    if (isFPush(Op##name)) {                                      \
-      as.beginFpi();                                              \
-    } else if (isFCallStar(Op##name)) {                           \
+    if (isFCallStar(Op##name)) {                                  \
       as.endFpi();                                                \
     }                                                             \
+                                                                  \
     as.ue->emitOp(Op##name);                                      \
                                                                   \
     IMM_##imm;                                                    \
                                                                   \
     int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;             \
     as.adjustStack(stackDelta);                                   \
+                                                                  \
+    if (isFPush(Op##name)) {                                      \
+      as.beginFpi(curOpcodeOff);                                  \
+    }                                                             \
                                                                   \
     for (auto& kv : labelJumps) {                                 \
       as.addLabelJump(kv.first, kv.second, curOpcodeOff);         \

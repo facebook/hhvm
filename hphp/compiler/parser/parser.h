@@ -304,6 +304,7 @@ private:
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
+  std::string m_containingFuncName;
   bool m_inTrait;
 
   // parser output

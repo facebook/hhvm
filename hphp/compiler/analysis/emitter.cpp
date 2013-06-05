@@ -1155,9 +1155,11 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   free(meta);
 }
 
+EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
+
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue), m_curFunc(ue.getMain()), m_evalStackIsUnknown(false),
-    m_actualStackHighWater(0), m_fdescHighWater(0), m_closureCounter(0) {
+    m_actualStackHighWater(0), m_fdescHighWater(0) {
   m_prevOpcode = OpLowInvalid;
   m_evalStack.m_actualStackHighWaterPtr = &m_actualStackHighWater;
   m_evalStack.m_fdescHighWaterPtr = &m_fdescHighWater;
@@ -3896,14 +3898,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        StringData* className = newClosureName();
-        const static StringData* parentName =
-          StringData::GetStaticString("Closure");
-        const Location* sLoc = ce->getLocation().get();
-        PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          className, PreClass::AlwaysHoistable);
-        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  AttrUnique | AttrPersistent, parentName, nullptr);
+        // The parser generated a unique name for the function,
+        // use that for the class
+        std::string clsName = ce->getClosureFunction()->getOriginalName();
+        StringData* className = StringData::GetStaticString(clsName);
 
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
@@ -3911,9 +3909,35 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         for (int i = 0; i < useCount; ++i) {
           emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
+
+        if (Option::WholeProgram) {
+          int my_id;
+          {
+            EmittedClosures::accessor acc;
+            s_emittedClosures.insert(acc, className);
+            my_id = ++acc->second;
+          }
+          if (my_id > 1) {
+            // The closure was from a trait, so we need a unique name in the
+            // implementing class
+            className = StringData::GetStaticString(
+              // _ is different from the #, which is used for many closures in
+              // the same func in ParserBase::newClosureName
+              className->toCPPString() + '_' + std::to_string(my_id)
+            );
+          }
+        }
+
         e.CreateCl(useCount, className);
 
-        // From here on out, we're just building metadata for the closure.
+        // From here on out, we're creating a new class to hold the closure.
+        const static StringData* parentName =
+          StringData::GetStaticString("Closure");
+        const Location* sLoc = ce->getLocation().get();
+        PreClassEmitter* pce = m_ue.newPreClassEmitter(
+          className, PreClass::AlwaysHoistable);
+        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
+                  AttrUnique | AttrPersistent, parentName, nullptr);
 
         // Instance variables.
         TypedValue uninit;
@@ -6805,30 +6829,6 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   Offset past = e.getUnitEmitter().bcPos();
   fe->finish(past, false);
   e.getUnitEmitter().recordFunction(fe);
-}
-
-StringData* EmitterVisitor::newClosureName() {
-  std::ostringstream str;
-  str << "Closure" << '$';
-  if (m_curFunc->pce() != nullptr) {
-    str << m_curFunc->pce()->name()->data();
-  }
-  str << '$';
-  if (m_curFunc->isPseudoMain()) {
-    str << "__pseudoMain";
-  } else {
-    str << m_curFunc->name()->data();
-  }
-  /*
-   * Uniquify the name
-   */
-  str << '$'
-      << std::hex
-      << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
-      << std::dec
-      << '$' << m_closureCounter++;
-
-  return StringData::GetStaticString(str.str());
 }
 
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {

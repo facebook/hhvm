@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/request_arena.h"
 #include "hphp/system/lib/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/parser/parser.h"
 
 #include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
@@ -2367,7 +2368,10 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
   Func* const* pcMethods = m_preClass->methods();
   for (size_t i = 0, sz = m_preClass->numMethods(); i < sz; i++) {
     Func* func = pcMethods[i];
-    if (isdigit(func->name()->data()[0])) continue;
+    if (isdigit(func->name()->data()[0]) ||
+        ParserBase::IsClosureOrContinuationName(func->name()->toCPPString())) {
+      continue;
+    }
     if (!(func->attrs() & AttrPublic)) {
       if (!ctx) continue;
       if (ctx != this) {

@@ -27,6 +27,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/read_only_arena.h"
+#include "hphp/util/parser/parser.h"
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -185,7 +186,9 @@ Array Unit::getUserFunctions() {
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
       if (!func_ || func_->isBuiltin() ||
-          isdigit(func_->name()->data()[0])) {
+          isdigit(func_->name()->data()[0]) ||
+          ParserBase::IsClosureOrContinuationName(
+            func_->name()->toCPPString())) {
         continue;
       }
       a.append(func_->nameRef());

@@ -36,10 +36,12 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/annotation.h"
+#include "hphp/runtime/vm/jit/hhbctranslator.h"
+#include "hphp/runtime/vm/jit/irfactory.h"
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -222,6 +224,10 @@ void sktrace(SrcKey sk, const char *fmt, ...) {
   va_start(a, fmt);
   Trace::vtrace(fmt, a);
   va_end(a);
+}
+
+SrcKey Tracelet::nextSk() const {
+  return m_instrStream.last->source.advanced(curUnit());
 }
 
 /*
@@ -1790,11 +1796,11 @@ static void addMVectorInputs(NormalizedInstruction& ni,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
-void Translator::getInputs(Tracelet& t,
+void Translator::getInputs(SrcKey startSk,
                            NormalizedInstruction* ni,
                            int& currentStackOffset,
                            InputInfos& inputs,
-                           const TraceletContext& tas) {
+                           std::function<Type(int)> localType) {
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
@@ -1891,17 +1897,17 @@ void Translator::getInputs(Tracelet& t,
     // hopes of avoiding further specialization. The localCount constraint
     // is an unfortunate consequence of the current generic machinery not
     // working for 0 locals.
-    if (tx64->numTranslations(t.m_sk) >= kTooPolyRet && localCount > 0) {
+    if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
     ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
-      auto curType = tas.currentType(Location(Location::Local, i));
+      auto curType = localType(i);
       if (ni->nonRefCountedLocals[i]) {
-        assert(!curType.isRefCounted() && "Static analysis was wrong");
+        assert(curType.notCounted() && "Static analysis was wrong");
       }
-      numRefCounted += curType.isRefCounted();
+      numRefCounted += curType.maybeCounted();
     }
     return numRefCounted <= kMaxInlineReturnDecRefs;
   }();
@@ -3248,15 +3254,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
 
     assert(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
-    for (int i = 0; i < numImmediates(ni->op()); i++) {
-      ni->imm[i] = getImm(ni->pc(), i);
-    }
-    if (hasImmVector(*ni->pc())) {
-      ni->immVec = getImmVector(ni->pc());
-    }
-    if (ni->op() == OpFCallArray) {
-      ni->imm[0].u_IVA = 1;
-    }
+    populateImmediates(*ni);
 
     SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackFrameOffset);
 
@@ -3265,7 +3263,10 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     try {
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
-      getInputs(t, ni, stackFrameOffset, inputInfos, tas);
+      getInputs(t.m_sk, ni, stackFrameOffset, inputInfos, [&](int i) {
+        return Type::fromRuntimeType(
+          tas.currentType(Location(Location::Local, i)));
+      });
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
         t.m_instrStream.append(ni);
@@ -3494,7 +3495,6 @@ breakBB:
   // Mark the last instruction appropriately
   assert(t.m_instrStream.last);
   t.m_instrStream.last->breaksTracelet = true;
-  t.m_nextSk = sk;
   // Populate t.m_changes, t.intermediates, t.m_dependencies
   t.m_dependencies = tas.m_dependencies;
   t.m_resolvedDeps = tas.m_resolvedDeps;
@@ -3511,7 +3511,9 @@ breakBB:
 }
 
 Translator::Translator()
-  : m_resumeHelper(nullptr)
+  : m_curTrace(nullptr)
+  , m_curNI(nullptr)
+  , m_resumeHelper(nullptr)
   , m_createdTime(Timer::GetCurrentTimeMicros())
   , m_analysisDepth(0)
 {
@@ -3558,6 +3560,24 @@ Translator::addDbgBLPC(PC pc) {
   }
   m_dbgBLPC.addPC(pc);
   return true;
+}
+
+// Return the SrcKey for the operation that should follow the supplied
+// NormalizedInstruction.
+SrcKey Translator::nextSrcKey(const NormalizedInstruction& i) {
+  return i.source.advanced(curUnit());
+}
+
+void Translator::populateImmediates(NormalizedInstruction& inst) {
+  for (int i = 0; i < numImmediates(inst.op()); i++) {
+    inst.imm[i] = getImm(inst.pc(), i);
+  }
+  if (hasImmVector(*inst.pc())) {
+    inst.immVec = getImmVector(inst.pc());
+  }
+  if (inst.op() == OpFCallArray) {
+    inst.imm[0].u_IVA = 1;
+  }
 }
 
 uint64_t* Translator::getTransCounterAddr() {

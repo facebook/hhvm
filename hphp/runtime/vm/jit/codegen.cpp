@@ -2383,7 +2383,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    jae(def);
     }
 
-    TCA* table = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA), data->cases);
+    TCA* table = m_tx64->allocData<TCA>(sizeof(TCA), data->cases);
     TCA afterLea = m_as.code.frontier + kLeaRipLen;
     ptrdiff_t diff = (TCA)table - afterLea;
     assert(deltaFits(diff, sz::dword));
@@ -2420,14 +2420,14 @@ static TCA sswitchHelperFast(const StringData* val,
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestFast>();
 
-  auto table = m_tx64->m_globalData.alloc<SSwitchMap>(64);
+  auto table = m_tx64->allocData<SSwitchMap>(64);
   table->init(data->numCases);
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
     emitReqBindAddr(data->func, *addr, data->cases[i].dest);
   }
-  TCA* def = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA), 1);
+  TCA* def = m_tx64->allocData<TCA>(sizeof(TCA), 1);
   emitReqBindAddr(data->func, *def, data->defaultOff);
 
   cgCallHelper(m_as,
@@ -2454,10 +2454,9 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
 void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestSlow>();
 
-  auto strtab = m_tx64->m_globalData.alloc<const StringData*>(
+  auto strtab = m_tx64->allocData<const StringData*>(
     sizeof(const StringData*), data->numCases);
-  auto jmptab = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA),
-    data->numCases + 1);
+  auto jmptab = m_tx64->allocData<TCA>(sizeof(TCA), data->numCases + 1);
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
     emitReqBindAddr(data->func, jmptab[i], data->cases[i].dest);

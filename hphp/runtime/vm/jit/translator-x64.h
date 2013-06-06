@@ -42,9 +42,6 @@ class CodeGenerator;
 
 namespace HPHP { namespace Transl {
 
-class IRTranslator;
-class MVecTransState;
-
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;
 };
@@ -130,25 +127,13 @@ class TranslatorX64 : public Translator
                     , boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
-  friend class WithCounters;
-  friend class DiamondGuard;
-  friend class DiamondReturn;
-  friend class RedirectSpillFill;
   friend class Tx64Reaper;
-  friend class IRTranslator;
   friend class HPHP::JIT::CodeGenerator;
-  friend class HPHP::JIT::HhbcTranslator; // packBitVec()
-  friend TCA funcBodyHelper(ActRec* fp);
-  template<unsigned, unsigned, ConditionCode, class> friend class CondBlock;
-  template<ConditionCode, typename smasher> friend class JccBlock;
-  template<ConditionCode> friend class IfElseBlock;
-  friend class UnlikelyIfBlock;
 
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
 
   typedef X64Assembler Asm;
-  static const int kMaxInlineContLocals = 10;
 
   class AHotSelector {
    public:
@@ -206,12 +191,6 @@ class TranslatorX64 : public Translator
 
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
-  std::unique_ptr<JIT::IRFactory>
-                         m_irFactory;
-  std::unique_ptr<JIT::HhbcTranslator>
-                         m_hhbcTrans;
-  std::string            m_lastHHIRPunt;
-  std::string            m_lastHHIRDump;
 
   void hhirTraceStart(Offset bcStartOffset, Offset nextTraceOffset);
   void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);
@@ -223,14 +202,6 @@ class TranslatorX64 : public Translator
   UnwindInfoHandle           m_unwindRegistrar;
   CatchTraceMap              m_catchTraceMap;
 
-public:
-  // Currently translating trace or instruction---only valid during
-  // translate phase.
-  const Tracelet*              m_curTrace;
-  const NormalizedInstruction* m_curNI;
-  litstr m_curFile;
-  int m_curLine;
-  litstr m_curFunc;
 private:
   int64_t m_createdTime;
 
@@ -263,6 +234,7 @@ private:
 public:
   void emitCall(Asm& a, TCA dest);
   void emitCall(Asm& a, Call call);
+  TCA getCallArrayProlog(Func* func);
 private:
 
   void translateClassExistsImpl(const Tracelet& t,
@@ -283,7 +255,6 @@ private:
   TCA genericRefCountStubRegs(Asm& a);
   void emitFreeLocalsHelpers();
   void emitGenericDecRefHelpers();
-  TCA getCallArrayProlog(Func* func);
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
   template <bool reentrant>
@@ -307,165 +278,10 @@ private:
   };
 
  private:
-#define INSTRS \
-  CASE(PopC) \
-  CASE(PopV) \
-  CASE(PopR) \
-  CASE(UnboxR) \
-  CASE(Null) \
-  CASE(NullUninit) \
-  CASE(True) \
-  CASE(False) \
-  CASE(Int) \
-  CASE(Double) \
-  CASE(String) \
-  CASE(Array) \
-  CASE(NewArray) \
-  CASE(NewTuple) \
-  CASE(NewCol) \
-  CASE(Nop) \
-  CASE(AddElemC) \
-  CASE(AddNewElemC) \
-  CASE(ColAddElemC) \
-  CASE(ColAddNewElemC) \
-  CASE(Cns) \
-  CASE(DefCns) \
-  CASE(ClsCnsD) \
-  CASE(Concat) \
-  CASE(Add) \
-  CASE(Xor) \
-  CASE(Not) \
-  CASE(Mod) \
-  CASE(BitNot) \
-  CASE(CastInt) \
-  CASE(CastString) \
-  CASE(CastDouble) \
-  CASE(CastArray) \
-  CASE(CastObject) \
-  CASE(Print) \
-  CASE(Jmp) \
-  CASE(Switch) \
-  CASE(SSwitch) \
-  CASE(RetC) \
-  CASE(RetV) \
-  CASE(NativeImpl) \
-  CASE(AGetC) \
-  CASE(AGetL) \
-  CASE(CGetL) \
-  CASE(CGetL2) \
-  CASE(CGetS) \
-  CASE(CGetM) \
-  CASE(CGetG) \
-  CASE(VGetL) \
-  CASE(VGetG) \
-  CASE(VGetM) \
-  CASE(IssetM) \
-  CASE(EmptyM) \
-  CASE(AKExists) \
-  CASE(SetS) \
-  CASE(SetG) \
-  CASE(SetM) \
-  CASE(SetWithRefLM) \
-  CASE(SetWithRefRM) \
-  CASE(SetOpL) \
-  CASE(SetOpM) \
-  CASE(IncDecL) \
-  CASE(IncDecM) \
-  CASE(UnsetL) \
-  CASE(UnsetM) \
-  CASE(BindM) \
-  CASE(FPushFuncD) \
-  CASE(FPushFunc) \
-  CASE(FPushClsMethodD) \
-  CASE(FPushClsMethodF) \
-  CASE(FPushObjMethodD) \
-  CASE(FPushCtor) \
-  CASE(FPushCtorD) \
-  CASE(FPassR) \
-  CASE(FPassL) \
-  CASE(FPassM) \
-  CASE(FPassS) \
-  CASE(FPassG) \
-  CASE(This) \
-  CASE(BareThis) \
-  CASE(CheckThis) \
-  CASE(InitThisLoc) \
-  CASE(FCall) \
-  CASE(FCallArray) \
-  CASE(FCallBuiltin) \
-  CASE(VerifyParamType) \
-  CASE(InstanceOfD) \
-  CASE(StaticLocInit) \
-  CASE(IterInit) \
-  CASE(IterInitK) \
-  CASE(IterNext) \
-  CASE(IterNextK) \
-  CASE(WIterInit) \
-  CASE(WIterInitK) \
-  CASE(WIterNext) \
-  CASE(WIterNextK) \
-  CASE(ReqDoc) \
-  CASE(DefCls) \
-  CASE(DefFunc) \
-  CASE(Self) \
-  CASE(Parent) \
-  CASE(ClassExists) \
-  CASE(InterfaceExists) \
-  CASE(TraitExists) \
-  CASE(Dup) \
-  CASE(CreateCl) \
-  CASE(CreateCont) \
-  CASE(ContEnter) \
-  CASE(ContExit) \
-  CASE(UnpackCont) \
-  CASE(PackCont) \
-  CASE(ContRetC) \
-  CASE(ContNext) \
-  CASE(ContSend) \
-  CASE(ContRaise) \
-  CASE(ContValid) \
-  CASE(ContCurrent) \
-  CASE(ContStopped) \
-  CASE(ContHandle) \
-  CASE(Strlen) \
-  CASE(IncStat) \
-  CASE(ArrayIdx) \
-  CASE(FPushCufIter) \
-  CASE(CIterFree) \
-  CASE(LateBoundCls) \
-  CASE(IssetS) \
-  CASE(IssetG) \
-  CASE(UnsetG) \
-  CASE(EmptyS) \
-  CASE(EmptyG) \
-  CASE(VGetS) \
-  CASE(BindS) \
-  CASE(BindG) \
-  CASE(IterFree) \
-  CASE(FPassV) \
-  CASE(UnsetN) \
-  CASE(DecodeCufIter) \
-
-  // These are instruction-like functions which cover more than one
-  // opcode.
-#define PSEUDOINSTRS \
-  CASE(BinaryArithOp) \
-  CASE(SameOp) \
-  CASE(EqOp) \
-  CASE(LtGtOp) \
-  CASE(UnaryBooleanOp) \
-  CASE(BranchOp) \
-  CASE(AssignToLocalOp) \
-  CASE(FPushCufOp) \
-  CASE(FPassCOp) \
-  CASE(CheckTypeOp)
-
   template<typename L>
   void translatorAssert(X64Assembler& a, ConditionCode cc,
                         const char* msg, L setup);
 
-  const Func* findCuf(const NormalizedInstruction& ni,
-                      Class* &cls, StringData*& invName, bool& forward);
   static uint64_t toStringHelper(ObjectData *obj);
   void invalidateSrcKey(SrcKey sk);
   bool dontGuardAnyInputs(Opcode op);
@@ -549,19 +365,16 @@ public:
     const RefDeps&, SrcRec&);
   void irEmitResolvedDeps(const ChangeMap& resolvedDeps);
 
-  void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
-
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
+
+  template<typename T, typename... Args>
+  T* allocData(Args&&... args) {
+    return m_globalData.alloc<T>(std::forward<Args>(args)...);
+  }
 
   FreeStubList m_freeStubs;
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
-private:
-  void irInterpretInstr(const NormalizedInstruction& i);
-  void irTranslateInstr(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
-  void irTranslateInstrDefault(const Tracelet& t,
-                               const NormalizedInstruction& i);
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
   enum TranslateTraceletResult {
     Failure,
@@ -572,11 +385,6 @@ private:
                                               const TCA start,
                                               const TCA stubStart,
                                               vector<TransBCMapping>* bcMap);
-  bool irTranslateTracelet(const Tracelet&         t,
-                           const TCA               start,
-                           const TCA               stubStart,
-                           vector<TransBCMapping>* bcMap);
-  void irPassPredictedAndInferredTypes(const NormalizedInstruction& i);
 
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
@@ -589,6 +397,43 @@ private:
   void emitInlineReturn(Location retvalSrcLoc, int retvalSrcDisp);
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
+
+  void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);
+  void emitFallbackJmp(Asm& as, SrcRec& dest, ConditionCode cc = CC_NZ);
+  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
+  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
+  void emitDebugPrint(Asm&, const char*,
+                      PhysReg = reg::r13,
+                      PhysReg = reg::r14,
+                      PhysReg = reg::rax);
+
+  TCA emitServiceReq(ServiceRequest, int numArgs, ...);
+  TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
+  TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,
+                       va_list args);
+
+  TCA emitRetFromInterpretedFrame();
+  TCA emitRetFromInterpretedGeneratorFrame();
+  void emitPopRetIntoActRec(Asm& a);
+  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
+  void emitCondJmp(SrcKey skTrue, SrcKey skFalse, ConditionCode cc);
+
+  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
+  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
+  SrcKey emitPrologue(Func* func, int nArgs);
+  static bool eagerRecord(const Func* func);
+  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
+  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
+                 ServiceRequest req);
+  void emitBindJmp(Asm& a, SrcKey dest,
+                   ServiceRequest req = REQ_BIND_JMP);
+  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
+                   ServiceRequest req = REQ_BIND_JCC);
+  void emitBindJmp(SrcKey dest);
+  void emitBindCallHelper(SrcKey srcKey,
+                          const Func* funcd,
+                          int numArgs);
+  void emitIncCounter(TCA start, int cntOfs);
 
  private:
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
@@ -621,26 +466,6 @@ private:
   TCA bindJmpccSecond(TCA toSmash, const Offset off,
                       ConditionCode cc,
                       bool& smashed);
-  void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);
-  void emitFallbackJmp(Asm& as, SrcRec& dest, ConditionCode cc = CC_NZ);
-  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
-  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
-  void emitDebugPrint(Asm&, const char*,
-                      PhysReg = reg::r13,
-                      PhysReg = reg::r14,
-                      PhysReg = reg::rax);
-
-  TCA emitServiceReq(ServiceRequest, int numArgs, ...);
-  TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
-  TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,
-                       va_list args);
-
-  TCA emitRetFromInterpretedFrame();
-  TCA emitRetFromInterpretedGeneratorFrame();
-  TCA emitGearTrigger(Asm& a, SrcKey sk, TransID transId);
-  void emitPopRetIntoActRec(Asm& a);
-  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
-  void emitCondJmp(SrcKey skTrue, SrcKey skFalse, ConditionCode cc);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
@@ -660,22 +485,6 @@ private:
   static int  shuffleArgsForMagicCall(ActRec* ar);
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
-  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
-  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
-  SrcKey emitPrologue(Func* func, int nArgs);
-  static bool eagerRecord(const Func* func);
-  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
-                 ServiceRequest req);
-  void emitBindJmp(Asm& a, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JMP);
-  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JCC);
-  void emitBindJmp(SrcKey dest);
-  void emitBindCallHelper(SrcKey srcKey,
-                          const Func* funcd,
-                          int numArgs);
-  void emitIncCounter(TCA start, int cntOfs);
 
   struct ReqLitStaticArgs {
     HPHP::Eval::PhpFile* m_efile;
@@ -688,9 +497,6 @@ private:
 
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);
-
-  // Utility function shared with IR code
-  static uint64_t packBitVec(const vector<bool>& bits, unsigned i);
 
 public:
   /*
@@ -770,20 +576,6 @@ private:
 
 public: // Only for HackIR
   void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
-#define DECLARE_FUNC(nm) \
-  void irTranslate ## nm(const Tracelet& t,               \
-                         const NormalizedInstruction& i);
-#define CASE DECLARE_FUNC
-
-INSTRS
-PSEUDOINSTRS
-
-#undef CASE
-#undef DECLARE_FUNC
-
-  void irTranslateReqLit(const Tracelet& t,
-                         const NormalizedInstruction& i,
-                         InclOpFlags flags);
 
 private:
   // asize + astubssize + gdatasize + trampolinesblocksize
@@ -841,7 +633,6 @@ Instance* newInstanceHelperCached(Class** classCache,
 Instance* newInstanceHelperNoCtorCached(Class** classCache,
                                         const StringData* clsName);
 
-SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);

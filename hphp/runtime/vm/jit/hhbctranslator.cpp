@@ -1022,7 +1022,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   );
 
   ContParamMap params;
-  if (origLocals <= TranslatorX64::kMaxInlineContLocals &&
+  if (origLocals <= Translator::kMaxInlineContLocals &&
       mapContParams(params, origFunc, genFunc)) {
     static auto const thisStr = StringData::GetStaticString("this");
     Id thisId = kInvalidId;
@@ -2441,6 +2441,19 @@ void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
   refineType(tmp, type);
 }
 
+static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {
+  uint64_t retval = 0;
+  assert(i % 64 == 0);
+  assert(i < bits.size());
+  while (i < bits.size()) {
+    retval |= bits[i] << (i % 64);
+    if ((++i % 64) == 0) {
+      break;
+    }
+  }
+  return retval;
+}
+
 void HhbcTranslator::guardRefs(int64_t entryArDelta,
                                const vector<bool>& mask,
                                const vector<bool>& vals) {
@@ -2456,11 +2469,11 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
   for (unsigned i = 0; i < mask.size(); i += 64) {
     assert(i < vals.size());
 
-    uint64_t mask64 = TranslatorX64::packBitVec(mask, i);
+    uint64_t mask64 = packBitVec(mask, i);
     if (mask64 == 0) {
       continue;
     }
-    uint64_t vals64 = TranslatorX64::packBitVec(vals, i);
+    uint64_t vals64 = packBitVec(vals, i);
 
     gen(
       GuardRefs,

@@ -32,18 +32,24 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/writelease.h"
+#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/trans-data.h"
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/writelease.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {
+namespace JIT {
+class HhbcTranslator;
+class IRFactory;
+}
 namespace Transl {
 
+using JIT::Type;
 static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
@@ -487,12 +493,6 @@ struct Tracelet : private boost::noncopyable {
   // from m_instrStream.first->source.
   SrcKey         m_sk;
 
-  // After this Tracelet runs, this is the SrcKey for the next
-  // instruction that we should go to.  Note that this can be
-  // different from m_instrStream.last->source.advance() if we removed
-  // the last instruction from the stream.
-  SrcKey         m_nextSk;
-
   // numOpcodes is the number of raw opcode instructions, before optimization.
   // The immediates optimization may both:
   //
@@ -547,6 +547,8 @@ struct Tracelet : private boost::noncopyable {
    * to make gdb happy. */
   void print() const;
   void print(std::ostream& out) const;
+
+  SrcKey nextSk() const;
 };
 
 enum TransKind {
@@ -613,7 +615,7 @@ struct TransRec {
            uint8_t                    _counterLen = 0,
            vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
       id(0), kind(_kind), src(s), md5(_md5),
-      bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
+      bcStopOffset(t.nextSk().offset()), aStart(_aStart), aLen(_aLen),
       astubsStart(_astubsStart), astubsLen(_astubsLen),
       counterStart(_counterStart), counterLen(_counterLen),
       bcMapping(_bcMapping) {
@@ -659,6 +661,159 @@ struct TranslArgs {
   bool m_interp;
 };
 
+#define INSTRS \
+  CASE(PopC) \
+  CASE(PopV) \
+  CASE(PopR) \
+  CASE(UnboxR) \
+  CASE(Null) \
+  CASE(NullUninit) \
+  CASE(True) \
+  CASE(False) \
+  CASE(Int) \
+  CASE(Double) \
+  CASE(String) \
+  CASE(Array) \
+  CASE(NewArray) \
+  CASE(NewTuple) \
+  CASE(NewCol) \
+  CASE(Nop) \
+  CASE(AddElemC) \
+  CASE(AddNewElemC) \
+  CASE(ColAddElemC) \
+  CASE(ColAddNewElemC) \
+  CASE(Cns) \
+  CASE(DefCns) \
+  CASE(ClsCnsD) \
+  CASE(Concat) \
+  CASE(Add) \
+  CASE(Xor) \
+  CASE(Not) \
+  CASE(Mod) \
+  CASE(BitNot) \
+  CASE(CastInt) \
+  CASE(CastString) \
+  CASE(CastDouble) \
+  CASE(CastArray) \
+  CASE(CastObject) \
+  CASE(Print) \
+  CASE(Jmp) \
+  CASE(Switch) \
+  CASE(SSwitch) \
+  CASE(RetC) \
+  CASE(RetV) \
+  CASE(NativeImpl) \
+  CASE(AGetC) \
+  CASE(AGetL) \
+  CASE(CGetL) \
+  CASE(CGetL2) \
+  CASE(CGetS) \
+  CASE(CGetM) \
+  CASE(CGetG) \
+  CASE(VGetL) \
+  CASE(VGetG) \
+  CASE(VGetM) \
+  CASE(IssetM) \
+  CASE(EmptyM) \
+  CASE(AKExists) \
+  CASE(SetS) \
+  CASE(SetG) \
+  CASE(SetM) \
+  CASE(SetWithRefLM) \
+  CASE(SetWithRefRM) \
+  CASE(SetOpL) \
+  CASE(SetOpM) \
+  CASE(IncDecL) \
+  CASE(IncDecM) \
+  CASE(UnsetL) \
+  CASE(UnsetM) \
+  CASE(BindM) \
+  CASE(FPushFuncD) \
+  CASE(FPushFunc) \
+  CASE(FPushClsMethodD) \
+  CASE(FPushClsMethodF) \
+  CASE(FPushObjMethodD) \
+  CASE(FPushCtor) \
+  CASE(FPushCtorD) \
+  CASE(FPassR) \
+  CASE(FPassL) \
+  CASE(FPassM) \
+  CASE(FPassS) \
+  CASE(FPassG) \
+  CASE(This) \
+  CASE(BareThis) \
+  CASE(CheckThis) \
+  CASE(InitThisLoc) \
+  CASE(FCall) \
+  CASE(FCallArray) \
+  CASE(FCallBuiltin) \
+  CASE(VerifyParamType) \
+  CASE(InstanceOfD) \
+  CASE(StaticLocInit) \
+  CASE(IterInit) \
+  CASE(IterInitK) \
+  CASE(IterNext) \
+  CASE(IterNextK) \
+  CASE(WIterInit) \
+  CASE(WIterInitK) \
+  CASE(WIterNext) \
+  CASE(WIterNextK) \
+  CASE(ReqDoc) \
+  CASE(DefCls) \
+  CASE(DefFunc) \
+  CASE(Self) \
+  CASE(Parent) \
+  CASE(ClassExists) \
+  CASE(InterfaceExists) \
+  CASE(TraitExists) \
+  CASE(Dup) \
+  CASE(CreateCl) \
+  CASE(CreateCont) \
+  CASE(ContEnter) \
+  CASE(ContExit) \
+  CASE(UnpackCont) \
+  CASE(PackCont) \
+  CASE(ContRetC) \
+  CASE(ContNext) \
+  CASE(ContSend) \
+  CASE(ContRaise) \
+  CASE(ContValid) \
+  CASE(ContCurrent) \
+  CASE(ContStopped) \
+  CASE(ContHandle) \
+  CASE(Strlen) \
+  CASE(IncStat) \
+  CASE(ArrayIdx) \
+  CASE(FPushCufIter) \
+  CASE(CIterFree) \
+  CASE(LateBoundCls) \
+  CASE(IssetS) \
+  CASE(IssetG) \
+  CASE(UnsetG) \
+  CASE(EmptyS) \
+  CASE(EmptyG) \
+  CASE(VGetS) \
+  CASE(BindS) \
+  CASE(BindG) \
+  CASE(IterFree) \
+  CASE(FPassV) \
+  CASE(UnsetN) \
+  CASE(DecodeCufIter) \
+
+  // These are instruction-like functions which cover more than one
+  // opcode.
+#define PSEUDOINSTRS \
+  CASE(BinaryArithOp) \
+  CASE(SameOp) \
+  CASE(EqOp) \
+  CASE(LtGtOp) \
+  CASE(UnaryBooleanOp) \
+  CASE(BranchOp) \
+  CASE(AssignToLocalOp) \
+  CASE(FPushCufOp) \
+  CASE(FPassCOp) \
+  CASE(CheckTypeOp)
+
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
@@ -669,6 +824,7 @@ public:
   // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
   // generate an inline return for.
   static const int kMaxInlineReturnDecRefs = 1;
+  static const int kMaxInlineContLocals = 10;
 
 private:
   friend struct TraceletContext;
@@ -682,11 +838,11 @@ private:
                           NormalizedInstruction* ni,
                           TraceletContext& tas,
                           InputInfos& ii);
-  void getInputs(Tracelet& t,
+  void getInputs(SrcKey startSk,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
                  InputInfos& inputs,
-                 const TraceletContext& tas);
+                 std::function<Type(int)> localType);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
@@ -724,7 +880,32 @@ private:
   virtual void invalidateSrcKey(SrcKey sk) = 0;
 
 protected:
+  void translateInstr(const NormalizedInstruction& i);
+private:
+  void interpretInstr(const NormalizedInstruction& i);
+  void translateInstrWork(const NormalizedInstruction& i);
+  void translateInstrDefault(const NormalizedInstruction& i);
+  void passPredictedAndInferredTypes(const NormalizedInstruction& i);
+
+  void translateReqLit(const NormalizedInstruction& i,
+                         InclOpFlags flags);
+#define CASE(nm) void translate ## nm(const NormalizedInstruction& i);
+INSTRS
+PSEUDOINSTRS
+#undef CASE
+
+public:
+  SrcKey nextSrcKey(const NormalizedInstruction& i);
+
+  // Currently translating trace or instruction---only valid during
+  // translate phase.
+  const Tracelet*              m_curTrace;
+  const NormalizedInstruction* m_curNI;
+
+protected:
   void requestResetHighLevelTranslator();
+
+  void populateImmediates(NormalizedInstruction&);
 
   TCA m_resumeHelper;
   TCA m_resumeHelperRet;
@@ -735,6 +916,9 @@ protected:
   vector<uint64_t*>    m_transCounters;
 
   int64_t              m_createdTime;
+
+  std::unique_ptr<JIT::IRFactory> m_irFactory;
+  std::unique_ptr<JIT::HhbcTranslator> m_hhbcTrans;
 
   static Lease s_writeLease;
   static volatile bool s_replaceInFlight;

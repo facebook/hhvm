@@ -130,14 +130,12 @@ TranslatorX64::irCheckType(X64Assembler& a,
 }
 
 void
-TranslatorX64::irTranslateMod(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateMod(const NormalizedInstruction& i) {
   HHIR_EMIT(Mod);
 }
 
 void
-TranslatorX64::irTranslateBinaryArithOp(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+Translator::translateBinaryArithOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   switch (op) {
 #define CASE(OpBc)                                          \
@@ -157,8 +155,7 @@ TranslatorX64::irTranslateBinaryArithOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateSameOp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateSameOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpSame || op == OpNSame);
   if (op == OpSame) {
@@ -169,8 +166,7 @@ TranslatorX64::irTranslateSameOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateEqOp(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateEqOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpEq || op == OpNeq);
   if (op == OpEq) {
@@ -181,8 +177,7 @@ TranslatorX64::irTranslateEqOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateLtGtOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
   assert(i.inputs.size() == 2);
@@ -208,8 +203,7 @@ TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateUnaryBooleanOp(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+Translator::translateUnaryBooleanOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpCastBool || op == OpEmptyL);
   if (op == OpCastBool) {
@@ -220,8 +214,7 @@ TranslatorX64::irTranslateUnaryBooleanOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateBranchOp(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateBranchOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpJmpZ || op == OpJmpNZ);
   assert(!i.next);
@@ -234,8 +227,7 @@ TranslatorX64::irTranslateBranchOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateCGetL(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateCGetL(const NormalizedInstruction& i) {
   const DEBUG_ONLY Opcode op = i.op();
   assert(op == OpFPassL || OpCGetL);
   const vector<DynLocation*>& inputs = i.inputs;
@@ -246,22 +238,19 @@ TranslatorX64::irTranslateCGetL(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateCGetL2(const Tracelet& t,
-                                 const NormalizedInstruction& ni) {
+Translator::translateCGetL2(const NormalizedInstruction& ni) {
   const int locIdx   = 1;
 
   HHIR_EMIT(CGetL2, ni.inputs[locIdx]->location.offset);
 }
 
 void
-TranslatorX64::irTranslateVGetL(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateVGetL(const NormalizedInstruction& i) {
   HHIR_EMIT(VGetL, i.inputs[0]->location.offset);
 }
 
 void
-TranslatorX64::irTranslateAssignToLocalOp(const Tracelet& t,
-                                          const NormalizedInstruction& ni) {
+Translator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   DEBUG_ONLY const int rhsIdx  = 0;
   const int locIdx  = 1;
   const Opcode op = ni.op();
@@ -285,8 +274,7 @@ TranslatorX64::irTranslateAssignToLocalOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslatePopC(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+Translator::translatePopC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   assert(!i.outStack && !i.outLocal);
 
@@ -298,24 +286,21 @@ TranslatorX64::irTranslatePopC(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslatePopV(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translatePopV(const NormalizedInstruction& i) {
   assert(i.inputs[0]->rtt.isVagueValue() || i.inputs[0]->isRef());
   HHIR_EMIT(PopV);
 }
 
 void
-TranslatorX64::irTranslatePopR(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  irTranslatePopC(t, i);
+Translator::translatePopR(const NormalizedInstruction& i) {
+  translatePopC(i);
 }
 
 void
-TranslatorX64::irTranslateUnboxR(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateUnboxR(const NormalizedInstruction& i) {
   if (i.noOp) {
     // statically proved to be unboxed -- just pass that info to the IR
-    TRACE(1, "HHIR: irTranslateUnboxR: output inferred to be Cell\n");
+    TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
     m_hhbcTrans->assertTypeStack(0, JIT::Type::Cell);
   } else {
     HHIR_EMIT(UnboxR);
@@ -323,8 +308,7 @@ TranslatorX64::irTranslateUnboxR(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateNull(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateNull(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
   assert(!i.outLocal);
 
@@ -332,14 +316,12 @@ TranslatorX64::irTranslateNull(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateNullUninit(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateNullUninit(const NormalizedInstruction& i) {
   HHIR_EMIT(NullUninit);
 }
 
 void
-TranslatorX64::irTranslateTrue(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateTrue(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
   assert(!i.outLocal);
 
@@ -347,8 +329,7 @@ TranslatorX64::irTranslateTrue(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFalse(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateFalse(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
   assert(!i.outLocal);
 
@@ -356,8 +337,7 @@ TranslatorX64::irTranslateFalse(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateInt(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateInt(const NormalizedInstruction& i) {
   assert(i.inputs.size()  == 0);
   assert(!i.outLocal);
 
@@ -365,14 +345,12 @@ TranslatorX64::irTranslateInt(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateDouble(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateDouble(const NormalizedInstruction& i) {
   HHIR_EMIT(Double, i.imm[0].u_DA);
 }
 
 void
-TranslatorX64::irTranslateString(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateString(const NormalizedInstruction& i) {
   assert(i.inputs.size()  == 0);
   assert(!i.outLocal);
 
@@ -380,8 +358,7 @@ TranslatorX64::irTranslateString(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateArray(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateArray(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
   assert(!i.outLocal);
 
@@ -389,26 +366,22 @@ TranslatorX64::irTranslateArray(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateNewArray(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateNewArray(const NormalizedInstruction& i) {
   HHIR_EMIT(NewArray, i.imm[0].u_IVA);
 }
 
 void
-TranslatorX64::irTranslateNop(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateNop(const NormalizedInstruction& i) {
   HHIR_EMIT(Nop);
 }
 
 void
-TranslatorX64::irTranslateAddElemC(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateAddElemC(const NormalizedInstruction& i) {
   HHIR_EMIT(AddElemC);
 }
 
 void
-TranslatorX64::irTranslateAddNewElemC(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+Translator::translateAddNewElemC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
   assert(i.outStack && !i.outLocal);
   assert(i.inputs[0]->outerType() != KindOfRef);
@@ -420,32 +393,27 @@ TranslatorX64::irTranslateAddNewElemC(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateCns(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateCns(const NormalizedInstruction& i) {
   HHIR_EMIT(Cns, i.imm[0].u_SA);
 }
 
 void
-TranslatorX64::irTranslateDefCns(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateDefCns(const NormalizedInstruction& i) {
   HHIR_EMIT(DefCns, (i.imm[0].u_SA));
 }
 
 void
-TranslatorX64::irTranslateClsCnsD(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateClsCnsD(const NormalizedInstruction& i) {
   HHIR_EMIT(ClsCnsD, (i.imm[0].u_SA), (i.imm[1].u_SA));
 }
 
 void
-TranslatorX64::irTranslateConcat(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateConcat(const NormalizedInstruction& i) {
   HHIR_EMIT(Concat);
 }
 
 void
-TranslatorX64::irTranslateAdd(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateAdd(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
 
   if (i.inputs[0]->valueType() == KindOfArray &&
@@ -457,28 +425,24 @@ TranslatorX64::irTranslateAdd(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateXor(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateXor(const NormalizedInstruction& i) {
   HHIR_EMIT(Xor);
 }
 
 void
-TranslatorX64::irTranslateNot(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateNot(const NormalizedInstruction& i) {
   HHIR_EMIT(Not);
 }
 
 void
-TranslatorX64::irTranslateBitNot(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateBitNot(const NormalizedInstruction& i) {
   assert(i.outStack && !i.outLocal);
 
   HHIR_EMIT(BitNot);
 }
 
 void
-TranslatorX64::irTranslateCastInt(const Tracelet& t,
-                                  const NormalizedInstruction& i) {
+Translator::translateCastInt(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   assert(i.outStack && !i.outLocal);
 
@@ -487,50 +451,42 @@ TranslatorX64::irTranslateCastInt(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateCastArray(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateCastArray(const NormalizedInstruction& i) {
   HHIR_EMIT(CastArray);
 }
 
 void
-TranslatorX64::irTranslateCastObject(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateCastObject(const NormalizedInstruction& i) {
   HHIR_EMIT(CastObject);
 }
 
 void
-TranslatorX64::irTranslateCastDouble(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+Translator::translateCastDouble(const NormalizedInstruction& i) {
   HHIR_EMIT(CastDouble);
 }
 
 void
-TranslatorX64::irTranslateCastString(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+Translator::translateCastString(const NormalizedInstruction& i) {
   HHIR_EMIT(CastString);
 }
 
 void
-TranslatorX64::irTranslatePrint(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translatePrint(const NormalizedInstruction& i) {
   HHIR_EMIT(Print);
 }
 
 void
-TranslatorX64::irTranslateJmp(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateJmp(const NormalizedInstruction& i) {
   HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, i.noSurprise);
 }
 
 void
-TranslatorX64::irTranslateSwitch(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateSwitch(const NormalizedInstruction& i) {
   HHIR_EMIT(Switch, i.immVec, i.imm[1].u_I64A, i.imm[2].u_IVA);
 }
 
 void
-TranslatorX64::irTranslateSSwitch(const Tracelet& t,
-                                  const NormalizedInstruction& i) {
+Translator::translateSSwitch(const NormalizedInstruction& i) {
   HHIR_EMIT(SSwitch, i.immVec);
 }
 
@@ -541,20 +497,17 @@ TranslatorX64::irTranslateSSwitch(const Tracelet& t,
  *   top-of-stack return value.
  */
 void
-TranslatorX64::irTranslateRetC(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateRetC(const NormalizedInstruction& i) {
   HHIR_EMIT(RetC, i.inlineReturn);
 }
 
 void
-TranslatorX64::irTranslateRetV(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+Translator::translateRetV(const NormalizedInstruction& i) {
   HHIR_EMIT(RetV, i.inlineReturn);
 }
 
 void
-TranslatorX64::irTranslateNativeImpl(const Tracelet& t,
-                                     const NormalizedInstruction& ni) {
+Translator::translateNativeImpl(const NormalizedInstruction& ni) {
   HHIR_EMIT(NativeImpl);
 }
 
@@ -567,44 +520,37 @@ TranslatorX64::irTranslateNativeImpl(const Tracelet& t,
 
 const int kEmitClsLocalIdx = 0;
 
-void TranslatorX64::irTranslateAGetC(const Tracelet& t,
-                                     const NormalizedInstruction& ni) {
+void Translator::translateAGetC(const NormalizedInstruction& ni) {
   const StringData* clsName =
     ni.inputs[kEmitClsLocalIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(AGetC, clsName);
 }
 
-void TranslatorX64::irTranslateAGetL(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateAGetL(const NormalizedInstruction& i) {
   assert(i.inputs[kEmitClsLocalIdx]->isLocal());
   const DynLocation* dynLoc = i.inputs[kEmitClsLocalIdx];
   const StringData* clsName = dynLoc->rtt.valueStringOrNull();
   HHIR_EMIT(AGetL, dynLoc->location.offset, clsName);
 }
 
-void TranslatorX64::irTranslateSelf(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+void Translator::translateSelf(const NormalizedInstruction& i) {
   HHIR_EMIT(Self);
 }
 
-void TranslatorX64::irTranslateParent(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+void Translator::translateParent(const NormalizedInstruction& i) {
   HHIR_EMIT(Parent);
 }
 
-void TranslatorX64::irTranslateDup(const Tracelet& t,
-                                   const NormalizedInstruction& ni) {
+void Translator::translateDup(const NormalizedInstruction& ni) {
   HHIR_EMIT(Dup);
 }
 
-void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+void Translator::translateCreateCont(const NormalizedInstruction& i) {
   HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
-void TranslatorX64::irTranslateContEnter(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
-  int after = nextSrcKey(t, i).offset();
+void Translator::translateContEnter(const NormalizedInstruction& i) {
+  auto after = nextSrcKey(i).offset();
 
   // ContEnter can't exist in an inlined function right now.  (If it
   // ever can, this curFunc() needs to change.)
@@ -615,228 +561,192 @@ void TranslatorX64::irTranslateContEnter(const Tracelet& t,
   HHIR_EMIT(ContEnter, callOffsetInUnit);
 }
 
-void TranslatorX64::irTranslateContExit(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateContExit(const NormalizedInstruction& i) {
   HHIR_EMIT(ContExit);
 }
 
-void TranslatorX64::irTranslateUnpackCont(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+void Translator::translateUnpackCont(const NormalizedInstruction& i) {
   HHIR_EMIT(UnpackCont);
 }
 
-void TranslatorX64::irTranslatePackCont(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translatePackCont(const NormalizedInstruction& i) {
   HHIR_EMIT(PackCont, i.imm[0].u_IVA);
 }
 
-void TranslatorX64::irTranslateContRetC(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateContRetC(const NormalizedInstruction& i) {
   HHIR_EMIT(ContRetC);
 }
 
-void TranslatorX64::irTranslateContNext(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateContNext(const NormalizedInstruction& i) {
   HHIR_EMIT(ContNext);
 }
 
-void TranslatorX64::irTranslateContSend(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateContSend(const NormalizedInstruction& i) {
   HHIR_EMIT(ContSend);
 }
 
-void TranslatorX64::irTranslateContRaise(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+void Translator::translateContRaise(const NormalizedInstruction& i) {
   HHIR_EMIT(ContRaise);
 }
 
-void TranslatorX64::irTranslateContValid(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+void Translator::translateContValid(const NormalizedInstruction& i) {
   HHIR_EMIT(ContValid);
 }
 
-void TranslatorX64::irTranslateContCurrent(const Tracelet& t,
-                                           const NormalizedInstruction& i) {
+void Translator::translateContCurrent(const NormalizedInstruction& i) {
   HHIR_EMIT(ContCurrent);
 }
 
-void TranslatorX64::irTranslateContStopped(const Tracelet& t,
-                                           const NormalizedInstruction& i) {
+void Translator::translateContStopped(const NormalizedInstruction& i) {
   HHIR_EMIT(ContStopped);
 }
 
-void TranslatorX64::irTranslateContHandle(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+void Translator::translateContHandle(const NormalizedInstruction& i) {
   HHIR_EMIT(ContHandle);
 }
 
-void TranslatorX64::irTranslateStrlen(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+void Translator::translateStrlen(const NormalizedInstruction& i) {
   HHIR_EMIT(Strlen);
 }
 
-void TranslatorX64::irTranslateIncStat(const Tracelet& t,
-                                       const NormalizedInstruction& i) {
+void Translator::translateIncStat(const NormalizedInstruction& i) {
   HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
-void TranslatorX64::irTranslateArrayIdx(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateArrayIdx(const NormalizedInstruction& i) {
   HHIR_EMIT(ArrayIdx);
 }
 
-void TranslatorX64::irTranslateClassExists(const Tracelet& t,
-                                           const NormalizedInstruction& i) {
+void Translator::translateClassExists(const NormalizedInstruction& i) {
   const StringData* clsName = i.inputs[1]->rtt.valueStringOrNull();
   HHIR_EMIT(ClassExists, clsName);
 }
 
-void TranslatorX64::irTranslateInterfaceExists(const Tracelet& t,
-                                               const NormalizedInstruction& i) {
+void Translator::translateInterfaceExists(const NormalizedInstruction& i) {
   const StringData* ifaceName = i.inputs[1]->rtt.valueStringOrNull();
 
   HHIR_EMIT(InterfaceExists, ifaceName);
 }
 
-void TranslatorX64::irTranslateTraitExists(const Tracelet& t,
-                                           const NormalizedInstruction& i) {
+void Translator::translateTraitExists(const NormalizedInstruction& i) {
   const StringData* traitName = i.inputs[1]->rtt.valueStringOrNull();
 
   HHIR_EMIT(TraitExists, traitName);
 }
 
-void TranslatorX64::irTranslateVGetS(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateVGetS(const NormalizedInstruction& i) {
   const int kPropNameIdx = 1;
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(VGetS, propName);
 }
 
 void
-TranslatorX64::irTranslateVGetG(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateVGetG(const NormalizedInstruction& i) {
   const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(VGetG, name);
 }
 
-void TranslatorX64::irTranslateBindS(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateBindS(const NormalizedInstruction& i) {
   const int kPropIdx = 2;
   const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(BindS, propName);
 }
 
-void TranslatorX64::irTranslateEmptyS(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+void Translator::translateEmptyS(const NormalizedInstruction& i) {
   const int kPropNameIdx = 1;
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(EmptyS, propName);
 }
 
-void TranslatorX64::irTranslateEmptyG(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+void Translator::translateEmptyG(const NormalizedInstruction& i) {
   const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(EmptyG, gblName);
 }
 
 void
-TranslatorX64::irTranslateIssetS(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateIssetS(const NormalizedInstruction& i) {
   const int kPropNameIdx = 1;
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(IssetS, propName);
 }
 
 void
-TranslatorX64::irTranslateIssetG(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateIssetG(const NormalizedInstruction& i) {
   const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(IssetG, gblName);
 }
 
 void
-TranslatorX64::irTranslateUnsetG(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateUnsetG(const NormalizedInstruction& i) {
   const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(UnsetG, gblName);
 }
 
 void
-TranslatorX64::irTranslateUnsetN(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateUnsetN(const NormalizedInstruction& i) {
   HHIR_EMIT(UnsetN);
 }
 
-void TranslatorX64::irTranslateCGetS(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateCGetS(const NormalizedInstruction& i) {
   const int kPropNameIdx = 1;
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(CGetS, propName,
             getInferredOrPredictedType(i), isInferredType(i));
 }
 
-void TranslatorX64::irTranslateSetS(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+void Translator::translateSetS(const NormalizedInstruction& i) {
   const int kPropIdx = 2;
   const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(SetS, propName);
 }
 
 void
-TranslatorX64::irTranslateCGetG(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateCGetG(const NormalizedInstruction& i) {
   const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(CGetG, name, getInferredOrPredictedType(i), isInferredType(i));
 }
 
-void TranslatorX64::irTranslateSetG(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+void Translator::translateSetG(const NormalizedInstruction& i) {
   const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
   HHIR_EMIT(SetG, name);
 }
 
-void TranslatorX64::irTranslateBindG(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateBindG(const NormalizedInstruction& i) {
   const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
   HHIR_EMIT(BindG, name);
 }
 
 void
-TranslatorX64::irTranslateLateBoundCls(const Tracelet&,
-                                       const NormalizedInstruction&i) {
+Translator::translateLateBoundCls(const NormalizedInstruction&i) {
   HHIR_EMIT(LateBoundCls);
 }
 
-void TranslatorX64::irTranslateFPassL(const Tracelet& t,
-                                      const NormalizedInstruction& ni) {
+void Translator::translateFPassL(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    irTranslateVGetL(t, ni);
+    translateVGetL(ni);
   } else {
-    irTranslateCGetL(t, ni);
+    translateCGetL(ni);
   }
 }
 
-void TranslatorX64::irTranslateFPassS(const Tracelet& t,
-                                      const NormalizedInstruction& ni) {
+void Translator::translateFPassS(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    irTranslateVGetS(t, ni);
+    translateVGetS(ni);
   } else {
-    irTranslateCGetS(t, ni);
+    translateCGetS(ni);
   }
 }
 
-void TranslatorX64::irTranslateFPassG(const Tracelet& t,
-                                      const NormalizedInstruction& ni) {
+void Translator::translateFPassG(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    irTranslateVGetG(t, ni);
+    translateVGetG(ni);
   } else {
-    irTranslateCGetG(t, ni);
+    translateCGetG(ni);
   }
 }
 
 void
-TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
-                                    const NormalizedInstruction& ni) {
+Translator::translateCheckTypeOp(const NormalizedInstruction& ni) {
   assert(ni.inputs.size() == 1);
   assert(ni.outStack);
 
@@ -865,14 +775,12 @@ TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateAKExists(const Tracelet& t,
-                                   const NormalizedInstruction& ni) {
+Translator::translateAKExists(const NormalizedInstruction& ni) {
   HHIR_EMIT(AKExists);
 }
 
 void
-TranslatorX64::irTranslateSetOpL(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateSetOpL(const NormalizedInstruction& i) {
   JIT::Opcode opc;
   switch (i.imm[1].u_OA) {
     case SetOpPlusEqual:   opc = JIT::OpAdd;    break;
@@ -893,8 +801,7 @@ TranslatorX64::irTranslateSetOpL(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIncDecL(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateIncDecL(const NormalizedInstruction& i) {
   const vector<DynLocation*>& inputs = i.inputs;
   assert(inputs.size() == 1);
   assert(i.outLocal);
@@ -914,39 +821,33 @@ TranslatorX64::irTranslateIncDecL(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateUnsetL(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateUnsetL(const NormalizedInstruction& i) {
   HHIR_EMIT(UnsetL, i.inputs[0]->location.offset);
 }
 
 void
-TranslatorX64::irTranslateReqDoc(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateReqDoc(const NormalizedInstruction& i) {
   const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
   HHIR_EMIT(ReqDoc, name);
 }
 
-void TranslatorX64::irTranslateDefCls(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+void Translator::translateDefCls(const NormalizedInstruction& i) {
   int cid = i.imm[0].u_IVA;
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
-void TranslatorX64::irTranslateDefFunc(const Tracelet& t,
-                                       const NormalizedInstruction& i) {
+void Translator::translateDefFunc(const NormalizedInstruction& i) {
   int fid = i.imm[0].u_IVA;
   HHIR_EMIT(DefFunc, fid);
 }
 
 void
-TranslatorX64::irTranslateFPushFunc(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateFPushFunc(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushFunc, (i.imm[0].u_IVA));
 }
 
 void
-TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+Translator::translateFPushClsMethodD(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushClsMethodD,
              (i.imm[0].u_IVA),
              (i.imm[1].u_SA),
@@ -954,8 +855,7 @@ TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+Translator::translateFPushClsMethodF(const NormalizedInstruction& i) {
   // For now, only support cases where both the class and the method are known.
   const int classIdx  = 0;
   const int methodIdx = 1;
@@ -976,8 +876,7 @@ TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFPushObjMethodD(const Tracelet &t,
-                                          const NormalizedInstruction& i) {
+Translator::translateFPushObjMethodD(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject),
                           FPushObjMethod_nonObj);
@@ -990,57 +889,48 @@ TranslatorX64::irTranslateFPushObjMethodD(const Tracelet &t,
             baseClass);
 }
 
-void TranslatorX64::irTranslateFPushCtor(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+void Translator::translateFPushCtor(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushCtor, (i.imm[0].u_IVA));
 }
 
-void TranslatorX64::irTranslateFPushCtorD(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+void Translator::translateFPushCtorD(const NormalizedInstruction& i) {
 
   HHIR_EMIT(FPushCtorD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
 }
 
-void TranslatorX64::irTranslateCreateCl(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+void Translator::translateCreateCl(const NormalizedInstruction& i) {
   HHIR_EMIT(CreateCl, (i.imm[0].u_IVA), (i.imm[1].u_SA));
 }
 
 // static void fatalNullThis() { raise_error(Strings::FATAL_NULL_THIS); }
 
 void
-TranslatorX64::irTranslateThis(const Tracelet &t,
-                               const NormalizedInstruction &i) {
+Translator::translateThis(const NormalizedInstruction &i) {
   HHIR_EMIT(This);
 }
 
 void
-TranslatorX64::irTranslateBareThis(const Tracelet &t,
-                                  const NormalizedInstruction &i) {
+Translator::translateBareThis(const NormalizedInstruction &i) {
   HHIR_EMIT(BareThis, (i.imm[0].u_OA));
 }
 
 void
-TranslatorX64::irTranslateCheckThis(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateCheckThis(const NormalizedInstruction& i) {
   HHIR_EMIT(CheckThis);
 }
 
 void
-TranslatorX64::irTranslateInitThisLoc(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateInitThisLoc(const NormalizedInstruction& i) {
   HHIR_EMIT(InitThisLoc, i.outLocal->location.offset);
 }
 
 void
-TranslatorX64::irTranslateFPushFuncD(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateFPushFuncD(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushFuncD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
 }
 
 void
-TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateFPassCOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {
     // These cases might have to raise a warning or an error
@@ -1051,24 +941,95 @@ TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFPassV(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateFPassV(const NormalizedInstruction& i) {
   if (i.preppedByRef || i.noOp) {
-    TRACE(1, "HHIR: irTranslateFPassV: noOp\n");
+    TRACE(1, "HHIR: translateFPassV: noOp\n");
     return;
   }
   HHIR_EMIT(FPassV);
 }
 
 void
-TranslatorX64::irTranslateFPushCufIter(const Tracelet& t,
-                                       const NormalizedInstruction& i) {
+Translator::translateFPushCufIter(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushCufIter, i.imm[0].u_IVA, i.imm[1].u_IA);
 }
 
+static const Func*
+findCuf(const NormalizedInstruction& ni,
+                    Class*& cls, StringData*& invName, bool& forward) {
+  forward = (ni.op() == OpFPushCufF);
+  cls = nullptr;
+  invName = nullptr;
+
+  DynLocation* callable = ni.inputs[ni.op() == OpFPushCufSafe ? 1 : 0];
+
+  const StringData* str =
+    callable->isString() ? callable->rtt.valueString() : nullptr;
+  const ArrayData* arr =
+    callable->isArray() ? callable->rtt.valueArray() : nullptr;
+
+  StringData* sclass = nullptr;
+  StringData* sname = nullptr;
+  if (str) {
+    Func* f = HPHP::Unit::lookupFunc(str);
+    if (f) return f;
+    String name(const_cast<StringData*>(str));
+    int pos = name.find("::");
+    if (pos <= 0 || pos + 2 >= name.size() ||
+        name.find("::", pos + 2) != String::npos) {
+      return nullptr;
+    }
+    sclass = StringData::GetStaticString(name.substr(0, pos).get());
+    sname = StringData::GetStaticString(name.substr(pos + 2).get());
+  } else if (arr) {
+    if (arr->size() != 2) return nullptr;
+    CVarRef e0 = arr->get(int64_t(0), false);
+    CVarRef e1 = arr->get(int64_t(1), false);
+    if (!e0.isString() || !e1.isString()) return nullptr;
+    sclass = e0.getStringData();
+    sname = e1.getStringData();
+    String name(sname);
+    if (name.find("::") != String::npos) return nullptr;
+  } else {
+    return nullptr;
+  }
+
+  Class* ctx = curFunc()->cls();
+
+  if (sclass->isame(s_self.get())) {
+    if (!ctx) return nullptr;
+    cls = ctx;
+    forward = true;
+  } else if (sclass->isame(s_parent.get())) {
+    if (!ctx || !ctx->parent()) return nullptr;
+    cls = ctx->parent();
+    forward = true;
+  } else if (sclass->isame(s_static.get())) {
+    return nullptr;
+  } else {
+    cls = Unit::lookupUniqueClass(sclass);
+    if (!cls) return nullptr;
+  }
+
+  bool magicCall = false;
+  const Func* f = lookupImmutableMethod(cls, sname, magicCall, true);
+  if (!f || (forward && !ctx->classof(f->cls()))) {
+    /*
+     * To preserve the invariant that the lsb class
+     * is an instance of the context class, we require
+     * that f's class is an instance of the context class.
+     * This is conservative, but without it, we would need
+     * a runtime check to decide whether or not to forward
+     * the lsb class
+     */
+    return nullptr;
+  }
+  if (magicCall) invName = sname;
+  return f;
+}
+
 void
-TranslatorX64::irTranslateFPushCufOp(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+Translator::translateFPushCufOp(const NormalizedInstruction& i) {
   Class* cls = nullptr;
   StringData* invName = nullptr;
   bool forward = false;
@@ -1077,8 +1038,7 @@ TranslatorX64::irTranslateFPushCufOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFPassR(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateFPassR(const NormalizedInstruction& i) {
   /*
    * Like FPassC, FPassR is able to cheat on boxing if the current
    * parameter is pass by reference but we have a cell: the box would refer
@@ -1096,8 +1056,7 @@ TranslatorX64::irTranslateFPassR(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+Translator::translateFCallBuiltin(const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
   int numNonDefault  = i.imm[1].u_IVA;
   Id funcId = i.imm[2].u_SA;
@@ -1269,12 +1228,11 @@ bool shouldIRInline(const Func* curFunc,
 }
 
 void
-TranslatorX64::irTranslateFCall(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+Translator::translateFCall(const NormalizedInstruction& i) {
   auto const numArgs = i.imm[0].u_IVA;
 
   always_assert(!m_hhbcTrans->isInlining() && "curUnit and curFunc calls");
-  const Opcode* after = curUnit()->at(nextSrcKey(t, i).offset());
+  const Opcode* after = curUnit()->at(nextSrcKey(i).offset());
   const Func* srcFunc = curFunc();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
@@ -1298,7 +1256,7 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
           ni; ni = ni->next) {
         m_curNI = ni;
         SCOPE_EXIT { m_curNI = &i; };
-        irTranslateInstr(*i.calleeTrace, *ni);
+        translateInstr(*ni);
       }
       return;
     }
@@ -1315,63 +1273,54 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFCallArray(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+Translator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset pcOffset = i.offset();
-  SrcKey next = i.next ? i.next->source : t.m_nextSk;
+  SrcKey next = nextSrcKey(i);
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after);
 }
 
 void
-TranslatorX64::irTranslateNewTuple(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateNewTuple(const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
   HHIR_EMIT(NewTuple, numArgs);
 }
 
 void
-TranslatorX64::irTranslateNewCol(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+Translator::translateNewCol(const NormalizedInstruction& i) {
   HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
 void
-TranslatorX64::irTranslateColAddNewElemC(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+Translator::translateColAddNewElemC(const NormalizedInstruction& i) {
   HHIR_EMIT(ColAddNewElemC);
 }
 
 void
-TranslatorX64::irTranslateColAddElemC(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+Translator::translateColAddElemC(const NormalizedInstruction& i) {
   HHIR_EMIT(ColAddElemC);
 }
 
 void
-TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+Translator::translateStaticLocInit(const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
 // check class hierarchy and fail if no match
 void
-TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
-                                          const NormalizedInstruction& i) {
+Translator::translateVerifyParamType(const NormalizedInstruction& i) {
   int param = i.imm[0].u_IVA;
   HHIR_EMIT(VerifyParamType, param);
 }
 
 void
-TranslatorX64::irTranslateInstanceOfD(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+Translator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
 
 void
-TranslatorX64::irTranslateIterInit(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateIterInit(const NormalizedInstruction& i) {
   HHIR_EMIT(IterInit,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
@@ -1379,8 +1328,7 @@ TranslatorX64::irTranslateIterInit(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIterInitK(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateIterInitK(const NormalizedInstruction& i) {
   HHIR_EMIT(IterInitK,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
@@ -1389,8 +1337,7 @@ TranslatorX64::irTranslateIterInitK(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIterNext(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateIterNext(const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNext,
             i.imm[0].u_IVA,
@@ -1399,8 +1346,7 @@ TranslatorX64::irTranslateIterNext(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIterNextK(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateIterNextK(const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNextK,
             i.imm[0].u_IVA,
@@ -1410,8 +1356,7 @@ TranslatorX64::irTranslateIterNextK(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateWIterInit(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateWIterInit(const NormalizedInstruction& i) {
   HHIR_EMIT(WIterInit,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
@@ -1419,8 +1364,7 @@ TranslatorX64::irTranslateWIterInit(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateWIterInitK(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateWIterInitK(const NormalizedInstruction& i) {
   HHIR_EMIT(WIterInitK,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
@@ -1429,8 +1373,7 @@ TranslatorX64::irTranslateWIterInitK(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateWIterNext(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateWIterNext(const NormalizedInstruction& i) {
 
   HHIR_EMIT(WIterNext,
             i.imm[0].u_IVA,
@@ -1439,8 +1382,7 @@ TranslatorX64::irTranslateWIterNext(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateWIterNextK(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateWIterNextK(const NormalizedInstruction& i) {
 
   HHIR_EMIT(WIterNextK,
             i.imm[0].u_IVA,
@@ -1450,22 +1392,19 @@ TranslatorX64::irTranslateWIterNextK(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIterFree(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+Translator::translateIterFree(const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterFree, i.imm[0].u_IVA);
 }
 
 void
-TranslatorX64::irTranslateDecodeCufIter(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+Translator::translateDecodeCufIter(const NormalizedInstruction& i) {
 
   HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA);
 }
 
 void
-TranslatorX64::irTranslateCIterFree(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateCIterFree(const NormalizedInstruction& i) {
 
   HHIR_EMIT(CIterFree, i.imm[0].u_IVA);
 }
@@ -1526,8 +1465,7 @@ TranslatorX64::irTranslateCIterFree(const Tracelet& t,
 
 // All vector instructions are handled by one HhbcTranslator method.
 #define MII(instr, ...)                                                 \
-  void TranslatorX64::irTranslate##instr##M(const Tracelet& t,          \
-                                            const NormalizedInstruction& ni) { \
+  void Translator::translate##instr##M(const NormalizedInstruction& ni) { \
     m_hhbcTrans->emitMInstr(ni);                                        \
   }
 MINSTRS
@@ -1535,8 +1473,7 @@ MII(FPass)
 #undef MII
 
 void
-TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
-                                       const NormalizedInstruction& i) {
+Translator::translateInstrDefault(const NormalizedInstruction& i) {
   const char *opNames[] = {
 #define O(name, imm, push, pop, flags) \
 "Unimplemented" #name,
@@ -1550,22 +1487,21 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateInstrWork(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+Translator::translateInstrWork(const NormalizedInstruction& i) {
   const Opcode op = i.op();
 
   switch (op) {
 #define CASE(iNm)                               \
-  case Op ## iNm:                               \
-                  irTranslate ## iNm(t, i);     \
-    break;
-#define TRANSLATE(a, b, c) irTranslate ## a(b, c); break;
+    case Op ## iNm:                             \
+      translate ## iNm(i);                    \
+      break;
+#define TRANSLATE(a, b, c) translate ## a(c); break;
     INSTRS
       PSEUDOINSTR_DISPATCH(TRANSLATE)
 #undef TRANSLATE
 #undef CASE
   default:
-      irTranslateInstrDefault(t, i);
+      translateInstrDefault(i);
   }
 }
 
@@ -1574,7 +1510,7 @@ static bool isPop(Opcode opc) {
 }
 
 void
-TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
+Translator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   if (!i.outStack || i.breaksTracelet) return;
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
@@ -1623,7 +1559,7 @@ static int getNumARCellsPushed(const NormalizedInstruction& i) {
   return pushesActRec(i.op()) ? kNumActRecCells : 0;
 }
 
-void TranslatorX64::irInterpretInstr(const NormalizedInstruction& i) {
+void Translator::interpretInstr(const NormalizedInstruction& i) {
   JIT::Type outStkType = JIT::Type::fromDynLocation(i.outStack);
   int poppedCells      = getNumPopped(i);
   int arPushedCells    = getNumARCellsPushed(i);
@@ -1646,16 +1582,13 @@ void TranslatorX64::irInterpretInstr(const NormalizedInstruction& i) {
   }
 }
 
-void TranslatorX64::irTranslateInstr(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+void Translator::translateInstr(const NormalizedInstruction& i) {
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
 
   m_hhbcTrans->setBcOff(i.source.offset(),
                         i.breaksTracelet && !m_hhbcTrans->isInlining());
-
-  emitVariantGuards(t, i);
 
   if (i.guardedThis) {
     // Task #2067635: This should really generate an AssertThis
@@ -1674,12 +1607,12 @@ void TranslatorX64::irTranslateInstr(const Tracelet& t,
   }
 
   if (i.interp) {
-    irInterpretInstr(i);
+    interpretInstr(i);
   } else {
-    irTranslateInstrWork(t, i);
+    translateInstrWork(i);
   }
 
-  irPassPredictedAndInferredTypes(i);
+  passPredictedAndInferredTypes(i);
 }
 
 void TranslatorX64::irAssertType(const Location& l,
@@ -1795,31 +1728,17 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni; ni = ni->next) {
       try {
-        SKTRACE(1, ni->source, "HHIR: irTranslateInstr\n");
+        SKTRACE(1, ni->source, "HHIR: translateInstr\n");
         Nuller<NormalizedInstruction> niNuller(&m_curNI);
         m_curNI = ni;
-        irTranslateInstr(t, *ni);
+        translateInstr(*ni);
       } catch (JIT::FailedIRGen& fcg) {
         // If we haven't tried interpreting ni yet, flag it to be interpreted
         // and retry
         if (!ni->interp && supportedInterpOne(ni)) {
           ni->interp = true;
           transResult = Retry;
-          break;
         }
-        if (!ni->prev) {
-          // Let the interpreter handle the entire tracelet.
-          throw;
-        }
-        // We've made forward progress. Proceed with the partial tracelet,
-        // with this last instruction interpreted. Since the interpretation
-        // might have had unknowable side effects, kill the trace right
-        // after.
-        SKTRACE(1, ni->source, "HHIR: RETRY to translate, breaking tracelet.\n");
-        ni = ni->prev;
-        ni->breaksTracelet = true;
-        t.m_nextSk = ni->next->source;
-        transResult = Retry;
         break;
       }
       assert(ni->source.offset() >= curFunc()->base());
@@ -1950,7 +1869,6 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
       dumpTraceImpl(trace, out, &regs, &lifetime, &ai);
-      m_lastHHIRDump = out.str();
     } else {
       dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
                 &lifetime, &ai);

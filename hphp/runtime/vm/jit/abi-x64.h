@@ -213,7 +213,6 @@ const int kNumServiceReqArgRegs =
   REQ(BIND_SIDE_EXIT)    \
   REQ(BIND_JMPCC_FIRST)  \
   REQ(BIND_JMPCC_SECOND) \
-  REQ(BIND_REQUIRE) \
   \
   /*
    * BIND_JMP_NO_IR is similar to BIND_JMP except that, if a new translation

@@ -152,14 +152,6 @@ static const int kLocalsToInitializeInline = 9;
 // instruction pointers.
 static const uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
-// Return the SrcKey for the operation that should follow the supplied
-// NormalizedInstruction.  (This might not be the next SrcKey in the
-// unit if we merged some instructions or otherwise modified them
-// during analysis.)
-SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i) {
-  return i.next ? i.next->source : t.m_nextSk;
-}
-
 // stubBlock --
 //   Used to emit a bunch of outlined code that is unconditionally jumped to.
 template <typename L>
@@ -891,7 +883,6 @@ TranslatorX64::translate(const TranslArgs& args) {
   }
 
   TCA start = a.code.frontier;
-  m_lastHHIRPunt.clear();
   translateTracelet(args);
 
   SKTRACE(1, args.m_sk, "translate moved head from %p to %p\n",
@@ -2141,19 +2132,6 @@ void TranslatorX64::emitReqRetransNoIR(Asm& as, const SrcKey& sk) {
   }
 }
 
-uint64_t TranslatorX64::packBitVec(const vector<bool>& bits, unsigned i) {
-  uint64_t retval = 0;
-  assert(i % 64 == 0);
-  assert(i < bits.size());
-  while (i < bits.size()) {
-    retval |= bits[i] << (i % 64);
-    if ((++i % 64) == 0) {
-      break;
-    }
-  }
-  return retval;
-}
-
 void
 TranslatorX64::checkRefs(X64Assembler& a,
                          SrcKey sk,
@@ -2490,20 +2468,6 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     ConditionCode cc = ConditionCode(args[2]);
     start = bindJmpccSecond(toSmash, off, cc, smashed);
     sk = SrcKey(curFunc(), off);
-  } break;
-
-  case REQ_BIND_REQUIRE: {
-    ReqLitStaticArgs* rlsa = (ReqLitStaticArgs*)args[0];
-    sk = SrcKey((Func*)args[1], (Offset)args[2]);
-    start = getTranslation(TranslArgs(sk, true));
-    if (start) {
-      LeaseHolder writer(s_writeLease);
-      if (writer) {
-        smashed = true;
-        SrcRec* sr = getSrcRec(sk);
-        sr->chainFrom(IncomingBranch::addr(&rlsa->m_pseudoMain));
-      }
-    }
   } break;
 
   case REQ_RETRANSLATE_NO_IR: {
@@ -2996,80 +2960,6 @@ newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
   return ret;
 }
 
-const Func*
-TranslatorX64::findCuf(const NormalizedInstruction& ni,
-                       Class*& cls, StringData*& invName, bool& forward) {
-  forward = (ni.op() == OpFPushCufF);
-  cls = nullptr;
-  invName = nullptr;
-
-  DynLocation* callable = ni.inputs[ni.op() == OpFPushCufSafe ? 1 : 0];
-
-  const StringData* str =
-    callable->isString() ? callable->rtt.valueString() : nullptr;
-  const ArrayData* arr =
-    callable->isArray() ? callable->rtt.valueArray() : nullptr;
-
-  StringData* sclass = nullptr;
-  StringData* sname = nullptr;
-  if (str) {
-    Func* f = HPHP::Unit::lookupFunc(str);
-    if (f) return f;
-    String name(const_cast<StringData*>(str));
-    int pos = name.find("::");
-    if (pos <= 0 || pos + 2 >= name.size() ||
-        name.find("::", pos + 2) != String::npos) {
-      return nullptr;
-    }
-    sclass = StringData::GetStaticString(name.substr(0, pos).get());
-    sname = StringData::GetStaticString(name.substr(pos + 2).get());
-  } else if (arr) {
-    if (arr->size() != 2) return nullptr;
-    CVarRef e0 = arr->get(int64_t(0), false);
-    CVarRef e1 = arr->get(int64_t(1), false);
-    if (!e0.isString() || !e1.isString()) return nullptr;
-    sclass = e0.getStringData();
-    sname = e1.getStringData();
-    String name(sname);
-    if (name.find("::") != String::npos) return nullptr;
-  } else {
-    return nullptr;
-  }
-
-  Class* ctx = curFunc()->cls();
-
-  if (sclass->isame(s_self.get())) {
-    if (!ctx) return nullptr;
-    cls = ctx;
-    forward = true;
-  } else if (sclass->isame(s_parent.get())) {
-    if (!ctx || !ctx->parent()) return nullptr;
-    cls = ctx->parent();
-    forward = true;
-  } else if (sclass->isame(s_static.get())) {
-    return nullptr;
-  } else {
-    cls = Unit::lookupUniqueClass(sclass);
-    if (!cls) return nullptr;
-  }
-
-  bool magicCall = false;
-  const Func* f = lookupImmutableMethod(cls, sname, magicCall, true);
-  if (!f || (forward && !ctx->classof(f->cls()))) {
-    /*
-     * To preserve the invariant that the lsb class
-     * is an instance of the context class, we require
-     * that f's class is an instance of the context class.
-     * This is conservative, but without it, we would need
-     * a runtime check to decide whether or not to forward
-     * the lsb class
-     */
-    return nullptr;
-  }
-  if (magicCall) invName = sname;
-  return f;
-}
-
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& a = atrampolines;
@@ -3262,45 +3152,6 @@ TranslatorX64::dontGuardAnyInputs(Opcode op) {
 #undef CASE
 }
 
-// Emit necessary guards for variants and pseudo-main locals before instr i.
-// For HHIR, this only inserts guards for pseudo-main locals.  Variants are
-// guarded in a different way.
-void
-TranslatorX64::emitVariantGuards(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  bool pseudoMain = Translator::liveFrameIsPseudoMain();
-  bool isFirstInstr = (&i == t.m_instrStream.first);
-  for (size_t in = 0; in < i.inputs.size(); ++in) {
-    DynLocation* input = i.inputs[in];
-    if (!input->isValue()) continue;
-    bool isRef = input->isRef() &&
-      !i.ignoreInnerType &&
-      input->rtt.innerType() != KindOfInvalid;
-    bool modifiableLocal = pseudoMain && input->isLocal() &&
-      !input->rtt.isVagueValue();
-
-    if (!modifiableLocal && !isRef) continue;
-
-    SKTRACE(1, i.source, "guarding %s: (%s:%d) :: %d!\n",
-            modifiableLocal ? "pseudoMain local" : "variant inner",
-            input->location.spaceName(),
-            input->location.offset,
-            input->rtt.valueType());
-    // TODO task 1122807: don't check the inner type if we've already
-    // checked it and have executed no possibly-aliasing instructions in
-    // the meanwhile.
-    if (modifiableLocal) {
-      RuntimeType& rtt = input->rtt;
-      JIT::Type type = JIT::Type::fromRuntimeType(rtt);
-      if (isFirstInstr) {
-        m_hhbcTrans->guardTypeLocal(input->location.offset, type);
-      } else {
-        m_hhbcTrans->checkTypeLocal(input->location.offset, type);
-      }
-    }
-  }
-}
-
 bool
 TranslatorX64::checkTranslationLimit(SrcKey sk,
                                      const SrcRec& srcRec) const {
@@ -3442,7 +3293,7 @@ TranslatorX64::translateTracelet(const TranslArgs& args) {
   if (!args.m_interp) {
     TranslateTraceletResult result;
     do {
-      hhirTraceStart(sk.offset(), t.m_nextSk.offset());
+      hhirTraceStart(sk.offset(), t.nextSk().offset());
       SKTRACE(1, sk, "retrying irTranslateTracelet\n");
       result = irTranslateTracelet(t, start, stubStart, &bcMapping);
       if (result == Retry) {
@@ -3595,12 +3446,7 @@ TranslatorX64::TranslatorX64()
   m_irAUsage(0),
   m_irAstubsUsage(0),
   m_numHHIRTrans(0),
-  m_catchTraceMap(128),
-  m_curTrace(0),
-  m_curNI(0),
-  m_curFile(nullptr),
-  m_curLine(0),
-  m_curFunc(nullptr)
+  m_catchTraceMap(128)
 {
   static const size_t kRoundUp = 2 << 20;
   const size_t kAHotSize = RuntimeOption::VMTranslAHotSize;

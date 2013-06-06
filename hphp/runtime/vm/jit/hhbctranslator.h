@@ -440,6 +440,33 @@ private:
     void emitMapGet(SSATmp* key);
     void emitMapIsset();
 
+    // Generate a catch trace that does not perform any final DecRef operations
+    // on scratch space
+    IRTrace* getEmptyCatchTrace() {
+      return m_ht.getCatchTrace();
+    }
+
+    // Generate a catch trace that will contain DecRef instructions for tvRef
+    // and/or tvRef2 as required
+    IRTrace* getCatchTrace() {
+      IRTrace* t = getEmptyCatchTrace();
+      m_failedTraceVec.push_back(t);
+      return t;
+    }
+
+    // Generate a catch trace that will free any scratch space used and perform
+    // a side-exit from a failed set operation
+    IRTrace* getCatchSetTrace() {
+      assert(!m_failedSetTrace);
+      return m_failedSetTrace = getCatchTrace();
+    }
+
+    void prependToTraces(IRInstruction* inst) {
+      for (auto t : m_failedTraceVec) {
+        t->front()->prepend(inst->clone(&m_irf));
+      }
+    }
+
     // Misc Helpers
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
@@ -531,7 +558,13 @@ private:
      * unexpected type, in which case they'll throw an InvalidSetMException. To
      * handle this, emitMPost adds code to the catch trace to fish the correct
      * value out of the exception and side exit. */
-    IRTrace* m_failedSetTrace;
+    IRTrace*  m_failedSetTrace;
+
+    /* Contains a list of all catch traces created in building the vector.
+     * Each trace must be appended with cleanup tasks (generally just DecRef)
+     * to be performed if an exception occurs during the course of the vector
+     * operation */
+    std::vector<IRTrace*> m_failedTraceVec;
   };
 
 private: // tracebuilder forwarding utilities

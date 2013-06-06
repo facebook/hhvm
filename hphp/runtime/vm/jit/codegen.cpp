@@ -820,7 +820,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   // successfully, so skip over any stack arguments and pop any
   // saved registers.
   if (info.rspOffset) {
-    m_as.subq(info.rspOffset, rsp);
+    m_as.addq(info.rspOffset, rsp);
   }
   PhysRegSaverParity::emitPops(m_as, info.savedRegs);
 }

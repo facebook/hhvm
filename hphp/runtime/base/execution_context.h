@@ -473,12 +473,12 @@ private:
                     MemberCode& mcode, TypedValue*& curMember);
   template <bool saveResult>
   void getHelperPost(unsigned ndiscard, TypedValue*& tvRet,
-                     TypedValue& tvScratch, TypedValue& tvRef,
-                     TypedValue& tvRef2);
+                     TypedValue& tvScratch, Variant& tvRef,
+                     Variant& tvRef2);
   void getHelper(PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
                  TypedValue*& base, TypedValue& tvScratch,
                  TypedValue& tvLiteral,
-                 TypedValue& tvRef, TypedValue& tvRef2,
+                 Variant& tvRef, Variant& tvRef2,
                  MemberCode& mcode, TypedValue*& curMember);
 
   template <bool warn, bool define, bool unset, bool reffy, unsigned mdepth,
@@ -489,8 +489,8 @@ private:
                     TypedValue& tvRef, TypedValue& tvRef2,
                     MemberCode& mcode, TypedValue*& curMember);
   template <unsigned mdepth>
-  void setHelperPost(unsigned ndiscard, TypedValue& tvRef,
-                     TypedValue& tvRef2);
+  void setHelperPost(unsigned ndiscard, Variant& tvRef,
+                     Variant& tvRef2);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);

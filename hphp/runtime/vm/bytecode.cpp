@@ -3275,8 +3275,8 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
   TypedValue* base;                             \
   TypedValue tvScratch;                         \
   TypedValue tvLiteral;                         \
-  TypedValue tvRef;                             \
-  TypedValue tvRef2;                            \
+  Variant tvRef;                                \
+  Variant tvRef2;                               \
   MemberCode mcode = MEL;                       \
   TypedValue* curMember = 0;
 #define DECLARE_SETHELPER_ARGS DECLARE_MEMBERHELPER_ARGS
@@ -3285,7 +3285,11 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
   TypedValue* tvRet;
 
 #define MEMBERHELPERPRE_ARGS                                           \
-  pc, ndiscard, base, tvScratch, tvLiteral,                \
+  pc, ndiscard, base, tvScratch, tvLiteral,                            \
+    *tvRef.asTypedValue(), *tvRef2.asTypedValue(), mcode, curMember
+
+#define MEMBERHELPERPRE_OUT                                            \
+  pc, ndiscard, base, tvScratch, tvLiteral,                            \
     tvRef, tvRef2, mcode, curMember
 
 // The following arguments are outputs:
@@ -3317,14 +3321,14 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     MemberCode& mcode,
     TypedValue*& curMember) {
   memberHelperPre<false, warn, false, false,
-    false, 0, mleave, saveResult>(MEMBERHELPERPRE_ARGS);
+    false, 0, mleave, saveResult>(MEMBERHELPERPRE_OUT);
 }
 
 #define GETHELPERPOST_ARGS ndiscard, tvRet, tvScratch, tvRef, tvRef2
 template <bool saveResult>
 inline void OPTBLD_INLINE VMExecutionContext::getHelperPost(
     unsigned ndiscard, TypedValue*& tvRet, TypedValue& tvScratch,
-    TypedValue& tvRef, TypedValue& tvRef2) {
+    Variant& tvRef, Variant& tvRef2) {
   // Clean up all ndiscard elements on the stack.  Actually discard
   // only ndiscard - 1, and overwrite the last cell with the result,
   // or if ndiscard is zero we actually need to allocate a cell.
@@ -3339,8 +3343,6 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPost(
     m_stack.ndiscard(ndiscard - 1);
     tvRet = m_stack.topTV();
   }
-  tvRefcountedDecRef(&tvRef);
-  tvRefcountedDecRef(&tvRef2);
 
   if (saveResult) {
     // If tvRef wasn't just allocated, we've already decref'd it in
@@ -3359,8 +3361,8 @@ VMExecutionContext::getHelper(PC& pc,
                               TypedValue*& base,
                               TypedValue& tvScratch,
                               TypedValue& tvLiteral,
-                              TypedValue& tvRef,
-                              TypedValue& tvRef2,
+                              Variant& tvRef,
+                              Variant& tvRef2,
                               MemberCode& mcode,
                               TypedValue*& curMember) {
   getHelperPre<true, true, ConsumeAll>(MEMBERHELPERPRE_ARGS);
@@ -3647,13 +3649,13 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     TypedValue& tvRef, TypedValue& tvRef2,
     MemberCode& mcode, TypedValue*& curMember) {
   return memberHelperPre<true, warn, define, unset,
-    reffy, mdepth, mleave, false>(MEMBERHELPERPRE_ARGS);
+    reffy, mdepth, mleave, false>(MEMBERHELPERPRE_OUT);
 }
 
 #define SETHELPERPOST_ARGS ndiscard, tvRef, tvRef2
 template <unsigned mdepth>
 inline void OPTBLD_INLINE VMExecutionContext::setHelperPost(
-    unsigned ndiscard, TypedValue& tvRef, TypedValue& tvRef2) {
+    unsigned ndiscard, Variant& tvRef, Variant& tvRef2) {
   // Clean up the stack.  Decref all the elements for the vector, but
   // leave the first mdepth (they are not part of the vector data).
   for (unsigned depth = mdepth; depth-mdepth < ndiscard; ++depth) {
@@ -3678,8 +3680,6 @@ inline void OPTBLD_INLINE VMExecutionContext::setHelperPost(
   }
 
   m_stack.ndiscard(ndiscard);
-  tvRefcountedDecRef(&tvRef);
-  tvRefcountedDecRef(&tvRef2);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLowInvalid(PC& pc) {
@@ -4928,7 +4928,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   case MEC:
   case MET:
   case MEI: {
-    issetResult = IssetEmptyElem<false>(tvScratch, tvRef, base, curMember);
+    issetResult = IssetEmptyElem<false>(tvScratch, *tvRef.asTypedValue(),
+        base, curMember);
     break;
   }
   case MPL:
@@ -5057,7 +5058,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   case MEC:
   case MET:
   case MEI: {
-    emptyResult = IssetEmptyElem<true>(tvScratch, tvRef, base, curMember);
+    emptyResult = IssetEmptyElem<true>(tvScratch, *tvRef.asTypedValue(),
+        base, curMember);
     break;
   }
   case MPL:
@@ -5302,20 +5304,22 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
     Cell* rhs = m_stack.topC();
 
     if (mcode == MW) {
-      result = SetOpNewElem(tvScratch, tvRef, op, base, rhs);
+      result = SetOpNewElem(tvScratch, *tvRef.asTypedValue(), op, base, rhs);
     } else {
       switch (mcode) {
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        result = SetOpElem(tvScratch, tvRef, op, base, curMember, rhs);
+        result = SetOpElem(tvScratch, *tvRef.asTypedValue(), op, base,
+            curMember, rhs);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class *ctx = arGetContextClass(m_fp);
-        result = SetOpProp(tvScratch, tvRef, ctx, op, base, curMember, rhs);
+        result = SetOpProp(tvScratch, *tvRef.asTypedValue(), ctx, op, base,
+            curMember, rhs);
         break;
       }
       default:
@@ -5390,20 +5394,22 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
       LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     if (mcode == MW) {
-      IncDecNewElem<true>(tvScratch, tvRef, op, base, to);
+      IncDecNewElem<true>(tvScratch, *tvRef.asTypedValue(), op, base, to);
     } else {
       switch (mcode) {
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        IncDecElem<true>(tvScratch, tvRef, op, base, curMember, to);
+        IncDecElem<true>(tvScratch, *tvRef.asTypedValue(), op, base,
+            curMember, to);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(m_fp);
-        IncDecProp<true>(tvScratch, tvRef, ctx, op, base, curMember, to);
+        IncDecProp<true>(tvScratch, *tvRef.asTypedValue(), ctx, op, base,
+            curMember, to);
         break;
       }
       default: assert(false);

@@ -1854,7 +1854,9 @@ xhp_bareword:
   | T_COMPILER_HALT_OFFSET             { $$ = $1;}
   | T_TRAIT                            { $$ = $1;}
   | T_TRAIT_C                          { $$ = $1;}
+  | T_INSTEADOF                        { $$ = $1;}
   | T_TYPE                             { $$ = $1;}
+  | T_SHAPE                            { $$ = $1;}
 ;
 
 simple_function_call:

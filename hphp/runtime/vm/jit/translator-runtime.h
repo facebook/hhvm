@@ -58,6 +58,7 @@ void setNewElem(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* box_value(TypedValue tv);
 ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
 /* Helper functions for conversion instructions that are too
 complicated to inline */

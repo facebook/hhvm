@@ -123,7 +123,7 @@ Array vm_get_class_constants(CStrRef className) {
       if (value->m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
-      retVal->nvSet(name, value, false);
+      retVal->set(name, tvAsCVarRef(value), false);
     }
   }
 
@@ -167,7 +167,7 @@ Array vm_get_class_vars(CStrRef className) {
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
-      ret->nvSet(name, value, false);
+      ret->set(name, tvAsCVarRef(value), false);
     }
   }
 
@@ -175,7 +175,8 @@ Array vm_get_class_vars(CStrRef className) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
-      ret->nvSet(const_cast<StringData*>(sPropInfo[i].m_name), value, false);
+      ret->set(const_cast<StringData*>(sPropInfo[i].m_name),
+               tvAsCVarRef(value), false);
     }
   }
 

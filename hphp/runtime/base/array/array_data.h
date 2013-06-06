@@ -323,12 +323,6 @@ public:
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
-  /*
-   * Inline wrappers that just use tvAsCVarRef on the value
-   */
-  ArrayData* nvSet(int64_t ki, const TypedValue* v, bool copy);
-  ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
-
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;
   virtual ssize_t iter_advance(ssize_t prev) const;

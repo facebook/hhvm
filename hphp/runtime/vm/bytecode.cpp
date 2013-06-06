@@ -6869,7 +6869,7 @@ lookupStatic(StringData* name,
   if (val == nullptr) {
     TypedValue tv;
     tvWriteUninit(&tv);
-    map->nvSet(name, &tv, false);
+    map->set(name, tvAsCVarRef(&tv), false);
     val = map->nvGet(name);
     inited = false;
   } else {

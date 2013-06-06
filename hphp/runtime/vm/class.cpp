@@ -1130,9 +1130,9 @@ HphpArray* Class::initClsCnsData() const {
 
   for (Slot i = 0; i < nConstants; ++i) {
     const Const& constant = m_constants[i];
-    TypedValue* tv = (TypedValue*)&constant.m_val;
-    constants->nvSet((StringData*)constant.m_name, tv, false);
-    // XXX: nvSet() converts KindOfUninit to KindOfNull, but our class
+    const TypedValue* tv = &constant.m_val;
+    constants->set((StringData*)constant.m_name, tvAsCVarRef(tv), false);
+    // XXX: set() converts KindOfUninit to KindOfNull, but our class
     // constant logic needs to store KindOfUninit to indicate the the
     // constant's value has not been computed yet. We should find a better
     // way to deal with this.
@@ -2379,8 +2379,7 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
         }
       }
     }
-    methods->nvSet(const_cast<StringData*>(func->name()),
-                   (TypedValue*)&true_varNR, false);
+    methods->set(const_cast<StringData*>(func->name()), true_varNR, false);
   }
   if (m_parent.get()) m_parent.get()->getMethodNames(ctx, methods);
   for (int i = 0, sz = m_declInterfaces.size(); i < sz; i++) {

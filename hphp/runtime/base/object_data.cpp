@@ -414,7 +414,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
           }
           retval->nvBind(key, val);
         } else {
-          retval->nvSet(key, val, false);
+          retval->set(key, tvAsCVarRef(val), false);
         }
       }
     }
@@ -441,7 +441,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
           }
           retval->nvBind(key.m_data.num, val);
         } else {
-          retval->nvSet(key.m_data.num, val, false);
+          retval->set(key.m_data.num, tvAsCVarRef(val), false);
         }
         continue;
       }
@@ -455,7 +455,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
         }
         retval->nvBind(strKey, val);
       } else {
-        retval->nvSet(strKey, val, false);
+        retval->set(strKey, tvAsCVarRef(val), false);
       }
       decRefStr(strKey);
     }

@@ -26,14 +26,54 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {
   // this does not re-enter
-  return array_setm_ik1_v0(0, ad, key, &value);
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  ArrayData* retval = ad->set(key, tvAsCVarRef(&value),
+                              ad->getCount() > 1);
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false>(ad, retval, nullptr);
 }
 
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
   // this does not re-enter
-  return array_setm_s0k1_v0(0, ad, key, &value);
+  bool copy = ad->getCount() > 1;
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  int64_t intkey;
+  ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
+                      ad->set(intkey, tvAsCVarRef(&value), copy) :
+                      ad->set(key, tvAsCVarRef(&value), copy);
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false>(ad, retval, nullptr);
+}
+
+ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
+  if (!a2->empty()) {
+    if (a1->empty()) {
+      decRefArr(a1);
+      return a2;
+    }
+    if (a1 != a2) {
+      ArrayData *escalated = a1->append(a2, ArrayData::Plus,
+                                        a1->getCount() > 1);
+      if (escalated != a1) {
+        escalated->incRefCount();
+        decRefArr(a2);
+        decRefArr(a1);
+        return escalated;
+      }
+    }
+  }
+  decRefArr(a2);
+  return a1;
 }
 
 HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
@@ -280,7 +320,7 @@ RefData* staticLocInitImpl(StringData* name, ActRec* fp, TypedValue val,
 
   TypedValue *mapVal = map->nvGet(name);
   if (!mapVal) {
-    map->nvSet(name, &val, false);
+    map->set(name, tvAsCVarRef(&val), false);
     mapVal = map->nvGet(name);
   }
   if (mapVal->m_type != KindOfRef) {

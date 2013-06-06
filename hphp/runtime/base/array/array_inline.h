@@ -107,15 +107,6 @@ inline ArrayData* ArrayData::set(CVarRef k, CVarRef v, bool copy) {
          set(getStringKey(tvk), v, copy);
 }
 
-inline ArrayData* ArrayData::nvSet(int64_t ki, const TypedValue* v, bool copy) {
-  return set(ki, tvAsCVarRef(v), copy);
-}
-
-inline ArrayData* ArrayData::nvSet(StringData* k, const TypedValue* v,
-                                   bool copy) {
-  return set(k, tvAsCVarRef(v), copy);
-}
-
 inline ArrayData* ArrayData::setRef(CStrRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
   return setRef(k.get(), v, copy);

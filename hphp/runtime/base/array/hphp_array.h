@@ -512,47 +512,6 @@ private:
 };
 
 //=============================================================================
-// VM runtime support functions.
-
-enum ArrayGetFlags {
-  DecRefKey = 1,
-  CheckInts = 2
-};
-
-ArrayData* array_setm_ik1_v(RefData* ref, ArrayData* ad, int64_t key,
-                            TypedValue* value);
-ArrayData* array_setm_ik1_v0(RefData* ref, ArrayData* ad, int64_t key,
-                             TypedValue* value);
-ArrayData* array_setm_sk1_v(RefData* ref, ArrayData* ad, StringData* key,
-                            TypedValue* value);
-ArrayData* array_setm_sk1_v0(RefData* ref, ArrayData* ad, StringData* key,
-                             TypedValue* value);
-ArrayData* array_setm_s0k1_v(RefData* ref, ArrayData* ad, StringData* key,
-                             TypedValue* value);
-ArrayData* array_setm_s0k1_v0(RefData* ref, ArrayData* ad, StringData* key,
-                              TypedValue* value);
-ArrayData* array_setm_s0k1nc_v(RefData* ref, ArrayData* ad, StringData* key,
-                               TypedValue* value);
-ArrayData* array_setm_s0k1nc_v0(RefData* ref, ArrayData* ad,
-                                StringData* key, TypedValue* value);
-ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value);
-ArrayData* array_getm_i(void* hphpArray, int64_t key, TypedValue* out);
-
-ArrayData* array_getm_s(ArrayData* a, StringData* key, TypedValue* out,
-                        int flags);
-uint64_t array_issetm_s(const void* hphpArray, StringData* sd)
-  FLATTEN;
-uint64_t array_issetm_s0(const void* hphpArray, StringData* sd)
-  FLATTEN;
-uint64_t array_issetm_s_fast(const void* hphpArray, StringData* sd)
-  FLATTEN;
-uint64_t array_issetm_s0_fast(const void* hphpArray, StringData* sd)
-  FLATTEN;
-uint64_t array_issetm_i(const void* hphpArray, int64_t key)
-  FLATTEN;
-ArrayData* array_add(ArrayData* a1, ArrayData* a2);
-
-//=============================================================================
 
 // inline for performance reasons
 

@@ -109,11 +109,11 @@ Object Instance::FromArray(ArrayData *properties) {
     TypedValue key;
     properties->nvGetKey(&key, pos);
     if (key.m_type == KindOfInt64) {
-      props->nvSet(key.m_data.num, value, false);
+      props->set(key.m_data.num, tvAsCVarRef(value), false);
     } else {
       assert(IS_STRING_TYPE(key.m_type));
       StringData* strKey = key.m_data.pstr;
-      props->nvSet(strKey, value, false);
+      props->set(strKey, tvAsCVarRef(value), false);
       decRefStr(strKey);
     }
   }

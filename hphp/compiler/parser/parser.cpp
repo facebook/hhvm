@@ -916,6 +916,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
+
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.hipHopSyntaxEnabled(), var->text(),

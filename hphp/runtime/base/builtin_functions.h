@@ -333,8 +333,6 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level = 0)
   __attribute__((cold));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
                               int level = 0) __attribute__((cold));
-void throw_unexpected_argument_type(int argNum, const char *fnName,
-                                    const char *expected, CVarRef val);
 
 /**
  * Handler for exceptions thrown from user functions that we don't

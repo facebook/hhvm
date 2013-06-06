@@ -206,11 +206,11 @@ class FuncFinisher {
  public:
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe)
     : m_ev(ev), m_e(e), m_fe(fe) {
-      TRACE(1, "FuncFinisher constructed: %s %p\n", m_fe->name()->data(), m_fe);
+      TRACE(2, "FuncFinisher constructed: %s\n", m_fe->name()->data());
     }
 
   ~FuncFinisher() {
-    TRACE(1, "Finishing func: %s %p\n", m_fe->name()->data(), m_fe);
+    TRACE(2, "Finishing func: %s\n", m_fe->name()->data());
     m_ev->finishFunc(m_e, m_fe);
   }
 };
@@ -5265,6 +5265,41 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
   return Attr(attrs);
 }
 
+static TypeConstraint
+determine_type_constraint(const ParameterExpressionPtr& par) {
+  if (par->hasTypeHint()) {
+    auto ce = dynamic_pointer_cast<ConstantExpression>(par->defaultValue());
+    auto flags = TypeConstraint::NoFlags;
+    if (ce && ce->isNull()) {
+      flags = flags|TypeConstraint::Nullable;
+    }
+    if (par->hhType()) {
+      flags = flags|TypeConstraint::HHType;
+    }
+    return TypeConstraint{
+      StringData::GetStaticString(par->getOriginalTypeHint()),
+      flags
+    };
+  }
+
+  if (auto annot = par->annotation()) {
+    if (!annot->isNullable()) return {};
+    if (annot->isSoft() || annot->isFunction()) return {};
+
+    auto strippedName = annot->stripNullable().vanillaName();
+    if (strippedName.empty()) return {};
+
+    return TypeConstraint{
+      StringData::GetStaticString(strippedName),
+      TypeConstraint::Nullable |
+        TypeConstraint::ExtendedHint |
+        TypeConstraint::HHType
+    };
+  }
+
+  return {};
+}
+
 void EmitterVisitor::emitPostponedMeths() {
   vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
@@ -5321,23 +5356,17 @@ void EmitterVisitor::emitPostponedMeths() {
       if (par->isOptional()) {
         dvInitializers.push_back(DVInitializer(i, par->defaultValue()));
       }
-      // Will be fixed up later, when the DV initializers are emitted.
+
       FuncEmitter::ParamInfo pi;
-      if (par->hasTypeHint()) {
-        ConstantExpressionPtr ce =
-          dynamic_pointer_cast<ConstantExpression>(par->defaultValue());
-        bool nullable = ce && ce->isNull();
-        TypeConstraint tc =
-          TypeConstraint(
-            StringData::GetStaticString(par->getOriginalTypeHint()),
-            nullable,
-            par->hhType());
-        pi.setTypeConstraint(tc);
-        TRACE(1, "Added constraint to %s\n", fe->name()->data());
+      auto const typeConstraint = determine_type_constraint(par);
+      if (typeConstraint.hasConstraint()) {
+        pi.setTypeConstraint(typeConstraint);
       }
+
       if (par->hasUserType()) {
         pi.setUserType(StringData::GetStaticString(par->getUserTypeHint()));
       }
+
       // Store info about the default value if there is one.
       if (par->isOptional()) {
         const StringData* phpCode;
@@ -5499,10 +5528,7 @@ void EmitterVisitor::emitPostponedMeths() {
       }
       for (uint i = 0; i < fe->params().size(); i++) {
         const TypeConstraint& tc = fe->params()[i].typeConstraint();
-        if (!tc.exists()) continue;
-        TRACE(2, "permanent home for tc %s, param %d of func %s: %p\n",
-              tc.typeName()->data(), i, fe->name()->data(), &tc);
-        assert(tc.typeName()->data() != (const char*)0xdeadba5eba11f00d);
+        if (!tc.hasConstraint()) continue;
         e.VerifyParamType(i);
       }
 
@@ -7333,9 +7359,11 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
   /* there is a race condition in the first call to
      GetStaticString. Make sure we dont hit it */
-  StringData::GetStaticString("");
-  /* same for TypeConstraint */
-  TypeConstraint tc;
+  {
+    StringData::GetStaticString("");
+    /* same for TypeConstraint */
+    TypeConstraint tc;
+  }
 
   JobQueueDispatcher<EmitterWorker::JobType, EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());

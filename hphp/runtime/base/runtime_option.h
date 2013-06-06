@@ -394,6 +394,7 @@ public:
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, AllowHhas,                   false)                           \
+  F(bool, CheckExtendedTypeHints,      true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \

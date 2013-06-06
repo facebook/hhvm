@@ -423,7 +423,7 @@ static void set_function_info(Array &ret, const Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.typeConstraint().exists() ?
+      const StringData* type = fpi.typeConstraint().hasConstraint() ?
         fpi.typeConstraint().typeName() : empty_string.get();
       param.set(s_type, VarNR(type));
       const StringData* typeHint = fpi.userType() ?
@@ -434,7 +434,7 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
       }
-      if (!fpi.typeConstraint().exists() ||
+      if (!fpi.typeConstraint().hasConstraint() ||
           fpi.typeConstraint().nullable()) {
         param.set(s_nullable, true_varNR);
       }

@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/compiler/expression/parameter_expression.h"
 
 #include "hphp/compiler/type_annotation.h"
-#include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
@@ -30,14 +30,23 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
-ParameterExpression::ParameterExpression
-(EXPRESSION_CONSTRUCTOR_PARAMETERS,
- TypeAnnotationPtr type, bool hhType, const std::string &name, bool ref,
- ExpressionPtr defaultValue, ExpressionPtr attributeList)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
-    m_originalType(type), m_name(name), m_hhType(hhType), m_ref(ref),
-    m_defaultValue(defaultValue), m_attributeList(attributeList) {
-  m_type = Util::toLower(type ? type->simpleName() : "");
+ParameterExpression::ParameterExpression(
+     EXPRESSION_CONSTRUCTOR_PARAMETERS,
+     TypeAnnotationPtr type,
+     bool hhType,
+     const std::string &name,
+     bool ref,
+     ExpressionPtr defaultValue,
+     ExpressionPtr attributeList)
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression))
+  , m_originalType(type)
+  , m_name(name)
+  , m_hhType(hhType)
+  , m_ref(ref)
+  , m_defaultValue(defaultValue)
+  , m_attributeList(attributeList)
+{
+  m_type = Util::toLower(type ? type->vanillaName() : "");
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
   }
@@ -51,12 +60,12 @@ ExpressionPtr ParameterExpression::clone() {
   return exp;
 }
 
-const std::string ParameterExpression::getOriginalTypeHint() const  {
+const std::string ParameterExpression::getOriginalTypeHint() const {
   assert(hasTypeHint());
-  return m_originalType->simpleName();
+  return m_originalType->vanillaName();
 }
 
-const std::string ParameterExpression::getUserTypeHint() const  {
+const std::string ParameterExpression::getUserTypeHint() const {
   assert(hasUserType());
   return m_originalType->fullName();
 }
@@ -286,7 +295,7 @@ void ParameterExpression::compatibleDefault() {
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_type.empty()) cg_printf("%s ", m_originalType->simpleName().c_str());
+  if (!m_type.empty()) cg_printf("%s ", m_originalType->vanillaName().c_str());
   if (m_ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {

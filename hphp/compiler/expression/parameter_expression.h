@@ -18,6 +18,7 @@
 #define incl_HPHP_PARAMETER_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/util/json.h"
 
 namespace HPHP {
@@ -46,11 +47,15 @@ public:
   ExpressionPtr defaultValue() { return m_defaultValue; }
   ExpressionPtr userAttributeList() { return m_attributeList; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
+
   bool hasTypeHint() const { return !m_type.empty(); }
   const std::string &getTypeHint() const {
     assert(hasTypeHint());
     return m_type;
   }
+
+  TypeAnnotationPtr annotation() const { return m_originalType; }
+
   bool hasUserType() const { return m_originalType != nullptr; }
   const std::string getOriginalTypeHint() const;
   const std::string getUserTypeHint() const;

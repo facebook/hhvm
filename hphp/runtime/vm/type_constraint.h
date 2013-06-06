@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef TYPE_CONSTRAINT_H_
-#define TYPE_CONSTRAINT_H_
+#ifndef incl_HPHP_TYPE_CONSTRAINT_H_
+#define incl_HPHP_TYPE_CONSTRAINT_H_
 
 #include <string>
 #include <tr1/functional>
@@ -32,11 +32,27 @@ class TypeConstraint {
 public:
   enum Flags {
     NoFlags = 0x0,
+
+    /*
+     * Nullable type hints check they are either the specified type,
+     * or null.
+     */
     Nullable = 0x1,
-    HHType = 0x2
+
+    /*
+     * This flag indicates either EnableHipHopSyntax was true, or the
+     * type came from a <?hh file and EnableHipHopSyntax was false.
+     */
+    HHType = 0x2,
+
+    /*
+     * Extended hints are hints that do not apply to normal, vanilla
+     * php.  For example "?Foo".
+     */
+    ExtendedHint = 0x4,
   };
 
-protected:
+private:
   enum class MetaType {
     Precise,
     Self,
@@ -78,20 +94,26 @@ protected:
 public:
   void verifyFail(const Func* func, int paramNum, const TypedValue* tv) const;
 
-  explicit TypeConstraint(const StringData* typeName, Flags flags)
-    : m_flags(flags), m_typeName(typeName), m_namedEntity(0) {
+  TypeConstraint()
+    : m_flags(NoFlags)
+    , m_typeName(nullptr)
+    , m_namedEntity(nullptr)
+  {
     init();
   }
 
-  explicit TypeConstraint(const StringData* typeName = nullptr,
-                          bool nullable = false, bool hhType = false)
-    : m_flags(NoFlags), m_typeName(typeName), m_namedEntity(0) {
-    if (nullable) m_flags = (Flags)(m_flags | Nullable);
-    if (hhType) m_flags = (Flags)(m_flags | HHType);
+  TypeConstraint(const StringData* typeName, Flags flags)
+    : m_flags(flags)
+    , m_typeName(typeName)
+    , m_namedEntity(nullptr)
+  {
     init();
   }
 
-  bool exists() const { return m_typeName; }
+  TypeConstraint(const TypeConstraint&) = default;
+  TypeConstraint& operator=(const TypeConstraint&) = default;
+
+  bool hasConstraint() const { return m_typeName; }
 
   const StringData* typeName() const { return m_typeName; }
   const NamedEntity* namedEntity() const { return m_namedEntity; }
@@ -124,12 +146,21 @@ public:
   }
 
   bool compat(const TypeConstraint& other) const {
+    if (other.isExtended() || isExtended()) {
+      /*
+       * Rely on the ahead of time typechecker---checking here can
+       * make it harder to convert a base class or interface to <?hh,
+       * because derived classes that are still <?php would all need
+       * to be modified.
+       */
+      return true;
+    }
     return (m_typeName == other.m_typeName
             || (m_typeName != nullptr && other.m_typeName != nullptr
                 && m_typeName->isame(other.m_typeName)));
   }
 
-  inline static bool equivDataTypes(DataType t1, DataType t2) {
+  static bool equivDataTypes(DataType t1, DataType t2) {
     return
       (t1 == t2) ||
       (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
@@ -158,12 +189,17 @@ public:
   void selfToClass(const Func* func, const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
 private:
+  bool isExtended() const { return m_flags & ExtendedHint; }
+
   void selfToTypeName(const Func* func, const StringData **typeName) const;
   void parentToTypeName(const Func* func, const StringData **typeName) const;
 };
 
+inline TypeConstraint::Flags
+operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
+  return TypeConstraint::Flags(static_cast<int>(a) | static_cast<int>(b));
 }
 
+}
 
-
-#endif /* TYPE_CONSTRAINT_H_ */
+#endif

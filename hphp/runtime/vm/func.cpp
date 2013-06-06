@@ -598,7 +598,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
         // owned by ParamInfo.
         pi->valueText = fpi.phpCode()->data();
       }
-      pi->type = fpi.typeConstraint().exists() ?
+      pi->type = fpi.typeConstraint().hasConstraint() ?
         fpi.typeConstraint().typeName()->data() : "";
       for (UserAttributeMap::const_iterator it = fpi.userAttributes().begin();
            it != fpi.userAttributes().end(); ++it) {

@@ -3345,6 +3345,9 @@ public:
       std::map<std::string,int>::iterator it =
         m_gidMap.find("v:" + p->getName());
       if (it != m_gidMap.end() && it->second) {
+        // NB: this is unsound if the user error handler swallows a
+        // parameter typehint failure.  It's opt-in via compiler
+        // options, though.
         if (useDefaults && p->hasTypeHint() && !p->defaultValue()) {
           b->setBit(DataFlow::AvailIn, it->second);
         }

@@ -33,7 +33,7 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_xhp(false),
                                 m_typevar(false) {}
 
-const std::string TypeAnnotation::simpleName() const {
+std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
   if (m_nullable || m_soft || m_typevar || m_function) {
     return "";
@@ -44,7 +44,7 @@ const std::string TypeAnnotation::simpleName() const {
   return m_name;
 }
 
-const std::string TypeAnnotation::fullName() const {
+std::string TypeAnnotation::fullName() const {
   std::string name;
   if (m_nullable) {
     name += '?';

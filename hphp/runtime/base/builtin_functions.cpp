@@ -681,29 +681,6 @@ void throw_call_non_object(const char *methodName) {
   throw FatalErrorException(msg.c_str());
 }
 
-void throw_unexpected_argument_type(int argNum, const char *fnName,
-                                    const char *expected, CVarRef val) {
-  const char *otype = nullptr;
-  switch (val.getType()) {
-  case KindOfUninit:
-  case KindOfNull:    otype = "null";        break;
-  case KindOfBoolean: otype = "bool";        break;
-  case KindOfInt64:   otype = "int";         break;
-  case KindOfDouble:  otype = "double";      break;
-  case KindOfStaticString:
-  case KindOfString:  otype = "string";      break;
-  case KindOfArray:   otype = "array";       break;
-  case KindOfObject:
-    otype = val.getObjectData()->o_getClassName().c_str();
-    break;
-  default:
-    assert(false);
-  }
-  raise_recoverable_error
-    ("Argument %d passed to %s must be an instance of %s, %s given",
-     argNum, fnName, expected, otype);
-}
-
 Object f_clone(CVarRef v) {
   if (v.isObject()) {
     Object clone = Object(v.toObject()->clone());

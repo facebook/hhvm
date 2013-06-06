@@ -30,11 +30,21 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+namespace {
+
+// TODO(#2322864): this is a hack until we can get rid of the "Xhp"
+// psuedo-type.
+const StaticString s_xhp("Xhp");
+bool blacklistedName(const StringData* sd) {
+  if (!sd) return false;
+  return sd->isame(s_xhp.get());
+}
+
+}
+
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
 
 void TypeConstraint::init() {
-  const StringData* typeName = m_typeName;
-
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
     const struct Pair {
       const StringData* name;
@@ -75,7 +85,16 @@ void TypeConstraint::init() {
     }
   }
 
-  if (typeName == nullptr) {
+  if (m_typeName && isExtended()) {
+    assert(nullable() &&
+           "Only nullable extended type hints are implemented");
+  }
+
+  if (blacklistedName(m_typeName) ||
+      (isExtended() && !RuntimeOption::EvalCheckExtendedTypeHints)) {
+    m_typeName = nullptr;
+  }
+  if (m_typeName == nullptr) {
     m_type.m_dt = KindOfInvalid;
     m_type.m_metatype = MetaType::Precise;
     return;
@@ -83,14 +102,14 @@ void TypeConstraint::init() {
 
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, typeName->data(), nullable());
-  if (!mapGet(s_typeNamesToTypes, typeName, &dtype) ||
+        this, m_typeName->data(), nullable());
+  if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
       !(hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
         dtype.isSelf())) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
-          this, typeName->data());
+          this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };
-    m_namedEntity = Unit::GetNamedEntity(typeName);
+    m_namedEntity = Unit::GetNamedEntity(m_typeName);
     TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;
   }
@@ -144,7 +163,7 @@ bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
 
 bool
 TypeConstraint::check(const TypedValue* tv, const Func* func) const {
-  assert(exists());
+  assert(hasConstraint());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
@@ -210,6 +229,25 @@ TypeConstraint::checkPrimitive(DataType dt) const {
   return equivDataTypes(m_type.m_dt, dt);
 }
 
+static const char* describe_actual_type(const TypedValue* tv) {
+  tv = tvToCell(tv);
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:          return "null";
+  case KindOfBoolean:       return "bool";
+  case KindOfInt64:         return "int";
+  case KindOfDouble:        return "double";
+  case KindOfStaticString:
+  case KindOfString:        return "string";
+  case KindOfArray:         return "array";
+  case KindOfObject:
+    return tv->m_data.pobj->o_getClassName().c_str();
+  default:
+    assert(false);
+  }
+  not_reached();
+}
+
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   Transl::VMRegAnchor _;
@@ -221,8 +259,23 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
   } else if (isParent()) {
     parentToTypeName(func, &tn);
   }
-  throw_unexpected_argument_type(paramNum + 1, fname.str().c_str(),
-                                 tn->data(), tvAsCVarRef(tv));
+
+  auto const givenType = describe_actual_type(tv);
+
+  if (isExtended()) {
+    // Extended type hints raise warnings instead of recoverable
+    // errors for now, to ease migration (we used to not check these
+    // at all at runtime).
+    assert(nullable() &&
+           "only nullable extended type hints are currently supported");
+    raise_warning(
+      "Argument %d to %s must be of type ?%s, %s given",
+      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+  } else {
+    raise_recoverable_error(
+      "Argument %d passed to %s must be an instance of %s, %s given",
+      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+  }
 }
 
 void TypeConstraint::selfToClass(const Func* func, const Class **cls) const {

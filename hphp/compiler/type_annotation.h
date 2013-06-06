@@ -73,9 +73,50 @@ public:
   void setXHP() { m_xhp = true; }
   void setTypeVar() { m_typevar = true; }
 
-  const std::string simpleName() const;
-  const std::string fullName() const;
+  bool isNullable() const { return m_nullable; }
+  bool isSoft() const { return m_soft; }
+  bool isTuple() const { return m_tuple; }
+  bool isFunction() const { return m_function; }
+  bool isXHP() const { return m_xhp; }
+  bool isTypeVar() const { return m_typevar; }
 
+  /*
+   * Return a shallow copy of this TypeAnnotation, except with
+   * nullability stripped.
+   */
+  TypeAnnotation stripNullable() const {
+    auto ret = *this;
+    ret.m_nullable = false;
+    return ret;
+  }
+
+  /*
+   * Returns whether this TypeAnnotation is "simple"---as described
+   * above, this implies it has only one level of depth.  Both the
+   * type list and type args are null.
+   *
+   * It may however be soft or nullable, or a function type, etc.
+   */
+  bool isSimple() const { return !m_typeList && !m_typeArgs; }
+
+  /*
+   * Return a string for this annotation that is a type hint for
+   * normal "vanilla" php.  This means <?hh-specific annotations (such
+   * as ?Foo or @Foo) are going to be stripped, as well as the deep
+   * information about a type.  (E.g. for Vector<string> this will
+   * return "Vector".)
+   */
+  std::string vanillaName() const;
+
+  /*
+   * Returns a complete string name of this type-annotation, including
+   * <?hh-specific extensions, any type parameter list, etc.
+   */
+  std::string fullName() const;
+
+  /*
+   * Add a new element to this type list for this TypeAnnotation.
+   */
   void appendToTypeList(TypeAnnotationPtr typeList);
 
 private:

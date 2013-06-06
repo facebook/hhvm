@@ -1026,7 +1026,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
       mapContParams(params, origFunc, genFunc)) {
     static auto const thisStr = StringData::GetStaticString("this");
     Id thisId = kInvalidId;
-    const bool fillThis = origFunc->isNonClosureMethod() &&
+    const bool fillThis = origFunc->isMethod() &&
       !origFunc->isStatic() &&
       ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
       (origFunc->lookupVarId(thisStr) == kInvalidId);

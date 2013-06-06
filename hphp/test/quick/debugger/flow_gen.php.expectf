@@ -2,7 +2,7 @@ Welcome to HipHop Debugger!
 Type "help" or "?" for a complete list of commands.
 
 Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-hphpd> run
+%Shphpd> run
 flow_gen.php loaded
 Program %s/flow_gen.php exited normally.
 hphpd> break flow_gen.php:12

@@ -2,7 +2,7 @@ Welcome to HipHop Debugger!
 Type "help" or "?" for a complete list of commands.
 
 Program %sprintThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
-hphpd> break printThis.php:5
+%Shphpd> break printThis.php:5
 Breakpoint 1 set on line 5 of printThis.php
 hphpd> run
 Breakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php

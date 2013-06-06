@@ -2,7 +2,7 @@ Welcome to HipHop Debugger!
 Type "help" or "?" for a complete list of commands.
 
 Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-hphpd> run
+%Shphpd> run
 flow2.php done
 Program %s/flow2.php exited normally.
 hphpd> break test()

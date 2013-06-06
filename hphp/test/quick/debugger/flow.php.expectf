@@ -2,7 +2,7 @@ Welcome to HipHop Debugger!
 Type "help" or "?" for a complete list of commands.
 
 Program %s/flow.php loaded. Type '[r]un' or '[c]ontinue' to go.
-hphpd> break cls::pub()
+%Shphpd> break cls::pub()
 Breakpoint 1 set upon entering cls::pub()
 hphpd> run
 flow_t.php loaded

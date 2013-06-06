@@ -7038,7 +7038,7 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
   );
   cont->incRefCount();
   cont->setNoDestruct();
-  cont->init(origFunc, thisPtr, args);
+  cont->init(origFunc, args);
 
   // The ActRec corresponding to the generator body lives as long as the object
   // does. We set it up once, here, and then just change FP to point to it when
@@ -7151,10 +7151,10 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
   // using InitThisLoc inside the body
-  if (!skipThis && cont->m_obj.get()) {
+  if (!skipThis && fp->hasThis()) {
     Id id = genFunc->lookupVarId(thisStr);
     if (id != kInvalidId) {
-      tvAsVariant(&cont->locals()[nLocals - id - 1]) = cont->m_obj;
+      tvAsVariant(&cont->locals()[nLocals - id - 1]) = fp->getThis();
     }
   }
   return cont;

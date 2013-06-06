@@ -46,17 +46,9 @@ class c_Continuation : public ExtObjectData {
 
 public:
   void init(const Func* origFunc,
-            ObjectData* thisPtr,
             ArrayData* args) noexcept {
     m_origFunc = const_cast<Func*>(origFunc);
     assert(m_origFunc);
-
-    if (thisPtr != nullptr) {
-      m_obj = thisPtr;
-    } else {
-      assert(m_obj.isNull());
-    }
-
     m_args = args;
   }
 
@@ -128,13 +120,11 @@ public:
   }
 
 public:
-  Object m_obj;
+  Func *m_origFunc;
   Array m_args;
   int64_t m_index;
   Variant m_value;
   Variant m_received;
-  Func *m_origFunc;
-
   int32_t m_label;
   int m_localsOffset;
   ActRec* m_arPtr;

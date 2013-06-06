@@ -46,10 +46,10 @@ static StaticString s___cont__("__cont__");
 
 c_Continuation::c_Continuation(Class* cb) :
     ExtObjectData(cb),
+    m_origFunc(nullptr),
     m_index(-1LL),
     m_value(Variant::NullInit()),
     m_received(Variant::NullInit()),
-    m_origFunc(nullptr),
     m_label(0) {
   o_subclassData.u16 = 0;
 }

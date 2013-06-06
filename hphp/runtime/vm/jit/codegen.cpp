@@ -5080,17 +5080,14 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgFillContThis(IRInstruction* inst) {
-  SSATmp* cont = inst->src(0);
+  auto thisObj = m_regs[inst->src(0)].reg();
   auto baseReg = m_regs[inst->src(1)].reg();
   int64_t offset = inst->src(2)->getValInt();
-  auto scratch = m_rScratch;
-  auto contReg = m_regs[cont].reg();
 
-  m_as.loadq(contReg[CONTOFF(m_obj)], scratch);
-  m_as.testq(scratch, scratch);
+  m_as.testq(thisObj, thisObj);
   ifThen(m_as, CC_NZ, [&] {
-    m_as.addl(1, scratch[FAST_REFCOUNT_OFFSET]);
-    m_as.storeq(scratch, baseReg[offset + TVOFF(m_data)]);
+    m_as.addl(1, thisObj[FAST_REFCOUNT_OFFSET]);
+    m_as.storeq(thisObj, baseReg[offset + TVOFF(m_data)]);
     emitStoreTVType(m_as, KindOfObject, baseReg[offset + TVOFF(m_type)]);
   });
 }

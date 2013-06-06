@@ -1046,7 +1046,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     }
     if (fillThis) {
       assert(thisId != kInvalidId);
-      gen(FillContThis, cont, locals,
+      gen(FillContThis, gen(LdThis, m_tb->fp()), locals,
                 cns(cellsToBytes(genLocals - thisId - 1)));
     }
   } else {

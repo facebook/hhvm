@@ -288,8 +288,8 @@ class Status {
 
   public static function fail($test) {
     array_push(self::$results, array(
-        'name' => $test, 
-        'status' => 'failed', 
+        'name' => $test,
+        'status' => 'failed',
         'details' => @file_get_contents("$test.diff")
     ));
     switch (self::$mode) {
@@ -374,7 +374,7 @@ function run_test($options, $test) {
       unlink("$test.repo/hhvm.hhbc");
       $hphp = hphp_cmd($options, $test);
       $output .= shell_exec("$hphp 2>&1");
-      $opts .= " -v Repo.Authoritative=true -v Repo.Central.Path=$test.repo/hhvm.hhbc";
+      $hhvm .= " -v Repo.Authoritative=true -v Repo.Central.Path=$test.repo/hhvm.hhbc";
     }
   }
 
@@ -393,12 +393,12 @@ function run_test($options, $test) {
   $output .= stream_get_contents($pipes[1]);
   file_put_contents("$test.out", $output);
   fclose($pipes[1]);
- 
+
   // hhvm redirects errors to stdout, so anything on stderr is really bad
   $stderr = stream_get_contents($pipes[2]);
   if ($stderr) {
     file_put_contents(
-      "$test.diff", 
+      "$test.diff",
       "Test failed because the process wrote on stderr:\n$stderr"
     );
     return false;

@@ -169,13 +169,6 @@ Variant c_Continuation::t___clone() {
   return uninit_null();
 }
 
-HphpArray* c_Continuation::getStaticLocals() {
-  if (m_VMStatics.get() == NULL) {
-    m_VMStatics = ArrayData::Make(1);
-  }
-  return m_VMStatics.get();
-}
-
 namespace {
   StaticString s_send("send");
   StaticString s_raise("raise");

@@ -28,6 +28,12 @@ dumpEach($cgg);
 $cgg = null;
 $cgg = $cg();
 dumpEach($cgg);
+$cg = makeClosureGen();
+$cgg = $cg();
+dumpEach($cgg);
+$cgg = null;
+$cgg = $cg();
+dumpEach($cgg);
 
 function makeClosure() {
   return function() {

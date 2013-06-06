@@ -131,11 +131,8 @@ public:
 
   p_ContinuationWaitHandle m_waitHandle;
 
-  SmartPtr<HphpArray> m_VMStatics;
-
   String& getCalledClass() { not_reached(); }
 
-  HphpArray* getStaticLocals();
   static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
     return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
             sizeof(Iter) * nIters + sizeof(ActRec));

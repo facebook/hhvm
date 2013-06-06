@@ -361,14 +361,16 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
 HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
     TypedValue* closureLoc = frame_local(ar, ar->m_func->numParams());
-    c_Closure* closure = static_cast<c_Closure*>(closureLoc->m_data.pobj);
-    assert(closure != nullptr);
-    return closure->getStaticLocals();
+    assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
+    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else if (ar->m_func->isGeneratorFromClosure()) {
     TypedValue* contLoc = frame_local(ar, 0);
+    assert(dynamic_cast<c_Continuation*>(contLoc->m_data.pobj));
     c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
-    assert(cont != nullptr);
-    return cont->getStaticLocals();
+
+    TypedValue* closureLoc = frame_local(ar, cont->m_origFunc->numParams() + 1);
+    assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
+    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else {
     return ar->m_func->getStaticLocals();
   }

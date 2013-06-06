@@ -603,8 +603,7 @@ Class* Unit::defClass(const PreClass* preClass,
     }
 
     if (!nameList->m_cachedClassOffset) {
-      nameList->m_cachedClassOffset = Transl::TargetCache::
-        allocKnownClass(newClass.get());
+      Transl::TargetCache::allocKnownClass(newClass.get());
     }
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
@@ -635,11 +634,7 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
   auto const aliasNe = Unit::GetNamedEntity(alias);
 
   if (!aliasNe->m_cachedClassOffset) {
-    Lock lk(s_classesMutex);
-    if (!aliasNe->m_cachedClassOffset) {
-      aliasNe->m_cachedClassOffset =
-        Transl::TargetCache::allocKnownClass(alias);
-    }
+    Transl::TargetCache::allocKnownClass(aliasNe, false);
   }
 
   auto const aliasClass = aliasNe->getCachedClass();

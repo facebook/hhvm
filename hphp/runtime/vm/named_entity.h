@@ -85,6 +85,8 @@ struct NamedEntity {
     , m_clsList(nullptr)
   {}
 
+  // Assigning these fields is protected by the targetcache lock.  We
+  // read them without locks.
   unsigned m_cachedClassOffset;
   unsigned m_cachedFuncOffset;
   unsigned m_cachedNameDefOffset;

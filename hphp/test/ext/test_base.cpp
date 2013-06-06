@@ -51,7 +51,7 @@ bool TestBase::CountSkip() {
 
 bool TestBase::VerifySame(const char *exp1, const char *exp2,
                           CVarRef v1, CVarRef v2) {
-  if (!v1.same(v2)) {
+  if (!same(v1, v2)) {
     g_context->obEndAll();
     printf("%s = \n", exp1); f_var_dump(v1);
     printf("%s = \n", exp2); f_var_dump(v2);

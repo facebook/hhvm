@@ -485,7 +485,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
 int64_t c_Vector::t_linearsearch(CVarRef search_value) {
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
-    if (search_value.same(tvAsCVarRef(&m_data[i]))) {
+    if (same(search_value, tvAsCVarRef(&m_data[i]))) {
       return i;
     }
   }

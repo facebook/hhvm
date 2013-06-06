@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/tv_comparisons.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,9 @@ bool same(CVarRef v1, CStrRef v2);
 bool same(CVarRef v1, litstr v2);
 bool same(CVarRef v1, CArrRef v2);
 bool same(CVarRef v1, CObjRef v2);
-inline bool same(CVarRef v1, CVarRef v2) { return v1.same(v2); }
+inline bool same(CVarRef v1, CVarRef v2) {
+  return tvSame(v1.asTypedValue(), v2.asTypedValue());
+}
 
 inline bool equal(CVarRef v1, bool    v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, int     v2) { return v1.equal(v2);}

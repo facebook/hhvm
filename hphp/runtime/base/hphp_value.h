@@ -42,7 +42,7 @@ union Value {
   StringData *pstr; // KindOfString, KindOfStaticString
   ArrayData  *parr; // KindOfArray
   ObjectData *pobj; // KindOfObject
-  Class  *pcls; // only in vm stack, no type tag.
+  Class      *pcls; // only in vm stack, no type tag.
   RefData    *pref; // KindOfRef
   TypedValue *pind; // only for KindOfIndirect
 };

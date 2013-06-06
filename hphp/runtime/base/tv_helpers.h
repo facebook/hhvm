@@ -420,13 +420,6 @@ inline bool tvIsStronglyBound(const TypedValue* tv) {
   return (tv->m_type == KindOfRef && tv->m_data.pref->_count > 1);
 }
 
-inline bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
-  if (tv1->m_type == KindOfUninit || tv2->m_type == KindOfUninit) {
-    return tv1->m_type == tv2->m_type;
-  }
-  return tvAsCVarRef(tv1).same(tvAsCVarRef(tv2));
-}
-
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->_count
 inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {

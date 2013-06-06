@@ -694,19 +694,9 @@ class Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
-  /**
+  /*
    * Comparisons
    */
-  bool same(bool    v2) const = delete;
-  bool same(int     v2) const = delete;
-  bool same(int64_t v2) const = delete;
-  bool same(double  v2) const = delete;
-  bool same(litstr  v2) const = delete;
-  bool same(const StringData *v2) const = delete;
-  bool same(CStrRef v2) const = delete;
-  bool same(CArrRef v2) const = delete;
-  bool same(CObjRef v2) const = delete;
-  bool same(CVarRef v2) const;
 
   bool equal(bool    v2) const;
   bool equal(int     v2) const;

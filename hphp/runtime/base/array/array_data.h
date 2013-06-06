@@ -443,7 +443,7 @@ public:
   virtual void dump(std::ostream &os);
 
   /**
-   * Comparisons. Similar to serialize(), we implemented it here generically.
+   * Comparisons.
    */
   int compare(const ArrayData *v2) const;
   bool equal(const ArrayData *v2, bool strict) const;

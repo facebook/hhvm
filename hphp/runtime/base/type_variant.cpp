@@ -1543,51 +1543,6 @@ Variant::operator Object() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// comparisons
-
-bool Variant::same(CVarRef v2) const {
-  bool null1 = isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-
-  TypedValueAccessor acc = getTypedAccessor();
-  switch (GetAccessorType(acc)) {
-  case KindOfInt64: {
-    TypedValueAccessor acc2 = v2.getTypedAccessor();
-    switch (GetAccessorType(acc2)) {
-    case KindOfInt64:
-      return HPHP::equal(GetInt64(acc), GetInt64(acc2));
-    default:
-      break;
-    }
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    TypedValueAccessor acc2 = v2.getTypedAccessor();
-    switch (GetAccessorType(acc2)) {
-    case KindOfStaticString:
-    case KindOfString:
-      return GetStringData(acc)->same(v2.GetStringData(acc2));
-    default:
-      return false;
-    }
-  }
-  case KindOfArray:
-    if (v2.is(KindOfArray)) {
-      return Array(getArrayData()).same(Array(v2.getArrayData()));
-    }
-    break;
-  case KindOfObject:
-    return v2.is(KindOfObject) && getObjectData() == v2.getObjectData();
-  default:
-    break;
-  }
-  return getType() == v2.getType() && equal(v2);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 #define UNWRAP(reverse)                                                    \
   TypedValueAccessor acc = getTypedAccessor();                             \

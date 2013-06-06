@@ -644,7 +644,7 @@ Variant &Array::addLval(CVarRef key, bool isKey /* = false */) {
 bool Array::valueExists(CVarRef search_value,
                         bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && iter.secondRef().same(search_value)) ||
+    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
         (!strict && iter.secondRef().equal(search_value))) {
       return true;
     }
@@ -654,7 +654,7 @@ bool Array::valueExists(CVarRef search_value,
 
 Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && iter.secondRef().same(search_value)) ||
+    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
         (!strict && iter.secondRef().equal(search_value))) {
       return iter.first();
     }
@@ -673,7 +673,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
   } else {
     Array ret = Array::Create();
     for (ArrayIter iter(*this); iter; ++iter) {
-      if ((strict && iter.secondRef().same(search_value)) ||
+      if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
           (!strict && iter.secondRef().equal(search_value))) {
         ret.append(iter.first());
       }

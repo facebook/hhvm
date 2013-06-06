@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/array/array_data.h"
+
+#include "tbb/concurrent_hash_map.h"
+
+#include "hphp/util/exception.h"
 #include "hphp/runtime/base/array/array_init.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/base/type_conversions.h"
@@ -24,9 +27,8 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/shared/shared_map.h"
-#include "hphp/util/exception.h"
-#include "tbb/concurrent_hash_map.h"
 #include "hphp/runtime/base/array/policy_array.h"
+#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,8 +177,8 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   if (strict) {
     for (ArrayIter iter1(this), iter2(v2); iter1; ++iter1, ++iter2) {
       assert(iter2);
-      if (!iter1.first().same(iter2.first())
-          || !iter1.second().same(iter2.secondRef())) return false;
+      if (!same(iter1.first(), iter2.first())
+          || !same(iter1.second(), iter2.secondRef())) return false;
     }
   } else {
     for (ArrayIter iter(this); iter; ++iter) {

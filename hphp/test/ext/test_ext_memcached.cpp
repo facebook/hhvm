@@ -42,7 +42,7 @@ bool TestExtMemcached::RunTests(const std::string &which) {
   memc->t___construct();                                                \
   memc->t_addserver(TEST_MEMCACHED_HOSTNAME, TEST_MEMCACHED_PORT);      \
   Variant memc_version = memc->t_getversion();                          \
-  if (memc_version.same(false)) {                                       \
+  if (same(memc_version, false)) {                                      \
     SKIP("No memcached running");                                       \
     return Count(true);                                                 \
   }

@@ -1620,7 +1620,7 @@ Variant f_iconv_mime_encode(CStrRef field_name, CStrRef field_value,
 Variant f_iconv_mime_decode(CStrRef encoded_string, int mode /* = 0 */,
                             CStrRef charset /* = null_string */) {
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   StringBuffer retval;
   php_iconv_err_t err =
@@ -1638,7 +1638,7 @@ Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
                                     int mode /* = 0 */,
                                     CStrRef charset /* = null_string */) {
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   Array ret;
   php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
@@ -1757,7 +1757,7 @@ Variant f_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str) {
 
 Variant f_iconv_strlen(CStrRef str, CStrRef charset /* = null_string */) {
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   unsigned int retval;
   php_iconv_err_t err = _php_iconv_strlen(&retval, str.data(), str.size(),
@@ -1780,7 +1780,7 @@ Variant f_iconv_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
   }
 
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   unsigned int retval;
   php_iconv_err_t err =
@@ -1800,7 +1800,7 @@ Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle,
   }
 
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   unsigned int retval;
   php_iconv_err_t err =
@@ -1816,7 +1816,7 @@ Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle,
 Variant f_iconv_substr(CStrRef str, int offset, int length /* = INT_MAX */,
                        CStrRef charset /* = null_string */) {
   Variant encoded = check_charset(charset);
-  if (encoded.same(false)) return false;
+  if (same(encoded, false)) return false;
   String enc = encoded.toString();
   StringBuffer retval;
   php_iconv_err_t err = _php_iconv_substr(retval, str.data(), str.size(),

@@ -517,7 +517,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     if (cmd == NULL) {
       break;
     }
-    if (cmdName.same(cmd)) {
+    if (same(cmdName, cmd)) {
       allowed = true;
       break;
     }

@@ -272,7 +272,7 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
 bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
                              bool throws /* = true */,
                              bool prepend /* = false */) {
-  if (autoload_function.same(s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call)) {
     if (throws) {
       throw_spl_exception("Function spl_autoload_call()"
                       "cannot be registered");
@@ -289,7 +289,7 @@ bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
 }
 
 bool f_spl_autoload_unregister(CVarRef autoload_function) {
-  if (autoload_function.same(s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call)) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
     AutoloadHandler::s_instance->removeHandler(autoload_function);

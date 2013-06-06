@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/stat_cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -860,7 +861,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
                                 AttachLiteral),
                          String(haystack, haystack_len, AttachLiteral),
                          matches);
-  return r.same(1);
+  return HPHP::same(r, 1);
 }
 
 bool BreakPointInfo::checkExceptionOrError(CVarRef e) {

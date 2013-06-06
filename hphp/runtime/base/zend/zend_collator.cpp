@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {
 
@@ -311,7 +312,7 @@ static String intl_convert_str_utf16_to_utf8(CStrRef utf16_str,
 
 static Variant collator_convert_string_to_number(CVarRef str) {
   Variant num = collator_convert_string_to_number_if_possible(str);
-  if (num.same(false)) {
+  if (same(num, false)) {
     /* String wasn't converted => return zero. */
     return 0;
   }
@@ -390,7 +391,7 @@ static Variant collator_normalize_sort_argument(CVarRef arg) {
   if (!arg.isString()) return arg;
 
   Variant n_arg = collator_convert_string_to_number_if_possible(arg);
-  if (n_arg.same(false)) {
+  if (same(n_arg, false)) {
     /* Conversion to number failed. */
     UErrorCode status;
     n_arg = intl_convert_str_utf16_to_utf8(arg, &status);
@@ -416,10 +417,10 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
    * then use ICU-compare. Otherwise PHP-compare. */
   if (str1.isString() && str2.isString()) {
     num1 = collator_convert_string_to_number_if_possible(str1);
-    if (!num1.same(false)) {
+    if (!same(num1, false)) {
       num2 = collator_convert_string_to_number_if_possible(str2);
     }
-    if (num1.same(false) || num2.same(false)) {
+    if (same(num1, false) || same(num2, false)) {
       assert(data);
       int ret = ucol_strcoll((const UCollator *)data,
                              (UChar*)(str1.toString().data()),
@@ -432,7 +433,7 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
 
   /* num1 is set if str1 and str2 are strings. */
   if (!num1.isNull()) {
-    if (num1.same(false)) {
+    if (same(num1, false)) {
       /* str1 is string but not numeric string just convert it to utf8. */
       UErrorCode status;
       norm1 = intl_convert_str_utf16_to_utf8(str1, &status);

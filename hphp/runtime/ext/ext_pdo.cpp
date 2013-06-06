@@ -3118,7 +3118,7 @@ Variant c_PDOStatement::t_key() {
 
 Variant c_PDOStatement::t_next() {
   m_row = t_fetch(PDO_FETCH_USE_DEFAULT);
-  if (m_row.same(false)) {
+  if (same(m_row, false)) {
     m_rowIndex = -1;
   } else {
     ++m_rowIndex;

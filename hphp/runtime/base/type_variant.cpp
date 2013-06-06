@@ -1545,62 +1545,6 @@ Variant::operator Object() const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-bool Variant::same(bool v2) const {
-  return isBoolean() && HPHP::equal(v2, getBoolean());
-}
-
-bool Variant::same(int v2) const {
-  return same((int64_t)v2);
-}
-
-bool Variant::same(int64_t v2) const {
-  TypedValueAccessor acc = getTypedAccessor();
-  switch (GetAccessorType(acc)) {
-  case KindOfInt64:
-    return HPHP::equal(v2, GetInt64(acc));
-  default:
-    break;
-  }
-  return false;
-}
-
-bool Variant::same(double v2) const {
-  return isDouble() && HPHP::equal(v2, getDouble());
-}
-
-bool Variant::same(litstr v2) const {
-  StackStringData sd2(v2);
-  return same(&sd2);
-}
-
-bool Variant::same(const StringData *v2) const {
-  bool null1 = isNull();
-  bool null2 = (v2 == nullptr);
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  return isString() && HPHP::same(getStringData(), v2);
-}
-
-bool Variant::same(CStrRef v2) const {
-  return same(v2.get());
-}
-
-bool Variant::same(CArrRef v2) const {
-  bool null1 = isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  return is(KindOfArray) && Array(getArrayData()).same(v2);
-}
-
-bool Variant::same(CObjRef v2) const {
-  bool null1 = isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  return is(KindOfObject) && getObjectData() == v2.get();
-}
-
 bool Variant::same(CVarRef v2) const {
   bool null1 = isNull();
   bool null2 = v2.isNull();

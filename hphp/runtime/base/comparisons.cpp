@@ -19,7 +19,71 @@
 #include "hphp/runtime/base/zend/zend_string.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+// Variant
+
+bool same(CVarRef v1, bool v2) {
+  return v1.isBoolean() && v2 == v1.getBoolean();
+}
+
+bool same(CVarRef v1, int64_t v2) {
+  auto const acc = v1.getTypedAccessor();
+  switch (acc->m_type) {
+  case KindOfInt64:
+    return v2 == acc->m_data.num;
+  default:
+    break;
+  }
+  return false;
+}
+
+bool same(CVarRef v1, double d) {
+  return v1.isDouble() && v1.getDouble() == d;
+}
+
+bool same(CVarRef v1, const StringData* v2) {
+  bool null1 = v1.isNull();
+  bool null2 = (v2 == nullptr);
+  if (null1 && null2) return true;
+  if (null1 || null2) return false;
+  if (!v1.isString()) return false;
+  auto const sdata = v1.getStringData();
+  return sdata == v2 || v2->same(sdata);
+}
+
+// TODO(#2298051) litstr must die
+bool same(CVarRef v1, litstr v2) {
+  StackStringData sd2(v2);
+  return same(v1, &sd2);
+}
+
+bool same(CVarRef v1, CStrRef v2) {
+  const StringData* sd = v2.get();
+  return same(v1, sd);
+}
+
+bool same(CVarRef v1, CArrRef v2) {
+  bool null1 = v1.isNull();
+  bool null2 = v2.isNull();
+  if (null1 && null2) return true;
+  if (null1 || null2) return false;
+  if (!v1.isArray()) return false;
+  auto const ad = v1.getArrayData();
+  return v2->equal(ad, true);
+}
+
+bool same(CVarRef v1, CObjRef v2) {
+  bool null1 = v1.isNull();
+  bool null2 = v2.isNull();
+  if (null1 && null2) return true;
+  if (null1 || null2) return false;
+  if (!v1.isObject()) return false;
+  auto const od = v1.getObjectData();
+  return od == v2.get();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 bool less_or_equal(CVarRef v1, CVarRef v2) {
   // To be PHP-compatible, when comparing two arrays or two objects we
@@ -165,5 +229,5 @@ bool more(int64_t v1, const StringData *v2) {
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 }

@@ -752,7 +752,7 @@ bool TestExtString::test_strcmp() {
 }
 
 bool TestExtString::test_strncmp() {
-  VERIFY(f_strncmp("a", "ab", 1).same(0));
+  VERIFY(same(f_strncmp("a", "ab", 1), 0));
   return Count(true);
 }
 
@@ -797,7 +797,7 @@ bool TestExtString::test_strcasecmp() {
 }
 
 bool TestExtString::test_strncasecmp() {
-  VERIFY(f_strncasecmp("a", "Ab", 1).same(0));
+  VERIFY(same(f_strncasecmp("a", "Ab", 1), 0));
   return Count(true);
 }
 

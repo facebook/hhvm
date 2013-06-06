@@ -242,14 +242,14 @@ static const StaticString s_days("days");
 
 Variant c_DateInterval::t___get(Variant member) {
   if (member.isString()) {
-    if (member.same(s_y))      return m_di->getYears();
-    if (member.same(s_m))      return m_di->getMonths();
-    if (member.same(s_d))      return m_di->getDays();
-    if (member.same(s_h))      return m_di->getHours();
-    if (member.same(s_i))      return m_di->getMinutes();
-    if (member.same(s_s))      return m_di->getSeconds();
-    if (member.same(s_invert)) return m_di->isInverted();
-    if (member.same(s_days)) {
+    if (same(member, s_y))      return m_di->getYears();
+    if (same(member, s_m))      return m_di->getMonths();
+    if (same(member, s_d))      return m_di->getDays();
+    if (same(member, s_h))      return m_di->getHours();
+    if (same(member, s_i))      return m_di->getMinutes();
+    if (same(member, s_s))      return m_di->getSeconds();
+    if (same(member, s_invert)) return m_di->isInverted();
+    if (same(member, s_days)) {
       if (m_di->haveTotalDays()) {
         return m_di->getTotalDays();
       } else {
@@ -265,35 +265,35 @@ Variant c_DateInterval::t___get(Variant member) {
 
 Variant c_DateInterval::t___set(Variant member, Variant value) {
   if (member.isString()) {
-    if (member.same(s_y)) {
+    if (same(member, s_y)) {
       m_di->setYears(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_m)) {
+    if (same(member, s_m)) {
       m_di->setMonths(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_d)) {
+    if (same(member, s_d)) {
       m_di->setDays(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_h)) {
+    if (same(member, s_h)) {
       m_di->setHours(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_i)) {
+    if (same(member, s_i)) {
       m_di->setMinutes(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_s)) {
+    if (same(member, s_s)) {
       m_di->setSeconds(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_invert)) {
+    if (same(member, s_invert)) {
       m_di->setInverted(value.toBoolean());
       return uninit_null();
     }
-    if (member.same(s_days)) {
+    if (same(member, s_days)) {
       m_di->setTotalDays(value.toInt64());
       return uninit_null();
     }

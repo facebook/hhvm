@@ -493,8 +493,8 @@ bool TestExtMb::test_mb_strrchr() {
     VS(f_strrchr(text, "\x9C"), "\x9C""Line 3");
     // f_mb_strrchr behaves differently in different versions of
     // libmbfl (https://github.com/facebook/hiphop-php/issues/68)
-    VERIFY(f_mb_strrchr(text, "\x9C").same(false) ||
-           f_mb_strrchr(text, "\x9C").same("Line 3"));
+    VERIFY(same(f_mb_strrchr(text, "\x9C"), false) ||
+           same(f_mb_strrchr(text, "\x9C"), String("Line 3")));
   }
   return Count(true);
 }
@@ -567,8 +567,8 @@ bool TestExtMb::test_mb_substr_count() {
   // different from substr_count
   // f_mb_strrchr behaves differently in different versions of
   // libmbfl (https://github.com/facebook/hiphop-php/issues/68)
-  VERIFY(f_mb_substr_count("gcdgcdgcd", "gcdgcd").same(2) ||
-         f_mb_substr_count("gcdgcdgcd", "gcdgcd").same(1));
+  VERIFY(same(f_mb_substr_count("gcdgcdgcd", "gcdgcd"), 2) ||
+         same(f_mb_substr_count("gcdgcdgcd", "gcdgcd"), 1));
   return Count(true);
 }
 

@@ -25,16 +25,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Variant
 
-inline bool same(CVarRef v1, bool    v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, int     v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, int64_t   v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, double  v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, const StringData *v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, CStrRef v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, litstr  v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, CArrRef v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, CObjRef v2)  { return v1.same(v2);}
-inline bool same(CVarRef v1, CVarRef v2)  { return v1.same(v2);}
+bool same(CVarRef v1, bool v2);
+bool same(CVarRef v1, int64_t v2);
+inline bool same(CVarRef v1, int v2) { return same(v1, (int64_t)v2); }
+bool same(CVarRef v1, double v2);
+bool same(CVarRef v1, const StringData* v2);
+bool same(CVarRef v1, CStrRef v2);
+bool same(CVarRef v1, litstr v2);
+bool same(CVarRef v1, CArrRef v2);
+bool same(CVarRef v1, CObjRef v2);
+inline bool same(CVarRef v1, CVarRef v2) { return v1.same(v2); }
 
 inline bool equal(CVarRef v1, bool    v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, int     v2) { return v1.equal(v2);}

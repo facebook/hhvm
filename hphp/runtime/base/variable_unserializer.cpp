@@ -76,7 +76,7 @@ bool VariableUnserializer::isWhitelistedClass(CStrRef cls_name) const {
   if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
     for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
       CVarRef value(iter.secondRef());
-      if (f_is_subclass_of(cls_name, value) || value.same(cls_name)) {
+      if (f_is_subclass_of(cls_name, value) || same(value, cls_name)) {
         return true;
       }
     }

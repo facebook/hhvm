@@ -49,8 +49,8 @@ int main(int argc, const char* argv[]) {
 
   std::ofstream cpp(argv[1]);
 
-  cpp << "#include \"runtime/ext_hhvm/ext_hhvm.h\"\n";
-  cpp << "#include \"runtime/ext/ext.h\"\n";
+  cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n";
+  cpp << "#include \"hphp/runtime/ext/ext.h\"\n";
   cpp << "#include \"ext_hhvm_infotabs.h\"\n";
   cpp << "namespace HPHP {\n";
   cpp << "  struct TypedValue;\n";

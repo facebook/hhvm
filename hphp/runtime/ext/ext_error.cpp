@@ -23,8 +23,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_debug_backtrace(bool provide_object /* = true */) {
-  return g_vmContext->debugBacktrace(true, false, provide_object);
+const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+const int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+
+Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
+  bool provide_object = options & DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
+  return g_vmContext->debugBacktrace(
+    true, false, provide_object, nullptr, ignore_args, limit
+  );
 }
 
 /**
@@ -45,8 +52,10 @@ Array f_hphp_debug_caller_info() {
   return Array::Create();
 }
 
-void f_debug_print_backtrace() {
-  echo(debug_string_backtrace(true));
+void f_debug_print_backtrace(int64_t options /* = 0 */,
+                             int64_t limit /* = 0 */) {
+  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
+  echo(debug_string_backtrace(true, ignore_args, limit));
 }
 
 static const StaticString s_class("class");
@@ -55,12 +64,15 @@ static const StaticString s_function("function");
 static const StaticString s_file("file");
 static const StaticString s_line("line");
 static const StaticString s_message("message");
+static const StaticString s_args("args");
 
-String debug_string_backtrace(bool skip) {
+String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
+                              int limit /* = 0 */) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
     StringBuffer buf;
-    bt = g_vmContext->debugBacktrace(skip);
+    bt = g_vmContext->debugBacktrace(skip, false, false, nullptr,
+                                     ignore_args, limit);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
       Array frame = it.second().toArray();
@@ -73,7 +85,19 @@ String debug_string_backtrace(bool skip) {
         buf.append(frame->get(s_type).toString());
       }
       buf.append(frame->get(s_function).toString());
-      buf.append("()");
+      buf.append("(");
+      if (!ignore_args) {
+        bool first = true;
+        for (ArrayIter it = frame->get(s_args).begin(); !it.end(); it.next()) {
+          if (!first) {
+            buf.append(", ");
+          } else {
+            first = false;
+          }
+          buf.append(it.second().toString());
+        }
+      }
+      buf.append(")");
       if (frame.exists(s_file)) {
         buf.append(" called at [");
         buf.append(frame->get(s_file).toString());
@@ -190,6 +214,9 @@ bool f_trigger_error(CStrRef error_msg,
 bool f_user_error(CStrRef error_msg, int error_type /* = k_E_USER_NOTICE */) {
   return f_trigger_error(error_msg, error_type);
 }
+
+const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = 2;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

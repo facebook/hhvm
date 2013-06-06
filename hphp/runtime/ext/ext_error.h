@@ -25,10 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_debug_backtrace(bool provide_object = true);
+Array f_debug_backtrace(int64_t options = 1, int64_t limit = 0);
 Array f_hphp_debug_caller_info();
-void f_debug_print_backtrace();
-String debug_string_backtrace(bool skip);
+void f_debug_print_backtrace(int64_t options = 0, int64_t limit = 0);
+String debug_string_backtrace(bool skip, bool ignore_args = false,
+                              int limit = 0);
 Array f_error_get_last();
 bool f_error_log(CStrRef message, int message_type = 0, CStrRef destination = null_string, CStrRef extra_headers = null_string);
 int64_t f_error_reporting(CVarRef level = uninit_null());
@@ -41,7 +42,8 @@ void f_hphp_throw_fatal_error(CStrRef error_msg);
 void f_hphp_clear_unflushed();
 bool f_trigger_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE);
 bool f_user_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE);
-
+extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
+extern const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

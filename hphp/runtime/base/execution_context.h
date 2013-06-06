@@ -660,7 +660,9 @@ public:
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,
-                       VMParserFrame* parserFrame = nullptr);
+                       VMParserFrame* parserFrame = nullptr,
+                       bool ignoreArgs = false,
+                       int limit = 0);
   VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);

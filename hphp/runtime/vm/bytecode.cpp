@@ -1965,7 +1965,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
                                          bool withSelf /* = false */,
                                          bool withThis /* = false */,
                                          VMParserFrame*
-                                         parserFrame /* = NULL */) {
+                                         parserFrame /* = NULL */,
+                                         bool ignoreArgs /* = false */,
+                                         int limit /* = 0 */) {
   Array bt = Array::Create();
 
   // If there is a parser frame, put it at the beginning of
@@ -2032,7 +2034,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 
   // Handle the subsequent VM frames
   Offset prevPc = 0;
-  for (ActRec* prevFp = getPrevVMState(fp, &prevPc); fp != nullptr;
+  for (ActRec* prevFp = getPrevVMState(fp, &prevPc);
+       fp != nullptr && (limit == 0 || depth < limit);
        fp = prevFp, pc = prevPc, prevFp = getPrevVMState(fp, &prevPc)) {
     // do not capture frame for HPHP only functions
     if (fp->m_func->isNoInjection()) {
@@ -2115,7 +2118,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     }
 
     Array args = Array::Create();
-    if (funcname.same(s_include)) {
+    if (ignoreArgs) {
+      // do nothing
+    } else if (funcname.same(s_include)) {
       if (depth) {
         args.append(const_cast<StringData*>(curUnit->filepath()));
         frame.set(s_args, args, true);

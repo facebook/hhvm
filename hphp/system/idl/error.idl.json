@@ -1,6 +1,14 @@
 {
     "preamble": "",
     "consts": [
+        {
+            "name": "DEBUG_BACKTRACE_PROVIDE_OBJECT",
+            "type": "Int64"
+        },
+        {
+            "name": "DEBUG_BACKTRACE_IGNORE_ARGS",
+            "type": "Int64"
+        }
     ],
     "funcs": [
         {
@@ -16,10 +24,16 @@
             },
             "args": [
                 {
-                    "name": "provide_object",
-                    "type": "Boolean",
-                    "value": "true",
-                    "desc": "Whether or not to populate the \"object\" index."
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "1",
+                    "desc": "Whether or not to populate the \"object\" index.\n\nDEBUG_BACKTRACE_PROVIDE_OBJECT: Whether or not to populate the \"object\" index.\nDEBUG_BACKTRACE_IGNORE_ARGS: Whether or not to omit the \"args\" index, and thus all the function/method arguments, to save memory."
+                },
+                {
+                    "name": "limit",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "This parameter can be used to limit the number of stack frames returned. By default (limit=0) it returns all stack frames."
                 }
             ]
         },
@@ -35,6 +49,18 @@
                 "desc": "No value is returned."
             },
             "args": [
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Whether or not to populate the \"object\" index.\n\nDEBUG_BACKTRACE_IGNORE_ARGS: Whether or not to omit the \"args\" index, and thus all the function/method arguments, to save memory."
+                },
+                {
+                    "name": "limit",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "This parameter can be used to limit the number of stack frames returned. By default (limit=0) it returns all stack frames."
+                }
             ]
         },
         {

@@ -34,6 +34,9 @@ namespace HPHP {
 namespace Transl { struct PropInfo; }
 namespace JIT {
 
+using Transl::Location;
+using Transl::RuntimeType;
+
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
@@ -102,7 +105,6 @@ private:
 struct HhbcTranslator {
   HhbcTranslator(IRFactory& irFactory,
                  Offset startOffset,
-                 Offset nextTraceOffset,
                  uint32_t initialSpOffsetFromFp,
                  const Func* func);
 
@@ -118,6 +120,7 @@ struct HhbcTranslator {
   // Tracelet guards.
   void guardTypeStack(uint32_t stackIndex, Type type);
   void guardTypeLocal(uint32_t locId, Type type);
+  void guardTypeLocation(const Location& loc, Type type);
   void guardRefs(int64_t entryArDelta,
                  const vector<bool>& mask,
                  const vector<bool>& vals);
@@ -125,9 +128,15 @@ struct HhbcTranslator {
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);
   void assertTypeStack(uint32_t stackIndex, Type type);
-  void checkTypeLocal(uint32_t localIndex, Type type);
+  void checkTypeLocal(uint32_t localIndex, Type type, Offset dest = -1);
+  void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
+  void assertTypeLocation(const Location& loc, Type type);
+  void checkTypeLocation(const Location& loc, Type type, Offset dest);
+  void assertString(const Location& loc, const StringData* sd);
+
+  RuntimeType rttFromLocation(const Location& loc);
 
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
@@ -795,10 +804,8 @@ private:
 
   std::vector<BcState> m_bcStateStack;
 
-  // The first HHBC offset for this tracelet, and the offset for the
-  // next Traclet.
+  // The first HHBC offset for this tracelet
   const Offset m_startBcOff;
-  const Offset m_nextTraceBcOff;
 
   // True if we're on the last HHBC opcode that will be emitted for
   // this tracelet.

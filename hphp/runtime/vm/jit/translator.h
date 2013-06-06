@@ -46,10 +46,12 @@ namespace HPHP {
 namespace JIT {
 class HhbcTranslator;
 class IRFactory;
+class RegionDesc;
 }
 namespace Transl {
 
 using JIT::Type;
+using JIT::RegionDesc;
 static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
@@ -80,13 +82,12 @@ struct NormalizedInstruction;
 struct DynLocation {
   Location    location;
   RuntimeType rtt;
-  NormalizedInstruction* source;
 
-  DynLocation(Location l, DataType t) : location(l), rtt(t), source(nullptr) {}
+  DynLocation(Location l, DataType t) : location(l), rtt(t) {}
 
-  DynLocation(Location l, RuntimeType t) : location(l), rtt(t), source(nullptr) {}
+  DynLocation(Location l, RuntimeType t) : location(l), rtt(t) {}
 
-  DynLocation() : location(), rtt(KindOfInvalid), source(nullptr) {}
+  DynLocation() : location(), rtt(KindOfInvalid) {}
 
   bool operator==(const DynLocation& r) const {
     return rtt == r.rtt && location == r.location;
@@ -290,6 +291,7 @@ class NormalizedInstruction {
   NormalizedInstruction()
     : next(nullptr)
     , prev(nullptr)
+    , funcd(nullptr)
     , outStack(nullptr)
     , outLocal(nullptr)
     , outLocal2(nullptr)
@@ -841,6 +843,8 @@ private:
                           NormalizedInstruction* ni,
                           TraceletContext& tas,
                           InputInfos& ii);
+  void readMetaData(Unit::MetaHandle& handle,
+                    NormalizedInstruction& inst);
   void getInputs(SrcKey startSk,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
@@ -889,15 +893,22 @@ private:
   virtual void invalidateSrcKey(SrcKey sk) = 0;
 
 protected:
+  enum TranslateResult {
+    Failure,
+    Retry,
+    Success
+  };
   void translateInstr(const NormalizedInstruction& i);
+  void traceStart(Offset bcStartOffset);
+  virtual void traceCodeGen(vector<TransBCMapping>* bcMap) = 0;
+  void traceEnd();
+  void traceFree();
+
 private:
   void interpretInstr(const NormalizedInstruction& i);
   void translateInstrWork(const NormalizedInstruction& i);
   void translateInstrDefault(const NormalizedInstruction& i);
   void passPredictedAndInferredTypes(const NormalizedInstruction& i);
-
-  void translateReqLit(const NormalizedInstruction& i,
-                         InclOpFlags flags);
 #define CASE(nm) void translate ## nm(const NormalizedInstruction& i);
 INSTRS
 PSEUDOINSTRS
@@ -915,6 +926,8 @@ protected:
   void requestResetHighLevelTranslator();
 
   void populateImmediates(NormalizedInstruction&);
+  TranslateResult translateRegion(const RegionDesc& region,
+                                  vector<TransBCMapping>* bcMap);
 
   TCA m_resumeHelper;
   TCA m_resumeHelperRet;

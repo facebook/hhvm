@@ -817,18 +817,6 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
     }
   }
 
-  /*
-   * First test if we have a region-selector that can handle this
-   * SrcKey.
-   */
-  JIT::RegionContext rContext { curFunc(), sk.offset() };
-  populateLiveContext(rContext);
-  if (auto UNUSED rd = JIT::selectRegion(rContext)) {
-    /*
-     * WIP.  Unimplemented.
-     */
-  }
-
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
   AHotSelector ahs(this, curFunc()->attrs() & AttrHot);
@@ -883,7 +871,8 @@ TranslatorX64::translate(const TranslArgs& args) {
   }
 
   TCA start = a.code.frontier;
-  translateTracelet(args);
+
+  translateWork(args);
 
   SKTRACE(1, args.m_sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.m_sk), start);
@@ -3273,14 +3262,14 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 }
 
 void
-TranslatorX64::translateTracelet(const TranslArgs& args) {
+TranslatorX64::translateWork(const TranslArgs& args) {
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp = analyze(sk);
   Tracelet& t = *tp;
   m_curTrace = &t;
   Nuller<Tracelet> ctNuller(&m_curTrace);
 
-  SKTRACE(1, sk, "translateTracelet\n");
+  SKTRACE(1, sk, "translateWork\n");
   assert(m_srcDB.find(sk));
 
   TCA                     start = a.code.frontier;
@@ -3292,16 +3281,48 @@ TranslatorX64::translateTracelet(const TranslArgs& args) {
   TransKind               transKind = TransInterp;
 
   if (!args.m_interp) {
-    TranslateTraceletResult result;
-    do {
-      hhirTraceStart(sk.offset(), t.nextSk().offset());
-      SKTRACE(1, sk, "retrying irTranslateTracelet\n");
-      result = irTranslateTracelet(t, start, stubStart, &bcMapping);
-      if (result == Retry) {
-        assert(a.code.frontier == start);
-        assert(astubs.code.frontier == stubStart);
+    // Attempt to create a region at this SrcKey
+    JIT::RegionContext rContext { curFunc(), args.m_sk.offset() };
+    populateLiveContext(rContext);
+    auto region = JIT::selectRegion(rContext);
+
+    TranslateResult result = Retry;
+    while (result == Retry) {
+      assert(a.code.frontier == start);
+      assert(astubs.code.frontier == stubStart);
+
+      traceStart(sk.offset());
+
+      // Try translating a region if we have one, then fall back to using the
+      // Tracelet.
+      if (region) {
+        try {
+          result = translateRegion(*region, &bcMapping);
+          FTRACE(2, "translateRegion succeeded\n");
+        } catch (const std::exception& e) {
+          FTRACE(1, "translateRegion failed with '{}'\n", e.what());
+          traceEnd();
+          result = Failure;
+        }
       }
-    } while (result == Retry);
+      if (!region || result == Failure) {
+        FTRACE(1, "trying irTranslateTracelet\n");
+        result = irTranslateTracelet(*tp, start, stubStart, &bcMapping);
+      }
+
+      if (result != Success) {
+        // The whole translation failed; give up on this SrcKey. Since it is not
+        // linked into srcDB yet, it is guaranteed not to be reachable.
+        // Free IR resources for this trace, rollback the Translation cache
+        // frontiers, and discard any pending fixups.
+        traceFree();
+        a.code.frontier = start;
+        astubs.code.frontier = stubStart;
+        m_pendingFixups.clear();
+        // Reset additions to list of addresses which need to be patched
+        srcRec.clearInProgressTailJumps();
+      }
+    }
 
     if (result == Success) {
       m_irAUsage += (a.code.frontier - start);

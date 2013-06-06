@@ -25,6 +25,8 @@ struct DynLocation;
 }
 namespace JIT {
 
+using Transl::RuntimeType;
+
 #define IRT_BOXES(name, bit)                                            \
   IRT(name,             (bit))                                          \
   IRT(Boxed##name,      (bit) << kBoxShift)                             \
@@ -351,6 +353,10 @@ public:
     return subtypeOf(Str);
   }
 
+  bool isCls() const {
+    return subtypeOf(Cls);
+  }
+
   const Class* getClass() const {
     assert(isObj());
     return m_class;
@@ -436,68 +442,14 @@ public:
       != Type::Bottom;
   }
 
-  // translates a compiler Type to an HPHP::DataType
-  DataType toDataType() const {
-    assert(!isPtr());
-    if (isBoxed()) {
-      return KindOfRef;
-    }
-
-    // Order is important here: types must progress from more specific
-    // to less specific to return the most specific DataType.
-    if (subtypeOf(None))          return KindOfInvalid;
-    if (subtypeOf(Uninit))        return KindOfUninit;
-    if (subtypeOf(Null))          return KindOfNull;
-    if (subtypeOf(Bool))          return KindOfBoolean;
-    if (subtypeOf(Int))           return KindOfInt64;
-    if (subtypeOf(Dbl))           return KindOfDouble;
-    if (subtypeOf(StaticStr))     return KindOfStaticString;
-    if (subtypeOf(Str))           return KindOfString;
-    if (subtypeOf(Arr))           return KindOfArray;
-    if (subtypeOf(Obj))           return KindOfObject;
-    if (subtypeOf(Cls))           return KindOfClass;
-    if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
-    if (subtypeOf(Uncounted))     return KindOfUncounted;
-    if (subtypeOf(Gen))           return KindOfAny;
-    not_reached();
-  }
+  DataType toDataType() const;
+  RuntimeType toRuntimeType() const;
 
   static Type fromDataType(DataType outerType,
                            DataType innerType = KindOfInvalid,
-                           const Class* klass = nullptr) {
-    assert(innerType != KindOfRef);
-
-    switch (outerType) {
-      case KindOfInvalid       : return None;
-      case KindOfUninit        : return Uninit;
-      case KindOfNull          : return InitNull;
-      case KindOfBoolean       : return Bool;
-      case KindOfInt64         : return Int;
-      case KindOfDouble        : return Dbl;
-      case KindOfStaticString  : return StaticStr;
-      case KindOfString        : return Str;
-      case KindOfArray         : return Arr;
-      case KindOfObject        : {
-        if (klass != nullptr) {
-          return Obj.specialize(klass);
-        } else {
-          return Obj;
-        }
-      }
-      case KindOfClass         : return Cls;
-      case KindOfUncountedInit : return UncountedInit;
-      case KindOfUncounted     : return Uncounted;
-      case KindOfAny           : return Gen;
-      case KindOfRef: {
-        if (innerType == KindOfInvalid) {
-          return BoxedCell;
-        } else {
-          return fromDataType(innerType).box();
-        }
-      }
-      default                  : not_reached();
-    }
-  }
+                           const Class* klass = nullptr);
+  static Type fromRuntimeType(const Transl::RuntimeType& rtt);
+  static Type fromDynLocation(const Transl::DynLocation* dynLoc);
 
   // return true if this corresponds to a type that
   // is passed by value in C++
@@ -530,11 +482,6 @@ public:
     return isRef ? t.box() : t;
   }
 
-  static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
-    return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
-  }
-
-  static Type fromDynLocation(const Transl::DynLocation* dynLoc);
 };
 
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),

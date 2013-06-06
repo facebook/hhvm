@@ -192,11 +192,7 @@ class TranslatorX64 : public Translator
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
 
-  void hhirTraceStart(Offset bcStartOffset, Offset nextTraceOffset);
-  void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);
-  void hhirTraceEnd();
-  void hhirTraceFree();
-
+  virtual void traceCodeGen(std::vector<TransBCMapping>*);
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
@@ -376,15 +372,10 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  enum TranslateTraceletResult {
-    Failure,
-    Retry,
-    Success
-  };
-  TranslateTraceletResult irTranslateTracelet(Tracelet& t,
-                                              const TCA start,
-                                              const TCA stubStart,
-                                              vector<TransBCMapping>* bcMap);
+  TranslateResult irTranslateTracelet(Tracelet& t,
+                                      const TCA start,
+                                      const TCA stubStart,
+                                      vector<TransBCMapping>* bcMap);
 
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
@@ -450,7 +441,7 @@ public:
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
   TCA translate(const TranslArgs& args);
-  void translateTracelet(const TranslArgs& args);
+  void translateWork(const TranslArgs& args);
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);

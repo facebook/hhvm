@@ -385,6 +385,11 @@ D:StkPtr = AssertStk<T,offset> S0:StkPtr
   is similar to a GuardStk except that it does not imply a runtime
   check and cannot cause control flow.
 
+D:StkPtr = AssertStkVal<offset> S0:StkPtr S1:Gen
+
+  Returns a new StkPtr that represents the same stack as S0, but with the
+  knowledge that the slot at offset has the value S1.
+
 D:StkPtr = CastStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with

@@ -338,6 +338,7 @@ X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
 X(AssertStk,                    StackOffset);
+X(AssertStkVal,                 StackOffset);
 X(ReDefSP,                      StackOffset);
 X(ReDefGeneratorSP,             StackOffset);
 X(DefSP,                        StackOffset);

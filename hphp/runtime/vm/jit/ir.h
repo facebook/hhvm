@@ -163,6 +163,7 @@ O(CheckLoc,                         ND, S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
+O(AssertStkVal,              D(StkPtr), S(StkPtr) S(Gen),                  E) \
 O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int)                              \

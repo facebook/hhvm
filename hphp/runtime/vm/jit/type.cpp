@@ -32,6 +32,80 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+DataType Type::toDataType() const {
+  assert(!isPtr());
+  if (isBoxed()) {
+    return KindOfRef;
+  }
+
+  // Order is important here: types must progress from more specific
+  // to less specific to return the most specific DataType.
+  if (subtypeOf(None))          return KindOfInvalid;
+  if (subtypeOf(Uninit))        return KindOfUninit;
+  if (subtypeOf(Null))          return KindOfNull;
+  if (subtypeOf(Bool))          return KindOfBoolean;
+  if (subtypeOf(Int))           return KindOfInt64;
+  if (subtypeOf(Dbl))           return KindOfDouble;
+  if (subtypeOf(StaticStr))     return KindOfStaticString;
+  if (subtypeOf(Str))           return KindOfString;
+  if (subtypeOf(Arr))           return KindOfArray;
+  if (subtypeOf(Obj))           return KindOfObject;
+  if (subtypeOf(Cls))           return KindOfClass;
+  if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
+  if (subtypeOf(Uncounted))     return KindOfUncounted;
+  if (subtypeOf(Gen))           return KindOfAny;
+  not_reached();
+}
+
+RuntimeType Type::toRuntimeType() const {
+  assert(!isPtr());
+  if (isBoxed()) {
+    return RuntimeType(KindOfRef, innerType().toDataType());
+  }
+  return RuntimeType(toDataType());
+}
+
+Type Type::fromDataType(DataType outerType,
+                        DataType innerType /* = KindOfInvalid */,
+                        const Class* klass /* = nullptr */) {
+  assert(innerType != KindOfRef);
+
+  switch (outerType) {
+    case KindOfInvalid       : return None;
+    case KindOfUninit        : return Uninit;
+    case KindOfNull          : return InitNull;
+    case KindOfBoolean       : return Bool;
+    case KindOfInt64         : return Int;
+    case KindOfDouble        : return Dbl;
+    case KindOfStaticString  : return StaticStr;
+    case KindOfString        : return Str;
+    case KindOfArray         : return Arr;
+    case KindOfObject        : {
+      if (klass != nullptr) {
+        return Obj.specialize(klass);
+      } else {
+        return Obj;
+      }
+    }
+    case KindOfClass         : return Cls;
+    case KindOfUncountedInit : return UncountedInit;
+    case KindOfUncounted     : return Uncounted;
+    case KindOfAny           : return Gen;
+    case KindOfRef: {
+      if (innerType == KindOfInvalid) {
+        return BoxedCell;
+      } else {
+        return fromDataType(innerType).box();
+      }
+    }
+    default                  : not_reached();
+  }
+}
+
+Type Type::fromRuntimeType(const RuntimeType& rtt) {
+  return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
+}
+
 Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
   if (!dynLoc) {
     return Type::None;

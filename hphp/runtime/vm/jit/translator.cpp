@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbctranslator.h"
 #include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/region_selection.h"
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -88,7 +89,7 @@ struct TraceletContext {
   RuntimeType currentType(const Location& l) const;
   DynLocation* recordRead(const InputInfo& l, bool useHHIR,
                           DataType staticType = KindOfInvalid);
-  void recordWrite(DynLocation* dl, NormalizedInstruction* source);
+  void recordWrite(DynLocation* dl);
   void recordDelete(const Location& l);
   void recordJmp();
   void aliasTaint();
@@ -2397,11 +2398,9 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
   return dl;
 }
 
-void TraceletContext::recordWrite(DynLocation* dl,
-                                  NormalizedInstruction* source) {
+void TraceletContext::recordWrite(DynLocation* dl) {
   TRACE(2, "recordWrite: %s : %s\n", dl->location.pretty().c_str(),
                                      dl->rtt.pretty().c_str());
-  dl->source = source;
   m_currentMap[dl->location] = dl;
   m_changeSet.insert(dl->location);
   m_deletedSet.erase(dl->location);
@@ -3204,7 +3203,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
       fcall->outputPredictionStatic = false;
       fcall->outStack = parent.newDynLocation(fcall->outStack->location,
                                               it->second->rtt);
-      tas.recordWrite(fcall->outStack, fcall);
+      tas.recordWrite(fcall->outStack);
     }
   }
 
@@ -3432,7 +3431,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         SKTRACE(2, sk, "inserting output t(%d->%d) #(%s, %d)\n",
                 o->rtt.outerType(), o->rtt.innerType(),
                 o->location.spaceName(), o->location.offset);
-        tas.recordWrite(o, ni);
+        tas.recordWrite(o);
       }
     }
 
@@ -3627,6 +3626,233 @@ void Translator::populateImmediates(NormalizedInstruction& inst) {
   if (inst.op() == OpFCallArray) {
     inst.imm[0].u_IVA = 1;
   }
+}
+
+/*
+ * Similar to applyInputMetaData, but designed to be used during ir
+ * generation. Reads and writes types of values using m_hhbcTrans. This will
+ * eventually replace applyInputMetaData.
+ */
+void Translator::readMetaData(Unit::MetaHandle& handle,
+                              NormalizedInstruction& inst) {
+  if (!handle.findMeta(inst.unit(), inst.offset())) return;
+
+  Unit::MetaInfo info;
+  if (!handle.nextArg(info)) return;
+  if (info.m_kind == Unit::MetaInfo::NopOut) {
+    inst.noOp = true;
+    return;
+  }
+
+  /*
+   * We need to adjust the indexes in MetaInfo::m_arg if this instruction takes
+   * other stack arguments than those related to the MVector.  (For example,
+   * the rhs of an assignment.)
+   */
+  auto const& iInfo = instrInfo[inst.op()];
+  if (iInfo.in & AllLocals) {
+    /*
+     * RetC/RetV dont care about their stack input, but it may have been
+     * annotated. Skip it (because RetC/RetV pretend they dont have a stack
+     * input).
+     */
+    return;
+  }
+  if (iInfo.in == FuncdRef) {
+    /*
+     * FPassC* pretend to have no inputs
+     */
+    return;
+  }
+  const int base = !(iInfo.in & MVector) ? 0 :
+                   !(iInfo.in & Stack1) ? 0 :
+                   !(iInfo.in & Stack2) ? 1 :
+                   !(iInfo.in & Stack3) ? 2 : 3;
+
+  do {
+    SKTRACE(3, inst.source, "considering MetaInfo of kind %d\n", info.m_kind);
+
+    int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
+      base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
+    auto& input = *inst.inputs[arg];
+    auto updateType = [&]{
+      input.rtt = m_hhbcTrans->rttFromLocation(input.location);
+    };
+
+    switch (info.m_kind) {
+      case Unit::MetaInfo::NoSurprise:
+        inst.noSurprise = true;
+        break;
+      case Unit::MetaInfo::GuardedCls:
+        inst.guardedCls = true;
+        break;
+      case Unit::MetaInfo::ArrayCapacity:
+        inst.imm[0].u_IVA = info.m_data;
+        break;
+      case Unit::MetaInfo::DataTypePredicted: {
+        m_hhbcTrans->checkTypeLocation(
+          input.location, Type::fromDataType(DataType(info.m_data)),
+          inst.source.offset());
+        updateType();
+        break;
+      }
+      case Unit::MetaInfo::DataTypeInferred: {
+        m_hhbcTrans->assertTypeLocation(
+          input.location, Type::fromDataType(DataType(info.m_data)));
+        updateType();
+        break;
+      }
+      case Unit::MetaInfo::String: {
+        m_hhbcTrans->assertString(input.location,
+                                  inst.unit()->lookupLitstrId(info.m_data));
+        updateType();
+        break;
+      }
+      case Unit::MetaInfo::Class: {
+        RuntimeType& rtt = inst.inputs[arg]->rtt;
+        if (rtt.valueType() != KindOfObject) {
+          continue;
+        }
+
+        const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
+        const StringData* rttName =
+          rtt.valueClass() ? rtt.valueClass()->name() : nullptr;
+        // The two classes might not be exactly the same, which is ok
+        // as long as metaCls is more derived than rttCls.
+        Class* metaCls = Unit::lookupUniqueClass(metaName);
+        Class* rttCls = rttName ? Unit::lookupUniqueClass(rttName) : nullptr;
+        if (metaCls && rttCls && metaCls != rttCls &&
+            !metaCls->classof(rttCls)) {
+          // Runtime type is more derived
+          metaCls = 0;
+        }
+        if (metaCls && metaCls != rttCls) {
+          SKTRACE(1, inst.source, "replacing input %d with a MetaInfo-supplied "
+                  "class of %s; old type = %s\n",
+                  arg, metaName->data(), rtt.pretty().c_str());
+          if (rtt.isRef()) {
+            rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
+          } else {
+            rtt = RuntimeType(KindOfObject, KindOfInvalid, metaCls);
+          }
+        }
+        break;
+      }
+      case Unit::MetaInfo::MVecPropClass: {
+        const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
+        Class* metaCls = Unit::lookupUniqueClass(metaName);
+        if (metaCls) {
+          inst.immVecClasses[arg] = metaCls;
+        }
+        break;
+      }
+      case Unit::MetaInfo::NopOut:
+        // NopOut should always be the first and only annotation
+        // and was handled above.
+        not_reached();
+
+      case Unit::MetaInfo::GuardedThis:
+      case Unit::MetaInfo::NonRefCounted:
+        // fallthrough; these are handled in preInputApplyMetaData.
+      case Unit::MetaInfo::None:
+        break;
+    }
+  } while (handle.nextArg(info));
+}
+
+static Location toLocation(const RegionDesc::Location& loc) {
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack:
+      return Location(Location::Stack, loc.stackOffset());
+
+    case T::Local:
+      return Location(Location::Local, loc.localId());
+  }
+  not_reached();
+}
+
+Translator::TranslateResult
+Translator::translateRegion(const RegionDesc& region,
+                            vector<TransBCMapping>* bcMap) {
+  FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+  assert(!region.blocks.empty());
+
+  for (auto const& block : region.blocks) {
+    const SrcKey startSk = block->start();
+    SrcKey sk = startSk;
+    auto predIt = block->typePreds().begin();
+    auto const predEnd = block->typePreds().end();
+
+    for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
+      // Emit prediction guards. If this is the first instruction in the
+      // region the guards will go to a retranslate request. Otherwise, they'll
+      // go to a side exit.
+      for (; predIt != predEnd && predIt->first == sk; ++predIt) {
+        auto const& pred = predIt->second;
+        if (block == region.blocks.front() && i == 0) {
+          m_hhbcTrans->guardTypeLocation(toLocation(pred.location), pred.type);
+        } else {
+          m_hhbcTrans->checkTypeLocation(toLocation(pred.location), pred.type,
+                                         sk.offset());
+        }
+      }
+
+      // Create and initialize the instruction.
+      NormalizedInstruction inst;
+      inst.source = sk;
+      inst.m_unit = block->unit();
+      inst.preppedByRef = false;
+      inst.breaksTracelet = false;
+      inst.changesPC = opcodeChangesPC(inst.op());
+      populateImmediates(inst);
+
+      // Apply the first round of metadata from the repo and get a list of
+      // input locations.
+      InputInfos inputInfos;
+      Unit::MetaHandle metaHand;
+      preInputApplyMetaData(metaHand, &inst);
+
+      // TranslatorX64 expected top of stack to be index -1, with indexes
+      // growing down from there. hhir defines top of stack to be index 1, with
+      // indexes growing up from there. To compensate we start with a stack
+      // offset of 1 and negate the index of any stack input after the call to
+      // getInputs.
+      int stackOff = 1;
+      getInputs(startSk, &inst, stackOff, inputInfos, [&](int i) {
+          return m_hhbcTrans->traceBuilder()->getLocalType(i);
+        });
+      for (auto& info : inputInfos) {
+        if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
+      }
+
+      // Populate the NormalizedInstruction's input vector, using types from
+      // HhbcTranslator.
+      std::vector<DynLocation> dynLocs;
+      dynLocs.reserve(inputInfos.size());
+      auto newDynLoc = [&](const InputInfo& ii) {
+        dynLocs.emplace_back(ii.loc, m_hhbcTrans->rttFromLocation(ii.loc));
+        FTRACE(2, "rttFromLocation: {} -> {}\n",
+               ii.loc.pretty(), dynLocs.back().rtt.pretty());
+        return &dynLocs.back();
+      };
+      FTRACE(2, "populating inputs for {}\n", inst.toString());
+      for (auto const& ii : inputInfos) {
+        inst.inputs.push_back(newDynLoc(ii));
+      }
+
+      // Apply the remaining metadata. This may change the types of some of
+      // inst's inputs.
+      readMetaData(metaHand, inst);
+
+      Util::Nuller<NormalizedInstruction> niNuller(&m_curNI);
+      m_curNI = &inst;
+      translateInstr(inst);
+    }
+  }
+
+  traceCodeGen(bcMap);
+  return Success;
 }
 
 uint64_t* Translator::getTransCounterAddr() {

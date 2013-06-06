@@ -111,6 +111,10 @@ struct TraceBuilder {
     m_thisIsAvailable = true;
   }
 
+  Type getLocalType(unsigned id) const;
+  SSATmp* getLocalValue(unsigned id) const;
+  void setLocalValue(unsigned id, SSATmp* value);
+
   /*
    * Run another pass of TraceBuilder-managed optimizations on this
    * trace.
@@ -328,9 +332,6 @@ private:
   void      killLocals();
   void      killLocalValue(uint32_t id);
   void      setLocalType(uint32_t id, Type type);
-  Type      getLocalType(unsigned id) const;
-  void      setLocalValue(unsigned id, SSATmp* value);
-  SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
   bool      callerHasValueAvailable(SSATmp*) const;

@@ -38,7 +38,6 @@ using namespace HPHP::Transl;
 
 HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
                                Offset startOffset,
-                               Offset nextTraceOffset,
                                uint32_t initialSpOffsetFromFp,
                                const Func* func)
   : m_irFactory(irFactory)
@@ -48,7 +47,6 @@ HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
                           func))
   , m_bcStateStack {BcState(startOffset, func)}
   , m_startBcOff(startOffset)
-  , m_nextTraceBcOff(nextTraceOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
   , m_stackDeficit(0)
@@ -2380,8 +2378,19 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
 }
 
-void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type) {
-  gen(CheckLoc, type, LocalId(locId), getExitTrace(), m_tb->fp());
+void HhbcTranslator::guardTypeLocation(const Location& loc, Type type) {
+  if (loc.isStack()) {
+    guardTypeStack(loc.offset, type);
+  } else if (loc.isLocal()) {
+    guardTypeLocal(loc.offset, type);
+  } else {
+    not_reached();
+  }
+}
+
+void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type,
+                                    Offset dest /* = -1 */) {
+  gen(CheckLoc, type, LocalId(locId), getExitTrace(dest), m_tb->fp());
 }
 
 void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
@@ -2390,6 +2399,27 @@ void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
 
 void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
   gen(OverrideLoc, type, LocalId(locId), m_tb->fp());
+}
+
+void HhbcTranslator::checkTypeLocation(const Location& loc, Type type,
+                                       Offset dest) {
+  if (loc.isStack()) {
+    checkTypeStack(loc.offset, type, dest);
+  } else if (loc.isLocal()) {
+    checkTypeLocal(loc.offset, type, dest);
+  } else {
+    not_reached();
+  }
+}
+
+void HhbcTranslator::assertTypeLocation(const Location& loc, Type type) {
+  if (loc.isStack()) {
+    assertTypeStack(loc.offset, type);
+  } else if (loc.isLocal()) {
+    assertTypeLocal(loc.offset, type);
+  } else {
+    not_reached();
+  }
 }
 
 void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
@@ -2402,20 +2432,22 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
   gen(GuardStk, type, StackOffset(stackIndex), m_tb->sp());
 }
 
-void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
-  IRTrace* exitTrace = getExitTrace(nextByteCode);
-  SSATmp* tmp = m_evalStack.top();
-  if (!tmp) {
-    FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", type.toString());
-    gen(CheckStk, type, exitTrace, StackOffset(0), m_tb->sp());
-    push(pop(type));
+void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
+  auto exitTrace = getExitTrace(dest);
+  if (idx >= m_evalStack.size()) {
+    FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
+    gen(CheckStk, type, exitTrace, StackOffset(idx), m_tb->sp());
   } else {
-    FTRACE(1, "checkTypeTopOfStack: generating CheckType for {}\n",
-           type.toString());
-    m_evalStack.pop();
-    tmp = gen(CheckType, type, exitTrace, tmp);
-    push(tmp);
+    FTRACE(1, "checkTypeStack(){}: generating CheckType for {}\n",
+           idx, type.toString());
+    SSATmp* tmp = m_evalStack.top(idx);
+    assert(tmp);
+    m_evalStack.replace(idx, gen(CheckType, type, exitTrace, tmp));
   }
+}
+
+void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
+  checkTypeStack(0, type, nextByteCode);
 }
 
 void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
@@ -2432,6 +2464,73 @@ void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
    * (not based on guards).
    */
   refineType(tmp, type);
+}
+
+void HhbcTranslator::assertString(const Location& loc, const StringData* str) {
+  auto idx = loc.offset;
+
+  if (loc.isStack()) {
+    if (idx >= m_evalStack.size()) {
+      gen(AssertStkVal, StackOffset(idx), cns(str));
+    } else {
+      DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(idx);
+      assert(oldStr->type().maybe(Type::Str));
+      m_evalStack.replace(idx, cns(str));
+    }
+  } else if (loc.isLocal()) {
+    assert(m_tb->getLocalType(loc.offset).maybe(Type::Str));
+    m_tb->setLocalValue(idx, cns(str));
+  } else {
+    not_reached();
+  }
+}
+
+/*
+ * Creates a RuntimeType struct from a program location. This needs access to
+ * more than just the location's type because RuntimeType includes known
+ * constant values.
+ */
+RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
+  Type t;
+  SSATmp* val;
+  switch (loc.space) {
+    case Location::Stack: {
+      auto i = loc.offset;
+      assert(i >= 0);
+      if (i < m_evalStack.size()) {
+        val = m_evalStack.top(i);
+        t = val->type();
+      } else {
+        auto stackVal = getStackValue(m_tb->sp(), i);
+        val = stackVal.value;
+        t = stackVal.knownType;
+      }
+    } break;
+    case Location::Local: {
+      auto l = loc.offset;
+      val = m_tb->getLocalValue(l);
+      t = val ? val->type() : m_tb->getLocalType(l);
+    } break;
+    case Location::Litstr:
+      return RuntimeType(curUnit()->lookupLitstrId(loc.offset));
+    case Location::Litint:
+      return RuntimeType(loc.offset);
+    case Location::This:
+      return RuntimeType(KindOfObject, KindOfInvalid, curFunc()->cls());
+    case Location::Invalid:
+    case Location::Iter:
+      not_reached();
+  }
+
+  assert(IMPLIES(val, val->type().equals(t)));
+  if (val && val->isConst()) {
+    // RuntimeType holds constant Bool, Int, Str, and Cls.
+    if (val->type().isBool())    return RuntimeType(val->getValBool());
+    if (val->type().isInt())     return RuntimeType(val->getValInt());
+    if (val->type().isString())  return RuntimeType(val->getValStr());
+    if (val->type().isCls())     return RuntimeType(val->getValClass());
+  }
+  return t.toRuntimeType();
 }
 
 static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {
@@ -3386,8 +3485,9 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   assert(!newVal->type().maybeBoxed());
 
   auto const oldLoc = ldLoc(id);
-  assert((oldLoc->type().isBoxed() || oldLoc->type().notBoxed()) &&
-         "We don't support maybeBoxed locals right now");
+  if (!(oldLoc->type().isBoxed() || oldLoc->type().notBoxed())) {
+    PUNT(stLocImpl-maybeBoxedValue);
+  }
 
   if (oldLoc->type().notBoxed()) {
     gen(StLoc, LocalId(id), m_tb->fp(), newVal);
@@ -3426,7 +3526,8 @@ SSATmp* HhbcTranslator::stLocNRC(uint32_t id, IRTrace* exit, SSATmp* newVal) {
 void HhbcTranslator::end() {
   if (m_hasExit) return;
 
-  auto const nextPc = m_nextTraceBcOff;
+  auto const nextSk = curSrcKey().advanced(curUnit());
+  auto const nextPc = nextSk.offset();
   if (nextPc >= curFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional

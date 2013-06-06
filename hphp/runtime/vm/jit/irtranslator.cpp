@@ -181,7 +181,6 @@ Translator::translateLtGtOp(const NormalizedInstruction& i) {
   const Opcode op = i.op();
   assert(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
   assert(i.inputs.size() == 2);
-  assert(i.outStack && !i.outLocal);
   assert(i.inputs[0]->outerType() != KindOfRef);
   assert(i.inputs[1]->outerType() != KindOfRef);
 
@@ -259,9 +258,6 @@ Translator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   assert((op == OpBindL) ==
          (ni.inputs[rhsIdx]->outerType() == KindOfRef));
 
-  assert(!ni.outStack || ni.inputs[locIdx]->location != ni.outStack->location);
-  assert(ni.outLocal);
-  assert(ni.inputs[locIdx]->location == ni.outLocal->location);
   assert(ni.inputs[rhsIdx]->isStack());
 
   if (op == OpSetL) {
@@ -276,7 +272,6 @@ Translator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
 void
 Translator::translatePopC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
-  assert(!i.outStack && !i.outLocal);
 
   if (i.inputs[0]->rtt.isVagueValue()) {
     HHIR_EMIT(PopR);
@@ -310,7 +305,6 @@ Translator::translateUnboxR(const NormalizedInstruction& i) {
 void
 Translator::translateNull(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(Null);
 }
@@ -323,7 +317,6 @@ Translator::translateNullUninit(const NormalizedInstruction& i) {
 void
 Translator::translateTrue(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(True);
 }
@@ -331,7 +324,6 @@ Translator::translateTrue(const NormalizedInstruction& i) {
 void
 Translator::translateFalse(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(False);
 }
@@ -339,7 +331,6 @@ Translator::translateFalse(const NormalizedInstruction& i) {
 void
 Translator::translateInt(const NormalizedInstruction& i) {
   assert(i.inputs.size()  == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(Int, i.imm[0].u_I64A);
 }
@@ -352,7 +343,6 @@ Translator::translateDouble(const NormalizedInstruction& i) {
 void
 Translator::translateString(const NormalizedInstruction& i) {
   assert(i.inputs.size()  == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(String, (i.imm[0].u_SA));
 }
@@ -360,7 +350,6 @@ Translator::translateString(const NormalizedInstruction& i) {
 void
 Translator::translateArray(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
-  assert(!i.outLocal);
 
   HHIR_EMIT(Array, i.imm[0].u_AA);
 }
@@ -383,7 +372,6 @@ Translator::translateAddElemC(const NormalizedInstruction& i) {
 void
 Translator::translateAddNewElemC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
-  assert(i.outStack && !i.outLocal);
   assert(i.inputs[0]->outerType() != KindOfRef);
   assert(i.inputs[1]->outerType() != KindOfRef);
   assert(i.inputs[0]->isStack());
@@ -436,15 +424,12 @@ Translator::translateNot(const NormalizedInstruction& i) {
 
 void
 Translator::translateBitNot(const NormalizedInstruction& i) {
-  assert(i.outStack && !i.outLocal);
-
   HHIR_EMIT(BitNot);
 }
 
 void
 Translator::translateCastInt(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
-  assert(i.outStack && !i.outLocal);
 
   HHIR_EMIT(CastInt);
   /* nop */
@@ -748,7 +733,6 @@ void Translator::translateFPassG(const NormalizedInstruction& ni) {
 void
 Translator::translateCheckTypeOp(const NormalizedInstruction& ni) {
   assert(ni.inputs.size() == 1);
-  assert(ni.outStack);
 
   const Opcode op = ni.op();
   const int    off = ni.inputs[0]->location.offset;
@@ -804,7 +788,6 @@ void
 Translator::translateIncDecL(const NormalizedInstruction& i) {
   const vector<DynLocation*>& inputs = i.inputs;
   assert(inputs.size() == 1);
-  assert(i.outLocal);
   assert(inputs[0]->isLocal());
   const IncDecOp oplet = IncDecOp(i.imm[1].u_OA);
   assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
@@ -921,7 +904,7 @@ Translator::translateCheckThis(const NormalizedInstruction& i) {
 
 void
 Translator::translateInitThisLoc(const NormalizedInstruction& i) {
-  HHIR_EMIT(InitThisLoc, i.outLocal->location.offset);
+  HHIR_EMIT(InitThisLoc, i.imm[0].u_HA);
 }
 
 void
@@ -1583,8 +1566,6 @@ void Translator::interpretInstr(const NormalizedInstruction& i) {
 }
 
 void Translator::translateInstr(const NormalizedInstruction& i) {
-  assert(!i.outStack || i.outStack->isStack());
-  assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
 
   m_hhbcTrans->setBcOff(i.source.offset(),
@@ -1673,7 +1654,7 @@ static bool supportedInterpOne(const NormalizedInstruction* i) {
   }
 }
 
-TranslatorX64::TranslateTraceletResult
+TranslatorX64::TranslateResult
 TranslatorX64::irTranslateTracelet(Tracelet&               t,
                                    const TCA               start,
                                    const TCA               stubStart,
@@ -1747,11 +1728,11 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       if (ni->breaksTracelet) break;
     }
 
-    hhirTraceEnd();
+    traceEnd();
     if (transResult != Retry) {
       try {
         transResult = Success;
-        hhirTraceCodeGen(bcMap);
+        traceCodeGen(bcMap);
       } catch (JIT::FailedCodeGen& fcg) {
         // Code-gen failed. Search for the bytecode instruction that caused the
         // problem, flag it to be interpreted, and retranslate the tracelet.
@@ -1800,24 +1781,10 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
     assert(0);
   }
-
-  if (transResult != Success) {
-    // The whole translation failed; give up on this BB. Since it is not
-    // linked into srcDB yet, it is guaranteed not to be reachable.
-    // Free IR resources for this trace, rollback the Translation cache
-    // frontiers, and discard any pending fixups.
-    hhirTraceFree();
-    a.code.frontier = start;
-    astubs.code.frontier = stubStart;
-    m_pendingFixups.clear();
-    // Reset additions to list of addresses which need to be patched
-    srcRec.clearInProgressTailJumps();
-  }
   return transResult;
 }
 
-void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
-                                   Offset nextTraceletOffset) {
+void Translator::traceStart(Offset bcStartOffset) {
   assert(!m_irFactory);
 
   Cell* fp = vmfp();
@@ -1831,10 +1798,10 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset,
 
   m_irFactory.reset(new JIT::IRFactory());
   m_hhbcTrans.reset(new JIT::HhbcTranslator(
-    *m_irFactory, bcStartOffset, nextTraceletOffset, fp - vmsp(), curFunc()));
+    *m_irFactory, bcStartOffset, fp - vmsp(), curFunc()));
 }
 
-void TranslatorX64::hhirTraceEnd() {
+void Translator::traceEnd() {
   m_hhbcTrans->end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
@@ -1842,7 +1809,7 @@ void TranslatorX64::hhirTraceEnd() {
          color(ANSI_COLOR_END));
 }
 
-void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
+void TranslatorX64::traceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
 
   HPHP::JIT::IRTrace* trace = m_hhbcTrans->trace();
@@ -1881,10 +1848,10 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   }
 
   m_numHHIRTrans++;
-  hhirTraceFree();
+  traceFree();
 }
 
-void TranslatorX64::hhirTraceFree() {
+void Translator::traceFree() {
   FTRACE(1, "HHIR free: arena size: {}\n",
          m_irFactory->arena().size());
   m_hhbcTrans.reset();

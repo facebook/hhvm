@@ -239,6 +239,7 @@ struct ElmUCompare {
   typedef typename AccessorT::ElmT ElmT;
   AccessorT acc;
   const CallCtx* ctx;
+  ElmUCompare() : warned(false) {}
   bool operator()(ElmT left, ElmT right) const {
     Variant ret;
     TypedValue args[2];
@@ -260,9 +261,11 @@ struct ElmUCompare {
         default: /* fall through */ break;
       }
     }
-    // Task #1839416: Raise a warning indicating that the comparator
-    // returned something other than an integer, double, or numeric
-    // string
+    if (!warned) {
+      raise_warning("Sort comparators should return an integer, double, "
+                    "or numeric string with value -1, 0, or 1");
+      warned = true;
+    }
     if (ret.isBoolean()) {
       // Match the behavior of Zend PHP for comparators that return
       // boolean values
@@ -283,6 +286,8 @@ struct ElmUCompare {
     }
     return ret.toInt64() < 0;
   }
+private:
+  mutable bool warned;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

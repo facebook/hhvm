@@ -46,11 +46,12 @@ static string valstr(const Variant& v) {
 
 SimpleArrayStore::SimpleArrayStore(const SimpleArrayStore& rhs,
                                    uint length, uint capacity,
-                                   bool nonSmart, const ArrayData* owner)
+                                   ArrayData::AllocationMode am,
+                                   const ArrayData* owner)
     : m_capacity(std::max<uint>(startingCapacity, capacity))
     , m_nextKey(rhs.m_nextKey) {
   assert(length <= capacity && this != &rhs);
-  allocate(m_keys, m_vals, m_capacity, nonSmart);
+  allocate(m_keys, m_vals, m_capacity, am);
   // Copy data with flattening
   FOR_EACH_RANGE (i, 0, length) {
     tvDupFlattenVars(rhs.m_vals + i, m_vals + i, owner);
@@ -63,26 +64,26 @@ SimpleArrayStore::SimpleArrayStore(const SimpleArrayStore& rhs,
 }
 
 void SimpleArrayStore::grow(uint length, uint minCap, uint idealCap,
-                            bool nonSmart) {
+                            ArrayData::AllocationMode am) {
   assert(idealCap >= minCap);
   if (m_capacity >= minCap) return;
   MYLOG << (void*)this << "->grow(" << length << ", " << minCap << ", "
-        << idealCap << ", " << nonSmart << "); m_capacity=" << m_capacity;
+        << idealCap << ", " << uint(am) << "); m_capacity=" << m_capacity;
   idealCap = std::max<uint>(startingCapacity, idealCap);
   Key* newKeys;
   TypedValueAux* newVals;
-  allocate(newKeys, newVals, idealCap, nonSmart);
+  allocate(newKeys, newVals, idealCap, am);
   // Move data
   memcpy(newKeys, m_keys, length * sizeof(*m_keys));
   memcpy(newVals, m_vals, length * sizeof(*m_vals));
-  deallocate(m_keys, m_vals, nonSmart);
+  deallocate(m_keys, m_vals, am);
   // Change state
   m_capacity = idealCap;
   m_keys = newKeys;
   m_vals = newVals;
 }
 
-void SimpleArrayStore::destroy(uint length, bool nonSmart) {
+void SimpleArrayStore::destroy(uint length, ArrayData::AllocationMode am) {
   FOR_EACH_RANGE (i, 0, length) {
     if (hasStrKey(toPos(i))) {
       auto k = m_keys[i].s;
@@ -91,7 +92,7 @@ void SimpleArrayStore::destroy(uint length, bool nonSmart) {
     }
     lval(toPos(i)).~Variant();
   }
-  deallocate(m_keys, m_vals, nonSmart);
+  deallocate(m_keys, m_vals, am);
 #ifndef NDEBUG
   m_keys = nullptr;
   m_vals = nullptr;
@@ -130,7 +131,7 @@ PosType SimpleArrayStore::find(const StringData* key, uint length) const {
 
 template <class K>
 bool SimpleArrayStore::update(K key, const Variant& val, uint length,
-                              bool nonSmart) {
+                              ArrayData::AllocationMode am) {
   assert(length <= m_capacity && m_vals);
   auto const pos = find(key, length);
   if (pos != PosType::invalid) {
@@ -142,7 +143,7 @@ bool SimpleArrayStore::update(K key, const Variant& val, uint length,
   // not found, insert
   assert(length <= m_capacity);
   if (length == m_capacity) {
-    grow(length, length + 1, length * 2 + 1, nonSmart);
+    grow(length, length + 1, length * 2 + 1, am);
   }
   assert(m_keys && m_vals && length < m_capacity);
   new(&lval(toPos(length))) Variant(val);
@@ -166,9 +167,10 @@ void SimpleArrayStore::erase(PosType pos, uint length) {
   memmove(m_vals + ipos, m_vals + ipos + 1, itemsToMove * sizeof(*m_vals));
 }
 
-void SimpleArrayStore::prepend(const Variant& v, uint length, bool nonSmart) {
+void SimpleArrayStore::prepend(const Variant& v, uint length,
+                               ArrayData::AllocationMode am) {
   if (length == capacity()) {
-    grow(length, length + 1, length * 2 + 1, nonSmart);
+    grow(length, length + 1, length * 2 + 1, am);
   }
   assert(length < capacity());
   // Shift stuff over
@@ -183,8 +185,8 @@ void SimpleArrayStore::prepend(const Variant& v, uint length, bool nonSmart) {
 IMPLEMENT_SMART_ALLOCATION(ArrayShell)
 
 ArrayShell::ArrayShell(uint capacity)
-    : ArrayData(kArrayShell)
-    , Store(m_nonsmart, capacity) {
+    : ArrayData(ArrayKind::kArrayShell)
+    , Store(m_allocMode, capacity) {
   m_size = 0;
   m_pos = invalid_index;
   // Log at the end of the ctor so as to show the properly initialized
@@ -193,19 +195,19 @@ ArrayShell::ArrayShell(uint capacity)
 }
 
 ArrayShell::ArrayShell(const ArrayShell& rhs, uint capacity,
-                           bool nonSmart)
-    : ArrayData(kArrayShell, nonSmart)
-    , Store(rhs, rhs.m_size, capacity, nonSmart, &rhs) {
+                       AllocationMode am)
+    : ArrayData(ArrayKind::kArrayShell, am)
+    , Store(rhs, rhs.m_size, capacity, am, &rhs) {
   m_size = rhs.m_size;
   m_pos = rhs.m_pos;
   // Log at the end of the ctor so as to show the properly initialized
   // members.
-  APILOG << "(" << &rhs << ", " << capacity << ", " << nonSmart << ");";
+  APILOG << "(" << &rhs << ", " << capacity << ", " << uint(am) << ");";
 }
 
 ArrayShell::~ArrayShell() {
   APILOG << "()";
-  destroy(m_size, m_nonsmart);
+  destroy(m_size, m_allocMode);
 }
 
 Variant ArrayShell::getKey(ssize_t pos) const {
@@ -391,7 +393,7 @@ ArrayData *ArrayShell::lvalImpl(K k, Variant*& ret,
   } else {
     // not found, initialize
     if (m_size == capacity()) {
-      grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+      grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
     }
     assert(m_size < capacity());
     ret = appendNoGrow(k, Variant::NullInit());
@@ -431,7 +433,7 @@ ArrayShell* ArrayShell::setImpl(K k, const Variant& v, bool copy) {
          << ")";
   ArrayShell* result = this;
   if (copy) result = ArrayShell::copy();
-  if (result->update(k, v, result->m_size, result->m_nonsmart)) {
+  if (result->update(k, v, result->m_size, result->m_allocMode)) {
     // Added a new element, must update size and possibly m_pos
     if (m_pos == invalid_index) m_pos = result->m_size;
     result->m_size++;
@@ -457,7 +459,7 @@ ArrayData *ArrayShell::setRefImpl(K k, CVarRef v, bool copy) {
     MYLOG << "setRef: not found, appending at " << m_size;
     if (m_size == capacity()) {
       MYLOG << "grow";
-      grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+      grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
     }
     appendNoGrow(k, Variant::NoInit())->constructRefHelper(v);
   }
@@ -475,7 +477,7 @@ ArrayData *ArrayShell::addImpl(K k, const Variant& v, bool copy) {
   assert(!exists(k));
   // Make sure there's enough capacity
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   appendNoGrow(k, v);
   return this;
@@ -489,7 +491,7 @@ ArrayShell *ArrayShell::addLvalImpl(K k, Variant*& ret, bool copy) {
   }
   assert(!exists(k) && m_size <= capacity());
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   ret = appendNoGrow(k, Variant::NullInit());
   MYLOG << (void*)this << "->lval:" << "added";
@@ -635,14 +637,14 @@ ArrayShell *ArrayShell::copy() const {
   auto result = NEW(ArrayShell)(
     *this,
     capacity() + (m_size == capacity()),
-    m_nonsmart);
+    m_allocMode);
   assert(result->getCount() == 0);
   return result;
 }
 
 ArrayShell* ArrayShell::copy(uint capacity) {
   APILOG << "(" << capacity << ")";
-  return NEW(ArrayShell)(*this, capacity, m_nonsmart);
+  return NEW(ArrayShell)(*this, capacity, m_allocMode);
 }
 
 ArrayShell *ArrayShell::copyWithStrongIterators() const {
@@ -664,7 +666,7 @@ ArrayShell *ArrayShell::append(const Variant& v, bool copy) {
   if (copy) {
     return ArrayShell::copy()->append(v, false);
   }
-  grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+  grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   appendNoGrow(nextKeyBump(), v);
   return this;
 }
@@ -677,7 +679,7 @@ ArrayShell *ArrayShell::appendRef(const Variant& v, bool copy) {
   //addValWithRef(nextKeyBump(), v);
   auto const k = nextKeyBump();
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   assert(m_size < capacity());
   appendNoGrow(k, Variant::NoInit())->constructRefHelper(v);
@@ -693,7 +695,7 @@ ArrayData *ArrayShell::appendWithRef(CVarRef v, bool copy) {
     return ArrayShell::copy()->appendWithRef(v, false);
   }
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   assert(m_size < capacity());
   appendNoGrow(nextKeyBump(), Variant::NullInit())->setWithRef(v);
@@ -710,7 +712,7 @@ void ArrayShell::addValWithRef(K k, const Variant& v) {
     return;
   }
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   assert(m_size < capacity());
   appendNoGrow(k, Variant::NullInit())->setWithRef(v);
@@ -730,7 +732,7 @@ void ArrayShell::nextInsertWithRef(const Variant& v) {
   // always false [-Werror=strict-overflow]
   auto const k = nextKeyBump();
   if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   }
   assert(m_size < capacity());
   appendNoGrow(k, Variant::NullInit())->setWithRef(v);
@@ -744,7 +746,7 @@ ArrayData *ArrayShell::append(const ArrayData *elems, ArrayOp op, bool copy) {
 
   assert(elems);
   assert(op == Plus || op == Merge);
-  grow(m_size, m_size + 1, m_size * 2 + 1, m_nonsmart);
+  grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -827,7 +829,7 @@ ArrayData* ArrayShell::prepend(CVarRef v, bool copy) {
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   freeStrongIterators();
-  Store::prepend(v, m_size, m_nonsmart);
+  Store::prepend(v, m_size, m_allocMode);
   ++m_size;
   auto first = firstIndex(m_size);
   setKey(first, int64_t(0));

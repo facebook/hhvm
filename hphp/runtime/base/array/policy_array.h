@@ -99,11 +99,12 @@ class SimpleArrayStore {
   Allocate keys and values at a given capacity and with a given
   allocation strategy.
   */
-  static void allocate(Key*& ks, TypedValueAux*& vs, uint cap, bool nonSmart) {
+  static void allocate(Key*& ks, TypedValueAux*& vs, uint cap,
+                       ArrayData::AllocationMode am) {
     /* To save time, only one allocation is done and keys are stored
        right next to the values. */
     auto const totSize = (sizeof(*ks) + sizeof(*vs)) * cap;
-    auto const raw = nonSmart
+    auto const raw = am == ArrayData::AllocationMode::nonSmart
       ? Util::safe_malloc(totSize)
       : smart_malloc(totSize);
     vs = static_cast<TypedValueAux*>(raw);
@@ -111,9 +112,10 @@ class SimpleArrayStore {
   }
 
   /** Inverse of allocate */
-  static void deallocate(Key* ks, TypedValueAux* vs, bool nonSmart) {
+  static void deallocate(Key* ks, TypedValueAux* vs,
+                         ArrayData::AllocationMode am) {
     assert(ks && vs);
-    if (nonSmart) {
+    if (am == ArrayData::AllocationMode::nonSmart) {
       Util::safe_free(vs);
     } else {
       smart_free(vs);
@@ -139,7 +141,7 @@ protected:
   required by tvDupFlattenVars).
   */
   SimpleArrayStore(const SimpleArrayStore& rhs, uint length, uint capacity,
-                   bool nonSmart, const ArrayData* owner);
+                   ArrayData::AllocationMode am, const ArrayData* owner);
   ~SimpleArrayStore() {
     /* If this fails, it means someone didn't call destroy. */
     assert(!m_keys && !m_vals);
@@ -151,7 +153,7 @@ protected:
   separate function in order to obtain length and nonSmart
   information.
   */
-  void destroy(uint length, bool nonSmart);
+  void destroy(uint length, ArrayData::AllocationMode);
 
   /**
   The following four methods implement bidirectional iteration for
@@ -188,7 +190,7 @@ protected:
   Prepend v to the array. An uninitialized hole is left in the first
   key slot; you MUST use setKey subsequently to initialize it.
   */
-  void prepend(const Variant& v, uint length, bool nonSmart);
+  void prepend(const Variant& v, uint length, ArrayData::AllocationMode);
 
   /**
   Erase at position pos from the array. Cleans up data and
@@ -200,10 +202,10 @@ protected:
   Construct an array store with the given allocation strategy and
   capacity.
   */
-  SimpleArrayStore(bool nonSmart, uint capacity)
+  SimpleArrayStore(ArrayData::AllocationMode am, uint capacity)
       : m_capacity(std::max<uint>(startingCapacity, capacity))
       , m_nextKey(0) {
-    allocate(m_keys, m_vals, m_capacity, nonSmart);
+    allocate(m_keys, m_vals, m_capacity, am);
   }
 
   /**
@@ -218,7 +220,7 @@ protected:
   <= minSize && minSize = idealSize. No actual objects are allocated
   in the grown store.
    */
-  void grow(uint size, uint minSize, uint idealSize, bool nonSmart);
+  void grow(uint size, uint minSize, uint idealSize, ArrayData::AllocationMode);
 
   /**
   Returns true iff the key at pos is a string.
@@ -277,7 +279,8 @@ protected:
   its refcount.
    */
   template <class K>
-  bool update(K key, const Variant& val, uint length, bool nonSmart);
+  bool update(K key, const Variant& val, uint length,
+              ArrayData::AllocationMode);
 
   /**
   Returns a const reference to the Variant held at position
@@ -326,7 +329,7 @@ class ArrayShell : public ArrayData, private SimpleArrayStore {
 
   ArrayShell(const ArrayShell& rhs) = delete;
   ArrayShell& operator=(const ArrayShell& rhs) = delete;
-  ArrayShell(const ArrayShell& rhs, uint capacity, bool nonSmart);
+  ArrayShell(const ArrayShell& rhs, uint capacity, ArrayData::AllocationMode);
 
   template <class K>
   void addValWithRef(K k, const Variant& value);

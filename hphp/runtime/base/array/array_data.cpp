@@ -31,6 +31,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static_assert(
+  sizeof(ArrayData) == 32,
+  "Performance is sensitive to sizeof(ArrayData)."
+  " Make sure you changed it with good reason and then update this assert.");
+
 typedef tbb::concurrent_hash_map<const StringData *, ArrayData *,
                                  StringDataHashCompare> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
@@ -121,7 +126,7 @@ void ArrayData::release() {
     that->release();
     return;
   }
-  assert(m_kind == kNameValueTableWrapper);
+  assert(m_kind == ArrayKind::kNameValueTableWrapper);
   // NameValueTableWrapper: nop.
 }
 

@@ -54,7 +54,7 @@ namespace HPHP {
  */
 struct NameValueTableWrapper : public ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)
-    : ArrayData(kNameValueTableWrapper)
+    : ArrayData(ArrayKind::kNameValueTableWrapper)
     , m_tab(tab)
   { }
 

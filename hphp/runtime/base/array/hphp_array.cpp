@@ -41,6 +41,11 @@
 
 namespace HPHP {
 
+static_assert(
+  sizeof(HphpArray) == 160,
+  "Performance is sensitive to sizeof(HphpArray)."
+  " Make sure you changed it with good reason and then update this assert.");
+
 static const Trace::Module TRACEMOD = Trace::runtime;
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -114,19 +119,22 @@ inline void HphpArray::init(uint capacity) {
   initHash(m_hash, tableSize);
 }
 
-HphpArray::HphpArray(uint size) : ArrayData(kHphpArray, false, 0),
-  m_lastE(ElmIndEmpty), m_hLoad(0), m_nextKI(0) {
+HphpArray::HphpArray(uint capacity)
+    : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, 0)
+    , m_lastE(ElmIndEmpty)
+    , m_hLoad(0)
+    , m_nextKI(0) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
   }
 #endif
   assert(m_size == 0);
-  init(size);
+  init(capacity);
 }
 
 HphpArray::HphpArray(uint size, const TypedValue* values)
-    : ArrayData(kHphpArray, false, size)
+    : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, size)
     , m_lastE(size - 1)
     , m_hLoad(size)
     , m_nextKI(size) {
@@ -163,33 +171,36 @@ HphpArray::HphpArray(uint size, const TypedValue* values)
 }
 
 HphpArray::HphpArray(EmptyMode)
-  : ArrayData(kHphpArray, false, 0)
-  , m_lastE(ElmIndEmpty)
-  , m_hLoad(0)
-  , m_nextKI(0) {
+    : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, 0)
+    , m_lastE(ElmIndEmpty)
+    , m_hLoad(0)
+    , m_nextKI(0) {
   init(0);
   setStatic();
 }
 
 // Empty constructor for internal use by nonSmartCopy() and copyImpl()
-HphpArray::HphpArray(AllocMode mode) :
-    ArrayData(kHphpArray, /*nonsmart*/ mode == kMalloc) {
+HphpArray::HphpArray(AllocationMode mode) :
+    ArrayData(ArrayKind::kHphpArray, mode) {
 }
 
 HOT_FUNC_VM
 HphpArray::~HphpArray() {
-  Elm* elms = m_data;
-  ssize_t lastE = (ssize_t)m_lastE;
+  auto const elms = m_data;
+  auto const lastE = (ssize_t)m_lastE;
   for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
-    Elm* e = &elms[pos];
-    if (e->data.m_type == KindOfTombstone) continue;
-    if (e->hasStrKey()) decRefStr(e->key);
-    tvRefcountedDecRef(&e->data);
+    auto& e = elms[pos];
+    if (e.data.m_type == KindOfTombstone) continue;
+    if (e.hasStrKey()) decRefStr(e.key);
+    tvRefcountedDecRef(&e.data);
   }
-  if (m_allocMode == kSmart) {
-    smart_free(m_data);
-  } else if (m_allocMode == kMalloc) {
-    free(m_data);
+  if (m_data == m_inline_data.slots) {
+    return;
+  }
+  if (m_allocMode == AllocationMode::smart) {
+    smart_free(elms);
+  } else {
+    free(elms);
   }
 }
 
@@ -724,19 +735,16 @@ void HphpArray::allocData(size_t maxElms, size_t tableSize) {
   if (maxElms <= SmallSize) {
     m_data = m_inline_data.slots;
     m_hash = m_inline_data.hash;
-    m_allocMode = kInline;
     return;
   }
   size_t hashSize = tableSize * sizeof(ElmInd);
   size_t dataSize = maxElms * sizeof(Elm);
   size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
                      dataSize + hashSize;
-  if (!m_nonsmart) {
+  if (m_allocMode == AllocationMode::smart) {
     m_data = (Elm*) smart_malloc(allocSize);
-    m_allocMode = kSmart;
   } else {
     m_data = (Elm*) Util::safe_malloc(allocSize);
-    m_allocMode = kMalloc;
   }
   m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
            (ElmInd*)(uintptr_t(m_data) + dataSize);
@@ -749,24 +757,21 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize, uint oldMask) {
   size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
                      dataSize + hashSize;
   size_t oldDataSize = computeMaxElms(oldMask) * sizeof(Elm); // slots only.
-  if (!m_nonsmart) {
-    assert(m_allocMode == kInline || m_allocMode == kSmart);
-    if (m_allocMode == kInline) {
+  if (m_allocMode == AllocationMode::smart) {
+    if (m_data == m_inline_data.slots) {
       m_data = (Elm*) smart_malloc(allocSize);
+      copyData:
       memcpy(m_data, m_inline_data.slots, oldDataSize);
-      m_allocMode = kSmart;
     } else {
       m_data = (Elm*) smart_realloc(m_data, allocSize);
     }
   } else {
-    assert(m_allocMode == kInline || m_allocMode == kMalloc);
-    if (m_allocMode == kInline) {
+    if (m_data == m_inline_data.slots) {
       m_data = (Elm*) Util::safe_malloc(allocSize);
-      memcpy(m_data, m_inline_data.slots, oldDataSize);
-      m_allocMode = kMalloc;
-    } else {
-      m_data = (Elm*) Util::safe_realloc(m_data, allocSize);
+      // This goto doesn't loop, just saves the memcpy call code.
+      goto copyData;
     }
+    m_data = (Elm*) Util::safe_realloc(m_data, allocSize);
   }
   m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
            (ElmInd*)(uintptr_t(m_data) + dataSize);
@@ -1855,8 +1860,8 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
 
 //=============================================================================
 
-ALWAYS_INLINE HphpArray* HphpArray::clone(AllocMode am) const {
-  const auto p = am == kSmart
+ALWAYS_INLINE HphpArray* HphpArray::clone(AllocationMode am) const {
+  const auto p = am == AllocationMode::smart
     ? HphpArray::AllocatorType::getNoCheck()->alloc(sizeof(HphpArray))
     : operator new(sizeof(HphpArray));
   auto target = new(p) HphpArray(am);
@@ -1870,7 +1875,7 @@ ALWAYS_INLINE HphpArray* HphpArray::clone(AllocMode am) const {
   // frequent. Do this only for arrays that actually don't allocate
   // data so the copied array doesn't lose capacity.
   target->ArrayData::m_pos = invalid_index;
-  target->ArrayData::m_allocMode = kInline;
+  assert(target->ArrayData::m_allocMode == am);
   // Conservatively copy m_nextKI
   target->m_nextKI = m_nextKI;
   target->m_tableMask = SmallHashSize - 1;
@@ -1889,11 +1894,11 @@ ALWAYS_INLINE HphpArray* HphpArray::clone(AllocMode am) const {
 }
 
 NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
-  return clone(kMalloc);
+  return clone(AllocationMode::nonSmart);
 }
 
 NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
-  return clone(kSmart);
+  return clone(AllocationMode::smart);
 }
 
 NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {

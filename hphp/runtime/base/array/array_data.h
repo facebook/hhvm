@@ -34,6 +34,8 @@ class HphpArray;
  */
 class ArrayData : public Countable {
  public:
+  enum class AllocationMode : bool { smart, nonSmart };
+
   enum ArrayOp {
     Plus,
     Merge,
@@ -41,50 +43,47 @@ class ArrayData : public Countable {
 
   // enum of possible array types, so we can guard nonvirtual
   // fast paths in runtime code.
-  enum ArrayKind : uint8_t {
+  enum class ArrayKind : uint8_t {
     kHphpArray,
     kSharedMap,
     kNameValueTableWrapper,
     kArrayShell,
   };
 
- protected:
-  // used in subclasses but declared here.
-  enum AllocMode : uint8_t { kInline, kSmart, kMalloc };
-
- public:
+public:
   static const ssize_t invalid_index = -1;
 
   explicit ArrayData(ArrayKind kind)
     : m_size(-1)
+    , m_strongIterators(nullptr)
     , m_pos(0)
     , m_kind(kind)
-    , m_nonsmart(false)
-    , m_strongIterators(nullptr) {
-  }
+    , m_allocMode(AllocationMode::smart)
+  {}
 
-  ArrayData(ArrayKind kind, bool nonsmart)
-    : m_size(-1)
-    , m_pos(0)
-    , m_kind(kind)
-    , m_nonsmart(nonsmart)
-    , m_strongIterators(nullptr) {
-  }
+  explicit ArrayData(ArrayKind kind, AllocationMode m)
+      : m_size(-1)
+      , m_strongIterators(nullptr)
+      , m_pos(0)
+      , m_kind(kind)
+      , m_allocMode(m)
+  {}
 
-  ArrayData(ArrayKind kind, bool nonsmart, uint size)
+  ArrayData(ArrayKind kind, AllocationMode m, uint size)
       : m_size(size)
+      , m_strongIterators(nullptr)
       , m_pos(size ? 0 : ArrayData::invalid_index)
       , m_kind(kind)
-      , m_nonsmart(nonsmart)
-      , m_strongIterators(nullptr) {
-  }
+      , m_allocMode(m)
+  {}
 
-  ArrayData(const ArrayData *src, ArrayKind kind, bool nonsmart = false)
-      : m_pos(src->m_pos)
-      , m_kind(src->m_kind)
-      , m_nonsmart(nonsmart)
-      , m_strongIterators(nullptr) {
-  }
+  ArrayData(const ArrayData *src, ArrayKind kind,
+            AllocationMode m = AllocationMode::smart)
+    : m_strongIterators(nullptr)
+    , m_pos(src->m_pos)
+    , m_kind(src->m_kind)
+    , m_allocMode(m)
+  {}
 
   static HphpArray* Make(uint capacity);
   static HphpArray* Make(uint size, const TypedValue*);
@@ -172,11 +171,11 @@ class ArrayData : public Countable {
   /*
    * Specific derived class type querying operators.
    */
-  bool isArrayShell() const { return m_kind == kArrayShell; }
-  bool isHphpArray() const { return m_kind == kHphpArray; }
-  bool isSharedMap() const { return m_kind == kSharedMap; }
+  bool isArrayShell() const { return m_kind == ArrayKind::kArrayShell; }
+  bool isHphpArray() const { return m_kind == ArrayKind::kHphpArray; }
+  bool isSharedMap() const { return m_kind == ArrayKind::kSharedMap; }
   bool isNameValueTableWrapper() const {
-    return m_kind == kNameValueTableWrapper;
+    return m_kind == ArrayKind::kNameValueTableWrapper;
   }
 
 
@@ -503,14 +502,12 @@ class ArrayData : public Countable {
   // Layout starts with 64 bits for vtable, then 32 bits for m_count
   // from Countable base, then...
   uint m_size;
-  int32_t m_pos;
- protected:
-  const ArrayKind m_kind;
-  AllocMode m_allocMode;
-  const bool m_nonsmart; // never use smartalloc to allocate Elms
-  uint8_t m_slack8;      // use this for whatever you wanna
- private:
+private:
   FullPos* m_strongIterators; // head of linked list
+protected:
+  int32_t m_pos;
+  const ArrayKind m_kind;
+  const AllocationMode m_allocMode;
 
  public: // for the JIT
   static uint32_t getKindOff() {

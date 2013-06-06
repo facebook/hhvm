@@ -45,7 +45,7 @@ public:
 
 private:
   // for copy-on-write escalation
-  explicit HphpArray(AllocMode);
+  explicit HphpArray(AllocationMode);
 
 public:
   // Create an empty array with enough capacity for nSize elements.
@@ -507,7 +507,7 @@ public:
   }
 
 private:
-  HphpArray* clone(AllocMode am) const;
+  HphpArray* clone(AllocationMode am) const;
   void cloneNonEmpty(HphpArray* target) const;
 };
 

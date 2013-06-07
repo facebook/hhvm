@@ -1041,9 +1041,6 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
       case VecKeyIS:
         argGroup.vectorKeyIS(src);
         break;
-      case Immed:
-        always_assert(0 && "We can't generate a native call for this");
-        break;
     }
   }
 

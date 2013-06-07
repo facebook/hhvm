@@ -323,7 +323,7 @@ void TranslatorX64::emitDebugPrint(Asm& a,
 
 void
 TranslatorX64::emitRB(X64Assembler& a,
-                      RingBufferType t,
+                      Trace::RingBufferType t,
                       SrcKey sk, RegSet toSave) {
   if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
     return;
@@ -338,7 +338,7 @@ TranslatorX64::emitRB(X64Assembler& a,
 
 void
 TranslatorX64::emitRB(X64Assembler& a,
-                      RingBufferType t,
+                      Trace::RingBufferType t,
                       const char* msg,
                       RegSet toSave) {
   if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {

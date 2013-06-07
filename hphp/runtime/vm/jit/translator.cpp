@@ -1060,7 +1060,7 @@ struct InstrInfo {
 };
 
 static const struct {
-  Opcode    op;
+  Opcode op;
   InstrInfo info;
 } instrInfoSparse [] = {
 

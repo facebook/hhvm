@@ -32,7 +32,7 @@
 
 namespace HPHP { class ExecutionContext; }
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace JIT {
 class HhbcTranslator;
 class IRFactory;
 class CSEHash;

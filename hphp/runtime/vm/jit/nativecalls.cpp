@@ -65,8 +65,6 @@ static const DestType DNone = DestType::None;
  *     {VecKeyS, idx} - Like TV, but Str values are passed as a raw
  *                      StringData*, in a single register
  *     {VecKeyIS, idx} - Like VecKeyS, including Int
- *     {Immed} - There's no precoloring to do here, an internal immediate is
- *               used in cgFoo for this function
  */
 static CallMap s_callMap({
     /* Opcode, Func, Dest, SyncPoint, Args */

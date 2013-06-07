@@ -80,9 +80,6 @@ public:
   static void InterruptRequestEnded(const char *url);
   static void InterruptPSPEnded(const char *url);
 
-  // Called when a user handler fails to handle an exception.
-  static bool InterruptException(CVarRef e);
-
   // Interrupt from VM
   static void InterruptVMHook(int type = BreakPointReached,
                               CVarRef e = null_variant);

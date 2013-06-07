@@ -617,18 +617,13 @@ void BaseExecutionContext::handleError(const std::string &msg,
     handled = callUserErrorHandler(ee, errnum, false);
   }
   if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
-    try {
-      if (!Eval::Debugger::InterruptException(String(msg))) return;
-    } catch (const Eval::DebuggerClientExitException &e) {}
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
     throw FatalErrorException(msg, bt);
   }
   if (!handled &&
       (RuntimeOption::NoSilencer ||
        (getErrorReportingLevel() & errnum) != 0)) {
-    try {
-      if (!Eval::Debugger::InterruptException(String(msg))) return;
-    } catch (const Eval::DebuggerClientExitException &e) {}
-
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
     String file = empty_string;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {

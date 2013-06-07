@@ -1433,16 +1433,13 @@ bool function_exists(CStrRef function_name) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugger and code coverage instrumentation
 
-inline void throw_exception_unchecked(CObjRef e) {
-  if (!Eval::Debugger::InterruptException(e)) return;
-  throw e;
-}
 void throw_exception(CObjRef e) {
   if (!e.instanceof(SystemLib::s_ExceptionClass)) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");
   }
-  throw_exception_unchecked(e);
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
+  throw e;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

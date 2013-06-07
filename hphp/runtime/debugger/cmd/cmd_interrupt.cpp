@@ -43,7 +43,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     thrift.write(m_site->getNamespace());
     thrift.write(m_site->getClass());
     thrift.write(m_site->getFunction());
-    Variant e = m_site->getException();
+    Variant e = m_site->getError();
     if (e.isNull()) {
       thrift.write("");
     } else if (e.isObject()) {

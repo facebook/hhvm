@@ -66,14 +66,13 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
 }
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
-// NB: this does not hook any portion of exception unwind.
-void phpDebuggerExceptionThrownHook(ObjectData* e) {
+void phpDebuggerExceptionThrownHook(ObjectData* exception) {
   TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
-  Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, e);
+  Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, exception);
   TRACE(5, "out phpDebuggerExceptionThrownHook()\n");
 }
 
@@ -87,6 +86,21 @@ void phpDebuggerExceptionHandlerHook() {
   }
   Eval::Debugger::InterruptVMHook(Eval::ExceptionHandler);
   TRACE(5, "out phpDebuggerExceptionHandlerHook()\n");
+}
+
+// Hook called when the VM raises an error.
+void phpDebuggerErrorHook(const std::string& message) {
+  TRACE(5, "in phpDebuggerErrorHook()\n");
+  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+    TRACE(5, "NoBreak flag is on\n");
+    return;
+  }
+  try {
+    Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, String(message));
+  } catch (const Eval::DebuggerClientExitException &e) {
+    // Don't disturb the error handler just because a debugger quits.
+  }
+  TRACE(5, "out phpDebuggerErrorHook()\n");
 }
 
 bool isDebuggerAttachedProcess() {

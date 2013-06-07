@@ -220,21 +220,6 @@ void Debugger::InterruptPSPEnded(const char *url) {
   }
 }
 
-// Called directly from exception handling to indicate a user error handler
-// failed to handle an exeption. NB: this is quite distinct from the hook called
-// from iopThrow named phpDebuggerExceptionHook().
-bool Debugger::InterruptException(CVarRef e) {
-  TRACE(2, "Debugger::InterruptException\n");
-  if (RuntimeOption::EnableDebugger) {
-    ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-    if (ti->m_reqInjectionData.getDebugger()) {
-      HPHP::Transl::VMRegAnchor _;
-      InterruptVMHook(ExceptionThrown, e);
-    }
-  }
-  return true;
-}
-
 // Primary entrypoint for the debugger from the VM. Called in response to a host
 // of VM events that the debugger is interested in. The debugger will execute
 // any logic needed to handle the event, and will block below this to wait for

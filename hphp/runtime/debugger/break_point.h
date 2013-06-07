@@ -57,7 +57,10 @@ public:
   int32_t getChar0() const { return m_char0; }
   int32_t getLine1() const { return m_line1; }
   int32_t getChar1() const { return m_char1; }
-  CVarRef getException() { return m_exception; }
+
+  // Optionally provided by VM, could be an exception object, a string, or null
+  // depending on the context.
+  CVarRef getError() { return m_error; }
 
   std::string &url() const { return m_url; }
   std::string desc() const;
@@ -72,7 +75,7 @@ public:
   bool funcEntry() const { return m_funcEntry; }
 
 private:
-  Variant m_exception;
+  Variant m_error;
 
   // cached
   mutable const char *m_class;
@@ -206,7 +209,7 @@ private:
   int32_t parseFileLocation(const std::string &str, int32_t offset);
   bool parseLines(const std::string &token);
 
-  bool checkException(CVarRef e);
+  bool checkExceptionOrError(CVarRef e);
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);

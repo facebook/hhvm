@@ -40,9 +40,9 @@ int InterruptSite::getFileLen() const {
 std::string InterruptSite::desc() const {
   TRACE(2, "InterruptSite::desc\n");
   string ret;
-  if (m_exception.isNull()) {
+  if (m_error.isNull()) {
     ret = "Break";
-  } else if (m_exception.isObject()) {
+  } else if (m_error.isObject()) {
     ret = "Exception thrown";
   } else {
     ret = "Error occurred";
@@ -74,8 +74,8 @@ std::string InterruptSite::desc() const {
   return ret;
 }
 
-InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef e)
-    : m_exception(e), m_class(nullptr), m_function(nullptr),
+InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
+    : m_error(error), m_class(nullptr), m_function(nullptr),
       m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
       m_unit(nullptr), m_valid(false), m_funcEntry(false) {
@@ -338,7 +338,7 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
           checkUrl(site.url());
       case ExceptionThrown:
         return
-          checkException(site.getException()) &&
+          checkExceptionOrError(site.getError()) &&
           checkUrl(site.url()) && checkClause();
       case BreakPointReached:
       {
@@ -879,7 +879,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
   return r.same(1);
 }
 
-bool BreakPointInfo::checkException(CVarRef e) {
+bool BreakPointInfo::checkExceptionOrError(CVarRef e) {
   TRACE(2, "BreakPointInfo::checkException\n");
   assert(!e.isNull());
   if (e.isObject()) {

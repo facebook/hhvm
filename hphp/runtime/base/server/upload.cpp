@@ -995,7 +995,7 @@ void rfc1867PostHandler(Transport *transport,
         }
       }
 
-      if (cancel_upload) {
+      if (cancel_upload && cancel_upload != UPLOAD_ERROR_C) {
         if (temp_filename) {
           if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
             unlink(temp_filename);
@@ -1075,7 +1075,7 @@ void rfc1867PostHandler(Transport *transport,
       s = nullptr;
 
       /* Possible Content-Type: */
-      if (cancel_upload ||
+      if ((cancel_upload && cancel_upload != UPLOAD_ERROR_C) ||
           !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
         cd = "";
       } else {

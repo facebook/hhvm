@@ -185,7 +185,7 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
   , m_baseCls(nullptr)
   , m_name(name)
   , m_namedEntity(nullptr)
-  , m_refBitVec(nullptr)
+  , m_refBitVal(0)
   , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
@@ -208,7 +208,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
   , m_baseCls(nullptr)
   , m_name(name)
   , m_namedEntity(nullptr)
-  , m_refBitVec(nullptr)
+  , m_refBitVal(0)
   , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
@@ -394,56 +394,53 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
 }
 
 bool Func::byRef(int32_t arg) const {
-  // Super special case. A handful of builtins are varargs functions where the
-  // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
-  if (arg >= m_numParams && info() &&
-      (info()->attribute & (ClassInfo::RefVariableArguments |
-                            ClassInfo::MixedVariableArguments))) {
-    return true;
+  const uint64_t* ref = &m_refBitVal;
+  assert(arg >= 0);
+  if (UNLIKELY(arg >= kBitsPerQword)) {
+    // Super special case. A handful of builtins are varargs functions where the
+    // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
+    if (arg >= m_numParams) {
+      return m_attrs & AttrVariadicByRef;
+    }
+    ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
   }
-  int qword = arg / kBitsPerQword;
-  int bit   = arg % kBitsPerQword;
-  bool retval = arg < m_numParams && (m_refBitVec[qword] & (1ull << bit)) != 0;
-  return retval;
+  int bit = (uint32_t)arg % kBitsPerQword;
+  return *ref & (1ull << bit);
 }
 
 bool Func::mustBeRef(int32_t arg) const {
-  // return true if the argument is required to be a reference
-  // (and thus should be an lvalue)
-  if (arg >= m_numParams && info() &&
-      ((info()->attribute & (ClassInfo::RefVariableArguments |
-                             ClassInfo::MixedVariableArguments)) ==
-                               ClassInfo::RefVariableArguments)) {
-    return true;
+  if (byRef(arg)) {
+    return arg < m_numParams || !(m_attrs & AttrVariadicByRef) ||
+      !info() || !(info()->attribute & ClassInfo::MixedVariableArguments);
   }
-  int qword = arg / kBitsPerQword;
-  int bit   = arg % kBitsPerQword;
-  bool retval = arg < m_numParams && (m_refBitVec[qword] & (1ull << bit)) != 0;
-  return retval;
+  return false;
 }
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,
                        std::vector<ParamInfo>& pBuilder) {
   int qword = m_numParams / kBitsPerQword;
   int bit   = m_numParams % kBitsPerQword;
+  m_numParams++;
+  uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
-  if ((m_numParams++ & (kBitsPerQword - 1)) == 0) {
-    assert(shared()->m_refBitVec == m_refBitVec);
-    shared()->m_refBitVec = m_refBitVec = (uint64_t*)
-      realloc(shared()->m_refBitVec,
-              // E.g., 65th m_numParams -> 2 qwords
-              (1 + m_numParams / kBitsPerQword) * sizeof(uint64_t));
+  if (qword) {
+    if (bit == 0) {
+      shared()->m_refBitPtr = (uint64_t*)
+        realloc(shared()->m_refBitPtr, qword * sizeof(uint64_t));
+    }
+    refBits = shared()->m_refBitPtr + qword - 1;
+  }
 
+  if (bit == 0) {
     // The new word is either zerod or set to 1, depending on whether
     // we are one of the special builtins that takes variadic
     // reference arguments.  This is for use in the translator.
-    shared()->m_refBitVec[m_numParams / kBitsPerQword] =
-      (m_attrs & AttrVariadicByRef) ? -1ull : 0;
+    *refBits = (m_attrs & AttrVariadicByRef) ? -1ull : 0;
   }
-  assert(!!(shared()->m_refBitVec[qword] & (uint64_t(1) << bit)) ==
-    !!(m_attrs & AttrVariadicByRef));
-  shared()->m_refBitVec[qword] &= ~(1ull << bit);
-  shared()->m_refBitVec[qword] |= uint64_t(ref) << bit;
+
+  assert(!(*refBits & (uint64_t(1) << bit)) == !(m_attrs & AttrVariadicByRef));
+  *refBits &= ~(1ull << bit);
+  *refBits |= uint64_t(ref) << bit;
   pBuilder.push_back(info);
 }
 
@@ -642,16 +639,14 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
   : m_preClass(preClass), m_id(id), m_base(base),
     m_numLocals(0), m_numIterators(0),
     m_past(past), m_line1(line1), m_line2(line2),
-    m_info(nullptr), m_refBitVec(nullptr), m_builtinFuncPtr(nullptr),
+    m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
     m_hasGeneratorAsBody(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
-  if (m_refBitVec) {
-    free(m_refBitVec);
-  }
+  free(m_refBitPtr);
 }
 
 void Func::SharedData::atomicRelease() {
@@ -952,6 +947,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setUserType(m_params[i].userType());
     f->appendParam(m_params[i].ref(), pi, pBuilder);
   }
+  if (!m_params.size()) {
+    assert(!f->m_refBitVal && !f->shared()->m_refBitPtr);
+    f->m_refBitVal = attrs & AttrVariadicByRef ? -1uLL : 0uLL;
+  }
+
   f->shared()->m_params = pBuilder;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;

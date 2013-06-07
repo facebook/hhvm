@@ -431,12 +431,13 @@ public: // Offset accessors for the translator.
   X(unit);
   X(cls);
   X(numParams);
-  X(refBitVec);
+  X(refBitVal);
   X(fullName);
   X(prologueTable);
   X(maybeIntercepted);
   X(maxStackCells);
   X(funcBody);
+  X(shared);
 #undef X
 
 private:
@@ -453,7 +454,9 @@ private:
     int m_line2;
     DataType m_returnType;
     const ClassInfo::MethodInfo* m_info; // For builtins.
-    uint64_t* m_refBitVec;
+    // bits 64 and up of the reffiness guards (first 64 bits
+    // are in Func::m_refBitVal)
+    uint64_t* m_refBitPtr;
     BuiltinFunction m_builtinFuncPtr;
     BuiltinFunction m_nativeFuncPtr;
     ParamInfoVec m_params; // m_params[i] corresponds to parameter i.
@@ -508,7 +511,7 @@ private:
     const NamedEntity* m_namedEntity;
     Slot m_methodSlot;
   };
-  uint64_t* m_refBitVec;
+  uint64_t m_refBitVal;
 public: // used by Unit
   unsigned m_cachedOffset;
 private:

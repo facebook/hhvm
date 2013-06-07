@@ -167,7 +167,6 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int)                              \
                                           S(Int)                              \
-                                          S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
@@ -775,7 +774,7 @@ class RawMemSlot {
 
   enum Kind {
     ContLabel, ContDone, ContRunning, ContARPtr,
-    StrLen, FuncNumParams, FuncRefBitVec, ContEntry, MisCtx,
+    StrLen, FuncNumParams, ContEntry, MisCtx,
     MaxKind
   };
 
@@ -787,7 +786,6 @@ class RawMemSlot {
       case ContARPtr:       return GetContARPtr();
       case StrLen:          return GetStrLen();
       case FuncNumParams:   return GetFuncNumParams();
-      case FuncRefBitVec:   return GetFuncRefBitVec();
       case ContEntry:       return GetContEntry();
       case MisCtx:          return GetMisCtx();
       default: not_reached();
@@ -826,11 +824,7 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetFuncNumParams() {
-    static RawMemSlot m(Func::numParamsOff(), Transl::sz::qword, Type::Int);
-    return m;
-  }
-  static RawMemSlot& GetFuncRefBitVec() {
-    static RawMemSlot m(Func::refBitVecOff(), Transl::sz::qword, Type::Int);
+    static RawMemSlot m(Func::numParamsOff(), Transl::sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContEntry() {

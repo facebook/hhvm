@@ -2452,12 +2452,7 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
                                const vector<bool>& vals) {
   int32_t actRecOff = cellsToBytes(entryArDelta);
   SSATmp* funcPtr = gen(LdARFuncPtr, m_tb->sp(), cns(actRecOff));
-  SSATmp* nParams = gen(
-    LdRaw, Type::Int, funcPtr, cns(RawMemSlot::FuncNumParams)
-  );
-  SSATmp* bitsPtr = gen(
-    LdRaw, Type::Int, funcPtr, cns(RawMemSlot::FuncRefBitVec)
-  );
+  SSATmp* nParams = nullptr;
 
   for (unsigned i = 0; i < mask.size(); i += 64) {
     assert(i < vals.size());
@@ -2468,14 +2463,22 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
     }
     uint64_t vals64 = packBitVec(vals, i);
 
+    if (i == 0) {
+      nParams = cns(64);
+    } else if (i == 64) {
+      nParams = gen(
+        LdRaw, Type::Int, funcPtr, cns(RawMemSlot::FuncNumParams)
+      );
+    }
+    SSATmp* maskTmp = !(mask64>>32) ? cns(mask64) : m_tb->genLdConst(mask64);
+    SSATmp* valsTmp = !(vals64>>32) ? cns(vals64) : m_tb->genLdConst(vals64);
     gen(
       GuardRefs,
       funcPtr,
       nParams,
-      bitsPtr,
       cns(i),
-      m_tb->genLdConst(mask64),
-      m_tb->genLdConst(vals64)
+      maskTmp,
+      valsTmp
     );
   }
 }

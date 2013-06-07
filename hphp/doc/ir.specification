@@ -398,16 +398,15 @@ CheckInitMem S0:PtrToGen S1:ConstInt -> L
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to L.
 
-GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int S6:Int
+GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
 
   Perform reffiness guard checks.  Operands:
 
     S0 - function pointer for the frame
     S1 - num params expected in the func
-    S2 - type Int, but actually a pointer to the func bitvector
-    S3 - first bit to check, must be a multiple of 64
-    S4 - mask to check (RefDeps::Record::m_mask entires)
-    S5 - values to check (RefDeps::Record::m_vals entires)
+    S2 - first bit to check, must be a multiple of 64
+    S3 - mask to check (RefDeps::Record::m_mask entires)
+    S4 - values to check (RefDeps::Record::m_vals entires)
 
   If any of the checks fail, make a fallback jump.  (Jump to a service
   request that will chain to a retranslation of this tracelet.)

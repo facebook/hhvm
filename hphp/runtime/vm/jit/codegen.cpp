@@ -4221,14 +4221,13 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  assert(inst->numSrcs() == 6);
+  assert(inst->numSrcs() == 5);
 
   SSATmp* funcPtrTmp = inst->src(0);
   SSATmp* nParamsTmp = inst->src(1);
-  SSATmp* bitsPtrTmp = inst->src(2);
-  SSATmp* firstBitNumTmp = inst->src(3);
-  SSATmp* mask64Tmp  = inst->src(4);
-  SSATmp* vals64Tmp  = inst->src(5);
+  SSATmp* firstBitNumTmp = inst->src(2);
+  SSATmp* mask64Tmp  = inst->src(3);
+  SSATmp* vals64Tmp  = inst->src(4);
 
   // Get values in place
   assert(funcPtrTmp->type() == Type::Func);
@@ -4237,63 +4236,106 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
 
   assert(nParamsTmp->type() == Type::Int);
   auto nParamsReg = m_regs[nParamsTmp].reg();
-  assert(nParamsReg != InvalidReg);
-
-  assert(bitsPtrTmp->type() == Type::Int);
-  auto bitsPtrReg = m_regs[bitsPtrTmp].reg();
-  assert(bitsPtrReg != InvalidReg);
+  assert(nParamsReg != InvalidReg || nParamsTmp->isConst());
 
   assert(firstBitNumTmp->isConst() && firstBitNumTmp->type() == Type::Int);
   uint32_t firstBitNum = (uint32_t)(firstBitNumTmp->getValInt());
 
   assert(mask64Tmp->type() == Type::Int);
-  assert(mask64Tmp->inst()->op() == LdConst);
+  assert(mask64Tmp->isConst());
   auto mask64Reg = m_regs[mask64Tmp].reg();
-  assert(mask64Reg != InvalidReg);
-  int64_t mask64 = mask64Tmp->getValInt();
+  assert(mask64Reg != InvalidReg || mask64Tmp->inst()->op() != LdConst);
+  uint64_t mask64 = mask64Tmp->getValInt();
+  assert(mask64);
 
   assert(vals64Tmp->type() == Type::Int);
-  assert(vals64Tmp->inst()->op() == LdConst);
+  assert(vals64Tmp->isConst());
   auto vals64Reg = m_regs[vals64Tmp].reg();
-  assert(vals64Reg != InvalidReg);
-  int64_t vals64 = vals64Tmp->getValInt();
+  assert(vals64Reg != InvalidReg || vals64Tmp->inst()->op() != LdConst);
+  uint64_t vals64 = vals64Tmp->getValInt();
+  assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
 
   auto thenBody = [&] {
-    auto bitsValReg = m_rScratch;
-    //   Load the bit values in bitValReg:
-    //     bitsValReg <- [bitsValPtr + (firstBitNum / 64)]
-    m_as.load_reg64_disp_reg64(bitsPtrReg,
-                               sizeof(uint64_t) * (firstBitNum / 64),
-                               bitsValReg);
-    //     bitsValReg <- bitsValReg & mask64
-    m_as.and_reg64_reg64(mask64Reg, bitsValReg);
+    auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
+    auto cond = CC_NE;
+    auto bitsPtrReg = m_rScratch;
 
-    //   If bitsValReg != vals64Reg, then goto Exit
-    m_as.cmp_reg64_reg64(bitsValReg, vals64Reg);
-    m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_NE);
+    if (firstBitNum == 0) {
+      bitsOff = Func::refBitValOff();
+      bitsPtrReg = funcPtrReg;
+    } else {
+      m_as.loadq(funcPtrReg[Func::sharedOff()], bitsPtrReg);
+      bitsOff -= sizeof(uint64_t);
+    }
+
+    if (vals64 == 0 || (mask64 & (mask64 - 1)) == 0) {
+      // If vals64 is zero, or we're testing a single
+      // bit, we can get away with a single test,
+      // rather than mask-and-compare
+      if (mask64Reg != InvalidReg) {
+        m_as.testq  (mask64Reg, bitsPtrReg[bitsOff]);
+      } else {
+        if (mask64 < 256) {
+          m_as.testb((int8_t)mask64, bitsPtrReg[bitsOff]);
+        } else {
+          m_as.testl((int32_t)mask64, bitsPtrReg[bitsOff]);
+        }
+      }
+      if (vals64) cond = CC_E;
+    } else {
+      auto bitsValReg = m_rScratch;
+      m_as.  loadq  (bitsPtrReg[bitsOff], bitsValReg);
+      if (debug) bitsPtrReg = InvalidReg;
+
+      //     bitsValReg <- bitsValReg & mask64
+      if (mask64Reg != InvalidReg) {
+        m_as.  andq   (mask64Reg, bitsValReg);
+      } else if (mask64 < 256) {
+        m_as.  andb   ((int8_t)mask64, rbyte(bitsValReg));
+      } else {
+        m_as.  andl   ((int32_t)mask64, r32(bitsValReg));
+      }
+
+      //   If bitsValReg != vals64, then goto Exit
+      if (vals64Reg != InvalidReg) {
+        m_as.  cmpq   (vals64Reg, bitsValReg);
+      } else if (mask64 < 256) {
+        assert(vals64 < 256);
+        m_as.  cmpb   ((int8_t)vals64, rbyte(bitsValReg));
+      } else {
+        m_as.  cmpl   ((int32_t)vals64, r32(bitsValReg));
+      }
+    }
+    m_tx64->emitFallbackCondJmp(m_as, *destSR, cond);
   };
 
-  // If few enough args...
-  m_as.cmp_imm32_reg32(firstBitNum + 1, nParamsReg);
-  if (vals64 == 0 && mask64 == 0) {
-    ifThen(m_as, CC_NL, thenBody);
-  } else if (vals64 != 0 && vals64 != mask64) {
-    m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_L);
+  if (firstBitNum == 0) {
+    assert(nParamsReg == InvalidReg);
+    // This is the first 64 bits. No need to check
+    // nParams.
     thenBody();
-  } else if (vals64 != 0) {
-    ifThenElse(CC_NL, thenBody, /* else */ [&] {
-      //   If not special builtin...
-      m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_Z);
-    });
   } else {
-    ifThenElse(CC_NL, thenBody, /* else */ [&] {
-      m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_NZ);
-    });
+    assert(nParamsReg != InvalidReg);
+    // Check number of args...
+    m_as.    cmpq   (firstBitNum, nParamsReg);
+
+    if (vals64 != 0 && vals64 != mask64) {
+      // If we're beyond nParams, then either all params
+      // are refs, or all params are non-refs, so if vals64
+      // isn't 0 and isnt mask64, there's no possibility of
+      // a match
+      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_LE);
+      thenBody();
+    } else {
+      ifThenElse(CC_NLE, thenBody, /* else */ [&] {
+          //   If not special builtin...
+          m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
+          m_tx64->emitFallbackCondJmp(m_as, *destSR, vals64 ? CC_Z : CC_NZ);
+        });
+    }
   }
 }
 

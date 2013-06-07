@@ -2146,9 +2146,10 @@ TranslatorX64::checkRefs(X64Assembler& a,
   for (RefDeps::ArMap::const_iterator it = refDeps.m_arMap.begin();
        it != refDeps.m_arMap.end(); ++it) {
     // Be careful! The actual Func might have fewer refs than the number
-    // of args we're passing. To forestall this, we're going to have to
-    // keep checking i against the number of params. We consider invocations
-    // with too many arguments to have passed their checks.
+    // of args we're passing. To forestall this, we always prepare at
+    // least 64 bits in the Func, and always fill out the refBitVec
+    // to a multiple of 64 bits
+
     int entryArDelta = it->first;
 
     m_hhbcTrans->guardRefs(entryArDelta,

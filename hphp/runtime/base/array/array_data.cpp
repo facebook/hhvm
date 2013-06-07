@@ -123,8 +123,8 @@ void ArrayData::release() {
     that->release();
     return;
   }
-  if (isArrayShell()) {
-    auto that = static_cast<ArrayShell*>(this);
+  if (isPolicyArray()) {
+    auto that = static_cast<PolicyArray*>(this);
     that->release();
     return;
   }

@@ -87,7 +87,7 @@ enum CopyMallocMode { CopyMalloc };
  * small: m_data:8, _count:4, m_len:4, m_hash:4,
  *        m_small[44]
  * big:   m_data:8, _count:4, m_len:4, m_hash:4,
- *        junk[12], node:16, shared:8, cap:8
+ *        junk[36], cap:8
  *
  * If the format is IsLiteral or IsShared, we always use the "big" layout.
  * resemblences to fbstring are not accidental.
@@ -137,7 +137,6 @@ class StringData {
   void destruct() const { if (!isStatic()) delete this; }
 
   StringData() : m_data(m_small), _count(0), m_len(0), m_hash(0) {
-    m_big.shared = 0;
     m_big.cap = IsSmall;
     m_small[0] = 0;
   }
@@ -301,11 +300,6 @@ public:
   double toDouble () const;
   DataType toNumeric(int64_t &lval, double &dval) const;
 
-  strhash_t getPrecomputedHash() const {
-    assert(!isShared());
-    return m_hash & STRHASH_MASK;
-  }
-
   strhash_t hash() const {
     strhash_t h = m_hash & STRHASH_MASK;
     return h ? h : hashHelper();
@@ -375,10 +369,8 @@ public:
     struct __attribute__((__packed__)) {
       // Calculate padding so that node, shared, and cap are pointer aligned,
       // and ensure cap overlaps the last byte of m_small.
-      static const size_t kPadding = sizeof(m_small) -
-        sizeof(SharedVariant*) - sizeof(uint64_t);
+      static const size_t kPadding = sizeof(m_small) - sizeof(uint64_t);
       char junk[kPadding];
-      SharedVariant *shared;
       uint64_t cap;
     } m_big;
   };

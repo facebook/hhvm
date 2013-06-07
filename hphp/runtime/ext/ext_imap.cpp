@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_

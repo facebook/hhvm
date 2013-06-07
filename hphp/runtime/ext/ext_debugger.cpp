@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/logger.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_xmlwriter.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);

@@ -1785,7 +1785,7 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.1.0-dev"
+            "value": "1.0.0"
         },
         {
             "name": "HTML_ENTITIES",

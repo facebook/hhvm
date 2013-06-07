@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/server/static_content_cache.h"
 #include "hphp/runtime/base/zend/zend_scanf.h"
 #include "hphp/runtime/base/file/pipe.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"

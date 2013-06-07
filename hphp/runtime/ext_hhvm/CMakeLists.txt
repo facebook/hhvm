@@ -47,7 +47,7 @@ foreach (header ${CXX_HEADERS})
 	file(APPEND ${INFOTABS_HEADER} "#include \"${header}\"\n")
 endforeach()
 
-auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/idl")
+auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
 add_custom_command(OUTPUT ${INFOTABS_SOURCE}
                    DEPENDS ${CXX_HEADERS} gen-infotabs
                    COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-infotabs"

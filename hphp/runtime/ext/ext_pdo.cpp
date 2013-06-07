@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/util/request_local.h"
 #include "hphp/runtime/base/macros.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \

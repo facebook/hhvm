@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/blob_helper.h"
 #include "hphp/runtime/vm/func_inline.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {

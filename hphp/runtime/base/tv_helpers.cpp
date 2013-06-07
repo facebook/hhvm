@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

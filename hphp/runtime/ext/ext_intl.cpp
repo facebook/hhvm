@@ -29,7 +29,7 @@
 #include "unicode/utypes.h"
 #include "unicode/unorm.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #ifdef UIDNA_INFO_INITIALIZER
 #define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */

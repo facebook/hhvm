@@ -17,7 +17,7 @@
 #include "hphp/test/ext/test_ext_variable.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/targetcache.h"
 #include "hphp/runtime/vm/unit.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

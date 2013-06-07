@@ -46,9 +46,14 @@ foreach ($files as $file) {
   $name = $matches[2];
   $ucname = $prefix ? camelCase($name) : ucfirst($name);
 
+  if ($name === 'constants') {
+    // Ignore 'cosntants.idl.json'
+    continue;
+  }
+
   switch ($format) {
   case 'test_ext':
-    $path = $prefix ? "hphp/$prefix" : "hphp/test/";
+    $path = $prefix ? "hphp/$prefix" : "hphp/test/ext/";
     fwrite($f, "#include \"${path}test_ext_$name.h\"\n");
     break;
   case 'test_suites':

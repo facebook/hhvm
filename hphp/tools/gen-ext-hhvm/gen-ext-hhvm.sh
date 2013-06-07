@@ -7,5 +7,5 @@
 readelf -s -W $2 | grep 'FUNC.*GLOBAL' | \
     sed -e 's/^.*DEFAULT[0-9 ]*//' | \
     $HPHP_HOME/hphp/tools/gen-ext-hhvm/gen-ext-hhvm \
-    $1 $4 $3 $HPHP_HOME/hphp/idl/*.idl.json
+    $1 $4 $3 $HPHP_HOME/hphp/system/idl/*.idl.json
 

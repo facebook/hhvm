@@ -20,7 +20,7 @@
 
 
 #include "hphp/runtime/base/base_includes.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

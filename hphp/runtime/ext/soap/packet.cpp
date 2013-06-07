@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_soap.h"
 #include "hphp/runtime/ext/soap/packet.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

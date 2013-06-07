@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

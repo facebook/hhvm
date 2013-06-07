@@ -92,7 +92,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 TRACE_SET_MOD(hhas);
 

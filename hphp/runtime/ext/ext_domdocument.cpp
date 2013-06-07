@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"

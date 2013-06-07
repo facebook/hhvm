@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/server/ip_block_map.h"
 #include "hphp/test/ext/test_mysql_info.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

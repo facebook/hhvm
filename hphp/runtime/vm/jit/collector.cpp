@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/file_repository.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/parser/parser.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

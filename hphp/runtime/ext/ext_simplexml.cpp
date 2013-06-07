@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/util/request_local.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #ifndef LIBXML2_NEW_BUFFER
 # define xmlOutputBufferGetSize(buf)    ((buf)->buffer->use)

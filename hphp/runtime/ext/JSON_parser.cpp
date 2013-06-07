@@ -34,7 +34,7 @@ SOFTWARE.
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/zend/utf8_decode.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/util/request_local.h"
 #include "hphp/runtime/base/ini_setting.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #define MMC_SERIALIZED 1
 #define MMC_COMPRESSED 2

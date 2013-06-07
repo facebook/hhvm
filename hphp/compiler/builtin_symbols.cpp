@@ -321,7 +321,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   if (g_context.isNull()) init_thread_locals();
   ClassInfo::Load();
 
-  // load extension functions first, so system/classes may call them
+  // load extension functions first, so system/php may call them
   ImportExtFunctions(ar, s_functions, ClassInfo::GetSystem());
   AnalysisResultPtr ar2 = AnalysisResultPtr(new AnalysisResult());
   s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
@@ -360,7 +360,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   s_constants->setDynamic(ar, "SID", true);
   s_constants->setDynamic(ar, "PHP_SAPI", true);
 
-  // parse all PHP files under system/classes
+  // parse all PHP files under system/php
   s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
   ar->loadBuiltins();
   string slib = get_systemlib();

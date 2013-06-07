@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_ext_json.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

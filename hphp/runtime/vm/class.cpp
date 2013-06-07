@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/name_value_table.h"
 #include "hphp/runtime/vm/name_value_table_wrapper.h"
 #include "hphp/runtime/vm/request_arena.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/parser/parser.h"
 

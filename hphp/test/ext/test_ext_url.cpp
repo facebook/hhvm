@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_ext_url.h"
 #include "hphp/runtime/ext/ext_url.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

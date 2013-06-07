@@ -30,7 +30,7 @@
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_stream.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

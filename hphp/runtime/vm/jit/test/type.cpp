@@ -19,7 +19,7 @@
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
 // for specialized object tests to get some real VM::Class
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace std { namespace tr1 {
   template<> struct hash<HPHP::JIT::Type> {

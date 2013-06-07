@@ -91,7 +91,7 @@
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #include "folly/ScopeGuard.h"
 

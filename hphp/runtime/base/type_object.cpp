@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

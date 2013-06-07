@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include <zlib.h>
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

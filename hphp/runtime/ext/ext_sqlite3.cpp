@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/util/exceptions.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);

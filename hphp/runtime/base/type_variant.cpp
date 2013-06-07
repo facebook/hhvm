@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/instance.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"

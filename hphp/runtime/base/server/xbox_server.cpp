@@ -24,7 +24,7 @@
 #include "hphp/util/job_queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

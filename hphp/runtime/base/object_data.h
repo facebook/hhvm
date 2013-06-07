@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/runtime_error.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/vm/core_types.h"
 #include "hphp/runtime/vm/runtime.h"

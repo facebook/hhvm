@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_icu_ucsdet.h"
 #include "unicode/unistr.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

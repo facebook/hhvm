@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread_init_fini.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/repo_schema.h"
 
 #include "hphp/hhvm/process_init.h"

@@ -60,7 +60,7 @@
 #include "hphp/runtime/base/server/source_root_info.h"
 #include "hphp/runtime/base/util/extended_logger.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name_value_table_wrapper.h"

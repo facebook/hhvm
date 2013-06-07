@@ -4954,10 +4954,6 @@
             "value": ""
         },
         {
-            "name": "PHP_SAPI",
-            "value": "cli"
-        },
-        {
             "name": "PHP_SHLIB_SUFFIX",
             "value": "so"
         },

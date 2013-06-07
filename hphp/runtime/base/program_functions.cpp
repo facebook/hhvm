@@ -1306,6 +1306,9 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
+
+  SystemGlobals *g = (SystemGlobals *)get_global_variables();
+  g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
 }
 
 bool hphp_is_warmup_enabled() {

@@ -264,7 +264,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
   for (auto it = src.begin(); it != src.end(); ++it) {
     // We make an assumption that if the constant is a callback type
     // (e.g. STDIN, STDOUT, STDERR) then it will return an Object.
-    // And that if it's deferred (SID) it'll be a String.
+    // And that if it's deferred (SID, PHP_SAPI) it'll be a String.
     ClassInfo::ConstantInfo *cinfo = *it;
     dest->add(cinfo->name.data(),
               cinfo->isDeferred() ?
@@ -394,6 +394,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     }
   }
   s_constants->setDynamic(ar, "SID", true);
+  s_constants->setDynamic(ar, "PHP_SAPI", true);
 
   return true;
 }

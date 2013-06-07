@@ -1257,7 +1257,6 @@ extern const int64_t k_PHP_OUTPUT_HANDLER_CONT;
 extern const int64_t k_PHP_OUTPUT_HANDLER_END;
 extern const int64_t k_PHP_OUTPUT_HANDLER_START;
 extern const StaticString k_PHP_PREFIX;
-extern const StaticString k_PHP_SAPI;
 extern const StaticString k_PHP_SHLIB_SUFFIX;
 extern const StaticString k_PHP_SYSCONFDIR;
 extern const int64_t k_PHP_URL_FRAGMENT;

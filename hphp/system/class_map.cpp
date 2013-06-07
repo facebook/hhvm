@@ -1255,7 +1255,6 @@ const int64_t k_PHP_OUTPUT_HANDLER_CONT = 2;
 const int64_t k_PHP_OUTPUT_HANDLER_END = 4;
 const int64_t k_PHP_OUTPUT_HANDLER_START = 1;
 extern const StaticString k_PHP_PREFIX("",0);
-extern const StaticString k_PHP_SAPI("cli",3);
 extern const StaticString k_PHP_SHLIB_SUFFIX("so",2);
 extern const StaticString k_PHP_SYSCONFDIR("",0);
 const int64_t k_PHP_URL_FRAGMENT = 7;
@@ -18208,7 +18207,6 @@ const char *g_class_map[] = {
   "PHP_OUTPUT_HANDLER_END", (const char*)4, "i:4;",
   "PHP_OUTPUT_HANDLER_START", (const char*)4, "i:1;",
   "PHP_PREFIX", (const char*)7, "s:0:\"\";",
-  "PHP_SAPI", (const char*)10, "s:3:\"cli\";",
   "PHP_SHLIB_SUFFIX", (const char*)9, "s:2:\"so\";",
   "PHP_SYSCONFDIR", (const char*)7, "s:0:\"\";",
   "PHP_URL_FRAGMENT", (const char*)4, "i:7;",
@@ -19049,6 +19047,7 @@ const char *g_class_map[] = {
   "CURLOPT_TIMEOUT_MS", (const char *)&k_CURLOPT_TIMEOUT_MS, (const char *)0xc /* KindOfInt64 */, 
   "CURLOPT_CONNECTTIMEOUT_MS", (const char *)&k_CURLOPT_CONNECTTIMEOUT_MS, (const char *)0xc /* KindOfInt64 */, 
   "SID", (const char *)((offsetof(SystemGlobals, k_SID) - offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), (const char *)1,
+  "PHP_SAPI", (const char *)((offsetof(SystemGlobals, k_PHP_SAPI) - offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), (const char *)1,
   NULL, // End of constants
   NULL,
   (const char *)0x10006000, "PDO", "", "", (const char *)0, (const char *)0,

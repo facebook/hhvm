@@ -357,6 +357,14 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         assert(!s_classes[iter->first]);
         s_classes[iter->first] = iter->second[0];
       }
+
+      const StringToFunctionScopePtrMap &functions =
+        iterFile->second->getFunctions();
+      for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin();
+           iter != functions.end(); ++iter) {
+        iter->second->setSystem();
+        s_functions[iter->first] = iter->second;
+      }
     }
   } else {
     NoSuperGlobals = true;

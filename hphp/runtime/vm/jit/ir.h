@@ -323,7 +323,6 @@ O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
 O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
-O(LdContLocalsPtr,         D(PtrToGen), S(Obj),                            C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
 O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
@@ -445,8 +444,6 @@ O(FillContLocals,                   ND, S(FramePtr)                           \
                                           C(Func)                             \
                                           C(Func)                             \
                                           S(Obj),                    E|N|Mem) \
-O(FillContThis,                     ND, S(Obj)                                \
-                                          S(PtrToGen) C(Int),         E|Mem) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(UnlinkContVarEnv,                 ND, S(FramePtr),                 E|N|Mem) \

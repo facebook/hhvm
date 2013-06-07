@@ -1484,24 +1484,12 @@ D:Obj = InlineCreateCont<origFunc,genFunc> S0:{Obj,Null}
   weaken the use of the frame in CreateCont when inlining an 'outer'
   generator function.
 
-D:PtrToGen = LdContLocalsPtr S0:Obj
-
-  Loads a pointer to the embedded local variables of S0 (a Continuation
-  object) into D.
-
 FillContLocals S0:FramePtr S1:ConstFunc S2:ConstFunc S3:Obj
 
   Fill the locals for the continuation object S3.  Copies the values
   for the locals from the frame S0 to their heap location in the
   continuation object.  S1 is the "original" func, and S2 is the
   generator function.
-
-FillContThis S0:Obj S1:PtrToGen S2:ConstInt
-
-  Store the continuation object S0 to the special continuation local
-  used as its $this pointer.  S1 should be the result of
-  LdContLocalsPtr, and S2 is the offset to this pointer (in bytes) to
-  the address for $this.
 
 ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 

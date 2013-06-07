@@ -82,14 +82,16 @@ public:
   Variant t___clone();
 
   static c_Continuation* alloc(Class* cls, int nLocals, int nIters) {
+    size_t arOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters +
+                      sizeof(TypedValue) * nLocals;
+    arOffset += sizeof(TypedValue) - 1;
+    arOffset &= ~(sizeof(TypedValue) - 1);
     c_Continuation* cont =
-      (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
+      (c_Continuation*)ALLOCOBJSZ(arOffset + sizeof(ActRec));
     new ((void *)cont) c_Continuation(cls);
-    cont->m_localsOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters;
-    cont->m_arPtr = (ActRec*)(cont->locals() + nLocals);
-
+    cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
-           sizeof(TypedValue) * nLocals + sizeof(Iter) * nIters);
+           arOffset - sizeof(c_Continuation));
     return cont;
   }
 
@@ -120,28 +122,20 @@ public:
   }
 
 public:
-  Func *m_origFunc;
-  Array m_args;
+  /* 32-bit o_id from ObjectData */
+  int32_t m_label;
   int64_t m_index;
   Variant m_value;
   Variant m_received;
-  int32_t m_label;
-  int m_localsOffset;
+  Func *m_origFunc;
   ActRec* m_arPtr;
-
+  Array m_args;
   p_ContinuationWaitHandle m_waitHandle;
 
   String& getCalledClass() { not_reached(); }
 
-  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
-    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
-            sizeof(Iter) * nIters + sizeof(ActRec));
-  }
   ActRec* actRec() {
     return m_arPtr;
-  }
-  TypedValue* locals() {
-    return (TypedValue*)(uintptr_t(this) + m_localsOffset);
   }
 };
 

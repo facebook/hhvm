@@ -3829,13 +3829,6 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
                            dstReg);
 }
 
-void CodeGenerator::cgLdContLocalsPtr(IRInstruction* inst) {
-  auto rCont = m_regs[inst->src(0)].reg();
-  auto rLocals = m_regs[inst->dst()].reg();
-  m_as.  loadl  (rCont[CONTOFF(m_localsOffset)], r32(rLocals));
-  m_as.  addq   (rCont, rLocals);
-}
-
 static int getNativeTypeSize(Type type) {
   if (type.subtypeOf(Type::Int | Type::Func)) return sz::qword;
   if (type.subtypeOf(Type::Bool))             return sz::byte;
@@ -5076,19 +5069,6 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
                  Stack::topOfStackOffset()], rVmSp);
 
   m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME, 0ull);
-}
-
-void CodeGenerator::cgFillContThis(IRInstruction* inst) {
-  auto thisObj = m_regs[inst->src(0)].reg();
-  auto baseReg = m_regs[inst->src(1)].reg();
-  int64_t offset = inst->src(2)->getValInt();
-
-  m_as.testq(thisObj, thisObj);
-  ifThen(m_as, CC_NZ, [&] {
-    m_as.addl(1, thisObj[FAST_REFCOUNT_OFFSET]);
-    m_as.storeq(thisObj, baseReg[offset + TVOFF(m_data)]);
-    emitStoreTVType(m_as, KindOfObject, baseReg[offset + TVOFF(m_type)]);
-  });
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

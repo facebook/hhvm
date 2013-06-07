@@ -1006,7 +1006,6 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   auto const origFunc = curFunc();
   auto const genFunc = origFunc->getGeneratorBody(genName);
   auto const origLocals = origFunc->numLocals();
-  auto const genLocals = genFunc->numLocals();
 
   auto const cont = gen(
     CreateCont,
@@ -1031,23 +1030,19 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
       ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
       (origFunc->lookupVarId(thisStr) == kInvalidId);
 
-    SSATmp* locals = gen(LdContLocalsPtr, cont);
+    SSATmp* contAR = gen(
+      LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
     for (int i = 0; i < origLocals; ++i) {
       // We must generate an AssertLoc because we don't have tracelet
       // guards on the object type in these outer generator functions.
       gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
       auto const loc = gen(IncRef, ldLoc(i));
-      gen(
-        StMem,
-        locals,
-        cns(cellsToBytes(genLocals - params[i] - 1)),
-        loc
-      );
+      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), loc);
     }
     if (fillThis) {
       assert(thisId != kInvalidId);
-      gen(FillContThis, gen(LdThis, m_tb->fp()), locals,
-                cns(cellsToBytes(genLocals - thisId - 1)));
+      auto const thisObj = gen(IncRef, gen(LdThis, m_tb->fp()));
+      gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
     }
   } else {
     gen(FillContLocals, m_tb->fp(), cns(origFunc),

@@ -7080,7 +7080,6 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // space at the end of the object using memcpy. Any variables in a
   // VarEnv are saved and restored from m_vars as usual.
   static const StringData* thisStr = s_this.get();
-  int nLocals = genFunc->numLocals();
   bool skipThis;
   if (fp->hasVarEnv()) {
     Stats::inc(Stats::Cont_CreateVerySlow);
@@ -7105,7 +7104,7 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   if (!skipThis && fp->hasThis()) {
     Id id = genFunc->lookupVarId(thisStr);
     if (id != kInvalidId) {
-      tvAsVariant(&cont->locals()[nLocals - id - 1]) = fp->getThis();
+      tvAsVariant(frame_local(cont->actRec(), id)) = fp->getThis();
     }
   }
   return cont;

@@ -210,58 +210,6 @@ ssize_t HphpArray::vsize() const {
   return m_size;
 }
 
-void HphpArray::dumpDebugInfo() const {
-  size_t maxElms = computeMaxElms(m_tableMask);
-  size_t tableSize = computeTableSize(m_tableMask);
-
-  fprintf(stderr,
-          "--- dumpDebugInfo(this=0x%08zx) ----------------------------\n",
-         uintptr_t(this));
-  fprintf(stderr, "m_data = %p\tm_hash = %p\n"
-          "m_tableMask = %u\tm_size = %d\tm_hLoad = %d\n"
-          "m_nextKI = %" PRId64 "\t\tm_lastE = %d\tm_pos = %zd\n",
-          m_data, m_hash, m_tableMask, m_size, m_hLoad,
-          m_nextKI, m_lastE, size_t(m_pos));
-  fprintf(stderr, "Elements:\n");
-  ssize_t lastE = m_lastE;
-  Elm* elms = m_data;
-  for (ssize_t /*ElmInd*/ i = 0; i <= lastE; ++i) {
-    if (elms[i].data.m_type < KindOfTombstone) {
-      Variant v = tvAsVariant(&elms[i].data);
-      VariableSerializer vs(VariableSerializer::DebugDump);
-      String s = vs.serialize(v, true);
-      if (elms[i].hasStrKey()) {
-        String k = Util::escapeStringForCPP(elms[i].key->data(),
-                                            elms[i].key->size());
-        fprintf(stderr, "  [%3d] hash=0x%016x key=\"%s\" data=(%.*s)\n",
-                int(i), elms[i].hash(), k.data(), s.size()-1, s.data());
-      } else {
-        fprintf(stderr, "  [%3d] ind=%" PRId64 " data.m_type=(%.*s)\n", int(i),
-               elms[i].ikey, s.size()-1, s.data());
-      }
-    } else {
-      fprintf(stderr, "  [%3d] <tombstone>\n", int(i));
-    }
-  }
-  if (size_t(m_lastE+1) < maxElms) {
-    fprintf(stderr, "  [%3d..%-3zd] <uninitialized>\n", m_lastE+1, maxElms-1);
-  }
-  fprintf(stderr, "Hash table:");
-  for (size_t i = 0; i < tableSize; ++i) {
-    if ((i % 8) == 0) {
-      fprintf(stderr, "\n  [%3zd..%-3zd]", i, i+7);
-    }
-    switch (m_hash[i]) {
-    default: fprintf(stderr, "%12d", m_hash[i]); break;
-    case ElmIndTombstone: fprintf(stderr, "%12s", "<tombstone>"); break;
-    case ElmIndEmpty: fprintf(stderr, "%12s", "<empty>"); break;
-    }
-  }
-  fprintf(stderr, "\n");
-  fprintf(stderr,
-          "---------------------------------------------------------------\n");
-}
-
 //=============================================================================
 // Iteration.
 

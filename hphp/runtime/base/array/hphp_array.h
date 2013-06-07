@@ -231,7 +231,6 @@ public:
   void uksort(CVarRef cmp_function);
   void usort(CVarRef cmp_function);
   void uasort(CVarRef cmp_function);
-  void dumpDebugInfo() const;
 
   // Used in Elm's data.m_type field to denote an invalid Elm.
   static const HPHP::DataType KindOfTombstone = MaxNumDataTypes;

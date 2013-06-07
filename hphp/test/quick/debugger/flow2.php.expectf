@@ -1,69 +1,66 @@
-Welcome to HipHop Debugger!
-Type "help" or "?" for a complete list of commands.
-
 Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Shphpd> run
+%Srun
 flow2.php done
 Program %s/flow2.php exited normally.
-hphpd> break test()
+break test()
 Breakpoint 1 set upon entering test()
-hphpd> @test(1)
+@test(1)
 Breakpoint 1 reached at test() on line 53 of %s/flow2.php
   52 function test($a) {
   53   foo($a);
   54 }
 
-hphpd> step
+step
 Break at foo() on line 36 of %s/flow2.php
   35 function foo($a) {
   36   $c = new C1(5);
   37 
 
-hphpd> next
+next
 Constructor
 Break at foo() on line 38 of %s/flow2.php
   37 
   38   $i = 0;
   39   foreach (genFoo($a) as $x) {
 
-hphpd> next
+next
 Break at foo() on line 39 of %s/flow2.php
   38   $i = 0;
   39   foreach (genFoo($a) as $x) {
   40     $i++;
 
-hphpd> next
+next
 Break at foo() on line 40 of %s/flow2.php
   39   foreach (genFoo($a) as $x) {
   40     $i++;
   41     var_dump($x);
 
-hphpd> next
+next
 Break at foo() on line 41 of %s/flow2.php
   40     $i++;
   41     var_dump($x);
   42   }
 
-hphpd> next
+next
 Break at foo() on line 40 of %s/flow2.php
   39   foreach (genFoo($a) as $x) {
   40     $i++;
   41     var_dump($x);
 
-hphpd> next
+next
 Break at foo() on line 41 of %s/flow2.php
   40     $i++;
   41     var_dump($x);
   42   }
 
-hphpd> next
+next
 Finished in genFoo
 Break at foo() on line 44 of %s/flow2.php
   43 
   44   $c = new C1(6); // Runs a destructor
   45   $d = $c;
 
-hphpd> next
+next
 Constructor
 Destructor
 Break at foo() on line 45 of %s/flow2.php
@@ -71,26 +68,26 @@ Break at foo() on line 45 of %s/flow2.php
   45   $d = $c;
   46   $e = new C1(7);
 
-hphpd> next
+next
 Break at foo() on line 46 of %s/flow2.php
   45   $d = $c;
   46   $e = new C1(7);
   47   $c = null;
 
-hphpd> next
+next
 Constructor
 Break at foo() on line 47 of %s/flow2.php
   46   $e = new C1(7);
   47   $c = null;
   48 
 
-hphpd> next
+next
 Break at foo() on line 49 of %s/flow2.php
   48 
   49   var_dump($d);
   50 } // Ret runs two destructors
 
-hphpd> next
+next
 Destructor
 Destructor
 Break at test() on line 53 of %s/flow2.php
@@ -98,9 +95,9 @@ Break at test() on line 53 of %s/flow2.php
   53   foo($a);
   54 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 int(8)
 int(1)
 object(C1)#2 (1) {
@@ -108,38 +105,38 @@ object(C1)#2 (1) {
   int(0)
 }
 
-hphpd> break flow2.php:10
+break flow2.php:10
 Breakpoint 1 set on line 10 of flow2.php
-hphpd> break flow2.php:12
+break flow2.php:12
 Breakpoint 2 set on line 12 of flow2.php
-hphpd> @test(2)
+@test(2)
 Constructor
-Breakpoint 1 reached at %s() on line 10 of %s/flow2.php
+Breakpoint 1 reached at %d_%d() on line 10 of %s/flow2.php
    9 function genFoo($a) {
   10   $a = bar($a);
   11   $z = yield $a+5;
 
-hphpd> out
+out
 Break at foo() on line 40 of %s/flow2.php
   39   foreach (genFoo($a) as $x) {
   40     $i++;
   41     var_dump($x);
 
-hphpd> continue
-Breakpoint 2 reached at %s() on line 12 of %s/flow2.php
+continue
+Breakpoint 2 reached at %d_%d() on line 12 of %s/flow2.php
   11   $z = yield $a+5;
   12   yield $z+1;
   13   error_log('Finished in genFoo');
 
-hphpd> out
+out
 Break at foo() on line 40 of %s/flow2.php
   39   foreach (genFoo($a) as $x) {
   40     $i++;
   41     var_dump($x);
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 Finished in genFoo
 Constructor
 Destructor
@@ -153,9 +150,9 @@ object(C1)#3 (1) {
   int(0)
 }
 
-hphpd> break flow2.php:26
+break flow2.php:26
 Breakpoint 2 set on line 26 of flow2.php
-hphpd> @test(3)
+@test(3)
 Constructor
 Finished in genFoo
 Constructor
@@ -164,37 +161,37 @@ Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
   26     error_log('Destructor');
   27   }
 
-hphpd> out
+out
 Destructor
 Break at foo() on line 44 of %s/flow2.php
   43 
   44   $c = new C1(6); // Runs a destructor
   45   $d = $c;
 
-hphpd> continue
+continue
 Constructor
 Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
   25   public function __destruct() {
   26     error_log('Destructor');
   27   }
 
-hphpd> out
+out
 Destructor
 Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
   25   public function __destruct() {
   26     error_log('Destructor');
   27   }
 
-hphpd> out
+out
 Destructor
 Break at test() on line 53 of %s/flow2.php
   52 function test($a) {
   53   foo($a);
   54 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 int(10)
 int(1)
 object(C1)#4 (1) {
@@ -202,4 +199,4 @@ object(C1)#4 (1) {
   int(0)
 }
 
-hphpd> quit
+quit

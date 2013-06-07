@@ -494,6 +494,7 @@ public:
   // Debugger options
   static bool EnableDebugger;
   static bool EnableDebuggerColor;
+  static bool EnableDebuggerPrompt;
   static bool EnableDebuggerServer;
   static bool EnableDebuggerUsageLog;
   static int DebuggerServerPort;

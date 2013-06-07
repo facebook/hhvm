@@ -1,32 +1,29 @@
-Welcome to HipHop Debugger!
-Type "help" or "?" for a complete list of commands.
-
-Program %sprintThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Shphpd> break printThis.php:5
+Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
+%Sbreak printThis.php:5
 Breakpoint 1 set on line 5 of printThis.php
-hphpd> run
-Breakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php
+run
+Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
    4   function method() {
    5     $other = $this;
    6   }
 
-hphpd> print $this
+print $this
 Foo Object
 (
     [prop] => "Hello\n"
 )
 
-hphpd> continue
-Breakpoint 1 reached at Foo::method() on line 5 of %sprintThis.php
+continue
+Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
    4   function method() {
    5     $other = $this;
    6   }
 
-hphpd> print $this
+print $this
 Foo Object
 (
     [prop] => "Hello\n"
     [prop2] => "\tThere"
 )
 
-hphpd> quit
+quit

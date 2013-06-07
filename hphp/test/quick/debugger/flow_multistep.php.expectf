@@ -1,10 +1,7 @@
-Welcome to HipHop Debugger!
-Type "help" or "?" for a complete list of commands.
-
 Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-hphpd> break flow_multistep.php:58
+%Sbreak flow_multistep.php:58
 Breakpoint 1 set on line 58 of flow_multistep.php
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 C2 oh hai
@@ -21,13 +18,13 @@ Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   58   var_dump(a(42));
   59 }
 
-hphpd> step 8
+step 8
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
   58   var_dump(a(42));
   59 }
 
-hphpd> continue
+continue
 int(46)
 C1 destructor!
 C2 destructor
@@ -35,7 +32,7 @@ C1 oh hai
 C1 destructor!
 C2 destructor done
 Program %s/flow_multistep.php exited normally.
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 C2 oh hai
@@ -52,19 +49,19 @@ Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   58   var_dump(a(42));
   59 }
 
-hphpd> step 4
+step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
   17   return $a + 1;
   18 }
 
-hphpd> step 4
+step 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
   58   var_dump(a(42));
   59 }
 
-hphpd> continue
+continue
 int(46)
 C1 destructor!
 C2 destructor
@@ -72,7 +69,7 @@ C1 oh hai
 C1 destructor!
 C2 destructor done
 Program %s/flow_multistep.php exited normally.
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 C2 oh hai
@@ -89,19 +86,19 @@ Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   58   var_dump(a(42));
   59 }
 
-hphpd> step 4
+step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
   17   return $a + 1;
   18 }
 
-hphpd> next 4
+next 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
   58   var_dump(a(42));
   59 }
 
-hphpd> continue
+continue
 int(46)
 C1 destructor!
 C2 destructor
@@ -109,7 +106,7 @@ C1 oh hai
 C1 destructor!
 C2 destructor done
 Program %s/flow_multistep.php exited normally.
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 C2 oh hai
@@ -126,19 +123,19 @@ Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   58   var_dump(a(42));
   59 }
 
-hphpd> step 4
+step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
   17   return $a + 1;
   18 }
 
-hphpd> out 4
+out 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
   58   var_dump(a(42));
   59 }
 
-hphpd> continue
+continue
 int(46)
 C1 destructor!
 C2 destructor
@@ -146,11 +143,11 @@ C1 oh hai
 C1 destructor!
 C2 destructor done
 Program %s/flow_multistep.php exited normally.
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> break flow_multistep.php:54
+break flow_multistep.php:54
 Breakpoint 1 set on line 54 of flow_multistep.php
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
@@ -158,9 +155,9 @@ Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
   54   $c2 = new C2(6);
   55   $d = $c1;
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> step 10
+step 10
 C2 oh hai
 C2 destructor
 C1 oh hai
@@ -169,7 +166,7 @@ Break at C1::__destruct() on line 30 of %s/flow_multistep.php
   30     echo "C1 destructor!\n";
   31   }
 
-hphpd> out 2
+out 2
 C1 destructor!
 C2 destructor done
 Break at main() on line 54 of %s/flow_multistep.php
@@ -177,7 +174,7 @@ Break at main() on line 54 of %s/flow_multistep.php
   54   $c2 = new C2(6);
   55   $d = $c1;
 
-hphpd> out
+out
 object(C1)#9 (1) {
   ["x":"C1":private]=>
   int(0)
@@ -193,11 +190,11 @@ Break on line 61 of %s/flow_multistep.php
   61 main();
   62 
 
-hphpd> continue
+continue
 Program %s/flow_multistep.php exited normally.
-hphpd> break flow_multistep.php:54
+break flow_multistep.php:54
 Breakpoint 1 set on line 54 of flow_multistep.php
-hphpd> run
+run
 C1 oh hai
 C2 oh hai
 Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
@@ -205,9 +202,9 @@ Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
   54   $c2 = new C2(6);
   55   $d = $c1;
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> step 10
+step 10
 C2 oh hai
 C2 destructor
 C1 oh hai
@@ -216,7 +213,7 @@ Break at C1::__destruct() on line 30 of %s/flow_multistep.php
   30     echo "C1 destructor!\n";
   31   }
 
-hphpd> next 3
+next 3
 C1 destructor!
 C2 destructor done
 Break at main() on line 54 of %s/flow_multistep.php
@@ -224,13 +221,13 @@ Break at main() on line 54 of %s/flow_multistep.php
   54   $c2 = new C2(6);
   55   $d = $c1;
 
-hphpd> next
+next
 Break at main() on line 55 of %s/flow_multistep.php
   54   $c2 = new C2(6);
   55   $d = $c1;
   56   $c1 = null;
 
-hphpd> continue
+continue
 object(C1)#11 (1) {
   ["x":"C1":private]=>
   int(0)
@@ -242,4 +239,4 @@ C1 oh hai
 C1 destructor!
 C2 destructor done
 Program %s/flow_multistep.php exited normally.
-hphpd> quit
+quit

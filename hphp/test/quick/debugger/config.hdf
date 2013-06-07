@@ -6,6 +6,7 @@ Eval {
   Debugger {
     EnableDebugger = true
     EnableDebuggerColor = false
+    EnableDebuggerPrompt = false
   }
 }
 

@@ -578,7 +578,7 @@ bool DebuggerClient::reconnect() {
 
 std::string DebuggerClient::getPrompt() {
   TRACE(2, "DebuggerClient::getPrompt\n");
-  if (NoPrompt) {
+  if (NoPrompt || !RuntimeOption::EnableDebuggerPrompt) {
     return "";
   }
   string *name = &m_machine->m_name;
@@ -622,19 +622,19 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 
   if (!options.cmds.empty()) {
     RuntimeOption::EnableDebuggerColor = false;
+    RuntimeOption::EnableDebuggerPrompt = false;
     s_use_utf8 = false;
-    NoPrompt = true;
   }
 
   if (options.apiMode) {
     RuntimeOption::EnableDebuggerColor = false;
-    NoPrompt = true;
+    RuntimeOption::EnableDebuggerPrompt = false;
     m_outputBuf.clear();
   }
 
   if (UseColor && RuntimeOption::EnableDebuggerColor) Debugger::SetTextColors();
 
-  if (!NoPrompt) {
+  if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
     info("Welcome to HipHop Debugger!");
     info("Type \"help\" or \"?\" for a complete list of commands.\n");
    }
@@ -1087,7 +1087,7 @@ bool DebuggerClient::console() {
           return false;
         }
       }
-    } else if (!NoPrompt) {
+    } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
     }
     if (*line && !m_macroPlaying) {

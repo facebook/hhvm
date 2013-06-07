@@ -1,29 +1,26 @@
-Welcome to HipHop Debugger!
-Type "help" or "?" for a complete list of commands.
-
 Program %s/flow.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Shphpd> break cls::pub()
+%Sbreak cls::pub()
 Breakpoint 1 set upon entering cls::pub()
-hphpd> run
+run
 flow_t.php loaded
 Program %s/flow.php exited normally.
-hphpd> @test(1)
+@test(1)
 test 1
 Breakpoint 1 reached at cls::pub() on line 12 of %s/flow.php
   11   public function pub($x) {
   12     error_log("in pub:".$x);
   13     $this->pri($x);
 
-hphpd> next
+next
 in pub:1
 Break at cls::pub() on line 13 of %s/flow.php
   12     error_log("in pub:".$x);
   13     $this->pri($x);
   14     error_log("out pub:".$x);
 
-hphpd> variable
+variable
 $x = 1
-hphpd> next
+next
 in pri:1
 foo:1
 out pri:1
@@ -32,27 +29,27 @@ Break at cls::pub() on line 14 of %s/flow.php
   14     error_log("out pub:".$x);
   15   }
 
-hphpd> next
+next
 out pub:1
 Break at test() on line 62 of %s/flow.php
   61   $obj = new cls();
   62   $obj->pub($x);
   63   error_log("test done ".$x);
 
-hphpd> next
+next
 Break at test() on line 63 of %s/flow.php
   62   $obj->pub($x);
   63   error_log("test done ".$x);
   64 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 test done 1
 
-hphpd> break flow.php:18
+break flow.php:18
 Breakpoint 1 set on line 18 of flow.php
-hphpd> @test(2)
+@test(2)
 test 2
 in pub:2
 in pri:2
@@ -61,58 +58,58 @@ Breakpoint 1 reached at cls::pri() on line 18 of %s/flow.php
   18     $y = $x + 3; $z = $x * 5;
   19     foo($y, $z);
 
-hphpd> step
+step
 Break at cls::pri() on line 19 of %s/flow.php
   18     $y = $x + 3; $z = $x * 5;
   19     foo($y, $z);
   20     if ($x == 3) {
 
-hphpd> variable
+variable
 $x = 2
 $y = 5
 $z = 10
-hphpd> step
+step
 Break at foo() on line 6 of %s/flow.php
    5 function foo($a, $b) {
    6   $c = $b - $a;
    7   error_log("foo:".$c);
 
-hphpd> variable
+variable
 $a = 5
 $b = 10
-hphpd> step
+step
 Break at foo() on line 7 of %s/flow.php
    6   $c = $b - $a;
    7   error_log("foo:".$c);
    8 }
 
-hphpd> variable
+variable
 $a = 5
 $b = 10
 $c = 5
-hphpd> next
+next
 foo:5
 Break at cls::pri() on line 19 of %s/flow.php
   18     $y = $x + 3; $z = $x * 5;
   19     foo($y, $z);
   20     if ($x == 3) {
 
-hphpd> step
+step
 Break at cls::pri() on line 20 of %s/flow.php
   19     foo($y, $z);
   20     if ($x == 3) {
   21       hphpd_break();
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 out pri:2
 out pub:2
 test done 2
 
-hphpd> break flow.php:6
+break flow.php:6
 Breakpoint 1 set on line 6 of flow.php
-hphpd> @test(3)
+@test(3)
 test 3
 in pub:3
 in pri:3
@@ -121,23 +118,23 @@ Breakpoint 1 reached at foo() on line 6 of %s/flow.php
    6   $c = $b - $a;
    7   error_log("foo:".$c);
 
-hphpd> continue
+continue
 foo:9
 Break at cls::pri() on line 21 of %s/flow.php
   20     if ($x == 3) {
   21       hphpd_break();
   22     }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 out pri:3
 out pub:3
 test done 3
 
-hphpd> break flow.php:7
+break flow.php:7
 Breakpoint 1 set on line 7 of flow.php
-hphpd> @test(4)
+@test(4)
 test 4
 in pub:4
 in pri:4
@@ -146,47 +143,47 @@ Breakpoint 1 reached at foo() on line 7 of %s/flow.php
    7   error_log("foo:".$c);
    8 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> out
+out
 foo:13
 Break at cls::pri() on line 19 of %s/flow.php
   18     $y = $x + 3; $z = $x * 5;
   19     foo($y, $z);
   20     if ($x == 3) {
 
-hphpd> step
+step
 Break at cls::pri() on line 20 of %s/flow.php
   19     foo($y, $z);
   20     if ($x == 3) {
   21       hphpd_break();
 
-hphpd> out
+out
 out pri:4
 Break at cls::pub() on line 13 of %s/flow.php
   12     error_log("in pub:".$x);
   13     $this->pri($x);
   14     error_log("out pub:".$x);
 
-hphpd> next
+next
 Break at cls::pub() on line 14 of %s/flow.php
   13     $this->pri($x);
   14     error_log("out pub:".$x);
   15   }
 
-hphpd> out
+out
 out pub:4
 Break at test() on line 62 of %s/flow.php
   61   $obj = new cls();
   62   $obj->pub($x);
   63   error_log("test done ".$x);
 
-hphpd> continue
+continue
 test done 4
 
-hphpd> break flow.php:46
+break flow.php:46
 Breakpoint 1 set on line 46 of flow.php
-hphpd> test(5)
+test(5)
 test 5
 in pub:5
 in pri:5
@@ -196,9 +193,9 @@ Breakpoint 1 reached at thrower() on line 46 of %s/flow.php
   46   throw new Exception();
   47 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> next
+next
 Break at baz() on line 50 of %s/flow.php
   49 function baz($a) {
   50   try {
@@ -208,26 +205,26 @@ Break at baz() on line 50 of %s/flow.php
   54   }
   55 
 
-hphpd> next
+next
 Break at baz() on line 53 of %s/flow.php
   52   } catch (Exception $e) {
   53     $a = 0;
   54   }
 
-hphpd> out
+out
 Break at cls::pri() on line 27 of %s/flow.php
   26     if ($x == 5 || $x == 6) {
   27       baz($x);
   28     }
 
-hphpd> continue
+continue
 out pri:5
 out pub:5
 test done 5
 
-hphpd> break flow.php:46
+break flow.php:46
 Breakpoint 1 set on line 46 of flow.php
-hphpd> test(6)
+test(6)
 test 6
 in pub:6
 in pri:6
@@ -237,9 +234,9 @@ Breakpoint 1 reached at thrower() on line 46 of %s/flow.php
   46   throw new Exception();
   47 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> out
+out
 Break at baz() on line 50 of %s/flow.php
   49 function baz($a) {
   50   try {
@@ -249,26 +246,26 @@ Break at baz() on line 50 of %s/flow.php
   54   }
   55 
 
-hphpd> next
+next
 Break at baz() on line 53 of %s/flow.php
   52   } catch (Exception $e) {
   53     $a = 0;
   54   }
 
-hphpd> out
+out
 Break at cls::pri() on line 27 of %s/flow.php
   26     if ($x == 5 || $x == 6) {
   27       baz($x);
   28     }
 
-hphpd> continue
+continue
 out pri:6
 out pub:6
 test done 6
 
-hphpd> break flow.php:7
+break flow.php:7
 Breakpoint 1 set on line 7 of flow.php
-hphpd> @test(7)
+@test(7)
 test 7
 in pub:7
 in pri:7
@@ -277,11 +274,11 @@ Breakpoint 1 reached at foo() on line 7 of %s/flow.php
    7   error_log("foo:".$c);
    8 }
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> break flow.php:62
+break flow.php:62
 Breakpoint 1 set on line 62 of flow.php
-hphpd> continue
+continue
 foo:25
 out pri:7
 out pub:7
@@ -290,9 +287,9 @@ Breakpoint 1 reached at test() on line 62 of %s/flow.php
   62   $obj->pub($x);
   63   error_log("test done ".$x);
 
-hphpd> break clear all
+break clear all
 All breakpoints are cleared.
-hphpd> continue
+continue
 test done 7
 
-hphpd> quit
+quit

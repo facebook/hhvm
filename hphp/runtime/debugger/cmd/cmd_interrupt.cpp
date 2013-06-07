@@ -25,6 +25,7 @@ TRACE_SET_MOD(debugger);
 
 void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  assert(m_interrupt != ExceptionHandler); // Server-side only.
   thrift.write(m_interrupt);
   thrift.write(m_program);
   thrift.write(m_errorMsg);
@@ -307,6 +308,8 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps,
         }
       }
       return !m_matched.empty();
+    case ExceptionHandler:
+      return false; // For flow control only at this time.
   }
   assert(false);
   return false;

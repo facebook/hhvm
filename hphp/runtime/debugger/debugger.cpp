@@ -283,6 +283,7 @@ void Debugger::Interrupt(int type, const char *program,
 // response to various events. While this function is quite general wrt. the
 // type of interrupt, practically the type will be one of the following:
 //   - ExceptionThrown
+//   - ExceptionHandler
 //   - BreakPointReached
 //   - HardBreakPoint
 //
@@ -618,6 +619,7 @@ const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {
     case HardBreakPoint: return "HardBreakPoint";
     case BreakPointReached: return "BreakPointReached";
     case ExceptionThrown: return "ExceptionThrown";
+    case ExceptionHandler: return "ExceptionHandler";
     default:
       return "unknown";
   }

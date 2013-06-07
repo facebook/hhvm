@@ -45,22 +45,27 @@ void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 }
 
 void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
-  TRACE(2, "CmdNext::onBeginInterrupt\n");
+  TRACE(2, "CmdOut::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  if (interrupt.getInterruptType() == ExceptionThrown) {
-    // If an exception is thrown we turn interrupts on to ensure we stop when
-    // control reaches the first catch clause.
-    removeLocationFilter();
-    m_needsVMInterrupt = true;
-    return;
-  }
 
+  m_needsVMInterrupt = false;
   int currentVMDepth = g_vmContext->m_nesting;
   int currentStackDepth = proxy.getStackDepth();
 
   // Deeper or same depth? Keep running.
   if ((currentVMDepth > m_vmDepth) ||
       ((currentVMDepth == m_vmDepth) && (currentStackDepth >= m_stackDepth))) {
+    TRACE(2, "CmdOut: deeper, keep running...\n");
+    return;
+  }
+
+  if (interrupt.getInterruptType() == ExceptionHandler) {
+    // If we're about to enter an exception handler we turn interrupts on to
+    // ensure we stop when control reaches the handler. The normal logic below
+    // will decide if we're done at that point or not.
+    TRACE(2, "CmdOut: exception thrown\n");
+    removeLocationFilter();
+    m_needsVMInterrupt = true;
     return;
   }
 
@@ -71,7 +76,6 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
     TRACE(2, "CmdOut: not complete, step out again.\n");
     onSetup(proxy, interrupt);
   }
-  m_needsVMInterrupt = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -912,6 +912,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
                  func->unit()->offsetOf(pc));
           fault.m_savedRaiseOffset = func->unit()->offsetOf(pc);
           pc = (uchar*)(func->unit()->entry() + eh->m_fault);
+          DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
           return UnwindResumeVM;
         case EHEnt::EHType_Catch:
           // Note: we skip catch clauses if we have a pending C++ exception
@@ -929,6 +930,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
               if (cls && obj->instanceof(cls)) {
                 pc = handler;
                 FTRACE(1, "unwindFrag: entering catch at {}\n", pc);
+                DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
                 return UnwindResumeVM;
               }
             }
@@ -4627,7 +4629,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopThrow(PC& pc) {
 
   Object obj(c1->m_data.pobj);
   m_stack.popC();
-  DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHook(obj.get()));
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
   throw obj;
 }
 

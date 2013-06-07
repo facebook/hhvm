@@ -27,7 +27,8 @@ class CmdNext : public CmdFlowControl {
 public:
   CmdNext() : CmdFlowControl(KindOfNext),
               m_stepContUnit(nullptr),
-              m_stepContOffset(InvalidAbsoluteOffset) {}
+              m_stepContOffset(InvalidAbsoluteOffset),
+              m_stepContTag(nullptr) {}
   virtual ~CmdNext();
 
   virtual void help(DebuggerClient& client);
@@ -40,9 +41,11 @@ private:
   bool atStepContOffset(Unit* unit, Offset o);
   void setupStepCont(ActRec* fp, PC pc);
   void cleanupStepCont();
+  void* getContinuationTag(ActRec* fp);
 
   HPHP::Unit* m_stepContUnit;
   Offset m_stepContOffset;
+  void* m_stepContTag; // Unique identifier for the continuation we're stepping
 };
 
 ///////////////////////////////////////////////////////////////////////////////

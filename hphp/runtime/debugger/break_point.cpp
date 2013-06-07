@@ -182,6 +182,7 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
       m_line1(0), m_line2(0),
       m_regex(regex), m_check(false) {
   TRACE(2, "BreakPointInfo::BreakPointInfo..const std::string &file)\n");
+  assert(m_interrupt != ExceptionHandler); // Server-side only.
   if (m_interrupt == ExceptionThrown) {
     parseExceptionThrown(exp);
     if (!m_file.empty() || m_line1 || m_line2 || !m_funcs.empty()) {

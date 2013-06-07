@@ -39,7 +39,8 @@ namespace HPHP {
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const uchar* pc);
-void phpDebuggerExceptionHook(ObjectData* e);
+void phpDebuggerExceptionThrownHook(ObjectData* e);
+void phpDebuggerExceptionHandlerHook();
 void phpDebuggerEvalHook(const Func* f);
 void phpDebuggerFileLoadHook(Eval::PhpFile* efile);
 class Class;

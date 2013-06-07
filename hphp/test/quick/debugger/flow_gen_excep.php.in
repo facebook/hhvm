@@ -1,0 +1,19 @@
+run
+break foo()
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+break clear all
+continue
+quit

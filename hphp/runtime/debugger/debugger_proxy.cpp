@@ -542,7 +542,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
 
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint ||
-       cmd.getInterruptType() == ExceptionThrown) && m_flow) {
+       cmd.getInterruptType() == ExceptionHandler) && m_flow) {
     if (!m_flow->is(DebuggerCommand::KindOfContinue)) {
       m_flow->onBeginInterrupt(*this, cmd);
       if (m_flow->complete()) {

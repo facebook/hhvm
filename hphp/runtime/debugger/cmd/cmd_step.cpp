@@ -47,6 +47,9 @@ void CmdStep::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 }
 
 void CmdStep::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+  // Step doesn't care about this interrupt... we just stay the course and
+  // keep stepping.
+  if (interrupt.getInterruptType() == ExceptionHandler) return;
   m_complete = (decCount() == 0);
   if (!m_complete) {
     installLocationFilterForLine(interrupt.getSite());

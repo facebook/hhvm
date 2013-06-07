@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_next.h"
 #include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,14 +56,6 @@ void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
 void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  if (interrupt.getInterruptType() == ExceptionThrown) {
-    // If an exception is thrown we turn interrupts on to ensure we stop when
-    // control reaches the first catch clause.
-    TRACE(2, "CmdNext: exception thrown\n");
-    removeLocationFilter();
-    m_needsVMInterrupt = true;
-    return;
-  }
 
   ActRec *fp = g_vmContext->getFP();
   assert(fp); // All interrupts which reach a flow cmd have an AR.
@@ -89,6 +83,8 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     deeper = true;
   }
 
+  m_needsVMInterrupt = false; // Will be set again below if still needed.
+
   // First consider if we've got internal breakpoints setup. These are used when
   // we can make an accurate prediction of where execution should flow,
   // eventually, and when we want to let the program run normally until we get
@@ -99,20 +95,53 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
       if (deeper) return; // Recursion
       TRACE(2, "CmdNext: hit step-out\n");
     } else if (atStepContOffset(unit, offset)) {
-      // For step-conts we want to hit the exact same frame, not a call to the
-      // same function higher or lower on the stack.
-      if (!originalDepth) return;
+      // For step-conts we want to hit the exact same frame, for the same
+      // continuation, not a call to the same function higher or lower on the
+      // stack.
+      if (!originalDepth || (m_stepContTag != getContinuationTag(fp))) return;
       TRACE(2, "CmdNext: hit step-cont\n");
+    } else if (interrupt.getInterruptType() == ExceptionHandler) {
+      // Entering an exception handler may take us someplace we weren't
+      // expecting. Adjust internal breakpoints accordingly. First case is easy.
+      if (deeper) {
+        TRACE(2, "CmdNext: exception handler, deeper\n");
+        return;
+      }
+      // For step-conts, we ignore handlers at the original level if we're not
+      // in the original continuation. We don't care about exception handlers
+      // in continuations being driven at the same level.
+      if (hasStepCont() && originalDepth &&
+          (m_stepContTag != getContinuationTag(fp))) {
+        TRACE(2, "CmdNext: exception handler, original depth, wrong cont\n");
+        return;
+      }
+      // Sometimes we have handlers in generated code, i.e., Continuation::next.
+      // These just help propagate exceptions so ignore those.
+      if (fp->m_func->line1() == 0) {
+        TRACE(2, "CmdNext: exception handler, ignoring func with no source\n");
+        return;
+      }
+      TRACE(2, "CmdNext: exception handler altering expected flow\n");
     } else {
       // We have internal breakpoints setup, but we haven't hit one yet. Keep
       // running until we reach one.
       TRACE(2, "CmdNext: waiting to hit internal breakpoint...\n");
       return;
     }
-    // We've hit one internal breakpoint at a useful place, so we can remove
-    // them all now.
+    // We've hit one internal breakpoint at a useful place, or decided we don't,
+    // need them, so we can remove them all now.
     cleanupStepOuts();
     cleanupStepCont();
+  }
+
+  if (interrupt.getInterruptType() == ExceptionHandler) {
+    // If we're about to enter an exception handler we turn interrupts on to
+    // ensure we stop when control reaches the handler. The normal logic below
+    // will decide if we're done at that point or not.
+    TRACE(2, "CmdNext: exception handler\n");
+    removeLocationFilter();
+    m_needsVMInterrupt = true;
+    return;
   }
 
   if (deeper) {
@@ -124,7 +153,6 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     // opcode executed while it's installed and that's bad if there's a lot of
     // code called from that line.
     removeLocationFilter();
-    m_needsVMInterrupt = false;
     return;
   }
 
@@ -162,7 +190,6 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
       setupStepCont(fp, pc);
     }
     removeLocationFilter();
-    m_needsVMInterrupt = false;
     return;
   }
 
@@ -192,6 +219,7 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   Offset nextInst = fp->m_func->unit()->offsetOf(pc + 4);
   m_stepContUnit = fp->m_func->unit();
   m_stepContOffset = nextInst;
+  m_stepContTag = getContinuationTag(fp);
   TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
   phpAddBreakPoint(m_stepContUnit, m_stepContOffset);
@@ -203,8 +231,24 @@ void CmdNext::cleanupStepCont() {
       phpRemoveBreakPoint(m_stepContUnit, m_stepContOffset);
       m_stepContOffset = InvalidAbsoluteOffset;
     }
+    m_stepContTag = nullptr;
     m_stepContUnit = nullptr;
   }
+}
+
+// Use the address of the c_Continuation object as a tag for this stepping
+// operation, to ensure we only stop once we're back to the same continuation.
+// Since we'll either stop when we get out of whatever is driving this
+// continuation, or we'll stop when we get back into it, we know the object
+// will remain alive.
+void* CmdNext::getContinuationTag(ActRec* fp) {
+  TypedValue* tv = frame_local(fp, 0);
+  assert(tv->m_type == HPHP::KindOfObject);
+  assert(dynamic_cast<c_Continuation*>(tv->m_data.pobj));
+  c_Continuation* cont = static_cast<c_Continuation*>(tv->m_data.pobj);
+  TRACE(2, "CmdNext: continuation tag %p for %s\n", cont,
+        cont->t_getorigfuncname()->data());
+  return cont;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

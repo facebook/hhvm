@@ -67,14 +67,26 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
 // NB: this does not hook any portion of exception unwind.
-void phpDebuggerExceptionHook(ObjectData* e) {
-  TRACE(5, "in phpDebuggerExceptionHook()\n");
+void phpDebuggerExceptionThrownHook(ObjectData* e) {
+  TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
   Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, e);
-  TRACE(5, "out phpDebuggerExceptionHook()\n");
+  TRACE(5, "out phpDebuggerExceptionThrownHook()\n");
+}
+
+// Hook called from exception unwind to signal that we are about to handle an
+// exception.
+void phpDebuggerExceptionHandlerHook() {
+  TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
+  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+    TRACE(5, "NoBreak flag is on\n");
+    return;
+  }
+  Eval::Debugger::InterruptVMHook(Eval::ExceptionHandler);
+  TRACE(5, "out phpDebuggerExceptionHandlerHook()\n");
 }
 
 bool isDebuggerAttachedProcess() {

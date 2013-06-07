@@ -31,6 +31,12 @@ enum InterruptType {
   HardBreakPoint, // From f_hphpd_break().
   BreakPointReached, // Break from the VM interpreter loop
   ExceptionThrown,
+
+  // Interrupts for exception handler entry are, for now, server-side only and
+  // only for flow control. We could consider exposing this to clients, and
+  // allowing it as a break point much like ExceptionThrown is, but the value
+  // seems quite low at this time. We assert this stays server-side.
+  ExceptionHandler,
 };
 
 // Represents a site in the code, at the source level.

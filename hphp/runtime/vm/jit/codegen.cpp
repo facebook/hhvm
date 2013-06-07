@@ -1069,7 +1069,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
     dstReg0 = info.reg(0);
     dstReg1 = info.reg(1);
   }
-  return cgCallHelper(a, Transl::Call(addr), dstReg0, dstReg1, sync, args,
+  return cgCallHelper(a, Transl::CppCall(addr), dstReg0, dstReg1, sync, args,
                       destType);
 }
 
@@ -1079,11 +1079,12 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  SyncOptions sync,
                                  ArgGroup& args,
                                  DestType destType) {
-  cgCallHelper(a, Transl::Call(addr), dstReg, InvalidReg, sync, args, destType);
+  cgCallHelper(a, Transl::CppCall(addr), dstReg, InvalidReg, sync, args,
+               destType);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::Call& call,
+                                 const Transl::CppCall& call,
                                  PhysReg dstReg,
                                  SyncOptions sync,
                                  ArgGroup& args,
@@ -1092,7 +1093,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::Call& call,
+                                 const Transl::CppCall& call,
                                  PhysReg dstReg0,
                                  PhysReg dstReg1,
                                  SyncOptions sync,
@@ -1103,7 +1104,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::Call& call,
+                                 const Transl::CppCall& call,
                                  PhysReg dstReg0,
                                  PhysReg dstReg1,
                                  SyncOptions sync,
@@ -3633,7 +3634,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // if the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
-  cgCallHelper(m_as, Transl::Call((TCA)func->nativeFuncPtr()),
+  cgCallHelper(m_as, Transl::CppCall((TCA)func->nativeFuncPtr()),
                isCppByRef(funcReturnType) ? InvalidReg : dstReg,
                kSyncPoint, callArgs);
 
@@ -4259,7 +4260,8 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     auto bitsValReg = m_rScratch;
     //   Load the bit values in bitValReg:
     //     bitsValReg <- [bitsValPtr + (firstBitNum / 64)]
-    m_as.load_reg64_disp_reg64(bitsPtrReg, sizeof(uint64_t) * (firstBitNum / 64),
+    m_as.load_reg64_disp_reg64(bitsPtrReg,
+                               sizeof(uint64_t) * (firstBitNum / 64),
                                bitsValReg);
     //     bitsValReg <- bitsValReg & mask64
     m_as.and_reg64_reg64(mask64Reg, bitsValReg);
@@ -4480,7 +4482,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
       StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
-    cgCallHelper(a, Transl::Call((TCA)lookup),
+    cgCallHelper(a, Transl::CppCall((TCA)lookup),
                  funcDestReg, InvalidReg,
                  kSyncPoint,
                  ArgGroup(m_regs).imm(ch)

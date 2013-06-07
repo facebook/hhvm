@@ -362,7 +362,7 @@ TranslatorX64::emitCall(X64Assembler& a, TCA dest) {
 }
 
 void
-TranslatorX64::emitCall(X64Assembler& a, Call call) {
+TranslatorX64::emitCall(X64Assembler& a, CppCall call) {
   if (call.isDirect()) {
     return emitCall(a, (TCA)call.getAddress());
   }
@@ -507,16 +507,16 @@ emitEagerVMRegSave(X64Assembler& a,
   return start;
 }
 
-Call TranslatorX64::getDtorCall(DataType type) {
+CppCall TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
-    return Call(getMethodPtr(&StringData::release));
+    return CppCall(getMethodPtr(&StringData::release));
   case KindOfArray:
-    return Call(getMethodPtr(&ArrayData::release));
+    return CppCall(getMethodPtr(&ArrayData::release));
   case KindOfObject:
-    return Call(getMethodPtr(&ObjectData::release));
+    return CppCall(getMethodPtr(&ObjectData::release));
   case KindOfRef:
-    return Call(getMethodPtr(&RefData::release));
+    return CppCall(getMethodPtr(&RefData::release));
   default:
     assert(false);
     NOT_REACHED();
@@ -3595,10 +3595,11 @@ TranslatorX64::TranslatorX64()
   typedef void* vp;
 
   TCA strDtor, arrDtor, objDtor, refDtor;
-  strDtor = emitUnaryStub(astubs, Call(getMethodPtr(&StringData::release)));
-  arrDtor = emitUnaryStub(astubs, Call(getVTableOffset(&HphpArray::release)));
-  objDtor = emitUnaryStub(astubs, Call(getMethodPtr(&ObjectData::release)));
-  refDtor = emitUnaryStub(astubs, Call(vp(getMethodPtr(&RefData::release))));
+  strDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&StringData::release)));
+  arrDtor = emitUnaryStub(astubs,
+                          CppCall(getVTableOffset(&HphpArray::release)));
+  objDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&ObjectData::release)));
+  refDtor = emitUnaryStub(astubs, CppCall(vp(getMethodPtr(&RefData::release))));
 
   m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
   m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
@@ -3680,7 +3681,7 @@ TranslatorX64::Get() {
 }
 
 template<int Arity>
-TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
+TCA TranslatorX64::emitNAryStub(X64Assembler& a, CppCall c) {
   BOOST_STATIC_ASSERT((Arity < kNumRegisterArgs));
 
   // The callNAryStub has already saved these regs on a.
@@ -3728,7 +3729,7 @@ TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
   return start;
 }
 
-TCA TranslatorX64::emitUnaryStub(X64Assembler& a, Call c) {
+TCA TranslatorX64::emitUnaryStub(X64Assembler& a, CppCall c) {
   return emitNAryStub<1>(a, c);
 }
 

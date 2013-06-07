@@ -174,20 +174,20 @@ private:
                     ArgGroup& args,
                     DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
-                    const Transl::Call& call,
+                    const Transl::CppCall& call,
                     PhysReg dstReg,
                     SyncOptions sync,
                     ArgGroup& args,
                     DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
-                    const Transl::Call& call,
+                    const Transl::CppCall& call,
                     PhysReg dstReg0,
                     PhysReg dstReg1,
                     SyncOptions sync,
                     ArgGroup& args,
                     DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
-                    const Transl::Call& call,
+                    const Transl::CppCall& call,
                     PhysReg dstReg0,
                     PhysReg dstReg1,
                     SyncOptions sync,

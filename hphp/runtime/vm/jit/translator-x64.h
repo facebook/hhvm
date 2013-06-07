@@ -66,10 +66,10 @@ struct FreeStubList {
   void push(TCA stub);
 };
 
-struct Call {
-  explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
-  explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
-  Call(Call const&) = default;
+struct CppCall {
+  explicit CppCall(void *p) : m_kind(Direct), m_fptr(p) {}
+  explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
+  CppCall(CppCall const&) = default;
 
   bool isDirect()  const { return m_kind == Direct;  }
   bool isVirtual() const { return m_kind == Virtual; }
@@ -221,7 +221,7 @@ private:
   void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
-  static Call getDtorCall(DataType type);
+  static CppCall getDtorCall(DataType type);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
   void emitCopyToStackRegSafe(Asm& a,
                               const NormalizedInstruction& ni,
@@ -233,7 +233,7 @@ private:
 
 public:
   void emitCall(Asm& a, TCA dest);
-  void emitCall(Asm& a, Call call);
+  void emitCall(Asm& a, CppCall call);
   TCA getCallArrayProlog(Func* func);
 private:
 
@@ -249,8 +249,8 @@ private:
   void emitObjToClass(const NormalizedInstruction& i);
   void emitClsAndPals(const NormalizedInstruction& i);
 
-  template<int Arity> TCA emitNAryStub(Asm& a, Call c);
-  TCA emitUnaryStub(Asm& a, Call c);
+  template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
+  TCA emitUnaryStub(Asm& a, CppCall c);
   TCA genericRefCountStub(Asm& a);
   TCA genericRefCountStubRegs(Asm& a);
   void emitFreeLocalsHelpers();

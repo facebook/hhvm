@@ -2957,7 +2957,8 @@ void Translator::specializeDeps(Tracelet& tclet, TraceletContext& tctxt) {
   for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
        instr = instr->next) {
     auto op = instr->op();
-    if ((op == OpCGetM || op == OpIssetM) && instr->inputs.size() == 2) {
+    if ((op == OpCGetM || op == OpIssetM || op == OpFPassM) &&
+        instr->inputs.size() == 2) {
       specializeCollections(instr, 0, tctxt);
     } else if (op == OpSetM && instr->inputs.size() == 3) {
       specializeCollections(instr, 1, tctxt);

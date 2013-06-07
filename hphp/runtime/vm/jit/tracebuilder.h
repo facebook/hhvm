@@ -98,7 +98,7 @@ struct TraceBuilder {
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
-  Trace* trace() const { return m_trace.get(); }
+  IRTrace* trace() const { return m_trace.get(); }
   IRFactory* factory() { return &m_irFactory; }
   int32_t spOffset() { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
@@ -141,7 +141,7 @@ struct TraceBuilder {
    * TODO(#2404447): run simplifier?
    */
   template<class... Args>
-  SSATmp* genFor(Trace* t, Args&&... args) {
+  SSATmp* genFor(IRTrace* t, Args&&... args) {
     auto instr = m_irFactory.gen(std::forward<Args>(args)...);
     t->back()->push_back(instr);
     return instr->dst();
@@ -257,7 +257,7 @@ struct TraceBuilder {
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  Trace* makeExitTrace(uint32_t bcOff) {
+  IRTrace* makeExitTrace(uint32_t bcOff) {
     return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
                                            bcOff));
   }
@@ -341,8 +341,8 @@ private:
   void      clearTrackedState();
   void      dropLocalRefsInnerTypes();
 
-  Trace* makeTrace(const Func* func, uint32_t bcOff) {
-    return new Trace(m_irFactory.defBlock(func), bcOff);
+  IRTrace* makeTrace(const Func* func, uint32_t bcOff) {
+    return new IRTrace(m_irFactory.defBlock(func), bcOff);
   }
 
 private:
@@ -356,7 +356,7 @@ private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
-  boost::scoped_ptr<Trace> const m_trace; // generated trace
+  boost::scoped_ptr<IRTrace> const m_trace; // generated trace
 
   // Flags that enable optimizations
   bool       m_enableCse;

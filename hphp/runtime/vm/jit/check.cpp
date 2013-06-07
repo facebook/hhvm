@@ -137,7 +137,7 @@ bool checkBlock(Block* b) {
  * Check that every catch trace has at most one incoming branch and a single
  * block.
  */
-bool checkCatchTraces(Trace* trace, const IRFactory& irFactory) {
+bool checkCatchTraces(IRTrace* trace, const IRFactory& irFactory) {
   forEachTraceBlock(trace, [&](Block* b) {
     auto trace = b->trace();
     if (trace->isCatch()) {
@@ -174,7 +174,7 @@ const Edge* nextEdge(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  */
-bool checkCfg(Trace* trace, const IRFactory& factory) {
+bool checkCfg(IRTrace* trace, const IRFactory& factory) {
   forEachTraceBlock(trace, checkBlock);
 
   // Check valid successor/predecessor edges.
@@ -227,7 +227,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
   return true;
 }
 
-bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
+bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
   auto const blocks   = rpoSortCfg(trace, irFactory);
   auto const children = findDomChildren(blocks);
 
@@ -275,7 +275,7 @@ bool checkTmpsSpanningCalls(Trace* trace, const IRFactory& irFactory) {
   return isValid;
 }
 
-bool checkRegisters(Trace* trace, const IRFactory& factory,
+bool checkRegisters(IRTrace* trace, const IRFactory& factory,
                     const RegAllocInfo& regs) {
   assert(checkCfg(trace, factory));
 

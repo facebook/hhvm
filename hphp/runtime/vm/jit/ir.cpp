@@ -325,7 +325,7 @@ Opcode getStackModifyingOpcode(Opcode opc) {
   return opc;
 }
 
-Trace* IRInstruction::trace() const {
+IRTrace* IRInstruction::trace() const {
   return block()->trace();
 }
 
@@ -1029,7 +1029,7 @@ std::string SSATmp::toString() const {
   return out.str();
 }
 
-std::string Trace::toString() const {
+std::string IRTrace::toString() const {
   std::ostringstream out;
   print(out, this, nullptr);
   return out.str();
@@ -1053,7 +1053,7 @@ bool isConvIntOrPtrToBool(IRInstruction* instr) {
   }
 }
 
-BlockList rpoSortCfg(Trace* trace, const IRFactory& factory) {
+BlockList rpoSortCfg(IRTrace* trace, const IRFactory& factory) {
   assert(trace->isMain());
   BlockList blocks;
   blocks.reserve(factory.numBlocks());
@@ -1151,7 +1151,7 @@ DomChildren findDomChildren(const BlockList& blocks) {
   return children;
 }
 
-bool hasInternalFlow(Trace* trace) {
+bool hasInternalFlow(IRTrace* trace) {
   for (Block* block : trace->blocks()) {
     if (Block* taken = block->taken()) {
       if (taken->trace() == trace) return true;

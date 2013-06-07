@@ -60,7 +60,7 @@ struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
   explicit LinearScan(IRFactory*);
-  RegAllocInfo allocRegs(Trace*, LifetimeInfo*);
+  RegAllocInfo allocRegs(IRTrace*, LifetimeInfo*);
 
 private:
   class RegState {
@@ -141,8 +141,8 @@ private:
     return m_irFactory->cns(val);
   }
   void initFreeList();
-  void coalesce(Trace* trace);
-  void genSpillStats(Trace* trace, int numSpillLocs);
+  void coalesce(IRTrace* trace);
+  void genSpillStats(IRTrace* trace, int numSpillLocs);
   void allocRegsOneTrace(BlockList::iterator& blockIt,
                          ExitTraceMap& etm);
   void allocRegsToTrace();
@@ -153,7 +153,7 @@ private:
   void rematerialize();
   void rematerializeAux();
   void removeUnusedSpills();
-  void collectInfo(BlockList::iterator it, Trace* trace);
+  void collectInfo(BlockList::iterator it, IRTrace* trace);
   RegNumber getJmpPreColor(SSATmp* tmp, uint32_t regIndx, bool isReload);
   void computePreColoringHint();
   void findFullXMMCandidates();
@@ -714,7 +714,7 @@ uint32_t LinearScan::assignSpillLoc() {
   return maxSpillLoc;
 }
 
-void LinearScan::collectInfo(BlockList::iterator it, Trace* trace) {
+void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
   m_natives.clear();
   m_jmps.reset();
   m_uses.reset();
@@ -954,7 +954,7 @@ void LinearScan::initFreeList() {
   }
 }
 
-void LinearScan::coalesce(Trace* trace) {
+void LinearScan::coalesce(IRTrace* trace) {
   forEachTraceInst(trace, [](IRInstruction* inst) {
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       SSATmp* src = inst->src(i);
@@ -990,7 +990,7 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
   }
 }
 
-void LinearScan::genSpillStats(Trace* trace, int numSpillLocs) {
+void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
   if (!moduleEnabled(HPHP::Trace::statgroups, 1)) return;
   static bool enabled = getenv("HHVM_STATS_SPILLS");
   if (!enabled) return;
@@ -1079,7 +1079,7 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
-RegAllocInfo LinearScan::allocRegs(Trace* trace, LifetimeInfo* lifetime) {
+RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce(trace);
@@ -1653,7 +1653,7 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegAllocInfo allocRegsForTrace(Trace* trace, IRFactory* irFactory,
+RegAllocInfo allocRegsForTrace(IRTrace* trace, IRFactory* irFactory,
                                LifetimeInfo* lifetime) {
   return LinearScan(irFactory).allocRegs(trace, lifetime);
 }

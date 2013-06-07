@@ -23,7 +23,7 @@
 
 namespace HPHP {  namespace JIT {
 
-class Trace;
+class IRTrace;
 class IRFactory;
 
 // This value must be consistent with the number of pre-allocated
@@ -206,7 +206,7 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-RegAllocInfo allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* = nullptr);
+RegAllocInfo allocRegsForTrace(IRTrace*, IRFactory*, LifetimeInfo* = nullptr);
 
 // Native stack layout:
 // |               |

@@ -61,7 +61,7 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
  * Optimizations that try to hoist CheckType instructions so that we
  * can specialize code earlier and avoid generic operations.
  */
-void optimizePredictions(Trace* const trace, IRFactory* const irFactory) {
+void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 

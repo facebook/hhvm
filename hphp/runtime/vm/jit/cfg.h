@@ -73,7 +73,7 @@ void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
  *
  * Post: isRPOSorted(return value)
  */
-BlockList rpoSortCfg(Trace*, const IRFactory&);
+BlockList rpoSortCfg(IRTrace*, const IRFactory&);
 
 /*
  * Return an iterator into an rpo-sorted BlockList for a given Block.
@@ -122,7 +122,7 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
  * Return true if trace has internal control flow (IE it has a branch
  * to itself somewhere.
  */
-bool hasInternalFlow(Trace*);
+bool hasInternalFlow(IRTrace*);
 
 /*
  * Visit basic blocks in a preorder traversal over the dominator tree.
@@ -144,9 +144,9 @@ void forPreorderDoms(Block* block, const DomChildren& children,
  * Visit the main trace followed by exit traces.
  */
 template <class Body>
-void forEachTrace(Trace* main, Body body) {
+void forEachTrace(IRTrace* main, Body body) {
   body(main);
-  for (Trace* exit : main->exitTraces()) {
+  for (IRTrace* exit : main->exitTraces()) {
     body(exit);
   }
 }
@@ -155,11 +155,11 @@ void forEachTrace(Trace* main, Body body) {
  * Visit the blocks in the main trace followed by exit trace blocks.
  */
 template <class Body>
-void forEachTraceBlock(Trace* main, Body body) {
+void forEachTraceBlock(IRTrace* main, Body body) {
   for (Block* block : main->blocks()) {
     body(block);
   }
-  for (Trace* exit : main->exitTraces()) {
+  for (IRTrace* exit : main->exitTraces()) {
     for (Block* block : exit->blocks()) {
       body(block);
     }
@@ -179,7 +179,7 @@ void forEachInst(const BlockList& blocks, Body body) {
 }
 
 template <class Body>
-void forEachInst(Trace* trace, Body body) {
+void forEachInst(IRTrace* trace, Body body) {
   forEachInst(trace->blocks(), body);
 }
 
@@ -187,8 +187,8 @@ void forEachInst(Trace* trace, Body body) {
  * Visit each instruction in the main trace, then the exit traces
  */
 template <class Body>
-void forEachTraceInst(Trace* main, Body body) {
-  forEachTrace(main, [=](Trace* t) {
+void forEachTraceInst(IRTrace* main, Body body) {
+  forEachTrace(main, [=](IRTrace* t) {
     forEachInst(t, body);
   });
 }

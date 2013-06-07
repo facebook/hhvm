@@ -28,7 +28,7 @@ struct IRInstruction;
 class  SSATmp;
 struct Block;
 struct AsmInfo;
-class  Trace;
+class  IRTrace;
 struct LifetimeInfo;
 
 // IRInstruction
@@ -47,11 +47,11 @@ void print(std::ostream& ostream, const SSATmp*,
 void print(const SSATmp*);
 
 // Trace
-void print(std::ostream& ostream, const Trace*,
+void print(std::ostream& ostream, const IRTrace*,
            const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr);
-void print(const Trace*);
+void print(const IRTrace*);
 
 /*
  * Some utilities related to dumping. Rather than file-by-file control, we
@@ -67,9 +67,9 @@ static const int kRegAllocLevel = 3;
 static const int kOptLevel = 4;
 static const int kExtraLevel = 6;
 
-void dumpTraceImpl(const Trace* trace, std::ostream& out,
+void dumpTraceImpl(const IRTrace* trace, std::ostream& out,
                    const RegAllocInfo*, const LifetimeInfo*, const AsmInfo*);
-void dumpTrace(int level, const Trace* trace, const char* caption,
+void dumpTrace(int level, const IRTrace* trace, const char* caption,
                const RegAllocInfo* regs = nullptr,
                const LifetimeInfo* lifetime = nullptr,
                AsmInfo* ai = nullptr);

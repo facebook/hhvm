@@ -102,7 +102,7 @@ private:
     inst->setTaken(target);
   }
 
-  void setter(IRInstruction* inst, Trace* trace) {
+  void setter(IRInstruction* inst, IRTrace* trace) {
     inst->setTaken(trace ? trace->front() : nullptr);
   }
 

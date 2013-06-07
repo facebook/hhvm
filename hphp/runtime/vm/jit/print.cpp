@@ -263,13 +263,13 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-void print(const Trace* trace) {
+void print(const IRTrace* trace) {
   print(std::cout, trace);
 }
 
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
-static smart::vector<Block*> blocks(const Trace* trace,
+static smart::vector<Block*> blocks(const IRTrace* trace,
                                     const AsmInfo* asmInfo) {
   smart::vector<Block*> blocks;
 
@@ -282,7 +282,7 @@ static smart::vector<Block*> blocks(const Trace* trace,
         blocks.push_back(block);
       }
     }
-    for (Trace* e : trace->exitTraces()) {
+    for (IRTrace* e : trace->exitTraces()) {
       unlikely.insert(unlikely.end(),
                       e->blocks().begin(),
                       e->blocks().end());
@@ -292,7 +292,7 @@ static smart::vector<Block*> blocks(const Trace* trace,
   }
 
   blocks.assign(trace->blocks().begin(), trace->blocks().end());
-  for (Trace* e : trace->exitTraces()) {
+  for (IRTrace* e : trace->exitTraces()) {
     blocks.insert(blocks.end(), e->blocks().begin(), e->blocks().end());
   }
   std::sort(
@@ -306,7 +306,7 @@ static smart::vector<Block*> blocks(const Trace* trace,
   return blocks;
 }
 
-void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
+void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
            const LifetimeInfo* lifetime, const AsmInfo* asmInfo) {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
@@ -413,7 +413,7 @@ void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
   }
 }
 
-void dumpTraceImpl(const Trace* trace,
+void dumpTraceImpl(const IRTrace* trace,
                    std::ostream& out,
                    const RegAllocInfo* regs,
                    const LifetimeInfo* lifetime,
@@ -423,7 +423,7 @@ void dumpTraceImpl(const Trace* trace,
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void dumpTrace(int level, const Trace* trace, const char* caption,
+void dumpTrace(int level, const IRTrace* trace, const char* caption,
                const RegAllocInfo* regs, const LifetimeInfo* lifetime,
                AsmInfo* ai) {
   if (dumpIREnabled(level)) {

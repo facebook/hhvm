@@ -266,7 +266,7 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
 }
 
 template<typename... Srcs>
-SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Trace* taken,
+SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, IRTrace* taken,
                                                  Srcs... srcs) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   assert(!opcodeHasFlags(opc, ModifiesStack));
@@ -565,7 +565,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   // the MInstrState. These particular stores are harmless though, and the
   // worst outcome here is that we'll end up doing the stores twice, once for
   // this instruction and once at the beginning of the retranslation.
-  Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
+  IRTrace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
       isSimpleArrayOp()) {
@@ -2155,7 +2155,7 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
     assert(toSpill[0] == m_result);
     SSATmp* str = m_irf.gen(AssertNonNull, m_strTestResult)->dst();
     toSpill[0] = str;
-    Trace* exit = m_ht.getExitTrace(nextOff, toSpill);
+    IRTrace* exit = m_ht.getExitTrace(nextOff, toSpill);
     exit->front()->prepend(str->inst());
     exit->front()->prepend(m_irf.gen(DecRef, m_result));
     exit->front()->prepend(

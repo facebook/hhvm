@@ -23,24 +23,24 @@
 namespace HPHP { namespace JIT {
 
 /*
- * A Trace is a single-entry, multi-exit, sequence of blocks.  Typically
+ * An IRTrace is a single-entry, multi-exit, sequence of blocks. Typically
  * each block falls through to the next block but this is not guaranteed;
  * traces may contain internal forward-only control flow.
  */
-struct Trace : private boost::noncopyable {
+struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit Trace(Block* first, uint32_t bcOff)
+  explicit IRTrace(Block* first, uint32_t bcOff)
     : m_bcOff(bcOff)
     , m_main(nullptr)
   {
     push_back(first);
   }
 
-  ~Trace() {
+  ~IRTrace() {
     std::for_each(m_exitTraces.begin(), m_exitTraces.end(),
-                  boost::checked_deleter<Trace>());
+                  boost::checked_deleter<IRTrace>());
   }
 
   std::list<Block*>& blocks() { return m_blocks; }
@@ -89,7 +89,7 @@ struct Trace : private boost::noncopyable {
   void setData(uint32_t d) { m_data = d; }
 
   uint32_t bcOff() const { return m_bcOff; }
-  Trace* addExitTrace(Trace* exit) {
+  IRTrace* addExitTrace(IRTrace* exit) {
     m_exitTraces.push_back(exit);
     exit->setMain(this);
     return exit;
@@ -104,16 +104,16 @@ struct Trace : private boost::noncopyable {
 
     return (--it)->op() == BeginCatch;
   }
-  void setMain(Trace* t) {
+  void setMain(IRTrace* t) {
     assert(m_main == nullptr);
     m_main = t;
   }
-  Trace* main() {
+  IRTrace* main() {
     return m_main;
   }
 
-  typedef std::list<Trace*> ExitList;
-  typedef std::list<Trace*>::iterator ExitIterator;
+  typedef std::list<IRTrace*> ExitList;
+  typedef std::list<IRTrace*>::iterator ExitIterator;
 
   ExitList& exitTraces() { return m_exitTraces; }
   const ExitList& exitTraces() const { return m_exitTraces; }
@@ -126,7 +126,7 @@ private:
   uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
-  Trace* m_main;              // ptr to parent trace if this is an exit trace
+  IRTrace* m_main;            // ptr to parent trace if this is an exit trace
 };
 
 }}

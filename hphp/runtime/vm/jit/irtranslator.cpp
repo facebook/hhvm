@@ -1845,7 +1845,7 @@ void TranslatorX64::hhirTraceEnd() {
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   using namespace JIT;
 
-  HPHP::JIT::Trace* trace = m_hhbcTrans->trace();
+  HPHP::JIT::IRTrace* trace = m_hhbcTrans->trace();
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs = nullptr,
                         const LifetimeInfo* lifetime = nullptr) {

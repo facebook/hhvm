@@ -107,7 +107,7 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  Trace* trace() const { return m_tb->trace(); }
+  IRTrace* trace() const { return m_tb->trace(); }
   TraceBuilder* traceBuilder() const { return m_tb.get(); }
 
   // In between each emit* call, irtranslator indicates the new
@@ -262,7 +262,7 @@ struct HhbcTranslator {
                            SSATmp* obj,
                            const Func* func,
                            int32_t numParams,
-                           Trace* catchTrace);
+                           IRTrace* catchTrace);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
   void emitFCallArray(const Offset pcOffset, const Offset after);
   void emitFCall(uint32_t numParams,
@@ -457,7 +457,7 @@ private:
      * if appropriate.
      */
     template<typename... Srcs>
-    SSATmp* genStk(Opcode op, Trace* taken, Srcs... srcs);
+    SSATmp* genStk(Opcode op, IRTrace* taken, Srcs... srcs);
 
     /* Various predicates about the current instruction */
     bool isSimpleArrayOp();
@@ -514,7 +514,7 @@ private:
      * unexpected type, in which case they'll throw an InvalidSetMException. To
      * handle this, emitMPost adds code to the catch trace to fish the correct
      * value out of the exception and side exit. */
-    Trace*  m_failedSetTrace;
+    IRTrace* m_failedSetTrace;
   };
 
 private: // tracebuilder forwarding utilities
@@ -529,7 +529,7 @@ private: // tracebuilder forwarding utilities
   }
 
   template<class... Args>
-  SSATmp* genFor(Trace* trace, Args&&... args) {
+  SSATmp* genFor(IRTrace* trace, Args&&... args) {
     return m_tb->genFor(trace, std::forward<Args>(args)...);
   }
 
@@ -560,7 +560,7 @@ private:
   void emitEmpty(const StringData* name,
                  CheckSupportedFun checkSupported,
                  EmitLdAddrFun emitLdAddr);
-  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Trace* exitTrace);
+  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, IRTrace* exitTrace);
   bool checkSupportedClsProp(const StringData* propName,
                              Type resultType,
                              int stkIndex);
@@ -595,10 +595,10 @@ private:
   void emitMarker();
 
 private: // Exit trace creation routines.
-  Trace* getExitTrace(Offset targetBcOff = -1);
-  Trace* getExitTrace(Offset targetBcOff,
+  IRTrace* getExitTrace(Offset targetBcOff = -1);
+  IRTrace* getExitTrace(Offset targetBcOff,
                       std::vector<SSATmp*>& spillValues);
-  Trace* getExitTraceWarn(Offset targetBcOff,
+  IRTrace* getExitTraceWarn(Offset targetBcOff,
                           std::vector<SSATmp*>& spillValues,
                           const StringData* warning);
 
@@ -609,7 +609,7 @@ private: // Exit trace creation routines.
    * The exit trace will spill things with a Marker for the current bytecode.
    *
    * Then it will do an ExceptionBarrier, followed by whatever is done
-   * by the CustomExit(Trace*) function.  The custom exit may add
+   * by the CustomExit(IRTrace*) function.  The custom exit may add
    * instructions to the exit trace, and optionally may return an
    * additional SSATmp* to spill on the stack.  If there is no
    * additional SSATmp*, it should return nullptr.
@@ -618,21 +618,21 @@ private: // Exit trace creation routines.
    * using gen/push/spillStack/etc.
    */
   template<class ExitLambda>
-  Trace* makeSideExit(Offset targetBcOff, ExitLambda exit);
+  IRTrace* makeSideExit(Offset targetBcOff, ExitLambda exit);
 
   /*
    * Generates an exit trace which will continue execution without HHIR.
    * This should be used in situations that HHIR cannot handle -- ideally
    * only in slow paths.
    */
-  Trace* getExitSlowTrace();
-  Trace* getCatchTrace();
+  IRTrace* getExitSlowTrace();
+  IRTrace* getCatchTrace();
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
    * and a flag for whether to make a no-IR exit.
    *
-   * Also takes a CustomExit(Trace*) function that may perform more
+   * Also takes a CustomExit(IRTrace*) function that may perform more
    * operations and optionally return a single additional SSATmp*
    * (otherwise nullptr) to spill on the stack before exiting.
    */
@@ -644,8 +644,8 @@ private: // Exit trace creation routines.
     // instead of one for targetBcOff.
     DelayedMarker,
   };
-  typedef std::function<SSATmp* (Trace*)> CustomExit;
-  Trace* getExitTraceImpl(Offset targetBcOff,
+  typedef std::function<SSATmp* (IRTrace*)> CustomExit;
+  IRTrace* getExitTraceImpl(Offset targetBcOff,
                           ExitFlag noIRExit,
                           std::vector<SSATmp*>& spillValues,
                           const CustomExit&);
@@ -703,7 +703,7 @@ private:
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   std::vector<SSATmp*> peekSpillValues() const;
-  SSATmp* emitSpillStack(Trace* t, SSATmp* sp,
+  SSATmp* emitSpillStack(IRTrace* t, SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();
@@ -718,12 +718,12 @@ private:
    */
   SSATmp* ldLoc(uint32_t id);
   SSATmp* ldLocAddr(uint32_t id);
-  SSATmp* ldLocInner(uint32_t id, Trace* exitTrace);
-  SSATmp* ldLocInnerWarn(uint32_t id, Trace* target,
-                         Trace* catchTrace = nullptr);
-  SSATmp* stLoc(uint32_t id, Trace* exitTrace, SSATmp* newVal);
-  SSATmp* stLocNRC(uint32_t id, Trace* exitTrace, SSATmp* newVal);
-  SSATmp* stLocImpl(uint32_t id, Trace*, SSATmp* newVal, bool doRefCount);
+  SSATmp* ldLocInner(uint32_t id, IRTrace* exitTrace);
+  SSATmp* ldLocInnerWarn(uint32_t id, IRTrace* target,
+                         IRTrace* catchTrace = nullptr);
+  SSATmp* stLoc(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocNRC(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocImpl(uint32_t id, IRTrace*, SSATmp* newVal, bool doRefCount);
 
 private:
   // Tracks information about the current bytecode offset and which

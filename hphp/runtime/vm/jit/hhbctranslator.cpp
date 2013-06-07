@@ -630,13 +630,13 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 }
 
 void HhbcTranslator::emitCGetL(int32_t id) {
-  Trace* exitTrace = getExitTrace();
+  IRTrace* exitTrace = getExitTrace();
   pushIncRef(ldLocInnerWarn(id, exitTrace));
 }
 
 void HhbcTranslator::emitCGetL2(int32_t id) {
-  Trace* exitTrace = getExitTrace();
-  Trace* catchTrace = getCatchTrace();
+  IRTrace* exitTrace = getExitTrace();
+  IRTrace* catchTrace = getCatchTrace();
   SSATmp* oldTop = pop(Type::Gen);
   pushIncRef(ldLocInnerWarn(id, exitTrace, catchTrace));
   push(oldTop);
@@ -688,7 +688,7 @@ void HhbcTranslator::emitSetL(int32_t id) {
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
-  Trace* exitTrace = getExitTrace();
+  IRTrace* exitTrace = getExitTrace();
   auto const src = ldLocInner(id, exitTrace);
 
   // Inc/Dec of a bool is a no-op.
@@ -714,7 +714,7 @@ SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
 void HhbcTranslator::emitIncDecMem(bool pre,
                                    bool inc,
                                    SSATmp* propAddr,
-                                   Trace* exitTrace) {
+                                   IRTrace* exitTrace) {
   // Handle only integer inc/dec for now
   SSATmp* src = gen(LdMem, Type::Int, exitTrace, propAddr, cns(0));
   // do the add and store back
@@ -1371,7 +1371,7 @@ SSATmp* HhbcTranslator::emitLdGblAddrDef(const StringData* gblName) {
 
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
   if (!checkSupportedClsProp(nullptr, Type::Cell, 0)) return;
-  Trace* exit = getExitSlowTrace();
+  IRTrace* exit = getExitSlowTrace();
   emitIncDecMem(pre, inc, emitLdClsPropAddr(nullptr), exit);
 }
 
@@ -1426,7 +1426,7 @@ void HhbcTranslator::emitIsTypeC(Type t) {
 }
 
 void HhbcTranslator::emitIsTypeL(Type t, int id) {
-  Trace* exitTrace = getExitTrace();
+  IRTrace* exitTrace = getExitTrace();
   push(gen(IsType, t, ldLocInnerWarn(id, exitTrace)));
 }
 
@@ -1496,7 +1496,7 @@ void HhbcTranslator::emitJmpNZ(Offset taken) {
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {
-  Trace* catchTrace = nullptr;
+  IRTrace* catchTrace = nullptr;
   if (cmpOpTypesMayReenter(opc, topC(0)->type(), topC(1)->type())) {
     catchTrace = getCatchTrace();
   }
@@ -1516,7 +1516,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
   // chaining to another Tracelet so forward progress still happens.
   auto const sideExit = makeSideExit(
     nextBcOff(),
-    [&] (Trace* t) {
+    [&] (IRTrace* t) {
       return genFor(t, LookupClsCns, Type::Cell, clsCnsName);
     }
   );
@@ -1677,7 +1677,7 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
                                          SSATmp* obj,
                                          const Func* func,
                                          int32_t numParams,
-                                         Trace* catchTrace) {
+                                         IRTrace* catchTrace) {
   push(obj);
   SSATmp* fn = nullptr;
   if (func) {
@@ -1691,7 +1691,7 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
 }
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
-  Trace* catchTrace = getCatchTrace();
+  IRTrace* catchTrace = getCatchTrace();
   SSATmp* cls = popA();
   SSATmp* obj = gen(IncRef, gen(AllocObj, cls));
   emitFPushCtorCommon(cls, obj, nullptr, numParams, catchTrace);
@@ -1706,8 +1706,8 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
   // The code generated for the catch trace depends on the environment at the
   // call so we can't share them between instructions.
-  Trace* catchTrace1 = getCatchTrace();
-  Trace* catchTrace2 = getCatchTrace();
+  IRTrace* catchTrace1 = getCatchTrace();
+  IRTrace* catchTrace2 = getCatchTrace();
 
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
@@ -1784,7 +1784,7 @@ void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
 
   const bool immutable = func->isNameBindingImmutable(curUnit());
 
-  Trace* catchTrace = nullptr;
+  IRTrace* catchTrace = nullptr;
   if (!immutable) {
     catchTrace = getCatchTrace();  // LdFuncCached can throw
   }
@@ -1950,7 +1950,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                     func && magicCall ? methodName : nullptr);
   } else {
     // lookup static method & class in the target cache
-    Trace* exitTrace = getExitSlowTrace();
+    IRTrace* exitTrace = getExitSlowTrace();
     SSATmp* funcClassTmp =
       gen(LdClsMethodCache,
                 exitTrace,
@@ -2283,7 +2283,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
                       switchVal, ssabase, ssatargets);
   } else if (type.subtypeOf(Type::Obj)) {
     // switchObjHelper can throw exceptions and reenter the VM
-    Trace* catchTrace = nullptr;
+    IRTrace* catchTrace = nullptr;
     if (type.subtypeOf(Type::Obj)) {
       catchTrace = getCatchTrace();
     }
@@ -2335,7 +2335,7 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
       }
     );
 
-  Trace* catchTrace = nullptr;
+  IRTrace* catchTrace = nullptr;
   // The slow path can throw exceptions and reenter the VM.
   if (!fastPath) catchTrace = getCatchTrace();
 
@@ -2405,7 +2405,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
 }
 
 void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
-  Trace* exitTrace = getExitTrace(nextByteCode);
+  IRTrace* exitTrace = getExitTrace(nextByteCode);
   SSATmp* tmp = m_evalStack.top();
   if (!tmp) {
     FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", type.toString());
@@ -2681,7 +2681,7 @@ void HhbcTranslator::emitCastBool() {
 }
 
 void HhbcTranslator::emitCastDouble() {
-  Trace* catchTrace = getCatchTrace();
+  IRTrace* catchTrace = getCatchTrace();
   SSATmp* src = popC();
   Type fromType = src->type();
   if (fromType.isDbl()) {
@@ -2705,7 +2705,7 @@ void HhbcTranslator::emitCastDouble() {
 }
 
 void HhbcTranslator::emitCastInt() {
-  Trace* catchTrace = getCatchTrace();
+  IRTrace* catchTrace = getCatchTrace();
   SSATmp* src = popC();
   Type fromType = src->type();
   if (fromType.isInt()) {
@@ -2740,7 +2740,7 @@ void HhbcTranslator::emitCastObject() {
 }
 
 void HhbcTranslator::emitCastString() {
-  Trace* catchTrace = getCatchTrace();
+  IRTrace* catchTrace = getCatchTrace();
   SSATmp* src = popC();
   Type fromType = src->type();
   if (fromType.isString()) {
@@ -2955,7 +2955,7 @@ void HhbcTranslator::emitCGet(const StringData* name,
                               EmitLdAddrFun emitLdAddr) {
   resultType = getResultType(resultType, isInferedType);
   if (!(this->*checkSupported)(name, resultType, 0)) return;
-  Trace* exit = (isInferedType || resultType.equals(Type::Cell))
+  IRTrace* exit = (isInferedType || resultType.equals(Type::Cell))
                 ? nullptr : getExitSlowTrace();
   SSATmp* ptr = (this->*emitLdAddr)(name,
                                     exitOnFailure
@@ -3147,24 +3147,24 @@ std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   return ret;
 }
 
-Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
+IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
   auto spillValues = peekSpillValues();
   return getExitTrace(targetBcOff, spillValues);
 }
 
-Trace* HhbcTranslator::getExitTrace(Offset targetBcOff,
+IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff,
                                     std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
   return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
     CustomExit{});
 }
 
-Trace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
+IRTrace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
                                         std::vector<SSATmp*>& spillValues,
                                         const StringData* warning) {
   assert(targetBcOff != -1);
   return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
-    [&](Trace* t) -> SSATmp* {
+    [&](IRTrace* t) -> SSATmp* {
       genFor(t, RaiseWarning, cns(warning));
       return nullptr;
     }
@@ -3172,7 +3172,7 @@ Trace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
 }
 
 template<class ExitLambda>
-Trace* HhbcTranslator::makeSideExit(Offset targetBcOff, ExitLambda exit) {
+IRTrace* HhbcTranslator::makeSideExit(Offset targetBcOff, ExitLambda exit) {
   auto spillValues = peekSpillValues();
   return getExitTraceImpl(targetBcOff,
                           ExitFlag::DelayedMarker,
@@ -3180,13 +3180,13 @@ Trace* HhbcTranslator::makeSideExit(Offset targetBcOff, ExitLambda exit) {
                           exit);
 }
 
-Trace* HhbcTranslator::getExitSlowTrace() {
+IRTrace* HhbcTranslator::getExitSlowTrace() {
   auto spillValues = peekSpillValues();
   return getExitTraceImpl(bcOff(), ExitFlag::NoIR, spillValues,
     CustomExit{});
 }
 
-Trace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
+IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
                                         ExitFlag flag,
                                         std::vector<SSATmp*>& stackValues,
                                         const CustomExit& customFn) {
@@ -3264,7 +3264,7 @@ Trace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
  * instruction as its taken field, code will be generated and the trace will be
  * registered with the unwinder automatically.
  */
-Trace* HhbcTranslator::getCatchTrace() {
+IRTrace* HhbcTranslator::getCatchTrace() {
   auto exit = m_tb->makeExitTrace(bcOff());
   assert(exit->blocks().size() == 1);
 
@@ -3277,7 +3277,7 @@ Trace* HhbcTranslator::getCatchTrace() {
   return exit;
 }
 
-SSATmp* HhbcTranslator::emitSpillStack(Trace* t, SSATmp* sp,
+SSATmp* HhbcTranslator::emitSpillStack(IRTrace* t, SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
   std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_stackDeficit)) };
   ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
@@ -3341,7 +3341,7 @@ SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId) {
  *       the tracked type for this local.  This check may be optimized away
  *       if we can determine that the inner type must match the tracked type.
  */
-SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, Trace* exitTrace) {
+SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, IRTrace* exitTrace) {
   auto loc = ldLoc(locId);
   assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
          "Currently we don't handle traces where locals are maybeBoxed");
@@ -3356,8 +3356,8 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, Trace* exitTrace) {
  * caller requires the catch trace to be generated at a point earlier than when
  * it calls this function.
  */
-SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Trace* target,
-                                       Trace* catchTrace /*   = nullptr */) {
+SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, IRTrace* target,
+                                       IRTrace* catchTrace /*   = nullptr */) {
   if (!catchTrace) catchTrace = getCatchTrace();
   auto const locVal = ldLocInner(id, target);
 
@@ -3379,7 +3379,7 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Trace* target,
  * Pre: exitTrace != nullptr if the local may be boxed
  */
 SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
-                                  Trace* exitTrace,
+                                  IRTrace* exitTrace,
                                   SSATmp* newVal,
                                   bool doRefCount) {
   assert(!newVal->type().maybeBoxed());
@@ -3412,12 +3412,12 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   return ret;
 }
 
-SSATmp* HhbcTranslator::stLoc(uint32_t id, Trace* exit, SSATmp* newVal) {
+SSATmp* HhbcTranslator::stLoc(uint32_t id, IRTrace* exit, SSATmp* newVal) {
   const bool doRefCount = true;
   return stLocImpl(id, exit, newVal, doRefCount);
 }
 
-SSATmp* HhbcTranslator::stLocNRC(uint32_t id, Trace* exit, SSATmp* newVal) {
+SSATmp* HhbcTranslator::stLocNRC(uint32_t id, IRTrace* exit, SSATmp* newVal) {
   const bool doRefCount = false;
   return stLocImpl(id, exit, newVal, doRefCount);
 }

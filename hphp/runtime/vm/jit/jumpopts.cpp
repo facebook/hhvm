@@ -33,7 +33,7 @@ namespace {
 // If main trace ends with an unconditional jump, and the target is not
 // reached by any other branch, then copy the target of the jump to the
 // end of the trace
-void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
+void elimUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
   boost::dynamic_bitset<> isJoin(irFactory->numBlocks());
   boost::dynamic_bitset<> havePred(irFactory->numBlocks());
   for (Block* block : trace->blocks()) {
@@ -58,7 +58,7 @@ void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   }
 }
 
-Block* findMainExitBlock(Trace* trace, IRFactory* irFactory) {
+Block* findMainExitBlock(IRTrace* trace, IRFactory* irFactory) {
   assert(trace->isMain());
   auto const back = trace->back();
 
@@ -136,7 +136,7 @@ bool jccCanBeDirectExit(Opcode opc) {
  * This leads to more efficient code because the service request stubs
  * will patch jumps in the main trace instead of off-trace.
  */
-void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
+void optimizeCondTraceExit(IRTrace* trace, IRFactory* irFactory) {
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -177,7 +177,7 @@ void optimizeCondTraceExit(Trace* trace, IRFactory* irFactory) {
  * branch to "normal exits".  We can optimize these into the
  * SideExitGuard* instructions that can be patched in place.
  */
-void optimizeSideExits(Trace* trace, IRFactory* irFactory) {
+void optimizeSideExits(IRTrace* trace, IRFactory* irFactory) {
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -220,7 +220,7 @@ void optimizeSideExits(Trace* trace, IRFactory* irFactory) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimizeJumps(Trace* trace, IRFactory* irFactory) {
+void optimizeJumps(IRTrace* trace, IRFactory* irFactory) {
   elimUnconditionalJump(trace, irFactory);
 
   if (RuntimeOption::EvalHHIRDirectExit) {

@@ -116,7 +116,7 @@ typedef StateVector<SSATmp, SSASet> SSACache;
 typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef std::list<const IRInstruction*> WorkList;
 
-void removeDeadInstructions(Trace* trace, const DceState& state) {
+void removeDeadInstructions(IRTrace* trace, const DceState& state) {
   auto &blocks = trace->blocks();
   for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
     auto cur = it; ++it;
@@ -148,7 +148,7 @@ bool isUnguardedLoad(IRInstruction* inst) {
 
 // removeUnreachable erases unreachable blocks from trace, and returns
 // a sorted list of the remaining blocks.
-BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
+BlockList removeUnreachable(IRTrace* trace, IRFactory* factory) {
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -184,7 +184,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
       }
     });
   }
-  forEachTrace(trace, [&](Trace* t) {
+  forEachTrace(trace, [&](IRTrace* t) {
     for (auto bit = t->begin(); bit != t->end();) {
       if (reachable[*bit]) {
         ++bit;
@@ -239,7 +239,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
 //    cannot be eliminated.
 // 3) Eliminates IncRef-DecRef pairs who value is used only by the DecRef and
 //    whose type does not run a destructor with side effects.
-void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
+void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
   WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
@@ -247,7 +247,7 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
       always_assert_log(s.decRefNZed(), [&]{
-        Trace* mainTrace = trace->isMain() ? trace : trace->main();
+        IRTrace* mainTrace = trace->isMain() ? trace : trace->main();
         return folly::format("\n{} has state {} in trace:\n{}{}\n",
                inst->toString(), s.toString(), mainTrace->toString(),
                trace == mainTrace ? "" : trace->toString()).str();
@@ -307,16 +307,16 @@ void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
  *    * replace each use of the original incref's result with the new
  *      incref's result.
  */
-void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
+void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
   assert(trace->isMain());
 
-  auto copyPropTrace = [] (Trace* trace) {
+  auto copyPropTrace = [] (IRTrace* trace) {
     forEachInst(trace, copyProp);
   };
 
   WorkList toSink;
 
-  auto processExit = [&] (Trace* exit) {
+  auto processExit = [&] (IRTrace* exit) {
     // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
     // instruction, and create a mapping between the original tmps to the sunk
     // tmps so that we can later replace the original ones with the sunk ones.
@@ -376,7 +376,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
     if (Block* target = inst->taken()) {
       if (!pushedTo[target->id()]) {
         pushedTo[target->id()] = 1;
-        Trace* exit = target->trace();
+        IRTrace* exit = target->trace();
         if (exit != trace) processExit(exit);
       }
     }
@@ -392,7 +392,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
+void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
                      UseCounts& uses) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -577,9 +577,9 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 // Publicly exported functions:
 
-void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
+void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
   auto removeEmptyExitTraces = [&] {
-    trace->exitTraces().remove_if([](Trace* exit) {
+    trace->exitTraces().remove_if([](IRTrace* exit) {
       return exit->blocks().empty();
     });
   };
@@ -621,7 +621,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   }
 
   // Optimize IncRefs and DecRefs.
-  forEachTrace(trace, [&](Trace* t) { optimizeRefCount(t, state, uses); });
+  forEachTrace(trace, [&](IRTrace* t) { optimizeRefCount(t, state, uses); });
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.
@@ -634,7 +634,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);
-  for (Trace* exit : trace->exitTraces()) {
+  for (IRTrace* exit : trace->exitTraces()) {
     removeDeadInstructions(exit, state);
   }
 

@@ -56,11 +56,11 @@ struct Block : boost::noncopyable {
     return &*it;
   }
 
-  uint32_t    id() const         { return m_id; }
-  Trace*      trace() const      { return m_trace; }
-  void        setTrace(Trace* t) { m_trace = t; }
-  Hint        hint() const       { return m_hint; }
-  void        setHint(Hint hint) { m_hint = hint; }
+  uint32_t    id() const           { return m_id; }
+  IRTrace*    trace() const        { return m_trace; }
+  void        setTrace(IRTrace* t) { m_trace = t; }
+  Hint        hint() const         { return m_hint; }
+  void        setHint(Hint hint)   { m_hint = hint; }
 
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
@@ -233,7 +233,7 @@ struct Block : boost::noncopyable {
 
  private:
   InstructionList m_instrs; // instructions in this block
-  Trace* m_trace;           // owner of this block.
+  IRTrace* m_trace;         // owner of this block.
   const Func* m_func;       // which func are we in
   Edge m_next;              // fall-through path; null if back()->isTerminal().
   const unsigned m_id;      // factory-assigned unique id of this block

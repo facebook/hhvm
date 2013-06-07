@@ -41,7 +41,7 @@ struct LayoutInfo {
  * goal is to minimize branching and put related blocks close to each
  * other.
  */
-LayoutInfo layoutBlocks(Trace*, const IRFactory&);
+LayoutInfo layoutBlocks(IRTrace*, const IRFactory&);
 
 //////////////////////////////////////////////////////////////////////
 

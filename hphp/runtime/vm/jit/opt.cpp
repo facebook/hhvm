@@ -77,7 +77,7 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
  * Insert asserts at various points in the IR.
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
-static void insertAsserts(Trace* trace, IRFactory* factory) {
+static void insertAsserts(IRTrace* trace, IRFactory* factory) {
   forEachTraceBlock(trace, [=](Block* block) {
     for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
@@ -101,7 +101,7 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
   });
 }
 
-void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
+void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->factory();
 
   auto finishPass = [&](const char* msg) {
@@ -111,7 +111,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  auto doPass = [&](void (*fn)(Trace*, IRFactory*),
+  auto doPass = [&](void (*fn)(IRTrace*, IRFactory*),
                     const char* msg) {
     fn(trace, irFactory);
     finishPass(msg);

@@ -122,7 +122,7 @@ struct CodegenState {
 
   // If non-null, represents the catch trace for the current
   // instruction, to be registered with the unwinder.
-  Trace* catchTrace;
+  IRTrace* catchTrace;
 };
 
 constexpr Reg64  rCgGP  (reg::r11);
@@ -132,8 +132,8 @@ constexpr RegXMM rCgXMM1(reg::xmm1);
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
-                CodegenState& state)
+  CodeGenerator(IRTrace* trace, Asm& as, Asm& astubs,
+                Transl::TranslatorX64* tx64, CodegenState& state)
     : m_as(as)
     , m_astubs(astubs)
     , m_tx64(tx64)
@@ -386,7 +386,7 @@ private:
   const RegAllocInfo& m_regs;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
-  Trace*              m_curTrace;
+  IRTrace*            m_curTrace;
   uint32_t            m_curBcOff; // offset of bytecode instr that produced
                                   // m_curInst
 };
@@ -565,7 +565,7 @@ const Func* loadClassCtor(Class* cls);
 
 Instance* createClHelper(Class*, int, ActRec*, TypedValue*);
 
-void genCodeForTrace(Trace*                  trace,
+void genCodeForTrace(IRTrace*                trace,
                      CodeGenerator::Asm&     a,
                      CodeGenerator::Asm&     astubs,
                      IRFactory*              irFactory,

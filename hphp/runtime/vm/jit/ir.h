@@ -62,7 +62,7 @@ using HPHP::Transl::ConditionCode;
 struct IRInstruction;
 struct SSATmp;
 struct Block;
-struct Trace;
+struct IRTrace;
 
 class FailedIRGen : public std::exception {
  public:
@@ -834,7 +834,7 @@ class RawMemSlot {
 };
 
 class SSATmp;
-class Trace;
+class IRTrace;
 class CodeGenerator;
 struct AsmInfo;
 class IRFactory;
@@ -932,7 +932,7 @@ typedef folly::Range<TCA> TcaRange;
 /**
  * Run all optimization passes on this trace
  */
-void optimizeTrace(Trace*, IRFactory* irFactory);
+void optimizeTrace(IRTrace*, IRFactory* irFactory);
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

@@ -5383,7 +5383,7 @@ LiveRegs computeLiveRegs(const IRFactory* factory, const RegAllocInfo& regs,
   return live_regs;
 }
 
-void genCodeForTrace(Trace* trace,
+void genCodeForTrace(IRTrace* trace,
                      CodeGenerator::Asm& as,
                      CodeGenerator::Asm& astubs,
                      IRFactory* irFactory,

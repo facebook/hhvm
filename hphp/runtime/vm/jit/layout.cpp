@@ -58,7 +58,7 @@ smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
  * so this just selects an appropriate reverse post order on the
  * blocks, and partitions the unlikely ones to astubs.
  */
-LayoutInfo layoutBlocks(Trace* trace, const IRFactory& irFactory) {
+LayoutInfo layoutBlocks(IRTrace* trace, const IRFactory& irFactory) {
   LayoutInfo ret;
   ret.blocks = rpoForCodegen(irFactory, trace->blocks().front());
 

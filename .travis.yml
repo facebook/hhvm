@@ -7,3 +7,5 @@ before_script:
   - sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8
   - HPHP_HOME=`pwd` make -j 8
 script: hphp/hhvm/hhvm hphp/test/run --arg --threads 8 quick zend
+notifications:
+  irc: "chat.freenode.net#hhvm"

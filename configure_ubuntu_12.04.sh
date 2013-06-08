@@ -2,10 +2,14 @@
 # 
 # Install all the dependancies for HipHop
 #
-# make sure you are running this script from the current directory
-# e.g. ./configure_ubuntu_12.04.sh
-#
 #########################################
+
+SCRIPT_NAME='./configure_ubuntu_12.04.sh'
+if [ "$0" != "$SCRIPT_NAME" ]; then
+  echo "Run the script from the hiphop-php directory like:"
+  echo "  $SCRIPT_NAME"
+  exit 1
+fi
 
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 export HPHP_HOME=`/bin/pwd`
@@ -61,3 +65,7 @@ rm -rf libevent curl google-glog jemalloc-3.0.0.tar.bz2 jemalloc-3.0.0
 
 # hphp
 cmake .
+
+echo "-------------------------------------------------------------------------"
+echo "Done. Now run:"
+echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. HPHP_HOME=\`pwd\` make"

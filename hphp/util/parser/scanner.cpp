@@ -85,7 +85,8 @@ void ScannerToken::xhpDecode() {
 Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0) {
+      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0),
+      m_listener(nullptr) {
   m_stream = new std::ifstream(filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
@@ -101,7 +102,8 @@ Scanner::Scanner(std::istream &stream, int type,
                  bool md5 /* = false */)
     : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0) {
+      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0),
+      m_listener(nullptr) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -113,7 +115,7 @@ Scanner::Scanner(const char *source, int len, int type,
     : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
       m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isHackMode(0),
-      m_lookaheadLtDepth(0) {
+      m_lookaheadLtDepth(0), m_listener(nullptr) {
   assert(m_source);
   m_streamOwner = false;
   if (md5) {
@@ -147,12 +149,12 @@ Scanner::~Scanner() {
   }
 }
 
-void Scanner::setHashBang(const char *rawText, int rawLeng) {
+void Scanner::setHashBang(const char *rawText, int rawLeng, int type) {
   if (m_type & ReturnAllTokens) {
     setToken(rawText, rawLeng);
   } else {
     m_token->setText("", 0);
-    incLoc(rawText, rawLeng);
+    incLoc(rawText, rawLeng, type);
   }
 }
 
@@ -487,9 +489,12 @@ void Scanner::warn(const char* fmt, ...) {
                   m_filename.c_str(), m_loc->line0, m_loc->char0);
 }
 
-void Scanner::incLoc(const char *rawText, int rawLeng) {
+void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
   assert(rawText);
   assert(rawLeng > 0);
+  if (m_listener) {
+    m_token->setID(m_listener->publish(rawText, rawLeng, type));
+  }
 
   m_loc->cursor += rawLeng;
 

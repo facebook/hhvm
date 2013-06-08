@@ -27,12 +27,15 @@
 #define RESET_YYCURSOR yyg->yy_hold_char = *YYCURSOR; *YYCURSOR = '\0';
 
 // macros for rules
-#define SETTOKEN _scanner->setToken(yytext, yyleng)
-#define STEPPOS  _scanner->stepPos(yytext, yyleng)
+#define RETTOKEN(t) do {_scanner->setToken(yytext, yyleng, t); return t;} \
+  while (0)
+#define RETSTEP(t)  do {_scanner->stepPos(yytext, yyleng, t); return t;} \
+  while (0)
+#define SETTOKEN(t) _scanner->setToken(yytext, yyleng, t)
+#define STEPPOS(t)  _scanner->stepPos(yytext, yyleng, t)
 
-#define HH_ONLY_KEYWORD(tok) do {                             \
-  SETTOKEN;                                                   \
-  return _scanner->hipHopSyntaxEnabled() ? tok : T_STRING;    \
+#define HH_ONLY_KEYWORD(tok) do {                               \
+  RETTOKEN(_scanner->hipHopSyntaxEnabled() ? tok : T_STRING); \
 } while (0)
 
 #define IS_LABEL_START(c) \
@@ -211,65 +214,64 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 %%
 
-<ST_IN_SCRIPTING>"exit"                 { SETTOKEN; return T_EXIT;}
-<ST_IN_SCRIPTING>"die"                  { SETTOKEN; return T_EXIT;}
-<ST_IN_SCRIPTING>"function"             { SETTOKEN; return T_FUNCTION;}
-<ST_IN_SCRIPTING>"const"                { SETTOKEN; return T_CONST;}
-<ST_IN_SCRIPTING>"return"               { SETTOKEN; return T_RETURN;}
-<ST_IN_SCRIPTING>"yield"                { SETTOKEN; return T_YIELD;}
-<ST_IN_SCRIPTING>"try"                  { SETTOKEN; return T_TRY;}
-<ST_IN_SCRIPTING>"catch"                { SETTOKEN; return T_CATCH;}
-<ST_IN_SCRIPTING>"finally"              { SETTOKEN; return T_FINALLY;}
-<ST_IN_SCRIPTING>"throw"                { SETTOKEN; return T_THROW;}
-<ST_IN_SCRIPTING>"if"                   { SETTOKEN; return T_IF;}
-<ST_IN_SCRIPTING>"elseif"               { SETTOKEN; return T_ELSEIF;}
-<ST_IN_SCRIPTING>"endif"                { SETTOKEN; return T_ENDIF;}
-<ST_IN_SCRIPTING>"else"                 { SETTOKEN; return T_ELSE;}
-<ST_IN_SCRIPTING>"while"                { SETTOKEN; return T_WHILE;}
-<ST_IN_SCRIPTING>"endwhile"             { SETTOKEN; return T_ENDWHILE;}
-<ST_IN_SCRIPTING>"do"                   { SETTOKEN; return T_DO;}
-<ST_IN_SCRIPTING>"for"                  { SETTOKEN; return T_FOR;}
-<ST_IN_SCRIPTING>"endfor"               { SETTOKEN; return T_ENDFOR;}
-<ST_IN_SCRIPTING>"foreach"              { SETTOKEN; return T_FOREACH;}
-<ST_IN_SCRIPTING>"endforeach"           { SETTOKEN; return T_ENDFOREACH;}
-<ST_IN_SCRIPTING>"declare"              { SETTOKEN; return T_DECLARE;}
-<ST_IN_SCRIPTING>"enddeclare"           { SETTOKEN; return T_ENDDECLARE;}
-<ST_IN_SCRIPTING>"instanceof"           { SETTOKEN; return T_INSTANCEOF;}
-<ST_IN_SCRIPTING>"as"                   { SETTOKEN; return T_AS;}
-<ST_IN_SCRIPTING>"switch"               { SETTOKEN; return T_SWITCH;}
-<ST_IN_SCRIPTING>"endswitch"            { SETTOKEN; return T_ENDSWITCH;}
-<ST_IN_SCRIPTING>"case"                 { SETTOKEN; return T_CASE;}
-<ST_IN_SCRIPTING>"default"              { SETTOKEN; return T_DEFAULT;}
-<ST_IN_SCRIPTING>"break"                { SETTOKEN; return T_BREAK;}
-<ST_IN_SCRIPTING>"continue"             { SETTOKEN; return T_CONTINUE;}
-<ST_IN_SCRIPTING>"goto"                 { SETTOKEN; return T_GOTO;}
-<ST_IN_SCRIPTING>"echo"                 { SETTOKEN; return T_ECHO;}
-<ST_IN_SCRIPTING>"print"                { SETTOKEN; return T_PRINT;}
-<ST_IN_SCRIPTING>"class"                { SETTOKEN; return T_CLASS;}
-<ST_IN_SCRIPTING>"interface"            { SETTOKEN; return T_INTERFACE;}
-<ST_IN_SCRIPTING>"trait"                { SETTOKEN; return T_TRAIT;}
-<ST_IN_SCRIPTING>"insteadof"            { SETTOKEN; return T_INSTEADOF;}
-<ST_IN_SCRIPTING>"extends"              { SETTOKEN; return T_EXTENDS;}
-<ST_IN_SCRIPTING>"implements"           { SETTOKEN; return T_IMPLEMENTS;}
-<ST_IN_SCRIPTING>"attribute"            { SETTOKEN; return T_XHP_ATTRIBUTE;}
-<ST_IN_SCRIPTING>"category"             { SETTOKEN; return T_XHP_CATEGORY;}
-<ST_IN_SCRIPTING>"children"             { SETTOKEN; return T_XHP_CHILDREN;}
-<ST_IN_SCRIPTING>"required"             { SETTOKEN; return T_XHP_REQUIRED;}
-<ST_IN_SCRIPTING>"enum"                 { SETTOKEN; return T_XHP_ENUM;}
+<ST_IN_SCRIPTING>"exit"                 { RETTOKEN(T_EXIT);}
+<ST_IN_SCRIPTING>"die"                  { RETTOKEN(T_EXIT);}
+<ST_IN_SCRIPTING>"function"             { RETTOKEN(T_FUNCTION);}
+<ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
+<ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
+<ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
+<ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
+<ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
+<ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
+<ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
+<ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
+<ST_IN_SCRIPTING>"elseif"               { RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
+<ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
+<ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}
+<ST_IN_SCRIPTING>"endwhile"             { RETTOKEN(T_ENDWHILE);}
+<ST_IN_SCRIPTING>"do"                   { RETTOKEN(T_DO);}
+<ST_IN_SCRIPTING>"for"                  { RETTOKEN(T_FOR);}
+<ST_IN_SCRIPTING>"endfor"               { RETTOKEN(T_ENDFOR);}
+<ST_IN_SCRIPTING>"foreach"              { RETTOKEN(T_FOREACH);}
+<ST_IN_SCRIPTING>"endforeach"           { RETTOKEN(T_ENDFOREACH);}
+<ST_IN_SCRIPTING>"declare"              { RETTOKEN(T_DECLARE);}
+<ST_IN_SCRIPTING>"enddeclare"           { RETTOKEN(T_ENDDECLARE);}
+<ST_IN_SCRIPTING>"instanceof"           { RETTOKEN(T_INSTANCEOF);}
+<ST_IN_SCRIPTING>"as"                   { RETTOKEN(T_AS);}
+<ST_IN_SCRIPTING>"switch"               { RETTOKEN(T_SWITCH);}
+<ST_IN_SCRIPTING>"endswitch"            { RETTOKEN(T_ENDSWITCH);}
+<ST_IN_SCRIPTING>"case"                 { RETTOKEN(T_CASE);}
+<ST_IN_SCRIPTING>"default"              { RETTOKEN(T_DEFAULT);}
+<ST_IN_SCRIPTING>"break"                { RETTOKEN(T_BREAK);}
+<ST_IN_SCRIPTING>"continue"             { RETTOKEN(T_CONTINUE);}
+<ST_IN_SCRIPTING>"goto"                 { RETTOKEN(T_GOTO);}
+<ST_IN_SCRIPTING>"echo"                 { RETTOKEN(T_ECHO);}
+<ST_IN_SCRIPTING>"print"                { RETTOKEN(T_PRINT);}
+<ST_IN_SCRIPTING>"class"                { RETTOKEN(T_CLASS);}
+<ST_IN_SCRIPTING>"interface"            { RETTOKEN(T_INTERFACE);}
+<ST_IN_SCRIPTING>"trait"                { RETTOKEN(T_TRAIT);}
+<ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
+<ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
+<ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
+<ST_IN_SCRIPTING>"attribute"            { RETTOKEN(T_XHP_ATTRIBUTE);}
+<ST_IN_SCRIPTING>"category"             { RETTOKEN(T_XHP_CATEGORY);}
+<ST_IN_SCRIPTING>"children"             { RETTOKEN(T_XHP_CHILDREN);}
+<ST_IN_SCRIPTING>"required"             { RETTOKEN(T_XHP_REQUIRED);}
+<ST_IN_SCRIPTING>"enum"                 { RETTOKEN(T_XHP_ENUM);}
 
 <ST_IN_SCRIPTING>"->" {
-        STEPPOS;
+        STEPPOS(T_OBJECT_OPERATOR);
         yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
         return T_OBJECT_OPERATOR;
 }
 
 <ST_LOOKING_FOR_PROPERTY>"->" {
-        STEPPOS;
-        return T_OBJECT_OPERATOR;
+        RETSTEP(T_OBJECT_OPERATOR);
 }
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
-        SETTOKEN;
+        SETTOKEN(T_STRING);
         yy_pop_state(yyscanner);
         return T_STRING;
 }
@@ -279,133 +281,116 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         yy_pop_state(yyscanner);
 }
 
-<ST_IN_SCRIPTING>"::"                { STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
-<ST_IN_SCRIPTING>"\\"                { SETTOKEN;return T_NS_SEPARATOR;}
-<ST_IN_SCRIPTING>"new"               { SETTOKEN;return T_NEW;}
-<ST_IN_SCRIPTING>"clone"             { SETTOKEN;return T_CLONE;}
-<ST_IN_SCRIPTING>"var"               { SETTOKEN;return T_VAR;}
+<ST_IN_SCRIPTING>"::"                { RETSTEP(T_PAAMAYIM_NEKUDOTAYIM);}
+<ST_IN_SCRIPTING>"\\"                { RETTOKEN(T_NS_SEPARATOR);}
+<ST_IN_SCRIPTING>"new"               { RETTOKEN(T_NEW);}
+<ST_IN_SCRIPTING>"clone"             { RETTOKEN(T_CLONE);}
+<ST_IN_SCRIPTING>"var"               { RETTOKEN(T_VAR);}
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_INT_CAST;
+    RETSTEP(T_INT_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_DOUBLE_CAST;
+    RETSTEP(T_DOUBLE_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_STRING_CAST;
+    RETSTEP(T_STRING_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_ARRAY_CAST;
+    RETSTEP(T_ARRAY_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_OBJECT_CAST;
+    RETSTEP(T_OBJECT_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_BOOL_CAST;
+    RETSTEP(T_BOOL_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
   if (_scanner->lastToken() != T_FUNCTION) {
-    STEPPOS;
-    return T_UNSET_CAST;
+    RETSTEP(T_UNSET_CAST);
   }
   yyless(1);
-  STEPPOS;
-  return '(';
+  RETSTEP('(');
 }
 
-<ST_IN_SCRIPTING>"eval"               { SETTOKEN; return T_EVAL;}
-<ST_IN_SCRIPTING>"include"            { SETTOKEN; return T_INCLUDE;}
-<ST_IN_SCRIPTING>"include_once"       { SETTOKEN; return T_INCLUDE_ONCE;}
-<ST_IN_SCRIPTING>"require"            { SETTOKEN; return T_REQUIRE;}
-<ST_IN_SCRIPTING>"require_once"       { SETTOKEN; return T_REQUIRE_ONCE;}
-<ST_IN_SCRIPTING>"namespace"          { SETTOKEN; return T_NAMESPACE;}
-<ST_IN_SCRIPTING>"use"                { SETTOKEN; return T_USE;}
-<ST_IN_SCRIPTING>"global"             { SETTOKEN; return T_GLOBAL;}
-<ST_IN_SCRIPTING>"isset"              { SETTOKEN; return T_ISSET;}
-<ST_IN_SCRIPTING>"empty"              { SETTOKEN; return T_EMPTY;}
-<ST_IN_SCRIPTING>"__halt_compiler"    { SETTOKEN; return T_HALT_COMPILER;}
-<ST_IN_SCRIPTING>"__compiler_halt_offset__" {
-  SETTOKEN;
-  return T_COMPILER_HALT_OFFSET;
-}
-<ST_IN_SCRIPTING>"static"             { SETTOKEN; return T_STATIC;}
-<ST_IN_SCRIPTING>"abstract"           { SETTOKEN; return T_ABSTRACT;}
-<ST_IN_SCRIPTING>"final"              { SETTOKEN; return T_FINAL;}
-<ST_IN_SCRIPTING>"private"            { SETTOKEN; return T_PRIVATE;}
-<ST_IN_SCRIPTING>"protected"          { SETTOKEN; return T_PROTECTED;}
-<ST_IN_SCRIPTING>"public"             { SETTOKEN; return T_PUBLIC;}
-<ST_IN_SCRIPTING>"unset"              { SETTOKEN; return T_UNSET;}
-<ST_IN_SCRIPTING>"=>"                 { STEPPOS; return T_DOUBLE_ARROW;}
-<ST_IN_SCRIPTING>"list"               { SETTOKEN; return T_LIST;}
-<ST_IN_SCRIPTING>"array"              { SETTOKEN; return T_ARRAY;}
-<ST_IN_SCRIPTING>"++"                 { STEPPOS; return T_INC;}
-<ST_IN_SCRIPTING>"--"                 { STEPPOS; return T_DEC;}
-<ST_IN_SCRIPTING>"==="                { STEPPOS; return T_IS_IDENTICAL;}
-<ST_IN_SCRIPTING>"!=="                { STEPPOS; return T_IS_NOT_IDENTICAL;}
-<ST_IN_SCRIPTING>"=="                 { STEPPOS; return T_IS_EQUAL;}
-<ST_IN_SCRIPTING>"!="|"<>"            { STEPPOS; return T_IS_NOT_EQUAL;}
-<ST_IN_SCRIPTING>"<="                 { STEPPOS; return T_IS_SMALLER_OR_EQUAL;}
-<ST_IN_SCRIPTING>">="                 { STEPPOS; return T_IS_GREATER_OR_EQUAL;}
-<ST_IN_SCRIPTING>"+="                 { STEPPOS; return T_PLUS_EQUAL;}
-<ST_IN_SCRIPTING>"-="                 { STEPPOS; return T_MINUS_EQUAL;}
-<ST_IN_SCRIPTING>"*="                 { STEPPOS; return T_MUL_EQUAL;}
-<ST_IN_SCRIPTING>"/="                 { STEPPOS; return T_DIV_EQUAL;}
-<ST_IN_SCRIPTING>".="                 { STEPPOS; return T_CONCAT_EQUAL;}
-<ST_IN_SCRIPTING>"%="                 { STEPPOS; return T_MOD_EQUAL;}
-<ST_IN_SCRIPTING>"<<="                { STEPPOS; return T_SL_EQUAL;}
-<ST_IN_SCRIPTING>">>="                { STEPPOS; return T_SR_EQUAL;}
-<ST_IN_SCRIPTING>"&="                 { STEPPOS; return T_AND_EQUAL;}
-<ST_IN_SCRIPTING>"|="                 { STEPPOS; return T_OR_EQUAL;}
-<ST_IN_SCRIPTING>"^="                 { STEPPOS; return T_XOR_EQUAL;}
-<ST_IN_SCRIPTING>"||"                 { STEPPOS; return T_BOOLEAN_OR;}
-<ST_IN_SCRIPTING>"&&"                 { STEPPOS; return T_BOOLEAN_AND;}
-<ST_IN_SCRIPTING>"OR"                 { SETTOKEN; return T_LOGICAL_OR;}
-<ST_IN_SCRIPTING>"AND"                { SETTOKEN; return T_LOGICAL_AND;}
-<ST_IN_SCRIPTING>"XOR"                { SETTOKEN; return T_LOGICAL_XOR;}
-<ST_IN_SCRIPTING>"<<"                 { STEPPOS; return T_SL;}
-<ST_IN_SCRIPTING>"..."                { SETTOKEN; return T_VARARG; }
+<ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}
+<ST_IN_SCRIPTING>"include"            { RETTOKEN(T_INCLUDE);}
+<ST_IN_SCRIPTING>"include_once"       { RETTOKEN(T_INCLUDE_ONCE);}
+<ST_IN_SCRIPTING>"require"            { RETTOKEN(T_REQUIRE);}
+<ST_IN_SCRIPTING>"require_once"       { RETTOKEN(T_REQUIRE_ONCE);}
+<ST_IN_SCRIPTING>"namespace"          { RETTOKEN(T_NAMESPACE);}
+<ST_IN_SCRIPTING>"use"                { RETTOKEN(T_USE);}
+<ST_IN_SCRIPTING>"global"             { RETTOKEN(T_GLOBAL);}
+<ST_IN_SCRIPTING>"isset"              { RETTOKEN(T_ISSET);}
+<ST_IN_SCRIPTING>"empty"              { RETTOKEN(T_EMPTY);}
+<ST_IN_SCRIPTING>"__halt_compiler"    { RETTOKEN(T_HALT_COMPILER);}
+<ST_IN_SCRIPTING>"__compiler_halt_offset__" { RETTOKEN(T_COMPILER_HALT_OFFSET);}
+<ST_IN_SCRIPTING>"static"             { RETTOKEN(T_STATIC);}
+<ST_IN_SCRIPTING>"abstract"           { RETTOKEN(T_ABSTRACT);}
+<ST_IN_SCRIPTING>"final"              { RETTOKEN(T_FINAL);}
+<ST_IN_SCRIPTING>"private"            { RETTOKEN(T_PRIVATE);}
+<ST_IN_SCRIPTING>"protected"          { RETTOKEN(T_PROTECTED);}
+<ST_IN_SCRIPTING>"public"             { RETTOKEN(T_PUBLIC);}
+<ST_IN_SCRIPTING>"unset"              { RETTOKEN(T_UNSET);}
+<ST_IN_SCRIPTING>"=>"                 { RETSTEP(T_DOUBLE_ARROW);}
+<ST_IN_SCRIPTING>"list"               { RETTOKEN(T_LIST);}
+<ST_IN_SCRIPTING>"array"              { RETTOKEN(T_ARRAY);}
+<ST_IN_SCRIPTING>"++"                 { RETSTEP(T_INC);}
+<ST_IN_SCRIPTING>"--"                 { RETSTEP(T_DEC);}
+<ST_IN_SCRIPTING>"==="                { RETSTEP(T_IS_IDENTICAL);}
+<ST_IN_SCRIPTING>"!=="                { RETSTEP(T_IS_NOT_IDENTICAL);}
+<ST_IN_SCRIPTING>"=="                 { RETSTEP(T_IS_EQUAL);}
+<ST_IN_SCRIPTING>"!="|"<>"            { RETSTEP(T_IS_NOT_EQUAL);}
+<ST_IN_SCRIPTING>"<="                 { RETSTEP(T_IS_SMALLER_OR_EQUAL);}
+<ST_IN_SCRIPTING>">="                 { RETSTEP(T_IS_GREATER_OR_EQUAL);}
+<ST_IN_SCRIPTING>"+="                 { RETSTEP(T_PLUS_EQUAL);}
+<ST_IN_SCRIPTING>"-="                 { RETSTEP(T_MINUS_EQUAL);}
+<ST_IN_SCRIPTING>"*="                 { RETSTEP(T_MUL_EQUAL);}
+<ST_IN_SCRIPTING>"/="                 { RETSTEP(T_DIV_EQUAL);}
+<ST_IN_SCRIPTING>".="                 { RETSTEP(T_CONCAT_EQUAL);}
+<ST_IN_SCRIPTING>"%="                 { RETSTEP(T_MOD_EQUAL);}
+<ST_IN_SCRIPTING>"<<="                { RETSTEP(T_SL_EQUAL);}
+<ST_IN_SCRIPTING>">>="                { RETSTEP(T_SR_EQUAL);}
+<ST_IN_SCRIPTING>"&="                 { RETSTEP(T_AND_EQUAL);}
+<ST_IN_SCRIPTING>"|="                 { RETSTEP(T_OR_EQUAL);}
+<ST_IN_SCRIPTING>"^="                 { RETSTEP(T_XOR_EQUAL);}
+<ST_IN_SCRIPTING>"||"                 { RETSTEP(T_BOOLEAN_OR);}
+<ST_IN_SCRIPTING>"&&"                 { RETSTEP(T_BOOLEAN_AND);}
+<ST_IN_SCRIPTING>"OR"                 { RETTOKEN(T_LOGICAL_OR);}
+<ST_IN_SCRIPTING>"AND"                { RETTOKEN(T_LOGICAL_AND);}
+<ST_IN_SCRIPTING>"XOR"                { RETTOKEN(T_LOGICAL_XOR);}
+<ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
+<ST_IN_SCRIPTING>"..."                { RETTOKEN(T_VARARG); }
 
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
@@ -413,19 +398,17 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING>">>" {
   if (_scanner->getLookaheadLtDepth() < 2) {
-    STEPPOS;
-    return T_SR;
+    RETSTEP(T_SR);
   }
   yyless(1);
-  STEPPOS;
-  return '>';
+  RETSTEP('>');
 }
 
 <ST_IN_SCRIPTING>"<"[a-zA-Z_\x7f-\xff] {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpTag) {
     yyless(1);
-    STEPPOS;
+    STEPPOS(T_XHP_TAG_LT);
     yy_push_state(ST_XHP_IN_TAG, yyscanner);
     return T_XHP_TAG_LT;
   }
@@ -437,82 +420,75 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     break;
   }
   yyless(1);
-  STEPPOS;
   if (_scanner->hipHopSyntaxEnabled() && (ntt & NextTokenType::TypeListMaybe)) {
     // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
     // to resolve this.
-    return T_UNRESOLVED_LT;
+    RETSTEP(T_UNRESOLVED_LT);
   }
-  return '<';
+  RETSTEP('<');
 }
 
 <ST_IN_SCRIPTING>"<" {
-  STEPPOS;
   if (_scanner->hipHopSyntaxEnabled()) {
     int ntt = getNextTokenType(_scanner->lastToken());
     if (ntt & NextTokenType::TypeListMaybe) {
       // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
       // to resolve this.
-      return T_UNRESOLVED_LT;
+      RETSTEP(T_UNRESOLVED_LT);
     }
   }
-  return '<';
+  RETSTEP('<');
 }
 
 <ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|[a-zA-Z_\x7f-\xff])) {
   BEGIN(ST_IN_SCRIPTING);
   yyless(1);
-  STEPPOS;
+  STEPPOS(T_XHP_TAG_LT);
   yy_push_state(ST_XHP_IN_TAG, yyscanner);
   return T_XHP_TAG_LT;
 }
 
 <ST_LT_CHECK>"<" {
   BEGIN(ST_IN_SCRIPTING);
-  STEPPOS;
-  return '<';
+  RETSTEP('<');
 }
 
 <ST_IN_SCRIPTING>":"{XHPLABEL}  {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpClassName) {
     yytext++; yyleng--; // skipping the first colon
-    SETTOKEN;
-    return T_XHP_LABEL;
+    RETTOKEN(T_XHP_LABEL);
   }
   yyless(1);
-  STEPPOS;
-  return ':';
+  RETSTEP(':');
 }
 
 <ST_IN_SCRIPTING>"%"{XHPLABEL}  {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpCategoryName) {
     yytext++; yyleng--; // skipping "%"
-    SETTOKEN;
-    return T_XHP_CATEGORY_LABEL;
+    RETTOKEN(T_XHP_CATEGORY_LABEL);
   }
   yyless(1);
-  STEPPOS;
-  return '%';
+  RETSTEP('%');
 }
 
-<ST_IN_SCRIPTING>{TOKENS}             {STEPPOS; return yytext[0];}
+<ST_IN_SCRIPTING>{TOKENS}             {RETSTEP(yytext[0]);}
 
 <ST_IN_SCRIPTING>"{" {
-        STEPPOS;
+        STEPPOS('{');
         yy_push_state(ST_IN_SCRIPTING, yyscanner);
         return '{';
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
-        STEPPOS;
+        STEPPOS(T_DOLLAR_OPEN_CURLY_BRACES);
         yy_push_state(ST_LOOKING_FOR_VARNAME, yyscanner);
         return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
 <ST_IN_SCRIPTING>"}" {
-        STEPPOS;
+        STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
         struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -521,7 +497,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_LOOKING_FOR_VARNAME>{LABEL} {
-        SETTOKEN;
+        SETTOKEN(T_STRING_VARNAME);
         // Change state to IN_SCRIPTING; current state will be popped
         // when we encounter '}'
         BEGIN(ST_IN_SCRIPTING);
@@ -536,86 +512,81 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{LNUM} {
-        SETTOKEN;
         errno = 0;
         long ret = strtoll(yytext, NULL, 0);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Dec number is too big: %s", yytext);
                 if (_scanner->isHackMode()) {
-                        return T_HACK_ERROR;
+                        RETTOKEN(T_HACK_ERROR);
                 }
         }
-        return T_LNUMBER;
+        RETTOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{HNUM} {
-        SETTOKEN;
         errno = 0;
         long ret = strtoull(yytext, NULL, 16);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Hex number is too big: %s", yytext);
                 if (_scanner->isHackMode()) {
-                        return T_HACK_ERROR;
+                        RETTOKEN(T_HACK_ERROR);
                 }
         }
-        return T_LNUMBER;
+        RETTOKEN(T_LNUMBER);
 }
 
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
-        SETTOKEN;
         errno = 0;
         long ret = strtoll(yytext, NULL, 0);
         if (ret == LLONG_MAX && errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
                 if (_scanner->isHackMode()) {
-                        return T_HACK_ERROR;
+                        RETTOKEN(T_HACK_ERROR);
                 }
         }
-        return T_NUM_STRING;
+        RETTOKEN(T_NUM_STRING);
 }
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
-        SETTOKEN;
-        return T_NUM_STRING;
+        RETTOKEN(T_NUM_STRING);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{DNUM}|{EXPONENT_DNUM} {
-        SETTOKEN;
-        return T_DNUMBER;
+        RETTOKEN(T_DNUMBER);
 }
 
-<ST_IN_SCRIPTING>"__CLASS__"            { SETTOKEN; return T_CLASS_C; }
-<ST_IN_SCRIPTING>"__TRAIT__"            { SETTOKEN; return T_TRAIT_C; }
-<ST_IN_SCRIPTING>"__FUNCTION__"         { SETTOKEN; return T_FUNC_C;  }
-<ST_IN_SCRIPTING>"__METHOD__"           { SETTOKEN; return T_METHOD_C;}
-<ST_IN_SCRIPTING>"__LINE__"             { SETTOKEN; return T_LINE;    }
-<ST_IN_SCRIPTING>"__FILE__"             { SETTOKEN; return T_FILE;    }
-<ST_IN_SCRIPTING>"__DIR__"              { SETTOKEN; return T_DIR;     }
-<ST_IN_SCRIPTING>"__NAMESPACE__"        { SETTOKEN; return T_NS_C;    }
+<ST_IN_SCRIPTING>"__CLASS__"            { RETTOKEN(T_CLASS_C); }
+<ST_IN_SCRIPTING>"__TRAIT__"            { RETTOKEN(T_TRAIT_C); }
+<ST_IN_SCRIPTING>"__FUNCTION__"         { RETTOKEN(T_FUNC_C); }
+<ST_IN_SCRIPTING>"__METHOD__"           { RETTOKEN(T_METHOD_C);}
+<ST_IN_SCRIPTING>"__LINE__"             { RETTOKEN(T_LINE); }
+<ST_IN_SCRIPTING>"__FILE__"             { RETTOKEN(T_FILE); }
+<ST_IN_SCRIPTING>"__DIR__"              { RETTOKEN(T_DIR); }
+<ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
 <INITIAL>"#"[^\n]*"\n" {
-        _scanner->setHashBang(yytext, yyleng);
+        _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
         return T_INLINE_HTML;
 }
 
 <INITIAL>(([^<#]|"<"[^?%s<]){1,400})|"<s"|"<" {
-        SETTOKEN;
+        SETTOKEN(T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_IN_HTML, yyscanner);
         return T_INLINE_HTML;
 }
 
 <ST_IN_HTML,ST_AFTER_HASHBANG>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
-        SETTOKEN;
+        SETTOKEN(T_INLINE_HTML);
         BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<?"|("<?php"([ \t]|{NEWLINE}))|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
-        SETTOKEN;
         if (_scanner->shortTags() || yyleng > 2) {
+          SETTOKEN(T_OPEN_TAG);
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
           } else {
@@ -623,6 +594,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           }
           return T_OPEN_TAG;
         } else {
+          SETTOKEN(T_INLINE_HTML);
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
             yy_push_state(ST_IN_HTML, yyscanner);
@@ -634,7 +606,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%="|"<?=" {
-        SETTOKEN;
         if ((yytext[1]=='%' && _scanner->aspTags()) ||
             (yytext[1]=='?' && _scanner->shortTags())) {
           if (YY_START == INITIAL) {
@@ -642,7 +613,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           } else {
             yy_pop_state(yyscanner);
           }
-          return T_ECHO; //return T_OPEN_TAG_WITH_ECHO;
+          RETTOKEN(T_ECHO); //return T_OPEN_TAG_WITH_ECHO;
         } else {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
@@ -650,19 +621,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           } else if (YY_START == ST_AFTER_HASHBANG) {
             BEGIN(ST_IN_HTML);
           }
-          return T_INLINE_HTML;
+          RETTOKEN(T_INLINE_HTML);
         }
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%" {
-        SETTOKEN;
         if (_scanner->aspTags()) {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
           } else {
             yy_pop_state(yyscanner);
           }
-          return T_OPEN_TAG;
+          RETTOKEN(T_OPEN_TAG);
         } else {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
@@ -670,7 +640,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           } else if (YY_START == ST_AFTER_HASHBANG) {
             BEGIN(ST_IN_HTML);
           }
-          return T_INLINE_HTML;
+          RETTOKEN(T_INLINE_HTML);
         }
 }
 
@@ -683,27 +653,27 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           _scanner->error("Hack mode: content before <?hh");
           return T_HACK_ERROR;
         }
-        STEPPOS;
+        STEPPOS(T_OPEN_TAG);
         _scanner->setHackMode();
         return T_OPEN_TAG;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
-        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
+        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);
         return T_VARIABLE;
 }
 
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
         yyless(yyleng - 3);
         yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
-        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
+        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);
         return T_VARIABLE;
 }
 
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
         yyless(yyleng - 1);
         yy_push_state(ST_VAR_OFFSET, yyscanner);
-        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
+        _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);
         return T_VARIABLE;
 }
 
@@ -723,18 +693,15 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
            line number */
         yyless(0);
         yy_pop_state(yyscanner);
-        STEPPOS;
-        return T_ENCAPSED_AND_WHITESPACE;
+        RETSTEP(T_ENCAPSED_AND_WHITESPACE);
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
-        SETTOKEN;
-        return T_STRING;
+        RETTOKEN(T_STRING);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{WHITESPACE} {
-        STEPPOS;
-        return T_WHITESPACE;
+        RETSTEP(T_WHITESPACE);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>"#"|"//" {
@@ -755,14 +722,14 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
                 yymore();
                 break;
         default:
-                STEPPOS;
+                STEPPOS(T_COMMENT);
                 yy_pop_state(yyscanner);
                 return T_COMMENT;
         }
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
-        STEPPOS;
+        STEPPOS(T_COMMENT);
         yy_pop_state(yyscanner);
         return T_COMMENT;
 }
@@ -773,7 +740,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           return T_HACK_ERROR;
         }
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
-                _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2);
+          _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2, T_COMMENT);
                 yyless(yyleng-2);
                 yy_pop_state(yyscanner);
                 return T_COMMENT;
@@ -797,13 +764,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_DOC_COMMENT>"*/" {
-        SETTOKEN;
+        SETTOKEN(T_DOC_COMMENT);
         yy_pop_state(yyscanner);
         return T_DOC_COMMENT;
 }
 
 <ST_COMMENT>"*/" {
-        STEPPOS;
+        STEPPOS(T_COMMENT);
         yy_pop_state(yyscanner);
         return T_COMMENT;
 }
@@ -817,7 +784,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_XHP_COMMENT>"-->" {
-        STEPPOS;
+        STEPPOS(T_COMMENT);
         yy_pop_state(yyscanner);
         return T_COMMENT;
 }
@@ -831,38 +798,35 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           _scanner->error("Hack mode: ?> not allowed");
           return T_HACK_ERROR;
         }
-        STEPPOS;
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {
-          return T_CLOSE_TAG;
+          RETSTEP(T_CLOSE_TAG);
         } else {
-          return ';';
+          RETSTEP(';');
         }
 }
 
 <ST_IN_SCRIPTING>"</script"{WHITESPACE}*">"{NEWLINE}? {
-        STEPPOS;
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {
-          return T_CLOSE_TAG;
+          RETSTEP(T_CLOSE_TAG);
         } else {
-          return ';';
+          RETSTEP(';');
         }
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
         if (_scanner->aspTags()) {
-                STEPPOS;
                 yy_push_state(ST_IN_HTML, yyscanner);
                 if (_scanner->full()) {
-                  return T_CLOSE_TAG;
+                  RETSTEP(T_CLOSE_TAG);
                 } else {
-                  return ';';
+                  RETSTEP(';');
                 }
         } else {
                 yyless(1);
                 _scanner->setToken(yytext, 1, yytext, 1);
-                return yytext[0];
+                RETSTEP(yytext[0]);
         }
 }
 
@@ -917,19 +881,17 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>[`] {
-        STEPPOS;
+        STEPPOS('`');
         BEGIN(ST_BACKQUOTE);
         return '`';
 }
 
 <ST_XHP_IN_TAG>{XHPLABEL} {
-  SETTOKEN;
-  return T_XHP_LABEL;
+        RETTOKEN(T_XHP_LABEL);
 }
 
 <ST_XHP_IN_TAG>"=" {
-  STEPPOS;
-  return yytext[0];
+  RETSTEP(yytext[0]);
 }
 
 <ST_XHP_IN_TAG>["][^"]*["] {
@@ -938,13 +900,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_XHP_IN_TAG>[{] {
-  STEPPOS;
+  STEPPOS('{');
   yy_push_state(ST_IN_SCRIPTING, yyscanner);
   return '{';
 }
 
 <ST_XHP_IN_TAG>">" {
-  STEPPOS;
+  STEPPOS(T_XHP_TAG_GT);
   BEGIN(ST_XHP_CHILD);
   return T_XHP_TAG_GT;
 }
@@ -958,14 +920,14 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_IN_TAG>{ANY_CHAR} {
   // This rule ensures we get a reasonable syntax error message
   // when unexpected characters occur inside XHP tags
-  STEPPOS;
+  STEPPOS(yytext[0]);
   _scanner->error("Unexpected character in input: '%c' (ASCII=%d)",
                   yytext[0], yytext[0]);
   return yytext[0];
 }
 
 <ST_XHP_END_SINGLETON_TAG>">" {
-  STEPPOS;
+  STEPPOS(T_XHP_TAG_GT);
   yy_pop_state(yyscanner);
   return T_XHP_TAG_GT;
 }
@@ -976,12 +938,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_XHP_CHILD>[^{<]+ {
-  SETTOKEN;
-  return T_XHP_TEXT;
+  RETTOKEN(T_XHP_TEXT);
 }
 
 <ST_XHP_CHILD>"{" {
-  STEPPOS;
+  STEPPOS('{');
   yy_push_state(ST_IN_SCRIPTING, yyscanner);
   return '{';
 }
@@ -989,28 +950,25 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_CHILD>"</" {
   BEGIN(ST_XHP_END_CLOSE_TAG);
   yyless(1);
-  STEPPOS;
-  return T_XHP_TAG_LT;
+  RETSTEP(T_XHP_TAG_LT);
 }
 
 <ST_XHP_END_CLOSE_TAG>"/" {
-  STEPPOS;
-  return '/';
+  RETSTEP('/');
 }
 
 <ST_XHP_END_CLOSE_TAG>{XHPLABEL} {
-  SETTOKEN;
-  return T_XHP_LABEL;
+  RETTOKEN(T_XHP_LABEL);
 }
 
 <ST_XHP_END_CLOSE_TAG>">" {
-  STEPPOS;
+  STEPPOS(T_XHP_TAG_GT);
   yy_pop_state(yyscanner);
   return T_XHP_TAG_GT;
 }
 
 <ST_XHP_CHILD>"<" {
-  STEPPOS;
+  STEPPOS(T_XHP_TAG_LT);
   yy_push_state(ST_XHP_IN_TAG, yyscanner);
   return T_XHP_TAG_LT;
 }
@@ -1187,8 +1145,7 @@ doc_scan_done:
 
 <ST_END_HEREDOC>{LABEL} {
         BEGIN(ST_IN_SCRIPTING);
-        STEPPOS;
-        return T_END_HEREDOC;
+        RETSTEP(T_END_HEREDOC);
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {

@@ -29,8 +29,8 @@ typedef int TokenID;
 
 class ScannerToken {
 public:
-  ScannerToken() : m_num(0), m_check(false) {}
-  void reset() { m_num = 0; m_text.clear();}
+  ScannerToken() : m_num(0), m_check(false), m_id(-1) {}
+  void reset() { m_num = 0; m_text.clear(); m_id = -1; }
 
   TokenID num() const { return m_num;}
   void setNum(TokenID num) {
@@ -50,6 +50,7 @@ public:
   void operator=(ScannerToken &other) {
     m_num = other.m_num;
     m_text = other.m_text;
+    m_id = other.m_id;
   }
 
   const std::string &text() const {
@@ -76,6 +77,12 @@ public:
   void setCheck() {
     m_check = true;
   }
+  void setID(int id) {
+    m_id = id;
+  }
+  int ID() {
+    return m_id;
+  }
 
   void xhpLabel(bool prefix = true);
   bool htmlTrim(); // true if non-empty after trimming
@@ -85,6 +92,7 @@ protected:
   TokenID m_num; // internal token id
   std::string m_text;
   bool m_check;
+  int m_id;
 };
 
 struct LookaheadToken {
@@ -167,6 +175,11 @@ struct TokenStore {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct TokenListener {
+  virtual int publish(const char *rawText, int rawLeng, int type) = 0;
+  virtual ~TokenListener() {}
+};
+
 class Scanner {
 public:
   enum Type {
@@ -182,6 +195,7 @@ public:
           bool md5 = false);
   Scanner(const char *source, int len, int type, const char *fileName = "",
           bool md5 = false);
+  void setListener(TokenListener *listener) { m_listener = listener; }
   ~Scanner();
 
   const std::string &getMd5() const {
@@ -221,26 +235,26 @@ public:
   bool aspTags() const { return m_type & AllowAspTags;}
   bool full() const { return m_type & ReturnAllTokens;}
   int lastToken() const { return m_lastToken;}
-  void setToken(const char *rawText, int rawLeng) {
+  void setToken(const char *rawText, int rawLeng, int type = -1) {
     m_token->setText(rawText, rawLeng);
-    incLoc(rawText, rawLeng);
+    incLoc(rawText, rawLeng, type);
   }
-  void stepPos(const char *rawText, int rawLeng) {
+  void stepPos(const char *rawText, int rawLeng, int type = -1) {
     if (m_type & ReturnAllTokens) {
       m_token->setText(rawText, rawLeng);
     }
-    incLoc(rawText, rawLeng);
+    incLoc(rawText, rawLeng, type);
   }
   void setToken(const char *rawText, int rawLeng,
-                const char *ytext, int yleng) {
+                const char *ytext, int yleng, int type = -1) {
     if (m_type & ReturnAllTokens) {
       m_token->setText(rawText, rawLeng);
     } else {
       m_token->setText(ytext, yleng);
     }
-    incLoc(rawText, rawLeng);
+    incLoc(rawText, rawLeng, type);
   }
-  void setHashBang(const char *rawText, int rawLeng);
+  void setHashBang(const char *rawText, int rawLeng, int type = -1);
   // also used for YY_FATAL_ERROR in hphp.x
   void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void warn(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
@@ -335,11 +349,12 @@ private:
 
   // fields for XHP parsing
   int m_lastToken;
-  void incLoc(const char *rawText, int rawLeng);
+  void incLoc(const char *rawText, int rawLeng, int type);
   bool m_isHackMode;
 
   TokenStore m_lookahead;
   int m_lookaheadLtDepth;
+  TokenListener *m_listener;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

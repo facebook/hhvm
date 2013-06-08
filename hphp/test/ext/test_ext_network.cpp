@@ -179,7 +179,7 @@ bool TestExtNetwork::test_fsockopen() {
              "Connection: Close\r\n"
              "\r\n");
     StringBuffer response;
-    while (!same(f_feof(f), true)) {
+    while (!f_feof(f)) {
       Variant line = f_fgets(f, 128);
       response.append(line.toString());
     }

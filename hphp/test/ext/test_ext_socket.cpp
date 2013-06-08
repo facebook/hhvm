@@ -299,7 +299,7 @@ bool TestExtSocket::test_socket_close() {
 bool TestExtSocket::test_socket_strerror() {
   Variant s = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
   f_socket_bind(s, "127.0.0.1", 80);
-  if (same(f_socket_last_error(s), 13)) {
+  if (f_socket_last_error(s) == 13) {
     VS(f_socket_strerror(13), "Permission denied");
     f_socket_clear_error(s);
   }

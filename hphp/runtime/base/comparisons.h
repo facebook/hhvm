@@ -89,10 +89,10 @@ inline bool more(CVarRef v1, CVarRef v2)  { return v1.more(v2);}
 ///////////////////////////////////////////////////////////////////////////////
 // bool
 
-inline bool same(bool v1, bool    v2)  { return v1 == v2;}
-inline bool same(bool v1, int     v2)  { return false;}
-inline bool same(bool v1, int64_t   v2)  { return false;}
-inline bool same(bool v1, double  v2)  { return false;}
+inline bool same(bool v1, bool    v2) = delete;
+inline bool same(bool v1, int     v2) = delete;
+inline bool same(bool v1, int64_t   v2) = delete;
+inline bool same(bool v1, double  v2) = delete;
 inline bool same(bool v1, const StringData *v2)  { return false;}
 inline bool same(bool v1, CStrRef v2)  { return false;}
 inline bool same(bool v1, litstr  v2)  { return false;}
@@ -154,10 +154,10 @@ inline bool more(bool v1, CVarRef v2)  { return less(v2,v1);}
 ///////////////////////////////////////////////////////////////////////////////
 // int
 
-inline bool same(int v1, bool    v2)  { return same(v2, v1);}
-inline bool same(int v1, int     v2)  { return v1 == v2;}
-inline bool same(int v1, int64_t   v2)  { return v1 == v2;}
-inline bool same(int v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(int v1, bool    v2) = delete;
+inline bool same(int v1, int     v2) = delete;
+inline bool same(int v1, int64_t   v2) = delete;
+inline bool same(int v1, double  v2) = delete;
 inline bool same(int v1, const StringData *v2)  { return false;}
 inline bool same(int v1, CStrRef v2)  { return false;}
 inline bool same(int v1, litstr  v2)  { return false;}
@@ -220,10 +220,10 @@ inline bool more(int v1, CVarRef v2)  { return less(v2, v1);}
 ///////////////////////////////////////////////////////////////////////////////
 // int64
 
-inline bool same(int64_t v1, bool    v2)  { return same(v2, v1);}
-inline bool same(int64_t v1, int     v2)  { return same(v2, v1);}
-inline bool same(int64_t v1, int64_t   v2)  { return v1 == v2;}
-inline bool same(int64_t v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(int64_t v1, bool    v2) = delete;
+inline bool same(int64_t v1, int     v2) = delete;
+inline bool same(int64_t v1, int64_t   v2) = delete;
+inline bool same(int64_t v1, double  v2) = delete;
 inline bool same(int64_t v1, const StringData *v2)  { return false;}
 inline bool same(int64_t v1, CStrRef v2)  { return false;}
 inline bool same(int64_t v1, litstr  v2)  { return false;}
@@ -289,10 +289,10 @@ inline bool more(int64_t v1, CVarRef v2)  { return less(v2, v1);}
 ///////////////////////////////////////////////////////////////////////////////
 // double
 
-inline bool same(double v1, bool    v2)  { return same(v2, v1);}
-inline bool same(double v1, int     v2)  { return same(v2, v1);}
-inline bool same(double v1, int64_t   v2)  { return same(v2, v1);}
-inline bool same(double v1, double  v2)  { return v1 == v2;}
+inline bool same(double v1, bool    v2) = delete;
+inline bool same(double v1, int     v2) = delete;
+inline bool same(double v1, int64_t   v2) = delete;
+inline bool same(double v1, double  v2) = delete;
 inline bool same(double v1, const StringData *v2)  { return false;}
 inline bool same(double v1, CStrRef v2)  { return false;}
 inline bool same(double v1, litstr  v2)  { return false;}

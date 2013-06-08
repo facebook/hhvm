@@ -546,7 +546,7 @@ Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
 }
 
 Object c_ImageSprite::t_loaddims(bool block /* = false */) {
-  if (same(m_current, true)) {
+  if (m_current) {
     return this;
   }
 
@@ -574,7 +574,7 @@ Object c_ImageSprite::t_loaddims(bool block /* = false */) {
 }
 
 Object c_ImageSprite::t_loadimages(bool block /* = false */) {
-  if (same(m_current, true)) {
+  if (m_current) {
     return this;
   }
 
@@ -613,14 +613,14 @@ Object c_ImageSprite::t_loadimages(bool block /* = false */) {
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockAreaComparator>
 
-static const StaticString
+const StaticString
   s_x("x"),
   s_y("y"),
   s_images("images"),
   s_sprite("sprite");
 
 void c_ImageSprite::map() {
-  if (same(m_current, true)) {
+  if (m_current) {
     return;
   }
 

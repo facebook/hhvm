@@ -156,8 +156,8 @@ int ArrayData::compare(const ArrayData *v2) const {
     if (!v2->exists(key)) return 1;
     auto value1 = iter.second();
     auto value2 = v2->get(key);
-    if (value1.more(value2)) return 1;
-    if (value1.less(value2)) return -1;
+    if (HPHP::more(value1, value2)) return 1;
+    if (HPHP::less(value1, value2)) return -1;
   }
 
   return 0;
@@ -184,7 +184,10 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
       if (!v2->exists(key)) return false;
-      if (!iter.second().equal(v2->get(key))) return false;
+      if (!tvEqual(iter.second().asTypedValue(),
+                   v2->get(key).asTypedValue())) {
+        return false;
+      }
     }
   }
 

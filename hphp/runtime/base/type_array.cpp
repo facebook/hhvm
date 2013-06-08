@@ -358,7 +358,7 @@ bool Array::less(CVarRef v2) const {
   if (v2.getType() == KindOfArray) {
     return m_px->compare(v2.toArray().get()) < 0;
   }
-  return v2.more(*this);
+  return HPHP::more(v2, *this);
 }
 
 bool Array::more(CArrRef v2, bool flip /* = true */) const {
@@ -386,7 +386,7 @@ bool Array::more(CVarRef v2) const {
   if (v2.getType() == KindOfArray) {
     return v2.toArray().get()->compare(m_px) < 0;
   }
-  return v2.less(*this);
+  return HPHP::less(v2, *this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -634,7 +634,7 @@ bool Array::valueExists(CVarRef search_value,
                         bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
     if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && iter.secondRef().equal(search_value))) {
+        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
       return true;
     }
   }
@@ -644,7 +644,7 @@ bool Array::valueExists(CVarRef search_value,
 Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
     if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && iter.secondRef().equal(search_value))) {
+        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
       return iter.first();
     }
   }
@@ -663,7 +663,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
     Array ret = Array::Create();
     for (ArrayIter iter(*this); iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-          (!strict && iter.secondRef().equal(search_value))) {
+          (!strict && HPHP::equal(iter.secondRef(), search_value))) {
         ret.append(iter.first());
       }
     }
@@ -1006,13 +1006,13 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
 }
 
 int Array::SortRegularAscending(CVarRef v1, CVarRef v2, const void *data) {
-  if (v1.less(v2)) return -1;
-  if (v1.equal(v2)) return 0;
+  if (HPHP::less(v1, v2)) return -1;
+  if (tvEqual(v1.asTypedValue(), v2.asTypedValue())) return 0;
   return 1;
 }
 int Array::SortRegularDescending(CVarRef v1, CVarRef v2, const void *data) {
-  if (v1.less(v2)) return 1;
-  if (v1.equal(v2)) return 0;
+  if (HPHP::less(v1, v2)) return 1;
+  if (tvEqual(v1.asTypedValue(), v2.asTypedValue())) return 0;
   return -1;
 }
 

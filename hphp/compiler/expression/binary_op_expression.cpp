@@ -179,9 +179,6 @@ ExpressionPtr BinaryOpExpression::unneededHelper() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
 int BinaryOpExpression::getLocalEffects() const {
@@ -193,7 +190,7 @@ int BinaryOpExpression::getLocalEffects() const {
   case T_DIV_EQUAL:
   case T_MOD_EQUAL: {
     Variant v2;
-    if (!m_exp2->getScalarValue(v2) || v2.equal(0)) {
+    if (!m_exp2->getScalarValue(v2) || equal(v2, 0)) {
       effect = CanThrow;
       m_canThrow = true;
     }

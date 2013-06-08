@@ -454,12 +454,12 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
     norm2 = collator_normalize_sort_argument(str2);
   }
   if (ascending) {
-    if (norm1.less(norm2)) return -1;
-    if (norm1.equal(norm2)) return 0;
+    if (less(norm1, norm2)) return -1;
+    if (equal(norm1, norm2)) return 0;
     return 1;
   }
-  if (norm1.less(norm2)) return 1;
-  if (norm1.equal(norm2)) return 0;
+  if (less(norm1, norm2)) return 1;
+  if (equal(norm1, norm2)) return 0;
   return -1;
 }
 
@@ -490,12 +490,12 @@ static int collator_numeric_compare_function(CVarRef v1, CVarRef v2,
     num2 = v2.toDouble();
   }
   if (ascending) {
-    if (num1.less(num2)) return -1;
-    if (num1.equal(num2)) return 0;
+    if (less(num1, num2)) return -1;
+    if (equal(num1, num2)) return 0;
     return 1;
   }
-  if (num1.less(num2)) return 1;
-  if (num1.equal(num2)) return 0;
+  if (less(num1, num2)) return 1;
+  if (equal(num1, num2)) return 0;
   return -1;
 }
 

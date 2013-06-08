@@ -1649,20 +1649,6 @@ Variant::operator Object() const {
   }                                                                        \
   return false;                                                            \
 
-bool Variant::equal(bool    v2) const { UNWRAP(equal);}
-bool Variant::equal(int     v2) const { UNWRAP(equal);}
-HOT_FUNC
-bool Variant::equal(int64_t   v2) const { UNWRAP(equal);}
-bool Variant::equal(double  v2) const { UNWRAP(equal);}
-bool Variant::equal(litstr  v2) const { UNWRAP_STR(equal);}
-bool Variant::equal(const StringData *v2) const { UNWRAP_STR(equal);}
-HOT_FUNC
-bool Variant::equal(CStrRef v2) const { UNWRAP_STR(equal);}
-bool Variant::equal(CArrRef v2) const { UNWRAP(equal);}
-bool Variant::equal(CObjRef v2) const { UNWRAP(equal);}
-HOT_FUNC
-bool Variant::equal(CVarRef v2) const { UNWRAP_VAR(equal,equal);}
-
 bool Variant::equalAsStr(bool    v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(int     v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(int64_t   v2) const { UNWRAP_STRING(equalAsStr);}
@@ -1675,30 +1661,6 @@ bool Variant::equalAsStr(CStrRef  v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(CArrRef  v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(CObjRef  v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(CVarRef  v2) const { UNWRAP_STRING(equalAsStr);}
-
-bool Variant::less(bool    v2) const { UNWRAP(more);}
-bool Variant::less(int     v2) const { UNWRAP(more);}
-bool Variant::less(int64_t   v2) const { UNWRAP(more);}
-bool Variant::less(double  v2) const { UNWRAP(more);}
-bool Variant::less(litstr  v2) const { UNWRAP_STR(more);}
-bool Variant::less(const StringData *v2) const { UNWRAP_STR(more);}
-bool Variant::less(CStrRef v2) const { UNWRAP_STR(more);}
-bool Variant::less(CArrRef v2) const { UNWRAP_ARR(less,more);}
-bool Variant::less(CObjRef v2) const { UNWRAP(more);}
-HOT_FUNC
-bool Variant::less(CVarRef v2) const { UNWRAP_VAR(less,more);}
-
-bool Variant::more(bool    v2) const { UNWRAP(less);}
-bool Variant::more(int     v2) const { UNWRAP(less);}
-HOT_FUNC
-bool Variant::more(int64_t   v2) const { UNWRAP(less);}
-bool Variant::more(double  v2) const { UNWRAP(less);}
-bool Variant::more(litstr  v2) const { UNWRAP_STR(less);}
-bool Variant::more(const StringData *v2) const { UNWRAP_STR(less);}
-bool Variant::more(CStrRef v2) const { UNWRAP_STR(less);}
-bool Variant::more(CArrRef v2) const { UNWRAP_ARR(more,less);}
-bool Variant::more(CObjRef v2) const { UNWRAP(less);}
-bool Variant::more(CVarRef v2) const { UNWRAP_VAR(more,less);}
 
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions

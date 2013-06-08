@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,7 +144,7 @@ void CmdWhere::processStackTrace() {
     CArrRef frame(iter.secondRef());
     Array smallFrame;
     for (ArrayIter iter2(frame); iter2; ++iter2) {
-      if (iter2.first().equal(s_args)) {
+      if (equal(iter2.first(), s_args)) {
         continue;
       }
       smallFrame.set(iter2.first(), iter2.secondRef());

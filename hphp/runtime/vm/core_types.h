@@ -25,14 +25,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * These may be used to provide a little more self-documentation about
- * whether execution stack typed values are assumed to be cells or
- * vars.  (See bytecode.specification for details.)
- */
-typedef TypedValue Cell;
-typedef TypedValue Var;
-
-/*
  * Non-enumerated version of type for referring to opcodes or the
  * bytecode stream.  (Use the enum Op in hhbc.h for an enumerated
  * version.)

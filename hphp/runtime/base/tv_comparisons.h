@@ -16,13 +16,12 @@
 #ifndef incl_HPHP_TV_COMPARISONS_H_
 #define incl_HPHP_TV_COMPARISONS_H_
 
+#include "hphp/runtime/vm/core_types.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-struct TypedValue;
-
-//////////////////////////////////////////////////////////////////////
+// Php's operator ===
 
 /*
  * Returns whether two TypedValues have the same value, in sense of
@@ -31,7 +30,70 @@ struct TypedValue;
 bool tvSame(const TypedValue*, const TypedValue*);
 
 //////////////////////////////////////////////////////////////////////
+// Php's operator ==
+
+/*
+ * Returns whether a Cell has the same value as an unpackaged type, in
+ * the sense of php's == operator.
+ */
+bool cellEqual(const Cell*, bool);
+bool cellEqual(const Cell*, int);
+bool cellEqual(const Cell*, int64_t);
+bool cellEqual(const Cell*, double);
+bool cellEqual(const Cell*, const StringData*);
+bool cellEqual(const Cell*, const ArrayData*);
+bool cellEqual(const Cell*, const ObjectData*);
+
+/*
+ * Returns whether two TypedValues have the same value, in the sense
+ * of php's == operator.
+ */
+bool tvEqual(const TypedValue*, const TypedValue*);
+
+//////////////////////////////////////////////////////////////////////
+// Php's operator <
+
+/*
+ * Returns whether a Cell is less than an unpackaged type, in the
+ * sense of php's < operator.
+ */
+bool cellLess(const Cell*, bool);
+bool cellLess(const Cell*, int);
+bool cellLess(const Cell*, int64_t);
+bool cellLess(const Cell*, double);
+bool cellLess(const Cell*, const StringData*);
+bool cellLess(const Cell*, const ArrayData*);
+bool cellLess(const Cell*, const ObjectData*);
+
+/*
+ * Returns whether tv1 is less than tv2, as in php's < operator.
+ */
+bool tvLess(const TypedValue*, const TypedValue*);
+
+//////////////////////////////////////////////////////////////////////
+// Php's operator >
+
+/*
+ * Returns whether a Cell is greater than an unpackaged type, in the
+ * sense of php's > operator.
+ */
+bool cellGreater(const Cell*, bool);
+bool cellGreater(const Cell*, int);
+bool cellGreater(const Cell*, int64_t);
+bool cellGreater(const Cell*, double);
+bool cellGreater(const Cell*, const StringData*);
+bool cellGreater(const Cell*, const ArrayData*);
+bool cellGreater(const Cell*, const ObjectData*);
+
+/*
+ * Returns whether tv1 is greather than tv2, as in php's > operator.
+ */
+bool tvGreater(const TypedValue*, const TypedValue*);
+
+//////////////////////////////////////////////////////////////////////
 
 }
+
+#include "hphp/runtime/base/tv_comparisons-inl.h"
 
 #endif

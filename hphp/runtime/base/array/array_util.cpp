@@ -673,7 +673,7 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
   for (unsigned int i = 1; i < indices.size(); ++i) {
     int currentIdx = indices[i];
     Variant current = input->getValue(opaque.positions[currentIdx]);
-    if (current.equal(last)) {
+    if (equal(current, last)) {
       if (currentIdx > lastIdx) {
         duplicates[currentIdx] = true;
         continue;

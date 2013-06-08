@@ -39,16 +39,29 @@ inline bool same(CVarRef v1, CVarRef v2) {
   return tvSame(v1.asTypedValue(), v2.asTypedValue());
 }
 
-inline bool equal(CVarRef v1, bool    v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, int     v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, int64_t   v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, double  v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, const StringData *v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, CStrRef v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, litstr  v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, CArrRef v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, CObjRef v2) { return v1.equal(v2);}
-inline bool equal(CVarRef v1, CVarRef v2) { return v1.equal(v2);}
+inline bool equal(CVarRef v1, bool v2) { return cellEqual(v1.asCell(), v2); }
+inline bool equal(CVarRef v1, int v2) { return cellEqual(v1.asCell(), v2); }
+inline bool equal(CVarRef v1, int64_t v2) { return cellEqual(v1.asCell(), v2);}
+inline bool equal(CVarRef v1, double  v2) { return cellEqual(v1.asCell(), v2);}
+inline bool equal(CVarRef v1, const StringData* v2) {
+  return cellEqual(v1.asCell(), v2);
+}
+inline bool equal(CVarRef v1, CStrRef v2) {
+  if (!v2.get()) return cellEqual(v1.asCell(), false);
+  return cellEqual(v1.asCell(), v2.get());
+}
+inline bool equal(CVarRef v1, litstr  v2) = delete;
+inline bool equal(CVarRef v1, CArrRef v2) {
+  if (!v2.get()) return cellEqual(v1.asCell(), false);
+  return cellEqual(v1.asCell(), v2.get());
+}
+inline bool equal(CVarRef v1, CObjRef v2) {
+  if (!v2.get()) return cellEqual(v1.asCell(), false);
+  return cellEqual(v1.asCell(), v2.get());
+}
+inline bool equal(CVarRef v1, CVarRef v2) {
+  return tvEqual(v1.asTypedValue(), v2.asTypedValue());
+}
 
 inline bool equalAsStr(CVarRef v1, bool    v2) { return v1.equalAsStr(v2);}
 inline bool equalAsStr(CVarRef v1, int     v2) { return v1.equalAsStr(v2);}
@@ -64,27 +77,69 @@ inline bool equalAsStr(CVarRef v1, CObjRef v2) { return v1.equalAsStr(v2);}
 inline bool equalAsStr(CVarRef v1, CVarRef v2) { return v1.equalAsStr(v2);}
 
 
-inline bool less(CVarRef v1, bool    v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, int     v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, int64_t   v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, double  v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, const StringData *v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, CStrRef v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, litstr  v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, CArrRef v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, CObjRef v2)  { return v1.less(v2);}
-inline bool less(CVarRef v1, CVarRef v2)  { return v1.less(v2);}
+inline bool less(CVarRef v1, bool v2) {
+  return cellLess(v1.asCell(), v2);
+}
+inline bool less(CVarRef v1, int v2) {
+  return cellLess(v1.asCell(), v2);
+}
+inline bool less(CVarRef v1, int64_t v2) {
+  return cellLess(v1.asCell(), v2);
+}
+inline bool less(CVarRef v1, double v2) {
+  return cellLess(v1.asCell(), v2);
+}
+inline bool less(CVarRef v1, const StringData* v2) {
+  return cellLess(v1.asCell(), v2);
+}
+inline bool less(CVarRef v1, CStrRef v2) {
+  if (!v2.get()) return cellLess(v1.asCell(), false);
+  return cellLess(v1.asCell(), v2.get());
+}
+inline bool less(CVarRef v1, litstr  v2) = delete;
+inline bool less(CVarRef v1, CArrRef v2) {
+  if (!v2.get()) return cellLess(v1.asCell(), false);
+  return cellLess(v1.asCell(), v2.get());
+}
+inline bool less(CVarRef v1, CObjRef v2) {
+  if (!v2.get()) return cellLess(v1.asCell(), false);
+  return cellLess(v1.asCell(), v2.get());
+}
+inline bool less(CVarRef v1, CVarRef v2) {
+  return tvLess(v1.asTypedValue(), v2.asTypedValue());
+}
 
-inline bool more(CVarRef v1, bool    v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, int     v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, int64_t   v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, double  v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, const StringData *v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, CStrRef v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, litstr  v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, CArrRef v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, CObjRef v2)  { return v1.more(v2);}
-inline bool more(CVarRef v1, CVarRef v2)  { return v1.more(v2);}
+inline bool more(CVarRef v1, bool v2) {
+  return cellGreater(v1.asCell(), v2);
+}
+inline bool more(CVarRef v1, int v2) {
+  return cellGreater(v1.asCell(), v2);
+}
+inline bool more(CVarRef v1, int64_t v2) {
+  return cellGreater(v1.asCell(), v2);
+}
+inline bool more(CVarRef v1, double v2) {
+  return cellGreater(v1.asCell(), v2);
+}
+inline bool more(CVarRef v1, const StringData* v2) {
+  return cellGreater(v1.asCell(), v2);
+}
+inline bool more(CVarRef v1, CStrRef v2) {
+  if (!v2.get()) return cellGreater(v1.asCell(), false);
+  return cellGreater(v1.asCell(), v2.get());
+}
+inline bool more(CVarRef v1, litstr  v2) = delete;
+inline bool more(CVarRef v1, CArrRef v2) {
+  if (!v2.get()) return cellGreater(v1.asCell(), false);
+  return cellGreater(v1.asCell(), v2.get());
+}
+inline bool more(CVarRef v1, CObjRef v2) {
+  if (!v2.get()) return cellGreater(v1.asCell(), false);
+  return cellGreater(v1.asCell(), v2.get());
+}
+inline bool more(CVarRef v1, CVarRef v2) {
+  return tvGreater(v1.asTypedValue(), v2.asTypedValue());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // bool

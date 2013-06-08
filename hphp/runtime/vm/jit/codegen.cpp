@@ -2453,9 +2453,9 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
                              const StringData** strs,
                              int numStrs,
                              TCA* jmptab) {
-  TypedValue* cell = tvToCell(&typedVal);
+  Cell* cell = tvToCell(&typedVal);
   for (int i = 0; i < numStrs; ++i) {
-    if (tvAsCVarRef(cell).equal(strs[i])) return jmptab[i];
+    if (cellEqual(cell, strs[i])) return jmptab[i];
   }
   return jmptab[numStrs]; // default case
 }

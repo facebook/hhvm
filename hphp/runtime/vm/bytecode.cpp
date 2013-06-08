@@ -4551,13 +4551,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
   StrVecItem* jmptab = (StrVecItem*)pc;
   pc += veclen * sizeof(*jmptab);
 
-  TypedValue* val = m_stack.topTV();
+  Cell* val = tvToCell(m_stack.topTV());
   Unit* u = m_fp->m_func->unit();
   unsigned i;
   for (i = 0; i < cases; ++i) {
     auto& item = jmptab[i];
     const StringData* str = u->lookupLitstrId(item.str);
-    if (tvAsVariant(val).equal(str)) {
+    if (cellEqual(val, str)) {
       pc = origPC + item.dest;
       break;
     }

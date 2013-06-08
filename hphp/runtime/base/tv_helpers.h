@@ -27,6 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Variant;
+
 template<typename Data>
 inline TypedValue tv(DataType type, Data data) {
   static_assert(sizeof(Data) == sizeof(int64_t),
@@ -242,12 +244,12 @@ inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
 }
 
 // conditionally unbox tv
-inline TypedValue* tvToCell(TypedValue* tv) {
+inline Cell* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
 // conditionally unbox tv, preserve constness.
-inline const TypedValue* tvToCell(const TypedValue* tv) {
+inline const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 

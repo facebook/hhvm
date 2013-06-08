@@ -14,20 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPLEX_TYPES_H_
-#define incl_HPHP_COMPLEX_TYPES_H_
+namespace HPHP {
 
-#define incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
+//////////////////////////////////////////////////////////////////////
 
-#include "hphp/runtime/base/hphp_value.h"
-#include "hphp/runtime/base/type_string.h"
-#include "hphp/runtime/base/type_array.h"
-#include "hphp/runtime/base/type_object.h"
-#include "hphp/runtime/base/ref_data.h"
-#include "hphp/runtime/base/tv_helpers.h"
-#include "hphp/runtime/base/type_variant.h"
-#include "hphp/runtime/base/array/array_inline.h"
+inline bool cellEqual(const Cell* cell, int ival) {
+  return cellEqual(cell, static_cast<int64_t>(ival));
+}
 
-#undef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
+inline bool cellLess(const Cell* cell, int ival) {
+  return cellLess(cell, static_cast<int64_t>(ival));
+}
 
-#endif // incl_HPHP_COMPLEX_TYPES_H_
+inline bool cellGreater(const Cell* cell, int ival) {
+  return cellGreater(cell, static_cast<int64_t>(ival));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

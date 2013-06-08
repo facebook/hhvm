@@ -473,6 +473,7 @@ void throw_collection_compare_exception() {
   raise_warning(msg);
 }
 
+// TODO
 void check_collection_compare(ObjectData* obj) {
   if (obj && obj->isCollection()) throw_collection_compare_exception();
 }

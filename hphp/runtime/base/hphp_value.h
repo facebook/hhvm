@@ -128,6 +128,16 @@ private:
   }
 };
 
+/*
+ * These may be used to provide a little more self-documentation about
+ * whether typed values must be cells (not KindOfRef) or var (must be
+ * KindOfRef).
+ *
+ * See bytecode.specification for details.
+ */
+typedef TypedValue Cell;
+typedef TypedValue Var;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

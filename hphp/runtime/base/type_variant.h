@@ -698,17 +698,6 @@ class Variant : private TypedValue {
    * Comparisons
    */
 
-  bool equal(bool    v2) const;
-  bool equal(int     v2) const;
-  bool equal(int64_t   v2) const;
-  bool equal(double  v2) const;
-  bool equal(litstr  v2) const;
-  bool equal(const StringData *v2) const;
-  bool equal(CStrRef v2) const;
-  bool equal(CArrRef v2) const;
-  bool equal(CObjRef v2) const;
-  bool equal(CVarRef v2) const;
-
   bool equalAsStr(bool    v2) const;
   bool equalAsStr(int     v2) const;
   bool equalAsStr(int64_t   v2) const;
@@ -719,28 +708,6 @@ class Variant : private TypedValue {
   bool equalAsStr(CArrRef v2) const;
   bool equalAsStr(CObjRef v2) const;
   bool equalAsStr(CVarRef v2) const;
-
-  bool less(bool    v2) const;
-  bool less(int     v2) const;
-  bool less(int64_t   v2) const;
-  bool less(double  v2) const;
-  bool less(litstr  v2) const;
-  bool less(const StringData *v2) const;
-  bool less(CStrRef v2) const;
-  bool less(CArrRef v2) const;
-  bool less(CObjRef v2) const;
-  bool less(CVarRef v2) const;
-
-  bool more(bool    v2) const;
-  bool more(int     v2) const;
-  bool more(int64_t   v2) const;
-  bool more(double  v2) const;
-  bool more(litstr  v2) const;
-  bool more(const StringData *v2) const;
-  bool more(CStrRef v2) const;
-  bool more(CArrRef v2) const;
-  bool more(CObjRef v2) const;
-  bool more(CVarRef v2) const;
 
   /**
    * Output functions
@@ -1008,16 +975,17 @@ class Variant : private TypedValue {
   void setToDefaultObject();
 
   /*
-   * Access this Variant as a TypedValue.  Differs slightly from
-   * getTypedAccessor() by returning the outer TypedValue if it is
+   * Access this Variant as a TypedValue.  Does not unbox refs, etc.
+   */
+  const TypedValue* asTypedValue() const { return this; }
+        TypedValue* asTypedValue()       { return this; }
+
+  /*
+   * Access this Variant as a Cell.  I.e. unboxes it if it was a
    * KindOfRef.
    */
-  TypedValue* asTypedValue() {
-    return reinterpret_cast<TypedValue*>(this);
-  }
-  const TypedValue* asTypedValue() const {
-    return reinterpret_cast<const TypedValue*>(this);
-  }
+  const Cell* asCell() const { return tvToCell(asTypedValue()); }
+        Cell* asCell()       { return tvToCell(asTypedValue()); }
 
   /**
    * Based on the order in complex_types.h, TypedValue is defined before.

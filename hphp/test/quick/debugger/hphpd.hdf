@@ -1,0 +1,68 @@
+UTF8 = 1
+Color = 0
+Color {
+  SupportedNames {
+    1 = black
+    2 = red
+    3 = green
+    4 = brown
+    5 = blue
+    6 = magenta
+    7 = cyan
+    8 = gray
+    9 = dark_gray
+    10 = light_red
+    11 = light_green
+    12 = yellow
+    13 = light_blue
+    14 = light_magenta
+    15 = light_cyan
+    16 = white
+  }
+  Palette {
+    emacs {
+      Keyword = CYAN
+      Comment = RED
+      String = GREEN
+      Variable = BROWN
+      Html = GRAY
+      Tag = MAGENTA
+      Declaration = BLUE
+      Constant = MAGENTA
+      LineNo = GRAY
+    }
+    vim {
+      Keyword = MAGENTA
+      Comment = BLUE
+      String = RED
+      Variable = CYAN
+      Html = GRAY
+      Tag = MAGENTA
+      Declaration = WHITE
+      Constant = WHITE
+      LineNo = GRAY
+    }
+  }
+  Help = BROWN
+  Info = GREEN
+  Output = CYAN
+  Error = RED
+  ItemName = GRAY
+  HighlightForeground = RED
+  HighlightBackground = GRAY
+  Code {
+    Keyword = CYAN
+    Comment = RED
+    String = GREEN
+    Variable = BROWN
+    Html = GRAY
+    Tag = MAGENTA
+    Declaration = BLUE
+    Constant = MAGENTA
+    LineNo = GRAY
+  }
+}
+Tutorial = 0
+Tutorial {
+}
+MaxCodeLines = -1

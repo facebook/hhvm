@@ -808,6 +808,8 @@ static int execute_program_impl(int argc, char **argv) {
      "use specified fd for SSL instead of creating a socket")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listener at specified port")
+    ("debug-config", value<string>(&po.debugger_options.configFName),
+      "load specified debugger config file")
     ("debug-host,h", value<string>(&po.debugger_options.host),
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),

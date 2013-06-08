@@ -209,6 +209,14 @@ function find_config_for_dir($dir, $name) {
   return __DIR__.'/'.$name;
 }
 
+function find_debug_config($test, $name) {
+  $debug_config = find_config_for_dir(dirname($test), $name);
+  if (is_file($debug_config)) {
+    return "-m debug --debug-config ".$debug_config;
+  }
+  return "";
+}
+
 function mode_cmd($options) {
   $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
   $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
@@ -229,6 +237,7 @@ function hhvm_cmd($options, $test) {
     idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
     '--config',
     find_config($test, 'config.hdf'),
+    find_debug_config($test, 'hphpd.hdf'),
     mode_cmd($options),
     '-v Eval.EnableArgsInBacktraces=true',
     read_file("$test.opts"),
@@ -368,7 +377,7 @@ function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
   $output = "";
   if (isset($options['repo'])) {
-    if (strpos($test, '.hhas') !== false || is_file($test.'.norepo')) {
+    if (strpos($test, '.hhas') !== false || strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {
       # We don't have a way to skip, I guess run non-repo?
     } else {
       unlink("$test.repo/hhvm.hhbc");

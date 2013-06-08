@@ -358,7 +358,7 @@ struct HhbcTranslator {
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations
-  void emitCreateCont(bool getArgs, Id funNameStrId);
+  void emitCreateCont(Id funNameStrId);
   void emitContEnter(int32_t returnBcOffset);
   void emitContExitImpl();
   void emitContExit();

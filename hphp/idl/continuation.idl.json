@@ -94,40 +94,6 @@
                     ]
                 },
                 {
-                    "name": "num_args",
-                    "return": {
-                        "type": "Int64"
-                    },
-                    "flags": [
-                    ],
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "get_args",
-                    "return": {
-                        "type": "VariantVec"
-                    },
-                    "flags": [
-                    ],
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "get_arg",
-                    "return": {
-                        "type": "Variant"
-                    },
-                    "args": [
-                        {
-                            "name": "id",
-                            "type": "Int64"
-                        }
-                    ],
-                    "flags": [
-                    ]
-                },
-                {
                     "name": "current",
                     "return": {
                         "type": "Variant"

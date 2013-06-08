@@ -3680,13 +3680,12 @@ ArrayIdx    [C C C] -> [C]
 14. Continuation creation and execution
 ---------------------------------------
 
-CreateCont <getargs> <function name>    []  ->  [C]
+CreateCont <function name>    []  ->  [C]
 
-  Creates a GenericContinuation object and pushes it on the stack. The
-  Continuation will capture all defined local variables in the current
-  function, and if the <getargs> immediate is nonzero it will also store the
-  result of func_get_args(). The Continuation will store a reference to the
-  function named by the string immediate to be used as its body.
+  Creates a Continuation object and pushes it on the stack. The Continuation
+  will capture all defined local variables in the current function. The 
+  Continuation will store a reference to the function named by the string 
+  immediate to be used as its body.
 
 ContEnter []  ->  []
 

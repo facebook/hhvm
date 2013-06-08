@@ -6986,16 +6986,14 @@ c_Continuation*
 VMExecutionContext::createContinuationHelper(const Func* origFunc,
                                              const Func* genFunc,
                                              ObjectData* thisPtr,
-                                             ArrayData* args,
                                              Class* frameStaticCls) {
   auto const cont = c_Continuation::alloc(
-    SystemLib::s_ContinuationClass,
+    origFunc,
     genFunc->numLocals(),
     genFunc->numIterators()
   );
   cont->incRefCount();
   cont->setNoDestruct();
-  cont->init(origFunc, args);
 
   // The ActRec corresponding to the generator body lives as long as the object
   // does. We set it up once, here, and then just change FP to point to it when
@@ -7035,21 +7033,14 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
 template<bool isMethod>
 c_Continuation*
 VMExecutionContext::createContinuation(ActRec* fp,
-                                       bool getArgs,
                                        const Func* origFunc,
                                        const Func* genFunc) {
   ObjectData* const thisPtr = fp->hasThis() ? fp->getThis() : nullptr;
-
-  Array args;
-  if (getArgs) {
-    args = hhvm_get_frame_args(fp);
-  }
 
   return createContinuationHelper<isMethod>(
     origFunc,
     genFunc,
     thisPtr,
-    args.get(),
     frameStaticClass(fp)
   );
 }
@@ -7118,17 +7109,16 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
 
 // Explicitly instantiate for hhbctranslator.o and codegen.o
 template c_Continuation* VMExecutionContext::createContinuation<true>(
-  ActRec*, bool, const Func*, const Func*);
+  ActRec*, const Func*, const Func*);
 template c_Continuation* VMExecutionContext::createContinuation<false>(
-  ActRec*, bool, const Func*, const Func*);
+  ActRec*, const Func*, const Func*);
 template c_Continuation* VMExecutionContext::createContinuationHelper<true>(
-  const Func*, const Func*, ObjectData*, ArrayData*, Class*);
+  const Func*, const Func*, ObjectData*, Class*);
 template c_Continuation* VMExecutionContext::createContinuationHelper<false>(
-  const Func*, const Func*, ObjectData*, ArrayData*, Class*);
+  const Func*, const Func*, ObjectData*, Class*);
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();
-  DECODE_IVA(getArgs);
   DECODE_LITSTR(genName);
 
   const Func* origFunc = m_fp->m_func;
@@ -7137,8 +7127,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
   bool isMethod = origFunc->isMethod();
   c_Continuation* cont = isMethod ?
-    createContinuation<true>(m_fp, getArgs, origFunc, genFunc) :
-    createContinuation<false>(m_fp, getArgs, origFunc, genFunc);
+    createContinuation<true>(m_fp, origFunc, genFunc) :
+    createContinuation<false>(m_fp, origFunc, genFunc);
 
   fillContinuationVars(m_fp, origFunc, genFunc, cont);
 

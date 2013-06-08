@@ -467,8 +467,8 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
           FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->id());
 
           CreateContData data;
-          data.origFunc = inst->src(3)->getValFunc();
-          data.genFunc  = inst->src(4)->getValFunc();
+          data.origFunc = inst->src(2)->getValFunc();
+          data.genFunc  = inst->src(3)->getValFunc();
 
           assert(fp->inst()->src(0)->inst()->op() == SpillFrame);
           auto const thisPtr = fp->inst()->src(0)->inst()->src(3);

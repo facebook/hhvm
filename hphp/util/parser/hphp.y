@@ -170,7 +170,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params) {
 // create a generator function with original name and parameters
 void create_generator(Parser *_p, Token &out, Token &params,
                       Token &name, const std::string &closureName,
-                      const char *clsname, Token *modifiers, bool getArgs,
+                      const char *clsname, Token *modifiers,
                       Token &origGenFunc, bool isHhvm, Token *attr) {
   _p->pushFuncLocation();
   if (clsname) {
@@ -203,18 +203,12 @@ void create_generator(Parser *_p, Token &out, Token &params,
                    _p->onCallParam(param1, &param1, fname, false);
                    _p->onCallParam(param1, &param1, oname, false);
 
-    if (getArgs) {
-      Token cname;   cname.setText("func_get_args");
-      Token empty;
-      Token call;    _p->onCall(call, false, cname, empty, NULL);
-                     _p->onCallParam(param1, &param1, call, false);
-    }
+    Token stmts0;  _p->onStatementListStart(stmts0);
 
     Token cname0;  cname0.setText("hphp_create_continuation");
     Token call;    _p->onCall(call, false, cname0, param1, NULL, true);
     Token ret;     _p->onReturn(ret, &call);
 
-    Token stmts0;  _p->onStatementListStart(stmts0);
     Token stmts1;  _p->addStatement(stmts1, stmts0, ret);
     _p->finishStatement(scont, stmts1); scont = 1;
   }

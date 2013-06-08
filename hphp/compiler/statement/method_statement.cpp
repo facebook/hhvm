@@ -63,7 +63,7 @@ MethodStatement::MethodStatement
  StatementListPtr stmt, int attr, const string &docComment,
  ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_method(method), m_ref(ref), m_attribute(attr),
+    m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
     m_cppLength(-1), m_modifiers(modifiers),
     m_originalName(name), m_params(params),
     m_retTypeConstraint(retTypeConstraint), m_stmt(stmt),
@@ -79,8 +79,8 @@ MethodStatement::MethodStatement
  int attr, const string &docComment, ExpressionListPtr attrList,
  bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
-    m_method(method), m_ref(ref), m_attribute(attr), m_cppLength(-1),
-    m_modifiers(modifiers), m_originalName(name),
+    m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
+    m_cppLength(-1), m_modifiers(modifiers), m_originalName(name),
     m_params(params), m_retTypeConstraint(retTypeConstraint),
     m_stmt(stmt), m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);

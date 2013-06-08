@@ -45,13 +45,6 @@ class c_Continuation : public ExtObjectData {
   ~c_Continuation();
 
 public:
-  void init(const Func* origFunc,
-            ArrayData* args) noexcept {
-    m_origFunc = const_cast<Func*>(origFunc);
-    assert(m_origFunc);
-    m_args = args;
-  }
-
   bool done() const { return o_subclassData.u8[0]; }
   bool running() const { return o_subclassData.u8[1]; }
   void setDone(bool done) { o_subclassData.u8[0] = done; }
@@ -67,9 +60,6 @@ public:
   void t_update(int64_t label, CVarRef value);
   Object t_getwaithandle();
   int64_t t_getlabel();
-  int64_t t_num_args();
-  Array t_get_args();
-  Variant t_get_arg(int64_t id);
   Variant t_current();
   int64_t t_key();
   void t_next();
@@ -81,14 +71,17 @@ public:
   String t_getcalledclass();
   Variant t___clone();
 
-  static c_Continuation* alloc(Class* cls, int nLocals, int nIters) {
+  static c_Continuation* alloc(const Func* origFunc, int nLocals, int nIters) {
+    assert(origFunc);
+
     size_t arOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters +
                       sizeof(TypedValue) * nLocals;
     arOffset += sizeof(TypedValue) - 1;
     arOffset &= ~(sizeof(TypedValue) - 1);
     c_Continuation* cont =
       (c_Continuation*)ALLOCOBJSZ(arOffset + sizeof(ActRec));
-    new ((void *)cont) c_Continuation(cls);
+    new ((void *)cont) c_Continuation();
+    cont->m_origFunc = const_cast<Func*>(origFunc);
     cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
            arOffset - sizeof(c_Continuation));
@@ -129,7 +122,6 @@ public:
   Variant m_received;
   Func *m_origFunc;
   ActRec* m_arPtr;
-  Array m_args;
   p_ContinuationWaitHandle m_waitHandle;
 
   String& getCalledClass() { not_reached(); }

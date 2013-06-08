@@ -91,19 +91,6 @@ int64_t c_Continuation::t_getlabel() {
   return m_label;
 }
 
-int64_t c_Continuation::t_num_args() {
-  return m_args.size();
-}
-
-Array c_Continuation::t_get_args() {
-  return m_args;
-}
-
-Variant c_Continuation::t_get_arg(int64_t id) {
-  if (id < 0LL || id >= m_args.size()) return false;
-  return m_args.rvalAt(id, AccessFlags::Error);
-}
-
 Variant c_Continuation::t_current() {
   const_assert(false);
   return m_value;

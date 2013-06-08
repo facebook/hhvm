@@ -115,7 +115,7 @@ extern void prepare_generator(Parser *_p, Token &stmt, Token &params);
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
-                             bool getArgs, Token &origGenFunc, bool isHhvm,
+                             Token &origGenFunc, bool isHhvm,
                              Token *attr);
 
 namespace HPHP {
@@ -858,7 +858,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       pushComment(comment);
       Token origGenFunc;
       create_generator(this, out, params, name, closureName, nullptr, nullptr,
-                       hasCallToGetArgs, origGenFunc,
+                       origGenFunc,
                        (!Option::WholeProgram || !Option::ParseTimeOpts),
                        attr);
       m_closureGenerator = false;
@@ -867,6 +867,8 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       assert(origStmt);
       func->setOrigGeneratorFunc(origStmt);
       origStmt->setGeneratorFunc(func);
+      origStmt->setHasCallToGetArgs(hasCallToGetArgs);
+      func->setHasCallToGetArgs(hasCallToGetArgs);
     }
 
   } else {
@@ -1155,7 +1157,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     pushComment(comment);
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
-                     &modifiers, hasCallToGetArgs, origGenFunc,
+                     &modifiers, origGenFunc,
                      (!Option::WholeProgram || !Option::ParseTimeOpts),
                      attr);
     MethodStatementPtr origStmt =
@@ -1163,7 +1165,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     assert(origStmt);
     mth->setOrigGeneratorFunc(origStmt);
     origStmt->setGeneratorFunc(mth);
-
+    origStmt->setHasCallToGetArgs(hasCallToGetArgs);
+    mth->setHasCallToGetArgs(hasCallToGetArgs);
   } else {
     ExpressionListPtr attrList;
     if (attr && attr->exp) {

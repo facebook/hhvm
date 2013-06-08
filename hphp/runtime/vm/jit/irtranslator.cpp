@@ -546,7 +546,7 @@ void Translator::translateDup(const NormalizedInstruction& ni) {
 }
 
 void Translator::translateCreateCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
+  HHIR_EMIT(CreateCont, i.imm[0].u_SA);
 }
 
 void Translator::translateContEnter(const NormalizedInstruction& i) {
@@ -1198,7 +1198,7 @@ bool shouldIRInline(const Func* curFunc,
    * Continuation allocation functions that take no arguments.
    */
   resetCursor();
-  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0) {
+  if (current == OpCreateCont) {
     if (func->numParams()) {
       FTRACE(1, "CreateCont with {} args\n", func->numParams());
     }

@@ -436,10 +436,9 @@ public:
     const Func* origFunc,
     const Func* genFunc,
     ObjectData* thisPtr,
-    ArrayData* args,
     Class* frameStaticCls);
   template<bool isMethod>
-  static c_Continuation* createContinuation(ActRec* fp, bool getArgs,
+  static c_Continuation* createContinuation(ActRec* fp,
                                             const Func* origFunc,
                                             const Func* genFunc);
   static c_Continuation* fillContinuationVars(

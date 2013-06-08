@@ -436,7 +436,6 @@ O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(CreateCont,                   D(Obj), C(TCA)                                \
                                           S(FramePtr)                         \
-                                          C(Bool)                             \
                                           C(Func)                             \
                                           C(Func),               E|N|Mem|PRc) \
 O(InlineCreateCont,             D(Obj), S(Obj,Null),                 E|N|PRc) \

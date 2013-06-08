@@ -998,8 +998,7 @@ bool mapContParams(ContParamMap& map,
   return true;
 }
 
-void HhbcTranslator::emitCreateCont(bool getArgs,
-                                    Id funNameStrId) {
+void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   gen(ExitOnVarEnv, getExitSlowTrace()->front(), m_tb->fp());
 
   auto const genName = lookupStringId(funNameStrId);
@@ -1015,7 +1014,6 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
         (TCA)&VMExecutionContext::createContinuation<false>
     ),
     m_tb->fp(),
-    cns(getArgs),
     cns(origFunc),
     cns(genFunc)
   );

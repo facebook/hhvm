@@ -109,6 +109,11 @@ TRACE_SET_MOD(emitter)
 using boost::dynamic_pointer_cast;
 using boost::static_pointer_cast;
 
+namespace {
+  const StringData* s_continuationVarArgsLocal
+    = StringData::GetStaticString("0ContinuationVarArgsLocal");
+}
+
 namespace StackSym {
   static const char None = 0x00;
 
@@ -3217,6 +3222,38 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               return true;
             }
           }
+        } else if (call->isCallToFunction("func_num_args") &&
+                   m_curFunc->isGenerator()) {
+          static const StringData* s_count =
+            StringData::GetStaticString("count");
+
+          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
+          emitConvertToCell(e);
+          e.False();
+          e.FCallBuiltin(2, 1, s_count);
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+          e.UnboxR();
+          return true;
+        } else if (call->isCallToFunction("func_get_args") &&
+                   m_curFunc->isGenerator()) {
+          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
+          emitConvertToCell(e);
+          return true;
+        } else if (call->isCallToFunction("func_get_arg") &&
+                   m_curFunc->isGenerator()) {
+          if (!params || params->getCount() == 0) {
+            e.Null();
+            return true;
+          }
+
+          visit((*params)[0]);
+          emitConvertToCell(e);
+          e.CastInt();
+          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
+          emitConvertToCell(e);
+          e.False();
+          e.ArrayIdx();
+          return true;
         } else if (call->isCompilerCallToFunction("hphp_unpack_continuation")) {
           assert(!params || params->getCount() == 0);
           int yieldLabelCount = call->getFunctionScope()->getYieldLabelCount();
@@ -3224,16 +3261,28 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitContinuationSwitch(e, yieldLabelCount);
           return false;
         } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
-          assert(params && (params->getCount() == 3 ||
-                            params->getCount() == 4));
+          assert(params && params->getCount() == 3);
           ExpressionPtr name = (*params)[1];
           Variant nameVar;
           UNUSED bool isScalar = name->getScalarValue(nameVar);
           assert(isScalar && nameVar.isString());
+
+          if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
+            static const StringData* s_func_get_args =
+              StringData::GetStaticString("func_get_args");
+
+            Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
+            emitVirtualLocal(local);
+            e.FCallBuiltin(0, 0, s_func_get_args);
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+            e.UnboxR();
+            emitSet(e);
+            e.PopC();
+          }
+
           const StringData* nameStr =
             StringData::GetStaticString(nameVar.getStringData());
-          bool callGetArgs = params->getCount() == 4;
-          e.CreateCont(callGetArgs, nameStr);
+          e.CreateCont(nameStr);
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           assert(params && params->getCount() == 1);
@@ -5363,6 +5412,10 @@ void EmitterVisitor::emitPostponedMeths() {
       }
     }
 
+    if (p.m_meth->hasCallToGetArgs()) {
+      fe->allocVarId(s_continuationVarArgsLocal);
+    }
+
     // Assign ids to all of the local variables eagerly. This gives us the
     // nice property that all named local variables will be assigned ids
     // 0 through k-1, while any unnamed local variable will have an id >= k.
@@ -5379,7 +5432,7 @@ void EmitterVisitor::emitPostponedMeths() {
 
     if (allowOverride) attrs = attrs | AttrAllowOverride;
 
-    if (funcScope->mayUseVV()) {
+    if (funcScope->mayUseVV() || p.m_meth->hasCallToGetArgs()) {
       attrs = attrs | AttrMayUseVV;
     }
 
@@ -5901,12 +5954,6 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
         return false;
       }
     }
-    // Special handling for func_get_args and friends inside a generator.
-    if (m_curFunc->isGenerator() &&
-        (name == "func_get_args" || name == "func_num_args"
-         || name == "func_get_arg")) {
-      return false;
-    }
     // in sandbox mode, don't emit FCallBuiltin for redefinable functions
     if (func->allowOverride() && !Option::WholeProgram) {
       return false;
@@ -5977,45 +6024,12 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       }
     }
 
-    if (useFCallBuiltin) {
-    } else if (!m_curFunc->isGenerator()) {
+    if (!useFCallBuiltin) {
       fpiStart = m_ue.bcPos();
-
       if (nsName == nullptr) {
         e.FPushFuncD(numParams, nLiteral);
       } else {
         e.FPushFuncU(numParams, nsName, nLiteral);
-      }
-    } else {
-      // Special handling for func_get_args and friends inside a generator.
-      const StringData* specialMethodName = nullptr;
-      static const StringData* contName =
-        StringData::GetStaticString(CONTINUATION_OBJECT_NAME);
-      Id contId = m_curFunc->lookupVarId(contName);
-      static const StringData* s_get_args =
-        StringData::GetStaticString("get_args");
-      static const StringData* s_num_args =
-        StringData::GetStaticString("num_args");
-      static const StringData* s_get_arg =
-        StringData::GetStaticString("get_arg");
-      if (nameStr == "func_get_args") {
-        specialMethodName = s_get_args;
-      } else if (nameStr == "func_num_args") {
-        specialMethodName = s_num_args;
-      } else if (nameStr == "func_get_arg") {
-        specialMethodName = s_get_arg;
-      }
-
-      if (nsName != nullptr) {
-        e.FPushFuncU(numParams, nsName, nLiteral);
-      } else if (specialMethodName != nullptr) {
-        emitVirtualLocal(contId);
-        emitCGet(e);
-        fpiStart = m_ue.bcPos();
-        e.FPushObjMethodD(numParams, specialMethodName);
-      } else {
-        fpiStart = m_ue.bcPos();
-        e.FPushFuncD(numParams, nLiteral);
       }
     }
   } else {

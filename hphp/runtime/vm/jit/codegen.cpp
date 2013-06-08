@@ -3499,7 +3499,6 @@ void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
       .immPtr(data.origFunc)
       .immPtr(data.genFunc)
       .ssa(inst->src(0))
-      .immPtr(nullptr) // getArgs array
       // Deliberately ignoring frameStaticClass parameter, because
       // it's unused if we have a $this pointer, and we don't inline
       // functions with a null $this.

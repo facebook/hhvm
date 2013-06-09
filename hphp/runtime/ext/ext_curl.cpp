@@ -1044,7 +1044,7 @@ public:
 
   void remove(CurlResource *curle) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (toObject(iter.second()).getTyped<CurlResource>()->get(true) ==
+      if (iter.second().toObject().getTyped<CurlResource>()->get(true) ==
           curle->get()) {
         m_easyh.remove(iter.first());
         return;
@@ -1054,7 +1054,7 @@ public:
 
   Object find(CURL *cp) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (toObject(iter.second()).getTyped<CurlResource>()->get(true) == cp) {
+      if (iter.second().toObject().getTyped<CurlResource>()->get(true) == cp) {
         return iter.second();
       }
     }

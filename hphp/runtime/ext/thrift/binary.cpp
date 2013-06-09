@@ -357,7 +357,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
                                  "type as a T_STRUCT", INVALID_DATA);
       }
       binary_serialize_spec(value, transport,
-                            f_hphp_get_static_property(toObject(value)->
+                            f_hphp_get_static_property(value.toObject()->
                                                        o_getClassName(),
                                                        s_TSPEC).toArray());
     } return;

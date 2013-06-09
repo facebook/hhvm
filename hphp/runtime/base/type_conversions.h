@@ -45,36 +45,6 @@ inline bool toBoolean(const ObjectData *v) {
 inline bool toBoolean(CObjRef v) { return toBoolean(v.get());}
 inline bool toBoolean(CVarRef v) { return v.toBoolean();}
 
-inline char toByte(bool    v) { return v ? 1 : 0;}
-inline char toByte(char    v) { return v;}
-inline char toByte(short   v) { return v;}
-inline char toByte(int     v) { return v;}
-inline char toByte(int64_t   v) { return v;}
-inline char toByte(double  v) { return (char)v;}
-inline char toByte(litstr  v) = delete;
-inline char toByte(const StringData *v) { return v ? v->toByte() : 0;}
-inline char toByte(CStrRef v) { return toByte(v.get());}
-inline char toByte(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
-inline char toByte(CArrRef v) { return toByte(v.get());}
-inline char toByte(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
-inline char toByte(CObjRef v) { return toByte(v.get());}
-inline char toByte(CVarRef v) { return v.toByte();}
-
-inline short toInt16(bool    v) { return v ? 1 : 0;}
-inline short toInt16(char    v) { return v;}
-inline short toInt16(short   v) { return v;}
-inline short toInt16(int     v) { return v;}
-inline short toInt16(int64_t   v) { return v;}
-inline short toInt16(double  v) { return (short)v;}
-inline short toInt16(litstr  v) = delete;
-inline short toInt16(const StringData *v) { return v ? v->toInt16() : 0;}
-inline short toInt16(CStrRef v) { return toInt16(v.get());}
-inline short toInt16(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
-inline short toInt16(CArrRef v) { return toInt16(v.get());}
-inline short toInt16(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
-inline short toInt16(CObjRef v) { return toInt16(v.get());}
-inline short toInt16(CVarRef v) { return v.toInt16();}
-
 inline int toInt32(bool    v) { return v ? 1 : 0;}
 inline int toInt32(char    v) { return v;}
 inline int toInt32(short   v) { return v;}
@@ -164,25 +134,6 @@ inline Array toArray(const ObjectData *v) {
 }
 inline Array toArray(CObjRef v) { return toArray(v.get());}
 inline Array toArray(CVarRef v) { return v.toArray();}
-
-inline Object toObject(bool    v) { return Variant(v).toObject();}
-inline Object toObject(char    v) { return Variant(v).toObject();}
-inline Object toObject(short   v) { return Variant(v).toObject();}
-inline Object toObject(int     v) { return Variant(v).toObject();}
-inline Object toObject(int64_t   v) { return Variant(v).toObject();}
-inline Object toObject(double  v) { return Variant(v).toObject();}
-inline Object toObject(litstr  v) = delete;
-inline Object toObject(const StringData *v) { return Variant(StrNR(v)).toObject();}
-inline Object toObject(CStrRef v) { return Variant(v).toObject();}
-Object toObject(ArrayData *v);
-inline Object toObject(CArrRef v) { return toObject(v.get());}
-Object toObject(ObjectData *v);
-inline Object toObject(CObjRef v) { return toObject(v.get());}
-inline Object toObject(CVarRef v) { return v.toObject();}
-
-inline const String *toSPOD(CStrRef v) { return &v;}
-inline const Variant *toVPOD(CVarRef v) { return &v;}
-inline const Object *toOPOD(CObjRef v) { return &v;}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

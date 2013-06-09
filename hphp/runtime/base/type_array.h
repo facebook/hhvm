@@ -243,7 +243,6 @@ class Array : protected SmartPtr<ArrayData> {
   int64_t  toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   double toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0;}
   String toString () const { return m_px ? "Array" : "";}
-  Object toObject () const;
 
   /**
    * Comparisons

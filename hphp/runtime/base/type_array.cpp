@@ -299,13 +299,6 @@ Array Array::slice(int offset, int length, bool preserve_keys) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// type conversions
-
-Object Array::toObject() const {
-  return HPHP::toObject(m_px);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
 bool Array::same(CArrRef v2) const {

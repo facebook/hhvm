@@ -1496,8 +1496,6 @@ Array VMExecutionContext::getCallerInfo() {
       Unit* unit = ar->m_func->unit();
       int lineNumber;
       if ((lineNumber = unit->getLineNumber(pc)) != -1) {
-        assert(!unit->filepath()->size() ||
-               unit->filepath()->data()[0] == '/');
         result.set(s_file, unit->filepath()->data(), true);
         result.set(s_line, lineNumber);
         return result;

@@ -65,16 +65,15 @@ const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 using HPHP::Transl::CallerFrame;
 using HPHP::Transl::EagerCallerFrame;
 
-#define getCheckedArrayRetType(input, fail, type)                       \
-  Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
-  if (UNLIKELY(Variant::GetAccessorType(tva_##input) != KindOfArray)) { \
-    throw_bad_array_exception();                                        \
-    return fail;                                                        \
-  }                                                                     \
-  type arr_##input = Variant::GetAsArray(tva_##input);
+#define getCheckedArrayRet(input, fail)                           \
+  auto const cell_##input = static_cast<CVarRef>(input).asCell(); \
+  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+    throw_bad_array_exception();                                  \
+    return fail;                                                  \
+  }                                                               \
+  ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
+  CArrRef arr_##input = arrNR_##input.asArray();
 
-#define getCheckedArrayRet(input, fail) \
-  getCheckedArrayRetType(input, fail, CArrRef)
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
 Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
@@ -191,12 +190,12 @@ Variant f_array_flip(CVarRef trans) {
 HOT_FUNC
 bool f_array_key_exists(CVarRef key, CVarRef search) {
   const ArrayData *ad;
-  Variant::TypedValueAccessor sacc = search.getTypedAccessor();
-  DataType saccType = Variant::GetAccessorType(sacc);
-  if (LIKELY(saccType == KindOfArray)) {
-    ad = Variant::GetArrayData(sacc);
-  } else if (saccType == KindOfObject) {
-    ObjectData* obj = Variant::GetObjectData(sacc);
+
+  auto const searchCell = search.asCell();
+  if (LIKELY(searchCell->m_type == KindOfArray)) {
+    ad = searchCell->m_data.parr;
+  } else if (searchCell->m_type == KindOfObject) {
+    ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
       return collectionOffsetContains(obj, key);
     }
@@ -206,19 +205,20 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
                              "false returned.");
     return false;
   }
-  Variant::TypedValueAccessor kacc = key.getTypedAccessor();
-  switch (Variant::GetAccessorType(kacc)) {
+
+  auto const cell = key.asCell();
+  switch (cell->m_type) {
   case KindOfString:
   case KindOfStaticString: {
     int64_t n = 0;
-    StringData *sd = Variant::GetStringData(kacc);
+    StringData *sd = cell->m_data.pstr;
     if (sd->isStrictlyInteger(n)) {
       return ad->exists(n);
     }
     return ad->exists(StrNR(sd));
   }
   case KindOfInt64:
-    return ad->exists(Variant::GetInt64(kacc));
+    return ad->exists(cell->m_data.num);
   case KindOfUninit:
   case KindOfNull:
     return ad->exists(empty_string);
@@ -445,7 +445,18 @@ Variant f_array_product(CVarRef array) {
 }
 
 Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  getCheckedArrayRetType(array, uninit_null(), Array &);
+  auto const array_cell = array.wrapped().asCell();
+  if (UNLIKELY(array_cell->m_type != KindOfArray)) {
+    throw_bad_array_exception();
+    return uninit_null();
+  }
+
+  /*
+   * Important note: this *must* cast the parr in the inner cell to
+   * the Array&---we can't copy it to the stack or anything because we
+   * might escalate.
+   */
+  Array& arr_array = *reinterpret_cast<Array*>(&array_cell->m_data.parr);
   arr_array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
     arr_array.append(iter.second());
@@ -1086,7 +1097,7 @@ class ArraySortTmp {
 static bool
 php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
@@ -1114,7 +1125,7 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 static bool
 php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
@@ -1142,7 +1153,7 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 static bool
 php_ksort(VRefParam array, int sort_flags, bool ascending) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->ksort(sort_flags, ascending);
     return true;
@@ -1201,7 +1212,7 @@ Variant f_natcasesort(VRefParam array) {
 
 bool f_usort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->usort(cmp_function);
     return true;
@@ -1220,7 +1231,7 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
 
 bool f_uasort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->uasort(cmp_function);
     return true;
@@ -1239,7 +1250,7 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
 
 bool f_uksort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->uksort(cmp_function);
     return true;
@@ -1273,8 +1284,8 @@ bool f_array_multisort(int _argc, VRefParam ar1,
   bool ascending = true;
   for (int i = 0; i < _argv.size(); i++) {
     Variant *v = &((Array&)_argv).lvalAt(i);
-    Variant::TypedValueAccessor tva = v->getTypedAccessor();
-    if (Variant::GetAccessorType(tva) == KindOfArray) {
+    auto const cell = v->asCell();
+    if (cell->m_type == KindOfArray) {
       sd.cmp_func = get_cmp_func(sort_flags, ascending);
       data.push_back(sd);
 
@@ -1282,7 +1293,7 @@ bool f_array_multisort(int _argc, VRefParam ar1,
       ascending = true;
 
       sd.original = v;
-      arrays.push_back(Variant::GetAsArray(tva));
+      arrays.push_back(Array(cell->m_data.parr));
       sd.array = &arrays.back();
     } else {
       int n = v->toInt32();

@@ -670,54 +670,60 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
 
 /* key MUST be a non-reference string or int */
 void VariableSerializer::writeArrayKey(Variant key) {
-  Variant::TypedValueAccessor tva = key.getTypedAccessor();
-  bool skey = Variant::IsString(tva);
+  auto const keyCell = key.asCell();
+  bool const skey = IS_STRING_TYPE(keyCell->m_type);
+
   if (skey && m_type == APCSerialize) {
-    write(Variant::GetAsString(tva));
+    write(StrNR(keyCell->m_data.pstr).asString());
     return;
   }
   ArrayInfo &info = m_arrayInfos.back();
+
   switch (m_type) {
   case DebuggerDump:
   case PrintR: {
     indent();
     m_buf->append('[');
     if (info.is_object && skey) {
-      writePropertyKey(Variant::GetAsString(tva));
+      writePropertyKey(keyCell->m_data.pstr);
     } else {
       m_buf->append(key);
     }
     m_buf->append("] => ");
     break;
   }
+
   case VarExport:
   case PHPOutput:
     indent();
     write(key, true);
     m_buf->append(" => ");
     break;
+
   case VarDump:
   case DebugDump:
     indent();
     m_buf->append('[');
     if (!skey) {
-      m_buf->append(Variant::GetInt64(tva));
+      m_buf->append(keyCell->m_data.num);
     } else {
       m_buf->append('"');
       if (info.is_object) {
-        writePropertyKey(Variant::GetAsString(tva));
+        writePropertyKey(keyCell->m_data.pstr);
       } else {
-        m_buf->append(Variant::GetAsString(tva));
+        m_buf->append(keyCell->m_data.pstr);
         m_buf->append('"');
       }
     }
     m_buf->append("]=>\n");
     break;
+
   case APCSerialize:
   case Serialize:
   case DebuggerSerialize:
     write(key);
     break;
+
   case JSON:
     if (!info.first_element) {
       m_buf->append(',');
@@ -728,9 +734,9 @@ void VariableSerializer::writeArrayKey(Variant key) {
     }
     if (!info.is_vector) {
       if (skey) {
-        CStrRef s = Variant::GetAsString(tva);
-        const char *k = s.data();
-        int len = s.size();
+        auto const sdata = keyCell->m_data.pstr;
+        const char *k = sdata->data();
+        int len = sdata->size();
         if (info.is_object && !*k && len) {
           while (*++k) len--;
           k++;
@@ -739,7 +745,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
         write(k, len);
       } else {
         m_buf->append('"');
-        m_buf->append(Variant::GetInt64(tva));
+        m_buf->append(keyCell->m_data.num);
         m_buf->append('"');
       }
       m_buf->append(':');
@@ -748,6 +754,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
       }
     }
     break;
+
   default:
     assert(false);
     break;

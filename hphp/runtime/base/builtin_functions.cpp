@@ -1056,10 +1056,10 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
   assert(!m_map.isNull());
   while (true) {
     CVarRef &type_map = m_map.get()->get(kind);
-    Variant::TypedValueAccessor tva = type_map.getTypedAccessor();
-    if (Variant::GetAccessorType(tva) != KindOfArray) return Failure;
+    auto const typeMapCell = type_map.asCell();
+    if (typeMapCell->m_type != KindOfArray) return Failure;
     String canonicalName = toLower ? StringUtil::ToLower(name) : name;
-    CVarRef &file = Variant::GetArrayData(tva)->get(canonicalName);
+    CVarRef &file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
     if (file.isString()) {
       String fName = file.toCStrRef().get();
@@ -1095,9 +1095,9 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
     Variant action = vm_call_user_func(func, CREATE_VECTOR2(kind, name));
-    tva = action.getTypedAccessor();
-    if (Variant::GetAccessorType(tva) == KindOfBoolean) {
-      if (Variant::GetBoolean(tva)) continue;
+    auto const actionCell = action.asCell();
+    if (actionCell->m_type == KindOfBoolean) {
+      if (actionCell->m_data.num) continue;
       return StopAutoloading;
     }
     return ContinueAutoloading;

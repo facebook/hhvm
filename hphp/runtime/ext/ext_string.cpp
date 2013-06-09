@@ -667,11 +667,11 @@ Variant f_strcspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
 }
 
 Variant f_strlen(CVarRef vstr) {
-  Variant::TypedValueAccessor tva = vstr.getTypedAccessor();
-  switch (Variant::GetAccessorType(tva)) {
+  auto const cell = vstr.asCell();
+  switch (cell->m_type) {
   case KindOfString:
   case KindOfStaticString:
-    return Variant(Variant::GetStringData(tva)->size());
+    return Variant(cell->m_data.pstr->size());
   case KindOfArray:
     raise_warning("strlen() expects parameter 1 to be string, array given");
     return uninit_null();

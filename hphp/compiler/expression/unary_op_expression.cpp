@@ -233,7 +233,7 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
       case '-':
         result = value.negate(); break;
       case '~':
-        result = ~value; break;
+        result = value.bitNot(); break;
       case '@':
         result = value; break;
       case T_INT_CAST:

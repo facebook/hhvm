@@ -4185,7 +4185,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
     c1->m_type = KindOfInt64;
     c1->m_data.num = ~int64_t(c1->m_data.dbl);
   } else if (IS_STRING_TYPE(c1->m_type)) {
-    tvCellAsVariant(c1) = ~tvCellAsVariant(c1);
+    tvCellAsVariant(c1) = tvCellAsVariant(c1).bitNot();
   } else {
     raise_error("Unsupported operand type for ~");
   }

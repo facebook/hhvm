@@ -177,12 +177,16 @@ void StringBuffer::append(int64_t n) {
 }
 
 void StringBuffer::append(CVarRef v) {
-  Variant::TypedValueAccessor tva = v.getTypedAccessor();
-  if (Variant::IsString(tva)) {
-    append(Variant::GetAsString(tva));
-  } else if (IS_INT_TYPE(Variant::GetAccessorType(tva))) {
-    append(Variant::GetInt64(tva));
-  } else {
+  auto const cell = v.asCell();
+  switch (cell->m_type) {
+  case KindOfStaticString:
+  case KindOfString:
+    append(cell->m_data.pstr);
+    break;
+  case KindOfInt64:
+    append(cell->m_data.num);
+    break;
+  default:
     append(v.toString());
   }
 }

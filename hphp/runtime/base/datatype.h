@@ -227,6 +227,10 @@ BOOST_STATIC_ASSERT(KindOfString       == 0x14);
 #define IS_REAL_TYPE(t) \
   (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
 
+inline bool IS_INT_KEY_TYPE(DataType t) {
+  return t <= KindOfInt64;
+}
+
 // typeReentersOnRelease --
 //   Returns whether the release helper for a given type can
 //   reenter.

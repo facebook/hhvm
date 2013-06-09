@@ -28,10 +28,10 @@ bool same(CVarRef v1, bool v2) {
 }
 
 bool same(CVarRef v1, int64_t v2) {
-  auto const acc = v1.getTypedAccessor();
-  switch (acc->m_type) {
+  auto const cell = v1.asCell();
+  switch (cell->m_type) {
   case KindOfInt64:
-    return v2 == acc->m_data.num;
+    return v2 == cell->m_data.num;
   default:
     break;
   }

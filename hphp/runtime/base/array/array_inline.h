@@ -24,18 +24,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-typedef Variant::TypedValueAccessor TypedValueAccessor;
-
-inline bool isIntKey(TypedValueAccessor tva) {
-    return Variant::GetAccessorType(tva) <= KindOfInt64;
+inline bool isIntKey(const Cell* cell) {
+  return IS_INT_KEY_TYPE(cell->m_type);
 }
 
-inline int64_t getIntKey(TypedValueAccessor tva) {
-    return Variant::GetInt64(tva);
+inline int64_t getIntKey(const Cell* cell) {
+  assert(cell->m_type == KindOfInt64);
+  return cell->m_data.num;
 }
 
-inline StringData *getStringKey(TypedValueAccessor tva) {
-    return Variant::GetStringData(tva);
+inline StringData* getStringKey(const Cell* cell) {
+  assert(IS_STRING_TYPE(cell->m_type));
+  return cell->m_data.pstr;
 }
 }
 
@@ -46,9 +46,9 @@ inline bool ArrayData::exists(CStrRef k) const {
 
 inline bool ArrayData::exists(CVarRef k) const {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? exists(getIntKey(tvk)) :
-         exists(getStringKey(tvk));
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? exists(getIntKey(cell))
+                        : exists(getStringKey(cell));
 }
 
 inline CVarRef ArrayData::get(CStrRef k, bool error) const {
@@ -58,9 +58,9 @@ inline CVarRef ArrayData::get(CStrRef k, bool error) const {
 
 inline CVarRef ArrayData::get(CVarRef k, bool error) const {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? get(getIntKey(tvk), error) :
-         get(getStringKey(tvk), error);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? get(getIntKey(cell), error)
+                        : get(getStringKey(cell), error);
 }
 
 inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,
@@ -72,9 +72,9 @@ inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,
 inline ArrayData* ArrayData::lval(CVarRef k, Variant *&ret, bool copy,
                                   bool checkExist) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? lval(getIntKey(tvk), ret, copy, checkExist) :
-         lval(getStringKey(tvk), ret, copy, checkExist);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? lval(getIntKey(cell), ret, copy, checkExist)
+                        : lval(getStringKey(cell), ret, copy, checkExist);
 }
 
 inline ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
@@ -90,9 +90,9 @@ inline ArrayData* ArrayData::set(CStrRef k, CVarRef v, bool copy) {
 
 inline ArrayData* ArrayData::set(CVarRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? set(getIntKey(tvk), v, copy) :
-         set(getStringKey(tvk), v, copy);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? set(getIntKey(cell), v, copy)
+                        : set(getStringKey(cell), v, copy);
 }
 
 inline ArrayData* ArrayData::setRef(CStrRef k, CVarRef v, bool copy) {
@@ -102,9 +102,9 @@ inline ArrayData* ArrayData::setRef(CStrRef k, CVarRef v, bool copy) {
 
 inline ArrayData* ArrayData::setRef(CVarRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? setRef(getIntKey(tvk), v, copy) :
-         setRef(getStringKey(tvk), v, copy);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? setRef(getIntKey(cell), v, copy)
+                        : setRef(getStringKey(cell), v, copy);
 }
 
 inline ArrayData* ArrayData::add(CStrRef k, CVarRef v, bool copy) {
@@ -114,9 +114,9 @@ inline ArrayData* ArrayData::add(CStrRef k, CVarRef v, bool copy) {
 
 inline ArrayData* ArrayData::add(CVarRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? add(getIntKey(tvk), v, copy) :
-         add(getStringKey(tvk), v, copy);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? add(getIntKey(cell), v, copy)
+                        : add(getStringKey(cell), v, copy);
 }
 
 inline ArrayData* ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
@@ -126,9 +126,9 @@ inline ArrayData* ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
 
 inline ArrayData* ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? addLval(getIntKey(tvk), ret, copy) :
-         addLval(getStringKey(tvk), ret, copy);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? addLval(getIntKey(cell), ret, copy)
+                        : addLval(getStringKey(cell), ret, copy);
 }
 
 inline ArrayData* ArrayData::remove(CStrRef k, bool copy) {
@@ -138,9 +138,9 @@ inline ArrayData* ArrayData::remove(CStrRef k, bool copy) {
 
 inline ArrayData* ArrayData::remove(CVarRef k, bool copy) {
   assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? remove(getIntKey(tvk), copy) :
-         remove(getStringKey(tvk), copy);
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? remove(getIntKey(cell), copy)
+                        : remove(getStringKey(cell), copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

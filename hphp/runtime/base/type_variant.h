@@ -585,7 +585,6 @@ class Variant : private TypedValue {
   Variant &operator %= (int64_t   n);
   Variant &operator %= (double  n);
 
-  Variant  operator ~  () const;
   Variant  operator |  (CVarRef v) const;
   Variant &operator |= (CVarRef v);
   Variant  operator &  (CVarRef v) const;
@@ -599,6 +598,10 @@ class Variant : private TypedValue {
   Variant  operator ++ (int);
   Variant &operator -- ();
   Variant  operator -- (int);
+
+  // Return the result of applying the php bitwise not operator to
+  // this value.
+  Variant bitNot() const;
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().
@@ -987,65 +990,6 @@ class Variant : private TypedValue {
   const Cell* asCell() const { return tvToCell(asTypedValue()); }
         Cell* asCell()       { return tvToCell(asTypedValue()); }
 
-  /**
-   * Based on the order in complex_types.h, TypedValue is defined before.
-   * TypedValue is binary compatible with Variant
-   */
-  typedef struct TypedValue* TypedValueAccessor;
-  TypedValueAccessor getTypedAccessor() const {
-    const Variant *value = m_type == KindOfRef ? m_data.pref->var() : this;
-    return (TypedValueAccessor)value;
-  }
-  static DataType GetAccessorType(TypedValueAccessor acc) {
-    assert(acc);
-    return acc->m_type;
-  }
-  static bool GetBoolean(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfBoolean);
-    return acc->m_data.num;
-  }
-  static int64_t GetInt64(TypedValueAccessor acc) {
-    assert(acc);
-    assert(acc->m_type == KindOfInt64);
-    return acc->m_data.num;
-  }
-  static double GetDouble(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfDouble);
-    return acc->m_data.dbl;
-  }
-  static bool IsString(TypedValueAccessor acc) {
-    return IS_STRING_TYPE(acc->m_type);
-  }
-  static StringData *GetStringData(TypedValueAccessor acc) {
-    assert(acc && IS_STRING_TYPE(acc->m_type));
-    return acc->m_data.pstr;
-  }
-  static ArrayData *GetArrayData(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfArray);
-    return acc->m_data.parr;
-  }
-  static ObjectData *GetObjectData(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfObject);
-    return acc->m_data.pobj;
-  }
-  static ObjectData *GetArrayAccess(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfObject);
-    ObjectData *obj = acc->m_data.pobj;
-    if (!obj->instanceof(SystemLib::s_ArrayAccessClass)) {
-      throw InvalidOperandException("not ArrayAccess objects");
-    }
-    return obj;
-  }
-  static Array& GetAsArray(TypedValueAccessor acc) {
-    assert(acc && acc->m_type == KindOfArray);
-    return *reinterpret_cast<Array*>(&acc->m_data.parr);
-  }
-
-  static String& GetAsString(TypedValueAccessor acc) {
-    assert(IsString(acc));
-    return *reinterpret_cast<String*>(&acc->m_data.pstr);
-  }
-
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
@@ -1270,8 +1214,10 @@ public:
     return *const_cast<VRefParamValue*>(this);
   }
   operator Variant&() const { return m_var; }
-  Variant *operator&() const { return &m_var; }
+  Variant *operator&() const { return &m_var; } // FIXME
   Variant *operator->() const { return &m_var; }
+
+  Variant& wrapped() const { return m_var; }
 
   explicit operator bool   () const { return m_var.toBoolean();}
   operator int    () const { return m_var.toInt32();}
@@ -1316,9 +1262,6 @@ public:
   Variant array_iter_key() const { return m_var.array_iter_key(); }
   Variant array_iter_each() const { return m_var.array_iter_each(); }
 
-  Variant::TypedValueAccessor getTypedAccessor() const {
-    return m_var.getTypedAccessor();
-  }
 private:
   mutable Variant m_var;
 };

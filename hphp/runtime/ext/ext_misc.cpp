@@ -136,7 +136,7 @@ bool f_define(CStrRef name, CVarRef value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  return Unit::defCns(name.get(), value.getTypedAccessor());
+  return Unit::defCns(name.get(), value.asCell());
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {

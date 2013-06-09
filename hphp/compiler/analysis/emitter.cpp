@@ -1699,7 +1699,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             } else {
               assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
-            mainReturn = *v.getTypedAccessor();
+            mainReturn = *v.asCell();
             m_ue.returnSeen();
           }
           break;

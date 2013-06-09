@@ -74,14 +74,14 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     if (!name.isReferenced()) return ret;
   }
 
-  Variant::TypedValueAccessor tv_func = v.getTypedAccessor();
-  if (Variant::IsString(tv_func)) {
-    if (name.isReferenced()) name = Variant::GetStringData(tv_func);
+  auto const tv_func = v.asCell();
+  if (IS_STRING_TYPE(tv_func->m_type)) {
+    if (name.isReferenced()) name = tv_func->m_data.pstr;
     return ret;
   }
 
-  if (Variant::GetAccessorType(tv_func) == KindOfArray) {
-    CArrRef arr = Variant::GetAsArray(tv_func);
+  if (tv_func->m_type == KindOfArray) {
+    CArrRef arr = tv_func->m_data.parr;
     CVarRef clsname = arr.rvalAtRef(int64_t(0));
     CVarRef mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
@@ -91,28 +91,28 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
       return false;
     }
 
-    Variant::TypedValueAccessor tv_meth = mthname.getTypedAccessor();
-    if (!Variant::IsString(tv_meth)) {
+    auto const tv_meth = mthname.asCell();
+    if (!IS_STRING_TYPE(tv_meth->m_type)) {
       if (name.isReferenced()) name = v.toString();
       return false;
     }
 
-    Variant::TypedValueAccessor tv_cls = clsname.getTypedAccessor();
-    if (Variant::GetAccessorType(tv_cls) == KindOfObject) {
-      name = Variant::GetObjectData(tv_cls)->o_getClassName();
-    } else if (Variant::IsString(tv_cls)) {
-      name = Variant::GetStringData(tv_cls);
+    auto const tv_cls = clsname.asCell();
+    if (tv_cls->m_type == KindOfObject) {
+      name = tv_cls->m_data.pobj->o_getClassName();
+    } else if (IS_STRING_TYPE(tv_cls->m_type)) {
+      name = tv_cls->m_data.pstr;
     } else {
       name = v.toString();
       return false;
     }
 
-    name = concat3(name, s_colon2, Variant::GetAsString(tv_meth));
+    name = concat3(name, s_colon2, tv_meth->m_data.pstr);
     return ret;
   }
 
-  if (Variant::GetAccessorType(tv_func) == KindOfObject) {
-    ObjectData *d = Variant::GetObjectData(tv_func);
+  if (tv_func->m_type == KindOfObject) {
+    ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
       if (d->instanceof(c_Closure::s_cls)) {

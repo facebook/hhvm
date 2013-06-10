@@ -47,7 +47,7 @@ namespace HPHP {
 
 using Util::getDataRef;
 
-static const Trace::Module TRACEMOD = Trace::hhbc;
+TRACE_SET_MOD(hhbc);
 
 static const StaticString s_stdin("STDIN");
 static const StaticString s_stdout("STDOUT");

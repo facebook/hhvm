@@ -24,7 +24,7 @@
 
 namespace HPHP { namespace JIT {
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
+TRACE_SET_MOD(hhir);
 
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            Offset initialSpOffsetFromFp,

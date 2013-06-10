@@ -22,7 +22,7 @@
 namespace HPHP {
 namespace Transl {
 
-static const Trace::Module TRACEMOD = Trace::trans;
+TRACE_SET_MOD(trans);
 
 /*
  * A mapping from FCall instructions to the statically-known StringData*

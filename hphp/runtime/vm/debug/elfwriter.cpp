@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/debug/elfwriter.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
 #include <gelf.h>
 #include <elf.h>
-#include "hphp/runtime/vm/debug/elfwriter.h"
-#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -34,7 +34,7 @@ using namespace HPHP::Transl;
 namespace HPHP {
 namespace Debug {
 
-static const Trace::Module TRACEMOD = Trace::debuginfo;
+TRACE_SET_MOD(debuginfo);
 static const uint8_t CFA_OFFSET = 16;
 
 void ElfWriter::logError(const string& msg) {

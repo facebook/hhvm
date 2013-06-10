@@ -33,7 +33,7 @@ using std::endl;
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::fr;
+TRACE_SET_MOD(fr);
 extern bool (*file_dump)(const char *filename);
 
 namespace Eval {

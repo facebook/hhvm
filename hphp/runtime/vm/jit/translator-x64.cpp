@@ -4175,7 +4175,7 @@ bool TranslatorX64::invalidateFile(Eval::PhpFile* f) {
 
 } // HPHP::Transl
 
-static const Trace::Module TRACEMOD = Trace::tx64;
+TRACE_SET_MOD(tx64);
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());

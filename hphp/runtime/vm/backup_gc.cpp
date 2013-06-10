@@ -33,7 +33,7 @@
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::gc;
+TRACE_SET_MOD(gc);
 
 //////////////////////////////////////////////////////////////////////
 

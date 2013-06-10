@@ -25,7 +25,7 @@
 namespace HPHP {
 namespace Transl {
 
-static const Trace::Module TRACEMOD = Trace::tx64;
+TRACE_SET_MOD(tx64);
 static const DataType BitwiseKindOfString = KindOfString;
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.

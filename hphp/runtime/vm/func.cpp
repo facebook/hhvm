@@ -36,7 +36,7 @@
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::hhbc;
+TRACE_SET_MOD(hhbc);
 const StringData* Func::s___call = StringData::GetStaticString("__call");
 const StringData* Func::s___callStatic =
   StringData::GetStaticString("__callStatic");

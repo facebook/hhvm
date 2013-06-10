@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Static strings.
 
-static const Trace::Module TRACEMOD = Trace::runtime;
+TRACE_SET_MOD(runtime);
 
 static StaticString s_rewind("rewind");
 static StaticString s_valid("valid");

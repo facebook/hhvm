@@ -39,7 +39,7 @@ namespace Transl {
  * Code related to reclaiming translation spaces.
  */
 
-static const Trace::Module TRACEMOD = Trace::tx64;
+TRACE_SET_MOD(tx64);
 
 /*
  * Visitor that makes a best effort at touching all live Func*'s at the

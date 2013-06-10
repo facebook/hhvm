@@ -50,7 +50,7 @@ using namespace Util;
 using namespace Trace;
 using std::max;
 
-static const Trace::Module TRACEMOD = Trace::hhir;
+TRACE_SET_MOD(hhir);
 #ifdef DEBUG
 static const bool debug = true;
 #else

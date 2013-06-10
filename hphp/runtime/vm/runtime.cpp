@@ -36,7 +36,7 @@ namespace HPHP {
 
 using Transl::tx64;
 
-static const Trace::Module TRACEMOD = Trace::runtime;
+TRACE_SET_MOD(runtime);
 
 CompileStringFn g_hphp_compiler_parse;
 BuildNativeFuncUnitFn g_hphp_build_native_func_unit;

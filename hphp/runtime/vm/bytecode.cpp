@@ -99,7 +99,7 @@ using Transl::tx64;
 #else
 #define OPTBLD_INLINE ALWAYS_INLINE
 #endif
-static const Trace::Module TRACEMOD = Trace::bcinterp;
+TRACE_SET_MOD(bcinterp);
 
 namespace {
 

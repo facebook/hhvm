@@ -34,7 +34,7 @@
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::tprefix;
+TRACE_SET_MOD(tprefix);
 
 namespace Trace {
 

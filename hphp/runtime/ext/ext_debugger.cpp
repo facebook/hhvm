@@ -62,7 +62,7 @@ Array f_hphpd_get_user_commands() {
   return CmdUser::GetCommands();
 }
 
-static const Trace::Module TRACEMOD = Trace::bcinterp;
+TRACE_SET_MOD(bcinterp);
 
 void f_hphpd_break(bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");

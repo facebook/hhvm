@@ -28,7 +28,7 @@ namespace HPHP {
 namespace JIT {
 namespace {
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
+TRACE_SET_MOD(hhir);
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */
 struct DceFlags {

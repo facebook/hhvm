@@ -36,7 +36,7 @@ using namespace HPHP::Trace;
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::intercept;
+TRACE_SET_MOD(intercept);
 
 class InterceptRequestData : public RequestEventHandler {
 public:

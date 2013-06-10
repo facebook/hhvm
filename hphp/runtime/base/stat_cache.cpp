@@ -29,7 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const Trace::Module TRACEMOD = Trace::stat;
+TRACE_SET_MOD(stat);
 
 UNUSED static std::string statToString(const struct stat* buf) {
   std::ostringstream os;

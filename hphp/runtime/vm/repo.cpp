@@ -21,7 +21,7 @@
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::hhbc;
+TRACE_SET_MOD(hhbc);
 
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";

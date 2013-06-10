@@ -46,7 +46,7 @@ static_assert(
   "Performance is sensitive to sizeof(HphpArray)."
   " Make sure you changed it with good reason and then update this assert.");
 
-static const Trace::Module TRACEMOD = Trace::runtime;
+TRACE_SET_MOD(runtime);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

@@ -2281,7 +2281,9 @@ void DebuggerClient::loadConfig() {
   }
 
   // make sure file exists
-  FILE *f = fopen(m_configFileName.c_str(), "a");
+  FILE *f = fopen(m_configFileName.c_str(), "r");
+  bool needToWriteFile = f == nullptr;
+  if (needToWriteFile) f = fopen(m_configFileName.c_str(), "a");
   if (f) {
     fclose(f);
   } else {
@@ -2336,7 +2338,9 @@ void DebuggerClient::loadConfig() {
 
   m_sourceRoot = m_config["SourceRoot"].getString();
 
-  saveConfig(); // so to generate a starter for people
+  if (needToWriteFile) {
+    saveConfig(); // so to generate a starter for people
+  }
 }
 
 void DebuggerClient::saveConfig() {

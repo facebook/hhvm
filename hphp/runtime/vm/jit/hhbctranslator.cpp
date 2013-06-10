@@ -1004,17 +1004,18 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   auto const genFunc = origFunc->getGeneratorBody(genName);
   auto const origLocals = origFunc->numLocals();
 
-  auto const cont = gen(
-    CreateCont,
-    cns(
-      origFunc->isMethod() ?
-        (TCA)&VMExecutionContext::createContinuation<true> :
-        (TCA)&VMExecutionContext::createContinuation<false>
-    ),
-    m_tb->fp(),
-    cns(origFunc),
-    cns(genFunc)
-  );
+  auto const cont = origFunc->isMethod()
+    ? gen(
+        CreateContMeth,
+        cns(origFunc),
+        cns(genFunc),
+        gen(LdCtx, m_tb->fp(), cns(curFunc()))
+      )
+    : gen(
+        CreateContFunc,
+        cns(origFunc),
+        cns(genFunc)
+      );
 
   ContParamMap params;
   if (origLocals <= Translator::kMaxInlineContLocals &&

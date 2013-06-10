@@ -6981,12 +6981,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCl(PC& pc) {
   m_stack.pushObject(cl2);
 }
 
-template<bool isMethod>
-c_Continuation*
-VMExecutionContext::createContinuationHelper(const Func* origFunc,
-                                             const Func* genFunc,
-                                             ObjectData* thisPtr,
-                                             Class* frameStaticCls) {
+static inline c_Continuation* createCont(const Func* origFunc,
+                                         const Func* genFunc) {
   auto const cont = c_Continuation::alloc(
     origFunc,
     genFunc->numLocals(),
@@ -6999,22 +6995,6 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
   // does. We set it up once, here, and then just change FP to point to it when
   // we enter the generator body.
   ActRec* ar = cont->actRec();
-
-  if (isMethod) {
-    if (origFunc->isClosureBody()) {
-      genFunc = genFunc->cloneAndSetClass(origFunc->cls());
-    }
-
-    if (thisPtr) {
-      ar->setThis(thisPtr);
-      thisPtr->incRefCount();
-    } else {
-      ar->setClass(frameStaticCls);
-    }
-  } else {
-    ar->setThis(nullptr);
-  }
-
   ar->m_func = genFunc;
   ar->initNumArgs(1);
   ar->setVarEnv(nullptr);
@@ -7030,19 +7010,29 @@ VMExecutionContext::createContinuationHelper(const Func* origFunc,
   return cont;
 }
 
-template<bool isMethod>
 c_Continuation*
-VMExecutionContext::createContinuation(ActRec* fp,
-                                       const Func* origFunc,
-                                       const Func* genFunc) {
-  ObjectData* const thisPtr = fp->hasThis() ? fp->getThis() : nullptr;
+VMExecutionContext::createContFunc(const Func* origFunc,
+                                   const Func* genFunc) {
+  auto cont = createCont(origFunc, genFunc);
+  cont->actRec()->setThis(nullptr);
+  return cont;
+}
 
-  return createContinuationHelper<isMethod>(
-    origFunc,
-    genFunc,
-    thisPtr,
-    frameStaticClass(fp)
-  );
+c_Continuation*
+VMExecutionContext::createContMeth(const Func* origFunc,
+                                   const Func* genFunc,
+                                   void* objOrCls) {
+  if (origFunc->isClosureBody()) {
+    genFunc = genFunc->cloneAndSetClass(origFunc->cls());
+  }
+
+  auto cont = createCont(origFunc, genFunc);
+  auto ar = cont->actRec();
+  ar->setThisOrClass(objOrCls);
+  if (ar->hasThis()) {
+    ar->getThis()->incRefCount();
+  }
+  return cont;
 }
 
 static inline void setContVar(const Func* genFunc,
@@ -7107,16 +7097,6 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   return cont;
 }
 
-// Explicitly instantiate for hhbctranslator.o and codegen.o
-template c_Continuation* VMExecutionContext::createContinuation<true>(
-  ActRec*, const Func*, const Func*);
-template c_Continuation* VMExecutionContext::createContinuation<false>(
-  ActRec*, const Func*, const Func*);
-template c_Continuation* VMExecutionContext::createContinuationHelper<true>(
-  const Func*, const Func*, ObjectData*, Class*);
-template c_Continuation* VMExecutionContext::createContinuationHelper<false>(
-  const Func*, const Func*, ObjectData*, Class*);
-
 inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();
   DECODE_LITSTR(genName);
@@ -7125,10 +7105,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   const Func* genFunc = origFunc->getGeneratorBody(genName);
   assert(genFunc != nullptr);
 
-  bool isMethod = origFunc->isMethod();
-  c_Continuation* cont = isMethod ?
-    createContinuation<true>(m_fp, origFunc, genFunc) :
-    createContinuation<false>(m_fp, origFunc, genFunc);
+  c_Continuation* cont = origFunc->isMethod()
+    ? createContMeth(origFunc, genFunc, m_fp->getThisOrClass())
+    : createContFunc(origFunc, genFunc);
 
   fillContinuationVars(m_fp, origFunc, genFunc, cont);
 

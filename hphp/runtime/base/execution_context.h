@@ -430,16 +430,11 @@ public:
   void requestExit();
 
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
-  template<bool isMethod>
-  static c_Continuation* createContinuationHelper(
-    const Func* origFunc,
-    const Func* genFunc,
-    ObjectData* thisPtr,
-    Class* frameStaticCls);
-  template<bool isMethod>
-  static c_Continuation* createContinuation(ActRec* fp,
-                                            const Func* origFunc,
-                                            const Func* genFunc);
+  static c_Continuation* createContFunc(const Func* origFunc,
+                                        const Func* genFunc);
+  static c_Continuation* createContMeth(const Func* origFunc,
+                                        const Func* genFunc,
+                                        void* objOrCls);
   static c_Continuation* fillContinuationVars(
     ActRec* fp, const Func* origFunc, const Func* genFunc,
     c_Continuation* cont);

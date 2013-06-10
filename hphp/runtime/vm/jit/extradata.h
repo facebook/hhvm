@@ -190,11 +190,6 @@ private:
   uintptr_t m_dataBits;
 };
 
-struct CreateContData : IRExtraData {
-  const Func* origFunc;
-  const Func* genFunc;
-};
-
 /*
  * Information for the REQ_BIND_JMPCC stubs we create when a tracelet
  * ends with conditional jumps.
@@ -349,7 +344,6 @@ X(DefInlineFP,                  DefInlineFPData);
 X(ReqBindJmp,                   BCOffset);
 X(ReqBindJmpNoIR,               BCOffset);
 X(ReqRetranslateNoIR,           BCOffset);
-X(InlineCreateCont,             CreateContData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);

@@ -401,22 +401,6 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
 
   forEachInst(trace, [&](IRInstruction* inst) {
     switch (inst->op()) {
-    case CreateCont:
-      {
-        auto const frameInst = inst->src(1)->inst();
-        if (frameInst->op() == DefInlineFP) {
-          auto const spInst = frameInst->src(0)->inst();
-          if (spInst->op() == SpillFrame &&
-              spInst->src(3)->type().subtypeOfAny(Type::Obj, Type::Null)) {
-            FTRACE(5, "CreateCont ({}): weak use of frame {}\n",
-                   inst->id(),
-                   frameInst->id());
-            state[frameInst].incWeakUse();
-          }
-        }
-      }
-      break;
-
     // We don't need to generate stores to a frame if it can be
     // eliminated.
     case StLoc:
@@ -460,28 +444,6 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
    */
   forEachInst(trace, [&](IRInstruction* inst) {
     switch (inst->op()) {
-    case CreateCont:
-      {
-        auto const fp = inst->src(1);
-        if (state[fp->inst()].isDead()) {
-          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->id());
-
-          CreateContData data;
-          data.origFunc = inst->src(2)->getValFunc();
-          data.genFunc  = inst->src(3)->getValFunc();
-
-          assert(fp->inst()->src(0)->inst()->op() == SpillFrame);
-          auto const thisPtr = fp->inst()->src(0)->inst()->src(3);
-          factory->replace(
-            inst,
-            InlineCreateCont,
-            data,
-            thisPtr
-          );
-        }
-      }
-      break;
-
     case StLoc: case InlineReturn:
       {
         auto const fp = inst->src(0);

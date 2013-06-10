@@ -129,10 +129,12 @@ void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
    *
    * We set m_thisIsAvailable to true on any object method, because we
    * just don't inline calls to object methods with a null $this.
+   *
+   * Static methods probably broken #2490252.
    */
   m_fpValue         = calleeFP;
   m_spValue         = calleeSP;
-  m_thisIsAvailable = target->cls() != nullptr;
+  m_thisIsAvailable = target->cls() != nullptr && !target->isStatic();
   m_curFunc         = cns(target);
 
   /*

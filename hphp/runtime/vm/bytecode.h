@@ -315,6 +315,15 @@ struct ActRec {
     return uintptr_t(p) & 1 ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
+  void setThisOrClass(void* objOrCls) {
+    m_this = (ObjectData*)objOrCls;
+    assert(hasThis() || hasClass());
+  }
+
+  void* getThisOrClass() const {
+    return m_this;
+  }
+
   /**
    * To conserve space, we use unions for pairs of mutually exclusive
    * fields (fields that are not used at the same time). We use unions

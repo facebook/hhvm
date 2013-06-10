@@ -395,7 +395,8 @@ CALL_OPCODE(ConvIntToStr);
 CALL_OPCODE(ConvObjToStr);
 CALL_OPCODE(ConvCellToStr);
 
-CALL_OPCODE(CreateCont)
+CALL_OPCODE(CreateContFunc)
+CALL_OPCODE(CreateContMeth)
 CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
@@ -3482,31 +3483,6 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                  dstReg,
                  kSyncPoint,
                  ArgGroup(m_regs).reg(dstReg));
-  }
-}
-
-void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
-  auto const& data = *inst->extra<InlineCreateCont>();
-  auto const helper = data.origFunc->isMethod()
-    ? &VMExecutionContext::createContinuationHelper<true>
-    : &VMExecutionContext::createContinuationHelper<false>;
-
-  cgCallHelper(
-    m_as,
-    reinterpret_cast<TCA>(helper),
-    inst->dst(),
-    kSyncPoint,
-    ArgGroup(m_regs)
-      .immPtr(data.origFunc)
-      .immPtr(data.genFunc)
-      .ssa(inst->src(0))
-      // Deliberately ignoring frameStaticClass parameter, because
-      // it's unused if we have a $this pointer, and we don't inline
-      // functions with a null $this.
-  );
-  if (data.origFunc->isMethod()) {
-    // We can't support a null $this.
-    assert(inst->src(0)->isA(Type::Obj));
   }
 }
 

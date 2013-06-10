@@ -434,11 +434,8 @@ O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
-O(CreateCont,                   D(Obj), C(TCA)                                \
-                                          S(FramePtr)                         \
-                                          C(Func)                             \
-                                          C(Func),               E|N|Mem|PRc) \
-O(InlineCreateCont,             D(Obj), S(Obj,Null),                 E|N|PRc) \
+O(CreateContFunc,               D(Obj), C(Func) C(Func),             E|N|PRc) \
+O(CreateContMeth,               D(Obj), C(Func) C(Func) S(Ctx),      E|N|PRc) \
 O(FillContLocals,                   ND, S(FramePtr)                           \
                                           C(Func)                             \
                                           C(Func)                             \

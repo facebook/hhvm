@@ -175,10 +175,10 @@ static CallMap s_callMap({
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Continuation support helpers */
-    {CreateCont,         {FSSA, 0}, DSSA, SNone,
-                           {{SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {InlineCreateCont,   nullptr, DSSA, SSync,
-                           {{Immed}, {Immed}, {SSA, 0}}},
+    {CreateContFunc,     (TCA)&VMExecutionContext::createContFunc, DSSA, SNone,
+                         {{SSA, 0}, {SSA, 1}}},
+    {CreateContMeth,     (TCA)&VMExecutionContext::createContMeth, DSSA, SNone,
+                         {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {FillContLocals, (TCA)&VMExecutionContext::fillContinuationVars,
               DNone, SNone,
               {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},

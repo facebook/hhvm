@@ -4643,6 +4643,9 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::StableMapType:
           obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
           break;
+        case Collection::SetType:
+          obj = collectionDeepCopySet(static_cast<c_Set*>(obj));
+          break;
         case Collection::PairType:
           obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
           break;

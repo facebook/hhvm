@@ -332,6 +332,21 @@
                     ]
                 },
                 {
+                    "name": "reserve",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "sz",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "toArray",
                     "flags": [
                         "HasDocComment"

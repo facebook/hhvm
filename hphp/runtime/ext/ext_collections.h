@@ -46,6 +46,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   Object t_append(CVarRef val); // deprecated
   Variant t_pop();
   void t_resize(CVarRef sz, CVarRef value);
+  void t_reserve(CVarRef sz);
   Object t_clear();
   bool t_isempty();
   int64_t t_count();

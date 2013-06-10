@@ -256,6 +256,21 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
   resize(intSz, val);
 }
 
+void c_Vector::t_reserve(CVarRef sz) {
+  if (!sz.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  int64_t intSz = sz.toInt64();
+  if (intSz < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter sz must be a non-negative integer"));
+    throw e;
+  }
+  reserve(intSz);
+}
+
 Object c_Vector::t_clear() {
   ++m_version;
   uint sz = m_size;

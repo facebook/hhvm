@@ -812,43 +812,6 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   return str;
 }
 
-String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
-  int len1 = s1.size();
-  int len2 = s2.size();
-  int len3 = s3.size();
-  int len4 = s4.size();
-  int len5 = s5.size();
-  int len = len1 + len2 + len3 + len4 + len5;
-  String s = String(len, ReserveString);
-  char *buf = s.mutableSlice().ptr;
-  memcpy(buf, s1.data(), len1);
-  memcpy(buf + len1, s2.data(), len2);
-  memcpy(buf + len1 + len2, s3.data(), len3);
-  memcpy(buf + len1 + len2 + len3, s4.data(), len4);
-  memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
-  return s.setSize(len);
-}
-
-String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
-               CStrRef s6) {
-  int len1 = s1.size();
-  int len2 = s2.size();
-  int len3 = s3.size();
-  int len4 = s4.size();
-  int len5 = s5.size();
-  int len6 = s6.size();
-  int len = len1 + len2 + len3 + len4 + len5 + len6;
-  String s = String(len, ReserveString);
-  char *buf = s.mutableSlice().ptr;
-  memcpy(buf, s1.data(), len1);
-  memcpy(buf + len1, s2.data(), len2);
-  memcpy(buf + len1 + len2, s3.data(), len3);
-  memcpy(buf + len1 + len2 + len3, s4.data(), len4);
-  memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
-  memcpy(buf + len1 + len2 + len3 + len4 + len5, s6.data(), len6);
-  return s.setSize(len);
-}
-
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_Traversable.get()) ||
           s->isame(s_KeyedTraversable.get()) ||

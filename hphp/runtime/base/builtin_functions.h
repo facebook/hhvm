@@ -134,12 +134,8 @@ inline String &concat_assign(String &s1, CStrRef s2) {
   return s1 += s2;
 }
 
-#define MAX_CONCAT_ARGS 6
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3);
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4);
-String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5);
-String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
-               CStrRef s6);
 
 inline Variant &concat_assign(Variant &v1, litstr s2) {
   if (v1.getType() == KindOfString) {

@@ -1856,7 +1856,7 @@ static DataType getPredictedDataType(ExpressionPtr expr) {
 }
 
 void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
-                                   bool useFCallBuiltin) {
+                                   Func* builtinFunc) {
   int ref = -1;
   if (fn->hasAnyContext(Expression::RefValue |
                         Expression::DeepReference |
@@ -1866,7 +1866,10 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     return;
   }
   bool voidReturn = false;
-  if (fn->isValid() && fn->getFuncScope()) {
+  if (builtinFunc) {
+    ref = (builtinFunc->info()->attribute & ClassInfo::IsReference) != 0;
+    voidReturn = builtinFunc->info()->returnType == KindOfNull;
+  } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getFuncScope()->getReturnType())) {
       voidReturn = true;
@@ -1884,22 +1887,24 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     /* we dont support V in M-vectors, so leave it as an R in that
        case */
     assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
-    Offset cur = m_ue.bcPos();
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
     if (ref) {
       e.BoxR();
     } else {
       e.UnboxR();
     }
-    m_metaInfo.add(cur, Unit::MetaInfo::NopOut, false, 0, 0);
   }
 
   if (voidReturn) {
     m_evalStack.setKnownType(KindOfNull, false /* inferred */);
     m_evalStack.setNotRef();
   } else if (!ref) {
-    DataType dt = getPredictedDataType(fn);
+    DataType dt = builtinFunc ?
+      builtinFunc->info()->returnType :
+      getPredictedDataType(fn);
+
     if (dt != KindOfUnknown) {
-      if (useFCallBuiltin) {
+      if (builtinFunc) {
         switch (dt) {
           case KindOfBoolean:
           case KindOfInt64:
@@ -5916,55 +5921,46 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   return true;
 }
 
-bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
-                                        const std::string& name,
-                                        int numParams) {
+Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
+                                         int numParams) {
   if (Option::JitEnableRenameFunction) {
-    return false;
+    return nullptr;
   }
   if (Option::DynamicInvokeFunctions.size()) {
     if (Option::DynamicInvokeFunctions.find(name) !=
         Option::DynamicInvokeFunctions.end()) {
-      return false;
+      return nullptr;
     }
   }
-  FunctionScopePtr func = fn->getFuncScope();
-  if (!func || func->getMaxParamCount() > kMaxBuiltinArgs) {
-    return false;
+  Func* f = Unit::lookupFunc(StringData::GetStaticString(name));
+  if (!f || !f->info() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+
+  const ClassInfo::MethodInfo* info = f->info();
+  if (info->attribute & (ClassInfo::NeedsActRec |
+                         ClassInfo::VariableArguments |
+                         ClassInfo::RefVariableArguments |
+                         ClassInfo::MixedVariableArguments)) {
+    return nullptr;
   }
-  if (!func->isUserFunction() && !func->needsActRec()
-      && numParams >= func->getMinParamCount()
-      && numParams <= func->getMaxParamCount()) {
-    if (func->isVariableArgument() || func->isReferenceVariableArgument()
-                || func->isMixedVariableArgument()) {
-      return false;
-    }
-    TypePtr t = func->getReturnType();
-    if (!t || t->getHhvmDataType() == KindOfDouble) {
-      return false;
-    }
-    for (int i = 0; i < func->getMaxParamCount(); i++) {
-      t = func->getParamType(i);
-      if (!t || t->getHhvmDataType() == KindOfDouble) {
-        return false;
+  if (numParams > f->numParams()) return nullptr;
+
+  if (info->returnType == KindOfDouble) return nullptr;
+
+  for (int i = 0; i < f->numParams(); i++) {
+    const ClassInfo::ParameterInfo* pi = f->info()->parameters[i];
+    if (pi->argType == KindOfDouble) return nullptr;
+
+    if (i >= numParams) {
+      if (!pi->valueLen) {
+        return nullptr;
       }
       // unserializable default values such as TimeStamp::Current()
       // are serialized as kUnserializableString ("\x01")
-      if (i >= numParams && func->getParamDefault(i) == kUnserializableString) {
-        return false;
-      }
+      if (!strcmp(pi->value, kUnserializableString)) return nullptr;
     }
-    // in sandbox mode, don't emit FCallBuiltin for redefinable functions
-    if (func->allowOverride() && !Option::WholeProgram) {
-      return false;
-    }
-
-    if (Func* f = Unit::lookupFunc(StringData::GetStaticString(name))) {
-      if (!f->info()) return false;
-    }
-    return true;
   }
-  return false;
+
+  return f;
 }
 
 void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
@@ -5972,7 +5968,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   const std::string& nameStr = node->getOriginalName();
   ExpressionListPtr params(node->getParams());
   int numParams = params ? params->getCount() : 0;
-  bool useFCallBuiltin = false;
+  Func* fcallBuiltin = nullptr;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
   if (node->getClass() || !node->getClassName().empty()) {
@@ -6012,19 +6008,28 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = StringData::GetStaticString(nameStr);
-    useFCallBuiltin = canEmitBuiltinCall(node, nameStr, numParams);
-
+    fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    if (fcallBuiltin && fcallBuiltin->attrs() & AttrAllowOverride) {
+      if (!Option::WholeProgram ||
+          (node->getFuncScope() && node->getFuncScope()->isUserFunction())) {
+        // In non-WholeProgram mode, we can't tell whether the function
+        // will be overridden, so never use FCallBuiltin.
+        // In WholeProgram mode, don't use FCallBuiltin if it *has* been
+        // overridden.
+        fcallBuiltin = nullptr;
+      }
+    }
     StringData* nsName = nullptr;
     if (!node->hadBackslash()) {
       const std::string& nonNSName = node->getNonNSOriginalName();
       if (nonNSName != nameStr) {
         nsName = nLiteral;
         nLiteral = StringData::GetStaticString(nonNSName);
-        useFCallBuiltin = false;
+        fcallBuiltin = nullptr;
       }
     }
 
-    if (!useFCallBuiltin) {
+    if (!fcallBuiltin) {
       fpiStart = m_ue.bcPos();
       if (nsName == nullptr) {
         e.FPushFuncD(numParams, nLiteral);
@@ -6040,24 +6045,22 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     fpiStart = m_ue.bcPos();
     e.FPushFunc(numParams);
   }
-  if (useFCallBuiltin) {
-    FunctionScopePtr func = node->getFuncScope();
-    assert(func);
-    assert(numParams <= func->getMaxParamCount()
-           && numParams >= func->getMinParamCount());
+  if (fcallBuiltin) {
+    assert(numParams <= fcallBuiltin->numParams());
     int i = 0;
     for (; i < numParams; i++) {
       // for builtin calls, since we don't push the ActRec, we
       // must determine the reffiness statically
-      bool byRef = func->isRefParam(i);
+      bool byRef = fcallBuiltin->byRef(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
-    for (; i < func->getMaxParamCount(); i++) {
-      Variant v = unserialize_from_string(func->getParamDefault(i));
-      TypePtr t = func->getParamType(i);
-      emitBuiltinDefaultArg(e, v, t->getDataType(), i);
+    for (; i < fcallBuiltin->numParams(); i++) {
+      const ClassInfo::ParameterInfo* pi = fcallBuiltin->info()->parameters[i];
+      Variant v = unserialize_from_string(
+        String(pi->value, pi->valueLen, CopyString));
+      emitBuiltinDefaultArg(e, v, pi->argType, i);
     }
-    e.FCallBuiltin(func->getMaxParamCount(), numParams, nLiteral);
+    e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
   } else {
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
@@ -6067,8 +6070,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     }
     e.FCall(numParams);
   }
-  if (Option::WholeProgram) {
-    fixReturnType(e, node, useFCallBuiltin);
+  if (Option::WholeProgram || fcallBuiltin) {
+    fixReturnType(e, node, fcallBuiltin);
   }
 }
 
@@ -7301,7 +7304,6 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
     ar = AnalysisResultPtr(new AnalysisResult());
     fsp->setOuterScope(ar);
 
-    ar->loadBuiltins();
     ar->setPhase(AnalysisResult::AnalyzeAll);
     fsp->analyzeProgram(ar);
   }
@@ -7507,8 +7509,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Option::WholeProgram = false;
     Type::InitTypeHintMap();
     BuiltinSymbols::LoadSuperGlobals();
-    AnalysisResultPtr ar(new AnalysisResult());
-    BuiltinSymbols::Load(ar, true);
     BuiltinSymbols::NoSuperGlobals = false;
     TypeConstraint tc;
     return nullptr;
@@ -7543,7 +7543,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       FileScopePtr fsp = parser.getFileScope();
       fsp->setOuterScope(ar);
 
-      ar->loadBuiltins();
       ar->setPhase(AnalysisResult::AnalyzeAll);
       fsp->analyzeProgram(ar);
 

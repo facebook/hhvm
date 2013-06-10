@@ -8494,7 +8494,7 @@ const char *g_class_map[] = {
   (const char *)0x20 /* KindOfArray */, NULL,
   NULL,
   NULL,
-  (const char *)0x10016040, "hphpd_break", "", (const char*)0, (const char*)0,
+  (const char *)0x90016040, "hphpd_break", "", (const char*)0, (const char*)0,
   "/**\n * ( HipHop specific )\n *\n * Sets a hard breakpoint. When a debugger is running, this line of code\n * will break into debugger, if condition is met. If there is no debugger\n * that's attached, it will not do anything.\n *\n * @condition  bool    If true, break, otherwise, continue.\n */",
   (const char *)0x8 /* KindOfNull */, (const char *)0x2000, "condition", "", (const char *)0x9 /* KindOfBoolean */, "b:1;", (const char *)4, "true", (const char *)4, NULL,
   NULL,

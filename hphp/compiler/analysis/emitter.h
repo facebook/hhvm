@@ -325,7 +325,7 @@ public:
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
   void fixReturnType(Emitter& e, FunctionCallPtr fn,
-                     bool isBuiltinCall = false);
+                     Func* builtinFunc = nullptr);
   typedef std::vector<int> IndexChain;
   void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
@@ -647,8 +647,7 @@ public:
   };
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
-  bool canEmitBuiltinCall(FunctionCallPtr fn, const std::string& name,
-                          int numParams);
+  Func* canEmitBuiltinCall(const std::string& name, int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,

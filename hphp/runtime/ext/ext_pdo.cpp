@@ -579,6 +579,9 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                CStrRef clsname, CVarRef ctor_args) {
+  if (clsname.empty()) {
+    return;
+  }
   Class* cls = Unit::loadClass(clsname.get());
   if (!cls) {
     return;

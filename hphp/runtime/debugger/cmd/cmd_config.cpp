@@ -99,10 +99,10 @@ void CmdConfig::onClientImpl(DebuggerClient &client) {
   if (var == "SmallStep" || var == "ss") {
     if (value == "on") {
       client.print("SmallStep(ss) set to on.\n");
-      client.setDebuggerSmallStep(true);
+      client.setDebuggerClientSmallStep(true);
     } else if (value == "off") {
       client.print("SmallStep(ss) set to off");
-      client.setDebuggerSmallStep(false);
+      client.setDebuggerClientSmallStep(false);
     } else {
       help(client);
     }
@@ -161,7 +161,7 @@ void CmdConfig::setClientOutput(DebuggerClient &client) {
   values.set(s_BypassAccessCheck, client.getDebuggerBypassCheck());
   values.set(s_LogFile, client.getLogFile());
   values.set(s_PrintLevel, client.getDebuggerPrintLevel());
-  values.set(s_SmallStep, client.getDebuggerSmallStep());
+  values.set(s_SmallStep, client.getDebuggerClientSmallStep());
   values.set(s_StackArgs, client.getDebuggerStackArgs());
   values.set(s_ApiModeSerialize, client.getDebuggerClientApiModeSerialize());
   client.setOTValues(values.create());
@@ -175,7 +175,7 @@ void CmdConfig::listVars(DebuggerClient &client) {
                 client.getDebuggerBypassCheck() ? "on" : "off");
   client.print("PrintLevel(pl) %d", client.getDebuggerPrintLevel());
   client.print("SmallStep(ss) %s",
-                client.getDebuggerSmallStep() ? "on" : "off");
+                client.getDebuggerClientSmallStep() ? "on" : "off");
   client.print("StackArgs(sa) %s",
                 client.getDebuggerStackArgs() ? "on" : "off");
   client.print("ApiModeSerialize %s",

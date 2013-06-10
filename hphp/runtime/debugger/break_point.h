@@ -66,9 +66,7 @@ public:
   std::string desc() const;
 
   const SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
-  const OffsetRangeVec& getCurOffsetRange() const {
-    return m_offsetRangeVec;
-  }
+  const Offset getCurOffset() const { return m_offset; }
   const Unit* getUnit() const { return m_unit; }
 
   bool valid() const { return m_valid; }
@@ -89,7 +87,7 @@ private:
   int32_t m_char1;
 
   SourceLoc m_sourceLoc;
-  OffsetRangeVec m_offsetRangeVec;
+  Offset m_offset;
   Unit* m_unit;
   bool m_valid;
   bool m_funcEntry;

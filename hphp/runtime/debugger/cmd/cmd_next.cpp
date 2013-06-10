@@ -43,7 +43,6 @@ void CmdNext::help(DebuggerClient& client) {
 void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  CmdFlowControl::onSetup(proxy, interrupt);
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_vmContext->m_nesting;
   m_loc = interrupt.getFileLine();

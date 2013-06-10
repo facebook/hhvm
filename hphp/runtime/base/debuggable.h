@@ -82,7 +82,6 @@ public:
 #define HPHPD_SETTINGS \
   HPHPD_SETTING(BypassCheck,         bool,  false)         \
   HPHPD_SETTING(PrintLevel,          int,   -1)            \
-  HPHPD_SETTING(SmallStep,           bool,  false)         \
   HPHPD_SETTING(StackArgs,           bool,  true)          \
 
 class DebuggerSettings {

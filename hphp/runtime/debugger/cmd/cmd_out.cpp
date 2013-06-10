@@ -36,7 +36,6 @@ void CmdOut::help(DebuggerClient &client) {
 void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdOut::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  CmdFlowControl::onSetup(proxy, interrupt);
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_vmContext->m_nesting;
 

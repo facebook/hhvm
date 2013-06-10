@@ -78,18 +78,18 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     : m_error(error), m_class(nullptr), m_function(nullptr),
       m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
-      m_unit(nullptr), m_valid(false), m_funcEntry(false) {
+      m_offset(InvalidAbsoluteOffset), m_unit(nullptr), m_valid(false),
+      m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
   Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
   bail_on(!fp);
-  Offset offset;
   if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
-    fp = context->getPrevVMState(fp, &offset);
+    fp = context->getPrevVMState(fp, &m_offset);
     assert(fp);
     bail_on(!fp->m_func);
     m_unit = fp->m_func->unit();
@@ -99,33 +99,17 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     bail_on(!fp->m_func);
     m_unit = fp->m_func->unit();
     bail_on(!m_unit);
-    offset = m_unit->offsetOf(pc);
-    if (offset == fp->m_func->base()) {
+    m_offset = m_unit->offsetOf(pc);
+    if (m_offset == fp->m_func->base()) {
       m_funcEntry = true;
     }
   }
   m_file = m_unit->filepath()->data();
-  if (m_unit->getSourceLoc(offset, m_sourceLoc)) {
+  if (m_unit->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
     m_char0 = m_sourceLoc.char0;
     m_line1 = m_sourceLoc.line1;
     m_char1 = m_sourceLoc.char1;
-
-    if (g_context->getDebuggerSmallStep()) {
-      // get offset range for the pc only
-      OffsetRange range;
-      if (m_unit->getOffsetRange(offset, range)) {
-        m_offsetRangeVec.push_back(range);
-      }
-    } else {
-      // get offset ranges for the whole line
-      // we use m_line1 here because it seems working better than m_line0
-      // in a handful of cases for our bytecode-source mapping. we probably
-      // should consider modify the mapping to make stepping easier.
-      if (!m_unit->getOffsetRanges(m_line1, m_offsetRangeVec)) {
-        m_offsetRangeVec.clear();
-      }
-    }
   }
   m_function = fp->m_func->name()->data();
   if (fp->m_func->preClass()) {

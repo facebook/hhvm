@@ -2312,7 +2312,7 @@ void DebuggerClient::loadConfig() {
   m_tutorial = m_config["Tutorial"].getInt32(0);
   std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
   setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
-  setDebuggerSmallStep(m_config["SmallStep"].getBool());
+  setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
   int printLevel = m_config["PrintLevel"].getInt16(3);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;

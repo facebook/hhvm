@@ -63,7 +63,7 @@ void CmdFlowControl::onClientImpl(DebuggerClient &client) {
       return;
     }
   }
-  m_smallStep = client.getDebuggerSmallStep();
+  m_smallStep = client.getDebuggerClientSmallStep();
   client.sendToServer(this);
   throw DebuggerConsoleExitException();
 }
@@ -74,11 +74,6 @@ bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
   return true;
 }
 
-void CmdFlowControl::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
-  // Should only do setting and nothing else
-  g_context->setDebuggerSmallStep(m_smallStep);
-}
-
 // Setup the last location filter on the VM context for all offsets covered by
 // the current source line. This will short-circuit the work done in
 // phpDebuggerOpcodeHook() and ensure we don't interrupt on this source line.
@@ -86,7 +81,8 @@ void CmdFlowControl::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 // which allows cmds to get a chance to alter their behavior when those opcodes
 // are encountered.
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
-  if (!site) return; // We may be stopped at a place with no source info.
+  // We may be stopped at a place with no source info.
+  if (!site || !site->valid()) return;
   if (g_vmContext->m_lastLocFilter) {
     g_vmContext->m_lastLocFilter->clear();
   } else {
@@ -94,11 +90,26 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   }
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
+  OffsetRangeVec ranges;
+  const auto unit = site->getUnit();
+  if (m_smallStep) {
+    // Get offset range for the pc only.
+    OffsetRange range;
+    if (unit->getOffsetRange(site->getCurOffset(), range)) {
+      ranges.push_back(range);
+    }
+  } else {
+    // Get offset ranges for the whole line.
+    // We use line1 here because it seems to be working better than line0
+    // in a handful of cases for our bytecode-source mapping.
+    if (!unit->getOffsetRanges(site->getLine1(), ranges)) {
+      ranges.clear();
+    }
+  }
   auto excludeContinuationReturns = [] (Opcode op) {
     return (op != OpContExit) && (op != OpContRetC);
   };
-  g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
-                                          site->getCurOffsetRange(),
+  g_vmContext->m_lastLocFilter->addRanges(unit, ranges,
                                           excludeContinuationReturns);
 }
 

@@ -58,7 +58,6 @@ void CmdRun::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   m_args = StringVecPtr(client.args(), null_deleter());
-  m_smallStep = client.getDebuggerSmallStep();
   client.sendToServer(this);
   client.clearCachedLocal();
   client.setFrame(0);
@@ -66,7 +65,6 @@ void CmdRun::onClientImpl(DebuggerClient &client) {
 }
 
 bool CmdRun::onServer(DebuggerProxy &proxy) {
-  g_context->setDebuggerSmallStep(m_smallStep);
   throw DebuggerRestartException(m_args);
 }
 

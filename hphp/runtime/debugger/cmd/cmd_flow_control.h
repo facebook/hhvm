@@ -67,7 +67,7 @@ public:
   virtual bool onServer(DebuggerProxy &proxy);
 
   // Work done to setup a new flow command, after receiving it from the client.
-  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) = 0;
 
   // Work done when a VM thread interrupts the proxy.
   virtual void onBeginInterrupt(DebuggerProxy &proxy,

@@ -35,7 +35,6 @@ void CmdContinue::help(DebuggerClient &client) {
 
 void CmdContinue::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  CmdFlowControl::onSetup(proxy, interrupt);
   // If there's a remaining count on this cmd then we want it left installed
   // in the proxy.
   m_complete = (decCount() == 0);

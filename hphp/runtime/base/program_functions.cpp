@@ -706,7 +706,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
                          const char *file) {
   argv = (char **)malloc((args.size() + 2) * sizeof(char*));
   argc = 0;
-  if (*file) {
+  if (file && *file) {
     argv[argc++] = (char*)file;
   }
   for (int i = 0; i < (int)args.size(); i++) {

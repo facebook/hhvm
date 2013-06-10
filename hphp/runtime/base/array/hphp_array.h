@@ -81,7 +81,6 @@ public:
   // from a CVarRef key to int64.
   using ArrayData::exists;
   using ArrayData::get;
-  using ArrayData::getIndex;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::lvalPtr;
@@ -121,10 +120,6 @@ public:
   // implements ArrayData
   CVarRef get(int64_t k, bool error=false) const FLATTEN;
   CVarRef get(const StringData* k, bool error=false) const FLATTEN;
-
-  // implements ArrayData
-  ssize_t getIndex(int64_t k) const;
-  ssize_t getIndex(const StringData* k) const;
 
   // implements ArrayData
   ArrayData* lval(int64_t k, Variant*& ret, bool copy, bool checkExist=false);

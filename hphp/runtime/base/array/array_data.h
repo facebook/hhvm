@@ -183,7 +183,7 @@ public:
    * Returns whether or not this array contains "vector-like" data.
    * I.e. all the keys are contiguous increasing integers.
    */
-  virtual bool isVectorData() const;
+  virtual bool isVectorData() const = 0;
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -231,13 +231,6 @@ public:
   virtual TypedValue* nvGetValueRef(ssize_t pos);
   virtual TypedValue* nvGetCell(int64_t ki) const;
   virtual TypedValue* nvGetCell(const StringData* k) const;
-
-  /**
-   * Get the numeric index for a key. Only these need to be
-   * in ArrayData.
-   */
-  virtual ssize_t getIndex(int64_t k) const = 0;
-  virtual ssize_t getIndex(const StringData* k) const = 0;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
@@ -307,8 +300,6 @@ public:
   bool exists(CVarRef k) const;
   CVarRef get(CStrRef k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
-  ssize_t getIndex(CStrRef k) const;
-  ssize_t getIndex(CVarRef k) const;
   ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy, bool create);

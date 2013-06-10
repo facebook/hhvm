@@ -93,15 +93,6 @@ TypedValue* NameValueTableWrapper::nvGet(int64_t k) const {
   return m_tab->lookup(String(k).get());
 }
 
-ssize_t NameValueTableWrapper::getIndex(int64_t k) const {
-  return getIndex(String(k));
-}
-
-ssize_t NameValueTableWrapper::getIndex(const StringData* k) const {
-  NameValueTable::Iterator iter(m_tab, k);
-  return iter.toInteger();
-}
-
 ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,
                                        bool checkExist) {
   return lval(String(k), ret, copy, checkExist);
@@ -314,6 +305,10 @@ void NameValueTableWrapper::asort(int sort_flags, bool ascending) {}
 void NameValueTableWrapper::uksort(CVarRef cmp_function) {}
 void NameValueTableWrapper::usort(CVarRef cmp_function) {}
 void NameValueTableWrapper::uasort(CVarRef cmp_function) {}
+
+bool NameValueTableWrapper::isVectorData() const {
+  return false;
+}
 
 //////////////////////////////////////////////////////////////////////
 

@@ -63,18 +63,6 @@ inline CVarRef ArrayData::get(CVarRef k, bool error) const {
          get(getStringKey(tvk), error);
 }
 
-inline ssize_t ArrayData::getIndex(CStrRef k) const {
-  assert(IsValidKey(k));
-  return getIndex(k.get());
-}
-
-inline ssize_t ArrayData::getIndex(CVarRef k) const {
-  assert(IsValidKey(k));
-  TypedValueAccessor tvk = k.getTypedAccessor();
-  return isIntKey(tvk) ? getIndex(getIntKey(tvk)) :
-         getIndex(getStringKey(tvk));
-}
-
 inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,
                                   bool checkExist) {
   assert(IsValidKey(k));

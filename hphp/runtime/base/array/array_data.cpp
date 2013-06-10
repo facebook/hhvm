@@ -137,16 +137,6 @@ Object ArrayData::toObject() const {
   return Instance::FromArray(const_cast<ArrayData *>(this));
 }
 
-bool ArrayData::isVectorData() const {
-  const auto n = size();
-  for (ssize_t i = 0; i < n; i++) {
-    if (getIndex(i) != i) {
-      return false;
-    }
-  }
-  return true;
-}
-
 int ArrayData::compare(const ArrayData *v2) const {
   assert(v2);
 

@@ -230,7 +230,10 @@ const Variant& ArrayShell::getValueRef(ssize_t pos) const {
 
 bool ArrayShell::isVectorData() const {
   APILOG << "()";
-  return ArrayData::isVectorData();
+  for (ssize_t i = 0; i < m_size; ++i) {
+    if (Store::find(i, m_size) != toPos(i)) return false;
+  }
+  return true;
 }
 
 Variant ArrayShell::reset() {
@@ -338,12 +341,6 @@ TypedValue* ArrayShell::nvGetCellImpl(K k) const {
   return LIKELY(pos != PosType::invalid)
     ? tvToCell(reinterpret_cast<TypedValue*>(&lval(pos)))
     : nvGetNotFound(k);
-}
-
-template <class K>
-ssize_t ArrayShell::getIndexImpl(K k) const {
-  APILOG << "(" << keystr(k) << ")";
-  return toInt64(find(k, m_size));
 }
 
 template <class K>

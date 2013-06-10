@@ -65,7 +65,6 @@ public: // ArrayData implementation
   // from a CVarRef key to int64.
   using ArrayData::exists;
   using ArrayData::get;
-  using ArrayData::getIndex;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::lvalPtr;
@@ -90,9 +89,6 @@ public: // ArrayData implementation
 
   virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;
-
-  virtual ssize_t getIndex(int64_t k) const;
-  virtual ssize_t getIndex(const StringData* k) const;
 
   virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
                           bool checkExist = false);
@@ -134,6 +130,7 @@ public: // ArrayData implementation
   virtual Variant each();
   virtual bool validFullPos(const FullPos & fp) const;
   virtual bool advanceFullPos(FullPos&);
+  virtual bool isVectorData() const;
 
   virtual ArrayData* escalateForSort();
   virtual void ksort(int sort_flags, bool ascending);

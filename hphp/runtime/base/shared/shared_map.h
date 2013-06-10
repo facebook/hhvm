@@ -47,7 +47,6 @@ public:
   // from a CVarRef key to int64.
   using ArrayData::exists;
   using ArrayData::get;
-  using ArrayData::getIndex;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::lvalPtr;
@@ -81,9 +80,6 @@ public:
 
   CVarRef get(int64_t k, bool error = false) const;
   CVarRef get(const StringData* k, bool error = false) const;
-
-  ssize_t getIndex(int64_t k) const;
-  ssize_t getIndex(const StringData* k) const;
 
   virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
                           bool checkExist = false);
@@ -120,6 +116,8 @@ public:
   TypedValue* nvGetCell(int64_t ki) const;
   TypedValue* nvGetCell(const StringData* k) const;
 
+  bool isVectorData() const;
+
   /**
    * Memory allocator methods.
    */
@@ -129,6 +127,10 @@ public:
   virtual ArrayData* escalateForSort();
 
   ArrayData* loadElems(bool mapInit = false) const;
+
+private:
+  ssize_t getIndex(int64_t k) const;
+  ssize_t getIndex(const StringData* k) const;
 
 private:
   bool m_isVector;

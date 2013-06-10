@@ -451,21 +451,6 @@ public:
     return nvGetCellImpl(k);
   }
 
-  /**
-   * Get the numeric index for a key. Only these need to be
-   * in ArrayData.
-   */
-private:
-  template <class K> ssize_t getIndexImpl(K k) const;
-
-public:
-  virtual ssize_t getIndex(int64_t k) const FOLLY_OVERRIDE {
-    return getIndexImpl(k);
-  }
-  virtual ssize_t getIndex(const StringData* k) const FOLLY_OVERRIDE {
-    return getIndexImpl(k);
-  }
-
 private:
   template <class K>
   ArrayData *lvalImpl(K k, Variant *&ret, bool copy, bool checkExist);

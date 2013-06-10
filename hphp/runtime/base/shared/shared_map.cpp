@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/base/array/array_init.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -68,12 +68,27 @@ ssize_t SharedMap::getIndex(int64_t k) const {
   return m_map->indexOf(k);
 }
 
+bool SharedMap::isVectorData() const {
+  if (isVector()) return true;
+  const auto n = size();
+  for (ssize_t i = 0; i < n; i++) {
+    if (m_map->indexOf(i) != i) return false;
+  }
+  return true;
+}
+
 bool SharedMap::exists(const StringData* k) const {
-  return getIndex(k) != -1;
+  if (isVector()) return false;
+  return m_map->indexOf(k) != -1;
 }
 
 bool SharedMap::exists(int64_t k) const {
   return getIndex(k) != -1;
+  if (isVector()) {
+    if (k < 0 || (size_t)k >= m_vec->m_size) return false;
+    return true;
+  }
+  return m_map->indexOf(k) != -1;
 }
 
 CVarRef SharedMap::get(const StringData* k, bool error /* = false */) const {

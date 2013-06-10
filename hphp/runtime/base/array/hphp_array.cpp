@@ -593,14 +593,6 @@ CVarRef HphpArray::get(const StringData* key, bool error /* = false */) const {
   return error ? getNotFound(key) : null_variant;
 }
 
-ssize_t HphpArray::getIndex(int64_t k) const {
-  return ssize_t(find(k));
-}
-
-ssize_t HphpArray::getIndex(const StringData* k) const {
-  return ssize_t(find(k, k->hash()));
-}
-
 //=============================================================================
 // Append/insert/update.
 

@@ -4077,7 +4077,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   MethodLookup::LookupResult res = staticLookup ?
-    g_vmContext->lookupClsMethod(func, cls, name, 0, false) :
+    g_vmContext->lookupClsMethod(func, cls, name, 0,
+                                 g_vmContext->getFP(), false) :
     g_vmContext->lookupObjMethod(func, cls, name, false);
 
   if (res == MethodLookup::MethodNotFound) return nullptr;

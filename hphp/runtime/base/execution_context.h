@@ -530,6 +530,7 @@ public:
                                              const HPHP::Class* cls,
                                              const StringData* methodName,
                                              ObjectData* this_,
+                                             ActRec* vmfp,
                                              bool raise = false);
   MethodLookup::LookupResult lookupCtorMethod(const HPHP::Func*& f,
                                               const HPHP::Class* cls,

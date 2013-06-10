@@ -4367,6 +4367,8 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   SSATmp* className  = inst->src(0);
   SSATmp* methodName = inst->src(1);
   SSATmp* baseClass  = inst->src(2);
+  SSATmp* fp         = inst->src(3);
+  SSATmp* sp         = inst->src(4);
   Block*  label      = inst->taken();
 
   // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
@@ -4391,17 +4393,22 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   // handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     if (false) { // typecheck
-      const UNUSED Func* f = StaticMethodCache::lookupIR(ch, ne, cls, method);
+      UNUSED TypedValue* fake_fp = nullptr;
+      UNUSED TypedValue* fake_sp = nullptr;
+      const UNUSED Func* f = StaticMethodCache::lookupIR(ch, ne, cls, method,
+                                                         fake_fp, fake_sp);
     }
     // can raise an error if class is undefined
     cgCallHelper(a,
                  (TCA)StaticMethodCache::lookupIR,
                  funcDestReg,
                  kSyncPoint,
-                 ArgGroup(m_regs).imm(ch)      // Handle ch
-                           .immPtr(ne)         // NamedEntity* np.second
-                           .immPtr(cls)        // className
-                           .immPtr(method)     // methodName
+                 ArgGroup(m_regs).imm(ch)         // Handle ch
+                           .immPtr(ne)            // NamedEntity* np.second
+                           .immPtr(cls)           // className
+                           .immPtr(method)        // methodName
+                           .reg(m_regs[fp].reg()) // frame pointer
+                           .reg(m_regs[sp].reg()) // stack pointer
     );
     // recordInstrCall is done in cgCallHelper
     a.testq(funcDestReg, funcDestReg);
@@ -4487,6 +4494,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   const Class*            cls = inst->src(0)->getValClass();
   const StringData*  methName = inst->src(1)->getValStr();
   SSATmp*           srcCtxTmp = inst->src(2);
+  SSATmp*           fp        = inst->src(3);
   PhysReg           srcCtxReg = m_regs[srcCtxTmp].reg(0);
   Block*            exitLabel = inst->taken();
   const StringData*   clsName = cls->name();
@@ -4502,8 +4510,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   // Handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    const Func* (*lookup)(CacheHandle, const Class*, const StringData*) =
-      StaticMethodFCache::lookupIR;
+    const Func* (*lookup)(CacheHandle, const Class*,
+      const StringData*, TypedValue*) = StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
     cgCallHelper(a, Transl::CppCall((TCA)lookup),
@@ -4511,7 +4519,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
                  kSyncPoint,
                  ArgGroup(m_regs).imm(ch)
                            .immPtr(cls)
-                           .immPtr(methName),
+                           .immPtr(methName)
+                           .reg(m_regs[fp].reg()),
                  toSave);
     // If entry found in target cache, jump back to m_as.
     // Otherwise, bail to exit label

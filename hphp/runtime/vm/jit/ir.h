@@ -308,8 +308,13 @@ O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
                                           C(Str)                              \
-                                          C(NamedEntity),  N|C|E|Refs|Er|Mem) \
-O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx), N|C|E|Er) \
+                                          C(NamedEntity)                      \
+                                          S(FramePtr)                         \
+                                          S(StkPtr),       N|C|E|Refs|Er|Mem) \
+O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
+                                          CStr                                \
+                                          S(Obj,Cls,Ctx)                      \
+                                          S(FramePtr),              N|C|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) S(Func),                    C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \

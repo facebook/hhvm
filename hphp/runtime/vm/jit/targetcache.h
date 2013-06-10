@@ -243,7 +243,8 @@ struct StaticMethodCache {
                            const char* ctxName);
   static const Func* lookupIR(CacheHandle chand,
                               const NamedEntity* ne, const StringData* cls,
-                              const StringData* meth);
+                              const StringData* meth, TypedValue* vmfp,
+                              TypedValue* vmsp);
   static const Func* lookup(CacheHandle chand,
                             const NamedEntity* ne, const StringData* cls,
                             const StringData* meth);
@@ -255,10 +256,8 @@ struct StaticMethodFCache {
 
   static CacheHandle alloc(const StringData* cls, const StringData* meth,
                            const char* ctxName);
-  static const Func* lookup(CacheHandle chand, const Class* cls,
-                            const StringData* meth);
   static const Func* lookupIR(CacheHandle chand, const Class* cls,
-                              const StringData* meth);
+                              const StringData* meth, TypedValue* vmfp);
 };
 
 typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>

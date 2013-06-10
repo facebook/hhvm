@@ -1108,8 +1108,9 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
                                     const Class* cls,
                                     const StringData* methodName,
                                     ObjectData* obj,
+                                    ActRec* vmfp,
                                     bool raise /* = false */) {
-  Class* ctx = arGetContextClass(getFP());
+  Class* ctx = arGetContextClass(vmfp);
   f = lookupMethodCtx(cls, methodName, ctx, ClsMethod, false);
   if (!f) {
     if (obj && obj->instanceof(cls)) {
@@ -5347,7 +5348,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
                                            ObjectData* obj,
                                            int numArgs) {
   const Func* f;
-  LookupResult res = lookupClsMethod(f, cls, name, obj, true);
+  LookupResult res = lookupClsMethod(f, cls, name, obj, getFP(), true);
   if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
     obj = nullptr;
   } else {

@@ -1947,13 +1947,16 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                     func && magicCall ? methodName : nullptr);
   } else {
     // lookup static method & class in the target cache
+    SSATmp* stack = spillStack();
     IRTrace* exitTrace = getExitSlowTrace();
     SSATmp* funcClassTmp =
       gen(LdClsMethodCache,
                 exitTrace,
                 cns(className),
                 cns(methodName),
-                cns(np.second));
+                cns(np.second),
+                m_tb->fp(),
+                stack);
     emitFPushActRec(funcClassTmp,
                     m_tb->genDefInitNull(),
                     numParams,
@@ -1988,7 +1991,8 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
     SSATmp* funcCtxTmp = gen(LdClsMethodFCache, exitBlock,
                                    cns(cls),
                                    cns(methName),
-                                   curCtxTmp);
+                                   curCtxTmp,
+                                   m_tb->fp());
     emitFPushActRec(funcCtxTmp,
                     m_tb->genDefInitNull(),
                     numParams,

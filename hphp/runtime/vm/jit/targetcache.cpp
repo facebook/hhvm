@@ -1008,16 +1008,16 @@ StaticMethodFCache::alloc(const StringData* clsName,
 const Func*
 StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
                             const StringData* clsName,
-                            const StringData* methName) {
+                            const StringData* methName, TypedValue* vmfp,
+                            TypedValue* vmsp) {
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
   Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
-  VMRegAnchor _; // needed for lookupClsMethod.
 
-  ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
+  ActRec* ar = reinterpret_cast<ActRec*>(vmsp - kNumActRecCells);
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   const Class* cls = Unit::loadClass(ne, clsName);
@@ -1028,6 +1028,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
+                                         (ActRec*)vmfp,
                                          false /*raise*/);
   if (LIKELY(res == MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -1042,9 +1043,6 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
     return f;
   }
   assert(res != MethodFoundWithThis); // Not possible: no this supplied.
-  // We've already sync'ed regs; this is some hard case, we might as well
-  // just let the interpreter handle this entirely.
-  assert(*vmpc() == OpFPushClsMethodD);
 
   // Indicate to the IR that it should take even slower path
   return nullptr;
@@ -1073,6 +1071,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
+                                         ec->getFP(),
                                          false /*raise*/);
   if (LIKELY(res == MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -1106,18 +1105,18 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
 
 const Func*
 StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
-                             const StringData* methName) {
+                             const StringData* methName, TypedValue* vmfp) {
   assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodFMiss);
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
-  VMRegAnchor _; // needed for lookupClsMethod.
 
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
                                          nullptr,
+                                         (ActRec*)vmfp,
                                          false /*raise*/);
   assert(res != MethodFoundWithThis); // Not possible: no this supplied.
   if (LIKELY(res == MethodFoundNoThis && !f->isAbstract())) {
@@ -1140,27 +1139,6 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
     return f;
   }
 
-  return nullptr;
-}
-
-const Func*
-StaticMethodFCache::lookup(Handle handle, const Class* cls,
-                           const StringData* methName) {
-  const Func* f = lookupIR(handle, cls, methName);
-  if (f) return f;
-
-  VMRegAnchor _; // needed for opFPushClsMethodF
-
-  // We've already sync'ed regs; this is some hard case, we might as well
-  // just let the interpreter handle this entirely.
-  assert(*vmpc() == OpFPushClsMethodF);
-  Stats::inc(Stats::Instr_TC, -1);
-  Stats::inc(Stats::Instr_InterpOneFPushClsMethodF);
-  g_vmContext->opFPushClsMethodF();
-
-  // We already did all the work so tell our caller to do nothing.
-  TRACE(1, "miss staticfcache %s :: %s -> intractable null\n",
-        cls->name()->data(), methName->data());
   return nullptr;
 }
 

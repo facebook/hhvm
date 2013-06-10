@@ -782,14 +782,15 @@ D:T = LookupClsCns<T,className,constName>
   undefined constant error if autoload cannot define the constant.
 
 D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
-                              S2:{Obj|Cls|Ctx} L:Label
+                              S2:{Obj|Cls|Ctx} S3:FramePtr L:Label
 
   Loads from the MethodFCache a pointer to the callee function and the
   context (ActRec's m_this/m_cls slot) into D.  S0 and S1 hold the
   names of the callee's class and method, respectively.  S2 is the
   current context.  This instruction loads the corresponding entry in
   the MethodFCache if needed.  In case the given method is not found,
-  control is transferred to label L.
+  control is transferred to label L.  The current frame pointer is 
+  passed in S3.
 
 D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
 
@@ -798,6 +799,7 @@ D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
   S0 and returns it. If S0 is a Cctx, this opcode returns S0.
 
 D:FuncCls = LdClsMethodCache S0:ConstStr S1:ConstStr S2:ConstNamedEntity*
+                             S3:FramePtr S4:StkPtr
 
   Lookup a function and class in the class method targetcache.  The
   sources to this instruction are:
@@ -805,6 +807,8 @@ D:FuncCls = LdClsMethodCache S0:ConstStr S1:ConstStr S2:ConstNamedEntity*
     S0 - class name
     S1 - method name
     S2 - the NamedEntity* for the class
+    S3 - the current frame pointer
+    S4 - the current stack pointer
 
 D:Func = LdClsMethod S0:Cls S1:ConstInt
 

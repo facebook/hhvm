@@ -1,0 +1,14 @@
+bool(false)
+int(156)
+array(2) {
+  ["elm1"]=>
+  int(1234)
+  ["elm2"]=>
+  bool(false)
+}
+array(2) {
+  ["elm1"]=>
+  int(1234)
+  ["elm2"]=>
+  int(432)
+}

@@ -1,0 +1,14 @@
+string(7) "FC00::1"
+bool(false)
+string(2) "::"
+bool(false)
+string(3) "::1"
+bool(false)
+string(10) "fe8:5:6::1"
+bool(false)
+string(12) "2001:0db8::1"
+bool(false)
+string(5) "5f::1"
+bool(false)
+string(7) "3ff3::1"
+bool(false)

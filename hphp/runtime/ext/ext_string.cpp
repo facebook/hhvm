@@ -1103,10 +1103,6 @@ String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {
 #define ENT_HTML_QUOTE_SINGLE   1
 #define ENT_HTML_QUOTE_DOUBLE   2
 
-#define ENT_COMPAT    ENT_HTML_QUOTE_DOUBLE
-#define ENT_QUOTES    (ENT_HTML_QUOTE_DOUBLE | ENT_HTML_QUOTE_SINGLE)
-#define ENT_NOQUOTES  ENT_HTML_QUOTE_NONE
-
 static const HtmlBasicEntity basic_entities[] = {
   { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
   { '\'', "&#039;",   6,  ENT_HTML_QUOTE_SINGLE },

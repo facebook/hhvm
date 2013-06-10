@@ -1052,13 +1052,13 @@ static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
 }
 
 char *string_strip_tags(const char *s, int &len, const char *allow,
-                        int allow_len) {
+                        int allow_len, bool allow_tag_spaces) {
   assert(s);
   assert(allow);
 
   char *ret = string_duplicate(s, len);
   char *sallow = string_duplicate(allow, allow_len);
-  len = strip_tags_impl(ret, len, nullptr, sallow, allow_len, false);
+  len = strip_tags_impl(ret, len, nullptr, sallow, allow_len, allow_tag_spaces);
   free(sallow);
   return ret;
 }

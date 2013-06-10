@@ -190,7 +190,7 @@ char *string_chunk_split(const char *src, int &srclen, const char *end,
  * Strip HTML and PHP tags.
  */
 char *string_strip_tags(const char *s, int &len, const char *allow,
-                        int allow_len);
+                        int allow_len, bool allow_tag_spaces);
 
 /**
  * Wrap text on word breaks.

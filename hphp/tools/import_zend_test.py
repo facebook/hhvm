@@ -98,7 +98,6 @@ no_import = (
     '/ext/enchant',
     '/ext/ereg',
     '/ext/fileinfo',
-    '/ext/filter',
     '/ext/ftp',
     '/ext/gettext',
     '/ext/gmp',
@@ -454,11 +453,13 @@ def walk(filename, source):
         test = test.replace(
             '<?php',
             '<?php\nparse_str("' + sections['POST'] + '", $_POST);\n'
+            '$_REQUEST = array_merge($_REQUEST, $_POST);\n'
         )
     if sections.has_key('GET'):
         test = test.replace(
             '<?php',
             '<?php\nparse_str("' + sections['GET'] + '", $_GET);\n'
+            '$_REQUEST = array_merge($_REQUEST, $_GET);\n'
         )
     if sections.has_key('COOKIE'):
         test = test.replace(

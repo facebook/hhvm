@@ -39,6 +39,7 @@
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_iconv.h"

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/zend/zend_html.h"
 #include "hphp/runtime/base/string_util.h"
+#include "hphp/util/zend/zend_html.h"
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/runtime/base/zend/zend_url.h"
 #include "hphp/runtime/base/runtime_error.h"
@@ -132,7 +132,7 @@ String StringUtil::StripHTMLTags(CStrRef input,
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_strip_tags(input.data(), len, allowable_tags.data(),
-                                allowable_tags.size());
+                                allowable_tags.size(), false);
   return String(ret, len, AttachString);
 }
 

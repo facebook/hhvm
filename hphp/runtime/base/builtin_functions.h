@@ -65,28 +65,28 @@ extern const StaticString s_parent;
 extern const StaticString s_static;
 
 // empty
-
-inline bool empty(bool    v) { return !v;}
-inline bool empty(char    v) { return !v;}
-inline bool empty(short   v) { return !v;}
-inline bool empty(int     v) { return !v;}
-inline bool empty(int64_t   v) { return !v;}
-inline bool empty(double  v) { return !v;}
-inline bool empty(litstr  v) { return !v || !*v;}
-inline bool empty(const StringData *v) { return v ? v->toBoolean() : false;}
-inline bool empty(CStrRef v) { return !v.toBoolean();}
-inline bool empty(CArrRef v) { return !v.toBoolean();}
-inline bool empty(CObjRef v) { return !v.toBoolean();}
 inline bool empty(CVarRef v) { return !v.toBoolean();}
 
-bool empty(CVarRef v, bool    offset);
-bool empty(CVarRef v, int64_t   offset);
-inline bool empty(CVarRef v, int  offset) { return empty(v, (int64_t)offset); }
-bool empty(CVarRef v, double  offset);
-bool empty(CVarRef v, CArrRef offset);
-bool empty(CVarRef v, CObjRef offset);
-bool empty(CVarRef v, CVarRef offset);
-bool empty(CVarRef v, CStrRef offset, bool isString = false);
+bool empty(bool) = delete;
+bool empty(char) = delete;
+bool empty(short) = delete;
+bool empty(int) = delete;
+bool empty(int64_t) = delete;
+bool empty(double) = delete;
+bool empty(litstr) = delete;
+bool empty(const StringData*) = delete;
+bool empty(CStrRef) = delete;
+bool empty(CArrRef) = delete;
+bool empty(CObjRef) = delete;
+
+bool empty(CVarRef v, bool) = delete;
+bool empty(CVarRef v, int64_t) = delete;
+bool empty(CVarRef v, int) = delete;
+bool empty(CVarRef v, double) = delete;
+bool empty(CVarRef v, CArrRef) = delete;
+bool empty(CVarRef v, CObjRef) = delete;
+bool empty(CVarRef v, CVarRef) = delete;
+bool empty(CVarRef v, CStrRef, bool = false) = delete;
 
 ///////////////////////////////////////////////////////////////////////////////
 // operators
@@ -220,34 +220,34 @@ bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);
 
 inline bool isInitialized(CVarRef v) { return v.isInitialized();}
 
-inline bool isset(bool v)    { return true; }
-inline bool isset(char v)    { return true; }
-inline bool isset(short v)   { return true; }
-inline bool isset(int v)     { return true; }
-inline bool isset(int64_t v)   { return true; }
-inline bool isset(double v)  { return true; }
-inline bool isset(CVarRef v) { return !v.isNull();}
-inline bool isset(CObjRef v) { return !v.isNull();}
-inline bool isset(CStrRef v) { return !v.isNull();}
-inline bool isset(CArrRef v) { return !v.isNull();}
+inline bool isset(CVarRef v) { return !v.isNull(); }
 
-bool isset(CVarRef v, bool    offset);
-bool isset(CVarRef v, int64_t   offset);
-inline bool isset(CVarRef v, int  offset) { return isset(v, (int64_t)offset); }
-bool isset(CVarRef v, double  offset);
-bool isset(CVarRef v, CArrRef offset);
-bool isset(CVarRef v, CObjRef offset);
-bool isset(CVarRef v, CVarRef offset);
-bool isset(CVarRef v, CStrRef offset, bool isString = false);
+bool isset(bool v)    = delete;
+bool isset(char v)    = delete;
+bool isset(short v)   = delete;
+bool isset(int v)     = delete;
+bool isset(int64_t v) = delete;
+bool isset(double v)  = delete;
+bool isset(CObjRef v) = delete;
+bool isset(CStrRef v) = delete;
+bool isset(CArrRef v) = delete;
+bool isset(CVarRef v, bool) = delete;
+bool isset(CVarRef v, int64_t) = delete;
+bool isset(CVarRef v, int) = delete;
+bool isset(CVarRef v, double) = delete;
+bool isset(CVarRef v, CArrRef) = delete;
+bool isset(CVarRef v, CObjRef) = delete;
+bool isset(CVarRef v, CVarRef) = delete;
+bool isset(CVarRef v, CStrRef, bool = false) = delete;
 
-bool isset(CArrRef v, int64_t   offset);
-inline bool isset(CArrRef v, bool   offset) { return isset(v, (int64_t)offset); }
-inline bool isset(CArrRef v, int    offset) { return isset(v, (int64_t)offset); }
-inline bool isset(CArrRef v, double offset) { return isset(v, (int64_t)offset); }
-bool isset(CArrRef v, CArrRef offset);
-bool isset(CArrRef v, CObjRef offset);
-bool isset(CArrRef v, CVarRef offset);
-bool isset(CArrRef v, CStrRef offset, bool isString = false);
+bool isset(CArrRef v, int64_t) = delete;
+bool isset(CArrRef v, bool)  = delete;
+bool isset(CArrRef v, int) = delete;
+bool isset(CArrRef v, double) = delete;
+bool isset(CArrRef v, CArrRef) = delete;
+bool isset(CArrRef v, CObjRef) = delete;
+bool isset(CArrRef v, CVarRef) = delete;
+bool isset(CArrRef v, CStrRef, bool = false) = delete;
 
 inline Variant unset(Variant &v)   { v.unset();   return uninit_null();}
 inline Variant unset(CVarRef v)    {              return uninit_null();}

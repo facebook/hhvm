@@ -126,22 +126,15 @@ static void scalar_null(Parser *_p, Token &out) {
 ///////////////////////////////////////////////////////////////////////////////
 // converting constant declartion to "define(name, value);"
 
-static void on_constant(Parser *_p, Token &out, Token *stmts,
-                        Token &name, Token &value) {
+static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
   Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
 
   Token fname;   fname.setText("define");
   Token params1; _p->onCallParam(params1, NULL, sname, 0);
   Token params2; _p->onCallParam(params2, &params1, value, 0);
   Token call;    _p->onCall(call, 0, fname, params2, 0);
-  Token scall;   _p->onExpStatement(scall, call);
-
-  Token stmts0;
-  if (!stmts) {
-    _p->onStatementListStart(stmts0);
-    stmts = &stmts0;
-  }
-  _p->addStatement(out, *stmts, scall);
+  
+  _p->onExpStatement(out, call);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -898,10 +891,10 @@ constant_declaration:
     constant_declaration ','
     hh_name_with_type
     '=' static_scalar                  { $3.setText(_p->nsDecl($3.text()));
-                                         on_constant(_p,$$,&$1,$3,$5);}
+                                         on_constant(_p,$$,$3,$5);}
   | T_CONST hh_name_with_type '='
     static_scalar                      { $2.setText(_p->nsDecl($2.text()));
-                                         on_constant(_p,$$,  0,$2,$4);}
+                                         on_constant(_p,$$,$2,$4);}
 ;
 
 inner_statement_list:

@@ -1986,20 +1986,24 @@ void UnitRepoProxy::GetUnitMergeablesStmt
   do {
     query.step();
     if (query.row()) {
+      int mergeableIx;           /**/ query.getInt(0, mergeableIx);
+      int mergeableKind;         /**/ query.getInt(1, mergeableKind);
+      Id mergeableId;            /**/ query.getInt(2, mergeableId);
+
       if (UNLIKELY(!RuntimeOption::RepoAuthoritative)) {
         /*
          * We're using a repo generated in WholeProgram mode,
          * but we're not using it in RepoAuthoritative mode
          * (this is dodgy to start with). We're not going to
          * deal with requires at merge time, so drop them
-         * here, and clear the mergeOnly flag for the unit
+         * here, and clear the mergeOnly flag for the unit.
+         * The one exception is persistent constants are allowed in systemlib.
          */
-        ue.setMergeOnly(false);
-        break;
+        if (mergeableKind != UnitMergeKindPersistentDefine ||
+           SystemLib::s_inited) {
+          ue.setMergeOnly(false);
+        }
       }
-      int mergeableIx;           /**/ query.getInt(0, mergeableIx);
-      int mergeableKind;         /**/ query.getInt(1, mergeableKind);
-      Id mergeableId;            /**/ query.getInt(2, mergeableId);
       switch (mergeableKind) {
         case UnitMergeKindReqDoc:
           ue.insertMergeableInclude(mergeableIx,
@@ -2583,7 +2587,7 @@ Unit* UnitEmitter::create() {
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
       extra++;
-      if (!RuntimeOption::RepoAuthoritative) {
+      if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
         if (it->first != UnitMergeKindClass) {
           extra = 0;
           u->m_mergeOnly = false;
@@ -2640,9 +2644,9 @@ Unit* UnitEmitter::create() {
           break;
         }
         case UnitMergeKindDefine:
-        case UnitMergeKindPersistentDefine:
-        case UnitMergeKindGlobal: {
+        case UnitMergeKindGlobal:
           assert(RuntimeOption::RepoAuthoritative);
+        case UnitMergeKindPersistentDefine: {
           void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);
           mi->mergeableObj(ix++) = (char*)name + (int)it->first;
           auto& tv = m_mergeableValues[it->second].second;

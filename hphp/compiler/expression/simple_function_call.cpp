@@ -635,7 +635,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     if (!name) return false;
     string varName = name->getIdentifier();
     if (varName.empty()) return false;
-    if (ar->isSystemConstant(varName)) {
+    if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
       always_assert(!m_extra);
       return true;
     }

@@ -29,11 +29,9 @@ StringData* prepareAnyKey(TypedValue* tv) {
   }
 }
 
-const StaticString s_ArrayAccess("ArrayAccess");
-
 void objArrayAccess(Instance* base) {
   assert(!base->isCollection());
-  if (!instanceOf(base, s_ArrayAccess)) {
+  if (!base->getVMClass()->classof(SystemLib::s_ArrayAccessClass)) {
     raise_error("Object does not implement ArrayAccess");
   }
 }

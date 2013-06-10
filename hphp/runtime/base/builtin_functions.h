@@ -178,24 +178,6 @@ inline String &concat_assign(const StringOffset &s1, CStrRef s2) {
   return concat_assign(s1.lval(), s2);
 }
 
-inline bool instanceOf(ObjectData *v, CStrRef s) {
-  return v && v->o_instanceof(s);
-}
-
-inline bool instanceOf(bool    v, CStrRef s) { return false;}
-inline bool instanceOf(char    v, CStrRef s) { return false;}
-inline bool instanceOf(short   v, CStrRef s) { return false;}
-inline bool instanceOf(int     v, CStrRef s) { return false;}
-inline bool instanceOf(int64_t   v, CStrRef s) { return false;}
-inline bool instanceOf(double  v, CStrRef s) { return false;}
-inline bool instanceOf(litstr  v, CStrRef s) { return false;}
-inline bool instanceOf(CStrRef v, CStrRef s) { return false;}
-inline bool instanceOf(CArrRef v, CStrRef s) { return false;}
-inline bool instanceOf(CObjRef v, CStrRef s) { return instanceOf(v.get(), s);}
-inline bool instanceOf(CVarRef v, CStrRef s) {
-  return v.is(KindOfObject) && instanceOf(v.getObjectData(), s);
-}
-
 template <class K, class V>
 const V &String::set(K key, const V &value) {
   StringData *s = StringData::Escalate(m_px);

@@ -4047,6 +4047,4 @@ void TranslatorX64::invalidateSrcKey(SrcKey sk) {
 
 } // HPHP::Transl
 
-TRACE_SET_MOD(tx64);
-
 } // HPHP

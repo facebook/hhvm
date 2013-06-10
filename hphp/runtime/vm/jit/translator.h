@@ -959,8 +959,7 @@ public:
   }
 
   // Async hook for file modifications.
-  bool invalidateFile(Eval::PhpFile* f);
-  void invalidateFileWork(Eval::PhpFile* f);
+  void invalidateFile(Eval::PhpFile* f);
 
   // Start a new translation space. Returns true IFF this thread created
   // a new space.

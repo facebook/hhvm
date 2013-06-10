@@ -4005,16 +4005,6 @@ void Translator::setTransCounter(TransID transId, uint64_t value) {
 
 namespace {
 
-struct DeferredFileInvalidate : public DeferredWorkItem {
-  Eval::PhpFile* m_f;
-  explicit DeferredFileInvalidate(Eval::PhpFile* f) : m_f(f) {
-    TRACE(2, "DeferredFileInvalidate @ %p, m_f %p\n", this, m_f); }
-  void operator()() {
-    TRACE(2, "DeferredFileInvalidate: Firing @ %p , m_f %p\n", this, m_f);
-    tx64->invalidateFileWork(m_f);
-  }
-};
-
 struct DeferredPathInvalidate : public DeferredWorkItem {
   const std::string m_path;
   explicit DeferredPathInvalidate(const std::string& path) : m_path(path) {
@@ -4031,49 +4021,14 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
      * this lookup; since the path has changed, the file we'll get out is
      * going to be some new file, not the old file that needs invalidation.
      */
-    UNUSED Eval::PhpFile* f =
-      g_vmContext->lookupPhpFile(spath.get(), "");
-    // We don't keep around the extra ref.
-    if (f) f->decRefAndDelete();
+    (void)g_vmContext->lookupPhpFile(spath.get(), "");
   }
 };
 
 }
 
-void Translator::invalidateFileWork(Eval::PhpFile* f) {
-  class FileInvalidationTrigger : public Treadmill::WorkItem {
-    Eval::PhpFile* m_f;
-    int m_nRefs;
-  public:
-    FileInvalidationTrigger(Eval::PhpFile* f, int n) : m_f(f), m_nRefs(n) { }
-    virtual void operator()() {
-      if (m_f->decRef(m_nRefs) == 0) {
-        Eval::FileRepository::onDelete(m_f);
-      }
-    }
-  };
-  size_t nSmashed = tx64->m_srcDB.invalidateCode(f);
-  if (nSmashed) {
-    // The srcDB found an entry for this file. The entry's dependency
-    // on this file was counted as a reference, and the code is no longer
-    // reachable. We need to wait until the last outstanding request
-    // drains to know that we can really remove the reference.
-    Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(f, nSmashed));
-  }
-}
-
-bool Translator::invalidateFile(Eval::PhpFile* f) {
-  // This is called from high rank, but we'll need the write lease to
-  // invalidate code.
-  if (!RuntimeOption::EvalJit) return false;
-  assert(f != nullptr);
-  PendQ::defer(new DeferredFileInvalidate(f));
-  return true;
-}
-
-void invalidatePath(const std::string& path) {
-  TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  PendQ::defer(new DeferredPathInvalidate(path));
+void Translator::invalidateFile(Eval::PhpFile* f) {
+  m_srcDB.invalidateCode(f);
 }
 
 static const char *transKindStr[] = {

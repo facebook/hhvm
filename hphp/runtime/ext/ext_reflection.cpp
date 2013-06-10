@@ -759,14 +759,11 @@ Array f_hphp_get_class_info(CVarRef name) {
   ret.set(s_extension, empty_string);
   ret.set(s_parent,    cls->parentRef());
 
-  typedef vector<ClassPtr> ClassVec;
   // interfaces
   {
     Array arr = Array::Create();
-    const ClassVec &interfaces = cls->declInterfaces();
-    for (ClassVec::const_iterator it = interfaces.begin(),
-           end = interfaces.end(); it != end; ++it) {
-      arr.set(it->get()->nameRef(), VarNR(1));
+    for (auto const& interface : cls->declInterfaces()) {
+      arr.set(interface->nameRef(), VarNR(1));
     }
     ret.set(s_interfaces, VarNR(arr));
   }
@@ -774,10 +771,8 @@ Array f_hphp_get_class_info(CVarRef name) {
   // traits
   {
     Array arr = Array::Create();
-    const ClassVec &traits = cls->usedTraits();
-    for (ClassVec::const_iterator it = traits.begin(),
-           end = traits.end(); it != end; ++it) {
-      arr.set(it->get()->nameRef(), VarNR(1));
+    for (auto const& trait : cls->usedTraits()) {
+      arr.set(trait->nameRef(), VarNR(1));
     }
     ret.set(s_traits, VarNR(arr));
   }

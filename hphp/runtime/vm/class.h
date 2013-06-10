@@ -446,9 +446,40 @@ public:
 
 public:
   // Call newClass() instead of directly calling new.
-  static ClassPtr newClass(PreClass* preClass, Class* parent);
+  static Class* newClass(PreClass* preClass, Class* parent);
   Class(PreClass* preClass, Class* parent, unsigned classVecLen);
+  ~Class();
+  /*
+   * destroy() is called when a Class becomes unreachable. This may happen
+   * before its refCount hits zero, because it is referred to by
+   * its NamedEntity, any derived classes, and (for interfaces) and Class
+   * that implents it, and (for traits) any class that uses it.
+   * Such referring classes must also be logically dead at the time
+   * destroy is called, but we dont have back pointers to find them,
+   * so instead we leave the Class in a zombie state. When we try to
+   * instantiate one of its referrers, we will notice that it depends
+   * on a zombie, and destroy *that*, releasing its refernce to this
+   * Class.
+   */
+  void destroy();
+  /*
+   * atomicRelease() is called when the (atomic) refCount hits zero.
+   * The class is completely dead at this point, and its memory is
+   * freed immediately.
+   */
   void atomicRelease();
+  /*
+   * releaseRefs() is called when a Class is put into the zombie state,
+   * to free any references to child classes, interfaces and traits
+   * Its safe to call multiple times, so is also called from the destructor
+   * (in case we bypassed the zombie state).
+   */
+  void releaseRefs();
+  /*
+   * isZombie() returns true if this class has been logically destroyed,
+   * but needed to be preserved due to outstanding references.
+   */
+  bool isZombie() const { return !m_cachedOffset; }
 
   static size_t sizeForNClasses(unsigned nClasses) {
     return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
@@ -693,10 +724,10 @@ private:
   static std::atomic<bool> s_instanceBitsInit;
 
   struct TraitMethod {
-    ClassPtr          m_trait;
+    Class*            m_trait;
     Func*             m_method;
     Attr              m_modifiers;
-    TraitMethod(ClassPtr trait, Func* method, Attr modifiers) :
+    TraitMethod(Class* trait, Func* method, Attr modifiers) :
         m_trait(trait), m_method(method), m_modifiers(modifiers) { }
   };
 
@@ -718,9 +749,9 @@ private:
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,
                          MethodMap::Builder& curMethodMap);
-  ClassPtr findSingleTraitWithMethod(const StringData* methName);
+  Class* findSingleTraitWithMethod(const StringData* methName);
   void setImportTraitMethodModifiers(TraitMethodList& methList,
-                                     ClassPtr         traitCls,
+                                     Class*           traitCls,
                                      Attr             modifiers);
   void importTraitMethods(MethodMap::Builder& curMethodMap);
   void addTraitPropInitializers(bool staticProps);
@@ -731,11 +762,11 @@ private:
                            MethodToTraitListMap& importMethToTraitMap);
   void importTraitProps(PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
-  void importTraitInstanceProp(ClassPtr    trait,
+  void importTraitInstanceProp(Class*      trait,
                                Prop&       traitProp,
                                TypedValue& traitPropVal,
                                PropMap::Builder& curPropMap);
-  void importTraitStaticProp(ClassPtr trait,
+  void importTraitStaticProp(Class*   trait,
                              SProp&   traitProp,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);

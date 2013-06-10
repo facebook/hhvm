@@ -28,6 +28,9 @@
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#include "folly/ScopeGuard.h"
 
 using std::endl;
 
@@ -75,8 +78,18 @@ int PhpFile::decRef(int n) {
 }
 
 void PhpFile::decRefAndDelete() {
+  class FileInvalidationTrigger : public Treadmill::WorkItem {
+    Eval::PhpFile* m_f;
+   public:
+    FileInvalidationTrigger(Eval::PhpFile* f) : m_f(f) { }
+    virtual void operator()() {
+      FileRepository::onDelete(m_f);
+    }
+  };
+
   if (decRef() == 0) {
-    FileRepository::onDelete(this);
+    if (RuntimeOption::EvalJit) Transl::Translator::Get()->invalidateFile(this);
+    Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(this));
   }
 }
 
@@ -117,7 +130,7 @@ bool FileRepository::fileDump(const char *filename) {
   return true;
 }
 
-void FileRepository::onDelete(PhpFile *f) {
+void FileRepository::onDelete(PhpFile* f) {
   assert(f->getRef() == 0);
   if (md5Enabled()) {
     WriteLock lock(s_md5Lock);
@@ -155,41 +168,54 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     if (s_files.find(acc, name.get()) && !acc->second->isChanged(s)) {
       TRACE(1, "FR fast path hit %s\n", rname->data());
       ret = acc->second->getPhpFile();
-      ret->incRef();
       return ret;
     }
   }
 
   TRACE(1, "FR fast path miss: %s\n", rname->data());
   const StringData *n = StringData::GetStaticString(name.get());
+
+  PhpFile* toKill = nullptr;
+  SCOPE_EXIT {
+    // run this after acc is destroyed (and its lock released)
+    if (toKill) toKill->decRefAndDelete();
+  };
   ParsedFilesMap::accessor acc;
   bool isNew = s_files.insert(acc, n);
-  assert(isNew || acc->second); // We don't leave null entries around.
-  bool isChanged = !isNew && acc->second->isChanged(s);
+  PhpFileWrapper* old = acc->second;
+  SCOPE_EXIT {
+    // run this just before acc is released
+    if (old && old != acc->second) {
+      if (old->getPhpFile() != acc->second->getPhpFile()) {
+        toKill = old->getPhpFile();
+      }
+      delete old;
+    }
+    if (!acc->second) s_files.erase(acc);
+  };
+
+  assert(isNew || old); // We don't leave null entries around.
+  bool isChanged = !isNew && old->isChanged(s);
 
   if (isNew || isChanged) {
     if (!readFile(n, s, fileInfo)) {
-      // Be sure to get rid of the new reference to it.
-      s_files.erase(acc);
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
       return nullptr;
     }
     ret = fileInfo.m_phpFile;
-    if (isChanged && ret == acc->second->getPhpFile()) {
+    if (isChanged && ret == old->getPhpFile()) {
       // The file changed but had the same contents.
       if (debug && md5Enabled()) {
         ReadLock lock(s_md5Lock);
         assert(s_md5Files.find(ret->getMd5())->second == ret);
       }
-      ret->incRef();
       return ret;
     }
   } else if (!isNew) {
     // Somebody might have loaded the file between when we dropped
     // our read lock and got the write lock
-    ret = acc->second->getPhpFile();
-    ret->incRef();
+    ret = old->getPhpFile();
     return ret;
   }
 
@@ -203,10 +229,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       raise_error("Tried to parse %s in repo authoritative mode", n->data());
     }
     ret = parseFile(n->data(), fileInfo);
-    if (!ret) {
-      s_files.erase(acc);
-      return nullptr;
-    }
+    if (!ret) return nullptr;
   }
   assert(ret != nullptr);
 
@@ -215,22 +238,18 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     ret->incRef();
     ret->setId(Transl::TargetCache::allocBit());
   } else {
-    PhpFile *f = acc->second->getPhpFile();
+    PhpFile *f = old->getPhpFile();
     if (f != ret) {
       ret->setId(f->getId());
-      Transl::Translator::Get()->invalidateFile(f); // f has changed
+      ret->incRef();
     }
-    f->decRefAndDelete();
-    delete acc->second;
     acc->second = new PhpFileWrapper(s, ret);
-    ret->incRef();
   }
 
   if (md5Enabled()) {
     WriteLock lock(s_md5Lock);
     s_md5Files[ret->getMd5()] = ret;
   }
-  ret->incRef();
   return ret;
 }
 

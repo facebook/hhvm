@@ -38,10 +38,10 @@ inline bool strEqual(bool case_sensitive,
 }
 
 template <typename V, bool case_sensitive>
-FixedStringMap<V, case_sensitive>::~FixedStringMap() {
-  if (m_table != (Elm*)&null_key) {
-    free(m_table);
-  }
+void FixedStringMap<V, case_sensitive>::clear() {
+  if (m_table != (Elm*)&null_key) free(m_table);
+  m_table = nullptr;
+  m_mask = 0;
 }
 
 template <typename V, bool case_sensitive>

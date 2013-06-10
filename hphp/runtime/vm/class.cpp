@@ -195,11 +195,11 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
-ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
+Class* Class::newClass(PreClass* preClass, Class* parent) {
   unsigned classVecLen = (parent != nullptr) ? parent->m_classVecLen+1 : 1;
   void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
   try {
-    return ClassPtr(new (mem) Class(preClass, parent, classVecLen));
+    return new (mem) Class(preClass, parent, classVecLen);
   } catch (...) {
     Util::low_free(mem);
     throw;
@@ -207,7 +207,7 @@ ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
 }
 
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
-  : m_preClass(PreClassPtr(preClass)), m_parent(ClassPtr(parent)),
+  : m_preClass(PreClassPtr(preClass)), m_parent(parent),
     m_traitsBeginIdx(0), m_traitsEndIdx(0), m_clsInfo(nullptr),
     m_builtinPropSize(0), m_classVecLen(classVecLen), m_cachedOffset(0),
     m_propDataCache(-1), m_propSDataCache(-1), m_InstanceCtor(nullptr),
@@ -224,26 +224,99 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   setClassVec();
 }
 
-void Class::atomicRelease() {
-  if (m_cachedOffset != 0u) {
-    /*
-      m_cachedOffset is initialied to 0, and is only set
-      when the Class is put on the list, so we only have to
-      remove this node if its NOT 0.
-      Since we're about to remove it, reset to 0 so we know
-      its safe to kill the node during the delayed Treadmill
-      callback.
-    */
-    m_cachedOffset = 0u;
-    PreClass* pcls = m_preClass.get();
-    {
-      Lock l(Unit::s_classesMutex);
-      pcls->namedEntity()->removeClass(this);
+Class::~Class() {
+  releaseRefs();
+
+  auto methods = methodRange();
+  while (!methods.empty()) {
+    Func* meth = methods.popFront();
+    if (meth) Func::destroy(meth);
+  }
+}
+
+void Class::releaseRefs() {
+  /*
+   * We have to be careful here.
+   * We want to free up as much as possible as early as possible, but
+   * some of our methods may actually belong to our parent
+   * This means we can't destroy *our* Funcs until our refCount
+   * hits zero (ie when Class::~Class gets called), because there
+   * could be a child class which hasn't yet been destroyed, which
+   * will need to inspect them. Also, we need to inspect the Funcs
+   * now (while we still have a references to parent) to determine
+   * which ones we will eventually need to free.
+   * Similarly, if any of our func's belong to a parent class, we
+   * can't free the parent, because one of our children could also
+   * have a reference to those func's (and its only reference to
+   * our parent is via this class).
+   */
+  auto methods = mutableMethodRange();
+  bool okToReleaseParent = true;
+  while (!methods.empty()) {
+    Func*& meth = methods.popFront();
+    if (meth /* releaseRefs can be called more than once */ &&
+        meth->cls() != this &&
+        ((meth->attrs() & AttrPrivate) || !meth->hasStaticLocals())) {
+      meth = nullptr;
+      okToReleaseParent = false;
     }
-    Treadmill::WorkItem::enqueue(new Treadmill::FreeClassTrigger(this));
-    return;
   }
 
+  if (okToReleaseParent) {
+    m_parent.reset();
+  }
+  m_declInterfaces.clear();
+  m_usedTraits.clear();
+}
+
+namespace {
+
+class FreeClassTrigger : public Treadmill::WorkItem {
+  TRACE_SET_MOD(treadmill);
+  Class* m_cls;
+ public:
+  explicit FreeClassTrigger(Class* cls) : m_cls(cls) {
+    TRACE(3, "FreeClassTrigger @ %p, cls %p\n", this, m_cls);
+  }
+  void operator()() {
+    TRACE(3, "FreeClassTrigger: Firing @ %p , cls %p\n", this, m_cls);
+    if (!m_cls->decAtomicCount()) {
+      m_cls->atomicRelease();
+    }
+  }
+};
+
+}
+
+void Class::destroy() {
+  /*
+   * If we were never put on NamedEntity::classList, or
+   * we've already been destroy'd, there's nothing to do
+   */
+  if (!m_cachedOffset) return;
+
+  Lock l(Unit::s_classesMutex);
+  // Need to recheck now we have the lock
+  if (!m_cachedOffset) return;
+  // Only do this once.
+  m_cachedOffset = 0;
+
+  PreClass* pcls = m_preClass.get();
+  pcls->namedEntity()->removeClass(this);
+  /*
+   * Regardless of refCount, this Class is now unusable.
+   * Release what we can immediately, to allow dependent
+   * classes to be freed.
+   * Needs to be under the lock, because multiple threads
+   * could call destroy
+   */
+  releaseRefs();
+  Treadmill::WorkItem::enqueue(new FreeClassTrigger(this));
+}
+
+void Class::atomicRelease() {
+  assert(!m_cachedOffset);
+  assert(!getCount());
   this->~Class();
   Util::low_free(this);
 }
@@ -262,16 +335,13 @@ bool Class::verifyPersistent() const {
       !Transl::TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
     return false;
   }
-  for (size_t i = 0, nInterfaces = m_declInterfaces.size();
-       i < nInterfaces; ++i) {
-    Class* declInterface = m_declInterfaces[i].get();
+  for (auto const& declInterface : m_declInterfaces) {
     if (!Transl::TargetCache::isPersistentHandle(
           declInterface->m_cachedOffset)) {
       return false;
     }
   }
-  for (size_t i = 0; i < m_usedTraits.size(); i++) {
-    Class* usedTrait = m_usedTraits[i].get();
+  for (auto const& usedTrait : m_usedTraits) {
     if (!Transl::TargetCache::isPersistentHandle(
           usedTrait->m_cachedOffset)) {
       return false;
@@ -429,11 +499,15 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
         return Avail::Fail;
       }
     }
-    if (parent != ourParent) return Avail::False;
+    if (parent != ourParent) {
+      if (UNLIKELY(ourParent->isZombie())) {
+        const_cast<Class*>(this)->destroy();
+      }
+      return Avail::False;
+    }
   }
-  for (size_t i = 0, nInterfaces = m_declInterfaces.size();
-       i < nInterfaces; ++i) {
-    Class* declInterface = m_declInterfaces[i].get();
+  for (auto const& di : m_declInterfaces) {
+    Class* declInterface = di.get();
     PreClass *pint = declInterface->m_preClass.get();
     Class* interface = Unit::getClass(pint->namedEntity(), pint->name(),
                                       tryAutoload);
@@ -442,11 +516,14 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
         parent = declInterface;
         return Avail::Fail;
       }
+      if (UNLIKELY(declInterface->isZombie())) {
+        const_cast<Class*>(this)->destroy();
+      }
       return Avail::False;
     }
   }
-  for (size_t i = 0; i < m_usedTraits.size(); i++) {
-    Class* usedTrait = m_usedTraits[i].get();
+  for (auto const& ut : m_usedTraits) {
+    Class* usedTrait = ut.get();
     PreClass* ptrait = usedTrait->m_preClass.get();
     Class* trait = Unit::getClass(ptrait->namedEntity(), ptrait->name(),
                                   tryAutoload);
@@ -454,6 +531,9 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       if (trait == nullptr) {
         parent = usedTrait;
         return Avail::Fail;
+      }
+      if (UNLIKELY(usedTrait->isZombie())) {
+        const_cast<Class*>(this)->destroy();
       }
       return Avail::False;
     }
@@ -1020,26 +1100,26 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
   }
 }
 
-ClassPtr Class::findSingleTraitWithMethod(const StringData* methName) {
+Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   // Note: m_methods includes methods from parents / traits recursively
-  ClassPtr traitCls = ClassPtr();
-  for (size_t t = 0; t < m_usedTraits.size(); t++) {
-    if (m_usedTraits[t]->m_methods.contains(methName)) {
-      if (traitCls.get() != nullptr) { // more than one trait contains method
-        return ClassPtr();
+  Class* traitCls = nullptr;
+  for (auto const& t : m_usedTraits) {
+    if (t->m_methods.contains(methName)) {
+      if (traitCls != nullptr) { // more than one trait contains method
+        return nullptr;
       }
-      traitCls = m_usedTraits[t];
+      traitCls = t.get();
     }
   }
   return traitCls;
 }
 
 void Class::setImportTraitMethodModifiers(TraitMethodList& methList,
-                                          ClassPtr         traitCls,
+                                          Class*           traitCls,
                                           Attr             modifiers) {
   for (TraitMethodList::iterator iter = methList.begin();
        iter != methList.end(); iter++) {
-    if (iter->m_trait.get() == traitCls.get()) {
+    if (iter->m_trait == traitCls) {
       iter->m_modifiers = modifiers;
       return;
     }
@@ -1065,14 +1145,14 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
   const StringData* origMethName = rule.getOrigMethodName();
   const StringData* newMethName  = rule.getNewMethodName();
 
-  ClassPtr traitCls;
+  Class* traitCls = nullptr;
   if (traitName->empty()) {
     traitCls = findSingleTraitWithMethod(origMethName);
   } else {
     traitCls = Unit::loadClass(traitName);
   }
 
-  if (!traitCls.get() || (!(traitCls->attrs() & AttrTrait))) {
+  if (!traitCls || (!(traitCls->attrs() & AttrTrait))) {
     raise_error("unknown trait '%s'", traitName->data());
   }
 
@@ -1115,7 +1195,6 @@ void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
 void Class::importTraitMethod(const TraitMethod&  traitMethod,
                               const StringData*   methName,
                               MethodMap::Builder& builder) {
-  ClassPtr trait     = traitMethod.m_trait;
   Func*    method    = traitMethod.m_method;
   Attr     modifiers = traitMethod.m_modifiers;
 
@@ -1218,8 +1297,8 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
   MethodToTraitListMap importMethToTraitMap;
 
   // 1. Find all methods to be imported
-  for (size_t t = 0; t < m_usedTraits.size(); t++) {
-    ClassPtr trait = m_usedTraits[t];
+  for (auto const& t : m_usedTraits) {
+    Class* trait = t.get();
     for (Slot i = 0; i < trait->m_methods.size(); ++i) {
       Func* method = trait->m_methods[i];
       const StringData* methName = method->name();
@@ -1460,8 +1539,7 @@ void Class::setConstants() {
   }
 
   // Copy in interface constants.
-  for (std::vector<ClassPtr>::const_iterator it = m_declInterfaces.begin();
-       it != m_declInterfaces.end(); ++it) {
+  for (auto it = m_declInterfaces.begin(); it != m_declInterfaces.end(); ++it) {
     for (Slot slot = 0; slot < (*it)->m_constants.size(); ++slot) {
       const Const& iConst = (*it)->m_constants[slot];
 
@@ -1763,7 +1841,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   }
 }
 
-void Class::importTraitInstanceProp(ClassPtr    trait,
+void Class::importTraitInstanceProp(Class*      trait,
                                     Prop&       traitProp,
                                     TypedValue& traitPropVal,
                                     PropMap::Builder& curPropMap) {
@@ -1793,7 +1871,7 @@ void Class::importTraitInstanceProp(ClassPtr    trait,
   }
 }
 
-void Class::importTraitStaticProp(ClassPtr trait,
+void Class::importTraitStaticProp(Class*   trait,
                                   SProp&   traitProp,
                                   PropMap::Builder& curPropMap,
                                   SPropMap::Builder& curSPropMap) {
@@ -1836,8 +1914,8 @@ void Class::importTraitStaticProp(ClassPtr trait,
 void Class::importTraitProps(PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;
-  for (size_t t = 0; t < m_usedTraits.size(); t++) {
-    ClassPtr trait = m_usedTraits[t];
+  for (auto& t : m_usedTraits) {
+    Class* trait = t.get();
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
@@ -1859,7 +1937,7 @@ void Class::importTraitProps(PropMap::Builder& curPropMap,
 void Class::addTraitPropInitializers(bool staticProps) {
   if (attrs() & AttrNoExpandTrait) return;
   for (unsigned t = 0; t < m_usedTraits.size(); t++) {
-    ClassPtr trait = m_usedTraits[t];
+    Class* trait = m_usedTraits[t].get();
     InitVec& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
     InitVec& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
@@ -1974,17 +2052,17 @@ void Class::setInterfaces() {
   for (PreClass::InterfaceVec::const_iterator it =
          m_preClass->interfaces().begin();
        it != m_preClass->interfaces().end(); ++it) {
-    auto cp = ClassPtr(Unit::loadClass(*it));
-    if (cp.get() == nullptr) {
+    Class* cp = Unit::loadClass(*it);
+    if (cp == nullptr) {
       raise_error("Undefined interface: %s", (*it)->data());
     }
     if (!(cp->attrs() & AttrInterface)) {
       raise_error("%s cannot implement %s - it is not an interface",
                   m_preClass->name()->data(), cp->name()->data());
     }
-    m_declInterfaces.push_back(cp);
+    m_declInterfaces.push_back(ClassPtr(cp));
     if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
-      interfacesBuilder.add(cp->name(), cp.get());
+      interfacesBuilder.add(cp->name(), cp);
     }
     int size = cp->m_interfaces.size();
     for (int i = 0; i < size; i++) {
@@ -2004,8 +2082,8 @@ void Class::setUsedTraits() {
   for (PreClass::UsedTraitVec::const_iterator
        it = m_preClass->usedTraits().begin();
        it != m_preClass->usedTraits().end(); it++) {
-    auto classPtr = ClassPtr(Unit::loadClass(*it));
-    if (classPtr.get() == nullptr) {
+    Class* classPtr = Unit::loadClass(*it);
+    if (classPtr == nullptr) {
       raise_error("Trait '%s' not found", (*it)->data());
     }
     if (!(classPtr->attrs() & AttrTrait)) {
@@ -2013,14 +2091,14 @@ void Class::setUsedTraits() {
                   m_preClass->name()->data(),
                   classPtr->name()->data());
     }
-    m_usedTraits.push_back(classPtr);
+    m_usedTraits.push_back(ClassPtr(classPtr));
   }
 }
 
 void Class::setClassVec() {
   if (m_classVecLen > 1) {
     assert(m_parent.get() != nullptr);
-    memcpy(m_classVec, m_parent.get()->m_classVec,
+    memcpy(m_classVec, m_parent->m_classVec,
            (m_classVecLen-1) * sizeof(Class*));
   }
   m_classVec[m_classVecLen-1] = this;
@@ -2041,12 +2119,12 @@ void Class::setInstanceBitsImpl() {
 
   InstanceBits bits;
   bits.set(0);
-  auto setBits = [&](ClassPtr& c) {
+  auto setBits = [&](Class* c) {
     if (setParents) c->setInstanceBitsAndParents();
     bits |= c->m_instanceBits;
   };
-  if (m_parent.get()) setBits(m_parent);
-  std::for_each(m_declInterfaces.begin(), m_declInterfaces.end(), setBits);
+  if (m_parent.get()) setBits(m_parent.get());
+  for (auto& di : m_declInterfaces) setBits(di.get());
 
   unsigned bit;
   if (mapGet(s_instanceBits, m_preClass->name(), &bit)) {
@@ -2082,9 +2160,9 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
     }
     methods->set(const_cast<StringData*>(func->name()), true_varNR, false);
   }
-  if (m_parent.get()) m_parent.get()->getMethodNames(ctx, methods);
+  if (m_parent.get()) m_parent->getMethodNames(ctx, methods);
   for (int i = 0, sz = m_declInterfaces.size(); i < sz; i++) {
-    m_declInterfaces[i].get()->getMethodNames(ctx, methods);
+    m_declInterfaces[i]->getMethodNames(ctx, methods);
   }
 }
 

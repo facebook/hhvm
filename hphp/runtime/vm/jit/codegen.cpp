@@ -2347,6 +2347,10 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
 
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   const Func* func = fp->m_func;
+  func->validate();
+  if (func->cls()) {
+    assert(!func->cls()->isZombie());
+  }
   if (fp->hasVarEnv()) {
     assert(fp->getVarEnv()->getCfp() == fp);
   }

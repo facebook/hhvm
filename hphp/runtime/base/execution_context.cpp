@@ -117,19 +117,7 @@ VMExecutionContext::~VMExecutionContext() {
        it != m_constInfo.end(); ++it) {
     delete it->second;
   }
-  // decRef all of the PhpFiles in m_evaledFiles. Any PhpFile whose refcount
-  // reaches zero will be destroyed. Currently each PhpFile "owns" its Unit,
-  // so when a PhpFile is destroyed it will free its Unit as well.
-  for (EvaledFilesMap::iterator it = m_evaledFiles.begin();
-       it != m_evaledFiles.end();) {
-    EvaledFilesMap::iterator current = it;
-    ++it;
-    StringData* sd = current->first;
-    Eval::PhpFile* efile = current->second;
-    efile->decRefAndDelete();
-    m_evaledFiles.erase(current);
-    decRefStr(sd);
-  }
+
   // Discard all units that were created via create_function().
   for (EvaledUnitsVec::iterator it = m_createdFuncs.begin();
        it != m_createdFuncs.end(); ++it) {

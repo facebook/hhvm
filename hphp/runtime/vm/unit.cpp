@@ -413,9 +413,7 @@ Unit::~Unit() {
       Class* cur = cls;
       cls = cls->m_nextClass;
       if (cur->preClass() == pcls) {
-        if (!cur->decAtomicCount()) {
-          cur->atomicRelease();
-        }
+        cur->destroy();
       }
     }
   }
@@ -559,14 +557,15 @@ Class* Unit::defClass(const PreClass* preClass,
     // Search for a compatible extant class.  Searching from most to least
     // recently created may have better locality than alternative search orders.
     // In addition, its the only simple way to make this work lock free...
-    for (Class* class_ = top; class_ != nullptr; class_ = class_->m_nextClass) {
-      if (class_->preClass() != preClass) continue;
-
-      Class::Avail avail = class_->avail(parent, failIsFatal /*tryAutoload*/);
+    for (Class* class_ = top; class_ != nullptr; ) {
+      Class* cur = class_;
+      class_ = class_->m_nextClass;
+      if (cur->preClass() != preClass) continue;
+      Class::Avail avail = cur->avail(parent, failIsFatal /*tryAutoload*/);
       if (LIKELY(avail == Class::Avail::True)) {
-        class_->setCached();
-        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(class_));
-        return class_;
+        cur->setCached();
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(cur));
+        return cur;
       }
       if (avail == Class::Avail::Fail) {
         if (failIsFatal) {
@@ -597,9 +596,6 @@ Class* Unit::defClass(const PreClass* preClass,
     }
     Lock l(Unit::s_classesMutex);
 
-    /*
-      We could re-enter via Unit::getClass() or class_->avail().
-    */
     if (UNLIKELY(top != nameList->clsList())) {
       top = nameList->clsList();
       continue;
@@ -610,24 +606,25 @@ Class* Unit::defClass(const PreClass* preClass,
     }
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
+    newClass.get()->incAtomicCount();
+    newClass.get()->setCached();
     if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
-      // If the instance bitmap has already been set up, we can just initialize
-      // our new class's bits and add ourselves to the class list normally.
+      // If the instance bitmap has already been set up, we can just
+      // initialize our new class's bits and add ourselves to the class
+      // list normally.
       newClass->setInstanceBits();
       nameList->pushClass(newClass.get());
     } else {
       // Otherwise, we have to grab the read lock. If the map has been
-      // initialized since we checked, initialize the bits normally. If not, we
-      // must add the new class to the class list before dropping the lock to
-      // ensure its bits are initialized when the time comes.
+      // initialized since we checked, initialize the bits normally. If not,
+      // we must add the new class to the class list before dropping the lock
+      // to ensure its bits are initialized when the time comes.
       ReadLock l(Class::s_instanceBitsLock);
       if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
         newClass->setInstanceBits();
       }
       nameList->pushClass(newClass.get());
     }
-    newClass.get()->incAtomicCount();
-    newClass.get()->setCached();
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }

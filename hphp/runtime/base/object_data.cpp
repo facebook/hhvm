@@ -363,12 +363,10 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   const Class* cls = m_cls;
   do {
     getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    auto& usedTraits = cls->m_usedTraits;
-    for (unsigned t = 0; t < usedTraits.size(); t++) {
-      const ClassPtr& trait = usedTraits[t];
+    for (auto const& trait : cls->m_usedTraits) {
       getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
     }
-    cls = cls->m_parent.get();
+    cls = cls->parent();
   } while (cls);
 
   // Iterate over dynamic properties and insert {name --> prop} pairs.
@@ -419,7 +417,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
         }
       }
     }
-    klass = klass->m_parent.get();
+    klass = klass->parent();
   }
 
   // Now get dynamic properties.

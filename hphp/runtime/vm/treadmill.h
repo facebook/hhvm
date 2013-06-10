@@ -59,14 +59,7 @@ class WorkItem {
 class FreeMemoryTrigger : public WorkItem {
   void* m_ptr;
  public:
-  FreeMemoryTrigger(void* ptr);
-  virtual void operator()();
-};
-
-class FreeClassTrigger : public Treadmill::WorkItem {
-  Class* m_cls;
- public:
-  FreeClassTrigger(Class* cls);
+  explicit FreeMemoryTrigger(void* ptr);
   virtual void operator()();
 };
 

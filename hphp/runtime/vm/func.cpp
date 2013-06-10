@@ -238,6 +238,9 @@ void Func::destroy(Func* func) {
   if (func->isClosureBody() || func->isGeneratorFromClosure()) {
     Func** startOfFunc = (Func**) mem;
     mem = startOfFunc - 1; // move back by a pointer
+    if (Func* f = startOfFunc[-1]) {
+      Func::destroy(f);
+    }
   }
   func->~Func();
   Util::low_free(mem);

@@ -2287,7 +2287,6 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
     // We found it! Return the unit.
     efile = it->second;
     initial = false;
-    if (!initial_opt) efile->incRef();
     return efile;
   }
   // We didn't find it, so try the realpath.
@@ -2309,9 +2308,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
           efile = it->second;
           m_evaledFiles[spath.get()] = efile;
           spath.get()->incRefCount();
-          efile->incRef();
           initial = false;
-          if (!initial_opt) efile->incRef();
           return efile;
         }
       }
@@ -2320,7 +2317,6 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   // This file hasn't been included yet, so we need to parse the file
   efile = HPHP::Eval::FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
-  assert(!efile || efile->getRef() > 0);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldnt be recorded as a
     // per request fetch of the file.
@@ -2335,7 +2331,6 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
     if (hasRealpath) {
       m_evaledFiles[rpath.get()] = efile;
       rpath.get()->incRefCount();
-      efile->incRef();
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
   }
@@ -2393,7 +2388,6 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
   EvaledFilesMap::const_iterator it = m_evaledFiles.find(absPath.get());
   if (it != m_evaledFiles.end()) {
     if (initial) *initial = false;
-    if (!initial) it->second->incRef();
     return it->second;
   }
 

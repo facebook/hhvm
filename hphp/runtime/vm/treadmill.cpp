@@ -26,7 +26,6 @@
 #include "hphp/util/base.h"
 #include "hphp/util/rank.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {  namespace Treadmill {
@@ -139,15 +138,6 @@ FreeMemoryTrigger::FreeMemoryTrigger(void* ptr) : m_ptr(ptr) {
 void FreeMemoryTrigger::operator()() {
   TRACE(3, "FreeMemoryTrigger: Firing @ %p , m_f %p\n", this, m_ptr);
   free(m_ptr);
-}
-
-FreeClassTrigger::FreeClassTrigger(Class* cls) : m_cls(cls) {
-  TRACE(3, "FreeClassTrigger @ %p, cls %p\n", this, m_cls);
-}
-
-void FreeClassTrigger::operator()() {
-  TRACE(3, "FreeClassTrigger: Firing @ %p , cls %p\n", this, m_cls);
-  m_cls->atomicRelease();
 }
 
 void deferredFree(void* p) {

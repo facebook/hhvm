@@ -49,6 +49,13 @@ struct IndexedStringMap {
     delete [] m_vec;
   }
 
+  void clear() {
+    delete [] m_vec;
+    m_vec = nullptr;
+    m_map.clear();
+    m_size = 0;
+  }
+
   /*
    * Create an IndexedStringMap from the supplied builder.  See
    * builder below.

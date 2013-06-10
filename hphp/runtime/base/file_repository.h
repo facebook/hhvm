@@ -121,7 +121,20 @@ typedef RankedCHM<const StringData*, HPHP::Eval::PhpFileWrapper*,
 typedef hphp_hash_map<std::string, PhpFile*, string_hash> Md5FileMap;
 
 /**
- * FileRepository is global.
+ * FileRepository tracks all the Units that are currently live in this session.
+ *
+ * Currently live means that its been loaded at least once, and we haven't
+ * noticed a change to the underlying file yet.
+ *
+ * FileRepository contains a chm from file-paths to PhpFileWrappers.
+ * The PhpFileWrapper is owned by the chm entry, and refers to a refCounted
+ * PhpFile (the refCount is the number of times it appears in the
+ * FileRepository in total - symlinks can cause a PhpFile to appear more than
+ * once). The PhpFile refers to, and owns a Unit.
+ *
+ * When the last reference to a PhpFile goes away, the Unit and its contents
+ * can no longer be reached by new requests, but existing requests could still
+ * be referring to it, so the Unit is freed via TreadMill.
  */
 class FileRepository {
 public:

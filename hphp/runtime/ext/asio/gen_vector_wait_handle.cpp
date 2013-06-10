@@ -71,7 +71,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     TypedValue* current = deps->at(iter_pos);
 
-    if (!c_WaitHandle::fromTypedValue(current)) {
+    if (UNLIKELY(!c_WaitHandle::fromTypedValue(current))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be a vector of WaitHandle instances"));
       throw e;

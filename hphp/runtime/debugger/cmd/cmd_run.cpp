@@ -22,21 +22,25 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 void CmdRun::sendImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "CmdRun::sendImpl\n");
   DebuggerCommand::sendImpl(thrift);
   thrift.write(*m_args);
 }
 
 void CmdRun::recvImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "CmdRun::recvImpl\n");
   DebuggerCommand::recvImpl(thrift);
   m_args = StringVecPtr(new StringVec());
   thrift.read(*m_args);
 }
 
 void CmdRun::list(DebuggerClient &client) {
+  TRACE(2, "CmdRun::list\n");
   client.addCompletion(DebuggerClient::AutoCompleteFileNames);
 }
 
 void CmdRun::help(DebuggerClient &client) {
+  TRACE(2, "CmdRun::help\n");
   client.helpTitle("Run Command");
   client.helpCmds(
     "[r]un",                             "restarts program",
@@ -55,6 +59,7 @@ void CmdRun::help(DebuggerClient &client) {
 }
 
 void CmdRun::onClientImpl(DebuggerClient &client) {
+  TRACE(2, "CmdRun::onClientImpl\n");
   if (DebuggerCommand::displayedHelp(client)) return;
 
   m_args = StringVecPtr(client.args(), null_deleter());

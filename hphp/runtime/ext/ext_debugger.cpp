@@ -27,6 +27,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+TRACE_SET_MOD(debugger);
 
 using namespace Eval;
 using HPHP::Transl::CallerFrame;
@@ -55,14 +56,14 @@ const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE =
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname) {
+  TRACE(5, "in f_hphpd_install_user_command()\n");
   return CmdUser::InstallCommand(cmd, clsname);
 }
 
 Array f_hphpd_get_user_commands() {
+  TRACE(5, "in f_hphpd_get_user_commands()\n");
   return CmdUser::GetCommands();
 }
-
-TRACE_SET_MOD(bcinterp);
 
 void f_hphpd_break(bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
@@ -87,6 +88,7 @@ static DbgCltMap s_dbgCltMap;
 
 // if the DebuggerClient with the same name is already in use, return null
 Variant f_hphpd_get_client(CStrRef name /* = null */) {
+  TRACE(5, "in f_hphpd_get_client()\n");
   if (name.empty()) {
     return uninit_null();
   }
@@ -111,6 +113,7 @@ Variant f_hphpd_get_client(CStrRef name /* = null */) {
 }
 
 Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
+  TRACE(5, "in f_hphpd_client_ctrl()\n");
   DebuggerClient *client = NULL;
   std::string nameStr = name->toCPPString();
   {
@@ -158,19 +161,24 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(Class* cb) : ExtObjectData(cb) {
+  TRACE(5, "c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser\n");
 }
 
 c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser() {
+  TRACE(5, "c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser\n");
 }
 
 void c_DebuggerProxyCmdUser::t___construct() {
+  TRACE(5, "c_DebuggerProxyCmdUser::t___construct\n");
 }
 
 bool c_DebuggerProxyCmdUser::t_islocal() {
+  TRACE(5, "c_DebuggerProxyCmdUser::t_islocal\n");
   return m_proxy->isLocal();
 }
 
 Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
+  TRACE(5, "c_DebuggerProxyCmdUser::t_send\n");
   CmdUser cmdUser(cmd);
   return m_proxy->sendToClient(&cmdUser);
 }
@@ -178,20 +186,25 @@ Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(Class* cb) : ExtObjectData(cb) {
+  TRACE(5, "c_DebuggerClientCmdUser::c_DebuggerClientCmdUser\n");
 }
 
 c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser() {
+  TRACE(5, "c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser\n");
 }
 
 void c_DebuggerClientCmdUser::t___construct() {
+  TRACE(5, "c_DebuggerClientCmdUser::t___construct\n");
 }
 
 void c_DebuggerClientCmdUser::t_quit() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_quit\n");
   m_client->quit();
 }
 
 static String format_string(DebuggerClient &client,
                             int _argc, CStrRef format, CArrRef _argv) {
+  TRACE(5, "c_DebuggerClientCmdUser::format_string\n");
   Variant ret = f_sprintf(_argc, format, _argv);
   if (ret.isString()) {
     return ret;
@@ -203,51 +216,61 @@ static String format_string(DebuggerClient &client,
 
 void c_DebuggerClientCmdUser::t_print(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_print\n");
   m_client->print(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_help(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_help\n");
   m_client->help(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_info(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_info\n");
   m_client->info(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_output(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_output\n");
   m_client->output(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_error(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_error\n");
   m_client->error(format_string(*m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_code(CStrRef source, int highlight_line /* = 0 */,
                               int start_line_no /* = 0 */,
                               int end_line_no /* = 0 */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_code\n");
   m_client->code(source, start_line_no, end_line_no, highlight_line);
 }
 
 Variant c_DebuggerClientCmdUser::t_ask(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_ask\n");
   String ret = format_string(*m_client, _argc, format, _argv);
   return String::FromChar(m_client->ask("%s", ret.data()));
 }
 
 String c_DebuggerClientCmdUser::t_wrap(CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_wrap\n");
   return m_client->wrap(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helptitle(CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_helptitle\n");
   m_client->helpTitle(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helpcmds(int _argc, CStrRef cmd, CStrRef desc,
                                   CArrRef _argv /* = null_array */) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_helpcmds\n");
   std::vector<String> holders;
   std::vector<const char *> cmds;
   cmds.push_back(cmd.data());
@@ -261,42 +284,52 @@ void c_DebuggerClientCmdUser::t_helpcmds(int _argc, CStrRef cmd, CStrRef desc,
 }
 
 void c_DebuggerClientCmdUser::t_helpbody(CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_helpbody\n");
   m_client->helpBody(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helpsection(CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_helpsection\n");
   m_client->helpSection(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_tutorial(CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_tutorial\n");
   m_client->tutorial(str.data());
 }
 
 String c_DebuggerClientCmdUser::t_getcode() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_getcode\n");
   return m_client->getCode();
 }
 
 String c_DebuggerClientCmdUser::t_getcommand() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_getcommand\n");
   return m_client->getCommand();
 }
 
 bool c_DebuggerClientCmdUser::t_arg(int index, CStrRef str) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_arg\n");
   return m_client->arg(index + 1, str.data());
 }
 
 int64_t c_DebuggerClientCmdUser::t_argcount() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_argcount\n");
   return m_client->argCount() - 1;
 }
 
 String c_DebuggerClientCmdUser::t_argvalue(int index) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_argvalue\n");
   return m_client->argValue(index + 1);
 }
 
 String c_DebuggerClientCmdUser::t_linerest(int index) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_linerest\n");
   return m_client->lineRest(index + 1);
 }
 
 Array c_DebuggerClientCmdUser::t_args() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_args\n");
   StringVec *args = m_client->args();
   Array ret(Array::Create());
   for (unsigned int i = 1; i < args->size(); i++) {
@@ -306,12 +339,14 @@ Array c_DebuggerClientCmdUser::t_args() {
 }
 
 Variant c_DebuggerClientCmdUser::t_send(CObjRef cmd) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_send\n");
   CmdUser cmdUser(cmd);
   m_client->sendToServer(&cmdUser);
   return true;
 }
 
 Variant c_DebuggerClientCmdUser::t_xend(CObjRef cmd) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_xend\n");
   CmdUser cmdUser(cmd);
   CmdUserPtr ret = m_client->xend<CmdUser>(&cmdUser);
   return ret->getUserCommand();
@@ -330,6 +365,7 @@ static const StaticString s_port("port");
 static const StaticString s_sandbox("sandbox");
 
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_getcurrentlocation\n");
   BreakPointInfoPtr bpi = m_client->getCurrentLocation();
   if (!bpi) return Array::Create();
   ArrayInit ret(6);
@@ -343,18 +379,22 @@ Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
 }
 
 Variant c_DebuggerClientCmdUser::t_getstacktrace() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_getstacktrace\n");
   return m_client->getStackTrace();
 }
 
 int64_t c_DebuggerClientCmdUser::t_getframe() {
+  TRACE(5, "c_DebuggerClientCmdUser::t_getframe\n");
   return m_client->getFrame();
 }
 
 void c_DebuggerClientCmdUser::t_printframe(int index) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_printframe\n");
   m_client->printFrame(index, m_client->getStackTrace()[index]);
 }
 
 void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {
+  TRACE(5, "c_DebuggerClientCmdUser::t_addcompletion\n");
   if (list.isInteger()) {
     m_client->addCompletion((DebuggerClient::AutoComplete)list.toInt64());
   } else {
@@ -380,17 +420,21 @@ const int64_t q_DebuggerClient$$STATE_BUSY
   = DebuggerClient::StateBusy;
 
 c_DebuggerClient::c_DebuggerClient(Class* cb) : ExtObjectData(cb) {
+  TRACE(5, "c_DebuggerClient::c_DebuggerClient(Class* cb)\n");
   m_client = NULL;
 }
 
 c_DebuggerClient::~c_DebuggerClient() {
+  TRACE(5, "c_DebuggerClient::~c_DebuggerClient()\n");
   sweep();
 }
 
 void c_DebuggerClient::t___construct() {
+  TRACE(5, "c_DebuggerClient::t___construct\n");
 }
 
 int64_t c_DebuggerClient::t_getstate() {
+  TRACE(5, "c_DebuggerClient::t_getstate\n");
   if (!m_client) {
     return q_DebuggerClient$$STATE_INVALID;
   }
@@ -398,6 +442,7 @@ int64_t c_DebuggerClient::t_getstate() {
 }
 
 Variant c_DebuggerClient::t_init(CVarRef options) {
+  TRACE(5, "c_DebuggerClient::t_init\n");
   if (!m_client) {
     raise_warning("invalid client");
     return false;
@@ -487,6 +532,7 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
 }
 
 Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
+  TRACE(5, "c_DebuggerClient::t_processcmd\n");
   if (!m_client ||
       m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not initialized");
@@ -506,9 +552,9 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
   }
 
   static const char *s_allowedCmds[] = {
-    "break", "continue", "down", "exception", "frame", "global",
-    "help", "info", "konstant", "next", "out", "print", "quit", "step",
-    "up", "variable", "where", "bt", "set", "inst", "=", "@", NULL
+    "break", "bt", "continue", "down", "exception", "frame", "global",
+    "help", "info", "inst", "konstant", "next", "out", "print", "quit",
+    "set", "step", "up", "variable", "where", "=", "@", nullptr
   };
 
   bool allowed = false;
@@ -541,17 +587,22 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
       raise_warning("command \"%s\" not found", cmdName.toString().data());
     }
   } catch (DebuggerConsoleExitException &e) {
+    TRACE(4, "Command raised DebuggerConsoleExitException\n");
     // Flow-control command goes here
     Logger::Info("wait for debugger client to stop");
     m_client->setTakingInterrupt();
     m_client->setClientState(DebuggerClient::StateBusy);
     DebuggerCommandPtr cmd = m_client->waitForNextInterrupt();
+    TRACE(4, "waitForNextInterrupt() came back as ");
     if (!cmd) {
+      TRACE(4, "null\n");
       raise_warning("not getting a command");
     } else if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
+      TRACE(4, "an interrupt\n");
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
       cmdInterrupt->onClient(*m_client);
     } else {
+      TRACE(4, "an previous pending command\n");
       // Previous pending commands
       cmd->handleReply(*m_client);
       cmd->setClientOutput(*m_client);
@@ -573,6 +624,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
 }
 
 void c_DebuggerClient::sweep() {
+  TRACE(5, "c_DebuggerClient::sweep\n");
   if (m_client) {
     // Note: it's important that resetSmartAllocatedMembers happens
     // before clearCachedLocal(), because the smart allocated pointers

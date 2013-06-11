@@ -112,9 +112,6 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
 
   Transl::TargetCache::requestInit();
-
-  String currentDir = g_vmContext->getCwd();
-
   string hhas;
   string slib = get_systemlib(&hhas);
 

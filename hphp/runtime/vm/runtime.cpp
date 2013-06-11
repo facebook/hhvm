@@ -333,7 +333,7 @@ Unit* compile_string(const char* s, size_t sz, const char* fname) {
   int out_len;
   md5 = MD5(string_md5(s, sz, false, out_len));
 
-  Unit* u = Repo::get().loadUnit("", md5);
+  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5);
   if (u != nullptr) {
     return u;
   }

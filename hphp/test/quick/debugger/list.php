@@ -1,0 +1,2 @@
+<?php
+$h = new SplMaxHeap();

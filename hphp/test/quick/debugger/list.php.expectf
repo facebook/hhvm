@@ -1,0 +1,14 @@
+Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
+step
+Break on line 2 of %s/list.php
+   1 <?php
+   2 $h = new SplMaxHeap();
+   3 (END)
+
+step
+Break at SplHeap::__construct() on line %d of systemlib.php
+ %d    */
+ %d   public function __construct() {}
+ %d 
+
+quit

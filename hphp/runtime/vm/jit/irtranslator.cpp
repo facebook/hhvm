@@ -1362,6 +1362,42 @@ Translator::translateIterNextK(const NormalizedInstruction& i) {
 }
 
 void
+Translator::translateMIterInit(const NormalizedInstruction& i) {
+  HHIR_EMIT(MIterInit,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
+}
+
+void
+Translator::translateMIterInitK(const NormalizedInstruction& i) {
+  HHIR_EMIT(MIterInitK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
+}
+
+void
+Translator::translateMIterNext(const NormalizedInstruction& i) {
+
+  HHIR_EMIT(MIterNext,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
+}
+
+void
+Translator::translateMIterNextK(const NormalizedInstruction& i) {
+
+  HHIR_EMIT(MIterNextK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
+}
+
+void
 Translator::translateWIterInit(const NormalizedInstruction& i) {
   HHIR_EMIT(WIterInit,
             i.imm[0].u_IVA,
@@ -1401,6 +1437,20 @@ void
 Translator::translateIterFree(const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterFree, i.imm[0].u_IVA);
+}
+
+void
+Translator::translateMIterFree(const NormalizedInstruction& i) {
+
+  HHIR_EMIT(MIterFree, i.imm[0].u_IVA);
+}
+
+void
+Translator::translateIterBreak(const NormalizedInstruction& i) {
+
+  assert(i.breaksTracelet);
+  HHIR_EMIT(IterBreak, i.immVec, i.offset() + i.imm[1].u_BA, i.breaksTracelet,
+            i.noSurprise);
 }
 
 void

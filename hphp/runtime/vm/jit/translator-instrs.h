@@ -117,6 +117,10 @@
   CASE(WIterInitK) \
   CASE(WIterNext) \
   CASE(WIterNextK) \
+  CASE(MIterInit) \
+  CASE(MIterInitK) \
+  CASE(MIterNext) \
+  CASE(MIterNextK) \
   CASE(ReqDoc) \
   CASE(DefCls) \
   CASE(DefFunc) \
@@ -155,6 +159,8 @@
   CASE(BindS) \
   CASE(BindG) \
   CASE(IterFree) \
+  CASE(MIterFree) \
+  CASE(IterBreak) \
   CASE(FPassV) \
   CASE(UnsetN) \
   CASE(DecodeCufIter) \

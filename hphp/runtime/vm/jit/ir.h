@@ -508,7 +508,21 @@ O(WIterNext,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),        E|N|Mem|Refs) \
 O(WIterNextK,                  D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
+O(MIterInit,                   D(Bool), S(BoxedCell)                          \
+                                          S(FramePtr)                         \
+                                          C(Int)                              \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
+O(MIterInitK,                  D(Bool), S(BoxedCell)                          \
+                                          S(FramePtr)                         \
+                                          C(Int)                              \
+                                          C(Int)                              \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
+O(MIterNext,                   D(Bool), S(FramePtr)                           \
+                                          C(Int) C(Int),        E|N|Mem|Refs) \
+O(MIterNextK,                  D(Bool), S(FramePtr)                           \
+                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(IterFree,                         ND, S(FramePtr),            E|N|Mem|Refs) \
+O(MIterFree,                        ND, S(FramePtr),            E|N|Mem|Refs) \
 O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
                                           S(FramePtr),          E|N|Mem|Refs) \
 O(CIterFree,                        ND, S(FramePtr),            E|N|Mem|Refs) \

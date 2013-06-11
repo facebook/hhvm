@@ -879,6 +879,46 @@ std::vector<uchar> read_immvector(AsmState& as, int& stackCount) {
   return ret;
 }
 
+// Read in a vector of iterators the format for this vector is:
+// <(TYPE) ID, (TYPE) ID, ...>
+// Where TYPE := Iter | MIter | CIter
+// and   ID   := Integer
+std::vector<uint32_t> read_itervec(AsmState& as) {
+  std::vector<uint32_t> ret;
+
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+
+  std::string word;
+  char *end;
+
+  for (;;) {
+    as.in.expectWs('(');
+    if (!as.in.readword(word)) as.error("Was expecting Iterator type.");
+    if (!word.compare("Iter")) ret.push_back(KindOfIter);
+    else if (!word.compare("MIter")) ret.push_back(KindOfMIter);
+    else if (!word.compare("CIter")) ret.push_back(KindOfCIter);
+    else as.error("Unknown iterator type `" + word + "'");
+    as.in.expectWs(')');
+
+    as.in.skipSpaceTab();
+
+    if (!as.in.readword(word)) as.error("Was expecting iterator id.");
+    uint32_t iterId = folly::to<uint32_t>(word);
+
+    if (!isdigit(word.back())) {
+      if (word.back() == '>') break;
+      if (word.back() != ',') as.error("Was expecting `,'.");
+    } else {
+      as.in.skipSpaceTab();
+      if (as.in.peek() == '>') { as.in.getc(); break; }
+      as.in.expect(',');
+    }
+  }
+
+  return ret;
+}
+
 // Jump tables are lists of labels.
 std::vector<std::string> read_jmpvector(AsmState& as) {
   std::vector<std::string> ret;
@@ -977,6 +1017,14 @@ OpcodeParserMap opcode_parsers;
   for (size_t i = 0; i < vecImm.size(); ++i) {                        \
     as.ue->emitByte(vecImm[i]);                                       \
   }
+
+#define IMM_ILA do {                               \
+  std::vector<uint32_t> vecImm = read_itervec(as); \
+  as.ue->emitInt32(vecImm.size() / 2);             \
+  for (auto& i : vecImm) {                         \
+    as.ue->emitInt32(i);                           \
+  }                                                \
+} while (0)
 
 #define IMM_BLA do {                                    \
   std::vector<std::string> vecImm = read_jmpvector(as); \

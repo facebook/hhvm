@@ -536,9 +536,7 @@ struct Iter {
         CufIter&     cuf()       { return m_u.cufiter; }
 
   bool init(TypedValue* c1);
-  bool minit(TypedValue* v1);
   bool next();
-  bool mnext();
   void free();
   void mfree();
   void cfree();
@@ -566,6 +564,14 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 int64_t iter_next(Iter* dest, TypedValue* val);
 template <bool withRef>
 int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
+
+
+int64_t new_miter_array_key(Iter* dest, RefData* arr, TypedValue* val,
+                           TypedValue* key);
+int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
+                        TypedValue* val, TypedValue* key);
+int64_t new_miter_other(Iter* dest, RefData* data);
+int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

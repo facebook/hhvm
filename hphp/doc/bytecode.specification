@@ -755,7 +755,8 @@ number of cells from the stack. In most cases the immediate vector arguments
 are ordered such that the loc-desc comes first (deepest in the stack), with the
 last M-vector element last (shallowest in the stack). However, classrefs that
 are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though).
+input to BaseSC comes first though).  Instuctions accepting an immediate vector 
+containing a list of iterators and iterator types use the notation "<iter-vec>".
 
 In addition to describing each instruction, this instruction set documentation
 also describes several operations that encapsulate fundamental, but non-trivial
@@ -3468,6 +3469,14 @@ CIterFree <iterator id>    []  ->  []
   Cuf iterator free. This instruction frees the specified iterator
   variable.
 
+IterBreak <iter-vec> <rel offset>   []  ->  []
+
+  Iterator break.  Frees vectors in %1 in left to right order then transfers 
+  control to the locaton specified by %2.  Surprise checks are performed 
+  before iterators are freed so that in the event of an exception iterators
+  are not double freed.  Note that as with normal jumps surprise checks will
+  only be performed if %2 is negative.
+
 
 12. Include, eval, and define instructions
 ------------------------------------------
@@ -4407,4 +4416,34 @@ class B extends A { public static function f() { return parent::x; } }
 
 ClsCnsD "x" "A"
 RetC
+
+foreach ($arr1 as $v1) {
+  foreach($arr2 as $v2) {
+    if ($v1 == $v2) {
+      break 2;
+    }
+  }
+}
+
+CGetL $arr1
+IterInit 0 endFor1 $v1
+startFor1:
+
+CGetL $arr2
+IterInit 1 endFor2 $v2
+startFor2:
+
+CGetL $v1
+CGetL $v2
+Eq
+
+JmpNZ notEqual
+IterBreak <(Iter) 1, (Iter) 2> endFor1
+notEqual:
+
+IterNext 1 startFor2 $v2
+endFor2:
+
+IterNext 1 startFor1 $v1
+endFor1:
 

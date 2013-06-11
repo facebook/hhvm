@@ -32,20 +32,21 @@ struct Unit;
 // The types in this macro for MA, BLA, and SLA are meaningless since
 // they are never read out of ArgUnion (they use ImmVector and
 // ImmVectorO).
-#define ARGTYPES \
-  ARGTYPE(NA,    void*)         /* unused */  \
-  ARGTYPEVEC(MA, int32_t)       /* Member vector immediate */ \
-  ARGTYPEVEC(BLA,Offset)        /* Bytecode address vector immediate */ \
-  ARGTYPEVEC(SLA,Id)            /* litstrid/offset pair vector */ \
-  ARGTYPE(IVA,   int32_t)       /* variable size: 8 or 32-bit integer */  \
-  ARGTYPE(I64A,  int64_t)       /* 64-bit Integer */ \
-  ARGTYPE(HA,    int32_t)       /* Local variable ID: 8 or 32-bit int */  \
-                                /* TODO(jdelong): rename HA to LA */ \
+#define ARGTYPES                                                            \
+  ARGTYPE(NA,    void*)         /* unused */                                \
+  ARGTYPEVEC(MA, int32_t)       /* Member vector immediate */               \
+  ARGTYPEVEC(BLA,Offset)        /* Bytecode address vector immediate */     \
+  ARGTYPEVEC(SLA,Id)            /* litstrid/offset pair vector */           \
+  ARGTYPEVEC(ILA,Id)            /* IterKind/IterId pair vector */           \
+  ARGTYPE(IVA,   int32_t)       /* variable size: 8 or 32-bit integer */    \
+  ARGTYPE(I64A,  int64_t)       /* 64-bit Integer */                        \
+  ARGTYPE(HA,    int32_t)       /* Local variable ID: 8 or 32-bit int */    \
+                                /* TODO(jdelong): rename HA to LA */        \
   ARGTYPE(IA,    int32_t)       /* Iterator variable ID: 8 or 32-bit int */ \
-  ARGTYPE(DA,    double)        /* Double */ \
-  ARGTYPE(SA,    Id)            /* litStr ID */ \
-  ARGTYPE(AA,    Id)            /* static array ID */ \
-  ARGTYPE(BA,    Offset)        /* Bytecode address */ \
+  ARGTYPE(DA,    double)        /* Double */                                \
+  ARGTYPE(SA,    Id)            /* litStr ID */                             \
+  ARGTYPE(AA,    Id)            /* static array ID */                       \
+  ARGTYPE(BA,    Offset)        /* Bytecode address */                      \
   ARGTYPE(OA,    unsigned char) /* Opcode */
 
 enum ArgType {
@@ -305,6 +306,12 @@ enum IncDecOp {
   IncDec_invalid
 };
 
+enum IterKind {
+  KindOfIter  = 0,
+  KindOfMIter = 1,
+  KindOfCIter = 2,
+};
+
 // Each of the setop ops maps to a binary bytecode op. We have reasons
 // for using distinct bitwise representations, though. This macro records
 // their correspondence for mapping either direction.
@@ -520,6 +527,7 @@ enum SetOpOp {
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
+  O(IterBreak,      TWO(ILA,BA),      NOV,             NOV,        CF_TF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \

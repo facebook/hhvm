@@ -713,48 +713,6 @@ bool Iter::init(TypedValue* c1) {
   return hasElems;
 }
 
-bool Iter::minit(TypedValue* v1) {
-  assert(v1->m_type == KindOfRef);
-  bool hasElems = true;
-  TypedValue* rtv = v1->m_data.pref->tv();
-  if (rtv->m_type == KindOfArray) {
-    ArrayData* ad = rtv->m_data.parr;
-    if (!ad->empty()) {
-      MArrayIter& mi = marr();
-      (void) new (&mi) MArrayIter(v1->m_data.pref);
-      mi.advance();
-    } else {
-      hasElems = false;
-    }
-  } else if (rtv->m_type == KindOfObject)  {
-    if (rtv->m_data.pobj->isCollection()) {
-      raise_error("Collection elements cannot be taken by reference");
-    }
-    bool isIterator;
-    Object obj = rtv->m_data.pobj->iterableObject(isIterator);
-    if (isIterator) {
-      raise_error("An iterator cannot be used with foreach by reference");
-    }
-    Class* ctx = arGetContextClass(g_vmContext->getFP());
-    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-    Array iterArray = obj->o_toIterArray(ctxStr, true);
-    if (iterArray->empty()) {
-      hasElems = false;
-    } else {
-      ArrayData* ad = iterArray.detach();
-      MArrayIter& mi = marr();
-      (void) new (&mi) MArrayIter(ad);
-      mi.advance();
-    }
-  } else {
-    if (!hphpiCompat) {
-      raise_warning("Invalid argument supplied for foreach()");
-    }
-    hasElems = false;
-  }
-  return hasElems;
-}
-
 bool Iter::next() {
   assert(arr().getIterType() == ArrayIter::TypeArray ||
          arr().getIterType() == ArrayIter::TypeIterator);
@@ -773,20 +731,6 @@ bool Iter::next() {
   // If after advancing the iterator we have not reached the end,
   // jump to the location specified by the second immediate argument.
   return true;
-}
-
-bool Iter::mnext() {
-  MArrayIter &mi = marr();
-  if (!mi.advance()) {
-    // If after advancing the iterator we have reached the end, free
-    // the iterator and fall through to the next instruction.
-    mi.~MArrayIter();
-    return false;
-  } else {
-    // If after advancing the iterator we have not reached the end,
-    // jump to the location specified by the second immediate argument.
-    return true;
-  }
 }
 
 void Iter::free() {
@@ -1377,6 +1321,92 @@ template int64_t iter_next_key<false>(Iter* dest,
 template int64_t iter_next_key<true>(Iter* dest,
                                      TypedValue* valOut,
                                      TypedValue* keyOut);
+
+///////////////////////////////////////////////////////////////////////////////
+// MIter functions
+
+HOT_FUNC
+int64_t new_miter_array_key(Iter* dest, RefData* v1,
+                           TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, v1);
+
+  TypedValue* rtv = v1->tv();
+  ArrayData* ad = rtv->m_data.parr;
+
+  if (UNLIKELY(ad->empty())) {
+    return 0LL;
+  }
+
+  (void) new (&dest->marr()) MArrayIter(v1);
+  dest->marr().advance();
+
+  tvAsVariant(valOut).assignRef(dest->marr().val());
+  if (keyOut) {
+    tvAsVariant(keyOut).assignVal(dest->marr().key());
+  }
+
+  return 1LL;
+}
+
+HOT_FUNC
+int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
+                      TypedValue* valOut, TypedValue* keyOut) {
+  ObjectData *obj = ref->tv()->m_data.pobj;
+  if (obj->isCollection()) {
+    raise_error("Collection elements cannot be taken by reference");
+  }
+
+  bool isIterator;
+  Object itObj = obj->iterableObject(isIterator);
+  if (isIterator) {
+    raise_error("An iterator cannot be used with foreach by reference");
+  }
+
+  TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
+        __func__, dest, obj, ctx);
+  CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+  Array iterArray(itObj->o_toIterArray(ctxStr, true));
+  ArrayData* ad = iterArray.detach();
+  (void) new (&dest->marr()) MArrayIter(ad);
+  if (UNLIKELY(!dest->marr().advance())) {
+    // Iterator was empty; call the destructor on the iterator we just
+    // constructed.
+    dest->marr().~MArrayIter();
+    return 0LL;
+  }
+
+  tvAsVariant(valOut).assignRef(dest->marr().val());
+  if (keyOut) {
+    tvAsVariant(keyOut).assignVal(dest->marr().key());
+  }
+  return 1LL;
+}
+
+int64_t new_miter_other(Iter* dest, RefData* data) {
+  TRACE(2, "%s: I %p, data %p, invalid type\n",
+        __func__, dest, data);
+
+  // TODO(#2570852): we should really issue a warning here
+  return 0LL;
+}
+
+HOT_FUNC
+int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "miter_next_key: I %p\n", iter);
+  MArrayIter& marr = iter->marr();
+
+  if (UNLIKELY(!marr.advance())) {
+    marr.~MArrayIter();
+    return 0LL;
+  }
+
+  tvAsVariant(valOut).assignRef(marr.val());
+  if (keyOut) {
+    tvAsVariant(keyOut).assignVal(marr.key());
+  }
+
+  return 1LL;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -356,6 +356,16 @@ struct HhbcTranslator {
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId);
+  void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitMIterInitK(uint32_t iterId,
+                     int targetOffset,
+                     uint32_t valLocalId,
+                     uint32_t keyLocalId);
+  void emitMIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitMIterNextK(uint32_t iterId,
+                     int targetOffset,
+                     uint32_t valLocalId,
+                     uint32_t keyLocalId);
   void emitWIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
   void emitWIterInitK(uint32_t iterId,
                       int targetOffset,
@@ -368,8 +378,11 @@ struct HhbcTranslator {
                       uint32_t keyLocalId);
 
   void emitIterFree(uint32_t iterId);
+  void emitMIterFree(uint32_t iterId);
   void emitDecodeCufIter(uint32_t iterId, int targetOffset);
   void emitCIterFree(uint32_t iterId);
+  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet,
+                      bool noSurprise);
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations
@@ -662,6 +675,8 @@ private:
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
   BCMarker makeMarker(Offset bcOff);
   void updateMarker();
+  template<class Lambda>
+  SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
 
   Type interpOutputType(const NormalizedInstruction&) const;

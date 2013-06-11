@@ -167,6 +167,11 @@ void Peephole::buildJumpTargets() {
       foreachSwitchTarget(instr, [&](Offset& o) {
         m_jumpTargets.insert(pos + o);
       });
+    } else if (*instr == OpIterBreak) {
+      uint32_t veclen = *(uint32_t *)(instr + 1);
+      assert(veclen > 0);
+      Offset target = *(Offset *)((uint32_t *)(instr + 1) + 2 * veclen + 1);
+      m_jumpTargets.insert(pos + target);
     } else {
       Offset target = instrJumpTarget((Op*)m_ue.m_bc, pos);
       if (target != InvalidAbsoluteOffset) {

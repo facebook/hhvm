@@ -1004,6 +1004,7 @@ opcodeControlFlowInfo(const Op instr) {
     case OpWIterInit: // Ditto
     case OpWIterInitK: // Ditto
     case OpDecodeCufIter: // Ditto
+    case OpIterBreak:
     case OpThrow:
     case OpUnwind:
     case OpEval:

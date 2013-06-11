@@ -1590,6 +1590,8 @@ D:Bool = IterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
 D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
 D:Bool = WIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
 D:Bool = WIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = MIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
+D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object
@@ -1610,6 +1612,9 @@ D:Bool = WIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   The WIterInit and WIterInitK instructions copy referenced array
   elements by reference, and non-referenced array elements by value.
 
+  The MIterInit and MIterInitK instructions always copy the array element
+  by reference.
+
   This instruction has the ConsumesRC property because it either
   decrements the reference count of s0 or stores a reference to S0
   into the new iterator.
@@ -1618,6 +1623,8 @@ D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 
   Advances the iterator variable whose index is given by S1. S2 and S3
   are local variable indices. S0 points to the stack frame containing
@@ -1633,8 +1640,11 @@ D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
   element by value.
   The WIterInit and WIterInitK instructions copy referenced array
   elements by reference, and non-referenced array elements by value.
+  The MIterNext and MIterNextK instructions always copy the array element
+  by reference.
 
 IterFree<IterId> S0:FramePtr
+MIterFree<IterId> S0:FramePtr
 
   Free the iterator variable whose index is given by S1 in the stack
   frame pointed to by S0.

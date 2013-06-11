@@ -306,6 +306,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_MA std::vector<uchar>
 #define DEC_BLA std::vector<Label*>&
 #define DEC_SLA std::vector<StrOff>&
+#define DEC_ILA std::vector<IterPair>&
 #define DEC_IVA int32_t
 #define DEC_HA int32_t
 #define DEC_IA int32_t
@@ -375,6 +376,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_HA_MA(i)
 #define POP_HA_BLA(i)
 #define POP_HA_SLA(i)
+#define POP_HA_ILA(i)
 #define POP_HA_IVA(i)
 #define POP_HA_IA(i)
 #define POP_HA_I64A(i)
@@ -457,6 +459,19 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL2_BLA IMPL_BLA(a2)
 #define IMPL3_BLA IMPL_BLA(a3)
 #define IMPL4_BLA IMPL_BLA(a4)
+
+#define IMPL_ILA(var) do {     \
+  auto& ue = getUnitEmitter(); \
+  ue.emitInt32(var.size());    \
+  for (auto& i : var) {        \
+    ue.emitInt32(i.kind);      \
+    ue.emitInt32(i.id);        \
+  }                            \
+} while(0)
+#define IMPL1_ILA IMPL_ILA(a1)
+#define IMPL2_ILA IMPL_ILA(a2)
+#define IMPL3_ILA IMPL_ILA(a3)
+#define IMPL4_ILA IMPL_ILA(a4)
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
@@ -618,6 +633,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL2_SLA
 #undef IMPL3_SLA
 #undef IMPL4_SLA
+#undef IMPL_ILA
+#undef IMPL1_ILA
+#undef IMPL2_ILA
+#undef IMPL3_ILA
+#undef IMPL4_ILA
 #undef IMPL_IVA
 #undef IMPL1_IVA
 #undef IMPL2_IVA
@@ -2024,31 +2044,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           return false;
         }
 
-        // "continue N" breaks out of N-1 loops and jumps to the top of the Nth.
-        // So whether this is break or continue, free N-1 Iters.
-        for (uint64_t i = 0; i < destLevel; ++i) {
-          if (m_controlTargets[i].m_itId != -1) {
-            if (m_controlTargets[i].m_itRef) {
-              e.MIterFree(m_controlTargets[i].m_itId);
-            } else {
-              e.IterFree(m_controlTargets[i].m_itId);
-            }
-          }
+        if (bs->is(Statement::KindOfBreakStatement)) {
+          // break N levels for a break
+          emitIterBreak(e, destLevel+1,
+                         m_controlTargets[destLevel].m_brkTarg);
+        } else {
+          // break N-1 levels for a continue
+          emitIterBreak(e, destLevel,
+                         m_controlTargets[destLevel].m_cntTarg);
         }
 
-        // Only free the Nth-level Iter for break statements.
-        if (bs->is(Statement::KindOfBreakStatement)) {
-          if (m_controlTargets[destLevel].m_itId != -1) {
-            if (m_controlTargets[destLevel].m_itRef) {
-              e.MIterFree(m_controlTargets[destLevel].m_itId);
-            } else {
-              e.IterFree(m_controlTargets[destLevel].m_itId);
-            }
-          }
-          e.Jmp(m_controlTargets[destLevel].m_brkTarg);
-        } else {
-          e.Jmp(m_controlTargets[destLevel].m_cntTarg);
-        }
         return false;
       }
 
@@ -4280,6 +4285,25 @@ void EmitterVisitor::emitCGet(Emitter& e) {
   }
 }
 
+void EmitterVisitor::emitIterBreak(Emitter& e, uint64_t n, Label& targ) {
+  std::vector<Emitter::IterPair> immItrList;
+
+  for (uint64_t level = 0; level < n; ++level) {
+    if (m_controlTargets[level].m_itId != -1) {
+      immItrList.push_back(Emitter::IterPair(m_controlTargets[level].m_itRef
+                                             ? KindOfMIter : KindOfIter,
+                                             m_controlTargets[level]
+                                             .m_itId));
+    }
+  }
+
+  if (immItrList.size()) {
+    e.IterBreak(immItrList, targ);
+  } else {
+    e.Jmp(targ);
+  }
+}
+
 void EmitterVisitor::emitVGet(Emitter& e) {
   if (checkIfStackEmpty("VGet*")) return;
   LocationGuard loc(e, m_tempLoc);
@@ -6460,7 +6484,7 @@ class ForeachIterGuard {
  public:
   ForeachIterGuard(EmitterVisitor& ev,
                    Id iterId,
-                   EmitterVisitor::IterKind kind)
+                   IterKind kind)
     : m_ev(ev)
   {
     m_ev.pushIterScope(iterId, kind);

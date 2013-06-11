@@ -856,10 +856,25 @@ SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   return emitJmpCondHelper(offset, true, res);
 }
 
+template<class Lambda>
+SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
+  auto trace = getExitTrace();
+
+  SSATmp* src = topV();
+  Type type = src->type();
+
+  assert(type.isBoxed());
+  gen(LdRef, type.innerType(), trace, src);
+  SSATmp* res = genFunc(src);
+  SSATmp* out = popV();
+  gen(DecRef, out);
+  return emitJmpCondHelper(offset, true, res);
+}
+
 void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId) {
-  emitIterInitCommon(offset, [=] (SSATmp* src) {
+  emitIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       IterInit,
       Type::Bool,
@@ -875,7 +890,7 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId) {
-  emitIterInitCommon(offset, [=] (SSATmp* src) {
+  emitIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       IterInitK,
       Type::Bool,
@@ -920,7 +935,7 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId) {
   emitIterInitCommon(
-    offset, [=] (SSATmp* src) {
+    offset, [&] (SSATmp* src) {
       return gen(
         WIterInit,
         Type::Bool,
@@ -938,7 +953,7 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId) {
   emitIterInitCommon(
-    offset, [=] (SSATmp* src) {
+    offset, [&] (SSATmp* src) {
       return gen(
         WIterInitK,
         Type::Bool,
@@ -980,8 +995,72 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
   emitJmpCondHelper(offset, false, res);
 }
 
+void HhbcTranslator::emitMIterInit(uint32_t iterId,
+                                  int offset,
+                                  uint32_t valLocalId) {
+  emitMIterInitCommon(offset, [&] (SSATmp* src) {
+    return gen(
+      MIterInit,
+      Type::Bool,
+      src,
+      m_tb->fp(),
+      cns(iterId),
+      cns(valLocalId)
+    );
+  });
+}
+
+void HhbcTranslator::emitMIterInitK(uint32_t iterId,
+                                   int offset,
+                                   uint32_t valLocalId,
+                                   uint32_t keyLocalId) {
+  emitMIterInitCommon(offset, [&] (SSATmp* src) {
+    return gen(
+      MIterInitK,
+      Type::Bool,
+      src,
+      m_tb->fp(),
+      cns(iterId),
+      cns(valLocalId),
+      cns(keyLocalId)
+    );
+  });
+}
+
+void HhbcTranslator::emitMIterNext(uint32_t iterId,
+                                   int offset,
+                                   uint32_t valLocalId) {
+  SSATmp* res = gen(
+    MIterNext,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId)
+  );
+  emitJmpCondHelper(offset, false, res);
+}
+
+void HhbcTranslator::emitMIterNextK(uint32_t iterId,
+                                    int offset,
+                                    uint32_t valLocalId,
+                                    uint32_t keyLocalId) {
+  SSATmp* res = gen(
+    MIterNextK,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId),
+    cns(keyLocalId)
+  );
+  emitJmpCondHelper(offset, false, res);
+}
+
 void HhbcTranslator::emitIterFree(uint32_t iterId) {
   gen(IterFree, IterId(iterId), m_tb->fp());
+}
+
+void HhbcTranslator::emitMIterFree(uint32_t iterId) {
+  gen(MIterFree, IterId(iterId), m_tb->fp());
 }
 
 void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
@@ -1000,6 +1079,30 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
 
 void HhbcTranslator::emitCIterFree(uint32_t iterId) {
   gen(CIterFree, IterId(iterId), m_tb->fp());
+}
+
+void HhbcTranslator::emitIterBreak(const ImmVector& iv,
+                                    uint32_t         offset,
+                                    bool             breakTracelet,
+                                    bool             noSurprise) {
+  bool backward = (offset - (int32_t)bcOff()) < 0;
+  if (backward && !noSurprise) {
+    gen(ExitWhenSurprised, getExitSlowTrace());
+  }
+
+  int iterIndex;
+  for (iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
+    IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
+    Id       iterId   = iv.vec32()[iterIndex + 1];
+    switch (iterKind) {
+      case KindOfIter:  gen(IterFree,  IterId(iterId), m_tb->fp()); break;
+      case KindOfMIter: gen(MIterFree, IterId(iterId), m_tb->fp()); break;
+      case KindOfCIter: gen(CIterFree, IterId(iterId), m_tb->fp()); break;
+    }
+  }
+
+  if (!breakTracelet) return;
+  gen(Jmp_, getExitTrace(offset));
 }
 
 typedef std::map<int, int> ContParamMap;

@@ -469,11 +469,12 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       }
       break;
     }
+    case ILA:
     case BLA:
-    case SLA: { // vec of offsets for Switch/SSwitch
+    case SLA: { // vec of offsets for Switch/SSwitch/IterBreak
       int len = *(int*)pc;
       if (len < 1) {
-        error("invalid length of jump table %d at Offset %d\n",
+        error("invalid length of immediate vector %d at Offset %d\n",
                len, offset(pc));
         return false;
       }
@@ -917,9 +918,7 @@ bool FuncChecker::checkFlow() {
       ok &= checkInputs(&cur, pc, b);
       if (isTF(pc)) ok &= checkTerminal(&cur, pc);
       if (isFF(pc)) ok &= checkFpi(&cur, pc, b);
-      // TODO(#1097182) Iterator checking is disabled, because
-      // systemlib currently doesn't pass it.
-      /* if (isIter(pc)) ok &= checkIter(&cur, pc); */
+      if (isIter(pc)) ok &= checkIter(&cur, pc);
       ok &= checkOutputs(&cur, pc, b);
     }
     ok &= checkSuccEdges(b, &cur);

@@ -1220,6 +1220,7 @@ static const struct {
   { OpIterFree,    {None,             None,         OutNone,           0 }},
   { OpMIterFree,   {None,             None,         OutNone,           0 }},
   { OpCIterFree,   {None,             None,         OutNone,           0 }},
+  { OpIterBreak,   {None,             None,         OutNone,           0 }},
 
   /*** 12. Include, eval, and define instructions ***/
 

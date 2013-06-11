@@ -5332,6 +5332,53 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgMIterInit(IRInstruction* inst) {
+  cgMIterInitCommon(inst);
+}
+
+void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
+  cgMIterInitCommon(inst);
+}
+
+void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
+  PhysReg          fpReg = m_regs[inst->src(1)].reg();
+  int64_t     iterOffset = this->iterOffset(inst->src(2));
+  int64_t valLocalOffset = localOffset(inst->src(3));
+  SSATmp*            src = inst->src(0);
+
+  ArgGroup args(m_regs);
+  args.addr(fpReg, iterOffset).ssa(src);
+
+  assert(src->type().isBoxed());
+
+  if (src->type().innerType().isArray()) {
+    args.addr(fpReg, valLocalOffset);
+    if (inst->op() == MIterInitK) {
+      args.addr(fpReg, localOffset(inst->src(4)));
+    } else {
+      args.imm(0);
+    }
+    cgCallHelper(m_as, (TCA)new_miter_array_key, inst->dst(),
+                 SyncOptions::kSyncPoint, args);
+  } else if (src->type() == Type::BoxedObj) {
+    args.immPtr(curClass()).addr(fpReg, valLocalOffset);
+    if (inst->op() == MIterInitK) {
+      args.addr(fpReg, localOffset(inst->src(4)));
+    } else {
+      args.imm(0);
+    }
+    // new_miter_object decrefs its src object if it propagates an
+    // exception out, so we use kSyncPointAdjustOne, which adjusts the
+    // stack pointer by 1 stack element on an unwind, skipping over
+    // the src object.
+    cgCallHelper(m_as, (TCA)new_miter_object, inst->dst(),
+                 SyncOptions::kSyncPointAdjustOne, args);
+  } else {
+    cgCallHelper(m_as, (TCA)new_miter_other, inst->dst(),
+                 SyncOptions::kSyncPoint, args);
+  }
+}
+
 void CodeGenerator::cgIterNext(IRInstruction* inst) {
   cgIterNextCommon(inst);
 }
@@ -5365,8 +5412,34 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   cgCallHelper(m_as, helperAddr, inst->dst(), SyncOptions::kSyncPoint, args);
 }
 
+void CodeGenerator::cgMIterNext(IRInstruction* inst) {
+  cgMIterNextCommon(inst);
+}
+
+void CodeGenerator::cgMIterNextK(IRInstruction* inst) {
+  cgMIterNextCommon(inst);
+}
+
+void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
+  PhysReg fpReg = m_regs[inst->src(0)].reg();
+  ArgGroup args(m_regs);
+  args.addr(fpReg, iterOffset(inst->src(1)))
+      .addr(fpReg, localOffset(inst->src(2)));
+  if (inst->op() == MIterNextK) {
+    args.addr(fpReg, localOffset(inst->src(3)));
+  } else {
+    args.imm(0);
+  }
+  cgCallHelper(m_as, (TCA)miter_next_key, inst->dst(),
+               SyncOptions::kSyncPoint, args);
+}
+
 void iterFreeHelper(Iter* iter) {
   iter->free();
+}
+
+void miterFreeHelper(Iter* iter) {
+  iter->mfree();
 }
 
 void citerFreeHelper(Iter* iter) {
@@ -5377,6 +5450,13 @@ void CodeGenerator::cgIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t offset = iterOffset(inst->extra<IterFree>()->iterId);
   cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, SyncOptions::kSyncPoint,
+               ArgGroup(m_regs).addr(fpReg, offset));
+}
+
+void CodeGenerator::cgMIterFree(IRInstruction* inst) {
+  PhysReg fpReg = m_regs[inst->src(0)].reg();
+  int64_t offset = iterOffset(inst->extra<MIterFree>()->iterId);
+  cgCallHelper(m_as, (TCA)miterFreeHelper, InvalidReg, SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 

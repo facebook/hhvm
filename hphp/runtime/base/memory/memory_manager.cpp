@@ -20,7 +20,6 @@
 #define __STDC_LIMIT_MACROS
 #endif
 #define __STDC_LIMIT_MACROS
-#include <stdint.h>
 
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/base/memory/smart_allocator.h"
@@ -32,6 +31,8 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+
+#include <stdint.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -325,12 +326,12 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   SweepNode* next = n->next;
   SweepNode* prev = n->prev;
   SweepNode* n2 = (SweepNode*) realloc(n, nbytes + sizeof(SweepNode));
+
+  // ensure that we have not exceeded the per request memory limit (#2529805)
+  refreshStatsHelper();
   if (n2 != n) {
     // block moved; must re-link to sweeplist
     next->prev = prev->next = n2;
-    if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
-      refreshStatsHelper();
-    }
   }
   return n2 + 1;
 }

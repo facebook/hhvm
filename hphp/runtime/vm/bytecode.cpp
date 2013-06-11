@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/shared/shared_variant.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/php_debug.h"
 #include "hphp/runtime/vm/debugger_hook.h"
@@ -201,6 +202,13 @@ Transl::Translator* tx() {
 
 #define DECODE_HA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
+
+#define DECODE_ITER_LIST(typeList, idList, vecLen) \
+  DECODE(int32_t, vecLen);                         \
+  assert(vecLen > 0);                              \
+  Id* typeList = (Id*)pc;                          \
+  Id* idList   = (Id*)pc + 1;                      \
+  pc += 2 * vecLen * sizeof(Id);
 
 #define SYNC() m_pc = pc
 
@@ -4036,6 +4044,37 @@ inline void OPTBLD_INLINE VMExecutionContext::iopJmpNZ(PC& pc) {
   jmpOpImpl<OpJmpNZ>(pc);
 }
 
+#define FREE_ITER_LIST(typeList, idList, vecLen) do {           \
+  int iterIndex;                                                \
+  for (iterIndex = 0; iterIndex < 2 * veclen; iterIndex += 2) { \
+    Id iterType = typeList[iterIndex];                          \
+    Id iterId   = idList[iterIndex];                            \
+                                                                \
+    Iter *iter = frame_iter(m_fp, iterId);                      \
+                                                                \
+    switch (iterType) {                                         \
+      case KindOfIter:  iter->free();  break;                   \
+      case KindOfMIter: iter->mfree(); break;                   \
+      case KindOfCIter: iter->cfree(); break;                   \
+    }                                                           \
+  }                                                             \
+} while(0)
+
+inline void OPTBLD_INLINE VMExecutionContext::iopIterBreak(PC& pc) {
+  PC savedPc = pc;
+  NEXT();
+  DECODE_ITER_LIST(iterTypeList, iterIdList, veclen);
+  DECODE_JMP(Offset, offset);
+
+  jmpSurpriseCheck(offset); // we do this early so iterators are still dirty if
+                            // we have an exception
+
+  FREE_ITER_LIST(iterTypeList, iterIdList, veclen);
+  pc = savedPc + offset;
+}
+
+#undef FREE_ITER_LIST
+
 enum class SwitchMatch {
   NORMAL,  // value was converted to an int: match normally
   NONZERO, // can't be converted to an int: match first nonzero case
@@ -6170,12 +6209,26 @@ inline void OPTBLD_INLINE VMExecutionContext::iopWIterInitK(PC& pc) {
   }
 }
 
+
 inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
-                                              Offset offset, Var* v1) {
-  bool hasElems = it->minit(v1);
+                                              Offset offset, Var* v1,
+                                              TypedValue *val,
+                                              TypedValue *key) {
+  bool hasElems = false;
+  TypedValue* rtv = v1->m_data.pref->tv();
+  if (rtv->m_type == KindOfArray) {
+    hasElems = new_miter_array_key(it, v1->m_data.pref, val, key);
+  } else if (rtv->m_type == KindOfObject)  {
+    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    hasElems = new_miter_object(it, v1->m_data.pref, ctx, val, key);
+  } else {
+    hasElems = new_miter_other(it, v1->m_data.pref);
+  }
+
   if (!hasElems) {
     ITER_SKIP(offset);
   }
+
   m_stack.popV();
   return hasElems;
 }
@@ -6190,9 +6243,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterInit(PC& pc) {
   assert(v1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
-  if (initIteratorM(pc, origPc, it, offset, v1)) {
-    tvAsVariant(tv1).assignRef(it->marr().val());
-  }
+  initIteratorM(pc, origPc, it, offset, v1, tv1, nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopMIterInitK(PC& pc) {
@@ -6207,10 +6258,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterInitK(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
-  if (initIteratorM(pc, origPc, it, offset, v1)) {
-    tvAsVariant(tv1).assignRef(it->marr().val());
-    tvAsVariant(tv2) = it->marr().key();
-  }
+  initIteratorM(pc, origPc, it, offset, v1, tv1, tv2);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIterNext(PC& pc) {
@@ -6283,9 +6331,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterNext(PC& pc) {
   DECODE_HA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
-  if (it->mnext()) {
+  if (miter_next_key(it, tv1, nullptr)) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1).assignRef(it->marr().val());
   }
 }
 
@@ -6299,10 +6346,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterNextK(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
-  if (it->mnext()) {
+  if (miter_next_key(it, tv1, tv2)) {
     ITER_SKIP(offset);
-    tvAsVariant(tv1).assignRef(it->marr().val());
-    tvAsVariant(tv2) = it->marr().key();
   }
 }
 

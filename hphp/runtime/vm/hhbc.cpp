@@ -146,6 +146,9 @@ int immSize(const Op* opcode, int idx) {
     } else if (itype == BLA) {
       prefixes = 1;
       vecElemSz = sizeof(Offset);
+    } else if (itype == ILA) {
+      prefixes = 1;
+      vecElemSz = 2 * sizeof(uint32_t);
     } else {
       assert(itype == SLA);
       prefixes = 1;
@@ -161,7 +164,7 @@ int immSize(const Op* opcode, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return (type == MA || type == BLA || type == SLA);
+  return (type == MA || type == BLA || type == SLA || type == ILA);
 }
 
 bool hasImmVector(Op opcode) {
@@ -303,6 +306,14 @@ Offset* instrJumpOffset(Op* instr) {
   };
 
   assert(!isSwitch(*instr));
+
+  if (Op(*instr) == OpIterBreak) {
+    uint32_t veclen = *(uint32_t *)(instr + 1);
+    assert(veclen > 0);
+    Offset* target  = (Offset *)((uint32_t *)(instr + 1) + 2 * veclen + 1);
+    return target;
+  }
+
   int mask = jumpMask[uint8_t(*instr)];
   if (mask == 0) {
     return nullptr;
@@ -340,7 +351,7 @@ int numSuccs(const Op* instr) {
     if (isSwitch(*instr)) {
       return *(int*)(instr + 1);
     }
-    if (*instr == OpJmp) return 1;
+    if (*instr == OpJmp || *instr == OpIterBreak) return 1;
     return 0;
   }
   if (instrJumpOffset(const_cast<Op*>(instr))) return 2;
@@ -817,6 +828,24 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   out << ">";                                   \
 } while (false)
 
+#define READIVEC() do {                           \
+  int sz = readData<int>(it);                     \
+  out << " <";                                    \
+  const char* sep = "";                           \
+  for (int i = 0; i < sz; ++i) {                  \
+    out << sep;                                   \
+    IterKind k = (IterKind)readData<Id>(it);      \
+    switch(k) {                                   \
+      case KindOfIter:  out << "(Iter) ";  break; \
+      case KindOfMIter: out << "(MIter) "; break; \
+      case KindOfCIter: out << "(CIter) "; break; \
+    }                                             \
+    out << readData<Id>(it);                      \
+    sep = ", ";                                   \
+  }                                               \
+  out << ">";                                     \
+} while (false)
+
 #define ONE(a) H_##a
 #define TWO(a, b) H_##a; H_##b
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
@@ -825,6 +854,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 #define H_MA READVEC()
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
+#define H_ILA READIVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_HA READV()
@@ -859,6 +889,7 @@ OPCODES
 #undef H_MA
 #undef H_BLA
 #undef H_SLA
+#undef H_ILA
 #undef H_IVA
 #undef H_I64A
 #undef H_HA
@@ -926,7 +957,7 @@ ImmVector getImmVector(const Op* opcode) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const uint8_t*>(vp));
-    } else if (t == BLA || t == SLA) {
+    } else if (t == BLA || t == SLA || t == ILA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));

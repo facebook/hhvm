@@ -487,7 +487,7 @@ private:
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);
   bool initIteratorM(PC& pc, PC& origPc, Iter* it,
-                     Offset offset, Var* v1);
+                     Offset offset, Var* v1, TypedValue* val, TypedValue* key);
   void jmpSurpriseCheck(Offset o);
   template<Op op> void jmpOpImpl(PC& pc);
 #define O(name, imm, pusph, pop, flags)                                       \

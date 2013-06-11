@@ -89,6 +89,12 @@ public:
     Id str;
     Label* dest;
   };
+
+  struct IterPair {
+    IterPair(IterKind k, Id i) : kind(k), id(i) {}
+    IterKind kind;
+    Id id;
+  };
 #define O(name, imm, pop, push, flags) \
   void name(imm);
 #define NA
@@ -103,6 +109,7 @@ public:
 #define MA std::vector<uchar>
 #define BLA std::vector<Label*>&
 #define SLA std::vector<StrOff>&
+#define ILA std::vector<IterPair>&
 #define IVA int32_t
 #define HA int32_t
 #define IA int32_t
@@ -122,6 +129,7 @@ public:
 #undef MA
 #undef BLA
 #undef SLA
+#undef ILA
 #undef IVA
 #undef HA
 #undef IA
@@ -374,11 +382,6 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
-  enum IterKind {
-    KindOfIter = 0,
-    KindOfMIter = 1
-  };
-
   void pushIterScope(Id id, IterKind kind) {
     m_pendingIters.emplace_back(id, kind);
   }
@@ -605,6 +608,7 @@ public:
   void emitStringSwitch(Emitter& e, SwitchStatementPtr s,
                         std::vector<Label>& caseLabels, Label& done,
                         const SwitchState& state);
+  void emitIterBreak(Emitter& e, uint64_t n, Label& targ);
 
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);

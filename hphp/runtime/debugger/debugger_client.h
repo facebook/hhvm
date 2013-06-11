@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client_settings.h"
-#include "hphp/runtime/debugger/inst_point.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/util/text_color.h"
 #include "hphp/util/hdf.h"
@@ -233,8 +232,6 @@ public:
    */
   BreakPointInfoPtr getCurrentLocation() const { return m_breakpoint;}
   BreakPointInfoPtrVec *getBreakPoints() { return &m_breakpoints;}
-  InstPointInfoPtrVec *getInstPoints() { return &m_instPoints;}
-  void setInstPoints(InstPointInfoPtrVec &ips) { m_instPoints = ips;}
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64_t threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
@@ -421,7 +418,6 @@ private:
   BreakPointInfoPtrVec m_breakpoints;
   BreakPointInfoPtr m_breakpoint;
   BreakPointInfoPtrVec m_matched;
-  InstPointInfoPtrVec m_instPoints;
 
   // list command's current location, which may be different from m_breakpoint
 

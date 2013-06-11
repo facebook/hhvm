@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/instrumentation.h"
 #include "hphp/util/base.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread_local.h"
@@ -669,7 +668,6 @@ public:
   VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
-  HPHP::InjectionTables* m_injTables;
   HPHP::PCFilter* m_breakPointFilter;
   HPHP::PCFilter* m_lastLocFilter;
   bool m_interpreting;

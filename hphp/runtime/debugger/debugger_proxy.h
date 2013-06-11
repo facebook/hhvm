@@ -22,7 +22,6 @@
 #include "hphp/util/async_func.h"
 #include "hphp/runtime/base/file/socket.h"
 #include "hphp/runtime/debugger/dummy_sandbox.h"
-#include "hphp/runtime/vm/instrumentation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,12 +104,6 @@ public:
   void checkStop();
   void forceQuit();
 
-  // For instrumentation
-  HPHP::InjectionTables* getInjTables() const { return m_injTables; }
-  void setInjTables(HPHP::InjectionTables* tables) { m_injTables = tables;}
-  void readInjTablesFromThread();
-  void writeInjTablesToThread();
-
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);
@@ -151,9 +144,6 @@ private:
 
   Mutex m_signumMutex;
   int m_signum;
-
-  // For instrumentation
-  HPHP::InjectionTables* m_injTables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

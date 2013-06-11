@@ -379,7 +379,6 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   DebuggerProxyPtr proxy = findProxy(sid);
   if (proxy) {
     ti->m_reqInjectionData.setDebugger(true);
-    proxy->writeInjTablesToThread();
   }
 }
 

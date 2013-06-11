@@ -78,7 +78,7 @@ VMExecutionContext::VMExecutionContext() :
     m_preg_backtrace_limit(RuntimeOption::PregBacktraceLimit),
     m_preg_recursion_limit(RuntimeOption::PregRecursionLimit),
     m_lambdaCounter(0), m_nesting(0),
-    m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
+    m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),
     m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
     m_executingSetprofileCallback(false) {
@@ -137,7 +137,6 @@ VMExecutionContext::~VMExecutionContext() {
     delete *it;
   }
 
-  delete m_injTables;
   delete m_breakPointFilter;
   delete m_lastLocFilter;
 }

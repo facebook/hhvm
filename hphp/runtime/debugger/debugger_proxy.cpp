@@ -33,7 +33,7 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
     : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
       m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
-      m_signum(CmdSignal::SignalNone), m_injTables(nullptr) {
+      m_signum(CmdSignal::SignalNone) {
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
@@ -48,8 +48,6 @@ DebuggerProxy::~DebuggerProxy() {
   if (m_dummySandbox) {
     m_dummySandbox->stop();
   }
-
-  delete m_injTables;
 
   Debugger::UsageLog("server", "disconnect");
   TRACE_RB(2, "DebuggerProxy::~DebuggerProxy complete\n");
@@ -713,34 +711,6 @@ BreakPointInfoPtr DebuggerProxy::getBreakPointAtCmd(CmdInterrupt& cmd) {
     }
   }
   return BreakPointInfoPtr();
-}
-
-void DebuggerProxy::readInjTablesFromThread() {
-  TRACE(2, "DebuggerProxy::readInjTablesFromThread\n");
-  ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.getDummySandbox()) {
-    return;
-  }
-  if (m_injTables) {
-    delete m_injTables;
-    m_injTables = nullptr;
-  }
-  if (!g_vmContext->m_injTables) {
-    return;
-  }
-  m_injTables = g_vmContext->m_injTables->clone();
-}
-
-void DebuggerProxy::writeInjTablesToThread() {
-  TRACE(2, "DebuggerProxy::writeInjTablesToThread\n");
-  if (g_vmContext->m_injTables) {
-    delete g_vmContext->m_injTables;
-    g_vmContext->m_injTables = nullptr;
-  }
-  if (!m_injTables) {
-    return;
-  }
-  g_vmContext->m_injTables = m_injTables->clone();
 }
 
 int DebuggerProxy::getRealStackDepth() {

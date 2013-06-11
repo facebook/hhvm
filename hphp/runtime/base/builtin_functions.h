@@ -278,54 +278,6 @@ bool interface_supports_array(const StringData* s);
 bool interface_supports_array(const std::string& n);
 
 ///////////////////////////////////////////////////////////////////////////////
-// special variable contexts
-
-/**
- * lval() is mainly to make this work,
- *
- *   $arr['a']['b'] = $value;
- *
- * where $arr['a'] is in an l-value context. Note that lval() cannot replace
- * those offset classes, because calling these lval() functions will actually
- * insert a null value into an array/object, whereas an offset class can be
- * more powerful by not inserting a dummy value beforehand. For example,
- *
- *   isset($arr['a']); // we have to use offset's exists() function
- *   $obj['a'] = $value; // ArrayAccess's offset is completely customized
- *
- */
-template<class T>
-T &lval(T &v) { return v; }
-inline Variant &lval(Variant &v) { return v;}
-inline Array   &lval(Array   &v) { return v;}
-inline Variant &lval(CVarRef  v) { // in case generating lval(1)
-  throw FatalErrorException("taking reference from an r-value");
-}
-inline String  &lval(const StringOffset  &v) { return v.lval();}
-
-template<class T>
-Variant &unsetLval(Variant &v, const T &key) {
-  if (v.isNull()) {
-    return v;
-  }
-  if (v.is(KindOfArray)) {
-    if (v.toArray().exists(key)) {
-      return v.lvalAt(key);
-    }
-    return Variant::lvalBlackHole();
-  }
-  return Variant::lvalInvalid();
-}
-
-template<class T>
-Variant &unsetLval(Array &v, const T &key) {
-  if (!v.isNull() && v.exists(key)) {
-    return v.lvalAt(key);
-  }
-  return Variant::lvalBlackHole();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // misc functions
 
 bool array_is_valid_callback(CArrRef arr);
@@ -505,32 +457,6 @@ Variant invoke_file(CStrRef file, bool once = false,
                     const char *currentDir = nullptr);
 bool invoke_file_impl(Variant &res, CStrRef path, bool once,
                       const char *currentDir);
-
-/**
- * For wrapping expressions that have no effect, so to make gcc happy.
- */
-inline bool    id(bool    v) { return v; }
-inline char    id(char    v) { return v; }
-inline short   id(short   v) { return v; }
-inline int     id(int     v) { return v; }
-inline int64_t   id(int64_t   v) { return v; }
-inline uint64_t  id(uint64_t  v) { return v; }
-inline double  id(double  v) { return v; }
-inline litstr  id(litstr  v) { return v; }
-inline CStrRef id(CStrRef v) { return v; }
-inline CArrRef id(CArrRef v) { return v; }
-inline CObjRef id(CObjRef v) { return v; }
-inline CVarRef id(CVarRef v) { return v; }
-template <class T>
-inline const SmartObject<T> &id(const SmartObject<T> &v) { return v; }
-
-/**
- * For wrapping return values to prevent elision of copy
- * constructors. This can be a problem if the function
- * returns by value, but a "referenced" variant is returned
- * through copy-constructor elision.
- */
-inline Variant wrap_variant(CVarRef x) { return x; }
 
 bool function_exists(CStrRef function_name);
 

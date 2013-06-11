@@ -696,9 +696,9 @@ bool TestExtArray::test_array_multisort() {
     Variant ar = CREATE_VECTOR2
       (CREATE_VECTOR5("10", 11, 100, 100, "a"),
        CREATE_VECTOR5(   1,  2, "2",   3,   1));
-    f_array_multisort(6, ref(lval(ar.lvalAt(0))),
+    f_array_multisort(6, ref(ar.lvalAt(0)),
                       CREATE_VECTOR5(k_SORT_ASC, k_SORT_STRING,
-                                     ref(lval(ar.lvalAt(1))),
+                                     ref(ar.lvalAt(1)),
                                      k_SORT_NUMERIC, k_SORT_DESC));
     VS(f_print_r(ar, true),
        "Array\n"

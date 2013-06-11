@@ -551,22 +551,22 @@ bool TestCppBase::TestArray() {
   // escalation
   {
     Array arr;
-    lval(arr.lvalAt(0)).lvalAt(0) = 1.2;
+    arr.lvalAt(0).lvalAt(0) = 1.2;
     VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
   }
   {
     Array arr;
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
   }
   {
     Array arr = Array::Create();
-    lval(arr.lvalAt(0)).lvalAt(0) = 1.2;
+    arr.lvalAt(0).lvalAt(0) = 1.2;
     VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
   }
   {
     Array arr = Array::Create();
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
   }
   {
@@ -576,7 +576,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Array arr = Array::Create("test");
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP2(0, "test", s_name, CREATE_VECTOR1(1.2)));
   }
   {
@@ -778,22 +778,22 @@ bool TestCppBase::TestVariant() {
   // array escalation
   {
     Variant arr;
-    lval(arr.lvalAt(0)).lvalAt(0) = 1.2;
+    arr.lvalAt(0).lvalAt(0) = 1.2;
     VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
   }
   {
     Variant arr;
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
   }
   {
     Variant arr = Array::Create();
-    lval(arr.lvalAt(0)).lvalAt(0) = 1.2;
+    arr.lvalAt(0).lvalAt(0) = 1.2;
     VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
   }
   {
     Variant arr = Array::Create();
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
   }
   {
@@ -803,7 +803,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant arr = Array::Create("test");
-    lval(arr.lvalAt(s_name)).lvalAt(0) = 1.2;
+    arr.lvalAt(s_name).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP2(0, "test", s_name, CREATE_VECTOR1(1.2)));
   }
 

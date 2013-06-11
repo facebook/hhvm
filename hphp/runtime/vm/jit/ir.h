@@ -170,6 +170,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
+O(AssertThis,                       ND, NA,                                E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
 O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \

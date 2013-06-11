@@ -221,6 +221,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     m_spValue = inst->dst();
     break;
 
+  case AssertThis:
+    m_thisIsAvailable = true;
+    break;
+
   case SpillStack: {
     m_spValue = inst->dst();
     // Push the spilled values but adjust for the popped values

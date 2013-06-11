@@ -86,7 +86,7 @@ void Debugger::RemoveProxy(DebuggerProxyPtr proxy) {
 }
 
 int Debugger::CountConnectedProxy() {
-  TRACE(2, "Debugger::CountConnectedProxy\n");
+  TRACE(7, "Debugger::CountConnectedProxy\n");
   return s_debugger.countConnectedProxy();
 }
 
@@ -157,8 +157,7 @@ void Debugger::LogShutdown(ShutdownKind shutdownKind) {
   if (proxyCount > 0) {
     Logger::Warning(DEBUGGER_LOG_TAG "%s with connected debuggers!",
                     shutdownKind == ShutdownKind::Normal ?
-                      "Normal shutdown" : "Unexpected crash",
-                    proxyCount);
+                      "Normal shutdown" : "Unexpected crash");
 
     for (const auto& proxyEntry: s_debugger.m_proxyMap) {
       auto sid = proxyEntry.first;
@@ -257,8 +256,8 @@ void Debugger::Interrupt(int type, const char *program,
     // Debugger clients are disconnected abnormally, or this sandbox is not
     // being debugged.
     if (type == SessionStarted || type == SessionEnded) {
-      // for command line programs, we need this exception to exit from
-      // the infinite execution loop
+      // For command line programs, we need this exception to exit from
+      // the infinite execution loop.
       throw DebuggerClientExitException();
     }
   }
@@ -334,8 +333,8 @@ void Debugger::registerThread() {
   acc->second = ti;
 }
 
-void Debugger::updateSandbox(const DSandboxInfo &sandbox) {
-  TRACE(2, "Debugger::updateSandbox\n");
+void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
+  TRACE(2, "Debugger::addOrUpdateSandbox\n");
   const StringData* sd = StringData::GetStaticString(sandbox.id());
   SandboxMap::accessor acc;
   if (m_sandboxMap.insert(acc, sd)) {
@@ -360,12 +359,15 @@ void Debugger::getSandboxes(DSandboxInfoPtrVec &sandboxes) {
   }
 }
 
+// Notify the debugger that this thread is executing a request in the given
+// sandbox. This ensures that the debugger knows about the sandbox, and adds
+// the thread to the set of threads currently active in the sandbox.
 void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   TRACE(2, "Debugger::registerSandbox\n");
   // update sandbox first
-  updateSandbox(sandbox);
+  addOrUpdateSandbox(sandbox);
 
-  // add thread do m_sandboxThreadInfoMap
+  // add thread to m_sandboxThreadInfoMap
   const StringData* sid = StringData::GetStaticString(sandbox.id());
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
   {
@@ -435,9 +437,13 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   // Creates a proxy and threads needed to handle it. At this point, there is
   // not enough information to attach a sandbox.
   DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
-  const StringData* sid =
-    StringData::GetStaticString(proxy->getDummyInfo().id());
   {
+    // Place this new proxy into the proxy map keyed on the dummy sandbox id.
+    // This keeps the proxy alive in the server case, which drops the result of
+    // this function on the floor. It also makes the proxy findable when we a
+    // dummy sandbox thread needs to interrupt.
+    const StringData* sid =
+      StringData::GetStaticString(proxy->getDummyInfo().id());
     assert(sid);
     ProxyMap::accessor acc;
     m_proxyMap.insert(acc, sid);
@@ -473,6 +479,9 @@ void Debugger::cleanupDummySandboxThreads() {
   }
 }
 
+// NB: when this returns, the Debugger class no longer has any references to the
+// given proxy. It will likely be destroyed when the caller's reference goes out
+// of scope.
 void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::removeProxy\n");
   if (proxy->getSandbox().valid()) {
@@ -523,7 +532,7 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
                                  bool force) {
   TRACE(2, "Debugger::switchSandboxImpln");
   // Take the new sandbox
-  DebuggerProxyPtr dpp;
+  DebuggerProxyPtr otherProxy;
   {
     ProxyMap::accessor acc;
     if (m_proxyMap.insert(acc, newSid)) {
@@ -536,7 +545,7 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
       // Delay the destruction of the proxy originally attached to the sandbox
       // to avoid calling a DebuggerProxy destructor (which can sleep) while
       // holding m_mutex.
-      dpp = acc->second;
+      otherProxy = acc->second;
       acc->second = proxy;
     }
   }
@@ -550,8 +559,8 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
   }
   setDebuggerFlag(newSid, true);
 
-  if (dpp) {
-    dpp->forceQuit();
+  if (otherProxy) {
+    otherProxy->forceQuit();
   }
 
   return true;

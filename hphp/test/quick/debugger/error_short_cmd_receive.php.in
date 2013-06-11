@@ -1,0 +1,3 @@
+break error_short_cmd_receive.php:3
+run
+internaltesting shortcmdreceive

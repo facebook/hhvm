@@ -115,7 +115,6 @@ public:
 public:
   explicit DebuggerClient(std::string name = ""); // name only for api usage
   ~DebuggerClient();
-  void reset();
 
   /**
    * Thread functions.
@@ -127,7 +126,7 @@ public:
   /**
    * Main processing functions.
    */
-  bool console();
+  void console();
   // Carries out the current command and returns true if the command completed.
   bool process();
   void quit();
@@ -299,8 +298,6 @@ public:
   void setClientState(ClientState state) { m_clientState = state; }
   void init(const DebuggerClientOptions &options);
   DebuggerCommandPtr waitForNextInterrupt();
-  bool isTakingCommand() const { return m_inputState == TakingCommand; }
-  void setTakingInterrupt() { m_inputState = TakingInterrupt; }
   String getPrintString();
   Array getOutputArray();
   void setOutputType(OutputType type) { m_outputType = type; }
@@ -346,11 +343,6 @@ private:
     TakingCode,
     TakingInterrupt
   };
-  enum RunState {
-    NotYet,
-    Running,
-    Stopped
-  };
 
   /*
    * NOTE: be careful about the use of smart-allocated data members
@@ -374,12 +366,10 @@ private:
   DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
-  bool m_quitting;
 
   InputState m_inputState;
-  RunState m_runState;
-  int m_signum;
-  int m_sigTime;
+  int m_signum; // Set when ctrl-c is pressed, used by signal polling
+  int m_sigTime; // The last time ctrl-c was recgonized
 
   // auto-completion states
   int m_acLen;
@@ -406,9 +396,9 @@ private:
   MacroPtr m_macroRecording;
   MacroPtr m_macroPlaying;
 
-  DMachineInfoPtrVec m_machines; // all connected ones
-  DMachineInfoPtr m_machine;     // current
-  std::string m_rpcHost;         // current RPC host
+  DMachineInfoPtrVec m_machines; // All connected machines. 0th is local.
+  DMachineInfoPtr m_machine;     // Current machine
+  std::string m_rpcHost;         // Current RPC host
 
   DSandboxInfoPtrVec m_sandboxes;
   DThreadInfoPtrVec m_threads;
@@ -465,6 +455,7 @@ private:
   void record(const char *line);
 
   // connections
+  void closeAllConnections();
   void switchMachine(DMachineInfoPtr machine);
   SmartPtr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);

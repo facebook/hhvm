@@ -42,7 +42,7 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
 
 DebuggerProxy::~DebuggerProxy() {
   TRACE_RB(2, "DebuggerProxy::~DebuggerProxy starting\n");
-  m_stopped = true;
+  stop();
   m_signalThread.waitForEnd();
 
   if (m_dummySandbox) {
@@ -91,11 +91,15 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   }
 }
 
+// Switch this proxy to debug the given sandbox.
 bool DebuggerProxy::switchSandbox(const std::string &newId, bool force) {
   TRACE(2, "DebuggerProxy::switchSandbox\n");
   return Debugger::SwitchSandbox(shared_from_this(), newId, force);
 }
 
+// Callback made by Debugger::SwitchSandbox() when the switch is successful.
+// NB: this is called with a read lock on the corresponding entry in the sandbox
+// map.
 void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
   TRACE(2, "DebuggerProxy::updateSandbox\n");
   Lock lock(m_mutex);
@@ -192,14 +196,14 @@ void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
 }
 
 bool DebuggerProxy::couldBreakEnterClsMethod(const StringData* className) {
-  TRACE(2, "DebuggerProxy::couldBreakEnterClsMethod\n");
+  TRACE(5, "DebuggerProxy::couldBreakEnterClsMethod\n");
   ReadLock lock(m_breakMutex);
   StringDataMap::const_accessor acc;
   return m_breaksEnterClsMethod.find(acc, className);
 }
 
 bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
-  TRACE(2, "DebuggerProxy::couldBreakEnterFunc\n");
+  TRACE(5, "DebuggerProxy::couldBreakEnterFunc\n");
   ReadLock lock(m_breakMutex);
   StringDataMap::const_accessor acc;
   return m_breaksEnterFunc.find(acc, funcFullName);
@@ -393,20 +397,37 @@ void DebuggerProxy::pollSignal() {
     }
   }
   if (!m_stopped) {
+    // We've noticed that the socket has closed. If there is a thread stopped at
+    // an interrrupt, stop() will help pop it out and cause the proxy to throw
+    // the proper exception to terminate the request.
     TRACE_RB(2, "DebuggerProxy::pollSignal: "
              "lost communication with the client, stopping proxy\n");
-    forceQuit();
+    stop();
   }
   TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
 }
 
-void DebuggerProxy::forceQuit() {
-  TRACE_RB(2, "DebuggerProxy::forceQuit\n");
+// Ask this proxy to stop running and exit cleanly. Used during proxy cleanup,
+// and from the signal polling thread.
+void DebuggerProxy::stop() {
+  TRACE_RB(2, "DebuggerProxy::stop\n");
   DSandboxInfo invalid;
   Lock l(this);
   m_sandbox = invalid;
   m_stopped = true;
   // the flag will take care of the rest
+}
+
+// Used to quit this proxy, typcially in response to either a quit command from
+// the client or loss of communication with the client. The proxy is removed
+// from the proxy map, ensuring no other threads can use the proxy. It stops
+// the proxy, and then tosses the client exit exception to ensure the current
+// request is terminated with a nice message.
+void DebuggerProxy::forceQuit() {
+  TRACE_RB(2, "DebuggerProxy::forceQuit\n");
+  Debugger::RemoveProxy(shared_from_this());
+  stop();
+  throw DebuggerClientExitException();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -573,10 +594,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
 
 void DebuggerProxy::checkStop() {
   TRACE(5, "DebuggerProxy::checkStop\n");
-  if (m_stopped) {
-    Debugger::RemoveProxy(shared_from_this());
-    throw DebuggerClientExitException();
-  }
+  if (m_stopped) forceQuit();
 }
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
@@ -624,9 +642,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       if (res->is(DebuggerCommand::KindOfQuit)) {
         TRACE_RB(2, "Received quit command\n");
         res->onServer(*this); // acknowledge receipt so that client can quit.
-        Debugger::RemoveProxy(shared_from_this());
         forceQuit();
-        throw DebuggerClientExitException();
       }
     }
     bool cmdFailure = false;
@@ -648,13 +664,8 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
                res->getType());
       cmdFailure = true;
     }
-    if (cmdFailure) {
-      Debugger::RemoveProxy(shared_from_this());
-      return;
-    }
-    if (res->shouldExitInterrupt()) {
-      return;
-    }
+    if (cmdFailure) forceQuit();
+    if (res->shouldExitInterrupt()) return;
   }
 }
 

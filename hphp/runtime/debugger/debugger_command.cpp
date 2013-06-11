@@ -70,6 +70,8 @@ void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_version);
 }
 
+// Returns false on timeout, true when data has been read even if that data
+// didn't form a usable command. Is there is no usable command, cmd is null.
 bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
                               DebuggerCommandPtr &cmd, const char *caller) {
   TRACE(5, "DebuggerCommand::Receive\n");
@@ -79,12 +81,16 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
   fds[0].fd = thrift.getSocket()->fd();
   fds[0].events = POLLIN|POLLERR|POLLHUP;
   int ret = poll(fds, 1, POLLING_SECONDS * 1000);
-  if (ret == 0) {
-    return false;
+  if (ret == 0) return false; // Timeout
+  if (ret == -1) {
+    auto errorNumber = errno; // Just in case TRACE_RB changes errno
+    TRACE_RB(1, "DebuggerCommand::Receive: error %d\n", errorNumber);
+    return errorNumber != EINTR; // Treat signals as timeouts
   }
-  // Any error bits set indicate that we have nothing to read, so bail early.
-  if ((ret == -1) || (fds[0].revents != POLLIN)) {
-    return errno != EINTR; // treat signals as timeouts
+  // Any error bits set indicate that we have nothing to read, so fail.
+  if (fds[0].revents != POLLIN) {
+    TRACE_RB(1, "DebuggerCommand::Receive: revents %d\n", fds[0].revents);
+    return true;
   }
 
   int32_t type;
@@ -94,7 +100,10 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {
-    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
+    // Note: this error case is difficult to test. But, it's exactly the same
+    // as the error noted below. Make sure to keep handling of both of these
+    // errors in sync.
+    Logger::Error("%s: socket error receiving command", caller);
     return true;
   }
 
@@ -127,6 +136,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
     case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
+    case KindOfInternalTesting :
+      cmd = DebuggerCommandPtr(new CmdInternalTesting()); break;
 
     case KindOfExtended: {
       assert(!clsname.empty());
@@ -136,13 +147,15 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     }
 
     default:
-      assert(false);
-      Logger::Error("%s => DebuggerCommand::Receive(): bad cmd type: %d",
-                    caller, type);
+      Logger::Error("%s: received bad cmd type: %d", caller, type);
+      cmd.reset();
       return true;
   }
   if (!cmd->recv(thrift)) {
-    Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
+    // Note: this error case is easily tested, and we have a test for it. But
+    // the error case noted above is quite difficult to test. Keep these two
+    // in sync.
+    Logger::Error("%s: socket error receiving command", caller);
     cmd.reset();
   }
   return true;

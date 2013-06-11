@@ -142,6 +142,9 @@ void DummySandbox::run() {
       ti->m_reqInjectionData.setDebugger(true);
       {
         DebuggerDummyEnv dde;
+        // This is really the entire point of having the dummy sandbox. This
+        // fires the initial session started interrupt to the client after
+        // it first attaches.
         Debugger::InterruptSessionStarted(nullptr, msg.c_str());
       }
 

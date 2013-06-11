@@ -93,14 +93,15 @@ void DebuggerClient::onSignal(int sig) {
 
     if (m_sigTime) {
       int secWait = 10;
-      if (now - m_sigTime > secWait) {
+      int secLeft = secWait - (now - m_sigTime);
+      if (secLeft <= 0) {
         error("Program is not responding. Please restart debugger to get a "
               "new connection.");
-        quit();
+        quit(); // NB: the machine is running, so can't send a real CmdQuit.
         return;
       }
-      info("Please wait. If not responding in %d seconds, "
-           "press Ctrl-C again to quit.", secWait);
+      info("Please wait. If not responding in %d second%s, "
+           "press Ctrl-C again to quit.", secLeft, secLeft > 1 ? "s" : "");
     } else {
       info("Pausing program execution, please wait...");
       usageLog("signal");
@@ -402,8 +403,7 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
     : m_tutorial(0), m_printFunction(""),
       m_logFile(""), m_logFileHandler(nullptr),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
-      m_quitting(false),
-      m_inputState(TakingCommand), m_runState(NotYet),
+      m_inputState(TakingCommand),
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
@@ -424,17 +424,11 @@ DebuggerClient::~DebuggerClient() {
   }
 }
 
-void DebuggerClient::reset() {
-  TRACE(2, "DebuggerClient::reset\n");
+void DebuggerClient::closeAllConnections() {
+  TRACE(2, "DebuggerClient::closeAllConnections\n");
   for (unsigned int i = 0; i < m_machines.size(); i++) {
     m_machines[i]->m_thrift.close();
   }
-
-  m_stacktrace.reset();
-  m_acItems.clear();
-  m_acLiveLists.reset();
-  m_machines.clear();
-  m_machine.reset();
 }
 
 bool DebuggerClient::isLocal() {
@@ -446,6 +440,7 @@ bool DebuggerClient::connect(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connect\n");
   assert(isApiMode() ||
          (!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
+  // First check for an existing connect, and reuse that.
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (f_gethostbyname(m_machines[i]->m_name) ==
         f_gethostbyname(host)) {
@@ -532,7 +527,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   // API mode, and in client mode we expect to destruct it ourselves
   // when ~DebuggerClient runs.
   sock->unregister();
-  Object obj(sock);
+  Object obj(sock); // Destroy sock if we don't connect.
   if (f_socket_connect(sock, String(host), port)) {
     DMachineInfoPtr machine(new DMachineInfo());
     machine->m_name = host;
@@ -553,10 +548,11 @@ bool DebuggerClient::reconnect() {
   int port = m_machine->m_port;
   if (port) {
     info("Re-connecting to %s:%d...", host.c_str(), port);
+    m_machine->m_thrift.close(); // Close the old socket, it may still be open.
     Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                               host.c_str(), port);
     sock->unregister();
-    Object obj(sock);
+    Object obj(sock); // Destroy sock if we don't connect.
     if (f_socket_connect(sock, String(host), port)) {
       for (unsigned int i = 0; i < m_machines.size(); i++) {
         if (m_machines[i] == m_machine) {
@@ -568,6 +564,7 @@ bool DebuggerClient::reconnect() {
       machine->m_name = host;
       machine->m_port = port;
       machine->m_thrift.create(SmartPtr<Socket>(sock));
+      m_machines.push_back(machine);
       switchMachine(machine);
       return true;
     }
@@ -656,6 +653,7 @@ void DebuggerClient::stop() {
   m_mainThread.waitForEnd();
 }
 
+// Executed by m_mainThread to run the command-line debugger.
 void DebuggerClient::run() {
   TRACE(2, "DebuggerClient::run\n");
   StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
@@ -681,24 +679,35 @@ void DebuggerClient::run() {
     hphp_invoke_simple(m_options.extension);
   }
   while (true) {
+    bool reconnect = false;
     try {
       runImpl();
     } catch (DebuggerServerLostException &e) {
-      if (reconnect()) {
-        continue;
-      }
+      // Loss of connection
+      TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
+      usageLog(m_commandCanonical, "DebuggerServerLostException");
+      reconnect = true;
+    } catch (DebuggerProtocolException &e) {
+      // Bad or unexpected data. Give reconnect a shot, it could help...
+      TRACE_RB(1, "DebuggerClient::run: protocol exception\n");
+      usageLog(m_commandCanonical, "DebuggerProtocolException");
+      reconnect = true;
     } catch (...) {
-      Logger::Error("Unhandled exception from DebuggerClient::runImpl().");
+      TRACE_RB(1, "DebuggerClient::run: unknown exception\n");
+      usageLog(m_commandCanonical, "UnknownException");
+      Logger::Error("Unhandled exception, exiting.");
+    }
+    // Note: it's silly to try to reconnect when stopping, or if we have a
+    // problem while quitting.
+    if (reconnect && !m_stopped && (m_commandCanonical != "quit")) {
+      if (DebuggerClient::reconnect()) continue;
+      Logger::Error("Unable to reconnect to server, exiting.");
     }
     break;
   }
-  // We are about to exit from client and ideally we should cleanup,
-  // but we the reset() where will try to cleanup Socket under DMachineInfo,
-  // which is created by another thread. If it's cleaned up here, later we'll
-  // have a SEGV when trying to sweep the object from the other thread.
-  // We should refactor the code to avoid Sweepable object being passed across
-  // threads later.
-  // reset();
+  // Closing all proxy connections will force the local proxy to pop out of
+  // it's wait, and eventually exit the main thread.
+  closeAllConnections();
   hphp_context_exit(context, false);
   hphp_session_exit();
 }
@@ -939,45 +948,55 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
 ///////////////////////////////////////////////////////////////////////////////
 // main
 
+// Execute the initial connection protocol with a machine. A connection has been
+// established, and the proxy has responded with an interrupt giving us initial
+// control. Send breakpoints to the server, and then attach to the sandbox
+// if necessary. If we attach to a sandbox, then the process is off and running
+// again (CmdMachine continues execution on a successful attach) so return false
+// to indicate that a client should wait for another interrupt before attempting
+// further communication. Returns true if the protocol is complete and the
+// machine is at an interrupt.
 bool DebuggerClient::initializeMachine() {
   TRACE(2, "DebuggerClient::initializeMachine\n");
-  if (!m_machine->m_initialized) {
-    // set/clear intercept for RPC thread
-    if (!m_machines.empty() && m_machine == m_machines[0]) {
-      CmdMachine::UpdateIntercept(*this, m_machine->m_rpcHost,
-                                  m_machine->m_rpcPort);
-    }
+  // set/clear intercept for RPC thread
+  if (!m_machines.empty() && m_machine == m_machines[0]) {
+    CmdMachine::UpdateIntercept(*this, m_machine->m_rpcHost,
+                                m_machine->m_rpcPort);
+  }
 
-    // upload breakpoints
-    if (!m_breakpoints.empty()) {
-      info("Updating breakpoints...");
-      CmdBreak::SendClientBreakpointListToServer(*this);
-    }
+  // upload breakpoints
+  if (!m_breakpoints.empty()) {
+    info("Updating breakpoints...");
+    CmdBreak::SendClientBreakpointListToServer(*this);
+  }
 
-    // attaching to default sandbox
-    int waitForgSandbox = false;
+  // attaching to default sandbox
+  int waitForSandbox = false;
+  if (!m_machine->m_sandboxAttached) {
+    const char *user = m_options.user.empty() ?
+      nullptr : m_options.user.c_str();
+    m_machine->m_sandboxAttached = (waitForSandbox =
+      CmdMachine::AttachSandbox(*this, user, m_options.sandbox.c_str()));
     if (!m_machine->m_sandboxAttached) {
-      const char *user = m_options.user.empty() ?
-                         nullptr : m_options.user.c_str();
-      m_machine->m_sandboxAttached = (waitForgSandbox =
-        CmdMachine::AttachSandbox(*this, user, m_options.sandbox.c_str()));
-      if (!m_machine->m_sandboxAttached) {
-        Logger::Error("Unable to communicate with default sandbox.");
-      }
+      Logger::Error("Unable to communicate with default sandbox.");
     }
+  }
 
-    m_machine->m_initialized = true;
-    if (!isApiMode() && waitForgSandbox) {
-      // Throw exception here to wait for next interrupt from server
-      throw DebuggerConsoleExitException();
-    }
+  m_machine->m_initialized = true;
+  if (!isApiMode() && waitForSandbox) {
+    // Return false to wait for next interrupt from server
+    return false;
   }
   return true;
 }
 
+// Only used in API mode, to listen for another interupt from the machine.
 DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
   TRACE(2, "DebuggerClient::waitForNextInterrupt\n");
+  assert(isApiMode());
   const char *func = "DebuggerClient::waitForNextInterrupt()";
+  m_machine->m_interrupting = false; // Machine is running again.
+  m_inputState = TakingInterrupt;
   while (!m_stopped) {
     DebuggerCommandPtr cmd;
     if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
@@ -1014,13 +1033,22 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
   return DebuggerCommandPtr();
 }
 
+// The main execution loop of DebuggerClient. This waits for interrupts from
+// the server (and responds to polls for signals). On interrupt, it presents
+// a command prompt, and continues pumping interrupts when a command lets the
+// machine run again.
+// When this returns, the command line client will exit.
 void DebuggerClient::runImpl() {
   TRACE(2, "DebuggerClient::runImpl\n");
-  const char *func = "DebuggerClient::runImpl()";
+  assert(!isApiMode());
+  const char *func = "Main client loop";
 
+  DebuggerCommandPtr cmd;
   try {
     while (!m_stopped) {
-      DebuggerCommandPtr cmd;
+      // The machine should be running at this point, otherwise it will never
+      // send us anything and we'll wait forever.
+      assert(!m_machine->m_interrupting);
       if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
         if (!cmd) {
           Logger::Error("Unable to communicate with server. Server's down?");
@@ -1031,38 +1059,47 @@ void DebuggerClient::runImpl() {
           continue;
         }
         if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
-          Logger::Error("%s: bad cmd type: %d", func, cmd->getType());
-          return;
+          Logger::Error("Received bad cmd type %d, unable to communicate "
+                        "with server.", cmd->getType());
+          throw DebuggerServerLostException();
         }
         m_sigTime = 0;
         CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
         Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
-        {
-          cmd->onClient(*this);
-        }
-        m_machine->m_interrupting = true;
-        setClientState(StateReadyForCommand);
-        m_inputState = TakingCommand;
+        cmd->onClient(*this);
+
+        // When we make a new connection to a machine, we have to wait for it
+        // to interrupt us before we can send it any messages. This is our
+        // opportunity to complete the connection and make it ready to use.
         if (!m_machine->m_initialized) {
-          try {
-            if (!initializeMachine()) {
-              return;
-            }
-          } catch (DebuggerConsoleExitException &e) {
+          if (!initializeMachine()) {
+            // False means the machine is running and we need to wait for
+            // another interrupt.
             continue;
           }
         }
-        if (!console()) {
-          return;
-        }
-        setClientState(StateBusy);
+        // Execution has been interrupted, so go ahead and give the user
+        // the prompt back.
+        m_machine->m_interrupting = true; // Machine is stopped
+        m_inputState = TakingCommand;
+        console(); // Prompt loop
         m_inputState = TakingInterrupt;
+        m_machine->m_interrupting = false; // Machine is running again.
       }
     }
   } catch (DebuggerClientExitException &e) { /* normal exit */ }
 }
 
-bool DebuggerClient::console() {
+// Execute the interactive command loop for the debugger client. This will
+// present the prompt, wait for user input, and execute commands, then rinse
+// and repeat. The loop terminates when a command is executed that causes the
+// machine to resume execution, or which should cause the client to exit.
+// This function is only entered when the machine being debugged is paused.
+//
+// If this function returns it means the process is running again.
+// NB: exceptions derrived from DebuggerException or DebuggerClientExeption
+// indicate the machine remains paused.
+void DebuggerClient::console() {
   TRACE(2, "DebuggerClient::console\n");
   while (true) {
     const char *line = nullptr;
@@ -1080,12 +1117,8 @@ bool DebuggerClient::console() {
       line = readline(getPrompt().c_str());
       if (line == nullptr) {
         // treat ^D as quit
-        try {
-          print("quit");
-          quit();
-        } catch (DebuggerClientExitException &e) {
-          return false;
-        }
+        print("quit");
+        line = "quit";
       }
     } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
@@ -1107,12 +1140,8 @@ bool DebuggerClient::console() {
             error("command \"" + m_command + "\" not found");
             m_command.clear();
           }
-        } catch (DebuggerClientExitException &e) {
-          return false;
         } catch (DebuggerConsoleExitException &e) {
-          return true;
-        } catch (DebuggerProtocolException &e) {
-          return false;
+          return;
         }
       }
     } else if (m_inputState == TakingCommand) {
@@ -1129,16 +1158,13 @@ bool DebuggerClient::console() {
             m_command = m_prevCmd;
             process(); // replay the same command
           } catch (DebuggerConsoleExitException &e) {
-            return true;
-          } catch (DebuggerProtocolException &e) {
-            return false;
+            return;
           }
           break;
       }
     }
   }
-
-  return true;
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1568,6 +1594,11 @@ do {                                         \
   if (m_command == "set") NEW_CMD_NAME("config", CmdConfig);
   if (m_command == "complete") NEW_CMD_NAME("complete", CmdComplete);
 
+  // Internal testing
+  if (m_command == "internaltesting") {
+    NEW_CMD_NAME("internaltesting", CmdInternalTesting);
+  }
+
   switch (tolower(m_command[0])) {
     case 'a': MATCH_CMD("abort"    , CmdAbort    );
     case 'b': MATCH_CMD("break"    , CmdBreak    );
@@ -1606,6 +1637,8 @@ do {                                         \
 
 // Parses the current command string. If invalid return false.
 // Otherwise, carry out the command and return true.
+// NB: the command may throw a variety of exceptions derrived from
+// DebuggerClientException.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
@@ -1812,13 +1845,14 @@ DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
 void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
   TRACE(2, "DebuggerClient::sendToServer\n");
   if (!cmd->send(m_machine->m_thrift)) {
+    Logger::Error("Send command: unable to communicate with server.");
     throw DebuggerProtocolException();
   }
 }
 
 DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
   TRACE(2, "DebuggerClient::recvFromServer\n");
-  const char *func = "DebuggerClient::recvFromServer ()";
+  const char *func = "Receive result";
 
   DebuggerCommandPtr res;
   while (true) {
@@ -1836,7 +1870,6 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
       usageLog("done", boost::lexical_cast<string>(expected));
       break;
     }
-
     if (!res->is(DebuggerCommand::KindOfInterrupt)) {
       Logger::Error("%s: unexpected return: %d", func, res->getType());
       throw DebuggerProtocolException();
@@ -1861,14 +1894,7 @@ DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
 
     // eval() can cause more breakpoints
     res->onClient(*this);
-    if (!console()) {
-      if (m_quitting) {
-        throw DebuggerClientExitException();
-      } else {
-        Logger::Error("%s: unable to process %d", func, res->getType());
-        throw DebuggerProtocolException();
-      }
-    }
+    console();
   }
 
   return res;
@@ -1937,7 +1963,6 @@ void DebuggerClient::processTakeCode() {
 
 void DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
-  m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
   CmdEval().onClient(*this);
@@ -1952,10 +1977,7 @@ void DebuggerClient::swapHelp() {
 
 void DebuggerClient::quit() {
   TRACE(2, "DebuggerClient::quit\n");
-  m_quitting = true;
-  for (unsigned int i = 0; i < m_machines.size(); i++) {
-    m_machines[i]->m_thrift.close();
-  }
+  closeAllConnections();
   throw DebuggerClientExitException();
 }
 

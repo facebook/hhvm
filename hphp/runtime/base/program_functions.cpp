@@ -1070,13 +1070,13 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       RuntimeOption::EnableDebugger = true;
-      Eval::DebuggerProxyPtr proxy =
+      Eval::DebuggerProxyPtr localProxy =
         Eval::Debugger::StartClient(po.debugger_options);
-      if (!proxy) {
+      if (!localProxy) {
         Logger::Error("Failed to start debugger client\n\n");
         return 1;
       }
-      Eval::Debugger::RegisterSandbox(proxy->getDummyInfo());
+      Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
       Eval::Debugger::RegisterThread();
       StringVecPtr client_args;
       bool restart = false;
@@ -1084,7 +1084,12 @@ static int execute_program_impl(int argc, char **argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-          g_context->setSandboxId(proxy->getDummyInfo().id());
+          // Set the proxy for this thread to be the localProxy we just
+          // created. If we're script debugging, this will be the proxy that
+          // does all of our work. If we're remote debugging, this proxy will
+          // go unused until we finally stop it when the user quits the
+          // debugger.
+          g_context->setSandboxId(localProxy->getDummyInfo().id());
           Eval::Debugger::DebuggerSession(po.debugger_options, file, restart);
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());

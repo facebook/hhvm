@@ -95,11 +95,7 @@ void phpDebuggerErrorHook(const std::string& message) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
-  try {
-    Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, String(message));
-  } catch (const Eval::DebuggerClientExitException &e) {
-    // Don't disturb the error handler just because a debugger quits.
-  }
+  Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, String(message));
   TRACE(5, "out phpDebuggerErrorHook()\n");
 }
 

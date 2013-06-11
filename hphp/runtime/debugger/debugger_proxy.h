@@ -114,6 +114,8 @@ private:
 
   void changeBreakPointDepth(CmdInterrupt& cmd);
 
+  void stop();
+
   bool m_stopped;
 
   bool m_local;

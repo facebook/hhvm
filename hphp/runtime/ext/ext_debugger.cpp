@@ -513,10 +513,7 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
   }
 
   ret = m_client->initializeMachine();
-  if (!ret) {
-    raise_warning("failed to initialize machine info");
-    return false;
-  }
+  assert(ret); // Always returns true in API mode.
 
   // To wait for the machine loading sandbox
   cmd = m_client->waitForNextInterrupt();
@@ -591,7 +588,6 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     TRACE(4, "Command raised DebuggerConsoleExitException\n");
     // Flow-control command goes here
     Logger::Info("wait for debugger client to stop");
-    m_client->setTakingInterrupt();
     m_client->setClientState(DebuggerClient::StateBusy);
     DebuggerCommandPtr cmd = m_client->waitForNextInterrupt();
     TRACE(4, "waitForNextInterrupt() came back as ");

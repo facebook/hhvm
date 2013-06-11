@@ -58,12 +58,14 @@ void CmdMachine::help(DebuggerClient &client) {
     "[m]achine [c]onnect {host}:{port}",  "debugging remote server natively",
     "[m]achine [r]pc {host}",             "debugging remote server with RPC",
     "[m]achine [r]pc {host}:{port}",      "debugging remote server with RPC",
-    "[m]achine [d]isconnect",             "debugging local script",
+    "[m]achine [d]isconnect",             "disconnect, debugging local script",
     "[m]achine [l]ist",                   "list all sandboxes",
     "[m]achine [a]ttach {index}",         "attach to a sandbox",
     "[m]achine [a]ttach {sandbox}",       "attach to my sandbox by name",
     "[m]achine [a]ttach {user} {sandbox}",
     "attach to a sandbox by user and name",
+    "[m]achine [a]ttach [f]orce {index|sandbox|user sandbox}",
+    "force attach to a sandbox (see below)",
     nullptr
   );
   client.helpBody(
@@ -86,6 +88,10 @@ void CmdMachine::help(DebuggerClient &client) {
     "\n"
     "When your sandbox is not available, please hit it at least once "
     "from your browser. Then run '[m]achine [l]ist' command again.\n"
+    "\n"
+    "If another debugger client is already attached to your sandbox you can "
+    "use the '[f]orce' option to '[m]achine [a]ttach'. This will disconnect "
+    "the other client and force your client to connect.\n"
     "\n"
     "If a HipHop server has RPC port open, one can also debug the server in "
     "a very special RPC mode. In this mode, one can type in PHP scripts to "
@@ -134,8 +140,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                bool force /* = false */) {
   string login;
   if (user == nullptr) {
-    login = client.getCurrentUser();
-    user = login.c_str();
+    user = client.getCurrentUser().c_str();
   }
   if (client.isApiMode()) {
     force = true;
@@ -166,11 +171,19 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   if (cmdMachine->m_succeed) {
     client.playMacro("startup");
   } else {
-    client.error("failed to attach to sandbox, maybe another client is "
-                  "debugging, \nattach to another sandbox, exit the "
-                  "attached hphpd client, or try \n"
-                  "[m]achine [a]ttach [f]orce [%s] [%s]",
-                  sandbox->m_user.c_str(), sandbox->m_name.c_str());
+    // Note: it would be nice to give them more info about the process we think
+    // is debugging this sandbox: what machine it's on, what it's pid is, etc.
+    // Unfortunately, we don't have any of that data. We'd need a protocol
+    // change to have the client give us more info when it attaches.
+    client.error(
+      "Failed to attach to the sandbox. Maybe another client is debugging, \n"
+      "or a client failed to detach cleanly.\n"
+      "You can attach to another sandbox, or exit the other attached client, \n"
+      "or force this client to take over the sandbox with: \n"
+      "\n"
+      "\t[m]achine [a]ttach [f]orce %s %s"
+      "\n",
+      sandbox->m_user.c_str(), sandbox->m_name.c_str());
   }
   return cmdMachine->m_succeed;
 }
@@ -227,7 +240,9 @@ void CmdMachine::onClientImpl(DebuggerClient &client) {
         throw DebuggerConsoleExitException();
       }
     }
-    client.initializeMachine();
+    if (!client.initializeMachine()) {
+      throw DebuggerConsoleExitException();
+    }
     return;
   }
 
@@ -235,7 +250,9 @@ void CmdMachine::onClientImpl(DebuggerClient &client) {
     if (client.disconnect()) {
       throw DebuggerConsoleExitException();
     }
-    client.initializeMachine();
+    if (!client.initializeMachine()) {
+      throw DebuggerConsoleExitException();
+    }
     return;
   }
 

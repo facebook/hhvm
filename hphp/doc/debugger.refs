@@ -265,7 +265,7 @@ will not be affected by this setting. This directory will be stored in
 configuration file for future sessions as well.
 
 
-    -------------------------- Machine Command --------------------------
+    ────────────────────────── Machine Command ──────────────────────────
 
     [m]achine            debugging remote server natively
       [c]onnect {host}
@@ -276,7 +276,7 @@ configuration file for future sessions as well.
       {host}
     [m]achine [r]pc      debugging remote server with RPC
       {host}:{port}
-    [m]achine            debugging local script
+    [m]achine            disconnect, debug only local script
       [d]isconnect
     [m]achine [l]ist     list all sandboxes
     [m]achine            attach to a sandbox
@@ -287,6 +287,10 @@ configuration file for future sessions as well.
     [m]achine            attach to a sandbox by user and name
       [a]ttach {user}
       {sandbox}
+    [m]achine            force attach to a sandbox (see below)
+      [a]ttach [f]orce
+      {index|sandbox|us
+      er sandbox}
 
 
 Use this command to switch between different machines or sandboxes.
@@ -307,6 +311,10 @@ attach to it.
 
 When your sandbox is not available, please hit it at least once from
 your browser. Then run '[m]achine [l]ist' command again.
+
+If another debugger client is already attached to your sandbox you can
+use the '[f]orce' option to '[m]achine [a]ttach'. This will disconnect
+the other client and force your client to connect.
 
 If a HipHop server has RPC port open, one can also debug the server in a
 very special RPC mode. In this mode, one can type in PHP scripts to run,

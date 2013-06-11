@@ -14,50 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
+#ifndef incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_
+#define incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdMachine);
-class CmdMachine : public DebuggerCommand {
+DECLARE_BOOST_TYPES(CmdInternalTesting);
+class CmdInternalTesting : public DebuggerCommand {
 public:
-  static bool AttachSandbox(DebuggerClient &client, const char *user = nullptr,
-                            const char *name = nullptr, bool force = false);
-  static void UpdateIntercept(DebuggerClient &client,
-                              const std::string &host, int port);
+  CmdInternalTesting() : DebuggerCommand(KindOfInternalTesting),
+                         m_unused(false) {}
 
-public:
-  CmdMachine() : DebuggerCommand(KindOfMachine),
-                 m_force(false), m_succeed(false) {}
-
-  virtual void list(DebuggerClient &client);
   virtual void help(DebuggerClient &client);
 
-  virtual bool onServer(DebuggerProxy &proxy);
-
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  virtual void onClientImpl(DebuggerClient &client);
+  virtual bool onServer(DebuggerProxy &proxy);
 
 private:
-  static bool AttachSandbox(DebuggerClient &client,
-                            DSandboxInfoPtr sandbox,
-                            bool force = false);
-
-  DSandboxInfoPtrVec m_sandboxes;
-  Array m_rpcConfig;
-  bool m_force;
-  bool m_succeed;
-
-  bool processList(DebuggerClient &client, bool output = true);
+  std::string m_arg;
+  bool m_unused;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
+#endif // incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_

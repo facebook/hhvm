@@ -114,28 +114,43 @@ private:
 
   static const char *InterruptTypeName(CmdInterrupt &cmd);
 
+  // The following maps use a "sandbox id", or sid, which is a string containing
+  // the user's name, a tab, and the sandbox name. I.e., "mikemag\tdefault".
+
+  // Map of "sandbox id"->proxy. The map contains an entry for every active
+  // proxy attached to this process, keyed by the sandbox being debugged. It
+  // also contains an entry for the proxy's dummy sandbox, keyed by the dummy
+  // sandbox id which is basically the proxy pointer rendered as a string.
   typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
                                    StringDataHashCompare> ProxyMap;
   ProxyMap m_proxyMap;
 
+  // Map of "sandbox id"->"sandbox info" for any sandbox the process has seen.
+  // Entries are made when a request is received for a sandbox, or when a switch
+  // to a new sandbox id is made via CmdMachine. The latter alows a debugger to
+  // "pre-attach" to a sandbox before the first request is every received.
+  // Entries are never removed.
   typedef tbb::concurrent_hash_map<const StringData*, DSandboxInfoPtr,
                                    StringDataHashCompare> SandboxMap;
   SandboxMap m_sandboxMap;
 
+  // Map of "sandbox id"->"set of threads executing requests in the sandbox".
   typedef std::set<ThreadInfo*> ThreadInfoSet;
   typedef tbb::concurrent_hash_map<const StringData*, ThreadInfoSet,
                                    StringDataHashCompare> SandboxThreadInfoMap;
   SandboxThreadInfoMap m_sandboxThreadInfoMap;
 
+  // "thread id"->"thread info". Each thread which is being debugged is
+  // added to this map.
   typedef tbb::concurrent_hash_map<int64_t, ThreadInfo*> ThreadInfoMap;
-  ThreadInfoMap m_threadInfos; // tid => ThreadInfo*
+  ThreadInfoMap m_threadInfos;
 
   typedef tbb::concurrent_queue<DummySandbox*> DummySandboxQ;
   DummySandboxQ m_cleanupDummySandboxQ;
 
   bool isThreadDebugging(int64_t id);
   void registerThread();
-  void updateSandbox(const DSandboxInfo &sandbox);
+  void addOrUpdateSandbox(const DSandboxInfo &sandbox);
   DSandboxInfoPtr getSandbox(const StringData* sid);
   void getSandboxes(DSandboxInfoPtrVec &sandboxes);
   void registerSandbox(const DSandboxInfo &sandbox);

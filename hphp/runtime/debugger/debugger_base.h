@@ -42,22 +42,46 @@ struct DebuggerClientOptions {
 ///////////////////////////////////////////////////////////////////////////////
 // exceptions
 
-// client side exception
-class DebuggerClientException      : public Exception {};
-class DebuggerConsoleExitException : public DebuggerClientException {};
-class DebuggerProtocolException    : public DebuggerClientException {};
-class DebuggerServerLostException  : public DebuggerClientException {};
+// Client-side exceptions
+class DebuggerClientException : public Exception {};
 
-// both client and server side exception
-class DebuggerException            : public Exception {
+// Exception used to force the debugger client to exit the command prompt loop
+// implemented in DebuggerClient::console(). Commands throw this when they do
+// something that causes the server to start running code again, so we pop out
+// of the command prompt loop and go back to waiting for interrupt messages from
+// the server.
+class DebuggerConsoleExitException : public DebuggerClientException {};
+
+// Exception thrown when the client detects an error in the communication
+// protocol with the server, but believes the connection is still alive.
+// I.e., bad command type back, missing fields, etc.
+class DebuggerProtocolException : public DebuggerClientException {};
+
+// Exception thrown when the client loses its connection to the server.
+class DebuggerServerLostException : public DebuggerClientException {};
+
+// Both client- and server-side exceptions
+class DebuggerException : public Exception {
   EXCEPTION_COMMON_IMPL(DebuggerException);
 };
+
+// Exception thrown in two cases:
+//
+// Client-side: thrown in cases where the client should completely exit. This
+// will pop us out of both the command prompt loop and the message loop for the
+// server, and cause the client to quit.
+//
+// Server-side: thrown when the server detects that the client is exiting. This
+// causes a thread which is currently interrupted to terminate it's request with
+// this exception. The message attempts to reflect that a request which was
+// being debugged has been terminated.
 class DebuggerClientExitException  : public DebuggerException {
   virtual const char *what() const throw() {
-    return "Debugger client has just quit.";
+    return "Debugger client has just quit, request (if any) terminated.";
   }
   EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
 };
+
 class DebuggerRestartException     : public DebuggerException {
 public:
   explicit DebuggerRestartException(StringVecPtr args) : m_args(args) {}
@@ -114,9 +138,9 @@ public:
   int m_port;
   DebuggerThriftBuffer m_thrift;
 
-  bool m_interrupting;
+  bool m_interrupting; // True if the machine is paused at an interrupt
   bool m_sandboxAttached;
-  bool m_initialized;
+  bool m_initialized; // True if the initial connection protocol is complete
   std::string m_rpcHost;
   int m_rpcPort;
 };

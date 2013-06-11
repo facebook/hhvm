@@ -59,14 +59,14 @@ public:
    * into numerically keyed map. When "preserve_keys" is false, a map will
    * turn into vectors, unless keys are not numeric.
    */
-  static Variant Slice(CArrRef input, int offset, int length,
+  static Variant Slice(CArrRef input, int offset, int64_t length,
                        bool preserve_keys);
 
   /**
    * Removes the elements designated by offset and length and replace them
    * with supplied array.
    */
-  static Variant Splice(CArrRef input, int offset, int length = 0,
+  static Variant Splice(CArrRef input, int offset, int64_t length = 0,
                         CVarRef replacement = null_variant,
                         Array *removed = nullptr);
 
@@ -111,7 +111,7 @@ public:
 
   /**
    * Returns input as a numerically indexed array starting from zero
-   * with no gaps. Is optimized for the case where input is already 
+   * with no gaps. Is optimized for the case where input is already
    * correct. Assumes input is not null.
    */
   static Array EnsureIntKeys(CArrRef input);

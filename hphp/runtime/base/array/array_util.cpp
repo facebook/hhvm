@@ -94,7 +94,7 @@ Variant ArrayUtil::Chunk(CArrRef input, int size,
   return ret;
 }
 
-Variant ArrayUtil::Slice(CArrRef input, int offset, int length,
+Variant ArrayUtil::Slice(CArrRef input, int offset, int64_t length,
                          bool preserve_keys) {
   int num_in = input.size();
   if (offset > num_in) {
@@ -126,7 +126,7 @@ Variant ArrayUtil::Slice(CArrRef input, int offset, int length,
   return out_hash;
 }
 
-Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
+Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
                           CVarRef replacement /* = null_variant */,
                           Array *removed /* = NULL */) {
   int num_in = input.size();

@@ -23,6 +23,13 @@ hphp/system/php/spl/iterators/DirectoryIterator.php
 hphp/system/php/spl/iterators/FilesystemIterator.php
 hphp/system/php/spl/iterators/RecursiveDirectoryIterator.php
 hphp/system/php/spl/file_handling/SplFileObject.php
+hphp/system/php/spl/file_handling/SplTempFileObject.php
+
+hphp/system/php/lang/ArrayAccess.php
+hphp/system/php/lang/Serializeable.php
+hphp/system/php/spl/datastructures/SplDoublyLinkedList.php
+hphp/system/php/spl/datastructures/SplQueue.php
+hphp/system/php/spl/datastructures/SplStack.php
 
 hphp/system/php/spl/interfaces/OuterIterator.php
 hphp/system/php/spl/iterators/IteratorIterator.php
@@ -45,13 +52,12 @@ hphp/system/php/collections/collections.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
 hphp/system/php/json/JsonSerializable.php
-hphp/system/php/lang/ArrayAccess.php
 hphp/system/php/lang/ErrorException.php
-hphp/system/php/lang/Serializeable.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/reflection/reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php
+hphp/system/php/spl/datastructures/SplFixedArray.php
 hphp/system/php/spl/datastructures/SplObjectStorage.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php
 hphp/system/php/spl/iterators/AppendIterator.php

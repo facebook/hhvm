@@ -268,33 +268,15 @@ void PolicyArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
 }
 
 template <class K>
-ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret,
-                                  bool copy, bool checkExist) {
+ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret, bool copy) {
   APILOG(this) << "(" << keystr(k) << ", " << ret << ", "
-         << copy << ", " << checkExist << ")";
+         << copy << ", " << ")";
 
   if (copy) {
-    return PolicyArray::copy()->lvalImpl(k, ret, false, checkExist);
+    return PolicyArray::copy()->lvalImpl(k, ret, false);
   }
 
-  PosType pos = PosType::invalid;
-
-  if (checkExist && (pos = find(k, m_size)) != PosType::invalid) {
-    assert(toInt<uint32_t>(pos) < m_size);
-    auto& e = lval(pos);
-    if (e.isReferenced() || e.isObject()) {
-      MYLOG << (void*)this << "->lval:" << "found1";
-      ret = &e;
-      return this;
-    }
-  }
-
-  // Make sure the search is done. TODO: this may actually search
-  // twice sometimes.
-  if (pos == PosType::invalid) {
-    pos = find(k, m_size);
-  }
-
+  PosType pos = find(k, m_size);
   if (pos != PosType::invalid) {
     // found, don't overwrite anything
     assert(toInt<uint32_t>(pos) <= m_size);
@@ -677,7 +659,7 @@ ArrayData *PolicyArray::merge(const ArrayData *elems, bool copy) {
       StringData *s = key.getStringData();
       Variant *p;
       // Andrei TODO: make sure this is the right semantics
-      lval(s, p, false, true);
+      lval(s, p, false);
       p->setWithRef(value);
     }
   }

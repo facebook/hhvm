@@ -122,9 +122,8 @@ public:
   bool exists(const StringData* k) const;
 
   // implements ArrayData
-  ArrayData* lval(int64_t k, Variant*& ret, bool copy, bool checkExist=false);
-  ArrayData* lval(StringData* k, Variant*& ret, bool copy,
-                  bool checkExist=false);
+  ArrayData* lval(int64_t k, Variant*& ret, bool copy);
+  ArrayData* lval(StringData* k, Variant*& ret, bool copy);
   ArrayData* lvalNew(Variant*& ret, bool copy);
 
   // overrides ArrayData

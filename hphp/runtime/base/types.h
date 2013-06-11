@@ -418,7 +418,6 @@ public:
     NoHipHop = 8,
 
     Error_Key = Error | Key,
-    CheckExist_Key = CheckExist | Key,
     Error_NoHipHop = Error | NoHipHop,
   };
   static Type IsKey(bool s) { return s ? Key : None; }

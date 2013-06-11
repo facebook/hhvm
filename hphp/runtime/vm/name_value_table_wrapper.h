@@ -88,10 +88,8 @@ public: // ArrayData implementation
   static TypedValue* NvGetInt(const ArrayData*, int64_t k);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
-  virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
-                          bool checkExist = false);
-  virtual ArrayData* lval(StringData* k, Variant*& ret,
-                          bool copy, bool checkExist = false);
+  virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy);
+  virtual ArrayData* lval(StringData* k, Variant*& ret, bool copy);
   virtual ArrayData* lvalNew(Variant*& ret, bool copy);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);

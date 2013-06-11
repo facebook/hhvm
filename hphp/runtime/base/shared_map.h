@@ -67,10 +67,8 @@ public:
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
 
-  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
-                          bool checkExist = false);
-  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
-                          bool checkExist = false);
+  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy);
+  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy);
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
   static ArrayData *SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);

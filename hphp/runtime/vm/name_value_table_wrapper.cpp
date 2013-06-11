@@ -91,13 +91,11 @@ TypedValue* NameValueTableWrapper::NvGetInt(const ArrayData* ad, int64_t k) {
   return asNVTW(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,
-                                       bool checkExist) {
-  return lval(String(k), ret, copy, checkExist);
+ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool) {
+  return lval(String(k), ret, false);
 }
 
-ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret,
-                                       bool copy, bool checkExist) {
+ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret, bool) {
   TypedValue* tv = m_tab->lookup(k);
   if (!tv) {
     TypedValue nulVal;

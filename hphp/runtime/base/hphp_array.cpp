@@ -1112,41 +1112,14 @@ ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
   return this;
 }
 
-ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy,
-                           bool checkExist /* = false */) {
+ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy) {
   assert(checkInvariants());
-  if (checkExist && copy) {
-    ElmInd pos = isVector() ? (size_t(k) < m_size ? ElmInd(k) : ElmIndEmpty) :
-                 find(k);
-    if (pos != ElmIndEmpty) {
-      Elm* e = &m_data[pos];
-      if (tvAsVariant(&e->data).isReferenced() ||
-          tvAsVariant(&e->data).isObject()) {
-        ret = &tvAsVariant(&e->data);
-        return this;
-      }
-    }
-  }
   return (!copy ? this : copyImpl())->addLvalImpl(k, &ret);
 }
 
-ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
-                           bool checkExist /* = false */) {
+ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy) {
   assert(checkInvariants());
-  strhash_t prehash = key->hash();
-  if (checkExist && copy && !isVector()) {
-    auto pos = find(key, prehash);
-    if (pos != ElmIndEmpty) {
-      Elm* e = &m_data[pos];
-      TypedValue* tv = &e->data;
-      if (tvAsVariant(tv).isReferenced() ||
-          tvAsVariant(tv).isObject()) {
-        ret = &tvAsVariant(tv);
-        return this;
-      }
-    }
-  }
-  return (!copy ? this : copyImpl())->addLvalImpl(key, prehash, &ret);
+  return (!copy ? this : copyImpl())->addLvalImpl(key, key->hash(), &ret);
 }
 
 ArrayData *HphpArray::createLvalPtr(StringData* key, Variant*& ret, bool copy) {

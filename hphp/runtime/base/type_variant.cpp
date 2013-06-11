@@ -1142,19 +1142,17 @@ template<typename T>
 Variant& Variant::LvalAtImpl0(
     Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
 head:
+  assert(!(flags & AccessFlags::CheckExist));
   if (self->m_type == KindOfArray) {
     ArrayData *arr = self->m_data.parr;
     ArrayData *escalated;
     Variant *ret = nullptr;
     if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1,
-                            flags & AccessFlags::CheckExist);
+      escalated = arr->lval(key, ret, arr->getCount() > 1);
     } else {
       typename LvalHelper<T>::KeyType k(ToKey(key));
       if (LvalHelper<T>::CheckKey(k)) {
-        escalated =
-          arr->lval(k, ret, arr->getCount() > 1,
-                    flags & AccessFlags::CheckExist);
+        escalated = arr->lval(k, ret, arr->getCount() > 1);
       } else {
         if (blackHole) ret = &lvalBlackHole();
         else           ret = tmp;

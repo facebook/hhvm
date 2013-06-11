@@ -110,14 +110,12 @@ inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   return a2;
 }
 
-ArrayData *SharedMap::lval(int64_t k, Variant *&ret, bool copy,
-                           bool checkExist /* = false */) {
+ArrayData *SharedMap::lval(int64_t k, Variant *&ret, bool copy) {
   ArrayData *escalated = SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
-ArrayData *SharedMap::lval(StringData* k, Variant *&ret, bool copy,
-                           bool checkExist /* = false */) {
+ArrayData *SharedMap::lval(StringData* k, Variant *&ret, bool copy) {
   ArrayData *escalated = SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }

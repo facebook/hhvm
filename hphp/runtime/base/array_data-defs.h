@@ -66,18 +66,16 @@ inline CVarRef ArrayData::get(const StringData* k, bool error) const {
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
-inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,
-                                  bool checkExist) {
+inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy) {
   assert(IsValidKey(k));
-  return lval(k.get(), ret, copy, checkExist);
+  return lval(k.get(), ret, copy);
 }
 
-inline ArrayData* ArrayData::lval(CVarRef k, Variant *&ret, bool copy,
-                                  bool checkExist) {
+inline ArrayData* ArrayData::lval(CVarRef k, Variant *&ret, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
-  return isIntKey(cell) ? lval(getIntKey(cell), ret, copy, checkExist)
-                        : lval(getStringKey(cell), ret, copy, checkExist);
+  return isIntKey(cell) ? lval(getIntKey(cell), ret, copy)
+                        : lval(getStringKey(cell), ret, copy);
 }
 
 inline

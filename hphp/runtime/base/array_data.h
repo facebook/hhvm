@@ -114,7 +114,7 @@ public:
    * Array interface functions.
    *
    * 1. For functions that return ArrayData pointers, these are the ones that
-   *    can potentially escalate into a different ArrayData type. Return NULL
+   *    can potentially escalate into a different ArrayData type. Return this
    *    if no escalation is needed.
    *
    * 2. All functions with a "key" parameter are type-specialized.
@@ -233,17 +233,15 @@ public:
   Variant getKey(ssize_t pos) const;
 
   /**
-   * Getting l-value (that Variant pointer) at specified key. Return NULL if
+   * Getting l-value (that Variant pointer) at specified key. Return this if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
-                          bool checkExist = false) = 0;
-  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
-                          bool checkExist = false) = 0;
+  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy) = 0;
+  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy) = 0;
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
-   * available integer key. Return NULL if escalation is not needed, or an
+   * available integer key. Return this if escalation is not needed, or an
    * escalated array data. Note that adding a new element with the next
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see Variant::lvalBlackHole() for details).
@@ -260,7 +258,7 @@ public:
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
-   * then set the value. Return NULL if escalation is not needed, or an
+   * then set the value. Return this if escalation is not needed, or an
    * escalated array data.
    */
   ArrayData *set(int64_t k, CVarRef v, bool copy);
@@ -286,7 +284,7 @@ public:
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
-   * then remove the value. Return NULL if escalation is not needed, or an
+   * then remove the value. Return this if escalation is not needed, or an
    * escalated array data.
    */
   virtual ArrayData *remove(int64_t k, bool copy) = 0;
@@ -302,8 +300,8 @@ public:
   CVarRef get(const StringData* k, bool error = false) const;
   CVarRef get(CStrRef k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
-  ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
-  ArrayData *lval(CVarRef k, Variant *&ret, bool copy, bool checkExist=false);
+  ArrayData *lval(CStrRef k, Variant *&ret, bool copy);
+  ArrayData *lval(CVarRef k, Variant *&ret, bool copy);
   ArrayData *createLvalPtr(CStrRef k, Variant *&ret, bool copy);
   ArrayData *getLvalPtr(CStrRef k, Variant *&ret, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);

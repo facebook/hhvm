@@ -465,11 +465,11 @@ class Array : protected SmartPtr<ArrayData> {
 
   template<typename T>
   Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL) {
+    assert(!(flags & AccessFlags::CheckExist));
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated =
-      m_px->lval(key, ret, m_px->getCount() > 1,
-                 flags & AccessFlags::CheckExist);
+      m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;

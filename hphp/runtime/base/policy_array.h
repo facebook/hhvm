@@ -375,7 +375,7 @@ public:
 
 private:
   template <class K>
-  ArrayData *lvalImpl(K k, Variant *&ret, bool copy, bool checkExist);
+  ArrayData *lvalImpl(K k, Variant *&ret, bool copy);
 
   using Store::lval;
 
@@ -386,15 +386,13 @@ public:
    */
   virtual ArrayData *lval(int64_t k,
                           Variant *&ret,
-                          bool copy,
-                          bool checkExist = false) FOLLY_OVERRIDE {
-    return lvalImpl(k, ret, copy, checkExist);
+                          bool copy) FOLLY_OVERRIDE {
+    return lvalImpl(k, ret, copy);
   }
   virtual ArrayData *lval(StringData* k,
                           Variant*& ret,
-                          bool copy,
-                          bool checkExist = false) FOLLY_OVERRIDE {
-    return lvalImpl(k, ret, copy, checkExist);
+                          bool copy) FOLLY_OVERRIDE {
+    return lvalImpl(k, ret, copy);
   }
 
   /**

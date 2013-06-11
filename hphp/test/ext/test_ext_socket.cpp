@@ -62,6 +62,14 @@ static int get_random_port() {
   return ++base;
 }
 
+static int bind_random_port(CObjRef socket, CStrRef address) {
+  for (int i = 0; i < 20; i++) {
+    int port = get_random_port();
+    if (f_socket_bind(socket, address, port)) return port;
+  }
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtSocket::test_socket_create() {
@@ -139,16 +147,16 @@ bool TestExtSocket::test_socket_connect() {
 
 bool TestExtSocket::test_socket_bind() {
   Variant s = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(s, "127.0.0.1", port));
+  int port = bind_random_port(s, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(s));
   return Count(true);
 }
 
 bool TestExtSocket::test_socket_listen() {
   Variant server = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(server, "127.0.0.1", port));
+  int port = bind_random_port(server, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(server));
 
   Variant client = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
@@ -164,8 +172,8 @@ bool TestExtSocket::test_socket_listen() {
 
 bool TestExtSocket::test_socket_select() {
   Variant server = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(server, "127.0.0.1", port));
+  int port = bind_random_port(server, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(server));
 
   Variant client = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
@@ -183,8 +191,13 @@ bool TestExtSocket::test_socket_select() {
 }
 
 bool TestExtSocket::test_socket_server() {
-  int port = get_random_port();
-  Variant server = f_socket_server("127.0.0.1", port);
+  Variant server;
+  int port;
+  for (int i = 0; i < 20; i++) {
+    port = get_random_port();
+    server = f_socket_server("127.0.0.1", port);
+    if (!same(server, false)) break;
+  }
   VERIFY(!same(server, false));
 
   Variant client = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
@@ -218,8 +231,8 @@ bool TestExtSocket::test_socket_write() {
 
 bool TestExtSocket::test_socket_send() {
   Variant server = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(server, "127.0.0.1", port));
+  int port = bind_random_port(server, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(server));
 
   Variant client = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
@@ -237,8 +250,8 @@ bool TestExtSocket::test_socket_send() {
 
 bool TestExtSocket::test_socket_sendto() {
   Variant server = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(server, "127.0.0.1", port));
+  int port = bind_random_port(server, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(server));
 
   Variant client = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
@@ -267,8 +280,8 @@ bool TestExtSocket::test_socket_recvfrom() {
 
 bool TestExtSocket::test_socket_shutdown() {
   Variant s = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(s, "127.0.0.1", port));
+  int port = bind_random_port(s, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(s));
   VERIFY(f_socket_shutdown(s));
   return Count(true);
@@ -276,8 +289,8 @@ bool TestExtSocket::test_socket_shutdown() {
 
 bool TestExtSocket::test_socket_close() {
   Variant s = f_socket_create(k_AF_INET, k_SOCK_STREAM, k_SOL_TCP);
-  int port = get_random_port();
-  VERIFY(f_socket_bind(s, "127.0.0.1", port));
+  int port = bind_random_port(s, "127.0.0.1");
+  VERIFY(port != 0);
   VERIFY(f_socket_listen(s));
   f_socket_close(s);
   return Count(true);

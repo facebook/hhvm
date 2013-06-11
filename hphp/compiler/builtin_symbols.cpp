@@ -49,7 +49,6 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 bool BuiltinSymbols::Loaded = false;
-bool BuiltinSymbols::NoSuperGlobals = false;
 StringBag BuiltinSymbols::s_strings;
 
 StringToFunctionScopePtrMap BuiltinSymbols::s_functions;
@@ -315,7 +314,7 @@ void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
   }
 }
 
-bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
+bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   if (Loaded) return true;
   Loaded = true;
 
@@ -328,81 +327,76 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
   s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
 
-  // parse all PHP files under system/classes
-  if (!extOnly) {
-    s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
-    ar->loadBuiltinFunctions();
-    string slib = get_systemlib();
-
-    Scanner scanner(slib.c_str(), slib.size(),
-                    Option::GetScannerType(), "systemlib.php");
-    Compiler::Parser parser(scanner, "systemlib.php", ar);
-    if (!parser.parse()) {
-      Logger::Error("Unable to parse systemlib.php: %s",
-                    parser.getMessage().c_str());
-      assert(false);
-    }
-
-    ar->analyzeProgram(true);
-    ar->inferTypes();
-    const StringToFileScopePtrMap &files = ar->getAllFiles();
-    for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
-         iterFile != files.end(); iterFile++) {
-      const StringToClassScopePtrVecMap &classes =
-        iterFile->second->getClasses();
-      for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
-           iter != classes.end(); ++iter) {
-        assert(iter->second.size() == 1);
-        iter->second[0]->setSystem();
-        assert(!s_classes[iter->first]);
-        s_classes[iter->first] = iter->second[0];
-      }
-
-      const StringToFunctionScopePtrMap &functions =
-        iterFile->second->getFunctions();
-      for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin();
-           iter != functions.end(); ++iter) {
-        iter->second->setSystem();
-        s_functions[iter->first] = iter->second;
-      }
-    }
-  } else {
-    NoSuperGlobals = true;
-  }
-
   // load extension constants, classes and dynamics
   ImportExtConstants(ar, s_constants, ClassInfo::GetSystem());
   ImportExtClasses(ar);
 
-  if (!extOnly) {
-    Array constants = ClassInfo::GetSystemConstants();
-    LocationPtr loc(new Location);
-    for (ArrayIter it = constants.begin(); it; ++it) {
-      CVarRef key = it.first();
-      if (!key.isString()) continue;
-      std::string name = key.toCStrRef().data();
-      if (s_constants->getSymbol(name)) continue;
-      if (name == "true" || name == "false" || name == "null") continue;
-      CVarRef value = it.secondRef();
-      if (!value.isInitialized() || value.isObject()) continue;
-      ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
-      TypePtr t =
-        value.isNull()    ? Type::Null    :
-        value.isBoolean() ? Type::Boolean :
-        value.isInteger() ? Type::Int64   :
-        value.isDouble()  ? Type::Double  :
-        value.isArray()   ? Type::Array   : Type::Variant;
+  Array constants = ClassInfo::GetSystemConstants();
+  LocationPtr loc(new Location);
+  for (ArrayIter it = constants.begin(); it; ++it) {
+    CVarRef key = it.first();
+    if (!key.isString()) continue;
+    std::string name = key.toCStrRef().data();
+    if (s_constants->getSymbol(name)) continue;
+    if (name == "true" || name == "false" || name == "null") continue;
+    CVarRef value = it.secondRef();
+    if (!value.isInitialized() || value.isObject()) continue;
+    ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
+    TypePtr t =
+      value.isNull()    ? Type::Null    :
+      value.isBoolean() ? Type::Boolean :
+      value.isInteger() ? Type::Int64   :
+      value.isDouble()  ? Type::Double  :
+      value.isArray()   ? Type::Array   : Type::Variant;
 
-      s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
-    }
-    s_variables = ar2->getVariables();
-    for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-      s_variables->add(GlobalNames[i], Type::Variant, false, ar,
-                       ConstructPtr(), ModifierExpressionPtr());
-    }
+    s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
   }
+  s_variables = ar2->getVariables();
+  for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
+    s_variables->add(GlobalNames[i], Type::Variant, false, ar,
+                     ConstructPtr(), ModifierExpressionPtr());
+  }
+
   s_constants->setDynamic(ar, "SID", true);
   s_constants->setDynamic(ar, "PHP_SAPI", true);
+
+  // parse all PHP files under system/classes
+  s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
+  ar->loadBuiltins();
+  string slib = get_systemlib();
+
+  Scanner scanner(slib.c_str(), slib.size(),
+                  Option::GetScannerType(), "systemlib.php");
+  Compiler::Parser parser(scanner, "systemlib.php", ar);
+  if (!parser.parse()) {
+    Logger::Error("Unable to parse systemlib.php: %s",
+                  parser.getMessage().c_str());
+    assert(false);
+  }
+
+  ar->analyzeProgram(true);
+  ar->inferTypes();
+  const StringToFileScopePtrMap &files = ar->getAllFiles();
+  for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
+       iterFile != files.end(); iterFile++) {
+    const StringToClassScopePtrVecMap &classes =
+      iterFile->second->getClasses();
+    for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
+         iter != classes.end(); ++iter) {
+      assert(iter->second.size() == 1);
+      iter->second[0]->setSystem();
+      assert(!s_classes[iter->first]);
+      s_classes[iter->first] = iter->second[0];
+    }
+
+    const StringToFunctionScopePtrMap &functions =
+      iterFile->second->getFunctions();
+    for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin();
+         iter != functions.end(); ++iter) {
+      iter->second->setSystem();
+      s_functions[iter->first] = iter->second;
+    }
+  }
 
   return true;
 }
@@ -483,7 +477,6 @@ void BuiltinSymbols::LoadSuperGlobals() {
 }
 
 bool BuiltinSymbols::IsSuperGlobal(const std::string &name) {
-  if (NoSuperGlobals) return false;
   return s_superGlobals.find(name) != s_superGlobals.end();
 }
 

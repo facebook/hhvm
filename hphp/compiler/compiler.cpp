@@ -539,13 +539,13 @@ int process(const CompilerOptions &po) {
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
-    if (!BuiltinSymbols::Load(ar,
-                              po.target == "hhbc" && !Option::WholeProgram)) {
-      return false;
-    }
     if (po.target == "hhbc" && !Option::WholeProgram) {
-      BuiltinSymbols::NoSuperGlobals = false;
+      // We're trying to produce the same bytecode as runtime parsing.
+      // There's nothing to do.
     } else {
+      if (!BuiltinSymbols::Load(ar)) {
+        return false;
+      }
       ar->loadBuiltins();
     }
     hphp_process_init();

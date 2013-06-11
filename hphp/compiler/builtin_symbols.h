@@ -34,9 +34,8 @@ DECLARE_BOOST_TYPES(ConstantTable);
 class BuiltinSymbols {
 public:
   static bool Loaded;
-  static bool NoSuperGlobals; // for SystemCPP bootstraping only
 
-  static bool Load(AnalysisResultPtr ar, bool extOnly = false);
+  static bool Load(AnalysisResultPtr ar);
 
   static void LoadFunctions(AnalysisResultPtr ar,
                             StringToFunctionScopePtrMap &functions);

@@ -7509,7 +7509,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Option::WholeProgram = false;
     Type::InitTypeHintMap();
     BuiltinSymbols::LoadSuperGlobals();
-    BuiltinSymbols::NoSuperGlobals = false;
     TypeConstraint tc;
     return nullptr;
   }

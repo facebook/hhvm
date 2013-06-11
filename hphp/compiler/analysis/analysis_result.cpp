@@ -557,11 +557,6 @@ bool AnalysisResult::isSystemConstant(const std::string &constName) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Program
 
-void AnalysisResult::loadBuiltinFunctions() {
-  AnalysisResultPtr ar = shared_from_this();
-  BuiltinSymbols::LoadFunctions(ar, m_functions);
-}
-
 void AnalysisResult::loadBuiltins() {
   AnalysisResultPtr ar = shared_from_this();
   BuiltinSymbols::LoadFunctions(ar, m_functions);

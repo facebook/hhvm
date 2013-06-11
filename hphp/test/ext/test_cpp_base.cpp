@@ -364,7 +364,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(1) = 10;
     VS(arr[1], 10);
-    VS(arr[1.5], 10);
     VS(arr[Variant(1.5)], 10);
     VS(arr[s_1], 10);
     VS(arr[Variant("1")], 10);
@@ -373,7 +372,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(Variant(1.5)) = 10;
     VS(arr[1], 10);
-    VS(arr[1.5], 10);
     VS(arr[Variant(1.5)], 10);
     VS(arr[s_1], 10);
     VS(arr[Variant("1")], 10);
@@ -382,7 +380,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(s_1) = 10;
     VS(arr[1], 10);
-    VS(arr[1.5], 10);
     VS(arr[Variant(1.5)], 10);
     VS(arr[s_1], 10);
     VS(arr[Variant("1")], 10);
@@ -391,7 +388,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(Variant("1")) = 10;
     VS(arr[1], 10);
-    VS(arr[1.5], 10);
     VS(arr[Variant(1.5)], 10);
     VS(arr[s_1], 10);
     VS(arr[Variant("1")], 10);
@@ -470,7 +466,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(1) = String("value");
     VERIFY(arr.exists(1));
-    VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
     VERIFY(arr.exists(Variant("1")));
     VERIFY(arr.exists(Variant(1)));
@@ -480,17 +475,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(s_1) = String("value");
     VERIFY(arr.exists(1));
-    VERIFY(arr.exists(1.5));
-    VERIFY(arr.exists(s_1));
-    VERIFY(arr.exists(Variant("1")));
-    VERIFY(arr.exists(Variant(1)));
-    VERIFY(arr.exists(Variant(1.5)));
-  }
-  {
-    Array arr;
-    arr.lvalAt(1.5) = String("value");
-    VERIFY(arr.exists(1));
-    VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
     VERIFY(arr.exists(Variant("1")));
     VERIFY(arr.exists(Variant(1)));
@@ -500,7 +484,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(Variant(1.5)) = String("value");
     VERIFY(arr.exists(1));
-    VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
     VERIFY(arr.exists(Variant("1")));
     VERIFY(arr.exists(Variant(1)));
@@ -510,7 +493,6 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.lvalAt(Variant("1")) = String("value");
     VERIFY(arr.exists(1));
-    VERIFY(arr.exists(1.5));
     VERIFY(arr.exists(s_1));
     VERIFY(arr.exists(Variant("1")));
     VERIFY(arr.exists(Variant(1)));
@@ -676,7 +658,6 @@ bool TestCppBase::TestVariant() {
     Variant v;
     v.lvalAt(1) = String("test");
     VS(v[1], "test");
-    VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
@@ -685,7 +666,6 @@ bool TestCppBase::TestVariant() {
     Variant v;
     v.lvalAt(Variant(1.5)) = String("test");
     VS(v[1], "test");
-    VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
@@ -694,7 +674,6 @@ bool TestCppBase::TestVariant() {
     Variant v;
     v.lvalAt(s_1) = String("test");
     VS(v[1], "test");
-    VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
@@ -703,7 +682,6 @@ bool TestCppBase::TestVariant() {
     Variant v;
     v.lvalAt(Variant("1")) = String("test");
     VS(v[1], "test");
-    VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");

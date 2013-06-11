@@ -69,6 +69,9 @@ static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 // local helpers
 
 static int64_t ToKey(int64_t i) { return i; }
+static int64_t ToKey(double d) {
+  return d > std::numeric_limits<uint64_t>::max() ? 0u : uint64_t(d);
+}
 static VarNR ToKey(CStrRef s) { return s.toKey(); }
 static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
@@ -1760,10 +1763,6 @@ static void raise_bad_offset_notice() {
   }                                                                     \
   return null_variant;
 
-Variant Variant::rvalAt(double offset, ACCESSPARAMS_IMPL) const {
-  IMPLEMENT_RVAL_INTEGRAL
-}
-
 Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   switch (m_type) {
   case KindOfStaticString:
@@ -1934,13 +1933,6 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
 template CVarRef
 Variant::rvalRefHelper(int64_t offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
 
-CVarRef Variant::rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    return m_data.parr->get(ToKey(offset), flags & AccessFlags::Error);
-  }
-  return rvalRefHelper(offset, tmp, flags);
-}
-
 CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
@@ -2017,9 +2009,6 @@ CVarRef Variant::rvalAtRefHelper<CStrRef>(CStrRef offset,
 template
 CVarRef Variant::rvalAtRefHelper<CVarRef>(CVarRef offset,
                                           ACCESSPARAMS_IMPL) const;
-CVarRef Variant::rvalAtRef(double offset, ACCESSPARAMS_IMPL) const {
-  return rvalAtRefHelper(HPHP::toInt64(offset), flags);
-}
 
 template <typename T>
 class LvalHelper {};
@@ -2117,9 +2106,6 @@ Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
-Variant &Variant::lvalAt(double  key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl(key, flags);
-}
 Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CStrRef>(key, flags);
 }
@@ -2131,9 +2117,6 @@ Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return lvalRef((int64_t)key, tmp, flags);
 }
 Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return LvalAtImpl0(this, key, &tmp, false, flags);
-}
-Variant &Variant::lvalRef(double  key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return LvalAtImpl0(this, key, &tmp, false, flags);
 }
 Variant &Variant::lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_IMPL) {
@@ -2350,10 +2333,6 @@ CVarRef Variant::set(int64_t key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
 
-CVarRef Variant::set(double key, CVarRef v) {
-  return SetImpl(this, key, v, false);
-}
-
 CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   return SetImpl<CStrRef>(this, key, v, isString);
 }
@@ -2474,10 +2453,6 @@ CVarRef Variant::setRef(int64_t key, CVarRef v) {
   return SetRefImpl(this, key, v, false);
 }
 
-CVarRef Variant::setRef(double key, CVarRef v) {
-  return SetRefImpl(this, key, v, false);
-}
-
 CVarRef Variant::setRef(CStrRef key, CVarRef v, bool isString /* = false */) {
   return SetRefImpl<CStrRef>(this, key, v, isString);
 }
@@ -2530,31 +2505,6 @@ CVarRef Variant::appendRef(CVarRef v) {
     throw_bad_type_exception("[] operator not supported for this type");
   }
   return v;
-}
-
-void Variant::removeImpl(double key) {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfArray:
-    {
-      ArrayData *arr = getArrayData();
-      if (arr) {
-        ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
-        if (escalated != arr) {
-          set(escalated);
-        }
-      }
-    }
-    break;
-  case KindOfObject:
-    callOffsetUnset(key);
-    break;
-  default:
-    lvalInvalid();
-    break;
-  }
 }
 
 void Variant::removeImpl(int64_t key) {

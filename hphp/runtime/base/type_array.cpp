@@ -418,16 +418,6 @@ CVarRef Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(double key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(ToKey(key), flags & AccessFlags::Error);
-  return null_variant;
-}
-
-CVarRef Array::rvalAtRef(double key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(ToKey(key), flags & AccessFlags::Error);
-  return null_variant;
-}
-
 CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;

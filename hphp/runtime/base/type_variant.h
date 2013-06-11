@@ -776,7 +776,7 @@ class Variant : private TypedValue {
     }
     return rvalAtHelper(offset, flags);
   }
-  Variant rvalAt(double offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(double offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(CStrRef offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
@@ -793,7 +793,7 @@ class Variant : private TypedValue {
     }
     return rvalRefHelper(offset, tmp, flags);
   }
-  CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
@@ -804,7 +804,7 @@ class Variant : private TypedValue {
   CVarRef rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper((int64_t)offset, flags);
   }
-  CVarRef rvalAtRef(double offset, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(double offset, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper(offset, flags);
   }
@@ -816,7 +816,7 @@ class Variant : private TypedValue {
   }
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64_t   key) const { return rvalAt(key);}
-  const Variant operator[](double  key) const { return rvalAt(key);}
+  const Variant operator[](double  key) const = delete;
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
   const Variant operator[](CArrRef key) const { return rvalAt(key);}
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
@@ -847,14 +847,14 @@ class Variant : private TypedValue {
 
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
   Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(double  key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
   Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
   Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
   Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
@@ -881,7 +881,7 @@ class Variant : private TypedValue {
 
   CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
   CVarRef set(int64_t   key, CVarRef v);
-  CVarRef set(double  key, CVarRef v);
+  CVarRef set(double  key, CVarRef v) = delete;
   CVarRef set(litstr  key, CVarRef v, bool isString = false) = delete;
   CVarRef set(CStrRef key, CVarRef v, bool isString = false);
   CVarRef set(CVarRef key, CVarRef v);
@@ -890,14 +890,14 @@ class Variant : private TypedValue {
 
   CVarRef setRef(int     key, CVarRef v) { return setRef((int64_t)key, v); }
   CVarRef setRef(int64_t   key, CVarRef v);
-  CVarRef setRef(double  key, CVarRef v);
+  CVarRef setRef(double  key, CVarRef v) = delete;
   CVarRef setRef(litstr  key, CVarRef v, bool isString = false) = delete;
   CVarRef setRef(CStrRef key, CVarRef v, bool isString = false);
   CVarRef setRef(CVarRef key, CVarRef v);
 
   CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
-  CVarRef set(double  key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(double  key, RefResult v) = delete;
   CVarRef set(litstr  key, RefResult v, bool isString = false) = delete;
   CVarRef set(CStrRef key, RefResult v, bool isString = false) {
     return setRef(key, variant(v), isString);
@@ -909,7 +909,7 @@ class Variant : private TypedValue {
 
   void remove(int     key) { removeImpl((int64_t)key);}
   void remove(int64_t   key) { removeImpl(key);}
-  void remove(double  key) { removeImpl(key);}
+  void remove(double  key) = delete;
   void remove(litstr  key, bool isString = false) = delete;
   void remove(CStrRef key, bool isString = false) {
     removeImpl(key, isString);
@@ -1087,7 +1087,7 @@ class Variant : private TypedValue {
       (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
 
-  void removeImpl(double key);
+  void removeImpl(double key) = delete;
   void removeImpl(int64_t key);
   void removeImpl(CVarRef key, bool isString = false);
   void removeImpl(CStrRef key, bool isString = false);
@@ -1455,10 +1455,6 @@ inline const Variant Array::operator[](int     key) const {
 }
 
 inline const Variant Array::operator[](int64_t   key) const {
-  return rvalAt(key);
-}
-
-inline const Variant Array::operator[](double  key) const {
   return rvalAt(key);
 }
 

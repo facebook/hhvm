@@ -33,10 +33,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int64_t ToKey(double d) {
-  return d > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)d;
-}
-
 // forward declaration
 class ArrayIter;
 
@@ -263,7 +259,7 @@ class Array : protected SmartPtr<ArrayData> {
    */
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(double  key, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
 
@@ -272,13 +268,13 @@ class Array : protected SmartPtr<ArrayData> {
    */
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t   key) const;
-  const Variant operator[](double  key) const;
+  const Variant operator[](double  key) const = delete;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
   const Variant operator[](const char*) const = delete; // use CStrRef
@@ -311,9 +307,7 @@ class Array : protected SmartPtr<ArrayData> {
   Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(key, flags);
   }
-  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
-    return lvalAtImpl(ToKey(key), flags);
-  }
+  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
@@ -376,9 +370,7 @@ class Array : protected SmartPtr<ArrayData> {
   Variant &addLval(int64_t   key) {
     return addLvalImpl(key);
   }
-  Variant &addLval(double  key) {
-    return addLvalImpl(ToKey(key));
-  }
+  Variant &addLval(double  key) = delete;
 
   Variant &addLval(CStrRef key, bool isKey = false);
   Variant &addLval(CVarRef key, bool isKey = false);
@@ -403,9 +395,7 @@ class Array : protected SmartPtr<ArrayData> {
   bool exists(int64_t   key) const {
     return existsImpl(key);
   }
-  bool exists(double  key) const {
-    return existsImpl(ToKey(key));
-  }
+  bool exists(double  key) const = delete;
   bool exists(CStrRef key, bool isKey = false) const;
   bool exists(CVarRef key, bool isKey = false) const;
 
@@ -428,9 +418,7 @@ class Array : protected SmartPtr<ArrayData> {
   void remove(int64_t   key) {
     removeImpl(key);
   }
-  void remove(double  key) {
-    removeImpl(ToKey(key));
-  }
+  void remove(double  key) = delete;
   void remove(CStrRef key, bool isString = false);
   void remove(CVarRef key);
 

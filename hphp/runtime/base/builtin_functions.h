@@ -185,31 +185,18 @@ const V &String::set(K key, const V &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-inline int print(const char *s) {
-  g_context->write(s);
-  return 1;
-}
-inline int print(CStrRef s) {
-  // print is not a real function. x_print exists, but this function gets called
-  g_context->write(s);
-  return 1;
-}
 inline void echo(const char *s) {
   g_context->write(s);
 }
 inline void echo(CStrRef s) {
-  // echo is not a real function. x_echo exists, but this function gets called
   g_context->write(s);
 }
-
-String get_source_filename(litstr path,bool dir_component = false);
 
 void NEVER_INLINE throw_invalid_property_name(CStrRef name) ATTRIBUTE_NORETURN;
 void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 void throw_exception(CObjRef e);
-bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // isset/unset

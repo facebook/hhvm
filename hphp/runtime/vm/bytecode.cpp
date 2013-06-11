@@ -4306,7 +4306,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOfD(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopPrint(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
-  print(tvCellAsVariant(c1).toString());
+  echo(tvCellAsVariant(c1).toString());
   tvRefcountedDecRefCell(c1);
   c1->m_type = KindOfInt64;
   c1->m_data.num = 1;
@@ -4350,7 +4350,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopExit(PC& pc) {
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
-    print(tvCellAsVariant(c1).toString());
+    echo(tvCellAsVariant(c1).toString());
   }
   m_stack.popC();
   throw ExitException(exitCode);

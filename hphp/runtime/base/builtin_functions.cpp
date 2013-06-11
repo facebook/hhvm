@@ -825,21 +825,6 @@ bool interface_supports_array(const std::string& n) {
           (n.size() == 8 && !strcasecmp(s, "Indexish")));
 }
 
-String get_source_filename(litstr path, bool dir_component /* = false */) {
-  String ret;
-  if (path[0] == '/') {
-    ret = path;
-  } else {
-    ret = RuntimeOption::SourceRoot + path;
-  }
-
-  if (dir_component) {
-    return f_dirname(ret);
-  } else {
-    return ret;
-  }
-}
-
 Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {
   if (file[0] == '/') {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {

@@ -737,11 +737,11 @@ private:
 
 public:
   SimpleProfiler() {
-    print("<div style='display:none'>");
+    echo("<div style='display:none'>");
   }
 
   ~SimpleProfiler() {
-    print("</div>");
+    echo("</div>");
     print_output();
   }
 
@@ -759,16 +759,16 @@ public:
 
 private:
   void print_output() {
-    print("<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
+    echo("<link rel='stylesheet' href='/css/hotprofiler.css' type='text/css'>"
           "<script language='javascript' src='/js/hotprofiler.js'></script>"
           "<p><center><h2>Hotprofiler Data</h2></center><br>"
           "<div id='hotprofiler_stats'></div>"
           "<script language='javascript'>hotprofiler_data = [");
     for (StatsMap::const_iterator iter = m_stats.begin();
          iter != m_stats.end(); ++iter) {
-      print("{\"fn\": \"");
-      print(iter->first.c_str());
-      print("\"");
+      echo("{\"fn\": \"");
+      echo(iter->first.c_str());
+      echo("\"");
 
       const CountMap &counts = iter->second;
 
@@ -778,11 +778,11 @@ private:
         ",\"ct\": %" PRId64 ",\"wt\": %" PRId64 ",\"ut\": %" PRId64 ",\"st\": 0",
         counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
         (int64_t)to_usec(counts.vtsc, m_MHz, true));
-      print(buf);
+      echo(buf);
 
-      print("},\n");
+      echo("},\n");
     }
-    print("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
+    echo("]; write_data('ut', false);</script><br><br>&nbsp;<br>");
   }
 };
 

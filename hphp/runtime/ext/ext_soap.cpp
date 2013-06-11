@@ -1752,13 +1752,14 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 // soap fault functions
 
 static const StaticString s_HTTP_USER_AGENT("HTTP_USER_AGENT");
+static const StaticString s__SERVER("_SERVER");
 
 static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
                                    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  if (g->GV(_SERVER)[s_HTTP_USER_AGENT].toString() == "Shockwave Flash") {
+  GlobalVariables *g = get_global_variables();
+  if (g->get(s__SERVER)[s_HTTP_USER_AGENT].toString() == "Shockwave Flash") {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -2091,9 +2092,9 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     }
     req = String(data, size, AttachLiteral);
 
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    if (g->GV(_SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->GV(_SERVER)[s_HTTP_CONTENT_ENCODING];
+    GlobalVariables *g = get_global_variables();
+    if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
+      String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING];
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
         ret = f_gzinflate(String(data, size, AttachLiteral));

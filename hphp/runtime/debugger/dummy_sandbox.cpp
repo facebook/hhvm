@@ -91,6 +91,8 @@ struct CLISession : private boost::noncopyable {
 
 }
 
+static const StaticString s__SERVER("_SERVER");
+
 void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
@@ -103,7 +105,7 @@ void DummySandbox::run() {
       DSandboxInfo sandbox = m_proxy->getSandbox();
       string msg;
       if (sandbox.valid()) {
-        SystemGlobals *g = (SystemGlobals *)get_global_variables();
+        GlobalVariables *g = get_global_variables();
         SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
         if (sandbox.m_path.empty()) {
           sandbox.m_path = sri.path();
@@ -112,7 +114,7 @@ void DummySandbox::run() {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
-          sri.setServerVariables(g->GV(_SERVER));
+          sri.setServerVariables(g->getRef(s__SERVER));
         }
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());

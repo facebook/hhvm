@@ -178,7 +178,8 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 static const StaticString
   s_output("output"),
   s_return("return"),
-  s_HPHP_RPC("HPHP_RPC");
+  s_HPHP_RPC("HPHP_RPC"),
+  s__ENV("_ENV");
 
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
@@ -191,8 +192,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    g->GV(_ENV).set(s_HPHP_RPC, 1);
+
+    GlobalVariables *g = get_global_variables();
+    g->getRef(s__ENV).set(s_HPHP_RPC, 1);
   }
 
   bool isFile = rpcFunc.rfind('.') != string::npos;

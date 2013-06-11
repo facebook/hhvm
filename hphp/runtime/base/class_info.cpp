@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array/array_util.h"
 #include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/array/array_util.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/hphp_system.h"
@@ -203,7 +203,7 @@ CVarRef ClassInfo::ConstantInfo::getDeferredValue() const {
     CVarRef (*f)()=(CVarRef(*)())callback;
     return (*f)();
   }
-  SystemGlobals* g = get_global_variables();
+  GlobalVariables* g = get_global_variables();
   return g->stgv_Variant[valueLen];
 }
 

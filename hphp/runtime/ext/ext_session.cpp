@@ -277,11 +277,17 @@ static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
   }
 }
 
-static const StaticString s_REMOTE_ADDR("REMOTE_ADDR");
+static const StaticString
+  s_REMOTE_ADDR("REMOTE_ADDR"),
+  s__SERVER("_SERVER"),
+  s__SESSION("_SESSION"),
+  s__COOKIE("_COOKIE"),
+  s__GET("_GET"),
+  s__POST("_POST");
 
 String SessionModule::create_sid() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String remote_addr = g->GV(_SERVER)[s_REMOTE_ADDR].toString();
+  GlobalVariables *g = get_global_variables();
+  String remote_addr = g->get(s__SERVER)[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -794,8 +800,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    for (ArrayIter iter(g->GV(_SESSION)); iter; ++iter) {
+    GlobalVariables *g = get_global_variables();
+    for (ArrayIter iter(g->get(s__SESSION)); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -813,7 +819,7 @@ public:
 
   virtual bool decode(CStrRef value) {
     const char *endptr = value.data() + value.size();
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
+    GlobalVariables *g = get_global_variables();
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -826,7 +832,7 @@ public:
       if (has_value) {
         VariableUnserializer vu(p, endptr, VariableUnserializer::Serialize);
         try {
-          g->GV(_SESSION).set(key, vu.unserialize());
+          g->getRef(s__SESSION).set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
         }
@@ -846,8 +852,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    for (ArrayIter iter(g->GV(_SESSION)); iter; ++iter) {
+    GlobalVariables *g = get_global_variables();
+    for (ArrayIter iter(g->get(s__SESSION)); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -867,7 +873,7 @@ public:
   virtual bool decode(CStrRef value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
+    GlobalVariables *g = get_global_variables();
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {
@@ -886,7 +892,7 @@ public:
       if (has_value) {
         VariableUnserializer vu(q, endptr, VariableUnserializer::Serialize);
         try {
-          g->GV(_SESSION).set(key, vu.unserialize());
+          g->getRef(s__SESSION).set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
         }
@@ -1023,8 +1029,8 @@ new_session:
    */
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  g->GV(_SESSION) = Array::Create();
+  GlobalVariables *g = get_global_variables();
+  g->getRef(s__SESSION) = Array::Create();
 
   PS(invalid_session_id) = false;
   String value;
@@ -1192,8 +1198,8 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
 static const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
 
 static inline void last_modified() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String path = g->GV(_SERVER)[s_PATH_TRANSLATED].toString();
+  GlobalVariables *g = get_global_variables();
+  String path = g->get(s__SERVER)[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1500,25 +1506,25 @@ bool f_session_start() {
    * Cookies are preferred, because initially
    * cookie and get variables will be available.
    */
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
+  GlobalVariables *g = get_global_variables();
   if (PS(id).empty()) {
     if (PS(use_cookies) &&
-        g->GV(_COOKIE).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_COOKIE)[String(PS(session_name))].toString();
+        g->get(s__COOKIE).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__COOKIE)[String(PS(session_name))].toString();
       PS(apply_trans_sid) = 0;
       PS(send_cookie) = 0;
       PS(define_sid) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->GV(_GET).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_GET)[String(PS(session_name))].toString();
+        g->get(s__GET).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__GET)[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->GV(_POST).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_POST)[String(PS(session_name))].toString();
+        g->get(s__POST).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__POST)[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
   }
@@ -1529,7 +1535,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->GV(_SERVER)[s_REQUEST_URI].toString();
+    value = g->get(s__SERVER)[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1544,7 +1550,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->GV(_SERVER)[s_HTTP_REFERER].toString();
+    value = g->get(s__SERVER)[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;
@@ -1607,8 +1613,8 @@ Variant f_session_unset() {
   if (PS(session_status) == Session::None) {
     return false;
   }
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  g->GV(_SESSION).reset();
+  GlobalVariables *g = get_global_variables();
+  g->getRef(s__SESSION).reset();
   return uninit_null();
 }
 

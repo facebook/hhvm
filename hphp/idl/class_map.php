@@ -33,11 +33,11 @@ if (substr($target, -4) == '.cpp') {
   foreach ($constants as $constant) {
     constantClassMap($constant);
   }
-  printf('  "SID", (const char *)((offsetof(SystemGlobals, k_SID) - '.
-         'offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), '.
+  printf('  "SID", (const char *)((offsetof(GlobalVariables, k_SID) - '.
+         'offsetof(GlobalVariables, stgv_Variant)) / sizeof(Variant)), '.
          "(const char *)1,\n");
-  printf('  "PHP_SAPI", (const char *)((offsetof(SystemGlobals, k_PHP_SAPI) - '.
-         'offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), '.
+  printf('  "PHP_SAPI", (const char *)((offsetof(GlobalVariables, k_PHP_SAPI) '.
+         '- offsetof(GlobalVariables, stgv_Variant)) / sizeof(Variant)), '.
          "(const char *)1,\n");
   printf("  NULL, // End of constants\n");
   printf("  NULL,\n");

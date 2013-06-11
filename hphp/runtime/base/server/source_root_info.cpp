@@ -247,12 +247,13 @@ string SourceRootInfo::path() const {
   }
 }
 
+static const StaticString s_SERVER("_SERVER");
 static const StaticString s_PHP_ROOT("PHP_ROOT");
 
 string& SourceRootInfo::initPhpRoot() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  Variant &server = g->GV(_SERVER);
-  Variant v = server.rvalAt(s_PHP_ROOT);
+  GlobalVariables *g = get_global_variables();
+  CVarRef server = g->get(s_SERVER);
+  CVarRef v = server.rvalAt(s_PHP_ROOT);
   if (v.isString()) {
     *s_phproot.getCheck() = string(v.asCStrRef().data()) + string("/");
   } else {

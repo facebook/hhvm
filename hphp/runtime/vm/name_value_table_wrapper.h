@@ -74,6 +74,10 @@ public: // ArrayData implementation
   using ArrayData::addLval;
   using ArrayData::remove;
 
+  Variant& getRef(CStrRef k) {
+    return tvAsVariant(nvGet(k.get()));
+  }
+
   virtual ssize_t vsize() const;
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
@@ -148,18 +152,6 @@ private:
 class GlobalNameValueTableWrapper : public NameValueTableWrapper {
  public:
   explicit GlobalNameValueTableWrapper(NameValueTable* tab);
-  Variant gvm_argc;
-  Variant gvm_argv;
-  Variant gvm__SERVER;
-  Variant gvm__GET;
-  Variant gvm__POST;
-  Variant gvm__COOKIE;
-  Variant gvm__FILES;
-  Variant gvm__ENV;
-  Variant gvm__REQUEST;
-  Variant gvm__SESSION;
-  Variant gvm_HTTP_RAW_POST_DATA;
-  Variant gvm_http_response_header;
 
   Variant __realPropProxy;
   Variant __lvalProxy;

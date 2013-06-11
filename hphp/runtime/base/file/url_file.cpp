@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/file/url_file.h"
+#include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/util/http_client.h"
 #include "hphp/runtime/base/runtime_error.h"
 
@@ -70,8 +70,9 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
                      m_response, pHeaders, &responseHeaders);
   }
 
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  Variant &r = g->GV(http_response_header);
+  static const StaticString s_http_response_header("http_response_header");
+  GlobalVariables *g = get_global_variables();
+  Variant &r = g->getRef(s_http_response_header);
   r = Array::Create();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     r.append(responseHeaders[i]);

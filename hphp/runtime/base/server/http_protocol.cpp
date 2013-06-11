@@ -94,6 +94,14 @@ static const StaticString
   s_PATH_INFO("PATH_INFO"),
   s_argc("argc"),
   s_argv("argv"),
+  s__SERVER("_SERVER"),
+  s__GET("_GET"),
+  s__POST("_POST"),
+  s__REQUEST("_REQUEST"),
+  s__ENV("_ENV"),
+  s__COOKIE("_COOKIE"),
+  s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
+  s__FILES("_FILES"),
   s_GATEWAY_INTERFACE("GATEWAY_INTERFACE"),
   s_CGI_1_1("CGI/1.1"),
   s_SERVER_ADDR("SERVER_ADDR"),
@@ -126,35 +134,37 @@ static const StaticString
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
+  GlobalVariables *g = get_global_variables();
   const VirtualHost *vhost = VirtualHost::GetCurrent();
 
-  Variant &server = g->GV(_SERVER);
+  Variant& server = g->getRef(s__SERVER);
   server.set(s_REQUEST_START_TIME, time(nullptr));
 
   // $_ENV
-  process_env_variables(g->GV(_ENV));
-  g->GV(_ENV).set(s_HPHP, 1);
-  g->GV(_ENV).set(s_HHVM, 1);
+  Variant& env = g->getRef(s__ENV);
+  process_env_variables(env);
+  env.set(s_HPHP, 1);
+  env.set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
-    g->GV(_ENV).set(s_HHVM_JIT, 1);
+    env.set(s_HHVM_JIT, 1);
   }
 
   bool isServer = RuntimeOption::ServerExecutionMode();
   if (isServer) {
-    g->GV(_ENV).set(s_HPHP_SERVER, 1);
+    env.set(s_HPHP_SERVER, 1);
 #ifdef HOTPROFILER
-    g->GV(_ENV).set(s_HPHP_HOTPROFILER, 1);
+    env.set(s_HPHP_HOTPROFILER, 1);
 #endif
   }
 
-  Variant &request = g->GV(_REQUEST);
+  Variant &request = g->getRef(s__REQUEST);
 
   // $_GET and $_REQUEST
   if (!r.queryString().empty()) {
-    DecodeParameters(g->GV(_GET), r.queryString().data(),
+    Variant &get = g->getRef(s__GET);
+    DecodeParameters(get, r.queryString().data(),
                      r.queryString().size());
-    CopyParams(request, g->GV(_GET));
+    CopyParams(request, get);
   }
 
   string contentType = transport->getHeader("Content-Type");
@@ -185,7 +195,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
             needDelete = true;
             data = Util::buffer_duplicate(data, size);
           }
-          DecodeRfc1867(transport, g->GV(_POST), g->GV(_FILES),
+          DecodeRfc1867(transport, g->getRef(s__POST), g->getRef(s__FILES),
                         content_length, data, size, boundary);
         }
         assert(!transport->getFiles(files));
@@ -199,26 +209,28 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         decodeData = true;
 
         if (decodeData) {
-          DecodeParameters(g->GV(_POST), (const char*)data, size, true);
+          DecodeParameters(g->getRef(s__POST), (const char*)data, size, true);
         }
 
         bool ret = transport->getFiles(files);
         if (ret) {
-          g->GV(_FILES) = unserialize_from_string(files);
+          g->getRef(s__FILES) = unserialize_from_string(files);
         }
       }
-      CopyParams(request, g->GV(_POST));
+      CopyParams(request, g->getRef(s__POST));
       if (needDelete) {
         if (RuntimeOption::AlwaysPopulateRawPostData &&
             uint32_t(size) <= StringData::MaxSize) {
-          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachString);
+          g->getRef(s_HTTP_RAW_POST_DATA) =
+            String((char*)data, size, AttachString);
         } else {
           free((void *)data);
         }
       } else {
         // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
         if (uint32_t(size) <= StringData::MaxSize) {
-          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachLiteral);
+          g->getRef(s_HTTP_RAW_POST_DATA) =
+            String((char*)data, size, AttachLiteral);
         }
       }
     }
@@ -229,8 +241,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   if (!cookie_data.empty()) {
     StringBuffer sb;
     sb.append(cookie_data);
-    DecodeCookies(g->GV(_COOKIE), (char*)sb.data());
-    CopyParams(request, g->GV(_COOKIE));
+    DecodeCookies(g->getRef(s__COOKIE), (char*)sb.data());
+    CopyParams(request, g->getRef(s__COOKIE));
   }
 
   // $_SERVER

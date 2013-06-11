@@ -39,29 +39,24 @@ void free_global_variables_after_sweep() {
   g_variables = nullptr;
 }
 
-SystemGlobals*  get_system_globals() { return get_global_variables(); }
-
 GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   NameValueTable* tab) : NameValueTableWrapper(tab) {
 
-  VarNR arr(HphpArray::GetStaticEmptyArray());
-#define X(s,v)                                          \
-  tab->migrateSet(StringData::GetStaticString(#s),      \
-                  gvm_##s.asTypedValue());              \
-  gvm_##s.v;
+  Variant arr(HphpArray::GetStaticEmptyArray());
+#define X(s,v) tab->set(StringData::GetStaticString(#s), v.asTypedValue());
 
-  X(argc,                 setNull());
-  X(argv,                 setNull());
-  X(_SERVER,              assignVal(arr));
-  X(_GET,                 assignVal(arr));
-  X(_POST,                assignVal(arr));
-  X(_COOKIE,              assignVal(arr));
-  X(_FILES,               assignVal(arr));
-  X(_ENV,                 assignVal(arr));
-  X(_REQUEST,             assignVal(arr));
-  X(_SESSION,             assignVal(arr));
-  X(HTTP_RAW_POST_DATA,   setNull());
-  X(http_response_header, setNull());
+  X(argc,                 init_null_variant);
+  X(argv,                 init_null_variant);
+  X(_SERVER,              arr);
+  X(_GET,                 arr);
+  X(_POST,                arr);
+  X(_COOKIE,              arr);
+  X(_FILES,               arr);
+  X(_ENV,                 arr);
+  X(_REQUEST,             arr);
+  X(_SESSION,             arr);
+  X(HTTP_RAW_POST_DATA,   init_null_variant);
+  X(http_response_header, init_null_variant);
 #undef X
 
   ThreadInfo::s_threadInfo->m_globals = g_variables = this;

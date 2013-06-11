@@ -124,12 +124,32 @@ time_t start_time() {
   return s_startTime.startTime;
 }
 
+static const StaticString
+  s_HPHP("HPHP"),
+  s_HHVM("HHVM"),
+  s_HHVM_JIT("HHVM_JIT"),
+  s_REQUEST_START_TIME("REQUEST_START_TIME"),
+  s_REQUEST_TIME("REQUEST_TIME"),
+  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
+  s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
+  s_SCRIPT_NAME("SCRIPT_NAME"),
+  s_PHP_SELF("PHP_SELF"),
+  s_argc("argc"),
+  s_argv("argv"),
+  s_PWD("PWD"),
+  s_HOSTNAME("HOSTNAME"),
+  s__SERVER("_SERVER"),
+  s__ENV("_ENV");
+
 static void process_cmd_arguments(int argc, char **argv) {
-  SystemGlobals *g = (SystemGlobals *)get_global_variables();
-  g->GV(argc) = argc;
+  GlobalVariables *g = get_global_variables();
+  g->set(s_argc, Variant(argc), false);
+  Array argvArray = HphpArray::GetStaticEmptyArray();
   for (int i = 0; i < argc; i++) {
-    g->GV(argv).lvalAt() = String(argv[i]);
+    argvArray.append(String(argv[i]));
   }
+  g->set(s_argv, argvArray, false);
 }
 
 void process_env_variables(Variant &variables) {
@@ -439,22 +459,6 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
-static const StaticString
-  s_HPHP("HPHP"),
-  s_HHVM("HHVM"),
-  s_HHVM_JIT("HHVM_JIT"),
-  s_REQUEST_START_TIME("REQUEST_START_TIME"),
-  s_REQUEST_TIME("REQUEST_TIME"),
-  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
-  s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
-  s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
-  s_SCRIPT_NAME("SCRIPT_NAME"),
-  s_PHP_SELF("PHP_SELF"),
-  s_argc("argc"),
-  s_argv("argv"),
-  s_PWD("PWD"),
-  s_HOSTNAME("HOSTNAME");
-
 void execute_command_line_begin(int argc, char **argv, int xhprof) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   string args;
@@ -468,18 +472,19 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   ExecutionContext *context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 
-  SystemGlobals *g = (SystemGlobals *)get_global_variables();
+  GlobalVariables *g = get_global_variables();
 
-  process_env_variables(g->GV(_ENV));
-  g->GV(_ENV).set(s_HPHP, 1);
-  g->GV(_ENV).set(s_HHVM, 1);
+  Variant& env = g->getRef(s__ENV);
+  process_env_variables(env);
+  env.set(s_HPHP, 1);
+  env.set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
-    g->GV(_ENV).set(s_HHVM_JIT, 1);
+    env.set(s_HHVM_JIT, 1);
   }
 
   process_cmd_arguments(argc, argv);
 
-  Variant &server = g->GV(_SERVER);
+  Variant& server = g->getRef(s__SERVER);
   process_env_variables(server);
   time_t now;
   struct timeval tp = {0};
@@ -502,8 +507,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   server.set(s_SCRIPT_FILENAME, file);
   server.set(s_SCRIPT_NAME, file);
   server.set(s_PHP_SELF, file);
-  server.set(s_argv, g->GV(argv));
-  server.set(s_argc, g->GV(argc));
+  server.set(s_argv, g->get(s_argv));
+  server.set(s_argc, g->get(s_argc));
   server.set(s_PWD, g_context->getCwd());
   char hostname[1024];
   if (!gethostname(hostname, 1024)) {
@@ -1309,7 +1314,7 @@ void hphp_session_init() {
 
   g_vmContext->requestInit();
 
-  SystemGlobals *g = (SystemGlobals *)get_global_variables();
+  GlobalVariables *g = get_global_variables();
   g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
 }
 

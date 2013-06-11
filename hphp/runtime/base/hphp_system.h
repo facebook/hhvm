@@ -53,14 +53,4 @@ const char* getHphpCompilerId();
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#define DECLARE_SYSTEM_GLOBALS(sg)                      \
-  SystemGlobals *sg ATTRIBUTE_UNUSED =       \
-    get_global_variables();
-
-#define DECLARE_GLOBAL_VARIABLES(g)                     \
-  SystemGlobals *g ATTRIBUTE_UNUSED =      \
-    get_global_variables();
-
-///////////////////////////////////////////////////////////////////////////////
-
 #endif // incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_

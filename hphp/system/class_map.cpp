@@ -19046,8 +19046,8 @@ const char *g_class_map[] = {
   "CURLINFO_LOCAL_PORT", (const char *)&k_CURLINFO_LOCAL_PORT, (const char *)0xc /* KindOfInt64 */, 
   "CURLOPT_TIMEOUT_MS", (const char *)&k_CURLOPT_TIMEOUT_MS, (const char *)0xc /* KindOfInt64 */, 
   "CURLOPT_CONNECTTIMEOUT_MS", (const char *)&k_CURLOPT_CONNECTTIMEOUT_MS, (const char *)0xc /* KindOfInt64 */, 
-  "SID", (const char *)((offsetof(SystemGlobals, k_SID) - offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), (const char *)1,
-  "PHP_SAPI", (const char *)((offsetof(SystemGlobals, k_PHP_SAPI) - offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant)), (const char *)1,
+  "SID", (const char *)((offsetof(GlobalVariables, k_SID) - offsetof(GlobalVariables, stgv_Variant)) / sizeof(Variant)), (const char *)1,
+  "PHP_SAPI", (const char *)((offsetof(GlobalVariables, k_PHP_SAPI) - offsetof(GlobalVariables, stgv_Variant)) / sizeof(Variant)), (const char *)1,
   NULL, // End of constants
   NULL,
   (const char *)0x10006000, "PDO", "", "", (const char *)0, (const char *)0,

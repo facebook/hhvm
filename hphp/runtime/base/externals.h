@@ -62,11 +62,6 @@ extern void init_global_variables();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
 extern Array get_global_state();
-/**
- * Returns a thread local global variable table pointer.
- */
-typedef GlobalNameValueTableWrapper SystemGlobals;
-extern SystemGlobals *get_system_globals();
 
 /**
  * Precomputed literal strings

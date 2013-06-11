@@ -130,11 +130,6 @@ namespace HPHP {
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(c_##cls)                 \
 
 ///////////////////////////////////////////////////////////////////////////////
-// global variable macros
-
-#define GV(s)   gvm_  ## s
-
-///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 
 #define DECLARE_THREAD_INFO                      \

@@ -569,8 +569,14 @@ function main($argv) {
 
   $results = array();
   foreach ($bad_test_files as $bad_test_file) {
-    $results = array_merge($results,
-      json_decode(file_get_contents($bad_test_file), true));
+    $json = json_decode(file_get_contents($bad_test_file), true);
+    if (!is_array($json)) {
+      error(
+        "A test thread didn't send json to the controller. WTF. ".
+        "If your code isn't horribly broken, please complain loudly"
+      );
+    }
+    $results = array_merge($results, $json);
   }
   if (isset($options['fbmake'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));

@@ -510,7 +510,6 @@ function run_test($options, $test) {
 function main($argv) {
 
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
-  ini_set('pcre.recursion_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);
   if (isset($options['help'])) {

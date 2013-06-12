@@ -864,13 +864,20 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";
     if (po.mode == "")  po.mode = "run";
-    set_execution_mode(po.mode);
+    if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
+        po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
+      set_execution_mode(po.mode);
+    } else {
+      Logger::Error("Error in command line: invalid mode: %s", po.mode.c_str());
+      cout << desc << "\n";
+      return -1;
+    }
   } catch (error &e) {
-    Logger::Error("Error in command line: %s\n\n", e.what());
+    Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";
     return -1;
   } catch (...) {
-    Logger::Error("Error in command line:\n\n");
+    Logger::Error("Error in command line.");
     cout << desc << "\n";
     return -1;
   }

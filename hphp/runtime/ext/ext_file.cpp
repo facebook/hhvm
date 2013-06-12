@@ -856,12 +856,18 @@ static const StaticString s_filename("filename");
 Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
   ArrayInit ret(4);
 
+  if (opt == 0) {
+    return empty_string;
+  }
+
   if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
     String dirname = f_dirname(path);
     if (opt == PHP_PATHINFO_DIRNAME) {
       return dirname;
     }
-    ret.set(s_dirname, dirname);
+    if (!dirname.equal(empty_string)) {
+      ret.set(s_dirname, dirname);
+    }
   }
 
   String basename = f_basename(path);
@@ -874,19 +880,19 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
 
   if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
     int pos = basename.rfind('.');
-    String extension;
+    String extension(empty_string);
     if (pos >= 0) {
       extension = basename.substr(pos + 1);
+      ret.set(s_extension, extension);
     }
     if (opt == PHP_PATHINFO_EXTENSION) {
       return extension;
     }
-    ret.set(s_extension, extension);
   }
 
   if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
     int pos = basename.rfind('.');
-    String filename;
+    String filename(empty_string);
     if (pos >= 0) {
       filename = basename.substr(0, pos);
     } else {

@@ -144,7 +144,12 @@ bool url_parse(Url &output, const char *str, int length) {
     if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
       memcpy(port_buf, p, (pp-p));
       port_buf[pp-p] = '\0';
-      output.port = atoi(port_buf);
+      auto port = atoi(port_buf);
+      if (port > 0 && port <= 65535) {
+        output.port = port;
+      } else {
+        return false;
+      }
     } else {
       goto just_path;
     }
@@ -207,7 +212,12 @@ bool url_parse(Url &output, const char *str, int length) {
       } else if (e - p > 0) {
         memcpy(port_buf, p, (e-p));
         port_buf[e-p] = '\0';
-        output.port = atoi(port_buf);
+        auto port = atoi(port_buf);
+        if (port > 0 && port <= 65535) {
+          output.port = port;
+        } else {
+          return false;
+        }
       }
       p--;
     }

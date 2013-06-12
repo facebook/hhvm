@@ -1,0 +1,18 @@
+continue
+break \TestNs\foo()
+@ \TestNs\foo('test_break7')
+variable
+break clear all
+continue
+break TestNs\cls::pubObj()
+@ $break8=new \TestNs\cls()
+@ $break8->pubObj('test_break8')
+variable
+break clear all
+continue
+break \TestNs\cls::pubCls()
+@ \TestNs\cls::pubCls('test_break9')
+variable
+break clear all
+continue
+quit

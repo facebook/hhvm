@@ -1,0 +1,26 @@
+run
+break break1.php:7
+@ foo('test_break1')
+variable
+break clear all
+continue
+break foo()
+@ foo('test_break2')
+variable
+break clear all
+continue
+break cls::pubObj()
+@ $break3=new cls()
+@ $break3->pubObj('test_break3')
+variable
+break clear all
+continue
+break cls::pubCls()
+@ cls::pubCls('test_break4')
+variable
+break clear all
+continue
+@ $break5=new cls()
+@ $break5->pubHardBreak('test_break5')
+continue
+quit

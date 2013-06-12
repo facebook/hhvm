@@ -1,0 +1,80 @@
+Program %s/break1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+break1.php loaded
+Program %s/break1.php exited normally.
+break break1.php:7
+Breakpoint 1 set on line 7 of break1.php
+@ foo('test_break1')
+Breakpoint 1 reached at foo() on line 7 of %s/break1.php
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+   8 }
+
+variable
+$x = "test_break1"
+$y = "test_break1_suffix"
+break clear all
+All breakpoints are cleared.
+continue
+test_break1_suffix
+
+break foo()
+Breakpoint 1 set upon entering foo()
+@ foo('test_break2')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+
+variable
+$x = "test_break2"
+break clear all
+All breakpoints are cleared.
+continue
+test_break2_suffix
+
+break cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj()
+@ $break3=new cls()
+
+@ $break3->pubObj('test_break3')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+variable
+$x = "test_break3"
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:test_break3
+
+break cls::pubCls()
+Breakpoint 1 set upon entering cls::pubCls()
+@ cls::pubCls('test_break4')
+Breakpoint 1 reached at cls::pubCls() on line 15 of %s/break1.php
+  14   public static function pubCls($x) {
+  15     error_log("pubCls:".$x);
+  16   }
+
+variable
+$x = "test_break4"
+break clear all
+All breakpoints are cleared.
+continue
+pubCls:test_break4
+
+@ $break5=new cls()
+
+@ $break5->pubHardBreak('test_break5')
+pubHardBreak:test_break5
+Break at cls::pubHardBreak() on line 19 of %s/break1.php
+  18     error_log("pubHardBreak:".$x);
+  19     hphpd_break();
+  20     error_log("pubHardBreak:done");
+
+continue
+pubHardBreak:done
+
+quit

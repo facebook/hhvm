@@ -1,0 +1,52 @@
+Program %s/break3.php loaded. Type '[r]un' or '[c]ontinue' to go.
+continue
+break3.php loaded
+Program %s/break3.php exited normally.
+break \TestNs\foo()
+Breakpoint 1 set upon entering TestNs\foo()
+@ \TestNs\foo('test_break7')
+Breakpoint 1 reached at TestNs\foo() on line 7 of %s/break3.php
+   6 function foo($x) {
+   7   $y = $x.'_suffix';
+   8   \error_log($y);
+
+variable
+$x = "test_break7"
+break clear all
+All breakpoints are cleared.
+continue
+test_break7_suffix
+
+break TestNs\cls::pubObj()
+Breakpoint 1 set upon entering TestNs\cls::pubObj()
+@ $break8=new \TestNs\cls()
+
+@ $break8->pubObj('test_break8')
+Breakpoint 1 reached at TestNs\cls::pubObj() on line 13 of %s/break3.php
+  12   public function pubObj($x) {
+  13     \error_log("pubObj:".$x);
+  14   }
+
+variable
+$x = "test_break8"
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:test_break8
+
+break \TestNs\cls::pubCls()
+Breakpoint 1 set upon entering TestNs\cls::pubCls()
+@ \TestNs\cls::pubCls('test_break9')
+Breakpoint 1 reached at TestNs\cls::pubCls() on line 16 of %s/break3.php
+  15   public static function pubCls($x) {
+  16     \error_log("pubCls:".$x);
+  17   }
+
+variable
+$x = "test_break9"
+break clear all
+All breakpoints are cleared.
+continue
+pubCls:test_break9
+
+quit

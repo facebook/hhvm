@@ -1,0 +1,7 @@
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = false
+}

@@ -507,6 +507,17 @@ function run_test($options, $test) {
   }
 }
 
+function num_cpus() {
+  $data = file('/proc/stat');
+  $cores = 0;
+  foreach($data as $line) {
+    if (preg_match('/^cpu[0-9]/', $line)) {
+      $cores++;
+    }
+  }
+  return $cores;
+}
+
 function main($argv) {
 
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
@@ -517,7 +528,7 @@ function main($argv) {
   }
   $tests = find_tests($files);
 
-  $threads = min(count($tests), idx($options, 'threads', 20));
+  $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
 
   if (!isset($options['fbmake'])) {
     print "Running ".count($tests)." tests in $threads threads\n";

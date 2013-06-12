@@ -740,7 +740,7 @@ StaticString::StaticString(std::string s) {
 }
 
 StaticString::StaticString(const StaticString &str) {
-  assert(m_px->isStatic());
+  assert(str.m_px->isStatic());
   m_px = str.m_px;
 }
 

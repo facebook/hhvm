@@ -587,7 +587,10 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // that access of undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(fpi.phpCode());
+          CVarRef v = g_vmContext->getEvaledArg(
+            fpi.phpCode(),
+            cls() ? cls()->nameRef() : nameRef()
+          );
           pi->value = strdup(f_serialize(v).get()->data());
         }
         // This is a raw char*, but its lifetime should be at least as long

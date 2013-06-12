@@ -277,5 +277,5 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("%s", m_name.c_str());
+  cg_printf("%s", getNonNSOriginalName().c_str());
 }

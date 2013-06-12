@@ -449,7 +449,10 @@ static void set_function_info(Array &ret, const Func* func) {
           // undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(fpi.phpCode());
+          CVarRef v = g_vmContext->getEvaledArg(
+            fpi.phpCode(),
+            func->cls() ? func->cls()->nameRef() : func->nameRef()
+          );
           param.set(s_default, v);
         }
         param.set(s_defaultText, VarNR(fpi.phpCode()));

@@ -2479,14 +2479,29 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   return ret;
 }
 
-CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
+StaticString
+  s_php_namespace("<?php namespace "),
+  s_curly_return(" { return "),
+  s_semicolon_curly("; }"),
+  s_php_return("<?php return "),
+  s_semicolon(";");
+CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
+                                         CStrRef namespacedName) {
   CStrRef key = *(String*)&val;
 
   if (m_evaledArgs.get()) {
     CVarRef arg = m_evaledArgs.get()->get(key);
     if (&arg != &null_variant) return arg;
   }
-  String code = HPHP::concat3("<?php return ", key, ";");
+
+  String code;
+  int pos = namespacedName.rfind('\\');
+  if (pos != -1) {
+    auto ns = namespacedName.substr(0, pos);
+    code = s_php_namespace + ns + s_curly_return + key + s_semicolon_curly;
+  } else {
+    code = s_php_return + key + s_semicolon;
+  }
   Unit* unit = compileEvalString(code.get());
   assert(unit != nullptr);
   Variant v;

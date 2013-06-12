@@ -671,7 +671,7 @@ public:
   bool m_dbgNoBreak;
   bool doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
-  CVarRef getEvaledArg(const StringData* val);
+  CVarRef getEvaledArg(const StringData* val, CStrRef namespacedName);
 private:
   void enterVMWork(ActRec* enterFnAr);
   void enterVMPrologue(ActRec* enterFnAr);

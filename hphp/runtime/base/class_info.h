@@ -35,7 +35,6 @@ class ClassInfoHook;
 class ClassInfo {
 public:
   enum Attribute {                      //  class   prop   func  method param
-    IsOverride             = (1 <<  0), //           x
     IsRedeclared           = (1 <<  1), //    x             x
     IsVolatile             = (1 <<  2), //    x             x
 
@@ -60,7 +59,6 @@ public:
     IsNothing              = (1 << 13),
 
     HasDocComment          = (1 << 14), //                  x      x
-    IsLazyInit             = (1 << 15), //    x
     HasGeneratorAsBody     = (1 << 15), //                  x      x
     HipHopSpecific         = (1 << 16), //    x             x
 
@@ -79,8 +77,6 @@ public:
     IsSystem               = (1 << 28), //    x             x
 
     IsTrait                = (1 << 29), //    x
-    UsesTraits             = (1 << 30), //    x
-    HasAliasedMethods      = (1u << 31),//    x
     NeedsActRec            = (1u << 31),//                  x      x
   };
 

@@ -644,26 +644,6 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   }
   p++;
 
-  if (m_attribute & ClassInfo::UsesTraits) {
-    while (*p) {
-      String trait_name = makeStaticString(*p++);
-      assert(m_traits.find(trait_name) == m_traits.end());
-      m_traits.insert(trait_name);
-      m_traitsVec.push_back(trait_name);
-    }
-    p++;
-  }
-
-  if (m_attribute & ClassInfo::HasAliasedMethods) {
-    while (*p) {
-      String new_name = makeStaticString(*p++);
-      String old_name = makeStaticString(*p++);
-      m_traitAliasesVec.push_back(std::pair<String, String>(
-        new_name, old_name));
-    }
-    p++;
-  }
-
   while (*p) {
     MethodInfo *method = new MethodInfo(p);
 

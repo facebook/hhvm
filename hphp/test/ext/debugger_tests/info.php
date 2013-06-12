@@ -15,15 +15,14 @@ function info1($c) {
   $c->processCmd('@', null);
   $o = $c->processCmd('info', array('array_key_exists'));
   VS(trim($o['text']), '/**
- * ( excerpt from http://php.net/manual/en/function.array-key-exists.php )
+ * ( excerpt from http://php.net/manual/en/function.array_key_exists.php )
+ * array_key_exists() returns TRUE if the given key is set in the array.'.
+ ' key can be any value possible for an array index.
  *
- * array_key_exists() returns TRUE if the given key is set in the array.
- * key can be any value possible for an array index.
+ * @key mixed Value to check.
+ * @search mixed An array with keys to check.
  *
- * @key        mixed   Value to check.
- * @search     mixed   An array with keys to check.
- *
- * @return     bool    Returns TRUE on success or FALSE on failure.
+ * @return bool Returns TRUE on success or FALSE on failure.
  */
 function array_key_exists($key, $search);');
   $o = $c->processCmd('info', array('stdClass'));

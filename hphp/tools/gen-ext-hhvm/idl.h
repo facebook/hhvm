@@ -86,11 +86,84 @@ static inline fbstring kindOfString(DataType t) {
   }
 }
 
+static inline fbstring escapeCpp(const fbstring& str) {
+  std::ostringstream ssb;
+  for (auto c : str) {
+    switch (c) {
+      case '\n': ssb << "\\n";   break;
+      case '\r': ssb << "\\r";   break;
+      case '\t': ssb << "\\t";   break;
+      case '\a': ssb << "\\a";   break;
+      case '\b': ssb << "\\b";   break;
+      case '\f': ssb << "\\f";   break;
+      case '\v': ssb << "\\v";   break;
+      case '\0': ssb << "\\000"; break;
+      case '\"': ssb << "\\\"";  break;
+      case '\\': ssb << "\\\\";  break;
+      case '\?': ssb << "\\?";   break; // trigraphs
+      default:
+        if ((c >= 0x20) && (c <= 0x7f)) {
+          ssb << c;
+        } else {
+          char buf[6];
+          snprintf(buf, sizeof(buf), "\\%03o", (unsigned int)c);
+          ssb << buf;
+        }
+    }
+  }
+  return fbstring(ssb.str());
+}
+
+static inline fbstring strtolower(const fbstring& str) {
+  fbstring lcase = str;
+  std::transform(str.begin(), str.end(), lcase.begin(),
+                 std::ptr_fun<int, int>(std::tolower));
+  return lcase;
+}
+
+fbstring phpSerialize(const folly::dynamic& d);
+
+class PhpConst {
+ public:
+  explicit PhpConst(const folly::dynamic& cns, fbstring cls = "");
+
+  fbstring name() const { return m_name; }
+  fbstring varname() const {
+    return m_className.empty() ? ("k_" + m_name)
+                               : ("q_" + m_className + "$$" + m_name);
+  }
+  bool isSystem() const { return m_className.empty(); }
+  fbstring getCppType() const { return m_cppType; }
+  DataType kindOf() const { return m_kindOf; }
+  bool hasValue() const {
+    return (m_constant.find("value") != m_constant.items().end());
+  }
+  fbstring value() const {
+    auto it = m_constant.find("value");
+    assert(it != m_constant.items().end());
+    auto v = it->second;
+    return v.isNull() ? "uninit_null()" : v.asString();
+  }
+
+  fbstring serialize() const { return phpSerialize(m_constant["value"]); }
+
+ private:
+  folly::dynamic m_constant;
+  fbstring m_name;
+  fbstring m_className;
+  fbstring m_cppType;
+  DataType m_kindOf;
+
+  bool parseType(const folly::dynamic& cns);
+  bool inferType(const folly::dynamic& cns);
+};
+
 class PhpParam {
  public:
   explicit PhpParam(const folly::dynamic& param, bool isMagicMethod = false);
 
   fbstring name() const { return m_name; }
+  fbstring getDesc() const { return m_desc; }
   fbstring getCppType() const { return m_cppType; }
   fbstring getStrippedCppType() const {
     fbstring ret = m_cppType;
@@ -103,6 +176,7 @@ class PhpParam {
     return ret;
   }
   DataType kindOf() const { return m_kindOf; }
+  fbstring getPhpType() const { return m_phpType; }
 
   bool isRef() const { return m_param.getDefault("ref", false).asBool(); }
 
@@ -112,6 +186,8 @@ class PhpParam {
   fbstring getDefault() const {
     return hasDefault() ? m_param["value"].asString() : "";
   }
+  fbstring getDefaultSerialized() const;
+  fbstring getDefaultPhp() const;
 
   bool isCheckedType() const {
     return !isRef() && (kindOf() != KindOfAny);
@@ -123,8 +199,10 @@ class PhpParam {
  private:
   fbstring m_name;
   folly::dynamic m_param;
+  fbstring m_desc;
   DataType m_kindOf;
   fbstring m_cppType;
+  fbstring m_phpType;
 };
 
 class PhpFunc {
@@ -133,6 +211,7 @@ class PhpFunc {
 
   fbstring name() const { return m_name; }
   fbstring className() const { return m_className; }
+  fbstring getDesc() const { return m_desc; }
 
   bool isMethod() const {
     return !m_className.empty();
@@ -169,6 +248,8 @@ class PhpFunc {
   bool isReturnRef() const { return m_returnRef; }
   DataType returnKindOf() const { return m_returnKindOf; }
   fbstring returnCppType() const { return m_returnCppType; }
+  fbstring returnPhpType() const { return m_returnPhpType; }
+  fbstring returnDesc() const { return m_returnDesc; }
 
   bool isIndirectReturn() const { return isKindOfIndirect(returnKindOf()); }
 
@@ -176,6 +257,7 @@ class PhpFunc {
   bool isStatic() const { return m_flags & IsStatic; }
   bool isVarArgs() const { return m_flags & VarArgsMask; }
   bool usesThis() const { return isMethod() && !isStatic(); }
+  unsigned int flags() const { return m_flags; }
 
   int numParams() const { return m_params.size(); }
   int minNumParams() const { return m_minNumParams; }
@@ -184,16 +266,27 @@ class PhpFunc {
   const PhpParam& param(int p) const { return m_params[p]; }
   const fbvector<PhpParam>& params() const { return m_params; }
 
+  bool hasDocComment() const {
+    auto it = m_func.find("doc");
+    return (it != m_func.items().end()) && it->second.size();
+  }
+  fbstring docComment() const {
+    return hasDocComment() ? m_func["doc"].asString() : "";
+  }
+
 private:
   fbstring m_name;
   fbstring m_className;
   folly::dynamic m_func;
   unsigned long m_flags;
+  fbstring m_desc;
 
   // Return value
   bool m_returnRef;
   DataType m_returnKindOf;
   fbstring m_returnCppType;
+  fbstring m_returnPhpType;
+  fbstring m_returnDesc;
 
   fbvector<PhpParam> m_params;
 
@@ -202,29 +295,80 @@ private:
   int m_numTypeChecks;
 };
 
+class PhpProp {
+ public:
+  PhpProp(const folly::dynamic& d, fbstring cls);
+
+  fbstring name() const { return m_name; }
+  fbstring className() const { return m_className; }
+  unsigned long flags() const { return m_flags; }
+  DataType kindOf() const { return m_kindOf; }
+
+ private:
+  fbstring m_name;
+  fbstring m_className;
+  folly::dynamic m_prop;
+  unsigned long m_flags;
+  DataType m_kindOf;
+};
+
 class PhpClass {
  public:
   explicit PhpClass(const folly::dynamic &c);
 
   fbstring name() const { return m_name; }
+  fbstring parent() const {
+    auto p = m_class.find("parent");
+    if (p == m_class.items().end()) {
+      return "";
+    }
+    assert(p->second.isString());
+    return p->second.asString();
+  }
+
+  int numIfaces() const { return m_ifaces.size(); }
+  fbvector<fbstring> ifaces() const { return m_ifaces; }
+
+  bool hasDocComment() const {
+    auto it = m_class.find("doc");
+    return (it != m_class.items().end()) && it->second.size();
+  }
+  fbstring docComment() const {
+    return hasDocComment() ? m_class["doc"].asString() : "";
+  }
+
+  fbstring getDesc() const { return m_desc; }
 
   int numMethods() const { return m_methods.size(); }
   const fbvector<PhpFunc>& methods() const { return m_methods; }
 
   unsigned long flags() const { return m_flags; }
 
+  int numProperties() const { return m_properties.size(); }
+  fbvector<PhpProp> properties() const { return m_properties; }
+
+  int numConstants() const { return m_constants.size(); }
+  fbvector<PhpConst> constants() const { return m_constants; }
+
  private:
   folly::dynamic m_class;
   fbstring m_name;
+  fbvector<fbstring> m_ifaces;
   fbvector<PhpFunc> m_methods;
+  fbvector<PhpConst> m_constants;
+  fbvector<PhpProp> m_properties;
   unsigned long m_flags;
-
-  void initFlagsProperty();
+  fbstring m_desc;
 };
 
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
               fbvector<PhpClass>& classVec);
+
+void parseIDL(const char* idlFilePath,
+              fbvector<PhpFunc>& funcVec,
+              fbvector<PhpClass>& classVec,
+              fbvector<PhpConst>& constVec);
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::IDL

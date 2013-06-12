@@ -52,6 +52,7 @@ static const std::unordered_map<fbstring, DataType> g_kindOfMap =
 static const std::unordered_map<int, fbstring> g_typeMap =
 {
   {(int)KindOfInvalid,     "void"},
+  {(int)KindOfNull,        "HPHP::Variant"},
   {(int)KindOfBoolean,     "bool"},
   {(int)KindOfInt64,       "long"},
   {(int)KindOfDouble,      "double"},
@@ -59,6 +60,19 @@ static const std::unordered_map<int, fbstring> g_typeMap =
   {(int)KindOfArray,       "HPHP::Array"},
   {(int)KindOfObject,      "HPHP::Object"},
   {(int)KindOfAny,         "HPHP::Variant"},
+};
+
+static const std::unordered_map<int, fbstring> g_phpTypeMap =
+{
+  {(int)KindOfInvalid,     "void"},
+  {(int)KindOfNull,        "void"},
+  {(int)KindOfBoolean,     "bool"},
+  {(int)KindOfInt64,       "long"},
+  {(int)KindOfDouble,      "double"},
+  {(int)KindOfString,      "String"},
+  {(int)KindOfArray,       "Array"},
+  {(int)KindOfObject,      "Object"},
+  {(int)KindOfAny,         "mixed"},
 };
 
 static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
@@ -99,9 +113,11 @@ bool isKindOfIndirect(DataType kindof) {
   return (kindof != KindOfBoolean) &&
          (kindof != KindOfInt64) &&
          (kindof != KindOfDouble) &&
-         (kindof != KindOfInvalid);
+         (kindof != KindOfInvalid) &&
+         (kindof != KindOfNull);
 }
 
+// Parse type from a descriptive string, e.g. "int", "bool", etc...
 static DataType kindOfFromDynamic(const folly::dynamic& t) {
   if (!t.isString()) {
     return KindOfInvalid;
@@ -111,6 +127,40 @@ static DataType kindOfFromDynamic(const folly::dynamic& t) {
     return KindOfObject;
   }
 
+  return it->second;
+}
+
+// Infer type from an actual value, e.g. 123, "foo", null, true, etc...
+static DataType kindOfFromValue(const folly::dynamic& v) {
+  if (v.isNull()) {
+    return KindOfNull;
+  }
+  if (v.isBool()) {
+    return KindOfBoolean;
+  }
+  if (v.isInt()) {
+    return KindOfInt64;
+  }
+  if (v.isDouble()) {
+    return KindOfDouble;
+  }
+  if (v.isString()) {
+    return KindOfString;
+  }
+  if (v.isArray()) {
+    return KindOfArray;
+  }
+  if (v.isObject()) {
+    return KindOfObject;
+  }
+  return KindOfInvalid;
+}
+
+static fbstring phpTypeFromDataType(DataType dt) {
+  auto it = g_phpTypeMap.find((int)dt);
+  if (it == g_phpTypeMap.end()) {
+    return "mixed";
+  }
   return it->second;
 }
 
@@ -150,13 +200,289 @@ static unsigned long parseFlags(const folly::dynamic &flags) {
   return ret;
 }
 
+static const std::unordered_map<fbstring,fbstring> g_serializedDefaults = {
+  {"true",              "b:1;"},
+  {"false",             "b:0;"},
+  {"null",              "N;"},
+  {"empty_array",       "a:0:{}"},
+  {"null_string",       "N;"},
+  {"null_array",        "N;"},
+  {"null_object",       "N;"},
+  {"null_variant",      "N;"},
+  {"INT_MAX",           "i:2147483647;"}, // (1 << 31) - 1
+};
+
+static const std::unordered_map<fbstring,fbstring> g_phpDefaults = {
+  {"true",              "true"},
+  {"false",             "false"},
+  {"null",              "null"},
+  {"empty_array",       "array()"},
+  {"null_string",       "null"},
+  {"null_array",        "null"},
+  {"null_object",       "null"},
+  {"null_variant",      "null"},
+  {"INT_MAX",           "null"},
+};
+
+/**
+ * From idl/base.php:get_serialized_default()
+ */
+fbstring PhpParam::getDefaultSerialized() const {
+  auto valIt = m_param.find("value");
+  if (valIt == m_param.items().end()) {
+    return ""; // No default
+  }
+  auto dval = valIt->second;
+  if (!dval.isString()) {
+    throw std::logic_error(
+      folly::format("Parameter '{0}' default value is non-string",
+                    m_name).str()
+    );
+  }
+  auto val = dval.asString();
+  if (!val.size()) {
+    throw std::logic_error(
+      folly::format("Parameter '{0}' default value malformed (empty string), "
+                    "specify \"\" as default value for actual empty string",
+                    m_name).str()
+    );
+  }
+
+  // Function calls "foo()" or "foo::bar()" to C/C++ functions/static methods,
+  // a constant, or a bitmask of constants
+  //
+  // Used by ext_reflection to resolve the value at runtime or
+  // represent the function/method call.
+  if ((val.size() > 2) &&
+      (!strncmp(val.c_str(), "k_", 2) ||
+       !strncmp(val.c_str(), "q_", 2) ||
+       !strcmp(val.c_str() + val.size() - 2, "()"))) {
+    return "\x01";
+  }
+
+  // Fixed substitutions
+  auto it = g_serializedDefaults.find(val);
+  if (it != g_serializedDefaults.end()) {
+    return it->second;
+  }
+
+  if (val == "RAND_MAX") {
+    return folly::to<fbstring>("i:", RAND_MAX, ";");
+  }
+
+  // Quoted string:  "foo"
+  if ((val.size() >= 2) && (val[0] == '"') && (val[val.size()-1] == '"')) {
+    return phpSerialize(val.substr(1, val.size() - 2));
+  }
+
+  // Integers and Floats
+  if (strchr(val.c_str(), '.')) {
+    // Decimal float?
+    char *e = nullptr;
+    double dval = strtod(val.c_str(), &e);
+    if (e && !*e) {
+      return folly::to<fbstring>("d:", dval, ";");
+    }
+  }
+
+  if (val[0] == '0') {
+    if ((val.size() > 1) && (val[1] == 'x')) {
+      // Hex?
+      char *e = nullptr;
+      long lval = strtol(val.c_str() + 2, &e, 16);
+      if (e && !*e) {
+        return folly::to<fbstring>("i:", lval, ";");
+      }
+    } else {
+      // Octal?
+      char *e = nullptr;
+      long lval = strtol(val.c_str() + 1, &e, 8);
+      if (e && !*e) {
+        return folly::to<fbstring>("i:", lval, ";");
+      }
+    }
+  }
+
+  // Decimal?
+  char *e = nullptr;
+  long lval = strtol(val.c_str(), &e, 10);
+  if (e && !*e) {
+    return folly::to<fbstring>("i:", lval, ";");
+  }
+
+  throw std::logic_error(
+    folly::format("'{0}' is not a valid default arg value", val).str()
+  );
+}
+
+static fbstring transformConstants(const fbstring val) {
+  fbstring ret = val;
+  int i = 0;
+  int len = ret.size();
+
+  while (i < len) {
+    while ((i < len) && (ret[i] == ' ')) i++;
+    if ((len - i) < 2) break;
+
+    if ((ret[i+1] == '_') &&
+        ((ret[i] == 'k') || (ret[i] == 'q'))) {
+      ret[i] = ret[i+1] = ' ';
+    }
+    while ((i < len) && (ret[i] != '|')) {
+      if (ret[i] == '$') {
+        ret[i] = ':';
+      }
+      i++;
+    }
+    i++;
+  }
+  return ret;
+}
+
+fbstring PhpParam::getDefaultPhp() const {
+  fbstring val = getDefault();
+  if (!val.size()) {
+    return "";
+  }
+
+  auto it = g_phpDefaults.find(val);
+  if (it != g_phpDefaults.end()) {
+    return it->second;
+  }
+
+  if (val == "RAND_MAX") {
+    return folly::to<fbstring>(RAND_MAX);
+  }
+
+  if ((val.size() > 2) && (val[1] == '_') &&
+    ((val[0] == 'k') || (val[0] == 'q'))) {
+    return transformConstants(val);
+  }
+
+  return val;
+}
+
+fbstring phpSerialize(const folly::dynamic& d) {
+  if (d.isNull()) {
+    return "N;";
+  }
+  if (d.isBool()) {
+    return d.asBool() ? "b:1;" : "b:0;";
+  }
+  if (d.isInt()) {
+    return "i:" + d.asString() + ";";
+  }
+  if (d.isDouble()) {
+    return "d:" + d.asString() + ";";
+  }
+  if (d.isString()) {
+    auto str = d.asString();
+    return folly::to<fbstring>("s:", str.size(), ":\"", str, "\";");
+  }
+  if (d.isArray()) {
+    fbstring ret = folly::to<fbstring>("a:", d.size(), ":{");
+    int i = 0;
+    for (auto &v : d) {
+      ret += folly::to<fbstring>("i:", i, ";", phpSerialize(v));
+    }
+    return ret + "};";
+  }
+  if (d.isObject()) {
+    fbstring ret = folly::to<fbstring>("a:", d.size(), ":{");
+    int nextindex = 0;
+    for (auto &k : d.keys()) {
+      if (k.isNull()) {
+        ret += "i:0;";
+        if (nextindex <= 0) {
+          nextindex = 1;
+        }
+      } else if (k.isInt() || k.isDouble()) {
+        int i = k.asInt();
+        ret += folly::to<fbstring>("i:", i, ";");
+        if (nextindex <= i) {
+          nextindex = i + 1;
+        }
+      } else if (k.isString()) {
+        ret += folly::to<fbstring>("s:", k.size(), ":\"",
+                                   escapeCpp(k.asString()), "\";");
+      } else {
+        /* Should never be reached, but cover it to be safe */
+        ret += folly::to<fbstring>("i:", nextindex++, ";");
+      }
+      ret += phpSerialize(d[k]);
+    }
+    return ret + "};";
+  }
+  throw std::logic_error("Unhandled dynamic type in php serialization");
+  return "N;";
+}
+
+static fbstring getFollyDynamicDefaultString(const folly::dynamic& d,
+                                             const fbstring& key,
+                                             const fbstring& def) {
+  auto it = d.find(key);
+  if (it == d.items().end()) {
+    return def;
+  }
+  auto val = it->second;
+  if (val.isNull()) {
+    return def;
+  }
+  return val.asString();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// PhpConst
+
+bool PhpConst::parseType(const folly::dynamic& cns) {
+  auto it = cns.find("type");
+  if (it != cns.items().end()) {
+    m_kindOf = kindOfFromDynamic(it->second);
+    m_cppType = typeString(it->second, false);
+    return true;
+  }
+  return false;
+}
+
+bool PhpConst::inferType(const folly::dynamic& cns) {
+  auto it = cns.find("value");
+  if (it != cns.items().end()) {
+    m_kindOf = kindOfFromValue(it->second);
+    auto typeIt = g_typeMap.find((int)m_kindOf);
+    if (typeIt != g_typeMap.end()) {
+      m_cppType = typeIt->second;
+      return true;
+    }
+  }
+  return false;
+}
+
+PhpConst::PhpConst(const folly::dynamic& cns,
+                   fbstring cls /* = "" */) :
+    m_constant(cns),
+    m_name(cns["name"].asString()),
+    m_className(cls) {
+  if (!parseType(cns) && !inferType(cns)) {
+    // Constant has neither explicit type nor implicit type from 'value'
+    assert(false);
+    m_kindOf = KindOfInvalid;
+    m_cppType = "void";
+  }
+
+  // Override typeString()'s selection for string values
+  if (m_kindOf == KindOfString) {
+    m_cppType = "HPHP::StaticString";
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // PhpParam
 
 PhpParam::PhpParam(const folly::dynamic& param,
                    bool isMagicMethod /*= false */) :
     m_name(param["name"].asString()),
-    m_param(param) {
+    m_param(param),
+    m_desc(getFollyDynamicDefaultString(param, "desc", "")) {
   if (isMagicMethod) {
     m_kindOf = KindOfAny;
     m_cppType = "HPHP::Variant";
@@ -170,6 +496,8 @@ PhpParam::PhpParam(const folly::dynamic& param,
     m_kindOf = kindOfFromDynamic(param["type"]);
     m_cppType = typeString(param["type"], false);
   }
+
+  m_phpType = phpTypeFromDataType(m_kindOf);
 }
 
 bool PhpParam::defValueNeedsVariable() const {
@@ -208,13 +536,28 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
     m_name(d["name"].asString()),
     m_className(className),
     m_func(d),
+    m_desc(getFollyDynamicDefaultString(d, "desc", "")),
     m_returnRef(d.getDefault("ref", "false") == "true"),
-    m_returnKindOf(m_returnRef ? KindOfRef :
-                   kindOfFromDynamic(d["return"]["type"])),
-    m_returnCppType(typeString(d["return"]["type"], true)),
+    m_returnKindOf(KindOfNull),
+    m_returnCppType("void"),
+    m_returnPhpType("void"),
     m_minNumParams(0),
     m_numTypeChecks(0) {
-  // Better at least have a name
+  auto returnIt = d.find("return");
+  if (returnIt != d.items().end()) {
+    auto retNode = returnIt->second;
+    auto typeIt = retNode.find("type");
+    if (typeIt != retNode.items().end()) {
+      auto type = typeIt->second;
+      if ((type.isString()) && (type != "void") && (type != "null")) {
+        m_returnKindOf = m_returnRef ? KindOfRef : kindOfFromDynamic(type);
+        m_returnCppType = typeString(type, true);
+        m_returnPhpType = phpTypeFromDataType(m_returnKindOf);
+      }
+    }
+    m_returnDesc = getFollyDynamicDefaultString(retNode, "desc", "");
+  }
+
   auto args = d.find("args");
   if (args == d.items().end() || !args->second.isArray()) {
     throw std::logic_error(
@@ -290,23 +633,64 @@ fbstring PhpFunc::getCppSig() const {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// PhpProp
+
+PhpProp::PhpProp(const folly::dynamic& d, fbstring cls) :
+    m_name(d["name"].asString()),
+    m_className(cls),
+    m_prop(d),
+    m_flags(parseFlags(m_prop["flags"])),
+    m_kindOf(kindOfFromDynamic(m_prop["type"])) {
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // PhpClass
 
 PhpClass::PhpClass(const folly::dynamic &c) :
   m_class(c),
-  m_name(c["name"].asString()) {
+  m_name(c["name"].asString()),
+  m_flags(parseFlags(m_class["flags"])),
+  m_desc(getFollyDynamicDefaultString(c, "desc", "")) {
+
+  auto ifacesIt = m_class.find("ifaces");
+  if (ifacesIt != m_class.items().end()) {
+    auto ifaces = ifacesIt->second;
+    if (!ifaces.isArray()) {
+      throw std::logic_error(
+        folly::format("Class {0}.ifaces field must be an array", m_name).str()
+      );
+    }
+    for (auto &interface : ifaces) {
+      m_ifaces.push_back(interface.asString());
+    }
+  }
+
   for (auto const& f : c["funcs"]) {
     PhpFunc func(f, m_name);
     m_methods.push_back(func);
   }
-  m_flags = parseFlags(m_class["flags"]);
+
+  if (c.find("consts") != c.items().end()) {
+    for (auto const& cns : c["consts"]) {
+      PhpConst cons(cns, m_name);
+      m_constants.push_back(cons);
+    }
+  }
+
+  if (c.find("properties") != c.items().end()) {
+    for (auto const& prp : c["properties"]) {
+      PhpProp prop(prp, m_name);
+      m_properties.push_back(prop);
+    }
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
-              fbvector<PhpClass>& classVec) {
+              fbvector<PhpClass>& classVec,
+              fbvector<PhpConst>& constVec) {
   std::ostringstream jsonString;
   std::ifstream infile(idlFilePath);
   infile >> jsonString.rdbuf();
@@ -321,6 +705,17 @@ void parseIDL(const char* idlFilePath,
     PhpClass klass(c);
     classVec.push_back(klass);
   }
+  for (auto const& c : parsed["consts"]) {
+    PhpConst cns(c);
+    constVec.push_back(cns);
+  }
+}
+
+void parseIDL(const char* idlFilePath,
+              fbvector<PhpFunc>& funcVec,
+              fbvector<PhpClass>& classVec) {
+  fbvector<PhpConst> consts; // dummy
+  parseIDL(idlFilePath, funcVec, classVec, consts);
 }
 
 /////////////////////////////////////////////////////////////////////////////

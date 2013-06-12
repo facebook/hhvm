@@ -545,7 +545,7 @@ ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
 ClassInfo::MethodInfo::MethodInfo(const char **&p) {
   attribute = (Attribute)(int64_t)(*p++);
   name = makeStaticString(*p++);
-  docComment = 0;
+  docComment = "";
   if (attribute & ClassInfo::IsRedeclared) {
     volatile_redec_offset = (int)(int64_t)(*p++);
     while (*p) {
@@ -632,6 +632,8 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   if (m_attribute & HasDocComment) {
     m_docComment = *p++;
+  } else {
+    m_docComment = "";
   }
 
   while (*p) {
@@ -822,3 +824,4 @@ ClassInfo::MethodInfo::~MethodInfo() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+

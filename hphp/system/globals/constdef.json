@@ -2,6 +2,28 @@
     "preamble": "",
     "consts": [
         {
+            "name": "true",
+            "value": true
+        },
+        {
+            "name": "false",
+            "value": false
+        },
+        {
+            "name": "null",
+            "value": null
+        },
+        {
+            "name": "SID",
+            "type": "String",
+            "desc": "Dynamic constant: session_id()"
+        },
+        {
+            "name": "PHP_SAPI",
+            "type": "String",
+            "desc": "Dynamic constant: php_sapi_name()"
+        },
+        {
             "name": "ABDAY_1",
             "value": 131072
         },

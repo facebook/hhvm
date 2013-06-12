@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -227,6 +228,54 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   }
 }
 
+static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
+  // ltrim
+  while (len && (*p == ' ')) {
+    p++;
+    len--;
+  }
+  // rtrim
+  while (len && (p[len-1] == ' ')) {
+    len--;
+  }
+
+  String cname(p, len, CopyString);
+
+  if (!f_defined(cname)) {
+    cns = uninit_null();
+    return false;
+  }
+
+  cns = f_constant(cname);
+  return true;
+}
+
+static bool resolveDefaultParameterConstant(const char *value,
+                                            int64_t valueLen,
+                                            Variant &cns) {
+  const char *p = value;
+  const char *e = value + valueLen;
+  const char *s;
+  bool isLval = false;
+  int64_t lval = 0;
+
+  while ((s = strchr(p, '|'))) {
+    isLval = true;
+    if (!resolveConstant(p, s - p, cns)) {
+      return false;
+    }
+    lval |= cns.toInt64();
+    p = s + 1;
+  }
+  if (!resolveConstant(p, e - p, cns)) {
+    return false;
+  }
+  if (isLval) {
+    cns = cns.toInt64() | lval;
+  }
+  return true;
+}
+
 static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
                               const String *classname) {
   // return type
@@ -263,23 +312,38 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
         param.set(s_class, VarNR(*classname));
       }
       const char *defText = p->valueText;
-      if (defText == nullptr) defText = "";
+      int64_t defTextLen = p->valueTextLen;
+      if (defText == nullptr) {
+        defText = "";
+        defTextLen = 0;
+      }
       if (!p->type || !*p->type || !strcasecmp("null", defText)) {
         param.set(s_nullable, true_varNR);
       }
       if (p->value && *p->value) {
         if (*p->value == '\x01') {
-          const char *sep = strchr(defText, ':');
-          Object v(SystemLib::AllocStdClassObject());
-          if (sep && sep[1] == ':') {
-            String cls = String(defText, sep - defText, CopyString);
-            String con = String(sep + 2, CopyString);
-            v.o_set(s_class, cls);
-            v.o_set(s_name, con);
+          Variant v;
+          if ((defTextLen > 2) &&
+              !strcmp(defText + defTextLen - 2, "()")) {
+            const char *sep = strchr(defText, ':');
+            v = SystemLib::AllocStdClassObject();
+            if (sep && sep[1] == ':') {
+              String cls = String(defText, sep - defText, CopyString);
+              String con = String(sep + 2, CopyString);
+              v.o_set(s_class, cls);
+              v.o_set(s_name, con);
+            } else {
+              v.o_set(s_name, String(defText, defTextLen, CopyString));
+            }
+            param.set(s_default, v);
+          } else if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
+            param.set(s_default, v);
           } else {
-            v.o_set(s_msg, String("unable to eval ") + defText);
+            v = SystemLib::AllocStdClassObject();
+            v.o_set(s_msg, String("Unknown unserializable default value: ")
+                                 + defText);
+            param.set(s_default, v);
           }
-          param.set(s_default, v);
         } else {
           param.set(s_default, unserialize_from_string(p->value));
         }

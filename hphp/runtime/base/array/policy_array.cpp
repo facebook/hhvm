@@ -735,35 +735,47 @@ void ArrayShell::nextInsertWithRef(const Variant& v) {
   appendNoGrow(k, Variant::NullInit())->setWithRef(v);
 }
 
-ArrayData *ArrayShell::append(const ArrayData *elems, ArrayOp op, bool copy) {
-  APILOG << "(" << elems << ", " << op << ", " << copy << ")";
+ArrayData *ArrayShell::plus(const ArrayData *elems, bool copy) {
+  APILOG << "(" << elems << ", " << copy << ")";
   if (copy) {
-    return ArrayShell::copy()->append(elems, op, false);
+    return ArrayShell::copy()->plus(elems, false);
   }
 
   assert(elems);
-  assert(op == Plus || op == Merge);
   grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     const Variant& value = it.secondRef();
-    if (op == Plus) {
-      if (key.isNumeric()) {
-        addValWithRef(key.toInt64(), value);
-      } else {
-        addValWithRef(key.getStringData(), value);
-      }
+    if (key.isNumeric()) {
+      addValWithRef(key.toInt64(), value);
     } else {
-      if (key.isNumeric()) {
-        nextInsertWithRef(value);
-      } else {
-        StringData *s = key.getStringData();
-        Variant *p;
-        // Andrei TODO: make sure this is the right semantics
-        lval(s, p, false, true);
-        p->setWithRef(value);
-      }
+      addValWithRef(key.getStringData(), value);
+    }
+  }
+  return this;
+}
+
+ArrayData *ArrayShell::merge(const ArrayData *elems, bool copy) {
+  APILOG << "(" << elems << ", " << copy << ")";
+  if (copy) {
+    return ArrayShell::copy()->merge(elems, false);
+  }
+
+  assert(elems);
+  grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
+
+  for (ArrayIter it(elems); !it.end(); it.next()) {
+    Variant key = it.first();
+    const Variant& value = it.secondRef();
+    if (key.isNumeric()) {
+      nextInsertWithRef(value);
+    } else {
+      StringData *s = key.getStringData();
+      Variant *p;
+      // Andrei TODO: make sure this is the right semantics
+      lval(s, p, false, true);
+      p->setWithRef(value);
     }
   }
   return this;

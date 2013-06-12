@@ -658,8 +658,8 @@ public:
    * first then append/merge arrays. Return NULL if escalation is not needed,
    * or an escalated array data.
    */
-  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy)
-    FOLLY_OVERRIDE;
+  virtual ArrayData *plus(const ArrayData *elems, bool copy) FOLLY_OVERRIDE;
+  virtual ArrayData *merge(const ArrayData *elems, bool copy) FOLLY_OVERRIDE;
 
   /**
    * Stack function: pop the last item and return it.

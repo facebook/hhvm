@@ -109,7 +109,8 @@ public: // ArrayData implementation
   virtual ArrayData* appendRef(CVarRef v, bool copy);
   virtual ArrayData* appendWithRef(CVarRef v, bool copy);
 
-  virtual ArrayData* append(const ArrayData* elems, ArrayOp op, bool copy);
+  virtual ArrayData* plus(const ArrayData* elems, bool copy);
+  virtual ArrayData* merge(const ArrayData* elems, bool copy);
 
   virtual ArrayData* prepend(CVarRef v, bool copy);
 

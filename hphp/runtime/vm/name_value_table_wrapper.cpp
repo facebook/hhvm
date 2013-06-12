@@ -161,10 +161,12 @@ ArrayData* NameValueTableWrapper::appendWithRef(CVarRef v, bool copy) {
   throw NotImplementedException("appendWithRef on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::append(const ArrayData* elems,
-                                         ArrayOp op,
-                                         bool copy) {
-  throw NotImplementedException("append on $GLOBALS");
+ArrayData* NameValueTableWrapper::plus(const ArrayData* elems, bool copy) {
+  throw NotImplementedException("plus on $GLOBALS");
+}
+
+ArrayData* NameValueTableWrapper::merge(const ArrayData* elems, bool copy) {
+  throw NotImplementedException("merge on $GLOBALS");
 }
 
 ArrayData* NameValueTableWrapper::prepend(CVarRef v, bool copy) {

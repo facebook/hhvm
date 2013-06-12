@@ -62,8 +62,7 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
       return a2;
     }
     if (a1 != a2) {
-      ArrayData *escalated = a1->append(a2, ArrayData::Plus,
-                                        a1->getCount() > 1);
+      ArrayData *escalated = a1->plus(a2, a1->getCount() > 1);
       if (escalated != a1) {
         escalated->incRefCount();
         decRefArr(a2);

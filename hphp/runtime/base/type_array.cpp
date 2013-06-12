@@ -84,23 +84,17 @@ Array &Array::operator =  (Variant&& v) {
 }
 
 Array Array::operator+(ArrayData *data) const {
-  return Array(m_px).operator+=(data);
-}
-
-Array Array::operator+(CVarRef var) const {
-  if (var.getType() != KindOfArray) {
-    throw BadArrayMergeException();
-  }
-  return operator+(var.getArrayData());
+  return Array(m_px).plusImpl(data);
 }
 
 Array Array::operator+(CArrRef arr) const {
-  return operator+(arr.m_px);
+  return Array(m_px).plusImpl(arr.m_px);
 }
 
 Array &Array::operator+=(ArrayData *data) {
-  return mergeImpl(data, ArrayData::Plus);
+  return plusImpl(data);
 }
+
 Array &Array::operator+=(CVarRef var) {
   if (var.getType() != KindOfArray) {
     throw BadArrayMergeException();
@@ -109,7 +103,7 @@ Array &Array::operator+=(CVarRef var) {
 }
 
 Array &Array::operator+=(CArrRef arr) {
-  return mergeImpl(arr.m_px, ArrayData::Plus);
+  return plusImpl(arr.m_px);
 }
 
 Array Array::diff(CVarRef array, bool by_key, bool by_value,
@@ -272,22 +266,34 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
 // manipulations
 
 Array &Array::merge(CArrRef arr) {
-  return mergeImpl(arr.m_px, ArrayData::Merge);
+  return mergeImpl(arr.m_px);
 }
 
 HOT_FUNC
-Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
+Array &Array::plusImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
   }
   if (!data->empty()) {
-    if (op != ArrayData::Merge && m_px->empty()) {
+    if (m_px->empty()) {
       ArrayBase::operator=(data);
-    } else if (m_px != data || op == ArrayData::Merge) {
-      ArrayData *escalated = m_px->append(data, op, m_px->getCount() > 1);
+    } else if (m_px != data) {
+      ArrayData *escalated = m_px->plus(data, m_px->getCount() > 1);
       if (escalated != m_px) ArrayBase::operator=(escalated);
     }
-  } else if (op == ArrayData::Merge) {
+  }
+  return *this;
+}
+
+HOT_FUNC
+Array &Array::mergeImpl(ArrayData *data) {
+  if (m_px == nullptr || data == nullptr) {
+    throw BadArrayMergeException();
+  }
+  if (!data->empty()) {
+    ArrayData *escalated = m_px->merge(data, m_px->getCount() > 1);
+    if (escalated != m_px) ArrayBase::operator=(escalated);
+  } else {
     m_px->renumber();
   }
   return *this;

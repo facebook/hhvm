@@ -1415,31 +1415,32 @@ ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
   return a->nextInsertWithRef(v);
 }
 
-ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
+ArrayData* HphpArray::plus(const ArrayData* elems, bool copy) {
   HphpArray* a = !copy ? this : copyImpl();
-  if (op == Plus) {
-    for (ArrayIter it(elems); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
-      if (key.isNumeric()) {
-        a->addValWithRef(key.toInt64(), value);
-      } else {
-        a->addValWithRef(key.getStringData(), value);
-      }
+  for (ArrayIter it(elems); !it.end(); it.next()) {
+    Variant key = it.first();
+    CVarRef value = it.secondRef();
+    if (key.isNumeric()) {
+      a->addValWithRef(key.toInt64(), value);
+    } else {
+      a->addValWithRef(key.getStringData(), value);
     }
-  } else {
-    assert(op == Merge);
-    for (ArrayIter it(elems); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
-      if (key.isNumeric()) {
-        a->nextInsertWithRef(value);
-      } else {
-        Variant *p;
-        StringData *sd = key.getStringData();
-        a->addLvalImpl(sd, sd->hash(), &p);
-        p->setWithRef(value);
-      }
+  }
+  return a;
+}
+
+ArrayData* HphpArray::merge(const ArrayData* elems, bool copy) {
+  HphpArray* a = !copy ? this : copyImpl();
+  for (ArrayIter it(elems); !it.end(); it.next()) {
+    Variant key = it.first();
+    CVarRef value = it.secondRef();
+    if (key.isNumeric()) {
+      a->nextInsertWithRef(value);
+    } else {
+      Variant *p;
+      StringData *sd = key.getStringData();
+      a->addLvalImpl(sd, sd->hash(), &p);
+      p->setWithRef(value);
     }
   }
   return a;

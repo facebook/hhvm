@@ -102,7 +102,8 @@ public:
   ArrayData *append(CVarRef v, bool copy);
   ArrayData *appendRef(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
-  ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
+  ArrayData *plus(const ArrayData *elems, bool copy);
+  ArrayData *merge(const ArrayData *elems, bool copy);
 
   ArrayData *prepend(CVarRef v, bool copy);
 

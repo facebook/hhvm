@@ -179,9 +179,14 @@ ArrayData *SharedMap::appendWithRef(CVarRef v, bool copy) {
   return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
 }
 
-ArrayData *SharedMap::append(const ArrayData *elems, ArrayOp op, bool copy) {
+ArrayData *SharedMap::plus(const ArrayData *elems, bool copy) {
   ArrayData *escalated = SharedMap::escalate();
-  return releaseIfCopied(escalated, escalated->append(elems, op, false));
+  return releaseIfCopied(escalated, escalated->plus(elems, false));
+}
+
+ArrayData *SharedMap::merge(const ArrayData *elems, bool copy) {
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->merge(elems, false));
 }
 
 ArrayData *SharedMap::prepend(CVarRef v, bool copy) {

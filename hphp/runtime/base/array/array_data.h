@@ -36,11 +36,6 @@ class ArrayData : public Countable {
  public:
   enum class AllocationMode : bool { smart, nonSmart };
 
-  enum ArrayOp {
-    Plus,
-    Merge,
-  };
-
   // enum of possible array types, so we can guard nonvirtual
   // fast paths in runtime code.
   enum class ArrayKind : uint8_t {
@@ -403,7 +398,8 @@ public:
    * first then append/merge arrays. Return NULL if escalation is not needed,
    * or an escalated array data.
    */
-  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy) = 0;
+  virtual ArrayData *plus(const ArrayData *elems, bool copy) = 0;
+  virtual ArrayData *merge(const ArrayData *elems, bool copy) = 0;
 
   /**
    * Stack function: pop the last item and return it.

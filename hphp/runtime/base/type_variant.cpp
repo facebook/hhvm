@@ -712,13 +712,11 @@ Variant &Variant::operator+=(CVarRef var) {
       set(arr2);
       return *this;
     }
-    ArrayData *escalated = arr1->append(arr2, ArrayData::Plus,
-                                        arr1->getCount() > 1);
+    ArrayData *escalated = arr1->plus(arr2, arr1->getCount() > 1);
     if (escalated != arr1) set(escalated);
     return *this;
-  } else if (na) {
-    throw BadArrayMergeException();
   }
+  if (na) throw BadArrayMergeException();
   if (isDouble() || var.isDouble()) {
     set(toDouble() + var.toDouble());
     return *this;

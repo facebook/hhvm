@@ -156,12 +156,17 @@ template <class T>
 class vector : public std::vector<T,Allocator<T>> {
   typedef std::vector<T,Allocator<T>> Base;
 public:
-  template <class... A>
-  explicit vector(A &&... args) : Base(std::forward<A>(args)...) {}
+  template<class... A>
+  explicit vector(A&&... args) : Base(std::forward<A>(args)...) {}
 };
 
 template <class T>
-class list : public std::list<T,Allocator<T>> {};
+class list : public std::list<T,Allocator<T>> {
+  typedef std::list<T,Allocator<T>> Base;
+public:
+  template<class... A>
+  explicit list(A&&... args) : Base(std::forward<A>(args)...) {}
+};
 
 template <class T>
 class queue : public std::queue<T, deque<T> > {};

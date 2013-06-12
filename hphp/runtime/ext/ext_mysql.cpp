@@ -14,10 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/ext/ext_mysql.h"
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_preg.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/mysql_stats.h"
@@ -44,45 +44,28 @@ StaticString MySQLResult::s_class_name("mysql result");
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
 
 MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
-    : m_res(res), m_current_async_row(NULL), m_localized(localized),
-      m_conn(NULL) {
-  m_fields = NULL;
-  m_field_count = 0;
-  m_current_field = -1;
+  : m_res(res)
+  , m_current_async_row(nullptr)
+  , m_localized(localized)
+  , m_fields(nullptr)
+  , m_current_field(-1)
+  , m_field_count(0)
+  , m_conn(nullptr)
+{
   if (localized) {
-    m_res = NULL; // ensure that localized results don't have another result
-    m_rows = new std::list<std::vector<Variant *> >(1); //sentinel
+    m_res = nullptr; // ensure that localized results don't have another result
+    m_rows = smart::list<smart::vector<Variant>>(1); // sentinel
     m_current_row = m_rows->begin();
     m_row_ready = false;
     m_row_count = 0;
-  } else {
-    m_rows = NULL;
   }
 }
 
 MySQLResult::~MySQLResult() {
   close();
   if (m_fields) {
-    for (int i = 0; i < m_field_count; i++) {
-      MySQLFieldInfo &info = m_fields[i];
-      if (info.name) {
-        DELETE(Variant)(info.name);
-        DELETE(Variant)(info.table);
-        DELETE(Variant)(info.def);
-      }
-    }
-    delete[] m_fields;
+    smart_delete_array(m_fields, m_field_count);
     m_fields = NULL;
-  }
-  if (m_rows) {
-    for (std::list<vector<Variant *> >::const_iterator it = m_rows->begin();
-         it != m_rows->end(); it++) {
-      for (unsigned int i = 0; i < it->size(); i++) {
-        DELETE(Variant)((*it)[i]);
-      }
-    }
-    delete m_rows;
-    m_rows = NULL;
   }
   if (m_conn) {
     m_conn->decRefCount();
@@ -92,10 +75,7 @@ MySQLResult::~MySQLResult() {
 
 void MySQLResult::sweep() {
   close();
-  // When a dangling MySQLResult is swept, there is no need to deallocate
-  // any Variant object.
-  delete[] m_fields;
-  delete m_rows;
+  // Note that ~MySQLResult is *not* going to run when we are swept.
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -425,9 +405,9 @@ static Variant php_mysql_field_info(CVarRef result, int field,
 
   switch (entry_type) {
   case PHP_MYSQL_FIELD_NAME:
-    return *(info->name);
+    return info->name;
   case PHP_MYSQL_FIELD_TABLE:
-    return *(info->table);
+    return info->table;
   case PHP_MYSQL_FIELD_LEN:
     return info->length;
   case PHP_MYSQL_FIELD_TYPE:
@@ -856,17 +836,17 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
     res->addRow();
     for (unsigned int i = 0; i < fields; i++) {
       unsigned long len = net_field_length(&cp);
-      Variant *data = NEW(Variant)();
+      Variant data;
       if (len != NULL_LENGTH) {
-        *data = mysql_makevalue(String((char *)cp, len, CopyString),
-                                mysql->fields + i);
+        data = mysql_makevalue(String((char *)cp, len, CopyString),
+                               mysql->fields + i);
         cp += len;
         if (mysql->fields) {
           if (mysql->fields[i].max_length < len)
             mysql->fields[i].max_length = len;
         }
       }
-      res->addField(data);
+      res->addField(std::move(data));
     }
     if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
       return false;
@@ -1222,7 +1202,7 @@ static Variant php_mysql_fetch_hash(CVarRef result, int result_type) {
       }
       if (result_type & MYSQL_ASSOC) {
         MySQLFieldInfo *info = res->getFieldInfo(i);
-        ret.set(info->name->toString(), res->getField(i));
+        ret.set(info->name, res->getField(i));
       }
     }
     return ret;
@@ -1691,8 +1671,8 @@ Variant f_mysql_result(CVarRef result, int row,
       res->seekField(0);
       while (i < res->getFieldCount()) {
         MySQLFieldInfo *info = res->getFieldInfo(i);
-        if ((table_name.empty() || table_name.same(info->table->toString())) &&
-            field_name.same(info->name->toString())) {
+        if ((table_name.empty() || table_name.same(info->table)) &&
+            field_name.same(info->name)) {
           field_offset = i;
           found = true;
           break;
@@ -1780,9 +1760,9 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   if (!(info = res->fetchFieldInfo())) return false;
 
   Object obj(SystemLib::AllocStdClassObject());
-  obj->o_set("name",         *(info->name));
-  obj->o_set("table",        *(info->table));
-  obj->o_set("def",          *(info->def));
+  obj->o_set("name",         info->name);
+  obj->o_set("table",        info->table);
+  obj->o_set("def",          info->def);
   obj->o_set("max_length",   (int)info->max_length);
   obj->o_set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
   obj->o_set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
@@ -1824,24 +1804,25 @@ Variant f_mysql_field_flags(CVarRef result, int field /* = 0 */) {
 
 void MySQLResult::addRow() {
   m_row_count++;
-  m_rows->push_back(vector<Variant *>());
+  m_rows->push_back(smart::vector<Variant>());
   m_rows->back().reserve(getFieldCount());
 }
 
-void MySQLResult::addField(Variant *value) {
-  m_rows->back().push_back(value);
+void MySQLResult::addField(Variant&& value) {
+  m_rows->back().push_back(std::move(value));
 }
 
 void MySQLResult::setFieldCount(int64_t fields) {
   m_field_count = fields;
-  m_fields = new MySQLFieldInfo[fields];
+  assert(!m_fields);
+  m_fields = smart_new_array<MySQLFieldInfo>(fields);
 }
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name = NEW(Variant)(String(field->name, CopyString));
-  info.table = NEW(Variant)(String(field->table, CopyString));
-  info.def = NEW(Variant)(String(field->def, CopyString));
+  info.name = String(field->name, CopyString);
+  info.table = String(field->table, CopyString);
+  info.def = String(field->def, CopyString);
   info.max_length = (int64_t)field->max_length;
   info.length = (int64_t)field->length;
   info.type = (int)field->type;
@@ -1868,7 +1849,7 @@ Variant MySQLResult::getField(int64_t field) const {
   if (!m_localized || field < 0 || field >= (int64_t)m_current_row->size()) {
     return uninit_null();
   }
-  return *(*m_current_row)[field];
+  return (*m_current_row)[field];
 }
 
 int64_t MySQLResult::getFieldCount() const {

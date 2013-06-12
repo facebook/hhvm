@@ -398,6 +398,42 @@ void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
 
+/*
+ * Similar to smart_malloc, but with support for constructors.  Note
+ * that explicitly calling smart_delete will run the destructors, but
+ * if you let the allocator sweep it the destructors will not be
+ * called.
+ */
+
+template<class T> T* smart_new_array(size_t count) {
+  T* ret = static_cast<T*>(smart_malloc(count * sizeof(T)));
+  size_t i = 0;
+  try {
+    for (; i < count; ++i) {
+      new (&ret[i]) T();
+    }
+  } catch (...) {
+    size_t j = i;
+    while (j-- > 0) {
+      ret[j].~T();
+    }
+    smart_free(ret);
+    throw;
+  }
+  return ret;
+}
+
+// Unlike the normal operator delete, this requires ~T() must be
+// nothrow.
+template<class T>
+void smart_delete_array(T* t, size_t count) {
+  size_t i = count;
+  while (i-- > 0) {
+    t[i].~T();
+  }
+  smart_free(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -18,8 +18,11 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/base/base_includes.h"
 #include "mysql/mysql.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -133,12 +136,12 @@ public:
 class MySQLFieldInfo {
 public:
   MySQLFieldInfo()
-    : name(NULL), table(NULL), def(NULL),
-      max_length(0), length(0), type(0), flags(0) {}
+    : max_length(0), length(0), type(0), flags(0)
+  {}
 
-  Variant *name;
-  Variant *table;
-  Variant *def;
+  String name;
+  String table;
+  String def;
   int64_t max_length;
   int64_t length;
   int type;
@@ -149,7 +152,7 @@ class MySQLResult : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(MySQLResult);
 
-  MySQLResult(MYSQL_RES *res, bool localized = false);
+  explicit MySQLResult(MYSQL_RES *res, bool localized = false);
   virtual ~MySQLResult();
 
   static StaticString s_class_name;
@@ -173,7 +176,7 @@ public:
 
   void addRow();
 
-  void addField(Variant *value);
+  void addField(Variant&& value);
 
   void setFieldCount(int64_t fields);
   void setFieldInfo(int64_t f, MYSQL_FIELD *field);
@@ -210,8 +213,8 @@ protected:
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
   MySQLFieldInfo *m_fields;
-  std::list<std::vector<Variant *> > *m_rows;
-  std::list<std::vector<Variant *> >::const_iterator m_current_row;
+  folly::Optional<smart::list<smart::vector<Variant>>> m_rows;
+  smart::list<smart::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64_t m_field_count;

@@ -2415,8 +2415,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
 
   return true iff the pseudomain needs to be executed.
 */
-bool VMExecutionContext::evalUnit(Unit* unit, bool local,
-                                  PC& pc, int funcType) {
+bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   m_pc = pc;
   unit->merge();
   if (unit->isMergeOnly()) {
@@ -2430,10 +2429,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   ActRec* ar = m_stack.allocA();
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
   Class* cls = curClass();
-  if (local) {
-    cls = nullptr;
-    ar->setThis(nullptr);
-  } else if (m_fp->hasThis()) {
+  if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
     this_->incRefCount();
     ar->setThis(this_);
@@ -2455,15 +2451,12 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
-  if (local) {
-    ar->m_varEnv = 0;
-  } else {
-    if (!m_fp->hasVarEnv()) {
-      m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);
-    }
-    ar->m_varEnv = m_fp->m_varEnv;
-    ar->m_varEnv->attach(ar);
+  if (!m_fp->hasVarEnv()) {
+    m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);
   }
+  ar->m_varEnv = m_fp->m_varEnv;
+  ar->m_varEnv->attach(ar);
+
   m_fp = ar;
   pc = func->getEntry();
   SYNC();
@@ -6334,11 +6327,10 @@ inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,
   Cell* c1 = ec->m_stack.topC();
   String path(prepareKey(c1));
   bool initial;
-  TRACE(2, "inclOp %s %s %s %s %s \"%s\"\n",
+  TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
         flags & InclOpOnce ? "Once" : "",
         flags & InclOpDocRoot ? "DocRoot" : "",
         flags & InclOpRelative ? "Relative" : "",
-        flags & InclOpLocal ? "Local" : "",
         flags & InclOpFatal ? "Fatal" : "",
         path->data());
 
@@ -6354,7 +6346,7 @@ inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,
     ec->m_stack.pushFalse();
   } else {
     if (!(flags & InclOpOnce) || initial) {
-      ec->evalUnit(u, (flags & InclOpLocal), pc, EventHook::PseudoMain);
+      ec->evalUnit(u, pc, EventHook::PseudoMain);
     } else {
       Stats::inc(Stats::PseudoMain_Guarded);
       ec->m_stack.pushTrue();
@@ -6392,7 +6384,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEval(PC& pc) {
     raise_error("Syntax error in eval()");
   }
   m_stack.popC();
-  evalUnit(unit, false, pc, EventHook::Eval);
+  evalUnit(unit, pc, EventHook::Eval);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopDefFunc(PC& pc) {

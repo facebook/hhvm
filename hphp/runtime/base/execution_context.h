@@ -149,9 +149,8 @@ enum InclOpFlags {
   InclOpDefault = 0,
   InclOpFatal = 1,
   InclOpOnce = 2,
-  InclOpLocal = 4,
   InclOpDocRoot = 8,
-  InclOpRelative = 16
+  InclOpRelative = 16,
 };
 
 inline InclOpFlags
@@ -628,8 +627,7 @@ public:
   HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
                                          InclOpFlags flags, bool* initial,
                                          HPHP::Unit* unit = 0);
-  bool evalUnit(HPHP::Unit* unit, bool local,
-                PC& pc, int funcType);
+  bool evalUnit(HPHP::Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
   HPHP::Unit* compileEvalString(StringData* code);
   CStrRef createFunction(CStrRef args, CStrRef code);

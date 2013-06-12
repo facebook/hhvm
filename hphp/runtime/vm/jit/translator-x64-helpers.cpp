@@ -45,38 +45,6 @@ register Cell* sp asm("rbx");
 Cell* sp;
 #endif
 
-void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
-  DECLARE_FRAME_POINTER(framePtr);
-
-  HPHP::Eval::PhpFile* efile = args->m_efile;
-  if (!checkEval(efile)) {
-    Stats::inc(Stats::PseudoMain_Guarded);
-    sp->m_type = KindOfBoolean;
-    sp->m_data.num = 1;
-    return;
-  }
-
-  ActRec* fp = (ActRec*)framePtr->m_savedRbp;
-
-  VMExecutionContext *ec = g_vmContext;
-  ec->m_fp = fp;
-  ec->m_stack.top() = sp + 1;
-  PC pc = curUnit()->at(args->m_pcOff);
-
-  tl_regState = REGSTATE_CLEAN;
-  Unit *unit = efile->unit();
-  bool runPseudoMain = ec->evalUnit(unit, args->m_local, pc,
-                                    EventHook::PseudoMain);
-  tl_regState = REGSTATE_DIRTY;
-  if (!runPseudoMain) return;
-
-  ec->m_fp->m_savedRip = framePtr->m_savedRip;
-  // smash our return and frame pointer chain
-  framePtr->m_savedRip = (uint64_t)args->m_pseudoMain;
-  sp = ec->m_stack.top();
-  framePtr->m_savedRbp = (uint64_t)ec->m_fp;
-}
-
 static void setupAfterProlog(ActRec* fp) {
   g_vmContext->m_fp = fp;
   g_vmContext->m_stack.top() = sp;

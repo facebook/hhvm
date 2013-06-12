@@ -477,13 +477,6 @@ public:
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
 
-  struct ReqLitStaticArgs {
-    HPHP::Eval::PhpFile* m_efile;
-    TCA m_pseudoMain;
-    Offset m_pcOff;
-    bool m_local;
-  };
-  static void reqLitHelper(const ReqLitStaticArgs* args);
   static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
 
   TCA getNativeTrampoline(TCA helperAddress);

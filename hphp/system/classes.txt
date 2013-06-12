@@ -22,6 +22,8 @@ hphp/system/classes/spl/file_handling/SplFileObject.php
 
 hphp/system/classes/spl/interfaces/OuterIterator.php
 hphp/system/classes/spl/iterators/IteratorIterator.php
+hphp/system/classes/spl/iterators/FilterIterator.php
+hphp/system/classes/spl/iterators/RecursiveFilterIterator.php
 
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/classes/DebuggerCommand.php
@@ -45,7 +47,6 @@ hphp/system/classes/spl/datastructures/SplObjectStorage.php
 hphp/system/classes/spl/datastructures/SplPriorityQueue.php
 hphp/system/classes/spl/iterators/AppendIterator.php
 hphp/system/classes/spl/iterators/ArrayIterator.php
-hphp/system/classes/spl/iterators/FilterIterator.php
 hphp/system/classes/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/classes/spl/miscellaneous/ArrayObject.php
 

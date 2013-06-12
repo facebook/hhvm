@@ -327,7 +327,13 @@ Instruction set
 D:T = CheckType<T> S0:{Gen|Nullptr} -> L
 
   Check that the type of the src S0 is T, and if so copy it to D.  If
-  S0 is not type T, branch to the label L.
+  S0 is not type T, branch to the label L. If T is Nullptr, the
+  instruction is being used to check for a C++ nullptr, usually from a
+  type like {Str|Nullptr}.
+
+D:T = AssertType<T> S0:{Gen|Nullptr}
+
+  Assert that the type of S0 is T, copying it to D.
 
 CheckTypeMem<T> S0:PtrToGen -> L
 
@@ -354,7 +360,8 @@ AssertLoc<T,localId> S0:FramePtr
 OverrideLoc<T,localId> S0:FramePtr
 
   Overrides tracked information about the type of a local in frame S0.
-  This is used to fix tracked state after InterpOne instructions.
+  T doesn't have to be related to the local's current type, so this
+  may be used to update tracked state after InterpOne instructions.
 
 D:StkPtr = GuardStk<T,offset> S0:StkPtr
 

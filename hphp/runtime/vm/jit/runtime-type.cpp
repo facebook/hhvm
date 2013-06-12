@@ -268,7 +268,8 @@ bool RuntimeType::isRef() const {
 }
 
 bool RuntimeType::isVagueValue() const {
-  return m_kind == VALUE && outerType() == KindOfInvalid;
+  return m_kind == VALUE && (outerType() == KindOfInvalid ||
+                             outerType() == KindOfAny);
 }
 
 bool RuntimeType::isRefCounted() const {

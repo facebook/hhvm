@@ -105,7 +105,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
                            SrcRec& fail) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
-  if (rtt.isVagueValue()) return;
+  assert(!rtt.isVagueValue());
 
   switch (l.space) {
   case Location::Stack:
@@ -125,7 +125,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
   case Location::Litstr:
   case Location::Litint:
   case Location::This:
-    assert(false); // should not happen
+    not_reached();
   }
 }
 
@@ -296,7 +296,8 @@ Translator::translateUnboxR(const NormalizedInstruction& i) {
   if (i.noOp) {
     // statically proved to be unboxed -- just pass that info to the IR
     TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
-    m_hhbcTrans->assertTypeStack(0, JIT::Type::Cell);
+    m_hhbcTrans->assertTypeLocation(Location(Location::Stack, 0),
+                                    JIT::Type::Cell);
   } else {
     HHIR_EMIT(UnboxR);
   }
@@ -1585,7 +1586,9 @@ void Translator::interpretInstr(const NormalizedInstruction& i) {
 }
 
 void Translator::translateInstr(const NormalizedInstruction& i) {
-  FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
+  FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
+                                         i.toString(),
+                                         m_hhbcTrans->showStack()));
 
   m_hhbcTrans->setBcOff(i.source.offset(),
                         i.breaksTracelet && !m_hhbcTrans->isInlining());
@@ -1674,20 +1677,11 @@ static bool supportedInterpOne(const NormalizedInstruction* i) {
 }
 
 TranslatorX64::TranslateResult
-TranslatorX64::irTranslateTracelet(Tracelet&               t,
-                                   const TCA               start,
-                                   const TCA               stubStart,
-                                   vector<TransBCMapping>* bcMap) {
-  auto transResult = Failure;
+TranslatorX64::irTranslateTracelet(Tracelet& t) {
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   assert(srcRec.inProgressTailJumps().size() == 0);
   try {
-    // Don't translate if we have already reached the maximum # of
-    // translations for this tracelet
-    HHIR_UNIMPLEMENTED_WHEN(checkTranslationLimit(t.m_sk, srcRec),
-                            TOO_MANY_TRANSLATIONS);
-
     irEmitResolvedDeps(t.m_resolvedDeps);
     emitGuardChecks(a, sk, t.m_dependencies, t.m_refDeps, srcRec);
 
@@ -1700,7 +1694,6 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
 
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
-    recordBCInstr(OpTraceletGuard, a, start);
 
     // Profiling on function entry.
     if (m_curTrace->m_sk.offset() == curFunc()->base()) {
@@ -1737,45 +1730,41 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
         // and retry
         if (!ni->interp && supportedInterpOne(ni)) {
           ni->interp = true;
-          transResult = Retry;
+          return Retry;
+        } else {
+          throw fcg;
         }
-        break;
       }
       assert(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
       // analysis, but breaksTracelet is authoritative.
       if (ni->breaksTracelet) break;
     }
-
     traceEnd();
-    if (transResult != Retry) {
-      try {
-        transResult = Success;
-        traceCodeGen(bcMap);
-      } catch (JIT::FailedCodeGen& fcg) {
-        // Code-gen failed. Search for the bytecode instruction that caused the
-        // problem, flag it to be interpreted, and retranslate the tracelet.
-        NormalizedInstruction *ni;
-        for (ni = t.m_instrStream.first; ni; ni = ni->next) {
-          if (ni->source.offset() == fcg.bcOff) break;
-        }
-        if (ni && !ni->interp && supportedInterpOne(ni)) {
-          ni->interp = true;
-          transResult = Retry;
-          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
-                "after failing to code-gen \n\n",
-                getCurrentTransID(), ni->toString().c_str());
-        } else {
-          throw fcg;
+
+    try {
+      traceCodeGen();
+      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
+            getCurrentTransID());
+      return Success;
+    } catch (JIT::FailedCodeGen& fcg) {
+      // Code-gen failed. Search for the bytecode instruction that caused the
+      // problem, flag it to be interpreted, and retranslate the tracelet.
+      for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
+        if (ni->source.offset() == fcg.bcOff) {
+          if (!ni->interp && supportedInterpOne(ni)) {
+            ni->interp = true;
+            TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
+                  "after failing to code-gen \n\n",
+                  getCurrentTransID(), ni->toString().c_str());
+            return Retry;
+          }
+          break;
         }
       }
-      if (transResult == Success) {
-        TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
-              getCurrentTransID());
-      }
+      throw fcg;
     }
   } catch (JIT::FailedCodeGen& fcg) {
-    transResult = Failure;
     TRACE(1, "HHIR: FAILED to generate code for Translation %d "
           "@ %s:%d (%s)\n", getCurrentTransID(),
           fcg.file, fcg.line, fcg.func);
@@ -1783,11 +1772,8 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           fcg.file, fcg.line, fcg.func);
   } catch (JIT::FailedIRGen& x) {
-    transResult = Failure;
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           x.file, x.line, x.func);
-  } catch (TranslationFailedExc& tfe) {
-    not_reached();
   } catch (const FailedAssertion& fa) {
     fa.print();
     StackTraceNoHeap::AddExtraLogging(
@@ -1796,11 +1782,10 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
                     fa.summary, m_hhbcTrans->trace()->toString()).str());
     abort();
   } catch (const std::exception& e) {
-    transResult = Failure;
     FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
     assert(0);
   }
-  return transResult;
+  return Failure;
 }
 
 void Translator::traceStart(Offset bcStartOffset) {
@@ -1828,7 +1813,7 @@ void Translator::traceEnd() {
          color(ANSI_COLOR_END));
 }
 
-void TranslatorX64::traceCodeGen(vector<TransBCMapping>* bcMap) {
+void TranslatorX64::traceCodeGen() {
   using namespace JIT;
 
   HPHP::JIT::IRTrace* trace = m_hhbcTrans->trace();
@@ -1844,13 +1829,14 @@ void TranslatorX64::traceCodeGen(vector<TransBCMapping>* bcMap) {
   finishPass(" after optimizing ", kOptLevel);
 
   auto* factory = m_irFactory.get();
+  recordBCInstr(OpTraceletGuard, a, a.code.frontier);
   if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
     LifetimeInfo lifetime(factory);
     RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
     finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
     assert(checkRegisters(trace, *factory, regs));
     AsmInfo ai(factory);
-    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs,
+    genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs,
                     &lifetime, &ai);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
@@ -1863,11 +1849,10 @@ void TranslatorX64::traceCodeGen(vector<TransBCMapping>* bcMap) {
     RegAllocInfo regs = allocRegsForTrace(trace, factory);
     finishPass(" after reg alloc ", kRegAllocLevel);
     assert(checkRegisters(trace, *factory, regs));
-    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs);
+    genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs);
   }
 
   m_numHHIRTrans++;
-  traceFree();
 }
 
 void Translator::traceFree() {

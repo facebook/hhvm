@@ -33,8 +33,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/intrusive/list.hpp>
 
-#include "folly/Range.h"
 #include "folly/Conv.h"
+#include "folly/Format.h"
+#include "folly/Range.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -64,13 +65,19 @@ struct SSATmp;
 struct Block;
 struct IRTrace;
 
-class FailedIRGen : public std::exception {
+class FailedIRGen : public std::runtime_error {
  public:
-  const char* file;
-  const int   line;
-  const char* func;
-  FailedIRGen(const char* _file, int _line, const char* _func) :
-      file(_file), line(_line), func(_func) { }
+  const char* const file;
+  const int         line;
+  const char* const func;
+
+  FailedIRGen(const char* _file, int _line, const char* _func)
+    : std::runtime_error(folly::format("FailedIRGen @ {}:{} in {}",
+                                       _file, _line, _func).str())
+    , file(_file)
+    , line(_line)
+    , func(_func)
+  {}
 };
 
 #define SPUNT(instr) do {                           \
@@ -155,6 +162,7 @@ class FailedIRGen : public std::exception {
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(CheckType,                    DParam, S(Gen,Nullptr),        C|E|CRc|PRc|P) \
+O(AssertType,                   DParam, S(Gen,Nullptr),        C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \

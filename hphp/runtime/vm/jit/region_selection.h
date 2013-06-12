@@ -26,7 +26,11 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP {
+namespace Transl {
+struct Tracelet;
+}
+namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -212,7 +216,7 @@ struct RegionContext::PreLiveAR {
  * analyzer.  Eventually we'd like analyze to occur underneath this as
  * well.
  */
-RegionDescPtr selectRegion(const RegionContext&);
+RegionDescPtr selectRegion(const RegionContext&, const Transl::Tracelet*);
 
 /*
  * Debug stringification for various things.

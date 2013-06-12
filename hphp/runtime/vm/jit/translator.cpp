@@ -128,46 +128,6 @@ void InstrStream::remove(NormalizedInstruction* ni) {
   ni->next = nullptr;
 }
 
-void Tracelet::constructLiveRanges() {
-  // Helper function.
-  auto considerLoc = [this](DynLocation* dloc,
-                            const NormalizedInstruction* ni,
-                            bool output) {
-    if (!dloc) return;
-    Location loc = dloc->location;
-    m_liveEnd[loc] = ni->sequenceNum;
-    if (output) m_liveDirtyEnd[loc] = ni->sequenceNum;
-  };
-  // We assign each instruction a sequence number. We do this here, rather
-  // than when creating the instruction, to allow splicing and removing
-  // instructions
-  int sequenceNum = 0;
-  for (auto ni = m_instrStream.first; ni; ni = ni->next) {
-    ni->sequenceNum = sequenceNum++;
-    considerLoc(ni->outLocal, ni, true);
-    considerLoc(ni->outStack3, ni, true);
-    considerLoc(ni->outStack2, ni, true);
-    considerLoc(ni->outStack, ni, true);
-    for (auto inp : ni->inputs) {
-      considerLoc(inp, ni, false);
-    }
-  }
-}
-
-bool Tracelet::isLiveAfterInstr(Location l,
-                                const NormalizedInstruction& ni) const {
-  const auto end = m_liveEnd.find(l);
-  assert(end != m_liveEnd.end());
-  return ni.sequenceNum < end->second;
-}
-
-bool Tracelet::isWrittenAfterInstr(Location l,
-                                   const NormalizedInstruction& ni) const {
-  const auto end = m_liveDirtyEnd.find(l);
-  if (end == m_liveDirtyEnd.end()) return false;
-  return ni.sequenceNum < end->second;
-}
-
 NormalizedInstruction* Tracelet::newNormalizedInstruction() {
   NormalizedInstruction* ni = new NormalizedInstruction();
   m_instrs.push_back(ni);
@@ -208,6 +168,12 @@ void Tracelet::print(std::ostream& out) const {
   for (; i; i = i->next) {
     out << "  " << i->offset() << ": " << i->toString() << std::endl;
   }
+}
+
+std::string Tracelet::toString() const {
+  std::ostringstream out;
+  print(out);
+  return out.str();
 }
 
 void sktrace(SrcKey sk, const char *fmt, ...) {
@@ -679,6 +645,8 @@ predictMVec(const NormalizedInstruction* ni) {
 static DataType
 predictOutputs(const Tracelet& t,
                NormalizedInstruction* ni) {
+  if (!RuntimeOption::EvalJitTypePrediction) return KindOfInvalid;
+
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     ni->outputPredicted = true;
@@ -3277,6 +3245,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto& t = *retval;
   t.m_sk = sk;
+  t.m_func = curFunc();
 
   DEBUG_ONLY const char* file = curUnit()->filepath()->data();
   DEBUG_ONLY const int lineNum = curUnit()->getLineNumber(t.m_sk.offset());
@@ -3561,8 +3530,6 @@ breakBB:
     t.m_changes[*it] = tas.m_currentMap[*it];
   }
 
-  t.constructLiveRanges();
-
   TRACE(1, "Tracelet done: stack delta %d\n", t.m_stackChange);
   return retval;
 }
@@ -3637,6 +3604,15 @@ void Translator::populateImmediates(NormalizedInstruction& inst) {
   }
 }
 
+const char* Translator::translateResultName(TranslateResult r) {
+  static const char* const names[] = {
+    "Failure",
+    "Retry",
+    "Success",
+  };
+  return names[r];
+}
+
 /*
  * Similar to applyInputMetaData, but designed to be used during ir
  * generation. Reads and writes types of values using m_hhbcTrans. This will
@@ -3683,8 +3659,8 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
 
     int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
-    auto& input = *inst.inputs[arg];
     auto updateType = [&]{
+      auto& input = *inst.inputs[arg];
       input.rtt = m_hhbcTrans->rttFromLocation(input.location);
     };
 
@@ -3699,20 +3675,27 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::DataTypePredicted: {
-        m_hhbcTrans->checkTypeLocation(
-          input.location, Type::fromDataType(DataType(info.m_data)),
-          inst.source.offset());
+        auto const& loc = inst.inputs[arg]->location;
+        auto const t = Type::fromDataType(DataType(info.m_data));
+        auto const offset = inst.source.offset();
+
+        // These 'predictions' mean the type is InitNull or the predicted type,
+        // so we assert InitNull | t, then guard t. This allows certain
+        // optimizations in the IR.
+        m_hhbcTrans->assertTypeLocation(loc, Type::InitNull | t);
+        m_hhbcTrans->checkTypeLocation(loc, t, offset);
         updateType();
         break;
       }
       case Unit::MetaInfo::DataTypeInferred: {
         m_hhbcTrans->assertTypeLocation(
-          input.location, Type::fromDataType(DataType(info.m_data)));
+          inst.inputs[arg]->location,
+          Type::fromDataType(DataType(info.m_data)));
         updateType();
         break;
       }
       case Unit::MetaInfo::String: {
-        m_hhbcTrans->assertString(input.location,
+        m_hhbcTrans->assertString(inst.inputs[arg]->location,
                                   inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
@@ -3782,8 +3765,7 @@ static Location toLocation(const RegionDesc::Location& loc) {
 }
 
 Translator::TranslateResult
-Translator::translateRegion(const RegionDesc& region,
-                            vector<TransBCMapping>* bcMap) {
+Translator::translateRegion(const RegionDesc& region) {
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   assert(!region.blocks.empty());
 
@@ -3812,7 +3794,8 @@ Translator::translateRegion(const RegionDesc& region,
       inst.source = sk;
       inst.m_unit = block->unit();
       inst.preppedByRef = false;
-      inst.breaksTracelet = false;
+      inst.breaksTracelet =
+        i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
       populateImmediates(inst);
 
@@ -3831,6 +3814,10 @@ Translator::translateRegion(const RegionDesc& region,
       getInputs(startSk, &inst, stackOff, inputInfos, [&](int i) {
           return m_hhbcTrans->traceBuilder()->getLocalType(i);
         });
+      if (inputInfos.needsRefCheck) {
+        // Not supported yet.
+        return Failure;
+      }
       for (auto& info : inputInfos) {
         if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
       }
@@ -3860,7 +3847,8 @@ Translator::translateRegion(const RegionDesc& region,
     }
   }
 
-  traceCodeGen(bcMap);
+  traceEnd();
+  traceCodeGen();
   return Success;
 }
 

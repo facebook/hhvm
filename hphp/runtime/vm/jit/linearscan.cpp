@@ -232,10 +232,17 @@ static SSATmp* canonicalize(SSATmp* tmp) {
     // The dst of IncRef, Mov, StRef, and StRefNT has the same value
     // as the src.
     // We follow these instructions to canonicalize an SSATmp.
-    if (opc != IncRef && opc != Mov && opc != StRef && opc != StRefNT) {
-      return tmp;
+    switch (opc) {
+      case IncRef:
+      case Mov:
+      case StRef:
+      case StRefNT:
+        tmp = inst->src(0);
+        break;
+
+      default:
+        return tmp;
     }
-    tmp = inst->src(0);
   }
 }
 
@@ -533,6 +540,9 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       m_preColoringHint.getPreColoringReg(orig, index);
     if (targetRegNo == reg::noreg) {
       targetRegNo = getJmpPreColor(orig, index, orig != ssaTmp);
+    }
+    if (targetRegNo == reg::noreg && ssaTmp->inst()->op() == AssertType) {
+      targetRegNo = m_allocInfo[ssaTmp->inst()->src(0)].reg(index);
     }
     if (targetRegNo != reg::noreg) {
       reg = getReg(&m_regs[int(targetRegNo)]);

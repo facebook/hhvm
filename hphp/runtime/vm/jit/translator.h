@@ -494,8 +494,8 @@ struct Tracelet : private boost::noncopyable {
   InstrStream    m_instrStream;
   int            m_stackChange;
 
-  // SrcKey for the start of the Tracelet.  This might be different
-  // from m_instrStream.first->source.
+  // SrcKey for the start of the Tracelet. This will be the same as
+  // m_instrStream.first->source.
   SrcKey         m_sk;
 
   // numOpcodes is the number of raw opcode instructions, before optimization.
@@ -510,15 +510,8 @@ struct Tracelet : private boost::noncopyable {
   ActRecState    m_arState;
   RefDeps        m_refDeps;
 
-  // Live range suport.
-  //
-  // Maintain a per-location last-read and last-written map. We don't need
-  // to remember the start of the live range, since we implicitly discover it
-  // at translation time. The entries in these maps are the sequence number
-  // of the instruction after which the location is no longer read/written.
-  typedef hphp_hash_map<Location, int, Location> RangeMap;
-  RangeMap m_liveEnd;
-  RangeMap m_liveDirtyEnd;
+  // The function this Tracelet was generated from.
+  const Func* m_func;
 
   /*
    * If we were unable to make sense of the instruction stream (e.g., it
@@ -547,10 +540,6 @@ struct Tracelet : private boost::noncopyable {
     m_analysisFailed(false),
     m_inliningFailed(false){ }
 
-  void constructLiveRanges();
-  bool isLiveAfterInstr(Location l, const NormalizedInstruction& i) const;
-  bool isWrittenAfterInstr(Location l, const NormalizedInstruction& i) const;
-
   NormalizedInstruction* newNormalizedInstruction();
   DynLocation* newDynLocation(Location l, DataType t);
   DynLocation* newDynLocation(Location l, RuntimeType t);
@@ -560,6 +549,7 @@ struct Tracelet : private boost::noncopyable {
    * to make gdb happy. */
   void print() const;
   void print(std::ostream& out) const;
+  std::string toString() const;
 
   SrcKey nextSk() const;
 };
@@ -906,9 +896,10 @@ protected:
     Retry,
     Success
   };
+  static const char* translateResultName(TranslateResult r);
   void translateInstr(const NormalizedInstruction& i);
   void traceStart(Offset bcStartOffset);
-  virtual void traceCodeGen(vector<TransBCMapping>* bcMap) = 0;
+  virtual void traceCodeGen() = 0;
   void traceEnd();
   void traceFree();
 
@@ -934,8 +925,7 @@ protected:
   void requestResetHighLevelTranslator();
 
   void populateImmediates(NormalizedInstruction&);
-  TranslateResult translateRegion(const RegionDesc& region,
-                                  vector<TransBCMapping>* bcMap);
+  TranslateResult translateRegion(const RegionDesc& region);
 
   TCA m_resumeHelper;
   TCA m_resumeHelperRet;

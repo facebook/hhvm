@@ -777,6 +777,7 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
           objOrCls
         }
       );
+      FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
 
       stackOff += kNumActRecCells;
     },
@@ -784,6 +785,7 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
       ctx.liveTypes.push_back(
         { L::Stack{stackOff++}, JIT::liveTVType(tv) }
       );
+      FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
 }
@@ -3277,74 +3279,75 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   TCA                     counterStart = 0;
   uint8_t                 counterLen = 0;
   SrcRec&                 srcRec = *getSrcRec(sk);
-  vector<TransBCMapping>  bcMapping;
   TransKind               transKind = TransInterp;
 
-  if (!args.m_interp) {
+  auto resetState = [&] {
+    a.code.frontier = start;
+    astubs.code.frontier = stubStart;
+    m_pendingFixups.clear();
+    m_bcMap.clear();
+    srcRec.clearInProgressTailJumps();
+  };
+
+  auto assertCleanState = [&] {
+    assert(a.code.frontier == start);
+    assert(astubs.code.frontier == stubStart);
+    assert(m_pendingFixups.empty());
+    assert(m_bcMap.empty());
+    assert(srcRec.inProgressTailJumps().empty());
+  };
+
+  if (!args.m_interp && !checkTranslationLimit(t.m_sk, srcRec)) {
     // Attempt to create a region at this SrcKey
     JIT::RegionContext rContext { curFunc(), args.m_sk.offset() };
+    FTRACE(2, "populating live context for region\n");
     populateLiveContext(rContext);
-    auto region = JIT::selectRegion(rContext);
+    auto region = JIT::selectRegion(rContext, &t);
 
     TranslateResult result = Retry;
     while (result == Retry) {
-      assert(a.code.frontier == start);
-      assert(astubs.code.frontier == stubStart);
-
       traceStart(sk.offset());
 
       // Try translating a region if we have one, then fall back to using the
       // Tracelet.
       if (region) {
         try {
-          result = translateRegion(*region, &bcMapping);
-          FTRACE(2, "translateRegion succeeded\n");
+          assertCleanState();
+          result = translateRegion(*region);
+          FTRACE(2, "translateRegion finished with result {}\n",
+                 translateResultName(result));
         } catch (const std::exception& e) {
           FTRACE(1, "translateRegion failed with '{}'\n", e.what());
-          traceEnd();
           result = Failure;
+        }
+        if (result == Failure) {
+          traceFree();
+          traceStart(sk.offset());
+          resetState();
         }
       }
       if (!region || result == Failure) {
         FTRACE(1, "trying irTranslateTracelet\n");
-        result = irTranslateTracelet(*tp, start, stubStart, &bcMapping);
+        assertCleanState();
+        result = irTranslateTracelet(*tp);
       }
 
       if (result != Success) {
-        // The whole translation failed; give up on this SrcKey. Since it is not
-        // linked into srcDB yet, it is guaranteed not to be reachable.
-        // Free IR resources for this trace, rollback the Translation cache
-        // frontiers, and discard any pending fixups.
-        traceFree();
-        a.code.frontier = start;
-        astubs.code.frontier = stubStart;
-        m_pendingFixups.clear();
-        // Reset additions to list of addresses which need to be patched
-        srcRec.clearInProgressTailJumps();
+        // Translation failed. Free resources for this trace, rollback the
+        // translation cache frontiers, and discard any pending fixups.
+        resetState();
       }
+      traceFree();
     }
 
     if (result == Success) {
-      m_irAUsage += (a.code.frontier - start);
-      m_irAstubsUsage += (astubs.code.frontier - stubStart);
+      // Translation succeeded. Mark it as such.
       transKind = TransNormalIR;
     }
   }
 
   if (transKind == TransInterp) {
-    assert(m_pendingFixups.size() == 0);
-    assert(srcRec.inProgressTailJumps().size() == 0);
-    bcMapping.clear();
-
-    // The whole translation failed; give up on this BB. Since it is not
-    // linked into srcDB yet, it is guaranteed not to be reachable.
-    // Permanent reset; nothing is reachable yet.
-    a.code.frontier = start;
-    astubs.code.frontier = stubStart;
-    bcMapping.clear();
-    // Discard any pending fixups.
-    m_pendingFixups.clear();
-    srcRec.clearInProgressTailJumps();
+    assertCleanState();
     TRACE(1,
           "emitting %d-instr interp request for failed translation\n",
           int(t.m_numOpcodes));
@@ -3368,7 +3371,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                           a.code.frontier - start, stubStart,
                           astubs.code.frontier - stubStart,
                           counterStart, counterLen,
-                          bcMapping));
+                          m_bcMap));
+  m_bcMap.clear();
 
   recordGdbTranslation(sk, curFunc(), a, start,
                        false, false);
@@ -3465,8 +3469,6 @@ TranslatorX64::TranslatorX64()
   m_trampolineSize(0),
   m_defClsHelper(0),
   m_funcPrologueRedispatch(0),
-  m_irAUsage(0),
-  m_irAstubsUsage(0),
   m_numHHIRTrans(0),
   m_catchTraceMap(128)
 {
@@ -3953,16 +3955,12 @@ std::string TranslatorX64::getUsage() {
     "tx64: %9zd bytes (%" PRId64 "%%) in ahot.code\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in a.code\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in a.code from ir\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code from ir\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in m_globalData\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in persistentCache\n",
     aHotUsage,  100 * aHotUsage / ahot.code.size,
     aUsage,     100 * aUsage / a.code.size,
     stubsUsage, 100 * stubsUsage / astubs.code.size,
-    m_irAUsage,     100 * m_irAUsage / a.code.size,
-    m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
     dataUsage, 100 * dataUsage / m_globalData.size,
     tcUsage,
     400 * tcUsage / RuntimeOption::EvalJitTargetCacheSize / 3,

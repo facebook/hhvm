@@ -153,6 +153,7 @@ struct HhbcTranslator {
   void setThisAvailable();
   void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
   void emitInterpOneCF(int numPopped);
+  std::string showStack() const;
 
   /*
    * An emit* function for each HHBC opcode.

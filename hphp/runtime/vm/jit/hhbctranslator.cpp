@@ -2384,9 +2384,12 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
 }
 
 void HhbcTranslator::guardTypeLocation(const Location& loc, Type type) {
+  assert(type.subtypeOf(Type::Gen | Type::Cls));
+
   if (loc.isStack()) {
     guardTypeStack(loc.offset, type);
   } else if (loc.isLocal()) {
+    assert(type.not(Type::Cls));
     guardTypeLocal(loc.offset, type);
   } else {
     not_reached();
@@ -2408,6 +2411,8 @@ void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
 
 void HhbcTranslator::checkTypeLocation(const Location& loc, Type type,
                                        Offset dest) {
+  assert(type.subtypeOf(Type::Gen));
+
   if (loc.isStack()) {
     checkTypeStack(loc.offset, type, dest);
   } else if (loc.isLocal()) {
@@ -2418,9 +2423,12 @@ void HhbcTranslator::checkTypeLocation(const Location& loc, Type type,
 }
 
 void HhbcTranslator::assertTypeLocation(const Location& loc, Type type) {
+  assert(type.subtypeOf(Type::Gen | Type::Cls));
+
   if (loc.isStack()) {
     assertTypeStack(loc.offset, type);
   } else if (loc.isLocal()) {
+    assert(type.not(Type::Cls));
     assertTypeLocal(loc.offset, type);
   } else {
     not_reached();
@@ -2434,20 +2442,24 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
     return;
   }
 
+  assert(m_evalStack.size() == 0);
+  assert(m_stackDeficit == 0); // This should only be called at the beginning
+                               // of a trace, with a clean stack.
   gen(GuardStk, type, StackOffset(stackIndex), m_tb->sp());
 }
 
 void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
   auto exitTrace = getExitTrace(dest);
-  if (idx >= m_evalStack.size()) {
-    FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
-    gen(CheckStk, type, exitTrace, StackOffset(idx), m_tb->sp());
-  } else {
+  if (idx < m_evalStack.size()) {
     FTRACE(1, "checkTypeStack(){}: generating CheckType for {}\n",
            idx, type.toString());
     SSATmp* tmp = m_evalStack.top(idx);
     assert(tmp);
     m_evalStack.replace(idx, gen(CheckType, type, exitTrace, tmp));
+  } else {
+    FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
+    gen(CheckStk, type, exitTrace,
+        StackOffset(idx - m_evalStack.size () + m_stackDeficit), m_tb->sp());
   }
 }
 
@@ -2455,32 +2467,29 @@ void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
   checkTypeStack(0, type, nextByteCode);
 }
 
-void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
-  SSATmp* tmp = m_evalStack.top(stackIndex);
-  if (!tmp) {
-    gen(AssertStk, type, StackOffset(stackIndex), m_tb->sp());
-    return;
+void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
+  if (idx < m_evalStack.size()) {
+    SSATmp* tmp = m_evalStack.top(idx);
+    assert(tmp);
+    m_evalStack.replace(idx, gen(AssertType, type, tmp));
+  } else {
+    gen(AssertStk, type,
+        StackOffset(idx - m_evalStack.size() + m_stackDeficit),
+        m_tb->sp());
   }
-
-  /*
-   * We already had a value in flight---refine the type in case it
-   * allows generating better code.  This is safe because in this path
-   * we know the value is *actually* this type due to static analysis
-   * (not based on guards).
-   */
-  refineType(tmp, type);
 }
 
 void HhbcTranslator::assertString(const Location& loc, const StringData* str) {
   auto idx = loc.offset;
 
   if (loc.isStack()) {
-    if (idx >= m_evalStack.size()) {
-      gen(AssertStkVal, StackOffset(idx), cns(str));
-    } else {
+    if (idx < m_evalStack.size()) {
       DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(idx);
       assert(oldStr->type().maybe(Type::Str));
       m_evalStack.replace(idx, cns(str));
+    } else {
+      gen(AssertStkVal, StackOffset(idx - m_evalStack.size() + m_stackDeficit),
+          m_tb->sp(), cns(str));
     }
   } else if (loc.isLocal()) {
     assert(m_tb->getLocalType(loc.offset).maybe(Type::Str));
@@ -2506,7 +2515,8 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
         val = m_evalStack.top(i);
         t = val->type();
       } else {
-        auto stackVal = getStackValue(m_tb->sp(), i);
+        auto stackVal = getStackValue(m_tb->sp(),
+                                      i - m_evalStack.size() + m_stackDeficit);
         val = stackVal.value;
         t = stackVal.knownType;
       }
@@ -3233,6 +3243,66 @@ void HhbcTranslator::emitInterpOneCF(int numPopped) {
   gen(InterpOneCF, m_tb->fp(), sp, cns(bcOff()));
   m_stackDeficit = 0;
   m_hasExit = true;
+}
+
+std::string HhbcTranslator::showStack() const {
+  if (isInlining()) {
+    return folly::format("{:*^60}\n",
+                         " I don't understand inlining stacks yet ").str();
+  }
+  std::ostringstream out;
+  auto header = [&](const std::string& str) {
+    out << folly::format("+{:-^62}+\n", str);
+  };
+
+  const int32_t stackDepth = m_tb->spOffset() - curFunc()->numLocals() +
+    m_evalStack.size() - m_stackDeficit;
+  auto spOffset = stackDepth;
+  auto elem = [&](const std::string& str) {
+    out << folly::format("| {:<60} |\n",
+                         folly::format("{:>2}: {}",
+                                       stackDepth - spOffset, str));
+    assert(spOffset > 0);
+    --spOffset;
+  };
+  auto fpiStack = m_fpiStack;
+  auto checkFpi = [&]() {
+    if (!fpiStack.empty() &&
+        spOffset - kNumActRecCells == fpiStack.top().second) {
+      for (unsigned i = 0; i < kNumActRecCells; ++i) elem("ActRec");
+      fpiStack.pop();
+      return true;
+    }
+    return false;
+  };
+
+  header(folly::format(" {} stack element(s); m_evalStack: ",
+                       stackDepth).str());
+  for (unsigned i = 0; i < m_evalStack.size(); ++i) {
+    while (checkFpi());
+    SSATmp* value = m_evalStack.top(i);
+    elem(value->inst()->toString());
+  }
+
+  header(" in-memory ");
+  for (unsigned i = m_stackDeficit; spOffset > 0; ) {
+    assert(i < curFunc()->maxStackCells());
+    if (checkFpi()) {
+      i += kNumActRecCells;
+      continue;
+    }
+
+    auto stkVal = getStackValue(m_tb->sp(), i);
+    std::ostringstream elemStr;
+    if (stkVal.knownType.equals(Type::None)) elem("unknown");
+    else if (stkVal.value) elem(stkVal.value->inst()->toString());
+    else elem(stkVal.knownType.toString());
+
+    ++i;
+  }
+
+  header("");
+  return out.str();
 }
 
 /*

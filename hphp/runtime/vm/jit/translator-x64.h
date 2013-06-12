@@ -186,17 +186,16 @@ class TranslatorX64 : public Translator
   TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
 
   DataBlock              m_globalData;
-  size_t                 m_irAUsage;
-  size_t                 m_irAstubsUsage;
 
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
 
-  virtual void traceCodeGen(std::vector<TransBCMapping>*);
+  virtual void traceCodeGen();
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
   CatchTraceMap              m_catchTraceMap;
+  std::vector<TransBCMapping> m_bcMap;
 
 private:
   int64_t m_createdTime;
@@ -372,10 +371,7 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  TranslateResult irTranslateTracelet(Tracelet& t,
-                                      const TCA start,
-                                      const TCA stubStart,
-                                      vector<TransBCMapping>* bcMap);
+  TranslateResult irTranslateTracelet(Tracelet& t);
 
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,

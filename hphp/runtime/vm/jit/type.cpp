@@ -92,7 +92,7 @@ Type Type::fromDataType(DataType outerType,
     case KindOfUncounted     : return Uncounted;
     case KindOfAny           : return Gen;
     case KindOfRef: {
-      if (innerType == KindOfInvalid) {
+      if (innerType == KindOfInvalid || innerType == KindOfAny) {
         return BoxedCell;
       } else {
         return fromDataType(innerType).box();
@@ -152,7 +152,7 @@ Type builtinReturn(const IRInstruction* inst) {
     return t;
   }
   if (t.isReferenceType() || t.equals(Type::BoxedCell)) {
-    return (t | Type::Null);
+    return t | Type::InitNull;
   }
   not_reached();
 }

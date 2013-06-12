@@ -108,6 +108,7 @@ private:
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyCheckType(IRInstruction* inst);
+  SSATmp* simplifyCheckStk(IRInstruction* inst);
   SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);

@@ -73,6 +73,10 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     return m_funcId;
   }
 
+  void setOffset(Offset o) {
+    m_offset = o;
+  }
+
   int offset() const {
     return m_offset;
   }

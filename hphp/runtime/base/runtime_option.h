@@ -406,6 +406,7 @@ public:
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \
   F(string, JitProfilePath,            string(""))                      \
+  F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitWarmupRequests,       kDefaultWarmupRequests)          \
   F(bool, JitProfileRecord,            false)                           \

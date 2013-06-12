@@ -329,7 +329,9 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
-  case CheckType:    return simplifyCheckType(inst);
+  case CheckType:
+  case AssertType:   return simplifyCheckType(inst);
+  case CheckStk:     return simplifyCheckStk(inst);
   case AssertNonNull:return simplifyAssertNonNull(inst);
 
   case LdCls:        return simplifyLdCls(inst);
@@ -513,6 +515,20 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
          srcType.toString(), type.toString());
   return src;
+}
+
+SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
+  auto type = inst->typeParam();
+  auto sp = inst->src(0);
+  auto offset = inst->extra<CheckStk>()->offset;
+
+  auto stkVal = getStackValue(sp, offset);
+  if (stkVal.knownType.equals(Type::None)) return nullptr;
+
+  if (stkVal.knownType.subtypeOf(type)) {
+    return sp;
+  }
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
@@ -1666,20 +1682,20 @@ SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
-  if (inst->typeParam().notCounted()) {
-    inst->convertToNop();
-    return nullptr;
-  }
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
     inst->convertToNop();
-    return gen(DecRef, info.knownType, info.value);
+    return gen(DecRef, info.value);
   }
   if (!info.knownType.equals(Type::None)) {
     inst->setTypeParam(
       Type::mostRefined(inst->typeParam(), info.knownType)
     );
+  }
+  if (inst->typeParam().notCounted()) {
+    inst->convertToNop();
+    return nullptr;
   }
   return nullptr;
 }

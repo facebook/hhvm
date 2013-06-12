@@ -806,6 +806,13 @@ void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   emitMovRegReg(m_as, srcReg, dstReg);
 }
 
+void CodeGenerator::cgAssertType(IRInstruction* inst) {
+  auto const& srcRegs = m_regs[inst->src(0)];
+  auto const& dstRegs = m_regs[inst->dst()];
+  shuffle2(m_as, srcRegs.reg(0), srcRegs.reg(1),
+           dstRegs.reg(0), dstRegs.reg(1));
+}
+
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
   cgLoad(rVmTl, TargetCache::kUnwinderTvOff, inst);
 }

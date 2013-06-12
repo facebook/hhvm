@@ -16,12 +16,14 @@
 #include "hphp/runtime/vm/jit/region_selection.h"
 
 #include <algorithm>
+#include <boost/range/adaptors.hpp>
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace JIT {
 
@@ -40,6 +42,7 @@ enum class RegionMode {
   None,
   OneBC,
   Method,
+  Tracelet,
 };
 
 RegionMode regionMode() {
@@ -47,6 +50,7 @@ RegionMode regionMode() {
   if (s == "")       return RegionMode::None;
   if (s == "onebc")  return RegionMode::OneBC;
   if (s == "method") return RegionMode::Method;
+  if (s == "tracelet") return RegionMode::Tracelet;
   FTRACE(1, "unknown region mode {}: using none\n", s);
   if (debug) abort();
   return RegionMode::None;
@@ -57,8 +61,9 @@ RegionMode regionMode() {
 //////////////////////////////////////////////////////////////////////
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
+  assert(pred.type.subtypeOf(Type::Gen | Type::Cls));
   auto const newElem = std::make_pair(sk, pred);
-  auto const it = std::lower_bound(m_predTypes.begin(), m_predTypes.end(),
+  auto const it = std::upper_bound(m_predTypes.begin(), m_predTypes.end(),
     newElem, typePredListCmp);
   m_predTypes.insert(it, newElem);
   checkInvariants();
@@ -130,7 +135,87 @@ bool RegionDesc::Block::typePredListCmp(TypePredList::const_reference a,
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDescPtr selectRegion(const RegionContext& context) {
+namespace {
+RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
+  if (tlet.m_refDeps.size()) {
+    // We don't support reffiness guards yet.
+    return nullptr;
+  }
+
+  auto region = smart::make_unique<RegionDesc>();
+  SrcKey sk(tlet.m_sk);
+  assert(sk == tlet.m_instrStream.first->source);
+  auto unit = tlet.m_instrStream.first->unit();
+
+  // Boundaries for the current RegionDesc::Block, which is created when we
+  // finish the Tracelet or start a new basic block.
+  SrcKey startSk(sk);
+  int numInstrs = 0;
+
+  for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
+    assert(sk == ni->source);
+    assert(ni->unit() == unit);
+
+    ++numInstrs;
+    if (ni->op() == OpJmp && ni->next) {
+      // A Jmp that isn't the final instruction in a Tracelet means we traced
+      // through a forward jump in analyze. Update sk to point to the next NI
+      // in the stream.
+      auto dest = ni->offset() + ni->imm[0].u_BA;
+      assert(dest > sk.offset()); // We only trace for forward Jmps for now.
+      sk.setOffset(dest);
+
+      // The Jmp terminates this block, so append it and start a new one.
+      region->blocks.push_back(
+        smart::make_unique<RegionDesc::Block>(
+          tlet.m_func, startSk.offset(), numInstrs));
+      numInstrs = 0;
+      startSk = sk;
+    } else {
+      sk.advance(unit);
+    }
+  }
+
+  // Append the final block. This will be the only block for Tracelets that
+  // didn't include a Jmp.
+  region->blocks.push_back(
+    smart::make_unique<RegionDesc::Block>(
+      tlet.m_func, startSk.offset(), numInstrs));
+
+  // Add tracelet guards as predictions on the first instruction. Predictions
+  // and known types from static analysis will be applied by
+  // Translator::translateRegion.
+  for (auto const& dep : tlet.m_dependencies) {
+    if (dep.second->rtt.isVagueValue() ||
+        dep.second->location.isThis()) continue;
+
+    typedef RegionDesc R;
+    auto addPred = [&](const R::Location& loc) {
+      auto type = Type::fromRuntimeType(dep.second->rtt);
+      region->blocks.front()->addPredicted(tlet.m_sk, {loc, type});
+    };
+
+    switch (dep.first.space) {
+      case Transl::Location::Stack:
+        addPred(R::Location::Stack{uint32_t(-dep.first.offset - 1)});
+        break;
+
+      case Transl::Location::Local:
+        addPred(R::Location::Local{uint32_t(dep.first.offset)});
+        break;
+
+      default: not_reached();
+    }
+  }
+
+  FTRACE(2, "Converted Tracelet:\n{}\nInto RegionDesc:\n{}\n",
+         tlet.toString(), show(*region));
+  return region;
+}
+}
+
+RegionDescPtr selectRegion(const RegionContext& context,
+                           const Transl::Tracelet* t) {
   auto const mode = regionMode();
 
   FTRACE(1,
@@ -160,6 +245,7 @@ RegionDescPtr selectRegion(const RegionContext& context) {
       case RegionMode::None:   return RegionDescPtr{nullptr};
       case RegionMode::OneBC:  return regionOneBC(context);
       case RegionMode::Method: return regionMethod(context);
+      case RegionMode::Tracelet: always_assert(t); return createRegion(*t);
       }
       not_reached();
     } catch (const std::exception& e) {

@@ -358,10 +358,11 @@ bool IRInstruction::hasMemEffects() const {
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(op(), CanCSE);
   // Make sure that instructions that are CSE'able can't produce a reference
-  // count or consume reference counts. CheckType is special because it can
-  // refine a maybeCounted type to a notCounted type, so it logically consumes
-  // and produces a reference without doing any work.
-  assert(!canCSE || !consumesReferences() || m_op == CheckType);
+  // count or consume reference counts. CheckType/AssertType are special
+  // because they can refine a maybeCounted type to a notCounted type, so they
+  // logically consume and produce a reference without doing any work.
+  assert(!canCSE || !consumesReferences() ||
+         m_op == CheckType || m_op == AssertType);
   return canCSE && !mayReenterHelper();
 }
 
@@ -373,9 +374,9 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
   }
-  // CheckType consumes a reference if we're guarding from a maybeCounted type
-  // to a notCounted type.
-  if (m_op == CheckType) {
+  // CheckType/AssertType consume a reference if we're guarding from a
+  // maybeCounted type to a notCounted type.
+  if (m_op == CheckType || m_op == AssertType) {
     assert(srcNo == 0);
     return src(0)->type().maybeCounted() && typeParam().notCounted();
   }
@@ -512,7 +513,9 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef || m_op == CheckType || m_op == Mov);
+  assert(m_op == IncRef ||
+         m_op == CheckType || m_op == AssertType ||
+         m_op == Mov);
   return src(0);
 }
 

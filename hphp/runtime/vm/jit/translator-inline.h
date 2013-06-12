@@ -37,15 +37,15 @@ namespace HPHP   {
  * Note that these do not assert anything about tl_regState; use
  * carefully.
  */
-static inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
-static inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
-static inline const uchar*& vmpc() { return g_vmContext->m_pc; }
-static inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
+inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
+inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
+inline const uchar*& vmpc() { return g_vmContext->m_pc; }
+inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
-static inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
-static inline const Func* curFunc() { return curFrame()->m_func; }
-static inline const Unit* curUnit() { return curFunc()->unit(); }
-static inline Class* curClass() {
+inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
+inline const Func* curFunc() { return curFrame()->m_func; }
+inline const Unit* curUnit() { return curFunc()->unit(); }
+inline Class* curClass() {
   const auto* func = curFunc();
   auto* cls = func->cls();
   if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {

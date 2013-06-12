@@ -3998,6 +3998,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopExit(PC& pc) {
     echo(tvCellAsVariant(c1).toString());
   }
   m_stack.popC();
+  m_stack.pushNull();
   throw ExitException(exitCode);
 }
 

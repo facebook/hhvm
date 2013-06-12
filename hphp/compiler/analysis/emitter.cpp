@@ -1448,10 +1448,10 @@ bool EmitterVisitor::isJumpTarget(Offset target) {
   return (it != m_jumpTargetEvalStacks.end());
 }
 
-#define CONTROL_BODY(brk, cnt, brkH, cntH) \
-  ControlTargetPusher _cop(this, -1, false, brk, cnt, brkH, cntH)
-#define FOREACH_BODY(itId, itRef, brk, cnt, brkH, cntH) \
-  ControlTargetPusher _cop(this, itId, itRef, brk, cnt, brkH, cntH)
+#define CONTROL_BODY(brk, cnt) \
+  ControlTargetPusher _cop(this, -1, false, brk, cnt)
+#define FOREACH_BODY(itId, itRef, brk, cnt) \
+  ControlTargetPusher _cop(this, itId, itRef, brk, cnt)
 
 class IterFreeThunklet : public Thunklet {
 public:
@@ -1638,9 +1638,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
   Emitter e(m, m_ue, *this);
 
   Label ctFatal;
-  Label ctFatalWithPop;
   int i, nk = stmts->getCount();
-  CONTROL_BODY(ctFatal, ctFatal, ctFatalWithPop, ctFatalWithPop);
+  CONTROL_BODY(ctFatal, ctFatal);
   for (i = 0; i < nk; i++) {
     StatementPtr s = (*stmts)[i];
     if (MethodStatementPtr meth = dynamic_pointer_cast<MethodStatement>(s)) {
@@ -1779,15 +1778,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
     // If the exitHnd label was used, we need to emit some extra code
     // to handle stray breaks
     Label exit;
-    if (ctFatal.isUsed() || ctFatalWithPop.isUsed()) {
+    if (ctFatal.isUsed()) {
       e.Jmp(exit);
-      if (ctFatalWithPop.isUsed()) {
-        ctFatalWithPop.set(e);
-        e.PopC();  // the number of levels to jump up
-      }
-      if (ctFatal.isUsed()) {
-        ctFatal.set(e);
-      }
+      ctFatal.set(e);
       static const StringData* msg =
         StringData::GetStaticString("Cannot break/continue");
       e.String(msg);
@@ -2018,51 +2011,43 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfContinueStatement:
       case Statement::KindOfBreakStatement: {
         BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
-        int64_t n = bs->getDepth();
-        if (n == 1) {
-          // Plain old "break;" or "continue;"
-          if (m_controlTargets.empty()) {
-            static const StringData* msg =
-              StringData::GetStaticString("Cannot break/continue 1 level");
-            e.String(msg);
-            e.Fatal(0);
-            return false;
+        uint64_t destLevel = bs->getDepth() - 1;
+
+        if (bs->getDepth() > m_controlTargets.size()) {
+          std::ostringstream msg;
+          msg << "Cannot break/continue " << bs->getDepth() << " level";
+          if (bs->getDepth() > 1) {
+            msg << "s";
           }
-          if (bs->is(Statement::KindOfBreakStatement)) {
-            if (m_controlTargets.front().m_itId != -1) {
-              if (m_controlTargets.front().m_itRef) {
-                e.MIterFree(m_controlTargets.front().m_itId);
-              } else {
-                e.IterFree(m_controlTargets.front().m_itId);
-              }
-            }
-            e.Jmp(m_controlTargets.front().m_brkTarg);
-          } else {
-            e.Jmp(m_controlTargets.front().m_cntTarg);
-          }
+          e.String(StringData::GetStaticString(msg.str()));
+          e.Fatal(0);
           return false;
         }
 
-        // Dynamic break/continue.
-        if (n == 0) {
-          // Depth can't be statically determined.
-          visit(bs->getExp());
-          emitConvertToCell(e);
-        } else {
-          // Dynamic break/continue with statically known depth.
-          if (n > (int64_t)m_controlTargets.size()) {
-            std::ostringstream msg;
-            msg << "Cannot break/continue " << n << " levels";
-            e.String(StringData::GetStaticString(msg.str()));
-            e.Fatal(0);
-            return false;
+        // "continue N" breaks out of N-1 loops and jumps to the top of the Nth.
+        // So whether this is break or continue, free N-1 Iters.
+        for (uint64_t i = 0; i < destLevel; ++i) {
+          if (m_controlTargets[i].m_itId != -1) {
+            if (m_controlTargets[i].m_itRef) {
+              e.MIterFree(m_controlTargets[i].m_itId);
+            } else {
+              e.IterFree(m_controlTargets[i].m_itId);
+            }
           }
-          e.Int(n);
         }
+
+        // Only free the Nth-level Iter for break statements.
         if (bs->is(Statement::KindOfBreakStatement)) {
-          e.Jmp(m_controlTargets.front().m_brkHand);
+          if (m_controlTargets[destLevel].m_itId != -1) {
+            if (m_controlTargets[destLevel].m_itRef) {
+              e.MIterFree(m_controlTargets[destLevel].m_itId);
+            } else {
+              e.IterFree(m_controlTargets[destLevel].m_itId);
+            }
+          }
+          e.Jmp(m_controlTargets[destLevel].m_brkTarg);
         } else {
-          e.Jmp(m_controlTargets.front().m_cntHand);
+          e.Jmp(m_controlTargets[destLevel].m_cntTarg);
         }
         return false;
       }
@@ -2072,10 +2057,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label top(e);
         Label condition;
         Label exit;
-        Label brkHand;
-        Label cntHand;
         {
-          CONTROL_BODY(exit, condition, brkHand, cntHand);
+          CONTROL_BODY(exit, condition);
           visit(ds->getBody());
         }
         condition.set(e);
@@ -2085,10 +2068,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           visitIfCondition(c, condEmitter, top, exit, false);
         }
 
-        if (brkHand.isUsed() || cntHand.isUsed()) {
-          e.Jmp(exit);
-          emitBreakHandler(e, exit, condition, brkHand, cntHand);
-        }
         if (exit.isUsed()) exit.set(e);
         return false;
       }
@@ -2141,8 +2120,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label preCond(e);
         Label preInc;
         Label fail;
-        Label brkHand;
-        Label cntHand;
         if (ExpressionPtr condExp = fs->getCondExp()) {
           Label tru;
           Emitter condEmitter(condExp, m_ue, *this);
@@ -2150,7 +2127,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (tru.isUsed()) tru.set(e);
         }
         {
-          CONTROL_BODY(fail, preInc, brkHand, cntHand);
+          CONTROL_BODY(fail, preInc);
           visit(fs->getBody());
         }
         preInc.set(e);
@@ -2158,7 +2135,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitPop(e);
         }
         e.Jmp(preCond);
-        emitBreakHandler(e, fail, preInc, brkHand, cntHand);
         if (fail.isUsed()) fail.set(e);
         return false;
       }
@@ -2343,8 +2319,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         uint ncase = cases->getCount();
         std::vector<Label> caseLabels(ncase);
         Label done;
-        Label brkHand;
-        Label cntHand;
 
         // There are two different ways this can go.  If the subject is a simple
         // variable, then we have to evaluate it every time we compare against a
@@ -2435,12 +2409,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         for (uint i = 0; i < ncase; i++) {
           caseLabels[i].set(e);
           CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-          CONTROL_BODY(done, done, brkHand, cntHand);
+          CONTROL_BODY(done, done);
           visit(c->getStatement());
-        }
-        if (brkHand.isUsed() || cntHand.isUsed()) {
-          e.Jmp(done);
-          emitBreakHandler(e, done, done, brkHand, cntHand);
         }
         done.set(e);
         if (!didSwitch && !simpleSubject) {
@@ -2535,8 +2505,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
         Label preCond(e);
         Label fail;
-        Label brkHand;
-        Label cntHand;
         {
           Label tru;
           ExpressionPtr c(ws->getCondExp());
@@ -2545,11 +2513,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (tru.isUsed()) tru.set(e);
         }
         {
-          CONTROL_BODY(fail, preCond, brkHand, cntHand);
+          CONTROL_BODY(fail, preCond);
           visit(ws->getBody());
         }
         e.Jmp(preCond);
-        emitBreakHandler(e, fail, preCond, brkHand, cntHand);
         if (fail.isUsed()) fail.set(e);
         return false;
       }
@@ -5545,24 +5512,16 @@ void EmitterVisitor::emitPostponedMeths() {
         e.Fatal(1);
       }
     }
-    Label ctFatal, ctFatalWithPop;
+    Label ctFatal;
     {
-      CONTROL_BODY(ctFatal, ctFatal, ctFatalWithPop, ctFatalWithPop);
+      CONTROL_BODY(ctFatal, ctFatal);
       // emit body
       visit(p.m_meth->getStmts());
     }
-    // If the break/continue label was used, we need to emit some extra code to
-    // handle stray breaks
     Label exit;
-    if (ctFatal.isUsed() || ctFatalWithPop.isUsed()) {
+    if (ctFatal.isUsed()) {
       e.Jmp(exit);
-      if (ctFatalWithPop.isUsed()) {
-        ctFatalWithPop.set(e);
-        e.PopC();
-      }
-      if (ctFatal.isUsed()) {
-        ctFatal.set(e);
-      }
+      ctFatal.set(e);
       static const StringData* msg =
         StringData::GetStaticString("Cannot break/continue");
       e.String(msg);
@@ -6428,67 +6387,6 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   return hoistable;
 }
 
-void
-EmitterVisitor::emitBreakHandler(Emitter& e,
-                                 Label& brkTarg,
-                                 Label& cntTarg,
-                                 Label& brkHand,
-                                 Label& cntHand,
-                                 Id iter /* = -1 */,
-                                 IterKind itKind /* = KindOfIter */) {
-  // Handle dynamic break
-  if (brkHand.isUsed()) {
-    brkHand.set(e);
-    // Whatever happens, we have left this loop
-    if (iter != -1) {
-      if (itKind == KindOfMIter) {
-        e.MIterFree(iter);
-      } else {
-        assert(itKind == KindOfIter);
-        e.IterFree(iter);
-      }
-    }
-    e.Int(1);
-    e.Sub();
-    e.Dup();
-    e.Int(1);
-    e.Lt();
-    e.JmpZ(topBreakHandler());
-    e.PopC(); // Pop break num
-    e.Jmp(brkTarg);
-  }
-
-  // Handle dynamic continue
-  if (cntHand.isUsed()) {
-    cntHand.set(e);
-    e.Int(1);
-    e.Sub();
-    e.Dup();
-    e.Int(1);
-    e.Lt();
-    if (iter != -1) {
-      // Freeing the iterator means another jump
-      Label leaving;
-      e.JmpZ(leaving);
-      e.PopC();
-      e.Jmp(cntTarg);
-      leaving.set(e);
-      // Leaving this loop
-      if (itKind == KindOfMIter) {
-        e.MIterFree(iter);
-      } else {
-        assert(itKind == KindOfIter);
-        e.IterFree(iter);
-      }
-      e.Jmp(topContHandler());
-    } else {
-      e.JmpZ(topContHandler());
-      e.PopC();
-      e.Jmp(cntTarg);
-    }
-  }
-}
-
 namespace {
 
 class ForeachIterGuard {
@@ -6518,8 +6416,6 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   bool strong = fe->isStrong();
   Label exit;
   Label next;
-  Label brkHand;
-  Label cntHand;
   Label start;
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
@@ -6630,11 +6526,10 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   }
 
   {
-    FOREACH_BODY(itId, strong, exit, next, brkHand, cntHand);
+    FOREACH_BODY(itId, strong, exit, next);
     if (body) visit(body);
   }
-  bool needBreakHandler = (brkHand.isUsed() || cntHand.isUsed());
-  if (next.isUsed() || needBreakHandler) {
+  if (next.isUsed()) {
     next.set(e);
   }
   if (key) {
@@ -6662,11 +6557,6 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   }
   newFaultRegion(bIterStart, m_ue.bcPos(), new IterFreeThunklet(itId, strong),
                  { itId, strong ? KindOfMIter : KindOfIter });
-  if (needBreakHandler) {
-    e.Jmp(exit);
-    IterKind itKind = strong ? KindOfMIter : KindOfIter;
-    emitBreakHandler(e, exit, next, brkHand, cntHand, itId, itKind);
-  }
   if (!simpleCase) {
     m_curFunc->freeUnnamedLocal(valTempLocal);
     if (key) {

@@ -1364,11 +1364,27 @@ void Parser::onCase(Token &out, Token &cases, Token *cond, Token &stmt) {
 }
 
 void Parser::onBreak(Token &out, Token *expr) {
-  out->stmt = NEW_STMT(BreakStatement, expr ? expr->exp : ExpressionPtr());
+  if (expr) {
+    int64_t depth = strtoll(expr->text().c_str(), nullptr, 0);
+    if (depth <= 0) {
+      PARSE_ERROR("'break' operator accepts only positive numbers");
+    }
+    out->stmt = NEW_STMT(BreakStatement, static_cast<uint64_t>(depth));
+  } else {
+    out->stmt = NEW_STMT(BreakStatement, 1UL);
+  }
 }
 
 void Parser::onContinue(Token &out, Token *expr) {
-  out->stmt = NEW_STMT(ContinueStatement, expr ? expr->exp : ExpressionPtr());
+  if (expr) {
+    int64_t depth = strtoll(expr->text().c_str(), nullptr, 0);
+    if (depth <= 0) {
+      PARSE_ERROR("'continue' operator accepts only positive numbers");
+    }
+    out->stmt = NEW_STMT(ContinueStatement, static_cast<uint64_t>(depth));
+  } else {
+    out->stmt = NEW_STMT(ContinueStatement, 1UL);
+  }
 }
 
 void Parser::onReturn(Token &out, Token *expr) {

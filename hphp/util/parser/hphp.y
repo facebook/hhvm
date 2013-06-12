@@ -133,7 +133,7 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
   Token params1; _p->onCallParam(params1, NULL, sname, 0);
   Token params2; _p->onCallParam(params2, &params1, value, 0);
   Token call;    _p->onCall(call, 0, fname, params2, 0);
-  
+
   _p->onExpStatement(out, call);
 }
 
@@ -929,9 +929,9 @@ statement:
     switch_case_list                   { _p->popLabelScope();
                                          _p->onSwitch($$,$2,$4);}
   | T_BREAK ';'                        { _p->onBreak($$, NULL);}
-  | T_BREAK expr ';'                   { _p->onBreak($$, &$2);}
+  | T_BREAK T_LNUMBER ';'              { _p->onBreak($$, &$2);}
   | T_CONTINUE ';'                     { _p->onContinue($$, NULL);}
-  | T_CONTINUE expr ';'                { _p->onContinue($$, &$2);}
+  | T_CONTINUE T_LNUMBER ';'           { _p->onContinue($$, &$2);}
   | T_RETURN ';'                       { _p->onReturn($$, NULL);}
   | T_RETURN expr ';'                  { _p->onReturn($$, &$2);}
   | T_YIELD T_BREAK ';'                { _p->onYieldBreak($$);}
@@ -2086,14 +2086,14 @@ array_access:
 
 dimmable_variable_access:
     dimmable_variable array_access     { _p->onRefDim($$, $1, $2);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     array_access                       { _p->onRefDim($$, $2, $4);}
 ;
 
 dimmable_variable_no_calls_access:
     dimmable_variable_no_calls
     array_access                       { _p->onRefDim($$, $1, $2);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     array_access                       { _p->onRefDim($$, $2, $4);}
 ;
 
@@ -2104,7 +2104,7 @@ variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable property_access           { _p->onObjectProperty($$,$1,$2);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
@@ -2144,15 +2144,15 @@ object_method_call:
   | variable T_OBJECT_OPERATOR
     '{' expr '}' '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$4,$7);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     T_OBJECT_OPERATOR
     ident hh_typeargs_opt '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$8);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     T_OBJECT_OPERATOR
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$7);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     T_OBJECT_OPERATOR
     '{' expr '}' '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$6,$9);}
@@ -2199,7 +2199,7 @@ variable_no_calls:
     variable_without_objects           { $$ = $1;}
   | dimmable_variable_no_calls_access  { $$ = $1;}
   | variable_no_calls property_access  { _p->onObjectProperty($$,$1,$2);}
-  | '(' expr_with_parens ')' 
+  | '(' expr_with_parens ')'
     property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM

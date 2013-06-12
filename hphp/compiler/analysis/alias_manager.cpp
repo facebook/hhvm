@@ -2971,15 +2971,6 @@ private:
         }
       }
       break;
-    case Statement::KindOfBreakStatement:
-      {
-        BreakStatementPtr bs(spc(BreakStatement, stmt));
-        if (bs->getExp()) {
-          ExpressionPtr rep(
-              insertTypeAssertion(assertion, bs->getExp()));
-          replaceExpression(bs, rep, bs->getExp(), 0);
-        }
-      }
     default:
       // this is something like a continue statement,
       // in which case we don't do anything

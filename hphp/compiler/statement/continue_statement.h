@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(ContinueStatement);
 
 class ContinueStatement : public BreakStatement {
 public:
-  ContinueStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
+  ContinueStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth);
   virtual StatementPtr clone();
 };
 

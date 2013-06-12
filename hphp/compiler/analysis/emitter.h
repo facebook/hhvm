@@ -436,24 +436,21 @@ private:
 
   class ControlTargets {
   public:
-    ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg,
-                   Label& brkHand, Label& cntHand) :
-        m_itId(itId), m_itRef(itRef), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
-        m_brkHand(brkHand), m_cntHand(cntHand) {}
+    ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg)
+        : m_itId(itId), m_itRef(itRef), m_brkTarg(brkTarg), m_cntTarg(cntTarg)
+      {}
     Id m_itId;
     bool m_itRef;
     Label& m_brkTarg;  // Jump here for "break;" (after doing IterFree)
     Label& m_cntTarg;  // Jump here for "continue;"
-    Label& m_brkHand;  // Push N and jump here for "break N;"
-    Label& m_cntHand;  // Push N and jump here for "continue N;"
   };
 
   class ControlTargetPusher {
   public:
     ControlTargetPusher(EmitterVisitor* e, Id itId, bool itRef, Label& brkTarg,
-        Label& cntTarg, Label& brkHand, Label& cntHand) : m_e(e) {
+        Label& cntTarg) : m_e(e) {
       e->m_controlTargets.push_front(ControlTargets(itId, itRef, brkTarg,
-            cntTarg, brkHand, cntHand));
+            cntTarg));
     }
     ~ControlTargetPusher() {
       m_e->m_controlTargets.pop_front();
@@ -553,9 +550,6 @@ private:
   std::vector<Label> m_yieldLabels;
   MetaInfoBuilder m_metaInfo;
 public:
-  Label& topBreakHandler() { return m_controlTargets.front().m_brkHand; }
-  Label& topContHandler() { return m_controlTargets.front().m_cntHand; }
-
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;
 
@@ -658,9 +652,6 @@ public:
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
-  void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
-                        Label& brkHand, Label& cntHand, Id iter = -1,
-                        IterKind itKind = KindOfIter);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);

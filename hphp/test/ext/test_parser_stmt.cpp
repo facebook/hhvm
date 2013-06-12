@@ -482,15 +482,15 @@ bool TestParserStmt::TestCaseStatement() {
 }
 
 bool TestParserStmt::TestBreakStatement() {
-  V("<?php break; break $a;",
-    "break;\nbreak $a;\n");
+  V("<?php break; break 4;",
+    "break;\nbreak 4;\n");
 
   return true;
 }
 
 bool TestParserStmt::TestContinueStatement() {
-  V("<?php continue; continue $a;",
-    "continue;\ncontinue $a;\n");
+  V("<?php continue; continue 5;",
+    "continue;\ncontinue 5;\n");
 
   return true;
 }

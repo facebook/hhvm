@@ -22,15 +22,15 @@ using namespace HPHP;
 // constructors/destructors
 
 ContinueStatement::ContinueStatement
-(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
+(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth)
   : BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ContinueStatement),
-                   exp) {
+                   depth) {
   m_name = "continue";
 }
 
 StatementPtr ContinueStatement::clone() {
   ContinueStatementPtr stmt(new ContinueStatement(*this));
-  stmt->m_exp = Clone(m_exp);
+  stmt->m_depth = m_depth;
   return stmt;
 }
 

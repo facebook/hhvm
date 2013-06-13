@@ -21,10 +21,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 static __thread GlobalVariables* g_variables;
-
-void init_global_variables() {
-  always_assert(false);
-}
+static __thread EnvConstants* g_envConstants;
 
 GlobalVariables* get_global_variables() {
   assert(g_variables);
@@ -37,6 +34,18 @@ void free_global_variables() {
 
 void free_global_variables_after_sweep() {
   g_variables = nullptr;
+}
+
+EnvConstants* get_env_constants() {
+  assert(g_envConstants);
+  return g_envConstants;
+}
+
+void EnvConstants::requestInit(EnvConstants* gt) {
+  g_envConstants = gt;
+}
+void EnvConstants::requestExit() {
+  g_envConstants = nullptr;
 }
 
 GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
@@ -59,7 +68,7 @@ GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   X(http_response_header, init_null_variant);
 #undef X
 
-  ThreadInfo::s_threadInfo->m_globals = g_variables = this;
+  g_variables = this;
 }
 
 //////////////////////////////////////////////////////////////////////

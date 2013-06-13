@@ -1947,7 +1947,7 @@ head:
       *tmp = self->getArrayAccess()->offsetGet(key);
       return *tmp;
     }
-    Variant& retv = get_global_variables()->__lvalProxy;
+    Variant& retv = get_env_constants()->__lvalProxy;
     retv = self->getArrayAccess()->offsetGet(key);
     return retv;
   }
@@ -2052,7 +2052,7 @@ Variant &Variant::lvalInvalid() {
 }
 
 Variant &Variant::lvalBlackHole() {
-  Variant &bh = get_global_variables()->__lvalProxy;
+  Variant &bh = get_env_constants()->__lvalProxy;
   bh.unset();
   return bh;
 }

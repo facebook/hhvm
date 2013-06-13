@@ -1127,7 +1127,7 @@ static void php_session_reset_id() {
     PS(send_cookie) = 0;
   }
 
-  GlobalVariables *g = get_global_variables();
+  EnvConstants *g = get_env_constants();
   if (PS(define_sid)) {
     StringBuffer var;
     var.append(String(PS(session_name)));

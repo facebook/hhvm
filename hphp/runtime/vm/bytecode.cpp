@@ -7292,6 +7292,7 @@ void VMExecutionContext::requestInit() {
   new (&s_requestArenaStorage) RequestArena();
   new (&s_varEnvArenaStorage) VarEnvArena();
 
+  EnvConstants::requestInit(new (request_arena()) EnvConstants());
   VarEnv::createGlobal();
   m_stack.requestInit();
   tx64 = nextTx64;
@@ -7329,6 +7330,7 @@ void VMExecutionContext::requestExit() {
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();
+  EnvConstants::requestExit();
 
   if (m_globalVarEnv) {
     assert(m_topVarEnv = m_globalVarEnv);

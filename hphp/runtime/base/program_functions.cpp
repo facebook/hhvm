@@ -1328,7 +1328,7 @@ void hphp_session_init() {
 
   g_vmContext->requestInit();
 
-  GlobalVariables *g = get_global_variables();
+  EnvConstants *g = get_env_constants();
   g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
 }
 

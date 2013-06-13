@@ -58,10 +58,24 @@ extern const char *g_class_map[];
  */
 typedef GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
-extern void init_global_variables();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
-extern Array get_global_state();
+
+/**
+ * These are things that look like constants to PHP, but their values aren't
+ * known at compile time and are instead determined at startup time. lvalProxy
+ * is not that (it's a "black hole" for certain types of assignments) but there
+ * isn't really an obviously better place for it to live.
+ */
+struct EnvConstants {
+  static void requestInit(EnvConstants* gt);
+  static void requestExit();
+  Variant __lvalProxy;
+  Variant stgv_Variant[2];
+#define k_SID stgv_Variant[0]
+#define k_PHP_SAPI stgv_Variant[1]
+};
+extern EnvConstants* get_env_constants();
 
 /**
  * Precomputed literal strings

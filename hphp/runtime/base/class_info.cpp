@@ -203,7 +203,7 @@ CVarRef ClassInfo::ConstantInfo::getDeferredValue() const {
     CVarRef (*f)()=(CVarRef(*)())callback;
     return (*f)();
   }
-  GlobalVariables* g = get_global_variables();
+  EnvConstants* g = get_env_constants();
   return g->stgv_Variant[valueLen];
 }
 

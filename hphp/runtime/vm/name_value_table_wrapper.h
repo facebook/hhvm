@@ -151,13 +151,6 @@ private:
 class GlobalNameValueTableWrapper : public NameValueTableWrapper {
  public:
   explicit GlobalNameValueTableWrapper(NameValueTable* tab);
-
-  Variant __realPropProxy;
-  Variant __lvalProxy;
-
-  Variant stgv_Variant[2];
-  #define k_SID stgv_Variant[0]
-  #define k_PHP_SAPI stgv_Variant[1]
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -326,7 +326,6 @@ public:
   Profiler *m_profiler;
   CodeCoverage *m_coverage;
 
-  GlobalVariables *m_globals;
   Executing m_executing;
 
   // A C++ exception which will be thrown by the next surprise check.

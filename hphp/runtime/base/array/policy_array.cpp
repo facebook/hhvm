@@ -182,10 +182,10 @@ void SimpleArrayStore::prepend(const Variant& v, uint length,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION(PolicyArray)
+IMPLEMENT_SMART_ALLOCATION(ArrayShell)
 
-PolicyArray::PolicyArray(uint capacity)
-    : ArrayData(ArrayKind::kPolicyArray)
+ArrayShell::ArrayShell(uint capacity)
+    : ArrayData(ArrayKind::kArrayShell)
     , Store(m_allocMode, capacity) {
   m_size = 0;
   m_pos = invalid_index;
@@ -194,9 +194,9 @@ PolicyArray::PolicyArray(uint capacity)
   APILOG << "(" << capacity << ");";
 }
 
-PolicyArray::PolicyArray(const PolicyArray& rhs, uint capacity,
+ArrayShell::ArrayShell(const ArrayShell& rhs, uint capacity,
                        AllocationMode am)
-    : ArrayData(ArrayKind::kPolicyArray, am)
+    : ArrayData(ArrayKind::kArrayShell, am)
     , Store(rhs, rhs.m_size, capacity, am, &rhs) {
   m_size = rhs.m_size;
   m_pos = rhs.m_pos;
@@ -205,30 +205,30 @@ PolicyArray::PolicyArray(const PolicyArray& rhs, uint capacity,
   APILOG << "(" << &rhs << ", " << capacity << ", " << uint(am) << ");";
 }
 
-PolicyArray::~PolicyArray() {
+ArrayShell::~ArrayShell() {
   APILOG << "()";
   destroy(m_size, m_allocMode);
 }
 
-Variant PolicyArray::getKey(ssize_t pos) const {
+Variant ArrayShell::getKey(ssize_t pos) const {
   APILOG << "(" << pos << ")";
   assert(size_t(pos) < m_size);
   return key(toPos(pos));
 }
 
-Variant PolicyArray::getValue(ssize_t pos) const {
+Variant ArrayShell::getValue(ssize_t pos) const {
   APILOG << "(" << pos << ")";
   assert(size_t(pos) < m_size);
   return getValueRef(pos);
 }
 
-const Variant& PolicyArray::getValueRef(ssize_t pos) const {
+const Variant& ArrayShell::getValueRef(ssize_t pos) const {
   APILOG << "(" << pos << ")";
   assert(size_t(pos) < m_size);
   return val(toPos(pos));
 }
 
-bool PolicyArray::isVectorData() const {
+bool ArrayShell::isVectorData() const {
   APILOG << "()";
   for (ssize_t i = 0; i < m_size; ++i) {
     if (Store::find(i, m_size) != toPos(i)) return false;
@@ -236,7 +236,7 @@ bool PolicyArray::isVectorData() const {
   return true;
 }
 
-Variant PolicyArray::reset() {
+Variant ArrayShell::reset() {
   APILOG << "()";
   if (m_size) {
     auto const first = firstIndex(m_size);
@@ -247,17 +247,11 @@ Variant PolicyArray::reset() {
   return false;
 }
 
-Variant PolicyArray::prev() {
-  APILOG << "()";
-  if (m_pos == invalid_index
-      || (m_pos = iter_rewind(m_pos)) == invalid_index) {
-    return false;
-  }
-  assert(size_t(m_pos) < m_size);
-  return val(toPos(m_pos));
+Variant ArrayShell::prev() {
+  NOT_IMPLEMENTED();
 }
 
-Variant PolicyArray::current() const {
+Variant ArrayShell::current() const {
   APILOG << "()";
   if (m_pos == invalid_index) {
     return false;
@@ -266,7 +260,7 @@ Variant PolicyArray::current() const {
   return val(toPos(m_pos));
 }
 
-Variant PolicyArray::next() {
+Variant ArrayShell::next() {
   APILOG << "()";
   if (m_pos == invalid_index
       || (m_pos = iter_advance(m_pos)) == invalid_index) {
@@ -276,7 +270,7 @@ Variant PolicyArray::next() {
   return val(toPos(m_pos));
 }
 
-Variant PolicyArray::end() {
+Variant ArrayShell::end() {
   if (m_size) {
     auto const last = lastIndex(m_size);;
     m_pos = toUint32(last);
@@ -286,7 +280,7 @@ Variant PolicyArray::end() {
   return false;
 }
 
-Variant PolicyArray::key() const {
+Variant ArrayShell::key() const {
   APILOG << ")";
   if (m_pos == invalid_index) {
     return uninit_null();
@@ -295,19 +289,15 @@ Variant PolicyArray::key() const {
   return key(toPos(m_pos));
 }
 
-Variant PolicyArray::value(int32_t &pos) const {
-  if (pos == ArrayData::invalid_index) {
-    return false;
-  }
-  assert(uint32_t(pos) < m_size);
-  return Variant(Store::val(toPos(pos)));
+Variant ArrayShell::value(int32_t &pos) const {
+  NOT_IMPLEMENTED();
 }
 
 static const StaticString s_value("value");
 static const StaticString s_key("key");
 static_assert(ArrayData::invalid_index == size_t(-1), "ehm");
 
-Variant PolicyArray::each() {
+Variant ArrayShell::each() {
   APILOG << "()";
   if (m_pos == invalid_index) return false;
   assert(m_size);
@@ -324,7 +314,7 @@ Variant PolicyArray::each() {
 }
 
 template <class K>
-TypedValue* PolicyArray::nvGetImpl(K k) const {
+TypedValue* ArrayShell::nvGetImpl(K k) const {
   APILOG << "(" << keystr(k) << ")";
   auto const pos = find(k, m_size);
   return LIKELY(pos != PosType::invalid)
@@ -332,20 +322,20 @@ TypedValue* PolicyArray::nvGetImpl(K k) const {
     : nullptr;
 }
 
-void PolicyArray::nvGetKey(TypedValue* out, ssize_t pos) {
+void ArrayShell::nvGetKey(TypedValue* out, ssize_t pos) {
   APILOG << "(" << out << ", " << pos << ")";
   assert(size_t(pos) < m_size);
   new(out) Variant(key(toPos(pos)));
 }
 
-TypedValue* PolicyArray::nvGetValueRef(ssize_t pos) {
+TypedValue* ArrayShell::nvGetValueRef(ssize_t pos) {
   APILOG << "(" << pos << ")";
   assert(size_t(pos) < m_size);
   return reinterpret_cast<TypedValue*>(&lval(toPos(pos)));
 }
 
 template <class K>
-TypedValue* PolicyArray::nvGetCellImpl(K k) const {
+TypedValue* ArrayShell::nvGetCellImpl(K k) const {
   APILOG << "(" << keystr(k) << ")";
   auto const pos = find(k, m_size);
   return LIKELY(pos != PosType::invalid)
@@ -354,17 +344,7 @@ TypedValue* PolicyArray::nvGetCellImpl(K k) const {
 }
 
 template <class K>
-<<<<<<< HEAD
 const Variant& ArrayShell::getImpl(K k, bool error) const {
-=======
-ssize_t PolicyArray::getIndexImpl(K k) const {
-  APILOG << "(" << keystr(k) << ")";
-  return toInt64(find(k, m_size));
-}
-
-template <class K>
-const Variant& PolicyArray::getImpl(K k, bool error) const {
->>>>>>> PolicyArray: implement NOT_IMPLEMENTED methods
   APILOG << "(" << keystr(k) << ", " << error << ")";
   auto const pos = find(k, m_size);
   if (pos != PosType::invalid) {
@@ -374,13 +354,13 @@ const Variant& PolicyArray::getImpl(K k, bool error) const {
 }
 
 template <class K>
-ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret,
+ArrayData *ArrayShell::lvalImpl(K k, Variant*& ret,
                                   bool copy, bool checkExist) {
   APILOG << "(" << keystr(k) << ", " << ret << ", "
          << copy << ", " << checkExist << ")";
 
   if (copy) {
-    return PolicyArray::copy()->lvalImpl(k, ret, false, checkExist);
+    return ArrayShell::copy()->lvalImpl(k, ret, false, checkExist);
   }
 
   PosType pos = PosType::invalid;
@@ -419,9 +399,9 @@ ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret,
   return this;
 }
 
-ArrayData *PolicyArray::lvalNew(Variant *&ret, bool copy) {
+ArrayData *ArrayShell::lvalNew(Variant *&ret, bool copy) {
   if (copy) {
-    return PolicyArray::copy()->lvalNew(ret, false);
+    return ArrayShell::copy()->lvalNew(ret, false);
   }
 
   // Andrei: TODO - append() currently never fails, probably it
@@ -439,29 +419,17 @@ ArrayData *PolicyArray::lvalNew(Variant *&ret, bool copy) {
   return this;
 }
 
-ArrayData *PolicyArray::lvalPtr(StringData* k, Variant *&ret, bool copy,
-                               bool create) {
-  APILOG << "(" << keystr(k) << ", " << ret << ", " << copy
-         << ", " << create << ")";
-  if (create) {
-    return addLval(k, ret, copy);
-  }
-  if (copy) {
-    return PolicyArray::copy()->lvalPtr(k, ret, false, create);
-  }
-  const auto pos = find(k, m_size);
-  ret = pos != PosType::invalid
-    ? &Store::lval(pos)
-    : nullptr;
-  return this;
+ArrayData *ArrayShell::lvalPtr(StringData* k, Variant *&ret, bool copy,
+                             bool create) {
+  NOT_IMPLEMENTED();
 }
 
 template <class K>
-PolicyArray* PolicyArray::setImpl(K k, const Variant& v, bool copy) {
+ArrayShell* ArrayShell::setImpl(K k, const Variant& v, bool copy) {
   APILOG << "(" << keystr(k) << ", " << valstr(v) << ", " << copy
          << ")";
-  PolicyArray* result = this;
-  if (copy) result = PolicyArray::copy();
+  ArrayShell* result = this;
+  if (copy) result = ArrayShell::copy();
   if (result->update(k, v, result->m_size, result->m_allocMode)) {
     // Added a new element, must update size and possibly m_pos
     if (m_pos == invalid_index) m_pos = result->m_size;
@@ -471,11 +439,11 @@ PolicyArray* PolicyArray::setImpl(K k, const Variant& v, bool copy) {
 }
 
 template <class K>
-ArrayData *PolicyArray::setRefImpl(K k, CVarRef v, bool copy) {
+ArrayData *ArrayShell::setRefImpl(K k, CVarRef v, bool copy) {
   APILOG << "(" << keystr(k) << ", " << valstr(v) << ", " << copy << ")";
 
   if (copy) {
-    return PolicyArray::copy()->setRef(k, v, false);
+    return ArrayShell::copy()->setRef(k, v, false);
   }
 
   auto const pos = find(k, m_size);
@@ -496,10 +464,10 @@ ArrayData *PolicyArray::setRefImpl(K k, CVarRef v, bool copy) {
 }
 
 template <class K>
-ArrayData *PolicyArray::addImpl(K k, const Variant& v, bool copy) {
+ArrayData *ArrayShell::addImpl(K k, const Variant& v, bool copy) {
   APILOG << "(" << keystr(k) << ", " << valstr(v) << ", " << copy << ");";
   if (copy) {
-    auto result = PolicyArray::copy(m_size * 2 + 1);
+    auto result = ArrayShell::copy(m_size * 2 + 1);
     result->add(k, v, false);
     return result;
   }
@@ -513,10 +481,10 @@ ArrayData *PolicyArray::addImpl(K k, const Variant& v, bool copy) {
 }
 
 template <class K>
-PolicyArray *PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
+ArrayShell *ArrayShell::addLvalImpl(K k, Variant*& ret, bool copy) {
   APILOG << "(" << k << ", " << ret << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->addLval(k, ret, false);
+    return ArrayShell::copy()->addLval(k, ret, false);
   }
   assert(!exists(k) && m_size <= capacity());
   if (m_size == capacity()) {
@@ -528,11 +496,11 @@ PolicyArray *PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
 }
 
 template <class K>
-ArrayData *PolicyArray::removeImpl(K k, bool copy) {
+ArrayData *ArrayShell::removeImpl(K k, bool copy) {
   APILOG << "(" << keystr(k) << ", " << copy << ")";
 
   if (copy) {
-    return PolicyArray::copy()->remove(k, false);
+    return ArrayShell::copy()->remove(k, false);
   }
 
   auto const pos = find(k, m_size);
@@ -565,35 +533,35 @@ ArrayData *PolicyArray::removeImpl(K k, bool copy) {
   return this;
 }
 
-ssize_t PolicyArray::iter_begin() const {
+ssize_t ArrayShell::iter_begin() const {
   APILOG << "()";
   return m_size ? toInt64(firstIndex(m_size)) : invalid_index;
 }
 
-ssize_t PolicyArray::iter_end() const {
+ssize_t ArrayShell::iter_end() const {
   APILOG << "()";
   return ssize_t(lastIndex(m_size));
 }
 
-ssize_t PolicyArray::iter_advance(ssize_t prev) const {
+ssize_t ArrayShell::iter_advance(ssize_t prev) const {
   APILOG << "(" << prev << ")";
   auto const result = toInt64(nextIndex(toPos(prev), m_size));
   MYLOG << "returning " << result;
   return result;
 }
 
-ssize_t PolicyArray::iter_rewind(ssize_t prev) const {
+ssize_t ArrayShell::iter_rewind(ssize_t prev) const {
   APILOG << "(" << prev << ")";
   return toInt64(prevIndex(toPos(prev), m_size));
 }
 
-bool PolicyArray::validFullPos(const FullPos& fp) const {
+bool ArrayShell::validFullPos(const FullPos& fp) const {
   APILOG << "(" << fp.m_pos << ";" << fp.getResetFlag() << ")";
   assert(fp.getContainer() == this);
   return fp.m_pos != invalid_index;
 }
 
-bool PolicyArray::advanceFullPos(FullPos &fp) {
+bool ArrayShell::advanceFullPos(FullPos &fp) {
   APILOG << "(" << fp.m_pos << ";" << fp.getResetFlag() << ")";
   assert(fp.getContainer() == this);
   if (fp.getResetFlag()) {
@@ -612,20 +580,15 @@ bool PolicyArray::advanceFullPos(FullPos &fp) {
   return true;
 }
 
-CVarRef PolicyArray::currentRef() {
-  APILOG << "()";
-  assert(m_pos != ArrayData::invalid_index);
-  assert(size_t(m_pos) < m_size);
-  return val(toPos(m_pos));
+CVarRef ArrayShell::currentRef() {
+  NOT_IMPLEMENTED();
 }
 
-CVarRef PolicyArray::endRef() {
-  APILOG << "()";
-  assert(m_size > 0);
-  return val(toPos(m_size - 1));
+CVarRef ArrayShell::endRef() {
+  NOT_IMPLEMENTED();
 }
 
-HphpArray* PolicyArray::toHphpArray() const {
+HphpArray* ArrayShell::toHphpArray() const {
   auto result = ArrayData::Make(m_size);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
@@ -637,38 +600,38 @@ HphpArray* PolicyArray::toHphpArray() const {
   return result;
 }
 
-ArrayData* PolicyArray::escalateForSort() {
+ArrayData* ArrayShell::escalateForSort() {
   APILOG << "()";
   return toHphpArray();
 }
 
-void PolicyArray::ksort(int sort_flags, bool ascending) {
+void ArrayShell::ksort(int sort_flags, bool ascending) {
   NOT_IMPLEMENTED();
 }
 
-void PolicyArray::sort(int sort_flags, bool ascending) {
+void ArrayShell::sort(int sort_flags, bool ascending) {
   NOT_IMPLEMENTED();
 }
 
-void PolicyArray::asort(int sort_flags, bool ascending) {
+void ArrayShell::asort(int sort_flags, bool ascending) {
   NOT_IMPLEMENTED();
 }
 
-void PolicyArray::uksort(CVarRef cmp_function) {
+void ArrayShell::uksort(CVarRef cmp_function) {
   NOT_IMPLEMENTED();
 }
 
-void PolicyArray::usort(CVarRef cmp_function) {
+void ArrayShell::usort(CVarRef cmp_function) {
   NOT_IMPLEMENTED();
 }
 
-void PolicyArray::uasort(CVarRef cmp_function) {
+void ArrayShell::uasort(CVarRef cmp_function) {
   NOT_IMPLEMENTED();
 }
 
-PolicyArray *PolicyArray::copy() const {
+ArrayShell *ArrayShell::copy() const {
   APILOG << "()";
-  auto result = NEW(PolicyArray)(
+  auto result = NEW(ArrayShell)(
     *this,
     capacity() + (m_size == capacity()),
     m_allocMode);
@@ -676,39 +639,39 @@ PolicyArray *PolicyArray::copy() const {
   return result;
 }
 
-PolicyArray* PolicyArray::copy(uint capacity) {
+ArrayShell* ArrayShell::copy(uint capacity) {
   APILOG << "(" << capacity << ")";
-  return NEW(PolicyArray)(*this, capacity, m_allocMode);
+  return NEW(ArrayShell)(*this, capacity, m_allocMode);
 }
 
-PolicyArray *PolicyArray::copyWithStrongIterators() const {
+ArrayShell *ArrayShell::copyWithStrongIterators() const {
   APILOG << "()";
-  auto result = PolicyArray::copy();
-  moveStrongIterators(result, const_cast<PolicyArray*>(this));
+  auto result = ArrayShell::copy();
+  moveStrongIterators(result, const_cast<ArrayShell*>(this));
   assert(result->getCount() == 0);
   return result;
 }
 
-ArrayData *PolicyArray::nonSmartCopy() const {
+ArrayData *ArrayShell::nonSmartCopy() const {
   APILOG << "()";
-  //return NEW(PolicyArray)(*this, capacity(), true);
+  //return NEW(ArrayShell)(*this, capacity(), true);
   return toHphpArray()->nonSmartCopy();
 }
 
-PolicyArray *PolicyArray::append(const Variant& v, bool copy) {
+ArrayShell *ArrayShell::append(const Variant& v, bool copy) {
   APILOG << "(" << valstr(v) << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->append(v, false);
+    return ArrayShell::copy()->append(v, false);
   }
   grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
   appendNoGrow(nextKeyBump(), v);
   return this;
 }
 
-PolicyArray *PolicyArray::appendRef(const Variant& v, bool copy) {
+ArrayShell *ArrayShell::appendRef(const Variant& v, bool copy) {
   APILOG << "(" << valstr(v) << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->appendRef(v, false);
+    return ArrayShell::copy()->appendRef(v, false);
   }
   //addValWithRef(nextKeyBump(), v);
   auto const k = nextKeyBump();
@@ -723,10 +686,10 @@ PolicyArray *PolicyArray::appendRef(const Variant& v, bool copy) {
   /**
    * Similar to append(v, copy), with reference in v preserved.
    */
-ArrayData *PolicyArray::appendWithRef(CVarRef v, bool copy) {
+ArrayData *ArrayShell::appendWithRef(CVarRef v, bool copy) {
   APILOG << "(" << valstr(v) << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->appendWithRef(v, false);
+    return ArrayShell::copy()->appendWithRef(v, false);
   }
   if (m_size == capacity()) {
     grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
@@ -737,7 +700,7 @@ ArrayData *PolicyArray::appendWithRef(CVarRef v, bool copy) {
 }
 
 template <class K>
-void PolicyArray::addValWithRef(K k, const Variant& v) {
+void ArrayShell::addValWithRef(K k, const Variant& v) {
   MYLOG << (void*)this << "->addValWithRef("
         << keystr(k) << ", " << valstr(v)
         << "); size=" << m_size;
@@ -752,7 +715,7 @@ void PolicyArray::addValWithRef(K k, const Variant& v) {
   appendNoGrow(k, Variant::NullInit())->setWithRef(v);
 }
 
-void PolicyArray::nextInsertWithRef(const Variant& v) {
+void ArrayShell::nextInsertWithRef(const Variant& v) {
   MYLOG << (void*)this << "->nextInsertWithRef("
         << valstr(v)
         << "); size=" << m_size;
@@ -760,7 +723,7 @@ void PolicyArray::nextInsertWithRef(const Variant& v) {
   // the overzealous gcc issues a spurious warning as such:
   //
   // hphp/runtime/base/array/policy_array.h: In member function 'void
-  // HPHP::PolicyArray::nextInsertWithRef(const HPHP::Variant&)':
+  // HPHP::ArrayShell::nextInsertWithRef(const HPHP::Variant&)':
   // hphp/runtime/base/array/policy_array.h:114:5: error: assuming
   // signed overflow does not occur when assuming that (X + c) < X is
   // always false [-Werror=strict-overflow]
@@ -772,17 +735,10 @@ void PolicyArray::nextInsertWithRef(const Variant& v) {
   appendNoGrow(k, Variant::NullInit())->setWithRef(v);
 }
 
-<<<<<<< HEAD
 ArrayData *ArrayShell::plus(const ArrayData *elems, bool copy) {
   APILOG << "(" << elems << ", " << copy << ")";
   if (copy) {
     return ArrayShell::copy()->plus(elems, false);
-=======
-ArrayData *PolicyArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
-  APILOG << "(" << elems << ", " << op << ", " << copy << ")";
-  if (copy) {
-    return PolicyArray::copy()->append(elems, op, false);
->>>>>>> PolicyArray: implement NOT_IMPLEMENTED methods
   }
 
   assert(elems);
@@ -828,10 +784,9 @@ ArrayData *ArrayShell::merge(const ArrayData *elems, bool copy) {
   /**
    * Stack function: pop the last item and return it.
    */
-ArrayData* PolicyArray::pop(Variant &value) {
-  APILOG << "(" << &value << ")";
+ArrayData* ArrayShell::pop(Variant &value) {
   if (getCount() > 1) {
-    return PolicyArray::copy()->pop(value);
+    return ArrayShell::copy()->pop(value);
   }
   if (!m_size) {
     value = uninit_null();
@@ -840,14 +795,7 @@ ArrayData* PolicyArray::pop(Variant &value) {
   auto pos = lastIndex(m_size);
   assert(size_t(pos) < m_size);
   value = val(pos);
-
-  // Match PHP 5.3.1 semantics
-  if (!hasStrKey(pos)
-      && Store::nextKey() == 1 + static_cast<int64_t>(key(pos))) {
-    nextKeyPop();
-  }
-
-  Store::erase(pos, m_size);
+  erase(pos, m_size);
   --m_size;
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator.
@@ -855,10 +803,10 @@ ArrayData* PolicyArray::pop(Variant &value) {
   return this;
 }
 
-ArrayData *PolicyArray::dequeue(Variant &value) {
+ArrayData *ArrayShell::dequeue(Variant &value) {
   APILOG << "(" << &value << ")";
   if (getCount() > 1) {
-    return PolicyArray::copy()->dequeue(value);
+    return ArrayShell::copy()->dequeue(value);
   }
 
   // To match PHP-like semantics, we invalidate all strong iterators when an
@@ -882,10 +830,10 @@ ArrayData *PolicyArray::dequeue(Variant &value) {
   return this;
 }
 
-ArrayData* PolicyArray::prepend(CVarRef v, bool copy) {
+ArrayData* ArrayShell::prepend(CVarRef v, bool copy) {
   APILOG << "(" << valstr(v) << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->prepend(v, false);
+    return ArrayShell::copy()->prepend(v, false);
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
@@ -902,7 +850,7 @@ ArrayData* PolicyArray::prepend(CVarRef v, bool copy) {
   return this;
 }
 
-void PolicyArray::renumber() {
+void ArrayShell::renumber() {
   APILOG << "()";
   if (!m_size) {
     return;
@@ -958,7 +906,7 @@ void PolicyArray::renumber() {
   assert(i == siKeys.cend());
 }
 
-void PolicyArray::onSetEvalScalar() {
+void ArrayShell::onSetEvalScalar() {
   APILOG << "()";
   //FOR_EACH_RANGE (pos, 0, m_size) {
   for (auto pos = firstIndex(m_size); pos != PosType::invalid;
@@ -979,7 +927,19 @@ void PolicyArray::onSetEvalScalar() {
   }
 }
 
-ArrayData *PolicyArray::escalate() const {
+void ArrayShell::dump() {
+  NOT_IMPLEMENTED();
+}
+
+void ArrayShell::dump(std::string &out) {
+  NOT_IMPLEMENTED();
+}
+
+void ArrayShell::dump(std::ostream &os) {
+  NOT_IMPLEMENTED();
+}
+
+ArrayData *ArrayShell::escalate() const {
   APILOG << "()";
   return ArrayData::escalate();
 }

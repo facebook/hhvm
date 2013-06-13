@@ -27,8 +27,8 @@ ArrayInit::ArrayInit(ssize_t n) {
   if (!n) {
     m_data = HphpArray::GetStaticEmptyArray();
   } else if (false) {
-    // Force compilation of PolicyArray
-    m_data = NEW(PolicyArray)(n);
+    // Force compilation of ArrayShell
+    m_data = NEW(ArrayShell)(n);
   } else {
     m_data = ArrayData::Make(n);
   }

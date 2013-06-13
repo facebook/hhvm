@@ -73,7 +73,7 @@ inline PosType toPos(uint32_t n) {
 }
 
 /**
-SimpleArrayStore implements a basic storage strategy for PolicyArray. It
+SimpleArrayStore implements a basic storage strategy for ArrayShell. It
 uses two contiguous arrays, one for keys and the other for
 values. There is no indexing, just linear search, so don't use for
 large arrays.
@@ -173,7 +173,7 @@ protected:
     auto result = toPos(toInt64(current) + 1);
     return toUint32(result) < length ? result : PosType::invalid;
   }
-  PosType prevIndex(PosType current, uint /*length*/) const {
+  PosType prevIndex(PosType current, uint length) const {
     if (current == PosType(0) || current == PosType::invalid) {
       return PosType::invalid;
     }
@@ -184,9 +184,7 @@ protected:
   Primitives for the next available integral key.
    */
   void nextKeyReset() { m_nextKey = 0; }
-  int64_t nextKey() const { return m_nextKey; }
   int64_t nextKeyBump() { return m_nextKey++; }
-  int64_t nextKeyPop() { return m_nextKey--; }
 
   /**
   Prepend v to the array. An uninitialized hole is left in the first
@@ -323,15 +321,15 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// PolicyArray
+// ArrayShell
 ////////////////////////////////////////////////////////////////////////////////
-class PolicyArray : public ArrayData, private SimpleArrayStore {
+class ArrayShell : public ArrayData, private SimpleArrayStore {
   typedef SimpleArrayStore Store;
   using Store::key;
 
-  PolicyArray(const PolicyArray& rhs) = delete;
-  PolicyArray& operator=(const PolicyArray& rhs) = delete;
-  PolicyArray(const PolicyArray& rhs, uint capacity, ArrayData::AllocationMode);
+  ArrayShell(const ArrayShell& rhs) = delete;
+  ArrayShell& operator=(const ArrayShell& rhs) = delete;
+  ArrayShell(const ArrayShell& rhs, uint capacity, ArrayData::AllocationMode);
 
   template <class K>
   void addValWithRef(K k, const Variant& value);
@@ -342,17 +340,17 @@ class PolicyArray : public ArrayData, private SimpleArrayStore {
 
 public:
   // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION(PolicyArray);
+  DECLARE_SMART_ALLOCATION(ArrayShell);
 
-  explicit PolicyArray(uint size);
+  explicit ArrayShell(uint size);
 
-  virtual ~PolicyArray() FOLLY_OVERRIDE;
+  virtual ~ArrayShell() FOLLY_OVERRIDE;
 
   /**
    * Number of elements this array has.
    */
   virtual ssize_t vsize() const FOLLY_OVERRIDE {
-    // vsize() called, but m_size should never be -1 in PolicyArray
+    // vsize() called, but m_size should never be -1 in ArrayShell
     assert(false);
     return m_size;
   }
@@ -502,7 +500,7 @@ public:
    */
 private:
   template <class K>
-  PolicyArray* setImpl(K k, CVarRef v, bool copy);
+  ArrayShell* setImpl(K k, CVarRef v, bool copy);
 
 public:
   virtual ArrayData* set(int64_t k, CVarRef v, bool copy) FOLLY_OVERRIDE {
@@ -547,14 +545,14 @@ public:
    */
 private:
   template <class K>
-  PolicyArray* addLvalImpl(K k, Variant*& ret, bool copy);
+  ArrayShell* addLvalImpl(K k, Variant*& ret, bool copy);
 
 public:
-  virtual PolicyArray *addLval(int64_t k, Variant *&ret, bool copy)
+  virtual ArrayShell *addLval(int64_t k, Variant *&ret, bool copy)
     FOLLY_OVERRIDE {
     return addLvalImpl(k, ret, copy);
   }
-  virtual PolicyArray *addLval(StringData* k, Variant *&ret, bool copy)
+  virtual ArrayShell *addLval(StringData* k, Variant *&ret, bool copy)
     FOLLY_OVERRIDE {
     return addLvalImpl(k, ret, copy);
   }
@@ -621,9 +619,9 @@ public:
    * Is only implemented for array types that need to be able to go
    * into the static array list.
    */
-  PolicyArray* copy(uint minCapacity);
-  virtual PolicyArray *copy() const FOLLY_OVERRIDE;
-  virtual PolicyArray *copyWithStrongIterators() const FOLLY_OVERRIDE;
+  ArrayShell* copy(uint minCapacity);
+  virtual ArrayShell *copy() const FOLLY_OVERRIDE;
+  virtual ArrayShell *copyWithStrongIterators() const FOLLY_OVERRIDE;
   virtual ArrayData *nonSmartCopy() const FOLLY_OVERRIDE;
 
 private:
@@ -647,8 +645,8 @@ public:
    * then append the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual PolicyArray *append(CVarRef v, bool copy) FOLLY_OVERRIDE;
-  virtual PolicyArray *appendRef(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  virtual ArrayShell *append(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  virtual ArrayShell *appendRef(CVarRef v, bool copy) FOLLY_OVERRIDE;
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
@@ -684,6 +682,10 @@ public:
   virtual void renumber() FOLLY_OVERRIDE;
 
   virtual void onSetEvalScalar() FOLLY_OVERRIDE;
+
+  virtual void dump() FOLLY_OVERRIDE;
+  virtual void dump(std::string &out) FOLLY_OVERRIDE;
+  virtual void dump(std::ostream &os) FOLLY_OVERRIDE;
 
   virtual ArrayData *escalate() const FOLLY_OVERRIDE;
 };

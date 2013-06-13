@@ -42,7 +42,7 @@ class ArrayData : public Countable {
     kHphpArray,
     kSharedMap,
     kNameValueTableWrapper,
-    kPolicyArray,
+    kArrayShell,
   };
 
 public:
@@ -166,7 +166,7 @@ public:
   /*
    * Specific derived class type querying operators.
    */
-  bool isPolicyArray() const { return m_kind == ArrayKind::kPolicyArray; }
+  bool isArrayShell() const { return m_kind == ArrayKind::kArrayShell; }
   bool isHphpArray() const { return m_kind == ArrayKind::kHphpArray; }
   bool isSharedMap() const { return m_kind == ArrayKind::kSharedMap; }
   bool isNameValueTableWrapper() const {

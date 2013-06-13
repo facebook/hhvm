@@ -336,7 +336,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
     ExtObjectDataFlags<ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::CallToImpl>(cb),
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
@@ -887,11 +888,11 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return uninit_null();
 }
 
-bool c_SimpleXMLElement::o_toBoolean() const {
+bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
   return m_node != NULL || getProperties().size();
 }
 
-int64_t c_SimpleXMLElement::o_toInt64() const {
+int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -900,7 +901,7 @@ int64_t c_SimpleXMLElement::o_toInt64() const {
   return prop.toString().toInt64();
 }
 
-double c_SimpleXMLElement::o_toDouble() const {
+double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {

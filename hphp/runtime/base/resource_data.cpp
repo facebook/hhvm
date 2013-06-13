@@ -33,6 +33,7 @@ int ResourceData::GetMaxResourceId() {
 ResourceData::ResourceData()
     : Instance(SystemLib::s_resourceClass, true) {
   assert(!m_cls->callsCustomInstanceInit());
+  ObjectData::setAttributes(ObjectData::CallToImpl);
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;

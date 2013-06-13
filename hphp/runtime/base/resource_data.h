@@ -37,7 +37,9 @@ public:
   // implementing ObjectData
   virtual bool isResource() const { return true;}
   virtual String t___tostring();
-  virtual int64_t o_toInt64() const { return o_getId();}
+  virtual bool o_toBooleanImpl() const noexcept { return 1; }
+  virtual int64_t o_toInt64Impl() const noexcept { return o_getId(); }
+  virtual double o_toDoubleImpl() const noexcept { return o_getId(); }
   void o_setId(int id); // only for BuiltinFiles
   virtual void serializeImpl(VariableSerializer *serializer) const;
   virtual CStrRef o_getResourceName() const;

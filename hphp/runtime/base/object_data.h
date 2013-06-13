@@ -60,6 +60,7 @@ class ObjectData : public CountableNF {
     UseUnset      = 0x0020, // __unset()
     HasCall       = 0x0080, // defines __call
     HasCallStatic = 0x0100, // defines __callStatic
+    CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     // The top 3 bits of o_attributes are reserved to indicate the
     // type of collection
     CollectionTypeAttrMask = (7 << 13),
@@ -142,10 +143,35 @@ class ObjectData : public CountableNF {
   virtual bool isResource() const { return false; }
   int o_getId() const { return o_id;}
 
+  bool o_toBoolean() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toBooleanImpl();
+    }
+    return true;
+  }
+
+  int64_t o_toInt64() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toInt64Impl();
+    }
+    raise_notice(
+      "Object of class %s could not be converted to int",
+      o_getClassName().data()
+    );
+    return 1;
+  }
+
+  double o_toDouble() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toDoubleImpl();
+    }
+    return o_toInt64();
+  }
+
   // overridable casting
-  virtual bool o_toBoolean() const { return true;}
-  virtual int64_t o_toInt64() const;
-  virtual double o_toDouble() const { return o_toInt64();}
+  virtual bool o_toBooleanImpl() const noexcept;
+  virtual int64_t o_toInt64Impl() const noexcept;
+  virtual double o_toDoubleImpl() const noexcept;
 
   void destruct();
 

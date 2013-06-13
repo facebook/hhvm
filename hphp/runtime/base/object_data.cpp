@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -117,10 +118,14 @@ bool ObjectData::o_instanceof(CStrRef s) const {
   return m_cls->classof(cls);
 }
 
-int64_t ObjectData::o_toInt64() const {
-  raise_notice("Object of class %s could not be converted to int",
-               o_getClassName().data());
-  return 1;
+bool ObjectData::o_toBooleanImpl() const noexcept {
+  not_reached();
+}
+int64_t ObjectData::o_toInt64Impl() const noexcept {
+  not_reached();
+}
+double ObjectData::o_toDoubleImpl() const noexcept {
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

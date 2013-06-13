@@ -44,7 +44,8 @@ class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
                                 ObjectData::UseIsset|
-                                ObjectData::UseUnset>,
+                                ObjectData::UseUnset|
+                                ObjectData::CallToImpl>,
       public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
@@ -86,9 +87,9 @@ class c_SimpleXMLElement :
   bool m_is_attribute;
   bool m_is_children;
   bool m_is_property;
-  virtual bool o_toBoolean() const;
-  virtual int64_t o_toInt64() const;
-  virtual double o_toDouble() const;
+  virtual bool o_toBooleanImpl() const noexcept;
+  virtual int64_t o_toInt64Impl() const noexcept;
+  virtual double o_toDoubleImpl() const noexcept;
   virtual Array o_toArray() const;
  private:
   xmlXPathContextPtr m_xpath;

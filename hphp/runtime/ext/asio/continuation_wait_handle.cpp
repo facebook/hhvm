@@ -192,6 +192,10 @@ void c_ContinuationWaitHandle::run() {
   } catch (const Object& exception) {
     // process exception thrown by generator or blockOn cycle detection
     markAsFailed(exception);
+  } catch (...) {
+    // process C++ exception
+    markAsFailed(AsioSession::Get()->getAbruptInterruptException());
+    throw;
   }
 }
 

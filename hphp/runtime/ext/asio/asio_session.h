@@ -83,6 +83,17 @@ class AsioSession {
     c_ExternalThreadEventWaitHandle* waitForExternalThreadEvents();
     void enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
 
+    // abrupt interrupt exception
+    CObjRef getAbruptInterruptException() {
+      return m_abruptInterruptException;
+    }
+
+    bool hasAbruptInterruptException() {
+      return m_abruptInterruptException.get();
+    }
+
+    void initAbruptInterruptException();
+
     // callback: on failed
     void setOnFailedCallback(ObjectData* on_failed_callback) {
       assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::s_cls));
@@ -161,6 +172,8 @@ class AsioSession {
     std::atomic<c_ExternalThreadEventWaitHandle*> m_readyExternalThreadEvents;
     std::mutex m_readyExternalThreadEventsMutex;
     std::condition_variable m_readyExternalThreadEventsCondition;
+
+    Object m_abruptInterruptException;
 
     Object m_onContinuationCreateCallback;
     Object m_onContinuationYieldCallback;

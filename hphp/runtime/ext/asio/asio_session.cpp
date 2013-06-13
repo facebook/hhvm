@@ -118,6 +118,12 @@ void AsioSession::enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wa
   }
 }
 
+void AsioSession::initAbruptInterruptException() {
+  assert(!hasAbruptInterruptException());
+  m_abruptInterruptException = SystemLib::AllocInvalidOperationExceptionObject(
+    "The request was abruptly interrupted.");
+}
+
 void AsioSession::onFailed(CObjRef exception) {
   if (m_onFailedCallback.get()) {
     try {

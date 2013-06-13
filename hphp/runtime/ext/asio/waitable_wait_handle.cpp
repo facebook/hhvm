@@ -140,25 +140,17 @@ void c_WaitableWaitHandle::join() {
 
   // enter new asio context and set up guard that will exit once we are done
   session->enterContext();
+  auto exit_guard = folly::makeGuard([&] { session->exitContext(); });
 
   assert(session->isInContext());
   assert(!session->getCurrentContext()->isRunning());
 
-  try {
-    // import this wait handle to the newly created context
-    // throws if cross-context cycle found
-    enterContext(session->getCurrentContextIdx());
+  // import this wait handle to the newly created context
+  // throws if cross-context cycle found
+  enterContext(session->getCurrentContextIdx());
 
-    // run queues until we are finished
-    session->getCurrentContext()->runUntil(this);
-  } catch (const Object& exception) {
-    // recover from PHP exceptions; HPHP internal exceptions are deliberately
-    // ignored as there is no easy way to recover from them
-    session->exitContext();
-    throw;
-  }
-  session->exitContext();
-
+  // run queues until we are finished
+  session->getCurrentContext()->runUntil(this);
   assert(isFinished());
 }
 

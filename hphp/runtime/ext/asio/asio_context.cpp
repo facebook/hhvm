@@ -96,6 +96,10 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   auto session = AsioSession::Get();
   uint8_t check_ete_counter = 0;
 
+  if (!session->hasAbruptInterruptException()) {
+    session->initAbruptInterruptException();
+  }
+
   while (!wait_handle->isFinished()) {
     // process ready external thread events once per 256 other events
     // (when 8-bit check_ete_counter overflows)
@@ -113,9 +117,12 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       auto current = m_runnableQueue.front();
       m_runnableQueue.pop();
       m_current = current;
+      auto exit_guard = folly::makeGuard([&] {
+        m_current = nullptr;
+        decRefObj(current);
+      });
+
       m_current->run();
-      m_current = nullptr;
-      decRefObj(current);
       continue;
     }
 

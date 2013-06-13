@@ -529,6 +529,13 @@ struct Tracelet : private boost::noncopyable {
    */
   bool           m_analysisFailed;
 
+  /*
+   * If IR inlining failed we may still need access to the trace for profiling
+   * purposes if stats are enabled so maintain this to verify that we should use
+   * this Tracelet for inlining purposes.
+   */
+  bool           m_inliningFailed;
+
   // Track which NormalizedInstructions and DynLocations are owned by this
   // Tracelet; used for cleanup purposes
   boost::ptr_vector<NormalizedInstruction> m_instrs;
@@ -537,7 +544,8 @@ struct Tracelet : private boost::noncopyable {
   Tracelet() :
     m_stackChange(0),
     m_arState(),
-    m_analysisFailed(false) { }
+    m_analysisFailed(false),
+    m_inliningFailed(false){ }
 
   void constructLiveRanges();
   bool isLiveAfterInstr(Location l, const NormalizedInstruction& i) const;

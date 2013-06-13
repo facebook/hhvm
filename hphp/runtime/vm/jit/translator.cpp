@@ -32,6 +32,7 @@
 #include "hphp/util/biased_coin.h"
 
 #include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -2707,7 +2708,9 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       // Note: instead of pessimizing calls that may be inlined with
       // DataTypeSpecific, we could apply the operand constraints of
       // the callee in constrainDep.
-      return instr->calleeTrace ? DataTypeSpecific : DataTypeGeneric;
+      return (instr->calleeTrace && !instr->calleeTrace->m_inliningFailed)
+               ? DataTypeSpecific
+               : DataTypeGeneric;
 
     case OpFCallArray:
       return DataTypeGeneric;
@@ -3174,6 +3177,12 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * want to do that unnecessarily.
    */
   if (!shouldIRInline(callerFunc, target, *subTrace)) {
+    if (UNLIKELY(Stats::enabledAny() && getenv("HHVM_STATS_FAILEDINL"))) {
+      subTrace->m_inliningFailed = true;
+      // Save the trace for stats purposes but don't waste time doing any
+      // further processing since we know we won't inline it.
+      fcall->calleeTrace = std::move(subTrace);
+    }
     return;
   }
 

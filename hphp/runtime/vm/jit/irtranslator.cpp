@@ -1225,7 +1225,7 @@ Translator::translateFCall(const NormalizedInstruction& i) {
    * the call.
    */
   if (i.calleeTrace) {
-    if (!m_hhbcTrans->isInlining()) {
+    if (!i.calleeTrace->m_inliningFailed && !m_hhbcTrans->isInlining()) {
       assert(shouldIRInline(curFunc(), i.funcd, *i.calleeTrace));
 
       m_hhbcTrans->beginInlining(numArgs, i.funcd, returnBcOffset);

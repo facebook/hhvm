@@ -8,7 +8,7 @@ Breakpoint 3 set upon entering cls2::pubObj()
 break cls2::pubCls()
 Breakpoint 4 set upon entering cls2::pubCls()
 run
-break1.inc1 loaded
+break2.php loaded
 Program %s/break2.php exited normally.
 @ foo2('test_break6')
 Breakpoint 2 reached at foo2() on line 6 of %s/break2.php

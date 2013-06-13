@@ -16,4 +16,4 @@ class cls2 {
   }
 }
 
-error_log('break1.inc1 loaded');
+error_log('break2.php loaded');

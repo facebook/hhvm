@@ -1,0 +1,151 @@
+Program %s/exception1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Program %s/exception1.php exited normally.
+exception Exception
+Breakpoint 1 set right before throwing Exception
+@ throw_exception()
+Breakpoint 1 reached: Throwing Exception at throw_exception() on line 10 of %s/exception1.php
+   9   function throw_exception() {
+  10     throw new Exception();
+  11   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:10
+Stack trace:
+#0 (1): throw_exception()
+#1 (1): include()
+#2 {main}
+exception MyException
+Breakpoint 1 set right before throwing MyException
+@ throw_myexception()
+Breakpoint 1 reached: Throwing MyException at throw_myexception() on line 14 of %s/exception1.php
+  13   function throw_myexception() {
+  14     throw new MyException();
+  15   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'MyException' with message '' in %s/exception1.php:14
+Stack trace:
+#0 (1): throw_myexception()
+#1 (1): include()
+#2 {main}
+exception error
+Breakpoint 1 set right after an error
+@ error_undefined_class()
+Breakpoint 1 reached: An error occurred at error_undefined_class() on line 18 of %s/exception1.php
+  17   function error_undefined_class() {
+  18     $x = new NoSuchClass();
+  19   }
+
+Error Message: Class undefined: NoSuchClass
+break clear all
+All breakpoints are cleared.
+continue
+Hit fatal : Class undefined: NoSuchClass
+    #0 at %s/exception1.php:18]
+    #1 error_undefined_class(), called at [:1]
+    #2 include(), called at [:1]
+
+exception Exception
+Breakpoint 1 set right before throwing Exception
+@ \Outer\throw_exception()
+Breakpoint 1 reached: Throwing Exception at Outer\throw_exception() on line 28 of %s/exception1.php
+  27   function throw_exception() {
+  28     throw new \Exception();
+  29   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:28
+Stack trace:
+#0 (1): Outer\throw_exception()
+#1 (1): include()
+#2 {main}
+exception \Outer\MyException
+Breakpoint 1 set right before throwing Outer\MyException
+@ Outer\throw_myexception()
+Breakpoint 1 reached: Throwing Outer\MyException at Outer\throw_myexception() on line 32 of %s/exception1.php
+  31   function throw_myexception() {
+  32     throw new MyException();
+  33   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'Outer\MyException' with message '' in %s/exception1.php:32
+Stack trace:
+#0 (1): Outer\throw_myexception()
+#1 (1): include()
+#2 {main}
+exception error
+Breakpoint 1 set right after an error
+@ \Outer\error_undefined_class()
+Breakpoint 1 reached: An error occurred at Outer\error_undefined_class() on line 36 of %s/exception1.php
+  35   function error_undefined_class() {
+  36     $x = new NoSuchClass();
+  37   }
+
+Error Message: Class undefined: Outer\NoSuchClass
+break clear all
+All breakpoints are cleared.
+continue
+Hit fatal : Class undefined: Outer\NoSuchClass
+    #0 at %s/exception1.php:36]
+    #1 Outer\error_undefined_class(), called at [:1]
+    #2 include(), called at [:1]
+
+exception Exception
+Breakpoint 1 set right before throwing Exception
+@ \Outer\Inner\throw_exception()
+Breakpoint 1 reached: Throwing Exception at Outer\Inner\throw_exception() on line 46 of %s/exception1.php
+  45   function throw_exception() {
+  46     throw new \Exception();
+  47   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'Exception' with message '' in %s/exception1.php:46
+Stack trace:
+#0 (1): Outer\Inner\throw_exception()
+#1 (1): include()
+#2 {main}
+exception Outer\Inner\MyException
+Breakpoint 1 set right before throwing Outer\Inner\MyException
+@ Outer\Inner\throw_myexception()
+Breakpoint 1 reached: Throwing Outer\Inner\MyException at Outer\Inner\throw_myexception() on line 50 of %s/exception1.php
+  49   function throw_myexception() {
+  50     throw new MyException();
+  51   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Hit a php exception : exception 'Outer\Inner\MyException' with message '' in %s/exception1.php:50
+Stack trace:
+#0 (1): Outer\Inner\throw_myexception()
+#1 (1): include()
+#2 {main}
+exception error
+Breakpoint 1 set right after an error
+@ \Outer\Inner\error_undefined_class()
+Breakpoint 1 reached: An error occurred at Outer\Inner\error_undefined_class() on line 54 of %s/exception1.php
+  53   function error_undefined_class() {
+  54     $x = new NoSuchClass();
+  55   }
+
+Error Message: Class undefined: Outer\Inner\NoSuchClass
+break clear all
+All breakpoints are cleared.
+continue
+Hit fatal : Class undefined: Outer\Inner\NoSuchClass
+    #0 at %s/exception1.php:54]
+    #1 Outer\Inner\error_undefined_class(), called at [:1]
+    #2 include(), called at [:1]
+
+quit

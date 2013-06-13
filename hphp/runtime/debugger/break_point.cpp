@@ -671,8 +671,9 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
       if (offset2 == offset1) goto returnInvalid;
       name = exp.substr(offset1, offset2-offset1);
     }
-    if (offset1 < len && exp[offset1] == '\\') {
-      m_namespace = name;
+    while (offset1 < len && exp[offset1] == '\\') {
+      if (!m_namespace.empty()) m_namespace += "\\";
+      m_namespace += name;
       offset1 += 1;
       auto offset2 = scanName(exp, offset1);
       // check for {namespace}\{something that is not a name}
@@ -756,32 +757,57 @@ parseUrl:
 
 returnInvalid:
   m_valid = false;
-  return;
 }
 
 void BreakPointInfo::parseExceptionThrown(const std::string &exp) {
   TRACE(2, "BreakPointInfo::parseExceptionThrown\n");
-  string input = exp;
 
-  // everything after @ is URL
-  size_t pos = input.find('@');
-  if (pos != string::npos) {
-    m_url = input.substr(pos + 1);
-    input = input.substr(0, pos);
+  string name;
+  auto len = exp.length();
+  auto offset0 = 0;
+  // Skip over a leading backslash
+  if (len > 0 && exp[0] == '\\') offset0++;
+  auto offset1 = scanName(exp, offset0);
+  // check that exp starts with a name
+  if (offset1 == offset0) goto returnInvalid;
+  name = exp.substr(offset0, offset1-offset0);
+  if (name.empty()) {
+    if (len > offset1 && exp[offset1] == '\\') offset1++;
+    auto offset2 = scanName(exp, offset1);
+    // check for {something other than a name}
+    if (offset2 == offset1) goto returnInvalid;
+    name = exp.substr(offset1, offset2-offset1);
   }
-
-  pos = input.find("::");
-  if (pos != string::npos) {
-    if (pos) {
-      m_namespace = input.substr(0, pos);
-    }
-    m_class = input.substr(pos + 2);
+  while (offset1 < len && exp[offset1] == '\\') {
+    if (!m_namespace.empty()) m_namespace += "\\";
+    m_namespace += name;
+    offset1 += 1;
+    auto offset2 = scanName(exp, offset1);
+    // check for {namespace}\{something that is not a name}
+    if (offset2 == offset1) goto returnInvalid;
+    name = exp.substr(offset1, offset2-offset1);
+    offset1 = offset2;
+  }
+  m_class = name;
+  // Now we have a namespace and class name.
+  // The namespace might be empty.
+  mangleXhpName(m_class, m_class);
+  if (m_class == "error") m_class = ErrorClassName;
+  if (!m_namespace.empty()) {
+    m_class = m_namespace + "\\" + m_class;
+    m_namespace.clear();
+  }
+  if (offset1 < len-2 && exp[offset1] == '@') {
+    offset1++;
+    m_url = exp.substr(offset1, len-offset1);
   } else {
-    m_class = input;
+    // check for unparsed characters at end of exp
+    if (offset1 != len) goto returnInvalid;
   }
-  if (strncasecmp(m_class.c_str(), "error", m_class.size()) == 0) {
-    m_class = ErrorClassName;
-  }
+  return;
+
+returnInvalid:
+  m_valid = false;
 }
 
 bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,

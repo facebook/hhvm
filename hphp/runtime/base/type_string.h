@@ -25,7 +25,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/util/smart_ptr.h"
 #include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/string_offset.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp_value.h"
 
@@ -407,22 +406,6 @@ public:
   String rvalAt(CObjRef key) const;
   String rvalAt(CVarRef key) const;
 
-  StringOffset lvalAt(bool    key) { return lvalAtImpl(key ? 1 : 0);}
-  StringOffset lvalAt(char    key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(short   key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(int     key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(int64_t   key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(double  key) { return lvalAtImpl((int64_t)key);}
-  StringOffset lvalAt(litstr  key) { return lvalAtImpl(String(key).toInt32());}
-  StringOffset lvalAt(const StringData *key) {
-    not_reached();
-    return lvalAtImpl(key ? key->toInt32() : 0);
-  }
-  StringOffset lvalAt(CStrRef key) { return lvalAtImpl(key.toInt32());}
-  StringOffset lvalAt(CArrRef key);
-  StringOffset lvalAt(CObjRef key);
-  StringOffset lvalAt(CVarRef key);
-
   template <class K, class V>
   inline const V &set(K key, const V &value);
 
@@ -445,12 +428,6 @@ public:
   void dump() const;
 
  private:
-
-  StringOffset lvalAtImpl(int key) {
-    StringData *s = StringData::Escalate(m_px);
-    StringBase::operator=(s);
-    return StringOffset(m_px, key);
-  }
 
   String rvalAtImpl(int key) const {
     if (m_px) {

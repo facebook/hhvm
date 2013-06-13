@@ -42,8 +42,8 @@ class TestCppBase : public TestBase {
   bool TestIpBlockMap();
 
   /**
-   * Date types. This in turn tests StringData, ArrayData, StringOffset,
-   * ArrayOffset, VariantOffset, ArrayIter, ArrayElement and other classes.
+   * Date types. This in turn tests StringData, ArrayData, String,
+   * ArrayIter, and other classes.
    *
    * Some of the classes are not tested here, including Object/ObjectData/
    * SmartObject<T>. They are a lot more covered in TestCodeRun with better

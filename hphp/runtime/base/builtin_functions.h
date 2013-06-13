@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/binary_operations.h"
-#include "hphp/runtime/base/string_offset.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -29,6 +28,7 @@
 #include "hphp/runtime/base/util/request_local.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/util/case_insensitive.h"
+#include "hphp/runtime/base/type_conversions.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**
@@ -166,19 +166,11 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   return v1;
 }
 
-inline String &concat_assign(const StringOffset &s1, litstr s2) {
-  return concat_assign(s1.lval(), s2);
-}
-
-inline String &concat_assign(const StringOffset &s1, CStrRef s2) {
-  return concat_assign(s1.lval(), s2);
-}
-
 template <class K, class V>
 const V &String::set(K key, const V &value) {
   StringData *s = StringData::Escalate(m_px);
   SmartPtr<StringData>::operator=(s);
-  m_px->setChar(toInt32(key), toString(value));
+  m_px->setChar(HPHP::toInt32(key), toString(value));
   return value;
 }
 

@@ -200,15 +200,15 @@ bool TestCppBase::TestString() {
   {
     VS(String("test").rvalAt(2).c_str(), "s");
     String s = "test";
-    s.lvalAt(2) = "";
+    s.set(2, String(""));
     VS(s, String("te\0t", 4, AttachLiteral));
-    s.lvalAt(2) = "zz";
+    s.set(2, String("zz"));
     VS(s, "tezt");
-    s.lvalAt(5) = "q";
+    s.set(5, String("q"));
     VS(s, "tezt q");
 
     String s2 = s; // test copy-on-write
-    s.lvalAt(1) = "3";
+    s.set(1, String("3"));
     VS(s,  "t3zt q");
     VS(s2, "tezt q");
   }

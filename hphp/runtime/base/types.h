@@ -95,12 +95,6 @@ class ObjectData;
 class ResourceData;
 
 /**
- * Arrays, strings and objects can take offsets or array elements. These offset
- * objects will help to store temporary information to make the task easier.
- */
-class StringOffset;
-
-/**
  * Miscellaneous objects to help arrays to construct or to iterate.
  */
 class ArrayIter;

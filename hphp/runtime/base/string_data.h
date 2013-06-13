@@ -76,10 +76,9 @@ enum ReserveStringMode { ReserveString };
 enum CopyMallocMode { CopyMalloc };
 
 /**
- * Inner data class for String type. As a coding guideline, String and
- * StringOffset classes should delegate real string work to this class,
- * although both String and StringOffset classes are more than welcome to test
- * nullability to avoid calling this class.
+ * Inner data class for String type. As a coding guideline, String
+ * should delegate real string work to this class, although String is
+ * more than welcome to test nullability to avoid calling this class.
  *
  * A StringData can be in two formats, small or big.  Small format
  * stores the string inline by overlapping with some fields, as follows:

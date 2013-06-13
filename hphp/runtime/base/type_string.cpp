@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_offset.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -258,18 +257,6 @@ String String::rvalAt(CObjRef key) const {
 
 String String::rvalAt(CVarRef key) const {
   return rvalAtImpl(key.toInt32());
-}
-
-StringOffset String::lvalAt(CArrRef key) {
-  return lvalAtImpl(key.toInt32());
-}
-
-StringOffset String::lvalAt(CObjRef key) {
-  return lvalAtImpl(key.toInt32());
-}
-
-StringOffset String::lvalAt(CVarRef key) {
-  return lvalAtImpl(key.toInt32());
 }
 
 char String::charAt(int pos) const {

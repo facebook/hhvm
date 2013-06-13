@@ -143,7 +143,7 @@ bool TestExtApc::test_apc_store() {
   String tsFetched = f_apc_fetch("ts");
   VS(tsFetched, "NewValue");
   String sharedString = tsFetched;
-  tsFetched.lvalAt(0) = "M";
+  tsFetched.set(0, String("M"));
   VS(tsFetched, "MewValue");
   VS(sharedString, "NewValue");
   VERIFY(tsFetched.get() != sharedString.get());

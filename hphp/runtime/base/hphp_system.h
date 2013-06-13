@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/string_offset.h"
 #include "hphp/runtime/base/util/smart_object.h"
 #include "hphp/runtime/base/list_assignment.h"
 #include "hphp/runtime/base/resource_data.h"

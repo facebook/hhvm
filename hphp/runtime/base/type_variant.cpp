@@ -49,8 +49,6 @@ static void unserializeProp(VariableUnserializer *uns,
                             CStrRef context, CStrRef realKey,
                             int nProp) NEVER_INLINE;
 
-IMPLEMENT_SMART_ALLOCATION_HOT(Variant);
-
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 

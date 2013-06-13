@@ -726,11 +726,10 @@ class Variant : private TypedValue {
    */
   Variant share(bool save) const;
 
-  /**
-   * Memory allocator methods.
+  /*
+   * Print information about a variant to stdout.  For debugging
+   * purposes.
    */
-  DECLARE_SMART_ALLOCATION(Variant);
-
   void dump() const;
 
   /**

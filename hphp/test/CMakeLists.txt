@@ -14,3 +14,11 @@ list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cp
 add_executable(test ${CXX_SOURCES})
 target_link_libraries(test hphp_analysis hphp_runtime_static ext_hhvm_static hphp_system
                       -Wl,-uregister_libevent_server)
+
+add_custom_command(TARGET test POST_BUILD
+                   COMMAND "objcopy"
+                   ARGS "--add-section" "systemlib=${HPHP_HOME}/bin/systemlib.php"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/test"
+                   COMMENT "Embedding systemlib.php in test")
+
+add_dependencies(test systemlib)

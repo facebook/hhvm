@@ -19,3 +19,22 @@ add_library(hphp_system STATIC ${CXX_SOURCES})
 add_dependencies(hphp_runtime_static hphp_system)
 add_dependencies(hphp_analysis hphp_system)
 
+FILE(STRINGS "classes.txt" SYSTEMLIB_CLASSES)
+set(SYSTEMLIB_SRCS)
+set(SYSTEMLIB_SRCS_STR)
+foreach(cls ${SYSTEMLIB_CLASSES})
+	STRING(REGEX REPLACE "[ \t]*#.*" "" cls "${cls}")
+	if (NOT "${cls}" STREQUAL "")
+		list(APPEND SYSTEMLIB_SRCS "../../${cls}")
+                set(SYSTEMLIB_SRCS_STR "${SYSTEMLIB_SRCS_STR} ${cls}")
+	endif()
+endforeach()
+
+add_custom_target(systemlib
+                  DEPENDS "classes.txt" ${SYSTEMLIB_SRCS}
+                  COMMAND "INSTALL_DIR=${HPHP_HOME}/bin"
+                          "FBCODE_DIR=${HPHP_HOME}"
+                          "${HPHP_HOME}/hphp/runtime/ext_hhvm/make_systemlib.sh"
+                          "--install_dir=${HPHP_HOME}/bin" "--fbcode_dir=${HPHP_HOME}"
+                          "${SYSTEMLIB_SRCS_STR}"
+                  COMMENT "Generating systemlib.php")

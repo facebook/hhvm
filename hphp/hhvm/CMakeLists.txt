@@ -11,5 +11,6 @@ add_custom_command(TARGET hhvm POST_BUILD
                    ARGS "--add-section" "systemlib=${HPHP_HOME}/bin/systemlib.php"
                         "${CMAKE_CURRENT_SOURCE_DIR}/hhvm"
                    COMMENT "Embedding systemlib.php in hhvm")
+add_dependencies(hhvm systemlib)
 
 install(TARGETS hhvm DESTINATION bin)

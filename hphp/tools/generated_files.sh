@@ -25,21 +25,12 @@ fi
 HPHP_TOOLS=$HPHP_HOME/hphp/tools/
 
 if [ "$1" = "help" ]; then
-  echo "$0 systemlib  - Build bin/systemlib.php"
   echo "$0 lexer      - Regenerate the lexer"
   echo "$0 parser     - Regenerate the parser"
   echo "$0 license    - Add license headers to all files"
   echo ""
   echo "$0 all  - All of the above in listed order"
   exit 0
-fi
-
-if [ "$1" = "systemlib" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
-  [ $VERBOSE -eq 1 ] && echo "Generating bin/systemlib.php"
-  FBCODE_DIR=$HPHP_HOME $HHVM hphp/system/lib/gen_systemlib.php bin/ \
-        `cat hphp/system/classes.txt | sed -e 's/#.*$//'`
-  check_err $? "Failed generating bin/systemlib.php"
 fi
 
 if [ "$1" = "lexer" -o "$1" = "all" ]; then

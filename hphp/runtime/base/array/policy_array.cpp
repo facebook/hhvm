@@ -580,10 +580,6 @@ bool ArrayShell::advanceFullPos(FullPos &fp) {
   return true;
 }
 
-CVarRef ArrayShell::currentRef() {
-  NOT_IMPLEMENTED();
-}
-
 CVarRef ArrayShell::endRef() {
   NOT_IMPLEMENTED();
 }

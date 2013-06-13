@@ -601,7 +601,6 @@ public:
    */
   virtual bool advanceFullPos(FullPos& fp) FOLLY_OVERRIDE;
 
-  virtual CVarRef currentRef() FOLLY_OVERRIDE;
   virtual CVarRef endRef() FOLLY_OVERRIDE;
 
   virtual ArrayData* escalateForSort() FOLLY_OVERRIDE;

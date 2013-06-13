@@ -170,7 +170,6 @@ public:
   // overrides ArrayData
   bool validFullPos(const FullPos &fp) const;
   bool advanceFullPos(FullPos& fp);
-  CVarRef currentRef();
   CVarRef endRef();
 
   // END overide/implements section

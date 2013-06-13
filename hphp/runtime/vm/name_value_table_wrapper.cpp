@@ -213,13 +213,6 @@ Variant NameValueTableWrapper::current() const {
     : Variant(false);
 }
 
-CVarRef NameValueTableWrapper::currentRef() {
-  if (m_pos != ArrayData::invalid_index) {
-    return getValueRef(m_pos);
-  }
-  throw FatalErrorException("invalid ArrayData::m_pos");
-}
-
 Variant NameValueTableWrapper::next() {
   if (m_pos != ArrayData::invalid_index) {
     m_pos = iter_advance(m_pos);
@@ -235,7 +228,7 @@ Variant NameValueTableWrapper::end() {
 
 CVarRef NameValueTableWrapper::endRef() {
   m_pos = iter_end();
-  return currentRef();
+  return getValueRef(m_pos);
 }
 
 Variant NameValueTableWrapper::key() const {

@@ -886,7 +886,6 @@ class Variant : private TypedValue {
   Variant array_iter_reset();
   Variant array_iter_prev();
   Variant array_iter_current() const;
-  Variant array_iter_current_ref();
   Variant array_iter_next();
   Variant array_iter_end();
   Variant array_iter_key() const;
@@ -1241,9 +1240,6 @@ public:
   Variant array_iter_reset() const { return m_var.array_iter_reset(); }
   Variant array_iter_prev() const { return m_var.array_iter_prev(); }
   Variant array_iter_current() const { return m_var.array_iter_current(); }
-  Variant array_iter_current_ref() const {
-    return m_var.array_iter_current_ref();
-  }
   Variant array_iter_next() const { return m_var.array_iter_next(); }
   Variant array_iter_end() const { return m_var.array_iter_end(); }
   Variant array_iter_key() const { return m_var.array_iter_key(); }

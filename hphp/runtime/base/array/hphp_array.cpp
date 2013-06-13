@@ -1570,13 +1570,6 @@ bool HphpArray::advanceFullPos(FullPos& fp) {
   return true;
 }
 
-CVarRef HphpArray::currentRef() {
-  assert(m_pos != ArrayData::invalid_index);
-  Elm* e = &m_data[(ElmInd)m_pos];
-  assert(e->data.m_type != KindOfTombstone);
-  return tvAsCVarRef(&e->data);
-}
-
 CVarRef HphpArray::endRef() {
   assert(m_lastE != ElmIndEmpty);
   ElmInd pos = m_lastE;

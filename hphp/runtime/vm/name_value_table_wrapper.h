@@ -126,7 +126,6 @@ public: // ArrayData implementation
   virtual Variant reset();
   virtual Variant prev();
   virtual Variant current() const;
-  virtual CVarRef currentRef();
   virtual Variant next();
   virtual Variant end();
   virtual CVarRef endRef();

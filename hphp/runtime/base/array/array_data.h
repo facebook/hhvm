@@ -358,7 +358,6 @@ public:
    */
   virtual bool advanceFullPos(FullPos& fp);
 
-  virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
   virtual ArrayData* escalateForSort();

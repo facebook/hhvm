@@ -35,6 +35,7 @@ extern const int64_t k_JSON_FORCE_OBJECT;
 extern const int64_t k_JSON_NUMERIC_CHECK;
 extern const int64_t k_JSON_UNESCAPED_SLASHES;
 extern const int64_t k_JSON_PRETTY_PRINT;
+extern const int64_t k_JSON_UNESCAPED_UNICODE;
 extern const int64_t k_JSON_FB_LOOSE;
 extern const int64_t k_JSON_FB_LOOSE;
 extern const int64_t k_JSON_FB_EXTRA_ESCAPES;

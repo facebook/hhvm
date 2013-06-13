@@ -14,9 +14,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-/* JSON_checker.h */
+
+#ifndef incl_HPHP_JSON_PARSER_H_
+#define incl_HPHP_JSON_PARSER_H_
 
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/util/string_buffer.h"
 
+void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,
                  bool assoc/*<fb>*/, bool loose/*</fb>*/);
+
+#endif // incl_HPHP_JSON_PARSER_H_

@@ -23,18 +23,19 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);
 ///////////////////////////////////////////////////////////////////////////////
-const int64_t k_JSON_HEX_TAG       = 1<<0;
-const int64_t k_JSON_HEX_AMP       = 1<<1;
-const int64_t k_JSON_HEX_APOS      = 1<<2;
-const int64_t k_JSON_HEX_QUOT      = 1<<3;
-const int64_t k_JSON_FORCE_OBJECT  = 1<<4;
-const int64_t k_JSON_NUMERIC_CHECK = 1<<5;
+const int64_t k_JSON_HEX_TAG           = 1<<0;
+const int64_t k_JSON_HEX_AMP           = 1<<1;
+const int64_t k_JSON_HEX_APOS          = 1<<2;
+const int64_t k_JSON_HEX_QUOT          = 1<<3;
+const int64_t k_JSON_FORCE_OBJECT      = 1<<4;
+const int64_t k_JSON_NUMERIC_CHECK     = 1<<5;
 const int64_t k_JSON_UNESCAPED_SLASHES = 1<<6;
-const int64_t k_JSON_PRETTY_PRINT  = 1<<7;
+const int64_t k_JSON_PRETTY_PRINT      = 1<<7;
+const int64_t k_JSON_UNESCAPED_UNICODE = 1<<8;
 // intentionally higher so when PHP adds more options we're fine
-const int64_t k_JSON_FB_LOOSE      = 1<<20;
-const int64_t k_JSON_FB_UNLIMITED  = 1<<21;
-const int64_t k_JSON_FB_EXTRA_ESCAPES = 1<<22;
+const int64_t k_JSON_FB_LOOSE          = 1<<20;
+const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
+const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1<<22;
 
 ///////////////////////////////////////////////////////////////////////////////
 

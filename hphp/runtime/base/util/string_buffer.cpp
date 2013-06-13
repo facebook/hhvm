@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/base/zend/utf8_decode.h"
 #include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/JSON_parser.h"
 
 #include "hphp/util/alloc.h"
 
@@ -311,7 +312,9 @@ void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
         }
         break;
       default:
-        if (us >= ' ' && (us & 127) == us) {
+        if (us >= ' ' && options & k_JSON_UNESCAPED_UNICODE) {
+          utf16_to_utf8(*this, us);
+        } else if (us >= ' ' && (us & 127) == us) {
           append((char)us);
         } else {
           append("\\u", 2);

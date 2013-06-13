@@ -28,7 +28,6 @@ SOFTWARE.
 
 
 #include "hphp/runtime/ext/JSON_parser.h"
-#include "hphp/runtime/base/util/string_buffer.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
@@ -402,7 +401,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
   }
 }
 
-static void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
+void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
   if (utf16 < 0x80) {
     buf += (char)utf16;
   } else if (utf16 < 0x800) {

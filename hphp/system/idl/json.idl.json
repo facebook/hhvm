@@ -34,6 +34,10 @@
             "type": "Int64"
         },
         {
+            "name": "JSON_UNESCAPED_UNICODE",
+            "type": "Int64"
+        },
+        {
             "name": "JSON_FB_LOOSE",
             "type": "Int64"
         },

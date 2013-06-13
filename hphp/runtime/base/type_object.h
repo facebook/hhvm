@@ -172,10 +172,6 @@ public:
   bool less (CObjRef v2) const;
   bool more (CObjRef v2) const;
 
-  /**
-   * Unresolved objects will go through these two functions than the ones
-   * on SmartObject<T>.
-   */
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);

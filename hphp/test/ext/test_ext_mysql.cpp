@@ -580,7 +580,7 @@ bool TestExtMysql::test_mysql_fetch_object() {
 
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_object(res);
-  VS(row.toObject().o_get("name"), "test");
+  VS(row.toObject()->o_get("name"), "test");
   return Count(true);
 }
 
@@ -600,7 +600,7 @@ bool TestExtMysql::test_mysql_fetch_field() {
   VS(f_mysql_query("insert into test (name) values ('test'),('test2')"), true);
 
   Variant res = f_mysql_query("select * from test");
-  VS(f_mysql_fetch_field(res, 1).o_get("name"), "name");
+  VS(f_mysql_fetch_field(res, 1).toObject()->o_get("name"), "name");
   return Count(true);
 }
 
@@ -611,7 +611,7 @@ bool TestExtMysql::test_mysql_field_seek() {
 
   Variant res = f_mysql_query("select * from test");
   VERIFY(f_mysql_field_seek(res, 1));
-  VS(f_mysql_fetch_field(res).o_get("name"), "name");
+  VS(f_mysql_fetch_field(res).toObject()->o_get("name"), "name");
   return Count(true);
 }
 

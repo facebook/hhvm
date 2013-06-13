@@ -347,7 +347,8 @@ String CmdInfo::GetParams(CArrRef params, bool varg,
         // ClassInfo was not able to serialize the value, so ext_reflection
         // prepared a stdClass error object. We should fall back to display
         // the original PHP text, if there.
-        args.append(defValue.o_get(s_msg).toString());
+        Object obj{defValue.asCell()->m_data.pobj};
+        args.append(obj->o_get(s_msg).toString());
       } else if (detailed) {
         args.append(DebuggerClient::FormatVariable(arg[s_default], -1));
       } else {

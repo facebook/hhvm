@@ -308,50 +308,58 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       param.set(s_name, p->name);
       param.set(s_type, p->type);
       param.set(s_function, info->name);
+
       if (classname) {
         param.set(s_class, VarNR(*classname));
       }
+
       const char *defText = p->valueText;
       int64_t defTextLen = p->valueTextLen;
       if (defText == nullptr) {
         defText = "";
         defTextLen = 0;
       }
+
       if (!p->type || !*p->type || !strcasecmp("null", defText)) {
         param.set(s_nullable, true_varNR);
       }
+
       if (p->value && *p->value) {
         if (*p->value == '\x01') {
-          Variant v;
           if ((defTextLen > 2) &&
               !strcmp(defText + defTextLen - 2, "()")) {
             const char *sep = strchr(defText, ':');
-            v = SystemLib::AllocStdClassObject();
+            Object obj = SystemLib::AllocStdClassObject();
             if (sep && sep[1] == ':') {
               String cls = String(defText, sep - defText, CopyString);
               String con = String(sep + 2, CopyString);
-              v.o_set(s_class, cls);
-              v.o_set(s_name, con);
+              obj->o_set(s_class, cls);
+              obj->o_set(s_name, con);
             } else {
-              v.o_set(s_name, String(defText, defTextLen, CopyString));
+              obj->o_set(s_name, String(defText, defTextLen, CopyString));
             }
-            param.set(s_default, v);
-          } else if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
-            param.set(s_default, v);
+            param.set(s_default, Variant(obj));
           } else {
-            v = SystemLib::AllocStdClassObject();
-            v.o_set(s_msg, String("Unknown unserializable default value: ")
-                                 + defText);
-            param.set(s_default, v);
+            Variant v;
+            if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
+              param.set(s_default, v);
+            } else {
+              Object obj = SystemLib::AllocStdClassObject();
+              obj->o_set(s_msg, String("Unknown unserializable default value: ")
+                                   + defText);
+              param.set(s_default, Variant(obj));
+            }
           }
         } else {
           param.set(s_default, unserialize_from_string(p->value));
         }
         param.set(s_defaultText, defText);
       }
+
       if (p->attribute & ClassInfo::IsReference) {
         param.set(s_ref, true_varNR);
       }
+
       {
         Array userAttrs = Array::Create();
         for (unsigned int i = 0; i < p->userAttrs.size(); ++i) {

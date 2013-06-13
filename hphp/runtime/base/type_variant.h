@@ -828,18 +828,6 @@ class Variant : private TypedValue {
   Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
 
-  Variant o_get(CStrRef propName, bool error = true,
-                CStrRef context = null_string) const;
-  Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
-  Variant o_set(CStrRef s, RefResult v, CStrRef context = null_string) {
-    return o_setRef(s, variant(v), context);
-  }
-  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
-
-  Variant o_invoke(CStrRef s, CArrRef params);
-  Variant o_invoke_few_args(CStrRef s, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
-
   template <typename T>
   inline ALWAYS_INLINE static CVarRef SetImpl(
     Variant *self, T key, CVarRef v, bool isKey);

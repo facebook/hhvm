@@ -74,25 +74,6 @@ static void setupAfterProlog(ActRec* fp) {
  *   Func's prologue entries initially point here. Vector into fcallHelper,
  *   where we can translate a new prologue.
  */
-
-static TCA callAndResume(ActRec *ar) {
-  if (!ar->m_func->isClonedClosure()) {
-    /*
-     * If the func is a cloned closure, then the original
-     * closure has already run the prolog, and the prologs
-     * array is just being used as entry points for the
-     * dv funclets. Dont run the prolog again.
-     */
-    VMRegAnchor _(ar);
-    uint64_t rip = ar->m_savedRip;
-    g_vmContext->doFCall(ar, g_vmContext->m_pc);
-    ar->m_savedRip = rip;
-    return Translator::Get()->getResumeHelperRet();
-  }
-  setupAfterProlog(ar);
-  return Translator::Get()->getResumeHelper();
-}
-
 static_assert(rStashedAR == reg::r15,
   "__fcallHelperThunk needs to be modified for ABI changes");
 asm(
@@ -142,7 +123,33 @@ TCA fcallHelper(ActRec* ar) {
     if (tca) {
       return tca;
     }
-    return callAndResume(ar);
+    if (!ar->m_func->isClonedClosure()) {
+      /*
+       * If the func is a cloned closure, then the original
+       * closure has already run the prolog, and the prologs
+       * array is just being used as entry points for the
+       * dv funclets. Dont run the prolog again.
+       */
+      VMRegAnchor _(ar);
+      uint64_t rip = ar->m_savedRip;
+      if (g_vmContext->doFCall(ar, g_vmContext->m_pc)) {
+        ar->m_savedRip = rip;
+        return Translator::Get()->getResumeHelperRet();
+      }
+      // We've been asked to skip the function body
+      // (fb_intercept). frame, stack and pc have
+      // already been fixed - so just ensure that
+      // we setup the registers, and return as
+      // if from the call to ar
+      DECLARE_FRAME_POINTER(framePtr);
+      framePtr->m_savedRip = rip;
+      framePtr->m_savedRbp = (uint64_t)g_vmContext->m_fp;
+      sp = g_vmContext->m_stack.top();
+      return nullptr;
+    }
+    setupAfterProlog(ar);
+    assert(ar == g_vmContext->m_fp);
+    return Translator::Get()->getResumeHelper();
   } catch (...) {
     /*
       The return address is set to __fcallHelperThunk,
@@ -152,9 +159,8 @@ TCA fcallHelper(ActRec* ar) {
       function's return address (which will be in the
       tc).
       Note that the registers really are clean - we
-      just came from callAndResume which cleaned
-      them for us - so we just have to tell the unwinder
-      that.
+      cleaned them in the try above - so we just
+      have to tell the unwinder that.
     */
     DECLARE_FRAME_POINTER(framePtr);
     tl_regState = REGSTATE_CLEAN;

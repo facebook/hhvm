@@ -5784,7 +5784,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
   }
 }
 
-void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
+bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(getOuterVMFrame(ar) == m_fp);
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   assert(isReturnHelper(ar->m_savedRip));
@@ -5796,9 +5796,9 @@ void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(pcOff() >= m_fp->m_func->base());
   prepareFuncEntry(ar, pc);
   SYNC();
-  if (!EventHook::FunctionEnter(ar, EventHook::NormalFunc)) {
-    pc = m_pc;
-  }
+  if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
+  pc = m_pc;
+  return false;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {

@@ -669,7 +669,7 @@ public:
   HPHP::PCFilter* m_lastLocFilter;
   bool m_interpreting;
   bool m_dbgNoBreak;
-  void doFCall(HPHP::ActRec* ar, PC& pc);
+  bool doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   CVarRef getEvaledArg(const StringData* val);
 private:

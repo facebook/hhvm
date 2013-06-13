@@ -159,7 +159,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   if (doneFlag.toBoolean()) {
     Offset pcOff;
     ActRec* outer = g_vmContext->getPrevVMState(ar, &pcOff);
-    assert(outer);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
     Stack& stack = g_vmContext->getStack();
@@ -167,7 +166,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     tvDup(ret.asTypedValue(), stack.allocTV());
 
     g_vmContext->m_fp = outer;
-    g_vmContext->m_pc = outer->m_func->unit()->at(pcOff);
+    g_vmContext->m_pc = outer ? outer->m_func->unit()->at(pcOff) : nullptr;
 
     return false;
   }

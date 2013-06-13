@@ -350,7 +350,7 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
   }
   RuntimeOption::WarningFrequency = savedWarningFrequency;
   if (!m_code && m_file == "systemlib.php") {
-    m_code = get_systemlib();
+    m_code = SystemLib::s_source;
   }
   return proxy.sendToClient((DebuggerCommand*)this);
 }

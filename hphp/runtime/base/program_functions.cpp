@@ -1199,7 +1199,9 @@ string get_systemlib(string* hhas) {
   ifs.seekg(desc.m_start, std::ios::beg);
   std::unique_ptr<char[]> data(new char[desc.m_len]);
   ifs.read(data.get(), desc.m_len);
-  return systemlib_split(string(data.get(), desc.m_len), hhas);
+  string ret = systemlib_split(string(data.get(), desc.m_len), hhas);
+  if (RuntimeOption::EnableDebugger) SystemLib::s_source = ret;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -53,6 +53,13 @@ public:
   int afdtRequest(String request, String* response);
 
 protected:
+
+  enum class TakeoverState {
+    NotStarted,
+    Started,
+    Complete,
+   };
+
   virtual void start();
   virtual int getAcceptSocket();
 
@@ -62,7 +69,12 @@ protected:
   void* m_delete_handle;
   std::string m_transfer_fname;
   std::set<TakeoverListener*> m_takeover_listeners;
+
+  // Was this server initiated with a socket from another server?
   bool m_took_over;
+
+  // The state of taking over this server's socket
+  TakeoverState m_takeover_state;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -86,7 +86,8 @@ LibEventServerWithTakeover::LibEventServerWithTakeover
 (const std::string &address, int port, int thread, int timeoutSeconds)
   : LibEventServer(address, port, thread, timeoutSeconds),
     m_delete_handle(nullptr),
-    m_took_over(false)
+    m_took_over(false),
+    m_takeover_state(TakeoverState::NotStarted)
 {
 }
 
@@ -107,6 +108,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
       // log message is not too harmful.
       Logger::Error("Unable to delete accept socket");
     }
+    m_takeover_state = TakeoverState::Started;
     return m_accept_sock;
   } else if (request == P_VERSION C_TERM_REQ) {
     Logger::Info("takeover: request is a terminate request");
@@ -143,6 +145,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
       return -1;
     }
     m_delete_handle = nullptr;
+    m_takeover_state = TakeoverState::Complete;
 
     *response = P_VERSION C_TERM_OK;
     Logger::Info("takeover: notifying all listeners");
@@ -321,7 +324,21 @@ void LibEventServerWithTakeover::stop() {
   if (m_delete_handle != nullptr) {
     afdt_close_server(m_delete_handle);
   }
-  m_accept_sock = -1;
+
+  // If we're doing takeover, we don't want to gracefully close the
+  // socket. If the takeover was fully completed the socket should
+  // already be closed. On the other hand if the takeover was started,
+  // we don't want to call shutdown because the new server might be
+  // listening on that socket and we would cause it to never work. To
+  // be safe we close the socket so that if nobody else is listening
+  // the OS starts rejecting requests but if somebody is listening we
+  // let them receive the requests.
+  if (m_takeover_state != TakeoverState::NotStarted &&
+      m_accept_sock != -1) {
+    close(m_accept_sock);
+    m_accept_sock = -1;
+  }
+
   LibEventServer::stop();
 }
 

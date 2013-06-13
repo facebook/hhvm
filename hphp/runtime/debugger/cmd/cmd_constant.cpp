@@ -65,8 +65,14 @@ void CmdConstant::onClientImpl(DebuggerClient &client) {
   } else {
     int i = 0;
     bool found = false;
-    m_constants = cmd->m_constants;
-    f_ksort(ref(m_constants));
+
+    {
+      Variant forSort(cmd->m_constants);
+      f_ksort(ref(forSort));
+      assert(forSort.is(KindOfArray));
+      m_constants = forSort.asCell()->m_data.parr;
+    }
+
     for (ArrayIter iter(m_constants); iter; ++iter) {
       String name = iter.first().toString();
       String value = DebuggerClient::FormatVariable(iter.second(), 200);

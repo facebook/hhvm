@@ -2229,6 +2229,9 @@ void UnitEmitter::addTrivialPseudoMain() {
 }
 
 void UnitEmitter::setBc(const uchar* bc, size_t bclen) {
+  if (m_bc) {
+    free(m_bc);
+  }
   m_bc = (uchar*)malloc(bclen);
   m_bcmax = bclen;
   memcpy(m_bc, bc, bclen);

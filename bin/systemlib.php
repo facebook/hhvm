@@ -3215,7 +3215,8 @@ interface Indexish extends KeyedTraversable {
 
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
-                              KeyedIterable {
+                              KeyedIterable,
+                              Indexish {
 }
 
 interface MutableVector extends ConstVector,
@@ -3225,7 +3226,8 @@ interface MutableVector extends ConstVector,
 
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
-                           KeyedIterable {
+                           KeyedIterable,
+                           Indexish {
 }
 
 interface MutableMap extends ConstMap,

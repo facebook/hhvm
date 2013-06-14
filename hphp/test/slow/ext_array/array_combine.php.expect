@@ -1,0 +1,8 @@
+array(3) {
+  ["green"]=>
+  string(7) "avocado"
+  ["red"]=>
+  string(5) "apple"
+  ["yellow"]=>
+  string(6) "banana"
+}

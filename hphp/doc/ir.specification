@@ -349,12 +349,6 @@ CheckLoc<T,localId> S0:FramePtr -> L
   Check that type of the given localId on the frame S0 is T; if not,
   branch to the label L.
 
-AssertThis 
-
-  Asserts that the $this variable is valid in the current frame.  This 
-  instruction is a hint to perform optimizations in later passes but does 
-  not have any runtime behavior.
-
 AssertLoc<T,localId> S0:FramePtr
 
   Asserts that type of the supplied local on the frame S0 is T.  This

@@ -107,6 +107,9 @@ struct TraceBuilder {
   bool isThisAvailable() const {
     return m_thisIsAvailable;
   }
+  void setThisAvailable() {
+    m_thisIsAvailable = true;
+  }
 
   Type getLocalType(unsigned id) const;
   SSATmp* getLocalValue(unsigned id) const;

@@ -371,10 +371,6 @@ void HhbcTranslator::emitUnboxR() {
   emitUnboxRAux();
 }
 
-void HhbcTranslator::assertThis() {
-  gen(AssertThis);
-}
-
 void HhbcTranslator::emitThis() {
   if (!curClass()) {
     emitInterpOne(Type::Obj, 0); // will throw a fatal
@@ -2377,6 +2373,10 @@ void HhbcTranslator::emitRetC(bool freeInline) {
 
 void HhbcTranslator::emitRetV(bool freeInline) {
   emitRet(Type::BoxedCell, freeInline);
+}
+
+void HhbcTranslator::setThisAvailable() {
+  m_tb->setThisAvailable();
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {

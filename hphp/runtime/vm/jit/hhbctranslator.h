@@ -126,7 +126,6 @@ struct HhbcTranslator {
                  const vector<bool>& vals);
 
   // Interface to irtranslator for predicted and inferred types.
-  void assertThis();
   void assertTypeLocal(uint32_t localIndex, Type type);
   void assertTypeStack(uint32_t stackIndex, Type type);
   void checkTypeLocal(uint32_t localIndex, Type type, Offset dest = -1);
@@ -151,6 +150,7 @@ struct HhbcTranslator {
   void profileFailedInlShape(const std::string& str);
 
   // Other public functions for irtranslator.
+  void setThisAvailable();
   void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
   void emitInterpOneCF(int numPopped);
 

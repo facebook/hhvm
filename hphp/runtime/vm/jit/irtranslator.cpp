@@ -1572,7 +1572,8 @@ void Translator::translateInstr(const NormalizedInstruction& i) {
                         i.breaksTracelet && !m_hhbcTrans->isInlining());
 
   if (i.guardedThis) {
-    m_hhbcTrans->assertThis();
+    // Task #2067635: This should really generate an AssertThis
+    m_hhbcTrans->setThisAvailable();
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {

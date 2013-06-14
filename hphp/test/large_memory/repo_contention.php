@@ -31,5 +31,5 @@ if (count($argv) > 1) {
 } else {
   $x10 = main(10);
   $x200 = main(200);
-  echo $x10 * 20 < $x200 ? "Failed since $x10 * 20 >= $x200" : "Passed", "\n";
+  echo $x10 * 20 < $x200 ? "Failed since $x10 * 20 < $x200" : "Passed", "\n";
 }

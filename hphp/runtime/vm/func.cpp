@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/func_inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/parser/parser.h"
 
 namespace HPHP {
 
@@ -642,7 +643,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_originalFilename(nullptr) {
+    m_hasGeneratorAsBody(false), m_isGenerated(false),
+    m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -905,10 +907,12 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 }
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
+  bool isGenerated = isdigit(m_name->data()[0]) ||
+    ParserBase::IsClosureOrContinuationName(m_name->toCPPString());
+
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
-      ((RuntimeOption::EvalJitEnableRenameFunction &&
-        !isdigit(m_name->data()[0])) ||
+      ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
        (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
@@ -970,6 +974,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_originalFilename = m_originalFilename;
+  f->shared()->m_isGenerated = isGenerated;
   return f;
 }
 

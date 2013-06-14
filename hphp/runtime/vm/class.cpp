@@ -1565,7 +1565,7 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
   // Skip special methods
-  if (isdigit((uchar)method->name()->data()[0])) return;
+  if (method->isGenerated()) return;
 
   if ((parentMethod->attrs() & AttrFinal)) {
     static StringData* sd___MockClass =
@@ -2368,10 +2368,7 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
   Func* const* pcMethods = m_preClass->methods();
   for (size_t i = 0, sz = m_preClass->numMethods(); i < sz; i++) {
     Func* func = pcMethods[i];
-    if (isdigit(func->name()->data()[0]) ||
-        ParserBase::IsClosureOrContinuationName(func->name()->toCPPString())) {
-      continue;
-    }
+    if (func->isGenerated()) continue;
     if (!(func->attrs() & AttrPublic)) {
       if (!ctx) continue;
       if (ctx != this) {
@@ -2459,10 +2456,14 @@ void Class::getClassInfo(ClassInfoVM* ci) {
 
   // Methods: in source order (from our PreClass), then traits.
   for (size_t i = 0; i < m_preClass->numMethods(); ++i) {
-    const StringData* name = m_preClass->methods()[i]->name();
-    // Filter out special methods
-    if (isdigit(name->data()[0])) continue;
     Func* func = lookupMethod(m_preClass->methods()[i]->name());
+    // Filter out special methods
+    if (!func) {
+      DEBUG_ONLY const StringData* name = m_preClass->methods()[i]->name();
+      assert(!strcmp(name->data(), "86ctor"));
+      continue;
+    }
+    if (func->isGenerated()) continue;
     assert(func);
     assert(declaredMethod(func));
     SET_FUNCINFO_BODY;
@@ -2471,7 +2472,7 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   for (Slot i = m_traitsBeginIdx; i < m_traitsEndIdx; ++i) {
     Func* func = m_methods[i];
     assert(func);
-    if (!isdigit(func->name()->data()[0])) {
+    if (!func->isGenerated()) {
       SET_FUNCINFO_BODY;
     }
   }

@@ -351,6 +351,10 @@ struct Func {
    */
   bool hasGeneratorAsBody() const { return shared()->m_hasGeneratorAsBody; }
   const Func* getGeneratorBody(const StringData* name) const;
+  /**
+   * Was this generated specially by the compiler to aide the runtime?
+   */
+  bool isGenerated() const { return shared()->m_isGenerated; }
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
@@ -470,6 +474,7 @@ private:
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
     bool m_hasGeneratorAsBody : 1;
+    bool m_isGenerated : 1;
     UserAttributeMap m_userAttributes;
     const StringData* m_retTypeConstraint;
     // per-func filepath for traits flattened during repo construction

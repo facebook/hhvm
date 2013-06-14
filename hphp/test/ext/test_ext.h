@@ -34,7 +34,6 @@
 #include "hphp/facebook/extensions/string_buffer/test_ext_string_buffer.h"
 #include "hphp/facebook/extensions/tao/test_ext_tao.h"
 #include "hphp/facebook/extensions/urlextraction/test_ext_urlextraction.h"
-#include "hphp/test/ext/test_ext_apd.h"
 #include "hphp/test/ext/test_ext_asio.h"
 #include "hphp/test/ext/test_ext_bcmath.h"
 #include "hphp/test/ext/test_ext_bzip2.h"

@@ -1115,6 +1115,8 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpIterNextK:
     case OpMIterNext:
     case OpMIterNextK:
+    case OpWIterNext:
+    case OpWIterNextK:
     case OpIterInit: // May branch to fail case.
     case OpIterInitK: // Ditto
     case OpMIterInit: // Ditto

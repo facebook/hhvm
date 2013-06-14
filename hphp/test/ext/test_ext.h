@@ -87,7 +87,6 @@
 #include "hphp/test/ext/test_ext_simplexml.h"
 #include "hphp/test/ext/test_ext_soap.h"
 #include "hphp/test/ext/test_ext_socket.h"
-#include "hphp/test/ext/test_ext_spl.h"
 #include "hphp/test/ext/test_ext_sqlite3.h"
 #include "hphp/test/ext/test_ext_stream.h"
 #include "hphp/test/ext/test_ext_string.h"

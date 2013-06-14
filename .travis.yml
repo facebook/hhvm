@@ -5,7 +5,7 @@ before_script:
   - ./configure_ubuntu_12.04.sh
 # for some tests  
   - sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8
-  - HPHP_HOME=`pwd` make -j `grep -c '^processor' /proc/cpuinfo`
+  - HPHP_HOME=`pwd` make -j 8
   
 script: hphp/hhvm/hhvm hphp/test/run --arg quick slow zend
 

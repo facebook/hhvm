@@ -48,7 +48,6 @@
 #include "hphp/test/ext/test_ext_debugger.h"
 #include "hphp/test/ext/test_ext_domdocument.h"
 #include "hphp/test/ext/test_ext_error.h"
-#include "hphp/test/ext/test_ext_fb.h"
 #include "hphp/test/ext/test_ext_file.h"
 #include "hphp/test/ext/test_ext_function.h"
 #include "hphp/test/ext/test_ext_hash.h"

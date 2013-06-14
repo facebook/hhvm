@@ -1,0 +1,24 @@
+bool(true)
+string(4) "honk"
+bool(true)
+string(7) "testఱ"
+bool(true)
+string(7) "testఱ"
+bool(true)
+string(0) ""
+bool(true)
+string(0) ""
+bool(true)
+string(6) "abcdef"
+bool(true)
+string(1) "("
+====
+int(0)
+int(1)
+int(2)
+int(12)
+int(2)
+int(7)
+int(7)
+int(6)
+int(6)

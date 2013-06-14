@@ -495,7 +495,7 @@ void CmdBreak::setClientOutput(DebuggerClient &client) {
     Array breakpoint;
     breakpoint.set(s_id, bpi->index());
     breakpoint.set(s_state, bpi->state(false));
-    if (bpi->m_interrupt == ExceptionThrown) {
+    if (bpi->m_interruptType == ExceptionThrown) {
       breakpoint.set(s_is_exception, true);
       breakpoint.set(s_exception_class, bpi->getExceptionClass());
     } else {

@@ -142,7 +142,7 @@ const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
 BreakPointInfo::BreakPointInfo(bool regex, State state,
                                const std::string &file, int line)
     : m_index(0), m_state(state), m_valid(true),
-      m_interrupt(BreakPointReached),
+      m_interruptType(BreakPointReached),
       m_file(file), m_line1(line), m_line2(line),
       m_regex(regex), m_check(false) {
   TRACE(2, "BreakPointInfo::BreakPointInfo..const std::string &file, int)\n");
@@ -152,7 +152,7 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
 BreakPointInfo::BreakPointInfo(bool regex, State state,
                                InterruptType interrupt,
                                const std::string &url)
-    : m_index(0), m_state(state), m_valid(true), m_interrupt(interrupt),
+    : m_index(0), m_state(state), m_valid(true), m_interruptType(interrupt),
       m_line1(0), m_line2(0), m_url(url),
       m_regex(regex), m_check(false) {
   TRACE(2, "BreakPointInfo::BreakPointInfo..const std::string &url)\n");
@@ -163,16 +163,13 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
                                InterruptType interrupt,
                                const std::string &exp,
                                const std::string &file)
-    : m_index(0), m_state(state), m_valid(true), m_interrupt(interrupt),
+    : m_index(0), m_state(state), m_valid(true), m_interruptType(interrupt),
       m_line1(0), m_line2(0),
       m_regex(regex), m_check(false) {
   TRACE(2, "BreakPointInfo::BreakPointInfo..const std::string &file)\n");
-  assert(m_interrupt != ExceptionHandler); // Server-side only.
-  if (m_interrupt == ExceptionThrown) {
+  assert(m_interruptType != ExceptionHandler); // Server-side only.
+  if (m_interruptType == ExceptionThrown) {
     parseExceptionThrown(exp);
-    if (!m_file.empty() || m_line1 || m_line2 || !m_funcs.empty()) {
-      m_valid = false;
-    }
   } else {
     parseBreakPointReached(exp, file);
   }
@@ -194,8 +191,8 @@ BreakPointInfo::~BreakPointInfo() {
 
 void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::sendImpl\n");
-  thrift.write(m_state);
-  thrift.write(m_interrupt);
+  thrift.write((int8_t)m_state);
+  thrift.write((int8_t)m_interruptType);
   thrift.write(m_file);
   thrift.write(m_line1);
   thrift.write(m_line2);
@@ -213,8 +210,9 @@ void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
 
 void BreakPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::recvImpl\n");
-  thrift.read(m_state);
-  thrift.read(m_interrupt);
+  int8_t tmp;
+  thrift.read(tmp); m_state = (State)tmp;
+  thrift.read(tmp); m_interruptType = (InterruptType)tmp;
   thrift.read(m_file);
   thrift.read(m_line1);
   thrift.read(m_line2);
@@ -281,7 +279,7 @@ void BreakPointInfo::toggle() {
 bool BreakPointInfo::valid() {
   TRACE(2, "BreakPointInfo::valid\n");
   if (m_valid) {
-    switch (m_interrupt) {
+    switch (m_interruptType) {
       case BreakPointReached:
         if (!getFuncName().empty()) {
           if (!m_file.empty() || m_line1 != 0) {
@@ -302,6 +300,8 @@ bool BreakPointInfo::valid() {
       case RequestEnded:
       case PSPEnded:
         return true;
+      default:
+        break;
     }
   }
   return false;
@@ -314,7 +314,7 @@ bool BreakPointInfo::same(BreakPointInfoPtr bpi) {
 
 bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
   TRACE(2, "BreakPointInfo::match\n");
-  if (m_interrupt == interrupt) {
+  if (m_interruptType == interrupt) {
     switch (interrupt) {
       case RequestStarted:
       case RequestEnded:
@@ -488,7 +488,7 @@ std::string BreakPointInfo::descExceptionThrown() const {
 std::string BreakPointInfo::desc() const {
   TRACE(2, "BreakPointInfo::desc\n");
   string ret;
-  switch (m_interrupt) {
+  switch (m_interruptType) {
     case BreakPointReached:
       ret = descBreakPointReached();
       break;
@@ -496,7 +496,7 @@ std::string BreakPointInfo::desc() const {
       ret = descExceptionThrown();
       break;
     default:
-      ret = GetInterruptName((InterruptType)m_interrupt);
+      ret = GetInterruptName((InterruptType)m_interruptType);
       break;
   }
 

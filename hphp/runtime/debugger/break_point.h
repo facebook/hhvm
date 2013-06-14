@@ -22,21 +22,37 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-enum InterruptType {
+// The type of interrupt that is sent from the server to notify the debugger
+// client about a notable event during execution.
+enum InterruptType : int8_t {
+  // The server is now ready to interact with the debugger
   SessionStarted,
+  // The server has terminated the debug session.
   SessionEnded,
+  // The server has received a web request
   RequestStarted,
+  // The server has sent a response to the web request
   RequestEnded,
+  // The server has finished all processing of a web request
+  // also known as Post Send Processing has Ended.
   PSPEnded,
-  HardBreakPoint, // From f_hphpd_break().
-  BreakPointReached, // Break from the VM interpreter loop
+  // The server has executed f_hphpd_break()
+  HardBreakPoint,
+  // The server has reached a point where it has been told to stop and wait
+  // for the debugger to tell it to resume execution. For example,
+  // a user breakpoint has been reached, or a step command has completed.
+  BreakPointReached,
+  // The server is about throw an exception
   ExceptionThrown,
 
-  // Interrupts for exception handler entry are, for now, server-side only and
-  // only for flow control. We could consider exposing this to clients, and
-  // allowing it as a break point much like ExceptionThrown is, but the value
-  // seems quite low at this time. We assert this stays server-side.
+  // The server has reached the start of an exception handler.
   ExceptionHandler,
+  // The above type of interrupt is not sent from the server to the debugger
+  // but is used for flow control inside the server. We could consider exposing
+  // this type of interrupt to clients, and thus allowing users to request the
+  // server to break execution when an interrupt handler is reached, but the
+  // value seems quite low at this time.
+  // We have assertions that check that these interrupts stays server-side.
 };
 
 // Represents a site in the code, at the source level.
@@ -99,10 +115,11 @@ DECLARE_BOOST_TYPES(DFunctionInfo);
 DECLARE_BOOST_TYPES(BreakPointInfo);
 class BreakPointInfo {
 public:
-  enum State {
-    Always   = -1,
-    Once     = 1,
-    Disabled = 0,
+  // The state of break point
+  enum State : int8_t {
+    Always   = -1, // always break when reaching this break point
+    Once     = 1, // break the first time, then disable
+    Disabled = 0, // carry on with execution when reaching this break point
   };
 
   static const char *ErrorClassName;
@@ -133,6 +150,7 @@ public:
   int index() const { return m_index;}
   std::string state(bool padding) const;
   std::string desc() const;
+
   std::string site() const;
   std::string regex(const std::string &name) const;
 
@@ -151,9 +169,9 @@ public:
 
   int16_t m_index; // client side index number
 
-  int8_t m_state;
-  bool m_valid;
-  int8_t m_interrupt;
+  State m_state; // Always, Once, Disabled
+  bool m_valid; // false if syntactically invalid
+  InterruptType m_interruptType; // Why this break point was reached
 
   // file::line1-line2
   std::string m_file;

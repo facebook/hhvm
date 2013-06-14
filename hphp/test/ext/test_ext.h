@@ -89,7 +89,6 @@
 #include "hphp/test/ext/test_ext_sqlite3.h"
 #include "hphp/test/ext/test_ext_stream.h"
 #include "hphp/test/ext/test_ext_string.h"
-#include "hphp/test/ext/test_ext_thread.h"
 #include "hphp/test/ext/test_ext_thrift.h"
 #include "hphp/test/ext/test_ext_url.h"
 #include "hphp/test/ext/test_ext_variable.h"

@@ -71,9 +71,6 @@
 #include "hphp/test/ext/test_ext_string.h"
 #include "hphp/test/ext/test_ext_url.h"
 #include "hphp/test/ext/test_ext_variable.h"
-#include "hphp/test/ext/test_ext_xml.h"
-#include "hphp/test/ext/test_ext_xmlreader.h"
-#include "hphp/test/ext/test_ext_xmlwriter.h"
 #include "hphp/test/ext/test_ext_zlib.h"
 
 #endif // incl_EXT_LIST_TEST_EXT_H_

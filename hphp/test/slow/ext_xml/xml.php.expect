@@ -1,0 +1,43 @@
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(3) {
+  ["tag"]=>
+  string(4) "PARA"
+  ["type"]=>
+  string(4) "open"
+  ["level"]=>
+  int(1)
+}
+array(5) {
+  ["tag"]=>
+  string(4) "NOTE"
+  ["type"]=>
+  string(8) "complete"
+  ["level"]=>
+  int(2)
+  ["attributes"]=>
+  array(1) {
+    ["ATTRIB1"]=>
+    string(3) "foo"
+  }
+  ["value"]=>
+  string(11) "simple&note"
+}
+array(3) {
+  ["tag"]=>
+  string(4) "PARA"
+  ["type"]=>
+  string(5) "close"
+  ["level"]=>
+  int(1)
+}

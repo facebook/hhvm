@@ -58,7 +58,6 @@
 #include "hphp/test/ext/test_ext_output.h"
 #include "hphp/test/ext/test_ext_pdo.h"
 #include "hphp/test/ext/test_ext_posix.h"
-#include "hphp/test/ext/test_ext_preg.h"
 #include "hphp/test/ext/test_ext_process.h"
 #include "hphp/test/ext/test_ext_server.h"
 #include "hphp/test/ext/test_ext_session.h"

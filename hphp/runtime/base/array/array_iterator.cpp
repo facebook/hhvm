@@ -1055,10 +1055,9 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     }
     const HphpArray* arr = (HphpArray*)ad;
     ssize_t pos = arrIter->getPos();
-
     HphpArray::Elm* elm;
     do {
-      if (size_t(pos) >= size_t(arr->getLastE())) {
+      if (size_t(++pos) >= size_t(arr->iterLimit())) {
         if (UNLIKELY(arr->getCount() == 1)) {
           goto cold;
         }
@@ -1068,7 +1067,6 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         }
         return 0;
       }
-      pos = pos + 1;
       elm = arr->getElm(pos);
     } while (elm->data.m_type >= HphpArray::KindOfTombstone);
     if (UNLIKELY(tvWillBeReleased(valOut))) {
@@ -1106,7 +1104,8 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     ssize_t pos = arrIter->getPos();
     HphpArray::Elm* elm;
     do {
-      if (size_t(pos) >= size_t(arr->getLastE())) {
+      ++pos;
+      if (size_t(pos) >= size_t(arr->iterLimit())) {
         if (UNLIKELY(arr->getCount() == 1)) {
           goto cold;
         }
@@ -1116,7 +1115,6 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         }
         return 0;
       }
-      pos = pos + 1;
       elm = arr->getElm(pos);
     } while (elm->data.m_type >= HphpArray::KindOfTombstone);
     if (!withRef) {

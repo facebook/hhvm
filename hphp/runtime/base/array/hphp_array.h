@@ -299,9 +299,9 @@ public:
     ElmInd hash[SmallHashSize];
   };
 
-  ElmInd getLastE() const { return m_lastE; }
-  Elm*   getElm(ssize_t pos)  const {
-    assert(unsigned(pos) <= unsigned(m_lastE));
+  uint32_t iterLimit() const { return m_used; }
+  Elm* getElm(ssize_t pos) const {
+    assert(size_t(pos) < m_used);
     return &m_data[pos];
   }
   static void getElmKey(Elm* e, TypedValue* out) {
@@ -352,32 +352,30 @@ private:
   // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
 
-  ElmInd  m_lastE;       // Index of last used element.
-  uint32_t  m_tableMask; // Bitmask used when indexing into the hash table.
-  uint32_t  m_hLoad;     // Hash table load (# of non-empty slots).
-  int64_t   m_nextKI;    // Next integer key to use for append.
-  Elm*    m_data;        // Contains elements and hash table.
-  ElmInd* m_hash;        // Hash table.
+  uint32_t m_used;       // number of used elements (values or tombstones)
+  uint32_t m_tableMask;  // Bitmask used when indexing into the hash table.
+  uint32_t m_hLoad;      // Hash table load (# of non-empty slots).
+  int64_t  m_nextKI;     // Next integer key to use for append.
+  Elm*     m_data;       // Contains elements and hash table.
+  ElmInd*  m_hash;       // Hash table.
   union {
     InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
   };
 
-  ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const {
+  ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
-    ssize_t lastE = m_lastE;
-    while (ei < lastE) {
-      ++ei;
+    while (size_t(++ei) < m_used) {
       if (elms[ei].data.m_type < KindOfTombstone) {
         return ei;
       }
     }
     return (ssize_t)ElmIndEmpty;
   }
-  ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
+  ssize_t prevElm(Elm* elms, ssize_t ei) const;
 
-  ssize_t /*ElmInd*/ find(int64_t ki) const;
-  ssize_t /*ElmInd*/ find(const StringData* s, strhash_t prehash) const;
+  ssize_t find(int64_t ki) const;
+  ssize_t find(const StringData* s, strhash_t prehash) const;
   ElmInd* findForInsert(int64_t ki) const;
   ElmInd* findForInsert(const StringData* k, strhash_t prehash) const;
 

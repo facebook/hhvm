@@ -121,7 +121,7 @@ inline void HphpArray::init(uint capacity) {
 
 HphpArray::HphpArray(uint capacity)
     : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, 0)
-    , m_lastE(ElmIndEmpty)
+    , m_used(0)
     , m_hLoad(0)
     , m_nextKI(0) {
 #ifdef PEDANTIC
@@ -135,7 +135,7 @@ HphpArray::HphpArray(uint capacity)
 
 HphpArray::HphpArray(uint size, const TypedValue* values)
     : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, size)
-    , m_lastE(size - 1)
+    , m_used(size)
     , m_hLoad(size)
     , m_nextKI(size) {
 #ifdef PEDANTIC
@@ -165,14 +165,14 @@ HphpArray::HphpArray(uint size, const TypedValue* values)
   }
   assert(m_size == size);
   assert(m_hLoad == size);
-  assert(m_lastE == size - 1);
+  assert(m_used == size);
   assert(m_nextKI == size);
   assert(size == 0 || m_pos == 0);
 }
 
 HphpArray::HphpArray(EmptyMode)
     : ArrayData(ArrayKind::kHphpArray, AllocationMode::smart, 0)
-    , m_lastE(ElmIndEmpty)
+    , m_used(0)
     , m_hLoad(0)
     , m_nextKI(0) {
   init(0);
@@ -187,8 +187,8 @@ HphpArray::HphpArray(AllocationMode mode) :
 HOT_FUNC_VM
 HphpArray::~HphpArray() {
   auto const elms = m_data;
-  auto const lastE = (ssize_t)m_lastE;
-  for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
+  auto const used = m_used;
+  for (uint32_t pos = 0; pos < used; ++pos) {
     auto& e = elms[pos];
     if (e.data.m_type == KindOfTombstone) continue;
     if (e.hasStrKey()) decRefStr(e.key);
@@ -213,9 +213,8 @@ ssize_t HphpArray::vsize() const {
 //=============================================================================
 // Iteration.
 
-inline /*ElmInd*/ ssize_t HphpArray::prevElm(Elm* elms,
-                                             /*ElmInd*/ ssize_t ei) const {
-  assert(ei <= (ssize_t)(m_lastE+1));
+inline ssize_t HphpArray::prevElm(Elm* elms, ssize_t ei) const {
+  assert(ei <= ssize_t(m_used));
   while (ei > 0) {
     --ei;
     if (elms[ei].data.m_type < KindOfTombstone) {
@@ -230,32 +229,30 @@ ssize_t HphpArray::iter_begin() const {
 }
 
 ssize_t HphpArray::iter_end() const {
-  return prevElm(m_data, (ssize_t)(m_lastE + 1));
+  return prevElm(m_data, m_used);
 }
 
 ssize_t HphpArray::iter_advance(ssize_t pos) const {
-  ssize_t lastE = m_lastE;
   assert(ArrayData::invalid_index == -1);
-  // Since lastE is always less than 2^32-1 and invalid_index == -1,
+  // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead
   // of a signed comparison.
-  if (size_t(pos) < size_t(lastE) &&
-      m_data[pos + 1].data.m_type < KindOfTombstone) {
-    return pos + 1;
+  if (size_t(++pos) < m_used &&
+      m_data[pos].data.m_type < KindOfTombstone) {
+    return pos;
   }
   return iter_advance_helper(pos);
 }
 
-ssize_t HphpArray::iter_advance_helper(ssize_t pos) const {
+// caller has already incremented pos but encountered a tombstone
+ssize_t HphpArray::iter_advance_helper(ssize_t next_pos) const {
   Elm* elms = m_data;
-  ssize_t lastE = m_lastE;
-  // Since lastE is always less than 2^32-1 and invalid_index == -1,
+  // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead of
   // a signed comparison.
-  while (size_t(pos) < size_t(lastE)) {
-    ++pos;
-    if (elms[pos].data.m_type < KindOfTombstone) {
-      return pos;
+  for (auto limit = m_used; size_t(next_pos) < limit; ++next_pos) {
+    if (elms[next_pos].data.m_type < KindOfTombstone) {
+      return next_pos;
     }
   }
   return ArrayData::invalid_index;
@@ -298,7 +295,7 @@ bool HphpArray::isVectorData() const {
   }
   Elm* elms = m_data;
   int64_t i = 0;
-  for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+  for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
     if (e->data.m_type == KindOfTombstone) {
       continue;
@@ -349,7 +346,7 @@ Variant HphpArray::next() {
 
 Variant HphpArray::end() {
   Elm* elms = m_data;
-  m_pos = prevElm(elms, (ssize_t)(m_lastE+1));
+  m_pos = prevElm(elms, m_used);
   if (m_pos != ArrayData::invalid_index) {
     Elm* e = &elms[m_pos];
     assert(e->data.m_type != KindOfTombstone);
@@ -360,8 +357,8 @@ Variant HphpArray::end() {
 
 Variant HphpArray::key() const {
   if (m_pos != ArrayData::invalid_index) {
-    assert(m_pos <= (ssize_t)m_lastE);
-    Elm* e = &m_data[(ElmInd)m_pos];
+    assert(size_t(m_pos) < m_used);
+    Elm* e = &m_data[m_pos];
     assert(e->data.m_type != KindOfTombstone);
     if (e->hasStrKey()) {
       return e->key;
@@ -456,7 +453,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
   size_t tableMask = m_tableMask; \
   size_t probeIndex = size_t(h0) & tableMask; \
   Elm* elms = m_data; \
-  ssize_t /*ElmInd*/ pos = m_hash[probeIndex]; \
+  ssize_t pos = m_hash[probeIndex]; \
   if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
     return pos; \
   } \
@@ -472,7 +469,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
   }
 
 NEVER_INLINE
-ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
+ssize_t HphpArray::find(int64_t ki) const {
   if (uint64_t(ki) < m_size) {
     // Try to get at it without dirtying a data cache line.
     Elm* e = m_data + uint64_t(ki);
@@ -490,7 +487,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
 }
 
 NEVER_INLINE
-ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
+ssize_t HphpArray::find(const StringData* s,
                                    strhash_t prehash) const {
   int32_t h = STRING_HASH(prehash);
   FIND_BODY(prehash, hitStringKey(&elms[pos], s, h));
@@ -509,7 +506,7 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   size_t probeIndex = size_t(h0) & tableMask;                           \
   Elm* elms = m_data;                                                   \
   ElmInd* ei = &m_hash[probeIndex];                                     \
-  ssize_t /*ElmInd*/ pos = *ei;                                         \
+  ssize_t pos = *ei;                                                    \
   if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) {       \
     return ei;                                                          \
   }                                                                     \
@@ -571,7 +568,7 @@ bool HphpArray::exists(int64_t k) const {
 }
 
 bool HphpArray::exists(const StringData* k) const {
-  ssize_t /*ElmInd*/ pos = find(k, k->hash());
+  ssize_t pos = find(k, k->hash());
   return pos != ssize_t(ElmIndEmpty);
 }
 
@@ -598,14 +595,14 @@ CVarRef HphpArray::get(const StringData* key, bool error /* = false */) const {
 
 inline ALWAYS_INLINE bool HphpArray::isFull() const {
   uint32_t maxElms = computeMaxElms(m_tableMask);
-  assert(m_lastE == ElmIndEmpty || uint32_t(m_lastE) + 1 <= maxElms);
+  assert(m_used <= maxElms);
   assert(m_hLoad <= maxElms);
-  return uint32_t(m_lastE) + 1 == maxElms || m_hLoad == maxElms;
+  return m_used == maxElms || m_hLoad == maxElms;
 }
 
 inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
   assert(!validElmInd(*ei) && !isFull());
-  assert(m_size != 0 || m_lastE == ElmIndEmpty);
+  assert(m_size != 0 || m_used == 0);
 #ifdef PEDANTIC
   if (m_size >= 0x7fffffffU) {
     raise_error("Cannot insert into array with 2^31 - 1 elements");
@@ -614,7 +611,7 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
 #endif
   ++m_size;
   m_hLoad += (*ei == ElmIndEmpty);
-  ElmInd i = ++m_lastE;
+  ElmInd i = m_used++;
   (*ei) = i;
   return &m_data[i];
 }
@@ -723,7 +720,7 @@ inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
 
 NEVER_INLINE void HphpArray::resize() {
   uint32_t maxElms = computeMaxElms(m_tableMask);
-  assert(m_lastE == ElmIndEmpty || uint32_t(m_lastE)+1 <= maxElms);
+  assert(m_used <= maxElms);
   assert(m_hLoad <= maxElms);
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
@@ -767,7 +764,7 @@ void HphpArray::grow() {
 #endif
   if (m_size > 0) {
     Elm* elms = m_data;
-    for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+    for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
       Elm* e = &elms[pos];
       if (e->data.m_type == KindOfTombstone) {
         continue;
@@ -786,7 +783,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   if (m_pos != ArrayData::invalid_index) {
     // Cache key for element associated with m_pos in order to update m_pos
     // below.
-    assert(m_pos <= ssize_t(m_lastE));
+    assert(size_t(m_pos) < m_used);
     Elm* e = &(m_data[(ElmInd)m_pos]);
     mPos.hash = e->hasIntKey() ? 0 : e->hash();
     mPos.key = e->key;
@@ -816,27 +813,22 @@ void HphpArray::compact(bool renumber /* = false */) {
 #else
   m_hLoad = m_size;
 #endif
-  ElmInd frPos = 0;
-  for (ElmInd toPos = 0; toPos < ElmInd(m_size); ++toPos) {
-    Elm* frE = &elms[frPos];
-    while (frE->data.m_type == KindOfTombstone) {
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (elms[frPos].data.m_type == KindOfTombstone) {
+      assert(frPos + 1 < m_used);
       ++frPos;
-      assert(frPos <= m_lastE);
-      frE = &elms[frPos];
     }
-    Elm* toE = &elms[toPos];
-    if (toE != frE) {
-      memcpy((void*)toE, (void*)frE, sizeof(Elm));
+    Elm& toE = elms[toPos];
+    if (toPos != frPos) {
+      toE = elms[frPos];
     }
-    if (renumber && !toE->hasStrKey()) {
-      toE->ikey = m_nextKI;
-      ++m_nextKI;
+    if (renumber && !toE.hasStrKey()) {
+      toE.ikey = m_nextKI++;
     }
-    ElmInd* ie = findForNewInsert(toE->hasIntKey() ? toE->ikey : toE->hash());
+    ElmInd* ie = findForNewInsert(toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
-    ++frPos;
   }
-  m_lastE = m_size - 1;
+  m_used = m_size;
 #ifdef DEBUG
   m_hLoad = m_size;
 #endif
@@ -1079,7 +1071,7 @@ ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) return addLvalImpl(k, &ret);
   if (checkExist) {
-    ssize_t /*ElmInd*/ pos = find(k);
+    auto pos = find(k);
     if (pos != (ssize_t)ElmIndEmpty) {
       Elm* e = &m_data[pos];
       if (tvAsVariant(&e->data).isReferenced() ||
@@ -1097,7 +1089,7 @@ ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
   strhash_t prehash = key->hash();
   if (!copy) return addLvalImpl(key, prehash, &ret);
   if (checkExist) {
-    ssize_t /*ElmInd*/ pos = find(key, prehash);
+    auto pos = find(key, prehash);
     if (pos != (ssize_t)ElmIndEmpty) {
       Elm* e = &m_data[pos];
       TypedValue* tv = &e->data;
@@ -1116,7 +1108,7 @@ ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
   strhash_t prehash = key->hash();
   HphpArray* a = !copy ? this : copyImpl();
   if (create) return a->addLvalImpl(key, prehash, &ret);
-  ssize_t /*ElmInd*/ pos = a->find(key, prehash);
+  auto pos = a->find(key, prehash);
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* e = &a->m_data[pos];
     ret = &tvAsVariant(&e->data);
@@ -1238,22 +1230,21 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
     }
   }
   --m_size;
-  // If this element was last, adjust m_lastE.
-  if (pos == m_lastE) {
+  // If this element was last, adjust m_used.
+  if (size_t(pos + 1) == m_used) {
     do {
-      --m_lastE;
-    } while (m_lastE >= 0 && elms[m_lastE].data.m_type == KindOfTombstone);
+      --m_used;
+    } while (m_used > 0 && elms[m_used - 1].data.m_type == KindOfTombstone);
   }
   // Mark the hash entry as "deleted".
   *ei = ElmIndTombstone;
-  assert(m_lastE == ElmIndEmpty ||
-         uint32_t(m_lastE)+1 <= computeMaxElms(m_tableMask));
+  assert(m_used <= computeMaxElms(m_tableMask));
   assert(m_hLoad <= computeMaxElms(m_tableMask));
 
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
 
-  if (m_size < (uint32_t)((m_lastE+1) >> 1)) {
+  if (m_size < m_used / 2) {
     // Compact in order to keep elms from being overly sparse.
     compact();
   }
@@ -1319,9 +1310,8 @@ ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
     ret = nullptr;
     return a;
   }
-  assert(a->m_lastE != ElmIndEmpty);
-  ssize_t lastE = (ssize_t)a->m_lastE;
-  ret = &a->m_data[lastE].data;
+  assert(a->m_used > 0);
+  ret = &a->m_data[a->m_used - 1].data;
   return a;
 }
 
@@ -1497,14 +1487,14 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   a->freeStrongIterators();
 
   Elm* elms = a->m_data;
-  if (a->m_lastE == 0 || elms[0].data.m_type != KindOfTombstone) {
+  if (a->m_used == 1 || elms[0].data.m_type != KindOfTombstone) {
     // Make sure there is room to insert an element.
     a->resizeIfNeeded();
     // Reload elms, in case resizeIfNeeded() had side effects.
     elms = a->m_data;
     // Move the existing elements to make element 0 available.
-    memmove(&elms[1], &elms[0], (a->m_lastE+1) * sizeof(Elm));
-    ++a->m_lastE;
+    memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
+    ++a->m_used;
   }
   // Prepend.
   Elm* e = &elms[0];
@@ -1530,7 +1520,7 @@ void HphpArray::renumber() {
 
 void HphpArray::onSetEvalScalar() {
   Elm* elms = m_data;
-  for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+  for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
     if (e->data.m_type != KindOfTombstone) {
       StringData *key = e->key;
@@ -1571,9 +1561,8 @@ bool HphpArray::advanceFullPos(FullPos& fp) {
 }
 
 CVarRef HphpArray::endRef() {
-  assert(m_lastE != ElmIndEmpty);
-  ElmInd pos = m_lastE;
-  Elm* e = &m_data[pos];
+  assert(m_used > 0);
+  Elm* e = &m_data[m_used - 1];
   return tvAsCVarRef(&e->data);
 }
 
@@ -1600,7 +1589,7 @@ ALWAYS_INLINE HphpArray* HphpArray::clone(AllocationMode am) const {
   target->m_tableMask = SmallHashSize - 1;
   target->m_size = 0;
   target->m_hLoad = 0;
-  target->m_lastE = ElmIndEmpty;
+  target->m_used = 0;
   target->m_data = target->m_inline_data.slots;
   auto const ht = target->m_inline_data.hash;
   target->m_hash = ht;
@@ -1627,7 +1616,7 @@ NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
   target->m_tableMask = m_tableMask;
   target->m_size = m_size;
   target->m_hLoad = m_hLoad;
-  target->m_lastE = m_lastE;
+  target->m_used = m_used;
   const auto tableSize = computeTableSize(m_tableMask);
   const auto maxElms = computeMaxElms(m_tableMask);
   target->allocData(maxElms, tableSize);
@@ -1637,8 +1626,7 @@ NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
   // Copy the elements and bump up refcounts as needed.
   Elm* elms = m_data;
   Elm* targetElms = target->m_data;
-  ssize_t lastE = (ssize_t)m_lastE;
-  for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
+  for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
     Elm* te = &targetElms[pos];
     if (e->data.m_type != KindOfTombstone) {
@@ -1654,17 +1642,17 @@ NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
     }
   }
   // It's possible that there were indirect elements at the end that were
-  // converted to tombstones, so check if we should adjust target->m_lastE
-  while (target->m_lastE >= 0) {
-    Elm* te = &targetElms[target->m_lastE];
-    if (te->data.m_type != KindOfTombstone) {
+  // converted to tombstones, so check if we should adjust target->m_used
+  while (target->m_used > 0) {
+    auto i = target->m_used - 1;
+    if (targetElms[i].data.m_type != KindOfTombstone) {
       break;
     }
-    --(target->m_lastE);
+    target->m_used = i;
   }
   // If the element density dropped below 50% due to indirect elements
   // being converted into tombstones, we should do a compaction
-  if (target->m_size < (uint32_t)((target->m_lastE+1) >> 1)) {
+  if (target->m_size < target->m_used / 2) {
     target->compact();
   }
 }

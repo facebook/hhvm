@@ -60,12 +60,12 @@ template <typename AccessorT>
 HphpArray::SortFlavor
 HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  if (!checkTypes && ssize_t(m_size) == ssize_t(m_lastE + 1)) {
+  if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
   }
   Elm* start = m_data;
-  Elm* end = m_data + m_lastE + 1;
+  Elm* end = m_data + m_used;
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   for (;;) {
@@ -99,8 +99,8 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     memcpy(start, end, sizeof(Elm));
   }
 done:
-  m_lastE = (start - m_data) - 1;
-  assert(ssize_t(m_size) == ssize_t(m_lastE + 1));
+  m_used = start - m_data;
+  assert(m_size == m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   } else {
@@ -119,7 +119,7 @@ void HphpArray::postSort(bool resetKeys) {
   initHash(m_hash, tableSize);
   m_hLoad = 0;
   if (resetKeys) {
-    for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+    for (uint32_t pos = 0; pos < m_used; ++pos) {
       Elm* e = &m_data[pos];
       if (e->hasStrKey()) decRefStr(e->key);
       e->setIntKey(pos);
@@ -127,7 +127,7 @@ void HphpArray::postSort(bool resetKeys) {
     }
     m_nextKI = m_size;
   } else {
-    for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
+    for (uint32_t pos = 0; pos < m_used; ++pos) {
       Elm* e = &m_data[pos];
       ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash());
       *ei = pos;

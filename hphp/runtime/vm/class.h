@@ -891,20 +891,20 @@ private:
   TypedValue* getSPropData() const;
   TypedValue* cnsNameToTV(const StringData* name, Slot& slot) const;
 
-  void addImportTraitMethod(const TraitMethod &traitMethod,
-                            const StringData  *methName);
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,
                          MethodMap::Builder& curMethodMap);
   ClassPtr findSingleTraitWithMethod(const StringData* methName);
-  void setImportTraitMethodModifiers(const StringData* methName,
-                                     ClassPtr          traitCls,
-                                     Attr              modifiers);
+  void setImportTraitMethodModifiers(TraitMethodList& methList,
+                                     ClassPtr         traitCls,
+                                     Attr             modifiers);
   void importTraitMethods(MethodMap::Builder& curMethodMap);
   void addTraitPropInitializers(bool staticProps);
-  void applyTraitRules();
-  void applyTraitPrecRule(const PreClass::TraitPrecRule& rule);
-  void applyTraitAliasRule(const PreClass::TraitAliasRule& rule);
+  void applyTraitRules(MethodToTraitListMap& importMethToTraitMap);
+  void applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
+                          MethodToTraitListMap& importMethToTraitMap);
+  void applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
+                           MethodToTraitListMap& importMethToTraitMap);
   void importTraitProps(PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
   void importTraitInstanceProp(ClassPtr    trait,
@@ -923,7 +923,8 @@ private:
   void methodOverrideCheck(const Func* parentMethod, const Func* method);
 
   static bool compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2);
-  void removeSpareTraitAbstractMethods();
+  void removeSpareTraitAbstractMethods(
+    MethodToTraitListMap& importMethToTraitMap);
 
   void setParent();
   void setSpecial();

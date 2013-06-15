@@ -1285,15 +1285,15 @@ void Class::setSpecial() {
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
-void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {
+void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
+                               MethodToTraitListMap& importMethToTraitMap) {
   const StringData* methName          = rule.getMethodName();
   const StringData* selectedTraitName = rule.getSelectedTraitName();
   TraitNameSet      otherTraitNames;
   rule.getOtherTraitNames(otherTraitNames);
 
-  MethodToTraitListMap::iterator methIter =
-    m_importMethToTraitMap.find(methName);
-  if (methIter == m_importMethToTraitMap.end()) {
+  auto methIter = importMethToTraitMap.find(methName);
+  if (methIter == importMethToTraitMap.end()) {
     raise_error("unknown method '%s'", methName->data());
   }
 
@@ -1337,11 +1337,9 @@ ClassPtr Class::findSingleTraitWithMethod(const StringData* methName) {
   return traitCls;
 }
 
-void Class::setImportTraitMethodModifiers(const StringData* methName,
-                                          ClassPtr          traitCls,
-                                          Attr              modifiers) {
-  TraitMethodList &methList = m_importMethToTraitMap[methName];
-
+void Class::setImportTraitMethodModifiers(TraitMethodList& methList,
+                                          ClassPtr         traitCls,
+                                          Attr             modifiers) {
   for (TraitMethodList::iterator iter = methList.begin();
        iter != methList.end(); iter++) {
     if (iter->m_trait.get() == traitCls.get()) {
@@ -1364,7 +1362,8 @@ void Class::addTraitAlias(const StringData* traitName,
                            (newMethName, origName));
 }
 
-void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule) {
+void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
+                                MethodToTraitListMap& importMethToTraitMap) {
   const StringData* traitName    = rule.getTraitName();
   const StringData* origMethName = rule.getOrigMethodName();
   const StringData* newMethName  = rule.getNewMethodName();
@@ -1391,30 +1390,28 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule) {
   Attr ruleModifiers;
   if (origMethName == newMethName) {
     ruleModifiers = rule.getModifiers();
-    setImportTraitMethodModifiers(origMethName, traitCls, ruleModifiers);
+    setImportTraitMethodModifiers(importMethToTraitMap[origMethName],
+                                  traitCls, ruleModifiers);
   } else {
     ruleModifiers = rule.getModifiers();
     TraitMethod traitMethod(traitCls, traitMeth, ruleModifiers);
-    addImportTraitMethod(traitMethod, newMethName);
+    if (!Func::isSpecial(newMethName)) {
+      importMethToTraitMap[newMethName].push_back(traitMethod);
+    }
   }
   if (ruleModifiers & AttrStatic) {
     raise_error("cannot use 'static' as access modifier");
   }
 }
 
-void Class::applyTraitRules() {
+void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
   for (size_t i = 0; i < m_preClass->traitPrecRules().size(); i++) {
-    applyTraitPrecRule(m_preClass->traitPrecRules()[i]);
+    applyTraitPrecRule(m_preClass->traitPrecRules()[i],
+                       importMethToTraitMap);
   }
   for (size_t i = 0; i < m_preClass->traitAliasRules().size(); i++) {
-    applyTraitAliasRule(m_preClass->traitAliasRules()[i]);
-  }
-}
-
-void Class::addImportTraitMethod(const TraitMethod &traitMethod,
-                                 const StringData  *methName) {
-  if (!Func::isSpecial(methName)) {
-    m_importMethToTraitMap[methName].push_back(traitMethod);
+    applyTraitAliasRule(m_preClass->traitAliasRules()[i],
+                        importMethToTraitMap);
   }
 }
 
@@ -1485,10 +1482,11 @@ void Class::importTraitMethod(const TraitMethod&  traitMethod,
 // This method removes trait abstract methods that are either:
 //   1) implemented by other traits
 //   2) duplicate
-void Class::removeSpareTraitAbstractMethods() {
+void Class::removeSpareTraitAbstractMethods(
+  MethodToTraitListMap& importMethToTraitMap) {
 
-  for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
-       iter != m_importMethToTraitMap.end(); iter++) {
+  for (MethodToTraitListMap::iterator iter = importMethToTraitMap.begin();
+       iter != importMethToTraitMap.end(); iter++) {
 
     TraitMethodList& tMethList = iter->second;
     bool hasNonAbstractMeth = false;
@@ -1520,6 +1518,8 @@ void Class::removeSpareTraitAbstractMethods() {
 
 // fatals on error
 void Class::importTraitMethods(MethodMap::Builder& builder) {
+  MethodToTraitListMap importMethToTraitMap;
+
   // 1. Find all methods to be imported
   for (size_t t = 0; t < m_usedTraits.size(); t++) {
     ClassPtr trait = m_usedTraits[t];
@@ -1527,20 +1527,22 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
       Func* method = trait->m_methods[i];
       const StringData* methName = method->name();
       TraitMethod traitMethod(trait, method, method->attrs());
-      addImportTraitMethod(traitMethod, methName);
+      if (!Func::isSpecial(methName)) {
+        importMethToTraitMap[methName].push_back(traitMethod);
+      }
     }
   }
 
   // 2. Apply trait rules
-  applyTraitRules();
+  applyTraitRules(importMethToTraitMap);
 
   // 3. Remove abstract methods provided by other traits, and also duplicates
-  removeSpareTraitAbstractMethods();
+  removeSpareTraitAbstractMethods(importMethToTraitMap);
 
   // 4. Actually import the methods
   for (MethodToTraitListMap::const_iterator iter =
-         m_importMethToTraitMap.begin();
-       iter != m_importMethToTraitMap.end(); iter++) {
+         importMethToTraitMap.begin();
+       iter != importMethToTraitMap.end(); iter++) {
 
     // The rules may rule out a method from all traits.
     // In this case, simply don't import the method.

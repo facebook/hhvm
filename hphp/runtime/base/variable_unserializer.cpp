@@ -46,7 +46,7 @@ int64_t VariableUnserializer::readInt() {
 double VariableUnserializer::readDouble() {
   check();
   char *newBuf;
-  double r = zend_strtod(m_buf, &newBuf);
+  double r = strtod(m_buf, &newBuf);
   m_buf = newBuf;
   return r;
 }

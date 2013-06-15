@@ -98,7 +98,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
     }
 
     *bufpos = '\0';
-    value = zend_strtod(numbuf, nullptr);
+    value = folly::to<double>(numbuf);
 
     if (numbuf != buf) {
       free(numbuf);

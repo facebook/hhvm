@@ -56,6 +56,13 @@ struct IndexedStringMap {
   void create(const Builder& b) {
     assert(!m_size && "IndexedStringMap::create called more than once");
     m_map.init(b.size());
+    if (!b.size()) {
+      assert(!m_vec);
+      // note that we have to initialize m_map even though its zero
+      // sized (an empty FixedStringMap isn't quite empty - see
+      // FixedStringMap::init).
+      return;
+    }
     m_vec = new T[b.size()];
     m_size = b.size();
 

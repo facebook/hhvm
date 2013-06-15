@@ -27,7 +27,7 @@ template <typename V, bool case_sensitive> class FixedStringMap {
 public:
   explicit FixedStringMap(int num) : m_table(0) { init(num); }
   FixedStringMap() : m_mask(0), m_table(0) {}
-  ~FixedStringMap() { free(m_table); }
+  ~FixedStringMap();
 
   void init(int num);
   void add(const StringData* s, const V& v);

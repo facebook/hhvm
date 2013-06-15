@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/core_types.h"
 #include "hphp/runtime/vm/fixed_string_map.h"
+#include "hphp/runtime/vm/core_types.h"
 #include "hphp/runtime/base/macros.h"
 
 namespace HPHP {
@@ -25,6 +25,8 @@ TRACE_SET_MOD(runtime);
 ///////////////////////////////////////////////////////////////////////////////
 
 class Func;
+
+static const StringData* null_key;
 
 inline bool strEqual(bool case_sensitive,
                      const StringData* sd1, const StringData* sd2) {
@@ -36,7 +38,20 @@ inline bool strEqual(bool case_sensitive,
 }
 
 template <typename V, bool case_sensitive>
+FixedStringMap<V, case_sensitive>::~FixedStringMap() {
+  if (m_table != (Elm*)&null_key) {
+    free(m_table);
+  }
+}
+
+template <typename V, bool case_sensitive>
 void FixedStringMap<V, case_sensitive>::init(int num) {
+  if (!num) {
+    m_table = (Elm*)&null_key;
+    m_mask = 0;
+    return;
+  }
+
   static const double kLoadFactor = 0.80;
   int capac = 1;
   while (num >= kLoadFactor * capac) {

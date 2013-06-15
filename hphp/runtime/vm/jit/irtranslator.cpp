@@ -1138,6 +1138,17 @@ bool shouldIRInline(const Func* curFunc,
     return atRet();
   };
 
+  // Constants that can be printed without an InterpOne.
+  auto simplePrintConstant = [&]() -> bool {
+    switch (current) {
+    case OpFalse: case OpInt: case OpString: case OpTrue: case OpNull:
+      next();
+      return true;
+    default:
+      return false;
+    }
+  };
+
   resetCursor();
 
   ////////////
@@ -1178,7 +1189,7 @@ bool shouldIRInline(const Func* curFunc,
   }
 
   /*
-   * Continuation allocation functions that take no arguments.
+   * Continuation allocation functions.
    */
   resetCursor();
   if (current == OpCreateCont) {
@@ -1205,6 +1216,14 @@ bool shouldIRInline(const Func* curFunc,
   resetCursor();
   if (nextIf(OpBareThis) && nextIf(OpInstanceOfD) && atRet()) {
     return accept("$this instanceof D");
+  }
+
+  // E.g. String; Print; PopC; Null; RetC
+  // Useful primarily for debugging.
+  resetCursor();
+  if (simplePrintConstant() && nextIf(OpPrint) && nextIf(OpPopC) &&
+      simpleCell() && cellManipRet()) {
+    return accept("constant printer");
   }
 
   return refuse("unknown kind of function");

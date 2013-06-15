@@ -1045,7 +1045,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
       if (!(flags & SCAN_SUPPRESS)) {
         double dvalue;
         *end = '\0';
-        dvalue = folly::to<double>(buf);
+        dvalue = strtod(buf, nullptr);
         return_value.append(dvalue);
       }
       break;

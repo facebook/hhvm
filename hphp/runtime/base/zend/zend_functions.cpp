@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/base/zend/zend_strtod.h"
-#include "folly/Conv.h"
 
 namespace HPHP {
 
@@ -184,7 +183,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
       int cmp = strcmp(&ptr[-digits], long_min_digits);
       if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
         if (dval) {
-          *dval = folly::to<double>(str);
+          *dval = strtod(str, nullptr);
         }
         return KindOfDouble;
       }

@@ -19,7 +19,6 @@
 #define incl_HPHP_ZEND_MATH_H_
 
 #include "hphp/util/base.h"
-#include "folly/Conv.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,7 +115,7 @@ inline double php_math_round(double value, int places,
     char buf[40];
     snprintf(buf, 39, "%15fe%d", tmp_value, -places);
     buf[39] = '\0';
-    tmp_value = folly::to<double>(buf);
+    tmp_value = strtod(buf, nullptr);
 
     /* couldn't convert to string and back */
     if (std::isinf(tmp_value)) {

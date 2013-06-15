@@ -37,7 +37,6 @@
 #include "hphp/test/ext/test_ext_bcmath.h"
 #include "hphp/test/ext/test_ext_bzip2.h"
 #include "hphp/test/ext/test_ext_curl.h"
-#include "hphp/test/ext/test_ext_datetime.h"
 #include "hphp/test/ext/test_ext_debugger.h"
 #include "hphp/test/ext/test_ext_domdocument.h"
 #include "hphp/test/ext/test_ext_error.h"

@@ -1,0 +1,57 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+array(11) {
+  ["seconds"]=>
+  int(56)
+  ["minutes"]=>
+  int(34)
+  ["hours"]=>
+  int(12)
+  ["mday"]=>
+  int(10)
+  ["wday"]=>
+  int(3)
+  ["mon"]=>
+  int(9)
+  ["year"]=>
+  int(2008)
+  ["yday"]=>
+  int(253)
+  ["weekday"]=>
+  string(9) "Wednesday"
+  ["month"]=>
+  string(9) "September"
+  [0]=>
+  int(1221075296)
+}
+bool(true)
+bool(true)
+bool(true)
+bool(true)

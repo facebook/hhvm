@@ -48,7 +48,6 @@
 #include "hphp/test/ext/test_ext_mb.h"
 #include "hphp/test/ext/test_ext_mcrypt.h"
 #include "hphp/test/ext/test_ext_memcached.h"
-#include "hphp/test/ext/test_ext_misc.h"
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/test/ext/test_ext_network.h"
 #include "hphp/test/ext/test_ext_openssl.h"

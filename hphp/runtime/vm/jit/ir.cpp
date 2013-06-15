@@ -94,7 +94,6 @@ namespace {
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
 #define Refs   MayModifyRefs
-#define Rm     Rematerializable
 #define Er     MayRaiseError
 #define Mem    MemEffects
 #define T      Terminal
@@ -138,7 +137,6 @@ struct {
 #undef PRc
 #undef CRc
 #undef Refs
-#undef Rm
 #undef Er
 #undef Mem
 #undef T
@@ -351,10 +349,6 @@ bool IRInstruction::isNative() const {
 
 bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
-}
-
-bool IRInstruction::isRematerializable() const {
-  return opcodeHasFlags(op(), Rematerializable);
 }
 
 bool IRInstruction::hasMemEffects() const {

@@ -139,7 +139,6 @@ class FailedIRGen : public std::exception {
  *      PRc   producesRC
  *      CRc   consumesRC
  *      Refs  mayModifyRefs
- *      Rm    isRematerializable
  *      Er    mayRaiseError
  *      Mem   hasMemEffects
  *      T     isTerminal
@@ -201,22 +200,22 @@ O(ConvStrToBool,               D(Bool), S(Str),                            N) \
 O(ConvCellToBool,              D(Bool), S(Cell),                           N) \
                                                                               \
 O(ConvArrToDbl,                 D(Dbl), S(Arr),                          C|N) \
-O(ConvBoolToDbl,                D(Dbl), S(Bool),                        C|Rm) \
-O(ConvIntToDbl,                 D(Dbl), S(Int),                         C|Rm) \
+O(ConvBoolToDbl,                D(Dbl), S(Bool),                           C) \
+O(ConvIntToDbl,                 D(Dbl), S(Int),                            C) \
 O(ConvObjToDbl,                 D(Dbl), S(Obj),                   N|Er|CRc|K) \
 O(ConvStrToDbl,                 D(Dbl), S(Str),                      N|CRc|K) \
 O(ConvCellToDbl,                D(Dbl), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ConvArrToInt,                 D(Int), S(Arr),                          C|N) \
-O(ConvBoolToInt,                D(Int), S(Bool),                        C|Rm) \
-O(ConvDblToInt,                 D(Int), S(Dbl),                       C|N|Rm) \
+O(ConvBoolToInt,                D(Int), S(Bool),                           C) \
+O(ConvDblToInt,                 D(Int), S(Dbl),                          C|N) \
 O(ConvObjToInt,                 D(Int), S(Obj),                   N|Er|CRc|K) \
 O(ConvStrToInt,                 D(Int), S(Str),                            N) \
 O(ConvCellToInt,                D(Int), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ConvCellToObj,                D(Obj), S(Cell),                     N|CRc|K) \
                                                                               \
-O(ConvBoolToStr,          D(StaticStr), S(Bool),                        C|Rm) \
+O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
 O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
 O(ConvIntToStr,                 D(Str), S(Int),                            N) \
 O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
@@ -291,12 +290,12 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
-O(LdThis,                       D(Obj), S(FramePtr),                    C|Rm) \
+O(LdThis,                       D(Obj), S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
-O(LdConst,                      DParam, NA,                             C|Rm) \
+O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
-O(LdCtx,                        D(Ctx), S(FramePtr) S(Func),            C|Rm) \
-O(LdCctx,                      D(Cctx), S(FramePtr),                    C|Rm) \
+O(LdCtx,                        D(Ctx), S(FramePtr) S(Func),               C) \
+O(LdCctx,                      D(Cctx), S(FramePtr),                       C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
 O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
 O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
@@ -722,7 +721,7 @@ enum OpcodeFlag : uint64_t {
   ConsumesRC       = 1ULL <<  5,
   ProducesRC       = 1ULL <<  6,
   MayModifyRefs    = 1ULL <<  7,
-  Rematerializable = 1ULL <<  8, // TODO: implies HasDest
+  // Unused
   MayRaiseError    = 1ULL <<  9,
   Terminal         = 1ULL << 10, // has no next instruction
   NaryDest         = 1ULL << 11, // has 0 or more destinations

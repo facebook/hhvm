@@ -274,7 +274,6 @@ struct IRInstruction {
   bool hasDst() const;
   bool naryDst() const;
   bool hasMemEffects() const;
-  bool isRematerializable() const;
   bool isNative() const;
   bool consumesReferences() const;
   bool consumesReference(int srcNo) const;

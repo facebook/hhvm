@@ -279,11 +279,6 @@ MayModifyRefs
 
   The instruction may modify inner cells on KindOfRef values.
 
-Rematerializable
-
-  The instruction is a candidate for rematerialization if the the
-  register allocator needs to spill its destination.
-
 MayRaiseError
 
   The instruction may raise an error, and therefore has an implicit

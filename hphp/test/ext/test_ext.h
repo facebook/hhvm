@@ -36,7 +36,6 @@
 #include "hphp/facebook/extensions/urlextraction/test_ext_urlextraction.h"
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/test/ext/test_ext_file.h"
-#include "hphp/test/ext/test_ext_icu.h"
 #include "hphp/test/ext/test_ext_icu_ucnv.h"
 #include "hphp/test/ext/test_ext_icu_ucsdet.h"
 #include "hphp/test/ext/test_ext_icu_uspoof.h"

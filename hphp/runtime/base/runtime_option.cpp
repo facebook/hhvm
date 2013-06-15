@@ -1014,7 +1014,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     MySQLLocalize = mysql["Localize"].getBool();
 #endif
     MySQLConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
-    MySQLReadTimeout = mysql["ReadTimeout"].getInt32(1000);
+    MySQLReadTimeout = mysql["ReadTimeout"].getInt32(60000);
     MySQLWaitTimeout = mysql["WaitTimeout"].getInt32(-1);
     MySQLSlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
     MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool();

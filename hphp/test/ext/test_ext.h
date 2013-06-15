@@ -37,7 +37,6 @@
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/test/ext/test_ext_imagesprite.h"
 #include "hphp/test/ext/test_ext_ipc.h"
-#include "hphp/test/ext/test_ext_json.h"
 #include "hphp/test/ext/test_ext_mailparse.h"
 #include "hphp/test/ext/test_ext_math.h"
 #include "hphp/test/ext/test_ext_mb.h"

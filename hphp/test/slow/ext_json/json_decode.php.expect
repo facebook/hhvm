@@ -1,0 +1,120 @@
+array(1) {
+  ["fbid"]=>
+  int(101501853510151001)
+}
+array(1) {
+  [0]=>
+  array(1) {
+    ["00"]=>
+    int(0)
+  }
+}
+array(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  float(2.3)
+  [3]=>
+  string(4) "test"
+}
+array(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+}
+array(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+}
+NULL
+array(1) {
+  ["z"]=>
+  int(1)
+}
+NULL
+array(1) {
+  ["z"]=>
+  string(1) "z"
+}
+NULL
+array(1) {
+  ["x"]=>
+  int(1)
+}
+NULL
+array(1) {
+  ["y"]=>
+  int(1)
+}
+NULL
+NULL
+NULL
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+NULL
+NULL
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  array(1) {
+    ["a"]=>
+    string(5) "apple"
+  }
+  [1]=>
+  array(1) {
+    ["b"]=>
+    string(6) "banana"
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    ["a"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["n"]=>
+        string(3) "1st"
+      }
+    }
+  }
+  [1]=>
+  array(1) {
+    ["b"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["n"]=>
+        string(3) "2nd"
+      }
+    }
+  }
+}

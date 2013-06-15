@@ -36,7 +36,6 @@
 #include "hphp/facebook/extensions/urlextraction/test_ext_urlextraction.h"
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/test/ext/test_ext_imagesprite.h"
-#include "hphp/test/ext/test_ext_intl.h"
 #include "hphp/test/ext/test_ext_ipc.h"
 #include "hphp/test/ext/test_ext_json.h"
 #include "hphp/test/ext/test_ext_mailparse.h"

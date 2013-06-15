@@ -98,7 +98,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
     }
 
     *bufpos = '\0';
-    value = strtod(numbuf, nullptr);
+    value = zend_strtod(numbuf, nullptr);
 
     if (numbuf != buf) {
       free(numbuf);

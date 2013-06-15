@@ -149,7 +149,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
     } else if (!(digits < SIZEOF_LONG * 2 ||
                  (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
       if (dval) {
-        local_dval = strtod(str, (char **)&ptr);
+        local_dval = zend_strtod(str, (char **)&ptr);
       }
       type = KindOfDouble;
     }

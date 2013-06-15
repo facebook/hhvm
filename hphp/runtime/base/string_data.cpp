@@ -824,7 +824,7 @@ int64_t StringData::toInt64(int base /* = 10 */) const {
 
 double StringData::toDouble() const {
   StringSlice s = slice();
-  if (s.len) return strtod(s.ptr, nullptr);
+  if (s.len) return zend_strtod(s.ptr, nullptr);
   return 0;
 }
 

@@ -48,7 +48,6 @@
 #include "hphp/test/ext/test_ext_session.h"
 #include "hphp/test/ext/test_ext_soap.h"
 #include "hphp/test/ext/test_ext_sqlite3.h"
-#include "hphp/test/ext/test_ext_string.h"
 #include "hphp/test/ext/test_ext_variable.h"
 #include "hphp/test/ext/test_ext_zlib.h"
 

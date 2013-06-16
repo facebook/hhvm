@@ -80,6 +80,19 @@ void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event,
   }
 }
 
+void c_ExternalThreadEventWaitHandle::destroyEvent() {
+  // destroy event and its private data
+  m_event->release();
+  m_event = nullptr;
+  m_privData = nullptr;
+
+  // unregister from sweep()
+  unregister();
+
+  // drop ownership by pending event (see initialize())
+  decRefObj(this);
+}
+
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   assert(getState() == STATE_WAITING);
   assert(getCount() == 1 || sweeping);
@@ -88,11 +101,8 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
     getContext()->unregisterExternalThreadEvent(m_index);
   }
 
-  // event is abandoned, destroy it, unregister sweepable and decref ownership
-  m_event->release();
-  m_event = nullptr;
-  unregister();
-  decRefObj(this);
+  // clean up
+  destroyEvent();
 }
 
 void c_ExternalThreadEventWaitHandle::process() {
@@ -102,22 +112,23 @@ void c_ExternalThreadEventWaitHandle::process() {
     getContext()->unregisterExternalThreadEvent(m_index);
   }
 
+  // clean up once event is processed
+  auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
+
+  TypedValue result;
   try {
-    TypedValue result;
     m_event->unserialize(&result);
-    assert(tvIsPlausible(&result));
-    setResult(&result);
-    tvRefcountedDecRefCell(&result);
   } catch (const Object& exception) {
     setException(exception.get());
+    return;
+  } catch (...) {
+    setException(AsioSession::Get()->getAbruptInterruptException().get());
+    throw;
   }
 
-  // event is processed, destroy it, unregister sweepable and decref ownership
-  m_event->release();
-  m_event = nullptr;
-  m_privData = nullptr;
-  unregister();
-  decRefObj(this);
+  assert(tvIsPlausible(&result));
+  setResult(&result);
+  tvRefcountedDecRefCell(&result);
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {

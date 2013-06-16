@@ -493,6 +493,7 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
 
  private:
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
+  void destroyEvent();
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;

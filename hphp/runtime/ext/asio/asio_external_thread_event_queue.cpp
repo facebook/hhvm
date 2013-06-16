@@ -23,22 +23,71 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
-    : m_queue(nullptr), m_queueMutex(), m_queueCondition() {
+    : m_received(nullptr), m_queue(nullptr), m_queueMutex(),
+      m_queueCondition() {
 }
 
-c_ExternalThreadEventWaitHandle* AsioExternalThreadEventQueue::consumeMulti() {
-  // try check for ready external thread events without grabbing lock
-  auto ready = m_queue.exchange(nullptr);
-  if (ready != nullptr) {
-    assert(ready != k_consumerWaiting);
-    return ready;
+/**
+ * Process all received finished events.
+ *
+ * May throw C++ exception that may leave some events unprocessed.
+ */
+void AsioExternalThreadEventQueue::processAllReceived() {
+  assert(m_received);
+  do {
+    auto ete_wh = m_received;
+    m_received = m_received->getNextToProcess();
+    ete_wh->process();
+  } while (m_received);
+}
+
+/**
+ * Abandon all received finished events.
+ *
+ * Returns true iff provided wait handle was abandoned.
+ */
+bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle) {
+  assert(m_received);
+  bool seen = false;
+  do {
+    auto ete_wh = m_received;
+    m_received = m_received->getNextToProcess();
+    ete_wh->abandon(true);
+    seen |= ete_wh == wait_handle;
+  } while (m_received);
+  return seen;
+}
+
+/**
+ * Try to receive finished events without blocking.
+ *
+ * Returns true iff at least one event was received.
+ */
+bool AsioExternalThreadEventQueue::tryReceiveSome() {
+  assert(!m_received);
+  m_received = m_queue.exchange(nullptr);
+  assert(m_received != k_consumerWaiting);
+  return m_received;
+}
+
+/**
+ * Receive at least one finished event. Block if necessary.
+ */
+void AsioExternalThreadEventQueue::receiveSome() {
+  assert(!m_received);
+
+  // try receive external thread events without grabbing lock
+  m_received = m_queue.exchange(nullptr);
+  if (m_received) {
+    assert(m_received != k_consumerWaiting);
+    return;
   }
 
-  // no ready external thread events available, synchronization needed
+  // no external thread events received, synchronization needed
   std::unique_lock<std::mutex> lock(m_queueMutex);
 
   // transition from empty to WAITING
-  if (m_queue.compare_exchange_strong(ready, k_consumerWaiting)) {
+  if (m_queue.compare_exchange_strong(m_received, k_consumerWaiting)) {
     // wait for transition from WAITING to non-empty
     do {
       m_queueCondition.wait(lock);
@@ -47,13 +96,15 @@ c_ExternalThreadEventWaitHandle* AsioExternalThreadEventQueue::consumeMulti() {
     // external thread transitioned from empty to non-empty while grabbing lock
   }
 
-  ready = m_queue.exchange(nullptr);
-  assert(ready != nullptr);
-  assert(ready != k_consumerWaiting);
-  return ready;
+  m_received = m_queue.exchange(nullptr);
+  assert(m_received);
+  assert(m_received != k_consumerWaiting);
 }
 
-void AsioExternalThreadEventQueue::produce(c_ExternalThreadEventWaitHandle* wait_handle) {
+/**
+ * Send finished event from the processing thread to the web request thread.
+ */
+void AsioExternalThreadEventQueue::send(c_ExternalThreadEventWaitHandle* wait_handle) {
   auto next = m_queue.load();
   while (true) {
     while (next != k_consumerWaiting) {

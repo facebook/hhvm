@@ -32,18 +32,18 @@ class AsioExternalThreadEventQueue {
   public:
     AsioExternalThreadEventQueue();
 
-    c_ExternalThreadEventWaitHandle* tryConsumeMulti() {
-      auto ready = m_queue.exchange(nullptr);
-      assert(ready != k_consumerWaiting);
-      return ready;
-    }
+    bool hasReceived() { return m_received; }
+    void processAllReceived();
+    bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
 
-    c_ExternalThreadEventWaitHandle* consumeMulti();
-    void produce(c_ExternalThreadEventWaitHandle* wait_handle);
+    bool tryReceiveSome();
+    void receiveSome();
+    void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
   private:
     static constexpr auto k_consumerWaiting = static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L);
 
+    c_ExternalThreadEventWaitHandle* m_received;
     std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
     std::mutex m_queueMutex;
     std::condition_variable m_queueCondition;

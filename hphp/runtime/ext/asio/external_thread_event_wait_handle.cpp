@@ -45,16 +45,11 @@ void c_ExternalThreadEventWaitHandle::sweep() {
 
   // event has finished, but process() was not called yet
   auto queue = AsioSession::Get()->getExternalThreadEventQueue();
-  bool done = false;
-  do {
-    auto ete_wh = queue->consumeMulti();
-    while (ete_wh) {
-      done |= ete_wh == this;
-      auto next_wh = ete_wh->getNextToProcess();
-      ete_wh->abandon(true);
-      ete_wh = next_wh;
-    }
-  } while (!done);
+  bool done = queue->hasReceived() && queue->abandonAllReceived(this);
+  while (!done) {
+    queue->receiveSome();
+    done = queue->abandonAllReceived(this);
+  }
 }
 
 void c_ExternalThreadEventWaitHandle::t___construct() {

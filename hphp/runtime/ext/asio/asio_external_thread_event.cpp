@@ -50,7 +50,7 @@ void AsioExternalThreadEvent::markAsFinished() {
   uint32_t/*state_t*/ expected(Waiting);
   if (m_state.compare_exchange_strong(expected, Finished)) {
     // transfer ownership
-    m_queue->produce(m_waitHandle);
+    m_queue->send(m_waitHandle);
   } else {
     // web request died, destroy object
     assert(expected == Canceled);

@@ -46,7 +46,6 @@
 #include "hphp/test/ext/test_ext_process.h"
 #include "hphp/test/ext/test_ext_server.h"
 #include "hphp/test/ext/test_ext_session.h"
-#include "hphp/test/ext/test_ext_soap.h"
 #include "hphp/test/ext/test_ext_zlib.h"
 
 #endif // incl_EXT_LIST_TEST_EXT_H_

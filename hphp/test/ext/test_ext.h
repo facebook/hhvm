@@ -35,7 +35,6 @@
 #include "hphp/facebook/extensions/tao/test_ext_tao.h"
 #include "hphp/facebook/extensions/urlextraction/test_ext_urlextraction.h"
 #include "hphp/test/ext/test_ext_curl.h"
-#include "hphp/test/ext/test_ext_imagesprite.h"
 #include "hphp/test/ext/test_ext_mailparse.h"
 #include "hphp/test/ext/test_ext_math.h"
 #include "hphp/test/ext/test_ext_mcrypt.h"

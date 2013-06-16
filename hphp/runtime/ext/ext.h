@@ -47,7 +47,6 @@
 #include "hphp/runtime/ext/ext_icu_ucsdet.h"
 #include "hphp/runtime/ext/ext_icu_uspoof.h"
 #include "hphp/runtime/ext/ext_image.h"
-#include "hphp/runtime/ext/ext_imagesprite.h"
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_ipc.h"

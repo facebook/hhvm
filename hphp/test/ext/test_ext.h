@@ -38,7 +38,6 @@
 #include "hphp/test/ext/test_ext_imagesprite.h"
 #include "hphp/test/ext/test_ext_mailparse.h"
 #include "hphp/test/ext/test_ext_math.h"
-#include "hphp/test/ext/test_ext_mb.h"
 #include "hphp/test/ext/test_ext_mcrypt.h"
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"

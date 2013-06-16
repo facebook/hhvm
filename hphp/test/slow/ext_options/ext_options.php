@@ -1,0 +1,39 @@
+<?php
+
+assert_options(1);
+var_dump(dl(""));
+
+var_dump(extension_loaded("phpmcc"));
+var_dump(extension_loaded("bcmath"));
+var_dump(extension_loaded("curl"));
+var_dump(extension_loaded("simplexml"));
+var_dump(extension_loaded("mysql"));
+
+$x = get_loaded_extensions();
+var_dump(empty($x));
+
+var_dump(get_included_files());
+var_dump(inclued_get_data());
+
+var_dump(get_magic_quotes_gpc());
+var_dump(get_magic_quotes_runtime());
+
+
+clock_getres(CLOCK_THREAD_CPUTIME_ID, $sec, $nsec);
+var_dump($sec);
+var_dump($nsec);
+
+var_dump(ini_get(""));
+ini_set("memory_limit", 50000000);
+var_dump(ini_get("memory_limit"));
+set_time_limit(30);
+var_dump(ini_get("max_execution_time"));
+ini_set("max_execution_time", 40);
+var_dump(ini_get("max_execution_time"));
+
+var_dump(phpversion());
+
+var_dump(putenv("FOO=bar"));
+var_dump(!putenv("FOO"));
+
+var_dump(!version_compare("1.3.0.dev", "1.1.2", "<"));

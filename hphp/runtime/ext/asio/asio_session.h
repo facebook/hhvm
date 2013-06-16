@@ -18,11 +18,9 @@
 #ifndef incl_HPHP_EXT_ASIO_SESSION_H_
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
-#include <atomic>
-#include <condition_variable>
-#include <mutex>
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_closure.h"
 
 namespace HPHP {
@@ -33,7 +31,6 @@ FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
 class AsioSession {
   public:
@@ -73,15 +70,10 @@ class AsioSession {
 
     uint16_t getCurrentWaitHandleDepth();
 
-    // external thread event
-    c_ExternalThreadEventWaitHandle* getReadyExternalThreadEvents() {
-      auto ready = m_readyExternalThreadEvents.exchange(nullptr);
-      assert(ready != k_waitingForExternalThreadEvents);
-      return ready;
+    // external thread events
+    AsioExternalThreadEventQueue* getExternalThreadEventQueue() {
+      return &m_externalThreadEventQueue;
     }
-
-    c_ExternalThreadEventWaitHandle* waitForExternalThreadEvents();
-    void enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
 
     // abrupt interrupt exception
     CObjRef getAbruptInterruptException() {
@@ -163,15 +155,11 @@ class AsioSession {
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
-    static constexpr c_ExternalThreadEventWaitHandle* k_waitingForExternalThreadEvents = static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L);
-
     AsioSession();
 
     smart::vector<AsioContext*> m_contexts;
 
-    std::atomic<c_ExternalThreadEventWaitHandle*> m_readyExternalThreadEvents;
-    std::mutex m_readyExternalThreadEventsMutex;
-    std::condition_variable m_readyExternalThreadEventsCondition;
+    AsioExternalThreadEventQueue m_externalThreadEventQueue;
 
     Object m_abruptInterruptException;
 

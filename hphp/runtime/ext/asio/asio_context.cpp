@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/asio/asio_context.h"
 
 #include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
 
@@ -104,7 +105,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // process ready external thread events once per 256 other events
     // (when 8-bit check_ete_counter overflows)
     if (!++check_ete_counter) {
-      auto ete_wh = session->getReadyExternalThreadEvents();
+      auto ete_wh = session->getExternalThreadEventQueue()->tryConsumeMulti();
       while (ete_wh) {
         auto next_wh = ete_wh->getNextToProcess();
         ete_wh->process();
@@ -134,7 +135,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // pending external thread events? wait for at least one to become ready
     if (!m_externalThreadEvents.empty()) {
       // all your wait time are belong to us
-      auto ete_wh = session->waitForExternalThreadEvents();
+      auto ete_wh = session->getExternalThreadEventQueue()->consumeMulti();
       while (ete_wh) {
         auto next_wh = ete_wh->getNextToProcess();
         ete_wh->process();

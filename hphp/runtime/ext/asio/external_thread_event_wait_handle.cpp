@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
 
@@ -43,10 +44,10 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 
   // event has finished, but process() was not called yet
-  auto session = AsioSession::Get();
+  auto queue = AsioSession::Get()->getExternalThreadEventQueue();
   bool done = false;
   do {
-    auto ete_wh = session->waitForExternalThreadEvents();
+    auto ete_wh = queue->consumeMulti();
     while (ete_wh) {
       done |= ete_wh == this;
       auto next_wh = ete_wh->getNextToProcess();

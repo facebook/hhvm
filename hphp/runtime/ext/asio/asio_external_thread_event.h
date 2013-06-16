@@ -281,7 +281,7 @@ class AsioExternalThreadEvent {
       Abandoned,
     };
 
-    AsioSession* m_session;
+    AsioExternalThreadEventQueue* m_queue;
     c_ExternalThreadEventWaitHandle* m_waitHandle;
     std::atomic<uint32_t/*state_t*/> m_state;
 };

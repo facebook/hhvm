@@ -15,48 +15,41 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
-#include <thread>
-#include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
+#ifndef incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_QUEUE_H_
+#define incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_QUEUE_H_
+
+#include "hphp/runtime/base/base_includes.h"
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
-    : m_queue(AsioSession::Get()->getExternalThreadEventQueue()),
-      m_state(Waiting) {
-  m_waitHandle = c_ExternalThreadEventWaitHandle::Create(this, priv_data);
-}
+FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
-void AsioExternalThreadEvent::abandon() {
-  assert(m_state.load() == Waiting);
-  assert(m_waitHandle->getCount() == 1);
-  m_state.store(Abandoned);
-  m_waitHandle->abandon(false);
-}
+class AsioExternalThreadEventQueue {
+  public:
+    AsioExternalThreadEventQueue();
 
-bool AsioExternalThreadEvent::cancel() {
-  uint32_t/*state_t*/ expected(Waiting);
-  if (m_state.compare_exchange_strong(expected, Canceled)) {
-    return true;
-  }
+    c_ExternalThreadEventWaitHandle* tryConsumeMulti() {
+      auto ready = m_queue.exchange(nullptr);
+      assert(ready != k_consumerWaiting);
+      return ready;
+    }
 
-  assert(expected == Finished);
-  return false;
-}
+    c_ExternalThreadEventWaitHandle* consumeMulti();
+    void produce(c_ExternalThreadEventWaitHandle* wait_handle);
 
-void AsioExternalThreadEvent::markAsFinished() {
-  uint32_t/*state_t*/ expected(Waiting);
-  if (m_state.compare_exchange_strong(expected, Finished)) {
-    // transfer ownership
-    m_queue->produce(m_waitHandle);
-  } else {
-    // web request died, destroy object
-    assert(expected == Canceled);
-    release();
-  }
-}
+  private:
+    static constexpr auto k_consumerWaiting = static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L);
+
+    std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
+    std::mutex m_queueMutex;
+    std::condition_variable m_queueCondition;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_QUEUE_H_

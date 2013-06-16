@@ -193,7 +193,9 @@ static unsigned long parseFlags(const folly::dynamic &flags) {
   for (auto &flag : flags) {
     auto f = g_flagsMap.find(flag.asString());
     if (f == g_flagsMap.end()) {
-      continue;
+      throw std::logic_error(
+        folly::format("Unknown flag '{0}' specified", flag.asString()).str()
+      );
     }
     ret |= f->second;
   }

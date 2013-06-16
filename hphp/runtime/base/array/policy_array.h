@@ -489,9 +489,10 @@ public:
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *lvalPtr(StringData* k, Variant *&ret,
-                                                bool copy,
-                                                bool create) FOLLY_OVERRIDE;
+  virtual ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy)
+    FOLLY_OVERRIDE;
+  virtual ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy)
+    FOLLY_OVERRIDE;
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first

@@ -217,8 +217,7 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
     if (!o_properties.get()) {
       thiz->initDynProps();
     }
-    o_properties.get()->lvalPtr(propName,
-                                *(Variant**)(&ret), false, true);
+    o_properties.get()->createLvalPtr(propName, *(Variant**)(&ret), false);
     return (Variant*)ret;
   }
 

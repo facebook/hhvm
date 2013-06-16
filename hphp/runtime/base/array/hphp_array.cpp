@@ -1103,12 +1103,14 @@ ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
   return copyImpl()->addLvalImpl(key, prehash, &ret);
 }
 
-ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
-                              bool create) {
-  strhash_t prehash = key->hash();
+ArrayData *HphpArray::createLvalPtr(StringData* key, Variant*& ret, bool copy) {
   HphpArray* a = !copy ? this : copyImpl();
-  if (create) return a->addLvalImpl(key, prehash, &ret);
-  auto pos = a->find(key, prehash);
+  return a->addLvalImpl(key, key->hash(), &ret);
+}
+
+ArrayData *HphpArray::getLvalPtr(StringData* key, Variant*& ret, bool copy) {
+  HphpArray* a = !copy ? this : copyImpl();
+  auto pos = a->find(key, key->hash());
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* e = &a->m_data[pos];
     ret = &tvAsVariant(&e->data);

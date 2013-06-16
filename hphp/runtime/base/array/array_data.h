@@ -250,8 +250,8 @@ public:
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *lvalPtr(StringData* k, Variant *&ret, bool copy,
-                             bool create);
+  virtual ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy);
+  virtual ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -297,7 +297,8 @@ public:
   CVarRef get(CVarRef k, bool error = false) const;
   ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy, bool checkExist=false);
-  ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy, bool create);
+  ArrayData *createLvalPtr(CStrRef k, Variant *&ret, bool copy);
+  ArrayData *getLvalPtr(CStrRef k, Variant *&ret, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
   ArrayData *setRef(CStrRef k, CVarRef v, bool copy);

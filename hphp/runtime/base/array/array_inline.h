@@ -77,10 +77,15 @@ inline ArrayData* ArrayData::lval(CVarRef k, Variant *&ret, bool copy,
                         : lval(getStringKey(cell), ret, copy, checkExist);
 }
 
-inline ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
-                                     bool create) {
+inline
+ArrayData *ArrayData::createLvalPtr(CStrRef k, Variant *&ret, bool copy) {
   assert(IsValidKey(k));
-  return lvalPtr(k.get(), ret, copy, create);
+  return createLvalPtr(k.get(), ret, copy);
+}
+
+inline ArrayData *ArrayData::getLvalPtr(CStrRef k, Variant *&ret, bool copy) {
+  assert(IsValidKey(k));
+  return getLvalPtr(k.get(), ret, copy);
 }
 
 inline ArrayData* ArrayData::set(CStrRef k, CVarRef v, bool copy) {

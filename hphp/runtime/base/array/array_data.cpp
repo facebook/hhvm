@@ -194,9 +194,12 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   return true;
 }
 
-ArrayData *ArrayData::lvalPtr(StringData* k, Variant *&ret, bool copy,
-                              bool create) {
-  throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
+ArrayData *ArrayData::createLvalPtr(StringData* k, Variant *&ret, bool copy) {
+  throw FatalErrorException("Unimplemented ArrayData::createLvalPtr");
+}
+
+ArrayData *ArrayData::getLvalPtr(StringData* k, Variant *&ret, bool copy) {
+  throw FatalErrorException("Unimplemented ArrayData::getLvalPtr");
 }
 
 ArrayData *ArrayData::add(int64_t k, CVarRef v, bool copy) {

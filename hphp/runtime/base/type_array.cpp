@@ -486,16 +486,16 @@ Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
-Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
-  if (create) {
-    if (!m_px) ArrayBase::operator=(ArrayData::Create());
-    return &lvalAt(key, AccessFlags::Key);
-  }
+Variant *Array::createLvalPtr(CStrRef key, bool forWrite) {
+  if (!m_px) ArrayBase::operator=(ArrayData::Create());
+  return &lvalAt(key, AccessFlags::Key);
+}
+
+Variant *Array::getLvalPtr(CStrRef key, bool forWrite) {
   Variant *ret = nullptr;
   if (m_px) {
-    ArrayData *escalated = m_px->lvalPtr(key, ret,
-                                         forWrite && m_px->getCount() > 1,
-                                         false);
+    ArrayData *escalated = m_px->getLvalPtr(key, ret,
+                                            forWrite && m_px->getCount() > 1);
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return ret;

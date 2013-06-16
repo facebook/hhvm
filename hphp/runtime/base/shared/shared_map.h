@@ -49,7 +49,6 @@ public:
   using ArrayData::get;
   using ArrayData::lval;
   using ArrayData::lvalNew;
-  using ArrayData::lvalPtr;
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;

@@ -1650,7 +1650,7 @@ static Array const_data;
 
 Variant f_fb_const_fetch(CVarRef key) {
   String k = key.toString();
-  Variant *ret = const_data.lvalPtr(k, false, false);
+  Variant *ret = const_data.getLvalPtr(k, false);
   if (ret) return *ret;
   return false;
 }

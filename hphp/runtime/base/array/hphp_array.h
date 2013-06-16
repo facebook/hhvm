@@ -83,7 +83,8 @@ public:
   using ArrayData::get;
   using ArrayData::lval;
   using ArrayData::lvalNew;
-  using ArrayData::lvalPtr;
+  using ArrayData::createLvalPtr;
+  using ArrayData::getLvalPtr;
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
@@ -128,8 +129,8 @@ public:
   ArrayData* lvalNew(Variant*& ret, bool copy);
 
   // overrides ArrayData
-  ArrayData* lvalPtr(StringData* k, Variant*& ret, bool copy,
-                     bool create);
+  ArrayData* createLvalPtr(StringData* k, Variant*& ret, bool copy);
+  ArrayData* getLvalPtr(StringData* k, Variant*& ret, bool copy);
 
   // implements ArrayData
   ArrayData* set(int64_t k, CVarRef v, bool copy);

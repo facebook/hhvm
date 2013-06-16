@@ -419,8 +419,11 @@ ArrayData *ArrayShell::lvalNew(Variant *&ret, bool copy) {
   return this;
 }
 
-ArrayData *ArrayShell::lvalPtr(StringData* k, Variant *&ret, bool copy,
-                             bool create) {
+ArrayData *ArrayShell::createLvalPtr(StringData* k, Variant *&ret, bool copy) {
+  NOT_IMPLEMENTED();
+}
+
+ArrayData *ArrayShell::getLvalPtr(StringData* k, Variant *&ret, bool copy) {
   NOT_IMPLEMENTED();
 }
 

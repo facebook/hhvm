@@ -351,10 +351,8 @@ typedef void (Asm::*OpIR32)(Immed, Reg32);
 typedef void (Asm::*OpIR8)(Immed, Reg8);
 typedef void (Asm::*OpIM64)(Immed, MemoryRef);
 typedef void (Asm::*OpIM32)(Immed, MemoryRef);
-typedef void (Asm::*OpIM16)(Immed, MemoryRef);
 typedef void (Asm::*OpISM64)(Immed, IndexedMemoryRef);
 typedef void (Asm::*OpISM32)(Immed, IndexedMemoryRef);
-typedef void (Asm::*OpISM16)(Immed, IndexedMemoryRef);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -458,83 +456,6 @@ TEST(Asm, General) {
   UNARY_BYTE_OP(neg);
 
   doingByteOpcodes = false;
-}
-
-TEST(Asm, WordSizeInstructions) {
-  Asm a;
-  a.init(10 << 24);
-
-  // single register operations
-  a.    incw   (ax);
-  // single memory operations
-  a.    decw   (*r8);
-  // register-register operations
-  a.    addw   (ax, bx);
-  a.    xorw   (r10w, r11w);
-  a.    movw   (cx, si);
-  // register-memory operations
-  a.    storew (ax, *rbx);
-  a.    testw  (r10w, rsi[0x10]);
-  // memory-register operations
-  a.    subw   (*rcx, ax);
-  a.    orw    (r11[0x100], dx);
-  // immediate-register operations
-  a.    shlw   (0x3, di);
-  a.    andw   (0x5555, r12w);
-  // immediate-memory operations
-  a.    storew (0x1, *r9);
-  a.    storew (0x1, rax[0x100]);
-
-  expect_asm(a, R"(
-inc %ax
-decw (%r8)
-add %ax,%bx
-xor %r10w,%r11w
-mov %cx,%si
-mov %ax,(%rbx)
-test %r10w,0x10(%rsi)
-sub (%rcx),%ax
-or 0x100(%r11),%dx
-shl $0x3,%di
-and $0x5555,%r12w
-movw $0x1,(%r9)
-movw $0x1,0x100(%rax)
-)");
-}
-
-TEST(Asm, IncDecRegs) {
-  Asm a;
-  a.init(10 << 24);
-
-  // incq, incl, incw
-  a.    incq(rax);
-  a.    incl(eax);
-  a.    incw(ax);
-  a.    incq(r15);
-  a.    incl(r15d);
-  a.    incw(r15w);
-  // decq, decl, decw
-  a.    decq(rax);
-  a.    decl(eax);
-  a.    decw(ax);
-  a.    decq(r15);
-  a.    decl(r15d);
-  a.    decw(r15w);
-
-  expect_asm(a, R"(
-inc %rax
-inc %eax
-inc %ax
-inc %r15
-inc %r15d
-inc %r15w
-dec %rax
-dec %eax
-dec %ax
-dec %r15
-dec %r15d
-dec %r15w
-)");
 }
 
 TEST(Asm, HighByteReg) {

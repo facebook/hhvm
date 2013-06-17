@@ -10,6 +10,6 @@ Breakpoint 1 reached on line 3 of %s/error_short_cmd_receive.php
 internaltesting shortcmdreceive
 Executing internal test...
 DebuggerCommand::recv(): a socket error has happened
-Receive result: socket error receiving command
+Receive for command: socket error receiving command
 Unable to communicate with server. Server's down?
 Unable to reconnect to server, exiting.

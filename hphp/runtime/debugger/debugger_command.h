@@ -41,6 +41,7 @@ public:
    * versions of debugger and server!
    */
   enum Type {
+    KindOfNone                = 0,
     // Now I sing my A, B, C...
     KindOfAbort               = 1,
     KindOfBreak               = 2,

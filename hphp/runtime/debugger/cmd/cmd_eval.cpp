@@ -40,8 +40,8 @@ void CmdEval::onClientImpl(DebuggerClient &client) {
   m_body = client.getCode();
   m_frame = client.getFrame();
   m_bypassAccessCheck = client.getDebuggerBypassCheck();
-  client.sendToServer(this);
-  DebuggerCommandPtr res = client.recvFromServer(m_type);
+  DebuggerCommandPtr res =
+    client.xendWithNestedExecution<DebuggerCommand>(this);
   if (!res->is(m_type)) {
     assert(client.isApiMode());
     m_incomplete = true;

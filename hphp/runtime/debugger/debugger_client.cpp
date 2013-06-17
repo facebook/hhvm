@@ -681,7 +681,8 @@ void DebuggerClient::run() {
   while (true) {
     bool reconnect = false;
     try {
-      runImpl();
+      eventLoop(TopLevel, DebuggerCommand::KindOfNone, "Main client loop");
+    } catch (DebuggerClientExitException &e) { /* normal exit */
     } catch (DebuggerServerLostException &e) {
       // Loss of connection
       TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
@@ -1037,57 +1038,88 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
 // the server (and responds to polls for signals). On interrupt, it presents
 // a command prompt, and continues pumping interrupts when a command lets the
 // machine run again.
-// When this returns, the command line client will exit.
-void DebuggerClient::runImpl() {
-  TRACE(2, "DebuggerClient::runImpl\n");
-  assert(!isApiMode());
-  const char *func = "Main client loop";
-
-  DebuggerCommandPtr cmd;
-  try {
-    while (!m_stopped) {
-      // The machine should be running at this point, otherwise it will never
-      // send us anything and we'll wait forever.
-      assert(!m_machine->m_interrupting);
-      if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
-        if (!cmd) {
-          Logger::Error("Unable to communicate with server. Server's down?");
-          throw DebuggerServerLostException();
-        }
-        if (cmd->is(DebuggerCommand::KindOfSignal)) {
-          cmd->onClient(*this);
-          continue;
-        }
-        if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
-          Logger::Error("Received bad cmd type %d, unable to communicate "
-                        "with server.", cmd->getType());
-          throw DebuggerServerLostException();
-        }
-        m_sigTime = 0;
-        CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
-        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
+// For nested loops it returns the command that completed the loop, which will
+// match the exptectedCmd passed in.
+// For all loop types, throws one of a variety of exceptions for various errors,
+// and throws DebuggerClientExitException when the event loop is terminated
+// due to the client stopping.
+DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
+                                             int expectedCmd,
+                                             const char *caller) {
+  TRACE(2, "DebuggerClient::eventLoop\n");
+  if (loopKind == NestedWithExecution) {
+    // Some callers have caused the server to start executing more PHP, so
+    // update the machine/client state accordingly.
+    m_inputState = TakingInterrupt;
+    m_machine->m_interrupting = false;
+  }
+  while (!m_stopped) {
+    DebuggerCommandPtr cmd;
+    if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, caller)) {
+      if (!cmd) {
+        Logger::Error("Unable to communicate with server. Server's down?");
+        throw DebuggerServerLostException();
+      }
+      if (cmd->is(DebuggerCommand::KindOfSignal)) {
+        // Respond to signal polling from the server.
         cmd->onClient(*this);
-
-        // When we make a new connection to a machine, we have to wait for it
-        // to interrupt us before we can send it any messages. This is our
-        // opportunity to complete the connection and make it ready to use.
-        if (!m_machine->m_initialized) {
-          if (!initializeMachine()) {
-            // False means the machine is running and we need to wait for
-            // another interrupt.
-            continue;
-          }
-        }
-        // Execution has been interrupted, so go ahead and give the user
-        // the prompt back.
+        continue;
+      }
+      if (!cmd->getWireError().empty()) {
+        error("wire error: %s", cmd->getWireError().data());
+      }
+      if ((loopKind != TopLevel) &&
+          cmd->is((DebuggerCommand::Type)expectedCmd)) {
+        // For the nested cases, the caller has sent a cmd to the server and is
+        // expecting a specific response. When we get it, return it.
+        usageLog("done", boost::lexical_cast<string>(expectedCmd));
         m_machine->m_interrupting = true; // Machine is stopped
         m_inputState = TakingCommand;
-        console(); // Prompt loop
-        m_inputState = TakingInterrupt;
-        m_machine->m_interrupting = false; // Machine is running again.
+        return cmd;
       }
+      if ((loopKind == Nested) || !cmd->is(DebuggerCommand::KindOfInterrupt)) {
+        Logger::Error("Received bad cmd type %d, unable to communicate "
+                      "with server.", cmd->getType());
+        throw DebuggerProtocolException();
+      }
+      if ((loopKind != TopLevel) && isApiMode()) {
+        // Hit breakpoint during eval. Return the interrupt, but remember what
+        // cmd we were originally waiting for.
+        if (expectedCmd == DebuggerCommand::KindOfEval ||
+            expectedCmd == DebuggerCommand::KindOfPrint) {
+          m_pendingCommands.push_back(expectedCmd);
+          return cmd;
+        } else {
+          Logger::Error("Received bad cmd type %d, unable to communicate "
+                        "with server.", cmd->getType());
+          throw DebuggerProtocolException();
+        }
+      }
+      m_sigTime = 0;
+      CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+      Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
+      cmd->onClient(*this);
+
+      // When we make a new connection to a machine, we have to wait for it
+      // to interrupt us before we can send it any messages. This is our
+      // opportunity to complete the connection and make it ready to use.
+      if (!m_machine->m_initialized) {
+        if (!initializeMachine()) {
+          // False means the machine is running and we need to wait for
+          // another interrupt.
+          continue;
+        }
+      }
+      // Execution has been interrupted, so go ahead and give the user
+      // the prompt back.
+      m_machine->m_interrupting = true; // Machine is stopped
+      m_inputState = TakingCommand;
+      console(); // Prompt loop
+      m_inputState = TakingInterrupt;
+      m_machine->m_interrupting = false; // Machine is running again.
     }
-  } catch (DebuggerClientExitException &e) { /* normal exit */ }
+  }
+  throw DebuggerClientExitException(); // Stopped, so exit.
 }
 
 // Execute the interactive command loop for the debugger client. This will
@@ -1836,10 +1868,11 @@ std::string DebuggerClient::lineRest(int index) {
 ///////////////////////////////////////////////////////////////////////////////
 // comunication with DebuggerProxy
 
-DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
+DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd,
+                                        EventLoopKind loopKind) {
   TRACE(2, "DebuggerClient::xend\n");
   sendToServer(cmd);
-  return recvFromServer(cmd->getType());
+  return eventLoop(loopKind, cmd->getType(), "Receive for command");
 }
 
 void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
@@ -1848,56 +1881,6 @@ void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
     Logger::Error("Send command: unable to communicate with server.");
     throw DebuggerProtocolException();
   }
-}
-
-DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
-  TRACE(2, "DebuggerClient::recvFromServer\n");
-  const char *func = "Receive result";
-
-  DebuggerCommandPtr res;
-  while (true) {
-    while (!DebuggerCommand::Receive(m_machine->m_thrift, res, func)) {
-      if (m_stopped) throw DebuggerClientExitException();
-    }
-    if (!res) {
-      Logger::Error("Unable to communicate with server. Server's down?");
-      throw DebuggerServerLostException();
-    }
-    if (!res->getWireError().empty()) {
-      error("wire error: %s", res->getWireError().data());
-    }
-    if (res->is((DebuggerCommand::Type)expected)) {
-      usageLog("done", boost::lexical_cast<string>(expected));
-      break;
-    }
-    if (!res->is(DebuggerCommand::KindOfInterrupt)) {
-      Logger::Error("%s: unexpected return: %d", func, res->getType());
-      throw DebuggerProtocolException();
-    }
-
-    CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(res);
-    Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
-
-    if (isApiMode()) {
-      // Hit breakpoint during eval
-      // Could also happen with CmdPrint, but since CmdPrint is also used
-      // for handling watch, it could potentially lead to infinite recursion
-      // Do not support KindOfPrint until we separate watch from it.
-      if (expected == DebuggerCommand::KindOfEval ||
-          expected == DebuggerCommand::KindOfPrint) {
-        m_pendingCommands.push_back(expected);
-      } else {
-        continue;
-      }
-      break;
-    }
-
-    // eval() can cause more breakpoints
-    res->onClient(*this);
-    console();
-  }
-
-  return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

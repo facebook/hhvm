@@ -326,7 +326,7 @@ void CmdPrint::onClientImpl(DebuggerClient &client) {
   m_printLevel = client.getDebuggerPrintLevel();
   assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
-  CmdPrintPtr res = client.xend<CmdPrint>(this);
+  CmdPrintPtr res = client.xendWithNestedExecution<CmdPrint>(this);
   if (!res->is(m_type)) {
     assert(client.isApiMode());
     m_incomplete = true;

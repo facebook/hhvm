@@ -9,6 +9,6 @@ Breakpoint 1 reached on line 3 of %s/error_bad_cmd_type_receive.php
 
 internaltesting badcmdtypereceive
 Executing internal test...
-Receive result: received bad cmd type: 20001
+Receive for command: received bad cmd type: 20001
 Unable to communicate with server. Server's down?
 Unable to reconnect to server, exiting.

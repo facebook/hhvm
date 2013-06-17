@@ -954,7 +954,9 @@ bool BreakPointInfo::checkClause() {
     }
     String output;
     {
-      EvalBreakControl eval(false);
+      // Don't hit more breakpoints while attempting to decide if we should stop
+      // at this breakpoint.
+      EvalBreakControl eval(true);
       Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false, 0);
       if (m_check) {
         return ret.toBoolean();

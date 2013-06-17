@@ -187,15 +187,20 @@ public:
   StringVec *args() { return &m_args;}
 
   /**
-   * Send the commmand to server's DebuggerProxy
-   * and expect same type of command back.
+   * Send the commmand to server's DebuggerProxy and expect same type of command
+   * back. The WithNestedExecution version supports commands that cause the
+   * server to run PHP on send when we want to be able to debug that PHP before
+   * completing the command.
    */
   template<typename T> boost::shared_ptr<T> xend(DebuggerCommand *cmd) {
-    return boost::static_pointer_cast<T>(xend(cmd));
+    return boost::static_pointer_cast<T>(xend(cmd, Nested));
+  }
+  template<typename T> boost::shared_ptr<T>
+  xendWithNestedExecution(DebuggerCommand *cmd) {
+    return boost::static_pointer_cast<T>(xend(cmd, NestedWithExecution));
   }
 
   void sendToServer(DebuggerCommand *cmd);
-  DebuggerCommandPtr recvFromServer(int expected);
 
   /**
    * Machine functions. True if we're switching to a machine that's not
@@ -429,7 +434,6 @@ private:
   std::string m_outputBuf;
 
   // helpers
-  void runImpl();
   std::string getPrompt();
   void addToken(std::string &token, int idx);
   void parseCommand(const char *line);
@@ -460,7 +464,15 @@ private:
   SmartPtr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);
 
-  DebuggerCommandPtr xend(DebuggerCommand *cmd);
+  enum EventLoopKind {
+    TopLevel, // The top-level event loop, called from run().
+    Nested, // A nested loop where we expect a cmd back with no PHP executed.
+    NestedWithExecution // A nested loop where more PHP may execute.
+  };
+
+  DebuggerCommandPtr xend(DebuggerCommand *cmd, EventLoopKind loopKind);
+  DebuggerCommandPtr eventLoop(EventLoopKind loopKind, int expectedCmd,
+                               const char *caller);
 
   // output
   OutputType m_outputType;

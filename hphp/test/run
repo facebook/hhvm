@@ -303,7 +303,7 @@ class Status {
     ));
     switch (self::$mode) {
       case self::MODE_NORMAL:
-        $diff = file_get_contents($test.'.diff');
+        $diff = @file_get_contents($test.'.diff');
         if (self::hasColor()) {
           print "\n\033[0;31m$test\033[0m\n$diff";
         } else {
@@ -375,6 +375,8 @@ function run($options, $tests, $bad_test_file) {
 
 function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
+  // timeout doesn't proxy the exit code, but we don't care
+  $hhvm = "/usr/bin/timeout 60 $hhvm";
   $output = "";
   if (isset($options['repo'])) {
     if (strpos($test, '.hhas') !== false || strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {

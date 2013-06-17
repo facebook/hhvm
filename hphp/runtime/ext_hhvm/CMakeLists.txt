@@ -16,10 +16,10 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH)
 	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
 	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
 	                   DEPENDS ${f_SRC} gen-ext-hhvm
-	                   COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-ext-hhvm.sh"
+	                   COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-ext-hhvm.sh"
 	                   ARGS ${EHHVM_ARCH} ${f_OBJ}
                                "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
-	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/gen-ext-hhvm"
+	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/bootstrap"
 	                   COMMENT "Generating ext_hhvm wrapper for ${REL}")
 endmacro()
 
@@ -50,7 +50,7 @@ endforeach()
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
 add_custom_command(OUTPUT ${INFOTABS_SOURCE}
                    DEPENDS ${CXX_HEADERS} gen-infotabs
-                   COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-infotabs"
+                   COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-infotabs"
                    ARGS ${INFOTABS_SOURCE} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 

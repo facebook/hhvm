@@ -2,7 +2,7 @@ auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"
                    DEPENDS ${IDL_SRCS} gen-class-map
-                   COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-class-map"
+                   COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-class-map"
                    ARGS "--system"
                         "${CMAKE_CURRENT_SOURCE_DIR}/class_map.cpp"
                         "${CMAKE_CURRENT_SOURCE_DIR}/constants.h"

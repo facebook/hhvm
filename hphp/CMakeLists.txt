@@ -91,7 +91,7 @@ SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 
 hphp_link(hphp_runtime_static)
 
-add_subdirectory("tools/gen-ext-hhvm")
+add_subdirectory("tools/bootstrap")
 
 add_subdirectory(compiler)
 add_subdirectory(runtime/ext_hhvm)

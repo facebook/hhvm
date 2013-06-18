@@ -23,7 +23,6 @@
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/test/ext/test_ext_pdo.h"
-#include "hphp/test/ext/test_ext_posix.h"
 #include "hphp/test/ext/test_ext_process.h"
 #include "hphp/test/ext/test_ext_server.h"
 

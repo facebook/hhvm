@@ -45,6 +45,7 @@ hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/Serializeable.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/reflection/reflection.php
+hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplObjectStorage.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php

@@ -804,38 +804,21 @@ Class::PropInitVec* Class::initPropsImpl() const {
   assert(getPropData() == nullptr);
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
-  // 86pinit() calls below. 86pinit() takes a reference to an array that
-  // contains the initial property values; alias propVec inside propArr such
-  // that propVec contains complete property initialization values as soon as
-  // the 86pinit() calls are done.
+  // 86pinit() calls below. 86pinit() takes a reference to an array to populate
+  // with initial property values; after it completes, we copy the values into
+  // the new propVec.
+  request_arena().beginFrame();
   PropInitVec* propVec = PropInitVec::allocInRequestArena(m_declPropInit);
   size_t nProps = numDeclProperties();
 
-  // During property initialization, we provide access to the
-  // properties by name via this NameValueTable.
-
-  // Note that constructing these on the stack is slightly
-  // risky; we're relying on nobody getting hold of references
-  // to them. Also note that the assert on the refCount below
-  // is quite inadequate; the only way for these to leak is if
-  // an error occurs - but in that case, we wont reach the assert
-  // However, since we dont /want/ these to leak into the backtrace,
-  // we prevent it by setting AttrNoInjection (see Func::init)
-  NameValueTable propNvt(numDeclProperties());
-  NameValueTableWrapper propArr(&propNvt);
-  // bump the refCount until we have a real reference to it
-  propArr.incRefCount();
-
-  // Insert propArr and sentinel into the args array, transferring ownership.
-  ArrayData* args = ArrayData::Make(2);
-  args->incRefCount();
   {
-    // the first argument is byRef. Make a reference,
-    // and hold its refCount above one until after the call
-    Variant arg0(&propArr);
-    // match the incRef above, now we have an owner
-    propArr.decRefCount();
-    args = args->appendRef(arg0, 0);
+    Array args;
+
+    HphpArray* propArr = ArrayData::Make(nProps);
+    Variant arg0(propArr);
+
+    args.appendRef(arg0);
+    assert(propArr->getCount() == 1);  // Don't want to trigger COW
     {
       // Create a sentinel that uniquely identifies uninitialized properties.
       ObjectData* sentinel = SystemLib::AllocPinitSentinel();
@@ -843,34 +826,63 @@ Class::PropInitVec* Class::initPropsImpl() const {
       TypedValue tv;
       tv.m_data.pobj = sentinel;
       tv.m_type = KindOfObject;
-      args = args->append(tvAsCVarRef(&tv), false);
+      args.append(tvAsCVarRef(&tv));
       sentinel->decRefCount();
     }
+
     TypedValue* tvSentinel = args->nvGetValueRef(1);
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue& prop = (*propVec)[i];
-      if (prop.m_type == KindOfUninit) {
-        // Replace undefined values with tvSentinel, which acts as a
-        // unique sentinel for undefined properties in 86pinit().
-        tvDup(tvSentinel, &prop);
-      }
       // We have to use m_originalMangledName here because the
       // 86pinit methods for traits depend on it
-      const StringData* k = (m_declProperties[i].m_attrs & AttrPrivate)
+      auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
         ? m_declProperties[i].m_originalMangledName
         : m_declProperties[i].m_name;
-      propNvt.migrateSet(k, &prop);
+
+      // Replace undefined values with tvSentinel, which acts as a
+      // unique sentinel for undefined properties in 86pinit().
+      if (prop.m_type == KindOfUninit) {
+        propArr->nvInsert(const_cast<StringData*>(k), tvSentinel);
+      } else {
+        // This may seem pointless, but if you don't populate all the keys,
+        // you'll get "undefined index" notices in the case where a
+        // scalar-initialized property overrides a parent's
+        // non-scalar-initialized property of the same name.
+        propArr->nvInsert(const_cast<StringData*>(k), &prop);
+      }
     }
-    // Iteratively invoke 86pinit() methods upward
-    // through the inheritance chain.
-    for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
-         it != m_pinitVec.rend(); ++it) {
-      TypedValue retval;
-      g_vmContext->invokeFunc(&retval, *it, args, nullptr,
-                              const_cast<Class*>(this));
-      assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+
+    try {
+      // Iteratively invoke 86pinit() methods upward
+      // through the inheritance chain.
+      for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
+           it != m_pinitVec.rend(); ++it) {
+        TypedValue retval;
+        g_vmContext->invokeFunc(&retval, *it, args, nullptr,
+                                const_cast<Class*>(this));
+        assert(retval.m_type == KindOfNull);
+      }
+    } catch (...) {
+      // Undo the allocation of propVec
+      request_arena().endFrame();
+      throw;
+    }
+
+    // Pull the values out of the populated array and put them in propVec
+    for (size_t i = 0; i < nProps; ++i) {
+      TypedValue& prop = (*propVec)[i];
+      if (prop.m_type == KindOfUninit) {
+        auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
+          ? m_declProperties[i].m_originalMangledName
+          : m_declProperties[i].m_name;
+
+        auto const* value = propArr->nvGet(k);
+        assert(value);
+        tvDup(value, &prop);
+      }
     }
   }
+
   // For properties that do not require deep initialization, promote strings
   // and arrays that came from 86pinit to static. This allows us to initialize
   // object properties very quickly because we can just memcpy and we don't
@@ -889,11 +901,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
       tv->deepInit() = false;
     }
   }
-  // Free the args array.  propArr is allocated on the stack so it better be
-  // only referenced from args.
-  assert(propArr.getCount() == 1);
-  assert(args->getCount() == 1);
-  decRefArr(args);
+
   return propVec;
 }
 

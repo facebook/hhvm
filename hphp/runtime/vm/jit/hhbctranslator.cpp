@@ -2104,10 +2104,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   push(ret);
 }
 
-static bool mayHaveThis(const Func* func) {
-  return func->isPseudoMain() || (func->isMethod() && !func->isStatic());
-}
-
 void HhbcTranslator::emitRetFromInlined(Type type) {
   SSATmp* retVal = pop(type);
 
@@ -2157,6 +2153,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
   SSATmp* retValSrcLoc = nullptr;
   Opcode  retValSrcOpc = Nop; // Nop flags the ref-count opt is impossible
   IRInstruction* retValSrcInstr = retVal->inst();
+  const Func* curFunc = this->curFunc();
 
   /*
    * In case retVal comes from a local, the logic below tweaks the code
@@ -2173,7 +2170,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
     }
   }
 
-  if (mayHaveThis(curFunc())) {
+  if (curFunc->mayHaveThis()) {
     if (retValSrcLoc && retValSrcOpc == LdThis) {
       gen(DecRef, retVal);
     } else {
@@ -2189,7 +2186,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
    */
   int retValLocId = (!isInlining() && retValSrcLoc && retValSrcOpc == LdLoc) ?
     retValSrcLoc->inst()->extra<LocalId>()->locId : -1;
-  for (int id = curFunc()->numLocals() - 1; id >= 0; --id) {
+  for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
     if (retValLocId == id) {
       gen(DecRef, retVal);
       continue;
@@ -2223,7 +2220,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StRetVal, m_tb->fp(), useRet);
     sp = gen(RetAdjustStack, m_tb->fp());
   } else {
-    if (mayHaveThis(curFunc)) {
+    if (curFunc->mayHaveThis()) {
       gen(DecRefThis, m_tb->fp());
     }
     sp = gen(GenericRetDecRefs, m_tb->fp(), cns(curFunc->numLocals()));

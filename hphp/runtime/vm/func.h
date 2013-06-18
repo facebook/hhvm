@@ -243,6 +243,10 @@ struct Func {
   }
   bool isNoInjection() const { return bool(m_attrs & AttrNoInjection); }
 
+  bool mayHaveThis() const {
+    return isPseudoMain() || (isMethod() && !isStatic());
+  }
+
   HphpArray* getStaticLocals() const;
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
 

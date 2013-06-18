@@ -1198,7 +1198,9 @@ bool shouldIRInline(const Func* curFunc,
       FTRACE(1, "CreateCont with {} args\n", func->numParams());
     }
     next();
-    if (atRet()) return accept("continuation creator");
+    if (atRet()) {
+      return accept("continuation creator");
+    }
   }
 
   /*

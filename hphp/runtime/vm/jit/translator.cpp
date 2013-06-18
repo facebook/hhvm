@@ -2964,19 +2964,17 @@ static bool checkTaintFuncs(StringData* name) {
  * Check whether the a given FCall should be analyzed for possible
  * inlining or not.
  */
-static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
+static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
+                                const FPIEnt* fpi,
+                                const Opcode pushOp) {
   auto const numArgs = fcall->imm[0].u_IVA;
   auto const target  = fcall->funcd;
-  auto const fpi     = curFunc()->findFPI(fcall->source.offset());
-  auto const pushOp  = curUnit()->getOpcode(fpi->m_fpushOff);
 
   if (!RuntimeOption::RepoAuthoritative) return false;
 
-  // Note: the IR assumes that $this is available in all inlined object
-  // methods, which will need to be updated when we support
-  // OpFPushClsMethod here.
   if (pushOp != OpFPushFuncD && pushOp != OpFPushObjMethodD
-      && pushOp != OpFPushCtorD && pushOp != OpFPushCtor) {
+      && pushOp != OpFPushCtorD && pushOp != OpFPushCtor
+      && pushOp != OpFPushClsMethodD) {
     FTRACE(1, "analyzeCallee: push op ({}) was not supported\n",
            opcodeToName(pushOp));
     return false;
@@ -3008,6 +3006,12 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
     return false;
   }
 
+  if (pushOp == OpFPushClsMethodD && target->mayHaveThis()) {
+    FTRACE(1, "analyzeCallee: not inlining static calls which may have a "
+              "this pointer\n");
+    return false;
+  }
+
   // Find the fpush and ensure it's in this tracelet---refuse to
   // inline if there are any calls in order to prepare arguments.
   for (auto* ni = fcall->prev; ni; ni = ni->prev) {
@@ -3031,11 +3035,14 @@ extern bool shouldIRInline(const Func* curFunc,
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
-  if (!shouldAnalyzeCallee(fcall)) return;
+  auto const callerFunc  = curFunc();
+  auto const fpi         = callerFunc->findFPI(fcall->source.offset());
+  auto const pushOp      = curUnit()->getOpcode(fpi->m_fpushOff);
+
+  if (!shouldAnalyzeCallee(fcall, fpi, pushOp)) return;
 
   auto const numArgs     = fcall->imm[0].u_IVA;
   auto const target      = fcall->funcd;
-  auto const callerFunc  = curFunc();
 
   /*
    * Prepare a map for all the known information about the argument

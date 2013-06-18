@@ -217,7 +217,7 @@ typedef CondBlock <TVOFF(m_type),
  * If we were physically pushing stack frames, we would push them
  * in reverse order to what you see here.
  */
-static void
+static inline void
 locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
              const Func* f = nullptr) {
   assert_not_implemented((l.space == Location::Stack ||
@@ -228,41 +228,6 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
 }
 
 // Common code emission patterns.
-
-// vstackOffset --
-// emitVStackStore --
-//
-//   Store to the virtual stack at a normalized instruction boundary.
-//   Since rVmSp points to the stack at entry to the current BB, we need to
-//   adjust stack references relative to it.
-//
-//   For all parameters, offsets and sizes are in bytes. Sizes are expected
-//   to be a hardware size: 1, 2, 4, or 8 bytes.
-static inline int
-vstackOffset(const NormalizedInstruction& ni, COff off) {
-  not_reached();
-}
-
-static inline void
-emitVStackStore(X64Assembler &a, const NormalizedInstruction &ni,
-                PhysReg src, int off, int size = sz::qword) {
-  int hwOff = vstackOffset(ni, off);
-  if (size == sz::qword) {
-    a.    store_reg64_disp_reg64(src, hwOff, rVmSp);
-  } else if (size == sz::dword) {
-    a.    store_reg32_disp_reg64(src, hwOff, rVmSp);
-  } else {
-    not_implemented();
-  }
-}
-
-static inline const StringData*
-local_name(const Location& l) {
-  assert(l.isLocal());
-  const StringData* ret = curFunc()->localNames()[l.offset];
-  assert(ret->isStatic());
-  return ret;
-}
 
 static_assert(sizeof(DataType) == 4 || sizeof(DataType) == 1,
               "Your DataType has an unsupported size.");
@@ -335,35 +300,18 @@ emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
   }
 }
 
-// emitDispDeref --
 // emitDeref --
 // emitStoreTypedValue --
 // emitStoreUninitNull --
-// emitStoreNull --
 //
 //   Helpers for common cell operations.
 //
 //   Dereference the var in the cell whose address lives in src into
 //   dest.
 static inline void
-emitDispDeref(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
-  // src is a RefData, dest will be m_data field of inner gizmoom.
-  a.    loadq (src[disp + TVOFF(m_data)], dest);
-}
-
-static inline void
 emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
-  emitDispDeref(a, src, 0, dest);
-}
-
-static inline void
-emitDerefRef(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
-  emitDispDeref(a, src, disp + RefData::tvOffset(), dest);
-}
-
-static inline void
-emitDerefRef(X64Assembler &a, Reg64 src, Reg64 dest) {
-  emitDerefRef(a, src, 0, dest);
+  // src is a RefData, dest will be m_data field of inner gizmoom.
+  a.    loadq (src[TVOFF(m_data)], dest);
 }
 
 static inline void
@@ -394,39 +342,11 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
 }
 
 static inline void
-emitStoreToRefData(X64Assembler& a, DataType type, PhysReg val,
-                   int disp, PhysReg dest) {
-  emitStoreTypedValue(a, type, val, disp + RefData::tvOffset(), dest);
-}
-
-static inline void
-emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
-  a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
-  emitStoreTVType(a, KindOfInvalid,     dest[disp + TVOFF(m_type)]);
-}
-
-static inline void
 emitStoreUninitNull(X64Assembler& a,
                     int disp,
                     PhysReg dest) {
   // OK to leave garbage in m_data, m_aux.
   emitStoreTVType(a, KindOfUninit, dest[disp + TVOFF(m_type)]);
-}
-
-static inline void
-emitStoreNull(X64Assembler& a,
-              int disp,
-              PhysReg dest) {
-  emitStoreTVType(a, KindOfNull, dest[disp + TVOFF(m_type)]);
-  // It's ok to leave garbage in m_data, m_aux for KindOfNull.
-}
-
-static inline void
-emitStoreNull(X64Assembler& a, const Location& where) {
-  PhysReg base;
-  int disp;
-  locToRegDisp(where, &base, &disp);
-  emitStoreNull(a, disp, base);
 }
 
 static inline void
@@ -446,59 +366,10 @@ emitCopyTo(X64Assembler& a,
   emitStoreTVType(a, s32, dest[destOff + TVOFF(m_type)]);
 }
 
-/*
- * Version of emitCopyTo where both the source and dest are known to
- * be 16-byte aligned.  In this case we can use xmm.
- */
-inline void emitCopyToAligned(X64Assembler& a,
-                              Reg64 src,
-                              int srcOff,
-                              Reg64 dest,
-                              int destOff) {
-  using namespace reg;
-
-  static_assert(sizeof(TypedValue) == 16,
-                "emitCopyToAligned assumes sizeof(TypedValue) is 128 bits");
-  a.    movdqa  (src[srcOff], xmm0);
-  a.    movdqa  (xmm0, dest[destOff]);
-}
-
-// supportedPlan --
-// nativePlan --
-// simplePlan --
-//   Some helpers for analyze* methods.
-static inline TXFlags
-plan(bool cond, TXFlags successFlags, TXFlags fallbackFlags=Interp) {
-  return cond ? successFlags : fallbackFlags;
-}
-
-static inline TXFlags simplePlan(bool cond) { return plan(cond, Simple); }
-static inline TXFlags simpleOrSupportedPlan(bool cond) {
-  return plan(cond, Simple, Supported);
-}
-static inline TXFlags supportedPlan(bool cond) { return plan(cond, Supported); }
-static inline TXFlags nativePlan(bool cond) { return plan(cond, Native); }
-
-static inline TXFlags planHingesOnRefcounting(DataType type) {
-  return !IS_REFCOUNTED_TYPE(type) ? Native :
-         !typeReentersOnRelease(type) ? Simple :
-         Supported;
-}
-
 static inline const char* getContextName() {
   Class* ctx = arGetContextClass(curFrame());
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
-
-template<class T>
-struct Deleter : private boost::noncopyable {
-  explicit Deleter(T** p) : p(p) {}
-  ~Deleter() {
-    delete *p;
-    *p = nullptr;
-  }
-  T** p;
-};
 
 }}
 

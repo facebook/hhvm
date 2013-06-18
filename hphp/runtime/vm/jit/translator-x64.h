@@ -218,11 +218,6 @@ private:
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
   static CppCall getDtorCall(DataType type);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
-  void emitCopyToStackRegSafe(Asm& a,
-                              const NormalizedInstruction& ni,
-                              PhysReg src,
-                              int off,
-                              PhysReg tmpReg);
 
   void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
 

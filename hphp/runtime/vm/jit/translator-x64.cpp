@@ -248,24 +248,6 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
   }
 }
 
-/*
- * Copy a heap cell from memory to the stack.
- *
- * Use emitCopyToStack when you can safely change the state of the
- * register map.  When using emitCopyToStackRegSafe, you'll need to
- * invalidate the stack location manually at an appropriate time.
- */
-
-void
-TranslatorX64::emitCopyToStackRegSafe(X64Assembler& a,
-                                      const NormalizedInstruction& ni,
-                                      PhysReg src,
-                                      int off,
-                                      PhysReg tmpReg) {
-  assert(off % sizeof(Cell) == 0);
-  emitCopyTo(a, src, 0, rVmSp, vstackOffset(ni, off), tmpReg);
-}
-
 // Logical register move: ensures the value in src will be in dest
 // after execution, but might do so in strange ways. Do not count on
 // being able to smash dest to a different register in the future, e.g.

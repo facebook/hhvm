@@ -231,11 +231,6 @@ public:
     return *m_map.insert(sk.toAtomicInt(), new SrcRec);
   }
 
-  inline void recordDependency(const Eval::PhpFile* file, const SrcKey& sk) {
-    if (RuntimeOption::RepoAuthoritative) return;
-    recordDependencyWork(file, sk);
-  }
-  void recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk);
   size_t invalidateCode(const Eval::PhpFile* file);
 };
 

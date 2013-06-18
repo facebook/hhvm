@@ -202,18 +202,6 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
   }
 }
 
-void SrcDB::recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk) {
-  if (RuntimeOption::RepoAuthoritative) return;
-  assert(Translator::WriteLease().amOwner());
-  std::pair<FileDepMap::iterator, bool> insRet =
-    m_deps.insert(FileDepMap::value_type(file, nullptr));
-  if (insRet.second) {
-    insRet.first->second = new GrowableVector<SrcKey>();
-  }
-  TRACE(1, "SrcDB::recordDependencyWork: file %p\n", file);
-  insRet.first->second = insRet.first->second->push_back(sk);
-}
-
 /*
  * Returns number of destroyed references to file.
  */

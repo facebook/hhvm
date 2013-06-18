@@ -687,7 +687,11 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   case KindOfString: {
     int baseLen = base->m_data.pstr->size();
     if (baseLen == 0) {
+      initScratchKey<keyType>(scratch, key);
       SetElemEmptyish(base, key, value);
+      if (!setResult) {
+        throw InvalidSetMException(*value);
+      }
     } else {
       // Convert key to string offset.
       int64_t x = castKeyToInt<keyType>(key);

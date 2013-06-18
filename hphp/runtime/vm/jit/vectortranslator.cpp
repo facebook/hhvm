@@ -156,7 +156,7 @@ void VectorEffects::init(Opcode op, const Type origBase,
     // definitely happen but those cases aren't handled yet. In a perfect world
     // we would remove Type::Null from baseType here but that can produce types
     // that are tricky to guard against and doesn't buy us much right now.
-    if (!baseBoxed || !baseType.isString()) {
+    if (!baseBoxed && (!baseType.isString() || op == SetProp)) {
       /*
        * Uses of boxed types are always guarded, in case the inner
        * type was modified. If the base type was String, its extremely

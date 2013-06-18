@@ -20,7 +20,6 @@
 #define incl_EXT_LIST_TEST_EXT_H_
 
 #include "hphp/test/ext/test_ext_curl.h"
-#include "hphp/test/ext/test_ext_mcrypt.h"
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/test/ext/test_ext_pdo.h"

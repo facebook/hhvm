@@ -202,6 +202,7 @@ class NormalizedInstruction {
                           //   MIterNextK
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3
+  Type         outPred;
   vector<Location> deadLocs; // locations that die at the end of this
                              // instruction
   ArgUnion imm[4];
@@ -238,7 +239,7 @@ class NormalizedInstruction {
   bool breaksTracelet:1;
   bool changesPC:1;
   bool fuseBranch:1;
-  bool preppedByRef:1;    // For FPass*; indicates parameter reffiness
+  bool preppedByRef:1;
   bool outputPredicted:1;
   bool outputPredictionStatic:1;
   bool ignoreInnerType:1;
@@ -300,6 +301,7 @@ class NormalizedInstruction {
     , outLocal2(nullptr)
     , outStack2(nullptr)
     , outStack3(nullptr)
+    , outPred(Type::Gen)
     , checkedInputs(0)
     , ignoreInnerType(false)
     , guardedThis(false)

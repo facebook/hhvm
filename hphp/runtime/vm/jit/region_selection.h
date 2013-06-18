@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <utility>
+#include <boost/container/flat_map.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include "folly/Format.h"
@@ -31,6 +32,9 @@ namespace Transl {
 struct Tracelet;
 }
 namespace JIT {
+
+using boost::container::flat_map;
+using boost::container::flat_multimap;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,7 +51,12 @@ struct RegionDesc {
   struct Block;
   struct Location;
   struct TypePred;
+  struct ReffinessPred;
   typedef smart::unique_ptr<Block>::type BlockPtr;
+  enum class ParamByRef : uint8_t {
+    Yes,
+    No,
+  };
 
   smart::vector<BlockPtr> blocks;
 };
@@ -108,11 +117,29 @@ struct RegionDesc::TypePred {
 };
 
 /*
+ * A prediction for the argument reffiness of the Func for a pre-live ActRec.
+ *
+ * mask is a bitmask of all 1's, with one bit for each parameter being passed.
+ *
+ * vals is a bitmask of the same length as mask, with a 1 representing a
+ * parameter that will be passed by reference and a 0 for for value.
+ *
+ * arSpOffset is the offset from rVmSp to the ActRec.
+ */
+struct RegionDesc::ReffinessPred {
+  std::vector<bool> mask;
+  std::vector<bool> vals;
+  int64_t arSpOffset;
+};
+
+/*
  * A basic block in the region, with type predictions for conditions
  * at various execution points, including at entry to the block.
  */
 class RegionDesc::Block {
-  typedef smart::vector<std::pair<SrcKey,TypePred>> TypePredList;
+  typedef flat_multimap<SrcKey, TypePred> TypePredMap;
+  typedef flat_map<SrcKey, ParamByRef> ParamByRefMap;
+  typedef flat_multimap<SrcKey, ReffinessPred> RefPredMap;
 
 public:
   explicit Block(const Func* func, Offset start, int length)
@@ -136,6 +163,14 @@ public:
   int length() const { return m_length; }
 
   /*
+   * Increase the length of the Block by 1.
+   */
+  void addInstruction() {
+    ++m_length;
+    checkInvariants();
+  }
+
+  /*
    * Add a predicted type to this block.
    *
    * Pre: sk is in the region delimited by this block.
@@ -143,25 +178,36 @@ public:
   void addPredicted(SrcKey sk, TypePred);
 
   /*
-   * Obtain a range for the type predictions on this block.  The
-   * elements in the range are listed in ascending SrcKey order.
-   *
-   * The caller should assume it is a SinglePassReadableRange.
+   * Add information about parameter reffiness to this block.
    */
-  boost::iterator_range<TypePredList::const_iterator> typePreds() const {
-    return boost::make_iterator_range(m_predTypes.begin(), m_predTypes.end());
-  }
+  void setParamByRef(SrcKey sk, ParamByRef);
+
+  /*
+   * Add a reffiness prediction about a pre-live ActRec.
+   */
+  void addReffinessPred(SrcKey, const ReffinessPred&);
+
+
+  /*
+   * The following getters return references to the metadata maps holding the
+   * information added using the add* and set* methods above. The best way to
+   * iterate over the information is using a MapWalker, since they're all
+   * backed by a sorted map.
+   */
+  const TypePredMap& typePreds()     const { return m_typePreds; }
+  const ParamByRefMap& paramByRefs() const { return m_byRefs; }
+  const RefPredMap& reffinessPreds() const { return m_refPreds; }
 
 private:
   void checkInvariants() const;
-  static bool typePredListCmp(TypePredList::const_reference,
-                              TypePredList::const_reference);
 
 private:
   const Func*  m_func;
   const Offset m_start;
-  const int    m_length;
-  TypePredList m_predTypes;
+  int          m_length;
+  TypePredMap  m_typePreds;
+  ParamByRefMap m_byRefs;
+  RefPredMap   m_refPreds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -211,7 +257,7 @@ struct RegionContext::PreLiveAR {
  *
  * May return nullptr.
  *
- * For now this is hooked up in TranslatorX64::createTranslation, and
+ * For now this is hooked up in TranslatorX64::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like analyze to occur underneath this as
  * well.
@@ -223,6 +269,8 @@ RegionDescPtr selectRegion(const RegionContext&, const Transl::Tracelet*);
  */
 std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypePred);
+std::string show(const RegionDesc::ReffinessPred&);
+std::string show(RegionDesc::ParamByRef);
 std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);
 std::string show(const RegionDesc::Block&);

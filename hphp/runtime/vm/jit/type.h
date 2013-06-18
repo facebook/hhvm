@@ -82,7 +82,7 @@ using Transl::RuntimeType;
 
 // Gen, Counted, PtrToGen, and PtrToCounted are here instead of
 // IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)
-// would be nonsense types.
+// would yield nonsense types.
 #define IRT_SPECIAL                                                 \
   IRT(Bottom,       0)                                              \
   IRT(Top,          0xffffffffffffffffULL)                          \

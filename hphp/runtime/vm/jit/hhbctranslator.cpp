@@ -1543,7 +1543,8 @@ SSATmp* HhbcTranslator::staticTVCns(const TypedValue* tv) {
   }
 }
 
-void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
+void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
+                                 Type outPred) {
   auto const clsNameStr = lookupStringId(clsNameId);
   auto const cnsNameStr = lookupStringId(cnsNameId);
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
@@ -1578,8 +1579,9 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
     }
   }
 
-  auto const cns = gen(LdClsCns, clsCnsName, Type::Uncounted);
-  gen(CheckInit, sideExit, cns);
+  auto guardType = Type::UncountedInit;
+  if (outPred.strictSubtypeOf(guardType)) guardType = outPred;
+  auto const cns = gen(LdClsCns, sideExit, clsCnsName, guardType);
   push(cns);
 }
 

@@ -803,9 +803,29 @@ inline bool isFCallStar(Op opcode) {
   return opcode == OpFCall || opcode == OpFCallArray;
 }
 
-inline bool isSwitch(Op op) {
-  return op == OpSwitch || op == OpSSwitch;
+inline bool isFPassStar(Op opcode) {
+  switch (opcode) {
+    case OpFPassC:
+    case OpFPassCW:
+    case OpFPassCE:
+    case OpFPassV:
+    case OpFPassR:
+    case OpFPassL:
+    case OpFPassN:
+    case OpFPassG:
+    case OpFPassS:
+    case OpFPassM:
+      return true;
+
+    default:
+      return false;
+  }
 }
+
+inline bool isSwitch(Op op) {
+  return op == Op::Switch || op == Op::SSwitch;
+}
+
 inline bool isSwitch(Opcode op) {
   return isSwitch(toOp(op));
 }

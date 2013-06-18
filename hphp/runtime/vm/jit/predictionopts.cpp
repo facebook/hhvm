@@ -153,46 +153,6 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
   };
 
   /*
-   * When we have a type prediction for a LdClsCns that is followed
-   * immediately by CheckInit, we can merge both checks into the
-   * LdClsCns and change it to exit to the same location the CheckInit
-   * would've exited to.
-   */
-  auto optLdClsCns = [&] (IRInstruction* checkType,
-                          IRInstruction* lastMarker) -> bool {
-    auto const ldClsCns = checkType->src(0)->inst();
-    if (ldClsCns->op() != LdClsCns) return false;
-    if (ldClsCns->taken()) return false;
-
-    auto const mainBlock = ldClsCns->block();
-    auto const nextIt    = boost::next(mainBlock->iteratorTo(ldClsCns));
-    if (nextIt == mainBlock->end()) return false;
-    auto const checkInit = &*nextIt;
-    if (checkInit->op() != CheckInit) return false;
-    auto const exit      = checkInit->taken();
-    if (exit->numPreds() != 1) return false;
-
-    FTRACE(5, "candidate: {}\n", ldClsCns->toString());
-
-    // Change the LdClsCns to do the check on the more refined type,
-    // exiting to the trace we would've exited to, and get rid of the
-    // CheckInit.
-    checkInit->setTaken(nullptr);
-    mainBlock->erase(mainBlock->iteratorTo(checkInit));
-    ldClsCns->setTaken(exit);
-    ldClsCns->setTypeParam(checkType->typeParam());
-
-    // We don't need the checkType anymore.
-    irFactory->replace(
-      checkType,
-      Mov,
-      ldClsCns->dst()
-    );
-
-    return true;
-  };
-
-  /*
    * The main loop for this pass.
    *
    * The individual optimizations called here are expected to change
@@ -213,8 +173,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
       if (inst.op() == CheckType &&
           inst.src(0)->type().equals(Type::Cell)) {
         assert(lastMarker);
-        if (optLdMem(&inst, lastMarker) ||
-            optLdClsCns(&inst, lastMarker)) {
+        if (optLdMem(&inst, lastMarker)) {
           needsReflow = true;
           break;
         }

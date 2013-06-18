@@ -30,7 +30,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/biased_coin.h"
-
+#include "hphp/util/map_walker.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/stats.h"
@@ -646,13 +646,12 @@ predictMVec(const NormalizedInstruction* ni) {
  *   Provide a best guess for the output type of this instruction.
  */
 static DataType
-predictOutputs(const Tracelet& t,
-               NormalizedInstruction* ni) {
+predictOutputs(SrcKey startSk,
+               const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfInvalid;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
-    ni->outputPredicted = true;
     int dt;
     while (true) {
       dt = get_random() % (KindOfRef + 1);
@@ -698,7 +697,6 @@ predictOutputs(const Tracelet& t,
     if (cls) {
       DataType dt = cls->clsCnsType(cnsName);
       if (dt != KindOfUninit) {
-        ni->outputPredicted = true;
         TRACE(1, "clscnsd: %s:%s prediction type %d\n",
               cne.first->data(), cnsName->data(), dt);
         return dt;
@@ -712,7 +710,7 @@ predictOutputs(const Tracelet& t,
   // them combinatorially explode if they bring in precondtions that vary a
   // lot. Get more conservative as evidence mounts that this is a
   // polymorphic tracelet.
-  if (tx64->numTranslations(t.m_sk) >= kTooPolyPred) return KindOfInvalid;
+  if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfInvalid;
   if (ni->op() == OpCGetS) {
     const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
     if (propName) {
@@ -736,7 +734,6 @@ predictOutputs(const Tracelet& t,
     }
   }
   if (pred.second >= kAccept) {
-    ni->outputPredicted = true;
     TRACE(1, "accepting prediction of type %d\n", pred.first);
     assert(pred.first != KindOfUninit);
     return pred.first;
@@ -805,7 +802,11 @@ getDynLocType(const vector<DynLocation*>& inputs,
     CS(OutArray,       KindOfArray);
     CS(OutObject,      KindOfObject);
 #undef CS
-    case OutPred: return RuntimeType(predictOutputs(t, ni));
+    case OutPred: {
+      auto dt = predictOutputs(t.m_sk, ni);
+      if (dt != KindOfInvalid) ni->outputPredicted = true;
+      return RuntimeType(dt);
+    }
 
     case OutClassRef: {
       Op op = Op(ni->op());
@@ -3281,7 +3282,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     ni->funcd = (t.m_arState.getCurrentState() == ActRecState::State::KNOWN) ?
       t.m_arState.getCurrentFunc() : nullptr;
     ni->m_unit = unit;
-    ni->preppedByRef = false;
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
     ni->fuseBranch = false;
@@ -3319,8 +3319,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         // relative to the sp at the beginning of the tracelet, so we adjust
         // by subtracting ni->stackOff
         int entryArDelta = instrSpToArDelta((Op*)ni->pc()) - ni->stackOffset;
-        ni->preppedByRef = t.m_arState.getReffiness(argNum,
-                                                    entryArDelta,
+        ni->preppedByRef = t.m_arState.getReffiness(argNum, entryArDelta,
                                                     &t.m_refDeps);
         SKTRACE(1, sk, "passing arg%d by %s\n", argNum,
                 ni->preppedByRef ? "reference" : "value");
@@ -3438,6 +3437,11 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       for (int i = stackFrameOffset; i < oldStackFrameOffset; ++i) {
         ni->deadLocs.push_back(Location(Location::Stack, i));
       }
+    }
+
+    if (ni->outputPredicted) {
+      assert(ni->outStack);
+      ni->outPred = Type::fromDynLocation(ni->outStack);
     }
 
     t.m_stackChange += getStackDelta(*ni);
@@ -3777,21 +3781,23 @@ static Location toLocation(const RegionDesc::Location& loc) {
 
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region) {
+  typedef JIT::RegionDesc::Block Block;
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   assert(!region.blocks.empty());
+  const SrcKey startSk = region.blocks.front()->start();
 
   for (auto const& block : region.blocks) {
-    const SrcKey startSk = block->start();
-    SrcKey sk = startSk;
-    auto predIt = block->typePreds().begin();
-    auto const predEnd = block->typePreds().end();
+    SrcKey sk = block->start();
+    auto typePreds = makeMapWalker(block->typePreds());
+    auto byRefs = makeMapWalker(block->paramByRefs());
+    auto refPreds = makeMapWalker(block->reffinessPreds());
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
       // go to a side exit.
-      for (; predIt != predEnd && predIt->first == sk; ++predIt) {
-        auto const& pred = predIt->second;
+      while (typePreds.hasNext(sk)) {
+        auto const& pred = typePreds.next();
         if (block == region.blocks.front() && i == 0) {
           m_hhbcTrans->guardTypeLocation(toLocation(pred.location), pred.type);
         } else {
@@ -3800,11 +3806,18 @@ Translator::translateRegion(const RegionDesc& region) {
         }
       }
 
+      // Emit reffiness guards. For now, we only support reffiness guards at
+      // the beginning of the region.
+      while (refPreds.hasNext(sk)) {
+        assert(sk == startSk);
+        auto const& pred = refPreds.next();
+        m_hhbcTrans->guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+      }
+
       // Create and initialize the instruction.
       NormalizedInstruction inst;
       inst.source = sk;
       inst.m_unit = block->unit();
-      inst.preppedByRef = false;
       inst.breaksTracelet =
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
@@ -3825,10 +3838,6 @@ Translator::translateRegion(const RegionDesc& region) {
       getInputs(startSk, &inst, stackOff, inputInfos, [&](int i) {
           return m_hhbcTrans->traceBuilder()->getLocalType(i);
         });
-      if (inputInfos.needsRefCheck) {
-        // Not supported yet.
-        return Failure;
-      }
       for (auto& info : inputInfos) {
         if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
       }
@@ -3851,11 +3860,44 @@ Translator::translateRegion(const RegionDesc& region) {
       // Apply the remaining metadata. This may change the types of some of
       // inst's inputs.
       readMetaData(metaHand, inst);
+      if (!inst.noOp && inputInfos.needsRefCheck) {
+        assert(byRefs.hasNext(sk));
+        auto byRef = byRefs.next();
+        inst.preppedByRef = byRef == RegionDesc::ParamByRef::Yes;
+      }
 
+      // Check for a type prediction. Put it in the NormalizedInstruction so
+      // the emit* method can use it if needed.
+      auto const& iInfo = instrInfo[inst.op()];
+      auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
+      if (doPrediction) {
+        // All OutPred ops have a single stack output for now.
+        assert(iInfo.out == Stack1);
+        auto dt = predictOutputs(startSk, &inst);
+        if (dt != KindOfInvalid) {
+          inst.outPred = Type::fromDataType(dt);
+        } else {
+          doPrediction = false;
+        }
+      }
+
+      // Emit IR for the body of the instruction.
       Util::Nuller<NormalizedInstruction> niNuller(&m_curNI);
       m_curNI = &inst;
       translateInstr(inst);
+
+      // Check the prediction. If the predicted type is less specific than what
+      // is currently on the eval stack, checkTypeLocation won't emit any code.
+      if (doPrediction) {
+        m_hhbcTrans->checkTypeLocation(Location(Location::Stack, 0),
+                                       inst.outPred,
+                                       sk.advanced(block->unit()).offset());
+      }
     }
+
+    assert(!typePreds.hasNext());
+    assert(!byRefs.hasNext());
+    assert(!refPreds.hasNext());
   }
 
   traceEnd();

@@ -151,6 +151,11 @@ class map : public std::map<
   Allocator<std::pair<const Key,T>>
 > {};
 
+template <class T, class Compare = std::less<T>>
+class set : public std::set<
+  T, Compare, Allocator<T>
+> {};
+
 template <class T>
 class deque : public std::deque<T,Allocator<T>> {};
 

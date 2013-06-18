@@ -125,6 +125,10 @@ struct SrcKey::Hasher {
 
 //////////////////////////////////////////////////////////////////////
 
+inline std::string show(SrcKey sk) {
+  return folly::format("{}@{}", sk.getFuncId(), sk.offset()).str();
+}
+
 }
 
 #endif

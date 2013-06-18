@@ -22,6 +22,7 @@
 #include "folly/Conv.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/map_walker.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -62,10 +63,18 @@ RegionMode regionMode() {
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
   assert(pred.type.subtypeOf(Type::Gen | Type::Cls));
-  auto const newElem = std::make_pair(sk, pred);
-  auto const it = std::upper_bound(m_predTypes.begin(), m_predTypes.end(),
-    newElem, typePredListCmp);
-  m_predTypes.insert(it, newElem);
+  m_typePreds.insert(std::make_pair(sk, pred));
+  checkInvariants();
+}
+
+void RegionDesc::Block::setParamByRef(SrcKey sk, ParamByRef byRef) {
+  assert(m_byRefs.find(sk) == m_byRefs.end());
+  m_byRefs.insert(std::make_pair(sk, byRef));
+  checkInvariants();
+}
+
+void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
+  m_refPreds.insert(std::make_pair(sk, pred));
   checkInvariants();
 }
 
@@ -76,23 +85,27 @@ void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
  *    non-fallthrough instructions mid-block and no control flow (not
  *    counting calls as control flow).
  *
- * 2. The type prediction list is ordered by increasing SrcKey.
+ * 2. Each SrcKey in m_typePreds, m_byRefs, and m_refPreds is within the bounds
+ *    of the block.
  *
- * 3. Each prediction in the type prediction list is inside the range
- *    of this block.
+ * 3. Each local id referred to in the type prediction list is valid.
  *
- * 4. Each local id referred to in the type prediction list is valid.
- *
- * 5. (Unchecked) each stack offset in the type prediction list is
+ * 4. (Unchecked) each stack offset in the type prediction list is
  *    valid.
  */
 void RegionDesc::Block::checkInvariants() const {
-  smart::vector<SrcKey> keysInRange;
-  keysInRange.reserve(length());
-  keysInRange.push_back(start());
+  if (!debug || length() == 0) return;
+
+  smart::set<SrcKey> keysInRange;
+  auto firstKey = [&] { return *keysInRange.begin(); };
+  auto lastKey = [&] {
+    assert(!keysInRange.empty());
+    return *--keysInRange.end();
+  };
+  keysInRange.insert(start());
   for (int i = 1; i < length(); ++i) {
     if (i != length() - 1) {
-      auto const pc = unit()->at(keysInRange.back().offset());
+      auto const pc = unit()->at(lastKey().offset());
       if (instrFlags(toOp(*pc)) & TF) {
         FTRACE(1, "Bad block: {}\n", show(*this));
         assert(!"Block may not contain non-fallthrough instruction unless "
@@ -104,20 +117,20 @@ void RegionDesc::Block::checkInvariants() const {
                 "they are last");
       }
     }
-    keysInRange.push_back(keysInRange.back().advanced(unit()));
+    keysInRange.insert(lastKey().advanced(unit()));
   }
   assert(keysInRange.size() == length());
 
-  assert(std::is_sorted(m_predTypes.begin(), m_predTypes.end(),
-                        typePredListCmp));
-  assert(std::is_sorted(keysInRange.begin(), keysInRange.end()));
-
-  auto rangeIt = keysInRange.begin();
-  for (auto& tpred : m_predTypes) {
-    while (rangeIt != keysInRange.end() && *rangeIt < tpred.first) ++rangeIt;
-    assert(rangeIt != keysInRange.end() && tpred.first == *rangeIt &&
-           "RegionDesc::Block contained an out-of-range prediction");
-
+  auto rangeCheck = [&](const char* type, SrcKey sk) {
+    if (!keysInRange.count(sk)) {
+      std::cerr << folly::format("{} at {} outside range [{}, {}]\n",
+                                type, show(sk),
+                                 show(firstKey()), show(lastKey()));
+      assert(!"Region::Block contained out-of-range metadata");
+    }
+  };
+  for (auto& tpred : m_typePreds) {
+    rangeCheck("type prediction", tpred.first);
     auto& loc = tpred.second.location;
     switch (loc.tag()) {
     case Location::Tag::Local: assert(loc.localId() < m_func->numLocals());
@@ -126,37 +139,45 @@ void RegionDesc::Block::checkInvariants() const {
                                break;
     }
   }
-}
 
-bool RegionDesc::Block::typePredListCmp(TypePredList::const_reference a,
-                                        TypePredList::const_reference b) {
-  return a.first < b.first;
+  for (auto& byRef : m_byRefs) {
+    rangeCheck("parameter reference flag", byRef.first);
+  }
+  for (auto& refPred : m_refPreds) {
+    rangeCheck("reffiness prediction", refPred.first);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
 RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
-  if (tlet.m_refDeps.size()) {
-    // We don't support reffiness guards yet.
-    return nullptr;
-  }
+  typedef Transl::NormalizedInstruction NI;
+  typedef RegionDesc::Block Block;
 
   auto region = smart::make_unique<RegionDesc>();
   SrcKey sk(tlet.m_sk);
   assert(sk == tlet.m_instrStream.first->source);
   auto unit = tlet.m_instrStream.first->unit();
 
-  // Boundaries for the current RegionDesc::Block, which is created when we
-  // finish the Tracelet or start a new basic block.
-  SrcKey startSk(sk);
-  int numInstrs = 0;
+  Block* curBlock;
+  auto newBlock = [&] {
+    region->blocks.push_back(
+      smart::make_unique<Block>(tlet.m_func, sk.offset(), 0));
+    curBlock = region->blocks.back().get();
+  };
+  newBlock();
 
   for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
     assert(sk == ni->source);
     assert(ni->unit() == unit);
 
-    ++numInstrs;
+    curBlock->addInstruction();
+    if (!ni->noOp && isFPassStar(ni->op())) {
+      curBlock->setParamByRef(
+        sk, ni->preppedByRef ? RegionDesc::ParamByRef::Yes
+                             : RegionDesc::ParamByRef::No);
+    }
     if (ni->op() == OpJmp && ni->next) {
       // A Jmp that isn't the final instruction in a Tracelet means we traced
       // through a forward jump in analyze. Update sk to point to the next NI
@@ -165,22 +186,14 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
       assert(dest > sk.offset()); // We only trace for forward Jmps for now.
       sk.setOffset(dest);
 
-      // The Jmp terminates this block, so append it and start a new one.
-      region->blocks.push_back(
-        smart::make_unique<RegionDesc::Block>(
-          tlet.m_func, startSk.offset(), numInstrs));
-      numInstrs = 0;
-      startSk = sk;
+      // The Jmp terminates this block.
+      newBlock();
     } else {
       sk.advance(unit);
     }
   }
 
-  // Append the final block. This will be the only block for Tracelets that
-  // didn't include a Jmp.
-  region->blocks.push_back(
-    smart::make_unique<RegionDesc::Block>(
-      tlet.m_func, startSk.offset(), numInstrs));
+  auto& frontBlock = *region->blocks.front();
 
   // Add tracelet guards as predictions on the first instruction. Predictions
   // and known types from static analysis will be applied by
@@ -192,7 +205,7 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
     typedef RegionDesc R;
     auto addPred = [&](const R::Location& loc) {
       auto type = Type::fromRuntimeType(dep.second->rtt);
-      region->blocks.front()->addPredicted(tlet.m_sk, {loc, type});
+      frontBlock.addPredicted(tlet.m_sk, {loc, type});
     };
 
     switch (dep.first.space) {
@@ -206,6 +219,14 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
 
       default: not_reached();
     }
+  }
+
+  // Add reffiness dependencies as predictions on the first instruction.
+  for (auto const& dep : tlet.m_refDeps.m_arMap) {
+    RegionDesc::ReffinessPred pred{dep.second.m_mask,
+                                   dep.second.m_vals,
+                                   dep.first};
+    frontBlock.addReffinessPred(tlet.m_sk, pred);
   }
 
   FTRACE(2, "Converted Tracelet:\n{}\nInto RegionDesc:\n{}\n",
@@ -283,6 +304,23 @@ std::string show(RegionDesc::TypePred ta) {
   ).str();
 }
 
+std::string show(const RegionDesc::ReffinessPred& pred) {
+  std::ostringstream out;
+  out << "offset: " << pred.arSpOffset << " mask: ";
+  for (auto const bit : pred.mask) out << (bit ? '1' : '0');
+  out << " vals: ";
+  for (auto const bit : pred.vals) out << (bit ? '1' : '0');
+  return out.str();
+}
+
+std::string show(RegionDesc::ParamByRef byRef) {
+  switch (byRef) {
+    case RegionDesc::ParamByRef::Yes: return "by value";
+    case RegionDesc::ParamByRef::No:  return "by reference";
+  }
+  not_reached();
+}
+
 std::string show(RegionContext::LiveType ta) {
   return folly::format(
     "{} :: {}",
@@ -308,29 +346,34 @@ std::string show(const RegionDesc::Block& b) {
     &ret
   );
 
-  auto const& tpRange = b.typePreds();
-  auto tpIter         = begin(tpRange);
+  auto typePreds = makeMapWalker(b.typePreds());
+  auto byRefs    = makeMapWalker(b.paramByRefs());
+  auto refPreds  = makeMapWalker(b.reffinessPreds());
 
   auto skIter = b.start();
   for (int i = 0; i < b.length(); ++i) {
-    while (tpIter != end(tpRange) && tpIter->first < skIter) {
-      ++tpIter;
+    while (typePreds.hasNext(skIter)) {
+      folly::toAppend("  predict: ", show(typePreds.next()), "\n", &ret);
     }
-    while (tpIter != end(tpRange) && tpIter->first == skIter) {
-      folly::toAppend("  predict: ", show(tpIter->second), "\n", &ret);
-      ++tpIter;
+    while (refPreds.hasNext(skIter)) {
+      folly::toAppend("  predict reffiness: ", show(refPreds.next()), "\n",
+                      &ret);
+    }
+    std::string byRef;
+    if (byRefs.hasNext(skIter)) {
+      byRef = folly::format(" (passed {})", show(byRefs.next())).str();
     }
     folly::toAppend(
       "    ",
       skIter.offset(),
       "  ",
       instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
-      '\n',
+      byRef,
+      "\n",
       &ret
     );
     skIter.advance(b.unit());
   }
-
   return ret;
 }
 

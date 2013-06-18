@@ -393,7 +393,7 @@ Translator::translateDefCns(const NormalizedInstruction& i) {
 
 void
 Translator::translateClsCnsD(const NormalizedInstruction& i) {
-  HHIR_EMIT(ClsCnsD, (i.imm[0].u_SA), (i.imm[1].u_SA));
+  HHIR_EMIT(ClsCnsD, (i.imm[0].u_SA), (i.imm[1].u_SA), i.outPred);
 }
 
 void

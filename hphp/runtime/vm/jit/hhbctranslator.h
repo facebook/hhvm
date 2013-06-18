@@ -280,7 +280,7 @@ struct HhbcTranslator {
                   const Func* callee);
   void emitFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault,
                         int32_t funcId);
-  void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId);
+  void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);
   void emitClsCns(int32_t cnsNameStrId);
   void emitAKExists();
   void emitAGetC(const StringData* clsName);

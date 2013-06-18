@@ -440,36 +440,33 @@ bool HphpArray::IsVectorData(const ArrayData* ad) {
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
-static bool hitStringKey(const HphpArray::Elm* e, const StringData* s,
+static bool hitStringKey(const HphpArray::Elm& e, const StringData* s,
                          int32_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
   // hash table entry. HphpArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!HphpArray::isTombstone(e->data.m_type));
+  assert(!HphpArray::isTombstone(e.data.m_type));
 
-  if (e->hash() != hash) {
-    return false;
-  }
-  if (e->key == s) {
-    return true;
-  }
-  const char* data = e->key->data();
-  const char* sdata = s->data();
-  int slen = s->size();
-  return data == sdata || ((e->key->size() == slen)
-                          && (memcmp(data, sdata, slen) == 0));
+  if (hash != e.hash()) return false;
+  auto* s2 = e.key;
+  if (s2 == s) return true;
+  const char* data = s->data();
+  const char* data2 = s2->data();
+  if (data2 == data) return true;
+  int len = s->size();
+  return len == s2->size() && !memcmp(data, data2, len);
 }
 
-static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
+static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {
   // hitIntKey() should only be called on an Elm that is referenced by a
   // hash table entry. HphpArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!HphpArray::isTombstone(e->data.m_type));
-  return e->ikey == ki && e->hasIntKey();
+  assert(!HphpArray::isTombstone(e.data.m_type));
+  return e.ikey == ki && e.hasIntKey();
 }
 
 // Quadratic probe is:
@@ -480,54 +477,60 @@ static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
 // 2, this guarantees a probe sequence of length tableSize that probes all
 // table elements exactly once.
 
-#define FIND_BODY(h0, hit) \
-  size_t tableMask = m_tableMask; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Elm* elms = m_data; \
-  ssize_t pos = m_hash[probeIndex]; \
-  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
-    return pos; \
-  } \
-  /* Quadratic probe. */ \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    pos = m_hash[probeIndex]; \
-    if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
-      return pos; \
-    } \
+template <class Hit> inline ALWAYS_INLINE
+HphpArray::ElmInd HphpArray::findBody(size_t h0, Hit hit) const {
+  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto.  Test carefully.
+  size_t tableMask = m_tableMask;
+  size_t probeIndex = h0 & tableMask;
+  auto* elms = m_data;
+  auto* hashtable = m_hash;
+  ssize_t pos = hashtable[probeIndex];
+  if ((validElmInd(pos) && hit(elms[pos])) || pos == ElmIndEmpty) {
+    return pos;
   }
+  for (size_t i = 1;; ++i) {
+    assert(i <= tableMask);
+    probeIndex = (probeIndex + i) & tableMask;
+    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
+    pos = hashtable[probeIndex];
+    if ((validElmInd(pos) && hit(elms[pos])) || pos == ElmIndEmpty) {
+      return pos;
+    }
+  }
+}
 
 NEVER_INLINE
 ssize_t HphpArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isVector());
-  if (uint64_t(ki) < m_size) {
+  if (size_t(ki) < m_used) {
     // Try to get at it without dirtying a data cache line.
-    Elm* e = m_data + uint64_t(ki);
-    if (!isTombstone(e->data.m_type) && hitIntKey(e, ki)) {
+    auto& e = m_data[ki];
+    if (!isTombstone(e.data.m_type) && hitIntKey(e, ki)) {
       Stats::inc(Stats::HA_FindIntFast);
-      assert([&] {
-          // Our results had better match the other path
-          FIND_BODY(ki, hitIntKey(&elms[pos], ki));
-      }() == ki);
+      // Our results had better match the other path
+      assert(ki == findBody(ki, [ki] (const Elm& e) {
+        return hitIntKey(e, ki);
+      }));
       return ki;
     }
   }
   Stats::inc(Stats::HA_FindIntSlow);
-  FIND_BODY(ki, hitIntKey(&elms[pos], ki));
+  return findBody(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
 }
 
 NEVER_INLINE
-ssize_t HphpArray::find(const StringData* s,
-                                   strhash_t prehash) const {
+ssize_t HphpArray::find(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isVector());
   int32_t h = STRING_HASH(prehash);
-  FIND_BODY(prehash, hitStringKey(&elms[pos], s, h));
+  return findBody(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
 }
-#undef FIND_BODY
 
 NEVER_INLINE
 HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
@@ -535,45 +538,50 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   return ei;
 }
 
-#define FIND_FOR_INSERT_BODY(h0, hit)                                   \
-  ElmInd* ret = nullptr;                                                \
-  size_t tableMask = m_tableMask;                                       \
-  size_t probeIndex = size_t(h0) & tableMask;                           \
-  Elm* elms = m_data;                                                   \
-  ElmInd* ei = &m_hash[probeIndex];                                     \
-  ssize_t pos = *ei;                                                    \
-  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) {       \
-    return ei;                                                          \
-  }                                                                     \
-  if (!validElmInd(pos)) ret = ei;                                      \
-  /* Quadratic probe. */                                                \
-  for (size_t i = 1;; ++i) {                                            \
-    assert(i <= tableMask);                                             \
-    probeIndex = (probeIndex + i) & tableMask;                          \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);  \
-    ei = &m_hash[probeIndex];                                           \
-    pos = ssize_t(*ei);                                                 \
-    if (validElmInd(pos)) {                                             \
-      if (hit) {                                                        \
-        assert(m_hLoad <= computeMaxElms(tableMask));                   \
-        return ei;                                                      \
-      }                                                                 \
-    } else {                                                            \
-      if (!ret) ret = ei;                                               \
-      if (pos == ElmIndEmpty) {                                         \
-        assert(m_hLoad <= computeMaxElms(tableMask));                   \
-        return LIKELY(i <= 100) ||                                      \
-          LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ?           \
-          ret : warnUnbalanced(i, ret);                                 \
-      }                                                                 \
-    }                                                                   \
+template <class Hit> inline ALWAYS_INLINE
+HphpArray::ElmInd* HphpArray::findForInsertBody(size_t h0, Hit hit) const {
+  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto.  Test carefully.
+  assert(m_hLoad <= computeMaxElms(m_tableMask));
+  size_t tableMask = m_tableMask;
+  auto* elms = m_data;
+  auto* hashtable = m_hash;
+  ElmInd* ret = nullptr;
+  size_t probeIndex = h0 & tableMask;
+  auto* ei = &hashtable[probeIndex];
+  ssize_t pos = *ei;
+  if ((validElmInd(pos) && hit(elms[pos])) || pos == ElmIndEmpty) {
+    return ei;
   }
+  if (!validElmInd(pos)) ret = ei;
+  for (size_t i = 1;; ++i) {
+    assert(i <= tableMask);
+    probeIndex = (probeIndex + i) & tableMask;
+    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
+    ei = &hashtable[probeIndex];
+    pos = *ei;
+    if (validElmInd(pos)) {
+      if (hit(elms[pos])) {
+        return ei;
+      }
+    } else {
+      if (!ret) ret = ei;
+      if (pos == ElmIndEmpty) {
+        return LIKELY(i <= 100) ||
+          LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ?
+          ret : warnUnbalanced(i, ret);
+      }
+    }
+  }
+}
 
 NEVER_INLINE
 HphpArray::ElmInd* HphpArray::findForInsert(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isVector());
-  FIND_FOR_INSERT_BODY(ki, hitIntKey(&elms[pos], ki));
+  return findForInsertBody(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
 }
 
 NEVER_INLINE
@@ -582,9 +590,10 @@ HphpArray::ElmInd* HphpArray::findForInsert(const StringData* s,
   // all vector methods should work w/out touching the hashtable
   assert(!isVector());
   int32_t h = STRING_HASH(prehash);
-  FIND_FOR_INSERT_BODY(prehash, hitStringKey(&elms[pos], s, h));
+  return findForInsertBody(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
 }
-#undef FIND_FOR_INSERT_BODY
 
 NEVER_INLINE HphpArray::ElmInd*
 HphpArray::findForNewInsertLoop(size_t tableMask, size_t h0) const {

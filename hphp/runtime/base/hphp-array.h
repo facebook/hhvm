@@ -394,6 +394,13 @@ private:
   bool checkInvariants() const;
 
   static void getElmKey(const Elm& e, TypedValue* out);
+
+  template <class Hit>
+  ElmInd findBody(size_t h0, Hit) const;
+
+  template <class Hit>
+  ElmInd* findForInsertBody(size_t h0, Hit) const;
+
   ssize_t find(int64_t ki) const;
   ssize_t find(const StringData* s, strhash_t prehash) const;
   ElmInd* findForInsert(int64_t ki) const;

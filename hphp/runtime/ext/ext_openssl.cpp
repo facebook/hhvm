@@ -42,6 +42,13 @@ namespace HPHP {
 #define OPENSSL_ALGO_MD2        4
 #endif
 #define OPENSSL_ALGO_DSS1       5
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+#define OPENSSL_ALGO_SHA224     6
+#define OPENSSL_ALGO_SHA256     7
+#define OPENSSL_ALGO_SHA384     8
+#define OPENSSL_ALGO_SHA512     9
+#define OPENSSL_ALGO_RMD160     10
+#endif
 
 enum php_openssl_key_type {
   OPENSSL_KEYTYPE_RSA,
@@ -1944,6 +1951,13 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   case OPENSSL_ALGO_MD2:  return EVP_md2();
 #endif
   case OPENSSL_ALGO_DSS1: return EVP_dss1();
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+  case OPENSSL_ALGO_SHA224: return EVP_sha224();
+  case OPENSSL_ALGO_SHA256: return EVP_sha256();
+  case OPENSSL_ALGO_SHA384: return EVP_sha384();
+  case OPENSSL_ALGO_SHA512: return EVP_sha512();
+  case OPENSSL_ALGO_RMD160: return EVP_ripemd160();
+#endif
   }
   return NULL;
 }

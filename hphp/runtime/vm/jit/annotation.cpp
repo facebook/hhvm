@@ -42,14 +42,10 @@ struct CallRecord {
 
 typedef hphp_hash_map<SrcKey,CallRecord,SrcKey::Hasher> CallDB;
 static CallDB s_callDB;
-/* record the max number of args to enable invalidation */
-static int s_maxNumArgs;
-int getMaxEncodedArgs() { return s_maxNumArgs; }
 
-const StringData*
+static const StringData*
 encodeCallAndArgs(const StringData* name, int numArgs) {
   char numArgsBuf[16];
-  if (numArgs > s_maxNumArgs) s_maxNumArgs = numArgs;
   snprintf(numArgsBuf, 15, "@%d@", numArgs);
   String s = String(numArgsBuf) + String(name->data());
   return StringData::GetStaticString(s.get());

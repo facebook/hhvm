@@ -26,9 +26,7 @@ namespace Transl {
  * per-instruction state that persists across tracelets.
  */
 void annotate(NormalizedInstruction* instr);
-const StringData* encodeCallAndArgs(const StringData *name, int numArgs);
 const StringData* fcallToFuncName(const NormalizedInstruction* fcall);
-int getMaxEncodedArgs();
 
 } }
 

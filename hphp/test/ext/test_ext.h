@@ -22,7 +22,6 @@
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"
-#include "hphp/test/ext/test_ext_process.h"
 #include "hphp/test/ext/test_ext_server.h"
 
 #endif // incl_EXT_LIST_TEST_EXT_H_

@@ -38,7 +38,7 @@ class c_Continuation : public ExtObjectData {
   virtual void sweep();
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
-    DELETEOBJSZ((char*)(this_->m_arPtr + 1) - (char*)p)(this_);
+    DELETEOBJSZ(this_->getObjectSize())(this_);
   }
 
   explicit c_Continuation(Class* cls = c_Continuation::s_cls);
@@ -71,21 +71,30 @@ public:
   String t_getcalledclass();
   Variant t___clone();
 
-  static c_Continuation* alloc(const Func* origFunc, int nLocals, int nIters) {
+  static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);
+    assert(genFunc);
 
-    size_t arOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters +
-                      sizeof(TypedValue) * nLocals;
-    arOffset += sizeof(TypedValue) - 1;
-    arOffset &= ~(sizeof(TypedValue) - 1);
-    c_Continuation* cont =
-      (c_Continuation*)ALLOCOBJSZ(arOffset + sizeof(ActRec));
+    size_t arOffset = getArOffset(genFunc);
+    size_t objectSize = arOffset + sizeof(ActRec);
+    c_Continuation* cont = (c_Continuation*)ALLOCOBJSZ(objectSize);
     new ((void *)cont) c_Continuation();
     cont->m_origFunc = const_cast<Func*>(origFunc);
     cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
            arOffset - sizeof(c_Continuation));
+    assert(cont->getObjectSize() == objectSize);
     return cont;
+  }
+
+  static size_t getArOffset(const Func* genFunc) {
+    size_t arOffset =
+      sizeof(c_Continuation) +
+      sizeof(Iter) * genFunc->numIterators() +
+      sizeof(TypedValue) * genFunc->numLocals();
+    arOffset += sizeof(TypedValue) - 1;
+    arOffset &= ~(sizeof(TypedValue) - 1);
+    return arOffset;
   }
 
 protected: virtual bool php_sleep(Variant &ret);
@@ -112,6 +121,11 @@ public:
       throw_exception(
         Object(SystemLib::AllocExceptionObject("Need to call next() first")));
     }
+  }
+
+private:
+  size_t getObjectSize() {
+    return (char*)(m_arPtr + 1) - (char*)this;
   }
 
 public:

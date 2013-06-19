@@ -6628,11 +6628,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCl(PC& pc) {
 
 static inline c_Continuation* createCont(const Func* origFunc,
                                          const Func* genFunc) {
-  auto const cont = c_Continuation::alloc(
-    origFunc,
-    genFunc->numLocals(),
-    genFunc->numIterators()
-  );
+  auto const cont = c_Continuation::alloc(origFunc, genFunc);
   cont->incRefCount();
   cont->setNoDestruct();
 

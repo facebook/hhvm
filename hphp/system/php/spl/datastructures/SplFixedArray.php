@@ -103,15 +103,15 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable {
    * @return     mixed   TRUE if the requested index exists, otherwise FALSE
    */
   public function offsetExists($index) {
-    if (!is_int($index) && !is_numeric($index)) {
+    if (!is_numeric($index)) {
       throw new RuntimeException("Index invalid or out of range");
     }
     return $index < count($this->data);
   }
 
   private function validateIndex($index) {
-    if ($index >= count($this->data) || $index < 0 ||
-        (!is_int($index) && !is_numeric($index))) {
+    if (!is_numeric($index) ||
+        $index >= count($this->data) || $index < 0) {
       throw new RuntimeException("Index invalid or out of range");
     }
   }
@@ -189,7 +189,7 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable {
    * @return     mixed   No value is returned.
    */
   public function setSize($size) {
-    if (!is_int($size)) {
+    if (!is_numeric($size)) {
       return;
     }
     if ($size < 0) {
@@ -244,7 +244,7 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable {
     $fixed_array = new self;
     if ($save_indexes) {
       foreach ($array as $key => $value) {
-        if (!is_int($key) || $key < 0) {
+        if (!is_numeric($key) || $key < 0) {
           throw new Exception('array must contain only positive integer keys');
         }
         if ($key >= $fixed_array->count()) {

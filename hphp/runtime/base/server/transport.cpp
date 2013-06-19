@@ -596,7 +596,8 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64_t expire /* = 0 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Transport::prepareHeaders(bool compressed, const void *data, int size) {
+void Transport::prepareHeaders(bool compressed, bool chunked,
+    const String &response, const String& orig_response) {
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     const vector<string> &values = iter->second;
@@ -613,11 +614,29 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
   if (compressed) {
     addHeaderImpl("Content-Encoding", "gzip");
     removeHeaderImpl("Content-Length");
-    if (m_responseHeaders.find("Content-MD5") != m_responseHeaders.end()) {
-      String response((const char *)data, size, AttachLiteral);
+    // Remove the Content-MD5 header coming from PHP if we compressed the data,
+    // as the checksum is going to be invalid.
+    auto it = m_responseHeaders.find("Content-MD5");
+    if (it != m_responseHeaders.end()) {
       removeHeaderImpl("Content-MD5");
-      addHeaderImpl("Content-MD5", StringUtil::Base64Encode(
-                      StringUtil::MD5(response, true)).c_str());
+      // Re-add it back unless this is a chunked response. We'd have to buffer
+      // the response completely to compute the MD5, which defeats the purpose
+      // of chunking.
+      if (chunked) {
+        raise_warning("Cannot use chunked HTTP response and Content-MD5 header "
+          "at the same time. Dropping Content-MD5.");
+      } else {
+        string cur_md5 = it->second[0];
+        String expected_md5 = StringUtil::Base64Encode(StringUtil::MD5(
+          orig_response, true));
+        // Can never trust these PHP people...
+        if (expected_md5.c_str() != cur_md5) {
+          raise_warning("Content-MD5 mismatch. Expected: %s, Got: %s",
+            expected_md5.c_str(), cur_md5.c_str());
+        }
+        addHeaderImpl("Content-MD5", StringUtil::Base64Encode(StringUtil::MD5(
+          response, true)).c_str());
+      }
     }
   }
 
@@ -756,7 +775,8 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
 
   // HTTP header handling
   if (!m_headerSent) {
-    prepareHeaders(compressed, data, size);
+    String orig_response((const char *)data, size, AttachLiteral);
+    prepareHeaders(compressed, chunked, response, orig_response);
     m_headerSent = true;
   }
 

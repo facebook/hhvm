@@ -422,7 +422,8 @@ protected:
   bool moveUploadedFileHelper(CStrRef filename, CStrRef destination);
 
 private:
-  void prepareHeaders(bool compressed, const void *data, int size);
+  void prepareHeaders(bool compressed, bool chunked, const String &response,
+    const String& orig_response);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -814,7 +814,10 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
       nvpair += iter.first().toString();
       nvpair += '=';
       nvpair += iter.second().toString();
-      envs.push_back(nvpair.detach().c_str());
+      string tmp = nvpair.detach().c_str();
+      if (tmp.find('\n') == string::npos) {
+        envs.push_back(tmp);
+      }
     }
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,

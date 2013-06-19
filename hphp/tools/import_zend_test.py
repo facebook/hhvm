@@ -153,6 +153,9 @@ bad_tests = (
     # line number is inconsistent on stack overflow
     '/zend/bug41633_3.php',
 
+    # doubles aren't serialized properly in the repo
+    '/ext-filter/049.php',
+
     # broken in Jenkins
     '/ext-standard-array/array_diff_assoc_variation6.php',
     '/zend/bug35239.php',

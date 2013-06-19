@@ -815,7 +815,8 @@ static int execute_program_impl(int argc, char **argv) {
      "start admin listener at specified port")
     ("debug-config", value<string>(&po.debugger_options.configFName),
       "load specified debugger config file")
-    ("debug-host,h", value<string>(&po.debugger_options.host),
+    ("debug-host,h",
+     value<string>(&po.debugger_options.host)->implicit_value("localhost"),
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
@@ -1070,6 +1071,7 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       RuntimeOption::EnableDebugger = true;
+      po.debugger_options.fileName = file;
       Eval::DebuggerProxyPtr localProxy =
         Eval::Debugger::StartClient(po.debugger_options);
       if (!localProxy) {
@@ -1090,7 +1092,7 @@ static int execute_program_impl(int argc, char **argv) {
           // go unused until we finally stop it when the user quits the
           // debugger.
           g_context->setSandboxId(localProxy->getDummyInfo().id());
-          Eval::Debugger::DebuggerSession(po.debugger_options, file, restart);
+          Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());
         } catch (const Eval::DebuggerRestartException &e) {

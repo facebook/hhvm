@@ -70,7 +70,7 @@ public:
 
   // Debugger session to be called in a loop
   static void DebuggerSession(const DebuggerClientOptions& options,
-                              const std::string& file, bool restart);
+                              bool restart);
 
   // Called from differnt time point of execution thread.
   static void InterruptSessionStarted(const char *file,

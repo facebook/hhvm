@@ -129,7 +129,7 @@ void Debugger::CleanupDummySandboxThreads() {
 }
 
 void Debugger::DebuggerSession(const DebuggerClientOptions& options,
-                               const std::string& file, bool restart) {
+                                bool restart) {
   TRACE(2, "Debugger::DebuggerSession: restart=%d\n", restart);
   if (options.extension.empty()) {
     // even if it's empty, still need to call for warmup
@@ -141,14 +141,14 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
   ti->m_reqInjectionData.setDebugger(true);
   if (!restart) {
     DebuggerDummyEnv dde;
-    Debugger::InterruptSessionStarted(file.c_str());
+    Debugger::InterruptSessionStarted(options.fileName.c_str());
   }
-  if (!file.empty()) {
-    hphp_invoke_simple(file);
+  if (!options.fileName.empty()) {
+    hphp_invoke_simple(options.fileName);
   }
   {
     DebuggerDummyEnv dde;
-    Debugger::InterruptSessionEnded(file.c_str());
+    Debugger::InterruptSessionEnded(options.fileName.c_str());
   }
 }
 

@@ -638,6 +638,12 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 
   if (!options.host.empty()) {
     connectRemote(options.host, options.port);
+  } else {
+    if (options.fileName.empty()) {
+      help("Note: no server specified, debugging local scripts only.");
+      help("If you want to connect to a server, launch with \"-h\" or use:");
+      help("  [m]achine [c]onnect <servername>\n");
+    }
   }
 }
 

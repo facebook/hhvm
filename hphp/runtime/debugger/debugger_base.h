@@ -35,6 +35,7 @@ struct DebuggerClientOptions {
   std::string user;
   bool apiMode;
   std::string configFName;
+  std::string fileName;
 
   DebuggerClientOptions() : port(-1), apiMode(false) {}
 };

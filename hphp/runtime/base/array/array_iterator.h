@@ -162,7 +162,65 @@ class ArrayIter {
     return (!hasArrayData() && !getObject()->isCollection());
   }
 
- public:
+  //
+  // Specialized iterator for collections. Used via JIT
+  //
+
+  /**
+   * Fixed is used for collections that are immutable in size.
+   * Templatized Fixed functions expect the collection to implement
+   * size() and get().
+   * The key is the current position of the iterator.
+   */
+  enum class Fixed {};
+  /**
+   * Versionable is used for collections that are mutable and throw if
+   * an insertion or deletion is made to the collection while iterating.
+   * Templatized Versionable functions expect the collection to implement
+   * size(), getVersion() and get().
+   * The key is the current position of the iterator.
+   */
+  enum class Versionable {};
+  /**
+   * VersionableSparse is used for collections that are mutable and throw if
+   * an insertion or deletion is made to the collection while iterating.
+   * Moreover the collection elements are accessed via an iterator.
+   * Templatized VersionableSparse functions expect the collection to implement
+   * getVersion(), iter_begin(), iter_next(), iter_value() and iter_key().
+   */
+  enum class VersionableSparse {};
+
+  // Constructors
+  template<class Tuplish>
+  ArrayIter(Tuplish* coll, Fixed);
+  template<class Vectorish>
+  ArrayIter(Vectorish* coll, Versionable);
+  template<class Mappish>
+  ArrayIter(Mappish* coll, VersionableSparse);
+
+  // iterator "next", "value", "key" functions
+  template<class Tuplish>
+  bool iterNext(Fixed);
+  template<class Vectorish>
+  bool iterNext(Versionable);
+  template<class Mappish>
+  bool iterNext(VersionableSparse);
+
+  template<class Tuplish>
+  Variant iterValue(Fixed);
+  template<class Vectorish>
+  Variant iterValue(Versionable);
+  template<class Mappish>
+  Variant iterValue(VersionableSparse);
+
+  template<class Tuplish>
+  Variant iterKey(Fixed);
+  template<class Vectorish>
+  Variant iterKey(Versionable);
+  template<class Mappish>
+  Variant iterKey(VersionableSparse);
+
+  public:
   const ArrayData* getArrayData() {
     assert(hasArrayData());
     return m_data;
@@ -180,7 +238,12 @@ class ArrayIter {
     m_itype = iterType;
   }
 
- private:
+  ObjectData* getObject() {
+    assert(!hasArrayData());
+    return (ObjectData*)((intptr_t)m_obj & ~1);
+  }
+
+  private:
   c_Vector* getVector() {
     assert(hasCollection() && getCollectionType() == Collection::VectorType);
     return (c_Vector*)((intptr_t)m_obj & ~1);
@@ -200,10 +263,6 @@ class ArrayIter {
   c_Pair* getPair() {
     assert(hasCollection() && getCollectionType() == Collection::PairType);
     return (c_Pair*)((intptr_t)m_obj & ~1);
-  }
-  ObjectData* getObject() {
-    assert(!hasArrayData());
-    return (ObjectData*)((intptr_t)m_obj & ~1);
   }
   Collection::Type getCollectionType() {
     ObjectData* obj = getObject();

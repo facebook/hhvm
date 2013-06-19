@@ -132,10 +132,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return ((uint64_t)key < (uint64_t)m_size);
   }
   void reserve(int64_t sz);
-  int getVersion() {
+  int getVersion() const {
     return m_version;
   }
-  int64_t size() {
+  int64_t size() const {
     return m_size;
   }
 
@@ -319,8 +319,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
       adjustCapacityImpl(sz);
     }
   }
-  int getVersion() {
+  int getVersion() const {
     return m_version;
+  }
+  int64_t size() const {
+    return m_size;
   }
   Array toArrayImpl() const;
 
@@ -618,8 +621,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
       adjustCapacityImpl(sz);
     }
   }
-  int getVersion() {
+  int getVersion() const {
     return m_version;
+  }
+  int64_t size() const {
+    return m_size;
   }
   Array toArrayImpl() const;
 
@@ -844,8 +850,11 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
       adjustCapacityImpl(sz);
     }
   }
-  int getVersion() {
+  int getVersion() const {
     return m_version;
+  }
+  int64_t size() const {
+    return m_size;
   }
   Array toArrayImpl() const;
 
@@ -958,6 +967,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   const TypedValue* iter_value(ssize_t pos) const;
+  Variant iter_key(ssize_t pos) const { return uninit_null(); }
 
   static void throwBadValueType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -1089,6 +1099,9 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static bool Equals(ObjectData* obj1, ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
+  int64_t size() const {
+    return 2;
+  }
 
  private:
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;

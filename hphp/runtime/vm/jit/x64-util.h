@@ -29,13 +29,6 @@ translator_not_reached(X64Assembler &a) {
   }
 }
 
-static inline void
-translator_debug_break(X64Assembler &a) {
-  if (debug) {
-    a.  int3();
-  }
-}
-
 /*
  * TLS access: XXX we currently only support static-style TLS directly
  * linked off of FS.

@@ -50,9 +50,6 @@ class Class;
 class Instance;
 class NamedEntity;
 class PreClass;
-namespace Transl {
-class TranslatorX64;
-}
 
 typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;

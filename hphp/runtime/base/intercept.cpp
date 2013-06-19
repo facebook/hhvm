@@ -27,7 +27,6 @@
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/file_repository.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;

@@ -209,7 +209,7 @@ class SplFileObject extends SplFileInfo
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  public function flock($operation, &$wouldblock) {
+  public function flock($operation, &$wouldblock = false) {
     return flock($this->rsrc, $operation, $wouldblock);
   }
 
@@ -382,7 +382,7 @@ class SplFileObject extends SplFileInfo
    * @return     mixed   Returns the number of bytes written, or NULL on
    *                     error.
    */
-  public function fwrite($str, $length) {
+  public function fwrite($str, $length = 0) {
     return fwrite($this->rsrc, $str, $length);
   }
 

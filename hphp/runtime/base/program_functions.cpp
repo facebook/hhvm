@@ -1406,11 +1406,14 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  context->requestExit();
 
+  // Run shutdown handlers. This may cause user code to run.
   if (shutdown) {
     context->onRequestShutdown();
   }
+
+  // Clean up a bunch of request state. No user code after this point.
+  context->requestExit();
   context->obProtect(false);
   context->obEndAll();
 }

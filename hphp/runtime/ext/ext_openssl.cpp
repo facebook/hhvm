@@ -1655,6 +1655,35 @@ static const StaticString s_alias("alias");
 static const StaticString s_purposes("purposes");
 static const StaticString s_extensions("extensions");
 
+static const StaticString s_rsa("rsa");
+static const StaticString s_dsa("dsa");
+static const StaticString s_dh("dh");
+
+static const StaticString s_n("n");
+static const StaticString s_e("e");
+static const StaticString s_d("d");
+static const StaticString s_p("p");
+static const StaticString s_q("q");
+static const StaticString s_g("g");
+static const StaticString s_dmp1("dmp1");
+static const StaticString s_dmq1("dmq1");
+static const StaticString s_iqmp("iqmp");
+static const StaticString s_priv_key("priv_key");
+static const StaticString s_pub_key("pub_key");
+
+static void add_bignum_as_string(Array &arr,
+                                 StaticString key,
+                                 BIGNUM *bn) {
+  if (!bn) {
+    return;
+  }
+  int num_bytes = BN_num_bytes(bn);
+  unsigned char *out = (unsigned char *)smart_malloc(num_bytes);
+  BN_bn2bin(bn, out);
+  arr.set(key, String((const char *)out, num_bytes, CopyString));
+  smart_free(out);
+}
+
 Array f_openssl_pkey_get_details(CObjRef key) {
   EVP_PKEY *pkey = key.getTyped<Key>()->m_key;
   BIO *out = BIO_new(BIO_s_mem());
@@ -1666,14 +1695,48 @@ Array f_openssl_pkey_get_details(CObjRef key) {
   ret.set(s_bits, EVP_PKEY_bits(pkey));
   ret.set(s_key, String(pbio, pbio_len, CopyString));
   long ktype = -1;
+
+  Array details;
+  RSA *rsa = pkey->pkey.rsa;
+  DSA *dsa = pkey->pkey.dsa;
+  DH *dh = pkey->pkey.dh;
   switch (EVP_PKEY_type(pkey->type)) {
   case EVP_PKEY_RSA:
-  case EVP_PKEY_RSA2:    ktype = k_OPENSSL_KEYTYPE_RSA;   break;
+  case EVP_PKEY_RSA2:
+    ktype = k_OPENSSL_KEYTYPE_RSA;
+    assert(rsa);
+    add_bignum_as_string(details, s_n, rsa->n);
+    add_bignum_as_string(details, s_e, rsa->e);
+    add_bignum_as_string(details, s_d, rsa->d);
+    add_bignum_as_string(details, s_p, rsa->p);
+    add_bignum_as_string(details, s_q, rsa->q);
+    add_bignum_as_string(details, s_dmp1, rsa->dmp1);
+    add_bignum_as_string(details, s_dmq1, rsa->dmq1);
+    add_bignum_as_string(details, s_iqmp, rsa->iqmp);
+    ret.set(s_rsa, details);
+    break;
   case EVP_PKEY_DSA:
   case EVP_PKEY_DSA2:
   case EVP_PKEY_DSA3:
-  case EVP_PKEY_DSA4:    ktype = k_OPENSSL_KEYTYPE_DSA;   break;
-  case EVP_PKEY_DH:      ktype = k_OPENSSL_KEYTYPE_DH;    break;
+  case EVP_PKEY_DSA4:
+    ktype = k_OPENSSL_KEYTYPE_DSA;
+    assert(dsa);
+    add_bignum_as_string(details, s_p, dsa->p);
+    add_bignum_as_string(details, s_q, dsa->q);
+    add_bignum_as_string(details, s_g, dsa->g);
+    add_bignum_as_string(details, s_priv_key, dsa->priv_key);
+    add_bignum_as_string(details, s_pub_key, dsa->pub_key);
+    ret.set(s_dsa, details);
+    break;
+  case EVP_PKEY_DH:
+    ktype = k_OPENSSL_KEYTYPE_DH;
+    assert(dh);
+    add_bignum_as_string(details, s_p, dh->p);
+    add_bignum_as_string(details, s_g, dh->g);
+    add_bignum_as_string(details, s_priv_key, dh->priv_key);
+    add_bignum_as_string(details, s_pub_key, dh->pub_key);
+    ret.set(s_dh, details);
+    break;
 #ifdef EVP_PKEY_EC
   case EVP_PKEY_EC:      ktype = k_OPENSSL_KEYTYPE_EC;    break;
 #endif

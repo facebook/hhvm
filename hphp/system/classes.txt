@@ -19,6 +19,7 @@ hphp/system/classes/spl/iterators/DirectoryIterator.php
 hphp/system/classes/spl/iterators/FilesystemIterator.php
 hphp/system/classes/spl/iterators/RecursiveDirectoryIterator.php
 hphp/system/classes/spl/file_handling/SplFileObject.php
+hphp/system/classes/spl/file_handling/SplTempFileObject.php
 
 hphp/system/classes/spl/interfaces/OuterIterator.php
 hphp/system/classes/spl/iterators/IteratorIterator.php
@@ -41,6 +42,7 @@ hphp/system/classes/lang/stdClass.php
 hphp/system/classes/pdo/PDOException.php
 hphp/system/classes/reflection/reflection.php
 hphp/system/classes/soap/SoapFault.php
+hphp/system/classes/spl/datastructures/SplFixedArray.php
 hphp/system/classes/spl/datastructures/SplObjectStorage.php
 hphp/system/classes/spl/datastructures/SplPriorityQueue.php
 hphp/system/classes/spl/iterators/AppendIterator.php
@@ -52,3 +54,6 @@ hphp/system/classes/spl/miscellaneous/ArrayObject.php
 hphp/system/classes_hhvm/pinitSentinel.php
 hphp/system/classes_hhvm/resource.php
 
+hphp/system/classes/spl/datastructures/SplDoublyLinkedList.php
+hphp/system/classes/spl/datastructures/SplQueue.php
+hphp/system/classes/spl/datastructures/SplStack.php

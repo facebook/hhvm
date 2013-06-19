@@ -34,3 +34,4 @@ class SplTempFileObject extends SplFileObject {
     }
   }
 }
+

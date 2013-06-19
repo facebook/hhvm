@@ -89,7 +89,7 @@ void dump_disasm(Asm& a, std::ifstream& dump) {
   close(mkstemp(outfile));
 
   std::FILE* fp = std::fopen(filename, "w");
-  std::fwrite(a.code.base, a.code.frontier - a.code.base, 1, fp);
+  std::fwrite(a.base(), a.used(), 1, fp);
   std::fclose(fp);
 
   system(str(boost::format(
@@ -292,7 +292,7 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg)) {
   std::ifstream dump;
   dump_disasm(a, dump);
   compare(opName, dump, expecteds);
-  a.code.frontier = a.code.base;
+  a.clear();
 }
 
 template<class Arg1, class Arg2>
@@ -313,7 +313,7 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2),
   std::ifstream dump;
   dump_disasm(a, dump);
   compare(opName, dump, expecteds);
-  a.code.frontier = a.code.base;
+  a.clear();
 }
 
 template<class Arg1, class Arg2>
@@ -507,7 +507,7 @@ TEST(Asm, RetImmediate) {
   a.init(10 << 24);
 
   a.ret(8);
-  ASSERT_FALSE(a.code.base[0] == kOpsizePrefix);
+  ASSERT_FALSE(a.base()[0] == kOpsizePrefix);
 }
 
 TEST(Asm, IncDecRegs) {
@@ -632,7 +632,7 @@ TEST(Asm, AluBytes) {
 #undef INSTRS
 
   // test is asymmetric.
-  a.code.frontier = a.code.base;
+  a.clear();
   a.   testb(sil, al);
   a.   testb(0xf, al);
   a.   testb(sil, rcx[0x10]);
@@ -668,7 +668,7 @@ TEST(Asm, SimpleLabelTest) {
   auto loopCallee = [] (int* counter) { ++*counter; };
 
   // Function that calls loopCallee N times.
-  auto function = reinterpret_cast<int (*)(int, int*)>(a.code.frontier);
+  auto function = reinterpret_cast<int (*)(int, int*)>(a.frontier());
   a.    push   (rbp);
   a.    movq   (rsp, rbp);
   a.    push   (r15);

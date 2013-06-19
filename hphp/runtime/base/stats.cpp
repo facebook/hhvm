@@ -55,7 +55,7 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
 
   TCA jcc = nullptr;
   if (havecc) {
-    jcc = a.code.frontier;
+    jcc = a.frontier();
     a.  jcc8  (ccNegate(cc), jcc);
   }
   a.    pushf ();
@@ -66,7 +66,8 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   a.    pop   (reg::rAsm);
   a.    popf  ();
   if (havecc) {
-    a.  patchJcc8(jcc, a.code.frontier);
+    assert(jcc);
+    a.  patchJcc8(jcc, a.frontier());
   }
 }
 

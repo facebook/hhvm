@@ -1641,7 +1641,7 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
     irEmitResolvedDeps(t.m_resolvedDeps);
     emitGuardChecks(a, sk, t.m_dependencies, t.m_refDeps, srcRec);
 
-    dumpTranslationInfo(t, a.code.frontier);
+    dumpTranslationInfo(t, a.frontier());
 
     // after guards, add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
@@ -1779,7 +1779,7 @@ void TranslatorX64::traceCodeGen() {
   finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
 
   auto* factory = m_irFactory.get();
-  recordBCInstr(OpTraceletGuard, a, a.code.frontier);
+  recordBCInstr(OpTraceletGuard, a, a.frontier());
   if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
     LifetimeInfo lifetime(factory);
     RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);

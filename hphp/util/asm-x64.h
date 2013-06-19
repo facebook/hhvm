@@ -905,14 +905,54 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-struct X64Assembler {
-  CodeBlock code;
+class X64Assembler {
+  friend struct Label;
+  friend class CodeCursor;
+  friend class UndoMarker;
 
+public:
   // must use init() later
   X64Assembler() {}
 
   void init(size_t sz);
   void init(CodeAddress start, size_t sz);
+
+  CodeAddress base() const {
+    return code.base;
+  }
+
+  CodeAddress frontier() const {
+    return code.frontier;
+  }
+
+  size_t capacity() const {
+    return code.size;
+  }
+
+  size_t used() const {
+    return frontier() - code.base;
+  }
+
+  size_t available() const {
+    return capacity() - used();
+  }
+
+  bool contains(CodeAddress addr) const {
+    return addr >= base() && addr < (base() + capacity());
+  }
+
+  bool empty() const {
+    return code.base == code.frontier;
+  }
+
+  void clear() {
+    code.frontier = code.base;
+  }
+
+  bool canEmit(size_t nBytes) const {
+    assert(capacity() >= used());
+    return nBytes < (capacity() - used());
+  }
 
   /*
    * The following section defines the main interface for emitting
@@ -2506,6 +2546,8 @@ private:
 #undef UMR
 #undef UIMR
 #undef URIP
+
+  CodeBlock code;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2579,7 +2621,7 @@ struct Label : private boost::noncopyable {
   friend void asm_label(X64Assembler& a, Label& l) {
     assert(!l.m_address && !l.m_a && "Label was already set");
     l.m_a = &a;
-    l.m_address = a.code.frontier;
+    l.m_address = a.frontier();
   }
 
 private:
@@ -2627,9 +2669,39 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 
 //////////////////////////////////////////////////////////////////////
 
-inline void emitImmReg(X64Assembler& a, Immed imm, Reg64 dest) {
-  a.emitImmReg(imm, dest);
-}
+class UndoMarker {
+  typedef X64Assembler Asm;
+  Asm& m_a;
+  CodeAddress m_oldFrontier;
+  public:
+  explicit UndoMarker(Asm& a)
+    : m_a(a)
+    , m_oldFrontier(a.frontier()) {
+    TRACE_MOD(Trace::trans, 1, "RewindTo: %p\n",
+              m_oldFrontier);
+  }
+
+  void undo() {
+    m_a.code.frontier = m_oldFrontier;
+    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_a.frontier());
+  }
+};
+
+/*
+ * RAII bookmark for scoped rewinding of frontier.
+ */
+class CodeCursor : public UndoMarker {
+  public:
+  CodeCursor(X64Assembler& a, CodeAddress newFrontier) :
+    UndoMarker(a) {
+    a.code.frontier = newFrontier;
+  }
+  ~CodeCursor() {
+    undo();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
 
 class StoreImmPatcher {
  public:
@@ -2656,7 +2728,7 @@ inline X64Assembler& asmChoose(CodeAddress addr) {
 }
 template<class... Asm>
 X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
-  if (a.code.isValidAddress(addr)) return a;
+  if (a.contains(addr)) return a;
   return asmChoose(addr, as...);
 }
 

@@ -64,10 +64,10 @@ void SrcRec::emitFallbackJump(TCA from, int cc /* = -1 */) {
 
   // emit dummy jump to be smashed via patch()
   if (cc < 0) {
-    a.jmp(a.code.frontier);
+    a.jmp(a.frontier());
   } else {
     assert(incoming.type() == IncomingBranch::Tag::JCC);
-    a.jcc((ConditionCode)cc, a.code.frontier);
+    a.jcc((ConditionCode)cc, a.frontier());
   }
 
   patch(incoming, destAddr);

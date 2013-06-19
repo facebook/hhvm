@@ -151,9 +151,8 @@ class TranslatorX64 : public Translator
    public:
     AHotSelector(TranslatorX64* tx, bool hot) :
         m_tx(tx), m_hot(hot &&
-                        tx->ahot.code.base + tx->ahot.code.size -
-                        tx->ahot.code.frontier > 8192 &&
-                        tx->a.code.base != tx->ahot.code.base) {
+                        tx->ahot.available() > 8192 &&
+                        tx->a.base() != tx->ahot.base()) {
       if (m_hot) {
         m_save = tx->a;
         tx->a = tx->ahot;
@@ -326,7 +325,7 @@ private:
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
+    return tca >= ahot.base() && tca < astubs.base() + astubs.capacity();
   }
 
   // If we were to shove every little helper function into this class
@@ -594,30 +593,6 @@ private:
   size_t m_totalSize;
 };
 
-
-/*
- * RAII bookmark for temporarily rewinding a.code.frontier.
- */
-class CodeCursor {
-  typedef X64Assembler Asm;
-  Asm& m_a;
-  TCA m_oldFrontier;
-  public:
-  CodeCursor(Asm& a, TCA newFrontier) :
-    m_a(a), m_oldFrontier(a.code.frontier) {
-      assert(TranslatorX64::canWrite());
-      m_a.code.frontier = newFrontier;
-      TRACE_MOD(Trace::trans, 1, "RewindTo: %p (from %p)\n",
-                m_a.code.frontier, m_oldFrontier);
-    }
-  ~CodeCursor() {
-    assert(TranslatorX64::canWrite());
-    m_a.code.frontier = m_oldFrontier;
-    TRACE_MOD(Trace::trans, 1, "Restore: %p\n",
-              m_a.code.frontier);
-  }
-};
-
 const size_t kTrampolinesBlockSize = 8 << 12;
 
 // minimum length in bytes of each trampoline code sequence
@@ -686,13 +661,13 @@ struct SpaceRecorder {
   const char *m_name;
   const X64Assembler m_a;
   // const X64Assembler& m_a;
-  const uint8_t *m_start;
+  size_t m_start;
   SpaceRecorder(const char* name, const X64Assembler& a) :
-      m_name(name), m_a(a), m_start(a.code.frontier)
+      m_name(name), m_a(a), m_start(a.used())
     { }
   ~SpaceRecorder() {
     if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-      ptrdiff_t diff = m_a.code.frontier - m_start;
+      auto diff = m_a.used() - m_start;
       if (diff) {
         Trace::traceRelease("TCSpace %10s %3td\n", m_name, diff);
       }

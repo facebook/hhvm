@@ -534,12 +534,12 @@ int ElfWriter::writeTextSection() {
   int section = -1;
   X64Assembler &a(TranslatorX64::Get()->getAsm());
   if ((section = newSection(
-      ".text.tracelets", a.code.size, SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
-      reinterpret_cast<uint64_t>(a.code.base))) < 0) {
+      ".text.tracelets", a.capacity(), SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
+      reinterpret_cast<uint64_t>(a.base()))) < 0) {
     logError("unable to create text section");
     return -1;
   }
-  if (!addSectionData(section, nullptr, a.code.size)) {
+  if (!addSectionData(section, nullptr, a.capacity())) {
     logError("unable to add text data");
     return -1;
   }

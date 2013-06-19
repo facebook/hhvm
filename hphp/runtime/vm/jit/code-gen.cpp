@@ -314,7 +314,7 @@ PhysReg CodeGenerator::selectScratchReg(IRInstruction* inst) {
 
 Address CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
-  auto const start = m_as.code.frontier;
+  auto const start = m_as.frontier();
   m_rScratch = selectScratchReg(inst);
   if (inst->taken() && inst->taken()->trace()->isCatch()) {
     m_state.catchTrace = inst->taken()->trace();
@@ -326,7 +326,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \
-             return m_as.code.frontier == start ? nullptr : start;
+             return m_as.frontier() == start ? nullptr : start;
   IR_OPCODES
 #undef O
 
@@ -487,8 +487,8 @@ static void emitFwdJmp(Asm& a, Block* target, CodegenState& state) {
   }
 
   // TODO(#2101926): it'd be nice to get 1-byte forward jumps here
-  a.jmp(a.code.frontier);
-  TCA immPtr = a.code.frontier - 4;
+  a.jmp(a.frontier());
+  TCA immPtr = a.frontier() - 4;
   prependPatchAddr(state, target, immPtr);
 }
 
@@ -498,8 +498,8 @@ void CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
   }
 
   // TODO(#2101926): it'd be nice to get 1-byte forward jumps here
-  a.jcc(cc, a.code.frontier);
-  TCA immPtr = a.code.frontier - 4;
+  a.jcc(cc, a.frontier());
+  TCA immPtr = a.frontier() - 4;
   prependPatchAddr(m_state, target, immPtr);
 }
 
@@ -774,7 +774,7 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
          "ReqBindJcc only makes sense outside of astubs");
 
   prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
-  auto const patchAddr = a.code.frontier;
+  auto const patchAddr = a.frontier();
   auto const jccStub =
     m_tx64->emitServiceReq(REQ_BIND_JMPCC_FIRST,
                            patchAddr,
@@ -814,7 +814,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   assert(info.afterCall);
 
-  m_tx64->registerCatchTrace(info.afterCall, m_as.code.frontier);
+  m_tx64->registerCatchTrace(info.afterCall, m_as.frontier());
 
   Stats::emitInc(m_as, Stats::TC_CatchTrace);
 
@@ -1146,7 +1146,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
   if (m_state.catchTrace) {
     auto& info = m_state.catches[m_state.catchTrace->front()];
     assert(!info.afterCall);
-    info.afterCall = a.code.frontier;
+    info.afterCall = a.frontier();
     info.savedRegs = toSave;
     info.rspOffset = regSaver.rspAdjustment();
   }
@@ -1833,7 +1833,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
     auto const srcReg = m_regs[src].reg();
     if (src->isA(Type::PtrToGen)) {
       emitTestTVType(m_as, KindOfObject, srcReg[TVOFF(m_type)]);
-      TCA toPatch = m_as.code.frontier;
+      TCA toPatch = m_as.frontier();
       m_as.   jne8(toPatch);  // 1
 
       // Get the ObjectData*
@@ -1841,7 +1841,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
       m_as.   cmpq(SystemLib::s_resourceClass,
                    m_rScratch[ObjectData::getVMClassOffset()]);
       // 1:
-      m_as.patchJcc8(toPatch, m_as.code.frontier);
+      m_as.patchJcc8(toPatch, m_as.frontier());
     } else {
       // Cases where src isn't an Obj should have been simplified away
       if (!src->isA(Type::Obj)) {
@@ -2455,17 +2455,17 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_as, kJmpccLen);
       TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND,
-                                       m_as.code.frontier, data->defaultOff,
+                                       m_as.frontier(), data->defaultOff,
                                        CC_AE);
       m_as.    jae(def);
     }
 
     TCA* table = m_tx64->allocData<TCA>(sizeof(TCA), data->cases);
-    TCA afterLea = m_as.code.frontier + kLeaRipLen;
+    TCA afterLea = m_as.frontier() + kLeaRipLen;
     ptrdiff_t diff = (TCA)table - afterLea;
     assert(deltaFits(diff, sz::dword));
     m_as.   lea(rip[diff], m_rScratch);
-    assert(m_as.code.frontier == afterLea);
+    assert(m_as.frontier() == afterLea);
     m_as.   jmp(m_rScratch[indexReg*8]);
 
     for (int i = 0; i < data->cases; i++) {
@@ -2953,7 +2953,7 @@ Address CodeGenerator::cgCheckStaticBit(Type type,
     m_as.cmp_imm32_disp_reg32(RefCountStaticValue, FAST_REFCOUNT_OFFSET, reg);
   }
 
-  Address addrToPatch = m_as.code.frontier;
+  Address addrToPatch = m_as.frontier();
   m_as.jcc8(CC_E, addrToPatch);
   return addrToPatch;
 }
@@ -3063,14 +3063,14 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
 //
 Address CodeGenerator::cgCheckRefCountedType(PhysReg typeReg) {
   emitCmpTVType(m_as, KindOfRefCountThreshold, typeReg);
-  Address addrToPatch = m_as.code.frontier;
+  Address addrToPatch = m_as.frontier();
   m_as.jcc8(CC_LE, addrToPatch);
   return addrToPatch;
 }
 
 Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset) {
   emitCmpTVType(m_as, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
-  Address addrToPatch = m_as.code.frontier;
+  Address addrToPatch = m_as.frontier();
   m_as.jcc8(CC_LE, addrToPatch);
   return addrToPatch;
 }
@@ -3110,7 +3110,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
     });
   }
   if (patchStaticCheck) {
-    m_as.patchJcc8(patchStaticCheck, m_as.code.frontier);
+    m_as.patchJcc8(patchStaticCheck, m_as.frontier());
   }
 }
 
@@ -3143,8 +3143,8 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
     });
   }
   // Patch checks to jump around the DecRef
-  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.code.frontier);
-  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.code.frontier);
+  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.frontier());
+  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.frontier());
 }
 
 //
@@ -3192,7 +3192,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
       recordSyncPoint(m_as);
     }
     if (patchTypeCheck) {
-      m_as.patchJcc8(patchTypeCheck, m_as.code.frontier);
+      m_as.patchJcc8(patchTypeCheck, m_as.frontier());
     }
     return;
   }
@@ -3215,8 +3215,8 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   }
 
   // Patch checks to jump around the DecRef
-  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.code.frontier);
-  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.code.frontier);
+  if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.frontier());
+  if (patchStaticCheck) m_as.patchJcc8(patchStaticCheck, m_as.frontier());
 }
 
 //
@@ -4164,7 +4164,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   Offset pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
 
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.code.frontier, pcOff,
+  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
@@ -5569,7 +5569,7 @@ static void emitTraceCall(CodeGenerator::Asm& as,
                           int64_t pcOff,
                           Transl::TranslatorX64* tx64) {
   // call to a trace function
-  as.mov_imm64_reg((int64_t)as.code.frontier, reg::rcx);
+  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
   as.mov_reg64_reg64(rVmFp, reg::rdi);
   as.mov_reg64_reg64(rVmSp, reg::rsi);
   as.mov_imm64_reg(pcOff, reg::rdx);
@@ -5584,7 +5584,7 @@ void CodeGenerator::print() const {
 
 static void patchJumps(Asm& as, CodegenState& state, Block* block) {
   void* list = state.patches[block];
-  Address labelAddr = as.code.frontier;
+  Address labelAddr = as.frontier();
   while (list) {
     int32_t* toPatch = (int32_t*)list;
     int32_t diffToNext = *toPatch;
@@ -5607,17 +5607,17 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
         m_tx64->isTransDBEnabled() && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().bcOff,
-                                      m_as.code.frontier,
-                                      m_astubs.code.frontier});
+                                      m_as.frontier(),
+                                      m_astubs.frontier()});
       prevMarker = inst->marker();
     }
     m_curInst = inst;
     auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
     auto* addr = cgInst(inst);
     if (m_state.asmInfo && addr) {
-      m_state.asmInfo->instRanges[inst] = TcaRange(addr, m_as.code.frontier);
+      m_state.asmInfo->instRanges[inst] = TcaRange(addr, m_as.frontier());
       m_state.asmInfo->asmRanges[block] =
-        TcaRange(m_state.asmInfo->asmRanges[block].start(), m_as.code.frontier);
+        TcaRange(m_state.asmInfo->asmRanges[block].start(), m_as.frontier());
     }
   }
 }
@@ -5682,8 +5682,8 @@ void genCodeForTrace(IRTrace* trace,
     FTRACE(6, "cgBlock {} on {}\n", block->id(),
            &a == &astubs ? "astubs" : "a");
 
-    auto const aStart      = a.code.frontier;
-    auto const astubsStart = astubs.code.frontier;
+    auto const aStart      = a.frontier();
+    auto const astubsStart = astubs.frontier();
     patchJumps(a, state, block);
     state.addresses[block] = aStart;
 
@@ -5694,7 +5694,7 @@ void genCodeForTrace(IRTrace* trace,
 
     CodeGenerator cg(trace, a, astubs, tx64, state);
     if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.code.frontier);
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.frontier());
     }
 
     cg.cgBlock(block, bcMap);
@@ -5707,10 +5707,10 @@ void genCodeForTrace(IRTrace* trace,
     }
 
     if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.code.frontier);
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.frontier());
       if (&a != &astubs) {
         state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
-                                                     astubs.code.frontier);
+                                                     astubs.frontier());
       }
     }
   };

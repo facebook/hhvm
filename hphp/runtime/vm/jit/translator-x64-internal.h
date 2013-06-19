@@ -86,8 +86,8 @@ struct UnlikelyIfBlock {
     : m_likely(likely)
     , m_unlikely(unlikely)
   {
-    m_likely.jcc(cc, m_unlikely.code.frontier);
-    m_likelyPostBranch = m_likely.code.frontier;
+    m_likely.jcc(cc, m_unlikely.frontier());
+    m_likelyPostBranch = m_likely.frontier();
   }
 
   ~UnlikelyIfBlock() {
@@ -124,13 +124,13 @@ struct JccBlock {
 
   explicit JccBlock(X64Assembler& a)
     : m_a(&a) {
-    m_jcc = a.code.frontier;
-    J::branch(a, Jcc, m_a->code.frontier);
+    m_jcc = a.frontier();
+    J::branch(a, Jcc, m_a->frontier());
   }
 
   ~JccBlock() {
     if (m_a) {
-      J::patch(*m_a, m_jcc, m_a->code.frontier);
+      J::patch(*m_a, m_jcc, m_a->frontier());
     }
   }
 
@@ -146,6 +146,7 @@ void jccBlock(X64Assembler& a, Lambda body) {
   body();
  asm_label(a, exit);
 }
+
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and
 // conditionally branches over the enclosing block of assembly on the
@@ -179,13 +180,13 @@ struct CondBlock {
     } else if (sizeof(FieldType) == 1) {
       a. cmpb(FieldValue, reg[typeDisp]);
     }
-    m_jcc8 = a.code.frontier;
+    m_jcc8 = a.frontier();
     a.   jcc8(Jcc, m_jcc8);
     // ...
   }
 
   ~CondBlock() {
-    m_a.patchJcc8(m_jcc8, m_a.code.frontier);
+    m_a.patchJcc8(m_jcc8, m_a.frontier());
   }
 };
 

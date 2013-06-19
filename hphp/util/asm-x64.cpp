@@ -111,7 +111,7 @@ StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
     as.mov_imm64_reg(initial, reg);
     as.store_reg64_disp_reg64(reg, offset, base);
   }
-  m_addr = as.code.frontier - (m_is32 ? 4 : 8);
+  m_addr = as.frontier() - (m_is32 ? 4 : 8);
   assert((m_is32 ?  (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
          == initial);
 }

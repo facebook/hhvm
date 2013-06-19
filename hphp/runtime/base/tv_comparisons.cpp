@@ -391,13 +391,13 @@ bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
   assert(tvIsPlausible(tv1));
   assert(tvIsPlausible(tv2));
 
+  tv1 = tvToCell(tv1);
+  tv2 = tvToCell(tv2);
+
   bool const null1 = IS_NULL_TYPE(tv1->m_type);
   bool const null2 = IS_NULL_TYPE(tv2->m_type);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
-
-  tv1 = tvToCell(tv1);
-  tv2 = tvToCell(tv2);
 
   switch (tv1->m_type) {
   case KindOfInt64:

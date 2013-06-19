@@ -26,6 +26,7 @@
 #include <string>
 #include <queue>
 #include <unwind.h>
+#include <unordered_set>
 
 #ifdef __FreeBSD__
 # include <ucontext.h>
@@ -445,8 +446,6 @@ emitEagerVMRegSave(X64Assembler& a,
   static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
 
   assert(spOff != 0);
-  // Instruction selection note: this is an lea, but add is more
-  // compact and we can afford the flags bash.
   a.    addq   (spOff, r64(rEC));
   a.    storeq (rVmSp, *rEC);
   if (savePC) {
@@ -785,8 +784,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
 
   TCA astart = a.code.frontier;
   TCA stubstart = astubs.code.frontier;
-  TCA req = emitServiceReq(SRFlags::None, REQ_RETRANSLATE,
-                           1, uint64_t(sk.offset()));
+  TCA req = emitServiceReq(REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           curUnit(), sk.offset(), req);
   SrcRec* sr = m_srcDB.insert(sk);
@@ -1730,7 +1728,7 @@ TranslatorX64::emitBindCallHelper(SrcKey srcKey,
 
   astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
   emitPopRetIntoActRec(astubs);
-  emitServiceReq(SRFlags::Persistent, REQ_BIND_CALL, 1ull, req);
+  emitServiceReq(REQ_BIND_CALL, req);
 
   TRACE(1, "will bind static call: tca %p, this %p, funcd %p, astubs %p\n",
         toSmash, this, funcd, astubs.code.frontier);
@@ -1831,23 +1829,15 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
   // to our stub.
   prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
   TCA old = a.code.frontier;
-  TCA stub = astubs.code.frontier;
+  TCA stub = emitServiceReq(REQ_BIND_JMPCC_FIRST,
+                            old,
+                            skTaken.offset(),
+                            skNotTaken.offset(),
+                            cc,
+                            ccArgInfo(cc));
 
-  // begin code for the stub
-
-  // We need to be careful here, as we are passing an extra paramter to
-  //   REQ_BIND_JMPCC_FIRST. However we can't pass this parameter via
-  //   emitServiceReq because that only supports constants/immediates, so
-  //   compute the last argument via setcc.
-  astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
-  emitServiceReq(SRFlags::Persistent, REQ_BIND_JMPCC_FIRST, 4ull,
-                 old,
-                 uint64_t(skTaken.offset()),
-                 uint64_t(skNotTaken.offset()),
-                 uint64_t(cc));
-
-  a.jcc(cc, stub); // MUST use 4-byte immediate form
-  a.jmp(stub); // MUST use 4-byte immediate form
+  a.jcc(cc, stub);
+  a.jmp(stub);
 }
 
 /*
@@ -1919,9 +1909,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   // We want the branch to point to whichever side has not been explored
   // yet.
   if (taken) cc = ccNegate(cc);
-  TCA stub =
-    emitServiceReq(SRFlags::None, REQ_BIND_JMPCC_SECOND, 3,
-                   toSmash, uint64_t(offWillDefer), uint64_t(cc));
+  TCA stub = emitServiceReq(REQ_BIND_JMPCC_SECOND, toSmash, offWillDefer, cc);
 
   Asm& as = getAsmFor(toSmash);
   // Its not clear where chainFrom should go to if as is astubs
@@ -1999,8 +1987,8 @@ TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
     emitJmpOrJcc(_a, cc, toSmash);
   }
 
-  TCA sr = emitServiceReq(SRFlags::None, req, 2,
-                          toSmash, uint64_t(dest.offset()));
+  TCA sr = emitServiceReq(SRFlags::None, req,
+                          toSmash, dest.offset());
 
   if (&_a == &astubs) {
     CodeCursor cursor(_a, toSmash);
@@ -2072,7 +2060,7 @@ void TranslatorX64::emitReqRetransNoIR(Asm& as, const SrcKey& sk) {
     as.jmp(toSmash);
   }
 
-  TCA sr = emitServiceReq(REQ_RETRANSLATE_NO_IR, 2,
+  TCA sr = emitServiceReq(REQ_RETRANSLATE_NO_IR,
                           toSmash, sk.offset());
 
   if (&as == &astubs) {
@@ -2124,8 +2112,7 @@ TranslatorX64::emitRetFromInterpretedFrame() {
   // Marshall our own args by hand here.
   astubs.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   astubs.   movq (rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags::Persistent | SRFlags::JmpInsteadOfRet,
-                        REQ_POST_INTERP_RET, 0ull);
+  emitServiceReq(SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
   return stub;
 }
 
@@ -2144,8 +2131,7 @@ TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
   astubs.    loadq (rVmFp[AROFF(m_this)], rContAR);
   astubs.    loadq (rContAR[CONTOFF(m_arPtr)], rContAR);
   astubs.    movq  (rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags::Persistent | SRFlags::JmpInsteadOfRet,
-                        REQ_POST_INTERP_RET, 0ull);
+  emitServiceReq(SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
   return stub;
 }
 
@@ -2158,7 +2144,8 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
   virtual void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
     if (TranslatorX64::Get()->freeRequestStub(m_stub) != true) {
-    /* If we can't free the stub, enqueue again to retry */
+      // If we can't free the stub, enqueue again to retry.
+      TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
       enqueue(new FreeRequestStubTrigger(m_stub));
     }
   }
@@ -2514,9 +2501,13 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   return true;
 }
 
+/*
+ * Support for the stub freelist.
+ */
 TCA FreeStubList::maybePop() {
   StubNode* ret = m_list;
   if (ret) {
+    TRACE(1, "alloc stub %p\n", ret);
     m_list = ret->m_next;
     ret->m_freed = ~kStubFree;
   }
@@ -2524,21 +2515,28 @@ TCA FreeStubList::maybePop() {
 }
 
 void FreeStubList::push(TCA stub) {
-  /* A freed stub may be released by Treadmill more than
-   * once if multiple threads execute the service request before it is
-   * freed. We detect duplicates by marking freed stubs */
+  /*
+   * A freed stub may be released by Treadmill more than once if multiple
+   * threads execute the service request before it is freed. We detect
+   * duplicates by marking freed stubs
+   */
   StubNode* n = (StubNode *)stub;
-  if (n->m_freed == kStubFree) return;
+  if (n->m_freed == kStubFree) {
+    TRACE(1, "already freed stub %p\n", stub);
+    return;
+  }
   n->m_freed = kStubFree;
   n->m_next = m_list;
+  TRACE(1, "free stub %p (-> %p)\n", stub, m_list);
   m_list = n;
 }
 
 bool
 TranslatorX64::freeRequestStub(TCA stub) {
   LeaseHolder writer(s_writeLease);
-  /* If we can't acquire the write lock, the
-   * caller (FreeRequestStubTrigger) retries
+  /*
+   * If we can't acquire the write lock, the caller
+   * (FreeRequestStubTrigger) retries
    */
   if (!writer) return false;
   assert(astubs.code.isValidAddress(stub));
@@ -2550,11 +2548,13 @@ TCA TranslatorX64::getFreeStub() {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
-    assert(m_freeStubs.m_list == 0
-           || astubs.code.isValidAddress(TCA(m_freeStubs.m_list)));
+    assert(m_freeStubs.m_list == nullptr ||
+           astubs.code.isValidAddress(TCA(m_freeStubs.m_list)));
+    TRACE(1, "recycle stub %p\n", ret);
   } else {
     ret = astubs.code.frontier;
     Stats::inc(Stats::Astubs_New);
+    TRACE(1, "alloc new stub %p\n", ret);
   }
   return ret;
 }
@@ -2585,9 +2585,9 @@ class ConditionalCodeCursor {
 };
 
 /*
- * emitServiceReq --
+ * emitServiceReqWork --
  *
- *   Call a translator service co-routine. The code emitted here is
+ *   Call a translator service co-routine. The code emitted here
  *   reenters the enterTC loop, invoking the requested service. Control
  *   will be returned non-locally to the next logical instruction in
  *   the TC.
@@ -2595,53 +2595,81 @@ class ConditionalCodeCursor {
  *   Return value is a destination; we emit the bulky service
  *   request code into astubs.
  */
-
 TCA
-TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
-                                va_list args) {
-  bool emitInA     = flags & SRFlags::EmitInA;
-  bool align       = (flags & SRFlags::Align) && !emitInA;
-  bool notReusable = flags & SRFlags::Persistent;
+TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
+                                  const TranslatorX64::ServiceReqArgVec& argv) {
+  /*
+   * Some requests can be recycled after they've fired once. Since this is
+   * a special situation, we enumerate them here rather than forcing every
+   * call site to choose.
+   */
+  auto requestIsEphemeral = [](ServiceRequest req) {
+    switch (req) {
+    case REQ_BIND_JMPCC_SECOND:
+    case REQ_BIND_JMPCC_FIRST:
+    case REQ_BIND_JMP:
+      return true;
+    default:
+      return false;
+    };
+  };
+  static const std::unordered_set<ServiceRequest> ephemeralReqs {
+    REQ_BIND_JMPCC_SECOND,
+    REQ_BIND_JMPCC_FIRST,
+    REQ_BIND_JMP
+  };
+
+  const bool emitInA = flags & SRFlags::EmitInA;
+  const bool align   = (flags & SRFlags::Align) && !emitInA;
+  const bool persist = !requestIsEphemeral(req);
   Asm&   as = emitInA ? a : astubs;
   TCA start = emitInA ? a.code.frontier :
-              notReusable ? astubs.code.frontier :
+              persist ? astubs.code.frontier :
               getFreeStub();
   ConditionalCodeCursor cg(as, start);
   /* max space for moving to align, saving VM regs plus emitting args */
-  static const int kVMRegSpace = 0x14;
-  static const int kMovSize = 0xa;
-  static const int kNumServiceRegs = sizeof(serviceReqArgRegs)/sizeof(PhysReg);
-  static const int kMaxStubSpace = kJmpTargetAlign - 1
-                              + kVMRegSpace
-                              + kNumServiceRegs * kMovSize;
+  static const int
+    kVMRegSpace = 0x14,
+    kMovSize = 0xa,
+    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
+    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
+      kNumServiceRegs * kMovSize;
   if (align) {
     moveToAlign(as);
   }
   TCA retval = as.code.frontier;
-  emitEagerVMRegSave(as, SaveFP);
+  TRACE(3, "Emit Service Req @%p %s(", start, reqName(req));
   /*
-   * Move args into appropriate regs.
+   * Move args into appropriate regs. Eager VMReg save may bash flags,
+   * so set the CondCode arguments first.
    */
-  TRACE(3, "Emit Service Req %s(", reqName(req));
-  for (int i = 0; i < numArgs; i++) {
-    uint64_t argVal = va_arg(args, uint64_t);
-    TRACE(3, "%p,", (void*)argVal);
-    emitImmReg(as, argVal, serviceReqArgRegs[i]);
+  for (int i = 0; i < argv.size(); ++i) {
+    assert(i < kNumServiceReqArgRegs);
+    auto reg = serviceReqArgRegs[i];
+    const auto& argInfo = argv[i];
+    switch(argv[i].m_kind) {
+      case ServiceReqArgInfo::Immediate: {
+        TRACE(3, "%lx, ", argInfo.m_imm);
+        as.    emitImmReg(argInfo.m_imm, reg);
+      } break;
+      case ServiceReqArgInfo::CondCode: {
+        // Already set before VM reg save.
+        DEBUG_ONLY TCA start = as.code.frontier;
+        as.    setcc(argInfo.m_cc, rbyte(reg));
+        assert(start - as.code.frontier <= kMovSize);
+        TRACE(3, "cc(%x), ", argInfo.m_cc);
+      } break;
+      default: not_reached();
+    }
   }
-
-  if (notReusable) {
-    emitImmReg(as, 0, rAsm);
+  emitEagerVMRegSave(as, SaveFP);
+  if (persist) {
+    as.  emitImmReg(0, rAsm);
   } else {
-    /*
-     * Make sure that the stub has enough space so it can be reused
-     * for other service requests, with different number of arguments,
-     * alignment, etc.
-     */
-    as.emitNop(start + kMaxStubSpace - as.code.frontier);
-    emitImmReg(as, (uint64_t)start, rAsm);
+    as.  emitImmReg((uint64_t)start, rAsm);
   }
   TRACE(3, ")\n");
-  emitImmReg(as, req, rdi);
+  as.    emitImmReg(req, rdi);
 
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -2652,32 +2680,22 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
    * SRJmpInsteadOfRet indicates to fake the return.
    */
   if (flags & SRFlags::JmpInsteadOfRet) {
-    as.pop(rax);
-    as.jmp(rax);
+    as.  pop(rax);
+    as.  jmp(rax);
   } else {
-    as.ret();
+    as.  ret();
   }
   recordBCInstr(OpServiceRequest, as, retval);
   translator_not_reached(as);
-  return retval;
-}
-
-TCA
-TranslatorX64::emitServiceReq(ServiceRequest req, int numArgs, ...) {
-  va_list args;
-  va_start(args, numArgs);
-  TCA retval = emitServiceReqVA(SRFlags::Align, req, numArgs, args);
-  va_end(args);
-  return retval;
-}
-
-TCA
-TranslatorX64::emitServiceReq(SRFlags flags, ServiceRequest req,
-                              int numArgs, ...) {
-  va_list args;
-  va_start(args, numArgs);
-  TCA retval = emitServiceReqVA(flags, req, numArgs, args);
-  va_end(args);
+  if (!persist) {
+    /*
+     * Recycled stubs need to be uniformly sized. Make space for the
+     * maximal possible service requests.
+     */
+    assert(as.code.frontier - start <= kMaxStubSpace);
+    as.emitNop(start + kMaxStubSpace - as.code.frontier);
+    assert(as.code.frontier - start == kMaxStubSpace);
+  }
   return retval;
 }
 
@@ -2933,7 +2951,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
    * opcode will need to movabs the address into rAsm before
    * jumping.)
    */
-  auto UNUSED stubUsingRScratch = [&](TCA tca) {
+  auto DEBUG_ONLY stubUsingRScratch = [&](TCA tca) {
     return tca == m_dtorGenericStubRegs;
   };
 
@@ -3257,8 +3275,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     if (RuntimeOption::EvalJitTransCounters) {
       emitTransCounterInc(a);
     }
-    a.    jmp(emitServiceReq(REQ_INTERPRET, 2ull, uint64_t(t.m_sk.offset()),
-                             uint64_t(t.m_numOpcodes)));
+    a.    jmp(emitServiceReq(REQ_INTERPRET,
+                             t.m_sk.offset(), t.m_numOpcodes));
     // Fall through.
   }
 
@@ -3469,7 +3487,7 @@ TranslatorX64::TranslatorX64()
   // Call to exit with whatever value the program leaves on
   // the return stack.
   m_callToExit = emitServiceReq(SRFlags::Align | SRFlags::JmpInsteadOfRet,
-                                REQ_EXIT, 0ull);
+                                REQ_EXIT);
 
   /*
    * Helpers for returning from a function where the ActRec was pushed
@@ -3495,7 +3513,7 @@ TranslatorX64::TranslatorX64()
                                        rVmFp);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
                                        Stack::topOfStackOffset(), rVmSp);
-  emitServiceReq(SRFlags::Persistent, REQ_RESUME, 0ull);
+  emitServiceReq(REQ_RESUME);
 
   // Helper for DefCls, in astubs.
   {
@@ -3565,7 +3583,7 @@ TranslatorX64::TranslatorX64()
   astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
   astubs.    add_reg32_reg32(rax, rdi);
   emitEagerVMRegSave(astubs, SaveFP | SavePC);
-  emitServiceReq(SRFlags::Persistent, REQ_STACK_OVERFLOW, 0ull);
+  emitServiceReq(REQ_STACK_OVERFLOW);
 }
 
 // do gdb specific initialization. This has to happen after
@@ -3904,7 +3922,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   a.   testb((int8_t)0xff, rbyte(rAsm));
   // Branch to a special REQ_INTERPRET if attached
   {
-    TCA fallback = emitServiceReq(REQ_INTERPRET, 2, uint64_t(sk.offset()), 0);
+    TCA fallback = emitServiceReq(REQ_INTERPRET, sk.offset(), 0);
     a. jnz(fallback);
   }
   // Emit a jump to the actual code

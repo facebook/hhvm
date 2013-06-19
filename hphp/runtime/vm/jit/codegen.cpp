@@ -772,24 +772,13 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
 
   prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.code.frontier;
-
-  auto const jccStub = m_astubs.code.frontier;
-  {
-    auto& a = m_astubs;
-    // TODO(#2404398): move the setcc into the generic stub code so we
-    // don't need SRFlags::Persistent.
-    a.    setcc  (cc, rbyte(serviceReqArgRegs[4]));
-    m_tx64->emitServiceReq(
-      SRFlags::Persistent,
-      REQ_BIND_JMPCC_FIRST,
-      4ull,
-      patchAddr,
-      uint64_t(extra->taken),
-      uint64_t(extra->notTaken),
-      uint64_t(cc)
-    );
-  }
-
+  auto const jccStub =
+    m_tx64->emitServiceReq(REQ_BIND_JMPCC_FIRST,
+                           patchAddr,
+                           extra->taken,
+                           extra->notTaken,
+                           cc,
+                           m_tx64->ccArgInfo(cc));
   a.    jcc    (cc, jccStub);
   a.    jmp    (jccStub);
 }
@@ -2419,9 +2408,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::emitReqBindAddr(const Func* func,
                                     TCA& dest,
                                     Offset offset) {
-  dest = m_tx64->emitServiceReq(SRFlags::None,
-                                REQ_BIND_ADDR,
-                                2ull,
+  dest = m_tx64->emitServiceReq(REQ_BIND_ADDR,
                                 &dest,
                                 offset);
 }
@@ -2438,8 +2425,9 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_as, kJmpccLen);
-      TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND, 3,
-                                   m_as.code.frontier, data->defaultOff, CC_AE);
+      TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND,
+                                       m_as.code.frontier, data->defaultOff,
+                                       CC_AE);
       m_as.    jae(def);
     }
 
@@ -5186,7 +5174,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
                  Stack::topOfStackOffset()], rVmSp);
 
-  m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME, 0ull);
+  m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME);
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

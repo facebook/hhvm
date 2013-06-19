@@ -278,23 +278,14 @@ enum class SRFlags {
   /*
    * Indicates the service request should be aligned.
    */
-  Align = 1,
-
-  /*
-   * Indicates the service request is not a one-time use stub, so it's
-   * ineligable for service request reclamation.
-   *
-   * The service request also will not reuse an existing service
-   * request---i.e. it will be emitted at the current astubs frontier.
-   */
-  Persistent = 2,
+  Align = 1 << 0,
 
   /*
    * For some service requests (returning from interpreted frames),
    * using a ret instruction to get back to enterTCHelper will
    * unbalance the return stack buffer---in these cases use a jmp.
    */
-  JmpInsteadOfRet = 4,
+  JmpInsteadOfRet = 1 << 1,
 
   /*
    * The service request should be emitted on a instead of astubs.
@@ -302,7 +293,7 @@ enum class SRFlags {
    * Overrides whatever the bits for Align and Persistent are and
    * implies !Align and !Persistent.
    */
-  EmitInA = 8,
+  EmitInA = 1 << 2,
 };
 
 inline bool operator&(SRFlags a, SRFlags b) {
@@ -314,7 +305,6 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 // Set of all the x64 registers.
 const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
                          | kSpecialCrossTraceRegs;
@@ -346,5 +336,15 @@ const size_t kReservedRSPSpillSpace   = 0x200;
 //////////////////////////////////////////////////////////////////////
 
 }}
+
+namespace std {
+
+template<> struct hash<HPHP::Transl::ServiceRequest> {
+  size_t operator()(const HPHP::Transl::ServiceRequest& sr) const {
+    return sr;
+  }
+};
+
+}
 
 #endif

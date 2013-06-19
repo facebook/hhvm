@@ -28,6 +28,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/base/memory/smart_containers.h"
 
 namespace HPHP { class ExecutionContext; }
 
@@ -121,6 +122,18 @@ enum class TestAndSmashFlags {
 void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
 void prepareForSmash(Asm&, int nBytes, int offset = 0);
 bool isSmashable(Address frontier, int nBytes, int offset = 0);
+
+// Service request arg packing.
+struct ServiceReqArgInfo {
+  enum {
+    Immediate,
+    CondCode,
+  } m_kind;
+  union {
+    uint64_t m_imm;
+    ConditionCode m_cc;
+  };
+};
 
 class TranslatorX64 : public Translator
                     , boost::noncopyable {
@@ -376,10 +389,55 @@ public:
                       PhysReg = reg::r14,
                       PhysReg = reg::rax);
 
-  TCA emitServiceReq(ServiceRequest, int numArgs, ...);
-  TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
-  TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,
-                       va_list args);
+  ServiceReqArgInfo ccArgInfo(ConditionCode cc) {
+    return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
+  }
+
+  typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
+  void packServiceReqArg(ServiceReqArgVec& args) {
+    // all done.
+  }
+
+  template<typename T>
+  typename std::enable_if<
+    // Only allow for things with a sensible cast to uint64_t.
+    std::is_integral<T>::value || std::is_pointer<T>::value ||
+    std::is_enum<T>::value
+  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
+    // By default, assume we meant to pass an immediate arg.
+    args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
+  }
+
+  void packServiceReqArg(ServiceReqArgVec& args,
+                         const ServiceReqArgInfo& argInfo) {
+    args.push_back(argInfo);
+  }
+
+  template<typename T, typename... Arg>
+  void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
+    packServiceReqArg(argv, arg);
+    packServiceReqArgs(argv, args...);
+  }
+
+  void packServiceReqArgs(ServiceReqArgVec& argv) {
+    // all done.
+  }
+
+
+  TCA emitServiceReqWork(SRFlags flags, ServiceRequest req,
+                         const ServiceReqArgVec& argInfo);
+public:
+  template<typename... Arg>
+  TCA emitServiceReq(SRFlags flags, ServiceRequest sr, Arg... a) {
+    ServiceReqArgVec argv;
+    packServiceReqArgs(argv, a...);
+    return emitServiceReqWork(flags, sr, argv);
+  }
+
+  template<typename... Arg>
+  TCA emitServiceReq(ServiceRequest sr, Arg... a) {
+    return emitServiceReq(SRFlags::None, sr, a...);
+  }
 
   TCA emitRetFromInterpretedFrame();
   TCA emitRetFromInterpretedGeneratorFrame();

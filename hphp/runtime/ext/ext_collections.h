@@ -1204,6 +1204,12 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
   collectionAppend(obj, tv);
 }
 
+inline bool isOptimizableCollectionClass(const Class* klass) {
+  return klass == c_Vector::s_cls || klass == c_Map::s_cls ||
+         klass == c_StableMap::s_cls || klass == c_Pair::s_cls;
+}
+
+
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
 ///////////////////////////////////////////////////////////////////////////////

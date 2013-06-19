@@ -2949,8 +2949,7 @@ void Translator::specializeCollections(NormalizedInstruction* instr,
     if (dep != tctxt.m_dependencies.end()) {
       RuntimeType specialized = liveType(l, *curUnit(), true);
       const Class* klass = specialized.knownClass();
-      if (klass != nullptr
-          && (klass == c_Vector::s_cls || klass == c_Map::s_cls)) {
+      if (klass != nullptr && isOptimizableCollectionClass(klass)) {
         tctxt.m_dependencies[l]->rtt = specialized;
       }
     }

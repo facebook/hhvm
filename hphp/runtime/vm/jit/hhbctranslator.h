@@ -446,9 +446,14 @@ private:
     void emitVectorSet(SSATmp* key, SSATmp* value);
     void emitVectorGet(SSATmp* key);
     void emitVectorIsset();
+    void emitPairGet(SSATmp* key);
+    void emitPairIsset();
     void emitMapSet(SSATmp* key, SSATmp* value);
     void emitMapGet(SSATmp* key);
     void emitMapIsset();
+    void emitStableMapSet(SSATmp* key, SSATmp* value);
+    void emitStableMapGet(SSATmp* key);
+    void emitStableMapIsset();
 
     // Generate a catch trace that does not perform any final DecRef operations
     // on scratch space
@@ -514,7 +519,11 @@ private:
       // simple opcode on Vector* (c_Vector*)
       Vector,
       // simple opcode on Map* (c_Map*)
-      Map
+      Map,
+      // simple opcode on Map* (c_StableMap*)
+      StableMap,
+      // simple opcode on Map* (c_Pair*)
+      Pair
     };
     SimpleOp isSimpleCollectionOp();
 

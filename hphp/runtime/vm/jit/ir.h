@@ -564,7 +564,13 @@ O(ArrayGet,                    D(Cell), C(TCA)                                \
 O(VectorGet,                   D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),            E|N|Mem|Refs|Er) \
+O(PairGet,                     D(Cell), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int),            E|N|Mem|Refs|Er) \
 O(MapGet,                      D(Cell), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str),        E|N|Mem|Refs|Er) \
+O(StableMapGet,                D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),        E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
@@ -589,6 +595,10 @@ O(VectorSet,                        ND, C(TCA)                                \
                                           S(Int)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
 O(MapSet,                           ND, C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str)                          \
+                                          S(Cell),           E|N|Mem|Refs|Er) \
+O(StableMapSet,                     ND, C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str)                          \
                                           S(Cell),           E|N|Mem|Refs|Er) \
@@ -633,7 +643,13 @@ O(ArrayIsset,                  D(Bool), C(TCA)                                \
 O(VectorIsset,                 D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),            E|N|Mem|Refs)    \
+O(PairIsset,                   D(Bool), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int),            E|N|Mem|Refs)    \
 O(MapIsset,                    D(Bool), C(TCA)                                \
+                                          S(Obj)                              \
+                                          S(Int,Str),        E|N|Mem|Refs)    \
+O(StableMapIsset,              D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),        E|N|Mem|Refs)    \
 O(IssetElem,                   D(Bool), C(TCA)                                \

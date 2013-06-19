@@ -341,8 +341,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   // IssetM with one vector array element and a collection type
   const bool simpleCollectionIsset = isIssetM && singleElem &&
     baseType.strictSubtypeOf(Type::Obj) &&
-    (baseType.getClass() == c_Vector::s_cls ||
-        baseType.getClass() == c_Map::s_cls );
+    isOptimizableCollectionClass(baseType.getClass());
 
   // UnsetM on an array with one vector element
   const bool simpleArrayUnset = isUnsetM && singleElem;
@@ -356,8 +355,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
     baseType.not(Type::Str | Type::Obj);
   const bool simpleCollectionGet = isCGetM && singleElem &&
     baseType.strictSubtypeOf(Type::Obj) &&
-    (baseType.getClass() == c_Vector::s_cls ||
-        baseType.getClass() == c_Map::s_cls );
+    isOptimizableCollectionClass(baseType.getClass());
 
   if (simpleProp || singlePropSet ||
       simpleArraySet || simpleArrayGet || simpleCollectionGet ||
@@ -624,18 +622,23 @@ HhbcTranslator::VectorTranslator::isSimpleCollectionOp() {
         }
       }
     } else if (baseType.strictSubtypeOf(Type::Obj)) {
-      if (baseType.getClass() == c_Vector::s_cls) {
+      const Class* klass = baseType.getClass();
+      if (klass == c_Vector::s_cls ||
+          klass == c_Pair::s_cls) {
         if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1);
           if (key->isA(Type::Int)) {
-            return SimpleOp::Vector;
+            return (klass == c_Vector::s_cls) ?
+                SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (baseType.getClass() == c_Map::s_cls) {
+      } else if (klass == c_Map::s_cls ||
+                 klass == c_StableMap::s_cls) {
         if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
-            return SimpleOp::Map;
+            return (klass == c_Map::s_cls) ?
+                SimpleOp::Map : SimpleOp::StableMap;
           }
         }
       }
@@ -1511,7 +1514,7 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
 #undef HELPER_TABLE
 
 namespace VectorHelpers {
-inline TypedValue vectorGet(c_Vector* vec, int64_t key) {
+TypedValue vectorGet(c_Vector* vec, int64_t key) {
   TypedValue* ret = vec->at(key);
   return *ret;
 }
@@ -1520,6 +1523,19 @@ inline TypedValue vectorGet(c_Vector* vec, int64_t key) {
 void HhbcTranslator::VectorTranslator::emitVectorGet(SSATmp* key) {
   SSATmp* value = gen(VectorGet, getCatchTrace(),
                       cns((TCA)VectorHelpers::vectorGet), m_base, key);
+  m_result = gen(IncRef, value);
+}
+
+namespace VectorHelpers {
+TypedValue pairGet(c_Pair* pair, int64_t key) {
+  TypedValue* ret = pair->at(key);
+  return *ret;
+}
+}
+
+void HhbcTranslator::VectorTranslator::emitPairGet(SSATmp* key) {
+  SSATmp* value = gen(PairGet, getCatchTrace(),
+                      cns((TCA)VectorHelpers::pairGet), m_base, key);
   m_result = gen(IncRef, value);
 }
 
@@ -1552,6 +1568,40 @@ void HhbcTranslator::VectorTranslator::emitMapGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
   SSATmp* value = gen(MapGet, getCatchTrace(),
+                      cns((TCA)opFunc), m_base, key);
+  m_result = gen(IncRef, value);
+}
+#undef HELPER_TABLE
+
+template<KeyType keyType>
+static inline TypedValue stableMapGetImpl(
+    c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
+  TypedValue* ret = map->at(key);
+  return *ret;
+}
+
+#define HELPER_TABLE(m)                           \
+  /* name             hot        keyType  */      \
+  m(stableMapGetS,   HOT_FUNC_VM, StrKey)         \
+  m(stableMapGetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                                   \
+hot                                                              \
+TypedValue nm(c_StableMap* map, TypedValue* key) {               \
+  return stableMapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitStableMapGet(SSATmp* key) {
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  SSATmp* value = gen(StableMapGet, getCatchTrace(),
                       cns((TCA)opFunc), m_base, key);
   m_result = gen(IncRef, value);
 }
@@ -1598,8 +1648,14 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
   case SimpleOp::Vector:
     emitVectorGet(key);
     break;
+  case SimpleOp::Pair:
+    emitPairGet(key);
+    break;
   case SimpleOp::Map:
     emitMapGet(key);
+    break;
+  case SimpleOp::StableMap:
+    emitStableMapGet(key);
     break;
   default:
     typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
@@ -1739,7 +1795,7 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
 #undef HELPER_TABLE
 
 namespace VectorHelpers {
-static inline uint64_t vectorIsset(c_Vector* vec, int64_t index) {
+uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return vec->get(index) != nullptr;
 }
 }
@@ -1753,20 +1809,35 @@ void HhbcTranslator::VectorTranslator::emitVectorIsset() {
                  key);
 }
 
+namespace VectorHelpers {
+uint64_t pairIsset(c_Pair* pair, int64_t index) {
+  return pair->get(index) != nullptr;
+}
+}
+
+void HhbcTranslator::VectorTranslator::emitPairIsset() {
+  SSATmp* key = getKey();
+  assert(key->isA(Type::Int));
+  m_result = gen(PairIsset,
+                 cns((TCA)VectorHelpers::pairIsset),
+                 m_base,
+                 key);
+}
+
 template<KeyType keyType>
 static inline uint64_t mapIssetImpl(
   c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
   return map->get(key) != nullptr;
 }
 
-#define HELPER_TABLE(m)                     \
-  /* name        hot        keyType  */     \
+#define HELPER_TABLE(m)                       \
+  /* name        hot        keyType  */       \
   m(mapIssetS,   HOT_FUNC_VM, StrKey)         \
   m(mapIssetI,   HOT_FUNC_VM, IntKey)
 
-#define ELEM(nm, hot, keyType)                              \
-hot                                                         \
-uint64_t nm(c_Map* map, TypedValue* key) {          \
+#define ELEM(nm, hot, keyType)                               \
+hot                                                          \
+uint64_t nm(c_Map* map, TypedValue* key) {                   \
   return mapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
 namespace VectorHelpers {
@@ -1785,6 +1856,38 @@ void HhbcTranslator::VectorTranslator::emitMapIsset() {
 }
 #undef HELPER_TABLE
 
+template<KeyType keyType>
+static inline uint64_t stableMapIssetImpl(
+  c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
+  return map->get(key) != nullptr;
+}
+
+#define HELPER_TABLE(m)                             \
+  /* name              hot          keyType  */     \
+  m(stableMapIssetS,   HOT_FUNC_VM, StrKey)         \
+  m(stableMapIssetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                                     \
+hot                                                                \
+uint64_t nm(c_StableMap* map, TypedValue* key) {                   \
+  return stableMapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitStableMapIsset() {
+  SSATmp* key = getKey();
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  m_result = gen(StableMapIsset, cns((TCA)opFunc), m_base, key);
+}
+#undef HELPER_TABLE
+
 void HhbcTranslator::VectorTranslator::emitIssetElem() {
   SimpleOp simpleOpType = isSimpleCollectionOp();
   switch (simpleOpType) {
@@ -1794,8 +1897,14 @@ void HhbcTranslator::VectorTranslator::emitIssetElem() {
   case SimpleOp::Vector:
     emitVectorIsset();
     break;
+  case SimpleOp::Pair:
+    emitPairIsset();
+    break;
   case SimpleOp::Map:
     emitMapIsset();
+    break;
+  case SimpleOp::StableMap:
+    emitStableMapIsset();
     break;
   default:
     emitIssetEmptyElem(false);
@@ -1961,9 +2070,7 @@ void HhbcTranslator::VectorTranslator::emitSetWithRefNewElem() {
 }
 
 namespace VectorHelpers {
-static inline void vectorSet(c_Vector* vec,
-                            int64_t key,
-                            Cell value) {
+void vectorSet(c_Vector* vec, int64_t key, Cell value) {
   vec->set(key, &value);
 }
 }
@@ -1988,10 +2095,10 @@ static inline void mapSetImpl(
   m(mapSetS,   HOT_FUNC_VM, StrKey)         \
   m(mapSetI,   HOT_FUNC_VM, IntKey)
 
-#define ELEM(nm, hot, keyType)                                      \
-hot                                                                 \
-void nm(c_Map* map, TypedValue* key, Cell value) {            \
-  mapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);         \
+#define ELEM(nm, hot, keyType)                                  \
+hot                                                             \
+void nm(c_Map* map, TypedValue* key, Cell value) {              \
+  mapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);      \
 }
 namespace VectorHelpers {
 HELPER_TABLE(ELEM)
@@ -2006,6 +2113,42 @@ void HhbcTranslator::VectorTranslator::emitMapSet(
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
   gen(MapSet, getCatchTrace(),
+      cns((TCA)opFunc), m_base, key, value);
+  m_result = value;
+}
+#undef HELPER_TABLE
+
+template<KeyType keyType>
+static inline void stableMapSetImpl(
+    c_StableMap* map,
+    typename KeyTypeTraits<keyType>::rawType key,
+    Cell value) {
+  map->set(key, &value);
+}
+
+#define HELPER_TABLE(m)                           \
+  /* name            hot          keyType  */     \
+  m(stableMapSetS,   HOT_FUNC_VM, StrKey)         \
+  m(stableMapSetI,   HOT_FUNC_VM, IntKey)
+
+#define ELEM(nm, hot, keyType)                                      \
+hot                                                                 \
+void nm(c_StableMap* map, TypedValue* key, Cell value) {            \
+  stableMapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);    \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitStableMapSet(
+    SSATmp* key, SSATmp* value) {
+  assert(key->isA(Type::Int) || key->isA(Type::Str));
+  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+
+  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType);
+  gen(StableMapSet, getCatchTrace(),
       cns((TCA)opFunc), m_base, key, value);
   m_result = value;
 }
@@ -2048,6 +2191,9 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
     break;
   case SimpleOp::Map:
     emitMapSet(key, value);
+    break;
+  case SimpleOp::StableMap:
+    emitStableMapSet(key, value);
     break;
   default:
     // Emit the appropriate helper call.

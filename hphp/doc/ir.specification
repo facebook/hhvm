@@ -1764,9 +1764,17 @@ D:Cell = VectorGet S0:ConstTCA S1:Obj<Vector> S2:{Int}
 
   Get element with key S2 from base S1. S1 is a Vector instance.
 
+D:Cell = PairGet S0:ConstTCA S1:Obj<Pair> S2:{Int}
+
+  Get element with key S2 from base S1. S1 is a Pair instance.
+
 D:Cell = MapGet S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
 
   Get element with key S2 from base S1. S1 is a Map instance.
+
+D:Cell = StableMapGet S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str}
+
+  Get element with key S2 from base S1. S1 is a StableMap instance.
 
 D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
@@ -1803,6 +1811,10 @@ VectorSet S0:ConstTCA S1:Obj<Vector> S2:{Int} S3:Cell
 MapSet S0:ConstTCA S1:Obj<Map> S2:{Int|Str} S3:Cell
 
   Set element with key S2 in S1 to S3. S1 is a Map instance.
+
+StableMapSet S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str} S3:Cell
+
+  Set element with key S2 in S1 to S3. S1 is a StableMap instance.
 
 D:{CountedStr|Nullptr} = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
@@ -1858,10 +1870,20 @@ D:Bool = VectorIsset S0:ConstTCA S1:Obj<Vector> S2:{Int}
   Returns true iff the element at key S2 in the base S1 is set. S1 is a
   Vector instance.
 
+D:Bool = PairIsset S0:ConstTCA S1:Obj<Pair> S2:{Int}
+
+  Returns true iff the element at key S2 in the base S1 is set. S1 is a
+  Pair instance.
+
 D:Bool = MapIsset S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
 
   Returns true iff the element at key S2 in the base S1 is set. S1 is a
   Map instance.
+
+D:Bool = StableMapIsset S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str}
+
+  Returns true iff the element at key S2 in the base S1 is set. S1 is a
+  StableMap instance.
 
 D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 

@@ -82,7 +82,8 @@ function verify_hhbc() {
 }
 
 function read_file($file) {
-  return file_exists($file) ? preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
+  return file_exists($file) ? 
+         preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
 }
 
 // http://stackoverflow.com/questions/2637945/
@@ -186,7 +187,9 @@ function find_tests($files) {
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
   }
   $files = implode(' ', $files);
-  $tests = explode("\n", shell_exec("find $files -name '*.php' -o -name '*.hhas'"));
+  $tests = explode("\n", shell_exec(
+      "find $files -name '*.php' -o -name '*.hhas'"
+  ));
   if (!$tests) {
     error(usage());
   }
@@ -219,7 +222,8 @@ function find_debug_config($test, $name) {
 
 function mode_cmd($options) {
   $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
-  $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
+  $jit_args = "$repo_args -v Eval.Jit=true ".
+              "-v Eval.JitEnableRenameFunction=true";
   $mode = idx($options, 'mode');
   switch ($mode) {
     case '':
@@ -377,13 +381,15 @@ function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
   $output = "";
   if (isset($options['repo'])) {
-    if (strpos($test, '.hhas') !== false || strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {
+    if (strpos($test, '.hhas') !== false || 
+        strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {
       # We don't have a way to skip, I guess run non-repo?
     } else {
       unlink("$test.repo/hhvm.hhbc");
       $hphp = hphp_cmd($options, $test);
       $output .= shell_exec("$hphp 2>&1");
-      $hhvm .= " -v Repo.Authoritative=true -v Repo.Central.Path=$test.repo/hhvm.hhbc";
+      $hhvm .= " -v Repo.Authoritative=true ".
+               "-v Repo.Central.Path=$test.repo/hhvm.hhbc";
     }
   }
 
@@ -423,7 +429,8 @@ function run_test($options, $test) {
 
   if (file_exists("$test.expect")) {
     $diff_cmds = "--text -u";
-    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1", $_, $status);
+    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1", 
+         $_, $status);
     // unix 0 == success
     return !$status;
 
@@ -449,10 +456,11 @@ function run_test($options, $test) {
         $start = $end = $length;
       }
       // quote a non re portion of the string
-      $temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+      $temp = $temp.preg_quote(substr($wanted_re, $startOffset,
+                                      ($start - $startOffset)),  '/');
       // add the re unquoted.
       if ($end > $start) {
-        $temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+        $temp = $temp.'('.substr($wanted_re, $start+2, ($end - $start-2)).')';
       }
       $startOffset = $end + 2;
     }
@@ -488,7 +496,8 @@ function run_test($options, $test) {
     $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
     $wanted_re = str_replace('%d', '\d+', $wanted_re);
     $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
+    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', 
+                             $wanted_re);
     $wanted_re = str_replace('%c', '.', $wanted_re);
     // %f allows two points "-.0.0" but that is the best *simple* expression
 
@@ -617,7 +626,8 @@ SHIP
         $command = hhvm_cmd($options, $test);
         if (isset($options['repo'])) {
           $command .= " -v Repo.Authoritative=true ";
-          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc", $command);
+          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc", 
+                                 $command);
           $command = hphp_cmd($options, $test)."\n".$command."\n";
         }
         print "$command\n";

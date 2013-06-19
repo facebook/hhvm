@@ -18,6 +18,22 @@ function get_random_port() {
   return ++$base;
 }
 
+// On the continuous integration server, it's not unlikely that we'll
+// fail to bind one of these random ports.  Retry a few times and hope
+// for the best.
+function retry_bind_server() {
+  for ($i = 0; $i < 20; ++$i) {
+    $port = get_random_port();
+    $address = "127.0.0.1:" . $port;
+
+    $server = stream_socket_server($address);
+    if ($server !== false) {
+      return array($port, $address, $server);
+    }
+  }
+  throw new Exception("Couldn't bind server");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 function test_stream_copy_to_stream() {
@@ -65,10 +81,8 @@ function test_stream_get_line() {
 }
 
 function test_stream_get_meta_data() {
-  $port = get_random_port();
-  $address = "127.0.0.1:" . $port;
+  list($port, $address, $server) = retry_bind_server();
 
-  $server = stream_socket_server($address);
   $client = stream_socket_client($address);
 
   stream_set_timeout($client, 0, 500 * 1000); // 500ms
@@ -102,37 +116,36 @@ function test_stream_select() {
   VERIFY(stream_select($reads, $ignore, $ignore, 0, 0) != false);
 }
 
-function test_stream_socket_recvfrom() {
-  $port = get_random_port();
-  $addresses = array(
-    "127.0.0.1:" . $port, // TCP
-    "unix:///tmp/test_stream.sock" // UNIX domain
-  );
-  unlink("/tmp/test_stream.sock");
+function test_stream_socket_recvfrom_tcp() {
+  list($port, $address, $server) = retry_bind_server();
+  $client = stream_socket_client($address);
 
-  $i = 0;
-  foreach ($addresses as $address) {
-    $server = stream_socket_server($address);
-    $client = stream_socket_client($address);
+  $s = stream_socket_accept($server);
+  $text = "testing";
+  VERIFY(stream_socket_sendto($client, $text, 0, $address) != false);
 
-    $s = stream_socket_accept($server);
-    $text = "testing";
-    if ($i++ == 1) {
-      VERIFY(socket_send($client, $text, 7, 0) != false);
-    } else {
-      VERIFY(stream_socket_sendto($client, $text, 0, $address) != false);
-    }
+  $buffer = stream_socket_recvfrom($s, 100);
+  VS($buffer, "testing");
+}
 
-    $buffer = stream_socket_recvfrom($s, 100);
-    VS($buffer, "testing");
-  }
+function test_stream_socket_recvfrom_unix() {
+  $tmpsock = tempnam('/tmp', 'vmstreamtest');
+  unlink($tmpsock);
+
+  $address = "unix://$tmpsock";
+  $server = stream_socket_server($address);
+  $client = stream_socket_client($address);
+
+  $s = stream_socket_accept($server);
+  $text = "testing";
+  VERIFY(socket_send($client, $text, 7, 0) != false);
+
+  $buffer = stream_socket_recvfrom($s, 100);
+  VS($buffer, $text);
 }
 
 function test_stream_socket_sendto_issue324() {
-  $port = get_random_port();
-  $address = "127.0.0.1:" . $port;
-
-  $server = stream_socket_server($address);
+  list($port, $address, $server) = retry_bind_server();
   $client = stream_socket_client($address);
 
   $s = stream_socket_accept($server);
@@ -140,13 +153,11 @@ function test_stream_socket_sendto_issue324() {
   VERIFY(stream_socket_sendto($client, $text, 0, ''));
 
   $buffer = stream_socket_recvfrom($s, 100);
-  VS($buffer, "testing");
+  VS($buffer, $text);
 }
 
 function test_stream_socket_shutdown() {
-  $port = get_random_port();
-  $address = "127.0.0.1:" . $port;
-  $server = stream_socket_server($address);
+  list($port, $address, $server) = retry_bind_server();
   VERIFY(stream_socket_shutdown($server, 0));
 }
 
@@ -157,6 +168,7 @@ test_stream_get_meta_data();
 test_stream_misc();
 test_stream_wrapper_restore();
 test_stream_select();
-test_stream_socket_recvfrom();
+test_stream_socket_recvfrom_tcp();
+test_stream_socket_recvfrom_unix();
 test_stream_socket_sendto_issue324();
 test_stream_socket_shutdown();

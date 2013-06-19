@@ -198,7 +198,7 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable {
     if ($size < count($this->data)) {
       $this->data = array_slice($this->data, 0, $size);
     } else if ($size > count($this->data)) {
-      $this->data = array_pad($thid->data, $size, null);
+      $this->data = array_pad($this->data, $size, null);
     }
   }
 

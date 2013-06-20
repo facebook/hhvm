@@ -44,6 +44,10 @@ Examples:
 
   # Zend tests with a "z" in their name:
   % $argv[0] $ztestexample
+
+  # Quick tests in JIT mode with some extra runtime options:
+  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRJumpOpts=0'
+
 EOT;
   return usage().$help;
 }
@@ -122,6 +126,7 @@ function get_options($argv) {
     'verbose' => 'v',
     'fbmake' => '',
     'threads:' => '',
+    'args:' => 'a:',
   );
   $options = array();
   $files = array();
@@ -221,9 +226,9 @@ function find_debug_config($test, $name) {
 }
 
 function mode_cmd($options) {
-  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
-  $jit_args = "$repo_args -v Eval.Jit=true ".
-              "-v Eval.JitEnableRenameFunction=true";
+  $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  $jit_args = "$repo_args -vEval.Jit=true ".
+              "-vEval.JitEnableRenameFunction=true";
   $mode = idx($options, 'mode');
   switch ($mode) {
     case '':
@@ -236,6 +241,10 @@ function mode_cmd($options) {
   }
 }
 
+function extra_args($options) {
+  return idx($options, 'args', '');
+}
+
 function hhvm_cmd($options, $test) {
   $cmd = implode(" ", array(
     idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
@@ -243,8 +252,9 @@ function hhvm_cmd($options, $test) {
     find_config($test, 'config.hdf'),
     find_debug_config($test, 'hphpd.hdf'),
     mode_cmd($options),
-    '-v Eval.EnableArgsInBacktraces=true',
+    '-vEval.EnableArgsInBacktraces=true',
     read_file("$test.opts"),
+    extra_args($options),
     '--file',
     $test
   ));
@@ -388,8 +398,8 @@ function run_test($options, $test) {
       unlink("$test.repo/hhvm.hhbc");
       $hphp = hphp_cmd($options, $test);
       $output .= shell_exec("$hphp 2>&1");
-      $hhvm .= " -v Repo.Authoritative=true ".
-               "-v Repo.Central.Path=$test.repo/hhvm.hhbc";
+      $hhvm .= " -vRepo.Authoritative=true ".
+               "-vRepo.Central.Path=$test.repo/hhvm.hhbc";
     }
   }
 
@@ -625,8 +635,8 @@ SHIP
       foreach ($failed as $test) {
         $command = hhvm_cmd($options, $test);
         if (isset($options['repo'])) {
-          $command .= " -v Repo.Authoritative=true ";
-          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc", 
+          $command .= " -vRepo.Authoritative=true ";
+          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
                                  $command);
           $command = hphp_cmd($options, $test)."\n".$command."\n";
         }

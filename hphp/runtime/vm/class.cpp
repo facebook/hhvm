@@ -21,15 +21,10 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/name_value_table.h"
-#include "hphp/runtime/vm/name_value_table_wrapper.h"
 #include "hphp/runtime/vm/request_arena.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/parser/parser.h"
-
-#include <boost/optional.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -763,68 +758,86 @@ TypedValue* Class::initSPropsImpl() const {
   TypedValue* const spropTable =
     new (request_arena()) TypedValue[m_staticProperties.size()];
 
-  boost::optional<NameValueTable> nvt;
   const bool hasNonscalarInit = !m_sinitVec.empty();
+  Array propArr;
+  TypedValue tvSentinel;
+  tvWriteUninit(&tvSentinel);
+
+  SCOPE_EXIT {
+    tvRefcountedDecRef(&tvSentinel);
+  };
+
+  // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
+  // They'll put their initialized values into an array, and we'll read any
+  // values we need out of the array later.
   if (hasNonscalarInit) {
-    nvt = boost::in_place<NameValueTable>(m_staticProperties.size());
-  }
+    HphpArray* propData = ArrayData::Make(m_staticProperties.size());
+    Variant arg0(propData);
 
-  // Iteratively initialize properties.  Non-scalar initializers are
-  // initialized to KindOfUninit here, and the 86sinit()-based initialization
-  // finishes the job later.
-  for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
-    const SProp& sProp = m_staticProperties[slot];
+    // The 86sinit functions will initialize some subset of the static props.
+    // Set all of them to a sentinel object so we can distinguish these.
+    tvSentinel.m_type = KindOfObject;
+    tvSentinel.m_data.pobj = SystemLib::AllocPinitSentinel();
+    tvSentinel.m_data.pobj->incRefCount();
 
-    TypedValue* storage = 0;
-    if (sProp.m_class == this) {
-      // Embed static property value directly in array.
-      assert(tvIsStatic(&sProp.m_val));
-      spropTable[slot] = sProp.m_val;
-      storage = &spropTable[slot];
-    } else {
-      // Alias parent class's static property.
-      bool visible, accessible;
-      storage = sProp.m_class->getSProp(nullptr, sProp.m_name, visible,
-                                        accessible);
-      tvBindIndirect(&spropTable[slot], storage);
+    for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
+      auto const& sProp = m_staticProperties[slot];
+      propData->set(const_cast<StringData*>(sProp.m_name),
+                    tvAsCVarRef(&tvSentinel),
+                    false);
     }
 
-    if (hasNonscalarInit) {
-      nvt->migrateSet(sProp.m_name, storage);
+    // Run the 86sinit functions, going up the inheritance chain.
+    Array args;
+    args.appendRef(arg0);
+    assert(propData->getCount() == 1);  // don't want to trigger COW
+
+    for (unsigned i = 0; i < m_sinitVec.size(); i++) {
+      TypedValue retval;
+      g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
+                              const_cast<Class*>(this));
+      assert(retval.m_type == KindOfNull);
     }
+
+    // Transfer ownership of the reference to the outer scope.
+    propArr = propData;
   }
 
-  // Invoke 86sinit's if necessary, to handle non-scalar initializers.
-  if (hasNonscalarInit) {
-    // See note in initPropsImpl for why its ok to allocate
-    // this on the stack.
-    NameValueTableWrapper nvtWrapper(&*nvt);
-    nvtWrapper.incRefCount();
-
-    ArrayData* args = ArrayData::Make(1);
-    args->incRefCount();
-    try {
-      {
-        Variant arg0(&nvtWrapper);
-        args = args->appendRef(arg0, false);
-
-        for (unsigned i = 0; i < m_sinitVec.size(); i++) {
-          TypedValue retval;
-          g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
-                                  const_cast<Class*>(this));
-          assert(!IS_REFCOUNTED_TYPE(retval.m_type));
-        }
+  // A helper to look up values produced by 86sinit.
+  auto getValueFromArr = [&](const StringData* name) -> const TypedValue* {
+    if (!propArr.isNull()) {
+      assert(tvSentinel.m_type == KindOfObject);
+      auto const* v = propArr.get()->nvGet(name);
+      if (v->m_type != KindOfObject ||
+          v->m_data.pobj != tvSentinel.m_data.pobj) {
+        return v;
       }
-      // Release the args array.  nvtWrapper is on the stack, so it
-      // better have a single reference.
-      assert(args->getCount() == 1);
-      args->release();
-      assert(nvtWrapper.getCount() == 1);
-    } catch (...) {
-      assert(args->getCount() == 1);
-      args->release();
-      assert(nvtWrapper.getCount() == 1);
-      throw;
+    }
+    return nullptr;
+  };
+
+  for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
+    auto const& sProp = m_staticProperties[slot];
+    auto const* propName = sProp.m_name;
+
+    if (sProp.m_class == this) {
+      auto const* value = getValueFromArr(propName);
+      if (value) {
+        tvDup(*value, spropTable[slot]);
+      } else {
+        assert(tvIsStatic(&sProp.m_val));
+        spropTable[slot] = sProp.m_val;
+      }
+    } else {
+      bool visible, accessible;
+      auto* storage = sProp.m_class->getSProp(nullptr, propName,
+                                              visible, accessible);
+      auto const* value = getValueFromArr(propName);
+      if (value) {
+        tvDup(*value, *storage);
+      }
+
+      tvBindIndirect(&spropTable[slot], storage);
     }
   }
 

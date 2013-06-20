@@ -632,6 +632,11 @@ void Class::initInstanceBits() {
   uint64_t accum = 0;
   for (auto& item : counts) {
     if (i >= kInstanceBits) break;
+    if (Class* cls = Unit::lookupUniqueClass(item.first)) {
+      if (!(cls->attrs() & AttrUnique)) {
+        continue;
+      }
+    }
     s_instanceBits[item.first] = i;
     accum += item.second;
     ++i;

@@ -380,6 +380,7 @@ bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
 
 static bool isUnresolved(int tokid) {
   return tokid == T_UNRESOLVED_LT ||
+         tokid == T_UNRESOLVED_NEWTYPE ||
          tokid == T_UNRESOLVED_TYPE;
 }
 
@@ -407,12 +408,13 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
   }
 
   switch (tokid) {
+  case T_UNRESOLVED_NEWTYPE:
   case T_UNRESOLVED_TYPE: {
     auto pos = m_lookahead.begin();
     auto typePos = pos;
     nextLookahead(pos);
     if (pos->t == T_STRING) {
-      typePos->t = T_TYPE;
+      typePos->t = tokid == T_UNRESOLVED_TYPE ? T_TYPE : T_NEWTYPE;
     } else {
       typePos->t = T_STRING;
     }

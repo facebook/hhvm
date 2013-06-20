@@ -793,6 +793,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_SHAPE
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
+%token T_NEWTYPE
+%token T_UNRESOLVED_NEWTYPE
 
 %token T_COMPILER_HALT_OFFSET
 
@@ -813,7 +815,7 @@ top_statement:
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
-  | hh_typedef_statement               { $$ = $1; }
+  | hh_type_alias_statement            { $$ = $1; }
   | T_HALT_COMPILER '(' ')' ';'        { _p->onHaltCompiler();
                                          _p->finiParseTree();
                                          YYACCEPT;}
@@ -1850,6 +1852,7 @@ xhp_bareword:
   | T_TRAIT_C                          { $$ = $1;}
   | T_INSTEADOF                        { $$ = $1;}
   | T_TYPE                             { $$ = $1;}
+  | T_NEWTYPE                          { $$ = $1;}
   | T_SHAPE                            { $$ = $1;}
 ;
 
@@ -2327,10 +2330,20 @@ class_constant:
  * mode, but simplify down to the original thing
  */
 
-hh_typedef_statement:
+hh_opt_constraint:
+    /* empty */
+  | T_AS hh_type
+  ;
+
+hh_type_alias_statement:
     T_TYPE hh_name_with_typevar
-    '=' hh_type ';'                    { only_in_hh_syntax(_p);
+      '=' hh_type ';'                  { only_in_hh_syntax(_p);
                                          _p->onTypedef($$, $2, $4);
+                                         _p->popTypeScope(); }
+  | T_NEWTYPE hh_name_with_typevar
+            hh_opt_constraint
+    '=' hh_type ';'                    { only_in_hh_syntax(_p);
+                                         _p->onTypedef($$, $2, $5);
                                          _p->popTypeScope(); }
 ;
 

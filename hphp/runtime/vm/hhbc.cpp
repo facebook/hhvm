@@ -892,11 +892,20 @@ bool instrIsControlFlow(Op opcode) {
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {
-  return
-    instrIsControlFlow(opcode) &&
-    !isFCallStar(opcode) &&
-    opcode != OpContEnter &&
-    opcode != OpFCallBuiltin;
+  if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
+  switch (opcode) {
+    case OpContEnter:
+    case OpFCallBuiltin:
+    case OpIncl:
+    case OpInclOnce:
+    case OpReq:
+    case OpReqOnce:
+    case OpReqDoc:
+      return false;
+
+    default:
+      return true;
+  }
 }
 
 bool instrAllowsFallThru(Op opcode) {

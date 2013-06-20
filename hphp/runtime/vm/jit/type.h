@@ -493,6 +493,12 @@ static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
  */
 Type liveTVType(const TypedValue* tv);
 
+/*
+ * Return the boxed version of the input type, taking into account php
+ * semantics and subtle implementation details.
+ */
+Type boxType(Type);
+
 }}
 
 #endif

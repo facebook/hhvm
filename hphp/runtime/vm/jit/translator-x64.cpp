@@ -2480,6 +2480,10 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   } break;
 
   case REQ_RESUME: {
+    if (UNLIKELY(vmpc() == 0)) {
+      g_vmContext->m_fp = 0;
+      return false;
+    }
     SrcKey dest(curFunc(), vmpc());
     sk = dest;
     start = getTranslation(TranslArgs(dest, true));
@@ -2726,6 +2730,11 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   assert(toOp(*vmpc()) == Op::opcode);                                  \
   VMExecutionContext* ec = g_vmContext;                                 \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
+  if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
+    static const StringData* cat = StringData::GetStaticString("interpOne"); \
+    static const StringData* name = StringData::GetStaticString(#opcode);    \
+    Stats::incStatGrouped(cat, name, 1);                                \
+  }                                                                     \
   INC_TPC(interp_one)                                                   \
   /* Correct for over-counting in TC-stats. */                          \
   Stats::inc(Stats::Instr_TC, -1);                                      \
@@ -3017,65 +3026,11 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   return switchBoundsCheck(ival, base, nTargets);
 }
 
-// PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
-// shared handlers, as per the PSEUDOINSTRS macro.
-#define PSEUDOINSTR_DISPATCH(func)              \
-  case OpBitAnd:                                \
-  case OpBitOr:                                 \
-  case OpBitXor:                                \
-  case OpSub:                                   \
-  case OpMul:                                   \
-    func(BinaryArithOp, t, i)                   \
-  case OpSame:                                  \
-  case OpNSame:                                 \
-    func(SameOp, t, i)                          \
-  case OpEq:                                    \
-  case OpNeq:                                   \
-    func(EqOp, t, i)                            \
-  case OpLt:                                    \
-  case OpLte:                                   \
-  case OpGt:                                    \
-  case OpGte:                                   \
-    func(LtGtOp, t, i)                          \
-  case OpEmptyL:                                \
-  case OpCastBool:                              \
-    func(UnaryBooleanOp, t, i)                  \
-  case OpJmpZ:                                  \
-  case OpJmpNZ:                                 \
-    func(BranchOp, t, i)                        \
-  case OpSetL:                                  \
-  case OpBindL:                                 \
-    func(AssignToLocalOp, t, i)                 \
-  case OpFPassC:                                \
-  case OpFPassCW:                               \
-  case OpFPassCE:                               \
-    func(FPassCOp, t, i)                        \
-  case OpFPushCuf:                              \
-  case OpFPushCufF:                             \
-  case OpFPushCufSafe:                          \
-    func(FPushCufOp, t, i)                      \
-  case OpIssetL:                                \
-  case OpIsNullL:                               \
-  case OpIsStringL:                             \
-  case OpIsArrayL:                              \
-  case OpIsIntL:                                \
-  case OpIsObjectL:                             \
-  case OpIsBoolL:                               \
-  case OpIsDoubleL:                             \
-  case OpIsNullC:                               \
-  case OpIsStringC:                             \
-  case OpIsArrayC:                              \
-  case OpIsIntC:                                \
-  case OpIsObjectC:                             \
-  case OpIsBoolC:                               \
-  case OpIsDoubleC:                             \
-    func(CheckTypeOp, t, i)
-
 bool
 TranslatorX64::dontGuardAnyInputs(Op op) {
   switch (op) {
 #define CASE(iNm) case Op ## iNm:
-#define NOOP(a, b, c)
+#define NOOP(...)
   INSTRS
     PSEUDOINSTR_DISPATCH(NOOP)
     return false;
@@ -3248,6 +3203,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     auto region = JIT::selectRegion(rContext, &t);
 
     TranslateResult result = Retry;
+    RegionBlacklist regionInterps;
     while (result == Retry) {
       traceStart(sk.offset());
 
@@ -3256,7 +3212,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       if (region) {
         try {
           assertCleanState();
-          result = translateRegion(*region);
+          result = translateRegion(*region, regionInterps);
           FTRACE(2, "translateRegion finished with result {}\n",
                  translateResultName(result));
         } catch (const std::exception& e) {
@@ -3272,9 +3228,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       if (!region || result == Failure) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
-        static const bool requireRegion = getenv("HHVM_REQUIRE_REGION");
-        assert(!requireRegion);
         result = irTranslateTracelet(*tp);
+        static const bool requireRegion = getenv("HHVM_REQUIRE_REGION");
+        assert(IMPLIES(region && requireRegion, result != Success));
       }
 
       if (result != Success) {

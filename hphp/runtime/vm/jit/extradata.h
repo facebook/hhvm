@@ -317,6 +317,23 @@ struct CheckDefinedClsData : IRExtraData {
   const Class* cls;
 };
 
+/*
+ * Offset and stack deltas for InterpOne.
+ */
+struct InterpOneData : IRExtraData {
+  InterpOneData(Offset o, int64_t pop, int64_t push)
+    : bcOff(o), cellsPopped(pop), cellsPushed(push) {}
+
+  // Offset of the instruction to interpret, in the Unit indicated by
+  // the current Marker.
+  Offset bcOff;
+
+  // The number of stack cells consumed and produced by the
+  // instruction, respectively. Includes ActRecs.
+  int64_t cellsPopped;
+  int64_t cellsPushed;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -380,6 +397,7 @@ X(ReqBindJmpNZero,              ReqBindJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);
+X(InterpOne,                    InterpOneData);
 
 #undef X
 

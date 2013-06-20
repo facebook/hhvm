@@ -339,6 +339,7 @@ private:
   void      trackDefInlineFP(IRInstruction* inst);
   void      trackInlineReturn(IRInstruction* inst);
   void      updateTrackedState(IRInstruction* inst);
+  void      clearLocals();
   void      clearTrackedState();
   void      dropLocalRefsInnerTypes();
 

@@ -28,17 +28,6 @@
 namespace HPHP {
 namespace JIT {
 
-class FailedCodeGen : public std::exception {
- public:
-  const char*    file;
-  const int      line;
-  const char*    func;
-  const uint32_t bcOff;
-  FailedCodeGen(const char* _file, int _line, const char* _func,
-                uint32_t _bcOff) :
-      file(_file), line(_line), func(_func), bcOff(_bcOff) { }
-};
-
 struct ArgGroup;
 
 // DestType describes the return type of native helper calls, particularly

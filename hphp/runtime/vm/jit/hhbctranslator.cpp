@@ -217,6 +217,17 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
   m_evalStack.replace(index, tmp);
 }
 
+Type HhbcTranslator::topType(uint32_t idx) const {
+  if (idx < m_evalStack.size()) {
+    return m_evalStack.top(idx)->type();
+  } else {
+    auto stkVal = getStackValue(m_tb->sp(),
+                                idx - m_evalStack.size() + m_stackDeficit);
+    if (stkVal.knownType.equals(Type::None)) return Type::Gen;
+    return stkVal.knownType;
+  }
+}
+
 /*
  * When doing gen-time inlining, we set up a series of IR instructions
  * that looks like this:
@@ -503,7 +514,7 @@ void HhbcTranslator::emitAddElemC() {
 
 void HhbcTranslator::emitAddNewElemC() {
   if (!topC(1)->isA(Type::Arr)) {
-    return emitInterpOne(Type::Arr, 2, 0);
+    return emitInterpOne(Type::Arr, 2);
   }
 
   auto const val = popC();
@@ -3278,31 +3289,269 @@ void HhbcTranslator::emitXor() {
   gen(DecRef, btr);
 }
 
-/**
- * Emit InterpOne instruction.
- *   - 'type' is the return type of the value the instruction pushes on
- *            the stack if any (or Type:None if none)
- *   - 'numPopped' is the number of cells that this instruction pops
- *   - 'numExtraPushed' is the number of cells this instruction pushes on
- *            the stack, in addition to the cell corresponding to 'type'
- */
-void HhbcTranslator::emitInterpOne(Type type, int numPopped,
-                                   int numExtraPushed) {
-  // We're calling into the interpreter so we want the stack synced to memory.
-  SSATmp* sp = spillStack();
-  // discard the top elements of the stack, which are consumed by this instr
-  discard(numPopped);
-  assert(numPopped == m_stackDeficit);
-  int numPushed = (type == Type::None ? 0 : 1) + numExtraPushed;
-  gen(
-    InterpOne,
-    type,
-    m_tb->fp(),
-    sp,
-    cns(bcOff()),
-    cns(numPopped - numPushed)
-  );
-  m_stackDeficit = 0;
+namespace {
+
+Type arithOpResult(Type t1, Type t2) {
+  if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
+    return Type::Cell;
+  }
+
+  auto both = t1 | t2;
+  if (both.maybe(Type::Dbl)) return Type::Dbl;
+  if (both.maybe(Type::Arr)) return Type::Arr;
+  if (both.maybe(Type::Str)) return Type::Cell;
+  return Type::Int;
+}
+
+Type bitOpResult(Type t1, Type t2) {
+  if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
+    return Type::Cell;
+  }
+
+  auto both = t1 | t2;
+  if (both.subtypeOf(Type::Str)) return Type::Str;
+  return Type::Int;
+}
+
+Type setOpResult(Type locType, Type valType, SetOpOp op) {
+  switch (op) {
+    case SetOpPlusEqual:
+    case SetOpMinusEqual:
+    case SetOpMulEqual:    return arithOpResult(locType.unbox(), valType);
+    case SetOpConcatEqual: return Type::Str;
+    case SetOpDivEqual:
+    case SetOpModEqual:    return Type::Cell;
+    case SetOpAndEqual:
+    case SetOpOrEqual:
+    case SetOpXorEqual:    return bitOpResult(locType.unbox(), valType);
+    case SetOpSlEqual:
+    case SetOpSrEqual:     return Type::Int;
+
+    case SetOp_invalid:    not_reached();
+  }
+  not_reached();
+}
+
+uint32_t localOutputId(const NormalizedInstruction& inst) {
+  switch (inst.op()) {
+    case OpUnpackCont:
+    case OpPackCont:
+    case OpContRetC:
+    case OpContSend:
+    case OpContRaise:
+      return 0;
+
+    case OpSetWithRefLM:
+    case OpFPassL:
+      return inst.imm[1].u_IVA;
+
+    default:
+      return inst.imm[0].u_IVA;
+  }
+}
+
+}
+
+Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
+  using namespace Transl::InstrFlags;
+  auto localType = [&]{
+    auto locId = localOutputId(inst);
+    assert(locId >= 0 && locId < curFunc()->numLocals());
+    auto t = m_tb->getLocalType(locId);
+    return t.equals(Type::None) ? Type::Gen : t;
+  };
+  auto cell = [](Type t) {
+    return t.unbox();
+  };
+  auto boxed = [](Type t) {
+    if (t.equals(Type::Gen)) return t;
+    assert(t.isBoxed() || t.notBoxed());
+    return t.isBoxed() ? t : boxType(t);
+  };
+
+  auto outFlag = getInstrInfo(inst.op()).type;
+  if (outFlag == OutFInputL) {
+    outFlag = inst.preppedByRef ? OutVInputL : OutCInputL;
+  } else if (outFlag == OutFInputR) {
+    outFlag = inst.preppedByRef ? OutVInput : OutCInput;
+  }
+
+  switch (outFlag) {
+    case OutNull:        return Type::InitNull;
+    case OutNullUninit:  return Type::Uninit;
+    case OutString:      return Type::Str;
+    case OutStringImm:   return Type::StaticStr;
+    case OutDouble:      return Type::Dbl;
+    case OutBoolean:
+    case OutBooleanImm:  return Type::Bool;
+    case OutInt64:       return Type::Int;
+    case OutArray:       return Type::Arr;
+    case OutArrayImm:    return Type::Arr; // Should be StaticArr: t2124292
+    case OutObject:
+    case OutThisObject:  return Type::Obj;
+
+    case OutFDesc:       return Type::None;
+    case OutUnknown:     return Type::Gen;
+    case OutPred:        return inst.outPred;
+    case OutCns:         return Type::Cell;
+    case OutVUnknown:    return Type::BoxedCell;
+
+    case OutSameAsInput: return topType(0);
+    case OutCInput:      return cell(topType(0));
+    case OutVInput:      return boxed(topType(0));
+    case OutCInputL:     return cell(localType());
+    case OutVInputL:     return boxed(localType());
+    case OutFInputL:
+    case OutFInputR:     not_reached();
+
+    case OutArith:       return arithOpResult(topType(0), topType(1));
+    case OutBitOp:
+      return bitOpResult(topType(0),
+                         inst.op() == HPHP::OpBitNot ? Type::Bottom
+                                                     : topType(1));
+    case OutSetOp:      return setOpResult(localType(), topType(0),
+                                           SetOpOp(inst.imm[1].u_OA));
+    case OutIncDec:     return localType().unbox().isInt() ? Type::Int
+                                                           : Type::Cell;
+    case OutStrlen:     return topType(0).isString() ? Type::Int : Type::Cell;
+    case OutClassRef:   return Type::Cls;
+    case OutSetM:       return Type::Cell; // Imprecise but we can translate
+                                           // all cases that matter.
+
+    case OutNone:       return Type::None;
+  }
+  not_reached();
+}
+
+void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
+  using namespace Transl::InstrFlags;
+  if (!(getInstrInfo(inst.op()).out & Local)) return;
+
+  auto setImmLocType = [&](uint32_t id, Type t = Type::Gen) {
+    gen(OverrideLoc, t, LocalId(inst.imm[id].u_HA), m_tb->fp());
+  };
+
+  switch (inst.op()) {
+    case OpSetN:
+    case OpSetOpN:
+    case OpIncDecN:
+    case OpBindN:
+    case OpUnsetN:
+      gen(SmashLocals, m_tb->fp());
+      break;
+
+    case OpSetOpL:
+    case OpIncDecL: {
+      auto locType = m_tb->getLocalType(inst.imm[0].u_HA);
+      auto stackType = topType(0);
+      setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
+      break;
+    }
+
+    case OpStaticLocInit:
+      setImmLocType(0, Type::BoxedCell);
+      break;
+
+    case OpInitThisLoc:
+      setImmLocType(0, Type::Gen);
+      break;
+
+    case OpSetL:
+    case OpBindL:
+      setImmLocType(0, topType(0));
+      break;
+
+    case OpUnsetL:
+      setImmLocType(0, Type::Uninit);
+      break;
+
+    case OpSetM:
+    case OpSetOpM:
+    case OpBindM:
+    case OpVGetM:
+    case OpSetWithRefLM:
+    case OpSetWithRefRM:
+      switch (inst.immVec.locationCode()) {
+        case LL: {
+          auto const& mii = getMInstrInfo(inst.mInstrOp());
+          auto const& base = inst.inputs[mii.valCount()]->location;
+          assert(base.space == Location::Local);
+          Type baseType = m_tb->getLocalType(base.offset);
+          assert(baseType.isBoxed() || baseType.notBoxed() ||
+                 baseType.equals(Type::Gen));
+          const bool baseBoxed = baseType.isBoxed();
+          baseType = baseType.strip();
+
+          // This is a simple, conservative approximation of the real type flow
+          // logic that happens in VectorTranslator.
+          if (baseType.maybe(Type::Str | Type::Bool | Type::Null)) {
+            auto promoted = mcodeMaybePropName(inst.immVecM[0]) ? Type::Obj
+                                                                : Type::Arr;
+            if (!baseType.isNull()) {
+              // Promotion isn't guaranteed to happen so the base might keep
+              // its original type.
+              promoted = promoted | baseType;
+            }
+            if (baseBoxed) promoted = boxType(promoted);
+            gen(OverrideLoc, promoted, LocalId(base.offset), m_tb->fp());
+          }
+          break;
+        }
+
+        case LNL:
+        case LNC:
+          gen(SmashLocals, m_tb->fp());
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    case OpMIterInitK:
+    case OpMIterNextK:
+      setImmLocType(3, Type::Cell);
+    case OpMIterInit:
+    case OpMIterNext:
+      setImmLocType(2, Type::BoxedCell);
+      break;
+
+    case OpIterInitK:
+    case OpWIterInitK:
+    case OpIterNextK:
+    case OpWIterNextK:
+      setImmLocType(3, Type::Cell);
+    case OpIterInit:
+    case OpWIterInit:
+    case OpIterNext:
+    case OpWIterNext:
+      setImmLocType(2, Type::Gen);
+      break;
+
+    default:
+      not_reached();
+  }
+}
+
+void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
+  auto stackType = interpOutputType(inst);
+  auto popped = getStackPopped(inst);
+  auto pushed = getStackPushed(inst);
+  FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
+         inst.toString(), stackType.toString(), popped, pushed);
+  emitInterpOne(stackType, popped, pushed);
+  interpOutputLocals(inst);
+}
+
+void HhbcTranslator::emitInterpOne(Type outType, int popped) {
+  emitInterpOne(outType, popped, outType.equals(Type::None) ? 0 : 1);
+}
+
+void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed) {
+  auto sp = spillStack();
+  gen(InterpOne, outType, InterpOneData(bcOff(), popped, pushed),
+      m_tb->fp(), sp);
+  assert(m_stackDeficit == 0);
 }
 
 void HhbcTranslator::emitInterpOneCF(int numPopped) {

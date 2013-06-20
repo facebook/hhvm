@@ -49,6 +49,7 @@ using namespace reg;
 using namespace Util;
 using namespace Trace;
 using std::max;
+using JIT::HhbcTranslator;
 
 TRACE_SET_MOD(hhir);
 #ifdef DEBUG
@@ -1414,60 +1415,6 @@ Translator::translateCIterFree(const NormalizedInstruction& i) {
   HHIR_EMIT(CIterFree, i.imm[0].u_IVA);
 }
 
-// PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
-// shared handlers, as per the PSEUDOINSTRS macro.
-#define PSEUDOINSTR_DISPATCH(func)              \
-  case OpBitAnd:                                \
-  case OpBitOr:                                 \
-  case OpBitXor:                                \
-  case OpSub:                                   \
-  case OpMul:                                   \
-    func(BinaryArithOp, t, i)                   \
-  case OpSame:                                  \
-  case OpNSame:                                 \
-    func(SameOp, t, i)                          \
-  case OpEq:                                    \
-  case OpNeq:                                   \
-    func(EqOp, t, i)                            \
-  case OpLt:                                    \
-  case OpLte:                                   \
-  case OpGt:                                    \
-  case OpGte:                                   \
-    func(LtGtOp, t, i)                          \
-  case OpEmptyL:                                \
-  case OpCastBool:                              \
-    func(UnaryBooleanOp, t, i)                  \
-  case OpJmpZ:                                  \
-  case OpJmpNZ:                                 \
-    func(BranchOp, t, i)                        \
-  case OpSetL:                                  \
-  case OpBindL:                                 \
-    func(AssignToLocalOp, t, i)                 \
-  case OpFPassC:                                \
-  case OpFPassCW:                               \
-  case OpFPassCE:                               \
-    func(FPassCOp, t, i)                        \
-  case OpFPushCuf:                              \
-  case OpFPushCufF:                             \
-  case OpFPushCufSafe:                          \
-    func(FPushCufOp, t, i)                      \
-  case OpIssetL:                                \
-  case OpIsNullL:                               \
-  case OpIsStringL:                             \
-  case OpIsArrayL:                              \
-  case OpIsIntL:                                \
-  case OpIsObjectL:                             \
-  case OpIsBoolL:                               \
-  case OpIsDoubleL:                             \
-  case OpIsNullC:                               \
-  case OpIsStringC:                             \
-  case OpIsArrayC:                              \
-  case OpIsIntC:                                \
-  case OpIsObjectC:                             \
-  case OpIsBoolC:                               \
-  case OpIsDoubleC:                             \
-    func(CheckTypeOp, t, i)
-
 // All vector instructions are handled by one HhbcTranslator method.
 #define MII(instr, ...)                                                 \
   void Translator::translate##instr##M(const NormalizedInstruction& ni) { \
@@ -1478,35 +1425,21 @@ MII(FPass)
 #undef MII
 
 void
-Translator::translateInstrDefault(const NormalizedInstruction& i) {
-  const char *opNames[] = {
-#define O(name, imm, push, pop, flags) \
-"Unimplemented" #name,
-  OPCODES
-#undef O
-  };
-  auto const op = i.op();
-
-  HHIR_UNIMPLEMENTED_OP(opNames[uint8_t(op)]);
-  assert(false);
-}
-
-void
 Translator::translateInstrWork(const NormalizedInstruction& i) {
   auto const op = i.op();
 
   switch (op) {
 #define CASE(iNm)                               \
     case Op ## iNm:                             \
-      translate ## iNm(i);                    \
+      translate ## iNm(i);                      \
       break;
-#define TRANSLATE(a, b, c) translate ## a(c); break;
+#define TRANSLATE(name, inst) translate ## name(inst); break;
     INSTRS
       PSEUDOINSTR_DISPATCH(TRANSLATE)
 #undef TRANSLATE
 #undef CASE
-  default:
-      translateInstrDefault(i);
+    default:
+      not_reached();
   }
 }
 
@@ -1557,33 +1490,15 @@ static int getNumPopped(const NormalizedInstruction& i) {
     + (pushesActRec(i.op()) ? kNumActRecCells : 0);
 }
 
-/**
- * Returns the number of Act-Rec cells that instruction i pushes onto the stack.
- */
-static int getNumARCellsPushed(const NormalizedInstruction& i) {
-  return pushesActRec(i.op()) ? kNumActRecCells : 0;
-}
-
 void Translator::interpretInstr(const NormalizedInstruction& i) {
-  JIT::Type outStkType = JIT::Type::fromDynLocation(i.outStack);
   int poppedCells      = getNumPopped(i);
-  int arPushedCells    = getNumARCellsPushed(i);
-
-  FTRACE(5, "HHIR: BC Instr {}  Popped = {}  ARCellsPushed = {}\n",
-         i.toString(), poppedCells, arPushedCells);
+  FTRACE(5, "HHIR: BC Instr {}  Popped = {}\n",
+         i.toString(), poppedCells);
 
   if (i.changesPC) {
     m_hhbcTrans->emitInterpOneCF(poppedCells);
   } else {
-    m_hhbcTrans->emitInterpOne(outStkType, poppedCells, arPushedCells);
-    if (i.outLocal) {
-      // HHIR tracks local values and types, so we should inform it about
-      // the new local type.  This is done via an overriding type assertion.
-      assert(i.outLocal->isLocal());
-      int32_t locId = i.outLocal->location.offset;
-      JIT::Type newType = JIT::Type::fromRuntimeType(i.outLocal->rtt);
-      m_hhbcTrans->overrideTypeLocal(locId, newType);
-    }
+    m_hhbcTrans->emitInterpOne(i);
   }
 }
 
@@ -1611,7 +1526,7 @@ void Translator::translateInstr(const NormalizedInstruction& i) {
                              1, true);
   }
 
-  if (i.interp) {
+  if (instrMustInterp(i) || i.interp) {
     interpretInstr(i);
   } else {
     translateInstrWork(i);
@@ -1665,21 +1580,9 @@ void TranslatorX64::irEmitResolvedDeps(const ChangeMap& resolvedDeps) {
   }
 }
 
-static bool supportedInterpOne(const NormalizedInstruction* i) {
-  switch (i->op()) {
-    // Instructions that do function return are not supported yet
-    case OpRetC:
-    case OpRetV:
-    case OpContRetC:
-    case OpNativeImpl:
-      return false;
-    default:
-      return true;
-  }
-}
-
 TranslatorX64::TranslateResult
 TranslatorX64::irTranslateTracelet(Tracelet& t) {
+  FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   assert(srcRec.inProgressTailJumps().size() == 0);
@@ -1721,7 +1624,8 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
     }();
 
     // Translate each instruction in the tracelet
-    for (auto* ni = t.m_instrStream.first; ni; ni = ni->next) {
+    for (auto* ni = t.m_instrStream.first; ni && !m_hhbcTrans->hasExit();
+         ni = ni->next) {
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
         Nuller<NormalizedInstruction> niNuller(&m_curNI);
@@ -1730,12 +1634,11 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
       } catch (JIT::FailedIRGen& fcg) {
         // If we haven't tried interpreting ni yet, flag it to be interpreted
         // and retry
-        if (!ni->interp && supportedInterpOne(ni)) {
+        if (!ni->interp) {
           ni->interp = true;
           return Retry;
-        } else {
-          throw fcg;
         }
+        throw fcg;
       }
       assert(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
@@ -1754,7 +1657,7 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
       // problem, flag it to be interpreted, and retranslate the tracelet.
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source.offset() == fcg.bcOff) {
-          if (!ni->interp && supportedInterpOne(ni)) {
+          if (!ni->interp) {
             ni->interp = true;
             TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
                   "after failing to code-gen \n\n",

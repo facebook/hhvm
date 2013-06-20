@@ -33,9 +33,11 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/region_selection.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-data.h"
+#include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/writelease.h"
 #include "hphp/runtime/vm/debugger_hook.h"
@@ -47,7 +49,6 @@ namespace HPHP {
 namespace JIT {
 class HhbcTranslator;
 class IRFactory;
-class RegionDesc;
 }
 namespace Debug {
 class DebugInfo;
@@ -669,159 +670,6 @@ struct TranslArgs {
   bool m_interp;
 };
 
-#define INSTRS \
-  CASE(PopC) \
-  CASE(PopV) \
-  CASE(PopR) \
-  CASE(UnboxR) \
-  CASE(Null) \
-  CASE(NullUninit) \
-  CASE(True) \
-  CASE(False) \
-  CASE(Int) \
-  CASE(Double) \
-  CASE(String) \
-  CASE(Array) \
-  CASE(NewArray) \
-  CASE(NewTuple) \
-  CASE(NewCol) \
-  CASE(Nop) \
-  CASE(AddElemC) \
-  CASE(AddNewElemC) \
-  CASE(ColAddElemC) \
-  CASE(ColAddNewElemC) \
-  CASE(Cns) \
-  CASE(DefCns) \
-  CASE(ClsCnsD) \
-  CASE(Concat) \
-  CASE(Add) \
-  CASE(Xor) \
-  CASE(Not) \
-  CASE(Mod) \
-  CASE(BitNot) \
-  CASE(CastInt) \
-  CASE(CastString) \
-  CASE(CastDouble) \
-  CASE(CastArray) \
-  CASE(CastObject) \
-  CASE(Print) \
-  CASE(Jmp) \
-  CASE(Switch) \
-  CASE(SSwitch) \
-  CASE(RetC) \
-  CASE(RetV) \
-  CASE(NativeImpl) \
-  CASE(AGetC) \
-  CASE(AGetL) \
-  CASE(CGetL) \
-  CASE(CGetL2) \
-  CASE(CGetS) \
-  CASE(CGetM) \
-  CASE(CGetG) \
-  CASE(VGetL) \
-  CASE(VGetG) \
-  CASE(VGetM) \
-  CASE(IssetM) \
-  CASE(EmptyM) \
-  CASE(AKExists) \
-  CASE(SetS) \
-  CASE(SetG) \
-  CASE(SetM) \
-  CASE(SetWithRefLM) \
-  CASE(SetWithRefRM) \
-  CASE(SetOpL) \
-  CASE(SetOpM) \
-  CASE(IncDecL) \
-  CASE(IncDecM) \
-  CASE(UnsetL) \
-  CASE(UnsetM) \
-  CASE(BindM) \
-  CASE(FPushFuncD) \
-  CASE(FPushFunc) \
-  CASE(FPushClsMethodD) \
-  CASE(FPushClsMethodF) \
-  CASE(FPushObjMethodD) \
-  CASE(FPushCtor) \
-  CASE(FPushCtorD) \
-  CASE(FPassR) \
-  CASE(FPassL) \
-  CASE(FPassM) \
-  CASE(FPassS) \
-  CASE(FPassG) \
-  CASE(This) \
-  CASE(BareThis) \
-  CASE(CheckThis) \
-  CASE(InitThisLoc) \
-  CASE(FCall) \
-  CASE(FCallArray) \
-  CASE(FCallBuiltin) \
-  CASE(VerifyParamType) \
-  CASE(InstanceOfD) \
-  CASE(StaticLocInit) \
-  CASE(IterInit) \
-  CASE(IterInitK) \
-  CASE(IterNext) \
-  CASE(IterNextK) \
-  CASE(WIterInit) \
-  CASE(WIterInitK) \
-  CASE(WIterNext) \
-  CASE(WIterNextK) \
-  CASE(ReqDoc) \
-  CASE(DefCls) \
-  CASE(DefFunc) \
-  CASE(Self) \
-  CASE(Parent) \
-  CASE(ClassExists) \
-  CASE(InterfaceExists) \
-  CASE(TraitExists) \
-  CASE(Dup) \
-  CASE(CreateCl) \
-  CASE(CreateCont) \
-  CASE(ContEnter) \
-  CASE(ContExit) \
-  CASE(UnpackCont) \
-  CASE(PackCont) \
-  CASE(ContRetC) \
-  CASE(ContNext) \
-  CASE(ContSend) \
-  CASE(ContRaise) \
-  CASE(ContValid) \
-  CASE(ContCurrent) \
-  CASE(ContStopped) \
-  CASE(ContHandle) \
-  CASE(Strlen) \
-  CASE(IncStat) \
-  CASE(ArrayIdx) \
-  CASE(FPushCufIter) \
-  CASE(CIterFree) \
-  CASE(LateBoundCls) \
-  CASE(IssetS) \
-  CASE(IssetG) \
-  CASE(UnsetG) \
-  CASE(EmptyS) \
-  CASE(EmptyG) \
-  CASE(VGetS) \
-  CASE(BindS) \
-  CASE(BindG) \
-  CASE(IterFree) \
-  CASE(FPassV) \
-  CASE(UnsetN) \
-  CASE(DecodeCufIter) \
-
-  // These are instruction-like functions which cover more than one
-  // opcode.
-#define PSEUDOINSTRS \
-  CASE(BinaryArithOp) \
-  CASE(SameOp) \
-  CASE(EqOp) \
-  CASE(LtGtOp) \
-  CASE(UnaryBooleanOp) \
-  CASE(BranchOp) \
-  CASE(AssignToLocalOp) \
-  CASE(FPushCufOp) \
-  CASE(FPassCOp) \
-  CASE(CheckTypeOp)
-
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
@@ -907,11 +755,11 @@ protected:
   virtual void traceCodeGen() = 0;
   void traceEnd();
   void traceFree();
+  static bool instrMustInterp(const NormalizedInstruction&);
 
 private:
   void interpretInstr(const NormalizedInstruction& i);
   void translateInstrWork(const NormalizedInstruction& i);
-  void translateInstrDefault(const NormalizedInstruction& i);
   void passPredictedAndInferredTypes(const NormalizedInstruction& i);
 #define CASE(nm) void translate ## nm(const NormalizedInstruction& i);
 INSTRS
@@ -930,7 +778,13 @@ protected:
   void requestResetHighLevelTranslator();
 
   void populateImmediates(NormalizedInstruction&);
-  TranslateResult translateRegion(const RegionDesc& region);
+
+  /* translateRegion reads from the RegionBlacklist to determine when
+   * to interpret an instruction, and adds failed instructions to the
+   * blacklist so they're interpreted on the next attempt. */
+  typedef hphp_hash_set<SrcKey, SrcKey::Hasher> RegionBlacklist;
+  TranslateResult translateRegion(const RegionDesc& region,
+                                  RegionBlacklist& interp);
 
   TCA m_resumeHelper;
   TCA m_resumeHelperRet;
@@ -938,7 +792,7 @@ protected:
   typedef std::map<TCA, TransID> TransDB;
   TransDB            m_transDB;
   vector<TransRec>   m_translations;
-  vector<uint64_t*>    m_transCounters;
+  vector<uint64_t*>  m_transCounters;
 
   int64_t              m_createdTime;
 
@@ -1115,6 +969,8 @@ public:
 };
 
 int getStackDelta(const NormalizedInstruction& ni);
+int64_t getStackPopped(const NormalizedInstruction&);
+int64_t getStackPushed(const NormalizedInstruction&);
 
 enum class ControlFlowInfo {
   None,
@@ -1211,6 +1067,94 @@ static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject;
 }
+
+namespace InstrFlags {
+enum OutTypeConstraints {
+  OutNull,
+  OutNullUninit,
+  OutString,
+  OutStringImm,         // String w/ precisely known immediate.
+  OutDouble,
+  OutBoolean,
+  OutBooleanImm,
+  OutInt64,
+  OutArray,
+  OutArrayImm,
+  OutObject,
+  OutThisObject,        // Object from current environment
+  OutFDesc,             // Blows away the current function desc
+
+  OutUnknown,           // Not known at tracelet compile-time
+  OutPred,              // Unknown, but give prediction a whirl.
+  OutCns,               // Constant; may be known at compile-time
+  OutVUnknown,          // type is V(unknown)
+
+  OutSameAsInput,       // type is the same as the first stack inpute
+  OutCInput,            // type is C(input)
+  OutVInput,            // type is V(input)
+  OutCInputL,           // type is C(type) of local input
+  OutVInputL,           // type is V(type) of local input
+  OutFInputL,           // type is V(type) of local input if current param is
+                        //   by ref, else type is C(type) of local input
+  OutFInputR,           // Like FInputL, but for R's on the stack.
+
+  OutArith,             // For Add, Sub, Mul
+  OutBitOp,             // For BitAnd, BitOr, BitXor
+  OutSetOp,             // For SetOpL
+  OutIncDec,            // For IncDecL
+  OutStrlen,            // OpStrLen
+  OutClassRef,          // KindOfClass
+  OutSetM,              // SetM is a very special snowflake
+  OutNone
+};
+
+/*
+ * Input codes indicate what an instruction reads, and some other
+ * things about their behavior.  The order these show up in the inputs
+ * vector is given in getInputs(), and is relevant in a few cases
+ * (e.g. instructions taking both stack inputs and MVectors).
+ */
+enum Operands {
+  None            = 0,
+  Stack3          = 1 << 0,
+  Stack2          = 1 << 1,
+  Stack1          = 1 << 2,
+  StackIns1       = 1 << 3,  // Insert an element under top of stack
+  StackIns2       = 1 << 4,  // Insert an element under top 2 of stack
+  FuncdRef        = 1 << 5,  // Input to FPass*
+  FStack          = 1 << 6,  // output of FPushFuncD and friends
+  Local           = 1 << 7,  // Writes to a local
+  MVector         = 1 << 8,  // Member-vector input
+  Iter            = 1 << 9,  // Iterator in imm[0]
+  AllLocals       = 1 << 10, // All locals (used by RetC)
+  DontGuardLocal  = 1 << 11, // Dont force a guard on behalf of the local input
+  DontGuardStack1 = 1 << 12, // Dont force a guard on behalf of stack1 input
+  DontBreakLocal  = 1 << 13, // Dont break a tracelet on behalf of the local
+  DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
+  IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
+  DontGuardAny    = 1 << 16, // Dont force a guard for any input
+  This            = 1 << 17, // Input to CheckThis
+  StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 19, // consume N cells from stack for builtin call;
+                             // n = imm[0].u_IVA
+  StackTop2 = Stack1 | Stack2,
+  StackTop3 = Stack1 | Stack2 | Stack3,
+  StackCufSafe = StackIns1 | FStack
+};
+
+inline Operands operator|(const Operands& l, const Operands& r) {
+  return Operands(int(r) | int(l));
+}
+}
+
+struct InstrInfo {
+  InstrFlags::Operands           in;
+  InstrFlags::Operands           out;
+  InstrFlags::OutTypeConstraints type; // How are outputs related to inputs?
+  int numPushed;
+};
+
+const InstrInfo& getInstrInfo(Op op);
 
 } } // HPHP::Transl
 

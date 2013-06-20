@@ -151,9 +151,14 @@ struct HhbcTranslator {
 
   // Other public functions for irtranslator.
   void setThisAvailable();
-  void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
+  void emitInterpOne(Type t, int popped);
+  void emitInterpOne(Type t, int popped, int pushed);
+  void emitInterpOne(const NormalizedInstruction&);
   void emitInterpOneCF(int numPopped);
   std::string showStack() const;
+  bool hasExit() const {
+    return m_hasExit;
+  }
 
   /*
    * An emit* function for each HHBC opcode.
@@ -664,6 +669,9 @@ private:
   void emitMarker();
   SSATmp* staticTVCns(const TypedValue*);
 
+  Type interpOutputType(const NormalizedInstruction&) const;
+  void interpOutputLocals(const NormalizedInstruction&);
+
 private: // Exit trace creation routines.
   IRTrace* getExitTrace(Offset targetBcOff = -1);
   IRTrace* getExitTrace(Offset targetBcOff,
@@ -779,6 +787,7 @@ private:
   SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  Type    topType(uint32_t i) const;
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(IRTrace* t, SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

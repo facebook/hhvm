@@ -237,7 +237,8 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case InterpOne: {
     m_spValue = inst->dst();
-    int64_t stackAdjustment = inst->src(3)->getValInt();
+    auto const& extra = *inst->extra<InterpOne>();
+    int64_t stackAdjustment = extra.cellsPopped - extra.cellsPushed;
     // push the return value if any and adjust for the popped values
     m_spOffset -= stackAdjustment;
     break;
@@ -287,6 +288,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case GuardLoc:
     setLocalType(inst->extra<LocalId>()->locId,
                  inst->typeParam());
+    break;
+
+  case SmashLocals:
+    clearLocals();
     break;
 
   case IterInitK:
@@ -462,14 +467,18 @@ void TraceBuilder::useState(Block* block) {
   useState(std::move(state));
 }
 
-void TraceBuilder::clearTrackedState() {
-  killCse(); // clears m_cseHash
+void TraceBuilder::clearLocals() {
   for (uint32_t i = 0; i < m_localValues.size(); i++) {
     m_localValues[i] = nullptr;
   }
   for (uint32_t i = 0; i < m_localTypes.size(); i++) {
     m_localTypes[i] = Type::None;
   }
+}
+
+void TraceBuilder::clearTrackedState() {
+  killCse(); // clears m_cseHash
+  clearLocals();
   m_callerAvailableValues.clear();
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;

@@ -157,23 +157,6 @@ Type builtinReturn(const IRInstruction* inst) {
   not_reached();
 }
 
-Type boxReturn(const IRInstruction* inst, int srcId) {
-  auto t = inst->src(srcId)->type();
-  // If t contains Uninit, replace it with InitNull.
-  t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
-  // We don't try to track when a BoxedStaticStr might be converted to
-  // a BoxedStr, and we never guard on staticness for strings, so
-  // boxing a string needs to forget this detail.  Same thing for
-  // arrays.
-  if (t.subtypeOf(Type::Str)) {
-    t = Type::Str;
-  } else if (t.subtypeOf(Type::Arr)) {
-    t = Type::Arr;
-  }
-  // Everything else is just a pure type-system boxing operation.
-  return t.box();
-}
-
 Type stkReturn(const IRInstruction* inst, int dstId,
                std::function<Type()> inner) {
   assert(inst->modifiesStack());
@@ -202,6 +185,22 @@ Type binArithResultType(Opcode op, Type t1, Type t2) {
 
 }
 
+Type boxType(Type t) {
+  // If t contains Uninit, replace it with InitNull.
+  t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
+  // We don't try to track when a BoxedStaticStr might be converted to
+  // a BoxedStr, and we never guard on staticness for strings, so
+  // boxing a string needs to forget this detail.  Same thing for
+  // arrays.
+  if (t.subtypeOf(Type::Str)) {
+    t = Type::Str;
+  } else if (t.subtypeOf(Type::Arr)) {
+    t = Type::Arr;
+  }
+  // Everything else is just a pure type-system boxing operation.
+  return t.box();
+}
+
 Type outputType(const IRInstruction* inst, int dstId) {
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
@@ -210,7 +209,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define D(type)   return Type::type;
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
-#define DBox(n)   return boxReturn(inst, n);
+#define DBox(n)   return boxType(inst->src(n)->type());
 #define DParam    return inst->typeParam();
 #define DMulti    return Type::None;
 #define DStk(in)  return stkReturn(inst, dstId,                         \

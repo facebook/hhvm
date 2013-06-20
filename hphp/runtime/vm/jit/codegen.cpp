@@ -87,15 +87,16 @@ int64_t spillSlotsToSize(int n) {
   return n * sizeof(int64_t);
 }
 
-void cgPunt(const char* file, int line, const char* func, uint32_t bcOff) {
+void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
+            const Func* vmFunc) {
   if (dumpIREnabled()) {
     HPHP::Trace::trace("--------- CG_PUNT %s %d %s  bcOff: %d \n",
                        file, line, func, bcOff);
   }
-  throw FailedCodeGen(file, line, func, bcOff);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
-#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr, m_curBcOff)
+#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr, m_curBcOff, curFunc())
 
 struct CycleInfo {
   int node;
@@ -354,6 +355,7 @@ NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(OverrideLoc)
+NOOP_OPCODE(SmashLocals)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
@@ -5116,9 +5118,8 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   SSATmp* fp = inst->src(0);
   SSATmp* sp = inst->src(1);
-  SSATmp* pcOffTmp  = inst->src(2);
-  SSATmp* spAdjustmentTmp = inst->src(3);
-  int64_t pcOff = pcOffTmp->getValInt();
+  auto const& extra = *inst->extra<InterpOne>();
+  int64_t pcOff = extra.bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
   void* interpOneHelper = interpOneEntryPoints[opc];
@@ -5130,7 +5131,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   auto newSpReg = m_regs[inst->dst()].reg();
   assert(newSpReg == m_regs[sp].reg());
 
-  int64_t spAdjustBytes = cellsToBytes(spAdjustmentTmp->getValInt());
+  int64_t spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
   if (spAdjustBytes != 0) {
     m_as.addq(spAdjustBytes, newSpReg);
   }

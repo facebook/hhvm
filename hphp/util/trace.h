@@ -72,6 +72,7 @@ namespace Trace {
       TM(treadmill)   \
       TM(regalloc)    \
       TM(bcinterp)    \
+      TM(interpOne)   \
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \

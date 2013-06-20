@@ -57,6 +57,7 @@ namespace Transl {
 
 using namespace HPHP;
 using HPHP::JIT::Type;
+using HPHP::JIT::HhbcTranslator;
 
 TRACE_SET_MOD(trans)
 
@@ -341,84 +342,6 @@ Translator::tvToLocation(const TypedValue* tv, const TypedValue* frame) {
   assert(offset < ((ActRec*)frame)->m_func->numLocals());
   TRACE(2, "tvToLocation: %p -> L:%d\n", tv, offset);
   return Location(Location::Local, offset);
-}
-
-/* Opcode type-table. */
-enum OutTypeConstraints {
-  OutNull,
-  OutNullUninit,
-  OutString,
-  OutStringImm,         // String w/ precisely known immediate.
-  OutDouble,
-  OutBoolean,
-  OutBooleanImm,
-  OutInt64,
-  OutArray,
-  OutArrayImm,
-  OutObject,
-  OutThisObject,        // Object from current environment
-  OutFDesc,             // Blows away the current function desc
-
-  OutUnknown,           // Not known at tracelet compile-time
-  OutPred,              // Unknown, but give prediction a whirl.
-  OutCns,               // Constant; may be known at compile-time
-  OutVUnknown,          // type is V(unknown)
-
-  OutSameAsInput,       // type is the same as the first stack inpute
-  OutCInput,            // type is C(input)
-  OutVInput,            // type is V(input)
-  OutCInputL,           // type is C(type) of local input
-  OutVInputL,           // type is V(type) of local input
-  OutFInputL,           // type is V(type) of local input if current param is
-                        //   by ref, else type is C(type) of local input
-  OutFInputR,           // Like FInputL, but for R's on the stack.
-
-  OutArith,             // For Add, Sub, Mul
-  OutBitOp,             // For BitAnd, BitOr, BitXor
-  OutSetOp,             // For SetOpL
-  OutIncDec,            // For IncDecL
-  OutStrlen,            // OpStrLen
-  OutClassRef,          // KindOfClass
-  OutNone
-};
-
-/*
- * Input codes indicate what an instruction reads, and some other
- * things about their behavior.  The order these show up in the inputs
- * vector is given in getInputs(), and is relevant in a few cases
- * (e.g. instructions taking both stack inputs and MVectors).
- */
-enum Operands {
-  None            = 0,
-  Stack3          = 1 << 0,
-  Stack2          = 1 << 1,
-  Stack1          = 1 << 2,
-  StackIns1       = 1 << 3,  // Insert an element under top of stack
-  StackIns2       = 1 << 4,  // Insert an element under top 2 of stack
-  FuncdRef        = 1 << 5,  // Input to FPass*
-  FStack          = 1 << 6,  // output of FPushFuncD and friends
-  Local           = 1 << 7,  // Writes to a local
-  MVector         = 1 << 8,  // Member-vector input
-  Iter            = 1 << 9,  // Iterator in imm[0]
-  AllLocals       = 1 << 10, // All locals (used by RetC)
-  DontGuardLocal  = 1 << 11, // Dont force a guard on behalf of the local input
-  DontGuardStack1 = 1 << 12, // Dont force a guard on behalf of stack1 input
-  DontBreakLocal  = 1 << 13, // Dont break a tracelet on behalf of the local
-  DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
-  IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 16, // Dont force a guard for any input
-  This            = 1 << 17, // Input to CheckThis
-  StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
-  BStackN         = 1 << 19, // consume N cells from stack for builtin call;
-                             // n = imm[0].u_IVA
-  StackTop2 = Stack1 | Stack2,
-  StackTop3 = Stack1 | Stack2 | Stack3,
-  StackCufSafe = StackIns1 | FStack
-};
-
-Operands
-operator|(const Operands& l, const Operands& r) {
-  return Operands(int(r) | int(l));
 }
 
 static int64_t typeToMask(DataType t) {
@@ -772,20 +695,16 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
     case SetOpSlEqual:
     case SetOpSrEqual:     return RuntimeType(KindOfInt64);
     default:
-      assert(false);
+      not_reached();
   }
-  NOT_REACHED();
-  return RuntimeType(KindOfInvalid);
 }
 
 static RuntimeType
-getDynLocType(const vector<DynLocation*>& inputs,
-              const Tracelet& t,
-              Op opcode,
+getDynLocType(const SrcKey startSk,
               NormalizedInstruction* ni,
-              Operands op,
-              OutTypeConstraints constraint,
-              DynLocation* outDynLoc) {
+              InstrFlags::OutTypeConstraints constraint) {
+  using namespace InstrFlags;
+  auto const& inputs = ni->inputs;
   assert(constraint != OutFInputL);
 
   switch (constraint) {
@@ -803,7 +722,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     CS(OutObject,      KindOfObject);
 #undef CS
     case OutPred: {
-      auto dt = predictOutputs(t.m_sk, ni);
+      auto dt = predictOutputs(startSk, ni);
       if (dt != KindOfInvalid) ni->outputPredicted = true;
       return RuntimeType(dt);
     }
@@ -897,53 +816,10 @@ getDynLocType(const vector<DynLocation*>& inputs,
         // rhs comes before the M-vector elements.
         op == OpSetL  || op == OpSetN  || op == OpSetG  || op == OpSetS  ||
         op == OpBindL || op == OpBindG || op == OpBindS || op == OpBindN ||
-        op == OpSetM  || op == OpBindM ||
+        op == OpBindM ||
         // Dup takes a single element.
         op == OpDup
       );
-
-      if (op == OpSetM) {
-        /*
-         * SetM returns null for "invalid" inputs, or a string if the
-         * base was a string. VectorTranslator ensures that invalid
-         * inputs or a string output when we weren't expecting it will
-         * cause a side exit, so we can keep this fairly simple.
-         */
-
-        if (ni->immVecM.size() > 1) {
-          // We don't know the type of the base for the final
-          // operation so we can't assume anything about the output
-          // type.
-          return RuntimeType(KindOfAny);
-        }
-
-        // For single-element vectors, we can determine the output
-        // type from the base.
-        Type baseType;
-        switch (ni->immVec.locationCode()) {
-          case LGL: case LGC:
-          case LNL: case LNC:
-          case LSL: case LSC:
-            baseType = Type::Gen;
-            break;
-
-          default:
-            baseType = Type::fromRuntimeType(inputs[1]->rtt);
-        }
-
-        const bool setElem = mcodeMaybeArrayOrMapKey(ni->immVecM[0]);
-        const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
-        if (setElem && baseType.maybe(Type::Str)) {
-          if (baseType.isString()) {
-            // The base is a string so our output is a string.
-            return RuntimeType(KindOfString);
-          } else if (!valType.isString()) {
-            // The base might be a string and our value isn't known to
-            // be a string. The output type could be Str or valType.
-            return RuntimeType(KindOfAny);
-          }
-        }
-      }
 
       const int idx = 0; // all currently supported cases.
 
@@ -959,6 +835,51 @@ getDynLocType(const vector<DynLocation*>& inputs,
         }
       }
       return inputs[idx]->rtt;
+    }
+
+    case OutSetM: {
+      /*
+       * SetM returns null for "invalid" inputs, or a string if the base was a
+       * string. VectorTranslator ensures that invalid inputs or a string
+       * output when we weren't expecting it will cause a side exit, so we can
+       * keep this fairly simple.
+       */
+
+      if (ni->immVecM.size() > 1) {
+        // We don't know the type of the base for the final operation so we
+        // can't assume anything about the output
+        // type.
+        return RuntimeType(KindOfAny);
+      }
+
+      // For single-element vectors, we can determine the output type from the
+      // base.
+      Type baseType;
+      switch (ni->immVec.locationCode()) {
+        case LGL: case LGC:
+        case LNL: case LNC:
+        case LSL: case LSC:
+          baseType = Type::Gen;
+          break;
+
+        default:
+          baseType = Type::fromRuntimeType(inputs[1]->rtt);
+      }
+
+      const bool setElem = mcodeMaybeArrayOrMapKey(ni->immVecM[0]);
+      const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
+      if (setElem && baseType.maybe(Type::Str)) {
+        if (baseType.isString()) {
+          // The base is a string so our output is a string.
+          return RuntimeType(KindOfString);
+        } else if (!valType.isString()) {
+          // The base might be a string and our value isn't known to
+          // be a string. The output type could be Str or valType.
+          return RuntimeType(KindOfAny);
+        }
+      }
+
+      return inputs[0]->rtt;
     }
 
     case OutCInputL: {
@@ -1002,7 +923,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
 
     case OutBitOp: {
       assert(inputs.size() == 2 ||
-             (inputs.size() == 1 && opcode == OpBitNot));
+             (inputs.size() == 1 && ni->op() == OpBitNot));
       if (inputs.size() == 2) {
         return bitOpType(inputs[0], inputs[1]);
       } else {
@@ -1024,13 +945,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
  * NB: this opcode structure is sparse; it cannot just be indexed by
  * opcode.
  */
-struct InstrInfo {
-  Operands           in;
-  Operands           out;
-  OutTypeConstraints type;       // How are outputs related to inputs?
-  int                stackDelta; // Impact on stack: # cells *pushed*
-};
-
+using namespace InstrFlags;
 static const struct {
   Op op;
   InstrInfo info;
@@ -1200,30 +1115,30 @@ static const struct {
 
   { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput,    0 }},
   { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
-  { OpSetG,        {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
+  { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput,   -1 }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
-  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutSameAsInput,    0 }},
+  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutSetM,           0 }},
   { OpSetWithRefLM,{MVector|Local ,   Local,        OutNone,           0 }},
   { OpSetWithRefRM,{MVector|Stack1,   Local,        OutNone,          -1 }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp,          0 }},
   { OpSetOpN,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
-  { OpSetOpG,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
+  { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpSetOpS,      {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpSetOpM,      {MVector|Stack1,   Stack1|Local, OutUnknown,        0 }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec,         1 }},
   { OpIncDecN,     {Stack1,           Stack1|Local, OutUnknown,        0 }},
-  { OpIncDecG,     {Stack1,           Stack1|Local, OutUnknown,        0 }},
+  { OpIncDecG,     {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpIncDecM,     {MVector,          Stack1,       OutUnknown,        1 }},
   { OpBindL,       {Stack1|Local|
                     IgnoreInnerType,  Stack1|Local, OutSameAsInput,    0 }},
   { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
-  { OpBindG,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
+  { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput,   -1 }},
   { OpBindS,       {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
   { OpBindM,       {MVector|Stack1,   Stack1|Local, OutSameAsInput,    0 }},
   { OpUnsetL,      {Local,            Local,        OutNone,           0 }},
   { OpUnsetN,      {Stack1,           Local,        OutNone,          -1 }},
-  { OpUnsetG,      {Stack1,           Local,        OutNone,          -1 }},
+  { OpUnsetG,      {Stack1,           None,         OutNone,          -1 }},
   { OpUnsetM,      {MVector,          None,         OutNone,           0 }},
 
   /*** 8. Call instructions ***/
@@ -1262,9 +1177,9 @@ static const struct {
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
                                       StackCufSafe, OutFDesc,
                                                          kNumActRecCells }},
-  { OpFPassC,      {FuncdRef,         None,         OutNull,           0 }},
-  { OpFPassCW,     {FuncdRef,         None,         OutNull,           0 }},
-  { OpFPassCE,     {FuncdRef,         None,         OutNull,           0 }},
+  { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
+  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
+  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
@@ -1376,9 +1291,79 @@ static void initInstrInfo() {
   }
 }
 
+const InstrInfo& getInstrInfo(Op op) {
+  assert(instrInfoInited);
+  return instrInfo[op];
+}
+
 static int numHiddenStackInputs(const NormalizedInstruction& ni) {
   assert(ni.immVec.isValid());
   return ni.immVec.numStackValues();
+}
+
+namespace {
+int64_t countOperands(uint64_t mask) {
+  const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
+    DontGuardLocal | DontGuardStack1 | DontBreakLocal | DontBreakStack1 |
+    IgnoreInnerType | DontGuardAny | This;
+  mask &= ~ignore;
+
+  static const uint64_t counts[][2] = {
+    {Stack3,       1},
+    {Stack2,       1},
+    {Stack1,       1},
+    {StackIns1,    2},
+    {StackIns2,    3},
+    {FStack,       kNumActRecCells},
+  };
+
+  int64_t count = 0;
+  for (auto const& pair : counts) {
+    if (mask & pair[0]) {
+      count += pair[1];
+      mask &= ~pair[0];
+    }
+  }
+  assert(mask == 0);
+  return count;
+}
+}
+
+int64_t getStackPopped(const NormalizedInstruction& ni) {
+  switch (ni.op()) {
+    case OpFCall:        return ni.imm[0].u_IVA + kNumActRecCells;
+    case OpFCallArray:   return kNumActRecCells + 1;
+
+    case OpFCallBuiltin:
+    case OpNewTuple:
+    case OpCreateCl:     return ni.imm[0].u_IVA;
+
+    default:             break;
+  }
+
+  uint64_t mask = getInstrInfo(ni.op()).in;
+  int64_t count = 0;
+
+  if (mask & MVector) {
+    count += ni.immVec.numStackValues();
+    mask &= ~MVector;
+  }
+  if (mask & (StackN | BStackN)) {
+    count += ni.imm[0].u_IVA;
+    mask &= ~(StackN | BStackN);
+  }
+
+  return count + countOperands(mask);
+}
+
+int64_t getStackPushed(const NormalizedInstruction& ni) {
+  switch (ni.op()) {
+    case OpFPushCufSafe:   return kNumActRecCells + 2;
+
+    default:               break;
+  }
+
+  return countOperands(getInstrInfo(ni.op()).out);
 }
 
 int getStackDelta(const NormalizedInstruction& ni) {
@@ -1404,7 +1389,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
     hiddenStackInputs = numHiddenStackInputs(ni);
     SKTRACE(2, ni.source, "Has %d hidden stack inputs\n", hiddenStackInputs);
   }
-  int delta = instrInfo[op].stackDelta - hiddenStackInputs;
+  int delta = instrInfo[op].numPushed - hiddenStackInputs;
   return delta;
 }
 
@@ -1957,6 +1942,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutBitOp:
     case OutSetOp:
     case OutIncDec:
+    case OutSetM:
       return true;
   }
   not_reached();
@@ -1978,7 +1964,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
   varEnvTaint = false;
 
   const vector<DynLocation*>& inputs = ni->inputs;
-  Op op = ni->op();
+  const Op op = ni->op();
 
   initInstrInfo();
   assert_not_implemented(instrInfo.find(op) != instrInfo.end());
@@ -2076,9 +2062,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
                                op == OpSetWithRefLM || op == OpSetWithRefRM ||
-                               op == OpIncDecL || op == OpIncDecG ||
-                               op == OpUnsetG || op == OpBindG ||
-                               op == OpSetG || op == OpSetOpG ||
+                               op == OpIncDecL ||
                                op == OpVGetM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
                                op == OpSetL || op == OpBindL ||
@@ -2099,11 +2083,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           assert(incDecLoc->location.isLocal());
           ni->outLocal = incDecLoc;
           continue; // Doesn't mutate a loc's types for int. Carry on.
-        }
-        if (op == OpSetG || op == OpSetOpG ||
-            op == OpUnsetG || op == OpBindG ||
-            op == OpIncDecG) {
-          continue;
         }
         if (op == OpUnsetL) {
           assert(ni->inputs.size() == 1);
@@ -2298,8 +2277,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     }
     DynLocation* dl = t.newDynLocation();
     dl->location = loc;
-    dl->rtt = getDynLocType(inputs, t, op, ni, (Operands)opnd,
-                            typeInfo, dl);
+    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo);
     SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %d)\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);
@@ -3767,6 +3745,24 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
   } while (handle.nextArg(info));
 }
 
+bool Translator::instrMustInterp(const NormalizedInstruction& inst) {
+  if (RuntimeOption::EvalJitAlwaysInterpOne) return true;
+
+  switch (inst.op()) {
+    // Generate a case for each instruction we support at least partially.
+# define CASE(name) case Op##name:
+  INSTRS
+# undef CASE
+# define NOTHING(...) // PSEUDOINSTR_DISPATCH has the cases in it
+  PSEUDOINSTR_DISPATCH(NOTHING)
+# undef NOTHING
+      return false;
+
+    default:
+      return true;
+  }
+}
+
 static Location toLocation(const RegionDesc::Location& loc) {
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
@@ -3780,7 +3776,8 @@ static Location toLocation(const RegionDesc::Location& loc) {
 }
 
 Translator::TranslateResult
-Translator::translateRegion(const RegionDesc& region) {
+Translator::translateRegion(const RegionDesc& region,
+                            RegionBlacklist& toInterp) {
   typedef JIT::RegionDesc::Block Block;
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   assert(!region.blocks.empty());
@@ -3822,6 +3819,11 @@ Translator::translateRegion(const RegionDesc& region) {
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
       populateImmediates(inst);
+
+      // We can get a more precise output type for interpOne if we know all of
+      // its inputs, so we still populate the rest of the instruction even if
+      // this is true.
+      inst.interp = toInterp.count(sk);
 
       // Apply the first round of metadata from the repo and get a list of
       // input locations.
@@ -3884,7 +3886,15 @@ Translator::translateRegion(const RegionDesc& region) {
       // Emit IR for the body of the instruction.
       Util::Nuller<NormalizedInstruction> niNuller(&m_curNI);
       m_curNI = &inst;
-      translateInstr(inst);
+      try {
+        translateInstr(inst);
+      } catch (const JIT::FailedIRGen& exn) {
+        FTRACE(1, "ir generation for {} failed with {}\n",
+               inst.toString(), exn.what());
+        always_assert(!toInterp.count(sk));
+        toInterp.insert(sk);
+        return Retry;
+      }
 
       // Check the prediction. If the predicted type is less specific than what
       // is currently on the eval stack, checkTypeLocation won't emit any code.
@@ -3901,7 +3911,21 @@ Translator::translateRegion(const RegionDesc& region) {
   }
 
   traceEnd();
-  traceCodeGen();
+  try {
+    traceCodeGen();
+  } catch (const JIT::FailedCodeGen& exn) {
+    FTRACE(1, "code generation failed with {}\n", exn.what());
+    SrcKey sk{exn.vmFunc, exn.bcOff};
+
+    // Until we can trust the placement of Marker instructions, we can't assert
+    // that this sk isn't already in the interp set. t2424830
+    if (toInterp.count(sk)) {
+      return Failure;
+    }
+    toInterp.insert(sk);
+    return Retry;
+  }
+
   return Success;
 }
 

@@ -86,7 +86,8 @@ class Init {
         if (mod >= 0) {
           levels[mod] = level;
         }
-        if (mod == Trace::minstr) {
+        if (mod == Trace::minstr ||
+            mod == Trace::interpOne) {
           levels[Trace::statgroups] = std::max(levels[Trace::statgroups], 1);
         }
       }

@@ -403,6 +403,7 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           string(""))                      \
+  F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \

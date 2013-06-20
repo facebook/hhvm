@@ -363,6 +363,11 @@ OverrideLoc<T,localId> S0:FramePtr
   T doesn't have to be related to the local's current type, so this
   may be used to update tracked state after InterpOne instructions.
 
+SmashLocals S0:FramePtr
+
+  Erases the tracked types and values of all locals in the frame
+  represented by S0.
+
 D:StkPtr = GuardStk<T,offset> S0:StkPtr
 
   Guard that the type of the cell on the stack pointed to by S0 at
@@ -1449,13 +1454,14 @@ D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
   in the range [S1:S1 + S2), and if so return the value S1 - (Int)S0.
   Else, they return the target of the default target, S2 + 1.
 
-D:StkPtr InterpOne<T> S0:FramePtr S1:StkPtr S2:ConstInt S3:ConstInt
+D:StkPtr InterpOne<T, bcOff, numPopped, numPushed> S0:FramePtr S1:StkPtr
 
-  Call the interpreter implementation function for one opcode.  S0 and
-  S1 are, respectively, the VM frame and stack pointers before this
-  instruction.  S2 is the bytecode offset.  S3 is the stack adjustment
-  performed by this instruction: number of cells popped minus number
-  of cells pushed.  This instruction returns the updated VM stack
+  Call the interpreter implementation function for one opcode. S0 and S1 are,
+  respectively, the VM frame and stack pointers before this instruction. T is
+  the type of the top stack element after the call, or None if it pushes
+  nothing. bcOff is the bytecode offset. numPopped is the number of stack cells
+  consumed by the instruction, and numPushed is the number of stack cells
+  produced by the instruction. This instruction returns the updated VM stack
   pointer.
 
 InterpOneCF S0:FramePtr S1:StkPtr S2:ConstInt S3:ConstInt

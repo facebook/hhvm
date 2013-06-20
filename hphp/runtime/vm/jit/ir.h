@@ -80,6 +80,28 @@ class FailedIRGen : public std::runtime_error {
   {}
 };
 
+class FailedCodeGen : public std::runtime_error {
+ public:
+  const char*    file;
+  const int      line;
+  const char*    func;
+  const Offset   bcOff;
+  const Func*    vmFunc;
+
+  FailedCodeGen(const char* _file, int _line, const char* _func,
+                uint32_t _bcOff, const Func* _vmFunc)
+    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}",
+                                       _file, _line, _func,
+                                       _vmFunc->fullName()->data(), _bcOff)
+                         .str())
+    , file(_file)
+    , line(_line)
+    , func(_func)
+    , bcOff(_bcOff)
+    , vmFunc(_vmFunc)
+  {}
+};
+
 #define SPUNT(instr) do {                           \
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
@@ -180,6 +202,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
+O(SmashLocals,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
 O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
@@ -441,8 +464,8 @@ O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
-O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr)                 \
-                                          C(Int) C(Int),     E|N|Mem|Refs|Er) \
+O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr),                \
+                                                             E|N|Mem|Refs|Er) \
 O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \

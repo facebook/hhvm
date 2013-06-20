@@ -129,11 +129,17 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case InterpOne: {
     SSATmp* prevSp = inst->src(1);
-    int64_t spAdjustment = inst->src(3)->getValInt(); // # popped - # pushed
+    auto const& extra = *inst->extra<InterpOne>();
+    int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
     Type resultType = inst->typeParam();
     if (index == 0 && !resultType.equals(Type::None)) {
       return StackValueInfo { resultType };
     }
+
+    // If the index we're looking for is a cell pushed by the InterpOne (other
+    // than top of stack), we know nothing about its type.
+    if (index < extra.cellsPushed) return StackValueInfo{ nullptr };
+
     return getStackValue(prevSp, index + spAdjustment);
   }
 

@@ -62,6 +62,10 @@ inline PosType toPos(int64_t n) {
   static_assert(sizeof(int64_t) == sizeof(PosType), "can't");
   return static_cast<PosType>(n);
 }
+inline PosType toPos(ssize_t n) {
+  static_assert(sizeof(ssize_t) == sizeof(PosType), "can't");
+  return static_cast<PosType>(n);
+}
 
 // Unsigned to pos.
 inline PosType toPos(uint32_t n) {

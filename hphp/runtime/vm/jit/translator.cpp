@@ -3785,9 +3785,11 @@ Translator::translateRegion(const RegionDesc& region,
 
   for (auto const& block : region.blocks) {
     SrcKey sk = block->start();
-    auto typePreds = makeMapWalker(block->typePreds());
-    auto byRefs = makeMapWalker(block->paramByRefs());
-    auto refPreds = makeMapWalker(block->reffinessPreds());
+    const Func* topFunc = nullptr;
+    auto typePreds  = makeMapWalker(block->typePreds());
+    auto byRefs     = makeMapWalker(block->paramByRefs());
+    auto refPreds   = makeMapWalker(block->reffinessPreds());
+    auto knownFuncs = makeMapWalker(block->knownFuncs());
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Emit prediction guards. If this is the first instruction in the
@@ -3811,6 +3813,11 @@ Translator::translateRegion(const RegionDesc& region,
         m_hhbcTrans->guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
+      // Update the current funcd, if we have a new one.
+      if (knownFuncs.hasNext(sk)) {
+        topFunc = knownFuncs.next();
+      }
+
       // Create and initialize the instruction.
       NormalizedInstruction inst;
       inst.source = sk;
@@ -3818,6 +3825,7 @@ Translator::translateRegion(const RegionDesc& region,
       inst.breaksTracelet =
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
+      inst.funcd = topFunc;
       populateImmediates(inst);
 
       // We can get a more precise output type for interpOne if we know all of
@@ -3908,6 +3916,7 @@ Translator::translateRegion(const RegionDesc& region,
     assert(!typePreds.hasNext());
     assert(!byRefs.hasNext());
     assert(!refPreds.hasNext());
+    assert(!knownFuncs.hasNext());
   }
 
   traceEnd();

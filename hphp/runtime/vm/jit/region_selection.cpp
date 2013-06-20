@@ -78,6 +78,12 @@ void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
   checkInvariants();
 }
 
+void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
+  assert(m_knownFuncs.find(sk) == m_knownFuncs.end());
+  m_knownFuncs.insert(std::make_pair(sk, func));
+  checkInvariants();
+}
+
 /*
  * Check invariants on a RegionDesc::Block.
  *
@@ -85,8 +91,8 @@ void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
  *    non-fallthrough instructions mid-block and no control flow (not
  *    counting calls as control flow).
  *
- * 2. Each SrcKey in m_typePreds, m_byRefs, and m_refPreds is within the bounds
- *    of the block.
+ * 2. Each SrcKey in m_typePreds, m_byRefs, m_refPreds, and m_knownFuncs is
+ *    within the bounds of the block.
  *
  * 3. Each local id referred to in the type prediction list is valid.
  *
@@ -146,6 +152,9 @@ void RegionDesc::Block::checkInvariants() const {
   for (auto& refPred : m_refPreds) {
     rangeCheck("reffiness prediction", refPred.first);
   }
+  for (auto& func : m_knownFuncs) {
+    rangeCheck("known Func*", func.first);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -160,6 +169,7 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
   assert(sk == tlet.m_instrStream.first->source);
   auto unit = tlet.m_instrStream.first->unit();
 
+  const Func* topFunc = nullptr;
   Block* curBlock;
   auto newBlock = [&] {
     region->blocks.push_back(
@@ -173,6 +183,11 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
     assert(ni->unit() == unit);
 
     curBlock->addInstruction();
+
+    if (curBlock->length() == 1 || ni->funcd != topFunc) {
+      topFunc = ni->funcd;
+      curBlock->setKnownFunc(sk, topFunc);
+    }
     if (!ni->noOp && isFPassStar(ni->op())) {
       curBlock->setParamByRef(
         sk, ni->preppedByRef ? RegionDesc::ParamByRef::Yes
@@ -349,8 +364,11 @@ std::string show(const RegionDesc::Block& b) {
   auto typePreds = makeMapWalker(b.typePreds());
   auto byRefs    = makeMapWalker(b.paramByRefs());
   auto refPreds  = makeMapWalker(b.reffinessPreds());
-
+  auto knownFuncs= makeMapWalker(b.knownFuncs());
   auto skIter = b.start();
+
+  const Func* currentFunc = nullptr;
+
   for (int i = 0; i < b.length(); ++i) {
     while (typePreds.hasNext(skIter)) {
       folly::toAppend("  predict: ", show(typePreds.next()), "\n", &ret);
@@ -359,15 +377,27 @@ std::string show(const RegionDesc::Block& b) {
       folly::toAppend("  predict reffiness: ", show(refPreds.next()), "\n",
                       &ret);
     }
+
+    std::string knownFunc;
+    if (knownFuncs.hasNext(skIter)) {
+      currentFunc = knownFuncs.next();
+    }
+    if (currentFunc) {
+      knownFunc = folly::format(" (top func: {})",
+                                currentFunc->fullName()->data()).str();
+    }
+
     std::string byRef;
     if (byRefs.hasNext(skIter)) {
       byRef = folly::format(" (passed {})", show(byRefs.next())).str();
     }
+
     folly::toAppend(
       "    ",
       skIter.offset(),
       "  ",
       instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
+      knownFunc,
       byRef,
       "\n",
       &ret

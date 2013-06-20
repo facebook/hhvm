@@ -140,6 +140,7 @@ class RegionDesc::Block {
   typedef flat_multimap<SrcKey, TypePred> TypePredMap;
   typedef flat_map<SrcKey, ParamByRef> ParamByRefMap;
   typedef flat_multimap<SrcKey, ReffinessPred> RefPredMap;
+  typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
   explicit Block(const Func* func, Offset start, int length)
@@ -187,6 +188,12 @@ public:
    */
   void addReffinessPred(SrcKey, const ReffinessPred&);
 
+  /*
+   * Update the statically known Func*. It remains active until another is
+   * specified, so pass nullptr to indicate that there is no longer a known
+   * Func*.
+   */
+  void setKnownFunc(SrcKey, const Func*);
 
   /*
    * The following getters return references to the metadata maps holding the
@@ -197,6 +204,7 @@ public:
   const TypePredMap& typePreds()     const { return m_typePreds; }
   const ParamByRefMap& paramByRefs() const { return m_byRefs; }
   const RefPredMap& reffinessPreds() const { return m_refPreds; }
+  const KnownFuncMap& knownFuncs()   const { return m_knownFuncs; }
 
 private:
   void checkInvariants() const;
@@ -208,6 +216,7 @@ private:
   TypePredMap  m_typePreds;
   ParamByRefMap m_byRefs;
   RefPredMap   m_refPreds;
+  KnownFuncMap m_knownFuncs;
 };
 
 //////////////////////////////////////////////////////////////////////

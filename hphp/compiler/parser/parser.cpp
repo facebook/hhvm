@@ -1634,7 +1634,9 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 }
 
 void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
-  out->stmt = NEW_STMT(TypedefStatement, name.text(), type.text());
+  auto td_stmt = NEW_STMT(TypedefStatement, name.text(), type.text());
+  td_stmt->onParse(m_ar, m_file);
+  out->stmt = td_stmt;
 }
 
 void Parser::onTypeAnnotation(Token& out, const Token& name,

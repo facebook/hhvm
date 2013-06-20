@@ -423,6 +423,16 @@ void AnalysisResult::markRedeclaringClasses() {
     }
   }
 
+  auto markRedeclaring = [&] (const std::string& name) {
+    auto it = m_classDecs.find(name);
+    if (it != m_classDecs.end()) {
+      auto& classes = it->second;
+      for (unsigned int i = 0; i < classes.size(); ++i) {
+        classes[i]->setRedeclaring(ar, i);
+      }
+    }
+  };
+
   /*
    * In WholeProgram mode, during parse time we collected all
    * class_alias calls so we can mark the targets of such calls
@@ -446,18 +456,18 @@ void AnalysisResult::markRedeclaringClasses() {
    * as redeclaring for now.
    */
   for (auto& kv : m_classAliases) {
-    auto markRedeclaring = [&] (const std::string& name) {
-      auto it = m_classDecs.find(name);
-      if (it != m_classDecs.end()) {
-        auto& classes = it->second;
-        for (unsigned int i = 0; i < classes.size(); ++i) {
-          classes[i]->setRedeclaring(ar, i);
-        }
-      }
-    };
-
     markRedeclaring(Util::toLower(kv.first));
     markRedeclaring(Util::toLower(kv.second));
+  }
+
+  /*
+   * Similar to class_alias, when a type alias is declared with the
+   * same name as a class in the program, we need to make sure the
+   * class is marked redeclaring.  It is possible in some requests
+   * that things like 'instanceof Foo' will not mean the same thing.
+   */
+  for (auto& name : m_typeAliasNames) {
+    markRedeclaring(Util::toLower(name));
   }
 }
 
@@ -643,6 +653,8 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
 
   m_classAliases.insert(fs->getClassAliases().begin(),
                         fs->getClassAliases().end());
+  m_typeAliasNames.insert(fs->getTypeAliasNames().begin(),
+                          fs->getTypeAliasNames().end());
 }
 
 static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {

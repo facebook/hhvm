@@ -145,6 +145,14 @@ public:
     return m_classAliasMap;
   }
 
+  void addTypeAliasName(const std::string& name) {
+    m_typeAliasNames.insert(name);
+  }
+
+  std::set<std::string> const& getTypeAliasNames() const {
+    return m_typeAliasNames;
+  }
+
   /**
    * Called only by World
    */
@@ -216,6 +224,11 @@ private:
   // Map from class alias names to the class they are aliased to.
   // This is only needed in WholeProgram mode.
   std::multimap<std::string,std::string> m_classAliasMap;
+
+  // Set of names that are on the left hand side of type alias
+  // declarations.  We need this to make sure we don't mark classes
+  // with the same name Unique.
+  std::set<std::string> m_typeAliasNames;
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void setFileLevel(StatementListPtr stmt);

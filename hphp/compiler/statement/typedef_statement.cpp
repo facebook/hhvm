@@ -15,6 +15,8 @@
 */
 #include "hphp/compiler/statement/typedef_statement.h"
 
+#include "hphp/compiler/analysis/file_scope.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -55,6 +57,10 @@ void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
 void TypedefStatement::inferTypes(AnalysisResultPtr) {}
 
 void TypedefStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
+}
+
+void TypedefStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  scope->addTypeAliasName(name);
 }
 
 //////////////////////////////////////////////////////////////////////

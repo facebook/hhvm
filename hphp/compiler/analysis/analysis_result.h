@@ -324,6 +324,9 @@ private:
   // Only in WholeProgram mode.  See markRedeclaringClasses.
   std::multimap<std::string,std::string> m_classAliases;
 
+  // Names of type aliases.
+  std::set<std::string> m_typeAliasNames;
+
   bool m_classForcedVariants[2];
 
   StatementPtrVec m_stmts;

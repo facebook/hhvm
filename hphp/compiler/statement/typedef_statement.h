@@ -25,7 +25,7 @@
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-struct TypedefStatement : Statement {
+struct TypedefStatement : Statement, IParseHandler {
   explicit TypedefStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                             const std::string& name,
                             const std::string& value);
@@ -33,6 +33,10 @@ struct TypedefStatement : Statement {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
+public: // IParseHandler
+  void onParse(AnalysisResultConstPtr, FileScopePtr);
+
+public:
   const std::string name;
   const std::string value;
 };

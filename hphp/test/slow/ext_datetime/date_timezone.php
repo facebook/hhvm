@@ -1,30 +1,27 @@
 <?php
 
-function VS($x, $y) {
-  var_dump($x === $y);
-  if ($x !== $y) { echo "Failed: $y\n"; }
-}
+date_default_timezone_set("America/Los_Angeles");
 
 var_dump(date_default_timezone_get());
 
 var_dump(date_default_timezone_set("Asia/Shanghai"));
-var_dump(date_default_timezone_get() === "Asia/Shanghai");
+var_dump(date_default_timezone_get());
 var_dump(date_default_timezone_set("America/Los_Angeles"));
-var_dump(date_default_timezone_get() === "America/Los_Angeles");
+var_dump(date_default_timezone_get());
 
 $dt = date_create("2008-08-08 12:34:56");
-var_dump(timezone_name_get(date_timezone_get($dt)) === "America/Los_Angeles");
+var_dump(timezone_name_get(date_timezone_get($dt)));
 
 $dt = date_create("2008-08-08 12:34:56");
 date_timezone_set($dt, timezone_open("Asia/Shanghai"));
-var_dump(timezone_name_get(date_timezone_get($dt)) === "Asia/Shanghai");
+var_dump(timezone_name_get(date_timezone_get($dt)));
 var_dump(date_format($dt, 'Y-m-d H:i:s'));
 
-VS(timezone_name_from_abbr("CET"), "Europe/Berlin");
-VS(timezone_name_from_abbr("", 3600, 0), "Europe/Paris");
+var_dump(timezone_name_from_abbr("CET"));
+var_dump(timezone_name_from_abbr("", 3600, 0));
 
 $tz = timezone_open("Asia/Shanghai");
-VS(timezone_name_get($tz), "Asia/Shanghai");
+var_dump(timezone_name_get($tz));
 
 // Create two timezone objects, one for Taipei (Taiwan) and one for
 // Tokyo (Japan)
@@ -36,18 +33,18 @@ $dateTimeZoneJapan = timezone_open("Asia/Tokyo");
 $dateTimeTaipei = date_create("2008-08-08", $dateTimeZoneTaipei);
 $dateTimeJapan = date_create("2008-08-08", $dateTimeZoneJapan);
 
-VS(date_offset_get($dateTimeTaipei), 28800);
-VS(date_offset_get($dateTimeJapan), 32400);
+var_dump(date_offset_get($dateTimeTaipei));
+var_dump(date_offset_get($dateTimeJapan));
 
 $tz = timezone_open("Asia/Shanghai");
-VS(timezone_name_get($tz), "Asia/Shanghai");
+var_dump(timezone_name_get($tz));
 
 $timezone = timezone_open("CET");
 $transitions = timezone_transitions_get($timezone);
-VS($transitions[0]['ts'], -1693706400);
-VS($transitions[0]['offset'], 7200);
-VS($transitions[0]['isdst'], true);
-VS($transitions[0]['abbr'], "CEST");
+var_dump($transitions[0]['ts']);
+var_dump($transitions[0]['offset']);
+var_dump($transitions[0]['isdst']);
+var_dump($transitions[0]['abbr']);
 
-VS((bool)timezone_version_get(), true);
+var_dump((bool)timezone_version_get());
 

@@ -3,7 +3,6 @@
 assert_options(1);
 var_dump(dl(""));
 
-var_dump(extension_loaded("phpmcc"));
 var_dump(extension_loaded("bcmath"));
 var_dump(extension_loaded("curl"));
 var_dump(extension_loaded("simplexml"));

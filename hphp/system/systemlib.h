@@ -63,6 +63,7 @@ namespace Eval {
   x(ZippedKeyedIterable)                        \
   x(IterableView)                               \
   x(KeyedIterableView)                          \
+  x(Phar)                                       \
   x(__PHP_Incomplete_Class)                     \
   x(__PHP_Unserializable_Class)                 \
 

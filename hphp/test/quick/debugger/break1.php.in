@@ -1,7 +1,10 @@
 run
 break break1.php:7
+break break1.php:77
+break list
 @ foo('test_break1')
 variable
+break list
 break clear all
 continue
 break foo()
@@ -23,4 +26,9 @@ continue
 @ $break5=new cls()
 @ $break5->pubHardBreak('test_break5')
 continue
+break clear all
+break cls::nosuchMethod()
+break list
+break noSuchFunction()
+break list
 quit

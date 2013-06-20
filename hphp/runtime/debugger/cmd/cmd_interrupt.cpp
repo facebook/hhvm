@@ -56,7 +56,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   } else {
     thrift.write(false);
   }
-  BreakPointInfo::SendImpl(m_matched, thrift);
+  BreakPointInfo::SendImpl(0, m_matched, thrift);
 }
 
 void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
@@ -85,7 +85,7 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(m_bpi->m_exceptionClass);
     thrift.read(m_bpi->m_exceptionObject);
   }
-  BreakPointInfo::RecvImpl(m_matched, thrift);
+  BreakPointInfo::RecvImpl(0, m_matched, thrift);
 }
 
 std::string CmdInterrupt::desc() const {

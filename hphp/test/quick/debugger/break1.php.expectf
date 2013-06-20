@@ -4,6 +4,11 @@ break1.php loaded
 Program %s/break1.php exited normally.
 break break1.php:7
 Breakpoint 1 set on line 7 of break1.php
+break break1.php:77
+Breakpoint 2 not set on line 77 of break1.php
+Because the line does not exist or is not executable code.
+break list
+  1	ALWAYS    on line 7 of break1.php
 @ foo('test_break1')
 Breakpoint 1 reached at foo() on line 7 of %s/break1.php
    6   $y = $x.'_suffix';
@@ -13,6 +18,8 @@ Breakpoint 1 reached at foo() on line 7 of %s/break1.php
 variable
 $x = "test_break1"
 $y = "test_break1_suffix"
+break list
+  1	ALWAYS    on line 7 of break1.php
 break clear all
 All breakpoints are cleared.
 continue
@@ -77,4 +84,15 @@ Break at cls::pubHardBreak() on line 19 of %s/break1.php
 continue
 pubHardBreak:done
 
+break clear all
+There is no breakpoint to clear or toggle.
+break cls::nosuchMethod()
+Breakpoint 1 not set upon entering cls::nosuchMethod()
+Because method cls::nosuchMethod does not exist.
+break list
+break noSuchFunction()
+Breakpoint 1 set upon entering noSuchFunction()
+But wont break until function noSuchFunction has been loaded.
+break list
+  1	ALWAYS    upon entering noSuchFunction() (unbound)
 quit

@@ -115,11 +115,18 @@ DECLARE_BOOST_TYPES(DFunctionInfo);
 DECLARE_BOOST_TYPES(BreakPointInfo);
 class BreakPointInfo {
 public:
-  // The state of break point
+  // The state of the break point
   enum State : int8_t {
     Always   = -1, // always break when reaching this break point
     Once     = 1, // break the first time, then disable
     Disabled = 0, // carry on with execution when reaching this break point
+  };
+
+  // Does the break point correspond to a known executable location?
+  enum BindState : int8_t {
+    KnownToBeValid, // Breakpoint refers to valid location or member
+    KnownToBeInvalid, // Breakpoint cannot be bound (no such class or line)
+    Unknown, // The file or class referenced by breakpoint is not loaded
   };
 
   static const char *ErrorClassName;
@@ -154,12 +161,12 @@ public:
   std::string site() const;
   std::string regex(const std::string &name) const;
 
-  void sendImpl(DebuggerThriftBuffer &thrift);
-  void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(int version, DebuggerThriftBuffer &thrift);
+  void recvImpl(int version, DebuggerThriftBuffer &thrift);
 
-  static void SendImpl(const BreakPointInfoPtrVec &bps,
+  static void SendImpl(int version, const BreakPointInfoPtrVec &bps,
                        DebuggerThriftBuffer &thrift);
-  static void RecvImpl(BreakPointInfoPtrVec &bps,
+  static void RecvImpl(int version, BreakPointInfoPtrVec &bps,
                        DebuggerThriftBuffer &thrift);
 
   bool breakable(int stackDepth) const;
@@ -170,6 +177,7 @@ public:
   int16_t m_index; // client side index number
 
   State m_state; // Always, Once, Disabled
+  BindState m_bindState; // KnownToBeValid, KnownToBeInvalid, Unknown
   bool m_valid; // false if syntactically invalid
   InterruptType m_interruptType; // Why this break point was reached
 

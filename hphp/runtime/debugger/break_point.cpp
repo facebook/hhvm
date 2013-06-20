@@ -189,9 +189,10 @@ BreakPointInfo::~BreakPointInfo() {
   }
 }
 
-void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
+void BreakPointInfo::sendImpl(int version, DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::sendImpl\n");
   thrift.write((int8_t)m_state);
+  if (version >= 1) thrift.write((int8_t)m_bindState);
   thrift.write((int8_t)m_interruptType);
   thrift.write(m_file);
   thrift.write(m_line1);
@@ -208,10 +209,13 @@ void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_exceptionObject);
 }
 
-void BreakPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
+void BreakPointInfo::recvImpl(int version, DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::recvImpl\n");
   int8_t tmp;
   thrift.read(tmp); m_state = (State)tmp;
+  if (version >= 1) {
+    thrift.read(tmp); m_bindState = (BindState)tmp;
+  }
   thrift.read(tmp); m_interruptType = (InterruptType)tmp;
   thrift.read(m_file);
   thrift.read(m_line1);
@@ -970,17 +974,17 @@ bool BreakPointInfo::checkClause() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BreakPointInfo::SendImpl(const BreakPointInfoPtrVec &bps,
+void BreakPointInfo::SendImpl(int version, const BreakPointInfoPtrVec &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::SendImpl\n");
   int16_t size = bps.size();
   thrift.write(size);
   for (int i = 0; i < size; i++) {
-    bps[i]->sendImpl(thrift);
+    bps[i]->sendImpl(version, thrift);
   }
 }
 
-void BreakPointInfo::RecvImpl(BreakPointInfoPtrVec &bps,
+void BreakPointInfo::RecvImpl(int version, BreakPointInfoPtrVec &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::RecvImpl\n");
   int16_t size;
@@ -988,7 +992,7 @@ void BreakPointInfo::RecvImpl(BreakPointInfoPtrVec &bps,
   bps.resize(size);
   for (int i = 0; i < size; i++) {
     BreakPointInfoPtr bpi(new BreakPointInfo());
-    bpi->recvImpl(thrift);
+    bpi->recvImpl(version, thrift);
     bps[i] = bpi;
   }
 }

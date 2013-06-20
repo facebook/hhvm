@@ -25,7 +25,9 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdBreak);
 class CmdBreak : public DebuggerCommand {
 public:
-  CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(nullptr) {}
+  CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(nullptr) {
+    m_version = 1;
+  }
 
   // Informs the client of all strings that may follow a break command.
   // Used for auto completion. The client uses the prefix of the argument
@@ -48,7 +50,7 @@ public:
 
   // Creates a new CmdBreak instance, sets its breakpoints to the client's
   // list, sends the command to the server and waits for a response.
-  static bool SendClientBreakpointListToServer(DebuggerClient &client);
+  static void SendClientBreakpointListToServer(DebuggerClient &client);
 
 protected:
   // Carries out the Break command. This always involves an action on the
@@ -84,7 +86,7 @@ private:
   // will update its breakpoint list with the one in this command.
   // The client will block until the server echoes
   // this command back to it. The echoed command is discarded.
-  bool updateServer(DebuggerClient &client);
+  void updateServer(DebuggerClient &client);
 
   // Carries out the "break list" command.
   void processList(DebuggerClient &client);

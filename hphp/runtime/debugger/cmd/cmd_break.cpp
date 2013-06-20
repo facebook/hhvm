@@ -28,13 +28,22 @@ void CmdBreak::sendImpl(DebuggerThriftBuffer &thrift) {
   // via Thrift, m_breakpoints points to a copy that is placed in m_bps.
   assert(m_breakpoints);
   DebuggerCommand::sendImpl(thrift);
-  BreakPointInfo::SendImpl(*m_breakpoints, thrift);
+  BreakPointInfo::SendImpl(this->m_version, *m_breakpoints, thrift);
 }
 
 // Deserializes a CmdBreak from the given Thrift buffer.
 void CmdBreak::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
-  BreakPointInfo::RecvImpl(m_bps, thrift);
+  BreakPointInfo::RecvImpl(this->m_version, m_bps, thrift);
+  m_breakpoints = &m_bps;
+  // Old senders will set version to 0. A new sender sets it to 1
+  // and then expects an answer using version 2.
+  // Note that version 1 is the same format as version 0, so old
+  // receivers will not break when receiving a version 1 message.
+  // This code ensures that version 2 messages are received only
+  // by receivers that previously sent a version 1 message (thus
+  // indicating their ability to deal with version 2 messages).
+  if (this->m_version == 1) this->m_version = 2;
 }
 
 // Informs the client of all strings that may follow a break command.
@@ -179,10 +188,13 @@ void CmdBreak::help(DebuggerClient &client) {
 // Carries out the "break list" command.
 void CmdBreak::processList(DebuggerClient &client) {
   m_breakpoints = client.getBreakPoints();
+  updateServer(client);
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
     BreakPointInfoPtr bpi = m_breakpoints->at(i);
-    client.print("  %d\t%s  %s", bpi->index(), bpi->state(true).c_str(),
-                  bpi->desc().c_str());
+    const char* boundStr =
+        bpi->m_bindState == BreakPointInfo::Unknown ? " (unbound)" : "";
+    client.print("  %d\t%s  %s%s", bpi->index(), bpi->state(true).c_str(),
+                  bpi->desc().c_str(), boundStr);
   }
   if (m_breakpoints->empty()) {
     client.tutorial(
@@ -330,19 +342,70 @@ void CmdBreak::processStatusChange(DebuggerClient &client) {
 // Uses the client to send this command to the server, which
 // will update its breakpoint list with the one in this command.
 // The client will block until the server echoes
-// this command back to it. The echoed command is discarded.
-bool CmdBreak::updateServer(DebuggerClient &client) {
+// this command back to it. The  echoed command is discarded.
+// If the server checked the validity of the breakpoints, the values
+// of the m_bindState flags are copied to the client's breakpoint list.
+void CmdBreak::updateServer(DebuggerClient &client) {
   m_body = "update";
-  client.xend<CmdBreak>(this);
-  return true;
+  auto serverReply = client.xend<CmdBreak>(this);
+  if (serverReply->m_version == 2) {
+    // The server will have checked the breakpoint list for validity.
+    // Transfer the results to the local breakpoint list.
+    auto cbreakpoints = *client.getBreakPoints();
+    auto sbreakpoints = *serverReply->m_breakpoints;
+    int csize = cbreakpoints.size();
+    int ssize = sbreakpoints.size();
+    assert(csize == ssize);
+    if (csize > ssize) csize = ssize;
+    for (int i = 0; i < csize; i++) {
+      cbreakpoints[i]->m_bindState = sbreakpoints[i]->m_bindState;
+    }
+  }
 }
 
 // Creates a new CmdBreak instance, sets its breakpoints to the client's
 // list, sends the command to the server and waits for a response.
-bool CmdBreak::SendClientBreakpointListToServer(DebuggerClient &client) {
+void CmdBreak::SendClientBreakpointListToServer(DebuggerClient &client) {
   auto cmd = CmdBreak();
   cmd.m_breakpoints = client.getBreakPoints();
-  return cmd.updateServer(client);
+  cmd.updateServer(client);
+}
+
+
+void ReportBreakpointBindState(DebuggerClient &client, BreakPointInfoPtr bpi) {
+  switch (bpi->m_bindState) {
+  case BreakPointInfo::KnownToBeValid:
+    client.info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
+    break;
+  case BreakPointInfo::KnownToBeInvalid:
+    client.info("Breakpoint %d not set %s", bpi->index(), bpi->desc().c_str());
+    if (!bpi->getClass().empty()) {
+      client.info("Because method %s does not exist.",
+                  bpi->getFuncName().c_str());
+    } else if (!bpi->getExceptionClass().empty()) {
+      client.info("Because class %s is not an exception.",
+                  bpi->getExceptionClass().c_str());
+    } else {
+      client.info("Because the line does not exist or is not executable code.");
+    }
+    break;
+  case BreakPointInfo::Unknown:
+    client.info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
+    if (!bpi->getClass().empty()) {
+      client.info("But wont break until class %s has been loaded.",
+                  bpi->getClass().c_str());
+    } else if (!bpi->getFuncName().empty()) {
+      client.info("But wont break until function %s has been loaded.",
+                  bpi->getFuncName().c_str());
+    } else if (!bpi->getExceptionClass().empty()) {
+      client.info("But note that class %s has yet been loaded.",
+                  bpi->getExceptionClass().c_str());
+    } else {
+      client.info("But wont break until file %s has been loaded.",
+                  bpi->m_file.c_str());
+    }
+    break;
+  }
 }
 
 // Adds conditional or watch clause to the breakpoint info if needed.
@@ -368,7 +431,10 @@ bool CmdBreak::addToBreakpointListAndUpdateServer(
     }
     m_breakpoints->push_back(bpi);
     updateServer(client);
-    client.info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
+    ReportBreakpointBindState(client, bpi);
+    if (bpi->m_bindState == BreakPointInfo::KnownToBeInvalid) {
+      m_breakpoints->pop_back();
+    }
     return true;
   }
 

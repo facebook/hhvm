@@ -83,10 +83,6 @@ public:
 
   void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
   void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
-  bool couldBreakEnterClsMethod(const StringData* className);
-  bool couldBreakEnterFunc(const StringData* funcFullName);
-  void getBreakClsMethods(std::vector<const StringData*>& classNames);
-  void getBreakFuncs(std::vector<const StringData*>& funcFullNames);
   BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
 
   bool needInterrupt();
@@ -133,11 +129,6 @@ private:
   int64_t m_thread;
   DThreadInfoPtr m_newThread;
   std::map<int64_t, DThreadInfoPtr> m_threads;
-
-  typedef tbb::concurrent_hash_map<const StringData*, void*,
-                                   StringDataHashCompare> StringDataMap;
-  StringDataMap m_breaksEnterClsMethod;
-  StringDataMap m_breaksEnterFunc;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
 

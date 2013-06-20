@@ -139,30 +139,35 @@ static PCFilter *getBreakPointFilter() {
   return g_vmContext->m_breakPointFilter;
 }
 
+// Looks up the offset range in the given unit, of the given breakpoint.
+// If the offset cannot be found, the breakpoint is marked as invalid.
+// Otherwise it is marked as valid and the offset is added to the
+// breakpoint filter and the offset range is black listed for the JIT.
+static void addBreakPointInUnit(Eval::BreakPointInfoPtr bp, Unit* unit) {
+  OffsetRangeVec offsets;
+  if (!unit->getOffsetRanges(bp->m_line1, offsets) || offsets.size() == 0) {
+    bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
+    return;
+  }
+  bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+  TRACE(3, "Add to breakpoint filter for %s:%d, unit %p:\n",
+      unit->filepath()->data(), bp->m_line1, unit);
+  getBreakPointFilter()->addRanges(unit, offsets);
+  if (RuntimeOption::EvalJit) {
+    blacklistRangesInJit(unit, offsets);
+  }
+}
+
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
                                  Eval::PhpFile* efile) {
   Eval::BreakPointInfoPtrVec bps;
   proxy->getBreakPoints(bps);
-  for(unsigned int i = 0; i < bps.size(); i++) {
+  for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
-    if (bp->m_line1 == 0 || bp->m_file.empty()) {
-      // invalid breakpoint for file:line
-      continue;
-    }
-    if (!Eval::BreakPointInfo::MatchFile(bp->m_file, efile->getFileName(),
+    if (Eval::BreakPointInfo::MatchFile(bp->m_file, efile->getFileName(),
                                          efile->getRelPath())) {
-      continue;
-    }
-    Unit* unit = efile->unit();
-    OffsetRangeVec offsets;
-    if (!unit->getOffsetRanges(bp->m_line1, offsets)) {
-      continue;
-    }
-    TRACE(3, "Add to breakpoint filter for %s:%d, unit %p:\n",
-          efile->getFileName().c_str(), bp->m_line1, unit);
-    getBreakPointFilter()->addRanges(unit, offsets);
-    if (RuntimeOption::EvalJit) {
-      blacklistRangesInJit(unit, offsets);
+      addBreakPointInUnit(bp, efile->unit());
+      break;
     }
   }
 }
@@ -182,13 +187,45 @@ static void addBreakPointFuncEntry(const Func* f) {
   }
 }
 
-static void addBreakPointsClass(Eval::DebuggerProxy* proxy,
-                                const Class* cls) {
+// If the proxy has an enabled breakpoint that matches entry into the given
+// function, arrange for the VM to stop execution and notify the debugger
+// whenever execution enters the given function.
+static void addBreakPointFuncEntry(Eval::DebuggerProxy* proxy, const Func* f) {
+  Eval::BreakPointInfoPtrVec bps;
+  proxy->getBreakPoints(bps);
+  for (unsigned int i = 0; i < bps.size(); i++) {
+    Eval::BreakPointInfoPtr bp = bps[i];
+    if (bp->m_state == Eval::BreakPointInfo::Disabled) continue;
+    if (bp->getFuncName() != f->fullName()->data()) continue;
+    bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+    addBreakPointFuncEntry(f);
+    return;
+  }
+}
+
+// If the proxy has enabled breakpoints that match entry into methods of
+// the given class, arrange for the VM to stop execution and notify the debugger
+// whenever execution enters one of these matched method.
+// This function is called once, when a class is first loaded, so it is not
+// performance critical.
+static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
   size_t numFuncs = cls->numMethods();
-  Func* const* funcs = cls->methods();
-  for (size_t i = 0; i < numFuncs; ++i) {
-    if (proxy->couldBreakEnterFunc(funcs[i]->fullName())) {
-      addBreakPointFuncEntry(funcs[i]);
+  if (numFuncs == 0) return;
+  auto clsName = cls->name();
+  auto funcs = cls->methods();
+  Eval::BreakPointInfoPtrVec bps;
+  proxy->getBreakPoints(bps);
+  for (unsigned int i = 0; i < bps.size(); i++) {
+    Eval::BreakPointInfoPtr bp = bps[i];
+    if (bp->m_state == Eval::BreakPointInfo::Disabled) continue;
+    // TODO: check name space separately
+    if (bp->getClass() != clsName->data()) continue;
+    bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
+    for (size_t i = 0; i < numFuncs; ++i) {
+      auto f = funcs[i];
+      if (bp->getFunction() != f->name()->data()) continue;
+      bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+      addBreakPointFuncEntry(f);
     }
   }
 }
@@ -223,57 +260,106 @@ void phpDebuggerEvalHook(const Func* f) {
   }
 }
 
-// Hook called by the VM when a file is loaded. Gives the debugger a chance
-// to apply any pending breakpoints that might be in the file.
+// Called by the VM when a file is loaded.
 void phpDebuggerFileLoadHook(Eval::PhpFile* efile) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
-  if (!proxy) {
-    return;
-  }
+  if (proxy == nullptr) return;
   addBreakPointsInFile(proxy.get(), efile);
 }
 
+// Called by the VM when a class definition is loaded.
 void phpDebuggerDefClassHook(const Class* cls) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
-  if (!proxy) {
-    return;
-  }
+  if (proxy == nullptr) return;
   addBreakPointsClass(proxy.get(), cls);
 }
 
+// Called by the VM when a function definition is loaded.
 void phpDebuggerDefFuncHook(const Func* func) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
-  if (proxy && proxy->couldBreakEnterFunc(func->fullName())) {
-    addBreakPointFuncEntry(func);
-  }
+  if (proxy == nullptr) return;
+  addBreakPointFuncEntry(proxy.get(), func);
 }
 
-// Helper which will look at every loaded file and attempt to see if any
-// existing file:line breakpoints should be set.
-void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy) {
-  for (EvaledFilesMap::const_iterator it =
-       g_vmContext->m_evaledFiles.begin();
-       it != g_vmContext->m_evaledFiles.end(); ++it) {
-    addBreakPointsInFile(proxy, it->second);
-  }
-
-  std::vector<const StringData*> clsNames;
-  proxy->getBreakClsMethods(clsNames);
-  for (unsigned int i = 0; i < clsNames.size(); i++) {
-    Class* cls = Unit::lookupClass(clsNames[i]);
-    if (cls) {
-      addBreakPointsClass(proxy, cls);
+// Called by the proxy whenever its breakpoint list is updated.
+// Since this intended to be called when user input is received, it is not
+// performance critical. Also, in typical scenarios, the list is short.
+void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
+  Eval::BreakPointInfoPtrVec bps;
+  proxy->getBreakPoints(bps);
+  for (unsigned int i = 0; i < bps.size(); i++) {
+    Eval::BreakPointInfoPtr bp = bps[i];
+    bp->m_bindState = Eval::BreakPointInfo::Unknown;
+    auto className = bp->getClass();
+    if (!className.empty()) {
+      auto clsName = StringData::GetStaticString(className);
+      auto cls = Unit::lookupClass(clsName);
+      if (cls == nullptr) continue;
+      bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
+      size_t numFuncs = cls->numMethods();
+      if (numFuncs == 0) continue;
+      auto methodName = bp->getFunction();
+      Func* const* funcs = cls->methods();
+      for (size_t i = 0; i < numFuncs; ++i) {
+        auto f = funcs[i];
+        if (methodName != f->name()->data()) continue;
+        bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+        addBreakPointFuncEntry(f);
+        break;
+      }
+      //TODO: what about superclass methods accessed via the derived class?
+      //Task 2527229.
+      continue;
     }
-  }
-
-  std::vector<const StringData*> funcFullNames;
-  proxy->getBreakFuncs(funcFullNames);
-  for (unsigned int i = 0; i < funcFullNames.size(); i++) {
-    // This list contains class method as well but they shouldn't hit anything
-    Func* f = Unit::lookupFunc(funcFullNames[i]);
-    if (f) {
+    auto funcName = bp->getFuncName();
+    if (!funcName.empty()) {
+      auto fName = StringData::GetStaticString(funcName);
+      Func* f = Unit::lookupFunc(fName);
+      if (f == nullptr) continue;
+      bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       addBreakPointFuncEntry(f);
+      continue;
     }
+    auto fileName = bp->m_file;
+    if (!fileName.empty()) {
+      for (EvaledFilesMap::const_iterator it =
+           g_vmContext->m_evaledFiles.begin();
+           it != g_vmContext->m_evaledFiles.end(); ++it) {
+        auto efile = it->second;
+        if (!Eval::BreakPointInfo::MatchFile(fileName, efile->getFileName(),
+                                             efile->getRelPath())) continue;
+        addBreakPointInUnit(bp, efile->unit());
+        break;
+      }
+      continue;
+    }
+    auto exceptionClassName = bp->getExceptionClass();
+    if (exceptionClassName == "@") {
+      bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+      continue;
+    } else if (!exceptionClassName.empty()) {
+      auto expClsName = StringData::GetStaticString(exceptionClassName);
+      auto cls = Unit::lookupClass(expClsName);
+      if (cls != nullptr) {
+        auto baseClsName = StringData::GetStaticString("Exception");
+        auto baseCls = Unit::lookupClass(baseClsName);
+        if (baseCls != nullptr) {
+          if (cls->classof(baseCls)) {
+            bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
+          } else {
+            bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
+          }
+        }
+      }
+      continue;
+    } else {
+      continue;
+    }
+    // If we get here, the break point is of a type that does
+    // not need to be explicitly enabled in the VM. For example
+    // a break point that get's triggered when the server starts
+    // to process a page request.
+    bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
   }
 }
 

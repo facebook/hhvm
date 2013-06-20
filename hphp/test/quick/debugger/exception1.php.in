@@ -1,5 +1,11 @@
+exception MyException
+break list
 run
+exception NotAnException
+break list
+break clear all
 exception Exception
+break list
 @ throw_exception()
 break clear all
 continue

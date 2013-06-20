@@ -155,8 +155,6 @@ void DebuggerProxy::notifyDummySandbox() {
   m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
 }
 
-// Hold the entire set of breakpoints, and sift breakpoints by function and
-// class name into separate containers for later.
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   TRACE(2, "DebuggerProxy::setBreakPoints\n");
   // Hold the break mutex while we update the proxy's state. There's no need
@@ -165,70 +163,14 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
     WriteLock lock(m_breakMutex);
     m_breakpoints = breakpoints;
     m_hasBreakPoints = !m_breakpoints.empty();
-    m_breaksEnterFunc.clear();
-    m_breaksEnterClsMethod.clear();
-    for (unsigned int i = 0; i < m_breakpoints.size(); i++) {
-      BreakPointInfoPtr bp = m_breakpoints[i];
-      std::string funcFullName = bp->getFuncName();
-      if (funcFullName.empty()) {
-        continue;
-      }
-      {
-        StringDataMap::accessor acc;
-        const StringData* sd = StringData::GetStaticString(funcFullName);
-        m_breaksEnterFunc.insert(acc, sd);
-      }
-      std::string clsName = bp->getClass();
-      if (!clsName.empty()) {
-        StringDataMap::accessor acc;
-        const StringData* sd = StringData::GetStaticString(clsName);
-        m_breaksEnterClsMethod.insert(acc, sd);
-      }
-    }
   }
-  phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
+  phpSetBreakPoints(this);
 }
 
 void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   TRACE(2, "DebuggerProxy::getBreakPoints\n");
   ReadLock lock(m_breakMutex);
   breakpoints = m_breakpoints;
-}
-
-bool DebuggerProxy::couldBreakEnterClsMethod(const StringData* className) {
-  TRACE(5, "DebuggerProxy::couldBreakEnterClsMethod\n");
-  ReadLock lock(m_breakMutex);
-  StringDataMap::const_accessor acc;
-  return m_breaksEnterClsMethod.find(acc, className);
-}
-
-bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
-  TRACE(5, "DebuggerProxy::couldBreakEnterFunc\n");
-  ReadLock lock(m_breakMutex);
-  StringDataMap::const_accessor acc;
-  return m_breaksEnterFunc.find(acc, funcFullName);
-}
-
-void DebuggerProxy::getBreakClsMethods(
-  std::vector<const StringData*>& classNames) {
-  TRACE(2, "DebuggerProxy::getBreakClsMethods\n");
-  classNames.clear();
-  WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
-  for (StringDataMap::const_iterator iter = m_breaksEnterClsMethod.begin();
-       iter != m_breaksEnterClsMethod.end(); ++iter) {
-    classNames.push_back(iter->first);
-  }
-}
-
-void DebuggerProxy::getBreakFuncs(
-  std::vector<const StringData*>& funcFullNames) {
-  TRACE(2, "DebuggerProxy::getBreakFuncs\n");
-  funcFullNames.clear();
-  WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
-  for (StringDataMap::const_iterator iter = m_breaksEnterFunc.begin();
-       iter != m_breaksEnterFunc.end(); ++iter) {
-    funcFullNames.push_back(iter->first);
-  }
 }
 
 // Proxy needs to be interrupted because it has something setup which may need

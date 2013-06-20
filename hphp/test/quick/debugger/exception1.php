@@ -5,6 +5,7 @@
 namespace {
 
   class MyException extends Exception { }
+  class NotAnException { }
 
   function throw_exception() {
     throw new Exception();

@@ -49,8 +49,7 @@ class Func;
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
-// Helper to apply pending breakpoints to all files.
-void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy);
+void phpSetBreakPoints(Eval::DebuggerProxy* proxy);
 
 // Add/remove breakpoints at a specific offset.
 void phpAddBreakPoint(const Unit* unit, Offset offset);

@@ -531,24 +531,6 @@
             ]
         },
         {
-            "name": "hphp_process_abort",
-            "desc": "Causes the process to die immediately in an undefined way.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "magic",
-                    "type": "Variant",
-                    "desc": "You shouldn't be calling this function if you don't know the magic value."
-                }
-            ]
-        },
-        {
             "name": "hphp_to_string",
             "desc": "Casts a given value to a string.",
             "flags": [

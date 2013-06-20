@@ -52,7 +52,6 @@ Variant f_unpack(CStrRef format, CStrRef data);
 Array f_sys_getloadavg();
 Array f_token_get_all(CStrRef source);
 String f_token_name(int64_t token);
-Variant f_hphp_process_abort(CVarRef magic);
 String f_hphp_to_string(CVarRef v);
 extern const double k_INF;
 extern const double k_NAN;

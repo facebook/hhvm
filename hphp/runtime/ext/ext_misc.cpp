@@ -370,15 +370,6 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
-static const StaticString s_marauder("I solemnly swear that I am up to no good.");
-
-Variant f_hphp_process_abort(CVarRef magic) {
-  if (equal(magic, s_marauder)) {
-    *((int*)0) = 0xdead;
-  }
-  return null_variant;
-}
-
 String f_hphp_to_string(CVarRef v) {
   return v.toString();
 }

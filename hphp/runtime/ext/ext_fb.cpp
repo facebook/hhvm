@@ -1011,7 +1011,7 @@ Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString
+const StaticString
   s_affected("affected"),
   s_result("result"),
   s_error("error"),
@@ -1047,7 +1047,7 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
   }
 }
 
-static const StaticString
+const StaticString
   s_session_variable("session_variable"),
   s_ip("ip"),
   s_db("db"),
@@ -1582,11 +1582,12 @@ void f_fb_set_exit_callback(CVarRef function) {
   g_context->setExitCallback(function);
 }
 
-static const StaticString s_flush_stats("flush_stats");
-static const StaticString s_chunk_stats("chunk_stats");
-static const StaticString s_total("total");
-static const StaticString s_sent("sent");
-static const StaticString s_time("time");
+const StaticString
+  s_flush_stats("flush_stats"),
+  s_chunk_stats("chunk_stats"),
+  s_total("total"),
+  s_sent("sent"),
+  s_time("time");
 
 Array f_fb_get_flush_stat() {
   Transport *transport = g_context->getTransport();

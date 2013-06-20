@@ -389,9 +389,10 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-static const StaticString s_instructions("instructions");
-static const StaticString s_loads("loads");
-static const StaticString s_stores("stores");
+const StaticString
+  s_instructions("instructions"),
+  s_loads("loads"),
+  s_stores("stores");
 
 void HardwareCounter::getPerfEvents(Array& ret) {
   ret.set(s_instructions, getInstructionCount());

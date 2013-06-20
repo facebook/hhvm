@@ -764,15 +764,16 @@ Variant f_curl_copy_handle(CObjRef ch) {
   return NEWOBJ(CurlResource)(curl);
 }
 
-static const StaticString s_version_number("version_number");
-static const StaticString s_age("age");
-static const StaticString s_features("features");
-static const StaticString s_ssl_version_number("ssl_version_number");
-static const StaticString s_version("version");
-static const StaticString s_host("host");
-static const StaticString s_ssl_version("ssl_version");
-static const StaticString s_libz_version("libz_version");
-static const StaticString s_protocols("protocols");
+const StaticString
+  s_version_number("version_number"),
+  s_age("age"),
+  s_features("features"),
+  s_ssl_version_number("ssl_version_number"),
+  s_version("version"),
+  s_host("host"),
+  s_ssl_version("ssl_version"),
+  s_libz_version("libz_version"),
+  s_protocols("protocols");
 
 Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
@@ -825,28 +826,29 @@ Variant f_curl_exec(CObjRef ch) {
   return curl->execute();
 }
 
-static const StaticString s_url("url");
-static const StaticString s_content_type("content_type");
-static const StaticString s_http_code("http_code");
-static const StaticString s_header_size("header_size");
-static const StaticString s_request_size("request_size");
-static const StaticString s_filetime("filetime");
-static const StaticString s_ssl_verify_result("ssl_verify_result");
-static const StaticString s_redirect_count("redirect_count");
-static const StaticString s_local_port("local_port");
-static const StaticString s_total_time("total_time");
-static const StaticString s_namelookup_time("namelookup_time");
-static const StaticString s_connect_time("connect_time");
-static const StaticString s_pretransfer_time("pretransfer_time");
-static const StaticString s_size_upload("size_upload");
-static const StaticString s_size_download("size_download");
-static const StaticString s_speed_download("speed_download");
-static const StaticString s_speed_upload("speed_upload");
-static const StaticString s_download_content_length("download_content_length");
-static const StaticString s_upload_content_length("upload_content_length");
-static const StaticString s_starttransfer_time("starttransfer_time");
-static const StaticString s_redirect_time("redirect_time");
-static const StaticString s_request_header("request_header");
+const StaticString
+  s_url("url"),
+  s_content_type("content_type"),
+  s_http_code("http_code"),
+  s_header_size("header_size"),
+  s_request_size("request_size"),
+  s_filetime("filetime"),
+  s_ssl_verify_result("ssl_verify_result"),
+  s_redirect_count("redirect_count"),
+  s_local_port("local_port"),
+  s_total_time("total_time"),
+  s_namelookup_time("namelookup_time"),
+  s_connect_time("connect_time"),
+  s_pretransfer_time("pretransfer_time"),
+  s_size_upload("size_upload"),
+  s_size_download("size_download"),
+  s_speed_download("speed_download"),
+  s_speed_upload("speed_upload"),
+  s_download_content_length("download_content_length"),
+  s_upload_content_length("upload_content_length"),
+  s_starttransfer_time("starttransfer_time"),
+  s_redirect_time("redirect_time"),
+  s_request_header("request_header");
 
 Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
@@ -1241,11 +1243,12 @@ Variant f_fb_curl_multi_fdset(CObjRef mh,
   return r;
 }
 
-static const StaticString s_msg("msg");
-static const StaticString s_result("result");
-static const StaticString s_handle("handle");
-static const StaticString s_headers("headers");
-static const StaticString s_requests("requests");
+const StaticString
+  s_msg("msg"),
+  s_result("result"),
+  s_handle("handle"),
+  s_headers("headers"),
+  s_requests("requests");
 
 Variant f_curl_multi_info_read(CObjRef mh,
                                VRefParam msgs_in_queue /* = null */) {
@@ -1352,8 +1355,9 @@ static LibEventHttpClientPtr prepare_client
   return client;
 }
 
-static const StaticString s_code("code");
-static const StaticString s_response("response");
+const StaticString
+  s_code("code"),
+  s_response("response");
 
 static Array prepare_response(LibEventHttpClientPtr client) {
   int len = 0;

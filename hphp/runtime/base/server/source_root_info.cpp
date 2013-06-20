@@ -247,8 +247,9 @@ string SourceRootInfo::path() const {
   }
 }
 
-static const StaticString s_SERVER("_SERVER");
-static const StaticString s_PHP_ROOT("PHP_ROOT");
+const StaticString
+  s_SERVER("_SERVER"),
+  s_PHP_ROOT("PHP_ROOT");
 
 string& SourceRootInfo::initPhpRoot() {
   GlobalVariables *g = get_global_variables();

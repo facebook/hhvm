@@ -368,9 +368,10 @@ bool c_Memcached::getMultiImpl(CStrRef server_key, CArrRef keys,
       keysCopy.size()));
 }
 
-static const StaticString s_key("key");
-static const StaticString s_value("value");
-static const StaticString s_cas("cas");
+const StaticString
+  s_key("key"),
+  s_value("value"),
+  s_cas("cas");
 
 bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   memcached_return status;
@@ -600,9 +601,10 @@ bool c_Memcached::t_addservers(CArrRef servers) {
 
 namespace {
 
-static const StaticString s_host("host");
-static const StaticString s_port("port");
-static const StaticString s_weight("weight");
+const StaticString
+  s_host("host"),
+  s_port("port"),
+  s_weight("weight");
 
 memcached_return_t doServerListCallback(const memcached_st *ptr,
     memcached_server_instance_st server, void *context) {
@@ -648,31 +650,31 @@ struct StatsContext {
   Array returnValue;
 };
 
-static const StaticString s_pid("pid");
-static const StaticString s_uptime("uptime");
-static const StaticString s_threads("threads");
-static const StaticString s_time("time");
-static const StaticString s_pointer_size("pointer_size");
-static const StaticString s_rusage_user_seconds("rusage_user_seconds");
-static const StaticString s_rusage_user_microseconds("rusage_user_microseconds");
-static const StaticString s_rusage_system_seconds("rusage_system_seconds");
-static const StaticString
-             s_rusage_system_microseconds("rusage_system_microseconds");
-static const StaticString s_curr_items("curr_items");
-static const StaticString s_total_items("total_items");
-static const StaticString s_limit_maxbytes("limit_maxbytes");
-static const StaticString s_curr_connections("curr_connections");
-static const StaticString s_total_connections("total_connections");
-static const StaticString s_connection_structures("connection_structures");
-static const StaticString s_bytes("bytes");
-static const StaticString s_cmd_get("cmd_get");
-static const StaticString s_cmd_set("cmd_set");
-static const StaticString s_get_hits("get_hits");
-static const StaticString s_get_misses("get_misses");
-static const StaticString s_evictions("evictions");
-static const StaticString s_bytes_read("bytes_read");
-static const StaticString s_bytes_written("bytes_written");
-static const StaticString s_version("version");
+const StaticString
+  s_pid("pid"),
+  s_uptime("uptime"),
+  s_threads("threads"),
+  s_time("time"),
+  s_pointer_size("pointer_size"),
+  s_rusage_user_seconds("rusage_user_seconds"),
+  s_rusage_user_microseconds("rusage_user_microseconds"),
+  s_rusage_system_seconds("rusage_system_seconds"),
+  s_rusage_system_microseconds("rusage_system_microseconds"),
+  s_curr_items("curr_items"),
+  s_total_items("total_items"),
+  s_limit_maxbytes("limit_maxbytes"),
+  s_curr_connections("curr_connections"),
+  s_total_connections("total_connections"),
+  s_connection_structures("connection_structures"),
+  s_bytes("bytes"),
+  s_cmd_get("cmd_get"),
+  s_cmd_set("cmd_set"),
+  s_get_hits("get_hits"),
+  s_get_misses("get_misses"),
+  s_evictions("evictions"),
+  s_bytes_read("bytes_read"),
+  s_bytes_written("bytes_written"),
+  s_version("version");
 
 memcached_return_t doStatsCallback(const memcached_st *ptr,
     memcached_server_instance_st server, void *inContext) {

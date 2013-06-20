@@ -72,7 +72,7 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   return VirtualHost::GetCurrent();
 }
 
-static const StaticString
+const StaticString
   s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),

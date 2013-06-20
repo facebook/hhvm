@@ -101,12 +101,13 @@ int HttpClient::post(const char *url, const char *data, int size,
   return impl(url, data, size, response, requestHeaders, responseHeaders);
 }
 
-static const StaticString s_ssl("ssl");
-static const StaticString s_verify_peer("verify_peer");
-static const StaticString s_capath("capath");
-static const StaticString s_cafile("cafile");
-static const StaticString s_local_cert("local_cert");
-static const StaticString s_passphrase("passphrase");
+const StaticString
+  s_ssl("ssl"),
+  s_verify_peer("verify_peer"),
+  s_capath("capath"),
+  s_cafile("cafile"),
+  s_local_cert("local_cert"),
+  s_passphrase("passphrase");
 
 int HttpClient::impl(const char *url, const char *data, int size,
                      StringBuffer &response, const HeaderMap *requestHeaders,

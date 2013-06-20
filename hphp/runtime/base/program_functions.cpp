@@ -124,7 +124,7 @@ time_t start_time() {
   return s_startTime.startTime;
 }
 
-static const StaticString
+const StaticString
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),

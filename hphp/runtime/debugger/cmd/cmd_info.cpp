@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-static const StaticString
+const StaticString
   s_params("params"),
   s_ref("ref"),
   s_name("name"),

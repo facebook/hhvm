@@ -104,42 +104,43 @@ SmartObject<DateTime> DateTime::Current(bool utc /* = false */) {
   return NEWOBJ(DateTime)(time(0), utc);
 }
 
-static const StaticString s_year("year");
-static const StaticString s_month("month");
-static const StaticString s_day("day");
-static const StaticString s_hour("hour");
-static const StaticString s_minute("minute");
-static const StaticString s_second("second");
-static const StaticString s_zone("zone");
-static const StaticString s_zone_type("zone_type");
-static const StaticString s_fraction("fraction");
-static const StaticString s_warning_count("warning_count");
-static const StaticString s_warnings("warnings");
-static const StaticString s_error_count("error_count");
-static const StaticString s_errors("errors");
-static const StaticString s_is_localtime("is_localtime");
-static const StaticString s_is_dst("is_dst");
-static const StaticString s_tz_abbr("tz_abbr");
-static const StaticString s_tz_id("tz_id");
-static const StaticString s_weekday("weekday");
-static const StaticString s_relative("relative");
-static const StaticString s_tm_sec("tm_sec");
-static const StaticString s_tm_min("tm_min");
-static const StaticString s_tm_hour("tm_hour");
-static const StaticString s_tm_mday("tm_mday");
-static const StaticString s_tm_mon("tm_mon");
-static const StaticString s_tm_year("tm_year");
-static const StaticString s_tm_wday("tm_wday");
-static const StaticString s_tm_yday("tm_yday");
-static const StaticString s_tm_isdst("tm_isdst");
-static const StaticString s_unparsed("unparsed");
-static const StaticString s_seconds("seconds");
-static const StaticString s_minutes("minutes");
-static const StaticString s_hours("hours");
-static const StaticString s_mday("mday");
-static const StaticString s_wday("wday");
-static const StaticString s_mon("mon");
-static const StaticString s_yday("yday");
+const StaticString
+  s_year("year"),
+  s_month("month"),
+  s_day("day"),
+  s_hour("hour"),
+  s_minute("minute"),
+  s_second("second"),
+  s_zone("zone"),
+  s_zone_type("zone_type"),
+  s_fraction("fraction"),
+  s_warning_count("warning_count"),
+  s_warnings("warnings"),
+  s_error_count("error_count"),
+  s_errors("errors"),
+  s_is_localtime("is_localtime"),
+  s_is_dst("is_dst"),
+  s_tz_abbr("tz_abbr"),
+  s_tz_id("tz_id"),
+  s_weekday("weekday"),
+  s_relative("relative"),
+  s_tm_sec("tm_sec"),
+  s_tm_min("tm_min"),
+  s_tm_hour("tm_hour"),
+  s_tm_mday("tm_mday"),
+  s_tm_mon("tm_mon"),
+  s_tm_year("tm_year"),
+  s_tm_wday("tm_wday"),
+  s_tm_yday("tm_yday"),
+  s_tm_isdst("tm_isdst"),
+  s_unparsed("unparsed"),
+  s_seconds("seconds"),
+  s_minutes("minutes"),
+  s_hours("hours"),
+  s_mday("mday"),
+  s_wday("wday"),
+  s_mon("mon"),
+  s_yday("yday");
 
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
   if ((int)parsed_time->elem == -99999) {                \
@@ -801,17 +802,16 @@ SmartObject<DateInterval> DateTime::diff(SmartObject<DateTime> datetime2, bool a
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
-static const StaticString s_sunrise("sunrise");
-static const StaticString s_sunset("sunset");
-static const StaticString s_transit("transit");
-static const StaticString s_civil_twilight_begin("civil_twilight_begin");
-static const StaticString s_civil_twilight_end("civil_twilight_end");
-static const StaticString s_nautical_twilight_begin("nautical_twilight_begin");
-static const StaticString s_nautical_twilight_end("nautical_twilight_end");
-static const StaticString
-       s_astronomical_twilight_begin("astronomical_twilight_begin");
-static const StaticString
-       s_astronomical_twilight_end("astronomical_twilight_end");
+const StaticString
+  s_sunrise("sunrise"),
+  s_sunset("sunset"),
+  s_transit("transit"),
+  s_civil_twilight_begin("civil_twilight_begin"),
+  s_civil_twilight_end("civil_twilight_end"),
+  s_nautical_twilight_begin("nautical_twilight_begin"),
+  s_nautical_twilight_end("nautical_twilight_end"),
+  s_astronomical_twilight_begin("astronomical_twilight_begin"),
+  s_astronomical_twilight_end("astronomical_twilight_end");
 
 Array DateTime::getSunInfo(double latitude, double longitude) const {
   Array ret;

@@ -257,9 +257,10 @@ void CmdInterrupt::onClientImpl(DebuggerClient &client) {
   }
 }
 
-static const StaticString s_format("format");
-static const StaticString s_php("php");
-static const StaticString s_value("value");
+const StaticString
+  s_format("format"),
+  s_php("php"),
+  s_value("value");
 
 void CmdInterrupt::setClientOutput(DebuggerClient &client) {
   client.setOutputType(DebuggerClient::OTCodeLoc);

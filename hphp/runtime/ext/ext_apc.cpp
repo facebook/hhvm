@@ -225,7 +225,7 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
   return s_apc_store[cache_id].exists(key.toString());
 }
 
-static const StaticString s_start_time("start_time");
+const StaticString s_start_time("start_time");
 
 Variant f_apc_cache_info(int64_t cache_id /* = 0 */, bool limited /* = false */) {
   return CREATE_MAP1(s_start_time, start_time());
@@ -955,14 +955,15 @@ static double my_time() {
   return t;
 }
 
-static const StaticString s_total("total");
-static const StaticString s_current("current");
-static const StaticString s_filename("filename");
-static const StaticString s_name("name");
-static const StaticString s_done("done");
-static const StaticString s_temp_filename("temp_filename");
-static const StaticString s_cancel_upload("cancel_upload");
-static const StaticString s_rate("rate");
+const StaticString
+  s_total("total"),
+  s_current("current"),
+  s_filename("filename"),
+  s_name("name"),
+  s_done("done"),
+  s_temp_filename("temp_filename"),
+  s_cancel_upload("cancel_upload"),
+  s_rate("rate");
 
 #define RFC1867_TRACKING_KEY_MAXLEN 63
 #define RFC1867_NAME_MAXLEN 63

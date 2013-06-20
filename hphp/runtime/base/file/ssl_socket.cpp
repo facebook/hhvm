@@ -42,8 +42,9 @@ int SSLSocket::GetSSLExDataIndex() {
   return s_ex_data_index;
 }
 
-static const StaticString s_allow_self_signed("allow_self_signed");
-static const StaticString s_verify_depth("verify_depth");
+const StaticString
+  s_allow_self_signed("allow_self_signed"),
+  s_verify_depth("verify_depth");
 
 static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
   int ret = preverify_ok;
@@ -75,7 +76,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
   return ret;
 }
 
-static const StaticString s_passphrase("passphrase");
+const StaticString s_passphrase("passphrase");
 
 static int passwd_callback(char *buf, int num, int verify, void *data) {
   /* TODO: could expand this to make a callback into PHP user-space */
@@ -88,11 +89,12 @@ static int passwd_callback(char *buf, int num, int verify, void *data) {
   return 0;
 }
 
-static const StaticString s_verify_peer("verify_peer");
-static const StaticString s_cafile("cafile");
-static const StaticString s_capath("capath");
-static const StaticString s_ciphers("ciphers");
-static const StaticString s_local_cert("local_cert");
+const StaticString
+  s_verify_peer("verify_peer"),
+  s_cafile("cafile"),
+  s_capath("capath"),
+  s_ciphers("ciphers"),
+  s_local_cert("local_cert");
 
 SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   ERR_clear_error();
@@ -439,7 +441,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   return true;
 }
 
-static const StaticString s_CN_match("CN_match");
+const StaticString s_CN_match("CN_match");
 
 bool SSLSocket::applyVerificationPolicy(X509 *peer) {
   /* verification is turned off */
@@ -508,10 +510,11 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
   return true;
 }
 
-static const StaticString s_capture_peer_cert("capture_peer_cert");
-static const StaticString s_peer_certificate("peer_certificate");
-static const StaticString s_capture_peer_cert_chain("capture_peer_cert_chain");
-static const StaticString s_peer_certificate_chain("peer_certificate_chain");
+const StaticString
+  s_capture_peer_cert("capture_peer_cert"),
+  s_peer_certificate("peer_certificate"),
+  s_capture_peer_cert_chain("capture_peer_cert_chain"),
+  s_peer_certificate_chain("peer_certificate_chain");
 
 bool SSLSocket::enableCrypto(bool activate /* = true */) {
   if (activate && !m_ssl_active) {

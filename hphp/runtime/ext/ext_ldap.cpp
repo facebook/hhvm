@@ -487,8 +487,9 @@ static int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req,
   return ret.toInt64();
 }
 
-static const StaticString s_count("count");
-static const StaticString s_dn("dn");
+const StaticString
+  s_count("count"),
+  s_dn("dn");
 
 static void get_attributes(Array &ret, LDAP *ldap,
                            LDAPMessage *ldap_result_entry, bool to_lower) {
@@ -770,9 +771,10 @@ bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
   return true;
 }
 
-static const StaticString s_oid("oid");
-static const StaticString s_value("value");
-static const StaticString s_iscritical("iscritical");
+const StaticString
+  s_oid("oid"),
+  s_value("value"),
+  s_iscritical("iscritical");
 
 bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
   LDAP *ldap = NULL;

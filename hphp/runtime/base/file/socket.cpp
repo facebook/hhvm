@@ -200,8 +200,9 @@ bool Socket::eof() {
   return m_eof;
 }
 
-static const StaticString s_timed_out("timed_out");
-static const StaticString s_blocked("blocked");
+const StaticString
+  s_timed_out("timed_out"),
+  s_blocked("blocked");
 
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();

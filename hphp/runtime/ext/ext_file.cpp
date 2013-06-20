@@ -95,19 +95,20 @@ static bool check_error(const char *function, int line, bool ret) {
   return ret;
 }
 
-static const StaticString s_dev("dev");
-static const StaticString s_ino("ino");
-static const StaticString s_mode("mode");
-static const StaticString s_nlink("nlink");
-static const StaticString s_uid("uid");
-static const StaticString s_gid("gid");
-static const StaticString s_rdev("rdev");
-static const StaticString s_size("size");
-static const StaticString s_atime("atime");
-static const StaticString s_mtime("mtime");
-static const StaticString s_ctime("ctime");
-static const StaticString s_blksize("blksize");
-static const StaticString s_blocks("blocks");
+const StaticString
+  s_dev("dev"),
+  s_ino("ino"),
+  s_mode("mode"),
+  s_nlink("nlink"),
+  s_uid("uid"),
+  s_gid("gid"),
+  s_rdev("rdev"),
+  s_size("size"),
+  s_atime("atime"),
+  s_mtime("mtime"),
+  s_ctime("ctime"),
+  s_blksize("blksize"),
+  s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
   ArrayInit ret(26);
@@ -848,10 +849,11 @@ Variant f_realpath(CStrRef path) {
 #define PHP_PATHINFO_EXTENSION  4
 #define PHP_PATHINFO_FILENAME   8
 
-static const StaticString s_dirname("dirname");
-static const StaticString s_basename("basename");
-static const StaticString s_extension("extension");
-static const StaticString s_filename("filename");
+const StaticString
+  s_dirname("dirname"),
+  s_basename("basename"),
+  s_extension("extension"),
+  s_filename("filename");
 
 Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
   ArrayInit ret(4);
@@ -1322,8 +1324,9 @@ public:
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryRequestData, s_directory_data);
 
-static const StaticString s_handle("handle");
-static const StaticString s_path("path");
+const StaticString
+  s_handle("handle"),
+  s_path("path");
 
 static DIR *get_dir(CObjRef dir_handle) {
   Object obj;

@@ -142,7 +142,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   tv->m_type = KindOfDouble;
 }
 
-static const StaticString
+const StaticString
   s_1("1"),
   s_Array("Array");
 

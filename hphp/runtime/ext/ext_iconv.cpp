@@ -1254,7 +1254,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString
+const StaticString
   s_scheme("scheme"),
   s_input_charset("input-charset"),
   s_output_charset("output-charset"),
@@ -1705,10 +1705,11 @@ Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
   return ret;
 }
 
-static const StaticString s_input_encoding("input_encoding");
-static const StaticString s_output_encoding("output_encoding");
-static const StaticString s_internal_encoding("internal_encoding");
-static const StaticString s_all("all");
+const StaticString
+  s_input_encoding("input_encoding"),
+  s_output_encoding("output_encoding"),
+  s_internal_encoding("internal_encoding"),
+  s_all("all");
 
 
 Variant f_iconv_get_encoding(CStrRef type /* = "all" */) {

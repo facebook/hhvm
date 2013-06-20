@@ -111,16 +111,17 @@ bool f_msg_remove_queue(CObjRef queue) {
   return msgctl(q->id, IPC_RMID, NULL) == 0;
 }
 
-static const StaticString s_msg_perm_uid("msg_perm.uid");
-static const StaticString s_msg_perm_gid("msg_perm.gid");
-static const StaticString s_msg_perm_mode("msg_perm.mode");
-static const StaticString s_msg_stime("msg_stime");
-static const StaticString s_msg_rtime("msg_rtime");
-static const StaticString s_msg_ctime("msg_ctime");
-static const StaticString s_msg_qnum("msg_qnum");
-static const StaticString s_msg_qbytes("msg_qbytes");
-static const StaticString s_msg_lspid("msg_lspid");
-static const StaticString s_msg_lrpid("msg_lrpid");
+const StaticString
+  s_msg_perm_uid("msg_perm.uid"),
+  s_msg_perm_gid("msg_perm.gid"),
+  s_msg_perm_mode("msg_perm.mode"),
+  s_msg_stime("msg_stime"),
+  s_msg_rtime("msg_rtime"),
+  s_msg_ctime("msg_ctime"),
+  s_msg_qnum("msg_qnum"),
+  s_msg_qbytes("msg_qbytes"),
+  s_msg_lspid("msg_lspid"),
+  s_msg_lrpid("msg_lrpid");
 
 bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();

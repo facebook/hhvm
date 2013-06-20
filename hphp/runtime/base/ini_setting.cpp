@@ -209,7 +209,7 @@ void IniSetting::Unbind(const char *name) {
   s_callbacks->erase(name);
 }
 
-static const StaticString
+const StaticString
   s_error_reporting("error_reporting"),
   s_memory_limit("memory_limit"),
   s_max_execution_time("max_execution_time"),

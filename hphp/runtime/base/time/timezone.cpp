@@ -156,17 +156,18 @@ Array TimeZone::GetNames() {
   return ret;
 }
 
-static const StaticString s_dst("dst");
-static const StaticString s_offset("offset");
-static const StaticString s_timezone_id("timezone_id");
-static const StaticString s_ts("ts");
-static const StaticString s_time("time");
-static const StaticString s_isdst("isdst");
-static const StaticString s_abbr("abbr");
-static const StaticString s_country_code("country_code");
-static const StaticString s_latitude("latitude");
-static const StaticString s_longitude("longitude");
-static const StaticString s_comments("comments");
+const StaticString
+  s_dst("dst"),
+  s_offset("offset"),
+  s_timezone_id("timezone_id"),
+  s_ts("ts"),
+  s_time("time"),
+  s_isdst("isdst"),
+  s_abbr("abbr"),
+  s_country_code("country_code"),
+  s_latitude("latitude"),
+  s_longitude("longitude"),
+  s_comments("comments");
 
 Array TimeZone::GetAbbreviations() {
   Array ret;

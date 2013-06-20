@@ -295,7 +295,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
   return ret;
 }
 
-static const StaticString s_default("(default)");
+const StaticString s_default("(default)");
 
 Variant ArrayUtil::FromHdf(const Hdf &hdf) {
   if (hdf.firstChild().exists()) {

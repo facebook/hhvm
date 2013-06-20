@@ -530,23 +530,24 @@ void CmdBreak::onClientImpl(DebuggerClient &client) {
   }
 }
 
-static const StaticString s_id("id");
-static const StaticString s_state("state");
-static const StaticString s_is_exception("is_exception");
-static const StaticString s_exception_class("exception_class");
-static const StaticString s_file("file");
-static const StaticString s_line1("line1");
-static const StaticString s_line2("line2");
-static const StaticString s_namespace("namespace");
-static const StaticString s_func("func");
-static const StaticString s_class("class");
-static const StaticString s_url("url");
-static const StaticString s_use_regex("use_regex");
-static const StaticString s_clause_type("clause_type");
-static const StaticString s_clause("clause");
-static const StaticString s_if("if");
-static const StaticString s_ampamp("ampamp");
-static const StaticString s_desc("desc");
+const StaticString
+  s_id("id"),
+  s_state("state"),
+  s_is_exception("is_exception"),
+  s_exception_class("exception_class"),
+  s_file("file"),
+  s_line1("line1"),
+  s_line2("line2"),
+  s_namespace("namespace"),
+  s_func("func"),
+  s_class("class"),
+  s_url("url"),
+  s_use_regex("use_regex"),
+  s_clause_type("clause_type"),
+  s_clause("clause"),
+  s_if("if"),
+  s_ampamp("ampamp"),
+  s_desc("desc");
 
 // Updates the client with information about the execution of this command.
 // This information is not used by the command line client, but can be accessed

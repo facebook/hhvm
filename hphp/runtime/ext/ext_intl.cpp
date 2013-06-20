@@ -736,9 +736,10 @@ enum {
 
 #ifdef HAVE_46_API
 
-static const StaticString s_result("result");
-static const StaticString s_isTransitionalDifferent("isTransitionalDifferent");
-static const StaticString s_errors("errors");
+const StaticString
+  s_result("result"),
+  s_isTransitionalDifferent("isTransitionalDifferent"),
+  s_errors("errors");
 
 static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   int32_t     converted_capacity;

@@ -91,7 +91,7 @@ struct CLISession : private boost::noncopyable {
 
 }
 
-static const StaticString s__SERVER("_SERVER");
+const StaticString s__SERVER("_SERVER");
 
 void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");

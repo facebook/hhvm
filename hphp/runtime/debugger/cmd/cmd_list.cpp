@@ -155,7 +155,7 @@ bool CmdList::listFileRange(DebuggerClient &client,
   return false;
 }
 
-static const StaticString
+const StaticString
   s_methods("methods"),
   s_file("file"),
   s_line1("line2"),

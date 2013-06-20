@@ -306,16 +306,17 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
   return true;
 }
 
-static const StaticString s_wrapper_type("wrapper_type");
-static const StaticString s_stream_type("stream_type");
-static const StaticString s_mode("mode");
-static const StaticString s_unread_bytes("unread_bytes");
-static const StaticString s_seekable("seekable");
-static const StaticString s_uri("uri");
-static const StaticString s_timed_out("timed_out");
-static const StaticString s_blocked("blocked");
-static const StaticString s_eof("eof");
-static const StaticString s_wrapper_data("wrapper_data");
+const StaticString
+  s_wrapper_type("wrapper_type"),
+  s_stream_type("stream_type"),
+  s_mode("mode"),
+  s_unread_bytes("unread_bytes"),
+  s_seekable("seekable"),
+  s_uri("uri"),
+  s_timed_out("timed_out"),
+  s_blocked("blocked"),
+  s_eof("eof"),
+  s_wrapper_data("wrapper_data");
 
 Array File::getMetaData() {
   ArrayInit ret(10);

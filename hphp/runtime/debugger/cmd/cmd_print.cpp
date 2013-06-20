@@ -341,11 +341,12 @@ void CmdPrint::onClientImpl(DebuggerClient &client) {
   }
 }
 
-static const StaticString s_format("format");
-static const StaticString s_php("php");
-static const StaticString s_body("body");
-static const StaticString s_value_serialize("value_serialize");
-static const StaticString s_value("value");
+const StaticString
+  s_format("format"),
+  s_php("php"),
+  s_body("body"),
+  s_value_serialize("value_serialize"),
+  s_value("value");
 
 void CmdPrint::setClientOutput(DebuggerClient &client) {
   client.setOutputType(DebuggerClient::OTValues);

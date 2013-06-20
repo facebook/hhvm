@@ -468,8 +468,9 @@ String c_UConverter::doConvert(CStrRef str,
   return destStr.setSize(dest_len);
 }
 
-static const StaticString s_from_subst("from_subst");
-static const StaticString s_to_subst("to_subst");
+const StaticString
+  s_from_subst("from_subst"),
+  s_to_subst("to_subst");
 
 Variant c_UConverter::ti_transcode(CStrRef str, CStrRef toEncoding,
                                    CStrRef fromEncoding, CArrRef options) {

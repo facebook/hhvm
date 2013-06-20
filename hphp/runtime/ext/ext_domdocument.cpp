@@ -1154,19 +1154,19 @@ static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   }
 }
 
-static const StaticString s_domdocument("domdocument");
-static const StaticString s_domdocumenttype("domdocumenttype");
-static const StaticString s_domelement("domelement");
-static const StaticString s_domattr("domattr");
-static const StaticString s_domtext("domtext");
-static const StaticString s_domcomment("domcomment");
-static const StaticString
-       s_domprocessinginstruction("domprocessinginstruction");
-static const StaticString s_domentityreference("domentityreference");
-static const StaticString s_domentity("domentity");
-static const StaticString s_domcdatasection("domcdatasection");
-static const StaticString s_domdocumentfragment("domdocumentfragment");
-static const StaticString s_domnotation("domnotation");
+const StaticString
+  s_domdocument("domdocument"),
+  s_domdocumenttype("domdocumenttype"),
+  s_domelement("domelement"),
+  s_domattr("domattr"),
+  s_domtext("domtext"),
+  s_domcomment("domcomment"),
+  s_domprocessinginstruction("domprocessinginstruction"),
+  s_domentityreference("domentityreference"),
+  s_domentity("domentity"),
+  s_domcdatasection("domcdatasection"),
+  s_domdocumentfragment("domdocumentfragment"),
+  s_domnotation("domnotation");
 
 static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {

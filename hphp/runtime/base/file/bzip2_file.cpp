@@ -63,8 +63,9 @@ String BZ2File::errstr() {
   return BZ2_bzerror(m_bzFile, &errnum);
 }
 
-static const StaticString s_errno("errno");
-static const StaticString s_errstr("errstr");
+const StaticString
+  s_errno("errno"),
+  s_errstr("errstr");
 
 Variant BZ2File::error() {
   assert(m_bzFile);

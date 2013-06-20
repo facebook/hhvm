@@ -58,13 +58,14 @@ void f_debug_print_backtrace(int64_t options /* = 0 */,
   echo(debug_string_backtrace(true, ignore_args, limit));
 }
 
-static const StaticString s_class("class");
-static const StaticString s_type("type");
-static const StaticString s_function("function");
-static const StaticString s_file("file");
-static const StaticString s_line("line");
-static const StaticString s_message("message");
-static const StaticString s_args("args");
+const StaticString
+  s_class("class"),
+  s_type("type"),
+  s_function("function"),
+  s_file("file"),
+  s_line("line"),
+  s_message("message"),
+  s_args("args");
 
 String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
                               int limit /* = 0 */) {

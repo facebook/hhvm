@@ -147,7 +147,7 @@ void CmdConfig::onClientImpl(DebuggerClient &client) {
   listVars(client);
 }
 
-static const StaticString
+const StaticString
   s_BypassAccessCheck("BypassAccessCheck"),
   s_LogFile("LogFile"),
   s_PrintLevel("PrintLevel"),

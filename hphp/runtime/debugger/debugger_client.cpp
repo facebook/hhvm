@@ -1209,7 +1209,7 @@ String DebuggerClient::getPrintString() {
   return s;
 }
 
-static const StaticString
+const StaticString
   s_output_type("output_type"),
   s_file("file"),
   s_line("line"),
@@ -2116,7 +2116,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   }
 }
 
-static const StaticString
+const StaticString
   s_args("args"),
   s_namespace("namespace"),
   s_class("class"),

@@ -55,8 +55,9 @@ void CmdEval::handleReply(DebuggerClient &client) {
   client.print(m_output);
 }
 
-static const StaticString s_body("body");
-static const StaticString s_value("value");
+const StaticString
+  s_body("body"),
+  s_value("value");
 
 void CmdEval::setClientOutput(DebuggerClient &client) {
   client.setOutputType(DebuggerClient::OTValues);

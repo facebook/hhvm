@@ -1574,7 +1574,7 @@ String f_image_type_to_extension(int imagetype,
   }
 }
 
-static const StaticString
+const StaticString
   s_bits("bits"),
   s_channels("channels"),
   s_mime("mime"),
@@ -2930,21 +2930,21 @@ static Variant php_imagettftext_common(int mode, int extended,
 }
 #endif  /* ENABLE_GD_TTF */
 
-static const StaticString s_GD_Version("GD Version");
-static const StaticString s_FreeType_Support("FreeType Support");
-static const StaticString s_FreeType_Linkage("FreeType Linkage");
-static const StaticString s_with_freetype("with freetype");
-static const StaticString s_with_TTF_library("with TTF library");
-static const StaticString s_with_unknown_library("with unknown library");
-static const StaticString s_T1Lib_Support("T1Lib_Support");
-static const StaticString s_GIF_Read_Support("GIF Read Support");
-static const StaticString s_GIF_Create_Support("GIF Create Support");
-static const StaticString s_JPG_Support("JPG Support");
-static const StaticString s_PNG_Support("PNG Support");
-static const StaticString s_WBMP_Support("WBMP Support");
-static const StaticString s_XPM_Support("XPM Support");
-static const StaticString s_XBM_Support("XBM Support");
-static const StaticString
+const StaticString
+  s_GD_Version("GD Version"),
+  s_FreeType_Support("FreeType Support"),
+  s_FreeType_Linkage("FreeType Linkage"),
+  s_with_freetype("with freetype"),
+  s_with_TTF_library("with TTF library"),
+  s_with_unknown_library("with unknown library"),
+  s_T1Lib_Support("T1Lib_Support"),
+  s_GIF_Read_Support("GIF Read Support"),
+  s_GIF_Create_Support("GIF Create Support"),
+  s_JPG_Support("JPG Support"),
+  s_PNG_Support("PNG Support"),
+  s_WBMP_Support("WBMP Support"),
+  s_XPM_Support("XPM Support"),
+  s_XBM_Support("XBM Support"),
   s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
 
 Array f_gd_info() {
@@ -3752,10 +3752,11 @@ Variant f_imagecolorset(CObjRef image, int index,
   }
 }
 
-static const StaticString s_red("red");
-static const StaticString s_green("green");
-static const StaticString s_blue("blue");
-static const StaticString s_alpha("alpha");
+const StaticString
+  s_red("red"),
+  s_green("green"),
+  s_blue("blue"),
+  s_alpha("alpha");
 
 Variant f_imagecolorsforindex(CObjRef image, int index) {
   gdImagePtr im = image.getTyped<Image>()->get();
@@ -4383,7 +4384,7 @@ static int php_iptc_next_marker(File *file, int spool,
   return (unsigned int) c;
 }
 
-static const StaticString s_size("size");
+const StaticString s_size("size");
 
 Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
                     int spool /* = 0 */) {
@@ -5337,20 +5338,21 @@ typedef struct {
 #define FOUND_WINXP         (1<<SECTION_WINXP)
 #define FOUND_MAKERNOTE     (1<<SECTION_MAKERNOTE)
 
-static const StaticString s_FILE("FILE");
-static const StaticString s_COMPUTED("COMPUTED");
-static const StaticString s_ANY_TAG("ANY_TAG");
-static const StaticString s_IFD0("IFD0");
-static const StaticString s_THUMBNAIL("THUMBNAIL");
-static const StaticString s_COMMENT("COMMENT");
-static const StaticString s_APP0("APP0");
-static const StaticString s_EXIF("EXIF");
-static const StaticString s_FPIX("FPIX");
-static const StaticString s_GPS("GPS");
-static const StaticString s_INTEROP("INTEROP");
-static const StaticString s_APP12("APP12");
-static const StaticString s_WINXP("WINXP");
-static const StaticString s_MAKERNOTE("MAKERNOTE");
+const StaticString
+  s_FILE("FILE"),
+  s_COMPUTED("COMPUTED"),
+  s_ANY_TAG("ANY_TAG"),
+  s_IFD0("IFD0"),
+  s_THUMBNAIL("THUMBNAIL"),
+  s_COMMENT("COMMENT"),
+  s_APP0("APP0"),
+  s_EXIF("EXIF"),
+  s_FPIX("FPIX"),
+  s_GPS("GPS"),
+  s_INTEROP("INTEROP"),
+  s_APP12("APP12"),
+  s_WINXP("WINXP"),
+  s_MAKERNOTE("MAKERNOTE");
 
 static String exif_get_sectionname(int section) {
   switch(section) {

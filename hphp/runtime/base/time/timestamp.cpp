@@ -33,10 +33,11 @@ double TimeStamp::CurrentSecond() {
   return (double)tp.tv_sec + (double)tp.tv_usec / 1000000;
 }
 
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
-static const StaticString s_minuteswest("minuteswest");
-static const StaticString s_dsttime("dsttime");
+const StaticString
+  s_sec("sec"),
+  s_usec("usec"),
+  s_minuteswest("minuteswest"),
+  s_dsttime("dsttime");
 
 Array TimeStamp::CurrentTime() {
   struct timeval tp;

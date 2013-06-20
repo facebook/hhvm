@@ -24,13 +24,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_GET("GET");
-static const StaticString s_method("method");
-static const StaticString s_http("http");
-static const StaticString s_header("header");
-static const StaticString s_max_redirects("max_redirects");
-static const StaticString s_timeout("timeout");
-static const StaticString s_content("content");
+const StaticString
+  s_GET("GET"),
+  s_method("method"),
+  s_http("http"),
+  s_header("header"),
+  s_max_redirects("max_redirects"),
+  s_timeout("timeout"),
+  s_content("content");
 
 File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
                               int options, CVarRef context) {

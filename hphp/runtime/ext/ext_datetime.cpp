@@ -89,10 +89,11 @@ String c_DateTime::t_format(CStrRef format) {
   return m_dt->toString(format, false);
 }
 
-static const StaticString s_warning_count("warning_count");
-static const StaticString s_warnings("warnings");
-static const StaticString s_error_count("error_count");
-static const StaticString s_errors("errors");
+const StaticString
+  s_warning_count("warning_count"),
+  s_warnings("warnings"),
+  s_error_count("error_count"),
+  s_errors("errors");
 
 Array c_DateTime::ti_getlasterrors() {
   Array errors = DateTime::getLastErrors();
@@ -231,14 +232,15 @@ void c_DateInterval::t___construct(CStrRef interval_spec) {
   }
 }
 
-static const StaticString s_y("y");
-static const StaticString s_m("m");
-static const StaticString s_d("d");
-static const StaticString s_h("h");
-static const StaticString s_i("i");
-static const StaticString s_s("s");
-static const StaticString s_invert("invert");
-static const StaticString s_days("days");
+const StaticString
+  s_y("y"),
+  s_m("m"),
+  s_d("d"),
+  s_h("h"),
+  s_i("i"),
+  s_s("s"),
+  s_invert("invert"),
+  s_days("days");
 
 Variant c_DateInterval::t___get(Variant member) {
   if (member.isString()) {

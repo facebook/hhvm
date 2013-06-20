@@ -353,17 +353,18 @@ Variant c_DebuggerClientCmdUser::t_xend(CObjRef cmd) {
   return ret->getUserCommand();
 }
 
-static const StaticString s_file("file");
-static const StaticString s_line("line");
-static const StaticString s_namespace("namespace");
-static const StaticString s_class("class");
-static const StaticString s_function("function");
-static const StaticString s_text("text");
-static const StaticString s_user("user");
-static const StaticString s_configFName("configFName");
-static const StaticString s_host("host");
-static const StaticString s_port("port");
-static const StaticString s_sandbox("sandbox");
+const StaticString
+  s_file("file"),
+  s_line("line"),
+  s_namespace("namespace"),
+  s_class("class"),
+  s_function("function"),
+  s_text("text"),
+  s_user("user"),
+  s_configFName("configFName"),
+  s_host("host"),
+  s_port("port"),
+  s_sandbox("sandbox");
 
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
   TRACE(5, "c_DebuggerClientCmdUser::t_getcurrentlocation\n");

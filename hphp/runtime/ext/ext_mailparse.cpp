@@ -85,7 +85,7 @@ bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
   return (!ret);
 }
 
-static const StaticString zero(LITSTR_INIT("\0"));
+const StaticString zero(LITSTR_INIT("\0"));
 
 bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers /* = null_string */, CStrRef additional_parameters /* = null_string */) {
   // replace \0 with spaces
@@ -195,9 +195,10 @@ Array f_mailparse_msg_get_structure(CObjRef mimemail) {
   return mimemail.getTyped<MimePart>()->getStructure();
 }
 
-static const StaticString s_display("display");
-static const StaticString s_address("address");
-static const StaticString s_is_group("is_group");
+const StaticString
+  s_display("display"),
+  s_address("address"),
+  s_is_group("is_group");
 
 Array f_mailparse_rfc822_parse_addresses(CStrRef addresses) {
   php_rfc822_tokenized_t *toks =
@@ -344,8 +345,9 @@ static size_t mailparse_do_uudecode(File *instream, File *outstream) {
   return file_size;
 }
 
-static const StaticString s_filename("filename");
-static const StaticString s_origfilename("origfilename");
+const StaticString
+  s_filename("filename"),
+  s_origfilename("origfilename");
 
 Variant f_mailparse_uudecode_all(CObjRef fp) {
   File *instream = fp.getTyped<File>();

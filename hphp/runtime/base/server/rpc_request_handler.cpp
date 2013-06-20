@@ -175,7 +175,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
-static const StaticString
+const StaticString
   s_output("output"),
   s_return("return"),
   s_HPHP_RPC("HPHP_RPC"),

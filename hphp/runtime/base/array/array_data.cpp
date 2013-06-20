@@ -371,8 +371,9 @@ Variant ArrayData::current() const {
   return false;
 }
 
-static const StaticString s_value("value");
-static const StaticString s_key("key");
+const StaticString
+  s_value("value"),
+  s_key("key");
 
 Variant ArrayData::each() {
   if (size_t(m_pos) < size_t(size())) {

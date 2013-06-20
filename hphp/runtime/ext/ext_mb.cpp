@@ -1618,23 +1618,24 @@ Variant f_mb_encode_numericentity(CStrRef str, CVarRef convmap,
   return php_mb_numericentity_exec(str, convmap, encoding, 0);
 }
 
-static const StaticString s_internal_encoding("internal_encoding");
-static const StaticString s_http_input("http_input");
-static const StaticString s_http_output("http_output");
-static const StaticString s_mail_charset("mail_charset");
-static const StaticString s_mail_header_encoding("mail_header_encoding");
-static const StaticString s_mail_body_encoding("mail_body_encoding");
-static const StaticString s_illegal_chars("illegal_chars");
-static const StaticString s_encoding_translation("encoding_translation");
-static const StaticString s_On("On");
-static const StaticString s_Off("Off");
-static const StaticString s_language("language");
-static const StaticString s_detect_order("detect_order");
-static const StaticString s_substitute_character("substitute_character");
-static const StaticString s_strict_detection("strict_detection");
-static const StaticString s_none("none");
-static const StaticString s_long("long");
-static const StaticString s_entity("entity");
+const StaticString
+  s_internal_encoding("internal_encoding"),
+  s_http_input("http_input"),
+  s_http_output("http_output"),
+  s_mail_charset("mail_charset"),
+  s_mail_header_encoding("mail_header_encoding"),
+  s_mail_body_encoding("mail_body_encoding"),
+  s_illegal_chars("illegal_chars"),
+  s_encoding_translation("encoding_translation"),
+  s_On("On"),
+  s_Off("Off"),
+  s_language("language"),
+  s_detect_order("detect_order"),
+  s_substitute_character("substitute_character"),
+  s_strict_detection("strict_detection"),
+  s_none("none"),
+  s_long("long"),
+  s_entity("entity");
 
 Variant f_mb_get_info(CStrRef type /* = null_string */) {
   const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));

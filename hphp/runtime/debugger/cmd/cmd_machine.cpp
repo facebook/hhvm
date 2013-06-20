@@ -188,10 +188,11 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   return cmdMachine->m_succeed;
 }
 
-static const StaticString s_host("host");
-static const StaticString s_port("port");
-static const StaticString s_auth("auth");
-static const StaticString s_timeout("timeout");
+const StaticString
+  s_host("host"),
+  s_port("port"),
+  s_auth("auth"),
+  s_timeout("timeout");
 
 void CmdMachine::UpdateIntercept(DebuggerClient &client,
                                  const std::string &host, int port) {

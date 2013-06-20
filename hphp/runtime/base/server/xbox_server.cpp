@@ -238,7 +238,7 @@ static bool isLocalHost(CStrRef host) {
   return host.empty() || host == "localhost" || host == "127.0.0.1";
 }
 
-static const StaticString
+const StaticString
   s_code("code"),
   s_response("response"),
   s_error("error");

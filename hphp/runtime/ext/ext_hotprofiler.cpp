@@ -519,14 +519,15 @@ enum Flag {
   TrackMalloc           = 0x80,
 };
 
-static const StaticString s_ct("ct");
-static const StaticString s_wt("wt");
-static const StaticString s_cpu("cpu");
-static const StaticString s_mu("mu");
-static const StaticString s_pmu("pmu");
-static const StaticString s_alloc("alloc");
-static const StaticString s_free("free");
-static const StaticString s_compressed_trace("(compressed_trace)");
+const StaticString
+  s_ct("ct"),
+  s_wt("wt"),
+  s_cpu("cpu"),
+  s_mu("mu"),
+  s_pmu("pmu"),
+  s_alloc("alloc"),
+  s_free("free"),
+  s_compressed_trace("(compressed_trace)");
 
 /**
  * Maintain profiles of a running stack.

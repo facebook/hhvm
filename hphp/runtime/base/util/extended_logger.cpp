@@ -120,11 +120,12 @@ void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
   }
 }
 
-static const StaticString s_class("class");
-static const StaticString s_function("function");
-static const StaticString s_file("file");
-static const StaticString s_type("type");
-static const StaticString s_line("line");
+const StaticString
+  s_class("class"),
+  s_function("function"),
+  s_file("file"),
+  s_type("type"),
+  s_line("line");
 
 void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
                                      bool escape /* = false */,

@@ -34,8 +34,9 @@ namespace HPHP {
 using HPHP::Transl::CallerFrame;
 using HPHP::Transl::EagerCallerFrame;
 
-static const StaticString s_internal("internal");
-static const StaticString s_user("user");
+const StaticString
+  s_internal("internal"),
+  s_user("user");
 
 Array f_get_defined_functions() {
   return CREATE_MAP2(s_internal, ClassInfo::GetSystemFunctions(),
@@ -50,7 +51,7 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
      function_exists(function_name));
 }
 
-static const StaticString
+const StaticString
   s__invoke("__invoke"),
   s_Closure__invoke("Closure::__invoke"),
   s_colon2("::");
@@ -160,7 +161,7 @@ Variant f_end_user_func_async(CObjRef handle,
   return uninit_null();
 }
 
-static const StaticString
+const StaticString
   s_func("func"),
   s_args("args"),
   s_exception("exception"),

@@ -954,8 +954,9 @@ void ServerStats::StartNetworkProfile() {
   }
 }
 
-static const StaticString s_ct("ct");
-static const StaticString s_wt("wt");
+const StaticString
+  s_ct("ct"),
+  s_wt("wt");
 
 Array ServerStats::EndNetworkProfile() {
   s_profile_network = false;

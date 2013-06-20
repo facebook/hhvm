@@ -356,11 +356,12 @@ int BaseExecutionContext::obGetLevel() {
   return m_buffers.size() - m_protectedLevel;
 }
 
-static const StaticString s_level("level");
-static const StaticString s_type("type");
-static const StaticString s_name("name");
-static const StaticString s_args("args");
-static const StaticString s_default_output_handler("default output handler");
+const StaticString
+  s_level("level"),
+  s_type("type"),
+  s_name("name"),
+  s_args("args"),
+  s_default_output_handler("default output handler");
 
 Array BaseExecutionContext::obGetStatus(bool full) {
   Array ret = Array::Create();

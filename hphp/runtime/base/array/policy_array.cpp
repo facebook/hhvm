@@ -303,8 +303,10 @@ Variant PolicyArray::value(int32_t &pos) const {
   return Variant(Store::val(toPos(pos)));
 }
 
-static const StaticString s_value("value");
-static const StaticString s_key("key");
+const StaticString
+  s_value("value"),
+  s_key("key");
+
 static_assert(ArrayData::invalid_index == size_t(-1), "ehm");
 
 Variant PolicyArray::each() {

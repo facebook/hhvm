@@ -288,11 +288,7 @@ bool PageletServer::Enabled() {
 }
 
 void PageletServer::Restart() {
-  if (s_dispatcher) {
-    s_dispatcher->stop();
-    delete s_dispatcher;
-    s_dispatcher = nullptr;
-  }
+  Stop();
   if (RuntimeOption::PageletServerThreadCount > 0) {
     s_dispatcher = new JobQueueDispatcher<PageletTransport*, PageletWorker>
       (RuntimeOption::PageletServerThreadCount,
@@ -302,6 +298,14 @@ void PageletServer::Restart() {
        nullptr);
     Logger::Info("pagelet server started");
     s_dispatcher->start();
+  }
+}
+
+void PageletServer::Stop() {
+  if (s_dispatcher) {
+    s_dispatcher->stop();
+    delete s_dispatcher;
+    s_dispatcher = nullptr;
   }
 }
 

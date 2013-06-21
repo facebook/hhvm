@@ -26,6 +26,7 @@ class PageletServer {
 public:
   static bool Enabled();
   static void Restart();
+  static void Stop();
 
   /**
    * Create a task. This returns a task handle, or null object

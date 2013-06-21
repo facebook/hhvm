@@ -204,11 +204,7 @@ private:
 static JobQueueDispatcher<XboxTransport*, XboxWorker> *s_dispatcher;
 
 void XboxServer::Restart() {
-  if (s_dispatcher) {
-    s_dispatcher->stop();
-    delete s_dispatcher;
-    s_dispatcher = nullptr;
-  }
+  Stop();
 
   if (RuntimeOption::XboxServerThreadCount > 0) {
     s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>

@@ -7134,8 +7134,6 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
       ONTRACE(1,                                                        \
               Trace::trace("dispatch: Halt ExecutionContext::dispatch(%p)\n", \
                            m_fp));                                      \
-      delete g_vmContext->m_lastLocFilter;                              \
-      g_vmContext->m_lastLocFilter = nullptr;                              \
       return;                                                           \
     }                                                                   \
     Op op = (Op)*pc;                                                    \
@@ -7179,21 +7177,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
 #undef DISPATCH
 }
 
-class InterpretingFlagGuard {
-private:
-  bool m_oldFlag;
-public:
-  InterpretingFlagGuard() {
-    m_oldFlag = g_vmContext->m_interpreting;
-    g_vmContext->m_interpreting = true;
-  }
-  ~InterpretingFlagGuard() {
-    g_vmContext->m_interpreting = m_oldFlag;
-  }
-};
-
 void VMExecutionContext::dispatch() {
-  InterpretingFlagGuard ifg;
   if (shouldProfile()) {
     dispatchImpl<Profile>(0);
   } else {
@@ -7202,7 +7186,6 @@ void VMExecutionContext::dispatch() {
 }
 
 void VMExecutionContext::dispatchN(int numInstrs) {
-  InterpretingFlagGuard ifg;
   dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
@@ -7212,7 +7195,6 @@ void VMExecutionContext::dispatchN(int numInstrs) {
 }
 
 void VMExecutionContext::dispatchBB() {
-  InterpretingFlagGuard ifg;
   dispatchImpl<BreakOnCtlFlow>(0);
   // We are about to go back to Jit, check whether we should
   // stick with interpreter

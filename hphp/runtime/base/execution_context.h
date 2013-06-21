@@ -668,7 +668,6 @@ public:
   Array getLocalDefinedVariables(int frame);
   HPHP::PCFilter* m_breakPointFilter;
   HPHP::PCFilter* m_lastLocFilter;
-  bool m_interpreting;
   bool m_dbgNoBreak;
   bool doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);

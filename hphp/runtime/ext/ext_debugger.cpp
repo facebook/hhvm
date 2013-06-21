@@ -76,8 +76,7 @@ void f_hphpd_break(bool condition /* = true */) {
   }
   CallerFrame cf;
   Debugger::InterruptVMHook(HardBreakPoint);
-  if (RuntimeOption::EvalJit && !g_vmContext->m_interpreting &&
-      DEBUGGER_FORCE_INTR) {
+  if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR) {
     TRACE(5, "switch mode\n");
     throw VMSwitchModeBuiltin();
   }

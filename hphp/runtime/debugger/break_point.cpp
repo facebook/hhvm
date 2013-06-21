@@ -829,21 +829,28 @@ bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
   return false;
 }
 
+// Returns true if file is a suffix path of fullPath
 bool BreakPointInfo::MatchFile(const std::string& file,
-                               const std::string& fullPath,
-                               const std::string& relPath) {
+                               const std::string& fullPath) {
   TRACE(2, "BreakPointInfo::MatchFile(const std::string&\n");
-  if (file == fullPath || file == relPath) {
+  if (file == fullPath) {
     return true;
   }
-  if (file.find('/') == std::string::npos &&
-      file == fullPath.substr(fullPath.rfind('/') + 1)) {
+  if (file.size() > 0 && file[0] != '/') {
+    auto pos = fullPath.rfind(file);
+    // check for match
+    if (pos == std::string::npos) return false;
+    // check if match is a suffix
+    if (pos + file.size() > fullPath.size()) return false;
+    // check if suffix is a sub path
+    if (pos == 0 || fullPath[pos-1] != '/') return false;
     return true;
   }
-  // file is possibly setup with a symlink in the path
-  if (StatCache::realpath(file.c_str()) ==
-      StatCache::realpath(fullPath.c_str())) {
-    return true;
+  // Perhaps file or fullPath is a symlink.
+  auto realFile = StatCache::realpath(file.c_str());
+  auto realFullPath = StatCache::realpath(fullPath.c_str());
+  if (realFile != file || realFullPath != fullPath) {
+    return MatchFile(realFile, realFullPath);
   }
   return false;
 }

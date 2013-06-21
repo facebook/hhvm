@@ -164,8 +164,7 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
-    if (Eval::BreakPointInfo::MatchFile(bp->m_file, efile->getFileName(),
-                                         efile->getRelPath())) {
+    if (Eval::BreakPointInfo::MatchFile(bp->m_file, efile->getFileName())) {
       addBreakPointInUnit(bp, efile->unit());
       break;
     }
@@ -326,8 +325,9 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
            g_vmContext->m_evaledFiles.begin();
            it != g_vmContext->m_evaledFiles.end(); ++it) {
         auto efile = it->second;
-        if (!Eval::BreakPointInfo::MatchFile(fileName, efile->getFileName(),
-                                             efile->getRelPath())) continue;
+        if (!Eval::BreakPointInfo::MatchFile(fileName, efile->getFileName())) {
+          continue;
+        }
         addBreakPointInUnit(bp, efile->unit());
         break;
       }

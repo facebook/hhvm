@@ -134,8 +134,7 @@ public:
   static const char *GetInterruptName(InterruptType interrupt);
   static bool MatchFile(const char *haystack, int haystack_len,
                         const std::string &needle);
-  static bool MatchFile(const std::string& file, const std::string& fullPath,
-                        const std::string& relPath);
+  static bool MatchFile(const std::string& file, const std::string& fullPath);
 
 public:
   BreakPointInfo() : m_index(0) {} // for thrift

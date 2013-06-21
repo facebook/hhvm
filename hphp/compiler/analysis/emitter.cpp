@@ -6143,28 +6143,33 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
 }
 
 void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
-  auto kind = !strcasecmp(td->value.c_str(), "array")   ? KindOfArray :
-              !strcasecmp(td->value.c_str(), "int")     ? KindOfInt64 :
-              !strcasecmp(td->value.c_str(), "integer") ? KindOfInt64 :
-              !strcasecmp(td->value.c_str(), "bool")    ? KindOfBoolean :
-              !strcasecmp(td->value.c_str(), "boolean") ? KindOfBoolean :
-              !strcasecmp(td->value.c_str(), "string")  ? KindOfString :
-              !strcasecmp(td->value.c_str(), "real")    ? KindOfDouble :
-              !strcasecmp(td->value.c_str(), "float")   ? KindOfDouble :
-              !strcasecmp(td->value.c_str(), "double")  ? KindOfDouble :
-              KindOfObject;
+  auto const nullable = td->annot->isNullable();
+  auto const valueStr = td->annot->stripNullable().vanillaName();
+  auto const kind =
+    td->annot->stripNullable().isMixed()     ? KindOfAny :
+    !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
+    !strcasecmp(valueStr.c_str(), "int")     ? KindOfInt64 :
+    !strcasecmp(valueStr.c_str(), "integer") ? KindOfInt64 :
+    !strcasecmp(valueStr.c_str(), "bool")    ? KindOfBoolean :
+    !strcasecmp(valueStr.c_str(), "boolean") ? KindOfBoolean :
+    !strcasecmp(valueStr.c_str(), "string")  ? KindOfString :
+    !strcasecmp(valueStr.c_str(), "real")    ? KindOfDouble :
+    !strcasecmp(valueStr.c_str(), "float")   ? KindOfDouble :
+    !strcasecmp(valueStr.c_str(), "double")  ? KindOfDouble :
+    KindOfObject;
 
   // We have to merge the strings as litstrs to ensure namedentity
   // creation.
   auto const name = StringData::GetStaticString(td->name);
-  auto const value = StringData::GetStaticString(td->value);
+  auto const value = StringData::GetStaticString(valueStr);
   m_ue.mergeLitstr(name);
   m_ue.mergeLitstr(value);
 
   Typedef record;
-  record.m_name  = name;
-  record.m_value = value;
-  record.m_kind  = kind;
+  record.name     = name;
+  record.value    = value;
+  record.kind     = kind;
+  record.nullable = nullable;
   Id id = m_ue.addTypedef(record);
   e.DefTypedef(id);
 }

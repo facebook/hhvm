@@ -145,16 +145,22 @@ Class* NamedEntity::getCachedClass() const {
   return nullptr;
 }
 
-void NamedEntity::setCachedNameDef(NameDef nd) {
-  assert(m_cachedNameDefOffset);
-  Transl::TargetCache::handleToRef<NameDef>(m_cachedNameDefOffset) = nd;
+void NamedEntity::setCachedTypedef(const TypedefReq& td) {
+  assert(m_cachedTypedefOffset);
+  auto& tdReq = Transl::TargetCache::handleToRef<TypedefReq>(
+    m_cachedTypedefOffset
+  );
+  tdReq = td;
 }
 
-NameDef NamedEntity::getCachedNameDef() const {
-  if (LIKELY(m_cachedNameDefOffset != 0)) {
-    return Transl::TargetCache::handleToRef<NameDef>(m_cachedNameDefOffset);
+const TypedefReq* NamedEntity::getCachedTypedef() const {
+  if (LIKELY(m_cachedTypedefOffset != 0)) {
+    auto ret = &Transl::TargetCache::handleToRef<const TypedefReq>(
+      m_cachedTypedefOffset
+    );
+    return ret->name ? ret : nullptr;
   }
-  return NameDef();
+  return nullptr;
 }
 
 void NamedEntity::pushClass(Class* cls) {
@@ -527,20 +533,15 @@ Class* Unit::defClass(const PreClass* preClass,
    * Raise a fatal unless the existing class definition is identical to the
    * one this invocation would create.
    */
-  if (NameDef current = nameList->getCachedNameDef()) {
-    auto name = current.asTypedef()
-      ? current.asTypedef()->m_name
-      : current.asClass()->name();
-
+  if (auto current = nameList->getCachedTypedef()) {
     FrameRestore fr(preClass);
     raise_error("Cannot declare class with the same name (%s) as an "
-                "existing type", name->data());
+                "existing type", current->name->data());
     return nullptr;
   }
 
-  // If it's compatible, the class must have been declared as a
-  // DefClass, not a typedef.  So we don't need to check the NameDef
-  // for a class, only the cached class offset.
+  // If there was already a class declared with DefClass, check if
+  // it's compatible.
   if (Class* cls = nameList->getCachedClass()) {
     if (cls->preClass() != preClass) {
       if (failIsFatal) {
@@ -651,33 +652,19 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
 void Unit::defTypedef(Id id) {
   assert(id < m_typedefs.size());
   auto thisType = &m_typedefs[id];
-  auto nameList = GetNamedEntity(thisType->m_name);
-  const StringData* typeName = thisType->m_value;
-
-  auto checkExistingClass = [&] (Class* cls) {
-    if (thisType->m_kind != KindOfObject ||
-        !cls->name()->isame(typeName)) {
-      raise_error("The type %s is already defined to a different class (%s)",
-                  thisType->m_name->data(),
-                  cls->name()->data());
-    }
-  };
+  auto nameList = GetNamedEntity(thisType->name);
+  const StringData* typeName = thisType->value;
 
   /*
-   * Check if this name already has a NameDef, and if so make sure it
-   * is compatible.
+   * Check if this name already was defined as a type alias, and if so
+   * make sure it is compatible.
    */
-  if (NameDef current = nameList->getCachedNameDef()) {
-    if (Class* cls = current.asClass()) {
-      checkExistingClass(cls);
-      return;
-    }
-    Typedef* td = current.asTypedef();
-    assert(td);
-    if (thisType->m_kind != td->m_kind ||
-        !td->m_value->isame(typeName)) {
+  if (auto current = nameList->getCachedTypedef()) {
+    if (thisType->kind != current->kind ||
+        thisType->nullable != current->nullable ||
+        Unit::lookupClass(typeName) != current->klass) {
       raise_error("The type %s is already defined to an incompatible type",
-                  thisType->m_name->data());
+                  thisType->name->data());
     }
     return;
   }
@@ -685,56 +672,58 @@ void Unit::defTypedef(Id id) {
   // There might also be a class with this name already.
   if (Class* cls = nameList->getCachedClass()) {
     raise_error("The name %s is already defined as a class",
-                thisType->m_name->data());
+                thisType->name->data());
     return;
   }
 
-  if (!nameList->m_cachedNameDefOffset) {
-    nameList->m_cachedNameDefOffset =
-      Transl::TargetCache::allocNameDef(nameList);
+  if (!nameList->m_cachedTypedefOffset) {
+    nameList->m_cachedTypedefOffset =
+      Transl::TargetCache::allocTypedef(nameList);
   }
 
   /*
-   * The cached NameDef for this typedef will be the actual Class* if
-   * it is a typedef for a class type, otherwise it is a pointer to a
-   * Typedef structure.
-   *
    * If this typedef is a KindOfObject and the name on the right hand
    * side was another typedef, we will bind the name to the other side
-   * for this request.  We need to inspect the right hand side and
-   * figure out what it was first.
+   * for this request (i.e. resolve that typedef now).
+   *
+   * We need to inspect the right hand side and figure out what it was
+   * first.
+   *
+   * If the right hand side was a class, we need to autoload and
+   * ensure it exists at this point.
    */
 
-  if (thisType->m_kind != KindOfObject) {
-    nameList->setCachedNameDef(NameDef(thisType));
-    return;
-  }
-  if (auto klass = Unit::loadClass(typeName)) {
-    nameList->setCachedNameDef(NameDef(klass));
+  if (thisType->kind != KindOfObject) {
+    nameList->setCachedTypedef(
+      TypedefReq { thisType->kind,
+                   thisType->nullable,
+                   nullptr,
+                   thisType->name }
+    );
     return;
   }
 
   auto targetNameList = GetNamedEntity(typeName);
-  NameDef target = targetNameList->getCachedNameDef();
-  if (!target) {
-    String normName = normalizeNS(typeName);
-    if (normName) {
-      typeName = normName.get();
-      targetNameList = GetNamedEntity(typeName);
-      target = targetNameList->getCachedNameDef();
-    }
-
-    if (!target) {
-      AutoloadHandler::s_instance->autoloadType(typeName->data());
-      target = targetNameList->getCachedNameDef();
-      if (!target) {
-        raise_error("Unknown type or class %s", typeName->data());
-        return;
-      }
-    }
+  if (auto targetTd = getTypedefWithAutoload(targetNameList, typeName)) {
+    nameList->setCachedTypedef(
+      TypedefReq { targetTd->kind,
+                   thisType->nullable || targetTd->nullable,
+                   targetTd->klass,
+                   thisType->name }
+    );
+    return;
   }
-  assert(target);
-  nameList->setCachedNameDef(target);
+  if (auto klass = Unit::loadClass(typeName)) {
+    nameList->setCachedTypedef(
+      TypedefReq { KindOfObject,
+                   thisType->nullable,
+                   klass,
+                   thisType->name }
+    );
+    return;
+  }
+
+  raise_error("Unknown type or class %s", typeName->data());
 }
 
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {

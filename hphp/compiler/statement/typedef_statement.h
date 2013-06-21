@@ -21,6 +21,7 @@
 #include <string>
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +29,7 @@ namespace HPHP {
 struct TypedefStatement : Statement, IParseHandler {
   explicit TypedefStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                             const std::string& name,
-                            const std::string& value);
+                            const TypeAnnotationPtr& typeAnnotation);
   ~TypedefStatement();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
@@ -38,7 +39,7 @@ public: // IParseHandler
 
 public:
   const std::string name;
-  const std::string value;
+  const TypeAnnotationPtr annot;
 };
 
 typedef boost::shared_ptr<TypedefStatement> TypedefStatementPtr;

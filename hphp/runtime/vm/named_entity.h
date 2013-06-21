@@ -28,60 +28,29 @@
 namespace HPHP {
 
 class Class;
-class Typedef;
+struct Typedef;
+struct TypedefReq;
 class Func;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A NameDef is a definition of a type for a given name.  This
- * currently means it is either a Class*, a Typedef*, or null.
- */
-struct NameDef : private boost::equality_comparable<NameDef> {
-  explicit NameDef() : m_p(0) {}
-  explicit NameDef(Class* c) : m_p(reinterpret_cast<uintptr_t>(c)) {
-    assert(!(m_p & 0x1));
-  }
-
-  explicit NameDef(Typedef* t)
-    : m_p(reinterpret_cast<uintptr_t>(t) | 0x1)
-  {}
-
-  Class* asClass() const {
-    return m_p & 0x1 ? nullptr : reinterpret_cast<Class*>(m_p);
-  }
-
-  Typedef* asTypedef() const {
-    return m_p & 0x1 ? reinterpret_cast<Typedef*>(m_p - 1) : nullptr;
-  }
-
-  explicit operator bool() const { return !!m_p; }
-
-  bool operator==(NameDef other) const {
-    return m_p == other.m_p;
-  }
-
-private:
-  uintptr_t m_p;
-};
-
-/*
  * NamedEntity represents a user-defined name that may map to
- * different objects (NameDefs) in different requests.  Classes and
- * functions are in separate namespaces, so we have a targetcache
- * offset for resolving each.
+ * different objects in different requests.  Classes and functions are
+ * in separate namespaces, so we have a targetcache offset for
+ * resolving each.
  *
  * Classes and typedefs are in the same namespace when we're naming
  * types, but different namespaces at sites that allocate classes.  If
- * a typedef is defined for a given name, we'll cache a NameDef in
- * each request at m_cachedNameDefOffset.  Classes are always cached
- * at m_cachedClassOffset.  See TargetCache::allocNameDef.
+ * a typedef is defined for a given name, we'll cache it in each
+ * request at m_cachedTypedefOffset.  Classes are always cached at
+ * m_cachedClassOffset.
  */
 struct NamedEntity {
   explicit NamedEntity()
     : m_cachedClassOffset(0)
     , m_cachedFuncOffset(0)
-    , m_cachedNameDefOffset(0)
+    , m_cachedTypedefOffset(0)
     , m_clsList(nullptr)
   {}
 
@@ -89,7 +58,7 @@ struct NamedEntity {
   // read them without locks.
   unsigned m_cachedClassOffset;
   unsigned m_cachedFuncOffset;
-  unsigned m_cachedNameDefOffset;
+  unsigned m_cachedTypedefOffset;
 
   void setCachedFunc(Func *f);
   Func* getCachedFunc() const;
@@ -97,8 +66,8 @@ struct NamedEntity {
   void setCachedClass(Class* c);
   Class* getCachedClass() const;
 
-  NameDef getCachedNameDef() const;
-  void setCachedNameDef(NameDef);
+  const TypedefReq* getCachedTypedef() const;
+  void setCachedTypedef(const TypedefReq&);
 
   Class* clsList() const {
     return m_clsList;
@@ -112,6 +81,16 @@ struct NamedEntity {
 private:
   Class* m_clsList;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Lookup a Typedef* for the supplied NamedEntity (which must be the
+ * NamedEntity for `name'), if necessary invoking autoload for types
+ * but not classes.
+ */
+const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
+                                         const StringData* name);
 
 //////////////////////////////////////////////////////////////////////
 

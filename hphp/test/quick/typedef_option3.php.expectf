@@ -1,0 +1,3 @@
+NULL
+int(2)
+HipHop Fatal error: Argument 1 passed to wat() must be an instance of bar, string given in %s on line 8

@@ -91,6 +91,11 @@ public:
   }
 
   /*
+   * Return whether this TypeAnnotation is equal to the "mixed" type.
+   */
+  bool isMixed() const { return !m_name.compare("mixed"); }
+
+  /*
    * Returns whether this TypeAnnotation is "simple"---as described
    * above, this implies it has only one level of depth.  Both the
    * type list and type args are null.

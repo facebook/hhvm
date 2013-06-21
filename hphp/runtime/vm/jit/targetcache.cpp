@@ -731,12 +731,18 @@ CacheHandle allocFixedFunction(const StringData* name) {
   return allocFixedFunction(Unit::GetNamedEntity(name), false);
 }
 
-CacheHandle allocNameDef(const NamedEntity* ne) {
-  if (ne->m_cachedNameDefOffset) {
-    return ne->m_cachedNameDefOffset;
+CacheHandle allocTypedef(const NamedEntity* ne) {
+  if (ne->m_cachedTypedefOffset) {
+    return ne->m_cachedTypedefOffset;
   }
-  return allocFuncOrClass(&ne->m_cachedNameDefOffset,
-    false /* persistent */); // TODO(#2103214): support persistent
+
+  Lock l(s_handleMutex);
+  // TODO(#2103214): support persistent
+  const_cast<NamedEntity*>(ne)->m_cachedTypedefOffset =
+    allocLocked(false /* persistent */,
+                sizeof(TypedefReq),
+                alignof(TypedefReq));
+  return ne->m_cachedTypedefOffset;
 }
 
 template<bool checkOnly>

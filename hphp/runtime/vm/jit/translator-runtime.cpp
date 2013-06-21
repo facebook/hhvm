@@ -285,16 +285,22 @@ void VerifyParamTypeSlow(const Class* cls,
   // object, so if it's a typedef for something non-objecty we're
   // failing anyway.
   if (auto namedEntity = expected->namedEntity()) {
-    NameDef def = namedEntity->getCachedNameDef();
+    auto def = namedEntity->getCachedTypedef();
     if (UNLIKELY(!def)) {
       VMRegAnchor _;
       String nameStr(const_cast<StringData*>(expected->typeName()));
       if (AutoloadHandler::s_instance->autoloadType(nameStr)) {
-        def = namedEntity->getCachedNameDef();
+        def = namedEntity->getCachedTypedef();
       }
     }
-    if (def && (constraint = def.asClass()) && cls->classof(constraint)) {
-      return;
+    if (def) {
+      // There's no need to handle nullable typedefs specially here:
+      // we already know we're checking a non-null object with the
+      // class `cls'.
+      if (def->kind == KindOfObject) {
+        constraint = def->klass;
+        if (constraint && cls->classof(constraint)) return;
+      }
     }
   }
 

@@ -1095,7 +1095,7 @@ bool AutoloadHandler::autoloadType(CStrRef name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_type, true,
       [] (CStrRef name) {
-        return !!Unit::GetNamedEntity(name.get())->getCachedNameDef();
+        return Unit::GetNamedEntity(name.get())->getCachedTypedef() != nullptr;
       }
     ) != Failure;
 }

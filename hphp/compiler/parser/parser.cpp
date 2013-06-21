@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/compiler/parser/parser.h"
+
+#include <boost/make_shared.hpp>
+
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -1635,7 +1637,13 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 }
 
 void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
-  auto td_stmt = NEW_STMT(TypedefStatement, name.text(), type.text());
+  // Note: we don't always get TypeAnnotations (e.g. for shape types
+  // currently).
+  auto const annot = type.typeAnnotation
+    ? type.typeAnnotation
+    : boost::make_shared<TypeAnnotation>(type.text(), TypeAnnotationPtr());
+
+  auto td_stmt = NEW_STMT(TypedefStatement, name.text(), annot);
   td_stmt->onParse(m_ar, m_file);
   out->stmt = td_stmt;
 }

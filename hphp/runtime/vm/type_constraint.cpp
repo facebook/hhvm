@@ -128,15 +128,15 @@ void TypeConstraint::init() {
  * autoload typedefs because they can affect whether the
  * VerifyParamType would succeed.
  */
-static NameDef getNameDefWithAutoload(const NamedEntity* ne,
-                                      const StringData* name) {
-  NameDef def = ne->getCachedNameDef();
+const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
+                                         const StringData* name) {
+  auto def = ne->getCachedTypedef();
   if (!def) {
     String nameStr(const_cast<StringData*>(name));
     if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
-      return NameDef();
+      return nullptr;
     }
-    def = ne->getCachedNameDef();
+    def = ne->getCachedTypedef();
   }
   return def;
 }
@@ -145,20 +145,21 @@ bool TypeConstraint::checkTypedefNonObj(const TypedValue* tv) const {
   assert(tv->m_type != KindOfObject); // this checks when tv is not an object
   assert(!isSelf() && !isParent());
 
-  NameDef def = getNameDefWithAutoload(m_namedEntity, m_typeName);
-  if (!def) return false;
-  Typedef* td = def.asTypedef();
-  return td && equivDataTypes(td->m_kind, tv->m_type);
+  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  if (!td) return false;
+  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
 }
 
 bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
   assert(tv->m_type == KindOfObject); // this checks when tv is an object
   assert(!isSelf() && !isParent() && !isCallable());
 
-  NameDef def = getNameDefWithAutoload(m_namedEntity, m_typeName);
-  if (!def) return false;
-  Class* c = def.asClass();
-  return c && tv->m_data.pobj->instanceof(c);
+  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  if (!td) return false;
+  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (td->kind != KindOfObject) return false;
+  return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
 
 bool

@@ -24,10 +24,10 @@ namespace HPHP {
 TypedefStatement::TypedefStatement(
     STATEMENT_CONSTRUCTOR_PARAMETERS,
     const std::string& name,
-    const std::string& value)
+    const TypeAnnotationPtr& annot)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TypedefStatement))
   , name(name)
-  , value(value)
+  , annot(annot)
 {}
 
 TypedefStatement::~TypedefStatement() {}

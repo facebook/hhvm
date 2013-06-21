@@ -246,18 +246,34 @@ typedef std::vector<FuncEntry> FuncTable;
  * just a name.  At runtime we still might resolve this name to
  * another typedef, becoming a typedef for KindOfArray or something in
  * that request.
+ *
+ * For the per-request struct, see TypedefReq below.
  */
 struct Typedef {
-  const StringData* m_name;
-  const StringData* m_value;
-  DataType          m_kind;
+  const StringData* name;
+  const StringData* value;
+  DataType          kind;
+  bool              nullable; // Null is allowed; for ?Foo typedefs
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(m_name)
-      (m_value)
-      (m_kind)
+    sd(name)
+      (value)
+      (kind)
+      (nullable)
       ;
   }
+};
+
+/*
+ * In a given request, a defined typedef is turned into a TypedefReq
+ * struct.  This contains the information needed to validate parameter
+ * type hints for a typedef at runtime.
+ */
+struct TypedefReq {
+  DataType kind;          // may be KindOfAny for "mixed"
+  bool nullable;          // for option types, like ?Foo
+  Class* klass;           // nullptr if kind != KindOfObject
+  const StringData* name; // needed for error messages; nullptr if not defined
 };
 
 //==============================================================================

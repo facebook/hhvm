@@ -5154,13 +5154,13 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   static_assert((doneOffset + 1) == c_Continuation::runningOffset(),
                 "done should immediately precede running");
   // Check done and running at the same time
-  m_as.test_imm16_disp_reg16(0x0101, doneOffset, contReg);
+  m_as.testw(0x0101, contReg[doneOffset]);
   emitFwdJcc(CC_NZ, inst->taken());
 
   // ++m_index
-  m_as.add_imm64_disp_reg64(0x1, CONTOFF(m_index), contReg);
+  m_as.addq(0x1, contReg[CONTOFF(m_index)]);
   // running = true
-  m_as.store_imm8_disp_reg(0x1, c_Continuation::runningOffset(), contReg);
+  m_as.storeb(0x1, contReg[c_Continuation::runningOffset()]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {

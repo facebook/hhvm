@@ -65,6 +65,8 @@ const int kNumGPRegs  = 16;
 const int kNumXMMRegs = 16;
 const int kNumRegs    = kNumGPRegs + kNumXMMRegs;
 
+const uint8_t kOpsizePrefix = 0x66;
+
 /*
  * Type for register numbers, independent of the size we're going to
  * be using it as.  Also, the same register number may mean different
@@ -116,6 +118,7 @@ private:
   }
 
 SIMPLE_REGTYPE(Reg32);
+SIMPLE_REGTYPE(Reg16);
 SIMPLE_REGTYPE(Reg8);
 SIMPLE_REGTYPE(RegXMM);
 
@@ -130,7 +133,10 @@ struct RegRIP {
 
 inline Reg8 rbyte(Reg32 r)     { return Reg8(int(r)); }
 inline Reg8 rbyte(RegNumber r) { return Reg8(int(r)); }
+inline Reg16 r16(Reg8 r)       { return Reg16(int(r)); }
+inline Reg16 r16(RegNumber r)  { return Reg16(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
+inline Reg32 r32(Reg16 r)      { return Reg32(int(r)); }
 inline Reg32 r32(Reg32 r)      { return r; }
 inline Reg32 r32(RegNumber r)  { return Reg32(int(r)); }
 inline Reg64 r64(RegNumber r)  { return Reg64(int(r)); }
@@ -370,6 +376,23 @@ namespace reg {
   constexpr Reg32 r14d(14);
   constexpr Reg32 r15d(15);
 
+  constexpr Reg16 ax  (0);
+  constexpr Reg16 cx  (1);
+  constexpr Reg16 dx  (2);
+  constexpr Reg16 bx  (3);
+  constexpr Reg16 sp  (4);
+  constexpr Reg16 bp  (5);
+  constexpr Reg16 si  (6);
+  constexpr Reg16 di  (7);
+  constexpr Reg16 r8w (8);
+  constexpr Reg16 r9w (9);
+  constexpr Reg16 r10w(10);
+  constexpr Reg16 r11w(11);
+  constexpr Reg16 r12w(12);
+  constexpr Reg16 r13w(13);
+  constexpr Reg16 r14w(14);
+  constexpr Reg16 r15w(15);
+
   constexpr Reg8 al  (0);
   constexpr Reg8 cl  (1);
   constexpr Reg8 dl  (2);
@@ -424,6 +447,11 @@ namespace reg {
   inline const char* regname(Reg32 r) {
     X(eax); X(ecx); X(edx); X(ebx); X(esp); X(ebp); X(esi); X(edi);
     X(r8d); X(r9d); X(r10d); X(r11d); X(r12d); X(r13d); X(r14d); X(r15d);
+    return nullptr;
+  }
+  inline const char* regname(Reg16 r) {
+    X(ax); X(cx); X(dx); X(bx); X(sp); X(bp); X(si); X(di);
+    X(r8w); X(r9w); X(r10w); X(r11w); X(r12w); X(r13w); X(r14w); X(r15w);
     return nullptr;
   }
   inline const char* regname(Reg8 r) {
@@ -913,21 +941,27 @@ struct X64Assembler {
 #define LOAD_OP(name, instr)                                          \
   void name##q(MemoryRef m, Reg64 r) { instrMR(instr, m, r); }        \
   void name##l(MemoryRef m, Reg32 r) { instrMR(instr, m, r); }        \
+  void name##w(MemoryRef m, Reg16 r) { instrMR(instr, m, r); }        \
   void name##q(IndexedMemoryRef m, Reg64 r) { instrMR(instr, m, r); } \
   void name##l(IndexedMemoryRef m, Reg32 r) { instrMR(instr, m, r); } \
+  void name##w(IndexedMemoryRef m, Reg16 r) { instrMR(instr, m, r); } \
   BYTE_LOAD_OP(name, instr##b)
 
-#define BYTE_STORE_OP(name, instr)                                     \
+#define BYTE_STORE_OP(name, instr)                                    \
   void name##b(Reg8 r, MemoryRef m)        { instrRM(instr, r, m); }  \
   void name##b(Reg8 r, IndexedMemoryRef m) { instrRM(instr, r, m); }  \
   void name##b(Immed i, MemoryRef m)       { instrIM8(instr, i, m); } \
   void name##b(Immed i, IndexedMemoryRef m){ instrIM8(instr, i, m); }
 
 #define STORE_OP(name, instr)                                           \
+  void name##w(Immed i, MemoryRef m) { instrIM16(instr, i, m); }        \
   void name##l(Immed i, MemoryRef m) { instrIM32(instr, i, m); }        \
+  void name##w(Reg16 r, MemoryRef m) { instrRM(instr, r, m); }          \
   void name##l(Reg32 r, MemoryRef m) { instrRM(instr, r, m); }          \
   void name##q(Reg64 r, MemoryRef m) { instrRM(instr, r, m); }          \
+  void name##w(Immed i, IndexedMemoryRef m) { instrIM16(instr, i, m); } \
   void name##l(Immed i, IndexedMemoryRef m) { instrIM32(instr, i, m); } \
+  void name##w(Reg16 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
   void name##l(Reg32 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
   void name##q(Reg64 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
   BYTE_STORE_OP(name, instr ## b)
@@ -939,7 +973,9 @@ struct X64Assembler {
 #define REG_OP(name, instr)                                       \
   void name##q(Reg64 r1, Reg64 r2)   { instrRR(instr, r1, r2); }  \
   void name##l(Reg32 r1, Reg32 r2)   { instrRR(instr, r1, r2); }  \
-  void name##l(Immed i, Reg32 r)     { instrIR(instr, i, r); } \
+  void name##w(Reg16 r1, Reg16 r2)   { instrRR(instr, r1, r2); }  \
+  void name##l(Immed i, Reg32 r)     { instrIR(instr, i, r); }    \
+  void name##w(Immed i, Reg16 r)     { instrIR(instr, i, r); }    \
   BYTE_REG_OP(name, instr##b)
 
   /*
@@ -1052,6 +1088,7 @@ struct X64Assembler {
   void idiv(Reg64 r)  { instrR(instr_idiv, r); }
   void incq(Reg64 r)  { instrR(instr_inc,  r); }
   void incl(Reg32 r)  { instrR(instr_inc,  r); }
+  void incw(Reg16 r)  { instrR(instr_inc,  r); }
   void decq(Reg64 r)  { instrR(instr_dec,  r); }
   // decl(Reg32) cannot be encoded; it's REX.
   void notb(Reg8 r)   { instrR(instr_notb, r); }
@@ -1071,8 +1108,10 @@ struct X64Assembler {
   void pop (MemoryRef m) { instrM(instr_pop,  m); }
   void incq(MemoryRef m) { instrM(instr_inc,  m); }
   void incl(MemoryRef m) { instrM32(instr_inc, m); }
+  void incw(MemoryRef m) { instrM16(instr_inc, m); }
   void decq(MemoryRef m) { instrM(instr_dec,  m); }
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
+  void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
   void movdqu(RegXMM x, IndexedMemoryRef m) { instrRM(instr_movdqu, x, m); }
@@ -1095,6 +1134,8 @@ struct X64Assembler {
   void shrq  (Immed i, Reg64 r) { instrIR(instr_shr, i.b(), r); }
   void shll  (Immed i, Reg32 r) { instrIR(instr_shl, i.b(), r); }
   void shrl  (Immed i, Reg32 r) { instrIR(instr_shr, i.b(), r); }
+  void shlw  (Immed i, Reg16 r) { instrIR(instr_shl, i.b(), r); }
+  void shrw  (Immed i, Reg16 r) { instrIR(instr_shr, i.b(), r); }
 
   /*
    * Control-flow directives.  Primitive labeling/patching facilities
@@ -1322,6 +1363,11 @@ struct X64Assembler {
     assert(regN != reg::noreg);
     int r = int(regN);
 
+    // Opsize prefix
+    if (opSz == sz::word) {
+      byte(kOpsizePrefix);
+    }
+
     // REX
     unsigned char rex = 0;
     bool highByteReg = false;
@@ -1359,6 +1405,10 @@ struct X64Assembler {
     emitCR(op, 0, r, sz::dword);
   }
 
+  void emitR16(X64Instr op, RegNumber r) ALWAYS_INLINE {
+    emitCR(op, 0, r, sz::word);
+  }
+
   // op %r2, %r1
   // -----------
   // Restrictions:
@@ -1371,7 +1421,7 @@ struct X64Assembler {
     int r1 = int(rn1);
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
-    prefixBytes(op.flags);
+    prefixBytes(op.flags, opSz);
     // The xchg instruction is special; we have compact encodings for
     // exchanging with rax or eax.
     if (op.flags & IF_XCHG) {
@@ -1447,6 +1497,11 @@ struct X64Assembler {
     emitCRR(op, 0, r1, r2, sz::dword);
   }
 
+  void emitRR16(X64Instr op, RegNumber r1,
+                RegNumber r2) ALWAYS_INLINE {
+    emitCRR(op, 0, r1, r2, sz::word);
+  }
+
   void emitRR8(X64Instr op, RegNumber r1, RegNumber r2) {
     emitCRR(op, 0, r1, r2, sz::byte);
   }
@@ -1460,13 +1515,15 @@ struct X64Assembler {
       ALWAYS_INLINE {
     assert(rname != reg::noreg);
     int r = int(rname);
+    // Opsize prefix
+    prefixBytes(0, opSz);
     // Determine the size of the immediate.  This might change opSz so
     // do it first.
     int immSize;
     if ((op.flags & IF_MOV) && opSz == sz::qword) {
       immSize = computeImmediateSizeForMovRI64(op, imm, opSz);
     } else {
-      immSize = computeImmediateSize(op, imm);
+      immSize = computeImmediateSize(op, imm, opSz);
     }
     // REX
     unsigned char rex = 0;
@@ -1518,6 +1575,11 @@ struct X64Assembler {
     emitIR(op, r, imm, sz::dword);
   }
 
+  void emitIR16(X64Instr op, RegNumber r, ssize_t imm)
+      ALWAYS_INLINE {
+    emitIR(op, r, safe_cast<int16_t>(imm), sz::word);
+  }
+
   void emitIR8(X64Instr op, RegNumber r, ssize_t imm) {
     emitIR(op, r, safe_cast<int8_t>(imm), sz::byte);
   }
@@ -1534,6 +1596,8 @@ struct X64Assembler {
     int r1 = int(rn1);
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
+    // Opsize prefix
+    prefixBytes(0, opSz);
     // REX
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
@@ -1541,7 +1605,7 @@ struct X64Assembler {
     if (r2 & 8) rex |= (reverse ? 4 : 1);
     if (rex) byte(0x40 | rex);
     // Determine the size of the immediate
-    int immSize = computeImmediateSize(op, imm);
+    int immSize = computeImmediateSize(op, imm, opSz);
     // Use 2-byte opcode for cmovcc, setcc, movsx, movzx, movsx8, movzx8
     // instructions
     if ((op.flags & IF_TWOBYTEOP) != 0) byte(0x0F);
@@ -1558,12 +1622,14 @@ struct X64Assembler {
 
   void emitCI(X64Instr op, int jcond, ssize_t imm, int opSz = sz::qword)
       ALWAYS_INLINE {
+    // Opsize prefix
+    prefixBytes(op.flags, opSz);
     // REX
     if ((op.flags & IF_NO_REXW) == 0) {
       byte(0x48);
     }
     // Determine the size of the immediate
-    int immSize = computeImmediateSize(op, imm);
+    int immSize = computeImmediateSize(op, imm, opSz);
     // Emit opcode
     if ((op.flags & IF_JCC) != 0) {
       // jcc is weird so we handle it separately
@@ -1656,14 +1722,16 @@ struct X64Assembler {
     int r = int(rName);
     int br = int(brName);
 
+    // The opsize prefix can be placed here, if the instruction
+    // deals with words.
     // When an instruction has a manditory prefix, it goes before the
     // REX byte if we end up needing one.
-    prefixBytes(op.flags);
+    prefixBytes(op.flags, opSz);
 
     // Determine immSize from the 'hasImmediate' flag
     int immSize = sz::nosize;
     if (hasImmediate) {
-      immSize = computeImmediateSize(op, imm);
+      immSize = computeImmediateSize(op, imm, opSz);
     }
     if ((op.flags & IF_REVERSE) != 0) reverse = !reverse;
     // Determine if we need to use a two byte opcode;
@@ -1817,6 +1885,11 @@ struct X64Assembler {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::dword);
   }
 
+  void emitRM16(X64Instr op, RegNumber br, RegNumber ir, int s,
+                int disp, RegNumber r) ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::word);
+  }
+
   void emitRM8(X64Instr op, RegNumber br, RegNumber ir, int s,
                int disp, RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::byte);
@@ -1837,6 +1910,11 @@ struct X64Assembler {
   void emitMR32(X64Instr op, RegNumber br, RegNumber ir,
                 int s, int disp, RegNumber r) ALWAYS_INLINE {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::dword);
+  }
+
+  void emitMR16(X64Instr op, RegNumber br, RegNumber ir,
+                int s, int disp, RegNumber r) ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::word);
   }
 
   void emitMR8(X64Instr op, RegNumber br, RegNumber ir,
@@ -1865,6 +1943,12 @@ struct X64Assembler {
                int s, int disp) ALWAYS_INLINE {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false,
             sz::dword);
+  }
+
+  void emitM16(X64Instr op, RegNumber br, RegNumber ir,
+               int s, int disp) ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false,
+            sz::word);
   }
 
   void emitCM(X64Instr op, int jcond, RegNumber br,
@@ -2045,12 +2129,6 @@ public:
   inline void name ## _imm32_reg32(int64_t imm, RegNumber rdest) { \
     emitIR32(instr_ ## name, rdest, safe_cast<int32_t>(imm));           \
   }                                                                     \
-  /* op imm, disp(rdest) */ \
-  inline void name ## _imm16_disp_reg16(int64_t imm, int disp,          \
-                                        RegNumber rdest) {        \
-    emitIM16(instr_ ## name, rdest, reg::noreg,                         \
-             sz::byte, disp, safe_cast<int16_t>(imm));                  \
-  }                                                                     \
   /* opl imm, disp(rdest) */                                            \
   inline void name ## _imm32_disp_reg32(int64_t imm, int disp,          \
                                         RegNumber rdest) {        \
@@ -2218,10 +2296,13 @@ private:
             " anything requiring a REX prefix");
   }
 
-  int computeImmediateSize(X64Instr op, ssize_t imm) {
-    // Most instructions take a 32-bit immediate, except
-    // for ret which takes a 16-bit immediate
-    int immSize = sz::dword;
+  int computeImmediateSize(X64Instr op,
+                           ssize_t imm,
+                           int opsize = sz::dword) {
+    // Most instructions take a 32-bit or 16-bit immediate,
+    // depending on the presence of the opsize prefix (0x66).
+    int immSize = opsize == sz::word ? sz::word : sz::dword;
+    // ret always takes a 16-bit immediate.
     if (op.flags & IF_RET) {
       immSize = sz::word;
     }
@@ -2278,7 +2359,8 @@ private:
     }
   }
 
-  void prefixBytes(unsigned long flags) {
+  void prefixBytes(unsigned long flags, int opSz) {
+    if (opSz == sz::word && !(flags & IF_RET)) byte(kOpsizePrefix);
     if (flags & IF_66PREFIXED) byte(0x66);
     if (flags & IF_F2PREFIXED) byte(0xF2);
     if (flags & IF_F3PREFIXED) byte(0xF3);
@@ -2286,6 +2368,7 @@ private:
 
 private:
   RegNumber rn(Reg8 r)   { return RegNumber(r); }
+  RegNumber rn(Reg16 r)  { return RegNumber(r); }
   RegNumber rn(Reg32 r)  { return RegNumber(r); }
   RegNumber rn(Reg64 r)  { return RegNumber(r); }
   RegNumber rn(RegXMM x) { return RegNumber(x); }
@@ -2300,14 +2383,17 @@ private:
 
   void instrR(X64Instr   op, Reg64  r)           { emitR(op,    rn(r));        }
   void instrR(X64Instr   op, Reg32  r)           { emitR32(op,  rn(r));        }
+  void instrR(X64Instr   op, Reg16  r)           { emitR16(op,  rn(r));        }
   void instrR(X64Instr   op, Reg8   r)           { emitR(op, rn(r), sz::byte); }
-  void instrRR(X64Instr  op, Reg64  x, Reg64 y)  { emitRR(op,   rn(x), rn(y)); }
-  void instrRR(X64Instr  op, Reg32  x, Reg32 y)  { emitRR32(op, rn(x), rn(y)); }
+  void instrRR(X64Instr  op, Reg64  x, Reg64  y) { emitRR(op,   rn(x), rn(y)); }
+  void instrRR(X64Instr  op, Reg32  x, Reg32  y) { emitRR32(op, rn(x), rn(y)); }
+  void instrRR(X64Instr  op, Reg16  x, Reg16  y) { emitRR16(op, rn(x), rn(y)); }
   void instrRR(X64Instr  op, Reg8   x, Reg8   y) { emitRR8(op,  rn(x), rn(y)); }
   void instrRR(X64Instr  op, RegXMM x, RegXMM y) { emitRR(op,   rn(x), rn(y)); }
   void instrM(X64Instr   op, MemoryRef m)        { emitM(op,    UMR(m));       }
   void instrM(X64Instr   op, IndexedMemoryRef m) { emitM(op,    UIMR(m));      }
   void instrM32(X64Instr op, MemoryRef m)        { emitM32(op,  UMR(m));       }
+  void instrM16(X64Instr op, MemoryRef m)        { emitM16(op,  UMR(m));       }
 
   void instrRM(X64Instr op,
                Reg64 r,
@@ -2315,6 +2401,9 @@ private:
   void instrRM(X64Instr op,
                Reg32 r,
                MemoryRef m)        { emitRM32(op, UMR(m), rn(r)); }
+  void instrRM(X64Instr op,
+               Reg16 r,
+               MemoryRef m)        { emitRM16(op, UMR(m), rn(r)); }
   void instrRM(X64Instr op,
                Reg8 r,
                MemoryRef m)        { emitRM8(op, UMR(m), rn(r)); }
@@ -2324,6 +2413,9 @@ private:
   void instrRM(X64Instr op,
                Reg32 r,
                IndexedMemoryRef m) { emitRM32(op, UIMR(m), rn(r)); }
+  void instrRM(X64Instr op,
+               Reg16 r,
+               IndexedMemoryRef m) { emitRM16(op, UIMR(m), rn(r)); }
   void instrRM(X64Instr op,
                Reg8 r,
                IndexedMemoryRef m) { emitRM8(op, UIMR(m), rn(r)); }
@@ -2342,6 +2434,9 @@ private:
                Reg32 r)            { emitMR32(op, UMR(m), rn(r)); }
   void instrMR(X64Instr op,
                MemoryRef m,
+               Reg16 r)            { emitMR16(op, UMR(m), rn(r)); }
+  void instrMR(X64Instr op,
+               MemoryRef m,
                Reg8 r)             { emitMR8(op, UMR(m), rn(r)); }
   void instrMR(X64Instr op,
                IndexedMemoryRef m,
@@ -2349,6 +2444,9 @@ private:
   void instrMR(X64Instr op,
                IndexedMemoryRef m,
                Reg32 r)            { emitMR32(op, UIMR(m), rn(r)); }
+  void instrMR(X64Instr op,
+               IndexedMemoryRef m,
+               Reg16 r)            { emitMR16(op, UIMR(m), rn(r)); }
   void instrMR(X64Instr op,
                IndexedMemoryRef m,
                Reg8 r)             { emitMR8(op, UIMR(m), rn(r)); }
@@ -2369,6 +2467,9 @@ private:
   void instrIR(X64Instr op, Immed i, Reg32 r) {
     emitIR32(op, rn(r), i.l());
   }
+  void instrIR(X64Instr op, Immed i, Reg16 r) {
+    emitIR16(op, rn(r), i.w());
+  }
   void instrIR(X64Instr op, Immed i, Reg8 r) {
     emitIR8(op, rn(r), i.b());
   }
@@ -2379,6 +2480,9 @@ private:
   void instrIM32(X64Instr op, Immed i, MemoryRef m) {
     emitIM32(op, UMR(m), i.l());
   }
+  void instrIM16(X64Instr op, Immed i, MemoryRef m) {
+    emitIM16(op, UMR(m), i.w());
+  }
   void instrIM8(X64Instr op, Immed i, MemoryRef m) {
     emitIM8(op, UMR(m), i.b());
   }
@@ -2388,6 +2492,9 @@ private:
   }
   void instrIM32(X64Instr op, Immed i, IndexedMemoryRef m) {
     emitIM32(op, UIMR(m), i.l());
+  }
+  void instrIM16(X64Instr op, Immed i, IndexedMemoryRef m) {
+    emitIM16(op, UIMR(m), i.w());
   }
   void instrIM8(X64Instr op, Immed i, IndexedMemoryRef m) {
     emitIM8(op, UIMR(m), i.b());

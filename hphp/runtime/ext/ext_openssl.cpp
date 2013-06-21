@@ -181,6 +181,22 @@ public:
    */
   static Object Get(CVarRef var, bool public_key,
                     const char *passphrase = NULL) {
+    if (var.is(KindOfArray)) {
+      Array arr = var.toArray();
+      if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
+        raise_warning("key array must be of the form "
+                        "array(0 => key, 1 => phrase)");
+        return Object();
+      }
+
+      String zphrase = arr[1].toString();
+      return GetHelper(arr[0], public_key, zphrase.data());
+    }
+    return GetHelper(var, public_key, passphrase);
+  }
+
+  static Object GetHelper(CVarRef var, bool public_key,
+                          const char *passphrase) {
     Object ocert;
     EVP_PKEY *key = NULL;
 
@@ -217,17 +233,6 @@ public:
           BIO_free(in);
         }
       } else {
-        String zphrase;
-        if (var.is(KindOfArray)) {
-          Array arr = var.toArray();
-          if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
-            raise_warning("key array must be of the form "
-                            "array(0 => key, 1 => phrase)");
-            return Object();
-          }
-          zphrase = arr[1].toString();
-          passphrase = zphrase.data();
-        }
         /* we want the private key */
         BIO *in = Certificate::ReadData(var);
         if (in == NULL) return Object();

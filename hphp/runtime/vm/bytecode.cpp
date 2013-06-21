@@ -24,7 +24,7 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/base/code_coverage.h"
@@ -39,6 +39,7 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat_cache.h"
 #include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/vm/debug/debug.h"
 
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/php_debug.h"
@@ -93,7 +94,8 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using Transl::tx64;
+using Transl::VMRegAnchor;
+using Transl::EagerVMRegAnchor;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -158,6 +160,11 @@ const StaticString s_class("class");
 const StaticString s_object("object");
 const StaticString s_type("type");
 const StaticString s_include("include");
+
+static inline
+Transl::Translator* tx() {
+  return Transl::Translator::Get();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -585,14 +592,14 @@ Stack::~Stack() {
 
 void
 Stack::protect() {
-  if (trustSigSegv) {
+  if (Transl::trustSigSegv) {
     mprotect(m_elms, sizeof(void*), PROT_NONE);
   }
 }
 
 void
 Stack::unprotect() {
-  if (trustSigSegv) {
+  if (Transl::trustSigSegv) {
     mprotect(m_elms, sizeof(void*), PROT_READ | PROT_WRITE);
   }
 }
@@ -600,7 +607,7 @@ Stack::unprotect() {
 void
 Stack::requestInit() {
   m_elms = t_se->elms();
-  if (trustSigSegv) {
+  if (Transl::trustSigSegv) {
     RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
     Lock l(data.surpriseLock);
     assert(data.surprisePage == nullptr);
@@ -626,7 +633,7 @@ Stack::requestInit() {
 void
 Stack::requestExit() {
   if (m_elms != nullptr) {
-    if (trustSigSegv) {
+    if (Transl::trustSigSegv) {
       RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
       Lock l(data.surpriseLock);
       assert(data.surprisePage == m_elms);
@@ -648,7 +655,7 @@ void flush_evaluation_stack() {
     if (!t_se.isNull()) {
       t_se->flush();
     }
-    TargetCache::flush();
+    Transl::TargetCache::flush();
   }
 }
 
@@ -1293,7 +1300,7 @@ void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
 }
 
 VarEnv* VMExecutionContext::getVarEnv() {
-  Transl::VMRegAnchor _;
+  VMRegAnchor _;
 
   VarEnv* builtinVarEnv = nullptr;
   ActRec* fp = getFP();
@@ -1325,7 +1332,7 @@ VarEnv* VMExecutionContext::getVarEnv() {
 }
 
 void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
-  Transl::VMRegAnchor _;
+  VMRegAnchor _;
   // setVar() should only be called after getVarEnv() has been called
   // to create a varEnv
   ActRec *fp = getFP();
@@ -1344,7 +1351,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
 }
 
 Array VMExecutionContext::getLocalDefinedVariables(int frame) {
-  Transl::VMRegAnchor _;
+  VMRegAnchor _;
   ActRec *fp = getFP();
   for (; frame > 0; --frame) {
     if (!fp) break;
@@ -1523,7 +1530,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
 
 void VMExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    tx64->m_debugInfo.debugSync();
+    tx()->getDebugInfo()->debugSync();
   }
 }
 
@@ -1534,8 +1541,8 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    TCA start = enterFnAr->m_func->getPrologue(na);
-    tx64->enterTCAtProlog(enterFnAr, start);
+    Transl::TCA start = enterFnAr->m_func->getPrologue(na);
+    tx()->enterTCAtProlog(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1544,7 +1551,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
 }
 
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
-  TCA start = nullptr;
+  Transl::TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
     checkStack(m_stack, enterFnAr->m_func);
@@ -1555,10 +1562,10 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) curUnit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx64->enterTCAfterProlog(start);
+      tx()->enterTCAfterProlog(start);
     } else {
       SrcKey sk(curFunc(), m_pc);
-      tx64->enterTCAtSrcKey(sk);
+      tx()->enterTCAtSrcKey(sk);
     }
   } else {
     dispatch();
@@ -1570,7 +1577,7 @@ void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->getCallToExit());
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
   assert(isReturnHelper(ar->m_savedRip));
 
   /*
@@ -1606,7 +1613,7 @@ resume:
     return;
 
   } catch (...) {
-    always_assert(tl_regState == REGSTATE_CLEAN);
+    always_assert(Transl::tl_regState == Transl::REGSTATE_CLEAN);
     auto const action = exception_handler();
     if (action == UnwindAction::ResumeVM) {
       goto resume;
@@ -1981,7 +1988,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     );
   }
 
-  Transl::VMRegAnchor _;
+  VMRegAnchor _;
   if (!getFP()) {
     // If there are no VM frames, we're done
     return bt;
@@ -2454,7 +2461,8 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
-  ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+  ar->m_savedRip =
+    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
@@ -2732,7 +2740,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     ar->setThis(nullptr);
     ar->m_soff = 0;
     ar->m_savedRbp = 0;
-    ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
+    ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
     assert(isReturnHelper(ar->m_savedRip));
     m_fp = ar;
     m_pc = s_debuggerDummy->entry();
@@ -2751,9 +2759,10 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
 bool VMExecutionContext::isReturnHelper(uintptr_t address) {
-  return ((address == (uintptr_t)tx64->getRetFromInterpretedFrame()) ||
-          (address == (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame()) ||
-          (address == (uintptr_t)tx64->getCallToExit()));
+  auto tcAddr = reinterpret_cast<Transl::TCA>(address);
+  return ((tcAddr == tx()->getRetFromInterpretedFrame()) ||
+          (tcAddr == tx()->getRetFromInterpretedGeneratorFrame()) ||
+          (tcAddr == tx()->getCallToExit()));
 }
 
 // Walk the stack and find any return address to jitted code and bash it to
@@ -2766,16 +2775,17 @@ void VMExecutionContext::preventReturnsToTC() {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx64->isValidCodeAddress((TCA)ar->m_savedRip))) {
+          (tx()->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%lx, "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {
           ar->m_savedRip =
-            (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
+            reinterpret_cast<uintptr_t>(
+              tx()->getRetFromInterpretedGeneratorFrame());
         } else {
           ar->m_savedRip =
-            (uintptr_t)tx64->getRetFromInterpretedFrame();
+            reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
         }
         assert(isReturnHelper(ar->m_savedRip));
       }
@@ -5786,7 +5796,8 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 
 bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(getOuterVMFrame(ar) == m_fp);
-  ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+  ar->m_savedRip =
+    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
   assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
@@ -6052,7 +6063,8 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
 
     assert(ar->m_savedRbp == (uint64_t)m_fp);
     assert(!ar->m_func->isGenerator());
-    ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+    ar->m_savedRip =
+      reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->m_func->unit()->entry(),
@@ -6783,7 +6795,8 @@ void VMExecutionContext::iopContEnter(PC& pc) {
 
   contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
-  contAR->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
+  contAR->m_savedRip =
+    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedGeneratorFrame());
   assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;
@@ -6989,7 +7002,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
 }
 
 void VMExecutionContext::checkRegStateWork() const {
-  assert(tl_regState == REGSTATE_CLEAN);
+  assert(Transl::tl_regState == Transl::REGSTATE_CLEAN);
 }
 
 void VMExecutionContext::DumpStack() {
@@ -7023,7 +7036,7 @@ void VMExecutionContext::PrintTCCallerInfo() {
   ActRec* fp = g_vmContext->getFP();
   Unit* u = fp->m_func->unit();
   fprintf(stderr, "Called from TC address %p\n",
-          TranslatorX64::Get()->getTranslatedCaller());
+          tx()->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
             << u->getLineNumber(u->offsetOf(g_vmContext->getPC())) << std::endl;
 }
@@ -7291,8 +7304,8 @@ void VMExecutionContext::requestInit() {
   EnvConstants::requestInit(new (request_arena()) EnvConstants());
   VarEnv::createGlobal();
   m_stack.requestInit();
-  tx64 = nextTx64;
-  tx64->requestInit();
+  Transl::Translator::advanceTranslator();
+  tx()->requestInit();
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
@@ -7321,8 +7334,8 @@ void VMExecutionContext::requestExit() {
   treadmillSharedVars();
   destructObjects();
   syncGdbState();
-  tx64->requestExit();
-  tx64 = nullptr;
+  tx()->requestExit();
+  Transl::Translator::clearTranslator();
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

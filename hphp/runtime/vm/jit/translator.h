@@ -49,6 +49,9 @@ class HhbcTranslator;
 class IRFactory;
 class RegionDesc;
 }
+namespace Debug {
+class DebugInfo;
+}
 namespace Transl {
 
 using JIT::Type;
@@ -951,6 +954,12 @@ public:
   Translator();
   virtual ~Translator();
   static Translator* Get();
+  static void advanceTranslator() {
+    tx64 = nextTx64;
+  }
+  static void clearTranslator() {
+    tx64 = nullptr;
+  }
   static Lease& WriteLease() {
     return s_writeLease;
   }
@@ -967,6 +976,8 @@ public:
   virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
   virtual TCA getCallToExit() = 0;
   virtual TCA getRetFromInterpretedFrame() = 0;
+  virtual TCA getRetFromInterpretedGeneratorFrame() = 0;
+  virtual TCA getTranslatedCaller() const = 0;
   virtual std::string getUsage() = 0;
   virtual size_t getCodeSize() = 0;
   virtual size_t getStubSize() = 0;
@@ -976,7 +987,11 @@ public:
   virtual bool dumpTCData() = 0;
   virtual void protectCode() = 0;
   virtual void unprotectCode() = 0;
-  virtual bool isValidCodeAddress(TCA) const = 0;
+  virtual bool isValidCodeAddress(TCA tca) const = 0;
+  virtual Debug::DebugInfo* getDebugInfo() = 0;
+  virtual void enterTCAtSrcKey(SrcKey& sk) = 0;
+  virtual void enterTCAtProlog(ActRec* ar, TCA start) = 0;
+  virtual void enterTCAfterProlog(TCA start) = 0;
 
   const TransDB& getTransDB() const {
     return m_transDB;

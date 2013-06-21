@@ -27,14 +27,11 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
 
 #include "hphp/runtime/base/zend/zend_functions.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
-
-using Transl::tx64;
 
 TRACE_SET_MOD(runtime);
 
@@ -285,7 +282,7 @@ int64_t arr0_to_bool(ArrayData* ad) {
 }
 
 int64_t arr_to_bool(ArrayData* ad) {
-  assert(tx64->stateIsDirty());
+  assert(Transl::Translator::Get()->stateIsDirty());
   int64_t retval = arr0_to_bool(ad);
   decRefArr(ad);
   return retval;

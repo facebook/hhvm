@@ -195,6 +195,8 @@ class TranslatorX64 : public Translator
   CatchTraceMap              m_catchTraceMap;
   std::vector<TransBCMapping> m_bcMap;
 
+  Debug::DebugInfo m_debugInfo;
+
 private:
   int64_t m_createdTime;
 
@@ -287,9 +289,6 @@ private:
   TCA getCatchTrace(CTCA ip) const;
 
   static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
-
-  // public for syncing gdb state
-  Debug::DebugInfo m_debugInfo;
 
   void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
   void fixup(VMExecutionContext* ec) const;

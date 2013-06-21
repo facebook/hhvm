@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/ringbuffer.h"
@@ -167,7 +166,6 @@ class TranslatorX64 : public Translator
   int                    m_numNativeTrampolines;
   size_t                 m_trampolineSize; // size of each trampoline
 
-  SrcDB                  m_srcDB;
   SignalStubMap          m_segvStubs;
   sigaction_t            m_segvChain;
   TCA                    m_callToExit;
@@ -296,14 +294,6 @@ private:
   void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
   void fixup(VMExecutionContext* ec) const;
   TCA getTranslatedCaller() const;
-
-  // helpers for srcDB.
-  SrcRec* getSrcRec(SrcKey sk) {
-    // TODO: add a insert-or-find primitive to THM
-    if (SrcRec* r = m_srcDB.find(sk)) return r;
-    assert(s_writeLease.amOwner());
-    return m_srcDB.insert(sk);
-  }
 
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
@@ -530,14 +520,6 @@ public:
 
   // Returns true on success
   bool dumpTCData();
-
-  // Async hook for file modifications.
-  bool invalidateFile(Eval::PhpFile* f);
-  void invalidateFileWork(Eval::PhpFile* f);
-
-  // Start a new translation space. Returns true IFF this thread created
-  // a new space.
-  bool replace();
 
   // Debugging interfaces to prevent tampering with code.
   void protectCode();

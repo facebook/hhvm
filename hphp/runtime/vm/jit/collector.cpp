@@ -108,7 +108,7 @@ void severFuncReferences(Translator* tx) {
  */
 volatile bool Translator::s_replaceInFlight;
 
-bool TranslatorX64::replace() {
+bool Translator::replace() {
   if (!RuntimeOption::EvalJit) return false;
 
   // Only one replace can occur at a time. Replace-related data is
@@ -122,11 +122,12 @@ bool TranslatorX64::replace() {
   // old prologues; these are external references to the old code.
 
   s_replaceInFlight = true;
-  severFuncReferences(tx64);
+  TranslatorX64* current = tx64;
+  severFuncReferences(current);
   TranslatorX64* n00b = new TranslatorX64();
   n00b->initGdb();
   TRACE(0, "Tx64: replace %p a.code %p -> %p a.code %p complete\n",
-        this, a.code.base, n00b, n00b->a.code.base);
+        current, current->getAsm().code.base, n00b, n00b->getAsm().code.base);
   // Here is the changing of the guard.
   nextTx64 = n00b;
   // TxReaper: runs after a translation space becomes unreachable.
@@ -147,7 +148,7 @@ bool TranslatorX64::replace() {
   };
   // No new requests can reach us; once no old ones persist, we can tear down
   // the old translator.
-  Treadmill::WorkItem::enqueue(new TxReaper(this));
+  Treadmill::WorkItem::enqueue(new TxReaper(current));
   return true;
 }
 

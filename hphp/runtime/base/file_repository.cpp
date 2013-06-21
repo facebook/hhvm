@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/server/source_root_info.h"
 
 #include "hphp/runtime/vm/jit/targetcache.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/repo.h"
@@ -218,7 +218,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     PhpFile *f = acc->second->getPhpFile();
     if (f != ret) {
       ret->setId(f->getId());
-      tx64->invalidateFile(f); // f has changed
+      Transl::Translator::Get()->invalidateFile(f); // f has changed
     }
     f->decRefAndDelete();
     delete acc->second;

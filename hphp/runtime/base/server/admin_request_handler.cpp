@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/shared/shared_store_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/repo_schema.h"
@@ -977,7 +976,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-tcreset") {
     int64_t start = Timer::GetCurrentTimeMicros();
-    if (HPHP::Transl::tx64->replace()) {
+    if (Transl::Translator::Get()->replace()) {
       string msg;
       Util::string_printf(msg, "Done %ld ms",
                           (Timer::GetCurrentTimeMicros() - start) / 1000);

@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-data.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/writelease.h"
@@ -940,6 +941,8 @@ protected:
   std::unique_ptr<JIT::IRFactory> m_irFactory;
   std::unique_ptr<JIT::HhbcTranslator> m_hhbcTrans;
 
+  SrcDB              m_srcDB;
+
   static Lease s_writeLease;
   static volatile bool s_replaceInFlight;
 
@@ -1013,6 +1016,14 @@ public:
 
   uint32_t addTranslation(const TransRec& transRec);
 
+  // helpers for srcDB.
+  SrcRec* getSrcRec(SrcKey sk) {
+    // TODO: add a insert-or-find primitive to THM
+    if (SrcRec* r = m_srcDB.find(sk)) return r;
+    assert(s_writeLease.amOwner());
+    return m_srcDB.insert(sk);
+  }
+
   /*
    * Create a Tracelet for the given SrcKey, which must actually be
    * the current VM frame.
@@ -1077,6 +1088,14 @@ public:
     assert(m_analysisDepth >= 0);
     return m_analysisDepth;
   }
+
+  // Async hook for file modifications.
+  bool invalidateFile(Eval::PhpFile* f);
+  void invalidateFileWork(Eval::PhpFile* f);
+
+  // Start a new translation space. Returns true IFF this thread created
+  // a new space.
+  bool replace();
 };
 
 int getStackDelta(const NormalizedInstruction& ni);

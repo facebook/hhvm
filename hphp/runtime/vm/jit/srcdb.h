@@ -21,7 +21,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/mutex.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/tread_hash_map.h"
 
 namespace HPHP {

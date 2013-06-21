@@ -423,11 +423,15 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
 }
 
 void LightProcess::Close() {
-  for (int i = 0; i < g_procsCount; i++) {
-    g_procs[i].closeShadow();
-  }
+  boost::scoped_array<LightProcess> procs;
+  procs.swap(g_procs);
+  int count = g_procsCount;
   g_procs.reset();
   g_procsCount = 0;
+
+  for (int i = 0; i < count; i++) {
+    procs[i].closeShadow();
+  }
 }
 
 void LightProcess::closeShadow() {

@@ -730,14 +730,16 @@ bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
-               const LocalTypeFn& localType);
+               const Func* func, const LocalTypeFn& localType);
 void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
                    int& currentStackOffset, InputInfos& inputs,
-                   const LocalTypeFn& localType);
+                   const Func* func, const LocalTypeFn& localType);
 bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+bool shouldAnalyzeCallee(const NormalizedInstruction*, const FPIEnt*,
+                         const Op, const int);
 
 namespace InstrFlags {
 enum OutTypeConstraints {

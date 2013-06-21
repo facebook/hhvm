@@ -154,8 +154,9 @@ public:
     : m_func(func)
     , m_start(start)
     , m_length(length)
+    , m_inlinedCallee(nullptr)
   {
-    if (debug) checkInvariants();
+    checkInvariants();
   }
 
   Block& operator=(const Block&) = delete;
@@ -168,6 +169,20 @@ public:
   const Func* func() const { return m_func; }
   SrcKey start() const { return SrcKey { m_func, m_start }; }
   int length() const { return m_length; }
+
+  /*
+   * Set and get whether or not this block ends with an inlined FCall. Inlined
+   * FCalls should not emit any code themselves, and they will be followed by
+   * one or more blocks from the callee.
+   */
+  void setInlinedCallee(const Func* callee) {
+    assert(callee);
+    m_inlinedCallee = callee;
+    checkInvariants();
+  }
+  const Func* inlinedCallee() const {
+    return m_inlinedCallee;
+  }
 
   /*
    * Increase the length of the Block by 1.
@@ -216,13 +231,15 @@ private:
   void checkInvariants() const;
 
 private:
-  const Func*  m_func;
-  const Offset m_start;
-  int          m_length;
-  TypePredMap  m_typePreds;
-  ParamByRefMap m_byRefs;
-  RefPredMap   m_refPreds;
-  KnownFuncMap m_knownFuncs;
+  const Func*    m_func;
+  const Offset   m_start;
+  int            m_length;
+  const Func*    m_inlinedCallee;
+
+  TypePredMap    m_typePreds;
+  ParamByRefMap  m_byRefs;
+  RefPredMap     m_refPreds;
+  KnownFuncMap   m_knownFuncs;
 };
 
 //////////////////////////////////////////////////////////////////////

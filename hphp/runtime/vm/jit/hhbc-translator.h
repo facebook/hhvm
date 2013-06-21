@@ -144,7 +144,6 @@ struct HhbcTranslator {
   void beginInlining(unsigned numArgs,
                      const Func* target,
                      Offset returnBcOffset);
-  void endInlining();
   bool isInlining() const;
   void profileFunctionEntry(const char* category);
   void profileInlineFunctionShape(const std::string& str);

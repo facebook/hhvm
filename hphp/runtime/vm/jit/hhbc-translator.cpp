@@ -278,6 +278,9 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   assert(!m_fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assert(!target->isGenerator() && "Generator stack handling not implemented");
+  assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
+  assert(curFunc()->base() + returnBcOffset < curFunc()->past() &&
+         "returnBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 

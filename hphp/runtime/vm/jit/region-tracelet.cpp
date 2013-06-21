@@ -164,7 +164,7 @@ bool RegionFormer::prepareInstruction() {
   Transl::preInputApplyMetaData(m_metaHand, &m_inst);
 
   Transl::InputInfos inputInfos;
-  getInputs(m_startSk, m_inst, inputInfos, [&](int i) {
+  getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
     return m_ht.traceBuilder()->getLocalType(i);
   });
 
@@ -232,7 +232,7 @@ void RegionFormer::addInstruction() {
     m_blockFinished = false;
   }
 
-  auto op = toOp(*m_curUnit->at(m_inst.source.offset()));
+  auto op = m_curUnit->getOpcode(m_inst.source.offset());
   if (isLiteral(op) || isThisSelfOrParent(op)) {
     // Don't finish a region with literal values or values that have a class
     // related to the current context class. They produce valuable information

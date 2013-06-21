@@ -297,7 +297,7 @@ struct PropByteOffset : IRExtraData {
 struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),", retSPOff, ',', retBCOff
+      target->fullName()->data(), "(),", retBCOff, ',', retSPOff
     );
   }
 

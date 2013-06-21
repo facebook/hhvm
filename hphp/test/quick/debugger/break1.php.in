@@ -31,4 +31,9 @@ break cls::nosuchMethod()
 break list
 break noSuchFunction()
 break list
+break clear all
+break derived::pubObj()
+@ $break6 = new derived()
+@ $break6->pubObj('test_break6')
+continue
 quit

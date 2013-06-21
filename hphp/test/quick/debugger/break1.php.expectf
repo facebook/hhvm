@@ -95,4 +95,19 @@ Breakpoint 1 set upon entering noSuchFunction()
 But wont break until function noSuchFunction has been loaded.
 break list
   1	ALWAYS    upon entering noSuchFunction() (unbound)
+break clear all
+All breakpoints are cleared.
+break derived::pubObj()
+Breakpoint 1 set upon entering derived::pubObj()
+@ $break6 = new derived()
+
+@ $break6->pubObj('test_break6')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+continue
+pubObj:test_break6
+
 quit

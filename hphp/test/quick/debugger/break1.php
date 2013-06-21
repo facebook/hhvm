@@ -21,4 +21,7 @@ class cls {
   }
 }
 
+class derived extends cls {
+}
+
 error_log('break1.php loaded');

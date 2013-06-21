@@ -119,22 +119,24 @@ void DummySandbox::run() {
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());
 
-        char cwd[PATH_MAX];
-        getcwd(cwd, sizeof(cwd));
         std::string doc = getStartupDoc(sandbox);
-        Logger::Info("Start loading startup doc '%s', pwd = '%s'",
-                     doc.c_str(), cwd);
-        bool error; string errorMsg;
-        bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
-                               uninit_null(), "", "", error, errorMsg, true, false,
-                               true);
-        if (!ret || error) {
-          msg += "Unable to pre-load " + doc;
-          if (!errorMsg.empty()) {
-            msg += ": " + errorMsg;
+        if (!doc.empty()) {
+          char cwd[PATH_MAX];
+          getcwd(cwd, sizeof(cwd));
+          Logger::Info("Start loading startup doc '%s', pwd = '%s'",
+                       doc.c_str(), cwd);
+          bool error; string errorMsg;
+          bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
+                                 uninit_null(), "", "", error, errorMsg, true,
+                                 false, true);
+          if (!ret || error) {
+            msg += "Unable to pre-load " + doc;
+            if (!errorMsg.empty()) {
+              msg += ": " + errorMsg;
+            }
           }
+          Logger::Info("Startup doc " + doc + " loaded");
         }
-        Logger::Info("Startup doc " + doc + " loaded");
       } else {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }

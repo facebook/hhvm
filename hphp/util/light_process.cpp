@@ -479,15 +479,10 @@ void LightProcess::runShadow(int fdin, int fdout) {
     if (ret < 0 && errno == EINTR) {
       continue;
     }
-    if (pfd[0].revents & POLLHUP) {
-      // no more command can come in
-      Logger::Error("Lost parent, LightProcess exiting");
-      break;
-    }
-    else if (pfd[0].revents & POLLIN) {
+    if (pfd[0].revents & POLLIN) {
       if (!fgets(buf, BUFFER_SIZE, fin)) buf[0] = '\0';
       if (strncmp(buf, "exit", 4) == 0) {
-        Logger::Info("LightProces exiting upon request");
+        Logger::Info("LightProcess exiting upon request");
         break;
       } else if (strncmp(buf, "popen", 5) == 0) {
         do_popen(fin, fout, m_afdt_fd);
@@ -499,7 +494,13 @@ void LightProcess::runShadow(int fdin, int fdout) {
         do_waitpid(fin, fout);
       } else if (strncmp(buf, "change_user", 11) == 0) {
         do_change_user(fin, fout);
+      } else if (buf[0]) {
+        Logger::Info("LightProcess got invalid command: %.20s", buf);
       }
+    } else if (pfd[0].revents & POLLHUP) {
+      // no more command can come in
+      Logger::Error("Lost parent, LightProcess exiting");
+      break;
     }
   }
 

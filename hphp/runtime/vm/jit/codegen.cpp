@@ -5027,14 +5027,6 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
     });
 }
 
-void CodeGenerator::cgDefCns(IRInstruction* inst) {
-  UNUSED SSATmp* dst     = inst->dst();
-  UNUSED SSATmp* cnsName = inst->src(0);
-  UNUSED SSATmp* val     = inst->src(1);
-  using namespace TargetCache;
-  CG_PUNT(DefCns);
-}
-
 // TODO: Kill this #2031980
 static StringData* concat_value(TypedValue tv1, TypedValue tv2) {
   return concat_tv(tv1.m_type, tv1.m_data.num, tv2.m_type, tv2.m_data.num);

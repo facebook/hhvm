@@ -443,22 +443,22 @@ void HhbcTranslator::emitArrayAdd() {
 }
 
 void HhbcTranslator::emitAddElemC() {
-  SSATmp* val = popC();
-  SSATmp* key = popC();
-  SSATmp* arr = popC();
-  // the AddElem* instructions decrefs their args, so don't decref
-  // pop'ed values. TODO task 1805916: verify that AddElem* increfs
-  // their result
-  auto kt = key->type();
+  // The AddElem* instructions decref their args, so don't decref
+  // pop'ed values.
+  auto kt = topC(1)->type();
   Opcode op;
   if (kt.subtypeOf(Type::Int)) {
     op = AddElemIntKey;
   } else if (kt.isString()) {
     op = AddElemStrKey;
   } else {
-    PUNT(AddElem-NonIntNonStr);
+    emitInterpOne(Type::Arr, 3);
+    return;
   }
 
+  auto const val = popC();
+  auto const key = popC();
+  auto const arr = popC();
   push(gen(op, arr, key, val));
 }
 
@@ -541,9 +541,7 @@ void HhbcTranslator::emitCnsU(uint32_t id) {
 }
 
 void HhbcTranslator::emitDefCns(uint32_t id) {
-  StringData* name = lookupStringId(id);
-  SSATmp* val = popC();
-  push(gen(DefCns, cns(name), val));
+  emitInterpOne(Type::Bool, 1);
 }
 
 void HhbcTranslator::emitConcat() {

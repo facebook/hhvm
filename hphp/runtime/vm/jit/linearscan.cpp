@@ -723,8 +723,7 @@ uint32_t LinearScan::assignSpillLoc() {
 
 void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
   m_natives.clear();
-  m_jmps.reset();
-  m_uses.reset();
+  m_uses.reset(); // TODO(#2536764): serious time sink
 
   while (it != m_blocks.end()) {
     Block* block = *it++;

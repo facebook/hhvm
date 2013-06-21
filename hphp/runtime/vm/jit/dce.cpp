@@ -111,10 +111,8 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef hphp_hash_set<const SSATmp*, pointer_hash<SSATmp>> SSASet;
-typedef StateVector<SSATmp, SSASet> SSACache;
 typedef StateVector<SSATmp, uint32_t> UseCounts;
-typedef std::list<const IRInstruction*> WorkList;
+typedef smart::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRTrace* trace, const DceState& state) {
   auto &blocks = trace->blocks();
@@ -316,11 +314,14 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
 
   WorkList toSink;
 
+  // Hoisted outside the loop to reduce allocations.
+  smart::flat_map<SSATmp*,SSATmp*> sunkTmps;
+
   auto processExit = [&] (IRTrace* exit) {
     // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
     // instruction, and create a mapping between the original tmps to the sunk
     // tmps so that we can later replace the original ones with the sunk ones.
-    std::vector<SSATmp*> sunkTmps(irFactory->numTmps(), nullptr);
+    sunkTmps.clear();
     for (auto* inst : boost::adaptors::reverse(toSink)) {
       // prepend inserts an instruction to the beginning of a block, after
       // the label. Therefore, we iterate through toSink in the reversed order.
@@ -328,16 +329,16 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
       state[sunkInst].setLive();
       exit->front()->prepend(sunkInst);
 
-      auto dstId = inst->dst()->id();
-      assert(!sunkTmps[dstId]);
-      sunkTmps[dstId] = sunkInst->dst();
+      assert(!sunkTmps[inst->dst()]);
+      sunkTmps[inst->dst()] = sunkInst->dst();
     }
     forEachInst(exit, [&](IRInstruction* inst) {
       // Replace the original tmps with the sunk tmps.
       for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
         SSATmp* src = inst->src(i);
-        if (SSATmp* sunkTmp = sunkTmps[src->id()]) {
-          inst->setSrc(i, sunkTmp);
+        auto it = sunkTmps.find(src);
+        if (it != sunkTmps.end()) {
+          inst->setSrc(i, it->second);
         }
       }
     });
@@ -473,26 +474,18 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
 // src's instruction to the real origin of the value. Currently this traces
 // through CheckType, AssertType and DefLabel.
 void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
-                   DceState& state, SSACache& ssas, SSASet visitedSrcs) {
-  assert(!visitedSrcs.count(src) && "Cycle detected in dataflow graph");
-  auto const& cache = ssas[src];
-  if (!cache.empty()) {
-    // We've already traced this path. Use the cache.
-    for (const SSATmp* cached : cache) {
-      consumeIncRef(consumer, cached, state, ssas, SSASet());
-    }
-    return;
-  }
-
+                   DceState& state) {
   const IRInstruction* srcInst = src->inst();
-  visitedSrcs.insert(src);
   if ((srcInst->op() == CheckType || srcInst->op() == AssertType) &&
       srcInst->typeParam().maybeCounted()) {
     // srcInst is a CheckType/AsserType that guards to a refcounted type. We
     // need to trace through to its source. If the instruciton guards to a
     // non-refcounted type then the reference is consumed by CheckType itself.
-    consumeIncRef(consumer, srcInst->src(0), state, ssas, visitedSrcs);
-  } else if (srcInst->op() == DefLabel) {
+    consumeIncRef(consumer, srcInst->src(0), state);
+    return;
+  }
+
+  if (srcInst->op() == DefLabel) {
     // srcInst is a DefLabel that may be a join node. We need to find
     // the dst index of src in srcInst and trace through to each jump
     // providing a value for it.
@@ -500,37 +493,28 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
       if (srcInst->dst(i) == src) {
         srcInst->block()->forEachSrc(i,
           [&](IRInstruction* jmp, SSATmp* val) {
-            consumeIncRef(consumer, val, state, ssas, visitedSrcs);
+            consumeIncRef(consumer, val, state);
           }
         );
         break;
       }
     }
-  } else {
-    // src is the canonical representation of everything in visitedSrcs. Put
-    // that knowledge in the cache.
-    for (const SSATmp* visited : visitedSrcs) {
-      // We don't need to store the fact that src is its own canonical
-      // representation.
-      if (visited != src) {
-        ssas[visited].insert(src);
-      }
-    }
+    return;
+  }
 
-    if (srcInst->op() == IncRef) {
-      // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
-      // REFCOUNT_CONSUMED.
-      if (consumer->trace()->isMain() || !srcInst->trace()->isMain()) {
-        // <srcInst> is consumed from its own trace.
-        state[srcInst].setCountConsumed();
-      } else {
-        // <srcInst> is consumed off trace.
-        if (!state[srcInst].countConsumed()) {
-          // mark <srcInst> as REFCOUNT_CONSUMED_OFF_TRACE unless it is
-          // also consumed from its own trace.
-          state[srcInst].setCountConsumedOffTrace();
-        }
-      }
+  if (srcInst->op() != IncRef) return;
+
+  // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
+  // REFCOUNT_CONSUMED.
+  if (consumer->trace()->isMain() || !srcInst->trace()->isMain()) {
+    // <srcInst> is consumed from its own trace.
+    state[srcInst].setCountConsumed();
+  } else {
+    // <srcInst> is consumed off trace.
+    if (!state[srcInst].countConsumed()) {
+      // mark <srcInst> as REFCOUNT_CONSUMED_OFF_TRACE unless it is
+      // also consumed from its own trace.
+      state[srcInst].setCountConsumedOffTrace();
     }
   }
 }
@@ -554,7 +538,6 @@ void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(irFactory, DceFlags());
-  SSACache ssaOriginals(irFactory, SSASet());
   UseCounts uses(irFactory, 0);
   WorkList wl = initInstructions(blocks, state);
 
@@ -577,7 +560,7 @@ void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
       // If inst consumes this source, find the true source instruction and
       // mark it as consumed if it's an IncRef.
       if (inst->consumesReference(i)) {
-        consumeIncRef(inst, src, state, ssaOriginals, SSASet());
+        consumeIncRef(inst, src, state);
       }
     }
   }

@@ -691,6 +691,23 @@ will look like this,
 "path" points to PHP source files. "log" points to error log location and
 "accesslog" points to access log location.
 
+== Debugger Configuration
+
+By default, HHVM does not listen for connections from the HipHop
+Debugger (hphpd). To enable this you need to first setup the sandbox
+environment described above, then add the following to your config:
+
+  Eval.Debugger {
+    EnableDebugger = true
+    EnableDebuggerServer = true
+    Port = 8089
+    DefaultSandboxPath = path to source files, similar to Server.SourceRoot
+  }
+
+This will cause HHVM to start a debugger server, and you should see an
+entry in the log indicating the debugger server has started before the
+entry about all servers having been started.
+
 - Machine Sharing
 
 The benefit is, same server can have one "Sandbox" configuration, and many

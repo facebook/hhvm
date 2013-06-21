@@ -19,21 +19,6 @@
 #ifndef incl_EXT_LIST_TEST_EXT_H_
 #define incl_EXT_LIST_TEST_EXT_H_
 
-#include "hphp/facebook/extensions/facebook/test_ext_facebook.h"
-#include "hphp/facebook/extensions/fbml/test_ext_fbml.h"
-#include "hphp/facebook/extensions/fdb/test_ext_fdb.h"
-#include "hphp/facebook/extensions/gameskill/test_ext_gameskill.h"
-#include "hphp/facebook/extensions/gatehouse/test_ext_gatehouse.h"
-#include "hphp/facebook/extensions/obc/test_ext_obc.h"
-#include "hphp/facebook/extensions/oracle/test_ext_oracle.h"
-#include "hphp/facebook/extensions/photodna/test_ext_photodna.h"
-#include "hphp/facebook/extensions/php_mcc/test_ext_php_mcc.h"
-#include "hphp/facebook/extensions/phpmc/test_ext_phpmc.h"
-#include "hphp/facebook/extensions/scrypt/test_ext_scrypt.h"
-#include "hphp/facebook/extensions/servicerouter/test_ext_servicerouter.h"
-#include "hphp/facebook/extensions/string_buffer/test_ext_string_buffer.h"
-#include "hphp/facebook/extensions/tao/test_ext_tao.h"
-#include "hphp/facebook/extensions/urlextraction/test_ext_urlextraction.h"
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/test/ext/test_ext_mcrypt.h"
 #include "hphp/test/ext/test_ext_memcached.h"

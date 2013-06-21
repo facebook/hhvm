@@ -106,7 +106,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
       ranges.clear();
     }
   }
-  auto excludeContinuationReturns = [] (Opcode op) {
+  auto excludeContinuationReturns = [] (Op op) {
     return (op != OpContExit) && (op != OpContRetC);
   };
   g_vmContext->m_lastLocFilter->addRanges(unit, ranges,
@@ -153,26 +153,26 @@ void CmdFlowControl::setupStepOuts() {
     PC returnPC = returnUnit->at(returnOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
           fp->m_func->fullName()->data(), returnOffset,
-          opcodeToName(*returnPC));
+          opcodeToName(toOp(*returnPC)));
     // Don't step out to generated functions, keep looking.
     if (fp->m_func->line1() == 0) continue;
     if (fromVMEntry) {
       TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
-      assert(!isSwitch(*returnPC) && (numSuccs(returnPC) <= 2));
+      assert(!isSwitch(*returnPC) && (numSuccs((Op*)returnPC) <= 2));
       // Set an internal breakpoint after the instruction if it can fall thru.
-      if (instrAllowsFallThru(*returnPC)) {
+      if (instrAllowsFallThru(toOp(*returnPC))) {
         m_stepOutUnit = returnUnit;
-        m_stepOutOffset1 = returnOffset + instrLen(returnPC);
+        m_stepOutOffset1 = returnOffset + instrLen((Op*)returnPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->m_func->fullName()->data(), m_stepOutOffset1);
         phpAddBreakPoint(m_stepOutUnit, m_stepOutOffset1);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
-      if (instrIsControlFlow(*returnPC)) {
-        Offset target = instrJumpTarget(returnPC, 0);
+      if (instrIsControlFlow(toOp(*returnPC))) {
+        Offset target = instrJumpTarget((Op*)returnPC, 0);
         if (target != InvalidAbsoluteOffset) {
           m_stepOutUnit = returnUnit;
           m_stepOutOffset2 = returnOffset + target;

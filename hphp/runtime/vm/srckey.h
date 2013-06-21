@@ -89,7 +89,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * contain an invalid bytecode offset.
    */
   void advance(const Unit* u) {
-    m_offset += instrLen(u->at(offset()));
+    m_offset += instrLen((Op*)u->at(offset()));
   }
 
   /*

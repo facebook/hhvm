@@ -4466,7 +4466,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
-  assert(hasImmVector(*oldPC));
+  assert(hasImmVector(toOp(*oldPC)));
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
@@ -5657,13 +5657,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCufSafe(PC& pc) {
   doFPushCuf(pc, false, true);
 }
 
-static inline ActRec* arFromInstr(TypedValue* sp, const Opcode* pc) {
+static inline ActRec* arFromInstr(TypedValue* sp, const Op* pc) {
   return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
 #ifdef DEBUG
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
 #endif
   NEXT();
   DECODE_IVA(paramId);
@@ -5673,7 +5673,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
 }
 
 #define FPASSC_CHECKED_PRELUDE                                                \
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);                       \
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);                           \
   NEXT();                                                                     \
   DECODE_IVA(paramId);                                                        \
   assert(paramId < ar->numArgs());                                            \
@@ -5704,7 +5704,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassCE(PC& pc) {
 #undef FPASSC_CHECKED_PRELUDE
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassV(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
   assert(paramId < ar->numArgs());
@@ -5715,7 +5715,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassV(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassR(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
   assert(paramId < ar->numArgs());
@@ -5733,7 +5733,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassR(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassL(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
   DECODE_HA(local);
@@ -5748,7 +5748,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassL(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassN(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
@@ -5761,7 +5761,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassN(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassG(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
@@ -5774,7 +5774,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassG(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassS(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
@@ -5787,7 +5787,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassS(PC& pc) {
 }
 
 void VMExecutionContext::iopFPassM(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
   assert(paramId < ar->numArgs());
@@ -5834,7 +5834,7 @@ bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
-  ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
+  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
@@ -7187,15 +7187,15 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
                            m_fp));                                      \
       return;                                                           \
     }                                                                   \
-    Op op = (Op)*pc;                                                    \
+    Op op = toOp(*pc);                                                  \
     COND_STACKTRACE("dispatch:                    ");                   \
     ONTRACE(1,                                                          \
-            Trace::trace("dispatch: %d: %s\n", pcOff(), nametab[op]));  \
-    assert(op < Op_count);                                              \
+            Trace::trace("dispatch: %d: %s\n", pcOff(),                 \
+                         nametab[uint8_t(op)]));                        \
     if (profile && (op == OpRetC || op == OpRetV)) {                    \
       profileReturnValue(m_stack.top()->m_type);                        \
     }                                                                   \
-    goto *optab[op];                                                    \
+    goto *optab[uint8_t(op)];                                           \
 } while (0)
 
   ONTRACE(1, Trace::trace("dispatch: Enter ExecutionContext::dispatch(%p)\n",
@@ -7214,10 +7214,10 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
     iop##name(pc);                                            \
     SYNC();                                                   \
     if (breakOnCtlFlow) {                                     \
-      isCtlFlow = instrIsControlFlow(Op##name);               \
-      Stats::incOp(Op##name);                                 \
+      isCtlFlow = instrIsControlFlow(Op::name);               \
+      Stats::incOp(Op::name);                                 \
     }                                                         \
-    const Op op = Op##name;                                   \
+    const Op op = Op::name;                                   \
     if (op == OpRetC || op == OpRetV || op == OpNativeImpl) { \
       if (UNLIKELY(!pc)) { m_fp = 0; return; }                \
     }                                                         \

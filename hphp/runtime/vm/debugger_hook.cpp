@@ -111,7 +111,7 @@ static void blacklistRangesInJit(const Unit* unit,
   for (OffsetRangeVec::const_iterator it = offsets.begin();
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
-         pc += instrLen((Opcode*)pc)) {
+         pc += instrLen((Op*)pc)) {
       transl()->addDbgBLPC(pc);
     }
   }
@@ -445,8 +445,8 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
     for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
-         pc += instrLen(pc)) {
-      if (isOpcodeAllowed(*pc)) {
+         pc += instrLen((Op*)pc)) {
+      if (isOpcodeAllowed(toOp(*pc))) {
         TRACE(3, "\t\tpc %p\n", pc);
         addPC(pc);
       } else {

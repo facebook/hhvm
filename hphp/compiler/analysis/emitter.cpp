@@ -265,7 +265,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 #define O(name, imm, pop, push, flags) \
   void Emitter::name(imm) { \
-    const Opcode opcode = Op##name; \
+    auto const opcode = Op::name; \
     Offset curPos UNUSED = getUnitEmitter().bcPos(); \
     getEmitterVisitor().prepareEvalStack(); \
     POP_##pop; \
@@ -1227,7 +1227,7 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
   }
 }
 
-void EmitterVisitor::popSymbolicLocal(Opcode op, int arg, int pos) {
+void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
   // Special case for instructions that consume the loc below the
   // top.
   int belowTop = -1;

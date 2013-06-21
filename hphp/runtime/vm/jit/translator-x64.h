@@ -253,8 +253,6 @@ private:
   void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
                             PhysReg lr, PhysReg rr,
                             RegXMM lxmm, RegXMM rxmm);
-  void binaryMixedArith(const NormalizedInstruction &i,
-                         Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void fpEq(const NormalizedInstruction& i, PhysReg lr, PhysReg rr);
   void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
               RegSet toSave = RegSet());
@@ -274,7 +272,7 @@ private:
 
   static uint64_t toStringHelper(ObjectData *obj);
   void invalidateSrcKey(SrcKey sk);
-  bool dontGuardAnyInputs(Opcode op);
+  bool dontGuardAnyInputs(Op op);
  public:
   template<typename T>
   void invalidateSrcKeys(const T& keys) {

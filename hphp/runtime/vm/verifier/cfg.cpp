@@ -58,11 +58,11 @@ void GraphBuilder::createBlocks() {
     PC pc = i.popFront();
     if (isCF(pc) && !i.empty()) createBlock(i.front());
     if (isSwitch(*pc)) {
-      foreachSwitchTarget((Opcode*)pc, [&](Offset& o) {
+      foreachSwitchTarget((Op*)pc, [&](Offset& o) {
         createBlock(pc + o);
       });
     } else {
-      Offset target = instrJumpTarget(bc, pc - bc);
+      Offset target = instrJumpTarget((Op*)bc, pc - bc);
       if (target != InvalidAbsoluteOffset) createBlock(target);
     }
   }
@@ -82,11 +82,11 @@ void GraphBuilder::linkBlocks() {
     if (isCF(pc)) {
       if (isSwitch(*pc)) {
         int i = 0;
-        foreachSwitchTarget((Opcode*)pc, [&](Offset& o) {
+        foreachSwitchTarget((Op*)pc, [&](Offset& o) {
           succs(block)[i++] = at(pc + o);
         });
       } else {
-        Offset target = instrJumpTarget(bc, pc - bc);
+        Offset target = instrJumpTarget((Op*)bc, pc - bc);
         if (target != InvalidAbsoluteOffset) {
           assert(numSuccBlocks(block) > 0);
           succs(block)[numSuccBlocks(block) - 1] = at(target);

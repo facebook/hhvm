@@ -564,12 +564,42 @@ enum SetOpOp {
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF) \
 
-enum Op {
-#define O(name, imm, pop, push, flags) Op##name,
+enum class Op : uint8_t {
+#define O(name, ...) name,
   OPCODES
 #undef O
-  Op_count
 };
+auto constexpr Op_count = uint8_t(Op::HighInvalid) + 1;
+
+/* Also put Op* in the enclosing namespace, to avoid having to change
+ * every existing usage site of the enum values. */
+#define O(name, ...) UNUSED auto constexpr Op##name = Op::name;
+  OPCODES
+#undef O
+
+inline constexpr bool operator<(Op a, Op b) { return uint8_t(a) < uint8_t(b); }
+inline constexpr bool operator>(Op a, Op b) { return uint8_t(a) > uint8_t(b); }
+inline constexpr bool operator<=(Op a, Op b) {
+  return uint8_t(a) <= uint8_t(b);
+}
+inline constexpr bool operator>=(Op a, Op b) {
+  return uint8_t(a) >= uint8_t(b);
+}
+
+inline bool isValidOpcode(Op op) {
+  return op > OpLowInvalid && op < OpHighInvalid;
+}
+
+inline Op toOp(Opcode o) {
+  Op op = Op(o);
+  assert(isValidOpcode(op));
+  return op;
+}
+
+inline bool operator==(Op a, Opcode b) { return a == toOp(b); }
+inline bool operator==(Opcode a, Op b) { return b == a; }
+inline bool operator!=(Op a, Opcode b) { return !(a == b); }
+inline bool operator!=(Opcode a, Op b) { return b != a; }
 
 const MInstrInfo& getMInstrInfo(Op op);
 
@@ -684,26 +714,26 @@ private:
 };
 
 // Must be an opcode that actually has an ImmVector.
-ImmVector getImmVector(const Opcode* opcode);
+ImmVector getImmVector(const Op* opcode);
 
 /* Some decoding helper functions. */
-int numImmediates(Opcode opcode);
-ArgType immType(Opcode opcode, int idx);
-int immSize(const Opcode* opcode, int idx);
-bool immIsVector(Opcode opcode, int idx);
-bool hasImmVector(Opcode opcode);
-inline bool isTypePred(const Opcode op) {
+int numImmediates(Op opcode);
+ArgType immType(Op opcode, int idx);
+int immSize(const Op* opcode, int idx);
+bool immIsVector(Op opcode, int idx);
+bool hasImmVector(Op opcode);
+inline bool isTypePred(const Op op) {
   return op >= OpIsNullC && op <= OpIsObjectL;
 }
-int instrLen(const Opcode* opcode);
-InstrFlags instrFlags(Opcode opcode);
-int numSuccs(const Opcode* opcode);
-bool pushesActRec(Opcode opcode);
+int instrLen(const Op* opcode);
+InstrFlags instrFlags(Op opcode);
+int numSuccs(const Op* opcode);
+bool pushesActRec(Op opcode);
 
 // The returned struct has normalized variable-sized immediates
-ArgUnion getImm(const Opcode* opcode, int idx);
+ArgUnion getImm(const Op* opcode, int idx);
 // Don't use this with variable-sized immediates!
-ArgUnion* getImmPtr(const Opcode* opcode, int idx);
+ArgUnion* getImmPtr(const Op* opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
@@ -737,17 +767,17 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
-std::string instrToString(const Opcode* it, const Unit* u = nullptr);
-const char* opcodeToName(Opcode op);
+std::string instrToString(const Op* it, const Unit* u = nullptr);
+const char* opcodeToName(Op op);
 
 // returns a pointer to the location within the bytecode containing the jump
 //   Offset, or NULL if the instruction cannot jump. Note that this offset is
 //   relative to the current instruction.
-Offset* instrJumpOffset(Opcode* instr);
+Offset* instrJumpOffset(Op* instr);
 
 // returns absolute address of target, or InvalidAbsoluteOffset if instruction
 //   cannot jump
-Offset instrJumpTarget(const Opcode* instrs, Offset pos);
+Offset instrJumpTarget(const Op* instrs, Offset pos);
 
 struct StackTransInfo {
   enum class Kind {
@@ -760,26 +790,28 @@ struct StackTransInfo {
   int pos;
 };
 
-bool isValidOpcode(Opcode opcode);
-bool instrIsControlFlow(Opcode opcode);
-bool instrIsNonCallControlFlow(Opcode opcode);
-bool instrAllowsFallThru(Opcode opcode);
-bool instrReadsCurrentFpi(Opcode opcode);
+bool instrIsControlFlow(Op opcode);
+bool instrIsNonCallControlFlow(Op opcode);
+bool instrAllowsFallThru(Op opcode);
+bool instrReadsCurrentFpi(Op opcode);
 
-inline bool isFPush(Opcode opcode) {
+inline bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }
 
-inline bool isFCallStar(Opcode opcode) {
+inline bool isFCallStar(Op opcode) {
   return opcode == OpFCall || opcode == OpFCallArray;
 }
 
-inline bool isSwitch(Opcode op) {
+inline bool isSwitch(Op op) {
   return op == OpSwitch || op == OpSSwitch;
+}
+inline bool isSwitch(Opcode op) {
+  return isSwitch(toOp(op));
 }
 
 template<typename L>
-void foreachSwitchTarget(Opcode* op, L func) {
+void foreachSwitchTarget(Op* op, L func) {
   assert(isSwitch(*op));
   bool isStr = readData<Opcode>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);
@@ -800,10 +832,10 @@ void foreachSwitchString(Opcode* op, L func) {
   }
 }
 
-int instrNumPops(const Opcode* opcode);
-int instrNumPushes(const Opcode* opcode);
-StackTransInfo instrStackTransInfo(const Opcode* opcode);
-int instrSpToArDelta(const Opcode* opcode);
+int instrNumPops(const Op* opcode);
+int instrNumPushes(const Op* opcode);
+StackTransInfo instrStackTransInfo(const Op* opcode);
+int instrSpToArDelta(const Op* opcode);
 
 inline bool
 mcodeIsLiteral(MemberCode mcode) {
@@ -835,7 +867,15 @@ mcodeMaybeVectorKey(MemberCode mcode) {
     return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 
-
 }
+
+namespace std { namespace tr1 {
+template<>
+struct hash<HPHP::Op> {
+  size_t operator()(HPHP::Op op) const {
+    return HPHP::hash_int64(uint8_t(op));
+  }
+};
+} }
 
 #endif

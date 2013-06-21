@@ -13,10 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/base/stats.h"
+
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 namespace Stats {
@@ -68,7 +70,7 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   }
 }
 
-void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
+void emitIncTranslOp(X64Assembler& a, Op opc, bool force) {
   if (!force && !enableInstrCount()) return;
   emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1,
           CC_None, force);

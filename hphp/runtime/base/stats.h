@@ -217,28 +217,32 @@ inline void inc(StatCounter stat, int n = 1) {
   }
 }
 
-inline StatCounter opcodeToStatCounter(Opcode opc) {
+inline StatCounter opcodeToStatCounter(Op opc) {
   assert(OpLowInvalid == 0);
-  return StatCounter(Instr_InterpBBLowInvalid + STATS_PER_OPCODE * opc);
+  return StatCounter(Instr_InterpBBLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-inline void incOp(Opcode opc) {
+inline void incOp(Op opc) {
   inc(opcodeToStatCounter(opc));
 }
 
-inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
+inline StatCounter opcodeToTranslStatCounter(Op opc) {
   assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
+  return StatCounter(Instr_TranslLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
+inline StatCounter opcodeToIRPreStatCounter(Op opc) {
   assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
+  return StatCounter(Instr_TranslIRPreLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
+inline StatCounter opcodeToIRPostStatCounter(Op opc) {
   assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
+  return StatCounter(Instr_TranslIRPostLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
 // Both emitIncs use r10.
@@ -254,7 +258,7 @@ inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
   emitInc(a, &tl_counters[0], stat, n, cc, force);
 }
 
-extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc,
+extern void emitIncTranslOp(Transl::X64Assembler& a, Op opc,
                             bool force = false);
 extern void init();
 extern void dump();

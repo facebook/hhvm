@@ -33,7 +33,7 @@ bool isFuncEntry(const Func* func, Offset off) {
 int numInstrs(PC start, PC end) {
   int ret{};
   for (; start != end; ++ret) {
-    start += instrLen(start);
+    start += instrLen((Op*)start);
   }
   return ret;
 }

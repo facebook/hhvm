@@ -1028,7 +1028,7 @@ OpcodeParserMap opcode_parsers;
 #define O(name, imm, pop, push, flags)                            \
   void parse_opcode_##name(AsmState& as) {                        \
     UNUSED int64_t immIVA = -1;                                   \
-    UNUSED const Opcode thisOpcode = Op##name;                    \
+    UNUSED auto const thisOpcode = Op::name;                      \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();            \
     std::vector<std::pair<std::string, Offset> > labelJumps;      \
                                                                   \

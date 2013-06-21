@@ -93,12 +93,12 @@ void RegionDesc::Block::checkInvariants() const {
   for (int i = 1; i < length(); ++i) {
     if (i != length() - 1) {
       auto const pc = unit()->at(keysInRange.back().offset());
-      if (instrFlags(*pc) & TF) {
+      if (instrFlags(toOp(*pc)) & TF) {
         FTRACE(1, "Bad block: {}\n", show(*this));
         assert(!"Block may not contain non-fallthrough instruction unless "
                 "they are last");
       }
-      if (instrIsNonCallControlFlow(*pc)) {
+      if (instrIsNonCallControlFlow(toOp(*pc))) {
         FTRACE(1, "Bad block: {}\n", show(*this));
         assert(!"Block may not contain control flow instructions unless "
                 "they are last");
@@ -324,7 +324,7 @@ std::string show(const RegionDesc::Block& b) {
       "    ",
       skIter.offset(),
       "  ",
-      instrToString(b.unit()->at(skIter.offset()), b.unit()),
+      instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
       '\n',
       &ret
     );

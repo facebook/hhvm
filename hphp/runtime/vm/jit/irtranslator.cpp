@@ -136,7 +136,7 @@ Translator::translateMod(const NormalizedInstruction& i) {
 
 void
 Translator::translateBinaryArithOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   switch (op) {
 #define CASE(OpBc)                                          \
     case Op ## OpBc:   HHIR_EMIT(OpBc);
@@ -156,7 +156,7 @@ Translator::translateBinaryArithOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateSameOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   assert(op == OpSame || op == OpNSame);
   if (op == OpSame) {
     HHIR_EMIT(Same);
@@ -167,7 +167,7 @@ Translator::translateSameOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateEqOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   assert(op == OpEq || op == OpNeq);
   if (op == OpEq) {
     HHIR_EMIT(Eq);
@@ -178,7 +178,7 @@ Translator::translateEqOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateLtGtOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   assert(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
   assert(i.inputs.size() == 2);
   assert(i.inputs[0]->outerType() != KindOfRef);
@@ -203,7 +203,7 @@ Translator::translateLtGtOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateUnaryBooleanOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   assert(op == OpCastBool || op == OpEmptyL);
   if (op == OpCastBool) {
     HHIR_EMIT(CastBool);
@@ -214,7 +214,7 @@ Translator::translateUnaryBooleanOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateBranchOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   assert(op == OpJmpZ || op == OpJmpNZ);
   assert(!i.next);
 
@@ -227,8 +227,8 @@ Translator::translateBranchOp(const NormalizedInstruction& i) {
 
 void
 Translator::translateCGetL(const NormalizedInstruction& i) {
-  const DEBUG_ONLY Opcode op = i.op();
-  assert(op == OpFPassL || OpCGetL);
+  DEBUG_ONLY auto const op = i.op();
+  assert(op == OpFPassL || op == OpCGetL);
   const vector<DynLocation*>& inputs = i.inputs;
   assert(inputs.size() == 1);
   assert(inputs[0]->isLocal());
@@ -252,7 +252,7 @@ void
 Translator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   DEBUG_ONLY const int rhsIdx  = 0;
   const int locIdx  = 1;
-  const Opcode op = ni.op();
+  auto const op = ni.op();
   assert(op == OpSetL || op == OpBindL);
   assert(ni.inputs.size() == 2);
   assert((op == OpBindL) ==
@@ -735,7 +735,7 @@ void
 Translator::translateCheckTypeOp(const NormalizedInstruction& ni) {
   assert(ni.inputs.size() == 1);
 
-  const Opcode op = ni.op();
+  auto const op = ni.op();
   const int    off = ni.inputs[0]->location.offset;
   switch (op) {
     case OpIssetL:    HHIR_EMIT(IssetL, off);
@@ -755,8 +755,8 @@ Translator::translateCheckTypeOp(const NormalizedInstruction& ni) {
     case OpIsObjectC: HHIR_EMIT(IsObjectC);
     // Note: for IsObject*, we need to emit some kind of
     // call to ObjectData::isResource or something.
+    default:          not_reached();
   }
-  NOT_REACHED();
 }
 
 void
@@ -915,7 +915,7 @@ Translator::translateFPushFuncD(const NormalizedInstruction& i) {
 
 void
 Translator::translateFPassCOp(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
   if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {
     // These cases might have to raise a warning or an error
     HHIR_UNIMPLEMENTED(FPassCW_FPassCE_byref);
@@ -1081,18 +1081,18 @@ bool shouldIRInline(const Func* curFunc,
 
   // Little pattern recognition helpers:
   const NormalizedInstruction* cursor;
-  Opcode current;
+  Op current;
   auto resetCursor = [&] {
     cursor = callee.m_instrStream.first;
     current = cursor->op();
   };
-  auto next = [&]() -> Opcode {
+  auto next = [&]() -> Op {
     auto op = cursor->op();
     cursor = cursor->next;
     current = cursor->op();
     return op;
   };
-  auto nextIf = [&](Opcode op) -> bool {
+  auto nextIf = [&](Op op) -> bool {
     if (current != op) return false;
     next();
     return true;
@@ -1485,15 +1485,15 @@ Translator::translateInstrDefault(const NormalizedInstruction& i) {
   OPCODES
 #undef O
   };
-  const Opcode op = i.op();
+  auto const op = i.op();
 
-  HHIR_UNIMPLEMENTED_OP(opNames[op]);
+  HHIR_UNIMPLEMENTED_OP(opNames[uint8_t(op)]);
   assert(false);
 }
 
 void
 Translator::translateInstrWork(const NormalizedInstruction& i) {
-  const Opcode op = i.op();
+  auto const op = i.op();
 
   switch (op) {
 #define CASE(iNm)                               \
@@ -1510,7 +1510,7 @@ Translator::translateInstrWork(const NormalizedInstruction& i) {
   }
 }
 
-static bool isPop(Opcode opc) {
+static bool isPop(Op opc) {
   return opc == OpPopC || opc == OpPopR;
 }
 

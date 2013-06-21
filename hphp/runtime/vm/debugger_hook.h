@@ -111,12 +111,12 @@ public:
   PCFilter() {}
 
   // Filter function to exclude opcodes when adding ranges.
-  typedef std::function<bool(Opcode)> OpcodeFilter;
+  typedef std::function<bool(Op)> OpcodeFilter;
 
   // Add/remove offsets, either individually or by range. By default allow all
   // opcodes.
   void addRanges(const Unit* unit, const OffsetRangeVec& offsets,
-                 OpcodeFilter isOpcodeAllowed = [] (Opcode) { return true; });
+                 OpcodeFilter isOpcodeAllowed = [] (Op) { return true; });
   void removeOffset(const Unit* unit, Offset offset);
 
   // Add/remove/check explicit PCs.

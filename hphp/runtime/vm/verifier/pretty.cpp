@@ -29,13 +29,13 @@ namespace HPHP {
 namespace Verifier {
 
 void printInstr(const Unit* unit, PC pc) {
-  Opcode* op = (Opcode*)pc;
+  auto* op = (Op*)pc;
   std::cout << "  " << std::setw(4) << (pc - unit->entry()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
                (isFF(pc) ? "F":" ") <<
                std::setw(3) << instrLen(op) <<
-               " " << instrToString(op, unit) << std::endl; 
+               " " << instrToString(op, unit) << std::endl;
 }
 
 std::string blockToString(const Block* b, const Graph* g, const Unit* u) {

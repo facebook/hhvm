@@ -340,7 +340,7 @@ public:
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
   void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
-  void popSymbolicLocal(Opcode opcode, int arg = -1, int pos = -1);
+  void popSymbolicLocal(Op opcode, int arg = -1, int pos = -1);
   void popEvalStackLMany();
   void popEvalStackMany(int len, char symFlavor);
   void popEvalStackCVMany(int len);
@@ -355,8 +355,8 @@ public:
   void restoreJumpTargetEvalStack();
   void recordCall();
   bool isJumpTarget(Offset target);
-  void setPrevOpcode(Opcode op) { m_prevOpcode = op; }
-  Opcode getPrevOpcode() const { return m_prevOpcode; }
+  void setPrevOpcode(Op op) { m_prevOpcode = op; }
+  Op getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
     return (m_ue.bcPos() == m_curFunc->base()
             || isJumpTarget(m_ue.bcPos())
@@ -519,7 +519,7 @@ private:
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
 
-  Opcode m_prevOpcode;
+  Op m_prevOpcode;
 
   std::deque<PostponedMeth> m_postponedMeths;
   std::deque<PostponedCtor> m_postponedCtors;

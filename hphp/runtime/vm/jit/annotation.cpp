@@ -107,7 +107,7 @@ static void recordActRecPush(NormalizedInstruction& i,
   assert(name->isStatic());
   assert(sk.offset() == fpi->m_fpushOff);
   auto const fcall = SrcKey { curFunc(), fpi->m_fcallOff };
-  assert(isFCallStar(*unit->at(fcall.offset())));
+  assert(isFCallStar(toOp(*unit->at(fcall.offset()))));
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);
     bool magic = false;
@@ -126,7 +126,7 @@ static void recordActRecPush(NormalizedInstruction& i,
   } else {
     // It's not enough to remember the function name; we also need to encode
     // the number of arguments and current flag disposition.
-    int numArgs = getImm(unit->at(sk.offset()), 0).u_IVA;
+    int numArgs = getImm((Op*)unit->at(sk.offset()), 0).u_IVA;
     recordNameAndArgs(fcall, name, numArgs);
   }
 }

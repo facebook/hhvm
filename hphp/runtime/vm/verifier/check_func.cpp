@@ -76,7 +76,7 @@ class FuncChecker {
                    const char* regionName, Offset base, Offset past,
                    bool check_instrs = true);
   bool checkSection(bool main, const char* name, Offset base, Offset past);
-  bool checkImmediates(const char* name, const Opcode* instr);
+  bool checkImmediates(const char* name, const Op* instr);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
@@ -246,14 +246,14 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   PC bc = unit()->entry();
   // Find instruction boundaries and branch instructions.
   for (InstrRange i(at(base), at(past)); !i.empty();) {
-    if (!checkImmediates(name, i.front())) return false;
+    if (!checkImmediates(name, (Op*)i.front())) return false;
     PC pc = i.popFront();
     m_instrs.set(offset(pc) - m_func->base());
-    if (isSwitch(*pc) ||
-        instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (*pc == OpSwitch && getImm(pc, 2).u_IVA != 0) {
-        int64_t switchBase = getImm(pc, 1).u_I64A;
-        int32_t len = getImmVector(pc).size();
+    if (isSwitch(toOp(*pc)) ||
+        instrJumpTarget((Op*)bc, offset(pc)) != InvalidAbsoluteOffset) {
+      if (*pc == OpSwitch && getImm((Op*)pc, 2).u_IVA != 0) {
+        int64_t switchBase = getImm((Op*)pc, 1).u_I64A;
+        int32_t len = getImmVector((Op*)pc).size();
         if (len <= 2) {
           error("Bounded switch must have a vector of length > 2 [%d:%d]\n",
                 base, past);
@@ -269,14 +269,14 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
       branches.push_back(pc);
     }
     if (i.empty()) {
-      if (offset(pc + instrLen(pc)) != past) {
+      if (offset(pc + instrLen((Op*)pc)) != past) {
         error("Last instruction in %s at %d overflows [%d:%d]\n",
                name, offset(pc), base, past);
         ok = false;
       }
       if (!isTF(pc)) {
         error("Last instruction in %s is not teriminal %d:%s\n",
-               name, offset(pc), instrToString(pc, unit()).c_str());
+               name, offset(pc), instrToString((Op*)pc, unit()).c_str());
         ok = false;
       } else {
         if (isRet(pc) && !is_main) {
@@ -294,12 +294,12 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   for (Range<BranchList> i(branches); !i.empty();) {
     PC branch = i.popFront();
     if (isSwitch(*branch)) {
-      foreachSwitchTarget((Opcode*)branch, [&](Offset& o) {
+      foreachSwitchTarget((Op*)branch, [&](Offset& o) {
         ok &= checkOffset("switch target", offset(branch + o),
                           name, base, past);
       });
     } else {
-      Offset target = instrJumpTarget(bc, offset(branch));
+      Offset target = instrJumpTarget((Op*)bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
     }
   }
@@ -323,7 +323,7 @@ Offset decodeOffset(PC* ppc) {
  */
 class ImmVecRange {
  public:
-  explicit ImmVecRange(const Opcode* instr) : v(getImmVector(instr)),
+  explicit ImmVecRange(const Op* instr) : v(getImmVector(instr)),
       vecp(v.vec() + 1), // skip location code
       loc(v.locationCode()),
       loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1) {
@@ -392,10 +392,10 @@ bool FuncChecker::checkString(PC pc, Id id) {
  * Check instruction and its immediates, return false if we can't continue
  * because we don't know the length of this instruction
  */
-bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
+bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
   if (!isValidOpcode(*instr)) {
     error("Invalid opcode %d in section %s at offset %d\n",
-           *instr, name, offset(instr));
+           uint8_t(*instr), name, offset(PC(instr)));
     return false;
   }
   bool ok = true;
@@ -409,12 +409,12 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       if (vr.size() < 2) {
         // vector must at least have a LocationCode and 1+ MemberCodes
         error("invalid vector size %d at %d\n",
-               vr.size(), offset(instr));
+               vr.size(), offset((PC)instr));
         return false;
       } else {
         if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
           error("invalid location code %d in vector at %d\n",
-                 (int)vr.loc, offset(instr));
+                 (int)vr.loc, offset((PC)instr));
           ok = false;
         }
         if (vr.loc_local != -1) checkLocal(pc, vr.loc_local);
@@ -464,6 +464,8 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
                  k, offset((PC)instr));
           ok = false;
         }
+      default:
+        break;
       }
       break;
     }
@@ -498,7 +500,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     }
     case BA: // bytecode address
       // we check branch offsets in checkSection(). ignore here.
-      assert(instrJumpTarget(unit()->entry(), offset((PC)instr)) !=
+      assert(instrJumpTarget((Op*)unit()->entry(), offset((PC)instr)) !=
              InvalidAbsoluteOffset);
       break;
     case OA: { // secondary opcode
@@ -558,7 +560,7 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
  *   [uint8 MemberCode; [IVA imm for member]]
  */
 const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
-  ImmVecRange vr(pc);
+  ImmVecRange vr((Op*)pc);
   int n = 0;
   if (vr.loc_local != -1 ||
       vr.loc == LH ||
@@ -579,7 +581,7 @@ const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
   }
   if (vr.loc == LSC || vr.loc == LSL) m_tmp_sig[n++] = AV; // extra classref
   if (rhs_flavor != NOV) m_tmp_sig[n++] = rhs_flavor; // extra rhs value for Set
-  assert(n == instrNumPops(pc));
+  assert(n == instrNumPops((Op*)pc));
   return m_tmp_sig;
 }
 
@@ -613,7 +615,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef ONE
   #undef NOV
   };
-  switch (Op(*pc)) {
+  switch (toOp(*pc)) {
   case OpCGetM:     // ONE(LA),      LMANY(), ONE(CV)
   case OpVGetM:     // ONE(LA),      LMANY(), ONE(VV)
   case OpIssetM:    // ONE(LA),      LMANY(), ONE(CV)
@@ -633,28 +635,28 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return vectorSig(pc, RV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
     return m_tmp_sig;
   case OpFCallBuiltin: //TWO(IVA, SA) CVMANY,  ONE(RV)
   case OpCreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
   case OpNewTuple:  // ONE(IVA),     CMANY,   ONE(CV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
   default:
-    return &inputSigs[*pc][0];
+    return &inputSigs[uint8_t(toOp(*pc))][0];
   }
 }
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
-  StackTransInfo info = instrStackTransInfo(pc);
+  StackTransInfo info = instrStackTransInfo((Op*)pc);
   int min = cur->fpilen > 0 ? cur->fpi[cur->fpilen - 1].stkmin : 0;
   if (info.numPops > 0 && cur->stklen - info.numPops < min) {
     reportStkUnderflow(b, *cur, pc);
@@ -666,7 +668,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 }
 
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
-  if (isRet(pc) || Op(*pc) == OpUnwind) {
+  if (isRet(pc) || toOp(*pc) == OpUnwind) {
     if (cur->stklen != 0) {
       error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
@@ -683,9 +685,9 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  if (isFCallStar(Op(*pc))) {
+  if (isFCallStar(toOp(*pc))) {
     --cur->fpilen;
-    int call_params = Op(*pc) == OpFCall ? getImmIva(pc) : 1;
+    int call_params = toOp(*pc) == OpFCall ? getImmIva(pc) : 1;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
@@ -728,14 +730,15 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-bool FuncChecker::checkIter(State* cur, PC pc) {
+bool FuncChecker::checkIter(State* cur, PC const pc) {
   assert(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
-  if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitK ||
-      Op(*pc) == OpWIterInit || Op(*pc) == OpWIterInitK ||
-      Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK ||
-      Op(*pc) == OpDecodeCufIter) {
+  auto op = toOp(*pc);
+  if (op == OpIterInit || op == OpIterInitK ||
+      op == OpWIterInit || op == OpWIterInitK ||
+      op == OpMIterInit || op == OpMIterInitK ||
+      op == OpDecodeCufIter) {
     if (cur->iters[id]) {
       error(
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
@@ -746,9 +749,9 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
       error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (Op(*pc) == OpIterFree ||
-        Op(*pc) == OpMIterFree ||
-        Op(*pc) == OpCIterFree) {
+    if (op == OpIterFree ||
+        op == OpMIterFree ||
+        op == OpCIterFree) {
       cur->iters[id] = false;
     }
   }
@@ -788,7 +791,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef NOV
   };
   bool ok = true;
-  StackTransInfo info = instrStackTransInfo(pc);
+  StackTransInfo info = instrStackTransInfo((Op*)pc);
   if (info.kind == StackTransInfo::Kind::InsertMid) {
     int index = cur->stklen - info.pos - 1;
     if (index < 0) {
@@ -797,7 +800,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
     memmove(&cur->stk[index + 1], &cur->stk[index],
            (info.pos + 1) * sizeof(*cur->stk));
-    cur->stk[index] = outputSigs[*pc][0];
+    cur->stk[index] = outputSigs[uint8_t(toOp(*pc))][0];
     cur->stklen++;
   } else {
     int pushes = info.numPushes;
@@ -805,8 +808,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
     for (int i = 0; i < pushes; ++i)
-      outs[i] = outputSigs[*pc][i];
-    if (isFPush(Op(*pc))) {
+      outs[i] = outputSigs[uint8_t(toOp(*pc))][i];
+    if (isFPush(toOp(*pc))) {
       if (cur->fpilen >= maxFpi()) {
         error("%s", "more FPush* instructions than FPI regions\n");
         return false;
@@ -909,7 +912,7 @@ bool FuncChecker::checkFlow() {
       if (m_verbose) {
         std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                      stateToString(cur) << " " <<
-                     instrToString(pc, unit()) << std::endl;
+                     instrToString((Op*)pc, unit()) << std::endl;
       }
       ok &= checkInputs(&cur, pc, b);
       if (isTF(pc)) ok &= checkTerminal(&cur, pc);

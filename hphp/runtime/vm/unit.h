@@ -412,6 +412,9 @@ struct Unit {
     assert(op >= m_bc && op <= (m_bc + m_bclen));
     return op - m_bc;
   }
+  Offset offsetOf(const Op* op) const {
+    return offsetOf(reinterpret_cast<const Opcode*>(op));
+  }
 
   const StringData* filepath() const {
     assert(m_filepath);
@@ -607,9 +610,9 @@ public:
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
   bool getOffsetRange(Offset pc, OffsetRange& range) const;
 
-  Opcode getOpcode(size_t instrOffset) const {
+  Op getOpcode(size_t instrOffset) const {
     assert(instrOffset < m_bclen);
-    return (Opcode)m_bc[instrOffset];
+    return toOp(m_bc[instrOffset]);
   }
 
   /*

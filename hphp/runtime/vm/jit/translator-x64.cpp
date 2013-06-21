@@ -1782,7 +1782,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
   assert(func->numIterators() == 0 && func->isBuiltin());
   assert(func->numLocals() == func->numParams());
   assert(*func->getEntry() == OpNativeImpl);
-  assert(instrLen(func->getEntry()) == func->past() - func->base());
+  assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no
                                        // non-arg locals
@@ -2496,7 +2496,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     const FPIEnt* fe = curFunc()->findPrecedingFPI(
       curUnit()->offsetOf(vmpc()));
     vmpc() = curUnit()->at(fe->m_fcallOff);
-    assert(isFCallStar(*vmpc()));
+    assert(isFCallStar(toOp(*vmpc())));
     raise_error("Stack overflow");
     NOT_REACHED();
   }
@@ -2711,24 +2711,6 @@ TranslatorX64::getInputsIntoXMMRegs(const NormalizedInstruction& ni,
   intoXmm(r, rr, rxmm);
 }
 
-void
-TranslatorX64::binaryMixedArith(const NormalizedInstruction& i,
-                           Opcode op,
-                           PhysReg srcReg,
-                           PhysReg srcDestReg) {
-  getInputsIntoXMMRegs(i, srcReg, srcDestReg, xmm1, xmm0);
-  switch(op) {
-#define CASEIMM(OpBc, x64op)                                       \
-    case OpBc:    a.  x64op ##sd_xmm_xmm(xmm1, xmm0); break
-    CASEIMM(OpAdd, add);
-    CASEIMM(OpSub, sub);
-    CASEIMM(OpMul, mul);
-#undef CASEIMM
-    default: not_reached();
-  }
-  a.   mov_xmm_reg64(xmm0, srcDestReg);
-}
-
 #define O(opcode, imm, pusph, pop, flags) \
 /**
  * The interpOne methods saves m_pc, m_fp, and m_sp ExecutionContext,
@@ -2741,7 +2723,7 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   SKTRACE(5, SrcKey(curFunc(), vmpc()), "%40s %p %p\n",                 \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
-  assert(*vmpc() == Op ## opcode);                                      \
+  assert(toOp(*vmpc()) == Op::opcode);                                  \
   VMExecutionContext* ec = g_vmContext;                                 \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   INC_TPC(interp_one)                                                   \
@@ -3090,15 +3072,17 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
     func(CheckTypeOp, t, i)
 
 bool
-TranslatorX64::dontGuardAnyInputs(Opcode op) {
+TranslatorX64::dontGuardAnyInputs(Op op) {
   switch (op) {
 #define CASE(iNm) case Op ## iNm:
 #define NOOP(a, b, c)
   INSTRS
     PSEUDOINSTR_DISPATCH(NOOP)
     return false;
+
+  default:
+    return true;
   }
-  return true;
 #undef NOOP
 #undef CASE
 }
@@ -3206,7 +3190,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   }
   for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
     TRACE(3, "  %6d: %s\n", ni->source.offset(),
-      instrToString(ni->pc()).c_str());
+      instrToString((Op*)ni->pc()).c_str());
     if (ni->breaksTracelet) break;
   }
   TRACE(3, "----------------------------------------------\n");

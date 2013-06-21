@@ -23,11 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool isValidOpcode(Opcode op) {
-  return op > OpLowInvalid && op < OpHighInvalid;
-}
-
-int numImmediates(Opcode opcode) {
+int numImmediates(Op opcode) {
   assert(isValidOpcode(opcode));
   static const int8_t values[] = {
 #define NA         0
@@ -44,10 +40,10 @@ int numImmediates(Opcode opcode) {
 #undef THREE
 #undef FOUR
   };
-  return values[opcode];
+  return values[uint8_t(opcode)];
 }
 
-ArgType immType(const Opcode opcode, int idx) {
+ArgType immType(const Op opcode, int idx) {
   assert(isValidOpcode(opcode));
   assert(idx >= 0 && idx < numImmediates(opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
@@ -107,16 +103,17 @@ ArgType immType(const Opcode opcode, int idx) {
 #undef THREE
 #undef FOUR
   };
+  auto opInt = uint8_t(opcode);
   switch (idx) {
-    case 0: return (ArgType)arg0Types[opcode];
-    case 1: return (ArgType)arg1Types[opcode];
-    case 2: return (ArgType)arg2Types[opcode];
-    case 3: return (ArgType)arg3Types[opcode];
+    case 0: return (ArgType)arg0Types[opInt];
+    case 1: return (ArgType)arg1Types[opInt];
+    case 2: return (ArgType)arg2Types[opInt];
+    case 3: return (ArgType)arg3Types[opInt];
     default: assert(false); return (ArgType)-1;
   }
 }
 
-int immSize(const Opcode* opcode, int idx) {
+int immSize(const Op* opcode, int idx) {
   assert(idx >= 0 && idx < numImmediates(*opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t argTypeToSizes[] = {
@@ -162,12 +159,12 @@ int immSize(const Opcode* opcode, int idx) {
   }
 }
 
-bool immIsVector(Opcode opcode, int idx) {
+bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
   return (type == MA || type == BLA || type == SLA);
 }
 
-bool hasImmVector(Opcode opcode) {
+bool hasImmVector(Op opcode) {
   const int num = numImmediates(opcode);
   for (int i = 0; i < num; ++i) {
     if (immIsVector(opcode, i)) return true;
@@ -175,8 +172,8 @@ bool hasImmVector(Opcode opcode) {
   return false;
 }
 
-ArgUnion getImm(const Opcode* opcode, int idx) {
-  const Opcode* p = opcode + 1;
+ArgUnion getImm(const Op* opcode, int idx) {
+  const Op* p = opcode + 1;
   assert(idx >= 0 && idx < numImmediates(*opcode));
   ArgUnion retval;
   retval.u_NA = 0;
@@ -188,7 +185,7 @@ ArgUnion getImm(const Opcode* opcode, int idx) {
   always_assert(cursor == idx);
   ArgType type = immType(*opcode, idx);
   if (type == IVA || type == HA || type == IA) {
-    retval.u_IVA = decodeVariableSizeImm(&p);
+    retval.u_IVA = decodeVariableSizeImm((const uint8_t**)&p);
   } else if (!immIsVector(*opcode, cursor)) {
     memcpy(&retval.bytes, p, immSize(opcode, idx));
   }
@@ -196,11 +193,11 @@ ArgUnion getImm(const Opcode* opcode, int idx) {
   return retval;
 }
 
-ArgUnion* getImmPtr(const Opcode* opcode, int idx) {
+ArgUnion* getImmPtr(const Op* opcode, int idx) {
   assert(immType(*opcode, idx) != IVA);
   assert(immType(*opcode, idx) != HA);
   assert(immType(*opcode, idx) != IA);
-  const Opcode* ptr = opcode + 1;
+  const Op* ptr = opcode + 1;
   for (int i = 0; i < idx; i++) {
     ptr += immSize(opcode, i);
   }
@@ -249,25 +246,26 @@ void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
   out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
 }
 
-int instrLen(const Opcode* opcode) {
+int instrLen(const Op* opcode) {
+  auto op = *opcode;
   int len = 1;
-  int nImm = numImmediates(*opcode);
+  int nImm = numImmediates(op);
   for (int i = 0; i < nImm; i++) {
     len += immSize(opcode, i);
   }
   return len;
 }
 
-InstrFlags instrFlags(Opcode opcode) {
+InstrFlags instrFlags(Op opcode) {
   static const InstrFlags instrFlagsData[] = {
 #define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
     OPCODES
 #undef O
   };
-  return instrFlagsData[opcode];
+  return instrFlagsData[uint8_t(opcode)];
 }
 
-Offset* instrJumpOffset(Opcode* instr) {
+Offset* instrJumpOffset(Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
 #define MA 0
@@ -305,7 +303,7 @@ Offset* instrJumpOffset(Opcode* instr) {
   };
 
   assert(!isSwitch(*instr));
-  int mask = jumpMask[*instr];
+  int mask = jumpMask[uint8_t(*instr)];
   if (mask == 0) {
     return nullptr;
   }
@@ -322,8 +320,8 @@ Offset* instrJumpOffset(Opcode* instr) {
   return &getImmPtr(instr, immNum)->u_BA;
 }
 
-Offset instrJumpTarget(const Opcode* instrs, Offset pos) {
-  Offset* offset = instrJumpOffset(const_cast<Opcode*>(instrs + pos));
+Offset instrJumpTarget(const Op* instrs, Offset pos) {
+  Offset* offset = instrJumpOffset(const_cast<Op*>(instrs + pos));
 
   if (!offset) {
     return InvalidAbsoluteOffset;
@@ -336,16 +334,16 @@ Offset instrJumpTarget(const Opcode* instrs, Offset pos) {
  * Return the number of successor-edges including fall-through paths but not
  * implicit exception paths.
  */
-int numSuccs(const Opcode* instr) {
+int numSuccs(const Op* instr) {
   if (!instrIsControlFlow(*instr)) return 1;
   if ((instrFlags(*instr) & TF) != 0) {
     if (isSwitch(*instr)) {
       return *(int*)(instr + 1);
     }
-    if (Op(*instr) == OpJmp) return 1;
+    if (*instr == OpJmp) return 1;
     return 0;
   }
-  if (instrJumpOffset(const_cast<Opcode*>(instr))) return 2;
+  if (instrJumpOffset(const_cast<Op*>(instr))) return 2;
   return 1;
 }
 
@@ -354,7 +352,7 @@ int numSuccs(const Opcode* instr) {
  * for a given push/pop instruction. For peek/poke instructions, this
  * function returns 0.
  */
-int instrNumPops(const Opcode* opcode) {
+int instrNumPops(const Op* opcode) {
   static const int8_t numberOfPops[] = {
 #define NOV 0
 #define ONE(...) 1
@@ -384,7 +382,7 @@ int instrNumPops(const Opcode* opcode) {
 #undef CMANY
 #undef O
   };
-  int n = numberOfPops[*opcode];
+  int n = numberOfPops[uint8_t(*opcode)];
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
@@ -409,7 +407,7 @@ int instrNumPops(const Opcode* opcode) {
  * for a given push/pop instruction. For peek/poke instructions or
  * InsertMid instructions, this function returns 0.
  */
-int instrNumPushes(const Opcode* opcode) {
+int instrNumPushes(const Op* opcode) {
   static const int8_t numberOfPushes[] = {
 #define NOV 0
 #define ONE(...) 1
@@ -429,10 +427,10 @@ int instrNumPushes(const Opcode* opcode) {
 #undef INS_2
 #undef O
   };
-  return numberOfPushes[*opcode];
+  return numberOfPushes[uint8_t(*opcode)];
 }
 
-StackTransInfo instrStackTransInfo(const Opcode* opcode) {
+StackTransInfo instrStackTransInfo(const Op* opcode) {
   static const StackTransInfo::Kind transKind[] = {
 #define NOV StackTransInfo::Kind::PushPop
 #define ONE(...) StackTransInfo::Kind::PushPop
@@ -472,7 +470,7 @@ StackTransInfo instrStackTransInfo(const Opcode* opcode) {
 #undef O
   };
   StackTransInfo ret;
-  ret.kind = transKind[*opcode];
+  ret.kind = transKind[uint8_t(*opcode)];
   switch (ret.kind) {
   case StackTransInfo::Kind::PushPop:
     ret.pos = 0;
@@ -482,14 +480,14 @@ StackTransInfo instrStackTransInfo(const Opcode* opcode) {
   case StackTransInfo::Kind::InsertMid:
     ret.numPops = 0;
     ret.numPushes = 0;
-    ret.pos = peekPokeType[*opcode];
+    ret.pos = peekPokeType[uint8_t(*opcode)];
     return ret;
   default:
     NOT_REACHED();
   }
 }
 
-bool pushesActRec(Opcode opcode) {
+bool pushesActRec(Op opcode) {
   switch (opcode) {
     case OpFPushFunc:
     case OpFPushFuncD:
@@ -674,7 +672,7 @@ MemberCode parseMemberCode(const char* s) {
   }
 }
 
-std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
+std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   // IncDec names
   static const char* incdecNames[] = {
     "PreInc", "PostInc", "PreDec", "PostDec"
@@ -691,8 +689,8 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
     (int)(sizeof(setopNames)/sizeof(const char*));
 
   std::stringstream out;
-  const Opcode* iStart = it;
-  Op op = (Op)*it;
+  const Op* iStart = it;
+  Op op = *it;
   ++it;
   switch (op) {
 
@@ -707,11 +705,11 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
   it += sizeof(Offset);                                             \
 } while (false)
 
-#define READV() out << " " << decodeVariableSizeImm(&it);
+#define READV() out << " " << decodeVariableSizeImm((const uint8_t**)&it);
 
 #define READIVA() do {                      \
   out << " ";                               \
-  auto imm = decodeVariableSizeImm(&it);    \
+  auto imm = decodeVariableSizeImm((const uint8_t**)&it);    \
   if (op == OpIncStat && immIdx == 0) {     \
     out << Stats::g_counterNames[imm];      \
   } else {                                  \
@@ -744,16 +742,16 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define READVEC() do {                                                  \
   int sz = *((int*)&*it);                                               \
   it += sizeof(int) * 2;                                                \
-  const uint8_t* const start = it;                                      \
+  const uint8_t* const start = (uint8_t*)it;                             \
   out << " <";                                                          \
   if (sz > 0) {                                                         \
     int immVal = (int)*((uchar*)&*it);                                  \
-    out << ((immVal >=0 && size_t(immVal) < locationNamesCount) ?       \
+    out << ((immVal >= 0 && size_t(immVal) < locationNamesCount) ?      \
             locationCodeString(LocationCode(immVal)) : "?");            \
     it += sizeof(uchar);                                                \
     int numLocImms = numLocationCodeImms(LocationCode(immVal));         \
     for (int i = 0; i < numLocImms; ++i) {                              \
-      out << ':' << decodeVariableSizeImm(&it);                         \
+      out << ':' << decodeVariableSizeImm((const uint8_t**)&it);        \
     }                                                                   \
     while (reinterpret_cast<const uint8_t*>(it) - start < sz) {         \
       immVal = (int)*((uchar*)&*it);                                    \
@@ -761,7 +759,8 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
                      memberCodeString(MemberCode(immVal)) : "?");       \
       it += sizeof(uchar);                                              \
       if (memberCodeHasImm(MemberCode(immVal))) {                       \
-        int64_t imm = decodeMemberCodeImm(&it, MemberCode(immVal));       \
+        int64_t imm = decodeMemberCodeImm((const uint8_t**)&it,         \
+                                          MemberCode(immVal));          \
         out << ':';                                                     \
         if (memberCodeImmIsString(MemberCode(immVal)) && u) {           \
           const StringData* str = u->lookupLitstrId(imm);               \
@@ -805,7 +804,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
     }                                           \
     Offset o = readData<Offset>(it);            \
     if (u != nullptr) {                         \
-      if (iStart + o == u->entry() - 1) {       \
+      if (iStart + o == (Op*)u->entry() - 1) {  \
         out << "Invalid";                       \
       } else {                                  \
         out << u->offsetOf(iStart + o);         \
@@ -874,26 +873,25 @@ OPCODES
   return out.str();
 }
 
-const char* opcodeToName(Opcode op) {
+const char* opcodeToName(Op op) {
   const char* namesArr[] = {
 #define O(name, imm, inputs, outputs, flags) \
     #name ,
     OPCODES
 #undef O
-    "Invalid"
   };
-  if (op >= 0 && op < sizeof namesArr / sizeof *namesArr) {
-    return namesArr[op];
+  if (op >= Op::LowInvalid && op <= Op::HighInvalid) {
+    return namesArr[uint8_t(op)];
   }
   return "Invalid";
 }
 
-bool instrIsControlFlow(Opcode opcode) {
+bool instrIsControlFlow(Op opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & CF) != 0;
 }
 
-bool instrIsNonCallControlFlow(Opcode opcode) {
+bool instrIsNonCallControlFlow(Op opcode) {
   return
     instrIsControlFlow(opcode) &&
     !isFCallStar(opcode) &&
@@ -901,17 +899,17 @@ bool instrIsNonCallControlFlow(Opcode opcode) {
     opcode != OpFCallBuiltin;
 }
 
-bool instrAllowsFallThru(Opcode opcode) {
+bool instrAllowsFallThru(Op opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & TF) == 0;
 }
 
-bool instrReadsCurrentFpi(Opcode opcode) {
+bool instrReadsCurrentFpi(Op opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & FF) != 0;
 }
 
-ImmVector getImmVector(const Opcode* opcode) {
+ImmVector getImmVector(const Op* opcode) {
   int numImm = numImmediates(*opcode);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(*opcode, k);
@@ -972,7 +970,7 @@ bool ImmVector::decodeLastMember(const Unit* u,
 }
 
 
-int instrSpToArDelta(const Opcode* opcode) {
+int instrSpToArDelta(const Op* opcode) {
   // This function should only be called for instructions that read
   // the current FPI
   assert(instrReadsCurrentFpi(*opcode));

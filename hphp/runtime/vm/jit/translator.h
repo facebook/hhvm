@@ -1074,7 +1074,7 @@ public:
    * inputs to this instruction (this is essentially to avoid
    * generating guards on behalf of interpreted instructions).
    */
-  virtual bool dontGuardAnyInputs(Opcode op) { return false; }
+  virtual bool dontGuardAnyInputs(Op op) { return false; }
 
 protected:
   PCFilter m_dbgBLPC;
@@ -1121,7 +1121,7 @@ enum class ControlFlowInfo {
 };
 
 static inline ControlFlowInfo
-opcodeControlFlowInfo(const Opcode instr) {
+opcodeControlFlowInfo(const Op instr) {
   switch (instr) {
     case OpJmp:
     case OpJmpZ:
@@ -1174,7 +1174,7 @@ opcodeControlFlowInfo(const Opcode instr) {
  *   to something other than the next instruction in the bytecode
  */
 static inline bool
-opcodeChangesPC(const Opcode instr) {
+opcodeChangesPC(const Op instr) {
   return opcodeControlFlowInfo(instr) >= ControlFlowInfo::ChangesPC;
 }
 
@@ -1186,11 +1186,11 @@ opcodeChangesPC(const Opcode instr) {
  *   do not (ex. FCall).
  */
 static inline bool
-opcodeBreaksBB(const Opcode instr) {
+opcodeBreaksBB(const Op instr) {
   return opcodeControlFlowInfo(instr) == ControlFlowInfo::BreaksBB;
 }
 
-bool outputDependsOnInput(const Opcode instr);
+bool outputDependsOnInput(const Op instr);
 
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,

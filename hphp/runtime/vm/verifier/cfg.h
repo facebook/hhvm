@@ -81,31 +81,31 @@ struct Graph {
 };
 
 inline bool isTF(PC pc) {
-  return (instrFlags(*pc) & TF) != 0;
+  return (instrFlags(toOp(*pc)) & TF) != 0;
 }
 
 inline bool isCF(PC pc) {
-  return instrIsNonCallControlFlow(*pc);
+  return instrIsNonCallControlFlow(toOp(*pc));
 }
 
 inline bool isFF(PC pc) {
-  return instrReadsCurrentFpi(*pc);
+  return instrReadsCurrentFpi(toOp(*pc));
 }
 
 inline bool isRet(PC pc) {
-  return isTF(pc) && Op(*pc) >= OpRetC && Op(*pc) <= OpRetV;
+  return isTF(pc) && toOp(*pc) >= OpRetC && toOp(*pc) <= OpRetV;
 }
 
 inline bool isIter(PC pc) {
-  return Op(*pc) >= OpIterInit && Op(*pc) <= OpCIterFree;
+  return toOp(*pc) >= OpIterInit && toOp(*pc) <= OpCIterFree;
 }
 
 inline int getImmIva(PC pc) {
-  return getImm((Opcode*)pc, 0).u_IVA;
+  return getImm((Op*)pc, 0).u_IVA;
 }
 
 inline int numSuccBlocks(const Block* b) {
-  return numSuccs(b->last);
+  return numSuccs((Op*)b->last);
 }
 
 /**
@@ -203,7 +203,7 @@ class InstrRange {
   }
   PC popFront() {
     PC i = front();
-    pc += instrLen((Opcode*)i);
+    pc += instrLen((Op*)i);
     return i;
   }
  private:
@@ -251,12 +251,12 @@ typedef std::pair<Id, Offset> CatchEnt;
 
 inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
   PC fpush = bc + fpi.m_fpushOff;
-  return fpush + instrLen((Opcode*)fpush) - bc;
+  return fpush + instrLen((Op*)fpush) - bc;
 }
 
 inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
   PC fcall = bc + fpi.m_fcallOff;
-  return fcall + instrLen((Opcode*)fcall) - bc;
+  return fcall + instrLen((Op*)fcall) - bc;
 }
 
 }} // HPHP::Verifier

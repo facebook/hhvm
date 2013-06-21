@@ -62,7 +62,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   Unit* unit = fp->m_func->unit();
   Offset offset = unit->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
-        pc, opcodeToName(*pc), fp->m_func->fullName()->data(), offset);
+        pc, opcodeToName(toOp(*pc)), fp->m_func->fullName()->data(), offset);
 
   int currentVMDepth = g_vmContext->m_nesting;
   int currentStackDepth = proxy.getStackDepth();

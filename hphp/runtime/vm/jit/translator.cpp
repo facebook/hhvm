@@ -184,7 +184,7 @@ void sktrace(SrcKey sk, const char *fmt, ...) {
     return;
   }
   // We don't want to print string literals, so don't pass the unit
-  string s = instrToString(curUnit()->at(sk.offset()));
+  string s = instrToString((Op*)curUnit()->at(sk.offset()));
   const char *filepath = "*anonFile*";
   if (curUnit()->filepath()->data() &&
       strlen(curUnit()->filepath()->data()) > 0)
@@ -784,7 +784,7 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
 static RuntimeType
 getDynLocType(const vector<DynLocation*>& inputs,
               const Tracelet& t,
-              Opcode opcode,
+              Op opcode,
               NormalizedInstruction* ni,
               Operands op,
               OutTypeConstraints constraint,
@@ -889,7 +889,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
        * consumers, stack elements before M-vectors and locals, etc.)
        */
       assert(inputs.size() >= 1);
-      Opcode op = ni->op();
+      auto op = ni->op();
       ASSERT_NOT_IMPLEMENTED(
         // Sets and binds that take multiple arguments have the rhs
         // pushed first.  In the case of the M-vector versions, the
@@ -1031,7 +1031,7 @@ struct InstrInfo {
 };
 
 static const struct {
-  Opcode op;
+  Op op;
   InstrInfo info;
 } instrInfoSparse [] = {
 
@@ -1362,7 +1362,7 @@ static const struct {
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
 };
 
-static hphp_hash_map<Opcode, InstrInfo> instrInfo;
+static hphp_hash_map<Op, InstrInfo> instrInfo;
 static bool instrInfoInited;
 static void initInstrInfo() {
   if (!instrInfoInited) {
@@ -1383,7 +1383,7 @@ static int numHiddenStackInputs(const NormalizedInstruction& ni) {
 int getStackDelta(const NormalizedInstruction& ni) {
   int hiddenStackInputs = 0;
   initInstrInfo();
-  Opcode op = ni.op();
+  auto op = ni.op();
   switch (op) {
     case OpFCall: {
       int numArgs = ni.imm[0].u_IVA;
@@ -1394,6 +1394,9 @@ int getStackDelta(const NormalizedInstruction& ni) {
     case OpNewTuple:
     case OpCreateCl:
       return 1 - ni.imm[0].u_IVA;
+
+    default:
+      break;
   }
   const InstrInfo& info = instrInfo[op];
   if (info.in & MVector) {
@@ -1919,7 +1922,7 @@ void Translator::getInputs(SrcKey startSk,
   }
 }
 
-bool outputDependsOnInput(const Opcode instr) {
+bool outputDependsOnInput(const Op instr) {
   switch (instrInfo[instr].type) {
     case OutNull:
     case OutNullUninit:
@@ -2220,7 +2223,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               op == OpWIterInitK || op == OpWIterNextK ||
               op == OpMIterInitK || op == OpMIterNextK) {
             DynLocation* outKey = t.newDynLocation();
-            int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
+            int keyOff = getImm((Op*)ni->pc(), kKeyImmIdx).u_IVA;
             outKey->location = Location(Location::Local, keyOff);
             outKey->rtt = RuntimeType(KindOfInvalid);
             ni->outLocal2 = outKey;
@@ -2423,7 +2426,7 @@ void TraceletContext::recordJmp() {
  *   Helpers for recovering context of this instruction.
  */
 Op NormalizedInstruction::op() const {
-  uchar op = *pc();
+  auto op = toOp(*pc());
   assert(isValidOpcode(op));
   return (Op)op;
 }
@@ -2454,7 +2457,7 @@ Offset NormalizedInstruction::offset() const {
 }
 
 std::string NormalizedInstruction::toString() const {
-  return instrToString(pc(), unit());
+  return instrToString((Op*)pc(), unit());
 }
 
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
@@ -2473,7 +2476,7 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
 }
 
 static bool isPop(const NormalizedInstruction* instr) {
-  Opcode opc = instr->op();
+  auto opc = instr->op();
   return (opc == OpPopC ||
           opc == OpPopV ||
           opc == OpPopR);
@@ -2644,7 +2647,7 @@ bool isPopped(DynLocation* loc, NormalizedInstruction* instr) {
 DataTypeCategory
 Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
                                          size_t opndIdx) {
-  Opcode opc = instr->op();
+  auto opc = instr->op();
 
   switch (opc) {
     case OpSetS:
@@ -2754,7 +2757,7 @@ void Translator::constrainDep(const DynLocation* loc,
 
   for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
     if (instr->noOp) continue;
-    Opcode opc = instr->op();
+    auto opc = instr->op();
     size_t nInputs = instr->inputs.size();
     for (size_t i = 0; i < nInputs; i++) {
       DynLocation* usedLoc = instr->inputs[i];
@@ -2826,7 +2829,7 @@ void Translator::propagateRelaxedType(Tracelet& tclet,
 
   for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
     if (instr->noOp) continue;
-    Opcode opc = instr->op();
+    auto opc = instr->op();
     size_t nInputs = instr->inputs.size();
     for (size_t i = 0; i < nInputs; i++) {
       DynLocation* usedLoc = instr->inputs[i];
@@ -2967,7 +2970,7 @@ static bool checkTaintFuncs(StringData* name) {
  */
 static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
                                 const FPIEnt* fpi,
-                                const Opcode pushOp) {
+                                const Op pushOp) {
   auto const numArgs = fcall->imm[0].u_IVA;
   auto const target  = fcall->funcd;
 
@@ -3315,7 +3318,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         // beginning of the instruction, but getReffiness() wants the delta
         // relative to the sp at the beginning of the tracelet, so we adjust
         // by subtracting ni->stackOff
-        int entryArDelta = instrSpToArDelta(ni->pc()) - ni->stackOffset;
+        int entryArDelta = instrSpToArDelta((Op*)ni->pc()) - ni->stackOffset;
         ni->preppedByRef = t.m_arState.getReffiness(argNum,
                                                     entryArDelta,
                                                     &t.m_refDeps);
@@ -3390,11 +3393,11 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
           doVarEnvTaint = true;
         } else if (*fpushPc == OpFPushFuncD) {
           StringData *funcName =
-            curUnit()->lookupLitstrId(getImm(fpushPc, 1).u_SA);
+            curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 1).u_SA);
           doVarEnvTaint = checkTaintFuncs(funcName);
         } else if (*fpushPc == OpFPushFuncU) {
           StringData *fallbackName =
-            curUnit()->lookupLitstrId(getImm(fpushPc, 2).u_SA);
+            curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 2).u_SA);
           doVarEnvTaint = checkTaintFuncs(fallbackName);
         }
       }
@@ -3566,8 +3569,8 @@ Translator::isSrcKeyInBL(const Unit* unit, const SrcKey& sk) {
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
   }
-  for (PC pc = unit->at(sk.offset()); !opcodeBreaksBB(*pc);
-       pc += instrLen(pc)) {
+  for (PC pc = unit->at(sk.offset()); !opcodeBreaksBB(toOp(*pc));
+       pc += instrLen((Op*)pc)) {
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
       return true;
@@ -3602,10 +3605,10 @@ SrcKey Translator::nextSrcKey(const NormalizedInstruction& i) {
 
 void Translator::populateImmediates(NormalizedInstruction& inst) {
   for (int i = 0; i < numImmediates(inst.op()); i++) {
-    inst.imm[i] = getImm(inst.pc(), i);
+    inst.imm[i] = getImm((Op*)inst.pc(), i);
   }
-  if (hasImmVector(*inst.pc())) {
-    inst.immVec = getImmVector(inst.pc());
+  if (hasImmVector(toOp(*inst.pc()))) {
+    inst.immVec = getImmVector((Op*)inst.pc());
   }
   if (inst.op() == OpFCallArray) {
     inst.imm[0].u_IVA = 1;

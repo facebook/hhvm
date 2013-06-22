@@ -67,7 +67,7 @@ namespace HPHP { namespace Util {
 #else
 // OSX requires a comma after segment name.
 // The segment name must also not be longer than 16 characters.
-# define HOT_FUNC          __attribute__ ((section (".text.hot.built,")))
+# define HOT_FUNC
 #endif
 #define EXTERNALLY_VISIBLE __attribute__((externally_visible))
 
@@ -92,8 +92,13 @@ namespace HPHP { namespace Util {
  * Note: this may not work properly with LTO. We'll revisit when/if we
  * move to it.
  */
+#ifndef __APPLE__
 #define KEEP_SECTION \
   __attribute__((section(".text.keep")))
+#else
+#define KEEP_SECTION \
+  __attribute__((section(".text.keep,")))
+#endif
 
 /**
  * Split a string into a list of tokens by character delimiter.

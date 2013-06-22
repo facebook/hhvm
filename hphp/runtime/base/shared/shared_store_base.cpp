@@ -26,6 +26,10 @@
 #include "hphp/util/logger.h"
 #include <sys/mman.h>
 
+#if !defined(HAVE_POSIX_FALLOCATE) && (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L)
+# define HAVE_POSIX_FALLOCATE 1
+#endif
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,8 +249,25 @@ bool SharedStoreFileStorage::addFile() {
     Logger::Error("Failed to open temp file");
     return false;
   }
-  if (posix_fallocate(fd, 0, m_chunkSize)) {
-    Logger::Error("Failred to posix_fallocate of size %llu", m_chunkSize);
+  bool couldAllocate = false;
+#if defined(HAVE_POSIX_FALLOCATE) && HAVE_POSIX_FALLOCATE
+  couldAllocate = posix_fallocate(fd, 0, m_chunkSize) == 0; 
+#elif defined(__APPLE__)
+  fstore_t store = { F_ALLOCATECONTIG, F_PEOFPOSMODE, 0, m_chunkSize };
+  int ret = fcntl(fd, F_PREALLOCATE, &store);
+  if(ret == -1) {
+    store.fst_flags = F_ALLOCATEALL;
+    ret = fcntl(fd, F_PREALLOCATE, &store);
+    if (ret == -1) {
+        couldAllocate = false;
+    }
+  }
+  couldAllocate = ftruncate(fd, m_chunkSize) == 0; 
+#else
+ #error "No implementation for posix_fallocate on your platform."
+#endif
+  if (!couldAllocate) {
+    Logger::Error("Failed to posix_fallocate of size %llu", m_chunkSize);
     close(fd);
     return false;
   }

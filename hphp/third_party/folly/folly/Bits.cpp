@@ -25,7 +25,7 @@
 // Clang doesn't support ifuncs. This also allows ifunc support to be explicitly
 // passed in as a compile flag.
 #ifndef FOLLY_HAVE_IFUNC
-#  ifdef __clang__
+#  if defined(__clang__) || defined(__APPLE__)
 #    define FOLLY_HAVE_IFUNC 0
 #  else
 #    define FOLLY_HAVE_IFUNC 1

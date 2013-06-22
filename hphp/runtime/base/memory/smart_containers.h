@@ -121,10 +121,12 @@ typename unique_ptr<T>::type make_unique(Args&&... args) {
   );
 }
 
+#ifndef __APPLE__
 static_assert(
   sizeof(unique_ptr<int>::type) == sizeof(std::unique_ptr<int>),
   "smart::unique_ptr pointer should not be larger than std::unique_ptr"
 );
+#endif
 
 /*
  * We are deriving from the std::collection classes to get

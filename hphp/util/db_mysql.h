@@ -18,7 +18,7 @@
 #define incl_HPHP_DB_MYSQL_H_
 
 #include "hphp/util/base.h"
-#include "mysql/mysql.h"
+#include "mysql.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

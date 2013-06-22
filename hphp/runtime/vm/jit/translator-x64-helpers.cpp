@@ -89,7 +89,11 @@ asm(
   "mov %r15, %rdi\n"
   "cmp %r15, %rbp\n"
   "jne 1f\n"
+#ifndef __APPLE__
   "call fcallHelper\n"
+#else
+  "call _fcallHelper\n"
+#endif
   "jmp *%rax\n"
   // fcallHelper may call doFCall. doFCall changes the return ip
   // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
@@ -103,7 +107,11 @@ asm(
   // a number of c++ frames. The new actrec is linked onto the c++
   // frames, however, so switch it into rbp in case fcallHelper throws.
   "xchg %r15,%rbp\n"
+#ifndef __APPLE__
   "call fcallHelper\n"
+#else
+  "call _fcallHelper\n"
+#endif
   "xchg %r15,%rbp\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
@@ -182,7 +190,11 @@ asm (
    * need to worry about stack parity
    */
   "mov %rbp, %rdi\n"
+#ifndef __APPLE__
   "call funcBodyHelper\n"
+#else
+  "call _funcBodyHelper\n"
+#endif
   "jmp *%rax\n"
   "ud2\n"
 #elif defined(__AARCH64EL__)

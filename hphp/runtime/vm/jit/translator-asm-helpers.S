@@ -13,6 +13,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(__x86_64__)
+#ifndef __APPLE__
   .byte 0
   .align 16
   .section .text
@@ -99,6 +100,47 @@ enterTCHelper:
   ret
   .cfi_endproc
 ///////////////////////////////////////////////////////////////////////////////
+#else 
+  .byte 0
+  .align 16
+  .section .text,
+  .globl _enterTCHelper
+_enterTCHelper:
+  push %rbp
+  mov %rsp, (%r8)
+  push %rcx
+  mov %rdi, %rbx
+  mov %r9, %r12
+  mov %rsi, %rbp
+  mov 0x30(%rcx), %r15
+  sub $0x280, %rsp
+  cmp $0x1, 0x0(%rcx)
+  jne .L_enterTCHelper$jumpToTC
+  lea .L_enterTCHelper$serviceReqLabel(%rip), %rax
+  push %rax
+  push 0x8(%r15)
+  jmp *%rdx
+.L_enterTCHelper$jumpToTC:
+  call *%rdx
+.L_enterTCHelper$serviceReqLabel:
+  add $0x280, %rsp
+  pop %rbx
+  mov %rdi, 0x0(%rbx)
+  test %rdi,%rdi
+  jnz .L_enterTCHelper$copyReqArgs
+  pop %rbp
+  ret
+.L_enterTCHelper$copyReqArgs:
+  mov %rsi, 0x8(%rbx)
+  mov %rdx, 0x10(%rbx)
+  mov %rcx, 0x18(%rbx)
+  mov %r8,  0x20(%rbx)
+  mov %r9,  0x28(%rbx)
+  mov %r15, 0x30(%rbx)
+  mov %r10, 0x38(%rbx)
+  pop %rbp
+  ret
+#endif
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper
 enterTCHelper:

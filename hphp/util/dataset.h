@@ -18,7 +18,7 @@
 #define incl_HPHP_DATASET_H_
 
 #include "hphp/util/base.h"
-#include "mysql/mysql.h"
+#include "mysql.h"
 
 namespace HPHP {
 

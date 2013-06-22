@@ -56,6 +56,20 @@ if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
     set(ICU_I18N_FOUND 0)
     set(ICU_I18N_LIBRARIES)
   endif (ICU_I18N_LIBRARY)
+
+  # Look for the ICU data libraries
+  find_library(
+      ICU_DATA_LIBRARY
+    NAMES icudata cygicudata cygicudata32
+    DOC "Libraries to link against for ICU data")
+  mark_as_advanced(ICU_DATA_LIBRARY)
+  if (ICU_DATA_LIBRARY)
+    set(ICU_DATA_FOUND 1)
+    set(ICU_DATA_LIBRARIES ${ICU_DATA_LIBRARY})
+  else (ICU_DATA_LIBRARY)
+    set(ICU_DATA_FOUND 0)
+    set(ICU_DATA_LIBRARIES)
+  endif (ICU_DATA_LIBRARY)
 else(ICU_INCLUDE_DIR AND ICU_LIBRARY)
   set(ICU_FOUND 0)
   set(ICU_I18N_FOUND 0)

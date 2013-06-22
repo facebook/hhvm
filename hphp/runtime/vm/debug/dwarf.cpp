@@ -16,7 +16,9 @@
 #include <stdio.h>
 #include "hphp/runtime/vm/debug/dwarf.h"
 #include "debug.h"
+#ifndef __APPLE__
 #include "hphp/runtime/vm/debug/elfwriter.h"
+#endif
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 
 #include "hphp/runtime/base/types.h"
@@ -33,8 +35,12 @@ namespace Debug {
 int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
             Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
             Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error) {
+#ifndef __APPLE__
   ElfWriter *e = reinterpret_cast<ElfWriter *>(handle);
   return e->dwarfCallback(name, size, type, flags, link, info);
+#else
+  return 0;
+#endif
 }
 
 void DwarfBuf::byte(uint8_t c) {
@@ -214,8 +220,10 @@ void DwarfInfo::compactChunks() {
     m_dwarfChunks[j] = nullptr;
   }
   m_dwarfChunks[i] = chunk;
+#ifndef __APPLE__
   // register compacted chunk with gdb
   ElfWriter e = ElfWriter(chunk);
+#endif
 }
 
 static Mutex s_lock(RankLeaf);
@@ -282,9 +290,11 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     f->m_chunk = chunk;
   }
 
+#ifndef __APPLE__
   if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
     ElfWriter e = ElfWriter(f->m_chunk);
   }
+#endif
 
   return f->m_chunk;
 }
@@ -295,7 +305,9 @@ void DwarfInfo::syncChunks() {
   for (i = 0; i < m_dwarfChunks.size(); i++) {
     if (m_dwarfChunks[i] && !m_dwarfChunks[i]->isSynced()) {
       unregister_gdb_chunk(m_dwarfChunks[i]);
+#ifndef __APPLE__
       ElfWriter e = ElfWriter(m_dwarfChunks[i]);
+#endif
     }
   }
 }

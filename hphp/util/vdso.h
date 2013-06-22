@@ -19,6 +19,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/util.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////

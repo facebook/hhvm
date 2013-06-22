@@ -29,6 +29,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware_counter.h"
 
 namespace HPHP {
@@ -64,8 +65,10 @@ Transport::~Transport() {
 
 void Transport::onRequestStart(const timespec &queueTime) {
   m_queueTime = queueTime;
-  gettime(CLOCK_MONOTONIC, &m_wallTime);
+  Timer::GetMonotonicTime(m_wallTime);
+#ifdef CLOCK_THREAD_CPUTIME_ID
   gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuTime);
+#endif
   /*
    * The hardware counter is only 48 bits, so reset this at the beginning
    * of every request to make sure we don't overflow.

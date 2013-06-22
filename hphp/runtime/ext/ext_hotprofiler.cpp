@@ -313,17 +313,22 @@ tv_to_cycles(const struct timeval& tv, int64_t MHz)
 static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
+#ifdef CLOCK_THREAD_CPUTIME_ID
   static int64_t vdso_usable =
     Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
 
   if (cpu_time && vdso_usable >= 0)
     return cycles / 1000;
   return (cycles + MHz/2) / MHz;
+#else
+  return 0;
+#endif
 }
 
 static esyscall vtsc_syscall("vtsc");
 
 static inline uint64_t vtsc(int64_t MHz) {
+#ifdef CLOCK_THREAD_CPUTIME_ID
   int64_t rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
@@ -335,6 +340,9 @@ static inline uint64_t vtsc(int64_t MHz) {
   getrusage(RUSAGE_SELF, &usage);
   return
     tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
+#else
+  return 0;
+#endif
 }
 
 #ifdef USE_JEMALLOC
@@ -1657,7 +1665,7 @@ void f_xhprof_frame_end() {
 
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
-#ifdef HOTPROFILER
+#if defined(HOTPROFILER) && defined(CLOCK_THREAD_CPUTIME_ID)
   if (vtsc_syscall.num <= 0 &&
       Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1) {
     flags &= ~TrackVtsc;

@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 #define incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 
+#include <boost/container/flat_map.hpp>
+
 #include "hphp/runtime/base/memory/memory_manager.h"
 
 namespace HPHP { namespace smart {
@@ -195,6 +197,20 @@ struct hash_set : std::tr1::unordered_set<T,V,W,Allocator<T> > {
     : std::tr1::unordered_set<T,V,W,Allocator<T>>(0)
   {}
 };
+
+template<class K,
+         class V,
+         class Pred = std::less<K>>
+struct flat_map
+  : boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>
+{};
+
+template<class K,
+         class V,
+         class Pred = std::less<K>>
+struct flat_multimap
+  : boost::container::flat_multimap<K,V,Pred,Allocator<std::pair<K,V>>>
+{};
 
 //////////////////////////////////////////////////////////////////////
 

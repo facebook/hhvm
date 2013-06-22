@@ -72,6 +72,17 @@ const StringData* StringData::convert_integer_helper(int64_t n) {
  return StringData::GetStaticString(p);
 }
 
+// If a string is static it better be the one in the table.
+#ifndef NDEBUG
+static bool checkStaticStr(const StringData* s) {
+  assert(s->isStatic());
+  StringDataMap::const_iterator it = s_stringDataMap->find(s);
+  assert(it != s_stringDataMap->end());
+  assert(it->first == s);
+  return true;
+}
+#endif
+
 size_t StringData::GetStaticStringCount() {
   if (!s_stringDataMap) return 0;
   return s_stringDataMap->size();
@@ -84,6 +95,10 @@ StringData *StringData::GetStaticString(const StringData *str) {
     s_stringDataMap =
       new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
                         config);
+  }
+  if (str->isStatic()) {
+    assert(checkStaticStr(str));
+    return const_cast<StringData*>(str);
   }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
@@ -105,6 +120,10 @@ StringData *StringData::GetStaticString(const StringData *str) {
 
 StringData *StringData::LookupStaticString(const StringData *str) {
   if (UNLIKELY(!s_stringDataMap)) return nullptr;
+  if (str->isStatic()) {
+    assert(checkStaticStr(str));
+    return const_cast<StringData*>(str);
+  }
   StringDataMap::const_iterator it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(it->first);
@@ -117,29 +136,17 @@ StringData* StringData::GetStaticString(const String& str) {
   return GetStaticString(str.get());
 }
 
-StringData* StringData::FindStaticString(const StringData* str) {
-  if (UNLIKELY(!s_stringDataMap)) {
-    StringDataMap::Config config;
-    config.growthFactor = 1;
-    s_stringDataMap =
-      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                        config);
-  }
-  StringDataMap::const_iterator it = s_stringDataMap->find(str);
-  if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(it->first);
-  }
-  return nullptr;
+StringData *StringData::GetStaticString(const char *str, size_t len) {
+  StackStringData sd(str, len, AttachLiteral);
+  return GetStaticString(&sd);
 }
 
 StringData *StringData::GetStaticString(const std::string &str) {
-  StackStringData sd(str.c_str(), str.size(), AttachLiteral);
-  return GetStaticString(&sd);
+  return GetStaticString(str.c_str(), str.size());
 }
 
 StringData *StringData::GetStaticString(const char *str) {
-  StackStringData sd(str, strlen(str), AttachLiteral);
-  return GetStaticString(&sd);
+  return GetStaticString(str, strlen(str));
 }
 
 uint32_t StringData::GetCnsHandle(const StringData* cnsName) {

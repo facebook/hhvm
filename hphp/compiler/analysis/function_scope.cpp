@@ -775,8 +775,7 @@ void FunctionScope::setParamName(int index, const std::string &name) {
 void FunctionScope::setParamDefault(int index, const char* value, int64_t len,
                                     const std::string &text) {
   assert(index >= 0 && index < (int)m_paramNames.size());
-  StringData* sd = new StringData(value, len, AttachLiteral);
-  sd->setStatic();
+  auto sd = StringData::GetStaticString(value, len);
   m_paramDefaults[index] = String(sd);
   m_paramDefaultTexts[index] = text;
 }

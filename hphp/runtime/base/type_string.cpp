@@ -747,12 +747,5 @@ String& String::operator=(Variant&& src) {
   return *this = src.toString();
 }
 
-void String::checkStaticHelper() {
-  if (StringData* t = StringData::FindStaticString(m_px)) {
-    decRefStr(m_px);
-    m_px = t;
-  }
-}
-
 //////////////////////////////////////////////////////////////////////////////
 }

@@ -194,9 +194,6 @@ public:
     m_px->setRefCount(1);
   }
 
-  void checkStaticHelper();
-  void checkStatic() {}
-
   void clear() { reset();}
   /**
    * Informational

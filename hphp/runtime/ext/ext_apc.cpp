@@ -575,7 +575,6 @@ void apc_load_impl(struct cache_info *info,
         item.len = (int)(int64_t)*(p+1);
         // Strings would be copied into APC anyway.
         String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
-        value.checkStatic();
         s.constructPrime(value, item, false);
       }
       s.prime(vars);
@@ -858,7 +857,7 @@ void apc_load_impl_compressed
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], AttachLiteral);
-        value.checkStatic();
+        // todo: t2539893: check if value is already a static string
         s.constructPrime(value, item, false);
         p += string_lens[i + i + 3] + 1; // skip \0
       }

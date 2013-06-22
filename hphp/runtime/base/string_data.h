@@ -122,9 +122,6 @@ class StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   void setRefCount(int32_t n) { _count = n;}
-  /* Only call preCompute() and setStatic() in a thread-neutral context! */
-  void preCompute() const;
-  void setStatic() const;
   bool isStatic() const { return _count == RefCountStaticValue; }
 
   static StringData *Escalate(StringData *in);
@@ -330,10 +327,10 @@ public:
   void dump() const;
   std::string toCPPString() const;
 
-  static StringData *FindStaticString(const StringData* str);
   static StringData *GetStaticString(const StringData* str);
   static StringData *GetStaticString(const std::string& str);
   static StringData *GetStaticString(const String& str);
+  static StringData *GetStaticString(const char* str, size_t len);
   static StringData *GetStaticString(const char* str);
   static StringData *GetStaticString(char c);
 
@@ -401,6 +398,9 @@ public:
     assert(!isSmall());
     return m_big.cap & ~IsMask;
   }
+  /* Only call preCompute() and setStatic() in a thread-neutral context! */
+  void preCompute() const;
+  void setStatic() const;
 };
 
 /**

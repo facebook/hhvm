@@ -44,11 +44,18 @@ for ($i = 0; $i < count($lines) - 1; $i++) {
     if (!empty($doc)) {
       $info['name'] = $func;
       $info['desc'] = isset($doc['desc']) ? $doc['desc'] : '';
-      $info['ret_desc'] = $doc['ret'];
+      if (isset($doc['ret'])) {
+        $info['ret_desc'] = $doc['ret'];
+      }
       $args = array();
       if (!empty($argdefs)) {
         $index = 0;
         foreach ($argdefs as $name) {
+          if (!isset($doc['params'][$index])) {
+            print "ERROR: The docs don't have param number $index ".
+                  "(which you named $name) for $class::$func\n";
+            continue;
+          }
           $args[] = array('name' => preg_replace('/[\&\$]/', '', $name),
                           'desc' => $doc['params'][$index++],
                           'ref'  => preg_match('/&/', $name));

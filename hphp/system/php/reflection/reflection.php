@@ -16,7 +16,7 @@ interface Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflector.tostring.php )
    *
-   * To string. WarningThis function is currently not documented; only its
+   * To string. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    */
@@ -58,7 +58,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionparameter.construct.php )
    *
-   * Constructs a ReflectionParameter class. WarningThis function is
+   * Constructs a ReflectionParameter class. Warning: This function is
    * currently not documented; only its argument list is available.
    *
    * @func       mixed   The function to reflect parameters from.
@@ -79,7 +79,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionparameter.tostring.php
    * )
    *
-   * To string. WarningThis function is currently not documented; only its
+   * To string. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    */
@@ -92,7 +92,7 @@ class ReflectionParameter implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionparameter.export.php )
    *
-   * Exports. WarningThis function is currently not documented; only its
+   * Exports. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    * @func       mixed   The function name.
@@ -130,8 +130,9 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionparameter.ispassedbyreference.php )
    *
-   * Checks if the parameter is passed in by reference. WarningThis function
-   * is currently not documented; only its argument list is available.
+   * Checks if the parameter is passed in by reference. Warning: This
+   * function is currently not documented; only its argument list is
+   * available.
    *
    * @return     mixed   TRUE if the parameter is passed in by reference,
    *                     otherwise FALSE
@@ -145,7 +146,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionparameter.getdeclaringclass.php )
    *
-   * Gets the declaring class. WarningThis function is currently not
+   * Gets the declaring class. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   A ReflectionClass object.
@@ -162,7 +163,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionparameter.getdeclaringfunction.php )
    *
-   * Gets the declaring function. WarningThis function is currently not
+   * Gets the declaring function. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   A ReflectionFunction object.
@@ -179,7 +180,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionparameter.getclass.php
    * )
    *
-   * Gets a class. WarningThis function is currently not documented; only
+   * Gets a class. Warning: This function is currently not documented; only
    * its argument list is available.
    *
    * @return     mixed   A ReflectionClass object.
@@ -242,7 +243,7 @@ class ReflectionParameter implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionparameter.allowsnull.php )
    *
-   * Checks whether the parameter allows NULL. WarningThis function is
+   * Checks whether the parameter allows NULL. Warning: This function is
    * currently not documented; only its argument list is available.
    *
    * @return     mixed   TRUE if NULL is allowed, otherwise FALSE
@@ -392,7 +393,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getname.php )
    *
-   * Get the name of the function. WarningThis function is currently not
+   * Get the name of the function. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The name of the function.
@@ -407,8 +408,8 @@ class ReflectionFunctionAbstract {
    * http://php.net/manual/en/reflectionfunctionabstract.isinternal.php )
    *
    * Checks whether the function is internal, as opposed to user-defined.
-   * WarningThis function is currently not documented; only its argument list
-   * is available.
+   * Warning: This function is currently not documented; only its argument
+   * list is available.
    *
    * @return     mixed   TRUE if it's internal, otherwise FALSE
    */
@@ -425,7 +426,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.isclosure.php )
    *
-   * Checks whether it's a closure. WarningThis function is currently not
+   * Checks whether it's a closure. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   TRUE if it's a closure, otherwise FALSE
@@ -439,7 +440,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.isgenerator.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns TRUE if the function is generator, FALSE if
@@ -455,8 +456,8 @@ class ReflectionFunctionAbstract {
    * http://php.net/manual/en/reflectionfunctionabstract.isuserdefined.php )
    *
    * Checks whether the function is user-defined, as opposed to internal.
-   * WarningThis function is currently not documented; only its argument list
-   * is available.
+   * Warning: This function is currently not documented; only its argument
+   * list is available.
    *
    * @return     mixed   TRUE if it's user-defined, otherwise false;
    */
@@ -469,7 +470,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getfilename.php )
    *
-   * Gets the file name from a user-defined function. WarningThis function
+   * Gets the file name from a user-defined function. Warning: This function
    * is currently not documented; only its argument list is available.
    *
    * @return     mixed   The file name.
@@ -483,8 +484,8 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getstartline.php )
    *
-   * Gets the starting line number of the function. WarningThis function is
-   * currently not documented; only its argument list is available.
+   * Gets the starting line number of the function. Warning: This function
+   * is currently not documented; only its argument list is available.
    *
    * @return     mixed   The starting line number.
    */
@@ -497,7 +498,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getendline.php )
    *
-   * Get the ending line number. WarningThis function is currently not
+   * Get the ending line number. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The ending line number of the user defined function,
@@ -512,7 +513,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getdoccomment.php )
    *
-   * Get a Doc comment from a function. WarningThis function is currently
+   * Get a Doc comment from a function. Warning: This function is currently
    * not documented; only its argument list is available.
    *
    * @return     mixed   The doc comment if it exists, otherwise FALSE
@@ -527,7 +528,7 @@ class ReflectionFunctionAbstract {
    * http://php.net/manual/en/reflectionfunctionabstract.getstaticvariables.php
    * )
    *
-   * Get the static variables. WarningThis function is currently not
+   * Get the static variables. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   An array of static variables.
@@ -542,7 +543,7 @@ class ReflectionFunctionAbstract {
    * http://php.net/manual/en/reflectionfunctionabstract.returnsreference.php
    * )
    *
-   * Checks whether the function returns a reference. WarningThis function
+   * Checks whether the function returns a reference. Warning: This function
    * is currently not documented; only its argument list is available.
    *
    * @return     mixed   TRUE if it returns a reference, otherwise FALSE
@@ -556,7 +557,7 @@ class ReflectionFunctionAbstract {
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getparameters.php )
    *
-   * Get the parameters as an array of ReflectionParameter. WarningThis
+   * Get the parameters as an array of ReflectionParameter. Warning: This
    * function is currently not documented; only its argument list is
    * available.
    *
@@ -580,7 +581,7 @@ class ReflectionFunctionAbstract {
    * )
    *
    * Get the number of parameters that a function defines, both optional and
-   * required. WarningThis function is currently not documented; only its
+   * required. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    * @return     mixed   The number of parameters.
@@ -595,9 +596,9 @@ class ReflectionFunctionAbstract {
    * http://php.net/manual/en/reflectionfunctionabstract.getnumberofrequiredparameters.php
    * )
    *
-   * Get the number of required parameters that a function defines.
-   * WarningThis function is currently not documented; only its argument list
-   * is available.
+   * Get the number of required parameters that a function defines. Warning:
+   * This function is currently not documented; only its argument list is
+   * available.
    *
    * @return     mixed   The number of required parameters.
    */
@@ -777,7 +778,7 @@ class ReflectionClass implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.construct.php )
    *
-   * Constructs a new ReflectionClass object. WarningThis function is
+   * Constructs a new ReflectionClass object. Warning: This function is
    * currently not documented; only its argument list is available.
    *
    * @name       mixed   Either a string containing the name of the class to
@@ -892,8 +893,8 @@ class ReflectionClass implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getname.php )
    *
-   * Gets the class name. WarningThis function is currently not documented;
-   * only its argument list is available.
+   * Gets the class name. Warning: This function is currently not
+   * documented; only its argument list is available.
    *
    * @return     mixed   The class name.
    */
@@ -1004,7 +1005,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php
    * )
    *
-   * Get the starting line number. WarningThis function is currently not
+   * Get the starting line number. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The starting line number, as an integer.
@@ -1031,7 +1032,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.getdoccomment.php )
    *
-   * Gets doc comments from a class. WarningThis function is currently not
+   * Gets doc comments from a class. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The doc comment if it exists, otherwise FALSE
@@ -1184,8 +1185,8 @@ class ReflectionClass implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionclass.getconstants.php
    * )
    *
-   * Gets defined constants from a class. WarningThis function is currently
-   * not documented; only its argument list is available.
+   * Gets defined constants from a class. Warning: This function is
+   * currently not documented; only its argument list is available.
    *
    * @return     mixed   An array of constants. Constant name in key,
    *                     constant value in value.
@@ -1199,7 +1200,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionclass.getconstant.php
    * )
    *
-   * Gets the defined constant. WarningThis function is currently not
+   * Gets the defined constant. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @name       mixed   Name of the constant.
@@ -1241,7 +1242,7 @@ class ReflectionClass implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns an array with trait names in keys and
@@ -1285,7 +1286,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.gettraitnames.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns an array with trait names in values. Returns
@@ -1307,7 +1308,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.gettraitaliases.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns an array with new method names in keys and
@@ -1363,7 +1364,7 @@ class ReflectionClass implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns TRUE if this is a trait, FALSE otherwise.
@@ -1449,7 +1450,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.getparentclass.php )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   A ReflectionClass.
@@ -1498,7 +1499,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.getstaticproperties.php )
    *
-   * Get the static properties. WarningThis function is currently not
+   * Get the static properties. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The static properties, as an array.
@@ -1539,7 +1540,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.setstaticpropertyvalue.php )
    *
-   * Sets static property value. WarningThis function is currently not
+   * Sets static property value. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @name       mixed   Property name.
@@ -1685,7 +1686,7 @@ class ReflectionClass implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.getnamespacename.php )
    *
-   * Gets the namespace name. WarningThis function is currently not
+   * Gets the namespace name. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The namespace name.
@@ -1732,8 +1733,8 @@ class ReflectionObject extends ReflectionClass {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionobject.export.php )
    *
-   * Exports a reflection. WarningThis function is currently not documented;
-   * only its argument list is available.
+   * Exports a reflection. Warning: This function is currently not
+   * documented; only its argument list is available.
    *
    * @obj        mixed   The reflection to export.
    * @ret        mixed   Setting to TRUE will return the export, as opposed
@@ -1780,7 +1781,7 @@ class ReflectionProperty implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionproperty.construct.php
    * )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @cls        mixed   The class name, that contains the property.
@@ -1809,7 +1810,7 @@ class ReflectionProperty implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionproperty.tostring.php
    * )
    *
-   * To string. WarningThis function is currently not documented; only its
+   * To string. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    */
@@ -1821,8 +1822,8 @@ class ReflectionProperty implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionproperty.export.php )
    *
-   * Exports a reflection. WarningThis function is currently not documented;
-   * only its argument list is available.
+   * Exports a reflection. Warning: This function is currently not
+   * documented; only its argument list is available.
    *
    * @cls        mixed   The reflection to export.
    * @name       mixed   The property name.
@@ -1848,7 +1849,7 @@ class ReflectionProperty implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionproperty.getname.php )
    *
-   * Gets the properties name. WarningThis function is currently not
+   * Gets the properties name. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The name of the reflected property.
@@ -1944,7 +1945,7 @@ class ReflectionProperty implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionproperty.getmodifiers.php )
    *
-   * Gets the modifiers. WarningThis function is currently not documented;
+   * Gets the modifiers. Warning: This function is currently not documented;
    * only its argument list is available.
    *
    * @return     mixed   A numeric representation of the modifiers.
@@ -2010,7 +2011,7 @@ class ReflectionProperty implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionproperty.getdeclaringclass.php )
    *
-   * Gets the declaring class. WarningThis function is currently not
+   * Gets the declaring class. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   A ReflectionClass object.
@@ -2027,8 +2028,8 @@ class ReflectionProperty implements Reflector {
    * ( excerpt from
    * http://php.net/manual/en/reflectionproperty.getdoccomment.php )
    *
-   * Gets the doc comment. WarningThis function is currently not documented;
-   * only its argument list is available.
+   * Gets the doc comment. Warning: This function is currently not
+   * documented; only its argument list is available.
    *
    * @return     mixed   The doc comment.
    */
@@ -2116,7 +2117,7 @@ implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.export.php )
    *
-   * Exports a ReflectionMethod. WarningThis function is currently not
+   * Exports a ReflectionMethod. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @cls        mixed   The class name.
@@ -2221,8 +2222,8 @@ implements Reflector {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.isprivate.php )
    *
-   * Checks if the method is private. WarningThis function is currently not
-   * documented; only its argument list is available.
+   * Checks if the method is private. Warning: This function is currently
+   * not documented; only its argument list is available.
    *
    * @return     mixed   TRUE if the method is private, otherwise FALSE
    */
@@ -2302,7 +2303,7 @@ implements Reflector {
    * ( excerpt from http://php.net/manual/en/reflectionmethod.getclosure.php
    * )
    *
-   * WarningThis function is currently not documented; only its argument
+   * Warning: This function is currently not documented; only its argument
    * list is available.
    *
    * @return     mixed   Returns Closure. Returns NULL in case of an error.

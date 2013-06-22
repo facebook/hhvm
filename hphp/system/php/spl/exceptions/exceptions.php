@@ -103,7 +103,7 @@ class OverflowException extends RuntimeException {}
 /**
  * ( excerpt from http://php.net/manual/en/class.rangeexception.php )
  *
- * exception thrown to indicate range errors during program execution.
+ * Exception thrown to indicate range errors during program execution.
  * Normally this means there was an arithmetic error other than
  * under/overflow. This is the runtime version of DomainException.
  *
@@ -114,7 +114,7 @@ class RangeException extends RuntimeException {}
 /**
  * ( excerpt from http://php.net/manual/en/class.underflowexception.php )
  *
- * exception thrown when performing an invalid operation on an empty
+ * Exception thrown when performing an invalid operation on an empty
  * container, such as removing an element.
  *
  */
@@ -125,7 +125,7 @@ class UnderflowException extends RuntimeException {}
  * ( excerpt from
  * http://php.net/manual/en/class.unexpectedvalueexception.php )
  *
- * exception thrown if a value does not match with a set of values.
+ * Exception thrown if a value does not match with a set of values.
  * Typically this happens when a function calls another function and
  * expects the return value to be of a certain type or value not including
  * arithmetic or buffer related errors.

@@ -59,8 +59,8 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
    * http://php.net/manual/en/recursiveiteratoriterator.getinneriterator.php
    * )
    *
-   * Gets the current active sub iterator. WarningThis function is currently
-   * not documented; only its argument list is available.
+   * Gets the current active sub iterator. Warning: This function is
+   * currently not documented; only its argument list is available.
    *
    * @return     mixed   The current active sub iterator.
    */

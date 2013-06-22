@@ -17,7 +17,7 @@ abstract class FilterIterator extends IteratorIterator {
    * ( excerpt from http://php.net/manual/en/filteriterator.construct.php )
    *
    * Constructs a new FilterIterator, which consists of a passed in iterator
-   * with filters applied to it. WarningThis function is currently not
+   * with filters applied to it. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @it         mixed   The iterator that is being filtered.

@@ -1047,7 +1047,7 @@ function idx($arr, $idx, $default=null) {
 }
 
 function format_doc_desc($arr, $clsname) {
-  if ($arr['flags'] & HipHopSpecific) {
+  if (isset($arr['flags']) && $arr['flags'] & HipHopSpecific) {
     $desc = "( HipHop specific )\n";
   } else {
     $clsname = preg_replace('#_#', '-', strtolower($clsname));
@@ -1143,6 +1143,7 @@ function phpnet_clean($text) {
   $text = preg_replace('/&#039;/', "'", $text);
   $text = trim(html_entity_decode($text));
   $text = preg_replace('/[^\t\n -~]/', '', $text);
+  $text = preg_replace('/WarningThis/', 'Warning: This', $text);
   return $text;
 }
 

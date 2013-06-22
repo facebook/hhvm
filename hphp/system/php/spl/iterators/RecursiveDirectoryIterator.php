@@ -89,7 +89,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator
    * ( excerpt from
    * http://php.net/manual/en/recursivedirectoryiterator.getsubpath.php )
    *
-   * Gets the sub path. WarningThis function is currently not documented;
+   * Gets the sub path. Warning: This function is currently not documented;
    * only its argument list is available.
    *
    * @return     mixed   The sub path (sub directory).
@@ -103,7 +103,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator
    * ( excerpt from
    * http://php.net/manual/en/recursivedirectoryiterator.getsubpathname.php )
    *
-   * Gets the sub path and filename. WarningThis function is currently not
+   * Gets the sub path and filename. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The sub path (sub directory) and filename.

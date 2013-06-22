@@ -291,7 +291,7 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
   /**
    * ( excerpt from http://php.net/manual/en/arrayobject.serialize.php )
    *
-   * Serializes an ArrayObject. WarningThis function is currently not
+   * Serializes an ArrayObject. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The serialized representation of the ArrayObject.
@@ -397,7 +397,7 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
   /**
    * ( excerpt from http://php.net/manual/en/arrayobject.unserialize.php )
    *
-   * Unserializes a serialized ArrayObject. WarningThis function is
+   * Unserializes a serialized ArrayObject. Warning: This function is
    * currently not documented; only its argument list is available.
    *
    * @serialized mixed   The serialized ArrayObject.

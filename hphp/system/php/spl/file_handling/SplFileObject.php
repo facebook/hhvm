@@ -91,12 +91,12 @@ class SplFileObject extends SplFileInfo
    * Gets a character from the file.
    *
    * @return     mixed   Returns a string containing a single character read
-   *                     from the file or FALSE on EOF. WarningThis function
-   *                     may return Boolean FALSE, but may also return a
-   *                     non-Boolean value which evaluates to FALSE. Please
-   *                     read the section on Booleans for more information.
-   *                     Use the === operator for testing the return value of
-   *                     this function.
+   *                     from the file or FALSE on EOF. Warning: This
+   *                     function may return Boolean FALSE, but may also
+   *                     return a non-Boolean value which evaluates to FALSE.
+   *                     Please read the section on Booleans for more
+   *                     information. Use the === operator for testing the
+   *                     return value of this function.
    */
   public function fgetc() {
     return fgetc($this->rsrc);

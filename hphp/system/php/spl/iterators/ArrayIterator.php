@@ -24,7 +24,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.construct.php )
    *
-   * Constructs an ArrayIterator object. WarningThis function is currently
+   * Constructs an ArrayIterator object. Warning: This function is currently
    * not documented; only its argument list is available.
    *
    * @array      mixed   The array or object to be iterated on.
@@ -41,7 +41,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.append.php )
    *
-   * Appends value as the last element. WarningThis function is currently
+   * Appends value as the last element. Warning: This function is currently
    * not documented; only its argument list is available.
    *
    * @value      mixed   The value to append.
@@ -56,7 +56,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.asort.php )
    *
-   * Sorts an array by values. WarningThis function is currently not
+   * Sorts an array by values. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   No value is returned.
@@ -70,7 +70,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * ( excerpt from http://php.net/manual/en/arrayiterator.count.php )
    *
    * Gets the number of elements in the array, or the number of public
-   * properties in the object. WarningThis function is currently not
+   * properties in the object. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The number of elements or public properties in the
@@ -96,7 +96,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.getarraycopy.php )
    *
-   * Get a copy of an array. WarningThis function is currently not
+   * Get a copy of an array. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   A copy of the array, or array of public properties
@@ -110,7 +110,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.getflags.php )
    *
-   * Get the current flags. WarningThis function is currently not
+   * Get the current flags. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   The current flags.
@@ -135,7 +135,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.ksort.php )
    *
-   * Sorts an array by the keys. WarningThis function is currently not
+   * Sorts an array by the keys. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @return     mixed   No value is returned.
@@ -149,7 +149,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * ( excerpt from http://php.net/manual/en/arrayiterator.natcasesort.php )
    *
    * Sort the entries by values using a case insensitive "natural order"
-   * algorithm. WarningThis function is currently not documented; only its
+   * algorithm. Warning: This function is currently not documented; only its
    * argument list is available.
    *
    * @return     mixed   No value is returned.
@@ -162,8 +162,8 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.natsort.php )
    *
-   * Sort the entries by values using "natural order" algorithm. WarningThis
-   * function is currently not documented; only its argument list is
+   * Sort the entries by values using "natural order" algorithm. Warning:
+   * This function is currently not documented; only its argument list is
    * available.
    *
    * @return     mixed   No value is returned.
@@ -188,7 +188,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.offsetexists.php )
    *
-   * Checks if the offset exists. WarningThis function is currently not
+   * Checks if the offset exists. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @index      mixed   The offset being checked.
@@ -203,7 +203,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.offsetget.php )
    *
-   * Gets the value from the provided offset. WarningThis function is
+   * Gets the value from the provided offset. Warning: This function is
    * currently not documented; only its argument list is available.
    *
    * @index      mixed   The offset to get the value from.
@@ -218,8 +218,8 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.offsetset.php )
    *
-   * Sets a value for a given offset. WarningThis function is currently not
-   * documented; only its argument list is available.
+   * Sets a value for a given offset. Warning: This function is currently
+   * not documented; only its argument list is available.
    *
    * @index      mixed   The index to set for.
    * @newval     mixed   The new value to store at the index.
@@ -234,7 +234,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.offsetunset.php )
    *
-   * Unsets a value for an offset. WarningThis function is currently not
+   * Unsets a value for an offset. Warning: This function is currently not
    * documented; only its argument list is available.
    *
    * @index      mixed   The offset to unset.
@@ -279,8 +279,8 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.setflags.php )
    *
-   * Sets behaviour flags. WarningThis function is currently not documented;
-   * only its argument list is available.
+   * Sets behaviour flags. Warning: This function is currently not
+   * documented; only its argument list is available.
    *
    * @flags      mixed   A bitmask as follows: 0 = Properties of the object
    *                     have their normal functionality when accessed as
@@ -297,7 +297,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.uasort.php )
    *
-   * Sort the entries by values using user defined function. WarningThis
+   * Sort the entries by values using user defined function. Warning: This
    * function is currently not documented; only its argument list is
    * available.
    *
@@ -314,7 +314,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   /**
    * ( excerpt from http://php.net/manual/en/arrayiterator.uksort.php )
    *
-   * Sort the entries by key using user defined function. WarningThis
+   * Sort the entries by key using user defined function. Warning: This
    * function is currently not documented; only its argument list is
    * available.
    *

@@ -126,7 +126,6 @@ function test_openssl_pkcs7_sign() {
           array("To" => "t@facebook.com", "From" => "hzhao@facebook.com")));
 
   $tmp = tempnam('/tmp', 'x509vmtestopenssl');
-  $tmp = "test/test_x509.tmp";
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));

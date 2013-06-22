@@ -1090,7 +1090,8 @@ struct X64Assembler {
   void incl(Reg32 r)  { instrR(instr_inc,  r); }
   void incw(Reg16 r)  { instrR(instr_inc,  r); }
   void decq(Reg64 r)  { instrR(instr_dec,  r); }
-  // decl(Reg32) cannot be encoded; it's REX.
+  void decl(Reg32 r)  { instrR(instr_dec,  r); }
+  void decw(Reg16 r)  { instrR(instr_dec,  r); }
   void notb(Reg8 r)   { instrR(instr_notb, r); }
   void not(Reg64 r)   { instrR(instr_not,  r); }
   void neg(Reg64 r)   { instrR(instr_neg,  r); }

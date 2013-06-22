@@ -510,6 +510,41 @@ TEST(Asm, RetImmediate) {
   ASSERT_FALSE(a.code.base[0] == kOpsizePrefix);
 }
 
+TEST(Asm, IncDecRegs) {
+  Asm a;
+  a.init(10 << 24);
+
+  // incq, incl, incw
+  a.    incq(rax);
+  a.    incl(eax);
+  a.    incw(ax);
+  a.    incq(r15);
+  a.    incl(r15d);
+  a.    incw(r15w);
+  // decq, decl, decw
+  a.    decq(rax);
+  a.    decl(eax);
+  a.    decw(ax);
+  a.    decq(r15);
+  a.    decl(r15d);
+  a.    decw(r15w);
+
+  expect_asm(a, R"(
+inc %rax
+inc %eax
+inc %ax
+inc %r15
+inc %r15d
+inc %r15w
+dec %rax
+dec %eax
+dec %ax
+dec %r15
+dec %r15d
+dec %r15w
+)");
+}
+
 TEST(Asm, HighByteReg) {
   Asm a;
   a.init(10 << 24);

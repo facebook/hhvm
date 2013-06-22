@@ -1,0 +1,1 @@
+HipHop Fatal error: Argument 1 passed to X::test() must be an instance of X, string given in %s/test/quick/fail_self.php on line 5

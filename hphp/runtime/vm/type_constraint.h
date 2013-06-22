@@ -56,6 +56,9 @@ protected:
     constexpr bool isCallable() const {
       return m_metatype == Callable;
     }
+    constexpr bool isPrecise() const {
+      return m_metatype == Precise;
+    }
   };
 
   // m_type represents the DataType to check on.  We don't know
@@ -107,6 +110,10 @@ public:
 
   bool isCallable() const {
     return m_type.isCallable();
+  }
+
+  bool isPrecise() const {
+    return m_type.isPrecise();
   }
 
   bool isObjectOrTypedef() const {

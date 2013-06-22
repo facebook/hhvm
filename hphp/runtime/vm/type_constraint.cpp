@@ -72,7 +72,9 @@ void TypeConstraint::init() {
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
         this, typeName->data(), nullable());
-  if (!mapGet(s_typeNamesToTypes, typeName, &dtype)) {
+  if (!mapGet(s_typeNamesToTypes, typeName, &dtype) ||
+      !(hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
+        dtype.isSelf())) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, typeName->data());
     m_type = { KindOfObject, Precise };
@@ -80,15 +82,11 @@ void TypeConstraint::init() {
     TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;
   }
-  if (hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
-      dtype.isSelf()) {
-    m_type = dtype;
-  } else {
-    m_type = { KindOfObject, Precise };
-  }
+  m_type = dtype;
   assert(m_type.m_dt != KindOfStaticString);
   assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
   assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
+  assert(IMPLIES(isCallable(), m_type.m_dt == KindOfObject));
 }
 
 /*
@@ -186,7 +184,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (isCallable()) {
       return f_is_callable(tvAsCVarRef(tv));
     }
-    return checkTypedefNonObj(tv);
+    return isPrecise() && checkTypedefNonObj(tv);
   }
 
   return equivDataTypes(m_type.m_dt, tv->m_type);

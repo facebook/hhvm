@@ -12,8 +12,7 @@ list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cpp")
 
 add_executable(test ${CXX_SOURCES})
-target_link_libraries(test hphp_analysis hphp_runtime_static ext_hhvm_static hphp_system
-                      -Wl,-uregister_libevent_server)
+target_link_libraries(test hphp_analysis hphp_runtime_static ext_hhvm_static hphp_system)
 
 add_custom_command(TARGET test POST_BUILD
                    COMMAND "objcopy"

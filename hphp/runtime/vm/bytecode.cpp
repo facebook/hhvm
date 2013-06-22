@@ -383,7 +383,7 @@ void VarEnv::detach(ActRec* fp) {
     TypedValue** origLocs =
       !m_restoreLocations.empty()
         ? m_restoreLocations.back()
-        : reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
+          : reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
 
     for (Id i = 0; i < numLocals; i++) {
       m_nvTable->resettle(func->localVarName(i), origLocs[i]);
@@ -6694,7 +6694,10 @@ static inline void setContVar(const Func* genFunc,
                               c_Continuation* cont) {
   Id destId = genFunc->lookupVarId(name);
   if (destId != kInvalidId) {
-    tvDup(src, frame_local(cont->actRec(), destId));
+    // Copy the value of the local to the cont object and set the
+    // local to uninit so that we don't need to change refcounts.
+    tvTeleport(src, frame_local(cont->actRec(), destId));
+    tvWriteUninit(src);
   } else {
     ActRec *contFP = cont->actRec();
     if (!contFP->hasVarEnv()) {

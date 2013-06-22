@@ -1033,8 +1033,10 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
       // We must generate an AssertLoc because we don't have tracelet
       // guards on the object type in these outer generator functions.
       gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-      auto const loc = gen(IncRef, ldLoc(i));
-      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), loc);
+      // Copy the value of the local to the cont object and set the
+      // local to uninit so that we don't need to change refcounts.
+      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
+      gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
     }
     if (fillThis) {
       assert(thisId != kInvalidId);

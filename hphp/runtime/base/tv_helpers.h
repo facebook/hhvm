@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_TV_HELPERS_H_
+#define incl_HPHP_TV_HELPERS_H_
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'tv_helpers.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_TV_HELPERS_H_
-#define incl_HPHP_TV_HELPERS_H_
 
 #include "hphp/runtime/base/types.h"
 
@@ -216,11 +216,17 @@ inline void tvDupRef(RefData* fr, TypedValue* to) {
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper does not modify to->_count
-inline void tvDup(const TypedValue* fr, TypedValue* to) {
+// After this operation, 'fr' is dead and 'to' live.
+inline void tvTeleport(const TypedValue* fr, TypedValue* to) {
   assert(tvIsPlausible(fr));
   to->m_data.num = fr->m_data.num;
   to->m_type = fr->m_type;
+}
+
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper does not modify to->_count
+inline void tvDup(const TypedValue* fr, TypedValue* to) {
+  tvTeleport(fr, to);
   tvRefcountedIncRef(to);
 }
 

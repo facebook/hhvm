@@ -1,5 +1,5 @@
 Program %s/exception1.php loaded. Type '[r]un' or '[c]ontinue' to go.
-exception MyException
+%Sexception MyException
 Breakpoint 1 set right before throwing MyException
 But note that class MyException has yet been loaded.
 break list

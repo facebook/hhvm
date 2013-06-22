@@ -1,5 +1,5 @@
 Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-run
+%Srun
 int(8)
 Caught Exception given to continuation 8 in genFoo()
 int(4)

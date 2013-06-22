@@ -1,5 +1,5 @@
 Program %s/flow_small.php loaded. Type '[r]un' or '[c]ontinue' to go.
-set SmallStep on
+%Sset SmallStep on
 SmallStep(ss) set to on.
 
 break cls::pub()

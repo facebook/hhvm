@@ -1,5 +1,5 @@
 Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-break quick/debugger/break2.php:7
+%Sbreak quick/debugger/break2.php:7
 Breakpoint 1 set on line 7 of quick/debugger/break2.php
 But wont break until file quick/debugger/break2.php has been loaded.
 break foo2()

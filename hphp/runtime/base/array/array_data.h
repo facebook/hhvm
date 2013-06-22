@@ -301,8 +301,10 @@ public:
   ArrayData *getLvalPtr(CStrRef k, Variant *&ret, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  ArrayData *set(const StringData*, CVarRef, bool) = delete;
   ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
   ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
+  ArrayData *setRef(const StringData*, CVarRef, bool) = delete;
   ArrayData *add(CStrRef k, CVarRef v, bool copy);
   ArrayData *add(CVarRef k, CVarRef v, bool copy);
   ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);

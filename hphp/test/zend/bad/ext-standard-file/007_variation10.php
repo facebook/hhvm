@@ -27,13 +27,14 @@ echo "*** Test fopen() & fclose() functions:  with 'r+t' mode ***\n";
 $file_handle = fopen($file, "r+t");  //opening the file in "r+t" mode
 var_dump($file_handle);  //Check for the content of handle
 var_dump( get_resource_type($file_handle) );  //Check for the type of resource
-var_dump( ftell($file_handle) );  //Initial file pointer position, expected at the begining of the file
+var_dump( ftell($file_handle) );  //Initial file pointer position, expected at the beginning of the file
 var_dump( fread($file_handle, 100) );  //Check for read operation
 var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the end of the file
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
-echo "*** Done ***\n"; <?php
+echo "*** Done ***\n"; ?>
+<?php
 unlink(dirname(__FILE__)."/007_variation10.tmp");
 ?>

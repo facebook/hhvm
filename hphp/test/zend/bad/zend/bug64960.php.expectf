@@ -1,0 +1,8 @@
+HipHop Notice: %s
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: {closure}(8, 'ob_end_clean():...', '%s', 9, Array)
+#1 %sbug64960.php(9): ob_end_clean()
+#2 [internal function]: ExceptionHandler->__invoke(Object(Exception))
+#3 {main}
+  thrown in %sbug64960.php on line 19

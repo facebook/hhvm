@@ -9,10 +9,10 @@ The File Contents
 -- Iteration 4 --
 The File Contents
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Iteration 7 --
 The File Contents
@@ -23,6 +23,6 @@ The File Contents
 -- Iteration 10 --
 The File Contents
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Done ***

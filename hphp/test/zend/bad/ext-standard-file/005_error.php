@@ -20,7 +20,7 @@
 echo "*** Testing error conditions ***\n";
 
 echo "\n-- Testing with  Non-existing files --";
-/* Both invalid argumetns */
+/* Both invalid arguments */
 var_dump( fileatime("/no/such/file/or/dir") );
 var_dump( filemtime("/no/such/file/or/dir") );
 var_dump( filectime("/no/such/file/or/dir") );

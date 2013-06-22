@@ -1,15 +1,15 @@
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
-bool(false)
-int(1)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 int(1)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 int(1)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+int(1)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
 bool(false)

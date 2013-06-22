@@ -1,10 +1,10 @@
 *** Testing ctype_alpha() : error conditions ***
 
 -- Testing ctype_alpha() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing ctype_alpha() function with more than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===DONE===

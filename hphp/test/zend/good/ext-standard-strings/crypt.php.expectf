@@ -3,7 +3,7 @@ EXT
 MD5
 BLO
 string(%d) "%s"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL

@@ -2,7 +2,7 @@
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Check if rewinddir() has repositioned the file pointer --

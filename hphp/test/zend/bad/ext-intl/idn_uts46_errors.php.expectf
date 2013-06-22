@@ -1,19 +1,19 @@
 => PHP level errors
 bad args:
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 bad variant:
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 empty domain:
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 fourth arg for 2003 variant (only notice raised):
-HipHop Notice: %a
+HipHop Notice: %s
 string(7) "foo.com"
 with error, but no details arg:
 bool(false)

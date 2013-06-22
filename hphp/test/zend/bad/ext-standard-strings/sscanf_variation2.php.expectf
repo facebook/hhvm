@@ -24,13 +24,13 @@ array(0) {
 array(0) {
 }
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
 array(0) {
@@ -54,7 +54,7 @@ array(0) {
 array(0) {
 }
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
 array(0) {

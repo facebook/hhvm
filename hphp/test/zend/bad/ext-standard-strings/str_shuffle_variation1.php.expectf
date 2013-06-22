@@ -16,13 +16,13 @@ string(5) "%s"
 -- Iteration 8 --
 string(12) "%s"
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
 string(1) "1"
@@ -39,7 +39,7 @@ string(0) ""
 -- Iteration 18 --
 string(13) "%s"
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
 string(0) ""

@@ -6,6 +6,6 @@ bool(true)
 int(1234)
 bool(true)
 string(4) "none"
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===DONE===

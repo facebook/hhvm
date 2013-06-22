@@ -1,0 +1,24 @@
+Array
+(
+    [0] => Array
+        (
+            [file] => %sbug64239_2.php
+            [line] => %d
+            [function] => Bmethod
+            [class] => B
+            [type] => ->
+        )
+
+)
+Array
+(
+    [0] => Array
+        (
+            [file] => %sbug64239_2.php
+            [line] => %d
+            [function] => Bmethod
+            [class] => B
+            [type] => ->
+        )
+
+)

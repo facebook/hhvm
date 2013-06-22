@@ -1,9 +1,9 @@
 int(0)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Notice: %a
-HipHop Warning: %a
+HipHop Notice: %s
+HipHop Warning: %s
 bool(false)
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 Done

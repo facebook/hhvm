@@ -30,10 +30,10 @@ string(2) "
 "
 string(9) "some anot"
 string(9) "her text "
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

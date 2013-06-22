@@ -199,19 +199,19 @@ array(9) {
 }
 
 --empty array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --int indexed array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --associative array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --nested arrays--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --uppercase NULL--
@@ -479,11 +479,11 @@ array(9) {
 }
 
 --instance of classWithToString--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --instance of classWithoutToString--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --undefined var--

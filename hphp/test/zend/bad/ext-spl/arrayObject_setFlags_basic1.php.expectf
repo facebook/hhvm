@@ -10,7 +10,7 @@ string(21) "array element.changed"
 
 --> Remove the array element and try access again:
 bool(false)
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
-HipHop Notice: %a
+HipHop Notice: %s
 string(8) ".changed"

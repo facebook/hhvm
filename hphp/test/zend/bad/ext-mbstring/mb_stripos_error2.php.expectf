@@ -1,4 +1,4 @@
 *** Testing mb_stripos() : error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

@@ -1,24 +1,24 @@
 string(1) "i"
-HipHop Notice: %a
+HipHop Notice: %s
 string(1) "S"
-HipHop Notice: %a
+HipHop Notice: %s
 string(1) "S"
-HipHop Warning: %a
+HipHop Warning: %s
 string(1) "S"
 string(1) "c"
-HipHop Warning: %a
+HipHop Warning: %s
 string(1) "o"
-HipHop Notice: %a
+HipHop Notice: %s
 string(1) "r"
-HipHop Notice: %a
+HipHop Notice: %s
 string(1) "i"
-HipHop Notice: %a
+HipHop Notice: %s
 string(1) "S"
-HipHop Warning: %a
+HipHop Warning: %s
 string(1) "%s"
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 string(1) "%s"
-HipHop Warning: %a
+HipHop Warning: %s
 string(1) "i"
 Done

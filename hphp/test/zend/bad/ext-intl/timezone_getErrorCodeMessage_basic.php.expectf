@@ -1,0 +1,7 @@
+int(0)
+string(12) "U_ZERO_ERROR"
+HipHop Warning: %s
+bool(false)
+int(1)
+string(67) "intltz_get_offset: error obtaining offset: U_ILLEGAL_ARGUMENT_ERROR"
+==DONE==

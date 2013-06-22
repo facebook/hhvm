@@ -1,9 +1,9 @@
 *** Testing array_combine() : assoc array with diff keys to both $keys and $values argument ***
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 -- Iteration 1 --
 array(0) {
 }

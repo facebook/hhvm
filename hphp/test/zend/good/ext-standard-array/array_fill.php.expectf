@@ -1,26 +1,26 @@
 ===========================
 start: 0 num: 0 value: 1
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 0 value: d
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 0 value: e
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 0 value: f
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 0 num: 1 value: 1
@@ -108,27 +108,27 @@ array(2) {
 }
 ===========================
 start: 1 num: 0 value: 1
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 0 value: d
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 0 value: e
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 0 value: f
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 1 num: 1 value: 1
@@ -216,27 +216,27 @@ array(2) {
 }
 ===========================
 start: 2.5 num: 0 value: 1
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 0 value: 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 0 value: d
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 0 value: e
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 0 value: f
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===========================
 start: 2.5 num: 1 value: 1

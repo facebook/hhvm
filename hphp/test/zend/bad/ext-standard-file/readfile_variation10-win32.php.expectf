@@ -1,32 +1,32 @@
 *** Testing readfile() : variation ***
 
 -- Filename: -1 --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: TRUE --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: FALSE --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: NULL --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: "" --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: " " --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: \0 --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: array() --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: /no/such/file/dir --
-HipHop Warning: %a
+HipHop Warning: %s
 
 -- Filename: php/php --
-HipHop Warning: %a
+HipHop Warning: %s
 ===Done===

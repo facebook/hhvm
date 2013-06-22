@@ -1,67 +1,73 @@
 ---( $c->boolFalse )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
 
 ---( $c->emptyString )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
 
 ---( $c->null )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Notice: %s
 
 
 ---( $c->boolTrue )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
 
 ---( $c->nonEmptyString )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
 
 ---( $c->intZero )---
   --> Attempting implicit conversion to object using increment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
   --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: %a
+HipHop Warning: %s
 
 
 

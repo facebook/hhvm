@@ -4,7 +4,7 @@ bool(true)
 -- With symlink --
 bool(true)
 -- With hardlink --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 *** Testing is_dir() with file and links to a file ***

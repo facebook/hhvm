@@ -31,7 +31,7 @@ object(ArrayObject)#2 (3) {
 
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 string(11) "new.changed"
   Original wrapped object:

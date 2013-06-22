@@ -25,7 +25,7 @@ NULL refcount(1)
 long(10) refcount(2)
 
 -- Value of $ref_first_var --
-HipHop Notice: %a
+HipHop Notice: %s
 NULL refcount(1)
 
 -- Value of $first_var --
@@ -43,7 +43,7 @@ long(10) refcount(1)
 long(10) refcount(1)
 
 -- Value of $var_3: (after unsetting var_3) --
-HipHop Notice: %a
+HipHop Notice: %s
 NULL refcount(1)
 
 -- Value of $var_2: --
@@ -53,7 +53,7 @@ long(10) refcount(1)
 long(10) refcount(1)
 
 -- Value of $var_1: (after unsetting variable_1) --
-HipHop Notice: %a
+HipHop Notice: %s
 NULL refcount(1)
 
 -- Value of $var_2: --

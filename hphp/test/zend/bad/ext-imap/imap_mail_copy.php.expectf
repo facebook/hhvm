@@ -1,13 +1,13 @@
 Checking with no parameters
-HipHop Warning: %a
+HipHop Warning: %s
 Checking with incorrect parameter type
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 Test with IMAP server
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===Done===

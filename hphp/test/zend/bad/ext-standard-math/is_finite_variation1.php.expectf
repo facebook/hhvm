@@ -49,31 +49,31 @@ bool(true)
 bool(true)
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 22 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 23 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 24 --
@@ -83,6 +83,6 @@ bool(true)
 bool(true)
 
 -- Iteration 26 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===Done===

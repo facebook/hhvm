@@ -57,31 +57,31 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 103567
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 43567
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 103567
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 43567
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 103567
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 43567
 -- Iteration 15 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 103567
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 43567
 *** Done ***

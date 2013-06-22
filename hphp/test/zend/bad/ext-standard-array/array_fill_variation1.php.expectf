@@ -36,19 +36,19 @@ array(2) {
   int(100)
 }
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
 array(2) {
@@ -93,19 +93,19 @@ array(2) {
   int(100)
 }
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 22 --
 array(2) {
@@ -122,6 +122,6 @@ array(2) {
   int(100)
 }
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

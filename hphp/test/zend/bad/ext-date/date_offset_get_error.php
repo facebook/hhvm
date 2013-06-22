@@ -1,9 +1,9 @@
 <?php
 
-/* Prototype  : int date_offset_get  ( DateTime $object  )
+/* Prototype  : int date_offset_get  ( DateTimeInterface $object  )
  * Description: Returns the daylight saving time offset
  * Source code: ext/date/php_date.c
- * Alias to functions:  DateTime::getOffset
+ * Alias to functions:  DateTimeInterface::getOffset
  */
  
  //Set the default time zone 

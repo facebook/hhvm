@@ -1,9 +1,9 @@
 Checking with no parameters
-HipHop Warning: %a
+HipHop Warning: %s
 Checking with incorrect parameter type
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 bool(true)
 string(%s) "{%s}%s"

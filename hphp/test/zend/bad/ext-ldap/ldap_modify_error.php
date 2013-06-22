@@ -38,7 +38,8 @@ $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_modify($link, "dc=my-domain,dc=com", $entry2));
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

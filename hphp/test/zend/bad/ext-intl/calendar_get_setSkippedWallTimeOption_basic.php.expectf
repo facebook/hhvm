@@ -1,0 +1,15 @@
+int(0)
+Should be 3h30
+int(3)
+int(30)
+bool(true)
+int(1)
+Should be 1h30
+int(1)
+int(30)
+bool(true)
+int(2)
+Should be 3h00
+int(3)
+int(0)
+==DONE==

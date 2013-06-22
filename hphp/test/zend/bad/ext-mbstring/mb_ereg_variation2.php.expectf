@@ -99,7 +99,7 @@ bool(false)
 NULL
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 NULL
 Done

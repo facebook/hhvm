@@ -61,27 +61,27 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
  =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 22 --
@@ -93,6 +93,6 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
  =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

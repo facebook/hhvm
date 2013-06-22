@@ -1,5 +1,5 @@
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(4) {
   ["type"]=>
@@ -11,7 +11,7 @@ array(4) {
   ["line"]=>
   int(4)
 }
-HipHop Notice: %a
+HipHop Notice: %s
 array(4) {
   ["type"]=>
   int(8)

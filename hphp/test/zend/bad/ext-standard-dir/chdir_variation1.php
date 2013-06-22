@@ -100,7 +100,8 @@ foreach($inputs as $input) {
 fclose($fp);
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/chdir_basic";
 

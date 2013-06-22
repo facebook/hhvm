@@ -1,11 +1,11 @@
 __get nonExisting
-HipHop Notice: %a
+HipHop Notice: %s
 __get publicProperty
-HipHop Notice: %a
+HipHop Notice: %s
 __get protectedProperty
-HipHop Notice: %a
+HipHop Notice: %s
 __get privateProperty
-HipHop Notice: %a
+HipHop Notice: %s
 __isset nonExisting
 __isset publicProperty
 __isset protectedProperty

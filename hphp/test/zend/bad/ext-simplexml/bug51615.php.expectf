@@ -1,5 +1,5 @@
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(2) {

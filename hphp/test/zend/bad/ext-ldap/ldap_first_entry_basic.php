@@ -9,7 +9,8 @@ var_dump(
 	ldap_get_values($link, $entry, 'sn')
 );
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

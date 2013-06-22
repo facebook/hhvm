@@ -16,5 +16,5 @@ object(PDORow)#%d (2) {
 }
 %unicode|string%(19) "SELECT id FROM test"
 ----------------------------------
-HipHop Notice: %a
+HipHop Notice: %s
 NULL

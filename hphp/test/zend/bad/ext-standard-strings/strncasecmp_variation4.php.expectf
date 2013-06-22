@@ -28,24 +28,24 @@ int(0)
 -- Iteration 14 --
 int(0)
 -- Iteration 15 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 16 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 17 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
 int(0)
@@ -68,8 +68,8 @@ int(0)
 -- Iteration 29 --
 int(0)
 -- Iteration 30 --
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 -- Iteration 31 --
 int(0)

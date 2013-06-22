@@ -16,5 +16,5 @@ array(3) {
   [1]=>
   string(4) "blub"
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL

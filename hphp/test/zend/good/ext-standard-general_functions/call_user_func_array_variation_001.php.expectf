@@ -4,7 +4,7 @@ array(1) {
   string(8) "original"
 }
 ------ Calling by_ref() with unreferenced argument ------
-HipHop Warning: %a
+HipHop Warning: %s
 array(1) {
   [0]=>
   string(8) "original"

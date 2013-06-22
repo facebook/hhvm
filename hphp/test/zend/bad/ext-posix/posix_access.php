@@ -16,7 +16,8 @@ var_dump(posix_access($filename, POSIX_W_OK));
 chmod ($filename, 0700);
 var_dump(posix_access($filename, POSIX_X_OK));
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $filename = dirname(__FILE__) . '/foo.test';
 chmod ($filename, 0700);
 unlink($filename);

@@ -15,25 +15,25 @@ stream_set_blocking 1
 
 close stream
 stream_set_blocking 
-HipHop Warning: %a
+HipHop Warning: %s
 
 socket_set_block 
-HipHop Warning: %a
+HipHop Warning: %s
 
 socket_get_option 
-HipHop Warning: %a
+HipHop Warning: %s
 
 
 
 close socket
 stream_set_blocking 
-HipHop Warning: %a
+HipHop Warning: %s
 
 socket_set_block 
-HipHop Warning: %a
+HipHop Warning: %s
 
 socket_get_option 
-HipHop Warning: %a
+HipHop Warning: %s
 
 
 Done.

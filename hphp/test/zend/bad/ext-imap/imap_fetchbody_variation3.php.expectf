@@ -82,7 +82,7 @@ Subject: test1
 1: this is a test message, please ignore%a"
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 19 --

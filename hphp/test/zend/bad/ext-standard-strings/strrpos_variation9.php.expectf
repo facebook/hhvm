@@ -28,23 +28,23 @@ bool(false)
 bool(false)
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 15 --
@@ -75,7 +75,7 @@ bool(false)
 bool(false)
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 25 --

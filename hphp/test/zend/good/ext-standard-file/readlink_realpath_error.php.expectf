@@ -1,24 +1,24 @@
 *** Testing readlink(): error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 *** Testing readlink() on a non-existent link ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 *** Testing readlink() on existing file ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 *** Testing readlink() on existing directory ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 *** Testing realpath(): error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 *** Testing realpath() on a non-existent file ***

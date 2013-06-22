@@ -10,25 +10,25 @@ This is a file in working dir
 This is a file in script dir
 
 ** testing with mode=r+ **
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 
 
 ** testing with mode=rt **

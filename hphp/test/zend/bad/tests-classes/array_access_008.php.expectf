@@ -3,10 +3,10 @@ string(6) "FooBar"
 string(9) "FooBarBaz"
 ===ArrayOverloading===
 string(3) "Foo"
-HipHop Notice: %a
+HipHop Notice: %s
 string(3) "Foo"
-HipHop Notice: %a
+HipHop Notice: %s
 string(3) "Foo"
-HipHop Notice: %a
+HipHop Notice: %s
 string(3) "Foo"
 ===DONE===

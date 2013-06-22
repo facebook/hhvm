@@ -14,13 +14,13 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 11 --
 bool(false)
@@ -35,10 +35,10 @@ bool(false)
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 19 --
 bool(false)

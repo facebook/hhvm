@@ -1,5 +1,5 @@
 1
-HipHop Warning: %a
+HipHop Warning: %s
 array(3) {
   [0]=>
   string(5) "23000"
@@ -9,7 +9,7 @@ array(3) {
   string(29) "Column 'count' cannot be null"
 }
 2
-HipHop Warning: %a
+HipHop Warning: %s
 array(3) {
   [0]=>
   string(5) "23000"

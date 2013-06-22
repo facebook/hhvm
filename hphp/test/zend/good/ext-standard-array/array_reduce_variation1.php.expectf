@@ -4,7 +4,7 @@
 int(2)
 
 --- Testing with a callback with too many parameters ---
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 int(3)
 ===DONE===

@@ -83,16 +83,16 @@ For mode '' count is => int(3)
 For mode '' count is => int(3)
 
 -- Testing error conditions --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Notice: %a
-HipHop Warning: %a
+HipHop Notice: %s
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Done

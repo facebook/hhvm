@@ -1,8 +1,8 @@
 bool(false)
 no such table: non_existent_table
 bool(true)
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 NULL
 Closing database
 bool(true)

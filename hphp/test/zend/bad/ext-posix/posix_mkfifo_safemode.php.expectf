@@ -1,5 +1,5 @@
 Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in hphp/test/zend/bad/ext-posix/posix_mkfifo_safemode.phpt on line %d
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 bool(true)
 ===DONE===

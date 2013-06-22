@@ -1,24 +1,24 @@
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 int(0)
 NULL
 int(1)
 string(4) "data"
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 string(4) "data"
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 array(0) {
 }
 array(0) {
 }
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 array(0) {
 }
@@ -27,6 +27,6 @@ array(0) {
 bool(false)
 array(0) {
 }
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 Done

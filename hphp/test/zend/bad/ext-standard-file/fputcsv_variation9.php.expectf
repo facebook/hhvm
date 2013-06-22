@@ -1,8 +1,8 @@
 *** Testing fputcsv() : with two chars as enclosure & delimiter ***
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -10,8 +10,8 @@ string(12) "water,fruit
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -19,8 +19,8 @@ string(12) "water,fruit
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -28,8 +28,8 @@ string(%d) "water,fruit
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -37,8 +37,8 @@ string(12) "water,fruit
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -46,8 +46,8 @@ string(12) "water,fruit
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -55,8 +55,8 @@ string(%d) "water,fruit
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -64,8 +64,8 @@ string(12) "water,fruit
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -73,8 +73,8 @@ string(12) "water,fruit
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -82,8 +82,8 @@ string(%d) "water,fruit
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -91,8 +91,8 @@ string(12) "water,fruit
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -100,8 +100,8 @@ string(12) "water,fruit
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(12)
 int(12)
 bool(false)
@@ -109,8 +109,8 @@ string(%d) "water,fruit
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -118,8 +118,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -127,8 +127,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -136,8 +136,8 @@ string(%d) ""water","fruit
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -145,8 +145,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -154,8 +154,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -163,8 +163,8 @@ string(%d) ""water","fruit
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -172,8 +172,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -181,8 +181,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -190,8 +190,8 @@ string(%d) ""water","fruit
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -199,8 +199,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -208,8 +208,8 @@ string(15) ""water","fruit
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(15)
 int(15)
 bool(false)
@@ -217,8 +217,8 @@ string(%d) ""water","fruit
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -226,8 +226,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -235,8 +235,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -244,8 +244,8 @@ string(%d) ""water","fruit"
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -253,8 +253,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -262,8 +262,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -271,8 +271,8 @@ string(%d) ""water","fruit"
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -280,8 +280,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -289,8 +289,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -298,8 +298,8 @@ string(%d) ""water","fruit"
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -307,8 +307,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -316,8 +316,8 @@ string(16) ""water","fruit"
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -325,8 +325,8 @@ string(%d) ""water","fruit"
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -334,8 +334,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -343,8 +343,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -352,8 +352,8 @@ string(%d) "%^water^ ^fruit^%
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -361,8 +361,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -370,8 +370,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -379,8 +379,8 @@ string(%d) "%^water^ ^fruit^%
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -388,8 +388,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -397,8 +397,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -406,8 +406,8 @@ string(%d) "%^water^ ^fruit^%
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -415,8 +415,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -424,8 +424,8 @@ string(18) "%^water^ ^fruit^%
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -433,8 +433,8 @@ string(%d) "%^water^ ^fruit^%
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -442,8 +442,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -451,8 +451,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -460,8 +460,8 @@ string(%d) "&water&:&fruit&
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -469,8 +469,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -478,8 +478,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -487,8 +487,8 @@ string(%d) "&water&:&fruit&
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -496,8 +496,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -505,8 +505,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -514,8 +514,8 @@ string(%d) "&water&:&fruit&
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -523,8 +523,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -532,8 +532,8 @@ string(16) "&water&:&fruit&
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -541,8 +541,8 @@ string(%d) "&water&:&fruit&
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -550,8 +550,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -559,8 +559,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -568,8 +568,8 @@ string(%d) "=water===fruit=
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -577,8 +577,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -586,8 +586,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -595,8 +595,8 @@ string(%d) "=water===fruit=
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -604,8 +604,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -613,8 +613,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -622,8 +622,8 @@ string(%d) "=water===fruit=
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -631,8 +631,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -640,8 +640,8 @@ string(16) "=water===fruit=
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(16)
 int(16)
 bool(false)
@@ -649,8 +649,8 @@ string(%d) "=water===fruit=
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -658,8 +658,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -667,8 +667,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -676,8 +676,8 @@ string(%d) "-water--fruit-air
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -685,8 +685,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -694,8 +694,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -703,8 +703,8 @@ string(%d) "-water--fruit-air
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -712,8 +712,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -721,8 +721,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -730,8 +730,8 @@ string(%d) "-water--fruit-air
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -739,8 +739,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -748,8 +748,8 @@ string(18) "-water--fruit-air
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(18)
 int(18)
 bool(false)
@@ -757,8 +757,8 @@ string(%d) "-water--fruit-air
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -766,8 +766,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -775,8 +775,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -784,8 +784,8 @@ string(%d) "-water---fruit---air-
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -793,8 +793,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -802,8 +802,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -811,8 +811,8 @@ string(%d) "-water---fruit---air-
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -820,8 +820,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -829,8 +829,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -838,8 +838,8 @@ string(%d) "-water---fruit---air-
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -847,8 +847,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -856,8 +856,8 @@ string(22) "-water---fruit---air-
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(22)
 int(22)
 bool(false)
@@ -865,8 +865,8 @@ string(%d) "-water---fruit---air-
 "
 
 -- file opened in r+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -874,8 +874,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in r+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -883,8 +883,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in r+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -892,8 +892,8 @@ string(%d) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in a+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -901,8 +901,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in a+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -910,8 +910,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in a+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -919,8 +919,8 @@ string(%d) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in w+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -928,8 +928,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in w+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -937,8 +937,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in w+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -946,8 +946,8 @@ string(%d) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in x+ --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -955,8 +955,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in x+b --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)
@@ -964,8 +964,8 @@ string(24) "&""""&:&"&:,:":&,&:,,,,
 "
 
 -- file opened in x+t --
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 int(24)
 int(24)
 bool(false)

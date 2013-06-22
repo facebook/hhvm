@@ -28,7 +28,8 @@ var_dump(scandir($directory, $sorting_order, $context));
 
 delete_files($directory, 3);
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $directory = dirname(__FILE__) . '/scandir_basic';
 rmdir($directory);
 ?>

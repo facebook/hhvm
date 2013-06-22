@@ -1,2 +1,21 @@
-HipHop Warning: %a
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+HipHop Warning: %s
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_connect.phpt on line %d
 done!

@@ -53,7 +53,8 @@ if (is_resource($dir_handle2)) {
 	closedir($dir_handle2);
 }
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $parent_dir_path = dirname(__FILE__) . "/opendir_variation5";
 $sub_dir_path = $parent_dir_path."/sub_dir";
 $child_dir_path = $sub_dir_path."/child_dir";

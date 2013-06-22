@@ -1,8 +1,8 @@
 *** Testing array_reverse() : usage variations ***
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 -- Iteration 1 --
 - default argument -
 array(0) {

@@ -1,9 +1,9 @@
 NULL
 NULL
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 NULL
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 int(5)
 int(5)
@@ -13,8 +13,8 @@ NULL
 NULL
 NULL
 bool(false)
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 ==DONE==

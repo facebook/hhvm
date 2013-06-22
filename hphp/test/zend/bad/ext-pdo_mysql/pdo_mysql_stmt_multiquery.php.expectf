@@ -37,5 +37,5 @@ array(1) {
   }
 }
 Native Prepared Statements...
-HipHop Warning: %a
-HipHop Fatal error: %a
+HipHop Warning: %s
+HipHop Fatal error: %s

@@ -28,7 +28,8 @@ var_dump( opendir($dir_path . "/sub_dir?") );
 var_dump( opendir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $dir_path = dirname(__FILE__) . "/opendir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 

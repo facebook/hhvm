@@ -4,6 +4,6 @@
 int(4)
 
 -- $mode = 1: --
-HipHop Warning: %a
+HipHop Warning: %s
 int(12)
 Done

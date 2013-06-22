@@ -1,5 +1,5 @@
-HipHop Warning: %a
-HipHop Fatal error: %a
+HipHop Warning: %s
+HipHop Fatal error: %s
 Stack trace:
 #0 [internal function]: wrapper->stream_eof()
 #1 %s(%d): feof(Resource id #6)

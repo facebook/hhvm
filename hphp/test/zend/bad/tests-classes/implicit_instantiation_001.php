@@ -17,7 +17,7 @@ foreach($c as $name => $value) {
 	echo "\n  --> Attempting implicit conversion to object using increment...\n";
 	$c->$name->prop++;
 	$c->$name = $value; // reset value in case implicit conversion was successful
-	
+
 	echo "\n  --> Attempting implicit conversion to object using assignment...\n";
 	$c->$name->prop = "Implicit instantiation!";
 	$c->$name = $value; // reset value in case implicit conversion was successful

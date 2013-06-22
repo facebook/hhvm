@@ -1,0 +1,9 @@
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
+HipHop Fatal error: %s

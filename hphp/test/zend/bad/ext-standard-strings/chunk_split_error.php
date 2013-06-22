@@ -7,7 +7,7 @@
 
 /*
 * Testing error conditions of chunk_split() with zero arguments 
-* and for more than expected number of argments 
+* and for more than expected number of arguments 
 */
 
 echo "*** Testing chunk_split() : error conditions ***\n";

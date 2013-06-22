@@ -37,7 +37,8 @@ $keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12,
                        "rdev", "size", "atime", "mtime", "blksize", "blocks");
 var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
 ?>
-===Done===<?php
+===Done===?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation3.tmp");
 unlink("$file_path/lstat_stat_variation_link3a.tmp");

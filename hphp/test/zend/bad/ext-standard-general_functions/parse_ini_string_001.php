@@ -52,15 +52,15 @@ Non_alpha4 = %
 Non_alpha5 = <>
 Non_alpha6 = @
 Non_alpha7 = #
-Non_alpha8 = ^
-Non_alpha9 = -
-Non_alpha10 = :
-Non_alpha11 = ?
-Non_alpha12 = /
-Non_alpha13 = \
+Non_alpha8 = -
+Non_alpha9 = :
+Non_alpha10 = ?
+Non_alpha11 = /
+Non_alpha12 = \
 ;These chars have a special meaning when used in the value,
 ;  hence parser throws an error
-;Non_alpha14 = & 
+;Non_alpha13 = & 
+;Non_alpha14 = ^
 ;Non_alpha15 = {}
 ;Non_alpha16 = |
 ;Non_alpha17 = ~

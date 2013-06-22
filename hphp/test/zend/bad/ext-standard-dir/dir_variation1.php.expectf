@@ -1,23 +1,23 @@
 *** Testing dir() : unexpected values for $directory argument ***
 
 -- Iteration 1 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 2 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 3 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 6 --
@@ -27,14 +27,14 @@ bool(false)
 bool(false)
 
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 9 --
 bool(false)
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 11 --
@@ -53,14 +53,14 @@ bool(false)
 bool(false)
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

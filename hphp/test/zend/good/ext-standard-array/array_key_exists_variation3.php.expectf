@@ -2,21 +2,21 @@
 
 -- Iteration 1 --
 Pass float as $key:
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Cast float to int:
 bool(true)

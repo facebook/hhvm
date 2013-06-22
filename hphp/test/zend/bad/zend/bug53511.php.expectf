@@ -1,4 +1,4 @@
-HipHop Fatal error: %a
+HipHop Fatal error: %s
 Stack trace:
 #0 %sbug53511.php(17): test()
 #1 {main}

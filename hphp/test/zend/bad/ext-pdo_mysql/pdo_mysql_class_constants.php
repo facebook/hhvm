@@ -22,6 +22,19 @@
 		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP']		= true;
 	}
 
+	if (extension_loaded('mysqlnd')) {
+		$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
+	} else if (extension_loaded('mysqli')) {
+	    if (mysqli_get_client_version() > 50605) {
+			$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']	= true;
+	    }
+	} else if (MySQLPDOTest::getClientVersion(MySQLPDOTest::factory()) > 50605) {
+		/* XXX the MySQL client library version isn't exposed with any 
+		constants, the single possibility is to use the PDO::getAttribute().
+		This however will fail with no connection. */
+		$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
+	}
+
 	/*
 	TODO
 

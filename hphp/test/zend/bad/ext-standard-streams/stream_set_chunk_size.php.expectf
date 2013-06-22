@@ -26,9 +26,9 @@ write with size: 50
 int(3)
 
 error conditions
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)

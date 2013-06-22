@@ -13,7 +13,7 @@ object(ArrayObject)#%d (1) {
     int(5)
   }
 }
-HipHop Notice: %a
+HipHop Notice: %s
 int(2)
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
@@ -40,9 +40,9 @@ object(ArrayObject)#%d (1) {
   }
 }
 1=>2
-HipHop Notice: %a
+HipHop Notice: %s
 3=>4
-HipHop Notice: %a
+HipHop Notice: %s
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
   array(0) {

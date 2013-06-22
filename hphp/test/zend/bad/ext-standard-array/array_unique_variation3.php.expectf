@@ -1,6 +1,6 @@
 *** Testing array_unique() : assoc. array with diff. keys passed to $input argument ***
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 -- Iteration 1 --
 array(1) {
   [0]=>

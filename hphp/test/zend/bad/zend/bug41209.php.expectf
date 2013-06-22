@@ -1,4 +1,4 @@
-HipHop Fatal error: %a
+HipHop Fatal error: %s
 Stack trace:
 #0 %s(%d): env::errorHandler(8, '%s', '%s', 34, Array)
 #1 {main}

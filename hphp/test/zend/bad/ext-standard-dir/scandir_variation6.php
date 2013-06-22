@@ -29,7 +29,8 @@ var_dump( scandir($dir_path . "/sub_dir?") );
 var_dump( scandir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $dir_path = dirname(__FILE__) . "/scandir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 

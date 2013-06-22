@@ -27,76 +27,76 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 bool(false)
 bool(false)
 -- Iteration 16 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 17 --
 bool(false)
 bool(false)
 -- Iteration 18 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 19 --
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
 -- Iteration 20 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 21 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 22 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 23 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 25 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 26 --
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 *** Done ***

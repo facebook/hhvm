@@ -1,6 +1,6 @@
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Fatal error: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Fatal error: %s
 Stack trace:
 #0 [internal function]: VariableStream->__construct()
 #1 %s(%d): fopen('var://myvar', 'r+')

@@ -164,9 +164,9 @@ NULL
 NULL
 NULL
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 NULL
 
@@ -188,13 +188,13 @@ NULL
 
 -- Iteration 24 --
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 NULL
 Done

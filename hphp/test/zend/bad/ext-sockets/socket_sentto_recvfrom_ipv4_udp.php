@@ -6,12 +6,14 @@
     if (!socket_set_nonblock($socket)) {
         die('Unable to set nonblocking mode for socket');
     }
-    socket_recvfrom($socket, $buf, 12, 0, $from, $port); // cause warning
+    
     $address = '127.0.0.1';
     socket_sendto($socket, '', 1, 0, $address); // cause warning
     if (!socket_bind($socket, $address, 1223)) {
         die("Unable to bind to $address:1223");
     }
+	
+	var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); //false (EAGAIN - no warning)
 
     $msg = "Ping!";
     $len = strlen($msg);

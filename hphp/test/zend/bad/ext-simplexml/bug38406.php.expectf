@@ -6,6 +6,6 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "something"
 }
-HipHop Notice: %a
-HipHop Warning: %a
+HipHop Notice: %s
+HipHop Warning: %s
 Done

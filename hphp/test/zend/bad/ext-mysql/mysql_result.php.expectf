@@ -1,10 +1,11 @@
-HipHop Warning: %a
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_result.phpt on line %d
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 valid fields
 %unicode|string%(1) "1"
@@ -14,13 +15,13 @@ valid fields
 %unicode|string%(1) "a"
 %unicode|string%(1) "a"
 some invalid fields
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 _id
 %unicode|string%(1) "1"
@@ -28,10 +29,10 @@ _label
 string(2) "aa"
 _foo
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 done!

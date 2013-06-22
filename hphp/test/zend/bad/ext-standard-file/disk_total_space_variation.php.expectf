@@ -30,19 +30,19 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 *** Testing with Binary Input ***
 float(%d)

@@ -1,11 +1,11 @@
 *** Testing get_extension_funcs() : error conditions ***
 
 -- Too few arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Too many arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Invalid extension name --

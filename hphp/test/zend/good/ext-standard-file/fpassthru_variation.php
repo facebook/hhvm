@@ -9,7 +9,7 @@ echo "*** Testing fpassthru() function with files ***\n\n";
 
 echo "--- Testing with different offsets ---\n";
 
-$file_name = dirname(__FILE__)."/fpassthru_variation.tmp";
+$file_name = dirname(__FILE__)."/passthru_variation.tmp";
 $file_write = fopen($file_name, "w");
 fwrite($file_write, "1234567890abcdefghijklmnopqrstuvwxyz");
 fclose($file_write);

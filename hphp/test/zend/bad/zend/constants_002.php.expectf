@@ -1,4 +1,4 @@
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 string(%d) "foo"
 resource(%d) of type (stream)

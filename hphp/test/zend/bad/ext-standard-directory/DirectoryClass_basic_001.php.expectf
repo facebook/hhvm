@@ -39,5 +39,5 @@ Class [ <internal%s> class Directory ] {
 Cannot instantiate a valid Directory directly:
 object(Directory)#%d (0) {
 }
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)

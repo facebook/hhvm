@@ -19,10 +19,10 @@ array(9) {
   [8]=>
   &string(1) "b"
 }
-HipHop Notice: %a
+HipHop Notice: %s
 array(0) {
 }
-HipHop Notice: %a
+HipHop Notice: %s
 array(7) {
   [0]=>
   string(1) "1"

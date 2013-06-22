@@ -1,0 +1,16 @@
+bool(true)
+bool(false)
+object(ModelA)#%d (1) {
+  ["db"]=>
+  object(PDO2)#%d (1) {
+    ["transLevel":protected]=>
+    NULL
+  }
+}
+object(ModelA)#%d (1) {
+  ["db"]=>
+  object(PDO2)#%d (1) {
+    ["transLevel":protected]=>
+    NULL
+  }
+}

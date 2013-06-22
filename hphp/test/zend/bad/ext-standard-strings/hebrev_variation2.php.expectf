@@ -86,13 +86,13 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 .The function tries to avoid breaking words
 "
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
 string(109) "xttel uaisv
@@ -133,13 +133,13 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 .The function tries to avoid breaking words
 "
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 21 --
-HipHop Notice: %a
+HipHop Notice: %s
 string(109) "textual vis
 to
 textrew Heb
@@ -154,7 +154,7 @@ riest
 tionfuncThe .
 "
 -- Iteration 22 --
-HipHop Notice: %a
+HipHop Notice: %s
 string(109) ".The hebrev function converts logical Hebrew text to visual text
 .The function tries to avoid breaking words
 "
@@ -173,10 +173,10 @@ riest
 tionfuncThe .
 "
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 25 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 26 --
 string(109) ".The hebrev function converts logical Hebrew text to visual text

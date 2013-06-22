@@ -7,7 +7,7 @@
 
 function ut_main()
 {
-	$timezone = 'GMT+5'; 
+	$timezone = 'GMT+05:00'; 
 
 	$locale_arr = array (
 		'en_US'

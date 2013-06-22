@@ -1,10 +1,10 @@
 *** Testing preg_match_all() : error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 NULL
 
 Arg value is: Array
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 NULL
 

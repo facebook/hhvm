@@ -7,23 +7,23 @@ int(8)
 int(8)
 
 -- Iteration 3 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 8 --
@@ -51,27 +51,27 @@ int(8)
 int(8)
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 22 --
@@ -81,6 +81,6 @@ int(8)
 int(8)
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

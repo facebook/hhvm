@@ -1,0 +1,10 @@
+Unsetting: unsetme
+Changing: keepme
+array(1) {
+  ["keepme"]=>
+  int(43)
+}
+array(1) {
+  [0]=>
+  string(6) "keepme"
+}

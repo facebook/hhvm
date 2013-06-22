@@ -48,10 +48,10 @@ string(3) "3rd"
 object::offsetGet(4th)
 int(4)
 object::offsetGet(5th)
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 object::offsetGet(6)
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
 ===offsetSet===
 WRITE 1

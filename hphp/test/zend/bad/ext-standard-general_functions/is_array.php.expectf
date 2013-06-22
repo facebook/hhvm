@@ -91,8 +91,8 @@ bool(false)
 bool(false)
 
 *** Testing error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

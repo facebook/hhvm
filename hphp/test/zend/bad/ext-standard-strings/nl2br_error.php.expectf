@@ -1,10 +1,10 @@
 *** Testing nl2br() : error conditions ***
 
 -- Testing nl2br() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing nl2br() function with more than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

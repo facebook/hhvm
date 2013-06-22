@@ -1,3 +1,4 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_assoc.phpt on line %d
 [005]
 array(2) {
   [%u|b%"id"]=>
@@ -20,7 +21,9 @@ array(5) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %a
+HipHop Warning: %s
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_assoc.phpt on line %d
 [010]
 array(5) {
   [%u|b%"id"]=>

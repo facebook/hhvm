@@ -38,9 +38,9 @@ array(6) {
   string(39) "and I know that it descends down on me
 "
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(6) {
   [0]=>

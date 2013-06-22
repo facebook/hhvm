@@ -35,7 +35,7 @@ bool(true)
 bool(true)
 
 ------ stream_set_blocking - 4: -------
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 ------ stream_set_write_buffer - 1: -------

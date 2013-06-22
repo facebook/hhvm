@@ -2,19 +2,19 @@
 
 --- Testing get_html_translation_table() by supplying different values for 'quote_style' argument ---
 -- Iteration 1 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 2 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 3 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 6 --
 array(4) {
@@ -57,19 +57,19 @@ array(3) {
   string(4) "&gt;"
 }
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 array(3) {
@@ -90,7 +90,7 @@ array(3) {
   string(4) "&gt;"
 }
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 18 --
 array(3) {

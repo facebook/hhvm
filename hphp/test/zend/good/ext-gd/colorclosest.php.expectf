@@ -1,5 +1,5 @@
 FF00FF
-HipHop Warning: %a
+HipHop Warning: %s
 Array
 (
     [red] => 255
@@ -22,7 +22,7 @@ Array
     [alpha] => 0
 )
 64FF00FF
-HipHop Warning: %a
+HipHop Warning: %s
 Array
 (
     [red] => 255

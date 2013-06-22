@@ -1,0 +1,9 @@
+bool(true)
+string(7) "foo bar"
+bool(true)
+string(1) "1"
+bool(true)
+string(3) "aaa"
+int(3)
+bool(true)
+int(0)

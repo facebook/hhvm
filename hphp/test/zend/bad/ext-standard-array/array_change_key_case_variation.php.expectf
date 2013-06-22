@@ -1,4 +1,4 @@
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(4) {
   ["ONE"]=>
@@ -14,7 +14,7 @@ array(1) {
   ["one"]=>
   int(4)
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(1) {
   ["ONE"]=>

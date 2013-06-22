@@ -40,13 +40,13 @@ array(1) {
   string(12) "101234567000"
 }
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
 array(1) {
@@ -72,7 +72,7 @@ array(1) {
   string(6) "sample"
 }
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 20 --
 NULL

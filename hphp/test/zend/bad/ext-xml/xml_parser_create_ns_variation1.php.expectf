@@ -1,59 +1,59 @@
 *** Testing xml_parser_create_ns() : usage variations ***
 
 Arg value 0 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 1 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 12345 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value -2345 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 10.5 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value -10.5 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 101234567000 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 1.07654321E-9 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value 0.5 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value  
@@ -63,14 +63,14 @@ Arg value
 resource(%d) of type (xml)
 
 Arg value 1 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value  
 resource(%d) of type (xml)
 
 Arg value 1 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value  
@@ -83,11 +83,11 @@ Arg value
 resource(%d) of type (xml)
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value ISO-8859-1 
@@ -100,15 +100,15 @@ Arg value US-ASCII
 resource(%d) of type (xml)
 
 Arg value UTF-32 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Some Ascii Data 
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value Resource id %s
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 Arg value  

@@ -78,6 +78,7 @@ function create_multipart_message($imap_stream, $mailbox) {
 }
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

@@ -40,6 +40,6 @@ array(20) {
   [19]=>
   string(8) "callback"
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

@@ -13,7 +13,8 @@ var_dump(ldap_get_values_len($link, $entry, "weirdAttribute", "Additional data")
 
 var_dump(ldap_get_values_len($link, $entry, "inexistantAttribute"));
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

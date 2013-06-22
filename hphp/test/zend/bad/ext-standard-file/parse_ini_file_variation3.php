@@ -48,7 +48,8 @@ file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
 ?>
-===Done===<?php
+===Done===?>
+<?php
 
 $pwd = getcwd();
 $f = "parse_ini_file_variation3";

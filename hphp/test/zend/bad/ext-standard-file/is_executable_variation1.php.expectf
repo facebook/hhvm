@@ -10,10 +10,10 @@ bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 8 --
 bool(false)

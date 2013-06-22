@@ -1,9 +1,9 @@
 *** Testing array_walk_recursive() : error conditions - callback parameters ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 callback1() invoked 
 bool(true)
-HipHop Warning: %a
+HipHop Warning: %s
 
 callback2() invoked 
 bool(true)
@@ -14,6 +14,6 @@ bool(true)
 callback2() invoked 
 bool(true)
 -- Testing array_walk_recursive() function with too many callback parameters --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

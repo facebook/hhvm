@@ -13,11 +13,11 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 7 --
@@ -33,7 +33,7 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 12 --

@@ -3,7 +3,7 @@ Create a temporary mailbox and add 1 msgs
 .. mailbox '{%s}%s' created
 
 -- Iteration 1 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 2 --
@@ -16,39 +16,39 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 "
 
 -- Iteration 3 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 12 --
@@ -61,7 +61,7 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 "
 
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 14 --
@@ -74,58 +74,58 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 "
 
 -- Iteration 15 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 22 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 23 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 25 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 26 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 27 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 28 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===DONE===

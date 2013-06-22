@@ -1,8 +1,8 @@
 <?php
-/* Prototype  : DateTimeZone date_timezone_get  ( DateTime $object  )
- * Description: Return time zone relative to given DateTime
+/* Prototype  : DateTimeZone date_timezone_get  ( DateTimeInterface $object  )
+ * Description: Return time zone relative to given DateTimeInterface
  * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::getTimezone
+ * Alias to functions: DateTimeInterface::getTimezone
  */
  
 // Set timezone 

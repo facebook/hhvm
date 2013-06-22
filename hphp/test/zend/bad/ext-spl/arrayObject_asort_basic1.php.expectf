@@ -11,7 +11,7 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>

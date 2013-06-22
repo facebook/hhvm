@@ -1,13 +1,13 @@
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 bool(false)
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 bool(false)
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 bool(false)
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 bool(false)
 done

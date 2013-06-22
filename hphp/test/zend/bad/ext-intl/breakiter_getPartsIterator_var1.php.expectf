@@ -1,0 +1,37 @@
+array(5) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(1) " "
+  [2]=>
+  string(3) "bar"
+  [3]=>
+  string(1) " "
+  [4]=>
+  string(3) "tao"
+}
+array(5) {
+  [0]=>
+  string(3) "foo"
+  [4]=>
+  string(1) " "
+  [5]=>
+  string(3) "bar"
+  [8]=>
+  string(1) " "
+  [9]=>
+  string(3) "tao"
+}
+array(5) {
+  [3]=>
+  string(3) "foo"
+  [5]=>
+  string(1) " "
+  [8]=>
+  string(3) "bar"
+  [9]=>
+  string(1) " "
+  [12]=>
+  string(3) "tao"
+}
+==DONE==

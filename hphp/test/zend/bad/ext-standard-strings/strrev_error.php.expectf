@@ -1,9 +1,9 @@
 *** Testing strrev() : error conditions ***
 -- Testing strrev() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing strrev() function with more than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 *** Done ***

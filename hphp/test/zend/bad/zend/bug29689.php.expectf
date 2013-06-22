@@ -1,6 +1,6 @@
 foo: foo foo2
 bar: bar 
-HipHop Notice: %a
+HipHop Notice: %s
 
 ---baz--
 foo: foo foo2

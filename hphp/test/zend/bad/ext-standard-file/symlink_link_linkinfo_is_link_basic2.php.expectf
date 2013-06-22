@@ -8,9 +8,9 @@ int(%d)
 bool(true)
 
 -- Testing on hard links --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 bool(false)
 Done

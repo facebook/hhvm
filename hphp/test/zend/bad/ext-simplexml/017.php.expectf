@@ -20,8 +20,8 @@ person: Joe
   child: Ann
   child: 
 person: 
-HipHop Notice: %a
+HipHop Notice: %s
   child: 
-HipHop Notice: %a
+HipHop Notice: %s
   child: 
 ===DONE===

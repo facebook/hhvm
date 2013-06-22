@@ -7,7 +7,7 @@ array(1) {
 }
 
 -- comparison function taking too many parameters --
-HipHop Warning: %a
+HipHop Warning: %s
 array(0) {
 }
 

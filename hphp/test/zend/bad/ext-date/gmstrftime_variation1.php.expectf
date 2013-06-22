@@ -37,27 +37,27 @@ string(3) "0.5"
 string(3) "0.5"
 
 --empty array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --int indexed array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --associative array--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --nested arrays--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --uppercase NULL--
@@ -97,9 +97,9 @@ string(14) "Class A object"
 string(14) "Class A object"
 
 --instance of classWithoutToString--
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 --undefined var--

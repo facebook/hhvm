@@ -1,24 +1,24 @@
 *** Testing array_intersect() : passing two dimensional array to both $arr1 and $arr2 arguments ***
 -- Passing the entire 2-D array to $arr1 and $arr2 --
 - With default arguments -
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
 array(4) {
   [0]=>
   array(4) {
@@ -62,34 +62,34 @@ array(4) {
   }
 }
 - With more arguments -
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
 array(4) {
   [0]=>
   array(4) {

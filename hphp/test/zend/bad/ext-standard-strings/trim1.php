@@ -15,7 +15,7 @@ var_dump( trim($null_var) );
 $bool_val = true;
 var_dump( trim($null_var) );
 
-/* second arguemnt charlist as null - does not trim any white spaces */
+/* second argument charlist as null - does not trim any white spaces */
 var_dump( trim("\ttesting trim", "") );
 var_dump( trim("  \ttesting trim  ", NULL) );
 var_dump( trim("\ttesting trim  ", true) );

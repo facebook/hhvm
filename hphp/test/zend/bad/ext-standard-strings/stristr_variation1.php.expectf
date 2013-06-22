@@ -14,13 +14,13 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
 bool(false)
@@ -37,7 +37,7 @@ bool(false)
 -- Iteration 17 --
 string(7) " object"
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 19 --
 bool(false)

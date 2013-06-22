@@ -16,7 +16,8 @@ var_dump(
 	$refs
 );
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

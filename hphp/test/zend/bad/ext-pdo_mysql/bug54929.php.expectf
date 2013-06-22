@@ -6,7 +6,7 @@ array(1) {
   ["f1"]=>
   string(3) "foo"
 }
-HipHop Warning: %a
+HipHop Warning: %s
 array(3) {
   [0]=>
   string(5) "42000"

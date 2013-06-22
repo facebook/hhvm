@@ -1,6 +1,6 @@
 *** Testing strtok() : with different token strings ***
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 
 --- Testing strtok() by supplying different values for 'token' argument ---
 -- Iteration 1 --
@@ -22,19 +22,19 @@ string(37) "this testcase test strtok() function "
 -- Iteration 9 --
 string(37) "this testcase test strtok() function "
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 string(37) "this testcase test strtok() function "
@@ -59,6 +59,6 @@ string(37) "this testcase test strtok() function "
 -- Iteration 25 --
 string(37) "this testcase test strtok() function "
 -- Iteration 26 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

@@ -286,27 +286,27 @@ array(5) {
 }
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration 22 --
@@ -348,6 +348,6 @@ array(5) {
 }
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

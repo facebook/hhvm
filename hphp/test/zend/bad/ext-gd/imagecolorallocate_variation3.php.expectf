@@ -16,19 +16,19 @@ int(655370)
 int(655370)
 
 --empty array--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --int indexed array--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --associative array--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --nested arrays--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --uppercase NULL--
@@ -50,35 +50,35 @@ int(655626)
 int(655370)
 
 --empty string DQ--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --empty string SQ--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --string DQ--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --string SQ--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --mixed case string--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --heredoc--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --instance of classWithToString--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --instance of classWithoutToString--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 --undefined var--
@@ -88,6 +88,6 @@ int(655370)
 int(655370)
 
 --file resource--
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===DONE===

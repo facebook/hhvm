@@ -16,23 +16,23 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 11 --
@@ -54,23 +54,23 @@ string(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &qu
 string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration 22 --
@@ -80,6 +80,6 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

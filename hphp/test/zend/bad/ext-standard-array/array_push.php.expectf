@@ -1,9 +1,9 @@
 *** Testing Error Conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 int(11)
 int(1)

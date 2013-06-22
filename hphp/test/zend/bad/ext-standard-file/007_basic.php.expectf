@@ -6,9 +6,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'wb' --
@@ -17,9 +17,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'wt' --
@@ -28,9 +28,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'w+' --
@@ -39,9 +39,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'w+b' --
@@ -50,9 +50,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'w+t' --
@@ -61,9 +61,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'r' --
@@ -72,9 +72,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'rb' --
@@ -83,9 +83,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'rt' --
@@ -94,9 +94,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'r+' --
@@ -105,9 +105,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'r+b' --
@@ -116,9 +116,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'r+t' --
@@ -127,9 +127,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'a' --
@@ -138,9 +138,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'ab' --
@@ -149,9 +149,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'at' --
@@ -160,9 +160,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'a+' --
@@ -171,9 +171,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'a+t' --
@@ -182,9 +182,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'a+b' --
@@ -193,9 +193,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Iteration with mode 'x' --
@@ -204,9 +204,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -216,9 +216,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -228,9 +228,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -240,9 +240,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -252,9 +252,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -264,9 +264,9 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (Unknown)
 

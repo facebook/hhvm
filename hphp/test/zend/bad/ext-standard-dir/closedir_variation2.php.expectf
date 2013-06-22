@@ -5,7 +5,7 @@ NULL
 Directory Handle: resource(%d) of type (Unknown)
 
 -- Close directory handle second time: --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Directory Handle: resource(%d) of type (Unknown)
 ===DONE===

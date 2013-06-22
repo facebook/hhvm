@@ -37,6 +37,7 @@ displayOverviewFields($a[1]);
 imap_close($stream_id);
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

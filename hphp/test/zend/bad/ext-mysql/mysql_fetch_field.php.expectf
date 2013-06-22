@@ -1,3 +1,4 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_field.phpt on line %d
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "ID"
@@ -55,8 +56,8 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"

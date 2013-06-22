@@ -1,0 +1,15 @@
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => %s
+    [rawOffset] => %i
+    [currentOffset] => %i
+)
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => %s
+    [rawOffset] => %i
+    [currentOffset] => %i
+)
+==DONE==

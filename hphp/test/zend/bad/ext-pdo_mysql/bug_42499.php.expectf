@@ -6,7 +6,7 @@ array(1) {
     %unicode|string%(1) "a"
   }
 }
-HipHop Warning: %a
+HipHop Warning: %s
 Native Prepared Statements...
 array(1) {
   [0]=>
@@ -15,5 +15,5 @@ array(1) {
     %unicode|string%(1) "a"
   }
 }
-HipHop Warning: %a
+HipHop Warning: %s
 done!

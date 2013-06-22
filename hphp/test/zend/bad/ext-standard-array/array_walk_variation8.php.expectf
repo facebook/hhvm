@@ -4,6 +4,6 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

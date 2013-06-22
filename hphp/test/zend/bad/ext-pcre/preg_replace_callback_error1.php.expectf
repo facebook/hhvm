@@ -1,19 +1,19 @@
 *** Testing preg_replace_callback() : error conditions ***
 
 Arg value is abcdef
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value is /[a-zA-Z]
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value is [a-zA-Z]/
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value is /[a-zA-Z]/F
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value is Array

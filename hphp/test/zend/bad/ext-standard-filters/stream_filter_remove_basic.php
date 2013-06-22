@@ -23,7 +23,8 @@ fpassthru( $fp );
 fclose( $fp );
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 
 $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 unlink( $file );

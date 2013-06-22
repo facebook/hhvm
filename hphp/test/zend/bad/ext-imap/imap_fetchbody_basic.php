@@ -49,6 +49,7 @@ $overview = imap_fetch_overview($stream_id, 1);
 echo "Seen Flag: ";
 var_dump( $overview[0]->seen );
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

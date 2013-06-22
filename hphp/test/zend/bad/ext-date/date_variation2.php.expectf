@@ -22,19 +22,19 @@ string(25) "January 1, 1970, 12:59 am"
 string(24) "January 1, 1970, 1:00 am"
 
 -- empty array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- int indexed array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- associative array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- nested arrays --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- uppercase NULL --
@@ -56,35 +56,35 @@ string(24) "January 1, 1970, 1:00 am"
 string(24) "January 1, 1970, 1:00 am"
 
 -- empty string DQ --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- empty string SQ --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- string DQ --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- string SQ --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- mixed case string --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- heredoc --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- instance of classWithToString --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- instance of classWithoutToString --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- undefined var --
@@ -94,6 +94,6 @@ string(24) "January 1, 1970, 1:00 am"
 string(24) "January 1, 1970, 1:00 am"
 
 -- resource --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===DONE===

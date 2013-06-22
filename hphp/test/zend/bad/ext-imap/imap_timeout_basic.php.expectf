@@ -1,7 +1,7 @@
 Checking with no parameters
-HipHop Warning: %a
+HipHop Warning: %s
 Checking with incorrect parameter type
-HipHop Warning: %a
+HipHop Warning: %s
 GET values:
 int(%d)
 int(%d)

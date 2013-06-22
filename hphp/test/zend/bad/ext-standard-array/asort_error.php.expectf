@@ -1,13 +1,13 @@
 *** Testing asort() : error conditions ***
 
 -- Testing asort() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- Testing asort() function with more than expected no. of arguments --
 
 Sort flag = SORT_REGULAR
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(2) {
   [0]=>
@@ -17,7 +17,7 @@ array(2) {
 }
 
 Sort flag = SORT_STRING
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(2) {
   [0]=>
@@ -27,7 +27,7 @@ array(2) {
 }
 
 Sort flag = SORT_NUMERIC
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(2) {
   [0]=>

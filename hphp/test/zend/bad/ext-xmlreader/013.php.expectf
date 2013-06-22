@@ -1,5 +1,5 @@
 string(3) "123"
 string(3) "456"
 ===FAIL===
-HipHop Warning: %a
+HipHop Warning: %s
 ===DONE===

@@ -1,10 +1,10 @@
 *** Testing get_headers() : error conditions ***
 
 -- Testing get_headers() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing get_headers() function with more than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

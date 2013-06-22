@@ -18,19 +18,19 @@ string(20) "1. 07 65 43 21 E- 9 "
 -- Iteration 9 --
 string(5) "0. 5 "
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 string(1) " "
@@ -59,6 +59,6 @@ string(1) " "
 -- Iteration 27 --
 string(1) " "
 -- Iteration 28 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

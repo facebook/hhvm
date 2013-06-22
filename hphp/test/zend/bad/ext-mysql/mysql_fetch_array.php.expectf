@@ -1,3 +1,4 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_array.phpt on line %d
 [005]
 array(4) {
   [0]=>
@@ -70,6 +71,6 @@ array(11) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 done!

@@ -1,4 +1,4 @@
-HipHop Warning: %a
+HipHop Warning: %s
 [003] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,
@@ -7,8 +7,8 @@ HipHop Warning: %a
 array(0) {
 }
 now the same with emulated PS
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 [005] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,

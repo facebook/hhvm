@@ -1,4 +1,4 @@
-HipHop Warning: %a
+HipHop Warning: %s
 [003] Execute has failed, '42S22' array (
   0 => '42S22',
   1 => 1054,
@@ -13,5 +13,5 @@ array(1) {
     string(4) "row1"
   }
 }
-HipHop Warning: %a
-HipHop Fatal error: %a
+HipHop Warning: %s
+HipHop Fatal error: %s

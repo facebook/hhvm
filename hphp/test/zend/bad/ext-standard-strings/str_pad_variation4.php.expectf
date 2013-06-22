@@ -6,28 +6,28 @@ string(20) "Test string*********"
 -- Iteration 3 --
 string(20) "****Test string*****"
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
 string(20) "****Test string*****"
@@ -36,13 +36,13 @@ string(20) "****Test string*****"
 -- Iteration 14 --
 string(20) "****Test string*****"
 -- Iteration 15 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 18 --
 string(20) "Test string*********"
@@ -57,7 +57,7 @@ string(20) "*********Test string"
 -- Iteration 23 --
 string(20) "*********Test string"
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 25 --
 string(20) "*********Test string"

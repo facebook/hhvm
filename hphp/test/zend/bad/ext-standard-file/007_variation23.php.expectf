@@ -8,5 +8,5 @@ string(0) ""
 int(0)
 bool(true)
 %unicode|string%(7) "Unknown"
-HipHop Warning: %a
+HipHop Warning: %s
 *** Done ***

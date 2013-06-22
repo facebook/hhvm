@@ -70,6 +70,6 @@ string(12) "Hello World!"
 string(0) ""
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

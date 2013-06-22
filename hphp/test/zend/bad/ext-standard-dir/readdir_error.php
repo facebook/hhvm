@@ -24,7 +24,8 @@ var_dump( readdir($dir_handle, $extra_arg) );
 // close the handle so can remove dir in CLEAN section
 closedir($dir_handle);
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $path = dirname(__FILE__) . "/readdir_error";
 rmdir($path);
 ?> 

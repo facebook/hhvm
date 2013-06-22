@@ -105,10 +105,10 @@ bool(false)
 bool(false)
 
 *** Testing error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

@@ -1,4 +1,4 @@
 *** Test substituting argument 2 with object values ***
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 NULL

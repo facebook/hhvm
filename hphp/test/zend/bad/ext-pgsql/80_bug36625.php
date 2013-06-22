@@ -31,4 +31,5 @@ var_dump($found > 0);
 var_dump(file_exists($tracefile));
 
 ?>
-===DONE===<?php unlink($tracefile); ?>
+===DONE===?>
+<?php unlink($tracefile); ?>

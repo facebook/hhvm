@@ -27,9 +27,9 @@ imagefilledellipse($image_lge, 200, 150, 300, 200, $col_ellipse);
 imagepng($image_lge, $dest_lge);
 
 // Get new dimensions
-$percent = 0.5; // new image 50% of orginal
+$percent = 0.5; // new image 50% of original
 list($width, $height) = getimagesize($dest_lge);
-echo "Size of orginal: width=". $width . " height=" . $height . "\n";
+echo "Size of original: width=". $width . " height=" . $height . "\n";
 
 $new_width = $width * $percent;
 $new_height = $height * $percent;

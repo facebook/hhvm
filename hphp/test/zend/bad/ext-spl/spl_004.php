@@ -40,8 +40,8 @@ var_dump(iterator_apply($it, 'test'));
 
 echo "===ERRORS===\n";
 var_dump(iterator_apply($it, 'test', 1));
-var_dump(iterator_apply($it, 'non_existing_functon'));
-var_dump(iterator_apply($it, 'non_existing_functon', NULL, 2));
+var_dump(iterator_apply($it, 'non_existing_function'));
+var_dump(iterator_apply($it, 'non_existing_function', NULL, 2));
 
 ?>
 ===DONE===

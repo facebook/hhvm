@@ -12,7 +12,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 * Testing strspn() : with different unexpected values for mask argument
 */
 
-echo "*** Testing strspn() : with diferent unexpected values of mask argument ***\n";
+echo "*** Testing strspn() : with different unexpected values of mask argument ***\n";
 
 $str = 'string_val';
 $start = 1;

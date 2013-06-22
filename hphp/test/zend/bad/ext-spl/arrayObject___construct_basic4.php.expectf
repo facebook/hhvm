@@ -11,9 +11,9 @@ string(8) "changed2"
 bool(true)
 bool(true)
   - Unset:
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
 NULL
 NULL
   - After:
@@ -38,8 +38,8 @@ string(8) "changed2"
 bool(true)
 bool(true)
   - Unset:
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 NULL
 NULL
   - After:

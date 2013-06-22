@@ -1,0 +1,6 @@
+*** Testing rewinddir() : error conditions ***
+
+-- Testing rewinddir() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

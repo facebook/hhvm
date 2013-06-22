@@ -10,7 +10,8 @@ $result = ldap_search($link, "dc=my-domain,dc=com", "(cn=userA)", array("cn", "s
 $result = ldap_search($link, "dc=my-domain,dc=com", "(cn=userZ)", array("cn", "sn"));
 var_dump(ldap_get_entries($link, $result));
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

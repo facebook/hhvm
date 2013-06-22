@@ -1,6 +1,6 @@
 *** Testing strtok() : with first argument as non-string ***
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 
 --- Testing strtok() by supplying different values for 'str' argument ---
 -- Iteration 1 --
@@ -22,19 +22,19 @@ string(11) "1.07654321E"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -59,6 +59,6 @@ bool(false)
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

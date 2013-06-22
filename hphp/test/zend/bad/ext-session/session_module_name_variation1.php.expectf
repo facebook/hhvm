@@ -1,5 +1,5 @@
 *** Testing session_module_name() : variation ***
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 bool(true)
 string(%d) "%s"

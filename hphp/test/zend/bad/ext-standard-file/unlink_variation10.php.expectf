@@ -17,5 +17,5 @@ directory unlinked
 directory unlinked
 
 --- try to unlink a directory ---
-HipHop Warning: %a
+HipHop Warning: %s
 ===DONE===

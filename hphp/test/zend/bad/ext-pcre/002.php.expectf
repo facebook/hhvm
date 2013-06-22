@@ -1,16 +1,18 @@
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 string(0) ""
 string(12) "a${1b${1c${1"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
+Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in hphp/test/zend/bad/ext-pcre/002.phpt on line 12
+
 Parse error: %s in %s002.php(12) : regexp code on line 1
-HipHop Fatal error: %a
+HipHop Fatal error: %s
 for ($ in %s002.php on line 12

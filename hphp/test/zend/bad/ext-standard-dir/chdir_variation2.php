@@ -56,7 +56,8 @@ var_dump(chdir("../../$level_one_dir_name"));
 var_dump(getcwd());
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level_one/level_two");
 rmdir("$file_path/level_one");

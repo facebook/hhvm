@@ -1,5 +1,5 @@
 *** Testing pathinfo() with miscelleneous input arguments ***
-HipHop Notice: %a
+HipHop Notice: %s
 -- Iteration 1 --
 array(3) {
   ["dirname"]=>
@@ -105,15 +105,15 @@ string(21) "array( array(), null)"
 string(0) ""
 string(21) "array( array(), null)"
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 10 --
 array(3) {

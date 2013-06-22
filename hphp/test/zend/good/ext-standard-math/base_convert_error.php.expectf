@@ -1,0 +1,9 @@
+*** Testing base_convert() : error conditions ***
+Incorrect number of arguments
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+Incorrect input
+HipHop Fatal error: %s

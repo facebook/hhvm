@@ -209,6 +209,19 @@ bad_tests = (
 other_files = (
     '/ext-curl/curl_testdata1.txt',
     '/ext-curl/curl_testdata2.txt',
+    '/ext-date/examine_diff.inc',
+    '/ext-date/DateTime_data-absolute.inc',
+    '/ext-date/DateTime_data-spring-type2-type3.inc',
+    '/ext-date/DateTime_data-spring-type3-type2.inc',
+    '/ext-date/DateTime_data-fall-type3-type2.inc',
+    '/ext-date/DateTime_data-february.inc',
+    '/ext-date/DateTime_data-dates.inc',
+    '/ext-date/DateTime_data-spring-type2-type2.inc',
+    '/ext-date/DateTime_data-fall-type2-type3.inc',
+    '/ext-date/DateTime_data-massive.inc',
+    '/ext-date/DateTime_data-spring-type3-type3.inc',
+    '/ext-date/DateTime_data-fall-type3-type3.inc',
+    '/ext-date/DateTime_data-fall-type2-type2.inc',
     '/ext-exif/bug48378.jpeg',
     '/ext-gd/Tuffy.ttf',
     '/ext-gd/bug37346.gif',
@@ -229,10 +242,13 @@ other_files = (
     '/ext-mcrypt/vectors.txt',
     '/ext-mysql/connect.inc',
     '/ext-openssl/005_crt.txt',
+    '/ext-openssl/bug28382cert.txt',
     '/ext-openssl/bug37820cert.pem',
     '/ext-openssl/bug37820key.pem',
     '/ext-openssl/bug39217cert1.txt',
     '/ext-openssl/bug39217cert2.txt',
+    '/ext-openssl/bug41033.pem',
+    '/ext-openssl/bug41033pub.pem',
     '/ext-openssl/cert.crt',
     '/ext-openssl/openssl.cnf',
     '/ext-openssl/private.key',
@@ -293,6 +309,7 @@ other_files = (
     '/tests-lang/inc.inc',
     '/tests-lang/inc_throw.inc',
     '/tests/quicktester.inc',
+    '/zend/bug46665_autoload.inc',
     '/zend/bug54804.inc',
     '/zend/nowdoc.inc',
     '/zend/ns_022.inc',
@@ -414,7 +431,7 @@ def walk(filename, source):
             exp = exp.replace('\n\nWarning:', '\nWarning:')
             exp = exp.replace('\n\nNotice:', '\nNotice:')
 
-            match_rest_of_line = '%a'
+            match_rest_of_line = '%s'
             if key == 'EXPECTREGEX':
                 match_rest_of_line = '.+'
 
@@ -582,6 +599,8 @@ def walk(filename, source):
     if '/ext-spl/SplFileObject_' in full_dest_filename:
         test = test.replace('testdata.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
+    if '/ext-spl/SplFileObject_rewind_error001.php' in full_dest_filename:
+        test = test.replace("?>", "unlink('SplFileObject_rewind_error001.csv');\n?>")
 
     file(full_dest_filename, 'w').write(test)
 
@@ -638,8 +657,9 @@ stdout = subprocess.Popen(
 
 # segfaults also print on stderr
 stdout = re.sub('\nsh: line 1:.*', '', stdout)
-# fbmake, you are crazy
-results = json.loads('['+stdout.strip().replace("\n", ",\n")+']')[-1]['results']
+# just the last line
+last_line = stdout.strip().split("\n")[-1]
+results = json.loads(last_line)['results']
 
 if args.verbose:
     print results

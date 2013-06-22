@@ -66,7 +66,8 @@
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	print "done!";<?php
+	print "done!";?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_commit');

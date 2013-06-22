@@ -14,8 +14,8 @@ array(5) {
   ["test4"]=>
   string(1) "4"
 }
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
 bool(false)
 array(5) {
   ["test0"]=>

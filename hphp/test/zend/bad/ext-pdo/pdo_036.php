@@ -1,10 +1,10 @@
 <?php
 
-$instance = new reflectionclass('pdorow');
+$instance = new reflectionclass('pdostatement');
 $x = $instance->newInstance();
 var_dump($x);
 
-$instance = new reflectionclass('pdostatement');
+$instance = new reflectionclass('pdorow');
 $x = $instance->newInstance();
 var_dump($x);
 

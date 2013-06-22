@@ -122,7 +122,7 @@ array(3) {
   int(45)
 }
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -133,7 +133,7 @@ array(3) {
   int(45)
 }
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -144,7 +144,7 @@ array(3) {
   int(45)
 }
 -- Iteration 15 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -155,7 +155,7 @@ array(3) {
   int(45)
 }
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -166,7 +166,7 @@ array(3) {
   int(45)
 }
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -177,7 +177,7 @@ array(3) {
   int(45)
 }
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -188,7 +188,7 @@ array(3) {
   int(45)
 }
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>
@@ -199,7 +199,7 @@ array(3) {
   int(45)
 }
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(3) {
   [1]=>

@@ -1,18 +1,18 @@
 *** Testing array_map() : error conditions ***
 
 -- Testing array_map() function with Zero arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing array_map() function with one less than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing array_map() function with less no. of arrays than callback function arguments --
-HipHop Warning: %a
-HipHop Notice: %a
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
+HipHop Warning: %s
+HipHop Notice: %s
 array(2) {
   [0]=>
   int(0)

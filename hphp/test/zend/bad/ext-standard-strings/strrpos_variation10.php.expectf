@@ -18,19 +18,19 @@ bool(false)
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 15 --
 bool(false)
@@ -41,7 +41,7 @@ bool(false)
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
 -- Iteration 20 --
 bool(false)
@@ -52,7 +52,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- Iteration 25 --
 bool(false)

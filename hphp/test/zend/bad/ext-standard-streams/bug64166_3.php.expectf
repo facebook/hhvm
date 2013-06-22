@@ -1,0 +1,13 @@
+string(15) "FIRST=20
+SECOND"
+string(19) "FIRST=
+=20
+SECON=
+D"
+string(18) "FIRST=20=20
+SECOND"
+string(24) "FIRST=
+=20=
+=20
+SECON=
+D"

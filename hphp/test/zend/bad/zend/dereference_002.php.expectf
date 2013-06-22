@@ -33,7 +33,7 @@ array(2) {
 }
 int(1)
 NULL
-HipHop Notice: %a
+HipHop Notice: %s
 NULL
-HipHop Notice: %a
-HipHop Fatal error: %a
+HipHop Notice: %s
+HipHop Fatal error: %s

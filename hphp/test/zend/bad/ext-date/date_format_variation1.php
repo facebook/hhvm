@@ -1,8 +1,8 @@
 <?php
-/* Prototype  : string date_format  ( DateTime $object  , string $format  )
+/* Prototype  : string date_format  ( DateTimeInterface $object  , string $format  )
  * Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::format
+ * Alias to functions: DateTimeInterface::format
  */
  
 echo "*** Testing date_format() : usage variation -  unexpected values to first argument \$object***\n";

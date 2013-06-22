@@ -1542,7 +1542,7 @@ bool(true)
 
 *** Testing rmdir() on a non-empty directory ***
 bool(true)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***

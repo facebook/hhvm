@@ -1,7 +1,7 @@
 bool(true)
-HipHop Warning: %a
-HipHop Warning: %a
-HipHop Warning: %a
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
 bool(false)
 bool(true)
 resource(%d) of type (stream)

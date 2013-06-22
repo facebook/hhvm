@@ -1,4 +1,4 @@
 *** Testing iconv_strpos() : error conditions ***
-HipHop Notice: %a
+HipHop Notice: %s
 bool(false)
 Done

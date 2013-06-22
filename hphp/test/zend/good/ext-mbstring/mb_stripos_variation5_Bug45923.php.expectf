@@ -2,10 +2,10 @@
 
 **-- Offset is: -10 --**
 -- ASCII String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 **-- Offset is: 0 --**
@@ -28,33 +28,33 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

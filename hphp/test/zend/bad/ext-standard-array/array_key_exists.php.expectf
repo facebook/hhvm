@@ -127,25 +127,25 @@ bool(false)
 bool(true)
 
 *** Testing error conditions ***
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 *** Testing operation on objects ***
@@ -155,6 +155,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

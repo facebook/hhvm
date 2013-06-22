@@ -30,7 +30,8 @@ var_dump( lchown( array(), $uid ) );
 var_dump( lchown( $filename, -5 ) );
 
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown.txt';
 unlink($filename);

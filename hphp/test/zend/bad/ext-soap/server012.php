@@ -1,5 +1,6 @@
 <?php
 parse_str("WSDL", $_GET);
+$_REQUEST = array_merge($_REQUEST, $_GET);
 
 function Add($x,$y) {
   return $x+$y;

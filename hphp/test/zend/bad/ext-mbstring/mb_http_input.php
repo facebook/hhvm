@@ -1,7 +1,9 @@
 <?php
 parse_str("b=日本語0123456789日本語カタカナひらがな", $_GET);
+$_REQUEST = array_merge($_REQUEST, $_GET);
 
 parse_str("a=日本語0123456789日本語カタカナひらがな", $_POST);
+$_REQUEST = array_merge($_REQUEST, $_POST);
 
 // TODO: This is not a real test.... Need to change so that it does real testing
 //$debug = true;

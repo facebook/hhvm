@@ -6,7 +6,7 @@ array(3) {
   [12]=>
   string(9) "'aa' 'bb'"
 }
-HipHop Notice: %a
+HipHop Notice: %s
 array(1) {
   [0]=>
   string(7) "'A'rray"

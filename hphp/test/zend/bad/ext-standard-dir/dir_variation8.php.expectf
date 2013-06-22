@@ -1,12 +1,12 @@
 *** Testing dir() : checking with wildcard characters ***
 -- wildcard = '*' --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 -- wildcard = '?' --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 Done

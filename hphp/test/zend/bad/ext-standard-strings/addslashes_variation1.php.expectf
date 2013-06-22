@@ -1,6 +1,6 @@
 *** Testing addslashes() : with non-string type argument ***
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 
 --- Testing addslashes() by supplying different values for 'str' argument ---
 -- Iteration 1 --
@@ -22,19 +22,19 @@ string(13) "1.07654321E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -55,7 +55,7 @@ string(0) ""
 -- Iteration 23 --
 string(7) "obj\'ct"
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 25 --
 string(0) ""

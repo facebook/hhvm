@@ -5,6 +5,6 @@ bool(true)
 bool(true)
 Closing statement: true
 Open BLOB with wrong parameter count
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

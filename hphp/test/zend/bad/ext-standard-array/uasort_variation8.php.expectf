@@ -28,9 +28,9 @@ array(5) {
   string(6) "orange"
 }
 -- Testing uasort() with language construct as 'cmp_function' --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Testing uasort() with language construct as 'cmp_function' --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

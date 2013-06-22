@@ -16,7 +16,8 @@ var_dump(
 	@ldap_search($link, "dc=my-domain,dc=com", "(o=my-domain)")
 );
 ?>
-===DONE===<?php
+===DONE===?>
+<?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

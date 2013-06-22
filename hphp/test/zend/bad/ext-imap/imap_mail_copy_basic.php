@@ -22,6 +22,7 @@ var_dump(imap_mail_copy($imap_stream, '1', 'INBOX.'.$mailbox_prefix));
 
 imap_close($imap_stream);
 ?>
-===Done===<?php 
+===Done===?>
+<?php 
 require_once('clean.inc');
 ?>

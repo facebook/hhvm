@@ -1,5 +1,5 @@
 string(3) "Foo"
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
 string(3) "Baz"
 ===DONE===

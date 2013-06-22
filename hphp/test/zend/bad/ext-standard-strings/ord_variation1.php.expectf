@@ -18,13 +18,13 @@ int(45)
 -- Iteration 9 --
 int(49)
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 13 --
 int(49)
@@ -41,7 +41,7 @@ int(0)
 -- Iteration 19 --
 int(115)
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 -- Iteration 21 --
 int(0)

@@ -1,6 +1,6 @@
 tell=int(23)
 move to the end of the file
-HipHop Warning: %a
+HipHop Warning: %s
 int(-1)
 tell=int(23)
 tell=int(47)

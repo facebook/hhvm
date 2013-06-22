@@ -1,14 +1,14 @@
 *** Testing floatval() and doubleval() : error conditions ***
 
 -- Testing floatval() and doubleval() function with no arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Testing floatval() and doubleval() function with more than expected no. of arguments --
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 ===DONE===

@@ -57,27 +57,27 @@ object(DateTime)#%d (3) {
 }
 
 -- empty array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- int indexed array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- associative array --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- nested arrays --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- uppercase NULL --
@@ -217,9 +217,9 @@ bool(false)
 bool(false)
 
 -- instance of classWithoutToString --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 
 -- undefined var --
@@ -259,8 +259,8 @@ object(DateTime)#%d (3) {
 }
 
 -- resource --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===DONE===

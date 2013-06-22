@@ -7,8 +7,8 @@ array(0) {
 
 --- testing autoload ---
 attempting to autoload non-existent
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 ===DONE===

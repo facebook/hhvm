@@ -16,23 +16,23 @@ Arg value 0.5
 string(8) "No error"
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value  
@@ -54,23 +54,23 @@ Arg value
 string(8) "No error"
 
 Arg value  
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value  
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value Some Ascii Data 
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 Arg value  

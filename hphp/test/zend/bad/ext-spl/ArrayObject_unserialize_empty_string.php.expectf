@@ -1,4 +1,4 @@
-HipHop Fatal error: %a
+HipHop Fatal error: %s
 Stack trace:
 #0 %s(%d): ArrayObject->unserialize('')
 #1 {main}

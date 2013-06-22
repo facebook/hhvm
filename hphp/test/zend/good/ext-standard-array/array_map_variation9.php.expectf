@@ -11,14 +11,14 @@ array(4) {
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
-HipHop Warning: %a
-HipHop Notice: %a
-HipHop Warning: %a
-HipHop Notice: %a
-HipHop Warning: %a
-HipHop Notice: %a
-HipHop Warning: %a
-HipHop Notice: %a
+HipHop Warning: %s
+HipHop Notice: %s
+HipHop Warning: %s
+HipHop Notice: %s
+HipHop Warning: %s
+HipHop Notice: %s
+HipHop Warning: %s
+HipHop Notice: %s
 array(4) {
   [0]=>
   array(1) {

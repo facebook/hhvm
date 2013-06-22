@@ -2,17 +2,17 @@ resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (Unknown)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (Unknown)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)

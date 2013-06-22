@@ -226,7 +226,7 @@ array(5) {
 }
 
 -- Iteration 16 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -242,7 +242,7 @@ array(5) {
 }
 
 -- Iteration 17 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -258,7 +258,7 @@ array(5) {
 }
 
 -- Iteration 18 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -274,7 +274,7 @@ array(5) {
 }
 
 -- Iteration 19 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -290,7 +290,7 @@ array(5) {
 }
 
 -- Iteration 20 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -306,7 +306,7 @@ array(5) {
 }
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>
@@ -352,7 +352,7 @@ array(5) {
 }
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(5) {
   [0]=>

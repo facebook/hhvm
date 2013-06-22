@@ -24,13 +24,13 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 -- File is not created --
-HipHop Warning: %a
+HipHop Warning: %s
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 -- File is not created --
-HipHop Warning: %a
+HipHop Warning: %s
 -- Iteration 8 --
 File name is => %s%et%s
 File permissions are => 100666

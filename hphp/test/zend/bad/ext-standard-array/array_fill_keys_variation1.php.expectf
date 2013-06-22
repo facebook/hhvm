@@ -17,7 +17,7 @@ array(4) {
 }
 
 -- Testing array_fill_keys() function with mixed array --
-HipHop Notice: %a
+HipHop Notice: %s
 array(7) {
   ["Resource id #%d"]=>
   string(6) "simple"

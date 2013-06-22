@@ -1,19 +1,19 @@
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
 array(1) {
   ["test"]=>
   string(0) ""
 }
-HipHop Warning: %a
+HipHop Warning: %s
  in %sparse_ini_file.php on line 20
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
  in %sparse_ini_file.php on line 26
 bool(false)
 array(1) {

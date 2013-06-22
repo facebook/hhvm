@@ -47,4 +47,4 @@ object(Test)#%d (3) {
   string(3) "kji"
 }
 ===FAIL===
-HipHop Fatal error: %a
+HipHop Fatal error: %s

@@ -10,5 +10,5 @@ mnopqrst	uvwxyz
 int(37)
 bool(true)
 string(7) "Unknown"
-HipHop Warning: %a
+HipHop Warning: %s
 *** Done ***

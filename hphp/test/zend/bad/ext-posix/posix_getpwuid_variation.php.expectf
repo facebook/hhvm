@@ -1,6 +1,6 @@
 *** Testing posix_getpwuid() : usage variations ***
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
 
 Arg value 10.5 
 valid output
@@ -16,30 +16,30 @@ valid output
 
 Arg value 0.5 
 valid output
-HipHop Notice: %a
+HipHop Notice: %s
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
-HipHop Notice: %a
+HipHop Notice: %s
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
-HipHop Notice: %a
+HipHop Notice: %s
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
-HipHop Notice: %a
+HipHop Notice: %s
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
-HipHop Notice: %a
+HipHop Notice: %s
 
 Arg value Array 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
 
 Arg value  
@@ -61,19 +61,19 @@ Arg value
 valid output
 
 Arg value  
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
 
 Arg value  
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
 
 Arg value string 
-HipHop Warning: %a
+HipHop Warning: %s
 valid output
 
 Arg value  
@@ -81,5 +81,4 @@ valid output
 
 Arg value  
 valid output
-
-HipHop Fatal error: %a
+HipHop Fatal error: %s

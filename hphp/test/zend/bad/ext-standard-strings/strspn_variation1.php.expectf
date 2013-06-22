@@ -46,43 +46,43 @@ int(0)
 int(0)
 
 -- Iteration with str value as "Array"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
-NULL
-
--- Iteration with str value as "Array"
-HipHop Warning: %a
-NULL
-HipHop Warning: %a
-NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration with str value as "Array"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
-NULL
-
--- Iteration with str value as "Array"
-HipHop Warning: %a
-NULL
-HipHop Warning: %a
-NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 
 -- Iteration with str value as "Array"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
+NULL
+
+-- Iteration with str value as "Array"
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with str value as "Array"
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
 NULL
 
 -- Iteration with str value as ""
@@ -141,10 +141,10 @@ bool(false)
 bool(false)
 
 -- Iteration with str value as "Resource id #%d"
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 Done

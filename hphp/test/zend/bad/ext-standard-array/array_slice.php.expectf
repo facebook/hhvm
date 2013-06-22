@@ -1,17 +1,17 @@
 *** Output for Zero Argument ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Output for Single array Argument ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Output for invalid number of Arguments ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Output for scalar Argument ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Output for string Argument ***
-HipHop Warning: %a
+HipHop Warning: %s
 
 *** Iteration 1 ***
 

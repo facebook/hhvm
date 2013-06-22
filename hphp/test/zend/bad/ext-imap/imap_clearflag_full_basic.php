@@ -40,6 +40,7 @@ var_dump(imap_search($imap_stream, "DELETED"));
 
 imap_close($imap_stream);
 ?>
-===Done===<?php 
+===Done===?>
+<?php 
 require_once('clean.inc');
 ?>

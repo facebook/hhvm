@@ -1,5 +1,5 @@
 string(12) "test thrown!"
-HipHop Fatal error: %a
+HipHop Fatal error: %s
 Stack trace:
 #0 [internal function]: foo(Object(test))
 #1 {main}

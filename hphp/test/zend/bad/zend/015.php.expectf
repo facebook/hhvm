@@ -1,14 +1,14 @@
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Notice: %a
+HipHop Notice: %s
 bool(true)
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(false)
-HipHop Warning: %a
+HipHop Warning: %s
 bool(true)
 
 Deprecated: error in hphp/test/zend/bad/zend/015.phpt on line %d

@@ -15,8 +15,8 @@ $dpu = unserialize($ser); // $dpu has invalid values???
 var_dump($dpu);
 
 echo "Unserialized:\r\n";
-// ???which leads to CRASH:
 foreach($dpu as $dt) {
         echo $dt->format('Y-m-d H:i:s')."\r\n";
 }
 ?>
+==DONE==

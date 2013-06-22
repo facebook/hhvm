@@ -28,23 +28,23 @@ string(26) "312e3037363534333231452d39"
 string(6) "302e35"
 
 -- Iteration 10 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 11 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 13 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 15 --
@@ -81,6 +81,6 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 ===DONE===

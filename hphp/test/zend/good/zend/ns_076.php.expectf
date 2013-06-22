@@ -1,9 +1,9 @@
-HipHop Notice: %a
-HipHop Notice: %a
-HipHop Notice: %a
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
 unknown
 array(1) {
   ["unknown"]=>
   %s(7) "unknown"
 }
-HipHop Fatal error: %a
+HipHop Fatal error: %s

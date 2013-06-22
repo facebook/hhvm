@@ -1,39 +1,39 @@
 *** Testing mb_convert_encoding() : usage variations ***
 
 -- Iteration 1 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 2 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 3 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 4 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 5 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 6 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 7 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 8 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 9 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 10 --
@@ -43,14 +43,14 @@ string(24) "68656c6c6f2c20776f726c64"
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 12 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 13 --
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 14 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 15 --
@@ -72,7 +72,7 @@ string(24) "68656c6c6f2c20776f726c64"
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 21 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 
 -- Iteration 22 --
@@ -82,6 +82,6 @@ string(24) "68656c6c6f2c20776f726c64"
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 24 --
-HipHop Warning: %a
+HipHop Warning: %s
 string(0) ""
 Done

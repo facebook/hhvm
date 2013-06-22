@@ -8,7 +8,7 @@ array(2) {
   [1]=>
   string(%d) "%s"
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(2) {
   [0]=>
@@ -16,7 +16,7 @@ array(2) {
   [1]=>
   string(%d) "%s"
 }
-HipHop Warning: %a
+HipHop Warning: %s
 NULL
 array(2) {
   [0]=>

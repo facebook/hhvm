@@ -17,6 +17,7 @@ endforeach()
 # remove additional non-portable items
 if (APPLE)
     list(REMOVE_ITEM files ${CMAKE_CURRENT_SOURCE_DIR}/folly/Benchmark.cpp)
+    list(REMOVE_ITEM files ${CMAKE_CURRENT_SOURCE_DIR}/folly/experimental/exception_tracer/ExceptionTracerTest.cpp)
     list(REMOVE_ITEM files ${CMAKE_CURRENT_SOURCE_DIR}/folly/experimental/exception_tracer/ExceptionTracer.cpp)
     list(REMOVE_ITEM files ${CMAKE_CURRENT_SOURCE_DIR}/folly/experimental/exception_tracer/ExceptionTracerLib.cpp)
     list(REMOVE_ITEM files ${CMAKE_CURRENT_SOURCE_DIR}/folly/experimental/io/AsyncIO.cpp)

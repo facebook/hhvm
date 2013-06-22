@@ -776,8 +776,30 @@ public:
     return m_constants.contains(clsCnsName);
   }
 
+  /*
+   * Look up the actual value of a class constant.
+   *
+   * Performs dynamic initialization if necessary.
+   */
   TypedValue* clsCnsGet(const StringData* clsCnsName) const;
+
+  /*
+   * Look up a class constant's TypedValue if it doesn't require
+   * dynamic initialization.
+   *
+   * The TypedValue represents the constant's value iff it is a
+   * scalar, otherwise it has m_type set to KindOfUninit.  (Non-scalar
+   * class constants need to run 86cinit code to determine their value
+   * at runtime.)
+   */
+  TypedValue* cnsNameToTV(const StringData* name, Slot& slot) const;
+
+  /*
+   * Provide the current runtime type of this class constant.  This
+   * has predictive value for the translator.
+   */
   DataType clsCnsType(const StringData* clsCnsName) const;
+
   void initialize() const;
   void initPropHandle() const;
   unsigned propHandle() const { return m_propDataCache; }
@@ -886,7 +908,6 @@ private:
   void setPropData(PropInitVec* propData) const;
   void setSPropData(TypedValue* sPropData) const;
   TypedValue* getSPropData() const;
-  TypedValue* cnsNameToTV(const StringData* name, Slot& slot) const;
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,

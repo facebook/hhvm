@@ -662,6 +662,7 @@ private:
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
   IRInstruction* makeMarker(Offset bcOff);
   void emitMarker();
+  SSATmp* staticTVCns(const TypedValue*);
 
 private: // Exit trace creation routines.
   IRTrace* getExitTrace(Offset targetBcOff = -1);
@@ -729,6 +730,13 @@ private:
   Unit*       curUnit()   const { return curFunc()->unit(); }
   Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
+
+  /*
+   * Predictates for testing information about the relationship of a
+   * class to the current context class.
+   */
+  bool classIsUniqueOrCtxParent(const Class*) const;
+  bool classIsPersistentOrCtxParent(const Class*) const;
 
   /*
    * Return the SrcKey for the next HHBC (whether it is in this

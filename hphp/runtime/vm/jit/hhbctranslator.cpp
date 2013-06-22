@@ -36,6 +36,31 @@ TRACE_SET_MOD(hhir);
 
 using namespace HPHP::Transl;
 
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+bool classIsUnique(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    (cls->attrs() & AttrUnique);
+}
+
+bool classIsPersistent(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    (cls->attrs() & AttrPersistent);
+}
+
+bool classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) &&
+    !(cls->attrs() & (AttrInterface | AttrTrait));
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
                                Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
@@ -54,6 +79,20 @@ HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
   emitMarker();
   auto const fp = gen(DefFP);
   gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
+}
+
+bool HhbcTranslator::classIsUniqueOrCtxParent(const Class* cls) const {
+  if (!cls) return false;
+  if (classIsUnique(cls)) return true;
+  if (!curClass()) return false;
+  return curClass()->classof(cls);
+}
+
+bool HhbcTranslator::classIsPersistentOrCtxParent(const Class* cls) const {
+  if (!cls) return false;
+  if (classIsPersistent(cls)) return true;
+  if (!curClass()) return false;
+  return curClass()->classof(cls);
 }
 
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
@@ -492,27 +531,12 @@ void HhbcTranslator::emitCns(uint32_t id) {
   SSATmp* result = nullptr;
   Type cnsType = Type::Cell;
   if (tv) {
-    switch (tv->m_type) {
-      case KindOfUninit:
-        // a dynamic system constant. always a slow lookup
-        result = gen(LookupCns, cnsType, cnsNameTmp);
-        break;
-      case KindOfBoolean:
-        result = cns((bool)tv->m_data.num);
-        break;
-      case KindOfInt64:
-        result = cns(tv->m_data.num);
-        break;
-      case KindOfDouble:
-        result = cns(tv->m_data.dbl);
-        break;
-      case KindOfString:
-      case KindOfStaticString:
-        result = cns(tv->m_data.pstr);
-        break;
-      default:
-        not_reached();
-    }
+    result =
+      // KindOfUninit is a dynamic system constant. always a slow
+      // lookup.
+      tv->m_type == KindOfUninit
+        ? gen(LookupCns, cnsType, cnsNameTmp)
+        : staticTVCns(tv);
   } else {
     SSATmp* c1 = gen(LdCns, cnsType, cnsNameTmp);
     result = m_tb->cond(
@@ -1505,9 +1529,26 @@ void HhbcTranslator::emitCmp(Opcode opc) {
   gen(DecRef, src1);
 }
 
+// Return a constant SSATmp representing a static value held in a
+// TypedValue.  The TypedValue may be a non-scalar, but it must have a
+// static value.
+SSATmp* HhbcTranslator::staticTVCns(const TypedValue* tv) {
+  switch (tv->m_type) {
+  case KindOfNull:         return m_tb->genDefInitNull();
+  case KindOfBoolean:      return cns(!!tv->m_data.num);
+  case KindOfInt64:        return cns(tv->m_data.num);
+  case KindOfString:
+  case KindOfStaticString: return cns(tv->m_data.pstr);
+  case KindOfDouble:       return cns(tv->m_data.dbl);
+  case KindOfArray:        return cns(tv->m_data.parr);
+  default:                 always_assert(0);
+  }
+}
+
 void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
-  auto const clsCnsName = ClsCnsName { lookupStringId(clsNameId),
-                                       lookupStringId(cnsNameId) };
+  auto const clsNameStr = lookupStringId(clsNameId);
+  auto const cnsNameStr = lookupStringId(cnsNameId);
+  auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
   // If we have to side exit, do the target cache lookup before
   // chaining to another Tracelet so forward progress still happens.
@@ -1517,6 +1558,27 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId) {
       return genFor(t, LookupClsCns, Type::Cell, clsCnsName);
     }
   );
+
+  /*
+   * If the class is already defined in this request, and this
+   * constant is a scalar constant, we can just compile it to a
+   * literal.
+   *
+   * We need to guard at runtime that the class is defined in this
+   * request and has the Class* we expect.  If the class is persistent
+   * or a parent of the current context, we don't need the guard.
+   */
+  if (auto const cls = Unit::lookupClass(clsNameStr)) {
+    Slot ignore;
+    auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
+    if (tv && tv->m_type != KindOfUninit) {
+      if (!classIsPersistentOrCtxParent(cls)) {
+        gen(CheckDefinedClsEq, CheckDefinedClsData{clsNameStr, cls}, sideExit);
+      }
+      push(staticTVCns(tv));
+      return;
+    }
+  }
 
   auto const cns = gen(LdClsCns, clsCnsName, Type::Uncounted);
   gen(CheckInit, sideExit, cns);

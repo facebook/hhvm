@@ -191,28 +191,6 @@ struct IfCountNotStatic {
   }
 };
 
-bool
-classIsUnique(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    (cls->attrs() & AttrUnique);
-}
-
-bool
-classIsUniqueOrCtxParent(const Class* cls) {
-  if (!cls) return false;
-  if (classIsUnique(cls)) return true;
-  Class* ctx = arGetContextClass(curFrame());
-  if (!ctx) return false;
-  return ctx->classof(cls);
-}
-
-bool
-classIsUniqueNormalClass(const Class* cls) {
-  return classIsUnique(cls) &&
-    !(cls->attrs() & (AttrInterface | AttrTrait));
-}
-
 // Segfault handler: figure out if it's an intentional segfault
 // (timeout exception) and if so, act appropriately. Otherwise, pass
 // the signal on.

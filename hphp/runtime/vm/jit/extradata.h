@@ -300,6 +300,23 @@ struct ClsCnsName : IRExtraData {
   const StringData* cnsName;
 };
 
+/*
+ * The name of a class, and the expected Class* at runtime.
+ */
+struct CheckDefinedClsData : IRExtraData {
+  CheckDefinedClsData(const StringData* clsName, const Class* cls)
+    : clsName(clsName)
+    , cls(cls)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(clsName->data());
+  }
+
+  const StringData* clsName;
+  const Class* cls;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -361,6 +378,7 @@ X(ReqBindJmpZero,               ReqBindJccData);
 X(ReqBindJmpNZero,              ReqBindJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
+X(CheckDefinedClsEq,            CheckDefinedClsData);
 
 #undef X
 

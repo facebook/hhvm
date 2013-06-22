@@ -405,6 +405,12 @@ CheckInitMem S0:PtrToGen S1:ConstInt -> L
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to L.
 
+CheckDefinedClsEq<className,classPtr> -> L
+
+  Compare the currently defined class of name `className' with
+  `classPtr'; if they aren't equal or if `className' is not defined,
+  branch to L.
+
 GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
 
   Perform reffiness guard checks.  Operands:

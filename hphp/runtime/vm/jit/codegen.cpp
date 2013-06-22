@@ -4206,6 +4206,14 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
                 reg[TVOFF(m_data)], inst->taken());
 }
 
+void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
+  auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
+  auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
+  auto const ch      = TargetCache::allocKnownClass(clsName);
+  m_as.cmpq(cls, rVmTl[ch]);
+  emitFwdJcc(CC_NZ, inst->taken());
+}
+
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(inst->numSrcs() == 5);
 

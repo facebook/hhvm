@@ -1190,13 +1190,11 @@ TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
   return clsCns;
 }
 
-/*
- * Class::clsCnsType: provide the current runtime type of this class
- *   constant. This has predictive value for the translator.
- */
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
   TypedValue* cns = cnsNameToTV(cnsName, slot);
+  // TODO: lookup the constant in target cache in case it's dynamic
+  // and already initialized.
   if (!cns) return KindOfUninit;
   return cns->m_type;
 }

@@ -40,10 +40,13 @@ VS($ret, 0);
 chdir("/tmp/");
 VS(system("/bin/pwd"), "/tmp");
 
+$errout = tempnam('/tmp', 'vmtesterrout');
+unlink($errout);
+
 $descriptorspec =
   array(array("pipe", "r"),
         array("pipe", "w"),
-        array("file", "/tmp/error-output.txt", "a"));
+        array("file", $errout, "a"));
 
 putenv("inherit_me=please");
 $process = proc_open('echo $inherit_me', $descriptorspec, $pipes);
@@ -64,14 +67,14 @@ VS(proc_close($process), 0);
 $descriptorspec =
   array(array("pipe", "r"),
         array("pipe", "w"),
-        array("file", "/tmp/error-output.txt", "a"));
+        array("file", $errout, "a"));
 $cwd = "/tmp";
 $env = array("some_option" => "aeiou");
 
-$process = proc_open("php", $descriptorspec, $pipes, $cwd, $env);
+$process = proc_open("sh", $descriptorspec, $pipes, $cwd, $env);
 VERIFY($process != false);
 
-fprintf($pipes[0], "<?php print(getenv('some_option')); ?>");
+fprintf($pipes[0], "echo Sup");
 fclose($pipes[0]);
 fpassthru($pipes[1]);
 VS(proc_close($process), 0);
@@ -79,17 +82,17 @@ VS(proc_close($process), 0);
 $descriptorspec =
   array(array("pipe", "r"),
         array("pipe", "w"),
-        array("file", "/tmp/error-output.txt", "a"));
-$process = proc_open('php', $descriptorspec, $pipes);
+        array("file", $errout, "a"));
+$process = proc_open('cat', $descriptorspec, $pipes);
 VERIFY($process != false);
 VERIFY(proc_terminate($process));
 // still need to close it, not to leave a zombie behind
 proc_close($process);
 
-$process = proc_open('php', $descriptorspec, $pipes);
+$process = proc_open('cat', $descriptorspec, $pipes);
 VERIFY($process != false);
 $ret = proc_get_status($process);
-VS($ret['command'], 'php');
+VS($ret['command'], 'cat');
 VERIFY($ret['pid'] > 0);
 VERIFY($ret['running']);
 VERIFY(!$ret['signaled']);

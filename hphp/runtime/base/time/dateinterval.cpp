@@ -55,7 +55,8 @@ bool DateInterval::setDateString(CStrRef date_string) {
   timelib_error_container *errors = nullptr;
 
   time = timelib_strtotime((char*)date_string.data(), date_string.size(),
-                           &errors, TimeZone::GetDatabase());
+                           &errors, TimeZone::GetDatabase(),
+                           TimeZone::GetTimeZoneInfoRaw);
   int error_count = errors->error_count;
   DateTime::setLastErrors(errors);
 

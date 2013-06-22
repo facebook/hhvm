@@ -60,8 +60,8 @@ public:
    * Constructing a timezone object by name or a raw pointer (internal).
    */
   TimeZone();
-  TimeZone(CStrRef name);
-  TimeZone(timelib_tzinfo *tzi);
+  explicit TimeZone(CStrRef name);
+  explicit TimeZone(timelib_tzinfo *tzi);
 
   static StaticString s_class_name;
   // overriding ResourceData
@@ -135,7 +135,11 @@ private:
   /**
    * Look up cache and if found return it, otherwise, read it from database.
    */
-  static TimeZoneInfo GetTimeZoneInfo(CStrRef name);
+  static TimeZoneInfo GetTimeZoneInfo(char* name, const timelib_tzdb* db);
+  /**
+   * only for timelib, don't use it unless you are passing to a timelib func
+   */
+  static timelib_tzinfo* GetTimeZoneInfoRaw(char* name, const timelib_tzdb* db);
 
   TimeZoneInfo m_tzi; // raw pointer
 };

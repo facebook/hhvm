@@ -87,20 +87,24 @@ const timelib_tzdb *TimeZone::GetDatabase() {
   return Database;
 }
 
-TimeZoneInfo TimeZone::GetTimeZoneInfo(CStrRef name) {
+TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
   MapStringToTimeZoneInfo &Cache = s_timezone_data->Cache;
 
-  MapStringToTimeZoneInfo::const_iterator iter = Cache.find(name.data());
+  MapStringToTimeZoneInfo::const_iterator iter = Cache.find(name);
   if (iter != Cache.end()) {
     return iter->second;
   }
 
-  TimeZoneInfo tzi(timelib_parse_tzfile((char *)name.data(), GetDatabase()),
-                   tzinfo_deleter());
+  TimeZoneInfo tzi(timelib_parse_tzfile(name, db), tzinfo_deleter());
   if (tzi) {
-    Cache[name.data()] = tzi;
+    Cache[name] = tzi;
   }
   return tzi;
+}
+
+timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
+                                             const timelib_tzdb* db) {
+  return GetTimeZoneInfo(name, db).get();
 }
 
 bool TimeZone::IsValid(CStrRef name) {
@@ -201,7 +205,7 @@ TimeZone::TimeZone() {
 }
 
 TimeZone::TimeZone(CStrRef name) {
-  m_tzi = GetTimeZoneInfo(name);
+  m_tzi = GetTimeZoneInfo((char*)name.data(), GetDatabase());
 }
 
 TimeZone::TimeZone(timelib_tzinfo *tzi) {

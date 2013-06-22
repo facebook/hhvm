@@ -153,7 +153,7 @@ Array DateTime::Parse(CStrRef datetime) {
   struct timelib_error_container *error;
   timelib_time *parsed_time =
     timelib_strtotime((char*)datetime.data(), datetime.size(), &error,
-                      TimeZone::GetDatabase());
+                      TimeZone::GetDatabase(), TimeZone::GetTimeZoneInfoRaw);
 
   Array ret;
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_year,      y);
@@ -422,7 +422,8 @@ void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
 
 void DateTime::modify(CStrRef diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
-                                             nullptr, TimeZone::GetDatabase());
+                                             nullptr, TimeZone::GetDatabase(),
+                                             TimeZone::GetTimeZoneInfoRaw);
   internalModify(&(tmp_time->relative), tmp_time->have_relative, 1);
   timelib_time_dtor(tmp_time);
 }
@@ -739,13 +740,15 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
   if (format) {
 #ifdef TIMELIB_HAVE_INTERVAL
     t = timelib_parse_from_format((char*)format, (char*)input.data(),
-                                  input.size(), &error, TimeZone::GetDatabase());
+                                  input.size(), &error, TimeZone::GetDatabase(),
+                                  TimeZone::GetTimeZoneInfoRaw);
 #else
     throw NotImplementedException("timelib version too old");
 #endif
   } else {
     t = timelib_strtotime((char*)input.data(), input.size(),
-                                 &error, TimeZone::GetDatabase());
+                                 &error, TimeZone::GetDatabase(),
+                                 TimeZone::GetTimeZoneInfoRaw);
   }
   int error1 = error->error_count;
   setLastErrors(error);
@@ -772,7 +775,7 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
   }
 
   m_time = TimePtr(t, time_deleter());
-  m_tz = NEWOBJ(TimeZone)(t->tz_info);
+  m_tz = NEWOBJ(TimeZone)(timelib_tzinfo_clone(t->tz_info));
   return true;
 }
 

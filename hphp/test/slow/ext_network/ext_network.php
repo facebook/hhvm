@@ -4,7 +4,7 @@
 
 var_dump(gethostname() != false);
 
-var_dump(gethostbyaddr("127.0.0.1"));
+var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
 var_dump(gethostbyname("localhost"));
 var_dump(gethostbynamel("localhost")[0]);
 var_dump(getprotobyname("tcp"));

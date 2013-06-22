@@ -69,9 +69,8 @@ $descriptorspec =
         array("pipe", "w"),
         array("file", $errout, "a"));
 $cwd = "/tmp";
-$env = array("some_option" => "aeiou");
 
-$process = proc_open("sh", $descriptorspec, $pipes, $cwd, $env);
+$process = proc_open("sh", $descriptorspec, $pipes, $cwd);
 VERIFY($process != false);
 
 fprintf($pipes[0], "echo Sup");

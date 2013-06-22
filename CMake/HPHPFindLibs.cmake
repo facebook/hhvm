@@ -335,6 +335,11 @@ if (FREEBSD)
 	endif()
 endif()
 
+if (APPLE)
+	find_library(LIBINTL_LIBRARIES NAMES intl libintl)
+	find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
+
 #find_package(BISON REQUIRED)
 #find_package(FLEX REQUIRED)
 
@@ -393,6 +398,11 @@ endif()
 
 if (FREEBSD)
 	target_link_libraries(${target} ${EXECINFO_LIB})
+endif()
+
+if (APPLE)
+	target_link_libraries(${target} ${LIBINTL_LIBRARIES})
+	target_link_libraries(${target} ${KERBEROS_LIB})
 endif()
 
 	target_link_libraries(${target} ${BFD_LIB})

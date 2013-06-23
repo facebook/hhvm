@@ -506,14 +506,14 @@ void BaseExecutionContext::onRequestShutdown() {
 
 void BaseExecutionContext::executeFunctions(CArrRef funcs) {
   for (ArrayIter iter(funcs); iter; ++iter) {
-    Array callback = iter.second();
-    vm_call_user_func(callback[s_name], callback[s_args]);
+    Array callback = iter.second().toArray();
+    vm_call_user_func(callback[s_name], callback[s_args].toArray());
   }
 }
 
 void BaseExecutionContext::onShutdownPreSend() {
   if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
-    executeFunctions(m_shutdowns[ShutDown]);
+    executeFunctions(m_shutdowns[ShutDown].toArray());
     m_shutdowns.remove(ShutDown);
   }
   obFlushAll(); // in case obStart was called without obFlush
@@ -526,11 +526,11 @@ void BaseExecutionContext::onShutdownPostSend() {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
       if (!m_shutdowns.isNull()) {
         if (m_shutdowns.exists(PostSend)) {
-          executeFunctions(m_shutdowns[PostSend]);
+          executeFunctions(m_shutdowns[PostSend].toArray());
           m_shutdowns.remove(PostSend);
         }
         if (m_shutdowns.exists(CleanUp)) {
-          executeFunctions(m_shutdowns[CleanUp]);
+          executeFunctions(m_shutdowns[CleanUp].toArray());
           m_shutdowns.remove(CleanUp);
         }
       }
@@ -632,7 +632,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
         if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-        if (top.exists(s_line)) line = top.rvalAt(s_line);
+        if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
       }
     }
 
@@ -659,7 +659,7 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       Array arr = ee->getBackTrace();
       if (!arr.isNull()) {
         backtrace = arr;
-        Array top = backtrace.rvalAt(0);
+        Array top = backtrace.rvalAt(0).toArray();
         if (!top.isNull()) {
           errfile = top.rvalAt(s_file);
           errline = top.rvalAt(s_line).toInt64();
@@ -699,7 +699,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
         if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-        if (top.exists(s_line)) line = top.rvalAt(s_line);
+        if (top.exists(s_line)) line = top.rvalAt(s_line).toInt32();
       }
     }
   }
@@ -792,7 +792,7 @@ void BaseExecutionContext::setenv(CStrRef name, CStrRef value) {
 
 String BaseExecutionContext::getenv(CStrRef name) const {
   if (m_envs.exists(name)) {
-    return m_envs[name];
+    return m_envs[name].toString();
   }
   char *value = ::getenv(name.data());
   if (value) {

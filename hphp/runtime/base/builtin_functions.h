@@ -91,12 +91,6 @@ bool empty(CVarRef v, CStrRef, bool = false) = delete;
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
-/**
- * These functions are rarely performance bottlenecks, so we are not fully
- * type-specialized, although we could.
- */
-
-inline bool logical_xor(bool v1, bool v2) { return (v1 ? 1:0) ^ (v2 ? 1:0);}
 inline Variant bitwise_or (CVarRef v1, CVarRef v2) { return v1 | v2;}
 inline Variant bitwise_and(CVarRef v1, CVarRef v2) { return v1 & v2;}
 inline Variant bitwise_xor(CVarRef v1, CVarRef v2) { return v1 ^ v2;}
@@ -126,12 +120,6 @@ inline Variant negate(CVarRef v) { return -(Variant)v; }
 
 inline String concat(CStrRef s1, CStrRef s2)         {
   return s1 + s2;
-}
-inline String &concat_assign(String &s1, litstr s2)  {
-  return s1 += s2;
-}
-inline String &concat_assign(String &s1, CStrRef s2) {
-  return s1 += s2;
 }
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3);

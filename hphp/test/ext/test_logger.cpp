@@ -57,11 +57,11 @@ bool TestLogger::initializeRun() {
 
   Array response = postData(CREATE_MAP1("runData", dataArr));
 
-  if (!response[s_result]) {
+  if (!response[s_result].toBoolean()) {
     return false;
   }
 
-  run_id = response[s_result][s_runId];
+  run_id = response[s_result][s_runId].toInt32();
 
   return true;
 }
@@ -76,8 +76,9 @@ bool TestLogger::finishRun() {
                            "runData", CREATE_MAP1("stillRunning", false));
 
   Array response = postData(data);
-  if (response[s_result])
+  if (response[s_result].toBoolean()) {
     return true;
+  }
   return false;
 }
 
@@ -92,8 +93,9 @@ bool TestLogger::logTest(Array test) {
                            "tests",   CREATE_VECTOR1(test));
 
   Array response = postData(data);
-  if (response[s_result])
+  if (response[s_result].toBoolean()) {
     return true;
+  }
   return false;
 }
 
@@ -112,7 +114,7 @@ Array TestLogger::postData(Array arr) {
 
   client.post(log_url, str.c_str(), str.length(), response);
 
-  return f_json_decode(response.detach(), true);
+  return f_json_decode(response.detach(), true).toArray();
 }
 
 std::string TestLogger::getRepoRoot() {

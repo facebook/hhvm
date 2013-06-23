@@ -46,10 +46,10 @@ String f_base64_encode(CStrRef data) {
 
 Variant f_get_headers(CStrRef url, int format /* = 0 */) {
   Variant c = f_curl_init();
-  f_curl_setopt(c, k_CURLOPT_URL, url);
-  f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c, k_CURLOPT_HEADER, 1);
-  Variant res = f_curl_exec(c);
+  f_curl_setopt(c.toObject(), k_CURLOPT_URL, url);
+  f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
+  f_curl_setopt(c.toObject(), k_CURLOPT_HEADER, 1);
+  Variant res = f_curl_exec(c.toObject());
   if (same(res, false)) {
     return false;
   }
@@ -60,14 +60,14 @@ Variant f_get_headers(CStrRef url, int format /* = 0 */) {
     response = response.substr(0, pos);
   }
 
-  Array ret = f_explode("\r\n", response);
+  Array ret = f_explode("\r\n", response).toArray();
   if (!format) {
     return ret;
   }
 
   Array assoc;
   for (ArrayIter iter(ret); iter; ++iter) {
-    Array tokens = f_explode(": ", iter.second(), 2);
+    Array tokens = f_explode(": ", iter.second(), 2).toArray();
     if (tokens.size() == 2) {
       assoc.set(tokens[0], tokens[1]);
     } else {
@@ -102,8 +102,8 @@ Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
                    f, ref(matches), k_PREG_SET_ORDER);
 
   Array ret = Array::Create();
-  for (ArrayIter iter(matches); iter; ++iter) {
-    Array pair = iter.second();
+  for (ArrayIter iter(matches.toArray()); iter; ++iter) {
+    Array pair = iter.second().toArray();
     ret.set(normalize_variable_name(pair[1].toString()), pair[2]);
   }
   return ret;

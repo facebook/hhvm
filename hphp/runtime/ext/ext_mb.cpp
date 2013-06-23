@@ -3959,7 +3959,7 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
   } suppressed_hdrs = { 0, 0 };
 
   static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");
-  String s = ht_headers[s_CONTENT_TYPE];
+  String s = ht_headers[s_CONTENT_TYPE].toString();
   if (!s.isNull()) {
     char *tmp;
     char *param_name;

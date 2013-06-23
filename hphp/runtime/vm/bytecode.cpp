@@ -3691,7 +3691,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
   if (IS_STRING_TYPE(c1->m_type) && IS_STRING_TYPE(c2->m_type)) {
-    tvCellAsVariant(c2) = concat(tvCellAsVariant(c2), tvCellAsCVarRef(c1));
+    tvCellAsVariant(c2) = concat(
+      tvCellAsVariant(c2).toString(), tvCellAsCVarRef(c1).toString());
   } else {
     tvCellAsVariant(c2) = concat(tvCellAsVariant(c2).toString(),
                                  tvCellAsCVarRef(c1).toString());
@@ -3717,6 +3718,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
     m_stack.popC();                                                           \
   }                                                                           \
 } while (0)
+
 #define MATHOP_DOUBLE(OP)                                                     \
   else if (c2->m_type == KindOfDouble                                         \
              && c1->m_type == KindOfDouble) {                                 \
@@ -3766,22 +3768,27 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDiv(PC& pc) {
 }
 #undef MATHOP_DOUBLE
 
+// XXX:
+Numeric moduloVar(CVarRef v1, CVarRef v2) {
+  return modulo(v1.toInt64(), v2.toInt64());
+}
+
 #define MATHOP_DOUBLE(OP)
 inline void OPTBLD_INLINE VMExecutionContext::iopMod(PC& pc) {
-  MATHOP(%, modulo);
+  MATHOP(%, moduloVar);
 }
 #undef MATHOP_DOUBLE
 #undef MATHOP_DIVCHECK
 
-#define LOGICOP(OP) do {                                                      \
-  NEXT();                                                                     \
-  Cell* c1 = m_stack.topC();                                                  \
-  Cell* c2 = m_stack.indC(1);                                                 \
-  {                                                                           \
-    tvCellAsVariant(c2) =                                                     \
-      (bool)(bool(tvCellAsVariant(c2)) OP bool(tvCellAsVariant(c1)));         \
-  }                                                                           \
-  m_stack.popC();                                                             \
+#define LOGICOP(OP) do {                                                \
+  NEXT();                                                               \
+  Cell* c1 = m_stack.topC();                                            \
+  Cell* c2 = m_stack.indC(1);                                           \
+  {                                                                     \
+    tvCellAsVariant(c2) =                                               \
+      bool(tvCellAsVariant(c2).toBoolean() OP tvCellAsVariant(c1).toBoolean()); \
+  }                                                                     \
+  m_stack.popC();                                                       \
 } while (0)
 
 inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
@@ -3792,27 +3799,28 @@ inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
-  tvCellAsVariant(c1) = !bool(tvCellAsVariant(c1));
+  tvCellAsVariant(c1) = !tvCellAsVariant(c1).toBoolean();
 }
 
-#define CMPOP(OP, VOP) do {                                                   \
-  NEXT();                                                                     \
-  Cell* c1 = m_stack.topC();                                                  \
-  Cell* c2 = m_stack.indC(1);                                                 \
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64_t a = c2->m_data.num;                                                 \
-    int64_t b = c1->m_data.num;                                                 \
-    c2->m_data.num = (a OP b);                                                \
-    c2->m_type = KindOfBoolean;                                               \
-    m_stack.popX();                                                           \
-  } else {                                                                    \
-    int64_t result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1));             \
-    tvRefcountedDecRefCell(c2);                                               \
-    c2->m_data.num = result;                                                  \
-    c2->m_type = KindOfBoolean;                                               \
-    m_stack.popC();                                                           \
-  }                                                                           \
+#define CMPOP(OP, VOP) do {                                         \
+  NEXT();                                                           \
+  Cell* c1 = m_stack.topC();                                        \
+  Cell* c2 = m_stack.indC(1);                                       \
+  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {     \
+    int64_t a = c2->m_data.num;                                     \
+    int64_t b = c1->m_data.num;                                     \
+    c2->m_data.num = (a OP b);                                      \
+    c2->m_type = KindOfBoolean;                                     \
+    m_stack.popX();                                                 \
+  } else {                                                          \
+    int64_t result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1)); \
+    tvRefcountedDecRefCell(c2);                                     \
+    c2->m_data.num = result;                                        \
+    c2->m_type = KindOfBoolean;                                     \
+    m_stack.popC();                                                 \
+  }                                                                 \
 } while (0)
+
 inline void OPTBLD_INLINE VMExecutionContext::iopSame(PC& pc) {
   CMPOP(==, same);
 }
@@ -4059,40 +4067,42 @@ inline void OPTBLD_INLINE VMExecutionContext::iopJmp(PC& pc) {
   pc += offset - 1;
 }
 
-#define JMPOP(OP, VOP) do {                                                   \
-  Cell* c1 = m_stack.topC();                                                  \
-  if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {             \
-    int64_t n = c1->m_data.num;                                                 \
-    if (n OP 0) {                                                             \
-      NEXT();                                                                 \
-      DECODE_JMP(Offset, offset);                                             \
-      JMP_SURPRISE_CHECK();                                                   \
-      pc += offset - 1;                                                       \
-      m_stack.popX();                                                         \
-    } else {                                                                  \
-      pc += 1 + sizeof(Offset);                                               \
-      m_stack.popX();                                                         \
-    }                                                                         \
-  } else {                                                                    \
-    if (VOP(tvCellAsCVarRef(c1))) {                                           \
-      NEXT();                                                                 \
-      DECODE_JMP(Offset, offset);                                             \
-      JMP_SURPRISE_CHECK();                                                   \
-      pc += offset - 1;                                                       \
-      m_stack.popC();                                                         \
-    } else {                                                                  \
-      pc += 1 + sizeof(Offset);                                               \
-      m_stack.popC();                                                         \
-    }                                                                         \
-  }                                                                           \
+#define JMPOP(OP, VOP) do {                                       \
+  Cell* c1 = m_stack.topC();                                      \
+  if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) { \
+    int64_t n = c1->m_data.num;                                   \
+    if (n OP 0) {                                                 \
+      NEXT();                                                     \
+      DECODE_JMP(Offset, offset);                                 \
+      JMP_SURPRISE_CHECK();                                       \
+      pc += offset - 1;                                           \
+      m_stack.popX();                                             \
+    } else {                                                      \
+      pc += 1 + sizeof(Offset);                                   \
+      m_stack.popX();                                             \
+    }                                                             \
+  } else {                                                        \
+    if (VOP(tvCellAsCVarRef(c1))) {                               \
+      NEXT();                                                     \
+      DECODE_JMP(Offset, offset);                                 \
+      JMP_SURPRISE_CHECK();                                       \
+      pc += offset - 1;                                           \
+      m_stack.popC();                                             \
+    } else {                                                      \
+      pc += 1 + sizeof(Offset);                                   \
+      m_stack.popC();                                             \
+    }                                                             \
+  }                                                               \
 } while (0)
+
 inline void OPTBLD_INLINE VMExecutionContext::iopJmpZ(PC& pc) {
-  JMPOP(==, !bool);
+  JMPOP(==, !toBoolean);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopJmpNZ(PC& pc) {
-  JMPOP(!=, bool);
+  JMPOP(!=, toBoolean);
 }
+
 #undef JMPOP
 #undef JMP_SURPRISE_CHECK
 

@@ -810,7 +810,7 @@ ArrayData* PolicyArray::pop(Variant &value) {
 
   // Match PHP 5.3.1 semantics
   if (!hasStrKey(pos)
-      && Store::nextKey() == 1 + static_cast<int64_t>(key(pos))) {
+      && Store::nextKey() == 1 + key(pos).toInt64()) {
     nextKeyPop();
   }
 

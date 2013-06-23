@@ -171,7 +171,7 @@ String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
-    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args]));
+    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args].toArray()));
   } catch (Object &e) {
     out.set(s_exception, e);
   }

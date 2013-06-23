@@ -1925,7 +1925,7 @@ Variant c_DOMNode::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNode::t___isset(Variant name) {
-  return domnode_properties_map.isset(this, name);
+  return domnode_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNode::t_appendchild(CObjRef newnode) {
@@ -2492,7 +2492,7 @@ Variant c_DOMAttr::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMAttr::t___isset(Variant name) {
-  return domattr_properties_map.isset(this, name);
+  return domattr_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMAttr::t_isid() {
@@ -2560,7 +2560,7 @@ Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMCharacterData::t___isset(Variant name) {
-  return domcharacterdata_properties_map.isset(this, name);
+  return domcharacterdata_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMCharacterData::t_appenddata(CStrRef arg) {
@@ -2771,7 +2771,7 @@ Variant c_DOMText::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMText::t___isset(Variant name) {
-  return domtext_properties_map.isset(this, name);
+  return domtext_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMText::t_iswhitespaceinelementcontent() {
@@ -3069,7 +3069,7 @@ Variant c_DOMDocument::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMDocument::t___isset(Variant name) {
-  return domdocument_properties_map.isset(this, name);
+  return domdocument_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMDocument::t_createattribute(CStrRef name) {
@@ -3732,7 +3732,7 @@ Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMDocumentType::t___isset(Variant name) {
-  return domdocumenttype_properties_map.isset(this, name);
+  return domdocumenttype_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3843,7 +3843,7 @@ Variant c_DOMElement::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMElement::t___isset(Variant name) {
-  return domelement_properties_map.isset(this, name);
+  return domelement_properties_map.isset(this, name.toString());
 }
 
 String c_DOMElement::t_getattribute(CStrRef name) {
@@ -4438,7 +4438,7 @@ Variant c_DOMEntity::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMEntity::t___isset(Variant name) {
-  return domentity_properties_map.isset(this, name);
+  return domentity_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4522,7 +4522,7 @@ Variant c_DOMNotation::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNotation::t___isset(Variant name) {
-  return domnotation_properties_map.isset(this, name);
+  return domnotation_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4593,7 +4593,7 @@ Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
-  return domprocessinginstruction_properties_map.isset(this, name);
+  return domprocessinginstruction_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4766,7 +4766,7 @@ Variant c_DOMNamedNodeMap::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNamedNodeMap::t___isset(Variant name) {
-  return domnamednodemap_properties_map.isset(this, name);
+  return domnamednodemap_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNamedNodeMap::t_getiterator() {
@@ -4846,7 +4846,7 @@ Variant c_DOMNodeList::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNodeList::t___isset(Variant name) {
-  return domnodelist_properties_map.isset(this, name);
+  return domnodelist_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNodeList::t_item(int64_t index) {
@@ -5233,7 +5233,7 @@ Variant c_DOMXPath::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMXPath::t___isset(Variant name) {
-  return domxpath_properties_map.isset(this, name);
+  return domxpath_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMXPath::t_evaluate(CStrRef expr,
@@ -5335,7 +5335,7 @@ void c_DOMNodeIterator::reset_iterator() {
  err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
-    m_curobj = create_node_object(curnode, doc, owner);
+    m_curobj = create_node_object(curnode, doc, owner).toObject();
   } else {
     m_curobj.reset();
   }
@@ -5409,7 +5409,7 @@ Variant c_DOMNodeIterator::t_next() {
 err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
-    m_curobj = create_node_object(curnode, doc, owner);
+    m_curobj = create_node_object(curnode, doc, owner).toObject();
   } else {
     m_curobj.reset();
   }

@@ -251,7 +251,7 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       x = key->m_data.pstr->toInt64(10);
     } else {
       raise_warning("String offset cast occurred");
-      x = int64_t(tvCellAsCVarRef(key));
+      x = tvCellAsCVarRef(key).toInt64();
     }
     if (x < 0 || x >= base->m_data.pstr->size()) {
       if (warn) {

@@ -910,7 +910,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
   if (filename.isResource()) {
     f = filename.toObject().getTyped<File>();
   } else if (isfile) {
-    Variant stream = File::Open(filename, "rb");
+    Variant stream = File::Open(filename.toString(), "rb");
     if (!same(stream, false)) {
       file = stream.toObject();
       f = file.getTyped<File>();
@@ -944,7 +944,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
       return m_extract_context;
     }
     if (callbackfunc.isResource()) {
-      return f_stream_get_contents(callbackfunc);
+      return f_stream_get_contents(callbackfunc.toObject());
     }
     return true;
   }

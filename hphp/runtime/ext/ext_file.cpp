@@ -245,7 +245,7 @@ Variant f_fgetss(CObjRef handle, int64_t length /* = 0 */,
                  CStrRef allowable_tags /* = null_string */) {
   Variant ret = f_fgets(handle, length);
   if (!same(ret, false)) {
-    return StringUtil::StripHTMLTags(ret, allowable_tags);
+    return StringUtil::StripHTMLTags(ret.toString(), allowable_tags);
   }
   return ret;
 }
@@ -360,14 +360,14 @@ Variant f_file_get_contents(CStrRef filename,
                             int64_t maxlen /* = 0 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
-  return f_stream_get_contents(stream, maxlen, offset);
+  return f_stream_get_contents(stream.toObject(), maxlen, offset);
 }
 
 Variant f_file_put_contents(CStrRef filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
   Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
-  if (!fvar) {
+  if (!fvar.toBoolean()) {
     return false;
   }
   File *f = fvar.asObjRef().getTyped<File>();
@@ -528,7 +528,7 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
   }
   Variant content = f_file_get_contents(translated);
   if (same(content, false)) return false;
-  return IniSetting::FromString(content, filename, process_sections,
+  return IniSetting::FromString(content.toString(), filename, process_sections,
                                 scanner_mode);
 }
 
@@ -540,7 +540,7 @@ Variant f_parse_ini_string(CStrRef ini, bool process_sections /* = false */,
 Variant f_parse_hdf_file(CStrRef filename) {
   Variant content = f_file_get_contents(filename);
   if (same(content, false)) return false;
-  return f_parse_hdf_string(content);
+  return f_parse_hdf_string(content.toString());
 }
 
 Variant f_parse_hdf_string(CStrRef input) {
@@ -1038,7 +1038,8 @@ bool f_copy(CStrRef source, CStrRef dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile, dfile).toBoolean();
+    return f_stream_copy_to_stream(sfile.toObject(),
+      dfile.toObject()).toBoolean();
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?

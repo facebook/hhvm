@@ -1633,7 +1633,7 @@ char *string_numeric_to_base(CVarRef value, int base) {
   }
 
   if (value.isDouble()) {
-    double fvalue = floor(value); /* floor it just in case */
+    double fvalue = floor(value.toDouble()); /* floor it just in case */
     char *ptr, *end;
     char buf[(sizeof(double) << 3) + 1];
 

@@ -343,7 +343,7 @@ Variant f_mysql_fetch_array(CVarRef result, int result_type = 3);
 Variant f_mysql_fetch_lengths(CVarRef result);
 
 Variant f_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass",
-                             CArrRef params = uninit_null());
+                             CArrRef params = uninit_null().toArray());
 
 Variant f_mysql_result(CVarRef result, int row, CVarRef field = null_variant);
 

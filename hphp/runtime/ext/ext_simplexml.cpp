@@ -531,7 +531,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
     elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();
-    for (ArrayIter iter(m_children); iter; ++iter) {
+    for (ArrayIter iter(m_children.toArray()); iter; ++iter) {
       if (iter.second().isObject()) {
         c_SimpleXMLElement *elem = iter.second().toObject().
           getTyped<c_SimpleXMLElement>();
@@ -540,7 +540,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
         }
       } else {
         Array subnodes;
-        for (ArrayIter iter2(iter.second()); iter2; ++iter2) {
+        for (ArrayIter iter2(iter.second().toArray()); iter2; ++iter2) {
           c_SimpleXMLElement *elem = iter2.second().toObject().
             getTyped<c_SimpleXMLElement>();
           if (elem->m_node && match_ns(elem->m_node, ns, is_prefix)) {
@@ -564,7 +564,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
 String c_SimpleXMLElement::t_getname() {
   if (m_is_children) {
     Variant first;
-    ArrayIter iter(m_children);
+    ArrayIter iter(m_children.toArray());
     if (iter) {
       return iter.first();
     }
@@ -713,7 +713,7 @@ void c_SimpleXMLElement::t_addattribute(CStrRef qname,
 
 String c_SimpleXMLElement::t___tostring() {
   Variant prop;
-  ArrayIter iter(m_children);
+  ArrayIter iter(m_children.toArray());
   if (iter) {
     prop = iter.second();
     if (prop.isString()) {
@@ -771,7 +771,7 @@ Variant c_SimpleXMLElement::t___unset(Variant name) {
       xmlUnlinkNode(elem->m_node);
     }
   } else if (node.isArray()) {
-    for (ArrayIter iter(node); iter; ++iter) {
+    for (ArrayIter iter(node.toArray()); iter; ++iter) {
       c_SimpleXMLElement *elem = iter.second().toObject().
         getTyped<c_SimpleXMLElement>();
       if (elem->m_node) {
@@ -881,7 +881,7 @@ bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
   Variant prop;
-  ArrayIter iter(m_children);
+  ArrayIter iter(m_children.toArray());
   if (iter) {
     prop = iter.second();
   }
@@ -890,7 +890,7 @@ int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
 
 double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
   Variant prop;
-  ArrayIter iter(m_children);
+  ArrayIter iter(m_children.toArray());
   if (iter) {
     prop = iter.second();
   }
@@ -899,7 +899,7 @@ double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
 
 Array c_SimpleXMLElement::o_toArray() const {
   if (m_attributes.toArray().empty()) {
-    return m_children;
+    return m_children.toArray();
   }
   Array ret;
   ret.set(s_attributes, m_attributes);
@@ -1037,7 +1037,7 @@ void c_SimpleXMLElementIterator::reset_iterator() {
   delete m_iter2; m_iter2 = NULL;
 
   if (m_parent->m_is_attribute) {
-    m_iter1 = new ArrayIter(m_parent->m_attributes);
+    m_iter1 = new ArrayIter(m_parent->m_attributes.toArray());
     return;
   }
 
@@ -1058,7 +1058,7 @@ void c_SimpleXMLElementIterator::reset_iterator() {
   }
 
   if (m_parent->m_children.toArray().size() == 1) {
-    ArrayIter iter(m_parent->m_children);
+    ArrayIter iter(m_parent->m_children.toArray());
     if (iter.second().isObject()) {
       c_SimpleXMLElement *elem = iter.second().toObject().
         getTyped<c_SimpleXMLElement>();
@@ -1068,9 +1068,9 @@ void c_SimpleXMLElementIterator::reset_iterator() {
     }
   }
 
-  m_iter1 = new ArrayIter(m_parent->m_children);
+  m_iter1 = new ArrayIter(m_parent->m_children.toArray());
   if (!m_iter1->end() && m_iter1->second().isArray()) {
-    m_iter2 = new ArrayIter(m_iter1->second());
+    m_iter2 = new ArrayIter(m_iter1->second().toArray());
   }
 }
 
@@ -1120,7 +1120,7 @@ Variant c_SimpleXMLElementIterator::t_next() {
   m_iter1->next();
   while (!m_iter1->end()) {
     if (m_iter1->second().isArray()) {
-      m_iter2 = new ArrayIter(m_iter1->second());
+      m_iter2 = new ArrayIter(m_iter1->second().toArray());
       break;
     }
     if (m_iter1->second().isObject()) {

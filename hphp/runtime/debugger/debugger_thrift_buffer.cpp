@@ -122,7 +122,7 @@ int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
     sdata = s_type_mismatch;
     return TypeMismatch;
   }
-  data = v;
+  data = v.toObject();
   return NoError;
 }
 

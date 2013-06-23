@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/server/virtual_host.h"
+
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -312,7 +312,9 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
     }
     if (!passed) continue;
     Variant matches;
-    int count = preg_match(rule.pattern.c_str(), normalized, matches);
+    int count = preg_match(rule.pattern.c_str(),
+                           normalized,
+                           matches).toInt64();
     if (count > 0) {
       const char *s = rule.to.c_str();
       StringBuffer ret;

@@ -301,7 +301,7 @@ Array &Array::mergeImpl(ArrayData *data) {
 
 Array Array::slice(int offset, int length, bool preserve_keys) const {
   if (m_px == nullptr) return Array();
-  return ArrayUtil::Slice(m_px, offset, length, preserve_keys);
+  return ArrayUtil::Slice(m_px, offset, length, preserve_keys).toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -761,7 +761,7 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   if (escalated != m_px) ArrayBase::operator=(escalated);
   assert(cv);
   switch (op) {
-  case T_CONCAT_EQUAL: return concat_assign((*cv), v);
+  case T_CONCAT_EQUAL: return concat_assign((*cv), v.toString());
   case T_PLUS_EQUAL:   return ((*cv) += v);
   case T_MINUS_EQUAL:  return ((*cv) -= v);
   case T_MUL_EQUAL:    return ((*cv) *= v);
@@ -770,8 +770,8 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   case T_AND_EQUAL:    return ((*cv) &= v);
   case T_OR_EQUAL:     return ((*cv) |= v);
   case T_XOR_EQUAL:    return ((*cv) ^= v);
-  case T_SL_EQUAL:     return ((*cv) <<= v);
-  case T_SR_EQUAL:     return ((*cv) >>= v);
+  case T_SL_EQUAL:     return ((*cv) <<= v.toInt64());
+  case T_SR_EQUAL:     return ((*cv) >>= v.toInt64());
   default:
     throw FatalErrorException(0, "invalid operator %d", op);
   }

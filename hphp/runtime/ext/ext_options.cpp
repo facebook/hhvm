@@ -140,7 +140,7 @@ String f_get_current_user() {
 }
 
 Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
-  if (categorize) {
+  if (categorize.toBoolean()) {
     throw NotSupportedException(__func__, "constant categorization not "
                                 "supported");
   }

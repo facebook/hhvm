@@ -811,7 +811,7 @@ void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
   }
   Variant v(unserialize_from_buffer(uncompressed, len));
   assert(v.isArray());
-  Array scalarArrays =  v;
+  Array scalarArrays = v.toArray();
   assert(scalarArrays.size() == nArrs);
   for (int i = 0; i < nArrs; i++) {
     arrs[i] = scalarArrays[i];

@@ -93,7 +93,7 @@ static bool CreateTestTable() {
   f_mysql_query("drop table test");
   return f_mysql_query("create table test (id int not null auto_increment,"
                        " name varchar(255) not null, primary key (id)) "
-                       "engine=innodb");
+                       "engine=innodb").toBoolean();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,14 +157,14 @@ bool TestExtMysql::test_mysql_close() {
 
 bool TestExtMysql::test_mysql_errno() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
-  VERIFY(!f_mysql_select_db("nonexistentdb"));
+  VERIFY(!f_mysql_select_db("nonexistentdb").toBoolean());
   VS(f_mysql_errno(conn), 1049);
   return Count(true);
 }
 
 bool TestExtMysql::test_mysql_error() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
-  VERIFY(!f_mysql_select_db("nonexistentdb"));
+  VERIFY(!f_mysql_select_db("nonexistentdb").toBoolean());
   VS(f_mysql_error(conn), "Unknown database 'nonexistentdb'");
   return Count(true);
 }

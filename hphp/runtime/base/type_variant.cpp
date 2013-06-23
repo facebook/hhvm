@@ -1513,18 +1513,6 @@ VarNR Variant::toKey() const {
   return null_varNR;
 }
 
-Variant::operator String() const {
-  return toString();
-}
-
-Variant::operator Array() const {
-  return toArray();
-}
-
-Variant::operator Object() const {
-  return toObject();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
 

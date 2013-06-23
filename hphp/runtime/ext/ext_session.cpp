@@ -303,7 +303,7 @@ String SessionModule::create_sid() {
     Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
     return String();
   }
-  if (!f_hash_update(context, buf.detach())) {
+  if (!f_hash_update(context.toObject(), buf.detach())) {
     Logger::Error("hash_update() failed");
     return String();
   }
@@ -318,7 +318,7 @@ String SessionModule::create_sid() {
         n = ::read(fd, rbuf, (to_read < (int)sizeof(rbuf) ?
                               to_read : (int)sizeof(buf)));
         if (n <= 0) break;
-        if (!f_hash_update(context,
+        if (!f_hash_update(context.toObject(),
                            String((const char *)rbuf, n, AttachLiteral))) {
           Logger::Error("hash_update() failed");
           ::close(fd);
@@ -330,7 +330,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context);
+  String hashed = f_hash_final(context.toObject());
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;
@@ -716,14 +716,14 @@ public:
        CREATE_VECTOR2(PS(ps_session_handler),
                       String("open")),
        CREATE_VECTOR2(String(save_path, CopyString),
-                      String(session_name, CopyString)));
+                      String(session_name, CopyString))).toBoolean();
   }
 
   virtual bool close() {
     return vm_call_user_func(
        CREATE_VECTOR2(PS(ps_session_handler),
                       String("close")),
-       Array::Create());
+       Array::Create()).toBoolean();
   }
 
   virtual bool read(const char *key, String &value) {
@@ -742,21 +742,21 @@ public:
     return vm_call_user_func(
        CREATE_VECTOR2(PS(ps_session_handler),
                       String("write")),
-       CREATE_VECTOR2(String(key, CopyString), value));
+       CREATE_VECTOR2(String(key, CopyString), value)).toBoolean();
   }
 
   virtual bool destroy(const char *key) {
     return vm_call_user_func(
        CREATE_VECTOR2(PS(ps_session_handler),
                       String("destroy")),
-       CREATE_VECTOR1(String(key, CopyString)));
+       CREATE_VECTOR1(String(key, CopyString))).toBoolean();
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
     return vm_call_user_func(
        CREATE_VECTOR2(PS(ps_session_handler),
                       String("gc")),
-       CREATE_VECTOR1((int64_t)maxlifetime));
+       CREATE_VECTOR1((int64_t)maxlifetime)).toBoolean();
   }
 };
 static UserSessionModule s_user_session_module;
@@ -802,7 +802,7 @@ public:
   virtual String encode() {
     StringBuffer buf;
     GlobalVariables *g = get_global_variables();
-    for (ArrayIter iter(g->get(s__SESSION)); iter; ++iter) {
+    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -855,7 +855,7 @@ public:
   virtual String encode() {
     StringBuffer buf;
     GlobalVariables *g = get_global_variables();
-    for (ArrayIter iter(g->get(s__SESSION)); iter; ++iter) {
+    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();

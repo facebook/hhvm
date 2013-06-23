@@ -1193,7 +1193,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
           if (!val2.isString()) {
             break;
           }
-          concat_assign(val, val2);
+          concat_assign(val, val2.toString());
           node = node->next;
         }
       } else {
@@ -1233,7 +1233,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     }
     node = node->next;
   }
-  if (any) {
+  if (any.toBoolean()) {
     ret.toObject()->o_set(name ? String(name, CopyString) : "any", any);
   }
 }

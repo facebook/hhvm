@@ -94,10 +94,10 @@ bool TestDebugger::getResponse(const string& path, string& result,
   server += "/" + path;
   printf("\n  Getting URL '%s'...\n", server.get()->data());
   Variant c = f_curl_init();
-  f_curl_setopt(c, k_CURLOPT_URL, server);
-  f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c, CURLOPT_TIMEOUT, 120);
-  Variant res = f_curl_exec(c);
+  f_curl_setopt(c.toObject(), k_CURLOPT_URL, server);
+  f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
+  f_curl_setopt(c.toObject(), CURLOPT_TIMEOUT, 120);
+  Variant res = f_curl_exec(c.toObject());
   if (same(res, false)) {
     printf("  Request failed\n");
     return false;
@@ -171,7 +171,7 @@ static std::string getSandboxHostFormat() {
   // and we need to change to the following to match sandbox format:
   // www.<sandbox>.<host>.<domain>.com
   String hostName = f_php_uname("n");
-  Array fields = f_split("\\.", hostName);
+  Array fields = f_split("\\.", hostName).toArray();
   if (fields.size() != 4) {
     return "";
   }

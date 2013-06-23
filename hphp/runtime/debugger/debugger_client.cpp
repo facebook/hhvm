@@ -1298,7 +1298,7 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
         }
       }
 
-      code(source, firstLine, lastLine,
+      code(source.toString(), firstLine, lastLine,
            beginHighlightLine,
            beginHighlightColumn,
            endHighlightLine,
@@ -1507,7 +1507,7 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       StringBuffer line;
       line.append("    ");
       if (n) line.append("  ");
-      line.append(StringUtil::Pad(lines1[n], leftMax));
+      line.append(StringUtil::Pad(lines1[n].toString(), leftMax));
       if (n == 0) line.append("  ");
       line.append("  ");
       line.append(lines2[n].toString());
@@ -2103,9 +2103,9 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   if (m_frame < 0) {
     m_frame = 0;
   }
-  CArrRef frame = m_stacktrace[m_frame];
+  CArrRef frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
-    String file = frame[s_file];
+    String file = frame[s_file].toString();
     int line = frame[s_line].toInt32();
     if (!file.empty() && line) {
       if (m_frame == 0) {
@@ -2131,7 +2131,7 @@ const StaticString
 void DebuggerClient::printFrame(int index, CArrRef frame) {
   TRACE(2, "DebuggerClient::printFrame\n");
   StringBuffer args;
-  for (ArrayIter iter(frame[s_args]); iter; ++iter) {
+  for (ArrayIter iter(frame[s_args].toArray()); iter; ++iter) {
     if (!args.empty()) args.append(", ");
     String value = FormatVariable(iter.second());
     args.append(value);

@@ -679,9 +679,9 @@ bool Instance::t___isset(Variant v_name) {
     TypedValue args[1];
     tvDup(v_name.asTypedValue(), args + 0);
     g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
-    return v;
+    return v.toBoolean();
   } else {
-    return uninit_null();
+    return false;
   }
 }
 

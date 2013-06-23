@@ -1442,7 +1442,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   // necessary for the descriptor in question, and put an entry into
   // fds.
   int nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
+  for (ArrayIter iter(items.toArray()); iter; ++iter) {
     Array entry = iter.second().toArray();
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
@@ -1482,7 +1482,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   // arrays from our input array into our return value.
   Array ret = Array::Create();
   nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
+  for (ArrayIter iter(items.toArray()); iter; ++iter) {
     Array entry = iter.second().toArray();
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
@@ -1579,7 +1579,7 @@ Variant f_mysql_fetch_object(CVarRef result,
   Variant properties = php_mysql_fetch_hash(result, MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);
-    obj->o_setArray(properties);
+    obj->o_setArray(properties.toArray());
 
     return obj;
   }

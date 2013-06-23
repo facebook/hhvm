@@ -51,7 +51,7 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
       return false;
     }
     bz = NEWOBJ(BZ2File)();
-    bool ret = bz->open(File::TranslatePath(filename), mode);
+    bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
       raise_warning("%s", Util::safe_strerror(errno).c_str());
       return false;

@@ -348,7 +348,7 @@ static Variant php_ldap_do_search(CVarRef link, CVarRef base_dn,
     LdapLink **lds = (LdapLink**)malloc(nlinks * sizeof(LdapLink*));
     int *rcs = (int*)malloc(nlinks * sizeof(int));
 
-    ArrayIter iter(link);
+    ArrayIter iter(link.toArray());
     ArrayIter iterdn(base_dn.toArray());
     ArrayIter iterfilter(filter.toArray());
     for (int i = 0; i < nlinks; i++) {
@@ -866,7 +866,7 @@ bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
       *ctrls = NULL;
       ctrlp = ctrls;
       Array stringHolder;
-      for (ArrayIter iter(newval); iter; ++iter) {
+      for (ArrayIter iter(newval.toArray()); iter; ++iter) {
         Variant vctrlval = iter.second();
         if (!vctrlval.isArray()) {
           raise_warning("The array value must contain only arrays, "

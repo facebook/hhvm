@@ -134,13 +134,13 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Variant value;
     value = data[s_msg_perm_uid];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_gid];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_mode];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_qbytes];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
   }

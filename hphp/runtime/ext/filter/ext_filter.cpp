@@ -215,7 +215,7 @@ static Variant filter_var(CVarRef variable, int64_t filter, CVarRef options) {
     option_array = options[s_options];
   }
 
-  Variant ret(filter_func.function(variable, flags, option_array));
+  Variant ret(filter_func.function(variable.toString(), flags, option_array));
   if (option_array.isArray() && option_array.toArray().exists(s_default) &&
       ((flags & k_FILTER_NULL_ON_FAILURE && ret.isNull()) ||
        (!(flags & k_FILTER_NULL_ON_FAILURE) && ret.isBoolean() &&
@@ -228,7 +228,7 @@ static Variant filter_var(CVarRef variable, int64_t filter, CVarRef options) {
 static Variant filter_recursive(CVarRef variable, int64_t filter,
                                 CVarRef options) {
   Array ret;
-  for (ArrayIter iter(variable); iter; ++iter) {
+  for (ArrayIter iter(variable.toArray()); iter; ++iter) {
     if (iter.second().isArray()) {
       ret.add(
         iter.first(),

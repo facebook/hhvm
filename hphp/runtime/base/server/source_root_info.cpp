@@ -47,7 +47,7 @@ SourceRootInfo::SourceRootInfo(const char *host)
     String sandboxName = matches.rvalAt(1).toString();
     createFromCommonRoot(sandboxName);
   } else {
-    Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2);
+    Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2).toArray();
     m_user = pair.rvalAt(0).toString();
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {

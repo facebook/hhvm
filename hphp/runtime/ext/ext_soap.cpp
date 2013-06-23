@@ -559,13 +559,13 @@ static encodeMapPtr soap_create_typemap_impl(sdl *sdl, Array &ht) {
       new_enc->to_xml = enc->to_xml;
       new_enc->to_zval = enc->to_zval;
       new_enc->details.map = soapMappingPtr(new soapMapping());
-      if (to_xml) {
+      if (to_xml.toBoolean()) {
         new_enc->details.map->to_xml = to_xml;
         new_enc->to_xml = to_xml_user;
       } else if (enc->details.map && !enc->details.map->to_xml.isNull()) {
         new_enc->details.map->to_xml = enc->details.map->to_xml;
       }
-      if (to_zval) {
+      if (to_zval.toBoolean()) {
         new_enc->details.map->to_zval = to_zval;
         new_enc->to_zval = to_zval_user;
       } else if (enc->details.map && !enc->details.map->to_zval.isNull()) {
@@ -2094,7 +2094,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
 
     GlobalVariables *g = get_global_variables();
     if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING];
+      String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
         ret = f_gzinflate(String(data, size, AttachLiteral));
@@ -2440,7 +2440,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
 }
 
 Variant c_SoapClient::t___call(Variant name, Variant args) {
-  return t___soapcall(name, args);
+  return t___soapcall(name.toString(), args.toArray());
 }
 
 Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
@@ -2479,7 +2479,7 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
     return uninit_null();
   }
   if (!m_default_headers.isNull()) {
-    soap_headers.merge(m_default_headers);
+    soap_headers.merge(m_default_headers.toArray());
   }
 
   output_headers = Array::Create();
@@ -2799,7 +2799,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
     }
   }
 
-  if (data)                    m_value  = data;
+  if (data.toBoolean())        m_value  = data;
   if (!type_name.empty())      m_stype  = type_name;
   if (!type_namespace.empty()) m_ns     = type_namespace;
   if (!node_name.empty())      m_name   = node_name;

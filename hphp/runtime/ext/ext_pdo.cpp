@@ -596,7 +596,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
 static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
                                   String &clsname, Variant &ctor_args) {
   if (!opt.isArray() || !opt.toArray().exists(0) || !opt[0].isString() ||
-      !f_class_exists(opt[0])) {
+      !f_class_exists(opt[0].toString())) {
     pdo_raise_impl_error
       (dbh, NULL, "HY000",
        "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
@@ -820,7 +820,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
         pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                              "classname must be a string");
       } else {
-        retval = f_class_exists(_argv[0]);
+        retval = f_class_exists(_argv[0].toString());
         if (retval) {
           stmt->fetch.clsname = _argv[0].toString();
         }
@@ -1813,7 +1813,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       Variant val;
       fetch_value(stmt, val, i++, NULL);
       if (!val.isNull()) {
-        if (!f_class_exists(val)) {
+        if (!f_class_exists(val.toString())) {
           stmt->fetch.clsname = "stdclass";
         } else {
           stmt->fetch.clsname = val.toString();
@@ -1836,7 +1836,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       if (!stmt->fetch.constructor.empty() &&
           (flags & PDO_FETCH_PROPS_LATE)) {
         ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
-                                        stmt->fetch.ctor_args);
+                                        stmt->fetch.ctor_args.toArray());
         ret.asCObjRef().get()->clearNoDestruct();
       }
     }
@@ -1972,7 +1972,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   case PDO_FETCH_CLASS:
     if (!stmt->fetch.constructor.empty() &&
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
-      ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args);
+      ret.toObject()->o_invoke(stmt->fetch.constructor,
+                               stmt->fetch.ctor_args.toArray());
       ret.toObject()->clearNoDestruct();
     }
     if (flags & PDO_FETCH_CLASSTYPE) {
@@ -1982,7 +1983,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     break;
 
   case PDO_FETCH_FUNC:
-    ret = vm_call_user_func(stmt->fetch.func, stmt->fetch.values);
+    ret = vm_call_user_func(stmt->fetch.func,
+                            stmt->fetch.values.toArray());
     break;
 
   default:
@@ -2457,7 +2459,7 @@ safe:
       if (stmt->dbh->support(PDOConnection::MethodQuoter)) {
         if (param->param_type == PDO_PARAM_LOB &&
             param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter);
+          Variant buf = f_stream_get_contents(param->parameter.toObject());
           if (!same(buf, false)) {
             if (!stmt->dbh->quoter(buf.toString(), plc->quoted,
                                    param->param_type)) {
@@ -2795,7 +2797,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
     break;
 
   case PDO_FETCH_FUNC:
-    if (!f_function_exists(class_name)) {
+    if (!f_function_exists(class_name.toString())) {
       pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                            "no fetch function specified");
       error = 1;

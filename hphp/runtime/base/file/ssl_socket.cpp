@@ -81,7 +81,7 @@ const StaticString s_passphrase("passphrase");
 static int passwd_callback(char *buf, int num, int verify, void *data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
-  String passphrase = stream->getContext()[s_passphrase];
+  String passphrase = stream->getContext()[s_passphrase].toString();
   if (!passphrase.empty() && passphrase.size() < num - 1) {
     memcpy(buf, passphrase.data(), passphrase.size() + 1);
     return passphrase.size();
@@ -105,8 +105,8 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
 
     /* CA stuff */
-    String cafile = m_context[s_cafile];
-    String capath = m_context[s_capath];
+    String cafile = m_context[s_cafile].toString();
+    String capath = m_context[s_capath].toString();
 
     if (!cafile.empty() || !capath.empty()) {
       if (!SSL_CTX_load_verify_locations(ctx, cafile.data(), capath.data())) {

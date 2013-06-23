@@ -145,8 +145,8 @@ bool CmdList::listFileRange(DebuggerClient &client,
 
   CmdListPtr res = client.xend<CmdList>(this);
   if (res->m_code.isString()) {
-    if (!client.code(res->m_code, m_line1, m_line2, lineFocus0, charFocus0,
-                      lineFocus1, charFocus1)) {
+    if (!client.code(res->m_code.toString(), m_line1, m_line2,
+                     lineFocus0, charFocus0, lineFocus1, charFocus1)) {
       client.info("No more lines in %s to display.", m_file.c_str());
     }
     client.setListLocation(m_file, m_line2, false);
@@ -179,9 +179,10 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   if (info.empty()) return false;
   always_assert(info.size() == 1);
   ArrayIter iter(info);
-  Array funcInfo = iter.second();
+  Array funcInfo = iter.second().toArray();
   if (!subsymbol.empty()) {
-    String key = CmdInfo::FindSubSymbol(funcInfo[s_methods], subsymbol);
+    String key = CmdInfo::FindSubSymbol(funcInfo[s_methods].toArray(),
+                                        subsymbol);
     if (key.isNull()) return false;
     funcInfo = funcInfo[s_methods][key].toArray();
   }
@@ -338,7 +339,7 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
   auto savedWarningFrequency = RuntimeOption::WarningFrequency;
   RuntimeOption::WarningFrequency = 0;
   m_code = f_file_get_contents(m_file.c_str());
-  if (!proxy.isLocal() && !m_code && m_file[0] != '/') {
+  if (!proxy.isLocal() && !m_code.toBoolean() && m_file[0] != '/') {
     DSandboxInfo info = proxy.getSandbox();
     if (info.m_path.empty()) {
       raise_warning("path for sandbox %s is not setup, run a web request",
@@ -349,7 +350,7 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
     }
   }
   RuntimeOption::WarningFrequency = savedWarningFrequency;
-  if (!m_code && m_file == "systemlib.php") {
+  if (!m_code.toBoolean() && m_file == "systemlib.php") {
     m_code = SystemLib::s_source;
   }
   return proxy.sendToClient((DebuggerCommand*)this);

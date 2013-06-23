@@ -287,7 +287,7 @@ class CompactWriter {
             thrift_error("Attempt to send non-object type as T_STRUCT",
               ERR_INVALID_DATA);
           }
-          writeStruct(value);
+          writeStruct(value.toObject());
           break;
 
         case T_BOOL: {
@@ -503,12 +503,12 @@ class CompactReader {
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
         Variant spec = f_hphp_get_static_property(resultClassName, "_TSPEC");
-        readStruct(ret, spec);
+        readStruct(ret, spec.toArray());
         return ret;
       } else if (type == T_EXCEPTION) {
         Object exn = create_object("TApplicationException", Array());
         Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC");
-        readStruct(exn, spec);
+        readStruct(exn, spec.toArray());
         throw exn;
       } else {
         thrift_error("Invalid response type", ERR_INVALID_DATA);
@@ -635,7 +635,7 @@ class CompactReader {
               thrift_error("invalid type of spec", ERR_INVALID_DATA);
             }
 
-            readStruct(newStruct, newStructSpec);
+            readStruct(newStruct.toObject(), newStructSpec.toArray());
             return newStruct;
           }
 
@@ -787,8 +787,10 @@ class CompactReader {
       uint32_t size;
       readMapBegin(keyType, valueType, size);
 
-      Array keySpec = spec.rvalAt(PHPTransport::s_key, AccessFlags::Error);
-      Array valueSpec = spec.rvalAt(PHPTransport::s_val, AccessFlags::Error);
+      Array keySpec = spec.rvalAt(PHPTransport::s_key,
+        AccessFlags::Error).toArray();
+      Array valueSpec = spec.rvalAt(PHPTransport::s_val,
+        AccessFlags::Error).toArray();
       Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {
@@ -807,7 +809,7 @@ class CompactReader {
       readListBegin(valueType, size);
 
       Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
-                                    AccessFlags::Error_Key);
+                                    AccessFlags::Error_Key).toArray();
       Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {

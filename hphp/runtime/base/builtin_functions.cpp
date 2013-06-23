@@ -929,7 +929,7 @@ String resolve_include(CStrRef file, const char* currentDir,
 
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
-      String includePath = includePaths[i];
+      String includePath = includePaths[i].toString();
 
       if (includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
@@ -1223,7 +1223,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
   if (!f_is_callable(handler, false, ref(name))) {
     return null_string;
   }
-  String lName = StringUtil::ToLower(name);
+  String lName = StringUtil::ToLower(name.toString());
   if (handler.isArray()) {
     Variant first = handler.getArrayData()->get(int64_t(0));
     if (first.isObject()) {

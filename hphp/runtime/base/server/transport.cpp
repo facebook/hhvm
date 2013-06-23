@@ -662,7 +662,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     String ip = RuntimeOption::ServerPrimaryIP;
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
-    int iv_len = f_openssl_cipher_iv_length(cipher);
+    int iv_len = f_openssl_cipher_iv_length(cipher).toInt32();
     String iv = f_openssl_random_pseudo_bytes(iv_len);
     String encrypted =
       f_openssl_encrypt(ip, cipher, key, k_OPENSSL_RAW_DATA, iv);
@@ -729,7 +729,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
 }
 
 bool Transport::setHeaderCallback(CVarRef callback) {
-  if (m_headerCallback) {
+  if (m_headerCallback.toBoolean()) {
     // return false if a callback has already been set.
     return false;
   }

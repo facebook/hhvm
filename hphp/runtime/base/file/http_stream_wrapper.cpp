@@ -50,16 +50,18 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
   if (!ctx || ctx->m_options.isNull() || ctx->m_options[s_http].isNull()) {
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());
   } else {
-    Array opts = ctx->m_options[s_http];
+    Array opts = ctx->m_options[s_http].toArray();
     String method = s_GET;
     if (opts.exists(s_method)) {
       method = opts[s_method].toString();
     }
     Array headers;
     if (opts.exists(s_header)) {
-      Array lines = StringUtil::Explode(opts[s_header].toString(), "\r\n");
+      Array lines = StringUtil::Explode(
+        opts[s_header].toString(), "\r\n").toArray();
       for (ArrayIter it(lines); it; ++it) {
-        Array parts = StringUtil::Explode(it.second().toString(), ": ");
+        Array parts = StringUtil::Explode(
+          it.second().toString(), ": ").toArray();
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }
@@ -69,9 +71,13 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
       headers.set(s_User_Agent, opts[s_user_agent]);
     }
     int max_redirs = 20;
-    if (opts.exists(s_max_redirects)) max_redirs = opts[s_max_redirects];
+    if (opts.exists(s_max_redirects)) {
+      max_redirs = opts[s_max_redirects].toInt64();
+    }
     int timeout = -1;
-    if (opts.exists(s_timeout)) timeout = opts[s_timeout];
+    if (opts.exists(s_timeout)) {
+      timeout = opts[s_timeout].toInt64();
+    }
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
                                                     opts[s_content].toString(),
                                                     max_redirs, timeout));

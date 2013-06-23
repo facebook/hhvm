@@ -548,7 +548,7 @@ Variant c_SQLite3Stmt::t_execute() {
       {
         String sblob;
         if (p.value.isResource()) {
-          Variant blob = f_stream_get_contents(p.value);
+          Variant blob = f_stream_get_contents(p.value.toObject());
           if (same(blob, false)) {
             raise_warning("Unable to read stream for parameter %d",
                           p.index);

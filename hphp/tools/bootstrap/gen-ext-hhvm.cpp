@@ -390,7 +390,14 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
       if (kindof != KindOfAny ||
           (defVal != "null" && defVal != "null_variant")) {
         out << " = ";
-        out << (defVal == "null" ? "uninit_null()" : defVal);
+        std::string nullToType =
+          kindof == KindOfArray ? ".toArray()" :
+          kindof == KindOfString ? ".toString()" :
+          kindof == KindOfObject ? ".toObject()" :
+          kindof == KindOfRef ? "" :
+          "icantconvertthisfromnull";
+        if (defVal == "null_variant") defVal += nullToType;
+        out << (defVal == "null" ? "uninit_null()" + nullToType : defVal);
       }
       out << ";\n";
     }

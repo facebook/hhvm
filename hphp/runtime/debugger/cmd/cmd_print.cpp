@@ -281,7 +281,7 @@ void CmdPrint::handleReply(DebuggerClient &client) {
   if (!m_output.empty()) {
     client.output(m_output);
   }
-  client.output(m_ret);
+  client.output(m_ret.toString());
 }
 
 void CmdPrint::onClientImpl(DebuggerClient &client) {

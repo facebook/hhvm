@@ -94,7 +94,7 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
   if (client.argCount() == 0) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {
-      client.printFrame(i, iter.second());
+      client.printFrame(i, iter.second().toArray());
       ++i;
       if (!client.isApiMode() &&
           i % DebuggerClient::ScrollBlockSize == 0 &&
@@ -115,11 +115,11 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
     }
     if (num > 0) {
       for (int i = 0; i < num && i < st.size(); i++) {
-        client.printFrame(i, st[i]);
+        client.printFrame(i, st[i].toArray());
       }
     } else if (num < 0) {
       for (int i = st.size() + num; i < st.size(); i++) {
-        client.printFrame(i, st[i]);
+        client.printFrame(i, st[i].toArray());
       }
     } else {
       client.error("0 was specified for the number of frames");
@@ -141,7 +141,7 @@ void CmdWhere::processStackTrace() {
   static StaticString s_args("args");
   Array smallST;
   for (ArrayIter iter(m_stacktrace); iter; ++iter) {
-    CArrRef frame(iter.secondRef());
+    CArrRef frame(iter.secondRef().toArray());
     Array smallFrame;
     for (ArrayIter iter2(frame); iter2; ++iter2) {
       if (equal(iter2.first(), s_args)) {

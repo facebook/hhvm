@@ -1057,7 +1057,7 @@ public:
   Object find(CURL *cp) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
       if (iter.second().toObject().getTyped<CurlResource>()->get(true) == cp) {
-        return iter.second();
+        return iter.second().toObject();
       }
     }
     return Object();

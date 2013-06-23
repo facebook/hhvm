@@ -434,7 +434,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   StringBuffer sbuf;
   sbuf.read(fp);
 
-  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
@@ -453,7 +453,9 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimType::Right);
+
+  return StringUtil::Trim(lines[count - 1].toString(),
+                          StringUtil::TrimType::Right);
 }
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
@@ -483,7 +485,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
     sbuf.read(fp);
   }
 
-  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
@@ -493,13 +495,15 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
   }
 
   for (int i = 0; i < count; i++) {
-    echo(lines[i]);
+    echo(lines[i].toString());
     echo("\n");
   }
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimType::Right);
+
+  return StringUtil::Trim(lines[count - 1].toString(),
+                          StringUtil::TrimType::Right);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

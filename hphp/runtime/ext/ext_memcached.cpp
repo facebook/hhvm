@@ -416,7 +416,7 @@ bool c_Memcached::t_setmultibykey(CStrRef server_key, CArrRef items,
   for (ArrayIter iter(items); iter; ++iter) {
     Variant key = iter.first();
     if (!key.isString()) continue;
-    if (!t_setbykey(server_key, key, iter.second(), expiration)) {
+    if (!t_setbykey(server_key, key.toString(), iter.second(), expiration)) {
       return false;
     }
   }
@@ -994,7 +994,7 @@ memcached_return c_Memcached::doCacheCallback(CVarRef callback, CStrRef key,
   Array params(ArrayInit(3).set(Variant(this))
                            .set(key)
                            .setRef(value).create());
-  if (!vm_call_user_func(callback, params)) {
+  if (!vm_call_user_func(callback, params).toBoolean()) {
     return MEMCACHED_NOTFOUND;
   }
 

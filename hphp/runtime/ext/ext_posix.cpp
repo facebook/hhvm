@@ -78,7 +78,7 @@ static const StaticString s_dir("dir");
 static const StaticString s_shell("shell");
 
 static Variant php_posix_group_to_array(int gid,
-                   CStrRef gname = null_variant) {
+                   CStrRef gname = null_variant.toString()) {
   // Don't pass a gid *and* a gname to this.
   assert((gid <  0) || gname.size() == 0);
 
@@ -169,7 +169,7 @@ int64_t f_posix_getppid() {
 }
 
 static Variant php_posix_passwd_to_array(int uid,
-                   CStrRef name = null_variant) {
+                   CStrRef name = null_variant.toString()) {
   // Don't pass a uid *and* a name to this.
   assert((uid <  0) || name.size() == 0);
 

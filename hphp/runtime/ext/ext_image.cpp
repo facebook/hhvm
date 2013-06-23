@@ -402,7 +402,7 @@ static struct gfxinfo *php_handle_gif(CObjRef stream) {
   String dim;
   const unsigned char *s;
 
-  if (f_fseek(stream, 3, SEEK_CUR)) return NULL;
+  if (f_fseek(stream, 3, SEEK_CUR).toBoolean()) return NULL;
   dim = f_fread(stream, 5);
   if (dim.length() != 5) return NULL;
   s = (unsigned char *)dim.c_str();
@@ -420,7 +420,7 @@ static struct gfxinfo *php_handle_psd (CObjRef stream) {
   String dim;
   const unsigned char *s;
 
-  if (f_fseek(stream, 11, SEEK_CUR)) return NULL;
+  if (f_fseek(stream, 11, SEEK_CUR).toBoolean()) return NULL;
 
   dim = f_fread(stream, 8);
   if (dim.length() != 8) return NULL;
@@ -444,7 +444,7 @@ static struct gfxinfo *php_handle_bmp (CObjRef stream) {
   const unsigned char *s;
   int size;
 
-  if (f_fseek(stream, 11, SEEK_CUR)) return NULL;
+  if (f_fseek(stream, 11, SEEK_CUR).toBoolean()) return NULL;
 
   dim = f_fread(stream, 16);
   if (dim.length() != 16) return NULL;
@@ -511,7 +511,7 @@ static struct gfxinfo *php_handle_swc(CObjRef stream) {
   b = (unsigned char *)IM_CALLOC(1, len + 1);
   CHECK_ALLOC_R(b, (len + 1), NULL);
 
-  if (f_fseek(stream, 5, SEEK_CUR)) {
+  if (f_fseek(stream, 5, SEEK_CUR).toBoolean()) {
     IM_FREE(b);
     return NULL;
   }
@@ -524,7 +524,7 @@ static struct gfxinfo *php_handle_swc(CObjRef stream) {
 
   if (uncompress((Bytef*)b, &len, (const Bytef*)a.c_str(), 64) != Z_OK) {
     /* failed to decompress the file, will try reading the rest of the file */
-    if (f_fseek(stream, 8, SEEK_SET)) {
+    if (f_fseek(stream, 8, SEEK_SET).toBoolean()) {
       IM_FREE(b);
       return NULL;
     }
@@ -582,7 +582,7 @@ static struct gfxinfo *php_handle_swf(CObjRef stream) {
   long bits;
   unsigned char *a;
 
-  if (f_fseek(stream, 5, SEEK_CUR)) return NULL;
+  if (f_fseek(stream, 5, SEEK_CUR).toBoolean()) return NULL;
 
   String str = toString(f_fread(stream, 32));
   if (str.length() != 32) return NULL;
@@ -612,7 +612,7 @@ static struct gfxinfo *php_handle_png(CObjRef stream) {
    * Interlace method:   1 byte
    */
 
- if (f_fseek(stream, 8, SEEK_CUR)) return NULL;
+ if (f_fseek(stream, 8, SEEK_CUR).toBoolean()) return NULL;
 
   dim = f_fread(stream, 9);
   if (dim.length() < 9) return NULL;
@@ -807,7 +807,7 @@ static struct gfxinfo *php_handle_jpeg(CObjRef stream, Variant &info) {
           /* if we don't want an extanded info -> return */
           return result;
         }
-        if (f_fseek(stream, length - 8, SEEK_CUR)) {
+        if (f_fseek(stream, length - 8, SEEK_CUR).toBoolean()) {
           /* file error after info */
           return result;
         }
@@ -939,7 +939,7 @@ static struct gfxinfo *php_handle_jpc(CObjRef stream) {
   php_read4(stream); /* XTOsiz */
   php_read4(stream); /* YTOsiz */
 #else
-  if (f_fseek(stream, 24, SEEK_CUR)) {
+  if (f_fseek(stream, 24, SEEK_CUR).toBoolean()) {
     IM_FREE(result);
     return NULL;
   }
@@ -1016,7 +1016,7 @@ static struct gfxinfo *php_handle_jp2(CObjRef stream) {
     }
 
     /* Skip over LBox (Which includes both TBox and LBox itself */
-    if (f_fseek(stream, box_length - 8, SEEK_CUR)) {
+    if (f_fseek(stream, box_length - 8, SEEK_CUR).toBoolean()) {
       break;
     }
   }
@@ -1142,7 +1142,7 @@ static struct gfxinfo *php_handle_tiff(CObjRef stream, int motorola_intel) {
   ifd_ptr = stream.getTyped<File>()->read(4);
   if (ifd_ptr.length() != 4) return NULL;
   ifd_addr = php_ifd_get32u((void*)ifd_ptr.c_str(), motorola_intel);
-  if (f_fseek(stream, ifd_addr-8, SEEK_CUR)) return NULL;
+  if (f_fseek(stream, ifd_addr-8, SEEK_CUR).toBoolean()) return NULL;
   ifd_data = f_fread(stream, 2);
   if (ifd_data.length() != 2) return NULL;
   num_entries = php_ifd_get16u((void*)ifd_data.c_str(), motorola_intel);
@@ -1245,7 +1245,7 @@ static struct gfxinfo *php_handle_iff(CObjRef stream) {
         return result;
       }
     } else {
-      if (f_fseek(stream, size, SEEK_CUR)) return NULL;
+      if (f_fseek(stream, size, SEEK_CUR).toBoolean()) return NULL;
     }
   } while (1);
 }
@@ -1592,61 +1592,61 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
     raise_warning("failed to open stream: %s", filename.c_str());
     return false;
   }
-  itype = php_getimagetype(stream);
+  itype = php_getimagetype(stream.toObject());
   switch( itype) {
   case IMAGE_FILETYPE_GIF:
-    result = php_handle_gif(stream);
+    result = php_handle_gif(stream.toObject());
     break;
   case IMAGE_FILETYPE_JPEG:
-    result = php_handle_jpeg(stream, imageinfo);
+    result = php_handle_jpeg(stream.toObject(), imageinfo);
     break;
   case IMAGE_FILETYPE_PNG:
-    result = php_handle_png(stream);
+    result = php_handle_png(stream.toObject());
     break;
   case IMAGE_FILETYPE_SWF:
-    result = php_handle_swf(stream);
+    result = php_handle_swf(stream.toObject());
     break;
   case IMAGE_FILETYPE_SWC:
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-    result = php_handle_swc(stream);
+    result = php_handle_swc(stream.toObject());
 #else
     raise_notice("The image is a compressed SWF file, but you do not "
                  "have a static version of the zlib extension enabled");
 #endif
     break;
   case IMAGE_FILETYPE_PSD:
-    result = php_handle_psd(stream);
+    result = php_handle_psd(stream.toObject());
     break;
   case IMAGE_FILETYPE_BMP:
-    result = php_handle_bmp(stream);
+    result = php_handle_bmp(stream.toObject());
     break;
   case IMAGE_FILETYPE_TIFF_II:
-    result = php_handle_tiff(stream, 0);
+    result = php_handle_tiff(stream.toObject(), 0);
     break;
   case IMAGE_FILETYPE_TIFF_MM:
-    result = php_handle_tiff(stream, 1);
+    result = php_handle_tiff(stream.toObject(), 1);
     break;
   case IMAGE_FILETYPE_JPC:
-    result = php_handle_jpc(stream);
+    result = php_handle_jpc(stream.toObject());
     break;
   case IMAGE_FILETYPE_JP2:
-    result = php_handle_jp2(stream);
+    result = php_handle_jp2(stream.toObject());
     break;
   case IMAGE_FILETYPE_IFF:
-    result = php_handle_iff(stream);
+    result = php_handle_iff(stream.toObject());
     break;
   case IMAGE_FILETYPE_WBMP:
-    result = php_handle_wbmp(stream);
+    result = php_handle_wbmp(stream.toObject());
     break;
   case IMAGE_FILETYPE_XBM:
-    result = php_handle_xbm(stream);
+    result = php_handle_xbm(stream.toObject());
     break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     break;
   }
 
-  f_fclose(stream);
+  f_fclose(stream.toObject());
 
   if (result) {
     ArrayInit ret(7);
@@ -1722,10 +1722,10 @@ static Variant php_open_plain_file(CStrRef filename, const char *mode,
   if (same(stream, false)) {
     return false;
   }
-  PlainFile *plain_file = Object(stream).getTyped<PlainFile>(false, true);
+  PlainFile *plain_file = stream.toObject().getTyped<PlainFile>(false, true);
   FILE *fp = NULL;
   if (!plain_file || !(fp = plain_file->getStream())) {
-    f_fclose(stream);
+    f_fclose(stream.toObject());
     return false;
   }
   if (fpp) *fpp = fp;
@@ -1833,7 +1833,7 @@ static bool _php_image_output_ctx(CObjRef image, CStrRef filename,
 
   if(fp) {
     fflush(fp);
-    f_fclose(stream);
+    f_fclose(stream.toObject());
   }
 
   return true;
@@ -2024,7 +2024,7 @@ static bool _php_image_convert(CStrRef f_org, CStrRef f_dest,
 
   gdImageDestroy(im_org);
 
-  f_fclose(org_stream);
+  f_fclose(org_stream.toObject());
 
   im_dest = gdImageCreate(dest_width, dest_height);
   if (im_dest == NULL) {
@@ -2068,7 +2068,7 @@ static bool _php_image_convert(CStrRef f_org, CStrRef f_dest,
   gdImageWBMP(im_dest, black , dest);
 
   fflush(dest);
-  f_fclose(dest_stream);
+  f_fclose(dest_stream.toObject());
 
   gdImageDestroy(im_dest);
 
@@ -2150,7 +2150,7 @@ static bool _php_image_output(CObjRef image, CStrRef filename, int quality,
       break;
     }
     fflush(fp);
-    f_fclose(stream);
+    f_fclose(stream.toObject());
   } else {
     int   b;
     FILE *tmp;
@@ -2253,7 +2253,7 @@ static gdImagePtr _php_image_create_from(CStrRef filename,
 #endif
 
   FILE *fp = NULL;
-  File *file = Object(stream).getTyped<File>();
+  File *file = stream.toObject().getTyped<File>();
   PlainFile *plain_file = dynamic_cast<PlainFile*>(file);
   if (plain_file) {
     fp = plain_file->getStream();
@@ -2327,13 +2327,13 @@ static gdImagePtr _php_image_create_from(CStrRef filename,
   }
 
   if (im) {
-    f_fclose(stream);
+    f_fclose(stream.toObject());
     return im;
   }
 
   raise_warning("'%s' is not a valid %s file", filename.c_str(), tn);
 out_err:
-  f_fclose(stream);
+  f_fclose(stream.toObject());
   return NULL;
 }
 
@@ -2580,10 +2580,10 @@ static bool php_imagepolygon(CObjRef image, CArrRef points, int num_points,
 
   for (i = 0; i < num_points; i++) {
     if (points.exists(i * 2)) {
-      pts[i].x = points[i * 2];
+      pts[i].x = points[i * 2].toInt32();
     }
     if (points.exists(i * 2 + 1)) {
-      pts[i].y = points[i * 2 + 1];
+      pts[i].y = points[i * 2 + 1].toInt32();
     }
   }
 
@@ -2844,15 +2844,15 @@ static Variant php_imagettftext_common(int mode, int extended,
 #endif
 
   if (mode == TTFTEXT_BBOX) {
-    ptsize = arg1;
-    angle = arg2;
+    ptsize = arg1.toDouble();
+    angle = arg2.toDouble();
     fontname = arg3;
     str = arg4;
     extrainfo = arg5;
   } else {
-    Object image = arg1;
-    ptsize = arg2;
-    angle = arg3;
+    Object image = arg1.toObject();
+    ptsize = arg2.toDouble();
+    angle = arg3.toDouble();
     x = toInt64(arg4);
     y = toInt64(arg5);
     col = toInt64(arg6);
@@ -2891,7 +2891,7 @@ static Variant php_imagettftext_common(int mode, int extended,
     raise_warning("Invalid font filename %s", fontname.c_str());
     return false;
   }
-  f_fclose(stream);
+  f_fclose(stream.toObject());
 
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_GD_STRINGFTEX
@@ -3133,7 +3133,7 @@ bool f_imagesetstyle(CObjRef image, CArrRef style) {
   CHECK_ALLOC_R(stylearr, malloc_size, false);
   index = 0;
   for (ArrayIter iter(style); iter; ++iter) {
-    stylearr[index++] = iter.secondRef();
+    stylearr[index++] = iter.secondRef().toInt32();
   }
   gdImageSetStyle(im, stylearr, index);
   IM_FREE(stylearr);
@@ -4401,16 +4401,16 @@ Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
     return false;
   }
   if (spool < 2) {
-    Array stat = f_fstat(stream);
-    int st_size = stat[s_size];
+    Array stat = f_fstat(stream.toObject()).toArray();
+    int st_size = stat[s_size].toInt32();
     size_t malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
     poi = spoolbuf = (unsigned char *)IM_MALLOC(malloc_size);
     CHECK_ALLOC_R(poi, malloc_size, false);
     memset(poi, 0, malloc_size);
   }
-  File *file = Object(stream).getTyped<File>();
+  File *file = stream.toObject().getTyped<File>();
   if (php_iptc_get1(file, spool, poi?&poi:0) != 0xFF) {
-    f_fclose(stream);
+    f_fclose(stream.toObject());
     if (spoolbuf) {
       IM_FREE(spoolbuf);
     }
@@ -4418,7 +4418,7 @@ Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
   }
 
   if (php_iptc_get1(file, spool, poi?&poi:0) != 0xD8) {
-    f_fclose(stream);
+    f_fclose(stream.toObject());
     if (spoolbuf) {
       IM_FREE(spoolbuf);
     }
@@ -4486,7 +4486,7 @@ Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
     }
   }
 
-  f_fclose(stream);
+  f_fclose(stream.toObject());
 
   if (spool < 2) {
     return String((char *)spoolbuf, poi - spoolbuf, AttachString);
@@ -7298,7 +7298,7 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
     raise_warning("Unable to open file %s", FileName.c_str());
     return 0;
   }
-  ImageInfo->infile = Object(stream).getTyped<File>();
+  ImageInfo->infile = stream.toObject().getTyped<File>();
   PlainFile *plain_file = dynamic_cast<PlainFile*>(ImageInfo->infile);
   if (plain_file) {
     if (stat(FileName.c_str(), &st) >= 0) {
@@ -7313,9 +7313,9 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
     ImageInfo->FileSize = st.st_size;
   } else {
     if (!ImageInfo->FileSize) {
-      f_fseek(stream, 0, SEEK_END);
+      f_fseek(stream.toObject(), 0, SEEK_END);
       ImageInfo->FileSize = ImageInfo->infile->tell();
-      f_fseek(stream, 0, SEEK_SET);
+      f_fseek(stream.toObject(), 0, SEEK_SET);
     }
   }
 
@@ -7336,7 +7336,7 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
     /* Scan the JPEG headers. */
   ret = exif_scan_FILE_header(ImageInfo);
 
-  f_fclose(stream);
+  f_fclose(stream.toObject());
   return ret;
 }
 
@@ -8021,8 +8021,8 @@ Variant f_exif_imagetype(CStrRef filename) {
     raise_warning("failed to open file: %s", filename.c_str());
     return false;
   }
-  int itype = php_getimagetype(stream);
-  f_fclose(stream);
+  int itype = php_getimagetype(stream.toObject());
+  f_fclose(stream.toObject());
   if (itype == IMAGE_FILETYPE_UNKNOWN) return false;
   return itype;
 }

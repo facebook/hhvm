@@ -181,8 +181,8 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   ops->hash_init(context);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-         chunk = f_fread(f, 1024)) {
+    for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
+         chunk = f_fread(f.toObject(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -272,8 +272,8 @@ static Variant php_hash_do_hash_hmac(CStrRef algo, CStrRef data,
   char *K = prepare_hmac_key(ops, context, key);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-         chunk = f_fread(f, 1024)) {
+    for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
+         chunk = f_fread(f.toObject(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -342,8 +342,8 @@ bool f_hash_update_file(CObjRef init_context, CStrRef filename,
   }
 
   HashContext *hash = init_context.getTyped<HashContext>();
-  for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-       chunk = f_fread(f, 1024)) {
+  for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
+       chunk = f_fread(f.toObject(), 1024)) {
     String schunk = chunk.toString();
     hash->ops->hash_update(hash->context, (unsigned char *)schunk.data(),
                            schunk.size());

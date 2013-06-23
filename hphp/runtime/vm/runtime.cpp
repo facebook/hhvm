@@ -302,7 +302,7 @@ tv_to_bool(TypedValue* tv) {
     ArrayData* ad = tv->m_data.parr;
     retval = bool(arr0_to_bool(ad));
   } else {
-    retval = bool(tvAsCVarRef(tv));
+    retval = tvAsCVarRef(tv).toBoolean();
   }
   TRACE(2, Trace::prettyNode("TvToBool", *tv) + string(" -> ") +
         string(retval ? "t" : "f") + string("\n"));

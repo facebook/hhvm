@@ -86,20 +86,20 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
     string err;
     for (int i = 0; i < 10; i++) {
       Variant c = f_curl_init();
-      f_curl_setopt(c, k_CURLOPT_URL, server);
-      f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
+      f_curl_setopt(c.toObject(), k_CURLOPT_URL, server);
+      f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
       if (postdata) {
-        f_curl_setopt(c, k_CURLOPT_POSTFIELDS, postdata);
-        f_curl_setopt(c, k_CURLOPT_POST, true);
+        f_curl_setopt(c.toObject(), k_CURLOPT_POSTFIELDS, postdata);
+        f_curl_setopt(c.toObject(), k_CURLOPT_POST, true);
       }
       if (header) {
-        f_curl_setopt(c, k_CURLOPT_HTTPHEADER, CREATE_VECTOR1(header));
+        f_curl_setopt(c.toObject(), k_CURLOPT_HTTPHEADER, CREATE_VECTOR1(header));
       }
       if (responseHeader) {
-        f_curl_setopt(c, k_CURLOPT_HEADER, 1);
+        f_curl_setopt(c.toObject(), k_CURLOPT_HEADER, 1);
       }
 
-      Variant res = f_curl_exec(c);
+      Variant res = f_curl_exec(c.toObject());
       if (!same(res, false)) {
         actual = (std::string) res.toString();
         break;
@@ -166,9 +166,9 @@ void TestServer::StopServer() {
     String url = "http://";
     url += f_php_uname("n");
     url += ":" + lexical_cast<string>(s_admin_port) + "/stop";
-    f_curl_setopt(c, k_CURLOPT_URL, url);
-    f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
-    Variant res = f_curl_exec(c);
+    f_curl_setopt(c.toObject(), k_CURLOPT_URL, url);
+    f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
+    Variant res = f_curl_exec(c.toObject());
     if (!same(res, false)) {
       break;
     }

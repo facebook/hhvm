@@ -133,8 +133,9 @@ bool TestExtMemcached::test_Memcached_types() {
 
 bool TestExtMemcached::test_Memcached_cas() {
   CREATE_MEMCACHED();
-  for (ArrayIter iter(memc_version); iter; ++iter) {
-    if (!f_version_compare(iter.second().toString(), "1.3.0", ">=")) {
+  for (ArrayIter iter(memc_version.toArray()); iter; ++iter) {
+    if (!f_version_compare(iter.second().toString(), "1.3.0", ">=")
+        .toBoolean()) {
       SKIP("Need memcached 1.3.0 for CAS");
       return Count(true);
     }

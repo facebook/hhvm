@@ -179,7 +179,7 @@ Variant f_mailparse_msg_extract_part(CObjRef mimemail, CVarRef msgbody,
 }
 
 Array f_mailparse_msg_get_part_data(CObjRef mimemail) {
-  return mimemail.getTyped<MimePart>()->getPartData();
+  return mimemail.getTyped<MimePart>()->getPartData().toArray();
 }
 
 Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {

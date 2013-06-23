@@ -614,23 +614,25 @@ class Variant : private TypedValue {
   // Called before iteration to give array a chance to escalate.
   void escalate();
 
-  /**
-   * Implicit type conversions. In general, we prefer explicit type conversion
-   * functions. These are needed simply because Variant is a coerced type from
-   * other types, and we need implicit type conversions to make our type
-   * inference coding simpler (Expression::m_expectedType handling).
+  /*
+   * Variant used to implicitly convert to all these types.  (It still
+   * implicitly converts *from* most of them.)
+   *
+   * We're leaving these functions deleted for now because we fear the
+   * possibility of changes to overload resolution by not declaring
+   * them.  Eventually when fewer of these types have implicit
+   * conversions we'll remove them.
    */
-
-  /* implicit */ operator bool   () const { return toBoolean();}
-  operator char   () const { return toByte();}
-  operator short  () const { return toInt16();}
-  operator int    () const { return toInt32();}
-  operator int64_t  () const { return toInt64();}
-  operator double () const { return toDouble();}
-  operator String () const;
-  operator Array  () const;
-  operator Object () const;
-  template<typename T> operator SmartObject<T>() const { return toObject();}
+  /* implicit */ operator bool   () const = delete;
+  /* implicit */ operator char   () const = delete;
+  /* implicit */ operator short  () const = delete;
+  /* implicit */ operator int    () const = delete;
+  /* implicit */ operator int64_t  () const = delete;
+  /* implicit */ operator double () const = delete;
+  /* implicit */ operator String () const = delete;
+  /* implicit */ operator Array  () const = delete;
+  /* implicit */ operator Object () const = delete;
+  template<typename T> /* implicit */ operator SmartObject<T>() const = delete;
 
   /**
    * Explicit type conversions

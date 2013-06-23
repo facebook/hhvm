@@ -115,7 +115,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
         return uninit_null();
       }
-      binary_deserialize_spec(ret, transport, spec.toArray());
+      binary_deserialize_spec(ret.toObject(), transport, spec.toArray());
       return ret;
     } break;
     case T_BOOL: {
@@ -356,7 +356,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
         throw_tprotocolexception("Attempt to send non-object "
                                  "type as a T_STRUCT", INVALID_DATA);
       }
-      binary_serialize_spec(value, transport,
+      binary_serialize_spec(value.toObject(), transport,
                             f_hphp_get_static_property(value.toObject()->
                                                        o_getClassName(),
                                                        s_TSPEC).toArray());

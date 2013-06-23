@@ -523,7 +523,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       Variant result;
       switch (m_op) {
         case T_LOGICAL_XOR:
-          result = logical_xor(v1, v2); break;
+          result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean()); break;
         case '|':
           result = bitwise_or(v1, v2); break;
         case '&':
@@ -531,7 +531,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case '^':
           result = bitwise_xor(v1, v2); break;
         case '.':
-          result = concat(v1, v2); break;
+          result = concat(v1.toString(), v2.toString()); break;
         case T_IS_IDENTICAL:
           result = same(v1, v2); break;
         case T_IS_NOT_IDENTICAL:
@@ -563,19 +563,19 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          result = modulo(v1, v2); break;
+          result = modulo(v1.toInt64(), v2.toInt64()); break;
         case T_SL:
-          result = shift_left(v1, v2); break;
+          result = shift_left(v1.toInt64(), v2.toInt64()); break;
         case T_SR:
-          result = shift_right(v1, v2); break;
+          result = shift_right(v1.toInt64(), v2.toInt64()); break;
         case T_BOOLEAN_OR:
-          result = v1 || v2; break;
+          result = v1.toBoolean() || v2.toBoolean(); break;
         case T_BOOLEAN_AND:
-          result = v1 && v2; break;
+          result = v1.toBoolean() && v2.toBoolean(); break;
         case T_LOGICAL_OR:
-          result = v1 || v2; break;
+          result = v1.toBoolean() || v2.toBoolean(); break;
         case T_LOGICAL_AND:
-          result = v1 && v2; break;
+          result = v1.toBoolean() && v2.toBoolean(); break;
         case T_INSTANCEOF: {
           if (v1.isArray() && v2.isString() &&
               interface_supports_array(v2.getStringData())) {

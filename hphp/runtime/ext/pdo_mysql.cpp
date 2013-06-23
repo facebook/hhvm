@@ -475,7 +475,7 @@ bool PDOMySqlConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
     return true;
   }
 
-  if (s->create(sql, options)) {
+  if (s->create(sql, options.toArray())) {
     alloc_own_columns = 1;
     return true;
   }
@@ -1100,7 +1100,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
         return false;
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter);
+          Variant buf = f_stream_get_contents(param->parameter.toObject());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {

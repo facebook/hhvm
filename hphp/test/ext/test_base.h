@@ -86,7 +86,7 @@ class TestBase {
 template <bool value>
 class WithOption {
 public:
-  WithOption(bool &option) :
+  explicit WithOption(bool& option) :
     m_option(&option), m_save(option) {
     option = value;
   }
@@ -117,7 +117,7 @@ typedef WithOption<false> WithNoOpt;
   return CountSkip();                                                   \
 
 #define VERIFY(exp)                                                     \
-  if (!(exp)) {                                                         \
+  if (!toBoolean(exp)) {                                                \
     LOG_TEST_ERROR("%s:%d: [%s] is false", __FILE__, __LINE__, #exp);   \
     return Count(false);                                                \
   }                                                                     \

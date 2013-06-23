@@ -236,7 +236,7 @@ bool TestCppBase::TestArray() {
     arr = Array::Create(0);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY((int)arr[0] == 0);
+    VERIFY(arr[0].toInt32() == 0);
     VS(arr, Array(ArrayInit(1).set(0).create()));
 
     arr = Array::Create("test");
@@ -256,7 +256,7 @@ bool TestCppBase::TestArray() {
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY((int)arr[s_name] == 1);
+    VERIFY(arr[s_name].toInt32() == 1);
     VS(arr, Array(ArrayInit(1).set(s_name, 1).create()));
 
     arr = Array::Create(s_name, "test");

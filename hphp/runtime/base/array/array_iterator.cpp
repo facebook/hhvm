@@ -171,7 +171,7 @@ bool ArrayIter::endHelper() {
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return !obj->o_invoke_few_args(s_valid, 0);
+      return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
     }
   }
 }

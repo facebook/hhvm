@@ -362,7 +362,7 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
     CVarRef value = iter.secondRef();
     /* Process string values only. */
     if (!value.isString()) continue;
-    String str = intl_convert_str_utf16_to_utf8(value, status);
+    String str = intl_convert_str_utf16_to_utf8(value.toString(), status);
     if (U_FAILURE(*status)) {
       return;
     }
@@ -377,7 +377,7 @@ static void collator_convert_array_from_utf8_to_utf16(Array &array,
     CVarRef value = iter.secondRef();
     /* Process string values only. */
     if (!value.isString()) continue;
-    String str = intl_convert_str_utf8_to_utf16(value, status);
+    String str = intl_convert_str_utf8_to_utf16(value.toString(), status);
     if (U_FAILURE(*status)) {
       return;
     }
@@ -394,7 +394,7 @@ static Variant collator_normalize_sort_argument(CVarRef arg) {
   if (same(n_arg, false)) {
     /* Conversion to number failed. */
     UErrorCode status;
-    n_arg = intl_convert_str_utf16_to_utf8(arg, &status);
+    n_arg = intl_convert_str_utf16_to_utf8(arg.toString(), &status);
     if (U_FAILURE(status)) {
       raise_warning("Error converting utf16 to utf8 in "
                     "collator_normalize_sort_argument()");
@@ -436,7 +436,7 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
     if (same(num1, false)) {
       /* str1 is string but not numeric string just convert it to utf8. */
       UErrorCode status;
-      norm1 = intl_convert_str_utf16_to_utf8(str1, &status);
+      norm1 = intl_convert_str_utf16_to_utf8(str1.toString(), &status);
       if (U_FAILURE(status)) {
         raise_warning("Error converting utf16 to utf8 in "
                       "collator_regular_compare_function()");

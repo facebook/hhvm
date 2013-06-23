@@ -117,7 +117,7 @@ protected:
     buffer_used = 0;
     buffer_size = _buffer_size;
     p = _p;
-    t = p->o_invoke_few_args(s_getTransport, 0);
+    t = p->o_invoke_few_args(s_getTransport, 0).toObject();
   }
   ~PHPTransport() {
     free(buffer);

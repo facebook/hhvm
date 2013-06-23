@@ -596,7 +596,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   CallerFrame cf;
   vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
-    return uninit_null();
+    return false;
   }
   PointerSet seen;
   ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
@@ -612,7 +612,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   CallerFrame cf;
   vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
-    return uninit_null();
+    return false;
   }
   ArrayUtil::Walk(input, walk_func, &ctx, false, NULL, userdata);
   return true;
@@ -671,7 +671,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     {
       Object obj = var.toObject();
       if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke_few_args(s_count, 0);
+        return obj->o_invoke_few_args(s_count, 0).toInt64();
       }
     }
     break;
@@ -781,7 +781,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
 
 static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
   Variant *callback = (Variant *)data;
-  return vm_call_user_func(*callback, CREATE_VECTOR2(v1, v2));
+  return vm_call_user_func(*callback, CREATE_VECTOR2(v1, v2)).toInt32();
 }
 
 #define COMMA ,

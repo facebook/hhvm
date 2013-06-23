@@ -37,10 +37,12 @@ inline Variant operator+(double  n, CVarRef v) { return Variant(v) += n;}
 
 // String + Variant means string concatenation
 inline Variant operator+(String&& n, CVarRef v) {
-  return Variant(std::move(n += v));
+  return Variant(std::move(n += v.toString()));
 }
 
-inline Variant operator+(CStrRef n, CVarRef v) { return String(n) += v;}
+inline Variant operator+(CStrRef n, CVarRef v) {
+  return String(n) += v.toString();
+}
 // Array + Variant is already defined in type_array.h
 inline Variant operator+(CObjRef n, CVarRef v) { return Variant(v) += n;}
 

@@ -541,7 +541,7 @@ Array c_UConverter::ti_getaliases(CStrRef encoding) {
 
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getAliases, error, s_intl_error->m_error);
-    return uninit_null();
+    return uninit_null().toArray();
   }
 
   Array ret = Array::Create();
@@ -550,7 +550,7 @@ Array c_UConverter::ti_getaliases(CStrRef encoding) {
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
-      return uninit_null();
+      return uninit_null().toArray();
     }
     ret.append(alias);
   }
@@ -566,7 +566,7 @@ Array c_UConverter::ti_getstandards() {
     const char *name = ucnv_getStandard(i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getStandard, error, s_intl_error->m_error);
-      return uninit_null();
+      return uninit_null().toArray();
     }
     ret.append(name);
   }

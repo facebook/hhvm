@@ -204,7 +204,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   bool success = false;
   int64_t didWrite = invoke(m_StreamWrite, s_stream_write,
                           CREATE_VECTOR1(String(buffer, length, CopyString)),
-                          success);
+                          success).toInt64();
   if (!success) {
     raise_warning("%s::stream_write is not implemented",
                   m_cls->name()->data());
@@ -228,7 +228,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool success = false;
   bool sought  = invoke(m_StreamSeek, s_stream_seek,
-                        CREATE_VECTOR2(offset, whence), success);
+                        CREATE_VECTOR2(offset, whence), success).toBoolean();
   return success ? sought : false;
 }
 

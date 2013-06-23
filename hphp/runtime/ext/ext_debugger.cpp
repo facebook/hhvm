@@ -207,7 +207,7 @@ static String format_string(DebuggerClient &client,
   TRACE(5, "c_DebuggerClientCmdUser::format_string\n");
   Variant ret = f_sprintf(_argc, format, _argv);
   if (ret.isString()) {
-    return ret;
+    return ret.toString();
   }
   client.error("Debugger extension failed to format string: %s",
                  format.data());
@@ -391,7 +391,7 @@ int64_t c_DebuggerClientCmdUser::t_getframe() {
 
 void c_DebuggerClientCmdUser::t_printframe(int index) {
   TRACE(5, "c_DebuggerClientCmdUser::t_printframe\n");
-  m_client->printFrame(index, m_client->getStackTrace()[index]);
+  m_client->printFrame(index, m_client->getStackTrace()[index].toArray());
 }
 
 void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {

@@ -522,7 +522,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, uninit_null());
+    f_xhprof_enable(xhprof, uninit_null().toArray());
   }
 }
 

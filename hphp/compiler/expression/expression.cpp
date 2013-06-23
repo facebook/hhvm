@@ -687,7 +687,7 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
     ExpressionListPtr el(new ExpressionList(scope, loc,
                                             ExpressionList::ListKindParam));
 
-    for (ArrayIter iter(value); iter; ++iter) {
+    for (ArrayIter iter(value.toArray()); iter; ++iter) {
       ExpressionPtr k(MakeScalarExpression(ar, scope, loc, iter.first()));
       ExpressionPtr v(MakeScalarExpression(ar, scope, loc, iter.second()));
       if (!k || !v) return ExpressionPtr();
@@ -701,7 +701,7 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
   } else if (value.isNull()) {
     return MakeConstant(ar, scope, loc, "null");
   } else if (value.isBoolean()) {
-    return MakeConstant(ar, scope, loc, value ? "true" : "false");
+    return MakeConstant(ar, scope, loc, value.toBoolean() ? "true" : "false");
   } else {
     return ScalarExpressionPtr
       (new ScalarExpression(scope, loc, value));

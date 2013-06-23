@@ -44,7 +44,6 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestObject);
   RUN_TEST(TestVariant);
   RUN_TEST(TestIpBlockMap);
-  RUN_TEST(TestEqualAsStr);
   return ret;
 }
 
@@ -940,39 +939,5 @@ bool TestCppBase::TestIpBlockMap() {
   VERIFY(!ibm.isBlocking("test/blah.php",
                          "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
 
-  return Count(true);
-}
-
-bool TestCppBase::TestEqualAsStr() {
-
-  const int arr_len = 18;
-  Variant var_array[arr_len];
-  var_array[0] = false;
-  var_array[1] = true;
-  var_array[2] = 0;
-  var_array[3] = 1;
-  var_array[4] = 42;
-  var_array[5] = 0.0;
-  var_array[6] = 1.0;
-  var_array[7] = 42.2;
-  var_array[8] = String("0");
-  var_array[9] = String("1");
-  var_array[10] = String("42");
-  var_array[11] = String("x");
-  var_array[12] = Array::Create();
-  Variant v1("original");
-  var_array[13] = v1;
-  Variant v2("changed");
-  var_array[14] = v2;
-  var_array[15] = empty_string;
-  var_array[16] = String("Array");
-  var_array[17] = String("ARRAY");
-  for (int i = 0; i < arr_len; i++) {
-    for (int j = 0; j < arr_len; j++) {
-      bool eqAsStr = equalAsStr(var_array[i], var_array[j]);
-      bool sm = same(toString(var_array[i]), toString(var_array[j]));
-      VERIFY(eqAsStr == sm);
-    }
-  }
   return Count(true);
 }

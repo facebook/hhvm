@@ -135,7 +135,7 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
 }
 
 int Array::CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
-  return equalAsStr(v1, v2) ? 0 : -1;
+  return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
 }
 
 Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,

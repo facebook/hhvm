@@ -58,9 +58,6 @@ class TestCppBase : public TestBase {
   bool TestObject();
   bool TestVariant();
   bool TestListAssignment();
-
-  // EqualAsStr functions
-  bool TestEqualAsStr();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

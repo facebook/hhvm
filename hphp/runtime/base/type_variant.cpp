@@ -1526,41 +1526,6 @@ Variant::operator Object() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// Array needs to convert to "Array" and Object to String
-#define UNWRAP_STRING(reverse)                                          \
-  auto const cell = asCell();                                           \
-  switch (cell->m_type) {                                               \
-  case KindOfUninit:                                                    \
-  case KindOfNull:    return HPHP::reverse(v2, empty_string);           \
-  case KindOfBoolean: return HPHP::reverse(v2, !!cell->m_data.num);     \
-  case KindOfInt64:   return HPHP::reverse(v2, cell->m_data.num);       \
-  case KindOfDouble:  return HPHP::reverse(v2, cell->m_data.dbl);       \
-  case KindOfStaticString:                                              \
-  case KindOfString:  return HPHP::reverse(v2, cell->m_data.pstr);      \
-  case KindOfArray:   return HPHP::reverse(v2, s_array);                \
-  case KindOfObject:                                                    \
-    return HPHP::reverse(v2, Object(cell->m_data.pobj).toString());     \
-  default:                                                              \
-    assert(false);                                                      \
-    break;                                                              \
-  }                                                                     \
-  return false;
-
-bool Variant::equalAsStr(bool    v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(int     v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(int64_t   v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(double  v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(litstr  v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(const StringData *v2) const {
-  UNWRAP_STRING(equalAsStr);
-}
-bool Variant::equalAsStr(CStrRef  v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(CArrRef  v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(CObjRef  v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(CVarRef  v2) const { UNWRAP_STRING(equalAsStr);}
-
-///////////////////////////////////////////////////////////////////////////////
 // offset functions
 
 ObjectData *Variant::getArrayAccess() const {

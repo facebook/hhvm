@@ -697,21 +697,6 @@ class Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
-  /*
-   * Comparisons
-   */
-
-  bool equalAsStr(bool    v2) const;
-  bool equalAsStr(int     v2) const;
-  bool equalAsStr(int64_t   v2) const;
-  bool equalAsStr(double  v2) const;
-  bool equalAsStr(litstr v2) const;
-  bool equalAsStr(const StringData *v2) const;
-  bool equalAsStr(CStrRef v2) const;
-  bool equalAsStr(CArrRef v2) const;
-  bool equalAsStr(CObjRef v2) const;
-  bool equalAsStr(CVarRef v2) const;
-
   /**
    * Output functions
    */

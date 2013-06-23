@@ -17,6 +17,7 @@
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
@@ -107,6 +108,38 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
     for (int i = 0; i < m_stmt->getCount(); i++) {
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
       ph->onParseRecur(ar, classScope);
+    }
+    checkArgumentsToPromote(ExpressionListPtr(), T_INTERFACE);
+  }
+}
+
+void InterfaceStatement::checkArgumentsToPromote(
+    ExpressionListPtr promotedParams, int type) {
+  if (!m_stmt) {
+    return;
+  }
+  for (int i = 0; i < m_stmt->getCount(); i++) {
+    MethodStatementPtr meth =
+      dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
+    if (meth && meth->getName() == "__construct") {
+      ExpressionListPtr params = meth->getParams();
+      if (params) {
+        for (int i = 0; i < params->getCount(); i++) {
+          ParameterExpressionPtr param =
+            dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+          if (param->getModifier() != 0) {
+            if (type == T_TRAIT || type == T_INTERFACE) {
+              param->parseTimeFatal(Compiler::InvalidAttribute,
+                                    "Constructor parameter promotion "
+                                    "not allowed on traits or interfaces");
+            }
+            if (promotedParams) {
+              promotedParams->addElement(param);
+            }
+          }
+        }
+      }
+      return; // nothing else to look at
     }
   }
 }

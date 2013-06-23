@@ -133,6 +133,9 @@ public:
   void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
   bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
 
+private:
+  void checkParameters();
+
 protected:
   bool m_method;
   bool m_ref;

@@ -60,6 +60,7 @@ public:
   }
 
   StatementListPtr getStmts() { return m_stmt; }
+  void checkArgumentsToPromote(ExpressionListPtr params, int type);
 protected:
   std::string m_originalName;
   std::string m_name;

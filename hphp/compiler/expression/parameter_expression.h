@@ -20,6 +20,7 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/util/json.h"
+#include "hphp/util/parser/scanner.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,7 @@ public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       TypeAnnotationPtr type, bool hhType,
                       const std::string &name,
-                      bool ref, ExpressionPtr defaultValue,
+                      bool ref, TokenID modifier, ExpressionPtr defaultValue,
                       ExpressionPtr attributeList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
@@ -63,6 +64,7 @@ public:
   void compatibleDefault();
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
   bool hhType() { return m_hhType; }
+  TokenID getModifier() const { return m_modifier; }
 private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 
@@ -71,6 +73,7 @@ private:
   std::string m_name;
   bool m_hhType;
   bool m_ref;
+  TokenID m_modifier;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;
 };

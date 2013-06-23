@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/compiler/expression/parameter_expression.h"
-
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -36,6 +35,7 @@ ParameterExpression::ParameterExpression(
      bool hhType,
      const std::string &name,
      bool ref,
+     TokenID modifier,
      ExpressionPtr defaultValue,
      ExpressionPtr attributeList)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression))
@@ -43,6 +43,7 @@ ParameterExpression::ParameterExpression(
   , m_name(name)
   , m_hhType(hhType)
   , m_ref(ref)
+  , m_modifier(modifier)
   , m_defaultValue(defaultValue)
   , m_attributeList(attributeList)
 {

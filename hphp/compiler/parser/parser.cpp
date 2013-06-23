@@ -907,7 +907,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
-                     bool ref, Token *defValue, Token *attr) {
+                     bool ref, Token *defValue, Token *attr, Token *modifier) {
   ExpressionPtr expList;
   if (params) {
     expList = params->exp;
@@ -922,7 +922,8 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.hipHopSyntaxEnabled(), var->text(),
-                              ref, defValue ? defValue->exp : ExpressionPtr(),
+                              ref, (modifier) ? modifier->num() : 0,
+                              defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
   out->exp = expList;
 }
@@ -957,6 +958,34 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
     (ClassStatement, type, name->text(), base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList, attrList);
+
+  // look for argument promotion in ctor
+  ExpressionListPtr promote = NEW_EXP(ExpressionList);
+  cls->checkArgumentsToPromote(promote, type);
+  for (int i = 0, count = promote->getCount(); i < count; i++) {
+    auto param =
+        dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
+    TokenID mod = param->getModifier();
+    std::string name = param->getName();
+    std::string type = param->hasUserType() ?
+                                  param->getUserTypeHint() : "";
+
+    // create the class variable and change the location to
+    // point to the paramenter location for error reporting
+    LocationPtr location = param->getLocation();
+    ModifierExpressionPtr modifier = NEW_EXP0(ModifierExpression);
+    modifier->add(mod);
+    modifier->setLocation(location);
+    SimpleVariablePtr svar = NEW_EXP(SimpleVariable, name);
+    svar->setLocation(location);
+    ExpressionListPtr expList = NEW_EXP0(ExpressionList);
+    expList->addElement(svar);
+    expList->setLocation(location);
+    ClassVariablePtr var = NEW_STMT(ClassVariable, modifier, type, expList);
+    var->setLocation(location);
+    cls->getStmts()->addElement(var);
+  }
+
   out->stmt = cls;
   {
     cls->onParse(m_ar, m_file);
@@ -1117,6 +1146,51 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
+
+  // look for argument promotion in ctor and add to function body
+  string funcName = name->text();
+  if (old_params && funcName == "__construct") {
+    bool isAbstract = (exp) ? exp->isAbstract() : false;
+    for (int i = 0, count = old_params->getCount(); i < count; i++) {
+      ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*old_params)[i]);
+      TokenID mod = param->getModifier();
+      if (mod != 0) {
+        if (isAbstract) {
+           param->parseTimeFatal(Compiler::InvalidAttribute,
+                                 "parameter modifiers not allowed on "
+                                 "abstract __construct");
+        }
+        if (!stmts) {
+           param->parseTimeFatal(Compiler::InvalidAttribute,
+                                 "parameter modifiers not allowed on "
+                                 "__construct without a body");
+        }
+        if (param->annotation()) {
+          std::vector<std::string> typeNames;
+          param->annotation()->getAllSimpleNames(typeNames);
+          for (auto& typeName : typeNames) {
+            if (isTypeVarInImmediateScope(typeName)) {
+              param->parseTimeFatal(Compiler::InvalidAttribute,
+                                    "parameter modifiers not supported with "
+                                    "type variable annotation");
+            }
+          }
+        }
+        std::string name = param->getName();
+        SimpleVariablePtr value = NEW_EXP(SimpleVariable, name);
+        ScalarExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name);
+        SimpleVariablePtr self = NEW_EXP(SimpleVariable, "this");
+        ObjectPropertyExpressionPtr objProp =
+            NEW_EXP(ObjectPropertyExpression, self, prop);
+        AssignmentExpressionPtr assign =
+            NEW_EXP(AssignmentExpression, objProp, value, false);
+        ExpStatementPtr stmt = NEW_STMT(ExpStatement, assign);
+        stmts->insertElement(stmt);
+      }
+    }
+  }
+
   int attribute = m_file->popAttribute();
   string comment = popComment();
   LocationPtr loc = popFuncLocation();
@@ -1134,7 +1208,6 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   MethodStatementPtr mth;
 
-  string funcName = name->text();
   if (funcName.empty()) {
     funcName = newClosureName(m_clsName, m_containingFuncName);
   }
@@ -1632,7 +1705,7 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
   }
   expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
                               m_scanner.hipHopSyntaxEnabled(), param->text(),
-                              ref, ExpressionPtr(), ExpressionPtr()));
+                              ref, 0, ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
 

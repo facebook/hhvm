@@ -69,6 +69,7 @@ MethodStatement::MethodStatement
     m_retTypeConstraint(retTypeConstraint), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
+  checkParameters();
 }
 
 MethodStatement::MethodStatement
@@ -84,6 +85,7 @@ MethodStatement::MethodStatement
     m_params(params), m_retTypeConstraint(retTypeConstraint),
     m_stmt(stmt), m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
+  checkParameters();
 }
 
 StatementPtr MethodStatement::clone() {
@@ -634,4 +636,36 @@ bool MethodStatement::hasRefParam() {
     if (param->isRef()) return true;
   }
   return false;
+}
+
+void MethodStatement::checkParameters() {
+  // only allow paramenter modifiers (public, private, protected)
+  // on constructor for promotion
+  if (!m_params) {
+    return;
+  }
+  bool isCtor = m_name == "__construct";
+  for (int i = 0; i < m_params->getCount(); i++) {
+    auto param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    switch (param->getModifier()) {
+    case 0:
+      continue;
+    case T_PUBLIC:
+    case T_PRIVATE:
+    case T_PROTECTED:
+      if (isCtor) {
+        continue;
+      }
+    default:
+      if (isCtor) {
+        param->parseTimeFatal(Compiler::InvalidAttribute,
+                              "Invalid modifier on __construct, only public, "
+                              "private or protected allowed");
+      } else {
+        param->parseTimeFatal(Compiler::InvalidAttribute,
+                              "Parameters modifiers not allowed on methods");
+      }
+    }
+  }
 }

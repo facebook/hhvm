@@ -124,6 +124,7 @@ public:
   void popTypeScope();
   void addTypeVar(const std::string &name);
   bool isTypeVar(const std::string &name);
+  bool isTypeVarInImmediateScope(const std::string &name);
 
   // for goto syntax checking
   void pushLabelInfo();

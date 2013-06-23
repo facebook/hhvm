@@ -163,6 +163,12 @@ bool ParserBase::isTypeVar(const std::string &name) {
   return false;
 }
 
+bool ParserBase::isTypeVarInImmediateScope(const std::string &name) {
+  int currentScope = m_typeScopes.size() - 1;
+  return m_typeScopes[currentScope].find(name)
+         != m_typeScopes[currentScope].end();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // checks GOTO label syntax
 

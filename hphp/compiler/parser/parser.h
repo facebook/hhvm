@@ -182,7 +182,7 @@ public:
   void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
                   Token &name, Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
-               bool ref, Token *defValue, Token *attr);
+               bool ref, Token *defValue, Token *attr, Token *modifiers);
   void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr);

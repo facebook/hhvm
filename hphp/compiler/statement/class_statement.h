@@ -24,6 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ClassStatement);
+DECLARE_BOOST_TYPES(MethodStatement);
 
 class ClassStatement : public InterfaceStatement {
 public:
@@ -47,6 +48,7 @@ public:
                              std::vector<std::string> &names);
   void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
   StatementPtr addClone(StatementPtr origStmt);
+
 private:
   int m_type;
   std::string m_parent;

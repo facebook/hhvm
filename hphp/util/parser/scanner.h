@@ -25,24 +25,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef int TokenID;
+
 class ScannerToken {
 public:
   ScannerToken() : m_num(0), m_check(false) {}
   void reset() { m_num = 0; m_text.clear();}
 
-  int num() const { return m_num;}
-  void setNum(int num) {
+  TokenID num() const { return m_num;}
+  void setNum(TokenID num) {
     m_num = num;
   }
-  void set(int num, const char *t) {
-    m_num = num;
-    m_text = t;
-  }
-  void set(int num, const std::string &t) {
+  void set(TokenID num, const char *t) {
     m_num = num;
     m_text = t;
   }
-  void operator++(int) {
+  void set(TokenID num, const std::string &t) {
+    m_num = num;
+    m_text = t;
+  }
+  void operator++(TokenID) {
     ++m_num;
   }
   void operator=(ScannerToken &other) {
@@ -80,7 +82,7 @@ public:
   void xhpDecode();  // xhp supports more entities than html
 
 protected:
-  int m_num; // internal token id
+  TokenID m_num; // internal token id
   std::string m_text;
   bool m_check;
 };

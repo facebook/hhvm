@@ -120,6 +120,14 @@ public:
   std::string fullName() const;
 
   /*
+   * Fill the vector in input with all the types used in this annotation
+   * as simple names.
+   * Vector<Map<string, int>> would return
+   * [Vector, Map, string, int]
+   */
+  void getAllSimpleNames(std::vector<std::string>& names) const;
+
+  /*
    * Add a new element to this type list for this TypeAnnotation.
    */
   void appendToTypeList(TypeAnnotationPtr typeList);

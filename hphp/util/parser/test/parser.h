@@ -324,8 +324,8 @@ struct Parser : ParserBase {
   }
 
   void onParam(Token &out, Token *params, Token &type, Token &var,
-               bool ref, Token *defValue, Token *attr) {
-    X(params, type, var, ref, defValue, attr);
+               bool ref, Token *defValue, Token *attr, Token* mods) {
+    X(params, type, var, ref, defValue, attr, mods);
   }
 
   void onClassStart(int type, Token &name) { X(type, name); }

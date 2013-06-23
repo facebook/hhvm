@@ -66,6 +66,16 @@ std::string TypeAnnotation::fullName() const {
   return name;
 }
 
+
+void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {
+  names.push_back(m_name);
+  if (m_typeList) {
+    m_typeList->getAllSimpleNames(names);
+  } else if (m_typeArgs) {
+    m_typeArgs->getAllSimpleNames(names);
+  }
+}
+
 void TypeAnnotation::functionTypeName(std::string &name) const {
   name += "(function (";
   // return value of function types is the first element of type list

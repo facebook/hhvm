@@ -163,7 +163,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params) {
     Token var;     var.setText(CONTINUATION_OBJECT_NAME);
     params.reset();
     type.reset();
-    _p->onParam(params, NULL, type, var, false, NULL, NULL);
+    _p->onParam(params, NULL, type, var, false, NULL, NULL, NULL);
   }
 }
 
@@ -1218,6 +1218,58 @@ new_else_single:
   |                                    { $$.reset();}
 ;
 
+method_parameter_list:
+    non_empty_method_parameter_list ',' T_VARARG
+                                       { only_in_hh_syntax(_p); $$ = $1; }
+  | non_empty_method_parameter_list
+    possible_comma_in_hphp_syntax      { $$ = $1;}
+  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
+  |                                    { $$.reset();}
+;
+
+non_empty_method_parameter_list:
+    optional_user_attributes
+    parameter_modifiers
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$3,$4,0,
+                                                     NULL,&$1,&$2);}
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$3,$5,1,
+                                                     NULL,&$1,&$2);}
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt '&' T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,NULL,$3,$5,1,
+                                                     &$7,&$1,&$2);}
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,NULL,$3,$4,0,
+                                                     &$6,&$1,&$2);}
+  | non_empty_method_parameter_list ','
+    parameter_modifiers
+    optional_user_attributes
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$5,$6,0,
+                                                     NULL,&$4,&$3);}
+  | non_empty_method_parameter_list ','
+    parameter_modifiers
+    optional_user_attributes
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$5,$7,1,
+                                                     NULL,&$4,&$3);}
+  | non_empty_method_parameter_list ','
+    parameter_modifiers
+    optional_user_attributes
+    hh_type_opt '&' T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,&$1,$5,$7,1,
+                                                     &$9,&$4,&$3);}
+  | non_empty_method_parameter_list ','
+    parameter_modifiers
+    optional_user_attributes
+    hh_type_opt T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,&$1,$5,$6,0,
+                                                     &$8,&$4,&$3);}
+;
+
 parameter_list:
     non_empty_parameter_list ',' T_VARARG
                                        { only_in_hh_syntax(_p); $$ = $1; }
@@ -1229,29 +1281,37 @@ parameter_list:
 
 non_empty_parameter_list:
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,0,NULL,&$1);}
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,0,
+                                                     NULL,&$1,NULL);}
   | optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,1,NULL,&$1);}
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,1,
+                                                     NULL,&$1,NULL);}
   | optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,1,&$6,&$1);}
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,1,
+                                                     &$6,&$1,NULL);}
   | optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,0,&$5,&$1);}
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,0,
+                                                     &$5,&$1,NULL);}
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,0,NULL,&$3);}
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,0,
+                                                     NULL,&$3,NULL);}
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,1,NULL,&$3);}
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,1,
+                                                     NULL,&$3,NULL);}
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,1,&$8,&$3);}
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,1,
+                                                     &$8,&$3,NULL);}
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,0,&$7,&$3);}
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,0,
+                                                     &$7,&$3,NULL);}
 ;
 
 function_call_parameter_list:
@@ -1305,7 +1365,7 @@ class_statement:
     is_reference hh_name_with_typevar '('
                                        { _p->onMethodStart($4, $1);
                                          _p->pushLabelInfo();}
-    parameter_list ')'
+    method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$1,$9,$3,$4,$7,$10,0);
@@ -1316,7 +1376,7 @@ class_statement:
     is_reference hh_name_with_typevar '('
                                        { _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}
-    parameter_list ')'
+    method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$2,$10,$4,$5,$8,$11,&$1);
@@ -1477,6 +1537,15 @@ member_modifier:
   | T_STATIC                           { $$ = T_STATIC;}
   | T_ABSTRACT                         { $$ = T_ABSTRACT;}
   | T_FINAL                            { $$ = T_FINAL;}
+;
+parameter_modifiers:
+    parameter_modifier                 { $$ = $1;}
+  |                                    { $$.reset();}
+;
+parameter_modifier:
+    T_PUBLIC                           { $$ = T_PUBLIC;}
+  | T_PROTECTED                        { $$ = T_PROTECTED;}
+  | T_PRIVATE                          { $$ = T_PRIVATE;}
 ;
 class_variable_declaration:
     class_variable_declaration ','

@@ -202,17 +202,21 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 static JobQueueDispatcher<XboxTransport*, XboxWorker> *s_dispatcher;
+static Mutex s_dispatchMutex;
 
 void XboxServer::Restart() {
   Stop();
 
   if (RuntimeOption::XboxServerThreadCount > 0) {
-    s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>
-      (RuntimeOption::XboxServerThreadCount,
-       RuntimeOption::ServerThreadRoundRobin,
-       RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-       RuntimeOption::ServerThreadDropStack,
-       nullptr);
+    {
+      Lock l(s_dispatchMutex);
+      s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>
+        (RuntimeOption::XboxServerThreadCount,
+         RuntimeOption::ServerThreadRoundRobin,
+         RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+         RuntimeOption::ServerThreadDropStack,
+         nullptr);
+    }
     if (RuntimeOption::XboxServerLogInfo) {
       Logger::Info("xbox server started");
     }
@@ -223,6 +227,8 @@ void XboxServer::Restart() {
 void XboxServer::Stop() {
   if (s_dispatcher) {
     s_dispatcher->stop();
+
+    Lock l(s_dispatchMutex);
     delete s_dispatcher;
     s_dispatcher = nullptr;
   }
@@ -242,16 +248,19 @@ const StaticString
 bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
                              CStrRef host /* = "localhost" */) {
   if (isLocalHost(host)) {
+    XboxTransport *job;
+    {
+      Lock l(s_dispatchMutex);
+      if (!s_dispatcher) {
+        return false;
+      }
 
-    if (RuntimeOption::XboxServerThreadCount <= 0) {
-      return false;
+      job = new XboxTransport(message);
+      job->incRefCount(); // paired with worker's decRefCount()
+      job->incRefCount(); // paired with decRefCount() at below
+      assert(s_dispatcher);
+      s_dispatcher->enqueue(job);
     }
-
-    XboxTransport *job = new XboxTransport(message);
-    job->incRefCount(); // paired with worker's decRefCount()
-    job->incRefCount(); // paired with decRefCount() at below
-    assert(s_dispatcher);
-    s_dispatcher->enqueue(job);
 
     if (timeout_ms <= 0) {
       timeout_ms = RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds;
@@ -314,8 +323,8 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
 bool XboxServer::PostMessage(CStrRef message,
                              CStrRef host /* = "localhost" */) {
   if (isLocalHost(host)) {
-
-    if (RuntimeOption::XboxServerThreadCount <= 0) {
+    Lock l(s_dispatchMutex);
+    if (!s_dispatcher) {
       return false;
     }
 
@@ -381,36 +390,37 @@ StaticString XboxTask::s_class_name("XboxTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool XboxServer::Available() {
-  return s_dispatcher->getActiveWorker() <
+Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
+  {
+    Lock l(s_dispatchMutex);
+    if (s_dispatcher &&
+        (s_dispatcher->getActiveWorker() <
          RuntimeOption::XboxServerThreadCount ||
          s_dispatcher->getQueuedJobs() <
-         RuntimeOption::XboxServerMaxQueueLength;
-}
+         RuntimeOption::XboxServerMaxQueueLength)) {
+      XboxTask *task = NEWOBJ(XboxTask)(msg, reqInitDoc);
+      Object ret(task);
+      XboxTransport *job = task->getJob();
+      job->incRefCount(); // paired with worker's decRefCount()
+      Transport *transport = g_context->getTransport();
+      if (transport) {
+        job->setHost(transport->getHeader("Host"));
+      }
+      assert(s_dispatcher);
+      s_dispatcher->enqueue(job);
 
-Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
-  bool xboxEnabled = (RuntimeOption::XboxServerThreadCount > 0);
-  if (!xboxEnabled || !Available()) {
-    const char* errMsg = (xboxEnabled ?
-      "Cannot create new Xbox task because the Xbox queue has "
-      "reached maximum capacity" :
-      "Cannot create new Xbox task because the Xbox is not enabled");
-    Object e = SystemLib::AllocExceptionObject(errMsg);
-    throw_exception(e);
-    return Object();
+      return ret;
+    }
   }
-  XboxTask *task = NEWOBJ(XboxTask)(msg, reqInitDoc);
-  Object ret(task);
-  XboxTransport *job = task->getJob();
-  job->incRefCount(); // paired with worker's decRefCount()
-  Transport *transport = g_context->getTransport();
-  if (transport) {
-    job->setHost(transport->getHeader("Host"));
-  }
-  assert(s_dispatcher);
-  s_dispatcher->enqueue(job);
+  const char* errMsg =
+    (RuntimeOption::XboxServerThreadCount > 0 ?
+     "Cannot create new Xbox task because the Xbox queue has "
+     "reached maximum capacity" :
+     "Cannot create new Xbox task because the Xbox is not enabled");
 
-  return ret;
+  Object e = SystemLib::AllocExceptionObject(errMsg);
+  throw_exception(e);
+  return Object();
 }
 
 bool XboxServer::TaskStatus(CObjRef task) {

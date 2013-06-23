@@ -282,20 +282,24 @@ StaticString PageletTask::s_class_name("PageletTask");
 // implementing PageletServer
 
 static JobQueueDispatcher<PageletTransport*, PageletWorker> *s_dispatcher;
+static Mutex s_dispatchMutex;
 
 bool PageletServer::Enabled() {
-  return RuntimeOption::PageletServerThreadCount > 0;
+  return s_dispatcher;
 }
 
 void PageletServer::Restart() {
   Stop();
   if (RuntimeOption::PageletServerThreadCount > 0) {
-    s_dispatcher = new JobQueueDispatcher<PageletTransport*, PageletWorker>
-      (RuntimeOption::PageletServerThreadCount,
-       RuntimeOption::PageletServerThreadRoundRobin,
-       RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
-       RuntimeOption::PageletServerThreadDropStack,
-       nullptr);
+    {
+      Lock l(s_dispatchMutex);
+      s_dispatcher = new JobQueueDispatcher<PageletTransport*, PageletWorker>
+        (RuntimeOption::PageletServerThreadCount,
+         RuntimeOption::PageletServerThreadRoundRobin,
+         RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
+         RuntimeOption::PageletServerThreadDropStack,
+         nullptr);
+    }
     Logger::Info("pagelet server started");
     s_dispatcher->start();
   }
@@ -304,6 +308,7 @@ void PageletServer::Restart() {
 void PageletServer::Stop() {
   if (s_dispatcher) {
     s_dispatcher->stop();
+    Lock l(s_dispatchMutex);
     delete s_dispatcher;
     s_dispatcher = nullptr;
   }
@@ -313,22 +318,28 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
                                 CStrRef remote_host,
                                 CStrRef post_data /* = null_string */,
                                 CArrRef files /* = null_array */) {
-  if (RuntimeOption::PageletServerThreadCount <= 0) {
-    return null_object;
-  }
-  if (RuntimeOption::PageletServerQueueLimit > 0 &&
-      s_dispatcher->getQueuedJobs() > RuntimeOption::PageletServerQueueLimit) {
-    return null_object;
+  {
+    Lock l(s_dispatchMutex);
+    if (!s_dispatcher) {
+      return null_object;
+    }
+    if (RuntimeOption::PageletServerQueueLimit > 0 &&
+        s_dispatcher->getQueuedJobs() >
+        RuntimeOption::PageletServerQueueLimit) {
+      return null_object;
+    }
   }
   PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
                                           get_uploaded_files(), files);
   Object ret(task);
   PageletTransport *job = task->getJob();
-  job->incRefCount(); // paired with worker's decRefCount()
-  assert(s_dispatcher);
-  s_dispatcher->enqueue(job);
-
-  return ret;
+  Lock l(s_dispatchMutex);
+  if (s_dispatcher) {
+    job->incRefCount(); // paired with worker's decRefCount()
+    s_dispatcher->enqueue(job);
+    return ret;
+  }
+  return null_object;
 }
 
 int64_t PageletServer::TaskStatus(CObjRef task) {
@@ -358,11 +369,13 @@ void PageletServer::AddToPipeline(const string &s) {
 }
 
 int PageletServer::GetActiveWorker() {
-  return s_dispatcher->getActiveWorker();
+  Lock l(s_dispatchMutex);
+  return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
 }
 
 int PageletServer::GetQueuedJobs() {
-  return s_dispatcher->getQueuedJobs();
+  Lock l(s_dispatchMutex);
+  return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

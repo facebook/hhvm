@@ -332,20 +332,20 @@ public:
    */
   bool operator == (litstr  v) const;
   bool operator != (litstr  v) const;
-  bool operator >= (litstr  v) const;
-  bool operator <= (litstr  v) const;
+  bool operator >= (litstr  v) const = delete;
+  bool operator <= (litstr  v) const = delete;
   bool operator >  (litstr  v) const;
   bool operator <  (litstr  v) const;
   bool operator == (CStrRef v) const;
   bool operator != (CStrRef v) const;
-  bool operator >= (CStrRef v) const;
-  bool operator <= (CStrRef v) const;
+  bool operator >= (CStrRef v) const = delete;
+  bool operator <= (CStrRef v) const = delete;
   bool operator >  (CStrRef v) const;
   bool operator <  (CStrRef v) const;
   bool operator == (CVarRef v) const;
   bool operator != (CVarRef v) const;
-  bool operator >= (CVarRef v) const;
-  bool operator <= (CVarRef v) const;
+  bool operator >= (CVarRef v) const = delete;
+  bool operator <= (CVarRef v) const = delete;
   bool operator >  (CVarRef v) const;
   bool operator <  (CVarRef v) const;
 

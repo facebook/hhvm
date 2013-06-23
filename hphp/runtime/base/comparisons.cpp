@@ -85,38 +85,6 @@ bool same(CVarRef v1, CObjRef v2) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool less_or_equal(CVarRef v1, CVarRef v2) {
-  // To be PHP-compatible, when comparing two arrays or two objects we
-  // cannot assume that "($x <= $y)" is equivalent to "!($x > $y)".
-  if (v1.is(KindOfArray) && v2.is(KindOfArray)) {
-    Array a1 = v1.toArray();
-    Array a2 = v2.toArray();
-    return a1.less(a2) || a1.equal(a2);
-  }
-  if (v1.is(KindOfObject) && v2.is(KindOfObject)) {
-    Object o1 = v1.toObject();
-    Object o2 = v2.toObject();
-    return o1.less(o2) || o1.equal(o2);
-  }
-  return !more(v1, v2);
-}
-
-bool more_or_equal(CVarRef v1, CVarRef v2) {
-  // To be PHP-compatible, when comparing two arrays or two objects we
-  // cannot assume that "($x >= $y)" is equivalent to "!($x < $y)".
-  if (v1.is(KindOfArray) && v2.is(KindOfArray)) {
-    Array a1 = v1.toArray();
-    Array a2 = v2.toArray();
-    return a1.more(a2) || a1.equal(a2);
-  }
-  if (v1.is(KindOfObject) && v2.is(KindOfObject)) {
-    Object o1 = v1.toObject();
-    Object o2 = v2.toObject();
-    return o1.more(o2) || o1.equal(o2);
-  }
-  return !less(v1, v2);
-}
-
 bool equal(int v1, const StringData *v2) {
   return equal((int64_t)v1, v2);
 }

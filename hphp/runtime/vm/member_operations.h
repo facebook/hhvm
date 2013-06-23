@@ -31,7 +31,7 @@ class InvalidSetMException : public std::runtime_error {
  public:
   InvalidSetMException()
     : std::runtime_error("Empty InvalidSetMException")
-    , m_tv(HPHP::tv(KindOfNull, 0LL))
+    , m_tv(make_tv<KindOfNull>())
   {}
 
   explicit InvalidSetMException(const TypedValue& value)
@@ -543,7 +543,7 @@ inline void SetElemNumberish(Cell* value) {
     tvRefcountedDecRefCell((TypedValue*)value);
     tvWriteNull((TypedValue*)value);
   } else {
-    throw InvalidSetMException(tv(KindOfNull, 0LL));
+    throw InvalidSetMException(make_tv<KindOfNull>());
   }
 }
 
@@ -631,7 +631,7 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
       tvRefcountedDecRef(value);
       tvWriteNull(value);
     } else {
-      throw InvalidSetMException(tv(KindOfNull, 0LL));
+      throw InvalidSetMException(make_tv<KindOfNull>());
     }
   }
 
@@ -788,7 +788,7 @@ inline void SetNewElemNumberish(Cell* value) {
     tvRefcountedDecRefCell((TypedValue*)value);
     tvWriteNull((TypedValue*)value);
   } else {
-    throw InvalidSetMException(tv(KindOfNull, 0LL));
+    throw InvalidSetMException(make_tv<KindOfNull>());
   }
 }
 template <bool setResult>
@@ -1519,7 +1519,7 @@ inline void SetPropNull(Cell* val) {
     tvRefcountedDecRefCell(val);
     tvWriteNull(val);
   } else {
-    throw InvalidSetMException(tv(KindOfNull, 0LL));
+    throw InvalidSetMException(make_tv<KindOfNull>());
   }
 }
 inline void SetPropStdclass(TypedValue* base, TypedValue* key,

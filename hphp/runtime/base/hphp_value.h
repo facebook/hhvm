@@ -13,21 +13,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_HPHPVALUE_H_
+#define incl_HPHP_HPHPVALUE_H_
 
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'hphp_value.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef incl_HPHP_HPHPVALUE_H_
-#define incl_HPHP_HPHPVALUE_H_
+#include <type_traits>
 
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-  class Class;
+class Class;
 
 struct TypedValue;
 
@@ -137,6 +138,72 @@ private:
  */
 typedef TypedValue Cell;
 typedef TypedValue Var;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * make_value and make_tv are helpers for creating TypedValues and
+ * Values as temporaries, without messing up the conversions.
+ */
+
+template<class T>
+typename std::enable_if<
+  std::is_integral<T>::value,
+  Value
+>::type make_value(T t) { Value v; v.num = t; return v; }
+
+template<class T>
+typename std::enable_if<
+  std::is_pointer<T>::value,
+  Value
+>::type make_value(T t) {
+  Value v;
+  v.num = reinterpret_cast<int64_t>(t);
+  return v;
+}
+
+inline Value make_value(double d) { Value v; v.dbl = d; return v; }
+
+namespace detail {
+
+  template<DataType> struct DataTypeCPPType;
+#define X(dt, cpp) \
+  template<> struct DataTypeCPPType<dt> { typedef cpp type; }
+
+  X(KindOfNull,         void);
+  X(KindOfBoolean,      bool);
+  X(KindOfInt64,        int64_t);
+  X(KindOfDouble,       double);
+  X(KindOfArray,        ArrayData*);
+  X(KindOfObject,       ObjectData*);
+  X(KindOfRef,          RefData*);
+  X(KindOfString,       StringData*);
+  X(KindOfStaticString, StringData*);
+
+#undef X
+
+}
+
+template<DataType DType>
+typename std::enable_if<
+  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  TypedValue
+>::type make_tv(typename detail::DataTypeCPPType<DType>::type val) {
+  TypedValue ret;
+  ret.m_data = make_value(val);
+  ret.m_type = DType;
+  return ret;
+}
+
+template<DataType DType>
+typename std::enable_if<
+  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  TypedValue
+>::type make_tv() {
+  TypedValue ret;
+  ret.m_type = DType;
+  return ret;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

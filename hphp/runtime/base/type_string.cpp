@@ -587,14 +587,6 @@ bool String::operator!=(litstr v) const {
   return !HPHP::equal(m_px, v);
 }
 
-bool String::operator>=(litstr v) const {
-  return more_or_equal(m_px, v);
-}
-
-bool String::operator<=(litstr v) const {
-  return less_or_equal(m_px, v);
-}
-
 bool String::operator>(litstr v) const {
   return HPHP::more(m_px, v);
 }
@@ -611,14 +603,6 @@ bool String::operator!=(CStrRef v) const {
   return !HPHP::equal(m_px, v);
 }
 
-bool String::operator>=(CStrRef v) const {
-  return more_or_equal(m_px, v);
-}
-
-bool String::operator<=(CStrRef v) const {
-  return less_or_equal(m_px, v);
-}
-
 bool String::operator>(CStrRef v) const {
   return HPHP::more(m_px, v);
 }
@@ -633,14 +617,6 @@ bool String::operator==(CVarRef v) const {
 
 bool String::operator!=(CVarRef v) const {
   return !HPHP::equal(m_px, v);
-}
-
-bool String::operator>=(CVarRef v) const {
-  return more_or_equal(m_px, v);
-}
-
-bool String::operator<=(CVarRef v) const {
-  return less_or_equal(m_px, v);
 }
 
 bool String::operator>(CVarRef v) const {

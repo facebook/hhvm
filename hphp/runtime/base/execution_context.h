@@ -483,6 +483,7 @@ private:
   template <unsigned mdepth>
   void setHelperPost(unsigned ndiscard, Variant& tvRef,
                      Variant& tvRef2);
+  template<class Op> void implCellBinOpBool(PC&, Op op);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);

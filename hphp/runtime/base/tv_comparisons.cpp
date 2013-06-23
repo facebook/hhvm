@@ -32,28 +32,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-bool cellToBool(const Cell* cell) {
-  assert(tvIsPlausible(cell));
-  assert(cell->m_type != KindOfRef);
-
-  switch (cell->m_type) {
-  case KindOfUninit:
-  case KindOfNull:          return false;
-  case KindOfInt64:         return cell->m_data.num != 0;
-  case KindOfBoolean:       return cell->m_data.num;
-  case KindOfDouble:        return cell->m_data.dbl != 0;
-  case KindOfStaticString:
-  case KindOfString:        return cell->m_data.pstr->toBoolean();
-  case KindOfArray:         return !cell->m_data.parr->empty();
-  case KindOfObject:        // TODO: should handle o_toBoolean?
-                            return true;
-  default:                  break;
-  }
-  not_reached();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Family of relative op functions.
  *
@@ -247,29 +225,34 @@ bool cellRelOp(Op op, const Cell* cell, const ObjectData* od) {
 }
 
 template<class Op>
-bool tvRelOp(Op op, const TypedValue* tv1, const TypedValue* tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
-  tv1 = tvToCell(tv1);
-  tv2 = tvToCell(tv2);
+bool cellRelOp(Op op, const Cell* c1, const Cell* c2) {
+  assert(c1->m_type != KindOfRef);
+  assert(c2->m_type != KindOfRef);
 
-  switch (tv2->m_type) {
+  switch (c2->m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return IS_STRING_TYPE(tv1->m_type)
-      ? op(tv1->m_data.pstr, empty_string.get())
-      : cellRelOp(op, tv1, false);
-  case KindOfInt64:        return cellRelOp(op, tv1, tv2->m_data.num);
-  case KindOfBoolean:      return cellRelOp(op, tv1, !!tv2->m_data.num);
-  case KindOfDouble:       return cellRelOp(op, tv1, tv2->m_data.dbl);
+    return IS_STRING_TYPE(c1->m_type)
+      ? op(c1->m_data.pstr, empty_string.get())
+      : cellRelOp(op, c1, false);
+  case KindOfInt64:        return cellRelOp(op, c1, c2->m_data.num);
+  case KindOfBoolean:      return cellRelOp(op, c1, !!c2->m_data.num);
+  case KindOfDouble:       return cellRelOp(op, c1, c2->m_data.dbl);
   case KindOfStaticString:
-  case KindOfString:       return cellRelOp(op, tv1, tv2->m_data.pstr);
-  case KindOfArray:        return cellRelOp(op, tv1, tv2->m_data.parr);
-  case KindOfObject:       return cellRelOp(op, tv1, tv2->m_data.pobj);
+  case KindOfString:       return cellRelOp(op, c1, c2->m_data.pstr);
+  case KindOfArray:        return cellRelOp(op, c1, c2->m_data.parr);
+  case KindOfObject:       return cellRelOp(op, c1, c2->m_data.pobj);
   default:
     break;
   }
   not_reached();
+}
+
+template<class Op>
+bool tvRelOp(Op op, const TypedValue* tv1, const TypedValue* tv2) {
+  assert(tvIsPlausible(tv1));
+  assert(tvIsPlausible(tv2));
+  return cellRelOp(op, tvToCell(tv1), tvToCell(tv2));
 }
 
 /*
@@ -387,44 +370,47 @@ struct Gt {
 
 }
 
-bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
+bool cellSame(const Cell* c1, const Cell* c2) {
+  assert(c1->m_type != KindOfRef);
+  assert(c2->m_type != KindOfRef);
 
-  tv1 = tvToCell(tv1);
-  tv2 = tvToCell(tv2);
-
-  bool const null1 = IS_NULL_TYPE(tv1->m_type);
-  bool const null2 = IS_NULL_TYPE(tv2->m_type);
+  bool const null1 = IS_NULL_TYPE(c1->m_type);
+  bool const null2 = IS_NULL_TYPE(c2->m_type);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
 
-  switch (tv1->m_type) {
+  switch (c1->m_type) {
   case KindOfInt64:
   case KindOfBoolean:
-    if (tv2->m_type != tv1->m_type) return false;
-    return tv1->m_data.num == tv2->m_data.num;
+    if (c2->m_type != c1->m_type) return false;
+    return c1->m_data.num == c2->m_data.num;
   case KindOfDouble:
-    if (tv2->m_type != tv1->m_type) return false;
-    return tv1->m_data.dbl == tv2->m_data.dbl;
+    if (c2->m_type != c1->m_type) return false;
+    return c1->m_data.dbl == c2->m_data.dbl;
 
   case KindOfStaticString:
   case KindOfString:
-    if (!IS_STRING_TYPE(tv2->m_type)) return false;
-    return tv1->m_data.pstr->same(tv2->m_data.pstr);
+    if (!IS_STRING_TYPE(c2->m_type)) return false;
+    return c1->m_data.pstr->same(c2->m_data.pstr);
 
   case KindOfArray:
-    if (tv2->m_type != KindOfArray) return false;
-    return tv1->m_data.parr->equal(tv2->m_data.parr, true);
+    if (c2->m_type != KindOfArray) return false;
+    return c1->m_data.parr->equal(c2->m_data.parr, true);
 
   case KindOfObject:
-    return tv2->m_type == KindOfObject &&
-      tv1->m_data.pobj == tv2->m_data.pobj;
+    return c2->m_type == KindOfObject &&
+      c1->m_data.pobj == c2->m_data.pobj;
 
   default:
     break;
   }
   not_reached();
+}
+
+bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
+  assert(tvIsPlausible(tv1));
+  assert(tvIsPlausible(tv2));
+  return cellSame(tvToCell(tv1), tvToCell(tv2));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -459,6 +445,10 @@ bool cellEqual(const Cell* cell, const ObjectData* val) {
   return cellRelOp(Eq(), cell, val);
 }
 
+bool cellEqual(const Cell* c1, const Cell* c2) {
+  return cellRelOp(Eq(), c1, c2);
+}
+
 HOT_FUNC
 bool tvEqual(const TypedValue* tv1, const TypedValue* tv2) {
   return tvRelOp(Eq(), tv1, tv2);
@@ -486,6 +476,10 @@ bool cellLess(const Cell* cell, const ArrayData* val) {
 
 bool cellLess(const Cell* cell, const ObjectData* val) {
   return cellRelOp(Lt(), cell, val);
+}
+
+bool cellLess(const Cell* c1, const Cell* c2) {
+  return cellRelOp(Lt(), c1, c2);
 }
 
 HOT_FUNC
@@ -518,8 +512,36 @@ bool cellGreater(const Cell* cell, const ObjectData* val) {
   return cellRelOp(Gt(), cell, val);
 }
 
+bool cellGreater(const Cell* c1, const Cell* c2) {
+  return cellRelOp(Gt(), c1, c2);
+}
+
 bool tvGreater(const TypedValue* tv1, const TypedValue* tv2) {
   return tvRelOp(Gt(), tv1, tv2);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool cellLessOrEqual(const Cell* c1, const Cell* c2) {
+  assert(c1->m_type != KindOfRef);
+  assert(c2->m_type != KindOfRef);
+
+  if ((c1->m_type == KindOfArray && c2->m_type == KindOfArray) ||
+      (c1->m_type == KindOfObject && c2->m_type == KindOfObject)) {
+    return cellLess(c1, c2) || cellEqual(c1, c2);
+  }
+  return !cellGreater(c1, c2);
+}
+
+bool cellGreaterOrEqual(const Cell* c1, const Cell* c2) {
+  assert(c1->m_type != KindOfRef);
+  assert(c2->m_type != KindOfRef);
+
+  if ((c1->m_type == KindOfArray && c2->m_type == KindOfArray) ||
+      (c1->m_type == KindOfObject && c2->m_type == KindOfObject)) {
+    return cellGreater(c1, c2) || cellEqual(c1, c2);
+  }
+  return !cellLess(c1, c2);
 }
 
 //////////////////////////////////////////////////////////////////////

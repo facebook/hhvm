@@ -24,6 +24,12 @@ namespace HPHP {
 // Php's operator ===
 
 /*
+ * Returns whether two Cells have the same value, in the sense of
+ * php's === operator.
+ */
+bool cellSame(const Cell*, const Cell*);
+
+/*
  * Returns whether two TypedValues have the same value, in sense of
  * php's === operator.
  */
@@ -43,6 +49,12 @@ bool cellEqual(const Cell*, double);
 bool cellEqual(const Cell*, const StringData*);
 bool cellEqual(const Cell*, const ArrayData*);
 bool cellEqual(const Cell*, const ObjectData*);
+
+/*
+ * Returns whether two Cells have the same value, in the same of php's
+ * == operator.
+ */
+bool cellEqual(const Cell*, const Cell*);
 
 /*
  * Returns whether two TypedValues have the same value, in the sense
@@ -66,6 +78,12 @@ bool cellLess(const Cell*, const ArrayData*);
 bool cellLess(const Cell*, const ObjectData*);
 
 /*
+ * Returns whether a Cell is greater than another Cell, in the sense
+ * of php's < operator.
+ */
+bool cellLess(const Cell*, const Cell*);
+
+/*
  * Returns whether tv1 is less than tv2, as in php's < operator.
  */
 bool tvLess(const TypedValue*, const TypedValue*);
@@ -86,9 +104,28 @@ bool cellGreater(const Cell*, const ArrayData*);
 bool cellGreater(const Cell*, const ObjectData*);
 
 /*
+ * Returns whether a Cell is greater than another Cell, in the sense
+ * of php's > operator.
+ */
+bool cellGreater(const Cell*, const Cell*);
+
+/*
  * Returns whether tv1 is greather than tv2, as in php's > operator.
  */
 bool tvGreater(const TypedValue*, const TypedValue*);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Php operator >= and <=
+ *
+ * Note that in php $x <= $y is not equivalent to !($x > $y) for
+ * objects and arrays.
+ *
+ * These functions are necessary to handle those cases specially.
+ */
+bool cellLessOrEqual(const Cell*, const Cell*);
+bool cellGreaterOrEqual(const Cell*, const Cell*);
 
 //////////////////////////////////////////////////////////////////////
 

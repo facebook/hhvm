@@ -688,15 +688,6 @@ inline bool more(CObjRef v1, CObjRef v2)  { return v1.more(v2);}
 inline bool more(CObjRef v1, CVarRef v2)  { return less(v2, v1);}
 
 ///////////////////////////////////////////////////////////////////////////////
-/**
- * Special-casing comparisons between arrays to get the same results from
- * comparisons between uncomparable arrays.
- */
-bool less_or_equal(CVarRef v1, CVarRef v2);
-
-bool more_or_equal(CVarRef v1, CVarRef v2);
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_COMPARISONS_H_

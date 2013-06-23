@@ -29,16 +29,6 @@ namespace HPHP {
 
 class Variant;
 
-template<typename Data>
-inline TypedValue tv(DataType type, Data data) {
-  static_assert(sizeof(Data) == sizeof(int64_t),
-                "Data type in tv() not proper size");
-  TypedValue v;
-  v.m_data.num = (int64_t)data;
-  v.m_type = type;
-  return v;
-}
-
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
@@ -448,6 +438,15 @@ inline bool tvIsString(const TypedValue* tv) {
 
 void tvUnboxIfNeeded(TypedValue* tv);
 
+/*
+ * Convert a cell to a boolean, without changing the Cell.
+ */
+bool cellToBool(const Cell*);
+
+/*
+ * TypedValue conversions that update the tv in place (decrefing and
+ * old value, if necessary).
+ */
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
 int64_t tvCastToInt64(TypedValue* tv, int base = 10);
@@ -470,5 +469,7 @@ extern const RawDestructor g_destructors[kDestrTableSize];
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/base/tv_helpers-inl.h"
 
 #endif // incl_HPHP_TV_HELPERS_H_

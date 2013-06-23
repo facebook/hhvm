@@ -3780,79 +3780,70 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMod(PC& pc) {
 #undef MATHOP_DOUBLE
 #undef MATHOP_DIVCHECK
 
-#define LOGICOP(OP) do {                                                \
-  NEXT();                                                               \
-  Cell* c1 = m_stack.topC();                                            \
-  Cell* c2 = m_stack.indC(1);                                           \
-  {                                                                     \
-    tvCellAsVariant(c2) =                                               \
-      bool(tvCellAsVariant(c2).toBoolean() OP tvCellAsVariant(c1).toBoolean()); \
-  }                                                                     \
-  m_stack.popC();                                                       \
-} while (0)
-
-inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
-  LOGICOP(^);
-}
-#undef LOGICOP
-
 inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCellAsVariant(c1) = !tvCellAsVariant(c1).toBoolean();
 }
 
-#define CMPOP(OP, VOP) do {                                         \
-  NEXT();                                                           \
-  Cell* c1 = m_stack.topC();                                        \
-  Cell* c2 = m_stack.indC(1);                                       \
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {     \
-    int64_t a = c2->m_data.num;                                     \
-    int64_t b = c1->m_data.num;                                     \
-    c2->m_data.num = (a OP b);                                      \
-    c2->m_type = KindOfBoolean;                                     \
-    m_stack.popX();                                                 \
-  } else {                                                          \
-    int64_t result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1)); \
-    tvRefcountedDecRefCell(c2);                                     \
-    c2->m_data.num = result;                                        \
-    c2->m_type = KindOfBoolean;                                     \
-    m_stack.popC();                                                 \
-  }                                                                 \
-} while (0)
+template<class Op>
+void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
+  NEXT();
+  auto const c1 = m_stack.topC();
+  auto const c2 = m_stack.indC(1);
+  bool const result = op(c2, c1);
+  tvRefcountedDecRefCell(c2);
+  *c2 = make_tv<KindOfBoolean>(result);
+  m_stack.popC();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) -> bool {
+    return cellToBool(c1) ^ cellToBool(c2);
+  });
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSame(PC& pc) {
-  CMPOP(==, same);
+  implCellBinOpBool(pc, cellSame);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopNSame(PC& pc) {
-  CMPOP(!=, !same);
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+    return !cellSame(c1, c2);
+  });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEq(PC& pc) {
-  CMPOP(==, equal);
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+    return cellEqual(c1, c2);
+  });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopNeq(PC& pc) {
-  CMPOP(!=, !equal);
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+    return !cellEqual(c1, c2);
+  });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLt(PC& pc) {
-  CMPOP(<, less);
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+    return cellLess(c1, c2);
+  });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLte(PC& pc) {
-  CMPOP(<=, less_or_equal);
+  implCellBinOpBool(pc, cellLessOrEqual);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
-  CMPOP(>, more);
+  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+    return cellGreater(c1, c2);
+  });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopGte(PC& pc) {
-  CMPOP(>=, more_or_equal);
+  implCellBinOpBool(pc, cellGreaterOrEqual);
 }
-#undef CMPOP
 
 #define MATHOP_DOUBLE(OP)
 #define MATHOP_DIVCHECK(x)

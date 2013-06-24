@@ -160,6 +160,7 @@ bool CmdExtended::invokeHelp(DebuggerClient &client, const std::string &cls) {
 }
 
 bool CmdExtended::invokeClient(DebuggerClient &client, const std::string &cls){
+  client.usageLogCommand("extended", cls);
   DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
   if (cmd) {
     cmd->onClient(client);

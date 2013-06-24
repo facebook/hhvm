@@ -96,6 +96,7 @@ bool CmdUser::invokeHelp(DebuggerClient &client, const std::string &cls) {
 }
 
 bool CmdUser::invokeClient(DebuggerClient &client, const std::string &cls) {
+  client.usageLogCommand("user", cls);
   p_DebuggerClientCmdUser pclient(NEWOBJ(c_DebuggerClientCmdUser)());
   pclient->m_client = &client;
   try {

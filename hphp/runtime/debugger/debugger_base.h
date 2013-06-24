@@ -128,6 +128,7 @@ extern const char *PHP_KEYWORDS[];
 
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_BOOST_TYPES(DSandboxInfo);
 DECLARE_BOOST_TYPES(DMachineInfo);
 class DMachineInfo {
 public:
@@ -141,6 +142,7 @@ public:
 
   bool m_interrupting; // True if the machine is paused at an interrupt
   bool m_sandboxAttached;
+  DSandboxInfoPtr m_sandbox;
   bool m_initialized; // True if the initial connection protocol is complete
   std::string m_rpcHost;
   int m_rpcPort;
@@ -148,7 +150,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DSandboxInfo);
 class DSandboxInfo {
 public:
   DSandboxInfo() {}
@@ -230,8 +231,8 @@ class DebuggerUsageLogger {
 public:
   virtual ~DebuggerUsageLogger() {}
   virtual void init() {}
-  virtual void log(const std::string &mode, const std::string &cmd,
-                   const std::string &data) {}
+  virtual void log(const std::string &mode, const std::string &sandboxId,
+                   const std::string &cmd, const std::string &data) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

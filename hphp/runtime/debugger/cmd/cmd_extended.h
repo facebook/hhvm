@@ -39,13 +39,13 @@ public:
 
   virtual bool onServer(DebuggerProxy &proxy);
 
+protected:
   // so CmdUser can override these functions
   virtual const ExtendedCommandMap &getCommandMap();
   virtual void invokeList(DebuggerClient &client, const std::string &cls);
   virtual bool invokeHelp(DebuggerClient &client, const std::string &cls);
   virtual bool invokeClient(DebuggerClient &client, const std::string &cls);
 
-protected:
   virtual void onClientImpl(DebuggerClient &client);
   void helpImpl(DebuggerClient &client, const char *name);
 

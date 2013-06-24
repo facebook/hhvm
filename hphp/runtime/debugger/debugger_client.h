@@ -223,6 +223,8 @@ public:
     m_sandboxes = sandboxes;
   }
   DSandboxInfoPtr getSandbox(int index) const;
+  void setSandbox(DSandboxInfoPtr sandbox);
+  std::string getSandboxId();
 
   /**
    * Thread functions.
@@ -341,6 +343,11 @@ public:
     m_logFileHandler = inLogFileHandler;
   }
   std::string getCurrentUser() const { return m_options.user; }
+
+  // Usage logging
+  void usageLogCommand(const std::string &cmd, const std::string &data);
+  void usageLogEvent(const std::string &eventName,
+                     const std::string &data = "");
 
 private:
   enum InputState {
@@ -487,7 +494,6 @@ private:
 
   // usage logging
   const char *getUsageMode();
-  void usageLog(const std::string &cmd, const std::string &data = "");
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -95,16 +95,18 @@ void DebuggerClient::onSignal(int sig) {
       int secWait = 10;
       int secLeft = secWait - (now - m_sigTime);
       if (secLeft <= 0) {
+        usageLogEvent("signal quit");
         error("Program is not responding. Please restart debugger to get a "
               "new connection.");
         quit(); // NB: the machine is running, so can't send a real CmdQuit.
         return;
       }
+      usageLogEvent("signal wait");
       info("Please wait. If not responding in %d second%s, "
            "press Ctrl-C again to quit.", secLeft, secLeft > 1 ? "s" : "");
     } else {
+      usageLogEvent("signal start");
       info("Pausing program execution, please wait...");
-      usageLog("signal");
       m_sigTime = now;
     }
     m_signum = CmdSignal::SignalBreak;
@@ -460,6 +462,7 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
   local->m_rpcPort = port;
   switchMachine(local);
   m_rpcHost = "rpc:" + host;
+  usageLogEvent("RPC connect", m_rpcHost);
   return !local->m_interrupting;
 }
 
@@ -613,7 +616,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     m_options.user = Process::GetCurrentUser();
   }
 
-  usageLog("init");
+  usageLogEvent("init");
 
   loadConfig();
 
@@ -692,26 +695,32 @@ void DebuggerClient::run() {
     } catch (DebuggerServerLostException &e) {
       // Loss of connection
       TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
-      usageLog(m_commandCanonical, "DebuggerServerLostException");
+      usageLogEvent("DebuggerServerLostException", m_commandCanonical);
       reconnect = true;
     } catch (DebuggerProtocolException &e) {
       // Bad or unexpected data. Give reconnect a shot, it could help...
       TRACE_RB(1, "DebuggerClient::run: protocol exception\n");
-      usageLog(m_commandCanonical, "DebuggerProtocolException");
+      usageLogEvent("DebuggerProtocolException", m_commandCanonical);
       reconnect = true;
     } catch (...) {
       TRACE_RB(1, "DebuggerClient::run: unknown exception\n");
-      usageLog(m_commandCanonical, "UnknownException");
+      usageLogEvent("UnknownException", m_commandCanonical);
       Logger::Error("Unhandled exception, exiting.");
     }
     // Note: it's silly to try to reconnect when stopping, or if we have a
     // problem while quitting.
     if (reconnect && !m_stopped && (m_commandCanonical != "quit")) {
-      if (DebuggerClient::reconnect()) continue;
+      usageLogEvent("reconnect attempt", m_commandCanonical);
+      if (DebuggerClient::reconnect()) {
+        usageLogEvent("reconnect success", m_commandCanonical);
+        continue;
+      }
+      usageLogEvent("reconnect failed", m_commandCanonical);
       Logger::Error("Unable to reconnect to server, exiting.");
     }
     break;
   }
+  usageLogEvent("exit");
   // Closing all proxy connections will force the local proxy to pop out of
   // it's wait, and eventually exit the main thread.
   closeAllConnections();
@@ -1028,7 +1037,8 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         }
       } else {
         CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
-        Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
+        Debugger::UsageLogInterrupt(getUsageMode(), getSandboxId(),
+                                    *intr.get());
       }
       m_sigTime = 0;
       m_machine->m_interrupting = true;
@@ -1078,7 +1088,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
           cmd->is((DebuggerCommand::Type)expectedCmd)) {
         // For the nested cases, the caller has sent a cmd to the server and is
         // expecting a specific response. When we get it, return it.
-        usageLog("done", boost::lexical_cast<string>(expectedCmd));
+        usageLogEvent("command done", boost::lexical_cast<string>(expectedCmd));
         m_machine->m_interrupting = true; // Machine is stopped
         m_inputState = TakingCommand;
         return cmd;
@@ -1103,7 +1113,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
       }
       m_sigTime = 0;
       CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      Debugger::UsageLogInterrupt(getUsageMode(), *intr.get());
+      Debugger::UsageLogInterrupt(getUsageMode(), getSandboxId(), *intr.get());
       cmd->onClient(*this);
 
       // When we make a new connection to a machine, we have to wait for it
@@ -1705,7 +1715,7 @@ bool DebuggerClient::process() {
     }
     case '?': {
       if (match("?")) {
-        usageLog("help", m_line);
+        usageLogCommand("help", m_line);
         CmdHelp().onClient(*this);
         return true;
       }
@@ -1718,7 +1728,7 @@ bool DebuggerClient::process() {
     default: {
       DebuggerCommand *cmd = createCommand();
       if (cmd) {
-        usageLog(m_commandCanonical, m_line);
+        usageLogCommand(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
         DebuggerCommandPtr deleter(cmd);
         cmd->onClient(*this);
@@ -1916,12 +1926,12 @@ void DebuggerClient::processTakeCode() {
 
   char first = m_line[0];
   if (first == '@') {
-    usageLog("@", m_line);
+    usageLogCommand("@", m_line);
     m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
     processEval();
     return;
   } else if (first == '=') {
-    usageLog("=", m_line);
+    usageLogCommand("=", m_line);
     while (m_line.at(m_line.size() - 1) == ';') {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
@@ -1930,7 +1940,7 @@ void DebuggerClient::processTakeCode() {
     processEval();
     return;
   } else if (first != '<') {
-    usageLog("eval", m_line);
+    usageLogCommand("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
     m_code = "<?php ";
@@ -1938,7 +1948,7 @@ void DebuggerClient::processTakeCode() {
     processEval();
     return;
   }
-  usageLog("<?php", m_line);
+  usageLogCommand("<?php", m_line);
   m_code = "<?php ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;
@@ -1979,6 +1989,23 @@ DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
     }
   }
   return DSandboxInfoPtr();
+}
+
+// Update the current sandbox in the current machine. This should always be
+// called once we're attached to a machine.
+void DebuggerClient::setSandbox(DSandboxInfoPtr sandbox) {
+  assert(m_machine != nullptr);
+  m_machine->m_sandbox = sandbox;
+}
+
+// Return the ID of the current sandbox, if there is one. If we're connected to
+// a machine that is attached to a sandbox, then we'll have an ID.
+std::string DebuggerClient::getSandboxId() {
+  if ((m_machine != nullptr) && m_machine->m_sandboxAttached &&
+      (m_machine->m_sandbox != nullptr)) {
+    return m_machine->m_sandbox->id();
+  }
+  return "None";
 }
 
 void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
@@ -2247,6 +2274,7 @@ void DebuggerClient::record(const char *line) {
 
 bool DebuggerClient::apiGrab() {
   TRACE(2, "DebuggerClient::apiGrab\n");
+  usageLogEvent("api grab");
   Lock l(m_inApiUseLck);
   if (m_inApiUse) {
     return false;
@@ -2257,6 +2285,7 @@ bool DebuggerClient::apiGrab() {
 
 void DebuggerClient::apiFree() {
   TRACE(2, "DebuggerClient::apiFree\n");
+  usageLogEvent("api grab");
   Lock l(m_inApiUseLck);
   m_inApiUse = false;
 }
@@ -2277,10 +2306,18 @@ const char *DebuggerClient::getUsageMode() {
   return isApiMode() ? "api" : "terminal";
 }
 
-void DebuggerClient::usageLog(const std::string &cmd, const std::string &data) {
-  Debugger::UsageLog(getUsageMode(), cmd, data);
+// Log the execution of a command.
+void DebuggerClient::usageLogCommand(const std::string &cmd,
+                                     const std::string &data) {
+  Debugger::UsageLog(getUsageMode(), getSandboxId(), cmd, data);
 }
 
+// Log random, interesting events in the client.
+void DebuggerClient::usageLogEvent(const std::string &eventName,
+                                   const std::string &data) {
+  Debugger::UsageLog(getUsageMode(), getSandboxId(),
+                     "ClientEvent: " + eventName, data);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // configuration

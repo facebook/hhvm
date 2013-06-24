@@ -169,6 +169,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
                sandbox->desc().c_str());
   CmdMachinePtr cmdMachine = client.xend<CmdMachine>(&cmd);
   if (cmdMachine->m_succeed) {
+    client.setSandbox(sandbox);
     client.playMacro("startup");
   } else {
     // Note: it would be nice to give them more info about the process we think

@@ -100,9 +100,13 @@ public:
   // Usage logging
   static void SetUsageLogger(DebuggerUsageLogger *usageLogger);
   static void InitUsageLogging();
-  static void UsageLog(const std::string &mode, const std::string &cmd,
+  static void UsageLog(const std::string &mode,
+                       const std::string &sandboxId,
+                       const std::string &cmd,
                        const std::string &data = "");
-  static void UsageLogInterrupt(const std::string &mode, CmdInterrupt &cmd);
+  static void UsageLogInterrupt(const std::string &mode,
+                                const std::string &sandboxId,
+                                CmdInterrupt &cmd);
 
 private:
   static Debugger s_debugger;

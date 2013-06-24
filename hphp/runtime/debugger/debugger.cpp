@@ -597,9 +597,10 @@ void Debugger::InitUsageLogging() {
   if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->init();
 }
 
-void Debugger::UsageLog(const std::string &mode, const std::string &cmd,
-                        const std::string &data) {
-  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->log(mode, cmd, data);
+void Debugger::UsageLog(const std::string &mode, const std::string &sandboxId,
+                        const std::string &cmd, const std::string &data) {
+  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->log(mode, sandboxId,
+                                                              cmd, data);
 }
 
 const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {
@@ -618,8 +619,10 @@ const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {
   }
 }
 
-void Debugger::UsageLogInterrupt(const std::string &mode, CmdInterrupt &cmd) {
-  UsageLog(mode, "interrupt", InterruptTypeName(cmd));
+void Debugger::UsageLogInterrupt(const std::string &mode,
+                                 const std::string &sandboxId,
+                                 CmdInterrupt &cmd) {
+  UsageLog(mode, sandboxId, "interrupt", InterruptTypeName(cmd));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1644,7 +1644,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
   if (func->isGenerator()) {
-    frameCells = 0;
+    frameCells = 1;
   } else {
     emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
   }

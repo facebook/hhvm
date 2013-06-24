@@ -6782,8 +6782,9 @@ static inline c_Continuation* this_continuation(ActRec* fp) {
 void VMExecutionContext::iopContEnter(PC& pc) {
   NEXT();
 
-  // The stack must be empty! Or else generatorStackBase() won't work!
-  assert(m_stack.top() == (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
+  // The stack must have one cell! Or else generatorStackBase() won't work!
+  assert(m_stack.top() + 1 ==
+         (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
 
   // Do linkage of the continuation's AR.
   assert(m_fp->hasThis());
@@ -6819,10 +6820,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
 
-  // Return the received value
-  TypedValue* recv_fr = cont->m_received.asTypedValue();
-  tvTeleport(recv_fr, m_stack.allocTV());
-  tvWriteNull(recv_fr);
+  // check sanity of received value
+  assert(tvIsPlausible(m_stack.topC()));
 
   // Return the label in a stack cell
   TypedValue* label = m_stack.allocTV();
@@ -6862,26 +6861,23 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCheck(PC& pc) {
   cont->preNext();
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
-  NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
-  tvWriteNull(cont->m_received.asTypedValue());
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
   NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
-  tvTeleport(frame_local(m_fp, 0), cont->m_received.asTypedValue());
+
+  // prepare value to be sent by ContEnter
+  tvTeleport(frame_local(m_fp, 0), m_stack.allocTV());
   tvWriteUninit(frame_local(m_fp, 0));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  tvTeleport(frame_local(m_fp, 0), cont->m_received.asTypedValue());
-  tvWriteUninit(frame_local(m_fp, 0));
   assert(cont->m_label);
   --cont->m_label;
+
+  // prepare exception to be sent by ContEnter
+  tvTeleport(frame_local(m_fp, 0), m_stack.allocTV());
+  tvWriteUninit(frame_local(m_fp, 0));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {

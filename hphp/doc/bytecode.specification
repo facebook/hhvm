@@ -3687,11 +3687,12 @@ CreateCont <function name>    []  ->  [C]
   Continuation will store a reference to the function named by the string 
   immediate to be used as its body.
 
-ContEnter []  ->  []
+ContEnter [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
   class. It transfers control flow to the beginning of the continuation body
-  associated with the $this object of the Continuation object.
+  associated with the $this object of the Continuation object. The value on the
+  stack is sent to the Continuation to be retrieved by UnpackCont.
 
 ContExit    []  ->  []
 
@@ -3726,22 +3727,17 @@ ContCheck <check started>    []  ->  []
   object. If the continuation is finished, already running, or not yet started
   and <check started> is enabled, an exception will be thrown.
 
-ContNext    []  ->  []
-
-  Prepare continuation for iteration. $this must be a Continuation object
-  that passed ContCheck<false> check.
-
-ContSend    []  ->  []
+ContSend    []  ->  [C]
 
   Prepare continuation to receive a value. $this must be a Continuation object
-  that passed ContCheck<true> check. The value in local 0 is stored in the 
-  continuation.
+  that passed ContCheck<true> check. The value in local 0 is moved to the stack
+  for sending to the Continuation by ContEnter.
 
-ContRaise    []  ->  []
+ContRaise    []  ->  [C:Obj:Exception]
 
   Prepare continuation to receive a thrown exception. $this must be a
   Continuation object that passed ContCheck<true> check. The exception in
-  local 0 is stored in the continuation.
+  local 0 is moved to the stack for sending to the Continuation by ContEnter.
 
 ContValid    []  ->  [C:Bool]
 

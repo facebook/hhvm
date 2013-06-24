@@ -1077,10 +1077,8 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
 }
 
 void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
-  // The stack should always be clean here; this only appears in generated
-  // methods we control.
-  assert(m_evalStack.size() == 0);
-  assert(m_stackDeficit == 0);
+  // make sure the value to be sent is on the actual stack
+  spillStack();
 
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
@@ -1119,10 +1117,6 @@ void HhbcTranslator::emitContExit() {
 void HhbcTranslator::emitUnpackCont() {
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
-
-  auto const valOffset = cns(CONTOFF(m_received));
-  push(gen(LdProp, Type::Cell, cont, valOffset));
-  gen(StProp, cont, valOffset, m_tb->genDefNull());
 
   push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
 }
@@ -1164,40 +1158,24 @@ void HhbcTranslator::emitContCheck(bool checkStarted) {
   gen(ContPreNext, getExitSlowTrace(), cont);
 }
 
-void HhbcTranslator::emitContNext() {
-  assert(curClass());
-  SSATmp* cont = gen(LdThis, m_tb->fp());
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // We're guaranteed to have a Null in m_received at this point
-    auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
-    gen(DbgAssertType, Type::InitNull, oldVal);
-  }
-}
-
-void HhbcTranslator::emitContSendImpl(bool raise) {
-  assert(curClass());
-  SSATmp* cont = gen(LdThis, m_tb->fp());
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // We're guaranteed to have a Null in m_received at this point
-    auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
-    gen(DbgAssertType, Type::InitNull, oldVal);
-  }
-  gen(AssertLoc, Type::Cell, LocalId(0), m_tb->fp());
-  gen(StProp, cont, cns(CONTOFF(m_received)), ldLoc(0));
-  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
-  if (raise) {
-    SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
-    label = gen(OpSub, label, cns(1));
-    gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
-  }
-}
-
 void HhbcTranslator::emitContSend() {
-  emitContSendImpl(false);
+  assert(curClass());
+
+  // prepare value to be sent by ContEnter
+  push(gen(LdLoc, Type::Cell, LocalId(0), m_tb->fp()));
+  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
 }
 
 void HhbcTranslator::emitContRaise() {
-  emitContSendImpl(true);
+  assert(curClass());
+  SSATmp* cont = gen(LdThis, m_tb->fp());
+  SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
+  label = gen(OpSub, label, cns(1));
+  gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
+
+  // prepare value to be sent by ContEnter
+  push(gen(LdLoc, Type::Cell, LocalId(0), m_tb->fp()));
+  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
 }
 
 void HhbcTranslator::emitContValid() {

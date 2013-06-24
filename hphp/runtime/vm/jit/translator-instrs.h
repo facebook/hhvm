@@ -134,7 +134,6 @@
   CASE(PackCont) \
   CASE(ContRetC) \
   CASE(ContCheck) \
-  CASE(ContNext) \
   CASE(ContSend) \
   CASE(ContRaise) \
   CASE(ContValid) \

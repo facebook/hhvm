@@ -49,7 +49,6 @@ c_Continuation::c_Continuation(Class* cb) :
     m_label(0),
     m_index(-1LL),
     m_value(Variant::NullInit()),
-    m_received(Variant::NullInit()),
     m_origFunc(nullptr) {
   o_subclassData.u16 = 0;
 }

@@ -1522,7 +1522,7 @@ ContRaiseCheck S0:Obj -> L
 
 ContPreNext S0:Obj -> L
 
-  Performs operations needed for the ContNext hhbc opcode.  This
+  Performs operations needed for the Continuation::next() method.  This
   includes checking m_done and m_running---if either is not the case
   branches to the label L.
 

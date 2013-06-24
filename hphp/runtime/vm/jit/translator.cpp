@@ -1264,15 +1264,14 @@ static const struct {
   /*** 14. Continuation instructions ***/
 
   { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
-  { OpContEnter,   {None,             None,         OutNone,           0 }},
+  { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpContExit,    {None,             None,         OutNone,           0 }},
   { OpUnpackCont,  {Local,            StackTop2,    OutInt64,          2 }},
   { OpPackCont,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContRetC,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
-  { OpContNext,    {None,             None,         OutNone,           0 }},
-  { OpContSend,    {Local,            None,         OutNone,           0 }},
-  { OpContRaise,   {Local,            None,         OutNone,           0 }},
+  { OpContSend,    {Local,            Stack1,       OutUnknown,        1 }},
+  { OpContRaise,   {Local,            Stack1,       OutUnknown,        1 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},

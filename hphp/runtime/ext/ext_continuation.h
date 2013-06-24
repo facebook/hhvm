@@ -133,7 +133,6 @@ public:
   int32_t m_label;
   int64_t m_index;
   Variant m_value;
-  Variant m_received;
   Func *m_origFunc;
   ActRec* m_arPtr;
   p_ContinuationWaitHandle m_waitHandle;

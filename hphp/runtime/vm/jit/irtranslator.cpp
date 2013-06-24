@@ -568,10 +568,6 @@ void Translator::translateContCheck(const NormalizedInstruction& i) {
   HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
 }
 
-void Translator::translateContNext(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContNext);
-}
-
 void Translator::translateContSend(const NormalizedInstruction& i) {
   HHIR_EMIT(ContSend);
 }

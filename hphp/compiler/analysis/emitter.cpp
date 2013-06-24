@@ -3951,7 +3951,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 0);
         e.ContExit();
 
-        // emit return label for ContRaise
+        // emit return label for raise()
         e.Null();
         m_yieldLabels[2 * y->getLabel() - 1].set(e);
 
@@ -3959,7 +3959,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
         e.Throw();
 
-        // emit return label for ContNext/ContSend
+        // emit return label for next()/send()
         e.Null();
         m_yieldLabels[2 * y->getLabel()].set(e);
 
@@ -7016,7 +7016,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
 
       const Offset ehStart = ue.bcPos();
       static Op mOps[] = {
-        OpContNext,
+        OpNull,
         OpContSend,
         OpContRaise,
       };

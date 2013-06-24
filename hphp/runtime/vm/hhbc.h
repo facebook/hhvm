@@ -547,15 +547,14 @@ enum SetOpOp {
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
   O(CreateCont,      ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(ContEnter,       NA,               NOV,             NOV,        CF) \
+  O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(ContExit,        NA,               NOV,             NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
   O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
-  O(ContNext,        NA,               NOV,             NOV,        NF) \
-  O(ContSend,        NA,               NOV,             NOV,        NF) \
-  O(ContRaise,       NA,               NOV,             NOV,        NF) \
+  O(ContSend,        NA,               NOV,             ONE(CV),    NF) \
+  O(ContRaise,       NA,               NOV,             ONE(CV),    NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \

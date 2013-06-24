@@ -113,6 +113,7 @@ static int getNextTokenType(int t) {
     case T_BOOL_CAST:
     case T_UNSET_CAST:
     case T_UNRESOLVED_LT:
+    case T_AS:
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName;
     case ',': case '(': case '|':

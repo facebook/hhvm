@@ -22,6 +22,9 @@
 
 #include "folly/String.h"
 
+#include "hphp/runtime/base/tv_comparisons.h"
+#include "hphp/runtime/base/tv_conversions.h"
+#include "hphp/runtime/base/tv_arith.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -3666,89 +3669,41 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
   m_stack.popC();
 }
 
-#define MATHOP(OP, VOP) do {                                                  \
-  NEXT();                                                                     \
-  Cell* c1 = m_stack.topC();                                                  \
-  Cell* c2 = m_stack.indC(1);                                                 \
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64_t a = c2->m_data.num;                                                 \
-    int64_t b = c1->m_data.num;                                                 \
-    MATHOP_DIVCHECK(0)                                                        \
-    c2->m_data.num = a OP b;                                                  \
-    m_stack.popX();                                                           \
-  }                                                                           \
-  MATHOP_DOUBLE(OP)                                                           \
-  else {                                                                      \
-    tvCellAsVariant(c2) = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1));      \
-    m_stack.popC();                                                           \
-  }                                                                           \
-} while (0)
-
-#define MATHOP_DOUBLE(OP)                                                     \
-  else if (c2->m_type == KindOfDouble                                         \
-             && c1->m_type == KindOfDouble) {                                 \
-    double a = c2->m_data.dbl;                                                \
-    double b = c1->m_data.dbl;                                                \
-    MATHOP_DIVCHECK(0.0)                                                      \
-    c2->m_data.dbl = a OP b;                                                  \
-    m_stack.popX();                                                           \
-  }
-#define MATHOP_DIVCHECK(x)
-inline void OPTBLD_INLINE VMExecutionContext::iopAdd(PC& pc) {
-  MATHOP(+, plus);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopSub(PC& pc) {
-  MATHOP(-, minus);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopMul(PC& pc) {
-  MATHOP(*, multiply);
-}
-#undef MATHOP_DIVCHECK
-
-#define MATHOP_DIVCHECK(x)                                                    \
-    if (b == x) {                                                             \
-      raise_warning(Strings::DIVISION_BY_ZERO);                               \
-      c2->m_data.num = 0;                                                     \
-      c2->m_type = KindOfBoolean;                                             \
-    } else
-inline void OPTBLD_INLINE VMExecutionContext::iopDiv(PC& pc) {
-  NEXT();
-  Cell* c1 = m_stack.topC();  // denominator
-  Cell* c2 = m_stack.indC(1); // numerator
-  // Special handling for evenly divisible ints
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64
-      && c1->m_data.num != 0 && c2->m_data.num % c1->m_data.num == 0) {
-    int64_t b = c1->m_data.num;
-    MATHOP_DIVCHECK(0)
-    c2->m_data.num /= b;
-    m_stack.popX();
-  }
-  MATHOP_DOUBLE(/)
-  else {
-    tvCellAsVariant(c2) = divide(tvCellAsVariant(c2), tvCellAsCVarRef(c1));
-    m_stack.popC();
-  }
-}
-#undef MATHOP_DOUBLE
-
-// XXX:
-Variant moduloVar(CVarRef v1, CVarRef v2) {
-  return modulo(v1.toInt64(), v2.toInt64());
-}
-
-#define MATHOP_DOUBLE(OP)
-inline void OPTBLD_INLINE VMExecutionContext::iopMod(PC& pc) {
-  MATHOP(%, moduloVar);
-}
-#undef MATHOP_DOUBLE
-#undef MATHOP_DIVCHECK
-
 inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCellAsVariant(c1) = !tvCellAsVariant(c1).toBoolean();
+}
+
+template<class Op>
+void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
+  NEXT();
+  auto const c1 = m_stack.topC();
+  auto const c2 = m_stack.indC(1);
+  auto const result = op(*c2, *c1);
+  tvRefcountedDecRefCell(c2);
+  *c2 = result;
+  m_stack.popC();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopAdd(PC& pc) {
+  implCellBinOp(pc, cellAdd);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopSub(PC& pc) {
+  implCellBinOp(pc, cellSub);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopMul(PC& pc) {
+  implCellBinOp(pc, cellMul);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopDiv(PC& pc) {
+  implCellBinOp(pc, cellDiv);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopMod(PC& pc) {
+  implCellBinOp(pc, cellMod);
 }
 
 template<class Op>
@@ -3809,6 +3764,24 @@ inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopGte(PC& pc) {
   implCellBinOpBool(pc, cellGreaterOrEqual);
 }
+
+#define MATHOP(OP, VOP) do {                                            \
+  NEXT();                                                               \
+  Cell* c1 = m_stack.topC();                                            \
+  Cell* c2 = m_stack.indC(1);                                           \
+  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {         \
+    int64_t a = c2->m_data.num;                                         \
+    int64_t b = c1->m_data.num;                                         \
+    MATHOP_DIVCHECK(0)                                                  \
+    c2->m_data.num = a OP b;                                            \
+    m_stack.popX();                                                     \
+  }                                                                     \
+  MATHOP_DOUBLE(OP)                                                     \
+  else {                                                                \
+    tvCellAsVariant(c2) = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1)); \
+    m_stack.popC();                                                     \
+  }                                                                     \
+} while (0)
 
 #define MATHOP_DOUBLE(OP)
 #define MATHOP_DIVCHECK(x)

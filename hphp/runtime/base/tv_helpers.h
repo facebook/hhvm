@@ -460,11 +460,6 @@ inline bool tvIsString(const TypedValue* tv) {
 void tvUnboxIfNeeded(TypedValue* tv);
 
 /*
- * Convert a cell to a boolean, without changing the Cell.
- */
-bool cellToBool(const Cell*);
-
-/*
  * TypedValue conversions that update the tv in place (decrefing and
  * old value, if necessary).
  */
@@ -491,7 +486,5 @@ extern const RawDestructor g_destructors[kDestrTableSize];
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#include "hphp/runtime/base/tv_helpers-inl.h"
 
 #endif // incl_HPHP_TV_HELPERS_H_

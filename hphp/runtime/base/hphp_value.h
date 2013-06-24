@@ -139,6 +139,12 @@ private:
 typedef TypedValue Cell;
 typedef TypedValue Var;
 
+/*
+ * A TypedNum is a TypedValue that is either KindOfDouble or
+ * KindOfInt64.
+ */
+typedef TypedValue TypedNum;
+
 //////////////////////////////////////////////////////////////////////
 
 /*

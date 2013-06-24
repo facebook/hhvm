@@ -17,6 +17,7 @@
 
 #include <type_traits>
 
+#include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type_conversions.h"
 

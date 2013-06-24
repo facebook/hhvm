@@ -541,7 +541,6 @@ class Variant : private TypedValue {
 
   Variant  operator +  () const;
   Variant unary_plus() const { return Variant(*this).operator+();}
-  friend Variant  operator +  (const Variant & lhs, const Variant & rhs);
   Variant &operator += (CVarRef v);
   Variant &operator += (int     n) { return operator+=((int64_t)n);}
   Variant &operator += (int64_t   n);
@@ -549,25 +548,25 @@ class Variant : private TypedValue {
 
   Variant negate() const { return Variant(*this).operator-();}
   Variant  operator -  () const;
-  Variant  operator -  (CVarRef v) const;
+  Variant  operator -  (CVarRef v) const = delete;
   Variant &operator -= (CVarRef v);
   Variant &operator -= (int     n) { return operator-=((int64_t)n);}
   Variant &operator -= (int64_t   n);
   Variant &operator -= (double  n);
 
-  Variant  operator *  (CVarRef v) const;
+  Variant  operator *  (CVarRef v) const = delete;
   Variant &operator *= (CVarRef v);
   Variant &operator *= (int     n) { return operator*=((int64_t)n);}
   Variant &operator *= (int64_t   n);
   Variant &operator *= (double  n);
 
-  Variant  operator /  (CVarRef v) const;
+  Variant  operator /  (CVarRef v) const = delete;
   Variant &operator /= (CVarRef v);
   Variant &operator /= (int     n) { return operator/=((int64_t)n);}
   Variant &operator /= (int64_t   n);
   Variant &operator /= (double  n);
 
-  int64_t    operator %  (CVarRef v) const;
+  int64_t    operator %  (CVarRef v) const = delete;
   Variant &operator %= (CVarRef v);
   Variant &operator %= (int     n) { return operator%=((int64_t)n);}
   Variant &operator %= (int64_t   n);
@@ -1152,6 +1151,8 @@ private:
 
   DataType convertToNumeric(int64_t *lval, double *dval) const;
 };
+
+Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 
 class RefResultValue {
 public:

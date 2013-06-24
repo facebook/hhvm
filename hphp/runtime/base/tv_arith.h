@@ -13,31 +13,52 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
+#define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
+
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool cellToBool(const Cell* cell) {
-  assert(tvIsPlausible(cell));
-  assert(cell->m_type != KindOfRef);
+/*
+ * Functions that implement php arithmetic.
+ *
+ * These functions return Cells by value.  In cases where they may
+ * return reference counted types, the value is already incRef'd when
+ * returned.
+ */
 
-  switch (cell->m_type) {
-  case KindOfUninit:
-  case KindOfNull:          return false;
-  case KindOfInt64:         return cell->m_data.num != 0;
-  case KindOfBoolean:       return cell->m_data.num;
-  case KindOfDouble:        return cell->m_data.dbl != 0;
-  case KindOfStaticString:
-  case KindOfString:        return cell->m_data.pstr->toBoolean();
-  case KindOfArray:         return !cell->m_data.parr->empty();
-  case KindOfObject:        // TODO: should handle o_toBoolean?
-                            return true;
-  default:                  break;
-  }
-  not_reached();
-}
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Operator +.
+ *
+ * Returns a TypedNum, unless both arguments are KindOfArray, in which
+ * case it returns an Cell that contains an Array.
+ */
+Cell cellAdd(Cell, Cell);
+
+/*
+ * Operators - and *.
+ *
+ * These arithmetic operators on any php value only return numbers.
+ */
+TypedNum cellSub(Cell, Cell);
+TypedNum cellMul(Cell, Cell);
+
+/*
+ * Operators / and %.
+ *
+ * The operators return numbers unless the second argument converts to
+ * zero, in which case they return boolean false.
+ */
+Cell cellDiv(Cell, Cell);
+Cell cellMod(Cell, Cell);
 
 //////////////////////////////////////////////////////////////////////
 
 }
+
+#endif

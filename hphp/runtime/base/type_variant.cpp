@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/instance.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/tv_arith.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
@@ -636,43 +637,6 @@ Variant Variant::operator+() const {
 ///////////////////////////////////////////////////////////////////////////////
 // add or array append
 
-Variant operator+(const Variant & lhs, const Variant & rhs) {
-  // Frequent case: two straight integers
-  if (lhs.m_type == KindOfInt64 && rhs.m_type == KindOfInt64) {
-    return lhs.m_data.num + rhs.m_data.num;
-  }
-  // Frequent case: two straight doubles
-  if (lhs.m_type == KindOfDouble && rhs.m_type == KindOfDouble) {
-    return lhs.m_data.dbl + rhs.m_data.dbl;
-  }
-  // Less frequent cases involving references etc.
-  if (lhs.isIntVal() && rhs.isIntVal()) {
-    return lhs.toInt64() + rhs.toInt64();
-  }
-  if (lhs.isDouble() || rhs.isDouble()) {
-    return lhs.toDouble() + rhs.toDouble();
-  }
-  if (lhs.isString()) {
-    int64_t lval; double dval;
-    if (lhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
-      return dval + rhs.toDouble();
-    }
-  }
-  if (rhs.isString()) {
-    int64_t lval; double dval;
-    if (rhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
-      return lhs.toDouble() + dval;
-    }
-  }
-  int na = lhs.is(KindOfArray) + rhs.is(KindOfArray);
-  if (na == 2) {
-    return lhs.toCArrRef() + rhs.toCArrRef();
-  } else if (na) {
-    throw BadArrayMergeException();
-  }
-  return lhs.toInt64() + rhs.toInt64();
-}
-
 Variant &Variant::operator+=(CVarRef var) {
   if (m_type == KindOfInt64 && var.m_type == KindOfInt64) {
     m_data.num += var.m_data.num;
@@ -790,33 +754,6 @@ Variant Variant::operator-() const {
   return *this;
 }
 
-Variant Variant::operator-(CVarRef var) const {
-  if (is(KindOfArray) || var.is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  if (isDouble() || var.isDouble()) {
-    return toDouble() - var.toDouble();
-  }
-  if (isIntVal() && var.isIntVal()) {
-    return toInt64() - var.toInt64();
-  }
-  if (isString()) {
-    int64_t lval; double dval;
-    DataType ret = convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return dval - var.toDouble();
-    }
-  }
-  if (var.isString()) {
-    int64_t lval; double dval;
-    DataType ret = var.convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return toDouble() - dval;
-    }
-  }
-  return toInt64() - var.toInt64();
-}
-
 Variant &Variant::operator-=(CVarRef var) {
   if (is(KindOfArray) || var.is(KindOfArray)) {
     throw BadArrayOperandException();
@@ -882,33 +819,6 @@ Variant &Variant::operator-=(double n) {
 ///////////////////////////////////////////////////////////////////////////////
 // multiply
 
-Variant Variant::operator*(CVarRef var) const {
-  if (is(KindOfArray) || var.is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  if (isDouble() || var.isDouble()) {
-    return toDouble() * var.toDouble();
-  }
-  if (isIntVal() && var.isIntVal()) {
-    return toInt64() * var.toInt64();
-  }
-  if (isString()) {
-    int64_t lval; double dval;
-    DataType ret = convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return dval * var.toDouble();
-    }
-  }
-  if (var.isString()) {
-    int64_t lval; double dval;
-    DataType ret = var.convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return toDouble() * dval;
-    }
-  }
-  return toInt64() * var.toInt64();
-}
-
 Variant &Variant::operator*=(CVarRef var) {
   if (is(KindOfArray) || var.is(KindOfArray)) {
     throw BadArrayOperandException();
@@ -973,64 +883,6 @@ Variant &Variant::operator*=(double n) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // divide
-
-Variant Variant::operator/(CVarRef var) const {
-  if (is(KindOfArray) || var.is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  int64_t lval; double dval; bool int1 = true;
-  int64_t lval2; double dval2; bool int2 = true;
-
-  if (isDouble()) {
-    dval = toDouble();
-    int1 = false;
-  } else if (isIntVal()) {
-    lval = toInt64();
-  } else if (isString()) {
-    DataType ret = convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      int1 = false;
-    } else if (ret != KindOfInt64) {
-      lval = 0;
-    }
-  } else {
-    assert(false);
-  }
-  if (var.isDouble()) {
-    dval2 = var.toDouble();
-    int2 = false;
-  } else if (var.isIntVal()) {
-    lval2 = var.toInt64();
-  } else if (var.isString()) {
-    DataType ret = var.convertToNumeric(&lval2, &dval2);
-    if (ret == KindOfDouble) {
-      int2 = false;
-    } else if (ret != KindOfInt64) {
-      lval2 = 0;
-    }
-  } else {
-    assert(false);
-  }
-
-  if ((int2 && lval2 == 0) || (!int2 && dval2 == 0)) {
-    raise_warning(Strings::DIVISION_BY_ZERO);
-    return false;
-  }
-
-  if (int1 && int2) {
-    if (lval % lval2 == 0) {
-      return lval / lval2;
-    } else {
-      return (double)lval / lval2;
-    }
-  } else if (int1 && !int2) {
-    return lval / dval2;
-  } else if (!int1 && int2) {
-    return dval / lval2;
-  } else {
-    return dval / dval2;
-  }
-}
 
 Variant &Variant::operator/=(CVarRef var) {
   if (is(KindOfArray) || var.is(KindOfArray)) {
@@ -1135,16 +987,6 @@ Variant &Variant::operator/=(double n) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // modulus
-
-int64_t Variant::operator%(CVarRef var) const {
-  int64_t lval = toInt64();
-  int64_t lval2 = var.toInt64();
-  if (lval2 == 0) {
-    raise_warning(Strings::DIVISION_BY_ZERO);
-    return false;
-  }
-  return lval % lval2;
-}
 
 Variant &Variant::operator%=(CVarRef var) {
   int64_t lval = toInt64();

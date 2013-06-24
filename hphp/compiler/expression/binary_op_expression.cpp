@@ -31,6 +31,7 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/loop_statement.h"
+#include "hphp/runtime/base/tv_arith.h"
 
 using namespace HPHP;
 
@@ -549,21 +550,26 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case T_IS_GREATER_OR_EQUAL:
           result = cellGreaterOrEqual(v1.asCell(), v2.asCell()); break;
         case '+':
-          result = plus(v1, v2); break;
+          *result.asCell() = cellAdd(*v1.asCell(), *v2.asCell());
+          break;
         case '-':
-          result = minus(v1, v2); break;
+          *result.asCell() = cellSub(*v1.asCell(), *v2.asCell());
+          break;
         case '*':
-          result = multiply(v1, v2); break;
+          *result.asCell() = cellMul(*v1.asCell(), *v2.asCell());
+          break;
         case '/':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          result = divide(v1, v2); break;
+          *result.asCell() = cellDiv(*v1.asCell(), *v2.asCell());
+          break;
         case '%':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          result = modulo(v1.toInt64(), v2.toInt64()); break;
+          *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
+          break;
         case T_SL:
           result = shift_left(v1.toInt64(), v2.toInt64()); break;
         case T_SR:

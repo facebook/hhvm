@@ -90,6 +90,10 @@ std::string RuntimeOption::AdminLogFormat;
 std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
+std::string RuntimeOption::SessionPath = "";
+std::string RuntimeOption::SessionHandler = "files";
+long RuntimeOption::SessionHashBitsPerCharacter = 4;
+long RuntimeOption::SessionMaxLifetime = 2 * 60 * 60;
 
 std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
@@ -670,6 +674,13 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf server = config["Server"];
+    {
+      Hdf session = server["Session"];
+      SessionPath = session["Path"].getString("");
+      SessionHandler = session["Handler"].getString("files");
+      SessionHashBitsPerCharacter = session["HashBitsPerCharacter"].getInt64(4);
+      SessionMaxLifetime = session["MaxLifetime"].getInt64(2 * 60 * 60);
+    }
     Host = server["Host"].getString();
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerType = server["Type"].getString(ServerType);

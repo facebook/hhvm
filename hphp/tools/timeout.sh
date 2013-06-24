@@ -88,4 +88,5 @@ fi
     kill -s SIGKILL $$
 ) 2> /dev/null &
 
-exec "$@"
+"$@"
+exit $?

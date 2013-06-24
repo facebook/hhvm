@@ -389,7 +389,7 @@ function run($options, $tests, $bad_test_file) {
 
 function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
-  $hhvm = __DIR__."/../tools/timeout.sh 60 $hhvm";
+  $hhvm = __DIR__."/../tools/timeout.sh -t 60 $hhvm";
   $output = "";
   if (isset($options['repo'])) {
     if (strpos($test, '.hhas') !== false || 

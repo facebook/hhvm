@@ -192,7 +192,6 @@ bool checkCfg(IRTrace* trace, const IRFactory& factory) {
   }
   for (Block* b : blocks) {
     for (DEBUG_ONLY auto const &e : b->preds()) {
-      assert(edges.find(&e) != edges.end());
       assert(&e == takenEdge(e.from()) || &e == nextEdge(e.from()));
       assert(e.to() == b);
     }

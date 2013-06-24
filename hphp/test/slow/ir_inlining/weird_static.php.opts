@@ -1,1 +1,1 @@
--vEval.JitEnableRenameFunction=0 -vEval.EnableHipHopSyntax=1
+-vEval.EnableHipHopSyntax=1

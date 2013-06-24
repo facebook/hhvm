@@ -86,7 +86,7 @@ function verify_hhbc() {
 }
 
 function read_file($file) {
-  return file_exists($file) ? 
+  return file_exists($file) ?
          preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
 }
 
@@ -227,8 +227,7 @@ function find_debug_config($test, $name) {
 
 function mode_cmd($options) {
   $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
-  $jit_args = "$repo_args -vEval.Jit=true ".
-              "-vEval.JitEnableRenameFunction=true";
+  $jit_args = "$repo_args -vEval.Jit=true";
   $mode = idx($options, 'mode');
   switch ($mode) {
     case '':
@@ -392,7 +391,7 @@ function run_test($options, $test) {
   $hhvm = __DIR__."/../tools/timeout.sh -t 300 $hhvm";
   $output = "";
   if (isset($options['repo'])) {
-    if (strpos($test, '.hhas') !== false || 
+    if (strpos($test, '.hhas') !== false ||
         strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {
       # We don't have a way to skip, I guess run non-repo?
     } else {
@@ -440,7 +439,7 @@ function run_test($options, $test) {
 
   if (file_exists("$test.expect")) {
     $diff_cmds = "--text -u";
-    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1", 
+    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1",
          $_, $status);
     // unix 0 == success
     return !$status;
@@ -507,7 +506,7 @@ function run_test($options, $test) {
     $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
     $wanted_re = str_replace('%d', '\d+', $wanted_re);
     $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', 
+    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
                              $wanted_re);
     $wanted_re = str_replace('%c', '.', $wanted_re);
     // %f allows two points "-.0.0" but that is the best *simple* expression

@@ -68,7 +68,7 @@ public:
   // this array is not empty and its not virtual.
   ssize_t getIterBegin() const {
     assert(!empty());
-    if (LIKELY((m_data[0].data.m_type < KindOfTombstone))) {
+    if (LIKELY(!isTombstone(m_data[0].data.m_type))) {
       return 0;
     }
     return nextElm(m_data, 0);
@@ -228,8 +228,11 @@ public:
   void usort(CVarRef cmp_function);
   void uasort(CVarRef cmp_function);
 
-  // Used in Elm's data.m_type field to denote an invalid Elm.
-  static const HPHP::DataType KindOfTombstone = MaxNumDataTypes;
+  // Elm's data.m_type == KindOfInvalid for deleted slots.
+  static bool isTombstone(DataType t) {
+    return t < KindOfUninit;
+    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
+  }
 
   // Array element.
   struct Elm {
@@ -245,7 +248,7 @@ public:
     // We store values here, but also some information local to this array:
     // data.m_aux.u_hash contains either 0 (for an int key) or a string
     // hashcode; the high bit is the int/string key descriminator.
-    // data.m_type == KindOfTombstone if this is an empty slot in the
+    // data.m_type == KindOfInvalid if this is an empty slot in the
     // array (e.g. after a key is deleted).
     TypedValueAux data;
     bool hasStrKey() const {
@@ -367,7 +370,7 @@ private:
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
     while (size_t(++ei) < m_used) {
-      if (elms[ei].data.m_type < KindOfTombstone) {
+      if (!isTombstone(elms[ei].data.m_type)) {
         return ei;
       }
     }

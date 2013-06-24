@@ -190,7 +190,7 @@ HphpArray::~HphpArray() {
   auto const used = m_used;
   for (uint32_t pos = 0; pos < used; ++pos) {
     auto& e = elms[pos];
-    if (e.data.m_type == KindOfTombstone) continue;
+    if (isTombstone(e.data.m_type)) continue;
     if (e.hasStrKey()) decRefStr(e.key);
     tvRefcountedDecRef(&e.data);
   }
@@ -217,7 +217,7 @@ inline ssize_t HphpArray::prevElm(Elm* elms, ssize_t ei) const {
   assert(ei <= ssize_t(m_used));
   while (ei > 0) {
     --ei;
-    if (elms[ei].data.m_type < KindOfTombstone) {
+    if (!isTombstone(elms[ei].data.m_type)) {
       return ei;
     }
   }
@@ -237,8 +237,7 @@ ssize_t HphpArray::iter_advance(ssize_t pos) const {
   // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead
   // of a signed comparison.
-  if (size_t(++pos) < m_used &&
-      m_data[pos].data.m_type < KindOfTombstone) {
+  if (size_t(++pos) < m_used && !isTombstone(m_data[pos].data.m_type)) {
     return pos;
   }
   return iter_advance_helper(pos);
@@ -251,7 +250,7 @@ ssize_t HphpArray::iter_advance_helper(ssize_t next_pos) const {
   // we can save a check by doing an unsigned comparison instead of
   // a signed comparison.
   for (auto limit = m_used; size_t(next_pos) < limit; ++next_pos) {
-    if (elms[next_pos].data.m_type < KindOfTombstone) {
+    if (!isTombstone(elms[next_pos].data.m_type)) {
       return next_pos;
     }
   }
@@ -267,8 +266,8 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
 
 Variant HphpArray::getKey(ssize_t pos) const {
   assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[/*(ElmInd)*/pos];
-  assert(e->data.m_type != KindOfTombstone);
+  Elm* e = &m_data[pos];
+  assert(!isTombstone(e->data.m_type));
   if (e->hasStrKey()) {
     return e->key; // String key.
   }
@@ -277,15 +276,15 @@ Variant HphpArray::getKey(ssize_t pos) const {
 
 Variant HphpArray::getValue(ssize_t pos) const {
   assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[/*(ElmInd)*/pos];
-  assert(e->data.m_type != KindOfTombstone);
+  Elm* e = &m_data[pos];
+  assert(!isTombstone(e->data.m_type));
   return tvAsCVarRef(&e->data);
 }
 
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
   assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[/*(ElmInd)*/pos];
-  assert(e->data.m_type != KindOfTombstone);
+  Elm* e = &m_data[pos];
+  assert(!isTombstone(e->data.m_type));
   return tvAsCVarRef(&e->data);
 }
 
@@ -297,7 +296,7 @@ bool HphpArray::isVectorData() const {
   int64_t i = 0;
   for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
-    if (e->data.m_type == KindOfTombstone) {
+    if (isTombstone(e->data.m_type)) {
       continue;
     }
     if (e->hasStrKey() || e->ikey != i) {
@@ -337,7 +336,7 @@ Variant HphpArray::next() {
     m_pos = nextElm(elms, m_pos);
     if (m_pos != ArrayData::invalid_index) {
       Elm* e = &elms[m_pos];
-      assert(e->data.m_type != KindOfTombstone);
+      assert(!isTombstone(e->data.m_type));
       return tvAsCVarRef(&e->data);
     }
   }
@@ -349,7 +348,7 @@ Variant HphpArray::end() {
   m_pos = prevElm(elms, m_used);
   if (m_pos != ArrayData::invalid_index) {
     Elm* e = &elms[m_pos];
-    assert(e->data.m_type != KindOfTombstone);
+    assert(!isTombstone(e->data.m_type));
     return tvAsCVarRef(&e->data);
   }
   return false;
@@ -359,7 +358,7 @@ Variant HphpArray::key() const {
   if (m_pos != ArrayData::invalid_index) {
     assert(size_t(m_pos) < m_used);
     Elm* e = &m_data[m_pos];
-    assert(e->data.m_type != KindOfTombstone);
+    assert(!isTombstone(e->data.m_type));
     if (e->hasStrKey()) {
       return e->key;
     }
@@ -371,7 +370,7 @@ Variant HphpArray::key() const {
 Variant HphpArray::value(int32_t& pos) const {
   if (pos != ArrayData::invalid_index) {
     Elm* e = &m_data[pos];
-    assert(e->data.m_type != KindOfTombstone);
+    assert(!isTombstone(e->data.m_type));
     return tvAsCVarRef(&e->data);
   }
   return false;
@@ -380,7 +379,7 @@ Variant HphpArray::value(int32_t& pos) const {
 Variant HphpArray::current() const {
   if (m_pos != ArrayData::invalid_index) {
     Elm* e = &m_data[m_pos];
-    assert(e->data.m_type != KindOfTombstone);
+    assert(!isTombstone(e->data.m_type));
     return tvAsCVarRef(&e->data);
   }
   return false;
@@ -416,7 +415,7 @@ static bool hitStringKey(const HphpArray::Elm* e, const StringData* s,
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(e->data.m_type != HphpArray::KindOfTombstone);
+  assert(!HphpArray::isTombstone(e->data.m_type));
 
   if (e->hash() != hash) {
     return false;
@@ -437,7 +436,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(e->data.m_type != HphpArray::KindOfTombstone);
+  assert(!HphpArray::isTombstone(e->data.m_type));
   return e->ikey == ki && e->hasIntKey();
 }
 
@@ -473,7 +472,7 @@ ssize_t HphpArray::find(int64_t ki) const {
   if (uint64_t(ki) < m_size) {
     // Try to get at it without dirtying a data cache line.
     Elm* e = m_data + uint64_t(ki);
-    if (e->data.m_type != HphpArray::KindOfTombstone && hitIntKey(e, ki)) {
+    if (!isTombstone(e->data.m_type) && hitIntKey(e, ki)) {
       Stats::inc(Stats::HA_FindIntFast);
       assert([&] {
           // Our results had better match the other path
@@ -766,7 +765,7 @@ void HphpArray::grow() {
     Elm* elms = m_data;
     for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
       Elm* e = &elms[pos];
-      if (e->data.m_type == KindOfTombstone) {
+      if (isTombstone(e->data.m_type)) {
         continue;
       }
       ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash());
@@ -814,7 +813,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   m_hLoad = m_size;
 #endif
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (elms[frPos].data.m_type == KindOfTombstone) {
+    while (isTombstone(elms[frPos].data.m_type)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
@@ -1213,10 +1212,10 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   TypedValue* tv = &e->data;
   DataType oldType = tv->m_type;
   uint64_t oldDatum = tv->m_data.num;
-  tv->m_type = KindOfTombstone;
+  tv->m_type = KindOfInvalid;
   // Free the key if necessary, and clear the h and key fields in order to
   // increase the chances that subsequent searches will quickly/safely fail
-  // when encountering tombstones, even though checking for KindOfTombstone is
+  // when encountering tombstones, even though checking for KindOfInvalid is
   // the last validation step during search.
   if (e->hasStrKey()) {
     decRefStr(e->key);
@@ -1236,7 +1235,7 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   if (size_t(pos + 1) == m_used) {
     do {
       --m_used;
-    } while (m_used > 0 && elms[m_used - 1].data.m_type == KindOfTombstone);
+    } while (m_used > 0 && isTombstone(elms[m_used - 1].data.m_type));
   }
   // Mark the hash entry as "deleted".
   *ei = ElmIndTombstone;
@@ -1320,7 +1319,7 @@ ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
 TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
   assert(pos != ArrayData::invalid_index);
   Elm* e = &m_data[/*(ElmInd)*/pos];
-  assert(e->data.m_type != KindOfTombstone);
+  assert(!isTombstone(e->data.m_type));
   return &e->data;
 }
 
@@ -1328,7 +1327,7 @@ TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
 // for inner or outer cells.
 void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
   assert(pos != ArrayData::invalid_index);
-  assert(m_data[pos].data.m_type != KindOfTombstone);
+  assert(!isTombstone(m_data[pos].data.m_type));
   Elm* e = &m_data[/*(ElmInd)*/pos];
   getElmKey(e, out);
 }
@@ -1444,7 +1443,7 @@ ArrayData* HphpArray::pop(Variant& value) {
   ElmInd pos = a->HphpArray::iter_end();
   if (validElmInd(pos)) {
     Elm* e = &elms[pos];
-    assert(e->data.m_type != KindOfTombstone);
+    assert(!isTombstone(e->data.m_type));
     value = tvAsCVarRef(&e->data);
     ElmInd* ei = e->hasStrKey()
         ? a->findForInsert(e->key, e->hash())
@@ -1489,7 +1488,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   a->freeStrongIterators();
 
   Elm* elms = a->m_data;
-  if (a->m_used == 1 || elms[0].data.m_type != KindOfTombstone) {
+  if (a->m_used == 0 || !isTombstone(elms[0].data.m_type)) {
     // Make sure there is room to insert an element.
     a->resizeIfNeeded();
     // Reload elms, in case resizeIfNeeded() had side effects.
@@ -1498,6 +1497,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
     memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
     ++a->m_used;
   }
+
   // Prepend.
   Elm* e = &elms[0];
 
@@ -1524,7 +1524,7 @@ void HphpArray::onSetEvalScalar() {
   Elm* elms = m_data;
   for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
-    if (e->data.m_type != KindOfTombstone) {
+    if (!isTombstone(e->data.m_type)) {
       StringData *key = e->key;
       if (e->hasStrKey() && !key->isStatic()) {
         StringData *skey = StringData::GetStaticString(key);
@@ -1631,7 +1631,7 @@ NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
   for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
     Elm* e = &elms[pos];
     Elm* te = &targetElms[pos];
-    if (e->data.m_type != KindOfTombstone) {
+    if (!isTombstone(e->data.m_type)) {
       te->key = e->key;
       te->data.hash() = e->data.hash();
       if (te->hasStrKey()) te->key->incRefCount();
@@ -1639,15 +1639,14 @@ NEVER_INLINE void HphpArray::cloneNonEmpty(HphpArray* target) const {
       assert(te->hash() == e->hash()); // ensure not clobbered.
     } else {
       // Tombstone.
-      te->setIntKey(0);
-      te->data.m_type = KindOfTombstone;
+      te->data.m_type = KindOfInvalid;
     }
   }
   // It's possible that there were indirect elements at the end that were
   // converted to tombstones, so check if we should adjust target->m_used
   while (target->m_used > 0) {
     auto i = target->m_used - 1;
-    if (targetElms[i].data.m_type != KindOfTombstone) {
+    if (!isTombstone(targetElms[i].data.m_type)) {
       break;
     }
     target->m_used = i;

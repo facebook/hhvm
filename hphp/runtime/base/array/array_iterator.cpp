@@ -1304,7 +1304,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         return 0;
       }
       elm = arr->getElm(pos);
-    } while (elm->data.m_type >= HphpArray::KindOfTombstone);
+    } while (HphpArray::isTombstone(elm->data.m_type));
     if (UNLIKELY(tvWillBeReleased(valOut))) {
       goto cold;
     }
@@ -1352,7 +1352,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         return 0;
       }
       elm = arr->getElm(pos);
-    } while (elm->data.m_type >= HphpArray::KindOfTombstone);
+    } while (HphpArray::isTombstone(elm->data.m_type));
     if (!withRef) {
       if (UNLIKELY(tvWillBeReleased(valOut))) {
         goto cold;

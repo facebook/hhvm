@@ -70,7 +70,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   bool allStrs UNUSED = true;
   for (;;) {
     if (checkTypes) {
-      while (start->data.m_type != KindOfTombstone) {
+      while (!isTombstone(start->data.m_type)) {
         allInts = (allInts && acc.isInt(*start));
         allStrs = (allStrs && acc.isStr(*start));
         ++start;
@@ -79,7 +79,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
         }
       }
     } else {
-      while (start->data.m_type != KindOfTombstone) {
+      while (!isTombstone(start->data.m_type)) {
         ++start;
         if (start == end) {
           goto done;
@@ -90,7 +90,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     if (start == end) {
       goto done;
     }
-    while (end->data.m_type == KindOfTombstone) {
+    while (isTombstone(end->data.m_type)) {
       --end;
       if (start == end) {
         goto done;

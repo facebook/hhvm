@@ -65,6 +65,9 @@ hphp/system/php/spl/datastructures/SplObjectStorage.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php
 hphp/system/php/spl/iterators/AppendIterator.php
 hphp/system/php/spl/iterators/ArrayIterator.php
+hphp/system/php/spl/iterators/EmptyIterator.php
+hphp/system/php/spl/iterators/InfiniteIterator.php
 hphp/system/php/spl/iterators/LimitIterator.php
+hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php

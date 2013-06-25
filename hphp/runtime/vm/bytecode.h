@@ -471,7 +471,7 @@ constexpr int kStackCheckPadding = kStackCheckLeafPadding +
   kStackCheckReenterPadding;
 
 struct Fault {
-  enum Type : int16_t {
+  enum class Type : int16_t {
     UserException,
     CppException
   };
@@ -487,7 +487,7 @@ struct Fault {
   };
   Type m_faultType;
 
-  // During unwinding, this tracks the number of nested EHType_Fault
+  // During unwinding, this tracks the number of nested EHEnt::Fault
   // regions we've propagated through in a given frame.
   int16_t m_handledCount;
 

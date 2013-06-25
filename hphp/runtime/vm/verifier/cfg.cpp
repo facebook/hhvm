@@ -120,7 +120,7 @@ void GraphBuilder::createExBlocks() {
     const EHEnt& handler = i.popFront();
     createBlock(handler.m_base);
     createBlock(handler.m_past);
-    if (handler.m_ehtype == EHEnt::EHType_Catch) {
+    if (handler.m_type == EHEnt::Type::Catch) {
       m_graph->exn_cap += handler.m_catches.size() - 1;
       for (Range<EHEnt::CatchVec> c(handler.m_catches); !c.empty(); ) {
         createBlock(c.popFront().second);
@@ -140,7 +140,7 @@ const EHEnt* findFunclet(const Func::EHEntVec& ehtab, Offset off) {
   const EHEnt* nearest = 0;
   for (Range<Func::EHEntVec> i(ehtab); !i.empty(); ) {
     const EHEnt* eh = &i.popFront();
-    if (eh->m_ehtype != EHEnt::EHType_Fault) continue;
+    if (eh->m_type != EHEnt::Type::Fault) continue;
     if (eh->m_fault <= off && (!nearest || eh->m_fault > nearest->m_fault)) {
       nearest = eh;
     }
@@ -180,7 +180,7 @@ void GraphBuilder::linkExBlocks() {
     int exn_index = 0;
     for (const EHEnt* eh = m_func->findEH(off); eh != 0; ) {
       assert(eh->m_base <= off && off < eh->m_past);
-      if (eh->m_ehtype == EHEnt::EHType_Catch) {
+      if (eh->m_type == EHEnt::Type::Catch) {
         // each catch block is reachable from b
         for (Range<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
           exns(b)[exn_index++] = at(j.popFront().second);
@@ -198,7 +198,7 @@ void GraphBuilder::linkExBlocks() {
       const EHEnt* eh = findFunclet(ehtab, offset(b->last));
       eh = nextOuter(ehtab, eh);
       while (eh) {
-        if (eh->m_ehtype == EHEnt::EHType_Catch) {
+        if (eh->m_type == EHEnt::Type::Catch) {
           // each catch target for eh is reachable from b
           for (Range<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
             exns(b)[exn_index++] = at(j.popFront().second);
@@ -262,7 +262,7 @@ void GraphBuilder::addEdge(Block* from, EdgeKind k, Block* target) {
  */
 class RpoSort {
  public:
-  RpoSort(Graph* g);
+  explicit RpoSort(Graph* g);
  private:
   void visit(Block* b);
  private:

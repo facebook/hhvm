@@ -90,7 +90,7 @@ Instance* Instance::callCustomInstanceInit() {
 HOT_FUNC_VM
 Instance* Instance::newInstanceRaw(Class* cls, int idx) {
   Instance* obj = (Instance*)ALLOCOBJIDX(idx);
-  new (obj) Instance(cls, noinit);
+  new (obj) Instance(cls, NoInit::noinit);
   return obj;
 }
 

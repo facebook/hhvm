@@ -38,10 +38,10 @@ namespace {
 #if (defined(DEBUG) || defined(USE_TRACE))
 std::string describeFault(const Fault& f) {
   switch (f.m_faultType) {
-  case Fault::UserException:
+  case Fault::Type::UserException:
     return folly::format("[user exception] {}",
                          implicit_cast<void*>(f.m_userException)).str();
-  case Fault::CppException:
+  case Fault::Type::CppException:
     return folly::format("[cpp exception] {}",
                          implicit_cast<void*>(f.m_cppException)).str();
   }
@@ -99,8 +99,8 @@ UnwindAction checkHandlers(const EHEnt* eh,
     if (faultNest == fault.m_handledCount) {
       ++fault.m_handledCount;
 
-      switch (eh->m_ehtype) {
-      case EHEnt::EHType_Fault:
+      switch (eh->m_type) {
+      case EHEnt::Type::Fault:
         FTRACE(1, "checkHandlers: entering fault at {}: save {}\n",
                eh->m_fault,
                func->unit()->offsetOf(pc));
@@ -108,11 +108,11 @@ UnwindAction checkHandlers(const EHEnt* eh,
         pc = func->unit()->entry() + eh->m_fault;
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindAction::ResumeVM;
-      case EHEnt::EHType_Catch:
+      case EHEnt::Type::Catch:
         // Note: we skip catch clauses if we have a pending C++ exception
         // as part of our efforts to avoid running more PHP code in the
         // face of such exceptions.
-        if (fault.m_faultType == Fault::UserException &&
+        if (fault.m_faultType == Fault::Type::UserException &&
             ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
           auto const obj = fault.m_userException;
           for (auto& idOff : eh->m_catches) {
@@ -321,7 +321,7 @@ void unwindBuiltinFrame() {
 
 void pushFault(Exception* e) {
   Fault f;
-  f.m_faultType = Fault::CppException;
+  f.m_faultType = Fault::Type::CppException;
   f.m_cppException = e;
   g_vmContext->m_faults.push_back(f);
   FTRACE(1, "pushing new fault: {}\n", describeFault(f));
@@ -329,7 +329,7 @@ void pushFault(Exception* e) {
 
 void pushFault(const Object& o) {
   Fault f;
-  f.m_faultType = Fault::UserException;
+  f.m_faultType = Fault::Type::UserException;
   f.m_userException = o.get();
   f.m_userException->incRefCount();
   g_vmContext->m_faults.push_back(f);

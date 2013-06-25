@@ -1076,12 +1076,12 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   Vec& info = m_metaMap[pos];
   int i = info.size();
-  if (kind == Unit::MetaInfo::NopOut) {
+  if (kind == Unit::MetaInfo::Kind::NopOut) {
     info.clear();
-  } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::NopOut) {
+  } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::Kind::NopOut) {
     return;
-  } else if (kind == Unit::MetaInfo::DataTypeInferred ||
-             kind == Unit::MetaInfo::DataTypePredicted) {
+  } else if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
+             kind == Unit::MetaInfo::Kind::DataTypePredicted) {
     // Put DataType first, because if applyInputMetaData saw Class
     // first, it would call recordRead which mark the input as
     // needing a guard before we saw the DataType
@@ -1097,8 +1097,8 @@ void MetaInfoBuilder::addKnownDataType(DataType dt,
                                        int      arg) {
   if (dt != KindOfUnknown) {
     Unit::MetaInfo::Kind dtKind = (dtPredicted ?
-                                   Unit::MetaInfo::DataTypePredicted :
-                                   Unit::MetaInfo::DataTypeInferred);
+                                   Unit::MetaInfo::Kind::DataTypePredicted :
+                                   Unit::MetaInfo::Kind::DataTypeInferred);
     add(pos, dtKind, mVector, arg, dt);
   }
 }
@@ -1127,7 +1127,7 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
     assert(v.size());
     for (unsigned i = 0; i < v.size(); i++) {
       const Unit::MetaInfo& mi = v[i];
-      data.push_back(mi.m_kind);
+      data.push_back(static_cast<uint8_t>(mi.m_kind));
       data.push_back(mi.m_arg);
       if (mi.m_data < 0x80) {
         data.push_back(mi.m_data << 1);
@@ -1882,7 +1882,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     /* we dont support V in M-vectors, so leave it as an R in that
        case */
     assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     if (ref) {
       e.BoxR();
     } else {
@@ -2245,14 +2245,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         if (r->isGuarded()) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                       false, 0, 0);
         }
 
         // XXX: disabled until static analysis is more reliable: t2225399
         /*for (auto& l : r->nonRefcountedLocals()) {
           auto v = m_curFunc->lookupVarId(StringData::GetStaticString(l));
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NonRefCounted,
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NonRefCounted,
                          false, 0, v);
         }*/
         if (retV) {
@@ -2633,7 +2633,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
               int capacity = el->getCount();
               if (capacity > 0) {
-                m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::ArrayCapacity,
+                m_metaInfo.add(m_ue.bcPos(),
+                               Unit::MetaInfo::Kind::ArrayCapacity,
                                false, 0, capacity);
               }
             }
@@ -2684,7 +2685,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           {
             FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
             e.Int(0);
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                           false, 0, 0);
             e.FPassC(0);
           }
           e.FCall(1);
@@ -3086,7 +3088,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (el->getType() == '`') {
           emitConvertToCell(e);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                         false, 0, 0);
           e.FPassC(0);
           delete fpi;
           e.FCall(1);
@@ -3205,7 +3208,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConvertToCell(e);
           e.False();
           e.FCallBuiltin(2, 1, s_count);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                         false, 0, 0);
           e.UnboxR();
           return true;
         } else if (call->isCallToFunction("func_get_args") &&
@@ -3248,7 +3252,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
             emitVirtualLocal(local);
             e.FCallBuiltin(0, 0, s_func_get_args);
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                           false, 0, 0);
             e.UnboxR();
             emitSet(e);
             e.PopC();
@@ -3524,7 +3529,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         if (clsName) {
           Id id = m_ue.mergeLitstr(clsName);
-          m_metaInfo.add(fpiStart, Unit::MetaInfo::Class, false,
+          m_metaInfo.add(fpiStart, Unit::MetaInfo::Kind::Class, false,
                          useDirectForm ? 0 : 1, id);
         }
         {
@@ -3549,7 +3554,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
         if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
           if (sv->isGuarded()) {
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                            false, 0, 0);
           }
           e.CheckThis();
@@ -3659,7 +3664,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (sv->isThis()) {
           if (sv->hasContext(Expression::ObjectContext)) {
             if (sv->isGuarded()) {
-              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                              false, 0, 0);
             }
             e.This();
@@ -3670,7 +3675,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             emitVirtualLocal(thisId);
           } else {
             if (sv->isGuarded()) {
-              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                              false, 0, 0);
               e.This();
             } else {
@@ -4010,7 +4015,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
                                 m_ue.bcPos(), true, 0);
     if (const StringData* cls = m_evalStack.getClsName(iFirst)) {
       Id id = m_ue.mergeLitstr(cls);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::Class, true, 0, id);
     }
     switch (marker) {
       case StackSym::N: {
@@ -4076,13 +4081,13 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       // m-vector later on in this function. Don't duplicate it in the
       // metadata table.
       if (symFlavor != StackSym::T) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::String,
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::String,
                        true, metaI, strid);
       }
     }
     if (const StringData* cls = m_evalStack.getClsName(i)) {
       const int mcodeNum = i - (iFirst + 1);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::MVecPropClass,
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::MVecPropClass,
                      false, mcodeNum, m_ue.mergeLitstr(cls));
     }
     m_metaInfo.addKnownDataType(m_evalStack.getKnownType(i),
@@ -4422,13 +4427,13 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
       if (passByRefKind == PassByRefKind::AllowCell ||
           m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
         emitVGet(e);
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
         e.FPassV(paramId);
         return;
       }
     } else {
       emitCGet(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(paramId);
       return;
     }
@@ -5541,7 +5546,7 @@ void EmitterVisitor::emitPostponedMeths() {
         e.ContRetC();
       } else {
         if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                          false, 0, 0);
         }
         e.RetC();
@@ -5563,7 +5568,8 @@ void EmitterVisitor::emitPostponedMeths() {
       p.m_fe->setParamFuncletOff(paramId, entryPoint.getAbsoluteOffset());
     }
     if (!dvInitializers.empty()) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NoSurprise, false, 0, 0);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NoSurprise,
+                     false, 0, 0);
       e.Jmp(topOfBody);
     }
     delete p.m_closureUseVars;
@@ -5884,7 +5890,7 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     for (int i = param; i < nParams; i++) {
       visit((*params)[i]);
       emitConvertToCell(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(i - param);
     }
   }
@@ -5965,7 +5971,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(numParams, nLiteral, cLiteral);
       if (node->forcedPresent()) {
-        m_metaInfo.add(fpiStart, Unit::MetaInfo::GuardedCls, false, 0, 0);
+        m_metaInfo.add(fpiStart, Unit::MetaInfo::Kind::GuardedCls, false, 0, 0);
       }
     } else {
       emitVirtualClassBase(e, node.get());
@@ -6591,7 +6597,7 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -6608,7 +6614,7 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -6655,7 +6661,7 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
   for (std::deque<ExnHandlerRegion*>::const_iterator it = m_exnHandlers.begin();
        it != m_exnHandlers.end(); ++it) {
     EHEnt& e = fe->addEHEnt();
-    e.m_ehtype = EHEnt::EHType_Catch;
+    e.m_type = EHEnt::Type::Catch;
     e.m_base = (*it)->m_start;
     e.m_past = (*it)->m_end;
     e.m_iterId = -1;
@@ -6672,7 +6678,7 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
 
   for (auto& fr : m_faultRegions) {
     EHEnt& e = fe->addEHEnt();
-    e.m_ehtype = EHEnt::EHType_Fault;
+    e.m_type = EHEnt::Type::Fault;
     e.m_base = fr->m_start;
     e.m_past = fr->m_end;
     e.m_iterId = fr->m_iterId;
@@ -6991,7 +6997,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       ue.emitOp(OpRetC);
 
       EHEnt& eh = fe->addEHEnt();
-      eh.m_ehtype = EHEnt::EHType_Catch;
+      eh.m_type = EHEnt::Type::Catch;
       eh.m_base = ehStart;
       eh.m_past = ue.bcPos();
       eh.m_catches.push_back(
@@ -7291,7 +7297,7 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
     for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
          it != ues.end(); ++it) {
       UnitEmitter* ue = *it;
-      if (repo.insertUnit(ue, UnitOriginFile, txn)) {
+      if (repo.insertUnit(ue, UnitOrigin::File, txn)) {
         err = true;
         break;
       }
@@ -7307,7 +7313,7 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
       UnitEmitter* ue = *it;
       // Commit units individually if an error occurred during batch commit.
       if (err) {
-        repo.commitUnit(ue, UnitOriginFile);
+        repo.commitUnit(ue, UnitOrigin::File);
       }
       delete ue;
   }
@@ -7404,10 +7410,10 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   }
 
   try {
-    UnitOrigin unitOrigin = UnitOriginFile;
+    UnitOrigin unitOrigin = UnitOrigin::File;
     if (!filename) {
       filename = "";
-      unitOrigin = UnitOriginEval;
+      unitOrigin = UnitOrigin::Eval;
     }
     SCOPE_EXIT { SymbolTable::Purge(); };
 

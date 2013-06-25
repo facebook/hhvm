@@ -42,7 +42,7 @@ class Instance : public ObjectData {
     instanceInit(cls);
   }
 
-  enum NoInit { noinit };
+  enum class NoInit { noinit };
   explicit Instance(Class* cls, NoInit) : ObjectData(false, cls) {}
 
  public:

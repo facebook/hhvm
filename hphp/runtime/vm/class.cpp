@@ -720,17 +720,17 @@ bool Class::getInstanceBitMask(const StringData* name,
  * Being available means that the parent, the interfaces and the traits are
  * already defined (or become defined via autoload, if tryAutoload is true).
  *
- * returns AvailTrue - if it is available
- *         AvailFail - if it is impossible to define the class at this point
- *         AvailFalse- if this particular Class* cant be defined at this point
+ * returns Avail::True - if it is available
+ *         Avail::Fail - if it is impossible to define the class at this point
+ *         Avail::False- if this particular Class* cant be defined at this point
  *
- * Note that AvailFail means that at least one of the parent, interfaces and
- * traits was not defined at all, while AvailFalse means that at least one
- * was defined but did not correspond to this Class*
+ * Note that Fail means that at least one of the parent, interfaces and traits
+ * was not defined at all, while False means that at least one was defined but
+ * did not correspond to this Class*
  *
  * The parent parameter is used for two purposes: first it avoids looking up the
  * active parent class for each potential Class*; and second its used on
- * AvailFail to return the problem class so the caller can report the error
+ * Fail to return the problem class so the caller can report the error
  * correctly.
  */
 Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
@@ -740,10 +740,10 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       parent = Unit::getClass(ppcls->namedEntity(), ppcls->name(), tryAutoload);
       if (!parent) {
         parent = ourParent;
-        return AvailFail;
+        return Avail::Fail;
       }
     }
-    if (parent != ourParent) return AvailFalse;
+    if (parent != ourParent) return Avail::False;
   }
   for (size_t i = 0, nInterfaces = m_declInterfaces.size();
        i < nInterfaces; ++i) {
@@ -754,9 +754,9 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
     if (interface != declInterface) {
       if (interface == nullptr) {
         parent = declInterface;
-        return AvailFail;
+        return Avail::Fail;
       }
-      return AvailFalse;
+      return Avail::False;
     }
   }
   for (size_t i = 0; i < m_usedTraits.size(); i++) {
@@ -767,12 +767,12 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
     if (trait != usedTrait) {
       if (trait == nullptr) {
         parent = usedTrait;
-        return AvailFail;
+        return Avail::Fail;
       }
-      return AvailFalse;
+      return Avail::False;
     }
   }
-  return AvailTrue;
+  return Avail::True;
 }
 
 void Class::initialize(TypedValue*& sProps) const {

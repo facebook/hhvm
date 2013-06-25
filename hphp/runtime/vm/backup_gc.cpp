@@ -39,7 +39,7 @@ TRACE_SET_MOD(gc);
 
 namespace {
 
-enum Color {
+enum class Color {
   Colorless,
   Black,      // Known to be reachable
   Garbage     // Used for GarbageDetector
@@ -79,7 +79,7 @@ struct GCState : private boost::noncopyable {
   Color setColor(void* vp, Color newColor) {
     std::pair<ColorMap::iterator,bool> p =
       m_colorMap.insert(std::make_pair(vp, newColor));
-    Color ret = !p.second ? p.first->second : Colorless;
+    Color ret = !p.second ? p.first->second : Color::Colorless;
     p.first->second = newColor;
     return ret;
   }
@@ -315,7 +315,7 @@ struct MarkLive {
   template<class T>
   void operator()(T* t) const {
     ++*count_addr(t);
-    if (m_state.setColor(t, Black) == Colorless) {
+    if (m_state.setColor(t, Color::Black) == Color::Colorless) {
       trace(*this, t);
     }
   }
@@ -328,7 +328,7 @@ struct ExternalRefRestorer {
 
   template<class T> void operator()(SmartAllocatorImpl*, T* t) const {
     if (*count_addr(t) == 0) return;
-    if (m_state.setColor(t, Black) == Colorless) {
+    if (m_state.setColor(t, Color::Black) == Color::Colorless) {
       trace(MarkLive(m_state), t);
     }
   }
@@ -409,7 +409,7 @@ struct GarbageDetector {
   void operator()(SmartAllocatorImpl*, T* t) const {
     // Check a color flag instead of the count, because we might
     // increment it before seeing it.
-    if (m_state.setColor(t, Garbage) == Colorless) {
+    if (m_state.setColor(t, Color::Garbage) == Color::Colorless) {
       m_state.m_cyclicGarbage.insert(make_typed_obj(t));
 
       /*

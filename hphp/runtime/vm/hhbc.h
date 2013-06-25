@@ -750,7 +750,7 @@ Offset* instrJumpOffset(Opcode* instr);
 Offset instrJumpTarget(const Opcode* instrs, Offset pos);
 
 struct StackTransInfo {
-  enum Kind {
+  enum class Kind {
     PushPop,
     InsertMid
   };

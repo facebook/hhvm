@@ -1637,13 +1637,13 @@ resume:
   m_faults.pop_back();
 
   switch (fault.m_faultType) {
-  case Fault::UserException:
+  case Fault::Type::UserException:
     {
       Object obj = fault.m_userException;
       fault.m_userException->decRefCount();
       throw obj;
     }
-  case Fault::CppException:
+  case Fault::Type::CppException:
     // throwException() will take care of deleting heap-allocated
     // exception object for us
     fault.m_cppException->throwException();
@@ -4096,18 +4096,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopJmpNZ(PC& pc) {
 #undef JMPOP
 #undef JMP_SURPRISE_CHECK
 
-enum SwitchMatch {
-  MATCH_NORMAL,  // value was converted to an int: match normally
-  MATCH_NONZERO, // can't be converted to an int: match first nonzero case
-  MATCH_DEFAULT, // can't be converted to an int: match default case
+enum class SwitchMatch {
+  NORMAL,  // value was converted to an int: match normally
+  NONZERO, // can't be converted to an int: match first nonzero case
+  DEFAULT, // can't be converted to an int: match default case
 };
 
 static SwitchMatch doubleCheck(double d, int64_t& out) {
   if (int64_t(d) == d) {
     out = d;
-    return MATCH_NORMAL;
+    return SwitchMatch::NORMAL;
   } else {
-    return MATCH_DEFAULT;
+    return SwitchMatch::DEFAULT;
   }
 }
 
@@ -4132,7 +4132,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
   } else {
     // Generic integer switch
     int64_t intval;
-    SwitchMatch match = MATCH_NORMAL;
+    SwitchMatch match = SwitchMatch::NORMAL;
 
     switch (val->m_type) {
       case KindOfUninit:
@@ -4143,7 +4143,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
       case KindOfBoolean:
         // bool(true) is equal to any non-zero int, bool(false) == 0
         if (val->m_data.num) {
-          match = MATCH_NONZERO;
+          match = SwitchMatch::NONZERO;
         } else {
           intval = 0;
         }
@@ -4182,7 +4182,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
       }
 
       case KindOfArray:
-        match = MATCH_DEFAULT;
+        match = SwitchMatch::DEFAULT;
         tvDecRef(val);
         break;
 
@@ -4196,15 +4196,15 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
     }
     m_stack.discard();
 
-    if (match != MATCH_NORMAL ||
+    if (match != SwitchMatch::NORMAL ||
         intval < base || intval >= (base + veclen - 2)) {
       switch (match) {
-        case MATCH_NORMAL:
-        case MATCH_DEFAULT:
+        case SwitchMatch::NORMAL:
+        case SwitchMatch::DEFAULT:
           pc = origPC + jmptab[veclen - 1];
           break;
 
-        case MATCH_NONZERO:
+        case SwitchMatch::NONZERO:
           pc = origPC + jmptab[veclen - 2];
           break;
       }
@@ -6581,7 +6581,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCatch(PC& pc) {
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
-  assert(fault.m_faultType == Fault::UserException);
+  assert(fault.m_faultType == Fault::Type::UserException);
   m_stack.pushObjectNoRc(fault.m_userException);
 }
 

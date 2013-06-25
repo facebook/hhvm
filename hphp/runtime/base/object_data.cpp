@@ -74,7 +74,7 @@ void ObjectData::destruct() {
       // case.
       auto& faults = g_vmContext->m_faults;
       if (!faults.empty()) {
-        if (faults.back().m_faultType == Fault::CppException) return;
+        if (faults.back().m_faultType == Fault::Type::CppException) return;
       }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.

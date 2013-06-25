@@ -984,28 +984,28 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue keyVal,
 }
 
 #define HELPER_TABLE(m)                                       \
-  /* name        hot        key       attrs  */               \
-  m(elemC,     ,            AnyKey,   None)                   \
-  m(elemCD,    ,            AnyKey,   Define)                 \
-  m(elemCDR,   ,            AnyKey,   DefineReffy)            \
-  m(elemCU,    ,            AnyKey,   Unset)                  \
-  m(elemCW,    ,            AnyKey,   Warn)                   \
-  m(elemCWD,   ,            AnyKey,   WarnDefine)             \
-  m(elemCWDR,  ,            AnyKey,   WarnDefineReffy)        \
-  m(elemI,     ,            IntKey,   None)                   \
-  m(elemID,    HOT_FUNC_VM, IntKey,   Define)                 \
-  m(elemIDR,   ,            IntKey,   DefineReffy)            \
-  m(elemIU,    ,            IntKey,   Unset)                  \
-  m(elemIW,    ,            IntKey,   Warn)                   \
-  m(elemIWD,   ,            IntKey,   WarnDefine)             \
-  m(elemIWDR,  ,            IntKey,   WarnDefineReffy)        \
-  m(elemS,     HOT_FUNC_VM, StrKey,   None)                   \
-  m(elemSD,    HOT_FUNC_VM, StrKey,   Define)                 \
-  m(elemSDR,   ,            StrKey,   DefineReffy)            \
-  m(elemSU,    ,            StrKey,   Unset)                  \
-  m(elemSW,    HOT_FUNC_VM, StrKey,   Warn)                   \
-  m(elemSWD,   ,            StrKey,   WarnDefine)             \
-  m(elemSWDR,  ,            StrKey,   WarnDefineReffy)
+  /* name        hot        keyType         attrs  */         \
+  m(elemC,     ,            KeyType::Any,   None)             \
+  m(elemCD,    ,            KeyType::Any,   Define)           \
+  m(elemCDR,   ,            KeyType::Any,   DefineReffy)      \
+  m(elemCU,    ,            KeyType::Any,   Unset)            \
+  m(elemCW,    ,            KeyType::Any,   Warn)             \
+  m(elemCWD,   ,            KeyType::Any,   WarnDefine)       \
+  m(elemCWDR,  ,            KeyType::Any,   WarnDefineReffy)  \
+  m(elemI,     ,            KeyType::Int,   None)             \
+  m(elemID,    HOT_FUNC_VM, KeyType::Int,   Define)           \
+  m(elemIDR,   ,            KeyType::Int,   DefineReffy)      \
+  m(elemIU,    ,            KeyType::Int,   Unset)            \
+  m(elemIW,    ,            KeyType::Int,   Warn)             \
+  m(elemIWD,   ,            KeyType::Int,   WarnDefine)       \
+  m(elemIWDR,  ,            KeyType::Int,   WarnDefineReffy)  \
+  m(elemS,     HOT_FUNC_VM, KeyType::Str,   None)             \
+  m(elemSD,    HOT_FUNC_VM, KeyType::Str,   Define)           \
+  m(elemSDR,   ,            KeyType::Str,   DefineReffy)      \
+  m(elemSU,    ,            KeyType::Str,   Unset)            \
+  m(elemSW,    HOT_FUNC_VM, KeyType::Str,   Warn)             \
+  m(elemSWD,   ,            KeyType::Str,   WarnDefine)       \
+  m(elemSWDR,  ,            KeyType::Str,   WarnDefineReffy)
 
 #define ELEM(nm, hot, keyType, attrs)                                   \
 hot                                                                     \
@@ -1145,11 +1145,11 @@ static inline TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
 }
 
 #define HELPER_TABLE(m)                                \
-  /* name           hot        key     isObj */        \
-  m(cGetPropC,    ,            AnyKey, false)          \
-  m(cGetPropCO,   ,            AnyKey,  true)          \
-  m(cGetPropS,    ,            StrKey, false)          \
-  m(cGetPropSO,   HOT_FUNC_VM, StrKey,  true)
+  /* name           hot        keyType       isObj */  \
+  m(cGetPropC,    ,            KeyType::Any, false)    \
+  m(cGetPropCO,   ,            KeyType::Any,  true)    \
+  m(cGetPropS,    ,            KeyType::Str, false)    \
+  m(cGetPropSO,   HOT_FUNC_VM, KeyType::Str,  true)
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
@@ -1199,12 +1199,12 @@ static inline RefData* vGetPropImpl(Class* ctx, TypedValue* base,
   return ref;
 }
 
-#define HELPER_TABLE(m)                         \
-  /* name          hot        key     isObj */  \
-  m(vGetPropC,   ,            AnyKey, false)    \
-  m(vGetPropCO,  ,            AnyKey,  true)    \
-  m(vGetPropS,   ,            StrKey, false)    \
-  m(vGetPropSO,  HOT_FUNC_VM, StrKey,  true)
+#define HELPER_TABLE(m)                             \
+  /* name          hot        keyType       isObj */\
+  m(vGetPropC,   ,            KeyType::Any, false)  \
+  m(vGetPropCO,  ,            KeyType::Any,  true)  \
+  m(vGetPropS,   ,            KeyType::Str, false)  \
+  m(vGetPropSO,  HOT_FUNC_VM, KeyType::Str,  true)
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
@@ -1486,10 +1486,10 @@ static inline TypedValue arrayGetImpl(
 }
 
 #define HELPER_TABLE(m)                                 \
-  /* name        hot        keyType  checkForInt */     \
-  m(arrayGetS,   HOT_FUNC_VM, StrKey,   false)          \
-  m(arrayGetSi,  HOT_FUNC_VM, StrKey,    true)          \
-  m(arrayGetI,   HOT_FUNC_VM, IntKey,   false)
+  /* name        hot          keyType     checkForInt */\
+  m(arrayGetS,   HOT_FUNC_VM, KeyType::Str,   false)    \
+  m(arrayGetSi,  HOT_FUNC_VM, KeyType::Str,    true)    \
+  m(arrayGetI,   HOT_FUNC_VM, KeyType::Int,   false)
 
 #define ELEM(nm, hot, keyType, checkForInt)                             \
 hot                                                                     \
@@ -1548,8 +1548,8 @@ static inline TypedValue mapGetImpl(
 
 #define HELPER_TABLE(m)                     \
   /* name        hot        keyType  */     \
-  m(mapGetS,   HOT_FUNC_VM, StrKey)         \
-  m(mapGetI,   HOT_FUNC_VM, IntKey)
+  m(mapGetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(mapGetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                              \
 hot                                                         \
@@ -1563,7 +1563,7 @@ HELPER_TABLE(ELEM)
 
 void HhbcTranslator::VectorTranslator::emitMapGet(SSATmp* key) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -1581,9 +1581,9 @@ static inline TypedValue stableMapGetImpl(
 }
 
 #define HELPER_TABLE(m)                           \
-  /* name             hot        keyType  */      \
-  m(stableMapGetS,   HOT_FUNC_VM, StrKey)         \
-  m(stableMapGetI,   HOT_FUNC_VM, IntKey)
+  /* name             hot         keyType  */     \
+  m(stableMapGetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(stableMapGetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                                   \
 hot                                                              \
@@ -1597,7 +1597,7 @@ HELPER_TABLE(ELEM)
 
 void HhbcTranslator::VectorTranslator::emitStableMapGet(SSATmp* key) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -1623,9 +1623,9 @@ static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define HELPER_TABLE(m)                                 \
   /* name         hot         key  */                   \
-  m(cGetElemC,  ,            AnyKey)                    \
-  m(cGetElemI,  ,            IntKey)                    \
-  m(cGetElemS,  HOT_FUNC_VM, StrKey)
+  m(cGetElemC,  ,            KeyType::Any)              \
+  m(cGetElemI,  ,            KeyType::Int)              \
+  m(cGetElemS,  HOT_FUNC_VM, KeyType::Str)
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
@@ -1684,9 +1684,9 @@ static inline RefData* vGetElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define HELPER_TABLE(m)                      \
   /* name         keyType */                 \
-  m(vGetElemC,    AnyKey)                    \
-  m(vGetElemI,    IntKey)                    \
-  m(vGetElemS,    StrKey)
+  m(vGetElemC,    KeyType::Any)              \
+  m(vGetElemI,    KeyType::Int)              \
+  m(vGetElemS,    KeyType::Str)
 
 #define ELEM(nm, ...)                                                   \
 RefData* nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
@@ -1718,13 +1718,13 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
 }
 
 #define HELPER_TABLE(m)                              \
-  /* name          hot        keyType  isEmpty */    \
-  m(issetElemC,   ,            AnyKey, false)        \
-  m(issetElemCE,  ,            AnyKey,  true)        \
-  m(issetElemI,   HOT_FUNC_VM, IntKey, false)        \
-  m(issetElemIE,  ,            IntKey,  true)        \
-  m(issetElemS,   HOT_FUNC_VM, StrKey, false)        \
-  m(issetElemSE,  ,            StrKey,  true)
+  /* name          hot         keyType     isEmpty */\
+  m(issetElemC,   ,            KeyType::Any, false)  \
+  m(issetElemCE,  ,            KeyType::Any,  true)  \
+  m(issetElemI,   HOT_FUNC_VM, KeyType::Int, false)  \
+  m(issetElemIE,  ,            KeyType::Int,  true)  \
+  m(issetElemS,   HOT_FUNC_VM, KeyType::Str, false)  \
+  m(issetElemSE,  ,            KeyType::Str,  true)
 
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
@@ -1766,10 +1766,10 @@ static inline uint64_t arrayIssetImpl(
 }
 
 #define HELPER_TABLE(m)                         \
-  /* name          keyType  checkForInt */      \
-  m(arrayIssetS,    StrKey,   false)            \
-  m(arrayIssetSi,   StrKey,    true)            \
-  m(arrayIssetI,    IntKey,   false)
+  /* name           keyType       checkForInt */\
+  m(arrayIssetS,    KeyType::Str,   false)      \
+  m(arrayIssetSi,   KeyType::Str,    true)      \
+  m(arrayIssetI,    KeyType::Int,   false)
 
 #define ISSET(nm, keyType, checkForInt)                                 \
   uint64_t nm(ArrayData* a, TypedValue* key) {                          \
@@ -1832,8 +1832,8 @@ static inline uint64_t mapIssetImpl(
 
 #define HELPER_TABLE(m)                       \
   /* name        hot        keyType  */       \
-  m(mapIssetS,   HOT_FUNC_VM, StrKey)         \
-  m(mapIssetI,   HOT_FUNC_VM, IntKey)
+  m(mapIssetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(mapIssetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                               \
 hot                                                          \
@@ -1848,7 +1848,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitMapIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -1864,8 +1864,8 @@ static inline uint64_t stableMapIssetImpl(
 
 #define HELPER_TABLE(m)                             \
   /* name              hot          keyType  */     \
-  m(stableMapIssetS,   HOT_FUNC_VM, StrKey)         \
-  m(stableMapIssetI,   HOT_FUNC_VM, IntKey)
+  m(stableMapIssetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(stableMapIssetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                                     \
 hot                                                                \
@@ -1880,7 +1880,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitStableMapIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -1932,7 +1932,8 @@ template<KeyType keyType, bool checkForInt, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
     ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
     CVarRef value, RefData* ref) {
-  static_assert(keyType != AnyKey, "AnyKey is not supported in arraySetMImpl");
+  static_assert(keyType != KeyType::Any,
+                "KeyType::Any is not supported in arraySetMImpl");
   const bool copy = a->getCount() > 1;
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : a->set(key, value, copy);
@@ -1941,13 +1942,13 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
 }
 
 #define HELPER_TABLE(m)                                                 \
-  /* name        hot          keyType  checkForInt setRef */            \
-  m(arraySetS,   HOT_FUNC_VM, StrKey,   false,     false)               \
-  m(arraySetSi,  HOT_FUNC_VM, StrKey,    true,     false)               \
-  m(arraySetI,   HOT_FUNC_VM, IntKey,   false,     false)               \
-  m(arraySetSR,  ,            StrKey,   false,      true)               \
-  m(arraySetSiR, ,            StrKey,    true,      true)               \
-  m(arraySetIR,  ,            IntKey,   false,      true)
+  /* name        hot          keyType        checkForInt setRef */      \
+  m(arraySetS,   HOT_FUNC_VM, KeyType::Str,   false,     false)         \
+  m(arraySetSi,  HOT_FUNC_VM, KeyType::Str,    true,     false)         \
+  m(arraySetI,   HOT_FUNC_VM, KeyType::Int,   false,     false)         \
+  m(arraySetSR,  ,            KeyType::Str,   false,      true)         \
+  m(arraySetSiR, ,            KeyType::Str,    true,      true)         \
+  m(arraySetIR,  ,            KeyType::Int,   false,      true)
 
 #define ELEM(nm, hot, keyType, checkForInt, setRef)                     \
 hot                                                                     \
@@ -2092,8 +2093,8 @@ static inline void mapSetImpl(
 
 #define HELPER_TABLE(m)                     \
   /* name        hot        keyType  */     \
-  m(mapSetS,   HOT_FUNC_VM, StrKey)         \
-  m(mapSetI,   HOT_FUNC_VM, IntKey)
+  m(mapSetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(mapSetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                                  \
 hot                                                             \
@@ -2108,7 +2109,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitMapSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -2128,8 +2129,8 @@ static inline void stableMapSetImpl(
 
 #define HELPER_TABLE(m)                           \
   /* name            hot          keyType  */     \
-  m(stableMapSetS,   HOT_FUNC_VM, StrKey)         \
-  m(stableMapSetI,   HOT_FUNC_VM, IntKey)
+  m(stableMapSetS,   HOT_FUNC_VM, KeyType::Str)   \
+  m(stableMapSetI,   HOT_FUNC_VM, KeyType::Int)
 
 #define ELEM(nm, hot, keyType)                                      \
 hot                                                                 \
@@ -2144,7 +2145,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitStableMapSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? IntKey : StrKey;
+  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
@@ -2162,10 +2163,10 @@ static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
 }
 
 #define HELPER_TABLE(m)                                 \
-  /* name         hot        key    */                  \
-  m(setElemC,   ,            AnyKey)                    \
-  m(setElemI,   ,            IntKey)                    \
-  m(setElemS,   HOT_FUNC_VM, StrKey)
+  /* name         hot        keyType    */              \
+  m(setElemC,   ,            KeyType::Any)              \
+  m(setElemI,   ,            KeyType::Int)              \
+  m(setElemS,   HOT_FUNC_VM, KeyType::Str)
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
@@ -2324,9 +2325,9 @@ static inline void unsetElemImpl(TypedValue* base, TypedValue keyVal) {
 
 #define HELPER_TABLE(m)                              \
   /* name           hot       keyType */             \
-  m(unsetElemC,   ,            AnyKey)                \
-  m(unsetElemI,   ,            IntKey)                \
-  m(unsetElemS,   HOT_FUNC_VM, StrKey)
+  m(unsetElemC,   ,            KeyType::Any)         \
+  m(unsetElemI,   ,            KeyType::Int)         \
+  m(unsetElemS,   HOT_FUNC_VM, KeyType::Str)
 
 #define ELEM(nm, hot, ...)                                      \
 hot                                                             \

@@ -37,7 +37,7 @@ public:
   };
 
 protected:
-  enum MetaType {
+  enum class MetaType {
     Precise,
     Self,
     Parent,
@@ -48,16 +48,16 @@ protected:
     DataType m_dt;
     MetaType m_metatype;
     constexpr bool isParent() const {
-      return m_metatype == Parent;
+      return m_metatype == MetaType::Parent;
     }
     constexpr bool isSelf() const {
-      return m_metatype == Self;
+      return m_metatype == MetaType::Self;
     }
     constexpr bool isCallable() const {
-      return m_metatype == Callable;
+      return m_metatype == MetaType::Callable;
     }
     constexpr bool isPrecise() const {
-      return m_metatype == Precise;
+      return m_metatype == MetaType::Precise;
     }
   };
 

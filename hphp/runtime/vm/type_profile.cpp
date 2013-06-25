@@ -184,7 +184,7 @@ void profileRequestEnd() {
   numRequests++; // racy RMW; ok to miss a rare few.
 }
 
-enum KeyToVPMode {
+enum class KeyToVPMode {
   Read, Write
 };
 
@@ -211,12 +211,12 @@ keyToVP(TypeProfileKey key, KeyToVPMode mode) {
             l[i].m_tag, key.m_name->data(), uint32_t(h));
       return &l[i];
     }
-    if (mode == Write && l[i].m_totalSamples < minCount) {
+    if (mode == KeyToVPMode::Write && l[i].m_totalSamples < minCount) {
       replaceCandidate = i;
       minCount = l[i].m_totalSamples;
     }
   }
-  if (mode == Write) {
+  if (mode == KeyToVPMode::Write) {
     assert(replaceCandidate >= 0 && replaceCandidate < kLineSize);
     ValueProfile& vp = l[replaceCandidate];
     Stats::inc(Stats::TypePred_Evict, vp.m_totalSamples != 0);
@@ -242,7 +242,7 @@ void recordType(TypeProfileKey key, DataType dt) {
   // Normalize strings to KindOfString.
   if (dt == KindOfStaticString) dt = KindOfString;
   TRACE(1, "recordType lookup: %s -> %d\n", key.m_name->data(), dt);
-  ValueProfile *prof = keyToVP(key, Write);
+  ValueProfile *prof = keyToVP(key, KeyToVPMode::Write);
   if (prof->m_totalSamples != kMaxCounter) {
     prof->m_totalSamples++;
     // NB: we can't quite assert that we have fewer than kMaxCounter samples,
@@ -260,7 +260,7 @@ typedef std::pair<DataType, double> PredVal;
 PredVal predictType(TypeProfileKey key) {
   PredVal kNullPred = std::make_pair(KindOfUninit, 0.0);
   if (!profiles) return kNullPred;
-  const ValueProfile *prof = keyToVP(key, Read);
+  const ValueProfile *prof = keyToVP(key, KeyToVPMode::Read);
   if (!prof) {
     TRACE(2, "predictType lookup: %s -> MISS\n", key.m_name->data());
     Stats::inc(Stats::TypePred_Miss);

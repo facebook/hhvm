@@ -59,32 +59,32 @@ const bool MoreWarnings =
 #endif
   ;
 
-enum KeyType {
-  AnyKey = 0,
-  StrKey,
-  IntKey,
+enum class KeyType {
+  Any = 0,
+  Str,
+  Int,
 };
 
 template<KeyType kt>
 struct KeyTypeTraits {};
-template<> struct KeyTypeTraits<AnyKey> {
+template<> struct KeyTypeTraits<KeyType::Any> {
   typedef CVarRef valType;
   typedef int64_t rawType; // This is never actually used but it's
                          // needed to keep the compiler happy
 };
-template<> struct KeyTypeTraits<StrKey> {
+template<> struct KeyTypeTraits<KeyType::Str> {
   typedef StrNR valType;
   typedef StringData* rawType;
 };
-template<> struct KeyTypeTraits<IntKey> {
+template<> struct KeyTypeTraits<KeyType::Int> {
   typedef int64_t valType;
   typedef int64_t rawType;
 };
 
 inline DataType keyDataType(KeyType t) {
-  if (t == StrKey) {
+  if (t == KeyType::Str) {
     return KindOfString;
-  } else if (t == IntKey) {
+  } else if (t == KeyType::Int) {
     return KindOfInt64;
   } else {
     not_reached();
@@ -94,21 +94,21 @@ inline DataType keyDataType(KeyType t) {
 template<KeyType kt>
 inline typename KeyTypeTraits<kt>::valType keyAsValue(TypedValue* key);
 template<>
-inline int64_t keyAsValue<IntKey>(TypedValue* key) {
+inline int64_t keyAsValue<KeyType::Int>(TypedValue* key) {
   return reinterpret_cast<int64_t>(key);
 }
 template<>
-inline CVarRef keyAsValue<AnyKey>(TypedValue* key) {
+inline CVarRef keyAsValue<KeyType::Any>(TypedValue* key) {
   return tvAsCVarRef(key);
 }
 template<>
-inline StrNR keyAsValue<StrKey>(TypedValue* key) {
+inline StrNR keyAsValue<KeyType::Str>(TypedValue* key) {
   return StrNR(reinterpret_cast<StringData*>(key));
 }
 
 template<KeyType kt>
 inline typename KeyTypeTraits<kt>::rawType keyAsRaw(TypedValue* key) {
-  if (kt == AnyKey) {
+  if (kt == KeyType::Any) {
     not_reached();
   }
   return reinterpret_cast<typename KeyTypeTraits<kt>::rawType>(key);
@@ -118,7 +118,7 @@ inline typename KeyTypeTraits<kt>::rawType keyAsRaw(TypedValue* key) {
 // and therefore need the key in a TypedValue
 template<KeyType kt>
 inline void initScratchKey(TypedValue& tv, TypedValue*& key) {
-  if (kt != AnyKey) {
+  if (kt != KeyType::Any) {
     tv.m_type = keyDataType(kt);
     tv.m_data.num = reinterpret_cast<int64_t>(key);
     key = &tv;
@@ -139,11 +139,11 @@ void objOffsetUnset(Instance* base, CVarRef offset);
 
 StringData* prepareAnyKey(TypedValue* tv);
 
-template <KeyType keyType = AnyKey>
+template <KeyType keyType = KeyType::Any>
 inline StringData* prepareKey(TypedValue* tv) {
-  if (keyType == StrKey) {
+  if (keyType == KeyType::Str) {
     return reinterpret_cast<StringData*>(tv);
-  } else if (keyType == AnyKey) {
+  } else if (keyType == KeyType::Any) {
     return prepareAnyKey(tv);
   } else {
     not_reached();
@@ -152,10 +152,10 @@ inline StringData* prepareKey(TypedValue* tv) {
 
 template <KeyType keyType>
 inline void releaseKey(StringData* keySD) {
-  if (keyType == AnyKey) {
+  if (keyType == KeyType::Any) {
     decRefStr(keySD);
   } else {
-    assert(keyType == StrKey);
+    assert(keyType == KeyType::Str);
   }
 }
 
@@ -186,7 +186,7 @@ template <bool warn, KeyType keyType>
 inline TypedValue* ElemArray(ArrayData* base,
                                     TypedValue* key) {
   TypedValue* result;
-  if (keyType == AnyKey) {
+  if (keyType == KeyType::Any) {
     DataType rtt = key->m_type;
     if (rtt == KindOfInt64) {
       result = ElemArrayRawKey(base, key->m_data.num);
@@ -213,7 +213,7 @@ inline TypedValue* ElemArray(ArrayData* base,
 }
 
 // $result = $base[$key];
-template <bool warn, KeyType keyType = AnyKey>
+template <bool warn, KeyType keyType = KeyType::Any>
 inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
                         TypedValue* base, TypedValue* key) {
   TypedValue* result;
@@ -241,9 +241,9 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfStaticString:
   case KindOfString: {
     int64_t x;
-    if (keyType == IntKey) {
+    if (keyType == KeyType::Int) {
       x = reinterpret_cast<int64_t>(key);
-    } else if (keyType == StrKey) {
+    } else if (keyType == KeyType::Str) {
       x = reinterpret_cast<StringData*>(key)->toInt64(10);
     } else if (LIKELY(IS_INT_TYPE(key->m_type))) {
       x = key->m_data.num;
@@ -296,7 +296,7 @@ inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
   bool defined = !warn ||
     tvAsCVarRef(base).asCArrRef().exists(keyAsValue<keyType>(key));
 
-  if (keyType == AnyKey && key->m_type == KindOfInt64) {
+  if (keyType == KeyType::Any && key->m_type == KindOfInt64) {
     result = (TypedValue*)&tvAsVariant(base).asArrRef()
                                             .lvalAt(key->m_data.num);
   } else {
@@ -320,7 +320,7 @@ inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
 // \____ ____/
 //      v
 //   $result
-template <bool warn, bool reffy, KeyType keyType = AnyKey>
+template <bool warn, bool reffy, KeyType keyType = KeyType::Any>
 inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
   TypedValue scratch;
@@ -411,7 +411,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
 // \____ ____/
 //      v
 //   $result
-template <KeyType keyType = AnyKey>
+template <KeyType keyType = KeyType::Any>
 inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
   TypedValue* result = nullptr;
@@ -437,7 +437,7 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     bool defined =
       tvAsCVarRef(base).asCArrRef().exists(keyAsValue<keyType>(key));
     if (defined) {
-      if (keyType == AnyKey && key->m_type == KindOfInt64) {
+      if (keyType == KeyType::Any && key->m_type == KindOfInt64) {
         result = (TypedValue*)&tvAsVariant(base).asArrRef()
                                                 .lvalAt(key->m_data.num);
       } else {
@@ -614,7 +614,7 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
   bool copy = (a->getCount() > 1)
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
-  if (keyType != AnyKey) {
+  if (keyType != KeyType::Any) {
     newData = SetElemArrayRawKey(a, keyAsRaw<keyType>(key), value, copy);
   } else if (key->m_type <= KindOfNull) {
     newData = a->set(empty_string, tvCellAsCVarRef(value), copy);
@@ -650,14 +650,14 @@ inline int64_t castKeyToInt(TypedValue* key) {
 }
 
 template<>
-inline int64_t castKeyToInt<IntKey>(TypedValue* key) {
-  return keyAsRaw<IntKey>(key);
+inline int64_t castKeyToInt<KeyType::Int>(TypedValue* key) {
+  return keyAsRaw<KeyType::Int>(key);
 }
 
 // SetElem() leaves the result in 'value', rather than returning it as in
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
 // get around.
-template <bool setResult, KeyType keyType = AnyKey>
+template <bool setResult, KeyType keyType = KeyType::Any>
 inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   TypedValue scratch;
   DataType type;
@@ -866,7 +866,7 @@ inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
   return &tvScratch;
 }
 
-template <KeyType keyType = AnyKey>
+template <KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
                                     unsigned char op, TypedValue* base,
                                     TypedValue* key, Cell* rhs) {
@@ -1100,7 +1100,7 @@ inline void IncDecElemNumberish(TypedValue& dest) {
     tvWriteNull(&dest);
   }
 }
-template <bool setResult, KeyType keyType = AnyKey>
+template <bool setResult, KeyType keyType = KeyType::Any>
 inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
                               unsigned char op, TypedValue* base,
                               TypedValue* key, TypedValue& dest) {
@@ -1245,7 +1245,7 @@ inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
   ArrayData* a2;
   bool copy = a->getCount() > 1;
-  if (keyType == AnyKey) {
+  if (keyType == KeyType::Any) {
     if (IS_STRING_TYPE(key->m_type)) {
       a2 = UnsetElemArrayRawKey(a, key->m_data.pstr, copy);
     } else if (key->m_type == KindOfInt64) {
@@ -1267,7 +1267,7 @@ inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   }
 }
 
-template <KeyType keyType = AnyKey>
+template <KeyType keyType = KeyType::Any>
 inline void UnsetElem(TypedValue* base, TypedValue* member) {
   TypedValue scratch;
   DataType type;
@@ -1370,10 +1370,11 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
 //        v
 //     $result
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
-          KeyType keyType = AnyKey>
+          KeyType keyType = KeyType::Any>
 inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                         Class* ctx, TypedValue* base, TypedValue* key) {
-  static_assert(keyType != IntKey, "Integer property keys are not supported");
+  static_assert(keyType != KeyType::Int,
+                "Integer property keys are not supported");
   assert(!warn || !unset);
   TypedValue* result = nullptr;
   StringData* keySD = nullptr;
@@ -1420,7 +1421,7 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
   }
 }
 
-template <bool useEmpty, bool isObj = false, KeyType keyType = AnyKey>
+template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
 inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
                                   TypedValue* base,
                                   TypedValue* key) {
@@ -1489,7 +1490,7 @@ inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
   return issetEmptyResult;
 }
 
-template <bool useEmpty, bool isObj = false, KeyType keyType = AnyKey>
+template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
 inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
                                   TypedValue* key) {
   if (isObj) {
@@ -1543,7 +1544,7 @@ inline void SetPropObj(Class* ctx, Instance* instance,
 }
 
 // $base->$key = $val
-template <bool setResult, bool isObj = false, KeyType keyType = AnyKey>
+template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
                            Cell* val) {
   if (isObj) {
@@ -1626,7 +1627,7 @@ inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 }
 
 // $base->$key <op>= $rhs
-template<bool isObj = false, KeyType keyType = AnyKey>
+template<bool isObj = false, KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
                                     Class* ctx, unsigned char op,
                                     TypedValue* base, TypedValue* key,
@@ -1723,7 +1724,7 @@ inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
   releaseKey<keyType>(keySD);
 }
 
-template <bool setResult, bool isObj = false, KeyType keyType = AnyKey>
+template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
 inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
                               Class* ctx, unsigned char op,
                               TypedValue* base, TypedValue* key,
@@ -1776,7 +1777,7 @@ inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
-template<bool isObj = false, KeyType keyType = AnyKey>
+template<bool isObj = false, KeyType keyType = KeyType::Any>
 inline void UnsetProp(Class* ctx, TypedValue* base,
                              TypedValue* key) {
   Instance* instance;

@@ -1434,11 +1434,11 @@ void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
   Unit::MetaInfo info;
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
-    case Unit::MetaInfo::NonRefCounted:
+    case Unit::MetaInfo::Kind::NonRefCounted:
       ni->nonRefCountedLocals.resize(curFunc()->numLocals());
       ni->nonRefCountedLocals[info.m_data] = 1;
       break;
-    case Unit::MetaInfo::GuardedThis:
+    case Unit::MetaInfo::Kind::GuardedThis:
       ni->guardedThis = true;
       break;
     default:
@@ -1455,7 +1455,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 
   Unit::MetaInfo info;
   if (!metaHand.nextArg(info)) return false;
-  if (info.m_kind == Unit::MetaInfo::NopOut) {
+  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
     ni->noOp = true;
     return true;
   }
@@ -1492,16 +1492,16 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
 
     switch (info.m_kind) {
-      case Unit::MetaInfo::NoSurprise:
+      case Unit::MetaInfo::Kind::NoSurprise:
         ni->noSurprise = true;
         break;
-      case Unit::MetaInfo::GuardedCls:
+      case Unit::MetaInfo::Kind::GuardedCls:
         ni->guardedCls = true;
         break;
-      case Unit::MetaInfo::ArrayCapacity:
+      case Unit::MetaInfo::Kind::ArrayCapacity:
         ni->imm[0].u_IVA = info.m_data;
         break;
-      case Unit::MetaInfo::DataTypePredicted: {
+      case Unit::MetaInfo::Kind::DataTypePredicted: {
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.
         assert((unsigned) arg < inputInfos.size());
@@ -1528,7 +1528,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         }
         break;
       }
-      case Unit::MetaInfo::DataTypeInferred: {
+      case Unit::MetaInfo::Kind::DataTypeInferred: {
         assert((unsigned)arg < inputInfos.size());
         SKTRACE(1, ni->source, "MetaInfo DataTypeInferred for input %d; "
                    "newType = %d\n", arg, DataType(info.m_data));
@@ -1585,7 +1585,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::String: {
+      case Unit::MetaInfo::Kind::String: {
         const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
@@ -1599,7 +1599,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::Class: {
+      case Unit::MetaInfo::Kind::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         DynLocation* dl = tas.recordRead(ii, true);
@@ -1632,7 +1632,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::MVecPropClass: {
+      case Unit::MetaInfo::Kind::MVecPropClass: {
         const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
         Class* metaCls = Unit::lookupUniqueClass(metaName);
         if (metaCls) {
@@ -1641,15 +1641,15 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::NopOut:
+      case Unit::MetaInfo::Kind::NopOut:
         // NopOut should always be the first and only annotation
         // and was handled above.
         not_reached();
 
-      case Unit::MetaInfo::GuardedThis:
-      case Unit::MetaInfo::NonRefCounted:
+      case Unit::MetaInfo::Kind::GuardedThis:
+      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
-      case Unit::MetaInfo::None:
+      case Unit::MetaInfo::Kind::None:
         break;
     }
   } while (metaHand.nextArg(info));
@@ -3632,7 +3632,7 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
 
   Unit::MetaInfo info;
   if (!handle.nextArg(info)) return;
-  if (info.m_kind == Unit::MetaInfo::NopOut) {
+  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
     inst.noOp = true;
     return;
   }
@@ -3673,16 +3673,16 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
     };
 
     switch (info.m_kind) {
-      case Unit::MetaInfo::NoSurprise:
+      case Unit::MetaInfo::Kind::NoSurprise:
         inst.noSurprise = true;
         break;
-      case Unit::MetaInfo::GuardedCls:
+      case Unit::MetaInfo::Kind::GuardedCls:
         inst.guardedCls = true;
         break;
-      case Unit::MetaInfo::ArrayCapacity:
+      case Unit::MetaInfo::Kind::ArrayCapacity:
         inst.imm[0].u_IVA = info.m_data;
         break;
-      case Unit::MetaInfo::DataTypePredicted: {
+      case Unit::MetaInfo::Kind::DataTypePredicted: {
         auto const& loc = inst.inputs[arg]->location;
         auto const t = Type::fromDataType(DataType(info.m_data));
         auto const offset = inst.source.offset();
@@ -3695,20 +3695,20 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
         updateType();
         break;
       }
-      case Unit::MetaInfo::DataTypeInferred: {
+      case Unit::MetaInfo::Kind::DataTypeInferred: {
         m_hhbcTrans->assertTypeLocation(
           inst.inputs[arg]->location,
           Type::fromDataType(DataType(info.m_data)));
         updateType();
         break;
       }
-      case Unit::MetaInfo::String: {
+      case Unit::MetaInfo::Kind::String: {
         m_hhbcTrans->assertString(inst.inputs[arg]->location,
                                   inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
       }
-      case Unit::MetaInfo::Class: {
+      case Unit::MetaInfo::Kind::Class: {
         RuntimeType& rtt = inst.inputs[arg]->rtt;
         if (rtt.valueType() != KindOfObject) {
           continue;
@@ -3738,7 +3738,7 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
         }
         break;
       }
-      case Unit::MetaInfo::MVecPropClass: {
+      case Unit::MetaInfo::Kind::MVecPropClass: {
         const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
         Class* metaCls = Unit::lookupUniqueClass(metaName);
         if (metaCls) {
@@ -3746,15 +3746,15 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
         }
         break;
       }
-      case Unit::MetaInfo::NopOut:
+      case Unit::MetaInfo::Kind::NopOut:
         // NopOut should always be the first and only annotation
         // and was handled above.
         not_reached();
 
-      case Unit::MetaInfo::GuardedThis:
-      case Unit::MetaInfo::NonRefCounted:
+      case Unit::MetaInfo::Kind::GuardedThis:
+      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
-      case Unit::MetaInfo::None:
+      case Unit::MetaInfo::Kind::None:
         break;
     }
   } while (handle.nextArg(info));

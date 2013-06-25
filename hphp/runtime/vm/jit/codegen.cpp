@@ -3608,7 +3608,7 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   }
 
   auto tmpReg = PhysReg(m_rScratch);
-  cgCallHelper(m_as, tvCoerceHelper, tmpReg, kSyncPoint, args);
+  cgCallHelper(m_as, tvCoerceHelper, tmpReg, SyncOptions::kSyncPoint, args);
   m_as.testb(1, rbyte(tmpReg));
   emitFwdJcc(m_as, CC_E, exit);
 }

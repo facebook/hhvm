@@ -90,7 +90,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
     params.append(s_exit);
     if (!g_vmContext->m_faults.empty()) {
       Fault fault = g_vmContext->m_faults.back();
-      if (fault.m_faultType == Fault::UserException) {
+      if (fault.m_faultType == Fault::Type::UserException) {
         frameinfo.set(s_exception, fault.m_userException);
       }
     } else if (!ar->m_func->info() &&

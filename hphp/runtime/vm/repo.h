@@ -51,9 +51,9 @@ class Repo : public RepoProxy {
   sqlite3* dbc() const { return m_dbc; }
   int repoIdForNewUnit(UnitOrigin unitOrigin) const {
     switch (unitOrigin) {
-    case UnitOriginFile:
+    case UnitOrigin::File:
       return m_localWritable ? RepoIdLocal : RepoIdCentral;
-    case UnitOriginEval:
+    case UnitOrigin::Eval:
       return m_evalRepoId;
     default:
       assert(false);

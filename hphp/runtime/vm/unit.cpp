@@ -557,19 +557,19 @@ Class* Unit::defClass(const PreClass* preClass,
       if (class_->preClass() != preClass) continue;
 
       Class::Avail avail = class_->avail(parent, failIsFatal /*tryAutoload*/);
-      if (LIKELY(avail == Class::AvailTrue)) {
+      if (LIKELY(avail == Class::Avail::True)) {
         class_->setCached();
         DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(class_));
         return class_;
       }
-      if (avail == Class::AvailFail) {
+      if (avail == Class::Avail::Fail) {
         if (failIsFatal) {
           FrameRestore fr(preClass);
           raise_error("unknown class %s", parent->name()->data());
         }
         return nullptr;
       }
-      assert(avail == Class::AvailFalse);
+      assert(avail == Class::Avail::False);
     }
 
     // Create a new class.
@@ -1319,10 +1319,10 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
           }
           Class::Avail avail = cls->avail(other, true);
-          if (UNLIKELY(avail == Class::AvailFail)) {
+          if (UNLIKELY(avail == Class::Avail::Fail)) {
             raise_error("unknown class %s", other->name()->data());
           }
-          assert(avail == Class::AvailTrue);
+          assert(avail == Class::Avail::True);
           getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
@@ -1585,48 +1585,48 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
         int arg = info.m_arg & ~MetaInfo::VectorArg;
         const char *argKind = info.m_arg & MetaInfo::VectorArg ? "M" : "";
         switch (info.m_kind) {
-          case Unit::MetaInfo::DataTypeInferred:
-          case Unit::MetaInfo::DataTypePredicted:
+          case Unit::MetaInfo::Kind::DataTypeInferred:
+          case Unit::MetaInfo::Kind::DataTypePredicted:
             out << " i" << argKind << arg << ":t=" << (int)info.m_data;
-            if (info.m_kind == Unit::MetaInfo::DataTypePredicted) {
+            if (info.m_kind == Unit::MetaInfo::Kind::DataTypePredicted) {
               out << "*";
             }
             break;
-          case Unit::MetaInfo::String: {
+          case Unit::MetaInfo::Kind::String: {
             const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":s=" <<
               std::string(sd->data(), sd->size());
             break;
           }
-          case Unit::MetaInfo::Class: {
+          case Unit::MetaInfo::Kind::Class: {
             const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":c=" << sd->data();
             break;
           }
-          case Unit::MetaInfo::MVecPropClass: {
+          case Unit::MetaInfo::Kind::MVecPropClass: {
             const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":pc=" << sd->data();
             break;
           }
-          case Unit::MetaInfo::NopOut:
+          case Unit::MetaInfo::Kind::NopOut:
             out << " Nop";
             break;
-          case Unit::MetaInfo::GuardedThis:
+          case Unit::MetaInfo::Kind::GuardedThis:
             out << " GuardedThis";
             break;
-          case Unit::MetaInfo::GuardedCls:
+          case Unit::MetaInfo::Kind::GuardedCls:
             out << " GuardedCls";
             break;
-          case Unit::MetaInfo::NoSurprise:
+          case Unit::MetaInfo::Kind::NoSurprise:
             out << " NoSurprise";
             break;
-          case Unit::MetaInfo::ArrayCapacity:
+          case Unit::MetaInfo::Kind::ArrayCapacity:
             out << " capacity=" << info.m_data;
             break;
-          case Unit::MetaInfo::NonRefCounted:
+          case Unit::MetaInfo::Kind::NonRefCounted:
             out << " :nrc=" << info.m_data;
             break;
-          case Unit::MetaInfo::None:
+          case Unit::MetaInfo::Kind::None:
             assert(false);
             break;
         }

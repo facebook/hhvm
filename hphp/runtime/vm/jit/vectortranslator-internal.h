@@ -111,11 +111,11 @@ static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
   assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 
   if ((key->isConst() || nonLitStr) && key->isString()) {
-    return StrKey;
+    return KeyType::Str;
   } else if ((key->isConst() || nonLitInt) && key->isA(Type::Int)) {
-    return IntKey;
+    return KeyType::Int;
   } else {
-    return AnyKey;
+    return KeyType::Any;
   }
 }
 inline static KeyType getKeyType(const SSATmp* key) {
@@ -135,7 +135,7 @@ inline static KeyType getKeyTypeIS(const SSATmp* key) {
 // cleaned up to use the right types: #2174037
 template<KeyType kt>
 static inline TypedValue* keyPtr(TypedValue& key) {
-  if (kt == AnyKey) {
+  if (kt == KeyType::Any) {
     assert(tvIsPlausible(&key));
     return &key;
   } else {

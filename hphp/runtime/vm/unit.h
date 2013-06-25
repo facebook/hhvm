@@ -40,9 +40,9 @@ class Repo;
 class FuncDict;
 class Unit;
 
-enum UnitOrigin {
-  UnitOriginFile = 0,
-  UnitOriginEval = 1
+enum class UnitOrigin {
+  File = 0,
+  Eval = 1
 };
 
 enum UnitMergeKind {
@@ -114,11 +114,11 @@ struct UnitMergeInfo {
 // Exception handler table entry.
 class EHEnt {
  public:
-  enum EHType {
-    EHType_Catch,
-    EHType_Fault
+  enum class Type {
+    Catch,
+    Fault
   };
-  EHType m_ehtype;
+  Type m_type;
   Offset m_base;
   Offset m_past;
   int m_iterId;
@@ -129,7 +129,7 @@ class EHEnt {
   CatchVec m_catches;
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(m_ehtype)
+    sd(m_type)
       (m_base)
       (m_past)
       (m_iterId)
@@ -137,7 +137,7 @@ class EHEnt {
       (m_itRef)
       // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
       ;
-    if (m_ehtype == EHType_Catch) {
+    if (m_type == Type::Catch) {
       sd(m_catches);
     }
   }
@@ -289,7 +289,7 @@ struct Unit {
 
   class MetaInfo {
    public:
-    enum Kind {
+    enum class Kind {
       None,
       String,
       Class,
@@ -344,7 +344,7 @@ struct Unit {
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
       assert((int)m_arg == a);
     }
-    MetaInfo() : m_kind(None), m_arg(-1), m_data(0) {}
+    MetaInfo() : m_kind(Kind::None), m_arg(-1), m_data(0) {}
 
     /*
      * m_arg indicates which input the MetaInfo applies to.

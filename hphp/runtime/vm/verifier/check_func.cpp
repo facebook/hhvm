@@ -174,7 +174,7 @@ bool FuncChecker::checkOffsets() {
   SectionMap sections;
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& eh = i.popFront();
-    if (eh.m_ehtype == EHEnt::EHType_Fault) {
+    if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault funclet", eh.m_fault, "func bytecode", base,
                         past, false);
       sections[eh.m_fault] = 0;
@@ -221,7 +221,7 @@ bool FuncChecker::checkOffsets() {
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& eh = i.popFront();
     checkRegion("EH", eh.m_base, eh.m_past, "func body", base, funclets);
-    if (eh.m_ehtype == EHEnt::EHType_Catch) {
+    if (eh.m_type == EHEnt::Type::Catch) {
       for (Range<vector<CatchEnt> > c(eh.m_catches); !c.empty(); ) {
         ok &= checkOffset("catch", c.popFront().second, "func body", base,
                           funclets);
@@ -789,7 +789,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   };
   bool ok = true;
   StackTransInfo info = instrStackTransInfo(pc);
-  if (info.kind == StackTransInfo::InsertMid) {
+  if (info.kind == StackTransInfo::Kind::InsertMid) {
     int index = cur->stklen - info.pos - 1;
     if (index < 0) {
       reportStkUnderflow(b, *cur, pc);
@@ -924,7 +924,7 @@ bool FuncChecker::checkFlow() {
   // Make sure eval stack is empty at start of each try region
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& handler = i.popFront();
-    if (handler.m_ehtype == EHEnt::EHType_Catch) {
+    if (handler.m_type == EHEnt::Type::Catch) {
       ok &= checkEmptyStack(handler, builder.at(handler.m_base));
     }
   }

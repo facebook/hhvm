@@ -307,7 +307,7 @@ bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {
   assert(o >= base() && o < past());
   for (unsigned i = 0, n = ehtab.size(); i < n; i++) {
     const EHEnt* eh = &ehtab[i];
-    if (eh->m_ehtype == EHEnt::EHType_Fault &&
+    if (eh->m_type == EHEnt::Type::Fault &&
         eh->m_base <= o && o < eh->m_past &&
         eh->m_iterId == iterId) {
       itRef = eh->m_itRef;
@@ -490,7 +490,7 @@ void Func::prettyPrint(std::ostream& out) const {
   }
   const EHEntVec& ehtab = shared()->m_ehtab;
   for (EHEntVec::const_iterator it = ehtab.begin(); it != ehtab.end(); ++it) {
-    bool catcher = it->m_ehtype == EHEnt::EHType_Catch;
+    bool catcher = it->m_type == EHEnt::Type::Catch;
     out << " EH " << (catcher ? "Catch" : "Fault") << " for " <<
       it->m_base << ":" << it->m_past;
     if (it->m_parentIndex != -1) {
@@ -846,7 +846,7 @@ struct EHEntComp {
   bool operator()(const EHEnt& e1, const EHEnt& e2) const {
     if (e1.m_base == e2.m_base) {
       if (e1.m_past == e2.m_past) {
-        return e1.m_ehtype == EHEnt::EHType_Catch;
+        return e1.m_type == EHEnt::Type::Catch;
       }
       return e1.m_past > e2.m_past;
     }

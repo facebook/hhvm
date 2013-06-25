@@ -1064,7 +1064,7 @@ OpcodeParserMap opcode_parsers;
       as.enforceStackDepth(0);                                    \
     }                                                             \
                                                                   \
-    if (instrFlags(thisOpcode) & TF) {                            \
+    if (instrFlags(thisOpcode) & InstrFlags::TF) {                \
       as.enterUnreachableRegion();                                \
     }                                                             \
   }
@@ -1181,7 +1181,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   parse_function_body(as, nestLevel + 1);
 
   EHEnt& eh = as.fe->addEHEnt();
-  eh.m_ehtype = EHEnt::EHType_Fault;
+  eh.m_type = EHEnt::Type::Fault;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
@@ -1224,7 +1224,7 @@ void parse_catch(AsmState& as, int nestLevel) {
   parse_function_body(as, nestLevel + 1);
 
   EHEnt& eh = as.fe->addEHEnt();
-  eh.m_ehtype = EHEnt::EHType_Catch;
+  eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = -1;
@@ -1302,16 +1302,16 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
  * The `attribute-name' rule is context-sensitive; just look at the
  * code below.
  */
-enum AttrContext {
-  ClassAttributes,
-  FuncAttributes,
-  PropAttributes,
-  TraitImportAttributes
+enum class AttrContext {
+  Class,
+  Func,
+  Prop,
+  TraitImport
 };
 Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
   as.in.skipWhitespace();
   int ret = AttrNone;
-  if (ctx == ClassAttributes || ctx == FuncAttributes) {
+  if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
     if (!SystemLib::s_inited) {
       ret |= AttrUnique | AttrPersistent;
     }
@@ -1325,27 +1325,27 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
     if (as.in.peek() == ']') break;
     if (!as.in.readword(word)) break;
 
-    if (ctx == FuncAttributes || ctx == PropAttributes ||
-        ctx == TraitImportAttributes) {
+    if (ctx == AttrContext::Func || ctx == AttrContext::Prop ||
+        ctx == AttrContext::TraitImport) {
       if (word == "public")    { ret |= AttrPublic;    continue; }
       if (word == "protected") { ret |= AttrProtected; continue; }
       if (word == "private")   { ret |= AttrPrivate;   continue; }
     }
-    if (ctx == FuncAttributes || ctx == PropAttributes) {
+    if (ctx == AttrContext::Func || ctx == AttrContext::Prop) {
       if (word == "static")    { ret |= AttrStatic;    continue; }
     }
-    if (ctx == ClassAttributes) {
+    if (ctx == AttrContext::Class) {
       if (word == "interface") { ret |= AttrInterface; continue; }
       if (word == "no_expand_trait")
                                { ret |= AttrNoExpandTrait; continue; }
     }
-    if (ctx == ClassAttributes || ctx == FuncAttributes ||
-        ctx == TraitImportAttributes) {
+    if (ctx == AttrContext::Class || ctx == AttrContext::Func ||
+        ctx == AttrContext::TraitImport) {
       if (word == "abstract")  { ret |= AttrAbstract;  continue; }
       if (word == "final")     { ret |= AttrFinal;     continue; }
       if (word == "no_override") { ret |= AttrNoOverride; continue; }
     }
-    if (ctx == ClassAttributes || ctx == FuncAttributes) {
+    if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
       if (word == "trait")     { ret |= AttrTrait;     continue; }
       if (word == "unique")    { ret |= AttrUnique;    continue; }
     }
@@ -1432,7 +1432,7 @@ void parse_function(AsmState& as) {
     as.error(".function blocks must all follow the .main block");
   }
 
-  Attr attrs = parse_attribute_list(as, FuncAttributes);
+  Attr attrs = parse_attribute_list(as, AttrContext::Func);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".function must have a name");
@@ -1456,7 +1456,7 @@ void parse_function(AsmState& as) {
 void parse_method(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, FuncAttributes);
+  Attr attrs = parse_attribute_list(as, AttrContext::Func);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".method requires a method name");
@@ -1528,7 +1528,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
 void parse_property(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, PropAttributes);
+  Attr attrs = parse_attribute_list(as, AttrContext::Prop);
   std::string name;
   if (!as.in.readword(name)) {
     as.error("expected name for property");
@@ -1640,7 +1640,7 @@ void parse_use(AsmState& as) {
     }
 
     if (as.in.tryConsume("as")) {
-      Attr attrs = parse_attribute_list(as, TraitImportAttributes);
+      Attr attrs = parse_attribute_list(as, AttrContext::TraitImport);
       std::string alias;
       if (!as.in.readword(alias)) {
         if (attrs != AttrNone) {
@@ -1729,7 +1729,7 @@ void parse_class_body(AsmState& as) {
 void parse_class(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, ClassAttributes);
+  Attr attrs = parse_attribute_list(as, AttrContext::Class);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".class must have a name");

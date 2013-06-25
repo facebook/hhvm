@@ -40,23 +40,35 @@ void TypeConstraint::init() {
       const StringData* name;
       Type type;
     } pairs[] = {
-      { StringData::GetStaticString("bool"),     { KindOfBoolean, Precise }},
-      { StringData::GetStaticString("boolean"),  { KindOfBoolean, Precise }},
+      { StringData::GetStaticString("bool"),     { KindOfBoolean,
+                                                   MetaType::Precise }},
+      { StringData::GetStaticString("boolean"),  { KindOfBoolean,
+                                                   MetaType::Precise }},
 
-      { StringData::GetStaticString("int"),      { KindOfInt64, Precise }},
-      { StringData::GetStaticString("integer"),  { KindOfInt64, Precise }},
+      { StringData::GetStaticString("int"),      { KindOfInt64,
+                                                   MetaType::Precise }},
+      { StringData::GetStaticString("integer"),  { KindOfInt64,
+                                                   MetaType::Precise }},
 
-      { StringData::GetStaticString("real"),     { KindOfDouble, Precise }},
-      { StringData::GetStaticString("double"),   { KindOfDouble, Precise }},
-      { StringData::GetStaticString("float"),    { KindOfDouble, Precise }},
+      { StringData::GetStaticString("real"),     { KindOfDouble,
+                                                   MetaType::Precise }},
+      { StringData::GetStaticString("double"),   { KindOfDouble,
+                                                   MetaType::Precise }},
+      { StringData::GetStaticString("float"),    { KindOfDouble,
+                                                   MetaType::Precise }},
 
-      { StringData::GetStaticString("string"),   { KindOfString, Precise }},
+      { StringData::GetStaticString("string"),   { KindOfString,
+                                                   MetaType::Precise }},
 
-      { StringData::GetStaticString("array"),    { KindOfArray, Precise }},
+      { StringData::GetStaticString("array"),    { KindOfArray,
+                                                   MetaType::Precise }},
 
-      { StringData::GetStaticString("self"),     { KindOfObject, Self }},
-      { StringData::GetStaticString("parent"),   { KindOfObject, Parent }},
-      { StringData::GetStaticString("callable"), { KindOfObject, Callable }},
+      { StringData::GetStaticString("self"),     { KindOfObject,
+                                                   MetaType::Self }},
+      { StringData::GetStaticString("parent"),   { KindOfObject,
+                                                   MetaType::Parent }},
+      { StringData::GetStaticString("callable"), { KindOfObject,
+                                                   MetaType::Callable }},
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
@@ -65,7 +77,7 @@ void TypeConstraint::init() {
 
   if (typeName == nullptr) {
     m_type.m_dt = KindOfInvalid;
-    m_type.m_metatype = Precise;
+    m_type.m_metatype = MetaType::Precise;
     return;
   }
 
@@ -77,7 +89,7 @@ void TypeConstraint::init() {
         dtype.isSelf())) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, typeName->data());
-    m_type = { KindOfObject, Precise };
+    m_type = { KindOfObject, MetaType::Precise };
     m_namedEntity = Unit::GetNamedEntity(typeName);
     TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;

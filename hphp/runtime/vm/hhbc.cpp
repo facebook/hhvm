@@ -434,13 +434,13 @@ int instrNumPushes(const Opcode* opcode) {
 
 StackTransInfo instrStackTransInfo(const Opcode* opcode) {
   static const StackTransInfo::Kind transKind[] = {
-#define NOV StackTransInfo::PushPop
-#define ONE(...) StackTransInfo::PushPop
-#define TWO(...) StackTransInfo::PushPop
-#define THREE(...) StackTransInfo::PushPop
-#define FOUR(...) StackTransInfo::PushPop
-#define INS_1(...) StackTransInfo::InsertMid
-#define INS_2(...) StackTransInfo::InsertMid
+#define NOV StackTransInfo::Kind::PushPop
+#define ONE(...) StackTransInfo::Kind::PushPop
+#define TWO(...) StackTransInfo::Kind::PushPop
+#define THREE(...) StackTransInfo::Kind::PushPop
+#define FOUR(...) StackTransInfo::Kind::PushPop
+#define INS_1(...) StackTransInfo::Kind::InsertMid
+#define INS_2(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -474,12 +474,12 @@ StackTransInfo instrStackTransInfo(const Opcode* opcode) {
   StackTransInfo ret;
   ret.kind = transKind[*opcode];
   switch (ret.kind) {
-  case StackTransInfo::PushPop:
+  case StackTransInfo::Kind::PushPop:
     ret.pos = 0;
     ret.numPushes = instrNumPushes(opcode);
     ret.numPops = instrNumPops(opcode);
     return ret;
-  case StackTransInfo::InsertMid:
+  case StackTransInfo::Kind::InsertMid:
     ret.numPops = 0;
     ret.numPushes = 0;
     ret.pos = peekPokeType[*opcode];

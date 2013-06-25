@@ -1291,10 +1291,10 @@ void HhbcTranslator::emitArrayIdx() {
   TCA opFunc;
   if (checkForInt) {
     opFunc = (TCA)&arrayIdxSi;
-  } else if (IntKey == arrayKeyType) {
+  } else if (KeyType::Int == arrayKeyType) {
     opFunc = (TCA)&arrayIdxI;
   } else {
-    assert(StrKey == arrayKeyType);
+    assert(KeyType::Str == arrayKeyType);
     opFunc = (TCA)&arrayIdxS;
   }
 
@@ -3696,14 +3696,14 @@ void HhbcTranslator::checkStrictlyInteger(
     SSATmp*& key, KeyType& keyType, bool& checkForInt) {
   checkForInt = false;
   if (key->isA(Type::Int)) {
-    keyType = IntKey;
+    keyType = KeyType::Int;
   } else {
     assert(key->isA(Type::Str));
-    keyType = StrKey;
+    keyType = KeyType::Str;
     if (key->isConst()) {
       int64_t i;
       if (key->getValStr()->isStrictlyInteger(i)) {
-        keyType = IntKey;
+        keyType = KeyType::Int;
         key = cns(i);
       }
     } else {

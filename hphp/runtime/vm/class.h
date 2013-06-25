@@ -98,7 +98,7 @@ typedef Instance*(*BuiltinCtorFunction)(Class*);
  *
  *    The very last condition here (parent already defined when the
  *    unit is required) is not known at parse time.  This leads to the
- *    MaybeHoistable/AlwaysHoistable split below.
+ *    Maybe/Always split below.
  *
  */
 class PreClass : public AtomicCountable {
@@ -556,10 +556,10 @@ public:
   friend class Instance;
   friend class Unit;
 
-  enum Avail {
-    AvailFalse,
-    AvailTrue,
-    AvailFail
+  enum class Avail {
+    False,
+    True,
+    Fail
   };
 
   struct Prop {

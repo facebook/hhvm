@@ -119,8 +119,8 @@ void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
   os << "L" << block->id();
   switch (block->hint()) {
-  case Block::Unlikely:    os << "<Unlikely>"; break;
-  case Block::Likely:      os << "<Likely>"; break;
+  case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
+  case Block::Hint::Likely:      os << "<Likely>"; break;
   default:
     break;
   }
@@ -276,7 +276,7 @@ static smart::vector<Block*> blocks(const IRTrace* trace,
   if (!asmInfo) {
     smart::vector<Block*> unlikely;
     for (Block* block : trace->blocks()) {
-      if (block->hint() == Block::Unlikely) {
+      if (block->hint() == Block::Hint::Unlikely) {
         unlikely.push_back(block);
       } else {
         blocks.push_back(block);

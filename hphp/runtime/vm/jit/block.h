@@ -39,14 +39,14 @@ struct Block : boost::noncopyable {
   typedef InstructionList::const_iterator const_iterator;
 
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
-  enum Hint { Neither, Likely, Unlikely };
+  enum class Hint { Neither, Likely, Unlikely };
 
   Block(unsigned id, const Func* func)
     : m_trace(nullptr)
     , m_func(func)
     , m_next(this, nullptr)
     , m_id(id)
-    , m_hint(Neither)
+    , m_hint(Hint::Neither)
   {}
 
   const IRInstruction* beginCatch() const {

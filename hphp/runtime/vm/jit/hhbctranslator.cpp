@@ -548,7 +548,7 @@ void HhbcTranslator::emitCns(uint32_t id) {
         return c1;
       },
       [&] { // Taken: miss in TC, do lookup & init
-        m_tb->hint(Block::Unlikely);
+        m_tb->hint(Block::Hint::Unlikely);
         return gen(LookupCns, getCatchTrace(), cnsType, cnsNameTmp);
       }
     );
@@ -824,7 +824,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
         return gen(IncRef, cachedBox);
       },
       [&] { // taken: We missed in the cache
-        m_tb->hint(Block::Unlikely);
+        m_tb->hint(Block::Hint::Unlikely);
         return gen(StaticLocInitCached,
                          cns(name), m_tb->fp(), value, ch);
       }
@@ -2751,7 +2751,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
         gen(JmpZero, taken, isInstance);
       },
       [&] { // taken: the param type does not match
-        m_tb->hint(Block::Unlikely);
+        m_tb->hint(Block::Hint::Unlikely);
         gen(VerifyParamFail, getCatchTrace(), cns(paramId));
       }
     );

@@ -65,13 +65,12 @@ extern TranslatorX64* volatile nextTx64;
 extern __thread TranslatorX64* tx64;
 
 /*
- * REGSTATE_DIRTY when the live register state is spread across the
- * stack and m_fixup, REGSTATE_CLEAN when it has been sync'ed into
- * g_context.
+ * DIRTY when the live register state is spread across the stack and m_fixup,
+ * CLEAN when it has been sync'ed into g_context.
  */
-enum VMRegState {
-  REGSTATE_CLEAN,
-  REGSTATE_DIRTY
+enum class VMRegState {
+  CLEAN,
+  DIRTY
 };
 extern __thread VMRegState tl_regState;
 
@@ -321,11 +320,11 @@ class NormalizedInstruction {
     return i < 32 && ((checkedInputs >> i) & 1);
   }
 
-  enum OutputUse {
-    OutputUsed,
-    OutputUnused,
-    OutputInferred,
-    OutputDoesntCare
+  enum class OutputUse {
+    Used,
+    Unused,
+    Inferred,
+    DoesntCare
   };
   OutputUse getOutputUsage(const DynLocation* output) const;
   bool isOutputUsed(const DynLocation* output) const;
@@ -470,7 +469,7 @@ struct ActRecState {
   // instructions that need to do so.
   static const int InvalidEntryArDelta = INT_MAX;
 
-  enum State {
+  enum class State {
     GUESSABLE, KNOWN, UNKNOWABLE
   };
 
@@ -1058,12 +1057,12 @@ public:
   static bool liveFrameIsPseudoMain();
 
   inline void sync() {
-    if (tl_regState == REGSTATE_CLEAN) return;
+    if (tl_regState == VMRegState::CLEAN) return;
     syncWork();
   }
 
   inline bool stateIsDirty() {
-    return tl_regState == REGSTATE_DIRTY;
+    return tl_regState == VMRegState::DIRTY;
   }
 
   inline bool isTransDBEnabled() const {
@@ -1115,10 +1114,10 @@ public:
 
 int getStackDelta(const NormalizedInstruction& ni);
 
-enum ControlFlowInfo {
-  ControlFlowNone,
-  ControlFlowChangesPC,
-  ControlFlowBreaksBB
+enum class ControlFlowInfo {
+  None,
+  ChangesPC,
+  BreaksBB
 };
 
 static inline ControlFlowInfo
@@ -1153,7 +1152,7 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpEval:
     case OpNativeImpl:
     case OpContHandle:
-      return ControlFlowBreaksBB;
+      return ControlFlowInfo::BreaksBB;
     case OpFCall:
     case OpFCallArray:
     case OpContEnter:
@@ -1162,9 +1161,9 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpReq:
     case OpReqOnce:
     case OpReqDoc:
-      return ControlFlowChangesPC;
+      return ControlFlowInfo::ChangesPC;
     default:
-      return ControlFlowNone;
+      return ControlFlowInfo::None;
   }
 }
 
@@ -1176,7 +1175,7 @@ opcodeControlFlowInfo(const Opcode instr) {
  */
 static inline bool
 opcodeChangesPC(const Opcode instr) {
-  return opcodeControlFlowInfo(instr) >= ControlFlowChangesPC;
+  return opcodeControlFlowInfo(instr) >= ControlFlowInfo::ChangesPC;
 }
 
 /*
@@ -1188,7 +1187,7 @@ opcodeChangesPC(const Opcode instr) {
  */
 static inline bool
 opcodeBreaksBB(const Opcode instr) {
-  return opcodeControlFlowInfo(instr) == ControlFlowBreaksBB;
+  return opcodeControlFlowInfo(instr) == ControlFlowInfo::BreaksBB;
 }
 
 bool outputDependsOnInput(const Opcode instr);

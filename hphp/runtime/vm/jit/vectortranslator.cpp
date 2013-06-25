@@ -869,7 +869,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
     [&] { // Taken: Property is Uninit. Raise a warning and return
           // a pointer to InitNull, either in the object or
           // init_null_variant.
-      m_tb.hint(Block::Unlikely);
+      m_tb.hint(Block::Hint::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
         gen(RaiseUndefProp, m_ht.getCatchTrace(), baseAsObj, key);
       }
@@ -931,7 +931,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
                              doDefine);
       },
       [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
-        m_tb.hint(Block::Unlikely);
+        m_tb.hint(Block::Hint::Unlikely);
         if (doWarn) {
           gen(WarnNonObjProp);
         }

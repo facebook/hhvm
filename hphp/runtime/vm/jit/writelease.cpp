@@ -121,8 +121,8 @@ void Lease::drop(int64_t hintExpireDelay) {
 LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire,
                                                 bool blocking)
   : m_lease(l), m_haveLock(false), m_acquired(false) {
-  assert(IMPLIES(blocking, acquire == ACQUIRE));
-  if (!m_lease.amOwner() && acquire == ACQUIRE) {
+  assert(IMPLIES(blocking, acquire == LeaseAcquire::ACQUIRE));
+  if (!m_lease.amOwner() && acquire == LeaseAcquire::ACQUIRE) {
     m_acquired = m_lease.acquire(blocking);
   }
   m_haveLock = m_lease.amOwner();

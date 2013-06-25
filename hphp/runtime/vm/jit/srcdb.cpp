@@ -66,7 +66,7 @@ void SrcRec::emitFallbackJump(TCA from, int cc /* = -1 */) {
   if (cc < 0) {
     a.jmp(a.code.frontier);
   } else {
-    assert(incoming.type() == IncomingBranch::JCC);
+    assert(incoming.type() == IncomingBranch::Tag::JCC);
     a.jcc((ConditionCode)cc, a.code.frontier);
   }
 
@@ -181,14 +181,14 @@ void SrcRec::replaceOldTranslations() {
 
 void SrcRec::patch(IncomingBranch branch, TCA dest) {
   switch (branch.type()) {
-  case IncomingBranch::JMP: {
+  case IncomingBranch::Tag::JMP: {
     auto& a = tx64->getAsmFor(branch.toSmash());
     CodeCursor cg(a, branch.toSmash());
     TranslatorX64::smashJmp(a, branch.toSmash(), dest);
     break;
   }
 
-  case IncomingBranch::JCC: {
+  case IncomingBranch::Tag::JCC: {
     // patch destination, but preserve the condition code
     int32_t delta = safe_cast<int32_t>((dest - branch.toSmash()) - kJmpccLen);
     int32_t* addr = (int32_t*)(branch.toSmash() + kJmpccLen - 4);
@@ -196,7 +196,7 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
     break;
   }
 
-  case IncomingBranch::ADDR:
+  case IncomingBranch::Tag::ADDR:
     // Note that this effectively ignores a
     atomic_release_store(reinterpret_cast<TCA*>(branch.toSmash()), dest);
   }

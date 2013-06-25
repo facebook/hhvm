@@ -28,7 +28,7 @@ TRACE_SET_MOD(trans);
  * A mapping from FCall instructions to the statically-known StringData*
  * that they're calling. Used to accelerate our FCall translations.
  */
-enum CallRecordType {
+enum class CallRecordType {
   EncodedNameAndArgs,
   Function
 };
@@ -67,7 +67,7 @@ static void recordNameAndArgs(const SrcKey& sk,
                               const StringData* name,
                               int numArgs) {
   CallRecord cr;
-  cr.m_type = EncodedNameAndArgs;
+  cr.m_type = CallRecordType::EncodedNameAndArgs;
   cr.m_encodedName = encodeCallAndArgs(name, numArgs);
   s_callDB.insert(std::make_pair(sk, cr));
 }
@@ -81,7 +81,7 @@ static void recordFunc(NormalizedInstruction& i,
          func->fullName()->data());
 
   CallRecord cr;
-  cr.m_type = Function;
+  cr.m_type = CallRecordType::Function;
   cr.m_func = func;
   s_callDB.insert(std::make_pair(sk, cr));
 }
@@ -184,10 +184,10 @@ void annotate(NormalizedInstruction* i) {
     case OpFCallArray: {
       CallRecord callRec;
       if (mapGet(s_callDB, i->source, &callRec)) {
-        if (callRec.m_type == Function) {
+        if (callRec.m_type == CallRecordType::Function) {
           i->funcd = callRec.m_func;
         } else {
-          assert(callRec.m_type == EncodedNameAndArgs);
+          assert(callRec.m_type == CallRecordType::EncodedNameAndArgs);
           i->funcName = callRec.m_encodedName;
         }
       } else {
@@ -202,7 +202,7 @@ const StringData*
 fcallToFuncName(const NormalizedInstruction* i) {
   CallRecord callRec;
   if (mapGet(s_callDB, i->source, &callRec)) {
-    if (callRec.m_type == Function) {
+    if (callRec.m_type == CallRecordType::Function) {
       return callRec.m_func->name();
     }
     string name;

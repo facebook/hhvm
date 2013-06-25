@@ -86,13 +86,13 @@ static const bool debug = false;
 
 bool isInferredType(const NormalizedInstruction& i) {
   return (i.getOutputUsage(i.outStack) ==
-          NormalizedInstruction::OutputInferred);
+          NormalizedInstruction::OutputUse::Inferred);
 }
 
 JIT::Type getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-  if (u == NormalizedInstruction::OutputInferred ||
-      (u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
+  if (u == NormalizedInstruction::OutputUse::Inferred ||
+     (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted)) {
     return JIT::Type::fromRuntimeType(i.outStack->rtt);
   }
   return JIT::Type::None;
@@ -1521,12 +1521,12 @@ Translator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
 
-  if (u == NormalizedInstruction::OutputInferred) {
+  if (u == NormalizedInstruction::OutputUse::Inferred) {
     TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
           jitType.toString().c_str());
     m_hhbcTrans->assertTypeStack(0, jitType);
 
-  } else if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
+  } else if (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted) {
     // If the value was predicted statically by the front-end, it
     // means that it's either the predicted type or null.  In this
     // case, if the predicted value is not ref-counted and it's simply

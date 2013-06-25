@@ -49,7 +49,7 @@ enum class DestType : unsigned {
   TV     // return a TypedValue packed in two registers
 };
 
-enum SyncOptions {
+enum class SyncOptions {
   kNoSyncPoint,
   kSyncPoint,
   kSyncPointAdjustOne,
@@ -329,7 +329,7 @@ private:
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* curFunc() const;
   Class*      curClass() const { return curFunc()->cls(); }
-  void recordSyncPoint(Asm& as, SyncOptions sync = kSyncPoint);
+  void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
   Address getDtorGeneric();
   Address getDtorTyped();
   int iterOffset(SSATmp* tmp);
@@ -393,7 +393,7 @@ private:
 
 class ArgDesc {
 public:
-  enum Kind {
+  enum class Kind {
     Reg,     // Normal register
     TypeReg, // TypedValue's m_type field. Might need arch-specific
              // mangling before call depending on TypedValue's layout.
@@ -469,7 +469,7 @@ struct ArgGroup {
   }
 
   ArgGroup& imm(uintptr_t imm) {
-    push_arg(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
+    push_arg(ArgDesc(ArgDesc::Kind::Imm, InvalidReg, imm));
     return *this;
   }
 
@@ -480,12 +480,12 @@ struct ArgGroup {
   ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
 
   ArgGroup& reg(PhysReg reg) {
-    push_arg(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
+    push_arg(ArgDesc(ArgDesc::Kind::Reg, PhysReg(reg), -1));
     return *this;
   }
 
   ArgGroup& addr(PhysReg base, intptr_t off) {
-    push_arg(ArgDesc(ArgDesc::Addr, base, off));
+    push_arg(ArgDesc(ArgDesc::Kind::Addr, base, off));
     return *this;
   }
 
@@ -544,7 +544,7 @@ private:
   }
 
   ArgGroup& none() {
-    push_arg(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    push_arg(ArgDesc(ArgDesc::Kind::None, InvalidReg, -1));
     return *this;
   }
 

@@ -1614,7 +1614,7 @@ resume:
     return;
 
   } catch (...) {
-    always_assert(Transl::tl_regState == Transl::REGSTATE_CLEAN);
+    always_assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
     auto const action = exception_handler();
     if (action == UnwindAction::ResumeVM) {
       goto resume;
@@ -7048,7 +7048,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
 }
 
 void VMExecutionContext::checkRegStateWork() const {
-  assert(Transl::tl_regState == Transl::REGSTATE_CLEAN);
+  assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
 }
 
 void VMExecutionContext::DumpStack() {

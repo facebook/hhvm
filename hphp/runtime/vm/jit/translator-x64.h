@@ -113,7 +113,7 @@ constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
 constexpr size_t kX64CacheLineSize = 64;
 constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
 
-enum TestAndSmashFlags {
+enum class TestAndSmashFlags {
   kAlignJccImmediate,
   kAlignJcc,
   kAlignJccAndJmp

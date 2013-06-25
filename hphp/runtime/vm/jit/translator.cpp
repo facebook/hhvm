@@ -2481,13 +2481,12 @@ static bool isPop(const NormalizedInstruction* instr) {
 
 NormalizedInstruction::OutputUse
 NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
-  for (NormalizedInstruction* succ = next;
-       succ; succ = succ->next) {
+  for (NormalizedInstruction* succ = next; succ; succ = succ->next) {
     if (succ->noOp) continue;
     for (size_t i = 0; i < succ->inputs.size(); ++i) {
       if (succ->inputs[i] == output) {
         if (succ->inputWasInferred(i)) {
-          return OutputInferred;
+          return OutputUse::Inferred;
         }
         if (Translator::Get()->dontGuardAnyInputs(succ->op())) {
           /* the consumer doesnt care about its inputs
@@ -2496,22 +2495,22 @@ NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
           */
           if (!outputDependsOnInput(succ->op()) ||
               !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outStack) != OutputUsed) ||
+                succ->getOutputUsage(succ->outStack) != OutputUse::Used) ||
               !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outLocal)) != OutputUsed) {
-            return OutputDoesntCare;
+                succ->getOutputUsage(succ->outLocal) != OutputUse::Used)) {
+            return OutputUse::DoesntCare;
           }
         }
-        return OutputUsed;
+        return OutputUse::Used;
       }
     }
   }
-  return OutputUnused;
+  return OutputUse::Unused;
 }
 
 bool NormalizedInstruction::isOutputUsed(const DynLocation* output) const {
   return (output && !output->rtt.isVagueValue() &&
-          getOutputUsage(output) == OutputUsed);
+          getOutputUsage(output) == OutputUse::Used);
 }
 
 bool NormalizedInstruction::isAnyOutputUsed() const
@@ -3276,7 +3275,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     NormalizedInstruction* ni = t.newNormalizedInstruction();
     ni->source = sk;
     ni->stackOffset = stackFrameOffset;
-    ni->funcd = (t.m_arState.getCurrentState() == ActRecState::KNOWN) ?
+    ni->funcd = (t.m_arState.getCurrentState() == ActRecState::State::KNOWN) ?
       t.m_arState.getCurrentFunc() : nullptr;
     ni->m_unit = unit;
     ni->preppedByRef = false;
@@ -4056,7 +4055,7 @@ void
 ActRecState::pushFuncD(const Func* func) {
   TRACE(2, "ActRecState: pushStatic func %p(%s)\n", func, func->name()->data());
   Record r;
-  r.m_state = KNOWN;
+  r.m_state = State::KNOWN;
   r.m_topFunc = func;
   r.m_entryArDelta = InvalidEntryArDelta;
   m_arStack.push_back(r);
@@ -4066,7 +4065,7 @@ void
 ActRecState::pushDynFunc() {
   TRACE(2, "ActRecState: pushDynFunc\n");
   Record r;
-  r.m_state = UNKNOWABLE;
+  r.m_state = State::UNKNOWABLE;
   r.m_topFunc = nullptr;
   r.m_entryArDelta = InvalidEntryArDelta;
   m_arStack.push_back(r);
@@ -4098,20 +4097,20 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
     // guards.
     const ActRec* ar = arFromSpOffset((ActRec*)vmsp(), entryArDelta);
     Record r;
-    r.m_state = GUESSABLE;
+    r.m_state = State::GUESSABLE;
     r.m_entryArDelta = entryArDelta;
     r.m_topFunc = ar->m_func;
     m_arStack.push_back(r);
   }
   Record& r = m_arStack.back();
-  if (r.m_state == UNKNOWABLE) {
+  if (r.m_state == State::UNKNOWABLE) {
     TRACE(2, "ActRecState: unknowable, throwing in the towel\n");
     throwUnknownInput();
     not_reached();
   }
   assert(r.m_topFunc);
   bool retval = r.m_topFunc->byRef(argNum);
-  if (r.m_state == GUESSABLE) {
+  if (r.m_state == State::GUESSABLE) {
     assert(r.m_entryArDelta != InvalidEntryArDelta);
     TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
     outRefDeps->addDep(r.m_entryArDelta, argNum, retval);
@@ -4127,7 +4126,7 @@ ActRecState::getCurrentFunc() {
 
 ActRecState::State
 ActRecState::getCurrentState() {
-  if (m_arStack.empty()) return GUESSABLE;
+  if (m_arStack.empty()) return State::GUESSABLE;
   return m_arStack.back().m_state;
 }
 

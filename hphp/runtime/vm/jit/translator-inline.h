@@ -93,9 +93,9 @@ struct VMRegAnchor : private boost::noncopyable {
   explicit VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call
     // instruction. This syncs us to right after the call instruction.
-    assert(tl_regState == REGSTATE_DIRTY);
-    m_old = REGSTATE_DIRTY;
-    tl_regState = REGSTATE_CLEAN;
+    assert(tl_regState == VMRegState::DIRTY);
+    m_old = VMRegState::DIRTY;
+    tl_regState = VMRegState::CLEAN;
 
     auto prevAr = g_vmContext->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
@@ -122,7 +122,7 @@ struct EagerVMRegAnchor {
       assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
     }
     m_old = tl_regState;
-    tl_regState = REGSTATE_CLEAN;
+    tl_regState = VMRegState::CLEAN;
   }
   ~EagerVMRegAnchor() {
     tl_regState = m_old;

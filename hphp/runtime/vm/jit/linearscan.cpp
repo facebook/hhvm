@@ -879,7 +879,7 @@ static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
   assert(label->op() == DefLabel);
   SSATmp* withReg = label->block()->findSrc(dstIdx, [&](SSATmp* src) {
     return regs[src].reg(regIndex) != InvalidReg &&
-      src->inst()->block()->hint() != Block::Unlikely;
+      src->inst()->block()->hint() != Block::Hint::Unlikely;
   });
   return withReg ? regs[withReg].reg(regIndex) : reg::noreg;
 }

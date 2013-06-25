@@ -136,7 +136,7 @@ TranslatorX64* volatile nextTx64;
 __thread TranslatorX64* tx64;
 
 // Register dirtiness: thread-private.
-__thread VMRegState tl_regState = REGSTATE_CLEAN;
+__thread VMRegState tl_regState = VMRegState::CLEAN;
 
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
@@ -857,18 +857,18 @@ bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
  */
 void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
   switch (flags) {
-  case kAlignJcc:
+  case TestAndSmashFlags::kAlignJcc:
     prepareForSmash(a, testBytes + kJmpccLen, testBytes);
     assert(isSmashable(a.code.frontier + testBytes, kJmpccLen));
     break;
-  case kAlignJccImmediate:
+  case TestAndSmashFlags::kAlignJccImmediate:
     prepareForSmash(a,
                     testBytes + kJmpccLen,
                     testBytes + kJmpccLen - kJmpImmBytes);
     assert(isSmashable(a.code.frontier + testBytes, kJmpccLen,
                        kJmpccLen - kJmpImmBytes));
     break;
-  case kAlignJccAndJmp:
+  case TestAndSmashFlags::kAlignJccAndJmp:
     // Ensure that the entire jcc, and the entire jmp are smashable
     // (but we dont need them both to be in the same cache line)
     prepareForSmash(a, testBytes + kJmpccLen, testBytes);
@@ -1042,14 +1042,14 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
  * Geronimo!
  */
 static void sync_regstate_to_caller(ActRec* preLive) {
-  assert(tl_regState == REGSTATE_DIRTY);
+  assert(tl_regState == VMRegState::DIRTY);
   VMExecutionContext* ec = g_vmContext;
   ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
   ActRec* fp = preLive == ec->m_firstAR ?
     ec->m_nestedVMs.back().m_savedState.fp : (ActRec*)preLive->m_savedRbp;
   ec->m_fp = fp;
   ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
 }
 
 void
@@ -1083,7 +1083,7 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
 
   // Only go back to dirty in a non-exception case.  (Same reason as
   // above.)
-  tl_regState = REGSTATE_DIRTY;
+  tl_regState = VMRegState::DIRTY;
 }
 
 TCA
@@ -1332,8 +1332,8 @@ TranslatorX64::emitPopRetIntoActRec(Asm& a) {
 }
 
 static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
-  assert(tl_regState == REGSTATE_DIRTY);
-  tl_regState = REGSTATE_CLEAN;
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
   vmfp() = (Cell*)ar;
   vmsp() = sp;
   vmpc() = curUnit()->at(pcOff);
@@ -1365,7 +1365,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     interp_set_regs(ar, (Cell*)ar - func->numSlotsInFrame(), entry);
     SrcKey funcBody(func, entry);
     TCA tca = getTranslation(TranslArgs(funcBody, false));
-    tl_regState = REGSTATE_DIRTY;
+    tl_regState = VMRegState::DIRTY;
     if (tca) {
       // racy, but ok...
       func->setPrologue(paramIndex, tca);
@@ -1828,7 +1828,7 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
 
   // reserve space for a smashable jnz/jmp pair; both initially point
   // to our stub.
-  prepareForTestAndSmash(a, 0, kAlignJccAndJmp);
+  prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
   TCA old = a.code.frontier;
   TCA stub = astubs.code.frontier;
 
@@ -1965,7 +1965,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   const Func* f = curFunc();
   SrcKey dest(f, off);
   TCA branch = getTranslation(TranslArgs(dest, true).src(toSmash));
-  LeaseHolder writer(s_writeLease, NO_ACQUIRE);
+  LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
   if (branch && writer.acquire()) {
     smashed = true;
     SrcRec* destRec = getSrcRec(dest);
@@ -2280,7 +2280,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
 
     TRACE(1, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
           vmfp(), func->name()->data(), vmsp());
-    tl_regState = REGSTATE_DIRTY;
+    tl_regState = VMRegState::DIRTY;
 
     // We have to force C++ to spill anything that might be in a callee-saved
     // register (aside from rbp). enterTCHelper does not save them.
@@ -2290,7 +2290,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
     CALLEE_SAVED_BARRIER();
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
 
-    tl_regState = REGSTATE_CLEAN; // Careful: pc isn't sync'ed yet.
+    tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
     TRACE(1, "enterTC: %p fp%p sp%p } return\n", start,
           vmfp(), vmsp());
 
@@ -2361,7 +2361,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
     }
-    LeaseHolder writer(s_writeLease, NO_ACQUIRE);
+    LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
     if (dest && writer.acquire()) {
       TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
       smashCall(tx64->getAsmFor(toSmash), toSmash, dest);
@@ -2754,7 +2754,7 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
    * is actually still correct, and we don't have information in the
    * fixup map for interpOne calls anyway.
    */ \
-  tl_regState = REGSTATE_DIRTY;                                         \
+  tl_regState = VMRegState::DIRTY;                                      \
   return ec;                                                            \
 }
 
@@ -2837,9 +2837,9 @@ TCA TranslatorX64::getTranslatedCaller() const {
 
 void
 TranslatorX64::syncWork() {
-  assert(tl_regState == REGSTATE_DIRTY);
+  assert(tl_regState == VMRegState::DIRTY);
   fixup(g_vmContext);
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
 
@@ -2971,17 +2971,17 @@ TranslatorX64::getNativeTrampoline(TCA helperAddr) {
 }
 
 static void defClsHelper(PreClass *preClass) {
-  assert(tl_regState == REGSTATE_DIRTY);
-  tl_regState = REGSTATE_CLEAN;
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
   Unit::defClass(preClass);
 
   /*
    * m_defClsHelper sync'd the registers for us already.  This means
    * if an exception propagates we want to leave things as
-   * REGSTATE_CLEAN, since we're still in sync.  Only set it to dirty
+   * VMRegState::CLEAN, since we're still in sync.  Only set it to dirty
    * if we are actually returning to run in the TC again.
    */
-  tl_regState = REGSTATE_DIRTY;
+  tl_regState = VMRegState::DIRTY;
 }
 
 template <typename T>
@@ -3729,7 +3729,7 @@ TCA TranslatorX64::getCatchTrace(CTCA ip) const {
 void
 TranslatorX64::requestInit() {
   TRACE(1, "in requestInit(%" PRId64 ")\n", g_vmContext->m_currentThreadIdx);
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
   PendQ::drain();
   requestResetHighLevelTranslator();
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);

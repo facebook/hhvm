@@ -163,7 +163,7 @@ TCA fcallHelper(ActRec* ar) {
       have to tell the unwinder that.
     */
     DECLARE_FRAME_POINTER(framePtr);
-    tl_regState = REGSTATE_CLEAN;
+    tl_regState = VMRegState::CLEAN;
     framePtr->m_savedRip = ar->m_savedRip;
     throw;
   }
@@ -198,7 +198,7 @@ asm (
  */
 TCA funcBodyHelper(ActRec* fp) {
   setupAfterProlog(fp);
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
 
   TCA tca = tx64->getCallArrayProlog(func);
@@ -208,7 +208,7 @@ TCA funcBodyHelper(ActRec* fp) {
   } else {
     tca = Translator::Get()->getResumeHelper();
   }
-  tl_regState = REGSTATE_DIRTY;
+  tl_regState = VMRegState::DIRTY;
   return tca;
 }
 
@@ -222,10 +222,10 @@ void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
   ec->m_pc = curUnit()->at(pcOff);
   PC pc = curUnit()->at(pcNext);
 
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
   bool runFunc = ec->doFCallArray(pc);
   sp = ec->m_stack.top();
-  tl_regState = REGSTATE_DIRTY;
+  tl_regState = VMRegState::DIRTY;
   if (!runFunc) return;
 
   ec->m_fp->m_savedRip = framePtr->m_savedRip;

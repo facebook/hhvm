@@ -53,7 +53,7 @@ void append_vec(std::vector<char>& v,
 }
 
 void sync_regstate(_Unwind_Context* context) {
-  assert(tl_regState == REGSTATE_DIRTY);
+  assert(tl_regState == VMRegState::DIRTY);
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
   uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
@@ -73,7 +73,7 @@ void sync_regstate(_Unwind_Context* context) {
 
   Stats::inc(Stats::TC_SyncUnwind);
   tx64->fixupWork(g_vmContext, &fakeAr);
-  tl_regState = REGSTATE_CLEAN;
+  tl_regState = VMRegState::CLEAN;
 }
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
@@ -134,7 +134,7 @@ tc_unwind_personality(int version,
     assert(status == 0);
     FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}. ",
            unwindType, exceptionObj,
-           tl_regState == REGSTATE_DIRTY ? "dirty" : "clean",
+           tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
            (TCA)_Unwind_GetIP(context), exnType);
   }
 
@@ -160,7 +160,7 @@ tc_unwind_personality(int version,
    * which is an exit traces from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
-    if (tl_regState == REGSTATE_DIRTY) {
+    if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
     }
     if (install_catch_trace(context, exceptionObj, ism)) {

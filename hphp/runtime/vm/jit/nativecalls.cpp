@@ -27,13 +27,13 @@ namespace HPHP {  namespace JIT { namespace NativeCalls {
 using namespace HPHP::Transl;
 using namespace HPHP::Transl::TargetCache;
 
-static const SyncOptions SNone = kNoSyncPoint;
-static const SyncOptions SSync = kSyncPoint;
-static const SyncOptions SSyncAdj1 = kSyncPointAdjustOne;
+const SyncOptions SNone = SyncOptions::kNoSyncPoint;
+const SyncOptions SSync = SyncOptions::kSyncPoint;
+const SyncOptions SSyncAdj1 = SyncOptions::kSyncPointAdjustOne;
 
-static const DestType DSSA = DestType::SSA;
-static const DestType DTV = DestType::TV;
-static const DestType DNone = DestType::None;
+const DestType DSSA = DestType::SSA;
+const DestType DTV = DestType::TV;
+const DestType DNone = DestType::None;
 
 /*
  * The table passed to s_callMap's constructor describes helpers calls

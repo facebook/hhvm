@@ -42,28 +42,32 @@ namespace Transl {
  * intact.
  */
 struct IncomingBranch {
-  enum BranchType {
+  enum class Tag {
     JMP,
     JCC,
     ADDR,
   };
 
-  static IncomingBranch jmpFrom(TCA from) { return IncomingBranch(JMP, from); }
-  static IncomingBranch jccFrom(TCA from) { return IncomingBranch(JCC, from); }
+  static IncomingBranch jmpFrom(TCA from) {
+    return IncomingBranch(Tag::JMP, from);
+  }
+  static IncomingBranch jccFrom(TCA from) {
+    return IncomingBranch(Tag::JCC, from);
+  }
   static IncomingBranch addr(TCA* from) {
-    return IncomingBranch(ADDR, TCA(from));
+    return IncomingBranch(Tag::ADDR, TCA(from));
   }
 
-  BranchType type() const { return m_type; }
+  Tag type()        const { return m_type; }
   TCA toSmash()     const { return m_toSmash; }
 
 private:
-  explicit IncomingBranch(BranchType type, TCA toSmash)
+  explicit IncomingBranch(Tag type, TCA toSmash)
     : m_type(type)
     , m_toSmash(toSmash)
   {}
 
-  BranchType m_type;
+  Tag m_type;
   TCA m_toSmash;
 };
 

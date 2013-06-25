@@ -71,7 +71,7 @@ private:
   void gremlinUnlockImpl();
 };
 
-enum LeaseAcquire {
+enum class LeaseAcquire {
   ACQUIRE,
   NO_ACQUIRE,
 };
@@ -91,12 +91,12 @@ struct LeaseHolderBase {
     bool m_acquired;
 };
 struct LeaseHolder : public LeaseHolderBase {
-  explicit LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
+  explicit LeaseHolder(Lease& l, LeaseAcquire acquire = LeaseAcquire::ACQUIRE)
     : LeaseHolderBase(l, acquire, false) {}
 };
 struct BlockingLeaseHolder : public LeaseHolderBase {
   explicit BlockingLeaseHolder(Lease& l)
-    : LeaseHolderBase(l, ACQUIRE, true) {}
+    : LeaseHolderBase(l, LeaseAcquire::ACQUIRE, true) {}
 };
 
 }} // HPHP::Transl

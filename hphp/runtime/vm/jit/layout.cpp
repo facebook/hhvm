@@ -74,7 +74,7 @@ LayoutInfo layoutBlocks(IRTrace* trace, const IRFactory& irFactory) {
   ret.astubsIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
     [&] (Block* b) {
-      return b->isMain() && b->hint() != Block::Unlikely;
+      return b->isMain() && b->hint() != Block::Hint::Unlikely;
     }
   );
 

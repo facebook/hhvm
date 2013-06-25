@@ -3716,7 +3716,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDiv(PC& pc) {
 #undef MATHOP_DOUBLE
 
 // XXX:
-Numeric moduloVar(CVarRef v1, CVarRef v2) {
+Variant moduloVar(CVarRef v1, CVarRef v2) {
   return modulo(v1.toInt64(), v2.toInt64());
 }
 

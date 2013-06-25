@@ -94,11 +94,11 @@ bool empty(CVarRef v, CStrRef, bool = false) = delete;
 inline Variant bitwise_or (CVarRef v1, CVarRef v2) { return v1 | v2;}
 inline Variant bitwise_and(CVarRef v1, CVarRef v2) { return v1 & v2;}
 inline Variant bitwise_xor(CVarRef v1, CVarRef v2) { return v1 ^ v2;}
-inline Numeric multiply(CVarRef v1, CVarRef v2)    { return v1 * v2;}
+inline Variant multiply(CVarRef v1, CVarRef v2)    { return v1 * v2;}
 inline Variant plus(CVarRef v1, CVarRef v2)        { return v1 + v2;}
-inline Numeric minus(CVarRef v1, CVarRef v2)       { return v1 - v2;}
-inline Numeric divide(CVarRef v1, CVarRef v2)      { return v1 / v2; }
-inline Numeric modulo(int64_t v1, int64_t v2) {
+inline Variant minus(CVarRef v1, CVarRef v2)       { return v1 - v2;}
+inline Variant divide(CVarRef v1, CVarRef v2)      { return v1 / v2; }
+inline Variant modulo(int64_t v1, int64_t v2) {
   if (UNLIKELY(v2 == 0)) {
     raise_warning(Strings::DIVISION_BY_ZERO);
     return false;

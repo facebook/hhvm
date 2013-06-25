@@ -73,7 +73,7 @@ Variant f_bindec(CStrRef binary_string);
 Variant f_hexdec(CStrRef hex_string);
 Variant f_octdec(CStrRef octal_string);
 Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase);
-Numeric f_pow(CVarRef base, CVarRef exp);
+Variant f_pow(CVarRef base, CVarRef exp);
 double f_exp(double arg);
 double f_expm1(double arg);
 double f_log10(double arg);

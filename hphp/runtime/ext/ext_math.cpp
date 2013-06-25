@@ -168,7 +168,7 @@ Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase) {
   return String(string_numeric_to_base(v, tobase), AttachString);
 }
 
-Numeric f_pow(CVarRef base, CVarRef exp) {
+Variant f_pow(CVarRef base, CVarRef exp) {
   int64_t bint, eint;
   double bdbl, edbl;
   DataType bt = base.toNumeric(bint, bdbl, true);

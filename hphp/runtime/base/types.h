@@ -49,10 +49,6 @@ template<typename T> class SmartObject;
 class Variant;
 class VarNR;
 class RefData;
-typedef Variant Numeric;
-typedef Variant Primitive;
-typedef Variant PlusOperand;
-typedef Variant Sequence;
 
 /**
  * Macros related to Variant that are needed by StringData, ObjectData,

@@ -218,7 +218,7 @@ inline void inc(StatCounter stat, int n = 1) {
 }
 
 inline StatCounter opcodeToStatCounter(Op opc) {
-  assert(OpLowInvalid == 0);
+  assert(static_cast<uint8_t>(OpLowInvalid) == 0);
   return StatCounter(Instr_InterpBBLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
 }

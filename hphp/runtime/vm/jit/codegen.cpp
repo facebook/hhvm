@@ -5182,18 +5182,6 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
   });
 }
 
-void CodeGenerator::cgUnlinkContVarEnv(IRInstruction* inst) {
-  emitContVarEnvHelperCall(
-    inst->src(0),
-    (TCA)VMExecutionContext::packContVarEnvLinkage);
-}
-
-void CodeGenerator::cgLinkContVarEnv(IRInstruction* inst) {
-  emitContVarEnvHelperCall(
-    inst->src(0),
-    (TCA)VMExecutionContext::unpackContVarEnvLinkage);
-}
-
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = m_regs[inst->src(0)].reg();
 

@@ -437,8 +437,6 @@ public:
   static c_Continuation* fillContinuationVars(
     ActRec* fp, const Func* origFunc, const Func* genFunc,
     c_Continuation* cont);
-  static void unpackContVarEnvLinkage(ActRec* fp);
-  static void packContVarEnvLinkage(ActRec* fp);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
   void enqueueSharedVar(SharedVariant* var);
 
@@ -580,7 +578,6 @@ public:
   static void PrintTCCallerInfo();
 
   VarEnv* m_globalVarEnv;
-  VarEnv* m_topVarEnv;
 
   HPHP::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;

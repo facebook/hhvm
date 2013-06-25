@@ -219,8 +219,8 @@ static inline Class* frameStaticClass(ActRec* fp) {
 VarEnv::VarEnv()
   : m_depth(0)
   , m_malloced(false)
+  , m_global(false)
   , m_cfp(0)
-  , m_previous(0)
   , m_nvTable(boost::in_place<NameValueTable>(
       RuntimeOption::EvalVMInitialGlobalTableSize))
 {
@@ -237,6 +237,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   : m_extraArgs(eArgs)
   , m_depth(1)
   , m_malloced(false)
+  , m_global(false)
   , m_cfp(fp)
 {
   const Func* func = fp->m_func;
@@ -260,9 +261,6 @@ VarEnv::~VarEnv() {
            this,
            isGlobalScope() ? "global scope" : "local scope");
   assert(m_restoreLocations.empty());
-  if (g_vmContext->m_topVarEnv == this) {
-    g_vmContext->m_topVarEnv = m_previous;
-  }
 
   if (!isGlobalScope()) {
     if (LIKELY(!m_malloced)) {
@@ -280,50 +278,34 @@ VarEnv::~VarEnv() {
   }
 }
 
-VarEnv* VarEnv::createLazyAttach(ActRec* fp,
-                                 bool skipInsert /* = false */) {
-  const Func* func = fp->m_func;
-  const size_t numNames = func->numNamedLocals();
-  ExtraArgs* eArgs = fp->getExtraArgs();
-  const size_t neededSz = sizeof(VarEnv) +
-                          sizeof(TypedValue*) * numNames;
+size_t VarEnv::getObjectSz(ActRec* fp) {
+  return sizeof(VarEnv) + sizeof(TypedValue*) * fp->m_func->numNamedLocals();
+}
 
-  TRACE(3, "Creating lazily attached VarEnv\n");
+VarEnv* VarEnv::createLocalOnStack(ActRec* fp) {
+  auto& va = varenv_arena();
+  va.beginFrame();
+  void* mem = va.alloc(getObjectSz(fp));
+  VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
+  TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
+  return ret;
+}
 
-  if (LIKELY(!skipInsert)) {
-    auto& va = varenv_arena();
-    va.beginFrame();
-    void* mem = va.alloc(neededSz);
-    VarEnv* ret = new (mem) VarEnv(fp, eArgs);
-    TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
-    ret->setPrevious(g_vmContext->m_topVarEnv);
-    g_vmContext->m_topVarEnv = ret;
-    return ret;
-  }
-
-  /*
-   * For skipInsert == true, we're adding a VarEnv in the middle of
-   * the chain, which means we can't use the stack allocation.
-   *
-   * The caller must immediately setPrevious, so don't bother setting
-   * it to an invalid pointer except in a debug build.
-   */
-  void* mem = malloc(neededSz);
-  VarEnv* ret = new (mem) VarEnv(fp, eArgs);
+VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
+  void* mem = malloc(getObjectSz(fp));
+  VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
+  TRACE(3, "Creating lazily attached VarEnv %p on heap\n", mem);
   ret->m_malloced = true;
-  if (debug) {
-    ret->setPrevious((VarEnv*)-1);
-  }
   return ret;
 }
 
 VarEnv* VarEnv::createGlobal() {
   assert(!g_vmContext->m_globalVarEnv);
-  assert(!g_vmContext->m_topVarEnv);
 
   VarEnv* ret = new (request_arena()) VarEnv();
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
-  g_vmContext->m_globalVarEnv = g_vmContext->m_topVarEnv = ret;
+  ret->m_global = true;
+  g_vmContext->m_globalVarEnv = ret;
   return ret;
 }
 
@@ -1303,31 +1285,15 @@ void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
 VarEnv* VMExecutionContext::getVarEnv() {
   VMRegAnchor _;
 
-  VarEnv* builtinVarEnv = nullptr;
   ActRec* fp = getFP();
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
-    if (fp->hasVarEnv()) {
-      builtinVarEnv = fp->getVarEnv();
-    }
     fp = getPrevVMState(fp);
   }
   if (!fp) return nullptr;
   assert(!fp->hasInvName());
   if (!fp->hasVarEnv()) {
-    if (builtinVarEnv) {
-      // If the builtin function has its own VarEnv, we temporarily
-      // remove it from the list before making a VarEnv for the calling
-      // function to satisfy various asserts
-      assert(builtinVarEnv == m_topVarEnv);
-      m_topVarEnv = m_topVarEnv->previous();
-    }
-    fp->m_varEnv = VarEnv::createLazyAttach(fp);
-    if (builtinVarEnv) {
-      // Put the builtin function's VarEnv back in the list
-      builtinVarEnv->setPrevious(fp->m_varEnv);
-      m_topVarEnv = builtinVarEnv;
-    }
+    fp->setVarEnv(VarEnv::createLocalOnStack(fp));
   }
   return fp->m_varEnv;
 }
@@ -2467,7 +2433,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
-    m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);
+    m_fp->setVarEnv(VarEnv::createLocalOnStack(m_fp));
   }
   ar->m_varEnv = m_fp->m_varEnv;
   ar->m_varEnv->attach(ar);
@@ -2638,16 +2604,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   ActRec *fp = getFP();
   ActRec *cfpSave = nullptr;
   if (fp) {
-    VarEnv* vit = nullptr;
     for (; frame > 0; --frame) {
-      if (fp->hasVarEnv()) {
-        if (!vit) {
-          vit = m_topVarEnv;
-        } else if (vit != fp->m_varEnv) {
-          vit = vit->previous();
-        }
-        assert(vit == fp->m_varEnv);
-      }
       ActRec* prevFp = getPrevVMState(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp. This would mean we've
@@ -2658,15 +2615,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
       fp = prevFp;
     }
     if (!fp->hasVarEnv()) {
-      if (!vit) {
-        fp->m_varEnv = VarEnv::createLazyAttach(fp);
-      } else {
-        const bool skipInsert = true;
-        fp->m_varEnv = VarEnv::createLazyAttach(fp, skipInsert);
-        // Slide it in front of the VarEnv most recently above it.
-        fp->m_varEnv->setPrevious(vit->previous());
-        vit->setPrevious(fp->m_varEnv);
-      }
+      fp->setVarEnv(VarEnv::createLocalOnHeap(fp));
     }
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
@@ -2748,7 +2697,6 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   if (!s_debuggerDummy) {
     s_debuggerDummy = compile_string("<?php?>", 7);
   }
-  VarEnv* varEnv = m_topVarEnv;
   if (!getFP()) {
     assert(m_stack.count() == 0);
     ActRec* ar = m_stack.allocA();
@@ -2762,13 +2710,12 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     m_pc = s_debuggerDummy->entry();
     m_firstAR = ar;
   }
-  m_fp->setVarEnv(varEnv);
-  varEnv->attach(m_fp);
+  m_fp->setVarEnv(m_globalVarEnv);
+  m_globalVarEnv->attach(m_fp);
 }
 
 void VMExecutionContext::exitDebuggerDummyEnv() {
-  assert(m_topVarEnv);
-  assert(m_globalVarEnv == m_topVarEnv);
+  assert(m_globalVarEnv);
   m_globalVarEnv->detach(getFP());
 }
 
@@ -2845,7 +2792,7 @@ static inline void lookupd_var(ActRec* fp,
   } else {
     assert(!fp->hasInvName());
     if (!fp->hasVarEnv()) {
-      fp->m_varEnv = VarEnv::createLazyAttach(fp);
+      fp->setVarEnv(VarEnv::createLocalOnStack(fp));
     }
     val = fp->m_varEnv->lookup(name);
     if (val == nullptr) {
@@ -6752,7 +6699,7 @@ static inline void setContVar(const Func* genFunc,
       // We pass skipInsert to this VarEnv because it's going to exist
       // independent of the chain; i.e. we can't stack-allocate it. We link it
       // into the chain in UnpackCont, and take it out in PackCont.
-      contFP->setVarEnv(VarEnv::createLazyAttach(contFP, true));
+      contFP->setVarEnv(VarEnv::createLocalOnHeap(contFP));
     }
     contFP->getVarEnv()->setWithRef(name, src);
   }
@@ -6868,20 +6815,9 @@ void VMExecutionContext::iopContExit(PC& pc) {
   m_fp = prevFp;
 }
 
-void VMExecutionContext::unpackContVarEnvLinkage(ActRec* fp) {
-  // This is called from the TC, and is assumed not to reenter.
-  if (fp->hasVarEnv()) {
-    VarEnv*& topVE = g_vmContext->m_topVarEnv;
-    fp->getVarEnv()->setPrevious(topVE);
-    topVE = fp->getVarEnv();
-  }
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-
-  unpackContVarEnvLinkage(m_fp);
 
   // Return the received value
   TypedValue* recv_to = m_stack.allocTV();
@@ -6895,18 +6831,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   label->m_data.num = cont->m_label;
 }
 
-void VMExecutionContext::packContVarEnvLinkage(ActRec* fp) {
-  if (fp->hasVarEnv()) {
-    g_vmContext->m_topVarEnv = fp->getVarEnv()->previous();
-  }
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
   NEXT();
   DECODE_IVA(label);
   c_Continuation* cont = frame_continuation(m_fp);
 
-  packContVarEnvLinkage(m_fp);
   cont->c_Continuation::t_update(label, tvAsCVarRef(m_stack.topTV()));
   m_stack.popTV();
 }
@@ -7375,9 +7304,8 @@ void VMExecutionContext::requestExit() {
   EnvConstants::requestExit();
 
   if (m_globalVarEnv) {
-    assert(m_topVarEnv = m_globalVarEnv);
     VarEnv::destroy(m_globalVarEnv);
-    m_globalVarEnv = m_topVarEnv = 0;
+    m_globalVarEnv = 0;
   }
 
   varenv_arena().~VarEnvArena();

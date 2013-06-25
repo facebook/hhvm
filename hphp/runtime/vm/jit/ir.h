@@ -455,8 +455,6 @@ O(FillContLocals,                   ND, S(FramePtr)                           \
                                           S(Obj),                    E|N|Mem) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
-O(UnlinkContVarEnv,                 ND, S(FramePtr),                 E|N|Mem) \
-O(LinkContVarEnv,                   ND, S(FramePtr),                 E|N|Mem) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
 O(ContStartedCheck,                 ND, S(Obj),                            E) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \

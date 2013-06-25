@@ -1114,7 +1114,6 @@ void HhbcTranslator::emitContExit() {
 }
 
 void HhbcTranslator::emitUnpackCont() {
-  gen(LinkContVarEnv, m_tb->fp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
 
@@ -1126,7 +1125,6 @@ void HhbcTranslator::emitUnpackCont() {
 }
 
 void HhbcTranslator::emitPackCont(int64_t labelId) {
-  gen(UnlinkContVarEnv, m_tb->fp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
   auto const newVal = popC();

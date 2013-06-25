@@ -127,8 +127,8 @@ class VarEnv {
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   bool m_malloced;
+  bool m_global;
   ActRec* m_cfp;
-  VarEnv* m_previous;
   // TODO remove vector (#1099580).  Note: trying changing this to a
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
@@ -153,27 +153,16 @@ class VarEnv {
    * used when we need a variable environment for some caller frame
    * (because we're about to attach a callee frame using attach()) but
    * don't actually have one.
-   *
-   * `skipInsert' means not to insert the new VarEnv on the front of
-   * g_vmContext->m_topVarEnv.  In this case the caller must
-   * immediately call setPrevious() as appropriate---this is used to
-   * support the debugger, creating VarEnvs for frames in the middle
-   * of the ActRec chain.
    */
-  static VarEnv* createLazyAttach(ActRec* fp, bool skipInsert = false);
+  static VarEnv* createLocalOnStack(ActRec* fp);
+  static VarEnv* createLocalOnHeap(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static VarEnv* createGlobal();
 
   static void destroy(VarEnv*);
 
-  /*
-   * Walk the VarEnv chain.  Returns null when we're out of variable
-   * environments.  You can change the chain with setPrevious (see
-   * evalPHPDebugger).
-   */
-  VarEnv* previous() { return m_previous; }
-  void setPrevious(VarEnv* p) { m_previous = p; }
+  static size_t getObjectSz(ActRec* fp);
 
   void attach(ActRec* fp);
   void detach(ActRec* fp);
@@ -192,7 +181,7 @@ class VarEnv {
   // Used for save/store m_cfp for debugger
   void setCfp(ActRec* fp) { m_cfp = fp; }
   ActRec* getCfp() const { return m_cfp; }
-  bool isGlobalScope() const { return !m_previous; }
+  bool isGlobalScope() const { return m_global; }
 
   // Access to wrapped ExtraArgs, if we have one.
   TypedValue* getExtraArg(unsigned argInd) const;

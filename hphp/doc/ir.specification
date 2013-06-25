@@ -1516,16 +1516,6 @@ ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
   object. S1 is the address to jump to. S2 is the bytecode offset in the
   caller to return to when the generator body yields. S3 is the current frame.
 
-UnlinkContVarEnv S0:FramePtr
-
-  Part of PackCont.  Unlinks the VarEnv associated with the
-  continuation frame S0 from the execution context, if it has one.
-
-LinkContVarEnv S0:FramePtr
-
-  Part of UnpackCont.  Links the VarEnv associated with the
-  continuation into the execution context, if it has one.
-
 ContRaiseCheck S0:Obj -> L
 
   Checks whethre the continuation object S0 has raised an exception,

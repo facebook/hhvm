@@ -21,7 +21,62 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+
+bool cellIsPlausible(const Cell* cell) {
+  assert(cell);
+  assert(cell->m_type != KindOfRef);
+
+  auto assertPtr = [](void* ptr) {
+    assert(ptr && (uintptr_t(ptr) % sizeof(ptr) == 0));
+  };
+
+  switch (cell->m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    break;
+  case KindOfBoolean:
+    assert(cell->m_data.num == 0 || cell->m_data.num == 1);
+    break;
+  case KindOfInt64:
+  case KindOfDouble:
+    break;
+  case KindOfStaticString:
+    assertPtr(cell->m_data.pstr);
+    assert(cell->m_data.pstr->isStatic());
+    break;
+  case KindOfString:
+    assertPtr(cell->m_data.pstr);
+    assert(is_refcount_realistic(cell->m_data.pstr->getCount()));
+    break;
+  case KindOfArray:
+    assertPtr(cell->m_data.parr);
+    assert(is_refcount_realistic(cell->m_data.parr->getCount()));
+    break;
+  case KindOfObject:
+    assertPtr(cell->m_data.pobj);
+    assert(!cell->m_data.pobj->isStatic());
+    break;
+  case KindOfRef:
+    assert(!"KindOfRef found in a Cell");
+    break;
+  default:
+    not_reached();
+  }
+  return true;
+}
+
+bool tvIsPlausible(const TypedValue* tv) {
+  assert(tv);
+  if (tv->m_type == KindOfRef) {
+    assert(tv->m_data.pref);
+    assert(uintptr_t(tv->m_data.pref) % sizeof(void*) == 0);
+    assert(is_refcount_realistic(tv->m_data.pref->getCount()));
+    tv = tv->m_data.pref->tv();
+  }
+  return cellIsPlausible(tv);
+}
 
 inline void tvUnboxIfNeeded(TypedValue *tv) {
   if (tv->m_type == KindOfRef) {
@@ -348,38 +403,6 @@ bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
   return tv->m_type == KindOfObject;
 }
 
-
-bool tvIsPlausible(const TypedValue* tv) {
-  if (!tv) return false;
-  auto okPtr = [](void* ptr) {
-    return ptr && (uintptr_t(ptr) % sizeof(ptr) == 0);
-  };
-  switch (tv->m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return true;
-    case KindOfBoolean:
-      return tv->m_data.num == 0 || tv->m_data.num == 1;
-    case KindOfInt64:
-    case KindOfDouble:
-      return true;
-    case KindOfStaticString:
-      return okPtr(tv->m_data.pstr) && tv->m_data.pstr->isStatic();
-    case KindOfString:
-      return okPtr(tv->m_data.pstr) &&
-        is_refcount_realistic(tv->m_data.pstr->getCount());
-    case KindOfArray:
-      return okPtr(tv->m_data.parr) &&
-             is_refcount_realistic(tv->m_data.parr->getCount());
-    case KindOfObject:
-      return okPtr(tv->m_data.pobj) && !tv->m_data.pobj->isStatic();
-    case KindOfRef:
-      return okPtr(tv->m_data.pref) &&
-             tv->m_data.pref->tv()->m_type != KindOfRef;
-    default:
-      return false;
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

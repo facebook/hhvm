@@ -29,11 +29,16 @@ namespace HPHP {
 
 class Variant;
 
+/*
+ * Assertions on Cells and TypedValues.  Should usually only happen
+ * inside an assert().
+ */
+bool tvIsPlausible(const TypedValue*);
+bool cellIsPlausible(const Cell*);
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
-
-bool tvIsPlausible(const TypedValue* tv);
 
 inline bool tvWillBeReleased(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&

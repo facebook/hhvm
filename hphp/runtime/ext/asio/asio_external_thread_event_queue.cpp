@@ -66,7 +66,7 @@ bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitH
 bool AsioExternalThreadEventQueue::tryReceiveSome() {
   assert(!m_received);
   m_received = m_queue.exchange(nullptr);
-  assert(m_received != k_consumerWaiting);
+  assert(m_received != K_CONSUMER_WAITING);
   return m_received;
 }
 
@@ -79,7 +79,7 @@ void AsioExternalThreadEventQueue::receiveSome() {
   // try receive external thread events without grabbing lock
   m_received = m_queue.exchange(nullptr);
   if (m_received) {
-    assert(m_received != k_consumerWaiting);
+    assert(m_received != K_CONSUMER_WAITING);
     return;
   }
 
@@ -87,18 +87,18 @@ void AsioExternalThreadEventQueue::receiveSome() {
   std::unique_lock<std::mutex> lock(m_queueMutex);
 
   // transition from empty to WAITING
-  if (m_queue.compare_exchange_strong(m_received, k_consumerWaiting)) {
+  if (m_queue.compare_exchange_strong(m_received, K_CONSUMER_WAITING)) {
     // wait for transition from WAITING to non-empty
     do {
       m_queueCondition.wait(lock);
-    } while (m_queue.load() == k_consumerWaiting);
+    } while (m_queue.load() == K_CONSUMER_WAITING);
   } else  {
     // external thread transitioned from empty to non-empty while grabbing lock
   }
 
   m_received = m_queue.exchange(nullptr);
   assert(m_received);
-  assert(m_received != k_consumerWaiting);
+  assert(m_received != K_CONSUMER_WAITING);
 }
 
 /**
@@ -107,7 +107,7 @@ void AsioExternalThreadEventQueue::receiveSome() {
 void AsioExternalThreadEventQueue::send(c_ExternalThreadEventWaitHandle* wait_handle) {
   auto next = m_queue.load();
   while (true) {
-    while (next != k_consumerWaiting) {
+    while (next != K_CONSUMER_WAITING) {
       wait_handle->setNextToProcess(next);
       if (m_queue.compare_exchange_weak(next, wait_handle)) {
         return;

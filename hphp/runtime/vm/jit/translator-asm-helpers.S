@@ -52,7 +52,7 @@ enterTCHelper:
    * in the ActRec pointed to by r15.  The 0x1 in the cmp instruction
    * must be kept in sync with REQ_BIND_CALL in abi-x64.h.
    */
-  cmp $0x1, 0x0(%rcx)
+  cmpl $0x1, 0x0(%rcx)
   jne .LenterTCHelper$jumpToTC
   lea .LenterTCHelper$serviceReqLabel(%rip), %rax
   push %rax

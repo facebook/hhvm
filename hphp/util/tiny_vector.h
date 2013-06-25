@@ -158,7 +158,7 @@ struct TinyVector : private boost::noncopyable {
 private:
   struct HeapData {
     uint32_t capacity; // numbers of vals---excludes this capacity field
-    T vals[];
+    T vals[0];
   };
 
   T* location(size_t index) {
@@ -215,4 +215,3 @@ private:
 }
 
 #endif
-

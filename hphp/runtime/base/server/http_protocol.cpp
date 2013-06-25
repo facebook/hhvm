@@ -337,7 +337,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   // Need to append port
   if (!transport->isSSL() && RuntimeOption::ServerPort != 80) {
-    port_suffix = ":" + RuntimeOption::ServerPort;
+    port_suffix = folly::format(":{}", RuntimeOption::ServerPort).str();
   }
   server.set(s_SCRIPT_URI,
              String(prefix + (hostHeader.empty() ? hostName + port_suffix :

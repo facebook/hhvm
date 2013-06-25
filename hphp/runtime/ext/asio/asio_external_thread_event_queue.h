@@ -28,6 +28,12 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
+/* This is not an optimal solution
+ * This value is in principle a constexp, but the integer-to-pointer cast would
+ * require a reinterpret cast, which is not allowed in a constexpr
+ */
+#define K_CONSUMER_WAITING (static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L))
+
 class AsioExternalThreadEventQueue {
   public:
     AsioExternalThreadEventQueue();
@@ -41,8 +47,6 @@ class AsioExternalThreadEventQueue {
     void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
   private:
-    static constexpr auto k_consumerWaiting = static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L);
-
     c_ExternalThreadEventWaitHandle* m_received;
     std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
     std::mutex m_queueMutex;

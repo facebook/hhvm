@@ -37,7 +37,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   switch (inst->op()) {
   case DefSP:
-    return {};
+    return StackValueInfo();
 
   case ReDefGeneratorSP:
   case StashGeneratorSP:

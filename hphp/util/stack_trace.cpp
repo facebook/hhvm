@@ -175,10 +175,10 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
   // m_btpointers_cnt must be an upper bound on the number of filenames
   // then *2 for tolerable hash table behavior
   unsigned int bfds_size = m_btpointers_cnt * 2;
-  NamedBfd bfds[bfds_size];
-  for (unsigned int i = 0; i < bfds_size; i++) bfds[i].key[0]='\0';
+  const std::unique_ptr<NamedBfd[]> bfds (new NamedBfd[bfds_size]);
+  for (unsigned int i = 0; i < bfds_size; i++) bfds.get()[i].key[0]='\0';
   for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
-    if (Translate(fd, m_btpointers[i], frame, bfds, bfds_size)) {
+    if (Translate(fd, m_btpointers[i], frame, bfds.get(), bfds_size)) {
       frame++;
     }
   }

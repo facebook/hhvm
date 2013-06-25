@@ -38,7 +38,7 @@ checkEval(HPHP::Eval::PhpFile* efile) {
  * like any other local. So I put this function in its own
  * file to avoid impacting the rest of translator-x64.cpp
  */
-#ifdef __x86_64__
+#if defined(__x86_64__) && !defined(__clang__)
 register Cell* sp asm("rbx");
 #else
 // TODO(#2056140): we have to decide regalloc conventions for ARM

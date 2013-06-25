@@ -104,7 +104,7 @@ private: TypedValue m_tv;
   };
 #else
 // overlap TypedValue with count
-private:
+public:
   union {
     struct {
       void* _ptr;

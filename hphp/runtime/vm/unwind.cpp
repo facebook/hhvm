@@ -35,7 +35,7 @@ using boost::implicit_cast;
 namespace {
 
 //////////////////////////////////////////////////////////////////////
-
+#if (defined(DEBUG) || defined(USE_TRACE))
 std::string describeFault(const Fault& f) {
   switch (f.m_faultType) {
   case Fault::UserException:
@@ -47,6 +47,7 @@ std::string describeFault(const Fault& f) {
   }
   not_reached();
 }
+#endif
 
 void discardStackTemps(const ActRec* const fp,
                        Stack& stack,

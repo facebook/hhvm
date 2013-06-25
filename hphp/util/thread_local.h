@@ -26,14 +26,17 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Only gcc >= 4.3.0 supports the '__thread' keyword for thread locals
+// gcc >= 4.3.0 supports the '__thread' keyword for thread locals
+//
+// Clang seems to have added this feature, or at the very least it is ignoring
+// __thread keyword and compiling anyway
 //
 // icc 13.0.0 appears to support it as well but we end up with
 // assembler warnings of unknown importance about incorrect section
 // types
 
 #if !defined(NO_TLS) &&                                         \
-  ((__llvm__ && !__clang__) ||                                  \
+  ((__llvm__ && __clang__) ||                                  \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||     \
    __INTEL_COMPILER)
 #define USE_GCC_FAST_TLS

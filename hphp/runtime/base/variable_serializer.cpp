@@ -657,7 +657,7 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
       int l = strlen(cls);
       m_buf->append(cls + l + 1, kl - l - 2);
       int o = m_type == PrintR ? 1 : 0;
-      m_buf->append("\":\"" + o, 3 - 2*o);
+      m_buf->append(&"\":\""[o], 3 - 2*o);
       m_buf->append(cls, l);
       const char priv[] = "\":private";
       m_buf->append(priv + o, sizeof(priv) - 1 - o);

@@ -56,6 +56,7 @@ emitTLSLoad(X64Assembler& a, const void* datum, RegNumber reg) {
   a.    load_disp32_reg64(virtualAddress, reg);
 }
 
+//TODO(2525714) Will not work without USE_GCC_FAST_TLS being defined
 template<typename T>
 static inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,

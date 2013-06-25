@@ -42,7 +42,7 @@ class UnitChecker {
 
  private:
   template<class... Args>
-  void error(const char* fmt, Args&&... args) {
+  void error(const char* const fmt, Args&&... args) {
     verify_error(m_unit, nullptr, fmt, std::forward<Args>(args)...);
   }
 

@@ -53,7 +53,7 @@ public:
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}
   const std::string getNonNSOriginalName() const {
-    int nsPos = m_origName.rfind('\\');
+    auto nsPos = m_origName.rfind('\\');
     if (nsPos == string::npos) {
       return m_origName;
     }

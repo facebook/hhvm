@@ -335,12 +335,14 @@ int64_t getVTableOffset(MethodPtr meth) {
 }
 
 template <typename MethodPtr>
+union MethodPtrU {
+  MethodPtr meth;
+  void* ptr;
+};
+
+template <typename MethodPtr>
 constexpr void* getMethodPtr(MethodPtr meth) {
-  union U {
-    MethodPtr meth;
-    void* ptr;
-  };
-  return ((U*)(&meth))->ptr;
+  return ((MethodPtrU<MethodPtr>*)(&meth))->ptr;
 }
 
 /**

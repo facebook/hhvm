@@ -202,24 +202,35 @@ function find_tests($files) {
   return array_filter($tests);
 }
 
-function find_config($test, $name) {
-  return find_config_for_dir(dirname($test), $name);
+function find_test_ext($test, $ext) {
+  if (is_file("{$test}.{$ext}")) {
+    return "{$test}.{$ext}";
+  }
+  return find_file_for_dir(dirname($test), "config.{$ext}");
 }
 
-function find_config_for_dir($dir, $name) {
-  while ($dir && stat($dir)) {
-    $config = "$dir/$name";
-    if (is_file($config)) {
-      return $config;
+function find_file($test, $name) {
+  return find_file_for_dir(dirname($test), $name);
+}
+
+function find_file_for_dir($dir, $name) {
+  while (($dir !== '.') && is_dir($dir)) {
+    $file = "$dir/$name";
+    if (is_file($file)) {
+      return $file;
     }
-    $dir = substr($dir, 0, strrpos($dir, '/'));
+    $dir = dirname($dir);
   }
-  return __DIR__.'/'.$name;
+  $file = __DIR__.'/'.$name;
+  if (file_exists($file)) {
+    return $file;
+  }
+  return null;
 }
 
 function find_debug_config($test, $name) {
-  $debug_config = find_config_for_dir(dirname($test), $name);
-  if (is_file($debug_config)) {
+  $debug_config = find_file_for_dir(dirname($test), $name);
+  if ($debug_config !== null) {
     return "-m debug --debug-config ".$debug_config;
   }
   return "";
@@ -244,21 +255,26 @@ function extra_args($options) {
   return idx($options, 'args', '');
 }
 
-function hhvm_cmd($options, $test) {
+function hhvm_cmd($options, $test, $test_run = null) {
+  if ($test_run === null) {
+    $test_run = $test;
+  }
   $cmd = implode(" ", array(
     idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
     '--config',
-    find_config($test, 'config.hdf'),
+    find_test_ext($test, 'hdf'),
     find_debug_config($test, 'hphpd.hdf'),
     mode_cmd($options),
     '-vEval.EnableArgsInBacktraces=true',
-    read_file("$test.opts"),
+    read_file(find_test_ext($test, 'opts')),
     extra_args($options),
     '--file',
-    $test
+    escapeshellarg($test_run)
   ));
-  if (file_exists("$test.in")) {
-    $cmd .= " <$test.in";
+
+  $in = find_test_ext($test, 'in');
+  if ($in !== null) {
+    $cmd .= ' < ' . escapeshellarg($in);
   }
   return $cmd;
 }
@@ -267,7 +283,7 @@ function hphp_cmd($options, $test) {
   return implode(" ", array(
     idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hphp'),
     '--config',
-    find_config($test, 'hphp_config.hdf'),
+    find_file($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o $test.repo $test",
   ));
@@ -304,6 +320,29 @@ class Status {
         break;
       case self::MODE_FBMAKE:
         self::sayFBMake($test, 'passed');
+        break;
+    }
+  }
+
+  public static function skip($test) {
+    array_push(self::$results, array('name'=>$test,'status'=>'skipped'));
+    switch (self::$mode) {
+      case self::MODE_NORMAL:
+        if (self::hasColor()) {
+          print "\033[1;33ms\033[0m";
+        } else {
+          print 's';
+        }
+        break;
+      case self::MODE_VERBOSE:
+        if (self::hasColor()) {
+          print "$test \033[1;33mskipped\033[0m\n";
+        } else {
+          print "$test skipped";
+        }
+        break;
+      case self::MODE_FBMAKE:
+        // Say nothing...
         break;
     }
   }
@@ -371,7 +410,9 @@ function run($options, $tests, $bad_test_file) {
   }
   foreach ($tests as $test) {
     $status = run_test($options, $test);
-    if ($status) {
+    if ($status === 'skip') {
+      Status::skip($test);
+    } else if ($status) {
       Status::pass($test);
     } else {
       Status::fail($test);
@@ -386,14 +427,32 @@ function run($options, $tests, $bad_test_file) {
   return 0;
 }
 
+function skip_test($options, $test) {
+  $skipif_test = find_test_ext($test, 'skipif');
+  if (!$skipif_test) {
+    return false;
+  }
+
+  $hhvm = hhvm_cmd($options, $test, $skipif_test);
+  $out = shell_exec($hhvm . ' 2> /dev/null');
+  $out = trim($out);
+  return (bool)strlen($out);
+}
+
 function run_test($options, $test) {
   $hhvm = hhvm_cmd($options, $test);
   $hhvm = __DIR__."/../tools/timeout.sh -t 300 $hhvm";
   $output = "";
+
+  if (skip_test($options, $test)) {
+    return 'skip';
+  }
+
   if (isset($options['repo'])) {
     if (strpos($test, '.hhas') !== false ||
-        strpos($hhvm, '-m debug') != false || is_file($test.'.norepo')) {
-      # We don't have a way to skip, I guess run non-repo?
+        strpos($hhvm, '-m debug') != false ||
+        file_exists($test.'.norepo')) {
+      return 'skip';
     } else {
       unlink("$test.repo/hhvm.hhbc");
       $hphp = hphp_cmd($options, $test);

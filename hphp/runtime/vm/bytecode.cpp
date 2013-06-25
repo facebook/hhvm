@@ -972,11 +972,11 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                                                 CallType callType,
                                                 bool raise /* = false */) {
   const Func* method;
-  if (callType == CtorMethod) {
+  if (callType == CallType::CtorMethod) {
     assert(methodName == nullptr);
     method = cls->getCtor();
   } else {
-    assert(callType == ObjMethod || callType == ClsMethod);
+    assert(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
     assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
@@ -1065,7 +1065,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
   // of cls that declares a private method with this name AND the context
   // class is an ancestor of cls, check if the context class declares a
   // private method with this name.
-  if (method->hasPrivateAncestor() && callType == ObjMethod &&
+  if (method->hasPrivateAncestor() && callType == CallType::ObjMethod &&
       ctx && cls->classof(ctx)) {
     const Func* ctxMethod = ctx->lookupMethod(methodName);
     if (ctxMethod && ctxMethod->cls() == ctx &&
@@ -1093,22 +1093,22 @@ LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
                                                  const StringData* methodName,
                                                  bool raise /* = false */) {
   Class* ctx = arGetContextClass(getFP());
-  f = lookupMethodCtx(cls, methodName, ctx, ObjMethod, false);
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, false);
   if (!f) {
     f = cls->lookupMethod(s___call.get());
     if (!f) {
       if (raise) {
         // Throw a fatal error
-        lookupMethodCtx(cls, methodName, ctx, ObjMethod, true);
+        lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, true);
       }
-      return MethodNotFound;
+      return LookupResult::MethodNotFound;
     }
-    return MagicCallFound;
+    return LookupResult::MagicCallFound;
   }
   if (f->attrs() & AttrStatic && !f->isClosureBody()) {
-    return MethodFoundNoThis;
+    return LookupResult::MethodFoundNoThis;
   }
-  return MethodFoundWithThis;
+  return LookupResult::MethodFoundWithThis;
 }
 
 LookupResult
@@ -1119,7 +1119,7 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
                                     ActRec* vmfp,
                                     bool raise /* = false */) {
   Class* ctx = arGetContextClass(vmfp);
-  f = lookupMethodCtx(cls, methodName, ctx, ClsMethod, false);
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, false);
   if (!f) {
     if (obj && obj->instanceof(cls)) {
       f = obj->getVMClass()->lookupMethod(s___call.get());
@@ -1129,26 +1129,26 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
       if (!f) {
         if (raise) {
           // Throw a fatal errpr
-          lookupMethodCtx(cls, methodName, ctx, ClsMethod, true);
+          lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
         }
-        return MethodNotFound;
+        return LookupResult::MethodNotFound;
       }
       f->validate();
       assert(f);
       assert(f->attrs() & AttrStatic);
-      return MagicCallStaticFound;
+      return LookupResult::MagicCallStaticFound;
     }
     assert(f);
     assert(obj);
     // __call cannot be static, this should be enforced by semantic
     // checks defClass time or earlier
     assert(!(f->attrs() & AttrStatic));
-    return MagicCallFound;
+    return LookupResult::MagicCallFound;
   }
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
-    return MethodFoundWithThis;
+    return LookupResult::MethodFoundWithThis;
   }
-  return MethodFoundNoThis;
+  return LookupResult::MethodFoundNoThis;
 }
 
 LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
@@ -1157,15 +1157,15 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
     Class* ctx = arGetContextClass(getFP());
-    f = lookupMethodCtx(cls, nullptr, ctx, CtorMethod, raise);
+    f = lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, raise);
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
       // so we should only be able to get here if raise was false
       assert(!raise);
-      return MethodNotFound;
+      return LookupResult::MethodNotFound;
     }
   }
-  return MethodFoundWithThis;
+  return LookupResult::MethodFoundWithThis;
 }
 
 ObjectData* VMExecutionContext::createObject(StringData* clsName,
@@ -3052,7 +3052,7 @@ VMExecutionContext::getHelper(PC& pc,
                               Variant& tvRef2,
                               MemberCode& mcode,
                               TypedValue*& curMember) {
-  getHelperPre<true, true, ConsumeAll>(MEMBERHELPERPRE_ARGS);
+  getHelperPre<true, true, VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   getHelperPost<true>(GETHELPERPOST_ARGS);
 }
 
@@ -3238,7 +3238,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
       curMember = (setMember && mcode == MW) ? nullptr : m_stack.indTV(depth--);
     }
 
-    if (mleave == LeaveLast) {
+    if (mleave == VectorLeaveCode::LeaveLast) {
       if (vec >= pc) {
         assert(vec == pc);
         break;
@@ -3287,7 +3287,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
     base = result;
   }
 
-  if (mleave == ConsumeAll) {
+  if (mleave == VectorLeaveCode::ConsumeAll) {
     assert(vec == pc);
     if (debug) {
       if (lcode == LSC || lcode == LSL) {
@@ -4525,7 +4525,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetM(PC& pc) {
   TypedValue* tv1 = m_stack.allocTV();
   tvWriteUninit(tv1);
   if (!setHelperPre<false, true, false, true, 1,
-      ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
     if (base->m_type != KindOfRef) {
       tvBox(base);
     }
@@ -4591,7 +4591,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
-  getHelperPre<false, false, LeaveLast>(MEMBERHELPERPRE_ARGS);
+  getHelperPre<false, false, VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS);
   // Process last member specially, in order to employ the IssetElem/IssetProp
   // operations.  (TODO combine with EmptyM.)
   bool issetResult = false;
@@ -4721,7 +4721,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
-  getHelperPre<false, false, LeaveLast>(MEMBERHELPERPRE_ARGS);
+  getHelperPre<false, false, VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS);
   // Process last member specially, in order to employ the EmptyElem/EmptyProp
   // operations.  (TODO combine with IssetM)
   bool emptyResult = false;
@@ -4836,7 +4836,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, true, false, false, 1,
-      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     Cell* c1 = m_stack.topC();
 
     if (mcode == MW) {
@@ -4873,7 +4873,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetWithRefLM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   bool skip = setHelperPre<false, true, false, false, 0,
-                           ConsumeAll>(MEMBERHELPERPRE_ARGS);
+                           VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   DECODE_HA(local);
   if (!skip) {
     TypedValue* from = frame_local(m_fp, local);
@@ -4886,7 +4886,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetWithRefRM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   bool skip = setHelperPre<false, true, false, false, 1,
-                           ConsumeAll>(MEMBERHELPERPRE_ARGS);
+                           VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   if (!skip) {
     TypedValue* from = m_stack.top();
     tvAsVariant(base) = withRefBind(tvAsVariant(from));
@@ -4971,7 +4971,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
   DECODE(unsigned char, op);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
-      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     TypedValue* result;
     Cell* rhs = m_stack.topC();
 
@@ -5064,7 +5064,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
   TypedValue to;
   tvWriteUninit(&to);
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
-      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     if (mcode == MW) {
       IncDecNewElem<true>(tvScratch, *tvRef.asTypedValue(), op, base, to);
     } else {
@@ -5156,7 +5156,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindM(PC& pc) {
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.topTV();
   if (!setHelperPre<false, true, false, true, 1,
-      ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
     // Bind the element/property with the var on the top of the stack
     tvBind(tv1, base);
   }
@@ -5202,7 +5202,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, false, true, false, 0,
-      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
+      VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     switch (mcode) {
     case MEL:
     case MEC:
@@ -5323,16 +5323,17 @@ void VMExecutionContext::fPushObjMethodImpl(
   ActRec* ar = m_stack.allocA();
   arSetSfp(ar, m_fp);
   ar->m_func = f;
-  if (res == MethodFoundNoThis) {
+  if (res == LookupResult::MethodFoundNoThis) {
     decRefObj(obj);
     ar->setClass(cls);
   } else {
-    assert(res == MethodFoundWithThis || res == MagicCallFound);
+    assert(res == LookupResult::MethodFoundWithThis ||
+           res == LookupResult::MagicCallFound);
     /* Transfer ownership of obj to the ActRec*/
     ar->setThis(obj);
   }
   ar->initNumArgs(numArgs);
-  if (res == MagicCallFound) {
+  if (res == LookupResult::MagicCallFound) {
     ar->setInvName(name);
   } else {
     ar->setVarEnv(NULL);
@@ -5381,11 +5382,13 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
                                            int numArgs) {
   const Func* f;
   LookupResult res = lookupClsMethod(f, cls, name, obj, getFP(), true);
-  if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
+  if (res == LookupResult::MethodFoundNoThis ||
+      res == LookupResult::MagicCallStaticFound) {
     obj = nullptr;
   } else {
     assert(obj);
-    assert(res == MethodFoundWithThis || res == MagicCallFound);
+    assert(res == LookupResult::MethodFoundWithThis ||
+           res == LookupResult::MagicCallFound);
     obj->incRefCount();
   }
   assert(f);
@@ -5409,7 +5412,8 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
     }
   }
   ar->initNumArgs(numArgs);
-  if (res == MagicCallFound || res == MagicCallStaticFound) {
+  if (res == LookupResult::MagicCallFound ||
+      res == LookupResult::MagicCallStaticFound) {
     ar->setInvName(name);
   } else {
     ar->setVarEnv(nullptr);
@@ -5480,7 +5484,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   // Lookup the ctor
   const Func* f;
   LookupResult res UNUSED = lookupCtorMethod(f, cls, true);
-  assert(res == MethodFoundWithThis);
+  assert(res == LookupResult::MethodFoundWithThis);
   // Replace input with uninitialized instance.
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
@@ -5513,7 +5517,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   // Lookup the ctor
   const Func* f;
   LookupResult res UNUSED = lookupCtorMethod(f, cls, true);
-  assert(res == MethodFoundWithThis);
+  assert(res == LookupResult::MethodFoundWithThis);
   // Push uninitialized instance.
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtorD: new'ed an instance of class %s: %p\n",
@@ -5797,7 +5801,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
     TypedValue* tv1 = m_stack.allocTV();
     tvWriteUninit(tv1);
     if (!setHelperPre<false, true, false, true, 1,
-        ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
+        VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
       if (base->m_type != KindOfRef) {
         tvBox(base);
       }

@@ -37,7 +37,7 @@ public:
   /**
    * Supported formats.
    */
-  enum Type {
+  enum class Type {
     PrintR, //print_r()
     VarExport, //var_export()
     VarDump, //var_dump()

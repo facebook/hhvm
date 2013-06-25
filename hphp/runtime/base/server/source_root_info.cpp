@@ -30,7 +30,8 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_path);
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_phproot);
 
 SourceRootInfo::SourceRootInfo(const char *host)
-    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
+                                                 SandboxCondition::Off) {
   s_path.destroy();
   s_phproot.destroy();
   if (!sandboxOn()) return;
@@ -39,7 +40,7 @@ SourceRootInfo::SourceRootInfo(const char *host)
                                 RuntimeOption::SandboxPattern.size(),
                                 AttachLiteral), host, matches);
   if (!same(r, 1)) {
-    m_sandboxCond = SandboxOff;
+    m_sandboxCond = SandboxCondition::Off;
     return;
   }
   if (RuntimeOption::SandboxFromCommonRoot) {
@@ -62,7 +63,8 @@ SourceRootInfo::SourceRootInfo(const char *host)
 
 SourceRootInfo::SourceRootInfo(const std::string &user,
                                const std::string &sandbox)
-    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
+                                                 SandboxCondition::Off) {
   s_path.destroy();
   s_phproot.destroy();
   if (!sandboxOn()) return;
@@ -103,7 +105,7 @@ void SourceRootInfo::createFromUserConfig() {
       if (!RuntimeOption::SandboxFallback.empty()) {
         homePath = String(RuntimeOption::SandboxFallback) + "/" + m_user + "/";
         if (stat(homePath.c_str(), &hstat) != 0) {
-          m_sandboxCond = SandboxOff;
+          m_sandboxCond = SandboxCondition::Off;
           return;
         }
       }
@@ -142,7 +144,7 @@ void SourceRootInfo::createFromUserConfig() {
     }
   }
   if (sp.isNull()) {
-    m_sandboxCond = SandboxError;
+    m_sandboxCond = SandboxCondition::Error;
     return;
   }
   if (sp.charAt(0) == '/') {

@@ -66,7 +66,7 @@ public:
 
 class SharedStore {
 public:
-  SharedStore(int id);
+  explicit SharedStore(int id);
   virtual ~SharedStore();
 
   virtual bool clear() = 0;
@@ -150,15 +150,15 @@ extern SharedStores s_apc_store;
 
 class SharedStoreFileStorage {
 public:
-  enum StorageState {
-    StateInvalid,
-    StateOpen,
-    StateSealed,
-    StateFull
+  enum class StorageState {
+    Invalid,
+    Open,
+    Sealed,
+    Full
   };
 
   SharedStoreFileStorage()
-  : m_state(StateInvalid), m_current(nullptr), m_chunkRemain(0) {}
+  : m_state(StorageState::Invalid), m_current(nullptr), m_chunkRemain(0) {}
   void enable(const std::string& prefix, int64_t chunkSize, int64_t maxSize);
   char *put(const char *data, int32_t len);
   void seal();

@@ -62,7 +62,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_cwd(Process::CurrentWorkingDirectory),
     m_out(nullptr), m_implicitFlush(false), m_protectedLevel(0),
     m_stdout(nullptr), m_stdoutData(nullptr),
-    m_errorState(ExecutionContext::NoError),
+    m_errorState(ExecutionContext::ErrorState::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(nullptr) {
@@ -406,7 +406,7 @@ void BaseExecutionContext::flush() {
   } else if (RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
              (m_transport == nullptr ||
               (m_transport->getHTTPVersion() == "1.1" &&
-               m_transport->getMethod() != Transport::HEAD))) {
+               m_transport->getMethod() != Transport::Method::HEAD))) {
     StringBuffer &oss = m_buffers.front()->oss;
     if (!oss.empty()) {
       if (m_transport) {
@@ -520,7 +520,7 @@ void BaseExecutionContext::onShutdownPreSend() {
 }
 
 void BaseExecutionContext::onShutdownPostSend() {
-  ServerStats::SetThreadMode(ServerStats::PostProcessing);
+  ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
@@ -544,7 +544,7 @@ void BaseExecutionContext::onShutdownPostSend() {
   } catch (...) {
     Logger::Error("unknown exception was thrown from psp");
   }
-  ServerStats::SetThreadMode(ServerStats::Idling);
+  ServerStats::SetThreadMode(ServerStats::ThreadMode::Idling);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,7 +554,8 @@ bool BaseExecutionContext::errorNeedsHandling(int errnum,
                                               bool callUserHandler,
                                               ErrorThrowMode mode) {
   if (m_throwAllErrors) throw errnum;
-  if (mode != NeverThrow || (getErrorReportingLevel() & errnum) != 0 ||
+  if (mode != ErrorThrowMode::Never ||
+      (getErrorReportingLevel() & errnum) != 0 ||
       RuntimeOption::NoSilencer) {
     return true;
   }
@@ -569,7 +570,8 @@ bool BaseExecutionContext::errorNeedsHandling(int errnum,
 
 class ErrorStateHelper {
 public:
-  ErrorStateHelper(BaseExecutionContext *context, int state) {
+  ErrorStateHelper(BaseExecutionContext *context,
+                   ExecutionContext::ErrorState state) {
     m_context = context;
     m_originalState = m_context->getErrorState();
     m_context->setErrorState(state);
@@ -579,7 +581,7 @@ public:
   }
 private:
   BaseExecutionContext *m_context;
-  int m_originalState;
+  ExecutionContext::ErrorState m_originalState;
 };
 
 static StaticString s_file("file");
@@ -593,20 +595,20 @@ void BaseExecutionContext::handleError(const std::string &msg,
                                        bool skipFrame /* = false */) {
   SYNC_VM_REGS_SCOPED();
 
-  int newErrorState = ErrorRaised;
+  ErrorState newErrorState = ErrorState::ErrorRaised;
   switch (getErrorState()) {
-  case ErrorRaised:
-  case ErrorRaisedByUserHandler:
+  case ErrorState::ErrorRaised:
+  case ErrorState::ErrorRaisedByUserHandler:
     return;
-  case ExecutingUserHandler:
-    newErrorState = ErrorRaisedByUserHandler;
+  case ErrorState::ExecutingUserHandler:
+    newErrorState = ErrorState::ErrorRaisedByUserHandler;
     break;
   default:
     break;
   }
   ErrorStateHelper esh(this, newErrorState);
   ExtendedException ee = skipFrame ?
-    ExtendedException(ExtendedException::skipFrame, msg) :
+    ExtendedException(ExtendedException::SkipFrame::skipFrame, msg) :
     ExtendedException(msg);
   Array bt = ee.getBackTrace();
 
@@ -615,7 +617,8 @@ void BaseExecutionContext::handleError(const std::string &msg,
   if (callUserHandler) {
     handled = callUserErrorHandler(ee, errnum, false);
   }
-  if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
+  if (mode == ErrorThrowMode::Always ||
+      (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
     throw FatalErrorException(msg, bt);
   }
@@ -640,8 +643,8 @@ void BaseExecutionContext::handleError(const std::string &msg,
 bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                                                 bool swallowExceptions) {
   switch (getErrorState()) {
-  case ExecutingUserHandler:
-  case ErrorRaisedByUserHandler:
+  case ErrorState::ExecutingUserHandler:
+  case ErrorState::ErrorRaisedByUserHandler:
     return false;
   default:
     break;
@@ -664,7 +667,7 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       }
     }
     try {
-      ErrorStateHelper esh(this, ExecutingUserHandler);
+      ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
@@ -706,7 +709,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int errnum = ErrorConstants::FATAL_ERROR;
+    int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {

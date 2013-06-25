@@ -704,7 +704,7 @@ class Variant : private TypedValue {
                  bool isArrayKey = false,
                  bool skipNestCheck = false) const;
   void unserialize(VariableUnserializer *unserializer,
-                   Uns::Mode mode = Uns::ValueMode);
+                   Uns::Mode mode = Uns::Mode::Value);
 
   /**
    * Used by SharedStore to save/restore a variant.

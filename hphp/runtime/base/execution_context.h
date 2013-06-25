@@ -131,12 +131,12 @@ class ClassInfoVM : public ClassInfo,
 };
 
 namespace MethodLookup {
-enum CallType {
+enum class CallType {
   ClsMethod,
   ObjMethod,
   CtorMethod,
 };
-enum LookupResult {
+enum class LookupResult {
   MethodFoundWithThis,
   MethodFoundNoThis,
   MagicCallFound,
@@ -193,13 +193,13 @@ public:
     ShutdownTypeCount
   };
 
-  enum ErrorThrowMode {
-    NeverThrow,
-    ThrowIfUnhandled,
-    AlwaysThrow,
+  enum class ErrorThrowMode {
+    Never,
+    IfUnhandled,
+    Always,
   };
 
-  enum ErrorState {
+  enum class ErrorState {
     NoError,
     ErrorRaised,
     ExecutingUserHandler,
@@ -298,8 +298,8 @@ public:
   void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
-  int getErrorState() const { return m_errorState;}
-  void setErrorState(int state) { m_errorState = state;}
+  ErrorState getErrorState() const { return m_errorState;}
+  void setErrorState(ErrorState state) { m_errorState = state;}
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
   int getErrorReportingLevel() const { return m_errorReportingLevel;}
@@ -374,7 +374,7 @@ private:
   // error handling
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
-  int m_errorState;
+  ErrorState m_errorState;
   int m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
@@ -446,7 +446,7 @@ private:
   SVarVector m_freedSvars;
   void treadmillSharedVars();
 
-  enum VectorLeaveCode {
+  enum class VectorLeaveCode {
     ConsumeAll,
     LeaveLast
   };

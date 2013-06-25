@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/server/virtual_host.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -203,15 +203,15 @@ void VirtualHost::init(Hdf vh) {
       const char *type = chdf["type"].get();
       if (type) {
         if (strcasecmp(type, "host") == 0) {
-          cond.type = RewriteCond::Host;
+          cond.type = RewriteCond::Type::Host;
         } else if (strcasecmp(type, "request") == 0) {
-          cond.type = RewriteCond::Request;
+          cond.type = RewriteCond::Type::Request;
         } else {
           throw InvalidArgumentException("rewrite rule",
                                          "(invalid cond type)");
         }
       } else {
-        cond.type = RewriteCond::Request;
+        cond.type = RewriteCond::Type::Request;
       }
       cond.negate = chdf["negate"].getBool(false);
     }
@@ -298,7 +298,7 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
     for (vector<RewriteCond>::const_iterator it = rule.rewriteConds.begin();
          it != rule.rewriteConds.end(); ++it) {
       String subject;
-      if (it->type == RewriteCond::Request) {
+      if (it->type == RewriteCond::Type::Request) {
         subject = normalized;
       } else {
         subject = host;

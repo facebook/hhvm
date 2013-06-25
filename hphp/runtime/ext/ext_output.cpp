@@ -100,7 +100,7 @@ int64_t f_hphp_get_stats(CStrRef name) {
 }
 Array f_hphp_get_status() {
   std::string out;
-  ServerStats::ReportStatus(out, ServerStats::JSON);
+  ServerStats::ReportStatus(out, ServerStats::Format::JSON);
   return f_json_decode(String(out));
 }
 Array f_hphp_get_iostatus() {

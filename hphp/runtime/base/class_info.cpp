@@ -214,7 +214,7 @@ Variant ClassInfo::ConstantInfo::getValue() const {
   if (!svalue.empty()) {
     try {
       VariableUnserializer vu(svalue.data(), svalue.size(),
-                              VariableUnserializer::Serialize);
+                              VariableUnserializer::Type::Serialize);
       return vu.unserialize();
     } catch (Exception &e) {
       assert(false);
@@ -224,7 +224,7 @@ Variant ClassInfo::ConstantInfo::getValue() const {
 }
 
 void ClassInfo::ConstantInfo::setValue(CVarRef value) {
-  VariableSerializer vs(VariableSerializer::Serialize);
+  VariableSerializer vs(VariableSerializer::Type::Serialize);
   String s = vs.serialize(value, true);
   svalue = string(s.data(), s.size());
   deferred = false;
@@ -529,7 +529,7 @@ void ClassInfo::ReadUserAttributes(const char **&p,
     int64_t valueLen = (int64_t)len;
     VariableUnserializer vu(valueText,
                             valueLen,
-                            VariableUnserializer::Serialize);
+                            VariableUnserializer::Type::Serialize);
     userAttr->setStaticValue(vu.unserialize());
 
     userAttrVec.push_back(userAttr);
@@ -594,7 +594,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       staticVariable->valueText = *p++;
       VariableUnserializer vu(staticVariable->valueText,
                               staticVariable->valueLen,
-                              VariableUnserializer::Serialize);
+                              VariableUnserializer::Type::Serialize);
       try {
         staticVariable->setStaticValue(vu.unserialize());
       } catch (Exception &e) {
@@ -675,7 +675,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       constant->valueLen = (int64_t)len_or_cw;
       VariableUnserializer vu(constant->valueText,
                               constant->valueLen,
-                              VariableUnserializer::Serialize);
+                              VariableUnserializer::Type::Serialize);
       try {
         constant->setStaticValue(vu.unserialize());
       } catch (Exception &e) {
@@ -711,7 +711,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     int64_t valueLen = (int64_t)len;
     VariableUnserializer vu(valueText,
                             valueLen,
-                            VariableUnserializer::Serialize);
+                            VariableUnserializer::Type::Serialize);
     userAttr->setStaticValue(vu.unserialize());
 
     m_userAttrVec.push_back(userAttr);

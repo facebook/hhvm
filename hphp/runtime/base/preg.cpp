@@ -156,7 +156,7 @@ static void preg_init_thread_locals() {
                    std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
                    ini_on_update_long, &g_context->m_preg_recursion_limit);
 }
-InitFiniNode init(preg_init_thread_locals, InitFiniNode::ThreadInit);
+InitFiniNode init(preg_init_thread_locals, InitFiniNode::When::ThreadInit);
 
 template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {

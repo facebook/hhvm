@@ -1895,8 +1895,8 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
       MethodLookup::LookupResult res =
         g_vmContext->lookupObjMethod(func, baseClass, methodName, false);
-      if ((res == MethodLookup::MethodFoundWithThis ||
-           res == MethodLookup::MethodFoundNoThis) &&
+      if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
+           res == MethodLookup::LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
         /*
          * If we found the func in baseClass, then either:
@@ -1914,7 +1914,7 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
           SSATmp* funcTmp = gen(
             LdClsMethod, clsTmp, cns(func->methodSlot())
           );
-          if (res == MethodLookup::MethodFoundNoThis) {
+          if (res == MethodLookup::LookupResult::MethodFoundNoThis) {
             gen(DecRef, obj);
             objOrCls = clsTmp;
           }

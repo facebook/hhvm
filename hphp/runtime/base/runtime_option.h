@@ -321,7 +321,7 @@ public:
   static std::string ApcPrimeLibrary;
   static int ApcLoadThread;
   static std::set<std::string> ApcCompletionKeys;
-  enum ApcTableTypes {
+  enum class ApcTableTypes {
     ApcConcurrentTable
   };
   static ApcTableTypes ApcTableType;

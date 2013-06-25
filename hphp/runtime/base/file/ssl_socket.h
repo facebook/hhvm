@@ -31,7 +31,7 @@ namespace HPHP {
  */
 class SSLSocket : public Socket {
 public:
-  enum CryptoMethod {
+  enum class CryptoMethod {
     ClientSSLv2,
     ClientSSLv3,
     ClientSSLv23,
@@ -99,7 +99,7 @@ private:
 class Certificate : public SweepableResourceData {
 public:
   X509 *m_cert;
-  Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
+  explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
   ~Certificate() { if (m_cert) X509_free(m_cert);}
 
   static StaticString s_class_name;

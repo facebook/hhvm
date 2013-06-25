@@ -85,7 +85,7 @@ SharedStores::SharedStores() {
 void SharedStores::create() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
     switch (RuntimeOption::ApcTableType) {
-      case RuntimeOption::ApcConcurrentTable:
+      case RuntimeOption::ApcTableTypes::ApcConcurrentTable:
         m_stores[i] = new ConcurrentTableSharedStore(i);
         break;
       default:
@@ -124,24 +124,24 @@ void SharedStoreFileStorage::enable(const std::string& prefix,
   m_prefix = prefix;
   m_chunkSize = chunkSize;
   m_maxSize = maxSize;
-  if (m_state != StateInvalid) {
+  if (m_state != StorageState::Invalid) {
     return;
   }
   if (!addFile()) {
     Logger::Error("Failed to open file for apc, fallback to in-memory mode");
     return;
   }
-  m_state = StateOpen;
+  m_state = StorageState::Open;
 }
 
 char *SharedStoreFileStorage::put(const char *data, int32_t len) {
   Lock lock(m_lock);
-  if (m_state != StateOpen ||
+  if (m_state != StorageState::Open ||
       len + PaddingSize > m_chunkSize - PaddingSize) {
     return nullptr;
   }
   if (len + PaddingSize > m_chunkRemain && !addFile()) {
-    m_state = StateFull;
+    m_state = StorageState::Full;
     return nullptr;
   }
   assert(m_current);
@@ -163,13 +163,13 @@ char *SharedStoreFileStorage::put(const char *data, int32_t len) {
 
 void SharedStoreFileStorage::seal() {
   Lock lock(m_lock);
-  if (m_state == StateSealed) {
+  if (m_state == StorageState::Sealed) {
     return;
   }
-  assert(m_state == StateOpen || m_state == StateFull);
+  assert(m_state == StorageState::Open || m_state == StorageState::Full);
   m_current = nullptr;
   m_chunkRemain = 0;
-  m_state = StateSealed;
+  m_state = StorageState::Sealed;
 
   for (int i = 0; i < (int)m_chunks.size(); i++) {
     if (mprotect(m_chunks[i], m_chunkSize, PROT_READ) < 0) {
@@ -235,7 +235,7 @@ void SharedStoreFileStorage::cleanup() {
 
 bool SharedStoreFileStorage::addFile() {
   if ((int64_t)m_chunks.size() * m_chunkSize >= m_maxSize) {
-    m_state = StateFull;
+    m_state = StorageState::Full;
     return false;
   }
   char name[PATH_MAX];

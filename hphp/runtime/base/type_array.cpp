@@ -833,7 +833,7 @@ void Array::unserialize(VariableUnserializer *uns) {
     // Pre-allocate an ArrayData of the given size, to avoid escalation in
     // the middle, which breaks references.
     operator=(ArrayInit(size).create());
-    bool isAPC = (uns->getType() == VariableUnserializer::APCSerialize);
+    bool isAPC = (uns->getType() == VariableUnserializer::Type::APCSerialize);
     for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
       if (!key.isString() && !key.isInteger()) {

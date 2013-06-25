@@ -621,13 +621,14 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
 bool AdminRequestHandler::handleStatusRequest(const std::string &cmd,
                                               Transport *transport) {
   if (cmd == "status.xml") {
-    return send_status(transport, ServerStats::XML, "application/xml");
+    return send_status(transport, ServerStats::Format::XML, "application/xml");
   }
   if (cmd == "status.json") {
-    return send_status(transport, ServerStats::JSON, "application/json");
+    return send_status(transport, ServerStats::Format::JSON,
+                       "application/json");
   }
   if (cmd == "status.html" || cmd == "status.htm") {
-    return send_status(transport, ServerStats::HTML, "text/html");
+    return send_status(transport, ServerStats::Format::HTML, "text/html");
   }
   return false;
 }
@@ -691,16 +692,17 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "stats.xml") {
-    return send_report(transport, ServerStats::XML, "application/xml");
+    return send_report(transport, ServerStats::Format::XML, "application/xml");
   }
   if (cmd == "stats.json") {
-    return send_report(transport, ServerStats::JSON, "application/json");
+    return send_report(transport, ServerStats::Format::JSON,
+                       "application/json");
   }
   if (cmd == "stats.kvp") {
-    return send_report(transport, ServerStats::KVP, "text/plain");
+    return send_report(transport, ServerStats::Format::KVP, "text/plain");
   }
   if (cmd == "stats.html" || cmd == "stats.htm") {
-    return send_report(transport, ServerStats::HTML, "text/html");
+    return send_report(transport, ServerStats::Format::HTML, "text/html");
   }
 
   if (cmd == "stats.xsl") {

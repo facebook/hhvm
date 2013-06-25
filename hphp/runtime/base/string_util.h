@@ -30,34 +30,34 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  */
 class StringUtil {
 public:
-  enum ToUpperType {
-    ToUpperAll,
-    ToUpperFirst,
-    ToUpperWords
+  enum class ToUpperType {
+    All,
+    First,
+    Words
   };
 
-  enum ToLowerType {
-    ToLowerAll,
-    ToLowerFirst,
-    ToLowerWords
+  enum class ToLowerType {
+    All,
+    First,
+    Words
   };
 
-  enum TrimType {
-    TrimLeft  = 1,
-    TrimRight = 2,
-    TrimBoth  = 3
+  enum class TrimType {
+    Left  = 1,
+    Right = 2,
+    Both  = 3
   };
 
-  enum PadType {
-    PadLeft = 0,
-    PadRight = 1,
-    PadBoth = 2
+  enum class PadType {
+    Left = 0,
+    Right = 1,
+    Both = 2
   };
 
-  enum QuoteStyle {
-    DoubleQuotes = 2,  // k_ENT_COMPAT:   escape double quotes only
-    BothQuotes   = 3,  // k_ENT_QUOTES:   escape both double and single quotes
-    NoQuotes     = 0,  // k_ENT_NOQUOTES: leave all quotes alone
+  enum class QuoteStyle {
+    Double       = 2,  // k_ENT_COMPAT:   escape double quotes only
+    Both         = 3,  // k_ENT_QUOTES:   escape both double and single quotes
+    No           = 0,  // k_ENT_NOQUOTES: leave all quotes alone
     FBUtf8       = 4,
     FBUtf8Only   = 8
   };
@@ -67,12 +67,12 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String ToLower(CStrRef input, ToLowerType type = ToLowerAll);
-  static String ToUpper(CStrRef input, ToUpperType type = ToUpperAll);
-  static String Trim(CStrRef input, TrimType type = TrimBoth,
+  static String ToLower(CStrRef input, ToLowerType type = ToLowerType::All);
+  static String ToUpper(CStrRef input, ToUpperType type = ToUpperType::All);
+  static String Trim(CStrRef input, TrimType type = TrimType::Both,
                      CStrRef charlist = k_HPHP_TRIM_CHARLIST);
   static String Pad(CStrRef input, int final_length,
-                    CStrRef pad_string = " ", PadType type = PadRight);
+                    CStrRef pad_string = " ", PadType type = PadType::Right);
   static String Reverse(CStrRef input);
   static String Repeat(CStrRef input, int count);
   static String Shuffle(CStrRef input);

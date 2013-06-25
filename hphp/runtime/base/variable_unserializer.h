@@ -28,7 +28,7 @@ public:
   /**
    * Supported formats.
    */
-  enum Type {
+  enum class Type {
     Serialize,
     APCSerialize,
   };
@@ -59,14 +59,14 @@ public:
   Variant unserialize();
   Variant unserializeKey();
   void add(Variant* v, Uns::Mode mode) {
-    if (mode == Uns::ValueMode) {
+    if (mode == Uns::Mode::Value) {
       m_refs.emplace_back(RefInfo(v));
-    } else if (mode == Uns::KeyMode) {
+    } else if (mode == Uns::Mode::Key) {
       // do nothing
-    } else if (mode == Uns::ColValueMode) {
+    } else if (mode == Uns::Mode::ColValue) {
       m_refs.emplace_back(RefInfo::makeNonRefable(v));
     } else {
-      assert(mode == Uns::ColKeyMode);
+      assert(mode == Uns::Mode::ColKey);
       // We don't currently support using the 'r' encoding to refer
       // to collection keys, but eventually we'll need to make this
       // work to allow objects as keys. For now we encode collections

@@ -26,19 +26,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-String StringUtil::ToLower(CStrRef input, ToLowerType type /*= ToLowerAll */) {
+String StringUtil::ToLower(CStrRef input,
+                           ToLowerType type /*= ToLowerType::All */) {
   if (input.empty()) return input;
 
   int len = input.size();
   char *ret = nullptr;
   switch (type) {
-  case ToLowerAll:
+  case ToLowerType::All:
     ret = string_to_lower(input.data(), len);
     break;
-  case ToLowerFirst:
+  case ToLowerType::First:
     ret = string_to_lower_first(input.data(), len);
     break;
-  case ToLowerWords:
+  case ToLowerType::Words:
     ret = string_to_lower_words(input.data(), len);
     break;
   default:
@@ -48,19 +49,20 @@ String StringUtil::ToLower(CStrRef input, ToLowerType type /*= ToLowerAll */) {
   return String(ret, len, AttachString);
 }
 
-String StringUtil::ToUpper(CStrRef input, ToUpperType type /*= ToUpperAll */) {
+String StringUtil::ToUpper(CStrRef input,
+                           ToUpperType type /*= ToUpperType::All */) {
   if (input.empty()) return input;
 
   int len = input.size();
   char *ret = nullptr;
   switch (type) {
-  case ToUpperAll:
+  case ToUpperType::All:
     ret = string_to_upper(input.data(), len);
     break;
-  case ToUpperFirst:
+  case ToUpperType::First:
     ret = string_to_upper_first(input.data(), len);
     break;
-  case ToUpperWords:
+  case ToUpperType::Words:
     ret = string_to_upper_words(input.data(), len);
     break;
   default:
@@ -70,12 +72,13 @@ String StringUtil::ToUpper(CStrRef input, ToUpperType type /*= ToUpperAll */) {
   return String(ret, len, AttachString);
 }
 
-String StringUtil::Trim(CStrRef input, TrimType type  /* = TrimBoth */,
+String StringUtil::Trim(CStrRef input, TrimType type  /* = TrimType::Both */,
                         CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_trim(input.data(), len,
-                          charlist.data(), charlist.length(), type);
+                          charlist.data(), charlist.length(),
+                          static_cast<int>(type));
   if (!ret) {
       return input;
   }
@@ -84,10 +87,10 @@ String StringUtil::Trim(CStrRef input, TrimType type  /* = TrimBoth */,
 
 String StringUtil::Pad(CStrRef input, int final_length,
                        CStrRef pad_string /* = " " */,
-                       PadType type /* = PadRight */) {
+                       PadType type /* = PadType::Right */) {
   int len = input.size();
   char *ret = string_pad(input.data(), len, final_length, pad_string.data(),
-                         pad_string.size(), type);
+                         pad_string.size(), static_cast<int>(type));
   if (ret) return String(ret, len, AttachString);
   return String();
 }
@@ -351,8 +354,10 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   }
 
   int len = input.size();
-  char *ret = string_html_encode(input.data(), len, quoteStyle != NoQuotes,
-                                 quoteStyle == BothQuotes, utf8, nbsp);
+  char *ret = string_html_encode(input.data(), len,
+                                 quoteStyle != QuoteStyle::No,
+                                 quoteStyle == QuoteStyle::Both,
+                                 utf8, nbsp);
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);
   }
@@ -403,21 +408,21 @@ String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
   AsciiMap tmp;
 
   switch (quoteStyle) {
-    case FBUtf8Only:
+    case QuoteStyle::FBUtf8Only:
       am = &mapNothing;
       flags |= STRING_HTML_ENCODE_HIGH;
       break;
-    case FBUtf8:
+    case QuoteStyle::FBUtf8:
       am = &mapBothQuotes;
       flags |= STRING_HTML_ENCODE_HIGH;
       break;
-    case BothQuotes:
+    case QuoteStyle::Both:
       am = &mapBothQuotes;
       break;
-    case DoubleQuotes:
+    case QuoteStyle::Double:
       am = &mapDoubleQuotes;
       break;
-    case NoQuotes:
+    case QuoteStyle::No:
       am = &mapNoQuotes;
       break;
     default:
@@ -425,7 +430,7 @@ String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
       raise_error("Unknown quote style: %d", (int)quoteStyle);
   }
 
-  if (quoteStyle != FBUtf8Only && extra.toBoolean()) {
+  if (quoteStyle != QuoteStyle::FBUtf8Only && extra.toBoolean()) {
     tmp = *am;
     am = &tmp;
     for (ArrayIter iter(extra); iter; ++iter) {
@@ -451,8 +456,10 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
   assert(charset);
 
   int len = input.size();
-  char *ret = string_html_decode(input.data(), len, quoteStyle != NoQuotes,
-                                 quoteStyle == BothQuotes, charset, all);
+  char *ret = string_html_decode(input.data(), len,
+                                 quoteStyle != QuoteStyle::No,
+                                 quoteStyle == QuoteStyle::Both,
+                                 charset, all);
   if (!ret) {
     // null iff charset was not recognized
     throw NotImplementedException(charset);

@@ -246,8 +246,8 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
   try {
     VariableUnserializer::Type sType =
       RuntimeOption::EnableApcSerialize ?
-      VariableUnserializer::APCSerialize :
-      VariableUnserializer::Serialize;
+      VariableUnserializer::Type::APCSerialize :
+      VariableUnserializer::Type::Serialize;
 
     VariableUnserializer vu(sval->sAddr, sval->getSerializedSize(), sType);
     Variant v;
@@ -502,7 +502,8 @@ void ConcurrentTableSharedStore::prime
 
 bool ConcurrentTableSharedStore::constructPrime(CStrRef v, KeyValuePair& item,
                                                 bool serialized) {
-  if (s_apc_file_storage.getState() != SharedStoreFileStorage::StateInvalid &&
+  if (s_apc_file_storage.getState() !=
+      SharedStoreFileStorage::StorageState::Invalid &&
       (!v->isStatic() || serialized)) {
     // StaticString for non-object should consume limited amount of space,
     // not worth going through the file storage
@@ -524,7 +525,8 @@ bool ConcurrentTableSharedStore::constructPrime(CStrRef v, KeyValuePair& item,
 
 bool ConcurrentTableSharedStore::constructPrime(CVarRef v,
                                                 KeyValuePair& item) {
-  if (s_apc_file_storage.getState() != SharedStoreFileStorage::StateInvalid &&
+  if (s_apc_file_storage.getState() !=
+      SharedStoreFileStorage::StorageState::Invalid &&
       (IS_REFCOUNTED_TYPE(v.getType()))) {
     // Only do the storage for ref-counted type
     String s = apc_serialize(v);
@@ -540,7 +542,8 @@ bool ConcurrentTableSharedStore::constructPrime(CVarRef v,
 }
 
 void ConcurrentTableSharedStore::primeDone() {
-  if (s_apc_file_storage.getState() != SharedStoreFileStorage::StateInvalid) {
+  if (s_apc_file_storage.getState() !=
+      SharedStoreFileStorage::StorageState::Invalid) {
     s_apc_file_storage.seal();
     s_apc_file_storage.hashCheck();
     // Schedule the adviseOut instead of doing it immediately, so that the
@@ -589,7 +592,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
       out << " #### ";
       const StoreValue *sval = &iter->second;
       if (!sval->expired()) {
-        VariableSerializer vs(VariableSerializer::Serialize);
+        VariableSerializer vs(VariableSerializer::Type::Serialize);
         Variant value;
         if (sval->inMem()) {
           value = sval->var->toLocal();

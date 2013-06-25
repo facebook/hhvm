@@ -55,20 +55,20 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
 
   switch (m_request->type) {
   case EVHTTP_REQ_GET:
-    m_method = Transport::GET;
+    m_method = Transport::Method::GET;
     m_requestSize += 3;
     break;
   case EVHTTP_REQ_POST:
-    m_method = Transport::POST;
+    m_method = Transport::Method::POST;
     m_requestSize += 4;
     break;
   case EVHTTP_REQ_HEAD:
-    m_method = Transport::HEAD;
+    m_method = Transport::Method::HEAD;
     m_requestSize += 4;
     break;
   default:
     assert(false);
-    m_method = Transport::UnknownMethod;
+    m_method = Transport::Method::Unknown;
     break;
   }
   m_extended_method = m_request->ext_method;
@@ -256,7 +256,7 @@ void LibEventTransport::removeRequestHeaderImpl(const char *name) {
 }
 
 bool LibEventTransport::isServerStopping() {
-  return m_server->getStatus() == Server::STOPPED;
+  return m_server->getStatus() == Server::RunStatus::STOPPED;
 }
 
 void LibEventTransport::sendImpl(const void *data, int size, int code,
@@ -266,7 +266,7 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
   assert(!m_sendStarted || chunked);
 
   if (chunked) {
-    assert(m_method != HEAD);
+    assert(m_method != Method::HEAD);
     evbuffer *chunk = evbuffer_new();
     evbuffer_add(chunk, data, size);
     /*
@@ -278,7 +278,7 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
     m_server->onChunkedResponse(m_workerId, m_request, code, chunk,
                                !m_sendStarted);
   } else {
-    if (m_method != HEAD) {
+    if (m_method != Method::HEAD) {
       evbuffer_add(m_request->output_buffer, data, size);
     } else if (!evhttp_find_header(m_request->output_headers,
                                    "Content-Length")) {

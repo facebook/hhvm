@@ -38,9 +38,9 @@ InitFiniNode *extra_init, *extra_fini, *extra_process_init, *extra_process_exit;
 
 InitFiniNode::InitFiniNode(void(*f)(), When init) {
   InitFiniNode *&ifn =
-    init == ThreadInit ? extra_init :
-    init == ThreadFini ? extra_fini :
-    init == ProcessInit ? extra_process_init : extra_process_exit;
+    init == When::ThreadInit ? extra_init :
+    init == When::ThreadFini ? extra_fini :
+    init == When::ProcessInit ? extra_process_init : extra_process_exit;
 
   func = f;
   next = ifn;

@@ -72,31 +72,31 @@ String f_strtolower(CStrRef str) {
   return StringUtil::ToLower(str);
 }
 String f_strtoupper(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperAll);
+  return StringUtil::ToUpper(str, StringUtil::ToUpperType::All);
 }
 String f_ucfirst(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperFirst);
+  return StringUtil::ToUpper(str, StringUtil::ToUpperType::First);
 }
 String f_lcfirst(CStrRef str) {
-  return StringUtil::ToLower(str, StringUtil::ToLowerFirst);
+  return StringUtil::ToLower(str, StringUtil::ToLowerType::First);
 }
 String f_ucwords(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperWords);
+  return StringUtil::ToUpper(str, StringUtil::ToUpperType::Words);
 }
 String f_strip_tags(CStrRef str, CStrRef allowable_tags /* = "" */) {
   return StringUtil::StripHTMLTags(str, allowable_tags);
 }
 String f_trim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
-  return StringUtil::Trim(str, StringUtil::TrimBoth, charlist);
+  return StringUtil::Trim(str, StringUtil::TrimType::Both, charlist);
 }
 String f_ltrim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
-  return StringUtil::Trim(str, StringUtil::TrimLeft, charlist);
+  return StringUtil::Trim(str, StringUtil::TrimType::Left, charlist);
 }
 String f_rtrim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
-  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
+  return StringUtil::Trim(str, StringUtil::TrimType::Right, charlist);
 }
 String f_chop(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
-  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
+  return StringUtil::Trim(str, StringUtil::TrimType::Right, charlist);
 }
 Variant f_explode(CStrRef delimiter, CStrRef str, int limit /* = 0x7FFFFFFF */) {
   return StringUtil::Explode(str, delimiter, limit);

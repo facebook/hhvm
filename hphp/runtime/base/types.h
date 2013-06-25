@@ -123,11 +123,11 @@ class VariableUnserializer;
  */
 
 namespace Uns {
-enum Mode {
-  ValueMode = 0,
-  KeyMode = 1,
-  ColValueMode = 2,
-  ColKeyMode = 3,
+enum class Mode {
+  Value = 0,
+  Key = 1,
+  ColValue = 2,
+  ColKey = 3,
 };
 }
 

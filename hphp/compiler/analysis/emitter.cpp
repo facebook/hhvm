@@ -5350,7 +5350,7 @@ void EmitterVisitor::emitPostponedMeths() {
           std::string orig = vNode->getComment();
           if (orig.empty()) {
             // Simple case: it's a scalar value so we just serialize it
-            VariableSerializer vs(VariableSerializer::PHPOutput);
+            VariableSerializer vs(VariableSerializer::Type::PHPOutput);
             String result = vs.serialize(tvAsCVarRef(&dv), true);
             phpCode = StringData::GetStaticString(result.get());
           } else {

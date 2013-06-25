@@ -31,7 +31,7 @@ Variant VariableUnserializer::unserialize() {
 
 Variant VariableUnserializer::unserializeKey() {
   Variant v;
-  v.unserialize(this, Uns::KeyMode);
+  v.unserialize(this, Uns::Mode::Key);
   return v;
 }
 
@@ -70,7 +70,7 @@ Variant &VariableUnserializer::addVar() {
 }
 
 bool VariableUnserializer::isWhitelistedClass(CStrRef cls_name) const {
-  if (m_type != Serialize || m_classWhiteList.isNull()) {
+  if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
     return true;
   }
   if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {

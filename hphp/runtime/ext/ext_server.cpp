@@ -148,7 +148,8 @@ String f_pagelet_server_task_result(CObjRef task, VRefParam headers,
 void f_pagelet_server_flush() {
   ExecutionContext *context = g_context.getNoCheck();
   Transport *transport = context->getTransport();
-  if (transport && transport->getThreadType() == Transport::PageletThread) {
+  if (transport &&
+      transport->getThreadType() == Transport::ThreadType::PageletThread) {
     // this method is only meaningful in a pagelet thread
     context->obFlushAll();
     String content = context->obDetachContents();

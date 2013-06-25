@@ -44,7 +44,9 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
     m_levelDebugger(0) {
   m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
-  if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
+  if (type == Type::Serialize ||
+      type == Type::APCSerialize ||
+      type == Type::DebuggerSerialize) {
     m_arrayIds = new SmartPtrCtrMap();
   } else {
     m_arrayIds = nullptr;
@@ -100,8 +102,8 @@ String VariableSerializer::serializeValue(CVarRef v, bool limit) {
 }
 
 String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
-  if (m_type == Serialize || m_type == JSON || m_type == APCSerialize ||
-      m_type == DebuggerSerialize) {
+  if (m_type == Type::Serialize || m_type == Type::JSON ||
+      m_type == Type::APCSerialize || m_type == Type::DebuggerSerialize) {
     assert(false);
     return null_string;
   }
@@ -125,25 +127,25 @@ String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
 
 void VariableSerializer::write(bool v) {
   switch (m_type) {
-  case PrintR:
+  case Type::PrintR:
     if (v) m_buf->append(1);
     break;
-  case VarExport:
-  case PHPOutput:
-  case JSON:
-  case DebuggerDump:
+  case Type::VarExport:
+  case Type::PHPOutput:
+  case Type::JSON:
+  case Type::DebuggerDump:
     m_buf->append(v ? "true" : "false");
     break;
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     indent();
     m_buf->append(v ? "bool(true)" : "bool(false)");
     writeRefCount();
     m_buf->append('\n');
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
@@ -154,20 +156,20 @@ void VariableSerializer::write(bool v) {
 
 void VariableSerializer::write(int64_t v) {
   switch (m_type) {
-  case PrintR:
-  case VarExport:
-  case PHPOutput:
-  case JSON:
-  case DebuggerDump:
+  case Type::PrintR:
+  case Type::VarExport:
+  case Type::PHPOutput:
+  case Type::JSON:
+  case Type::DebuggerDump:
     m_buf->append(v);
     break;
-  case VarDump:
+  case Type::VarDump:
     indent();
     m_buf->append("int(");
     m_buf->append(v);
     m_buf->append(")\n");
     break;
-  case DebugDump:
+  case Type::DebugDump:
     indent();
     m_buf->append("long(");
     m_buf->append(v);
@@ -175,9 +177,9 @@ void VariableSerializer::write(int64_t v) {
     writeRefCount();
     m_buf->append('\n');
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append("i:");
     m_buf->append(v);
     m_buf->append(';');
@@ -190,7 +192,7 @@ void VariableSerializer::write(int64_t v) {
 
 void VariableSerializer::write(double v) {
   switch (m_type) {
-  case JSON:
+  case Type::JSON:
     if (!std::isinf(v) && !std::isnan(v)) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
@@ -203,26 +205,26 @@ void VariableSerializer::write(double v) {
       m_buf->append('0');
     }
     break;
-  case VarExport:
-  case PHPOutput:
-  case PrintR:
-  case DebuggerDump:
+  case Type::VarExport:
+  case Type::PHPOutput:
+  case Type::PrintR:
+  case Type::DebuggerDump:
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      bool isExport = m_type == VarExport || m_type == PHPOutput;
+      bool isExport = m_type == Type::VarExport || m_type == Type::PHPOutput;
       vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", 14, v);
       m_buf->append(buf);
       // In PHPOutput mode, we always want doubles to parse as
       // doubles, so make sure there's a decimal point.
-      if (m_type == PHPOutput && strpbrk(buf, ".E") == nullptr) {
+      if (m_type == Type::PHPOutput && strpbrk(buf, ".E") == nullptr) {
         m_buf->append(".0");
       }
       free(buf);
     }
     break;
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
@@ -234,9 +236,9 @@ void VariableSerializer::write(double v) {
       m_buf->append('\n');
     }
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append("d:");
     if (std::isnan(v)) {
       m_buf->append("NAN");
@@ -264,11 +266,11 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   if (len < 0) len = strlen(v);
 
   switch (m_type) {
-  case PrintR: {
+  case Type::PrintR: {
     m_buf->append(v, len);
     break;
   }
-  case VarExport: {
+  case Type::VarExport: {
     m_buf->append('\'');
     const char *p = v;
     for (int i = 0; i < len; i++, p++) {
@@ -285,8 +287,8 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->append('\'');
     break;
   }
-  case VarDump:
-  case DebugDump: {
+  case Type::VarDump:
+  case Type::DebugDump: {
     indent();
     m_buf->append("string(");
     m_buf->append(len);
@@ -297,16 +299,16 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->append('\n');
     break;
   }
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append("s:");
     m_buf->append(len);
     m_buf->append(":\"");
     m_buf->append(v, len);
     m_buf->append("\";");
     break;
-  case JSON: {
+  case Type::JSON: {
     if (m_option & k_JSON_NUMERIC_CHECK) {
       int64_t lval; double dval;
       switch (is_numeric_string(v, len, &lval, &dval, 0)) {
@@ -324,8 +326,8 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->appendJsonEscape(v, len, m_option);
     break;
   }
-  case DebuggerDump:
-  case PHPOutput: {
+  case Type::DebuggerDump:
+  case Type::PHPOutput: {
     m_buf->append('"');
     for (int i = 0; i < len; ++i) {
       const unsigned char c = v[i];
@@ -359,7 +361,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
 }
 
 void VariableSerializer::write(CStrRef v) {
-  if (m_type == APCSerialize && !v.isNull() && v->isStatic()) {
+  if (m_type == Type::APCSerialize && !v.isNull() && v->isStatic()) {
     union {
       char buf[8];
       StringData *sd;
@@ -374,7 +376,7 @@ void VariableSerializer::write(CStrRef v) {
 }
 
 void VariableSerializer::write(CObjRef v) {
-  if (!v.isNull() && m_type == JSON) {
+  if (!v.isNull() && m_type == Type::JSON) {
 
     if (v.instanceof(SystemLib::s_JsonSerializableClass)) {
       assert(!v->isCollection());
@@ -415,27 +417,27 @@ void VariableSerializer::write(CVarRef v, bool isArrayKey /* = false */) {
 
 void VariableSerializer::writeNull() {
   switch (m_type) {
-  case PrintR:
+  case Type::PrintR:
     // do nothing
     break;
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     m_buf->append("NULL");
     break;
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     indent();
     m_buf->append("NULL");
     writeRefCount();
     m_buf->append('\n');
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append("N;");
     break;
-  case JSON:
-  case DebuggerDump:
+  case Type::JSON:
+  case Type::DebuggerDump:
     m_buf->append("null");
     break;
   default:
@@ -448,7 +450,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   bool wasRef = m_referenced;
   setReferenced(false);
   switch (m_type) {
-  case PrintR:
+  case Type::PrintR:
     if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
       m_buf->append(" Object\n");
@@ -457,24 +459,24 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     }
     m_buf->append(" *RECURSION*");
     break;
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     throw NestingLevelTooDeepException();
-  case VarDump:
-  case DebugDump:
-  case DebuggerDump:
+  case Type::VarDump:
+  case Type::DebugDump:
+  case Type::DebuggerDump:
     indent();
     m_buf->append("*RECURSION*\n");
     break;
-  case DebuggerSerialize:
+  case Type::DebuggerSerialize:
     if (m_maxLevelDebugger > 0 && m_levelDebugger > m_maxLevelDebugger) {
       // Not recursion, just cut short of print
       m_buf->append("s:12:\"...(omitted)\";", 20);
       break;
     }
     // fall through
-  case Serialize:
-  case APCSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
     {
       assert(m_arrayIds);
       SmartPtrCtrMap::const_iterator iter = m_arrayIds->find(ptr);
@@ -493,7 +495,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
       }
     }
     break;
-  case JSON:
+  case Type::JSON:
     raise_warning("json_encode(): recursion detected");
     m_buf->append("null");
     break;
@@ -504,7 +506,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
 }
 
 void VariableSerializer::writeRefCount() {
-  if (m_type == DebugDump) {
+  if (m_type == Type::DebugDump) {
     m_buf->append(" refcount(");
     m_buf->append(m_refCount);
     m_buf->append(')');
@@ -519,8 +521,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   info.indent_delta = 0;
 
   switch (m_type) {
-  case DebuggerDump:
-  case PrintR:
+  case Type::DebuggerDump:
+  case Type::PrintR:
     if (!m_rsrcName.empty()) {
       m_buf->append("Resource id #");
       m_buf->append(m_rsrcId);
@@ -538,8 +540,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     m_buf->append("(\n");
     m_indent += (info.indent_delta = 4);
     break;
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     if (m_indent > 0) {
       m_buf->append('\n');
       indent();
@@ -557,8 +559,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
     m_indent += (info.indent_delta = 2);
     break;
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     indent();
     if (!m_rsrcName.empty()) {
       m_buf->append("resource(");
@@ -581,7 +583,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     m_buf->append(')');
 
     // ...so to strictly follow PHP's output
-    if (m_type == VarDump) {
+    if (m_type == Type::VarDump) {
       m_buf->append(' ');
     } else {
       writeRefCount();
@@ -590,9 +592,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     m_buf->append("{\n");
     m_indent += (info.indent_delta = 2);
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     if (!m_objClass.empty()) {
       m_buf->append(m_objCode);
       m_buf->append(":");
@@ -608,11 +610,11 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append(":{");
     }
     break;
-  case JSON:
+  case Type::JSON:
     info.is_vector =
       (m_objClass.empty() || m_objCode == 'V' || m_objCode == 'K') &&
       isVectorData;
-    if (info.is_vector && m_type == JSON) {
+    if (info.is_vector && m_type == Type::JSON) {
       info.is_vector = (m_option & k_JSON_FORCE_OBJECT)
                        ? false : info.is_vector;
     }
@@ -623,7 +625,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append('{');
     }
 
-    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
       m_indent += (info.indent_delta = 4);
     }
 
@@ -651,12 +653,12 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
       assert(key[2] == 0);
       m_buf->append(key + 3, kl - 3);
       const char prot[] = "\":protected";
-      int o = m_type == PrintR ? 1 : 0;
+      int o = m_type == Type::PrintR ? 1 : 0;
       m_buf->append(prot + o, sizeof(prot) - 1 - o);
     } else {
       int l = strlen(cls);
       m_buf->append(cls + l + 1, kl - l - 2);
-      int o = m_type == PrintR ? 1 : 0;
+      int o = m_type == Type::PrintR ? 1 : 0;
       m_buf->append(&"\":\""[o], 3 - 2*o);
       m_buf->append(cls, l);
       const char priv[] = "\":private";
@@ -664,7 +666,9 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
     }
   } else {
     m_buf->append(prop);
-    if (m_type != PrintR && m_type != DebuggerDump) m_buf->append('"');
+    if (m_type != Type::PrintR && m_type != Type::DebuggerDump) {
+      m_buf->append('"');
+    }
   }
 }
 
@@ -673,15 +677,15 @@ void VariableSerializer::writeArrayKey(Variant key) {
   auto const keyCell = key.asCell();
   bool const skey = IS_STRING_TYPE(keyCell->m_type);
 
-  if (skey && m_type == APCSerialize) {
+  if (skey && m_type == Type::APCSerialize) {
     write(StrNR(keyCell->m_data.pstr).asString());
     return;
   }
   ArrayInfo &info = m_arrayInfos.back();
 
   switch (m_type) {
-  case DebuggerDump:
-  case PrintR: {
+  case Type::DebuggerDump:
+  case Type::PrintR: {
     indent();
     m_buf->append('[');
     if (info.is_object && skey) {
@@ -693,15 +697,15 @@ void VariableSerializer::writeArrayKey(Variant key) {
     break;
   }
 
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     indent();
     write(key, true);
     m_buf->append(" => ");
     break;
 
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     indent();
     m_buf->append('[');
     if (!skey) {
@@ -718,17 +722,17 @@ void VariableSerializer::writeArrayKey(Variant key) {
     m_buf->append("]=>\n");
     break;
 
-  case APCSerialize:
-  case Serialize:
-  case DebuggerSerialize:
+  case Type::APCSerialize:
+  case Type::Serialize:
+  case Type::DebuggerSerialize:
     write(key);
     break;
 
-  case JSON:
+  case Type::JSON:
     if (!info.first_element) {
       m_buf->append(',');
     }
-    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
       m_buf->append("\n");
       indent();
     }
@@ -749,7 +753,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
         m_buf->append('"');
       }
       m_buf->append(':');
-      if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
         m_buf->append(' ');
       }
     }
@@ -762,8 +766,8 @@ void VariableSerializer::writeArrayKey(Variant key) {
 }
 
 void VariableSerializer::writeCollectionKey(CVarRef key) {
-  if (m_type == Serialize || m_type == APCSerialize ||
-      m_type == DebuggerSerialize) {
+  if (m_type == Type::Serialize || m_type == Type::APCSerialize ||
+      m_type == Type::DebuggerSerialize) {
     m_valueCount++;
   }
   writeArrayKey(key);
@@ -771,24 +775,24 @@ void VariableSerializer::writeCollectionKey(CVarRef key) {
 
 void VariableSerializer::writeCollectionKeylessPrefix() {
   switch (m_type) {
-  case PrintR:
-  case VarExport:
-  case PHPOutput:
+  case Type::PrintR:
+  case Type::VarExport:
+  case Type::PHPOutput:
     indent();
     break;
-  case VarDump:
-  case DebugDump:
-  case APCSerialize:
-  case Serialize:
-  case DebuggerSerialize:
+  case Type::VarDump:
+  case Type::DebugDump:
+  case Type::APCSerialize:
+  case Type::Serialize:
+  case Type::DebuggerSerialize:
     break;
-  case JSON:
-  case DebuggerDump: {
+  case Type::JSON:
+  case Type::DebuggerDump: {
     ArrayInfo &info = m_arrayInfos.back();
     if (!info.first_element) {
       m_buf->append(',');
     }
-    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
       m_buf->append("\n");
       indent();
     }
@@ -802,8 +806,8 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
 
 void VariableSerializer::writeArrayValue(CVarRef value) {
   // Do not count referenced values after the first
-  if ((m_type == Serialize || m_type == APCSerialize ||
-       m_type == DebuggerSerialize) &&
+  if ((m_type == Type::Serialize || m_type == Type::APCSerialize ||
+       m_type == Type::DebuggerSerialize) &&
       !(value.isReferenced() &&
         m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
     m_valueCount++;
@@ -811,12 +815,12 @@ void VariableSerializer::writeArrayValue(CVarRef value) {
 
   write(value);
   switch (m_type) {
-  case DebuggerDump:
-  case PrintR:
+  case Type::DebuggerDump:
+  case Type::PrintR:
     m_buf->append('\n');
     break;
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     m_buf->append(",\n");
     break;
   default:
@@ -832,8 +836,8 @@ void VariableSerializer::writeArrayFooter() {
 
   m_indent -= info.indent_delta;
   switch (m_type) {
-  case DebuggerDump:
-  case PrintR:
+  case Type::DebuggerDump:
+  case Type::PrintR:
     if (m_rsrcName.empty()) {
       indent();
       m_buf->append(")\n");
@@ -842,8 +846,8 @@ void VariableSerializer::writeArrayFooter() {
       }
     }
     break;
-  case VarExport:
-  case PHPOutput:
+  case Type::VarExport:
+  case Type::PHPOutput:
     indent();
     if (info.is_object) {
       if (m_objCode == 'O') {
@@ -856,20 +860,20 @@ void VariableSerializer::writeArrayFooter() {
       m_buf->append(')');
     }
     break;
-  case VarDump:
-  case DebugDump:
+  case Type::VarDump:
+  case Type::DebugDump:
     if (m_rsrcName.empty()) {
       indent();
       m_buf->append("}\n");
     }
     break;
-  case Serialize:
-  case APCSerialize:
-  case DebuggerSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
     m_buf->append('}');
     break;
-  case JSON:
-    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+  case Type::JSON:
+    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
       m_buf->append("\n");
       indent();
     }
@@ -907,7 +911,7 @@ void VariableSerializer::indent() {
     m_buf->append(' ');
   }
   if (m_referenced) {
-    if (m_indent > 0 && m_type == VarDump) m_buf->append('&');
+    if (m_indent > 0 && m_type == Type::VarDump) m_buf->append('&');
     m_referenced = false;
   }
 }
@@ -915,21 +919,21 @@ void VariableSerializer::indent() {
 bool VariableSerializer::incNestedLevel(void *ptr,
                                         bool isObject /* = false */) {
   switch (m_type) {
-  case VarExport:
-  case PHPOutput:
-  case PrintR:
-  case VarDump:
-  case DebugDump:
-  case JSON:
-  case DebuggerDump:
+  case Type::VarExport:
+  case Type::PHPOutput:
+  case Type::PrintR:
+  case Type::VarDump:
+  case Type::DebugDump:
+  case Type::JSON:
+  case Type::DebuggerDump:
     return ++m_counts[ptr] >= m_maxCount;
-  case DebuggerSerialize:
+  case Type::DebuggerSerialize:
     if (m_maxLevelDebugger > 0 && ++m_levelDebugger > m_maxLevelDebugger) {
       return true;
     }
     // fall through
-  case Serialize:
-  case APCSerialize:
+  case Type::Serialize:
+  case Type::APCSerialize:
     {
       assert(m_arrayIds);
       int ct = ++m_counts[ptr];
@@ -951,7 +955,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
 
 void VariableSerializer::decNestedLevel(void *ptr) {
   --m_counts[ptr];
-  if (m_type == DebuggerSerialize && m_maxLevelDebugger > 0) {
+  if (m_type == Type::DebuggerSerialize && m_maxLevelDebugger > 0) {
     --m_levelDebugger;
   }
 }

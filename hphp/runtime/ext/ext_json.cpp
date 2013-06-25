@@ -45,7 +45,7 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
     json_options = k_JSON_FB_LOOSE;
   }
 
-  VariableSerializer vs(VariableSerializer::JSON, json_options);
+  VariableSerializer vs(VariableSerializer::Type::JSON, json_options);
   return vs.serializeValue(value, !(json_options & k_JSON_FB_UNLIMITED));
 }
 

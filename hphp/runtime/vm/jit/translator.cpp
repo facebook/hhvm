@@ -4150,17 +4150,17 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                  g_vmContext->getFP(), false) :
     g_vmContext->lookupObjMethod(func, cls, name, false);
 
-  if (res == MethodLookup::MethodNotFound) return nullptr;
+  if (res == MethodLookup::LookupResult::MethodNotFound) return nullptr;
 
-  assert(res == MethodLookup::MethodFoundWithThis ||
-         res == MethodLookup::MethodFoundNoThis ||
+  assert(res == MethodLookup::LookupResult::MethodFoundWithThis ||
+         res == MethodLookup::LookupResult::MethodFoundNoThis ||
          (staticLookup ?
-          res == MethodLookup::MagicCallStaticFound :
-          res == MethodLookup::MagicCallFound));
+          res == MethodLookup::LookupResult::MagicCallStaticFound :
+          res == MethodLookup::LookupResult::MagicCallFound));
 
   magicCall =
-    res == MethodLookup::MagicCallStaticFound ||
-    res == MethodLookup::MagicCallFound;
+    res == MethodLookup::LookupResult::MagicCallStaticFound ||
+    res == MethodLookup::LookupResult::MagicCallFound;
 
   if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
       func->isAbstract() ||

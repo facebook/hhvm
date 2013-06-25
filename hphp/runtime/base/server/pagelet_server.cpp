@@ -41,7 +41,7 @@ public:
     : m_refCount(0), m_done(false), m_code(0) {
 
     gettime(CLOCK_MONOTONIC, &m_queueTime);
-    m_threadType = PageletThread;
+    m_threadType = ThreadType::PageletThread;
 
     m_url.append(url.data(), url.size());
     m_remoteHost.append(remoteHost.data(), remoteHost.size());
@@ -92,7 +92,7 @@ public:
     return m_postData.data();
   }
   virtual Method getMethod() {
-    return m_get ? Transport::GET : Transport::POST;
+    return m_get ? Transport::Method::GET : Transport::Method::POST;
   }
   virtual std::string getHeader(const char *name) {
     assert(name && *name);

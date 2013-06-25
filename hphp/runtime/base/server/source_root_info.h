@@ -38,7 +38,7 @@ public:
   std::string path() const;
 
   bool sandboxOn() const {
-    return m_sandboxCond == SandboxOn;
+    return m_sandboxCond == SandboxCondition::On;
   }
 
   void clear() {
@@ -49,7 +49,7 @@ public:
   }
 
   bool error() const {
-    return m_sandboxCond == SandboxError;
+    return m_sandboxCond == SandboxCondition::Error;
   }
   void handleError(Transport *t);
   static const std::string &GetCurrentSourceRoot() {
@@ -65,10 +65,10 @@ private:
   String m_user;
   String m_sandbox;
   String m_path;
-  enum SandboxCondition {
-    SandboxOn,
-    SandboxError,
-    SandboxOff
+  enum class SandboxCondition {
+    On,
+    Error,
+    Off
   } m_sandboxCond;
   Array m_serverVars;
   static DECLARE_THREAD_LOCAL_NO_CHECK(std::string, s_path);

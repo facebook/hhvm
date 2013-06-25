@@ -1129,8 +1129,8 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 String apc_serialize(CVarRef value) {
   VariableSerializer::Type sType =
     RuntimeOption::EnableApcSerialize ?
-      VariableSerializer::APCSerialize :
-      VariableSerializer::Serialize;
+      VariableSerializer::Type::APCSerialize :
+      VariableSerializer::Type::Serialize;
   VariableSerializer vs(sType);
   return vs.serialize(value, true);
 }
@@ -1138,8 +1138,8 @@ String apc_serialize(CVarRef value) {
 Variant apc_unserialize(CStrRef str) {
   VariableUnserializer::Type sType =
     RuntimeOption::EnableApcSerialize ?
-      VariableUnserializer::APCSerialize :
-      VariableUnserializer::Serialize;
+      VariableUnserializer::Type::APCSerialize :
+      VariableUnserializer::Type::Serialize;
   return unserialize_ex(str, sType);
 }
 
@@ -1289,7 +1289,7 @@ String apc_reserialize(CStrRef str) {
       !RuntimeOption::EnableApcSerialize) return str;
 
   VariableUnserializer uns(str.data(), str.size(),
-                           VariableUnserializer::APCSerialize);
+                           VariableUnserializer::Type::APCSerialize);
   StringBuffer buf;
   reserialize(&uns, buf);
 

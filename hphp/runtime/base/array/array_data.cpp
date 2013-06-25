@@ -552,7 +552,7 @@ void ArrayData::dump() {
 }
 
 void ArrayData::dump(std::string &out) {
-  VariableSerializer vs(VariableSerializer::VarDump);
+  VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(Array(this), true));
   out += "ArrayData(";
   out += boost::lexical_cast<string>(_count);
@@ -563,7 +563,7 @@ void ArrayData::dump(std::string &out) {
 void ArrayData::dump(std::ostream &out) {
   unsigned int i = 0;
   for (ArrayIter iter(this); iter; ++iter, i++) {
-    VariableSerializer vs(VariableSerializer::Serialize);
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
     Variant key(iter.first());
     out << i << " #### " << key.toString()->toCPPString() << " #### ";
     Variant val(iter.second());

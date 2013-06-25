@@ -63,7 +63,8 @@ bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
-int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
+int RuntimeOption::RuntimeErrorReportingLevel =
+  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
 
 std::string RuntimeOption::ServerUser;
 
@@ -327,7 +328,8 @@ bool RuntimeOption::ForceConstLoadToAPC = true;
 std::string RuntimeOption::ApcPrimeLibrary;
 int RuntimeOption::ApcLoadThread = 1;
 std::set<std::string> RuntimeOption::ApcCompletionKeys;
-RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType = ApcConcurrentTable;
+RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType =
+  ApcTableTypes::ApcConcurrentTable;
 bool RuntimeOption::EnableApcSerialize = true;
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
 size_t RuntimeOption::ApcMaximumCapacity = 0;
@@ -605,7 +607,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     NoSilencer = logger["NoSilencer"].getBool();
     EnableApplicationLog = logger["ApplicationLog"].getBool(true);
     RuntimeErrorReportingLevel =
-      logger["RuntimeErrorReportingLevel"].getInt32(ErrorConstants::HPHP_ALL);
+      logger["RuntimeErrorReportingLevel"]
+        .getInt32(static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
 
     AccessLogDefaultFormat = logger["AccessLogDefaultFormat"].
       getString("%h %l %u %t \"%r\" %>s %b");
@@ -835,7 +838,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     string apcTableType = apc["TableType"].getString("concurrent");
     if (strcasecmp(apcTableType.c_str(), "concurrent") == 0) {
-      ApcTableType = ApcConcurrentTable;
+      ApcTableType = ApcTableTypes::ApcConcurrentTable;
     } else {
       throw InvalidArgumentException("apc table type",
                                      "Invalid table type");
@@ -937,7 +940,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       for (Hdf hdf = satellites.firstChild(); hdf.exists(); hdf = hdf.next()) {
         SatelliteServerInfoPtr satellite(new SatelliteServerInfo(hdf));
         SatelliteServerInfos.push_back(satellite);
-        if (satellite->getType() == SatelliteServer::KindOfRPCServer) {
+        if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
           XboxPassword = satellite->getPassword();
           XboxPasswords = satellite->getPasswords();
         }

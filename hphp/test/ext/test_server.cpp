@@ -406,7 +406,7 @@ public:
   virtual const char *getRemoteHost() { return "remote";}
   virtual const void *getPostData(int &size) { size = 0; return nullptr;}
   virtual uint16_t getRemotePort() { return 0; }
-  virtual Method getMethod() { return Transport::GET;}
+  virtual Method getMethod() { return Transport::Method::GET;}
   virtual std::string getHeader(const char *name) { return "";}
   virtual void getHeaders(HeaderMap &headers) {}
   virtual void addHeaderImpl(const char *name, const char *value) {}
@@ -539,7 +539,7 @@ public:
     response = "\nGET param: name = ";
     response += transport->getParam("name");
 
-    if (transport->getMethod() == Transport::POST) {
+    if (transport->getMethod() == Transport::Method::POST) {
       int size = 0;
       const char *data = (const char *)transport->getPostData(size);
       response += "\nPOST data: ";

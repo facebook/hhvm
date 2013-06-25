@@ -595,7 +595,7 @@ void SymbolTable::countTypes(std::map<std::string, int> &counts) {
 }
 
 string SymbolTable::getEscapedText(Variant v, int &len) {
-  VariableSerializer vs(VariableSerializer::Serialize);
+  VariableSerializer vs(VariableSerializer::Type::Serialize);
   String str = vs.serialize(v, true);
   len = str.length();
   string output = Util::escapeStringForCPP(str.data(), len);

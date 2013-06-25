@@ -64,23 +64,23 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
       StringBuffer sb;
       DateTime dt(nret);
       sb.append("RFC822:            ");
-      sb.append(dt.toString(DateTime::RFC822));
+      sb.append(dt.toString(DateTime::DateFormat::RFC822));
       sb.append("\nRFC850:            ");
-      sb.append(dt.toString(DateTime::RFC850));
+      sb.append(dt.toString(DateTime::DateFormat::RFC850));
       sb.append("\nRFC1036:           ");
-      sb.append(dt.toString(DateTime::RFC1036));
+      sb.append(dt.toString(DateTime::DateFormat::RFC1036));
       sb.append("\nRFC1123/RSS:       ");
-      sb.append(dt.toString(DateTime::RFC1123));
+      sb.append(dt.toString(DateTime::DateFormat::RFC1123));
       sb.append("\nRFC2822:           ");
-      sb.append(dt.toString(DateTime::RFC2822));
+      sb.append(dt.toString(DateTime::DateFormat::RFC2822));
       sb.append("\nRFC3339/ATOM/W3C:  ");
-      sb.append(dt.toString(DateTime::RFC3339));
+      sb.append(dt.toString(DateTime::DateFormat::RFC3339));
       sb.append("\nISO8601:           ");
-      sb.append(dt.toString(DateTime::ISO8601));
+      sb.append(dt.toString(DateTime::DateFormat::ISO8601));
       sb.append("\nCookie:            ");
-      sb.append(dt.toString(DateTime::Cookie));
+      sb.append(dt.toString(DateTime::DateFormat::Cookie));
       sb.append("\nHttpHeader:        ");
-      sb.append(dt.toString(DateTime::HttpHeader));
+      sb.append(dt.toString(DateTime::DateFormat::HttpHeader));
       return sb.data();
     }
 
@@ -212,7 +212,7 @@ void CmdPrint::processList(DebuggerClient &client) {
   for (int i = 0; i < (int)watches.size(); i++) {
     client.print("  %d %s  %s", i + 1,
                   StringUtil::Pad(watches[i]->first, 8, " ",
-                                  StringUtil::PadLeft).data(),
+                                  StringUtil::PadType::Left).data(),
                   watches[i]->second.c_str());
   }
   if (watches.empty()) {

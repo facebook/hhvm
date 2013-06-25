@@ -641,8 +641,8 @@ void StringData::setChar(int offset, char ch) {
  */
 char *increment_string(char *s, uint32_t &len) {
   assert(s && *s);
-  enum CharKind {
-    UNKNOWN_KIND,
+  enum class CharKind {
+    UNKNOWN,
     LOWER_CASE,
     UPPER_CASE,
     NUMERIC
@@ -650,7 +650,7 @@ char *increment_string(char *s, uint32_t &len) {
 
   int carry = 0;
   int pos = len - 1;
-  int last = UNKNOWN_KIND; // Shut up the compiler warning
+  CharKind last = CharKind::UNKNOWN; // Shut up the compiler warning
   int ch;
 
   while (pos >= 0) {
@@ -663,7 +663,7 @@ char *increment_string(char *s, uint32_t &len) {
         s[pos]++;
         carry=0;
       }
-      last=LOWER_CASE;
+      last = CharKind::LOWER_CASE;
     } else if (ch >= 'A' && ch <= 'Z') {
       if (ch == 'Z') {
         s[pos] = 'A';
@@ -672,7 +672,7 @@ char *increment_string(char *s, uint32_t &len) {
         s[pos]++;
         carry=0;
       }
-      last=UPPER_CASE;
+      last = CharKind::UPPER_CASE;
     } else if (ch >= '0' && ch <= '9') {
       if (ch == '9') {
         s[pos] = '0';
@@ -681,7 +681,7 @@ char *increment_string(char *s, uint32_t &len) {
         s[pos]++;
         carry=0;
       }
-      last = NUMERIC;
+      last = CharKind::NUMERIC;
     } else {
       carry=0;
       break;
@@ -697,14 +697,16 @@ char *increment_string(char *s, uint32_t &len) {
     memcpy(t+1, s, len);
     t[++len] = '\0';
     switch (last) {
-    case NUMERIC:
+    case CharKind::NUMERIC:
       t[0] = '1';
       break;
-    case UPPER_CASE:
+    case CharKind::UPPER_CASE:
       t[0] = 'A';
       break;
-    case LOWER_CASE:
+    case CharKind::LOWER_CASE:
       t[0] = 'a';
+      break;
+    default:
       break;
     }
     return t;

@@ -27,9 +27,9 @@ namespace HPHP {
 
 class ExtendedException : public Exception {
 public:
-  enum SkipFrame { skipFrame };
+  enum class SkipFrame { skipFrame };
   ExtendedException();
-  ExtendedException(const std::string &msg);
+  explicit ExtendedException(const std::string &msg);
   ExtendedException(SkipFrame frame, const std::string &msg);
   ExtendedException(const char *fmt, ...);
   Array getBackTrace() const;
@@ -58,7 +58,7 @@ public:
 
 class InvalidObjectTypeException : public ExtendedException {
 public:
-  InvalidObjectTypeException(const char *name)
+  explicit InvalidObjectTypeException(const char *name)
     : ExtendedException("Unexpected object type %s.", name) {}
   virtual ~InvalidObjectTypeException() throw() {}
   EXCEPTION_COMMON_IMPL(InvalidObjectTypeException);
@@ -66,7 +66,7 @@ public:
 
 class InvalidOperandException : public ExtendedException {
 public:
-  InvalidOperandException(const char *msg)
+  explicit InvalidOperandException(const char *msg)
     : ExtendedException("Invalid operand type was used: %s.", msg) {}
   virtual ~InvalidOperandException() throw() {}
   EXCEPTION_COMMON_IMPL(InvalidOperandException);
@@ -90,7 +90,7 @@ public:
 
 class BadTypeConversionException : public ExtendedException {
 public:
-  BadTypeConversionException(const char *msg)
+  explicit BadTypeConversionException(const char *msg)
     : ExtendedException("Bad type conversion: %s.", msg) {}
   virtual ~BadTypeConversionException() throw() {}
   EXCEPTION_COMMON_IMPL(BadTypeConversionException);
@@ -122,7 +122,7 @@ public:
 
 class InvalidFunctionCallException : public ExtendedException {
 public:
-  InvalidFunctionCallException(const char *func)
+  explicit InvalidFunctionCallException(const char *func)
     : ExtendedException("(1) call the function without enough arguments OR "
                         "(2) Unable to find function \"%s\" OR "
                         "(3) function was not in invoke table OR "
@@ -134,7 +134,7 @@ public:
 
 class InvalidClassException : public ExtendedException {
 public:
-  InvalidClassException(const char *cls)
+  explicit InvalidClassException(const char *cls)
     : ExtendedException("Unable to find class \"%s\".", cls) {}
   virtual ~InvalidClassException() throw() {}
   EXCEPTION_COMMON_IMPL(InvalidClassException);
@@ -156,7 +156,8 @@ public:
 
 class FatalErrorException : public ExtendedException {
 public:
-  FatalErrorException(const char *msg) : ExtendedException("%s", msg) {}
+  explicit FatalErrorException(const char *msg)
+    : ExtendedException("%s", msg) {}
   FatalErrorException(int, const char *msg, ...) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
   }
@@ -167,14 +168,14 @@ public:
 
 class UncatchableException : public ExtendedException {
 public:
-  UncatchableException(const char *msg) : ExtendedException(msg) {}
+  explicit UncatchableException(const char *msg) : ExtendedException(msg) {}
   virtual ~UncatchableException() throw() {}
   EXCEPTION_COMMON_IMPL(UncatchableException);
 };
 
 class ClassNotFoundException : public FatalErrorException {
 public:
-  ClassNotFoundException(const char *msg)
+  explicit ClassNotFoundException(const char *msg)
     : FatalErrorException(msg) {}
   virtual ~ClassNotFoundException() throw() {}
   EXCEPTION_COMMON_IMPL(ClassNotFoundException);
@@ -182,7 +183,7 @@ public:
 
 class SystemCallFailure : public ExtendedException {
 public:
-  SystemCallFailure(const char *func)
+  explicit SystemCallFailure(const char *func)
     : ExtendedException("%s returned %d: %s.", func, errno,
                         Util::safe_strerror(errno).c_str()) {}
   virtual ~SystemCallFailure() throw() {}
@@ -217,7 +218,7 @@ public:
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
 
-  InvalidArgumentException(const char *param)
+  explicit InvalidArgumentException(const char *param)
     : ExtendedException("Invalid argument: %s", param) {}
 
   virtual ~InvalidArgumentException() throw() {}
@@ -226,7 +227,7 @@ public:
 
 class NotEnoughArgumentsException : public ExtendedException {
 public:
-  NotEnoughArgumentsException(const char *funcname)
+  explicit NotEnoughArgumentsException(const char *funcname)
     : ExtendedException("Not enough arguments for function %s", funcname) {}
   virtual ~NotEnoughArgumentsException() throw() {}
   EXCEPTION_COMMON_IMPL(NotEnoughArgumentsException);
@@ -234,7 +235,7 @@ public:
 
 class TooManyArgumentsException : public ExtendedException {
 public:
-  TooManyArgumentsException(const char *funcname)
+  explicit TooManyArgumentsException(const char *funcname)
     : ExtendedException("Too much arguments for function %s", funcname) {}
   virtual ~TooManyArgumentsException() throw() {}
   EXCEPTION_COMMON_IMPL(TooManyArgumentsException);
@@ -242,7 +243,7 @@ public:
 
 class TypeVariableChangeException : public ExtendedException {
 public:
-  TypeVariableChangeException(const char *loc)
+  explicit TypeVariableChangeException(const char *loc)
     : ExtendedException("Type of variable changed at %s", loc) {}
   virtual ~TypeVariableChangeException() throw() {}
   EXCEPTION_COMMON_IMPL(TypeVariableChangeException);
@@ -250,7 +251,7 @@ public:
 
 class UseOfUndefinedVarException : public ExtendedException {
 public:
-  UseOfUndefinedVarException(const char *loc)
+  explicit UseOfUndefinedVarException(const char *loc)
     : ExtendedException("Use of undefined variable at %s", loc) {}
   virtual ~UseOfUndefinedVarException() throw() {}
   EXCEPTION_COMMON_IMPL(UseOfUndefinedVarException);
@@ -258,7 +259,7 @@ public:
 
 class MethodSignatureChangeException : public ExtendedException {
 public:
-  MethodSignatureChangeException(const char *method)
+  explicit MethodSignatureChangeException(const char *method)
     : ExtendedException("Signature of method %s changed", method) {}
   virtual ~MethodSignatureChangeException() throw() {}
   EXCEPTION_COMMON_IMPL(MethodSignatureChangeException);
@@ -274,7 +275,7 @@ public:
 
 class NotImplementedException : public ExtendedException {
 public:
-  NotImplementedException(const char *feature)
+  explicit NotImplementedException(const char *feature)
     : ExtendedException("%s is not implemented yet.", feature) {}
   virtual ~NotImplementedException() throw() {}
   EXCEPTION_COMMON_IMPL(NotImplementedException);
@@ -293,7 +294,7 @@ class ExitException : public ExtendedException {
 public:
   static int ExitCode;
 
-  ExitException(int exitCode) {
+  explicit ExitException(int exitCode) {
     m_handled = false;
     ExitCode = exitCode;
   }
@@ -303,7 +304,7 @@ public:
 
 class PhpFileDoesNotExistException : public ExtendedException {
 public:
-  PhpFileDoesNotExistException(const char *file)
+  explicit PhpFileDoesNotExistException(const char *file)
     : ExtendedException("File could not be loaded: %s", file) {}
   virtual ~PhpFileDoesNotExistException() throw() {}
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);

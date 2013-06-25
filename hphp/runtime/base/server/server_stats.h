@@ -29,14 +29,14 @@ namespace HPHP {
 
 class ServerStats {
 public:
-  enum Format {
+  enum class Format {
     XML,
     JSON,
     KVP,
     HTML
   };
 
-  enum ThreadMode {
+  enum class ThreadMode {
     Idling,
     Processing,
     Writing,
@@ -206,7 +206,7 @@ public:
     TRACK_MEMORY = 0x00000001,
     TRACK_HWINST = 0x00000002,
   };
-  ServerStatsHelper(const char *section, uint32_t track = 0);
+  explicit ServerStatsHelper(const char *section, uint32_t track = 0);
   ~ServerStatsHelper();
 
 private:
@@ -227,7 +227,8 @@ private:
  */
 class IOStatusHelper {
 public:
-  IOStatusHelper(const char *name, const char *address = nullptr, int port = 0);
+  explicit IOStatusHelper(const char *name, const char *address = nullptr,
+                          int port = 0);
   ~IOStatusHelper();
 
 private:

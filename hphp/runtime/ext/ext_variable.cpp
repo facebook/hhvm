@@ -116,7 +116,7 @@ bool f_is_null(CVarRef v) {
 Variant f_print_r(CVarRef expression, bool ret /* = false */) {
   Variant res;
   try {
-    VariableSerializer vs(VariableSerializer::PrintR);
+    VariableSerializer vs(VariableSerializer::Type::PrintR);
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -133,7 +133,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
 Variant f_var_export(CVarRef expression, bool ret /* = false */) {
   Variant res;
   try {
-    VariableSerializer vs(VariableSerializer::VarExport);
+    VariableSerializer vs(VariableSerializer::Type::VarExport);
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -147,7 +147,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
 }
 
 void f_var_dump(CVarRef v) {
-  VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
+  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
   // manipulate maxCount to match PHP behavior
   if (!v.isObject()) {
     vs.incMaxCount();
@@ -164,7 +164,7 @@ void f_var_dump(int _argc, CVarRef expression,
 }
 
 void f_debug_zval_dump(CVarRef variable) {
-  VariableSerializer vs(VariableSerializer::DebugDump);
+  VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
 }
 

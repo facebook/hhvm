@@ -28,8 +28,8 @@ DECLARE_BOOST_TYPES(SatelliteServerInfo);
 DECLARE_BOOST_TYPES(SatelliteServer);
 class SatelliteServer {
 public:
-  enum Type {
-    UnknownType,
+  enum class Type {
+    Unknown,
 
     KindOfInternalPageServer,  // handles restricted URLs
     KindOfDanglingPageServer,  // handles old version requests during shutdown

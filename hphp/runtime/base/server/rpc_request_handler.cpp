@@ -36,7 +36,7 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
   : m_requestsSinceReset(0),
     m_reset(false),
     m_logResets(info),
-    m_returnEncodeType(Json) {
+    m_returnEncodeType(ReturnEncodeType::Json) {
   initState();
 }
 
@@ -133,7 +133,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   // return encoding type
   ReturnEncodeType returnEncodeType = m_returnEncodeType;
   if (transport->getParam("return") == "serialize") {
-    returnEncodeType = Serialize;
+    returnEncodeType = ReturnEncodeType::Serialize;
   }
 
   // resolve virtual host
@@ -153,11 +153,11 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // set thread type
   switch (m_serverInfo->getType()) {
-  case SatelliteServer::KindOfRPCServer:
-    transport->setThreadType(Transport::RpcThread);
+  case SatelliteServer::Type::KindOfRPCServer:
+    transport->setThreadType(Transport::ThreadType::RpcThread);
     break;
-  case SatelliteServer::KindOfXboxServer:
-    transport->setThreadType(Transport::XboxThread);
+  case SatelliteServer::Type::KindOfXboxServer:
+    transport->setThreadType(Transport::ThreadType::XboxThread);
     break;
   default:
     break;
@@ -296,11 +296,12 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       String response;
       switch (output) {
         case 0: {
-          assert(returnEncodeType == Json ||
-                 returnEncodeType == Serialize);
+          assert(returnEncodeType == ReturnEncodeType::Json ||
+                 returnEncodeType == ReturnEncodeType::Serialize);
           try {
-            response = (returnEncodeType == Json) ?  f_json_encode(funcRet)
-                                                  : f_serialize(funcRet);
+            response = (returnEncodeType == ReturnEncodeType::Json) ?
+                       f_json_encode(funcRet) :
+                       f_serialize(funcRet);
           } catch (...) {
             serializeFailed = true;
           }

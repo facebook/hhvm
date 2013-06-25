@@ -2892,7 +2892,7 @@ newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
     VMRegAnchor _;
     UNUSED MethodLookup::LookupResult res =
       g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == MethodLookup::MethodFoundWithThis);
+    assert(res == MethodLookup::LookupResult::MethodFoundWithThis);
   }
   // Don't start pushing the AR until newInstance returns; it may reenter.
   ret = newInstance(cls);

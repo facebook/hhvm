@@ -259,7 +259,7 @@ Array TimeZone::transitions() const {
 
       ArrayInit element(5);
       element.set(s_ts, timestamp);
-      element.set(s_time, dt.toString(DateTime::ISO8601));
+      element.set(s_time, dt.toString(DateTime::DateFormat::ISO8601));
       element.set(s_offset, offset.offset);
       element.set(s_isdst, (bool)offset.isdst);
       element.set(s_abbr, String(abbr, CopyString));

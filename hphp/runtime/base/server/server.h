@@ -106,7 +106,7 @@ typedef std::function<bool(const std::string&)> URLChecker;
  */
 class Server {
 public:
-  enum RunStatus {
+  enum class RunStatus {
     NOT_YET_STARTED = 0,
     RUNNING,
     STOPPING,

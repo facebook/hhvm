@@ -28,19 +28,18 @@ namespace HPHP {
  * We heap allocate a RefData when we make a reference to something.
  * A Variant or TypedValue can be KindOfRef and point to a RefData,
  * but the value held here must not be KindOfRef.
+ *
  */
 class RefData {
-  enum Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
+  enum class Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
 public:
-  enum NullInit { nullinit };
-  RefData() { assert(m_magic = kMagic); }
-  RefData(NullInit) {
-    assert(m_magic = kMagic);
-    _count = 1;
-    m_tv.m_type = KindOfNull;
+  RefData() {
+    // intentional use of = to only assign in debug builds
+    assert(static_cast<bool>(m_magic = Magic::kMagic));
   }
   RefData(DataType t, int64_t datum) {
-    assert(m_magic = kMagic);
+    // intentional use of = to only assign in debug builds
+    assert(static_cast<bool>(m_magic = Magic::kMagic));
     init(t, datum);
   }
   ~RefData();
@@ -54,11 +53,11 @@ public:
   void dump() const;
 
   const TypedValue* tv() const {
-    assert(m_magic == kMagic);
+    assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
   TypedValue* tv() {
-    assert(m_magic == kMagic);
+    assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
   const Variant* var() const { return (const Variant*)tv(); }
@@ -67,7 +66,7 @@ public:
   static constexpr size_t tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
-    assert(m_magic == kMagic);
+    assert(m_magic == Magic::kMagic);
   }
 
   // TODO: t2221110: get rid of this hack.

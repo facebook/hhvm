@@ -50,7 +50,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
 
   string type = hdf["Type"].getString();
   if (type == "InternalPageServer") {
-    m_type = SatelliteServer::KindOfInternalPageServer;
+    m_type = SatelliteServer::Type::KindOfInternalPageServer;
     vector<string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
@@ -60,12 +60,12 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
   } else if (type == "DanglingPageServer") {
-    m_type = SatelliteServer::KindOfDanglingPageServer;
+    m_type = SatelliteServer::Type::KindOfDanglingPageServer;
     DanglingServerPort = m_port;
   } else if (type == "RPCServer") {
-    m_type = SatelliteServer::KindOfRPCServer;
+    m_type = SatelliteServer::Type::KindOfRPCServer;
   } else {
-    m_type = SatelliteServer::UnknownType;
+    m_type = SatelliteServer::Type::Unknown;
   }
 }
 
@@ -180,16 +180,16 @@ SatelliteServerPtr SatelliteServer::Create(SatelliteServerInfoPtr info) {
   SatelliteServerPtr satellite;
   if (info->getPort()) {
     switch (info->getType()) {
-    case KindOfInternalPageServer:
+    case Type::KindOfInternalPageServer:
       satellite = SatelliteServerPtr(new InternalPageServer(info));
       break;
-    case KindOfDanglingPageServer:
+    case Type::KindOfDanglingPageServer:
       satellite = SatelliteServerPtr(new DanglingPageServer(info));
       break;
-    case KindOfRPCServer:
+    case Type::KindOfRPCServer:
       satellite = SatelliteServerPtr(new RPCServer(info));
       break;
-    case KindOfXboxServer:
+    case Type::KindOfXboxServer:
       satellite = SatelliteServerPtr(new RPCServer(info));
       break;
     default:

@@ -253,7 +253,7 @@ bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
     const char *bufText = (const char *)MSGBUF_MTEXT(buffer);
     uint bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
-                            VariableUnserializer::Serialize);
+                            VariableUnserializer::Type::Serialize);
     try {
       message = vu.unserialize();
     } catch (Exception &e) {

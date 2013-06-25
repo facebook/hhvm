@@ -34,7 +34,7 @@ public:
 
 public:
   DebuggerThriftBuffer()
-    : ThriftBuffer(BUFFER_SIZE, VariableSerializer::DebuggerSerialize) {}
+    : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
   SmartPtr<Socket> getSocket() { return m_socket;}
 

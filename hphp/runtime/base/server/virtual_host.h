@@ -37,7 +37,7 @@ public:
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
   VirtualHost();
-  VirtualHost(Hdf vh);
+  explicit VirtualHost(Hdf vh);
 
   void init(Hdf vh);
   void addAllowedDirectories(const std::vector<std::string>& dirs);
@@ -67,7 +67,7 @@ public:
 
 private:
   struct RewriteCond {
-    enum Type {
+    enum class Type {
       Request,
       Host
     };

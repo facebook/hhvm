@@ -1295,7 +1295,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
         String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
-                                            StringUtil::DoubleQuotes,
+                                            StringUtil::QuoteStyle::Double,
                                             "UTF-8", true);
         xmlAddChild(param, node);
         if (!fault_ns.empty()) {
@@ -1325,7 +1325,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
         String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
-                                            StringUtil::DoubleQuotes,
+                                            StringUtil::QuoteStyle::Double,
                                             "UTF-8", true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);
         if (!fault_ns.empty()) {
@@ -2059,7 +2059,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
 
   // 0. serving WSDL
   Transport *transport = g_context->getTransport();
-  if (transport && transport->getMethod() == Transport::GET &&
+  if (transport && transport->getMethod() == Transport::Method::GET &&
       transport->getCommand() == "wsdl") {
     if (!m_sdl) {
       throw_soap_server_fault("Server", "WSDL generation is not supported");

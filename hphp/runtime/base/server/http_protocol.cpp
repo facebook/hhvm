@@ -170,7 +170,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   string contentType = transport->getHeader("Content-Type");
   string contentLength = transport->getHeader("Content-Length");
   // $_POST and $_REQUEST
-  if (transport->getMethod() == Transport::POST) {
+  if (transport->getMethod() == Transport::Method::POST) {
     bool needDelete = false;
     int size = 0;
     const void *data = transport->getPostData(size);
@@ -388,9 +388,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   server.set(s_SERVER_ADMIN, empty_string);
   server.set(s_SERVER_SIGNATURE, empty_string);
   switch (transport->getMethod()) {
-  case Transport::GET:  server.set(s_REQUEST_METHOD, s_GET);  break;
-  case Transport::HEAD: server.set(s_REQUEST_METHOD, s_HEAD); break;
-  case Transport::POST:
+  case Transport::Method::GET:  server.set(s_REQUEST_METHOD, s_GET);  break;
+  case Transport::Method::HEAD: server.set(s_REQUEST_METHOD, s_HEAD); break;
+  case Transport::Method::POST:
     if (transport->getExtendedMethod() == nullptr) {
       server.set(s_REQUEST_METHOD, s_POST);
     } else {
@@ -669,7 +669,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
 
   int size = 0;
   const char *data = nullptr;
-  if (transport->getMethod() == Transport::POST) {
+  if (transport->getMethod() == Transport::Method::POST) {
     data = (const char *)transport->getPostData(size);
   }
 

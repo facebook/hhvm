@@ -33,7 +33,7 @@ public:
   virtual void handleRequest(Transport *transport) {
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
-    if (transport->getMethod() == Transport::POST) {
+    if (transport->getMethod() == Transport::Method::POST) {
       int len = 0;
       const void *data = transport->getPostData(len);
       String res = "POST: ";

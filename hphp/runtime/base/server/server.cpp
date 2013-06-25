@@ -51,7 +51,7 @@ void Server::InstallStopSignalHandlers(ServerPtr server) {
 Server::Server(const std::string &address, int port, int threadCount)
   : m_address(address), m_port(port), m_threadCount(threadCount),
     m_urlChecker(SatelliteServerInfo::checkMainURL),
-    m_status(NOT_YET_STARTED) {
+    m_status(RunStatus::NOT_YET_STARTED) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

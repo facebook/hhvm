@@ -172,12 +172,13 @@ LibEventServer::LibEventServer(const std::string &address, int port,
 }
 
 LibEventServer::~LibEventServer() {
-  assert(getStatus() == STOPPED || getStatus() == STOPPING ||
-         getStatus() == NOT_YET_STARTED);
+  assert(getStatus() == RunStatus::STOPPED ||
+         getStatus() == RunStatus::STOPPING ||
+         getStatus() == RunStatus::NOT_YET_STARTED);
   // We can't free event base when server is still working on it.
   // This will cause a leak with event base, but normally this happens when
   // process exits, so we're probably fine.
-  if (getStatus() != STOPPING) {
+  if (getStatus() != RunStatus::STOPPING) {
     event_base_free(m_eventBase);
   }
 }
@@ -203,7 +204,7 @@ int LibEventServer::getLibEventConnectionCount() {
 }
 
 void LibEventServer::start() {
-  if (getStatus() == RUNNING) return;
+  if (getStatus() == RunStatus::RUNNING) return;
 
   if (getAcceptSocket() != 0) {
     throw FailedToListenException(m_address, m_port);
@@ -220,7 +221,7 @@ void LibEventServer::start() {
     Logger::Info("Listen on ssl port %d",m_port_ssl);
   }
 
-  setStatus(RUNNING);
+  setStatus(RunStatus::RUNNING);
   m_dispatcher.start();
   m_dispatcherThread.start();
   m_timeoutThread.start();
@@ -255,7 +256,7 @@ void LibEventServer::dispatch() {
   event_base_set(m_eventBase, &m_eventStop);
   event_add(&m_eventStop, nullptr);
 
-  while (getStatus() != STOPPED) {
+  while (getStatus() != RunStatus::STOPPED) {
     event_base_loop(m_eventBase, EVLOOP_ONCE);
   }
 
@@ -275,7 +276,7 @@ void LibEventServer::dispatch() {
 
 void LibEventServer::stop() {
   Lock lock(m_mutex);
-  if (getStatus() != RUNNING || m_server == nullptr) return;
+  if (getStatus() != RunStatus::RUNNING || m_server == nullptr) return;
 
 #define SHUT_FBLISTEN 3
   /*
@@ -311,13 +312,13 @@ void LibEventServer::stop() {
   }
 
   // inform LibEventServer::onRequest() to stop queuing
-  setStatus(STOPPING);
+  setStatus(RunStatus::STOPPING);
 
   // stop JobQueue processing
   m_dispatcher.stop();
 
   // stop event loop
-  setStatus(STOPPED);
+  setStatus(RunStatus::STOPPED);
   if (write(m_pipeStop.getIn(), "", 1) < 0) {
     // an error occured but we're in shutdown already, so ignore
   }
@@ -386,7 +387,7 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
     evhttp_connection_set_timeout(request->evcon,
                                   RuntimeOption::ConnectionTimeoutSeconds);
   }
-  if (getStatus() == RUNNING) {
+  if (getStatus() == RunStatus::RUNNING) {
     m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)));
   } else {
     Logger::Error("throwing away one new request while shutting down");

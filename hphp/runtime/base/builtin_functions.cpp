@@ -248,7 +248,7 @@ vm_decode_function(CVarRef function,
       return f;
     }
     assert(cls);
-    CallType lookupType = this_ ? ObjMethod : ClsMethod;
+    CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
     const HPHP::Func* f =
       g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
@@ -271,7 +271,7 @@ vm_decode_function(CVarRef function,
           f = cls->lookupMethod(s___call.get());
           assert(!f || !(f->attrs() & AttrStatic));
         }
-        if (!f && lookupType == ClsMethod) {
+        if (!f && lookupType == CallType::ClsMethod) {
           f = cls->lookupMethod(s___callStatic.get());
           assert(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
@@ -746,7 +746,7 @@ String f_serialize(CVarRef value) {
   }
   case KindOfObject:
   case KindOfDouble: {
-    VariableSerializer vs(VariableSerializer::Serialize);
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
     return vs.serialize(value, true);
   }
   default:

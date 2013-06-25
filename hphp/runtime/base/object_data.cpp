@@ -570,8 +570,8 @@ static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   bool handleSleep = false;
   Variant ret;
-  if (LIKELY(serializer->getType() == VariableSerializer::Serialize ||
-             serializer->getType() == VariableSerializer::APCSerialize)) {
+  if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
+             serializer->getType() == VariableSerializer::Type::APCSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       Variant ret =
@@ -588,7 +588,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     }
     handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
   } else if (UNLIKELY(serializer->getType() ==
-                      VariableSerializer::DebuggerSerialize)) {
+                      VariableSerializer::Type::DebuggerSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       try {
@@ -649,21 +649,21 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       wanted.serialize(serializer, true);
     } else {
       if (instanceof(c_Closure::s_cls)) {
-        if (serializer->getType() == VariableSerializer::APCSerialize) {
+        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
           p_DummyClosure dummy(NEWOBJ(c_DummyClosure));
           serializer->write(dummy);
         } else if (serializer->getType() ==
-                   VariableSerializer::DebuggerSerialize) {
+                   VariableSerializer::Type::DebuggerSerialize) {
           serializer->write("Closure");
         } else {
           throw_fatal("Serialization of Closure is not allowed");
         }
       } else if (instanceof(c_Continuation::s_cls)) {
-        if (serializer->getType() == VariableSerializer::APCSerialize) {
+        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
           p_DummyContinuation dummy(NEWOBJ(c_DummyContinuation));
           serializer->write(dummy);
         } else if (serializer->getType() ==
-                   VariableSerializer::DebuggerSerialize) {
+                   VariableSerializer::Type::DebuggerSerialize) {
           serializer->write("Continuation");
         } else {
           throw_fatal("Serialization of Continuation is not allowed");
@@ -681,7 +681,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     } else {
       CStrRef className = o_getClassName();
       Array properties = o_toArray();
-      if (serializer->getType() != VariableSerializer::VarDump &&
+      if (serializer->getType() != VariableSerializer::Type::VarDump &&
           className == s_PHP_Incomplete_Class) {
         Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {

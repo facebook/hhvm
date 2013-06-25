@@ -2423,9 +2423,9 @@ void Variant::serialize(VariableSerializer *serializer,
                         bool skipNestCheck /* = false */) const {
   if (m_type == KindOfRef) {
     // Ugly, but behavior is different for serialize
-    if (serializer->getType() == VariableSerializer::Serialize ||
-        serializer->getType() == VariableSerializer::APCSerialize ||
-        serializer->getType() == VariableSerializer::DebuggerSerialize) {
+    if (serializer->getType() == VariableSerializer::Type::Serialize ||
+        serializer->getType() == VariableSerializer::Type::APCSerialize ||
+        serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
       if (serializer->incNestedLevel(m_data.pref->var())) {
         serializer->writeOverflow(m_data.pref->var());
       } else {
@@ -2492,7 +2492,7 @@ static void unserializeProp(VariableUnserializer *uns,
 }
 
 void Variant::unserialize(VariableUnserializer *uns,
-                          Uns::Mode mode /* = Uns::ValueMode */) {
+                          Uns::Mode mode /* = Uns::Mode::Value */) {
 
   char type, sep;
   type = uns->readChar();
@@ -2571,7 +2571,7 @@ void Variant::unserialize(VariableUnserializer *uns,
     }
     break;
   case 'S':
-    if (uns->getType() == VariableUnserializer::APCSerialize) {
+    if (uns->getType() == VariableUnserializer::Type::APCSerialize) {
       union {
         char buf[8];
         StringData *sd;
@@ -2786,7 +2786,7 @@ Variant Variant::share(bool save) const {
 }
 
 void Variant::dump() const {
-  VariableSerializer vs(VariableSerializer::VarDump);
+  VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(*this, true));
   printf("Variant: %s", ret.c_str());
 }

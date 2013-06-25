@@ -62,7 +62,7 @@ public:
     return m_message.data();
   }
   virtual Method getMethod() {
-    return Transport::POST;
+    return Transport::Method::POST;
   }
   virtual std::string getHeader(const char *name) {
     if (!strcasecmp(name, "Host")) return m_host;
@@ -182,7 +182,8 @@ private:
     }
     if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
-    s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
+    s_xbox_request_handler->setReturnEncodeType(
+      RPCRequestHandler::ReturnEncodeType::Serialize);
     return s_xbox_request_handler.get();
   }
 

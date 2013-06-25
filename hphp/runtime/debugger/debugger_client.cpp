@@ -331,8 +331,8 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
   if (maxlen <= 0) {
     try {
       VariableSerializer::Type t = vardump ?
-                                   VariableSerializer::VarDump :
-                                   VariableSerializer::DebuggerDump;
+                                   VariableSerializer::Type::VarDump :
+                                   VariableSerializer::Type::DebuggerDump;
       VariableSerializer vs(t, 0, 2);
       value = vs.serialize(v, true);
     } catch (StringBufferLimitException &e) {
@@ -342,7 +342,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
       throw;
     }
   } else {
-    VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 2);
+    VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
     value = vs.serializeWithLimit(v, maxlen);
   }
 
@@ -1512,7 +1512,7 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       line.append("  ");
       line.append(lines2[n].toString());
 
-      sb.append(StringUtil::Trim(line.detach(), StringUtil::TrimRight));
+      sb.append(StringUtil::Trim(line.detach(), StringUtil::TrimType::Right));
       sb.append("\n");
     }
   }

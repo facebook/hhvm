@@ -76,17 +76,17 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
 
   time_t base = time(nullptr);
   if (RuntimeOption::ExpiresActive) {
-    time_t expires = base + RuntimeOption::ExpiresDefault;
+    time_t exp = base + RuntimeOption::ExpiresDefault;
     char age[20];
     snprintf(age, sizeof(age), "max-age=%d", RuntimeOption::ExpiresDefault);
     transport->addHeader("Cache-Control", age);
     transport->addHeader("Expires",
-        DateTime(expires, true).toString(DateTime::HttpHeader).c_str());
+      DateTime(exp, true).toString(DateTime::DateFormat::HttpHeader).c_str());
   }
 
   if (mtime) {
     transport->addHeader("Last-Modified",
-        DateTime(mtime, true).toString(DateTime::HttpHeader).c_str());
+      DateTime(mtime, true).toString(DateTime::DateFormat::HttpHeader).c_str());
   }
   transport->addHeader("Accept-Ranges", "bytes");
 

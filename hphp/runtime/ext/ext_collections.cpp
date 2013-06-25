@@ -950,7 +950,7 @@ void c_Vector::Unserialize(ObjectData* obj,
     auto tv = &vec->m_data[vec->m_size];
     tv->m_type = KindOfNull;
     ++vec->m_size;
-    tvAsVariant(tv).unserialize(uns, Uns::ColValueMode);
+    tvAsVariant(tv).unserialize(uns, Uns::Mode::ColValue);
   }
 }
 
@@ -2078,7 +2078,7 @@ void c_Map::Unserialize(ObjectData* obj,
   mp->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
-    k.unserialize(uns, Uns::ColKeyMode);
+    k.unserialize(uns, Uns::Mode::ColKey);
     Bucket* p;
     if (k.isInteger()) {
       auto h = k.toInt64();
@@ -2098,7 +2098,7 @@ void c_Map::Unserialize(ObjectData* obj,
     ++mp->m_load;
     p->data.m_type = KindOfNull;
 do_unserialize:
-    tvAsVariant(&p->data).unserialize(uns, Uns::ColValueMode);
+    tvAsVariant(&p->data).unserialize(uns, Uns::Mode::ColValue);
   }
 }
 
@@ -3350,7 +3350,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
   smp->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
-    k.unserialize(uns, Uns::ColKeyMode);
+    k.unserialize(uns, Uns::Mode::ColKey);
     Bucket* p;
     uint nIndex;
     if (k.isInteger()) {
@@ -3377,7 +3377,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
     smp->m_arBuckets[nIndex] = p;
     CONNECT_TO_GLOBAL_DLLIST(smp, p);
 do_unserialize:
-    tvAsVariant(&p->data).unserialize(uns, Uns::ColValueMode);
+    tvAsVariant(&p->data).unserialize(uns, Uns::Mode::ColValue);
   }
 }
 
@@ -4158,10 +4158,10 @@ void c_Set::Unserialize(ObjectData* obj,
   st->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
-    // When unserializing an element of a Set, we use ColKeyMode for now.
+    // When unserializing an element of a Set, we use Mode::ColKey for now.
     // This will make the unserializer to reserve an id for the element
     // but won't allow referencing the element via 'r' or 'R'.
-    k.unserialize(uns, Uns::ColKeyMode);
+    k.unserialize(uns, Uns::Mode::ColKey);
     Bucket* p;
     if (k.isInteger()) {
       auto h = k.toInt64();
@@ -4521,8 +4521,8 @@ void c_Pair::Unserialize(ObjectData* obj,
   pair->m_size = 2;
   pair->elm0.m_type = KindOfNull;
   pair->elm1.m_type = KindOfNull;
-  tvAsVariant(&pair->elm0).unserialize(uns, Uns::ColValueMode);
-  tvAsVariant(&pair->elm1).unserialize(uns, Uns::ColValueMode);
+  tvAsVariant(&pair->elm0).unserialize(uns, Uns::Mode::ColValue);
+  tvAsVariant(&pair->elm1).unserialize(uns, Uns::Mode::ColValue);
 }
 
 c_PairIterator::c_PairIterator(Class* cb) :
@@ -4600,11 +4600,11 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
-    if (serializer->getType() == VariableSerializer::Serialize ||
-        serializer->getType() == VariableSerializer::APCSerialize ||
-        serializer->getType() == VariableSerializer::DebuggerSerialize ||
-        serializer->getType() == VariableSerializer::VarExport ||
-        serializer->getType() == VariableSerializer::PHPOutput) {
+    if (serializer->getType() == VariableSerializer::Type::Serialize ||
+        serializer->getType() == VariableSerializer::Type::APCSerialize ||
+        serializer->getType() == VariableSerializer::Type::DebuggerSerialize ||
+        serializer->getType() == VariableSerializer::Type::VarExport ||
+        serializer->getType() == VariableSerializer::Type::PHPOutput) {
       // For the 'V' serialization format, we don't print out keys
       // for Serialize, APCSerialize, DebuggerSerialize
       for (ArrayIter iter(obj); iter; ++iter) {

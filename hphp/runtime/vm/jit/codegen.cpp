@@ -3372,7 +3372,7 @@ const Func* loadClassCtor(Class* cls) {
     VMRegAnchor _;
     UNUSED MethodLookup::LookupResult res =
       g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == MethodLookup::MethodFoundWithThis);
+    assert(res == MethodLookup::LookupResult::MethodFoundWithThis);
   }
   return f;
 }

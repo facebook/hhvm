@@ -453,7 +453,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimRight);
+  return StringUtil::Trim(lines[count - 1], StringUtil::TrimType::Right);
 }
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
@@ -499,7 +499,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimRight);
+  return StringUtil::Trim(lines[count - 1], StringUtil::TrimType::Right);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ThriftBuffer::ThriftBuffer(int size,
-                           int sType /* = VariableSerializer::Serialize*/)
+                           VariableSerializer::Type sType /* = Serialize*/)
   : m_size(size), m_safe(false), m_serializerType(sType) {
   m_buf = (char *)malloc(m_size + 1);
   if (!m_buf) throwOutOfMemory();
@@ -193,7 +193,7 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 
 static Variant unserialize_with_no_notice(CStrRef str) {
   VariableUnserializer vu(str.data(), str.data() + str.size(),
-      VariableUnserializer::Serialize, true);
+      VariableUnserializer::Type::Serialize, true);
   Variant v;
   try {
     v = vu.unserialize();
@@ -237,7 +237,7 @@ void ThriftBuffer::read(Array &data) {
 }
 
 void ThriftBuffer::write(CArrRef data) {
-  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
@@ -249,7 +249,7 @@ void ThriftBuffer::read(Object &data) {
 }
 
 void ThriftBuffer::write(CObjRef data) {
-  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
@@ -261,7 +261,7 @@ void ThriftBuffer::read(Variant &data) {
 }
 
 void ThriftBuffer::write(CVarRef data) {
-  VariableSerializer vs((VariableSerializer::Type)m_serializerType);
+  VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(data, true);
   write(sdata);
 }

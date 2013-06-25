@@ -36,7 +36,7 @@ public:
   /**
    * Different RFC/ISO date/time formats for toString(DateFormat).
    */
-  enum DateFormat {
+  enum class DateFormat {
     InvalidFormat,
 
     /**
@@ -169,7 +169,7 @@ public:
   /**
    * Different array formats for toArray().
    */
-  enum ArrayFormat {
+  enum class ArrayFormat {
     TimeMap,
     TmMap,
     TmVector
@@ -178,7 +178,7 @@ public:
   /**
    * Different formats for getSunInfo().
    */
-  enum SunInfoFormat {
+  enum class SunInfoFormat {
     ReturnTimeStamp,
     ReturnString,
     ReturnDouble
@@ -223,7 +223,7 @@ public:
 public:
   // constructor
   DateTime();
-  DateTime(int64_t timestamp, bool utc = false); // from a timestamp
+  explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
 
   static StaticString s_class_name;
   // overriding ResourceData

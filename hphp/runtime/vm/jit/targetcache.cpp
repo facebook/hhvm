@@ -485,15 +485,15 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
         Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
         Stats::inc(Stats::TgtCache_MethodMiss);
         TRACE(2, "MethodCache: miss class %p name %s!\n", cls, name->data());
-        func = g_vmContext->lookupMethodCtx(cls, name, ctx,
-                                            MethodLookup::ObjMethod, false);
+        auto const& objMethod = MethodLookup::CallType::ObjMethod;
+        func = g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod, false);
         if (UNLIKELY(!func)) {
           isMagicCall = true;
           func = cls->lookupMethod(s___call.get());
           if (UNLIKELY(!func)) {
             // Do it again, but raise the error this time.
-            (void) g_vmContext->lookupMethodCtx(cls, name, ctx,
-                                                MethodLookup::ObjMethod, true);
+            (void) g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod,
+                                                true);
             NOT_REACHED();
           }
         } else {
@@ -1030,7 +1030,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
                                                // in that case.
                                          (ActRec*)vmfp,
                                          false /*raise*/);
-  if (LIKELY(res == MethodFoundNoThis &&
+  if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
              f->isStatic())) {
     f->validate();
@@ -1042,7 +1042,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
     ar->setClass(const_cast<Class*>(cls));
     return f;
   }
-  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
+  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
 
   // Indicate to the IR that it should take even slower path
   return nullptr;
@@ -1073,7 +1073,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
                                                // in that case.
                                          ec->getFP(),
                                          false /*raise*/);
-  if (LIKELY(res == MethodFoundNoThis &&
+  if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
              f->isStatic())) {
     f->validate();
@@ -1085,7 +1085,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
     ar->setClass(const_cast<Class*>(cls));
     return f;
   }
-  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
+  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
   assert(*vmpc() == OpFPushClsMethodD);
@@ -1118,8 +1118,8 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
                                          nullptr,
                                          (ActRec*)vmfp,
                                          false /*raise*/);
-  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
-  if (LIKELY(res == MethodFoundNoThis && !f->isAbstract())) {
+  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
+  if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a
     // method that may or may not be static. This implies that
     // lookupClsMethod, given the same class and the same method name,

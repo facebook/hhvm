@@ -36,7 +36,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
   hdf["tpid"] = string(buf);
 
-  hdf["cmd"] = transport->getMethod();
+  hdf["cmd"] = static_cast<int>(transport->getMethod());
   hdf["url"] = transport->getUrl();
   hdf["remote_host"] = transport->getRemoteHost();
   hdf["remote_port"] = transport->getRemotePort();

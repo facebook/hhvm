@@ -831,7 +831,8 @@ public:
       String key(p + 1, namelen, CopyString);
       p += namelen + 1;
       if (has_value) {
-        VariableUnserializer vu(p, endptr, VariableUnserializer::Serialize);
+        VariableUnserializer vu(p, endptr,
+                                VariableUnserializer::Type::Serialize);
         try {
           g->getRef(s__SESSION).set(key, vu.unserialize());
           p = vu.head();
@@ -891,7 +892,8 @@ public:
       String key(p, q - p, CopyString);
       q++;
       if (has_value) {
-        VariableUnserializer vu(q, endptr, VariableUnserializer::Serialize);
+        VariableUnserializer vu(q, endptr,
+                                VariableUnserializer::Type::Serialize);
         try {
           g->getRef(s__SESSION).set(key, vu.unserialize());
           q = vu.head();
@@ -1101,7 +1103,7 @@ static void php_session_send_cookie() {
     time_t t = tv.tv_sec + PS(cookie_lifetime);
     if (t > 0) {
       ncookie.append(COOKIE_EXPIRES);
-      ncookie.append(DateTime(t).toString(DateTime::Cookie));
+      ncookie.append(DateTime(t).toString(DateTime::DateFormat::Cookie));
     }
   }
   if (!PS(cookie_path).empty()) {

@@ -49,7 +49,7 @@ static StaticString s_type_mismatch(LITSTR_INIT("Type mismatch"));
 template<typename T>
 static inline int serializeImpl(T data, String& sdata) {
   TRACE(2, "DebuggerWireHelpers::serializeImpl\n");
-  VariableSerializer vs(VariableSerializer::DebuggerSerialize);
+  VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
   try {
     sdata = vs.serialize(data, true);
   } catch (StringBufferLimitException &e) {
@@ -71,7 +71,7 @@ static inline int unserializeImpl(CStrRef sdata, Variant& data) {
     return DebuggerWireHelpers::UnknownError;
   }
   VariableUnserializer vu(sdata.data(), sdata.size(),
-                          VariableUnserializer::Serialize, true);
+                          VariableUnserializer::Type::Serialize, true);
   try {
     data = vu.unserialize();
   } catch (Exception &e) {

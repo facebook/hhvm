@@ -403,13 +403,14 @@ String f_gmstrftime(CStrRef format,
 }
 
 Array f_getdate(int64_t timestamp /* = TimeStamp::Current() */) {
-  return DateTime(timestamp, false).toArray(DateTime::TimeMap);
+  return DateTime(timestamp, false).toArray(DateTime::ArrayFormat::TimeMap);
 }
 
 Array f_localtime(int64_t timestamp /* = TimeStamp::Current() */,
                   bool is_associative /* = false */) {
   DateTime::ArrayFormat format =
-    is_associative ? DateTime::TmMap : DateTime::TmVector;
+    is_associative ? DateTime::ArrayFormat::TmMap :
+                     DateTime::ArrayFormat::TmVector;
   return DateTime(timestamp, false).toArray(format);
 }
 

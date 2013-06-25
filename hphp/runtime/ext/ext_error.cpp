@@ -192,19 +192,19 @@ bool f_trigger_error(CStrRef error_msg,
   if (g_context->getThrowAllErrors()) throw error_type;
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ThrowIfUnhandled,
+                       ExecutionContext::ErrorThrowMode::IfUnhandled,
                        "HipHop Recoverable error: ");
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Warning: ");
   } else if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Notice: ");
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Deprecated: ");
   } else {
     return false;

@@ -106,7 +106,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
     SatelliteServerInfoPtr info = RuntimeOption::SatelliteServerInfos[i];
     SatelliteServerPtr satellite = SatelliteServer::Create(info);
     if (satellite) {
-      if (info->getType() == SatelliteServer::KindOfDanglingPageServer) {
+      if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
         m_danglings.push_back(satellite);
       } else {
         m_satellites.push_back(satellite);
@@ -133,7 +133,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 
   if (!RuntimeOption::StartupDocument.empty()) {
     Hdf hdf;
-    hdf["cmd"] = Transport::GET;
+    hdf["cmd"] = static_cast<int>(Transport::Method::GET);
     hdf["url"] = RuntimeOption::StartupDocument;
     hdf["remote_host"] = RuntimeOption::ServerIP;
 

@@ -30,7 +30,7 @@ DECLARE_BOOST_TYPES(SatelliteServerInfo);
 
 class RPCRequestHandler : public RequestHandler {
 public:
-  enum ReturnEncodeType {
+  enum class ReturnEncodeType {
     Json      = 1,
     Serialize = 2,
   };

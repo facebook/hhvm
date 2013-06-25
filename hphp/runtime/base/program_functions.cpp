@@ -276,10 +276,10 @@ void register_variable(Variant &variables, char *name, CVarRef value,
   }
 }
 
-enum ContextOfException {
-  ReqInitException = 1,
-  InvokeException,
-  HandlerException,
+enum class ContextOfException {
+  ReqInit = 1,
+  Invoke,
+  Handler,
 };
 
 static void handle_exception_append_bt(std::string& errorMsg,
@@ -301,9 +301,9 @@ static void handle_exception_helper(bool& ret,
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
-    if (where == ReqInitException) {
+    if (where == ContextOfException::ReqInit) {
       ret = false;
-    } else if (where != HandlerException &&
+    } else if (where != ContextOfException::Handler &&
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace();
@@ -312,7 +312,7 @@ static void handle_exception_helper(bool& ret,
     }
   } catch (const PhpFileDoesNotExistException &e) {
     ret = false;
-    if (where != HandlerException) {
+    if (where != ContextOfException::Handler) {
       raise_notice("%s", e.getMessage().c_str());
     } else {
       Logger::Error("%s", e.getMessage().c_str());
@@ -342,11 +342,11 @@ static void handle_exception_helper(bool& ret,
     ret = false;
     error = true;
     errorMsg = "";
-    if (where == HandlerException) {
+    if (where == ContextOfException::Handler) {
       errorMsg = "Exception handler threw an exception: ";
     }
     errorMsg += e.what();
-    if (where == InvokeException) {
+    if (where == ContextOfException::Invoke) {
       bool handlerRet = context->onFatalError(e);
       if (handlerRet) {
         ret = oldRet;
@@ -369,7 +369,7 @@ static void handle_exception_helper(bool& ret,
     ret = false;
     error = true;
     errorMsg = "";
-    if (where == HandlerException) {
+    if (where == ContextOfException::Handler) {
       errorMsg = "Exception handler threw an object exception: ";
     }
     try {
@@ -377,7 +377,7 @@ static void handle_exception_helper(bool& ret,
     } catch (...) {
       errorMsg += "(unable to call toString())";
     }
-    if (where == InvokeException) {
+    if (where == ContextOfException::Invoke) {
       bool handlerRet = context->onUnhandledException(e);
       if (handlerRet) {
         ret = oldRet;
@@ -1263,28 +1263,30 @@ void hphp_process_init() {
 static void handle_exception(bool& ret, ExecutionContext* context,
                              std::string& errorMsg, ContextOfException where,
                              bool& error, bool richErrorMsg) {
-  assert(where == InvokeException || where == ReqInitException);
+  assert(where == ContextOfException::Invoke ||
+         where == ContextOfException::ReqInit);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
   } catch (const ExitException &e) {
     // Got an ExitException during exception handling, handle
     // similarly to the case below but don't call obEndAll().
   } catch (...) {
-    handle_exception_helper(ret, context, errorMsg, HandlerException, error,
-                            richErrorMsg);
+    handle_exception_helper(ret, context, errorMsg, ContextOfException::Handler,
+                            error, richErrorMsg);
     context->obEndAll();
   }
 }
 
 static void handle_reqinit_exception(bool &ret, ExecutionContext *context,
                                      std::string &errorMsg, bool &error) {
-  handle_exception(ret, context, errorMsg, ReqInitException, error, false);
+  handle_exception(ret, context, errorMsg, ContextOfException::ReqInit, error,
+                   false);
 }
 
 static void handle_invoke_exception(bool &ret, ExecutionContext *context,
                                     std::string &errorMsg, bool &error,
                                     bool richErrorMsg) {
-  handle_exception(ret, context, errorMsg, InvokeException, error,
+  handle_exception(ret, context, errorMsg, ContextOfException::Invoke, error,
                    richErrorMsg);
 }
 

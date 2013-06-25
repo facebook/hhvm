@@ -42,8 +42,8 @@ typedef std::map<std::string, std::string, stdltistr> CookieMap;
  */
 class Transport : public IDebuggable {
 public:
-  enum Method {
-    UnknownMethod,
+  enum class Method {
+    Unknown,
 
     GET,
     POST,
@@ -53,8 +53,8 @@ public:
 
   // TODO: add all status codes
   // (http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)
-  enum StatusCode {
-    UnknownStatusCode,
+  enum class StatusCode {
+    Unknown,
 
     // Success
     OK = 200,
@@ -72,7 +72,7 @@ public:
     SERVICE_UNAVAILABLE = 503,
   };
 
-  enum ThreadType {
+  enum class ThreadType {
     RequestThread,
     PageletThread,
     XboxThread,
@@ -230,22 +230,22 @@ public:
    * Whether a parameter exists. Normally this is not needed to know, unless
    * "null" is different from an empty string or 0.
    */
-  bool paramExists(const char *name, Method method = GET);
+  bool paramExists(const char *name, Method method = Method::GET);
 
   /**
    * Get value of a parameter. Returns empty string is not present.
    */
-  std::string getParam(const char *name, Method method = GET);
+  std::string getParam(const char *name, Method method = Method::GET);
 
   /**
    * Turn a string parameter into an integer.
    */
-  int getIntParam(const char *name, Method method = GET);
+  int getIntParam(const char *name, Method method = Method::GET);
 
   /**
    * Turn a string parameter into a 64-bit number.
    */
-  long long getInt64Param(const char *name, Method method = GET);
+  long long getInt64Param(const char *name, Method method = Method::GET);
 
   /**
    * Collect multiple string parameters with the same name into "values".
@@ -253,7 +253,7 @@ public:
    *   /foo?x=1&x=2&x=3
    */
   void getArrayParam(const char *name, std::vector<std::string> &values,
-                     Method method = GET);
+                     Method method = Method::GET);
 
   /**
    * Split a string parameter into multiple sub-strings.
@@ -261,7 +261,7 @@ public:
    *  /foo?x=1:2:3
    */
   void getSplitParam(const char *name, std::vector<std::string> &values,
-                     char delimiter, Method method = GET);
+                     char delimiter, Method method = Method::GET);
 
   /**
    * Test whether client accepts a certain encoding.
@@ -400,11 +400,11 @@ protected:
 
   bool m_isSSL;
 
-  enum CompressionDecision {
+  enum class CompressionDecision {
     NotDecidedYet,
-    ShouldNotCompress,
-    ShouldCompress,
-    HasToCompress,
+    ShouldNot,
+    Should,
+    HasTo,
   };
   CompressionDecision m_compressionDecision;
 

@@ -29,11 +29,11 @@ namespace HPHP {
  */
 
 void raise_error(const std::string &msg) {
-  int errnum = ErrorConstants::ERROR;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
   g_context->handleError(msg, errnum, false,
                          RuntimeOption::CallUserHandlerOnFatals ?
-                         ExecutionContext::ThrowIfUnhandled :
-                         ExecutionContext::AlwaysThrow,
+                         ExecutionContext::ErrorThrowMode::IfUnhandled :
+                         ExecutionContext::ErrorThrowMode::Always,
                          "HipHop Fatal error: ");
 }
 
@@ -47,19 +47,19 @@ void raise_error(const char *fmt, ...) {
 }
 
 void raise_error_without_first_frame(const std::string &msg) {
-  int errnum = ErrorConstants::ERROR;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
   g_context->handleError(msg, errnum, false,
                          RuntimeOption::CallUserHandlerOnFatals ?
-                         ExecutionContext::ThrowIfUnhandled :
-                         ExecutionContext::AlwaysThrow,
+                         ExecutionContext::ErrorThrowMode::IfUnhandled :
+                         ExecutionContext::ErrorThrowMode::Always,
                          "HipHop Fatal error: ",
                          true);
 }
 
 void raise_recoverable_error(const std::string &msg) {
-  int errnum = ErrorConstants::RECOVERABLE_ERROR;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ThrowIfUnhandled,
+                         ExecutionContext::ErrorThrowMode::IfUnhandled,
                          "HipHop Recoverable Fatal error: ");
 }
 
@@ -79,13 +79,13 @@ void raise_strict_warning(const std::string &msg) {
       (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
     return;
   }
-  int errnum = ErrorConstants::STRICT;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::STRICT);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Strict Warning: ");
 }
 
@@ -95,9 +95,9 @@ void raise_strict_warning(const char *fmt, ...) {
     return;
   }
   std::string msg;
-  int errnum = ErrorConstants::STRICT;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::STRICT);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   va_list ap;
@@ -105,7 +105,7 @@ void raise_strict_warning(const char *fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Strict Warning: ");
 }
 
@@ -116,13 +116,13 @@ void raise_warning(const std::string &msg) {
       (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
     return;
   }
-  int errnum = ErrorConstants::WARNING;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Warning: ");
 }
 
@@ -132,9 +132,9 @@ void raise_warning(const char *fmt, ...) {
     return;
   }
   std::string msg;
-  int errnum = ErrorConstants::WARNING;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   va_list ap;
@@ -142,13 +142,15 @@ void raise_warning(const char *fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Warning: ");
 }
 
 void raise_debugging(const std::string &msg) {
-  g_context->handleError(msg, ErrorConstants::WARNING, true,
-                         ExecutionContext::NeverThrow,
+  g_context->handleError(msg,
+                         static_cast<int>(ErrorConstants::ErrorModes::WARNING),
+                         true,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Warning: ");
 }
 
@@ -166,13 +168,13 @@ void raise_notice(const std::string &msg) {
       (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
     return;
   }
-  int errnum = ErrorConstants::NOTICE;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::NOTICE);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Notice: ");
 }
 
@@ -182,9 +184,9 @@ void raise_notice(const char *fmt, ...) {
     return;
   }
   std::string msg;
-  int errnum = ErrorConstants::NOTICE;
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::NOTICE);
   if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::NeverThrow)) {
+                                     ExecutionContext::ErrorThrowMode::Never)) {
     return;
   }
   va_list ap;
@@ -192,7 +194,7 @@ void raise_notice(const char *fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
-                         ExecutionContext::NeverThrow,
+                         ExecutionContext::ErrorThrowMode::Never,
                          "HipHop Notice: ");
 }
 

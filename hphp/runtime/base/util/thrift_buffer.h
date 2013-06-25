@@ -94,7 +94,9 @@ public:
    * Constructing with some initial size, subsequent allocation will double
    * existing size every round.
    */
-  ThriftBuffer(int size, int sType = VariableSerializer::Serialize);
+  explicit ThriftBuffer(
+    int size,
+    VariableSerializer::Type sType = VariableSerializer::Type::Serialize);
   ~ThriftBuffer();
 
   void flush(); // write bytes to transport
@@ -271,7 +273,7 @@ private:
 
   char *m_buf;
 
-  int m_serializerType;
+  VariableSerializer::Type m_serializerType;
 
   void flush(CStrRef data);
   void read(char *data, int len);

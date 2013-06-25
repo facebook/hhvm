@@ -413,7 +413,7 @@ Variant unserialize_ex(const char* str, int len,
 inline Variant unserialize_from_buffer(const char* str, int len,
                                        CArrRef class_whitelist = null_array) {
   return unserialize_ex(str, len,
-                        VariableUnserializer::Serialize,
+                        VariableUnserializer::Type::Serialize,
                         class_whitelist);
 }
 

@@ -42,7 +42,8 @@ Transport::Transport()
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),
     m_compression(true), m_compressor(nullptr), m_isSSL(false),
-    m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
+    m_compressionDecision(CompressionDecision::NotDecidedYet),
+    m_threadType(ThreadType::RequestThread) {
   memset(&m_queueTime, 0, sizeof(m_queueTime));
   memset(&m_wallTime, 0, sizeof(m_wallTime));
   memset(&m_cpuTime, 0, sizeof(m_cpuTime));
@@ -76,15 +77,15 @@ void Transport::onRequestStart(const timespec &queueTime) {
 
 const char *Transport::getMethodName() {
   switch (getMethod()) {
-    case GET:  return "GET";
-    case HEAD: return "HEAD";
-    case POST: {
-      const char *m = getExtendedMethod();
-      return m ? m : "POST";
-    }
-    default:
-      break;
-    }
+  case Method::GET:  return "GET";
+  case Method::HEAD: return "HEAD";
+  case Method::POST: {
+    const char *m = getExtendedMethod();
+    return m ? m : "POST";
+  }
+  default:
+    break;
+  }
   return "";
 }
 
@@ -206,9 +207,10 @@ void Transport::parsePostParams() {
   }
 }
 
-bool Transport::paramExists(const char *name, Method method /* = GET */) {
+bool Transport::paramExists(const char *name,
+                            Method method /* = Method::GET */) {
   assert(name && *name);
-  if (method == GET || method == AUTO) {
+  if (method == Method::GET || method == Method::AUTO) {
     if (m_url == nullptr) {
       parseGetParams();
     }
@@ -217,7 +219,7 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
     }
   }
 
-  if (method == POST || method == AUTO) {
+  if (method == Method::POST || method == Method::AUTO) {
     if (!m_postDataParsed) {
       parsePostParams();
     }
@@ -229,10 +231,11 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
   return false;
 }
 
-std::string Transport::getParam(const char *name,  Method method /* = GET */) {
+std::string Transport::getParam(const char *name,
+                                Method method /* = Method::GET */) {
   assert(name && *name);
 
-  if (method == GET || method == AUTO) {
+  if (method == Method::GET || method == Method::AUTO) {
     if (m_url == nullptr) {
       parseGetParams();
     }
@@ -242,7 +245,7 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
     }
   }
 
-  if (method == POST || method == AUTO) {
+  if (method == Method::POST || method == Method::AUTO) {
     if (!m_postDataParsed) {
       parsePostParams();
     }
@@ -255,7 +258,8 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
   return "";
 }
 
-int Transport::getIntParam(const char *name, Method method /* = GET */) {
+int Transport::getIntParam(const char *name,
+                           Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (param.empty()) {
     return 0;
@@ -264,7 +268,7 @@ int Transport::getIntParam(const char *name, Method method /* = GET */) {
 }
 
 long long Transport::getInt64Param(const char *name,
-                                   Method method /* = GET */) {
+                                   Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (param.empty()) {
     return 0;
@@ -275,7 +279,7 @@ long long Transport::getInt64Param(const char *name,
 void Transport::getArrayParam(const char *name,
                               std::vector<std::string> &values,
                               Method method /* = GET */) {
-  if (method == GET || method == AUTO) {
+  if (method == Method::GET || method == Method::AUTO) {
     if (m_url == nullptr) {
       parseGetParams();
     }
@@ -286,7 +290,7 @@ void Transport::getArrayParam(const char *name,
     }
   }
 
-  if (method == POST || method == AUTO) {
+  if (method == Method::POST || method == Method::AUTO) {
     if (!m_postDataParsed) {
       parsePostParams();
     }
@@ -300,7 +304,8 @@ void Transport::getArrayParam(const char *name,
 
 void Transport::getSplitParam(const char *name,
                               std::vector<std::string> &values,
-                              char delimiter, Method method /* = GET */) {
+                              char delimiter,
+                              Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (!param.empty()) {
     Util::split(delimiter, param.c_str(), values);
@@ -363,7 +368,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
     /* Zend seems to set 303 on a post with HTTP version > 1.0 in the code but
      * in our testing we can only get it to give 302.
     Method m = getMethod();
-    if (m != GET && m != HEAD) {
+    if (m != Method::GET && m != Method::HEAD) {
       setResponse(303);
     } else {
       setResponse(302);
@@ -472,11 +477,11 @@ string Transport::getCookie(const string &name) {
 }
 
 bool Transport::decideCompression() {
-  assert(m_compressionDecision == NotDecidedYet);
+  assert(m_compressionDecision == CompressionDecision::NotDecidedYet);
 
   if (!RuntimeOption::ForceCompressionURL.empty() &&
       getCommand() == RuntimeOption::ForceCompressionURL) {
-    m_compressionDecision = HasToCompress;
+    m_compressionDecision = CompressionDecision::HasTo;
     return true;
   }
 
@@ -485,11 +490,11 @@ bool Transport::decideCompression() {
        cookieExists(RuntimeOption::ForceCompressionCookie.c_str())) ||
       (!RuntimeOption::ForceCompressionParam.empty() &&
        paramExists(RuntimeOption::ForceCompressionParam.c_str()))) {
-    m_compressionDecision = ShouldCompress;
+    m_compressionDecision = CompressionDecision::Should;
     return true;
   }
 
-  m_compressionDecision = ShouldNotCompress;
+  m_compressionDecision = CompressionDecision::ShouldNot;
   return false;
 }
 
@@ -551,8 +556,7 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64_t expire /* = 0 */,
      * so in order to force cookies to be deleted, even on MSIE, we
      * pick an expiry date in the past
      */
-    String sdt = DateTime(1, true)
-      .toString(DateTime::Cookie);
+    String sdt = DateTime(1, true).toString(DateTime::DateFormat::Cookie);
     cookie += name.data();
     cookie += "=deleted; expires=";
     cookie += sdt.data();
@@ -566,7 +570,8 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64_t expire /* = 0 */,
         return false;
       }
       cookie += "; expires=";
-      String sdt = DateTime(expire, true).toString(DateTime::Cookie);
+      String sdt =
+        DateTime(expire, true).toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
     }
   }
@@ -687,11 +692,11 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   // we don't use chunk encoding to send anything pre-compressed
   assert(!compressed || !m_chunkedEncoding);
 
-  if (m_compressionDecision == NotDecidedYet) {
+  if (m_compressionDecision == CompressionDecision::NotDecidedYet) {
     decideCompression();
   }
   if (compressed || !isCompressionEnabled() ||
-      m_compressionDecision == ShouldNotCompress) {
+      m_compressionDecision == CompressionDecision::ShouldNot) {
     return response;
   }
 
@@ -699,7 +704,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,
   // where we don't really know if next chunk will benefit from compresseion.
   if (m_chunkedEncoding || size > 1000 ||
-      m_compressionDecision == HasToCompress) {
+      m_compressionDecision == CompressionDecision::HasTo) {
     if (m_compressor == nullptr) {
       m_compressor = new StreamCompressor(RuntimeOption::GzipCompressionLevel,
                                           CODING_GZIP, true);
@@ -710,7 +715,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
     if (compressedData) {
       String deleter(compressedData, len, AttachString);
       if (m_chunkedEncoding || len < size ||
-          m_compressionDecision == HasToCompress) {
+          m_compressionDecision == CompressionDecision::HasTo) {
         response = deleter;
         compressed = true;
       }
@@ -781,9 +786,9 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   }
 
   m_responseSize += response.size();
-  ServerStats::SetThreadMode(ServerStats::Writing);
+  ServerStats::SetThreadMode(ServerStats::ThreadMode::Writing);
   sendImpl(response.data(), response.size(), m_responseCode, chunked);
-  ServerStats::SetThreadMode(ServerStats::Processing);
+  ServerStats::SetThreadMode(ServerStats::ThreadMode::Processing);
 
   ServerStats::LogBytes(size);
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
@@ -873,10 +878,10 @@ bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
 
 const char *Transport::getThreadTypeName() const {
   switch (m_threadType) {
-    case RequestThread: return "Web Request";
-    case PageletThread: return "Pagelet Thread";
-    case XboxThread:    return "Xbox Thread";
-    case RpcThread:     return "RPC Thread";
+    case ThreadType::RequestThread: return "Web Request";
+    case ThreadType::PageletThread: return "Pagelet Thread";
+    case ThreadType::XboxThread:    return "Xbox Thread";
+    case ThreadType::RpcThread:     return "RPC Thread";
   }
   return "(unknown)";
 }
@@ -886,7 +891,7 @@ void Transport::debuggerInfo(InfoVec &info) {
   Add(info, "URL",         getCommand());
   Add(info, "HTTP",        getHTTPVersion());
   Add(info, "Method",      getMethodName());
-  if (getMethod() == Transport::POST) {
+  if (getMethod() == Method::POST) {
     int size; getPostData(size);
     Add(info, "Post Data", FormatSize(size));
   }

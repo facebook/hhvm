@@ -28,7 +28,7 @@ namespace HPHP {
 
 class ErrorConstants {
 public:
-  enum ErrorModes {
+  enum class ErrorModes {
     ERROR = 1,
     WARNING = 2,
     PARSE = 4, // not supported

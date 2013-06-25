@@ -43,7 +43,7 @@ UserFile::UserFile(Class *cls, int options /*= 0 */,
                    m_cls(cls), m_options(options) {
   Transl::VMRegAnchor _;
   const Func *ctor;
-  if (MethodLookup::MethodFoundWithThis !=
+  if (MethodLookup::LookupResult::MethodFoundWithThis !=
       g_vmContext->lookupCtorMethod(ctor, cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    cls->name()->data());
@@ -107,7 +107,7 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
   }
 
   switch(g_vmContext->lookupObjMethod(func, m_cls, name.get())) {
-    case MethodLookup::MethodFoundWithThis:
+    case MethodLookup::LookupResult::MethodFoundWithThis:
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
@@ -115,7 +115,7 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
       return ret;
     }
 
-    case MethodLookup::MagicCallFound:
+    case MethodLookup::LookupResult::MagicCallFound:
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func,
@@ -124,17 +124,17 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
       return ret;
     }
 
-    case MethodLookup::MethodNotFound:
+    case MethodLookup::LookupResult::MethodNotFound:
       // There's a method somewhere in the heirarchy, but none
       // which are accessible.
       /* fallthrough */
-    case MethodLookup::MagicCallStaticFound:
+    case MethodLookup::LookupResult::MagicCallStaticFound:
       // We're not calling staticly, so this result is unhelpful
       // Also, it's never produced by lookupObjMethod, so it'll
       // never happen, but we must handle all enums
       return uninit_null();
 
-    case MethodLookup::MethodFoundNoThis:
+    case MethodLookup::LookupResult::MethodFoundNoThis:
       // Should never happen (Attr::Static check in ctor)
       assert(false);
       raise_error("%s::%s() must not be declared static",

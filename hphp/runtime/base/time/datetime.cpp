@@ -532,15 +532,15 @@ String DateTime::toString(CStrRef format, bool stdc /* = false */) const {
 
 String DateTime::toString(DateFormat format) const {
   switch (format) {
-  case RFC822:     return rfcFormat(DateFormatRFC822);
-  case RFC850:     return rfcFormat(DateFormatRFC850);
-  case RFC1036:    return rfcFormat(DateFormatRFC1036);
-  case RFC1123:    return rfcFormat(DateFormatRFC1123);
-  case RFC2822:    return rfcFormat(DateFormatRFC2822);
-  case RFC3339:    return rfcFormat(DateFormatRFC3339);
-  case ISO8601:    return rfcFormat(DateFormatISO8601);
-  case Cookie:     return rfcFormat(DateFormatCookie);
-  case HttpHeader: return rfcFormat(DateFormatHttpHeader);
+  case DateFormat::RFC822:     return rfcFormat(DateFormatRFC822);
+  case DateFormat::RFC850:     return rfcFormat(DateFormatRFC850);
+  case DateFormat::RFC1036:    return rfcFormat(DateFormatRFC1036);
+  case DateFormat::RFC1123:    return rfcFormat(DateFormatRFC1123);
+  case DateFormat::RFC2822:    return rfcFormat(DateFormatRFC2822);
+  case DateFormat::RFC3339:    return rfcFormat(DateFormatRFC3339);
+  case DateFormat::ISO8601:    return rfcFormat(DateFormatISO8601);
+  case DateFormat::Cookie:     return rfcFormat(DateFormatCookie);
+  case DateFormat::HttpHeader: return rfcFormat(DateFormatHttpHeader);
   default:
     assert(false);
   }
@@ -686,7 +686,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   Array ret;
   bool error;
   switch (format) {
-  case TimeMap:
+  case ArrayFormat::TimeMap:
     ret.set(s_seconds, second());
     ret.set(s_minutes, minute());
     ret.set(s_hours,   hour());
@@ -699,7 +699,7 @@ Array DateTime::toArray(ArrayFormat format) const {
     ret.set(s_month,   monthName());
     ret.set(0,         toTimeStamp(error));
     break;
-  case TmMap:
+  case ArrayFormat::TmMap:
     {
       struct tm tm;
       toTm(tm);
@@ -714,7 +714,7 @@ Array DateTime::toArray(ArrayFormat format) const {
       ret.set(s_tm_isdst, tm.tm_isdst);
     }
     break;
-  case TmVector:
+  case ArrayFormat::TmVector:
     {
       struct tm tm;
       toTm(tm);
@@ -903,9 +903,9 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
                              double latitude, double longitude,
                              double zenith, double utc_offset,
                              bool calc_sunset) const {
-  if (retformat != ReturnTimeStamp &&
-      retformat != ReturnString &&
-      retformat != ReturnDouble) {
+  if (retformat != SunInfoFormat::ReturnTimeStamp &&
+      retformat != SunInfoFormat::ReturnString &&
+      retformat != SunInfoFormat::ReturnDouble) {
     raise_warning("Wrong return format given, pick one of "
                     "SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or "
                     "SUNFUNCS_RET_DOUBLE");
@@ -930,7 +930,7 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
     return false;
   }
 
-  if (retformat == ReturnTimeStamp) {
+  if (retformat == SunInfoFormat::ReturnTimeStamp) {
     return calc_sunset ? sunset : sunrise;
   }
 
@@ -939,14 +939,14 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
     N -= floor(N / 24) * 24;
   }
 
-  if (retformat == ReturnString) {
+  if (retformat == SunInfoFormat::ReturnString) {
     char retstr[6];
     snprintf(retstr, sizeof(retstr),
              "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
     return String(retstr, CopyString);
   }
 
-  assert(retformat == ReturnDouble);
+  assert(retformat == SunInfoFormat::ReturnDouble);
   return N;
 }
 

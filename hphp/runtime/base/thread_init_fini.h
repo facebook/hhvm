@@ -28,7 +28,7 @@ void finish_thread_locals(void *arg = nullptr) ATTRIBUTE_COLD
   NEVER_INLINE;
 
 struct InitFiniNode {
-  enum When {
+  enum class When {
     ThreadInit,
     ThreadFini,
     ProcessInit,

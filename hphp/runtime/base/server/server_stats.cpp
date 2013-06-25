@@ -706,7 +706,7 @@ void ServerStats::Report(string &output, Format format,
                          const list<TimeSlot*> &slots,
                          const std::string &prefix) {
   std::ostringstream out;
-  if (format == KVP) {
+  if (format == Format::KVP) {
     bool first = true;
     for (list<TimeSlot*>::const_iterator iter = slots.begin();
          iter != slots.end(); ++iter) {
@@ -751,12 +751,12 @@ void ServerStats::Report(string &output, Format format,
 
   } else {
     Writer *w;
-    if (format == XML) {
+    if (format == Format::XML) {
       w = new XMLWriter(out);
-    } else if (format == HTML) {
+    } else if (format == Format::HTML) {
       w = new HTMLWriter(out);
     } else {
-      assert(format == JSON);
+      assert(format == Format::JSON);
       w = new JSONWriter(out);
     }
 
@@ -833,12 +833,12 @@ static std::string format_duration(timeval &duration) {
 void ServerStats::ReportStatus(std::string &output, Format format) {
   std::ostringstream out;
   Writer *w;
-  if (format == XML) {
+  if (format == Format::XML) {
     w = new XMLWriter(out);
-  } else if (format == HTML) {
+  } else if (format == Format::HTML) {
     w = new HTMLWriter(out);
   } else {
-    assert(format == JSON);
+    assert(format == Format::JSON);
     w = new JSONWriter(out);
   }
 
@@ -893,10 +893,10 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
 
     const char *mode = "(unknown)";
     switch (ts.m_mode) {
-    case Idling:         mode = "idle";    break;
-    case Processing:     mode = "process"; break;
-    case Writing:        mode = "writing"; break;
-    case PostProcessing: mode = "psp";     break;
+    case ThreadMode::Idling:         mode = "idle";    break;
+    case ThreadMode::Processing:     mode = "process"; break;
+    case ThreadMode::Writing:        mode = "writing"; break;
+    case ThreadMode::PostProcessing: mode = "psp";     break;
     default: assert(false);
     }
 
@@ -982,7 +982,8 @@ Array ServerStats::EndNetworkProfile() {
 ///////////////////////////////////////////////////////////////////////////////
 
 ServerStats::ThreadStatus::ThreadStatus()
-    : m_requestCount(0), m_writeBytes(0), m_mode(Idling), m_ioInProcess(false) {
+    : m_requestCount(0), m_writeBytes(0), m_mode(ThreadMode::Idling),
+      m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
   memset(&m_start, 0, sizeof(m_start));
   memset(&m_done, 0, sizeof(m_done));
@@ -1071,7 +1072,7 @@ void ServerStats::logPage(const string &url, int code) {
     m_max = now;
   }
 
-  m_threadStatus.m_mode = Idling;
+  m_threadStatus.m_mode = ThreadMode::Idling;
   gettimeofday(&m_threadStatus.m_done, 0);
 }
 
@@ -1123,7 +1124,7 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
   m_threadStatus.m_mm = ThreadInfo::s_threadInfo->m_mm;
   gettimeofday(&m_threadStatus.m_start, 0);
   memset(&m_threadStatus.m_done, 0, sizeof(m_threadStatus.m_done));
-  m_threadStatus.m_mode = Processing;
+  m_threadStatus.m_mode = ThreadMode::Processing;
   m_threadStatus.m_ioStatuses.clear();
 
   *m_threadStatus.m_ioLogicalName = 0;

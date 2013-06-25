@@ -2019,7 +2019,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     ArrayInit frame(7);
 
     auto const curUnit = fp->m_func->unit();
-    auto const curOp = *reinterpret_cast<const Opcode*>(curUnit->at(pc));
+    auto const curOp = toOp(*curUnit->at(pc));
     auto const isReturning = curOp == OpRetC || curOp == OpRetV;
 
     // Builtins and generators don't have a file and line number
@@ -3992,57 +3992,57 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFatal(PC& pc) {
   }
 }
 
-#define JMP_SURPRISE_CHECK()                                               \
-  if (offset < 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) { \
-    SYNC();                                                                \
-    EventHook::CheckSurprise();                                            \
+inline void OPTBLD_INLINE VMExecutionContext::jmpSurpriseCheck(Offset offset) {
+  if (offset < 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+    EventHook::CheckSurprise();
   }
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopJmp(PC& pc) {
   NEXT();
   DECODE_JMP(Offset, offset);
-  JMP_SURPRISE_CHECK();
+  jmpSurpriseCheck(offset);
+
   pc += offset - 1;
 }
 
-#define JMPOP(OP, VOP) do {                                       \
-  Cell* c1 = m_stack.topC();                                      \
-  if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) { \
-    int64_t n = c1->m_data.num;                                   \
-    if (n OP 0) {                                                 \
-      NEXT();                                                     \
-      DECODE_JMP(Offset, offset);                                 \
-      JMP_SURPRISE_CHECK();                                       \
-      pc += offset - 1;                                           \
-      m_stack.popX();                                             \
-    } else {                                                      \
-      pc += 1 + sizeof(Offset);                                   \
-      m_stack.popX();                                             \
-    }                                                             \
-  } else {                                                        \
-    if (VOP(tvCellAsCVarRef(c1))) {                               \
-      NEXT();                                                     \
-      DECODE_JMP(Offset, offset);                                 \
-      JMP_SURPRISE_CHECK();                                       \
-      pc += offset - 1;                                           \
-      m_stack.popC();                                             \
-    } else {                                                      \
-      pc += 1 + sizeof(Offset);                                   \
-      m_stack.popC();                                             \
-    }                                                             \
-  }                                                               \
-} while (0)
+template<Op op>
+inline void OPTBLD_INLINE VMExecutionContext::jmpOpImpl(PC& pc) {
+  static_assert(op == OpJmpZ || op == OpJmpNZ,
+                "jmpOpImpl should only be used by JmpZ and JmpNZ");
+  NEXT();
+  DECODE_JMP(Offset, offset);
+  jmpSurpriseCheck(offset);
+
+  Cell* c1 = m_stack.topC();
+  if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {
+    int64_t n = c1->m_data.num;
+    if (op == OpJmpZ ? n == 0 : n != 0) {
+      pc += offset - 1;
+      m_stack.popX();
+    } else {
+      pc += sizeof(Offset);
+      m_stack.popX();
+    }
+  } else {
+    auto const condition = toBoolean(tvCellAsCVarRef(c1));
+    if (op == OpJmpZ ? !condition : condition) {
+      pc += offset - 1;
+      m_stack.popC();
+    } else {
+      pc += sizeof(Offset);
+      m_stack.popC();
+    }
+  }
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopJmpZ(PC& pc) {
-  JMPOP(==, !toBoolean);
+  jmpOpImpl<OpJmpZ>(pc);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopJmpNZ(PC& pc) {
-  JMPOP(!=, toBoolean);
+  jmpOpImpl<OpJmpNZ>(pc);
 }
-
-#undef JMPOP
-#undef JMP_SURPRISE_CHECK
 
 enum class SwitchMatch {
   NORMAL,  // value was converted to an int: match normally

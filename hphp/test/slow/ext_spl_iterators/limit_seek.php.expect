@@ -1,0 +1,2 @@
+string(54) "Cannot seek to 2 which is behind offset 0 plus count 2"
+string(44) "Cannot seek to 0 which is below the offset 1"

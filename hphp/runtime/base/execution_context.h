@@ -492,8 +492,6 @@ private:
 OPCODES
 #undef O
 
-  template<bool raise>
-  void contSendImpl();
   void classExistsImpl(PC& pc, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);

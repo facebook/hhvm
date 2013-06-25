@@ -6853,33 +6853,34 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   m_fp = prevFp;
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopContCheck(PC& pc) {
+  NEXT();
+  DECODE_IVA(check_started);
+  c_Continuation* cont = this_continuation(m_fp);
+  if (check_started) {
+    cont->startedCheck();
+  }
+  cont->preNext();
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->preNext();
   cont->m_received.setNull();
-}
-
-template<bool raise>
-inline void VMExecutionContext::contSendImpl() {
-  c_Continuation* cont = this_continuation(m_fp);
-  cont->startedCheck();
-  cont->preNext();
-  cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
-  if (raise) {
-    assert(cont->m_label);
-    --cont->m_label;
-  }
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
   NEXT();
-  contSendImpl<false>();
+  c_Continuation* cont = this_continuation(m_fp);
+  cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
   NEXT();
-  contSendImpl<true>();
+  c_Continuation* cont = this_continuation(m_fp);
+  cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
+  assert(cont->m_label);
+  --cont->m_label;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {

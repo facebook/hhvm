@@ -552,6 +552,7 @@ enum SetOpOp {
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
   O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
+  O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContNext,        NA,               NOV,             NOV,        NF) \
   O(ContSend,        NA,               NOV,             NOV,        NF) \
   O(ContRaise,       NA,               NOV,             NOV,        NF) \

@@ -1269,6 +1269,7 @@ static const struct {
   { OpUnpackCont,  {Local,            StackTop2,    OutInt64,          2 }},
   { OpPackCont,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContRetC,    {Local|Stack1,     None,         OutNone,          -1 }},
+  { OpContCheck,   {None,             None,         OutNone,           0 }},
   { OpContNext,    {None,             None,         OutNone,           0 }},
   { OpContSend,    {Local,            None,         OutNone,           0 }},
   { OpContRaise,   {Local,            None,         OutNone,           0 }},

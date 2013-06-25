@@ -3720,24 +3720,28 @@ ContRetC    [C]  ->  []
   which must be a non-static method of the Continuation class. Further attempts
   to iterate it will fail.
 
+ContCheck <check started>    []  ->  []
+
+  Check whether continuation can be iterated. $this must be a Continuation
+  object. If the continuation is finished, already running, or not yet started
+  and <check started> is enabled, an exception will be thrown.
+
 ContNext    []  ->  []
 
-  Prepare continuation for iteration. $this must be a Continuation
-  object. If the continuation is finished or already running, an exception
-  will be thrown.
+  Prepare continuation for iteration. $this must be a Continuation object
+  that passed ContCheck<false> check.
 
 ContSend    []  ->  []
 
-  Prepare continuation to receive a value. $this must be a Continuation
-  object. If the continuation is finished or already running, an exception will
-  be thrown. Otherwise, the value in local 0 is stored in the continuation.
+  Prepare continuation to receive a value. $this must be a Continuation object
+  that passed ContCheck<true> check. The value in local 0 is stored in the 
+  continuation.
 
 ContRaise    []  ->  []
 
   Prepare continuation to receive a thrown exception. $this must be a
-  Continuation object. If the continuation is finished or already running, an
-  exception will be thrown. Otherwise, the exception in local 0 is stored in
-  the continuation.
+  Continuation object that passed ContCheck<true> check. The exception in
+  local 0 is stored in the continuation.
 
 ContValid    []  ->  [C:Bool]
 

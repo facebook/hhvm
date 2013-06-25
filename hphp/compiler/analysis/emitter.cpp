@@ -7010,13 +7010,17 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       // translations
       fe->setAttrs(Attr(fe->attrs() | AttrClone));
 
+      // check continuation status; send()/raise() also checks started
+      ue.emitOp(OpContCheck);
+      ue.emitIVA(m == METH_SEND || m == METH_RAISE);
+
+      const Offset ehStart = ue.bcPos();
       static Op mOps[] = {
         OpContNext,
         OpContSend,
         OpContRaise,
       };
       ue.emitOp(mOps[m]);
-      const Offset ehStart = ue.bcPos();
       ue.emitOp(OpContEnter);
       ue.emitOp(OpContStopped);
       ue.emitOp(OpNull);

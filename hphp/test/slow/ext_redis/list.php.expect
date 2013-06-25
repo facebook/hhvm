@@ -1,0 +1,15 @@
+int(4)
+array(3) {
+  [0]=>
+  string(5) "apple"
+  [1]=>
+  string(11) "easy as 123"
+  [2]=>
+  string(3) "abc"
+}
+string(4) "pear"
+string(3) "abc"
+int(2)
+string(11) "easy as 123"
+string(5) "apple"
+string(11) "easy as 123"

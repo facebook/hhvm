@@ -44,6 +44,8 @@ hphp/system/php/filter/filter_input_array.php
 hphp/system/php/sessions/SessionHandlerInterface.php
 hphp/system/php/sessions/session_set_save_handler.php
 
+hphp/system/php/redis/RedisException.php
+
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/php/DebuggerCommand.php
 hphp/system/php/XhprofFrame.php
@@ -57,6 +59,7 @@ hphp/system/php/file_system/Directory.php
 hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/pdo/PDOException.php
+hphp/system/php/redis/Redis.php
 hphp/system/php/reflection/reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php

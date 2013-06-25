@@ -1,0 +1,11 @@
+string(14) "This is a test"
+bool(true)
+array(1) {
+  [0]=>
+  string(20) "This is a multi test"
+}
+bool(true)
+array(1) {
+  [0]=>
+  string(23) "This is a pipeline test"
+}

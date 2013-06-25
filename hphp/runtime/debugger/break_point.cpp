@@ -353,7 +353,8 @@ bool BreakPointInfo::same(BreakPointInfoPtr bpi) {
   return desc() == bpi->desc();
 }
 
-bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
+bool BreakPointInfo::match(DebuggerProxy &proxy, InterruptType interrupt,
+                           InterruptSite &site) {
   TRACE(2, "BreakPointInfo::match\n");
   if (m_interruptType == interrupt) {
     switch (interrupt) {
@@ -365,13 +366,13 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
       case ExceptionThrown:
         return
           checkExceptionOrError(site.getError()) &&
-          checkUrl(site.url()) && checkClause();
+          checkUrl(site.url()) && checkClause(proxy);
       case BreakPointReached:
       {
         bool match =
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
           checkLines(site.getLine0()) && checkStack(site) &&
-          checkUrl(site.url()) && checkClause();
+          checkUrl(site.url()) && checkClause(proxy);
 
         if (!getFuncName().empty()) {
           // function entry breakpoint
@@ -999,7 +1000,7 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
   return true;
 }
 
-bool BreakPointInfo::checkClause() {
+bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
   TRACE(2, "BreakPointInfo::checkClause\n");
   if (!m_clause.empty()) {
     if (m_php.empty()) {
@@ -1014,7 +1015,8 @@ bool BreakPointInfo::checkClause() {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.
       EvalBreakControl eval(true);
-      Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false, 0);
+      Variant ret = proxy.ExecutePHP(m_php, output, 0,
+                                     DebuggerProxy::ExecutePHPFlagsNone);
       if (m_check) {
         return ret.toBoolean();
       }

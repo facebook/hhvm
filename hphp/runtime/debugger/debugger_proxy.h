@@ -58,8 +58,6 @@ public:
 
   static std::string MakePHP(const std::string &php);
   static std::string MakePHPReturn(const std::string &php);
-  static Variant ExecutePHP(const std::string &php, String &output, bool log,
-                            int frame);
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
@@ -103,11 +101,22 @@ public:
 
   bool getClientConnectionInfo(VRefParam address, VRefParam port);
 
+  enum ExecutePHPFlags {
+    ExecutePHPFlagsNone = 0x0, // No logging, not at an interrupt
+    ExecutePHPFlagsLog = 0x1, // Add logs to the output string
+    ExecutePHPFlagsAtInterrupt = 0x02 // Called when stopped at an interrupt
+  };
+
+  Variant ExecutePHP(const std::string &php, String &output, int frame,
+                     int flags);
+
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);
   bool checkFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
+  void enableSignalPolling();
+  void disableSignalPolling();
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
@@ -137,6 +146,7 @@ private:
 
   Mutex m_signalMutex; // who can talk to client
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
+  bool m_okayToPoll; // whether the polling thread can send polls to the client
 
   Mutex m_signumMutex;
   int m_signum;

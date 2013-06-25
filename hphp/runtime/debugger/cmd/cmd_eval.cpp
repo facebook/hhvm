@@ -67,11 +67,16 @@ void CmdEval::setClientOutput(DebuggerClient &client) {
   client.setOTValues(values.create());
 }
 
+// NB: unlike most other commands, the client expects that more interrupts
+// can occur while we're doing the server-side work for an eval.
 bool CmdEval::onServer(DebuggerProxy &proxy) {
   PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
-  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy.isLocal(), m_frame);
+  proxy.ExecutePHP(m_body, m_output, m_frame,
+                   DebuggerProxy::ExecutePHPFlagsAtInterrupt |
+                   (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
+                    DebuggerProxy::ExecutePHPFlagsNone));
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = locSave;

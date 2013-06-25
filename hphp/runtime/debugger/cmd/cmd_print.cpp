@@ -373,14 +373,20 @@ void CmdPrint::setClientOutput(DebuggerClient &client) {
   client.setOTValues(values);
 }
 
+// NB: unlike most other commands, the client expects that more interrupts
+// can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
   PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
-    m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                      m_output, !proxy.isLocal(), m_frame);
+    m_ret =
+      proxy.ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                       m_output, m_frame,
+                       DebuggerProxy::ExecutePHPFlagsAtInterrupt |
+                       (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
+                        DebuggerProxy::ExecutePHPFlagsNone));
   }
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;

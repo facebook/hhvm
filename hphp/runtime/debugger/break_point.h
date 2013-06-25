@@ -119,6 +119,7 @@ private:
 
 DECLARE_BOOST_TYPES(DFunctionInfo);
 DECLARE_BOOST_TYPES(BreakPointInfo);
+DECLARE_BOOST_TYPES(DebuggerProxy);
 class BreakPointInfo {
 public:
   // The state of the break point
@@ -157,7 +158,8 @@ public:
 
   bool valid();
   bool same(BreakPointInfoPtr bpi);
-  bool match(InterruptType interrupt, InterruptSite &site);
+  bool match(DebuggerProxy &proxy, InterruptType interrupt,
+             InterruptSite &site);
 
   int index() const { return m_index;}
   std::string state(bool padding) const;
@@ -242,7 +244,7 @@ private:
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);
-  bool checkClause();
+  bool checkClause(DebuggerProxy &proxy);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

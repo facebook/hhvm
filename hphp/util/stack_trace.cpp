@@ -301,7 +301,12 @@ StackTrace::FramePtr StackTrace::Translate(void *frame) {
 
   Frame * f1 = new Frame(frame);
   FramePtr f(f1);
-  if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) return f;
+  if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) {
+    // Lookup using dladdr() failed, so this is probably a PHP symbol.
+    // Let's check the perf map.
+    StackTrace::TranslateFromPerfMap(frame, f1);
+    return f;
+  }
 
   if (adata.filename) {
     f->filename = adata.filename;
@@ -317,6 +322,39 @@ StackTrace::FramePtr StackTrace::Translate(void *frame) {
   }
 
   return f;
+}
+
+void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
+  // For now just read the whole map file every time.  If this is
+  // egregiously slow I'll build a map and cache it.
+  char perfMapName[64];
+  snprintf(perfMapName,
+           sizeof(perfMapName),
+           "/tmp/perf-%d.map", getpid());
+  FILE* perfMap = fopen(perfMapName, "r");
+
+  uintptr_t begin;
+  uint32_t size;
+  char name[256];
+  while (fscanf(perfMap, "%lx %x %255s", &begin, &size, name) == 3) {
+    uintptr_t end = begin + size;
+    if (bt >= (void*)begin && bt <= (void*)end) {
+      break;
+    }
+  }
+  fclose(perfMap);
+
+  std::string filefunc = std::string(name);
+  size_t endPhp = filefunc.find("::");
+  if (endPhp == std::string::npos) {
+    f->funcname = std::string(filefunc);
+    return;
+  }
+  endPhp += 2;   // Skip the ::
+  size_t endFile = filefunc.find("::", endPhp);
+
+  f->filename = std::string(filefunc, endPhp, endFile - endPhp);
+  f->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
 }
 
 bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,

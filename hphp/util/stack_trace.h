@@ -87,6 +87,11 @@ public:
   static FramePtr Translate(void *bt);
 
   /**
+   * Translate the frame pointer of a PHP function using the perf map.
+   */
+  static void TranslateFromPerfMap(void* bt, Frame* f);
+
+  /**
    * Demangle a function name.
    */
   static std::string Demangle(const char *mangled);

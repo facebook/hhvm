@@ -20,8 +20,8 @@
 
 namespace HPHP {  namespace JIT {
 
-IRInstruction* IRFactory::defLabel(unsigned numDst) {
-  IRInstruction inst(DefLabel);
+IRInstruction* IRFactory::defLabel(unsigned numDst, BCMarker marker) {
+  IRInstruction inst(DefLabel, marker);
   IRInstruction* label = cloneInstruction(&inst);
   if (numDst > 0) {
     SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
@@ -37,15 +37,15 @@ Block* IRFactory::defBlock(const Func* func) {
   return new (m_arena) Block(m_nextBlockId++, func);
 }
 
-IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
-  IRInstruction* inst = gen(Mov, dst->type(), src);
+IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
+  IRInstruction* inst = gen(Mov, marker, dst->type(), src);
   dst->setInstruction(inst);
   inst->setDst(dst);
   return inst;
 }
 
 SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
-  IRInstruction inst(DefConst);
+  IRInstruction inst(DefConst, BCMarker());
   inst.setExtra(&cdata);
   inst.setTypeParam(ctype);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {

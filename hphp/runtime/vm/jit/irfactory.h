@@ -49,20 +49,21 @@ struct InstructionBuilder {
 
   /*
    * Create an IRInstruction, and then recursively chew on the Args
-   * list to populate its fields.
+   * list to populate its fields. Every instruction must have at least
+   * an Opcode and a BCMarker.
    *
    * The IRInstruction is stack allocated, and should not escape the
    * lambda, so we fill it with 0xc0 in debug builds after we're done.
    */
   template<class... Args>
-  Ret go(Opcode op, Args&&... args) {
+  Ret go(Opcode op, BCMarker marker, Args&&... args) {
     std::aligned_storage<
       sizeof(IRInstruction)
     >::type buffer;
     void* const vpBuffer = &buffer;
     SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof buffer); };
 
-    new (vpBuffer) IRInstruction(op);
+    new (vpBuffer) IRInstruction(op, marker);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT { inst->clearExtra(); };
@@ -188,10 +189,12 @@ public:
    * This function takes arguments in the same format as gen().
    */
   template<class... Args>
-  void replace(IRInstruction* old, Args... args) {
+  void replace(IRInstruction* old, Opcode op, Args... args) {
     makeInstruction(
       [&] (IRInstruction* replacement) { old->become(this, replacement); },
-      args...
+      op,
+      old->marker(),
+      std::forward<Args>(args)...
     );
   }
 
@@ -220,13 +223,22 @@ public:
   /*
    * Some helpers for creating specific instruction patterns.
    */
-  IRInstruction* defLabel(unsigned numDst);
+  IRInstruction* defLabel(unsigned numDst, BCMarker marker);
   Block* defBlock(const Func* f);
+
   template<typename T> SSATmp* cns(T val) {
-    Type type = typeForConst(val);
+    return cns(val, typeForConst(val));
+  }
+
+  template<typename T> SSATmp* cns(T val, Type type) {
     // Normalize bool values to 0 or 1
     if (type.equals(Type::Bool)) val = (T)(val != 0);
     ConstData cdata(val);
+    return findConst(cdata, type);
+  }
+
+  SSATmp* cns(Type type) {
+    ConstData cdata(0);
     return findConst(cdata, type);
   }
 
@@ -235,7 +247,7 @@ public:
    * to create such a move because gen assigns a newly allocated destination
    * SSATmp whereas we want to use the given dst SSATmp.
    */
-  IRInstruction* mov(SSATmp* dst, SSATmp* src);
+  IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }

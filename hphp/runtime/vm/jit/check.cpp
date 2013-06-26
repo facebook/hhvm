@@ -64,7 +64,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
 /*
  * Check one block for being well formed. Invariants verified:
  * 1. The block begins with an optional DefLabel, followed by an optional
- *    BeginCatch, followed by either a Marker or no more instructions.
+ *    BeginCatch.
  * 2. DefLabel and BeginCatch may not appear anywhere in a block other than
  *    where specified in #1.
  * 3. If the optional BeginCatch is present, the block must belong to an exit
@@ -75,6 +75,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  *    blocks listed in the block list for this block's Trace.
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp_ instruciton.
+ * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -91,20 +92,17 @@ bool checkBlock(Block* b) {
     assert(b == b->trace()->front());
   }
 
-  // Invariant #3
-  if (it == end) return true;
-  assert(it->op() == Marker);
-
   // Invariants #2, #4
-  if (++it == end) return true;
+  if (it == end) return true;
   if (b->back()->isBlockEnd()) --end;
-  while (it != end && it->op() == Marker) ++it;
   for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(it, end)) {
     assert(inst.op() != DefLabel);
     assert(inst.op() != BeginCatch);
     assert(!inst.isBlockEnd());
   }
   for (DEBUG_ONLY IRInstruction& inst : *b) {
+    // Invariant #8
+    assert(inst.marker().valid());
     assert(inst.block() == b);
   }
 

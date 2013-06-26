@@ -98,7 +98,7 @@ struct TraceBuilder {
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
-  IRTrace* trace() const { return m_trace.get(); }
+  IRTrace* trace() const { return m_curTrace; }
   IRFactory* factory() { return &m_irFactory; }
   int32_t spOffset() { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
@@ -116,39 +116,58 @@ struct TraceBuilder {
   void setLocalValue(unsigned id, SSATmp* value);
 
   /*
+   * Updates the marker used for instructions generated without one
+   * supplied.
+   */
+  void setMarker(BCMarker marker);
+
+  /*
+   * To emit code to a trace other than the main trace, call pushTrace(), emit
+   * instructions as usual with gen(...), then, call popTrace(). This is best
+   * done using the TracePusher struct:
+   *
+   * gen(CodeForMainTrace, ...);
+   * {
+   *   TracePusher tp(m_tb, exitTrace, marker);
+   *   gen(CodeForExitTrace, ...);
+   * }
+   * gen(CodeForMainTrace, ...);
+   *
+   * b and where may be supplied to emit code to a specific location in the
+   * trace. b must be nullptr iff where is boost::none, and where (if present)
+   * must be an iterator to somewhere in b's InstructionList. Instructions will
+   * be inserted at where, before the instruction it currently points to.
+   */
+  void pushTrace(IRTrace* t, BCMarker marker, Block* b,
+                 const boost::optional<Block::iterator>& where);
+  void popTrace();
+
+  /*
    * Run another pass of TraceBuilder-managed optimizations on this
    * trace.
    */
   void reoptimize();
 
   /*
-   * Create an IRInstruction attached to the current main Trace, and
+   * Create an IRInstruction attached to the current IRTrace, and
    * allocate a destination SSATmp for it.  Uses the same argument
    * list format as IRFactory::gen.
    */
   template<class... Args>
-  SSATmp* gen(Args&&... args) {
+  SSATmp* gen(Opcode op, Args&&... args) {
+    return gen(op, m_curMarker, std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
         return optimizeInst(inst, CloneFlag::Yes);
       },
+      op,
+      marker,
       std::forward<Args>(args)...
     );
-  }
-
-  /*
-   * Create an IRInstruction, similar to gen(), except link it into
-   * the Trace t instead of the current main trace.
-   *
-   * Does not run optimization passes.
-   *
-   * TODO(#2404447): run simplifier?
-   */
-  template<class... Args>
-  SSATmp* genFor(IRTrace* t, Args&&... args) {
-    auto instr = m_irFactory.gen(std::forward<Args>(args)...);
-    t->back()->push_back(instr);
-    return instr->dst();
   }
 
   /*
@@ -169,18 +188,9 @@ struct TraceBuilder {
   SSATmp* genPtrToUninit();
   SSATmp* genDefNone();
 
-  template<typename T>
-  SSATmp* cns(T val) {
-    return gen(DefConst, typeForConst(val), ConstData(val));
-  }
-
-  template<typename T>
-  SSATmp* cns(T val, Type type) {
-    return gen(DefConst, type, ConstData(val));
-  }
-
-  SSATmp* cns(Type type) {
-    return gen(DefConst, type, ConstData(0));
+  template<class... Args>
+  SSATmp* cns(Args&&... args) {
+    return m_irFactory.cns(std::forward<Args>(args)...);
   }
 
   template<typename T>
@@ -193,7 +203,7 @@ struct TraceBuilder {
 
   // hint the execution frequency of the current block
   void hint(Block::Hint h) const {
-    m_trace->back()->setHint(h);
+    m_curTrace->back()->setHint(h);
   }
 
   /*
@@ -206,7 +216,7 @@ struct TraceBuilder {
   SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_irFactory.defBlock(func);
     Block* done_block = m_irFactory.defBlock(func);
-    IRInstruction* label = m_irFactory.defLabel(1);
+    IRInstruction* label = m_irFactory.defLabel(1, m_curMarker);
     done_block->push_back(label);
     DisableCseGuard guard(*this);
     branch(taken_block);
@@ -232,8 +242,8 @@ struct TraceBuilder {
     Block* done_block = m_irFactory.defBlock(func);
     DisableCseGuard guard(*this);
     branch(taken_block);
-    assert(!m_trace->back()->next());
-    m_trace->back()->setNext(done_block);
+    assert(!m_curTrace->back()->next());
+    m_curTrace->back()->setNext(done_block);
     appendBlock(taken_block);
     taken();
     taken_block->setNext(done_block);
@@ -252,7 +262,7 @@ struct TraceBuilder {
     DisableCseGuard guard(*this);
     branch(done_block);
     next();
-    m_trace->back()->setNext(done_block);
+    m_curTrace->back()->setNext(done_block);
     appendBlock(done_block);
   }
 
@@ -262,8 +272,8 @@ struct TraceBuilder {
    * rejoining the main line.
    */
   IRTrace* makeExitTrace(uint32_t bcOff) {
-    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
-                                           bcOff));
+    return m_mainTrace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
+                                               bcOff));
   }
 
 private:
@@ -297,7 +307,7 @@ private:
     std::vector<Type> localTypes;
     SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
-    MarkerData lastMarker;
+    BCMarker curMarker;
   };
 
 private:
@@ -358,7 +368,24 @@ private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
-  boost::scoped_ptr<IRTrace> const m_trace; // generated trace
+  boost::scoped_ptr<IRTrace> const m_mainTrace; // generated trace
+
+  /*
+   * m_savedTraces will be nonempty iff we're emitting code to a trace other
+   * than the main trace. m_curTrace, m_curMarker, m_curBlock, m_curWhere are
+   * all set from the most recent call to pushTrace() or popTrace().
+   */
+  struct TraceState {
+    IRTrace* trace;
+    Block* block;
+    BCMarker marker;
+    boost::optional<Block::iterator> where;
+  };
+  smart::stack<TraceState> m_savedTraces;
+  IRTrace* m_curTrace;
+  Block* m_curBlock;
+  boost::optional<Block::iterator> m_curWhere;
+  BCMarker m_curMarker;
 
   // Flags that enable optimizations
   bool       m_enableCse;
@@ -418,15 +445,35 @@ private:
   // inlined call.
   std::vector<SSATmp*> m_callerAvailableValues;
 
-  // The data for the last Marker instruction we've seen.
-  folly::Optional<MarkerData> m_lastMarker;
-
   // When we're building traces for an inlined callee, the state of
   // the caller needs to be preserved here.
   std::vector<std::unique_ptr<State>> m_inlineSavedStates;
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * RAII helper for emitting code to exit traces. See TraceBuilder::pushTrace
+ * for usage.
+ */
+struct TracePusher {
+  template<typename... Args>
+  TracePusher(TraceBuilder& tb, IRTrace* trace, BCMarker marker,
+              Block* block = nullptr,
+              const boost::optional<Block::iterator>& where =
+                boost::optional<Block::iterator>())
+    : m_tb(tb)
+  {
+    tb.pushTrace(trace, marker, block, where);
+  }
+
+  ~TracePusher() {
+    m_tb.popTrace();
+  }
+
+ private:
+  TraceBuilder& m_tb;
+};
 
 }}
 

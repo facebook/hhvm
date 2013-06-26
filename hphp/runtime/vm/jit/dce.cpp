@@ -126,8 +126,16 @@ void removeDeadInstructions(IRTrace* trace, const DceState& state) {
               });
       return state[inst].isDead();
     });
-    // Marker and DefLabel instructions are marked live in reachable blocks
-    assert(!block->empty());
+    if (block->empty()) {
+      // Update any predecessors to point to the empty block's next block.
+      auto next = block->next();
+      for (auto it = block->preds().begin(); it != block->preds().end(); ) {
+        auto cur = it;
+        ++it;
+        cur->setTo(next);
+      }
+      trace->erase(cur);
+    }
   }
 }
 
@@ -325,7 +333,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
     for (auto* inst : boost::adaptors::reverse(toSink)) {
       // prepend inserts an instruction to the beginning of a block, after
       // the label. Therefore, we iterate through toSink in the reversed order.
-      IRInstruction* sunkInst = irFactory->gen(IncRef, inst->src(0));
+      auto* sunkInst = irFactory->gen(IncRef, inst->marker(), inst->src(0));
       state[sunkInst].setLive();
       exit->front()->prepend(sunkInst);
 

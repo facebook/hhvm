@@ -655,6 +655,7 @@ public:
       : startOffset(kInvalidOffset)
       , stopOffset(kInvalidOffset)
       , showLines(true)
+      , showFuncs(true)
       , indentSize(1)
     {}
 
@@ -669,6 +670,11 @@ public:
       return *this;
     }
 
+    PrintOpts& noFuncs() {
+      showFuncs = false;
+      return *this;
+    }
+
     PrintOpts& indent(int i) {
       indentSize = i;
       return *this;
@@ -677,6 +683,7 @@ public:
     Offset startOffset;
     Offset stopOffset;
     bool showLines;
+    bool showFuncs;
     int indentSize;
   };
 

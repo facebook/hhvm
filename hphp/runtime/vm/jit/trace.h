@@ -59,11 +59,12 @@ struct IRTrace : private boost::noncopyable {
         iterator end()          { return blocks().end(); }
 
   /*
-   * Unlink a block from a trace.  Updates any successor blocks that
+   * Unlink a block from a trace. Updates any successor blocks that
    * have a DefLabel with a dest depending on this block.
    */
   iterator erase(iterator it) {
     Block* b = *it;
+    assert(b->preds().empty());
     it = m_blocks.erase(it);
     b->setTrace(nullptr);
     if (!b->empty()) b->back()->setTaken(nullptr);
@@ -95,11 +96,13 @@ struct IRTrace : private boost::noncopyable {
     return exit;
   }
   bool isMain() const { return m_main == nullptr; }
+  /*
+   * Catch traces always start with DefLabel; BeginCatch.
+   */
   bool isCatch() const {
-    auto it = front()->skipHeader();
-    if (it == front()->end()) return false;
+    if (front()->empty()) return false;
 
-    assert(it->op() == Marker);
+    auto it = front()->skipHeader();
     if (it == front()->begin()) return false;
 
     return (--it)->op() == BeginCatch;

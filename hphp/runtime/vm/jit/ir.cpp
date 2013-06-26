@@ -295,6 +295,24 @@ std::string showExtra(Opcode opc, const IRExtraData* data) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string BCMarker::show() const {
+  assert(valid());
+  return folly::format("--- bc {}, spOff {} ({})",
+                       bcOff,
+                       spOff,
+                       func->fullName()->data()).str();
+}
+
+bool BCMarker::valid() const {
+  return
+    func != nullptr &&
+    bcOff >= func->base() && bcOff < func->past() &&
+    spOff <= func->numLocals() +
+             func->numIterators() * kNumIterCells +
+             func->maxStackCells();
+}
+
+
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   : m_op(inst->m_op)
   , m_typeParam(inst->m_typeParam)
@@ -303,6 +321,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
+  , m_marker(inst->m_marker)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
@@ -773,7 +792,7 @@ bool isRefCounted(SSATmp* tmp) {
 }
 
 void IRInstruction::convertToNop() {
-  IRInstruction nop(Nop);
+  IRInstruction nop(Nop, marker());
   // copy all but m_id, m_taken, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
@@ -810,7 +829,7 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = factory->arena();
 
-  // Copy all but m_id, m_taken.from, m_listNode, and don't clone
+  // Copy all but m_id, m_taken.from, m_listNode, m_marker, and don't clone
   // dests---the whole point of become() is things still point to us.
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;

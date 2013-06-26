@@ -30,10 +30,8 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   auto pos = block->iteratorTo(definer);
   if (pos->op() == DefLabel) {
     ++pos;
-    assert(pos != block->end() && pos->op() == Marker);
   }
-  ++pos;
-  block->insert(pos, inst);
+  block->insert(++pos, inst);
 }
 
 /*
@@ -45,7 +43,7 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
   for (SSATmp& dst : inst.dsts()) {
     Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
-      insertAfter(&inst, factory->gen(DbgAssertRefCount, &dst));
+      insertAfter(&inst, factory->gen(DbgAssertRefCount, inst.marker(), &dst));
     }
   }
 }
@@ -63,11 +61,13 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
     Type t = vals[i]->type();
     if (t.subtypeOf(Type::Gen)) {
       IRInstruction* addr = factory->gen(LdStackAddr,
+                                         inst.marker(),
                                          Type::PtrToGen,
                                          StackOffset(i),
                                          sp);
       block->insert(pos, addr);
-      IRInstruction* check = factory->gen(DbgAssertPtr, addr->dst());
+      IRInstruction* check = factory->gen(DbgAssertPtr, inst.marker(),
+                                          addr->dst());
       block->insert(pos, check);
     }
   }
@@ -89,11 +89,13 @@ static void insertAsserts(IRTrace* trace, IRFactory* factory) {
       if (inst.op() == Call) {
         SSATmp* sp = inst.dst();
         IRInstruction* addr = factory->gen(LdStackAddr,
+                                           inst.marker(),
                                            Type::PtrToGen,
                                            StackOffset(0),
                                            sp);
         insertAfter(&inst, addr);
-        insertAfter(addr, factory->gen(DbgAssertPtr, addr->dst()));
+        insertAfter(addr, factory->gen(DbgAssertPtr, inst.marker(),
+                                       addr->dst()));
         continue;
       }
       if (!inst.isBlockEnd()) insertRefCountAsserts(inst, factory);

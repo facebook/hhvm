@@ -129,14 +129,6 @@ void printLabel(std::ostream& os, const Block* block) {
 
 void print(std::ostream& ostream, const IRInstruction* inst,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
-  if (inst->op() == Marker) {
-    auto* marker = inst->extra<Marker>();
-    ostream << color(ANSI_COLOR_BLUE)
-            << marker->show()
-            << color(ANSI_COLOR_END);
-    return;
-  }
-
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
     if (!lifetime || !lifetime->linear[inst]) {
@@ -313,47 +305,62 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
                                  .printEncoding(dumpIREnabled(kExtraLevel))
                                  .color(color(ANSI_COLOR_BROWN)));
 
+  BCMarker curMarker;
   for (Block* block : blocks(trace, asmInfo)) {
     if (!block->isMain()) {
       os << "\n" << color(ANSI_COLOR_GREEN)
          << "    -------  Exit Trace  -------"
          << color(ANSI_COLOR_END) << '\n';
+      curMarker = BCMarker();
     }
 
     TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
                           TcaRange(nullptr, nullptr);
 
-    os << std::string(kIndent - 2, ' ');
+    os << '\n' << std::string(kIndent - 3, ' ');
     printLabel(os, block);
     os << punc(":") << "\n";
 
+    const char* markerEndl = "";
     for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it; ++it;
 
-      if (inst.op() == Marker) {
-        os << std::string(kIndent, ' ');
-        JIT::print(os, &inst, regs, lifetime);
-        os << '\n';
+      if (inst.marker() != curMarker) {
+        std::ostringstream mStr;
+        auto const& newMarker = inst.marker();
+        auto func = newMarker.func;
+        if (!func) {
+          os << color(ANSI_COLOR_BLUE)
+             << std::string(kIndent, ' ')
+             << "--- invalid marker"
+             << color(ANSI_COLOR_END)
+             << '\n';
+        } else {
+          if (func != curMarker.func) {
+            func->prettyPrint(mStr);
+          }
+          mStr << std::string(kIndent, ' ')
+               << newMarker.show()
+               << '\n';
 
-        // Don't print bytecode in a non-main trace.
-        if (!trace->isMain()) continue;
-
-        auto* marker = inst.extra<Marker>();
-        uint32_t bcOffset = marker->bcOff;
-        if (const auto* func = marker->func) {
-          std::ostringstream uStr;
+          auto bcOffset = newMarker.bcOff;
           func->unit()->prettyPrint(
-            uStr, Unit::PrintOpts()
-                  .range(bcOffset, bcOffset+1)
-                  .noLineNumbers()
-                  .indent(0));
+            mStr, Unit::PrintOpts()
+                       .range(bcOffset, bcOffset+1)
+                       .noLineNumbers()
+                       .noFuncs()
+                       .indent(0));
           std::vector<std::string> vec;
-          folly::split('\n', uStr.str(), vec);
+          folly::split('\n', mStr.str(), vec);
+          os << markerEndl;
+          markerEndl = "\n";
           for (auto& s : vec) {
+            if (s.empty()) continue;
             os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
           }
-          continue;
         }
+
+        curMarker = newMarker;
       }
 
       if (inst.op() == DefLabel) {
@@ -409,6 +416,15 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
       if (!blockRange.empty() || !astubRange.empty()) {
         os << '\n';
       }
+    }
+
+    os << std::string(kIndent - 2, ' ');
+    if (auto next = block->next()) {
+      os << punc("-> ");
+      printLabel(os, next);
+      os << '\n';
+    } else {
+      os << "no fallthrough\n";
     }
   }
 }

@@ -432,7 +432,6 @@ O(DecRefMem,                        ND, S(PtrToGen)                           \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, NA,                                E) \
-O(Marker,                           ND, NA,                                E) \
 O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr),              NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \

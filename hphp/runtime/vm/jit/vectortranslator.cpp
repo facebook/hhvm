@@ -256,6 +256,7 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
     , m_tb(*m_ht.m_tb)
     , m_irf(m_ht.m_irFactory)
     , m_mii(getMInstrInfo(ni.mInstrOp()))
+    , m_marker(ht.makeMarker(ht.bcOff()))
     , m_needMIS(true)
     , m_misBase(nullptr)
     , m_base(nullptr)
@@ -2412,8 +2413,8 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
         if (m_failedSetTrace) {
-          m_ht.genFor(m_failedSetTrace, DecRefStack,
-                      StackOffset(m_stackInputs[i]), Type::Cell, catchSp);
+          TracePusher tp(m_tb, m_failedSetTrace, m_marker);
+          gen(DecRefStack, StackOffset(m_stackInputs[i]), Type::Cell, catchSp);
         }
       }
       break;
@@ -2451,8 +2452,8 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   // it will be stored in tvRef.
   static const size_t refOffs[] = { HHIR_MISOFF(tvRef), HHIR_MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
-    IRInstruction* inst = m_irf.gen(DecRefMem, Type::Gen, m_misBase,
-                                  cns(refOffs[m_failedSetTrace ? 1 - i : i]));
+    IRInstruction* inst = m_irf.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
+                                    cns(refOffs[m_failedSetTrace ? 1 - i : i]));
     m_tb.add(inst);
     prependToTraces(inst);
   }
@@ -2481,18 +2482,16 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
         cns(nStack), // cells popped since the last SpillStack
     };
 
+    TracePusher tp(m_tb, m_failedSetTrace, m_marker);
     if (!isSetWithRef) {
-      m_ht.genFor(m_failedSetTrace, DecRefStack, StackOffset(0),
-                  Type::Cell, catchSp);
-      args.push_back(m_ht.genFor(m_failedSetTrace, LdUnwinderValue,
-                                 Type::Cell));
+      gen(DecRefStack, StackOffset(0), Type::Cell, catchSp);
+      args.push_back(m_ht.gen(LdUnwinderValue, Type::Cell));
     }
 
-    SSATmp* sp = m_ht.genFor(m_failedSetTrace, SpillStack,
-                             std::make_pair(args.size(), &args[0]));
-    m_ht.genFor(m_failedSetTrace, DeleteUnwinderException);
-    m_ht.genFor(m_failedSetTrace, SyncABIRegs, m_tb.fp(), sp);
-    m_ht.genFor(m_failedSetTrace, ReqBindJmp, BCOffset(nextOff));
+    SSATmp* sp = gen(SpillStack, std::make_pair(args.size(), &args[0]));
+    gen(DeleteUnwinderException);
+    gen(SyncABIRegs, m_tb.fp(), sp);
+    gen(ReqBindJmp, BCOffset(nextOff));
   }
 
   if (m_strTestResult) {
@@ -2504,17 +2503,18 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
     auto toSpill = m_ht.peekSpillValues();
     assert(toSpill.size());
     assert(toSpill[0] == m_result);
-    SSATmp* str = m_irf.gen(AssertNonNull, m_strTestResult)->dst();
+    SSATmp* str = m_irf.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
     toSpill[0] = str;
-    IRTrace* exit = m_ht.getExitTrace(nextOff, toSpill);
-    exit->front()->prepend(str->inst());
-    exit->front()->prepend(m_irf.gen(DecRef, m_result));
-    exit->front()->prepend(
-      m_irf.gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss),
-                           cns(1), cns(false)));
-    exit->front()->prepend(m_ht.makeMarker(m_ht.bcOff()));
 
-    gen(CheckType, Type::Nullptr, exit, m_strTestResult);
+    auto exitTrace = m_ht.getExitTrace(nextOff, toSpill);
+    {
+      TracePusher tp(m_tb, exitTrace, m_marker, exitTrace->back(),
+                     exitTrace->back()->skipHeader());
+      gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss), cns(1), cns(false));
+      gen(DecRef, m_result);
+      m_tb.add(str->inst());
+    }
+    gen(CheckType, Type::Nullptr, exitTrace, m_strTestResult);
     gen(IncStat, cns(Stats::TC_SetMStrGuess_Hit), cns(1), cns(false));
   }
 }

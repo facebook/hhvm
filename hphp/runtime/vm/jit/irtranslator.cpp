@@ -1628,13 +1628,9 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
         m_curNI = ni;
         translateInstr(*ni);
       } catch (JIT::FailedIRGen& fcg) {
-        // If we haven't tried interpreting ni yet, flag it to be interpreted
-        // and retry
-        if (!ni->interp) {
-          ni->interp = true;
-          return Retry;
-        }
-        throw fcg;
+        always_assert(!ni->interp);
+        ni->interp = true;
+        return Retry;
       }
       assert(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
@@ -1653,14 +1649,12 @@ TranslatorX64::irTranslateTracelet(Tracelet& t) {
       // problem, flag it to be interpreted, and retranslate the tracelet.
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source.offset() == fcg.bcOff) {
-          if (!ni->interp) {
-            ni->interp = true;
-            TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
-                  "after failing to code-gen \n\n",
-                  getCurrentTransID(), ni->toString().c_str());
-            return Retry;
-          }
-          break;
+          always_assert(!ni->interp);
+          ni->interp = true;
+          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
+                "after failing to code-gen \n\n",
+                getCurrentTransID(), ni->toString().c_str());
+          return Retry;
         }
       }
       throw fcg;

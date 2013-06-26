@@ -119,16 +119,13 @@ struct Block : boost::noncopyable {
   void setPostId(unsigned id) { m_postid = id; }
 
   /*
-   * Insert inst after this block's optional DefLabel, optional
-   * BeginCatch, and Marker, return an iterator to the newly inserted
-   * instruction.
-   *
-   * Pre: the block contains a Marker after the optional DefLabel.
+   * Insert inst after this block's optional DefLabel and BeginCatch,
+   * then return an iterator to the newly inserted instruction.
    */
   iterator prepend(IRInstruction* inst) {
+    assert(inst->marker().valid());
     auto it = skipHeader();
-    assert(it->op() == Marker);
-    return insert(++it, inst);
+    return insert(it, inst);
   }
 
   // return iterator to first instruction after the DefLabel (if
@@ -146,7 +143,11 @@ struct Block : boost::noncopyable {
   }
 
   // return iterator to last instruction
-  iterator backIter() { auto it = end(); return --it; }
+  iterator backIter() {
+    assert(!empty());
+    auto it = end();
+    return --it;
+  }
 
   // return an iterator to a specific instruction
   iterator iteratorTo(IRInstruction* inst) {
@@ -156,8 +157,12 @@ struct Block : boost::noncopyable {
 
   // Accessors of list of predecessor edges.  Each edge has a from() property
   // which is the predecessor block.
+  EdgeList& preds()             { return m_preds; }
   const EdgeList& preds() const { return m_preds; }
   size_t numPreds() const { return m_preds.size(); }
+
+  // Remove edge from its destination's predecessor list and insert it in
+  // new_to's predecessor list.
   static Block* updatePreds(Edge* edge, Block* new_to) {
     if (Block* old_to = edge->to()) {
       auto &preds = old_to->m_preds;
@@ -210,15 +215,21 @@ struct Block : boost::noncopyable {
   const_iterator   end()   const { return m_instrs.end(); }
 
   iterator insert(iterator pos, IRInstruction* inst) {
+    assert(inst->marker().valid());
     inst->setBlock(this);
     return m_instrs.insert(pos, *inst);
   }
-  void splice(iterator pos, Block* from, iterator begin, iterator end) {
+  void splice(iterator pos, Block* from, iterator begin, iterator end,
+              BCMarker newMarker) {
     assert(from != this);
-    for (auto i = begin; i != end; ++i) (*i).setBlock(this);
+    for (auto i = begin; i != end; ++i) {
+      i->setBlock(this);
+      i->setMarker(newMarker);
+    }
     m_instrs.splice(pos, from->instrs(), begin, end);
   }
   void push_back(IRInstruction* inst) {
+    assert(inst->marker().valid());
     inst->setBlock(this);
     return m_instrs.push_back(*inst);
   }

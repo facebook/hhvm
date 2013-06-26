@@ -136,10 +136,16 @@ private:
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
-  template<class... Args> SSATmp* gen(Args&&...);
+  template<class... Args> SSATmp* gen(Opcode op, Args&&...);
+  template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
   TraceBuilder* const m_tb;
+
+  // The current instruction being simplified is always at
+  // m_insts.top(). This has to be a stack instead of just a pointer
+  // because simplify is reentrant.
+  smart::stack<const IRInstruction*> m_insts;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -251,13 +251,25 @@ template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
   return m_tb->cns(std::forward<Args>(cns)...);
 }
 
-template<class... Args> SSATmp* Simplifier::gen(Args&&... args) {
-  return m_tb->gen(std::forward<Args>(args)...);
+template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
+  assert(!m_insts.empty());
+  return m_tb->gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
+}
+
+template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
+                                                Args&&... args) {
+  return m_tb->gen(op, marker, std::forward<Args>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* Simplifier::simplify(IRInstruction* inst) {
+  m_insts.push(inst);
+  SCOPE_EXIT {
+    assert(m_insts.top() == inst);
+    m_insts.pop();
+  };
+
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
 
@@ -561,6 +573,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
       return nullptr;
     },
     JmpNZero,
+    inst->marker(),
     inst->taken(),
     newCmp);
   if (!newQueryJmp) return nullptr;
@@ -1617,6 +1630,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
+      srcInst->marker(),
       srcInst->typeParam(), // if it had a type param
       inst->taken(),
       std::make_pair(ssas.size(), ssas.begin())

@@ -1556,10 +1556,12 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
     assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
-    if (funcIt != funcMap.end() && funcIt->first == offsetOf(it)) {
-      out.put('\n');
-      funcIt->second->prettyPrint(out);
-      ++funcIt;
+    if (opts.showFuncs) {
+      if (funcIt != funcMap.end() && funcIt->first == offsetOf(it)) {
+        out.put('\n');
+        funcIt->second->prettyPrint(out);
+        ++funcIt;
+      }
     }
 
     if (opts.showLines) {

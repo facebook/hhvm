@@ -3924,12 +3924,7 @@ Translator::translateRegion(const RegionDesc& region,
   } catch (const JIT::FailedCodeGen& exn) {
     FTRACE(1, "code generation failed with {}\n", exn.what());
     SrcKey sk{exn.vmFunc, exn.bcOff};
-
-    // Until we can trust the placement of Marker instructions, we can't assert
-    // that this sk isn't already in the interp set. t2424830
-    if (toInterp.count(sk)) {
-      return Failure;
-    }
+    always_assert(!toInterp.count(sk));
     toInterp.insert(sk);
     return Retry;
   }

@@ -1273,12 +1273,6 @@ DecRefNZ S0:Gen
 13. Misc
 
 
-Marker<bcOff,stackOff,func>
-
-  Record HHBC virtual position information at the position of this
-  instruction.  Marker has no executable semantics.  The JIT compiler
-  uses this to generate bytecode<->machine code maps.
-
 D:FramePtr = DefFP
 
   Creates a temporary D representing the current vm frame pointer.

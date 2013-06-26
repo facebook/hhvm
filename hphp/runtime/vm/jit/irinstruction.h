@@ -24,6 +24,42 @@
 namespace HPHP { namespace JIT {
 
 /*
+ * BCMarker holds the location of a specific bytecode instruction, along with
+ * the offset from vmfp to vmsp at the beginning of the instruction. Every
+ * IRInstruction has one to keep track of which bytecode instruction it came
+ * from.
+ */
+struct BCMarker {
+  const Func* func;
+  Offset      bcOff;
+  int32_t     spOff;
+
+  BCMarker()
+    : func(nullptr)
+    , bcOff(0)
+    , spOff(0)
+  {}
+
+  BCMarker(const Func* f, Offset o, int32_t sp)
+    : func(f)
+    , bcOff(o)
+    , spOff(sp)
+  {
+    assert(valid());
+  }
+
+  bool operator==(BCMarker b) const {
+    return b.func == func &&
+      b.bcOff == bcOff &&
+      b.spOff == spOff;
+  }
+  bool operator!=(BCMarker b) const { return !operator==(b); }
+
+  std::string show() const;
+  bool valid() const;
+};
+
+/*
  * IRInstructions must be arena-allocatable.
  * (Destructors are not called when they come from IRFactory.)
  */
@@ -37,6 +73,7 @@ struct IRInstruction {
    * TraceBuilder rather than directly.
    */
   explicit IRInstruction(Opcode op,
+                         BCMarker marker,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
     : m_op(op)
@@ -46,8 +83,15 @@ struct IRInstruction {
     , m_id(kTransient)
     , m_srcs(srcs)
     , m_dst(nullptr)
+    , m_marker(marker)
     , m_extra(nullptr)
-  {}
+  {
+    if (op != DefConst) {
+      // DefConst is the only opcode that's allowed to not have a marker, since
+      // it's not part of the instruction stream.
+      assert(m_marker.valid());
+    }
+  }
 
   IRInstruction(const IRInstruction&) = delete;
   IRInstruction& operator=(const IRInstruction&) = delete;
@@ -260,6 +304,14 @@ struct IRInstruction {
   bool cseEquals(IRInstruction* inst) const;
   size_t cseHash() const;
 
+  void setMarker(BCMarker marker) {
+    assert(marker.valid());
+    m_marker = marker;
+  }
+  const BCMarker& marker() const {
+    return m_marker;
+  }
+
   std::string toString() const;
 
   /*
@@ -307,6 +359,7 @@ private:
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Edge              m_taken;   // for branches, guards, and jmp
+  BCMarker          m_marker;
   IRExtraData*      m_extra;
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList

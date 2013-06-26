@@ -68,7 +68,6 @@ struct CodegenState {
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , addresses(factory, nullptr)
-    , lastMarker(nullptr)
     , regs(regs)
     , liveRegs(liveRegs)
     , lifetime(lifetime)
@@ -81,10 +80,6 @@ struct CodegenState {
   // it's already been emitted.
   StateVector<Block,void*> patches;
   StateVector<Block,TCA> addresses;
-
-  // Keep track of the most recent Marker instruction we've seen in the
-  // current trace (even across blocks).
-  const MarkerData* lastMarker;
 
   // True if this block's terminal Jmp_ has a desination equal to the
   // next block in the same assmbler.
@@ -131,7 +126,7 @@ struct CodeGenerator {
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
     , m_curTrace(trace)
-    , m_curBcOff(-1) {
+  {
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -376,8 +371,6 @@ private:
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
   IRTrace*            m_curTrace;
-  uint32_t            m_curBcOff; // offset of bytecode instr that produced
-                                  // m_curInst
 };
 
 class ArgDesc {

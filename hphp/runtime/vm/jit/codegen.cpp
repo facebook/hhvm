@@ -96,7 +96,8 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
   throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
-#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr, m_curBcOff, curFunc())
+#define CG_PUNT(instr) \
+  cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
 
 struct CycleInfo {
   int node;
@@ -283,9 +284,8 @@ ArgDesc::ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val)
 }
 
 const Func* CodeGenerator::curFunc() const {
-  always_assert(m_state.lastMarker &&
-                "We shouldn't be looking for a func when we have no marker");
-  return m_state.lastMarker->func;
+  assert(m_curInst->marker().valid());
+  return m_curInst->marker().func;
 }
 
 /*
@@ -1180,14 +1180,6 @@ void CodeGenerator::cgCallHelper(Asm& a,
     // void return type, no registers have values
     assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
   }
-}
-
-/*
- * This doesn't really produce any code; it just keeps track of the current
- * bytecode offset.
- */
-void CodeGenerator::cgMarker(IRInstruction* inst) {
-  m_curBcOff = inst->extra<MarkerData>()->bcOff;
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -3543,8 +3535,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     m_as.add_imm32_reg64(adjustment, spReg);
   }
 
-  assert(m_state.lastMarker);
-  SrcKey srcKey = SrcKey(m_state.lastMarker->func, m_state.lastMarker->bcOff);
+  assert(m_curInst->marker().valid());
+  SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = (func->isConst() && !func->type().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   assert(&m_as == &m_tx64->getAsm());
@@ -3634,7 +3626,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
 
   if (TranslatorX64::eagerRecord(func)) {
-    const uchar* pc = curUnit()->entry() + m_state.lastMarker->bcOff;
+    const uchar* pc = curUnit()->entry() + m_curInst->marker().bcOff;
     // we have spilled all args to stack, so spDiff is 0
     m_tx64->emitEagerSyncPoint(m_as, pc, 0);
   }
@@ -4103,9 +4095,9 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
 
 void CodeGenerator::recordSyncPoint(Asm& as,
                                     SyncOptions sync /* = kSyncPoint */) {
-  assert(m_state.lastMarker);
+  assert(m_curInst->marker().valid());
 
-  Offset stackOff = m_state.lastMarker->stackOff;
+  Offset stackOff = m_curInst->marker().spOff;
   switch (sync) {
   case SyncOptions::kSyncPointAdjustOne:
     stackOff -= 1;
@@ -4116,7 +4108,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
     assert(0);
   }
 
-  Offset pcOff = m_state.lastMarker->bcOff - m_state.lastMarker->func->base();
+  Offset pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.code.frontier, pcOff,
          stackOff);
@@ -5410,16 +5402,17 @@ static void patchJumps(Asm& as, CodegenState& state, Block* block) {
 void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
   FTRACE(6, "cgBlock: {}\n", block->id());
 
+  BCMarker prevMarker;
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
-    if (inst->op() == Marker) {
-      m_state.lastMarker = inst->extra<Marker>();
-      FTRACE(7, "lastMarker is now {}\n", inst->extra<Marker>()->show());
-      if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-        bcMap->push_back((TransBCMapping){Offset(m_state.lastMarker->bcOff),
-              m_as.code.frontier,
-              m_astubs.code.frontier});
-      }
+    // If we're on the first instruction of the block or we have a new
+    // marker since the last instruction, update the bc mapping.
+    if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
+        m_tx64->isTransDBEnabled() && bcMap) {
+      bcMap->push_back(TransBCMapping{inst->marker().bcOff,
+                                      m_as.code.frontier,
+                                      m_astubs.code.frontier});
+      prevMarker = inst->marker();
     }
     m_curInst = inst;
     auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
@@ -5508,7 +5501,6 @@ void genCodeForTrace(IRTrace* trace,
     }
 
     cg.cgBlock(block, bcMap);
-    state.lastMarker = nullptr;
     if (auto next = block->next()) {
       if (next != nextBlock) {
         // If there's a fallthrough block and it's not the next thing

@@ -167,6 +167,9 @@ public:
   explicit vector(A&&... args) : Base(std::forward<A>(args)...) {}
 };
 
+template <class T, class Container = deque<T>>
+class stack : public std::stack<T, Container> {};
+
 template <class T>
 class list : public std::list<T,Allocator<T>> {
   typedef std::list<T,Allocator<T>> Base;

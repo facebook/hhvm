@@ -41,7 +41,6 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
     case ReDefGeneratorSP:
     case DecRef:
     case DecRefNZ:
-    case Marker:
     case IncRef:
     case LdMem:
       return true;
@@ -81,8 +80,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
    * generic LdMem/IncRef on the exit block, otherwise we do
    * type-specialized versions.
    */
-  auto optLdMem = [&] (IRInstruction* checkType,
-                       IRInstruction* lastMarker) -> bool {
+  auto optLdMem = [&] (IRInstruction* checkType) -> bool {
     auto const incRef = checkType->src(0)->inst();
     if (incRef->op() != IncRef) return false;
     auto const ldMem = incRef->src(0)->inst();
@@ -116,6 +114,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
      */
     auto const newCheckType = irFactory->gen(
       CheckTypeMem,
+      checkType->marker(),
       checkType->typeParam(),
       checkType->taken(),
       ldMem->src(0)
@@ -124,7 +123,6 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
 
     // Clone the instructions to the exit before specializing.
     cloneToBlock(rpoSort, irFactory, sinkFirst, sinkLast, exit);
-    exit->insert(exit->skipHeader(), irFactory->cloneInstruction(lastMarker));
 
     /*
      * Specialize the LdMem left on the main trace after cloning the
@@ -146,8 +144,6 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
 
     // Move the fallthrough case to specialized.
     moveToBlock(sinkFirst, boost::next(sinkLast), specialized);
-    specialized->insert(specialized->skipHeader(),
-                        irFactory->cloneInstruction(lastMarker));
 
     return true;
   };
@@ -163,17 +159,10 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
   if (!trace->isMain()) return;
   bool needsReflow = false;
   for (Block* b : trace->blocks()) {
-    IRInstruction* lastMarker = nullptr;
     for (auto& inst : *b) {
-      if (inst.op() == Marker) {
-        lastMarker = &inst;
-        continue;
-      }
-
       if (inst.op() == CheckType &&
           inst.src(0)->type().equals(Type::Cell)) {
-        assert(lastMarker);
-        if (optLdMem(&inst, lastMarker)) {
+        if (optLdMem(&inst)) {
           needsReflow = true;
           break;
         }

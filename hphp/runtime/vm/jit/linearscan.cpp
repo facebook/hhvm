@@ -396,7 +396,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
       // Insert the Reload instruction.
       SSATmp* spillTmp = m_slots[slotId].spillTmp;
-      IRInstruction* reload = m_irFactory->gen(Reload, spillTmp);
+      IRInstruction* reload = m_irFactory->gen(Reload, inst->marker(),
+                                               spillTmp);
       inst->block()->insert(it, reload);
 
       // Create <reloadTmp> which inherits <tmp>'s slot ID and
@@ -979,7 +980,6 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
   uint32_t nextId = 1;
   for (auto* block : blocks) {
     for (auto& inst : *block) {
-      if (inst.op() == Marker) continue; // don't number markers
       uint32_t id = nextId++;
       m_linear[inst] = id;
       for (SSATmp* tmp : inst.srcs()) {
@@ -1029,27 +1029,18 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
   static StringData* exitSpills = StringData::GetStaticString("ExitSpills");
   static StringData* exitReloads = StringData::GetStaticString("ExitReloads");
   static StringData* spillSpace = StringData::GetStaticString("SpillSpace");
-  trace->front()->prepend(m_irFactory->gen(
-                            IncStatGrouped,
-                            cns(spillStats),
-                            cns(mainSpills), cns(numMainSpills)));
-  trace->front()->prepend(m_irFactory->gen(
-                            IncStatGrouped,
-                            cns(spillStats),
-                            cns(mainReloads), cns(numMainReloads)));
-  trace->front()->prepend(m_irFactory->gen(
-                            IncStatGrouped,
-                            cns(spillStats),
-                            cns(exitSpills), cns(numExitSpills)));
-  trace->front()->prepend(m_irFactory->gen(
-                            IncStatGrouped,
-                            cns(spillStats),
-                            cns(exitReloads), cns(numExitReloads)));
-  trace->front()->prepend(m_irFactory->gen(
-                            IncStatGrouped,
-                            cns(spillStats),
-                            cns(spillSpace), cns(numSpillLocs)));
 
+  auto const marker = trace->front()->front()->marker();
+  auto addStat = [&](const StringData* key, int value) {
+    trace->front()->prepend(m_irFactory->gen(IncStatGrouped, marker,
+                                             cns(spillStats), cns(key),
+                                             cns(value)));
+  };
+  addStat(mainSpills, numMainSpills);
+  addStat(mainReloads, numMainReloads);
+  addStat(exitSpills, numExitSpills);
+  addStat(exitReloads, numExitReloads);
+  addStat(spillSpace, numSpillLocs);
 }
 
 /*
@@ -1205,10 +1196,6 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
       block->next()->prepend(spill);
     } else {
       auto pos = block->iteratorTo(inst);
-      if (inst->op() == DefLabel) {
-        ++pos;
-        assert(pos != block->end() && pos->op() == Marker);
-      }
       block->insert(++pos, spill);
     }
   }
@@ -1390,7 +1377,7 @@ void LinearScan::spill(SSATmp* tmp) {
 uint32_t LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32_t slotId = m_slots.size();
   m_spillSlots[tmp] = slotId;
-  IRInstruction* spillInst = m_irFactory->gen(Spill, tmp);
+  auto* spillInst = m_irFactory->gen(Spill, tmp->inst()->marker(), tmp);
   SSATmp* spillTmp = spillInst->dst();
   SlotInfo si;
   si.spillTmp = spillTmp;

@@ -538,7 +538,7 @@ private:
 
     template<class... Args>
     SSATmp* cns(Args&&... args) {
-      return m_tb.cns(std::forward<Args>(args)...);
+      return m_irf.cns(std::forward<Args>(args)...);
     }
 
     template<class... Args>
@@ -551,6 +551,7 @@ private:
     TraceBuilder& m_tb;
     IRFactory& m_irf;
     const MInstrInfo& m_mii;
+    const BCMarker m_marker;
     hphp_hash_map<unsigned, unsigned> m_stackInputs;
 
     unsigned m_mInd;
@@ -592,17 +593,12 @@ private:
 private: // tracebuilder forwarding utilities
   template<class... Args>
   SSATmp* cns(Args&&... args) {
-    return m_tb->cns(std::forward<Args>(args)...);
+    return m_irFactory.cns(std::forward<Args>(args)...);
   }
 
   template<class... Args>
   SSATmp* gen(Args&&... args) {
     return m_tb->gen(std::forward<Args>(args)...);
-  }
-
-  template<class... Args>
-  SSATmp* genFor(IRTrace* trace, Args&&... args) {
-    return m_tb->genFor(trace, std::forward<Args>(args)...);
   }
 
 private:
@@ -663,8 +659,8 @@ private:
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
-  IRInstruction* makeMarker(Offset bcOff);
-  void emitMarker();
+  BCMarker makeMarker(Offset bcOff);
+  void updateMarker();
   SSATmp* staticTVCns(const TypedValue*);
 
   Type interpOutputType(const NormalizedInstruction&) const;
@@ -673,22 +669,21 @@ private:
 private: // Exit trace creation routines.
   IRTrace* getExitTrace(Offset targetBcOff = -1);
   IRTrace* getExitTrace(Offset targetBcOff,
-                      std::vector<SSATmp*>& spillValues);
+                        std::vector<SSATmp*>& spillValues);
   IRTrace* getExitTraceWarn(Offset targetBcOff,
-                          std::vector<SSATmp*>& spillValues,
-                          const StringData* warning);
+                            std::vector<SSATmp*>& spillValues,
+                            const StringData* warning);
 
   /*
    * Create a custom side exit---that is, an exit that does some
    * amount work before leaving the trace.
    *
-   * The exit trace will spill things with a Marker for the current bytecode.
+   * The exit trace will spill things with for the current bytecode instruction.
    *
-   * Then it will do an ExceptionBarrier, followed by whatever is done
-   * by the CustomExit(IRTrace*) function.  The custom exit may add
-   * instructions to the exit trace, and optionally may return an
-   * additional SSATmp* to spill on the stack.  If there is no
-   * additional SSATmp*, it should return nullptr.
+   * Then it will do an ExceptionBarrier, followed by whatever is done by the
+   * CustomExit() function. Any instructions emitted by the custom exit will go
+   * to the exit trace, and it may return an additional SSATmp* to spill on the
+   * stack. If there is no additional SSATmp*, it should return nullptr.
    *
    * TODO(#2447661): this should be way better than this, should allow
    * using gen/push/spillStack/etc.
@@ -708,9 +703,9 @@ private: // Exit trace creation routines.
    * Implementation for the above.  Takes spillValues, target offset,
    * and a flag for whether to make a no-IR exit.
    *
-   * Also takes a CustomExit(IRTrace*) function that may perform more
-   * operations and optionally return a single additional SSATmp*
-   * (otherwise nullptr) to spill on the stack before exiting.
+   * Also takes a CustomExit() function that may perform more operations and
+   * optionally return a single additional SSATmp* (otherwise nullptr) to spill
+   * on the stack before exiting.
    */
   enum class ExitFlag {
     None,
@@ -720,11 +715,11 @@ private: // Exit trace creation routines.
     // instead of one for targetBcOff.
     DelayedMarker,
   };
-  typedef std::function<SSATmp* (IRTrace*)> CustomExit;
+  typedef std::function<SSATmp* ()> CustomExit;
   IRTrace* getExitTraceImpl(Offset targetBcOff,
-                          ExitFlag noIRExit,
-                          std::vector<SSATmp*>& spillValues,
-                          const CustomExit&);
+                            ExitFlag noIRExit,
+                            std::vector<SSATmp*>& spillValues,
+                            const CustomExit&);
 
 private:
   /*
@@ -787,7 +782,7 @@ private:
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   Type    topType(uint32_t i) const;
   std::vector<SSATmp*> peekSpillValues() const;
-  SSATmp* emitSpillStack(IRTrace* t, SSATmp* sp,
+  SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();

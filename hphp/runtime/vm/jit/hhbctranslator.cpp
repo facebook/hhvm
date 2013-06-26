@@ -76,7 +76,7 @@ HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
   , m_hasExit(false)
   , m_stackDeficit(0)
 {
-  emitMarker();
+  updateMarker();
   auto const fp = gen(DefFP);
   gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
 }
@@ -303,29 +303,25 @@ void HhbcTranslator::beginInlining(unsigned numParams,
     gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
   }
 
-  emitMarker();
+  updateMarker();
 }
 
 bool HhbcTranslator::isInlining() const {
   return m_bcStateStack.size() > 1;
 }
 
-IRInstruction* HhbcTranslator::makeMarker(Offset bcOff) {
+BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   int32_t stackOff = m_tb->spOffset() +
     m_evalStack.numCells() - m_stackDeficit;
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
-  MarkerData marker;
-  marker.bcOff     = bcOff;
-  marker.func      = curFunc();
-  marker.stackOff  = stackOff;
-  return m_irFactory.gen(Marker, marker);
+  return BCMarker{ curFunc(), bcOff, stackOff };
 }
 
-void HhbcTranslator::emitMarker() {
-  m_tb->add(makeMarker(bcOff()));
+void HhbcTranslator::updateMarker() {
+  m_tb->setMarker(makeMarker(bcOff()));
 }
 
 void HhbcTranslator::profileFunctionEntry(const char* category) {
@@ -373,7 +369,7 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
 
   if (newOff != bcOff()) {
     m_bcStateStack.back().bcOff = newOff;
-    emitMarker();
+    updateMarker();
   }
   m_lastBcOff = lastBcOff;
 }
@@ -1540,8 +1536,8 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
   // chaining to another Tracelet so forward progress still happens.
   auto const sideExit = makeSideExit(
     nextBcOff(),
-    [&] (IRTrace* t) {
-      return genFor(t, LookupClsCns, Type::Cell, clsCnsName);
+    [&] {
+      return gen(LookupClsCns, Type::Cell, clsCnsName);
     }
   );
 
@@ -1940,7 +1936,7 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
 
     // This is special. We need to move the stackpointer incase LdObjMethod
     // calls a destructor. Otherwise it would clobber the ActRec we just pushed.
-    emitMarker();
+    updateMarker();
 
     gen(LdObjMethod,
               objCls,
@@ -2182,7 +2178,7 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   gen(InlineReturn, m_tb->fp());
 
   // Return to the caller function.  Careful between here and the
-  // emitMarker() below, where the caller state isn't entirely set up.
+  // updateMarker() below, where the caller state isn't entirely set up.
   m_bcStateStack.pop_back();
   m_fpiStack.pop();
 
@@ -2207,7 +2203,7 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
   push(retVal);
 
-  emitMarker();
+  updateMarker();
 }
 
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
@@ -2960,7 +2956,8 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
   gen(StMem, ptr, cns(0), src);
   if (isRefCounted(src) && src->type().canRunDtor()) {
     Block* exitBlock = getExitTrace(nextBcOff())->front();
-    exitBlock->prepend(m_irFactory.gen(DecRef, prevValue));
+    exitBlock->prepend(m_irFactory.gen(DecRef, makeMarker(nextBcOff()),
+                                       prevValue));
     gen(DecRefNZOrBranch, exitBlock, prevValue);
   } else {
     gen(DecRef, prevValue);
@@ -3533,8 +3530,11 @@ std::string HhbcTranslator::showStack() const {
     out << folly::format("+{:-^62}+\n", str);
   };
 
-  const int32_t stackDepth = m_tb->spOffset() - curFunc()->numLocals() +
-    m_evalStack.size() - m_stackDeficit;
+  const int32_t frameCells = curFunc()->numLocals() +
+    curFunc()->numIterators() * kNumIterCells;
+  const int32_t stackDepth =
+    m_tb->spOffset() + m_evalStack.size() - m_stackDeficit -
+    (curFunc()->isGenerator() ? 0 : frameCells);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
     out << folly::format("| {:<60} |\n",
@@ -3606,19 +3606,19 @@ IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
 }
 
 IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff,
-                                    std::vector<SSATmp*>& spillValues) {
+                                      std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
   return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
     CustomExit{});
 }
 
 IRTrace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
-                                        std::vector<SSATmp*>& spillValues,
-                                        const StringData* warning) {
+                                          std::vector<SSATmp*>& spillValues,
+                                          const StringData* warning) {
   assert(targetBcOff != -1);
   return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
-    [&](IRTrace* t) -> SSATmp* {
-      genFor(t, RaiseWarning, cns(warning));
+    [&]() -> SSATmp* {
+      gen(RaiseWarning, cns(warning));
       return nullptr;
     }
   );
@@ -3643,22 +3643,16 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
                                         ExitFlag flag,
                                         std::vector<SSATmp*>& stackValues,
                                         const CustomExit& customFn) {
+  BCMarker exitMarker;
+  exitMarker.bcOff = targetBcOff;
+  exitMarker.spOff = m_tb->spOffset() + stackValues.size() - m_stackDeficit;
+  exitMarker.func  = curFunc();
+
+  BCMarker currentMarker = makeMarker(bcOff());
+
   auto const exit = m_tb->makeExitTrace(targetBcOff);
-
-  MarkerData exitMarker;
-  exitMarker.bcOff    = targetBcOff;
-  exitMarker.stackOff = m_tb->spOffset() +
-                          stackValues.size() - m_stackDeficit;
-  exitMarker.func     = curFunc();
-
-  MarkerData currentMarker;
-  currentMarker.bcOff     = bcOff();
-  currentMarker.func      = curFunc();
-  currentMarker.stackOff  = m_tb->spOffset() +
-                              m_evalStack.numCells() - m_stackDeficit;
-
-  genFor(exit, Marker,
-         flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
+  TracePusher tp(*m_tb, exit,
+                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
 
   // The value we use for stack is going to depend on whether we have
   // to spillstack or what.
@@ -3670,41 +3664,38 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
       stackValues.begin(),
       { m_tb->sp(), cns(int64_t(m_stackDeficit)) }
     );
-    stack = genFor(exit,
-      SpillStack, std::make_pair(stackValues.size(), &stackValues[0])
+    stack = gen(SpillStack, std::make_pair(stackValues.size(), &stackValues[0])
     );
   }
 
   if (customFn) {
-    stack = genFor(exit, ExceptionBarrier, stack);
-    auto const customTmp = customFn(exit);
+    stack = gen(ExceptionBarrier, stack);
+    auto const customTmp = customFn();
     if (customTmp) {
       SSATmp* spill2[] = { stack, cns(0), customTmp };
-      stack = genFor(exit,
-        SpillStack, std::make_pair(sizeof spill2 / sizeof spill2[0], spill2)
+      stack = gen(SpillStack,
+                  std::make_pair(sizeof spill2 / sizeof spill2[0], spill2)
       );
-      exitMarker.stackOff += 1;
+      exitMarker.spOff += 1;
     }
   }
 
   if (flag == ExitFlag::DelayedMarker) {
-    genFor(exit, Marker, exitMarker);
+    m_tb->setMarker(exitMarker);
   }
 
-  genFor(exit, SyncABIRegs, m_tb->fp(), stack);
+  gen(SyncABIRegs, m_tb->fp(), stack);
 
   if (flag == ExitFlag::NoIR) {
-    genFor(exit,
-      targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
-      BCOffset(targetBcOff)
-    );
+    gen(targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
+        BCOffset(targetBcOff));
     return exit;
   }
 
   if (bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
-    genFor(exit, ReqRetranslate);
+    gen(ReqRetranslate);
   } else {
-    genFor(exit, ReqBindJmp, BCOffset(targetBcOff));
+    gen(ReqBindJmp, BCOffset(targetBcOff));
   }
 
   return exit;
@@ -3721,31 +3712,26 @@ IRTrace* HhbcTranslator::getCatchTrace() {
   auto exit = m_tb->makeExitTrace(bcOff());
   assert(exit->blocks().size() == 1);
 
-  genFor(exit, BeginCatch);
-  exit->front()->push_back(makeMarker(bcOff()));
-  auto sp = emitSpillStack(exit, m_tb->sp(), peekSpillValues());
-  genFor(exit, EndCatch, sp);
+  TracePusher tp(*m_tb, exit, makeMarker(bcOff()));
+  gen(BeginCatch);
+  auto sp = emitSpillStack(m_tb->sp(), peekSpillValues());
+  gen(EndCatch, sp);
 
   assert(exit->blocks().size() == 1);
   return exit;
 }
 
-SSATmp* HhbcTranslator::emitSpillStack(IRTrace* t, SSATmp* sp,
+SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
   std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_stackDeficit)) };
   ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
 
   auto args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);
-  if (t->isMain()) {
-    return gen(SpillStack, args);
-  } else {
-    return genFor(t, SpillStack, args);
-  }
+  return gen(SpillStack, args);
 }
 
 SSATmp* HhbcTranslator::spillStack() {
-  auto newSp =
-    emitSpillStack(m_tb->trace(), m_tb->sp(), peekSpillValues());
+  auto newSp = emitSpillStack(m_tb->sp(), peekSpillValues());
   m_evalStack.clear();
   m_stackDeficit = 0;
   return newSp;

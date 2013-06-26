@@ -34,26 +34,14 @@ namespace {
 // reached by any other branch, then copy the target of the jump to the
 // end of the trace
 void elimUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
-  boost::dynamic_bitset<> isJoin(irFactory->numBlocks());
-  boost::dynamic_bitset<> havePred(irFactory->numBlocks());
-  for (Block* block : trace->blocks()) {
-    if (block->taken()) {
-      auto id = block->taken()->id();
-      isJoin[id] = havePred[id];
-      havePred[id] = 1;
-    }
-    if (block->next()) {
-      auto id = block->next()->id();
-      isJoin[id] = havePred[id];
-      havePred[id] = 1;
-    }
-  }
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp_ && !isJoin[jmp.taken()->id()]) {
+  if (jmp.op() == Jmp_ && jmp.taken()->numPreds() == 1) {
     Block* target = jmp.taken();
-    lastBlock->splice(lastInst, target, target->skipHeader(), target->end());
+    lastBlock->splice(lastInst, target, target->skipHeader(), target->end(),
+                      lastInst->marker());
+    jmp.convertToNop();         // unlink it from its Edge
     lastBlock->erase(lastInst); // delete the jmp
   }
 }
@@ -99,7 +87,6 @@ struct BlockMatcher {
 
   template<class... Opcodes>
   bool match(Opcode op, Opcodes... opcs) {
-    while (m_it != m_block->end() && m_it->op() == Marker) ++m_it;
     if (m_it == m_block->end()) return false;
     auto const cur = m_it->op();
     ++m_it;
@@ -156,19 +143,26 @@ void optimizeCondTraceExit(IRTrace* trace, IRFactory* irFactory) {
   if (!isNormalExit(jccExitTrace)) return;
   FTRACE(5, "exit trace is side-effect free\n");
 
+  auto it = mainExit->backIter();
+  auto& reqBindJmp = *(it--);
+  auto& syncAbi = *it;
+  assert(syncAbi.op() == SyncABIRegs);
+
   auto const newOpcode = jmpToReqBindJmp(jccBlock->back()->op());
   ReqBindJccData data;
   data.taken = jccExitTrace->back()->extra<ReqBindJmp>()->offset;
-  data.notTaken = mainExit->back()->extra<ReqBindJmp>()->offset;
+  data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
   FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
   irFactory->replace(
-    mainExit->back(),
+    &reqBindJmp,
     newOpcode,
     data,
     std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
   );
 
+  syncAbi.setMarker(jccInst->marker());
+  reqBindJmp.setMarker(jccInst->marker());
   jccInst->convertToNop();
 }
 

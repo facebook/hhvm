@@ -1177,14 +1177,14 @@ void HhbcTranslator::emitContNext() {
 void HhbcTranslator::emitContSendImpl(bool raise) {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
-  gen(AssertLoc, Type::Cell, LocalId(0), m_tb->fp());
-  auto const newVal = gen(IncRef, ldLoc(0));
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // We're guaranteed to have a Null in m_received at this point
     auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
     gen(DbgAssertType, Type::InitNull, oldVal);
   }
-  gen(StProp, cont, cns(CONTOFF(m_received)), newVal);
+  gen(AssertLoc, Type::Cell, LocalId(0), m_tb->fp());
+  gen(StProp, cont, cns(CONTOFF(m_received)), ldLoc(0));
+  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
   if (raise) {
     SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
     label = gen(OpSub, label, cns(1));

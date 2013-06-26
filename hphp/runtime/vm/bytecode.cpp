@@ -6820,9 +6820,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   c_Continuation* cont = frame_continuation(m_fp);
 
   // Return the received value
-  TypedValue* recv_to = m_stack.allocTV();
   TypedValue* recv_fr = cont->m_received.asTypedValue();
-  memcpy(recv_to, recv_fr, sizeof(TypedValue));
+  tvTeleport(recv_fr, m_stack.allocTV());
   tvWriteNull(recv_fr);
 
   // Return the label in a stack cell
@@ -6866,19 +6865,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCheck(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->m_received.setNull();
+  tvWriteNull(cont->m_received.asTypedValue());
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
+  tvTeleport(frame_local(m_fp, 0), cont->m_received.asTypedValue());
+  tvWriteUninit(frame_local(m_fp, 0));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
+  tvTeleport(frame_local(m_fp, 0), cont->m_received.asTypedValue());
+  tvWriteUninit(frame_local(m_fp, 0));
   assert(cont->m_label);
   --cont->m_label;
 }

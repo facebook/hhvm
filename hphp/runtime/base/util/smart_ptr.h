@@ -150,8 +150,9 @@ public:
 protected:
   T* m_px;  // raw pointer
 
+private:
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(SmartPtr, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }
 };
 

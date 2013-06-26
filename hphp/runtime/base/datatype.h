@@ -117,7 +117,7 @@ static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 static_assert(KindOfUninit == 0,
               "Several things assume this tag is 0, especially target cache");
 
-BOOST_STATIC_ASSERT(MaxNumDataTypes - 1 <= kDataTypeMask);
+static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
 
 static_assert(kNotConstantValueTypeMask & KindOfArray &&
               kNotConstantValueTypeMask & KindOfObject &&
@@ -230,8 +230,8 @@ inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 #define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
 
 // Helper macro for checking if a type is KindOfString or KindOfStaticString.
-BOOST_STATIC_ASSERT(KindOfStaticString == 0x0C);
-BOOST_STATIC_ASSERT(KindOfString       == 0x14);
+static_assert(KindOfStaticString == 0x0C, "");
+static_assert(KindOfString       == 0x14, "");
 #define IS_STRING_TYPE(t) (((t) & ~0x18) == KindOfStringBit)
 
 // Check if a type is KindOfUninit or KindOfNull

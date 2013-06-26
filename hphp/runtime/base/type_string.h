@@ -434,7 +434,7 @@ public:
   }
 
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(String, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(String, m_px) == kExpectedMPxOffset, "");
   }
 };
 
@@ -559,8 +559,10 @@ public:
 
 protected:
   StringData *m_px;
+
+private:
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(StrNR, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(StrNR, m_px) == kExpectedMPxOffset, "");
   }
 };
 

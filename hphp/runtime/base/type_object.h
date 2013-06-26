@@ -213,8 +213,9 @@ public:
 
 private:
   ObjectData* m_px;
+
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(ObjNR, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
   }
 };
 

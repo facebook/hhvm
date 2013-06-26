@@ -480,7 +480,7 @@ class Array : protected SmartPtr<ArrayData> {
   }
 
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(Array, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(Array, m_px) == kExpectedMPxOffset, "");
   }
 };
 
@@ -509,8 +509,10 @@ struct ArrNR {
 
 protected:
   ArrayData *m_px;
+
+private:
   static void compileTimeAssertions() {
-    BOOST_STATIC_ASSERT((offsetof(ArrNR, m_px) == kExpectedMPxOffset));
+    static_assert(offsetof(ArrNR, m_px) == kExpectedMPxOffset, "");
   }
 };
 

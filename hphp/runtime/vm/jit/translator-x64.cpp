@@ -3607,7 +3607,7 @@ TranslatorX64::Get() {
 
 template<int Arity>
 TCA TranslatorX64::emitNAryStub(X64Assembler& a, CppCall c) {
-  BOOST_STATIC_ASSERT((Arity < kNumRegisterArgs));
+  static_assert(Arity < kNumRegisterArgs, "");
 
   // The callNAryStub has already saved these regs on a.
   RegSet alreadySaved;

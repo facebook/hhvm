@@ -1157,7 +1157,7 @@ static const StaticString s_native_type("native_type");
 static const StaticString s_flags("flags");
 static const StaticString s_table("table");
 
-bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
+bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_result) {
     return false;
   }
@@ -1166,7 +1166,6 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
     return false;
   }
 
-  Array ret = Array::Create();
   Array flags = Array::Create();
 
   const MYSQL_FIELD *F = m_fields + colno;

@@ -84,6 +84,15 @@ LibEventWorker::~LibEventWorker() {
 }
 
 void LibEventWorker::doJob(LibEventJobPtr job) {
+  doJobImpl(job, false /*abort*/);
+}
+
+void LibEventWorker::abortJob(LibEventJobPtr job) {
+  doJobImpl(job, true /*abort*/);
+  m_requestsTimedOutOnQueue->addValue(1);
+}
+
+void LibEventWorker::doJobImpl(LibEventJobPtr job, bool abort) {
   job->stopTimer();
   evhttp_request *request = job->request;
   assert(m_opaque);
@@ -97,6 +106,12 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
 #endif
   bool error = true;
   std::string errorMsg;
+
+  if (abort) {
+    transport.sendString("Service Unavailable", 503);
+    return;
+  }
+
   try {
     std::string cmd = transport.getCommand();
     cmd = std::string("/") + cmd;
@@ -136,6 +151,9 @@ void LibEventWorker::onThreadEnter() {
     Eval::Debugger::RegisterThread();
   }
   m_handler = server->createRequestHandler();
+  m_requestsTimedOutOnQueue =
+    ServiceData::createTimeseries("requests_timed_out_on_queue",
+                                  {ServiceData::StatsType::COUNT});
 }
 
 void LibEventWorker::onThreadExit() {
@@ -154,7 +172,8 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
-                 this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold),
+                 this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
+                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);

@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/job_queue_vm_stack.h"
 #include "hphp/util/job_queue.h"
 #include "hphp/util/process.h"
+#include "hphp/util/service_data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +60,7 @@ struct LibEventWorker
    * Request handler called by LibEventServer.
    */
   virtual void doJob(LibEventJobPtr job);
+  virtual void abortJob(LibEventJobPtr job);
 
   /**
    * Called when thread enters and exits.
@@ -67,7 +69,9 @@ struct LibEventWorker
   virtual void onThreadExit();
 
 private:
+  void doJobImpl(LibEventJobPtr job, bool abort);
   std::unique_ptr<RequestHandler> m_handler;
+  ServiceData::ExportedTimeSeries* m_requestsTimedOutOnQueue;
 };
 
 /**

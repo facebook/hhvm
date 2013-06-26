@@ -1008,25 +1008,21 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 
 typedef std::map<int, int> ContParamMap;
 /*
- * mapContParams determines if every named local in origFunc has a
- * corresponding named local in genFunc. If this step succeeds and
+ * mapContParams builds a mapping between named locals in origFunc and
+ * corresponding named locals in genFunc. If this step succeeds and
  * there's no VarEnv at runtime, the continuation's variables can be
  * filled completely inline in the TC (assuming there aren't too
  * many).
  */
 static
-bool mapContParams(ContParamMap& map,
+void mapContParams(ContParamMap& map,
                    const Func* origFunc, const Func* genFunc) {
   const StringData* const* varNames = origFunc->localNames();
   for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
     Id id = genFunc->lookupVarId(varNames[i]);
-    if (id != kInvalidId) {
-      map[i] = id;
-    } else {
-      return false;
-    }
+    assert(id != kInvalidId);
+    map[i] = id;
   }
-  return true;
 }
 
 void HhbcTranslator::emitCreateCont(Id funNameStrId) {
@@ -1051,34 +1047,30 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
       );
 
   ContParamMap params;
-  if (origLocals <= Translator::kMaxInlineContLocals &&
-      mapContParams(params, origFunc, genFunc)) {
-    static auto const thisStr = StringData::GetStaticString("this");
-    Id thisId = kInvalidId;
-    const bool fillThis = origFunc->isMethod() &&
-      !origFunc->isStatic() &&
-      ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
-      (origFunc->lookupVarId(thisStr) == kInvalidId);
+  mapContParams(params, origFunc, genFunc);
 
-    SSATmp* contAR = gen(
-      LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
-    for (int i = 0; i < origLocals; ++i) {
-      // We must generate an AssertLoc because we don't have tracelet
-      // guards on the object type in these outer generator functions.
-      gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-      // Copy the value of the local to the cont object and set the
-      // local to uninit so that we don't need to change refcounts.
-      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
-      gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
-    }
-    if (fillThis) {
-      assert(thisId != kInvalidId);
-      auto const thisObj = gen(IncRef, gen(LdThis, m_tb->fp()));
-      gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
-    }
-  } else {
-    gen(FillContLocals, m_tb->fp(), cns(origFunc),
-      cns(genFunc), cont);
+  static auto const thisStr = StringData::GetStaticString("this");
+  Id thisId = kInvalidId;
+  const bool fillThis = origFunc->isMethod() &&
+    !origFunc->isStatic() &&
+    ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
+    (origFunc->lookupVarId(thisStr) == kInvalidId);
+
+  SSATmp* contAR = gen(
+    LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
+  for (int i = 0; i < origLocals; ++i) {
+    // We must generate an AssertLoc because we don't have tracelet
+    // guards on the object type in these outer generator functions.
+    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
+    // Copy the value of the local to the cont object and set the
+    // local to uninit so that we don't need to change refcounts.
+    gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
+    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
+  }
+  if (fillThis) {
+    assert(thisId != kInvalidId);
+    auto const thisObj = gen(IncRef, gen(LdThis, m_tb->fp()));
+    gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
   }
 
   push(cont);

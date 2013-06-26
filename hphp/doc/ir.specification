@@ -808,7 +808,7 @@ D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
   names of the callee's class and method, respectively.  S2 is the
   current context.  This instruction loads the corresponding entry in
   the MethodFCache if needed.  In case the given method is not found,
-  control is transferred to label L.  The current frame pointer is 
+  control is transferred to label L.  The current frame pointer is
   passed in S3.
 
 D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
@@ -1508,13 +1508,6 @@ D:Obj = CreateContMeth S0:ConstFunc S1:ConstFunc S2:Ctx
      S0 - the "original" method
      S1 - the generator function
      S2 - the m_this/m_cls field of the current frame pointer
-
-FillContLocals S0:FramePtr S1:ConstFunc S2:ConstFunc S3:Obj
-
-  Fill the locals for the continuation object S3.  Copies the values
-  for the locals from the frame S0 to their heap location in the
-  continuation object.  S1 is the "original" func, and S2 is the
-  generator function.
 
 ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 

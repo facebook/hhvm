@@ -472,10 +472,6 @@ O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(CreateContFunc,               D(Obj), C(Func) C(Func),             E|N|PRc) \
 O(CreateContMeth,               D(Obj), C(Func) C(Func) S(Ctx),      E|N|PRc) \
-O(FillContLocals,                   ND, S(FramePtr)                           \
-                                          C(Func)                             \
-                                          C(Func)                             \
-                                          S(Obj),                    E|N|Mem) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \

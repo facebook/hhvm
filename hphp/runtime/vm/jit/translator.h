@@ -680,7 +680,6 @@ public:
   // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
   // generate an inline return for.
   static const int kMaxInlineReturnDecRefs = 1;
-  static const int kMaxInlineContLocals = 10;
 
 private:
   friend struct TraceletContext;

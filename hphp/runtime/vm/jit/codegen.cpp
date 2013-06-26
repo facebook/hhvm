@@ -399,7 +399,6 @@ CALL_OPCODE(ConvCellToStr);
 
 CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
-CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
 CALL_OPCODE(AllocObj)

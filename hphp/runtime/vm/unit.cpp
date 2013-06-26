@@ -103,13 +103,18 @@ size_t Unit::GetNamedEntityTableSize() {
   return s_namedDataMap ? s_namedDataMap->size() : 0;
 }
 
+NEVER_INLINE
+static void initializeNamedDataMap() {
+  NamedEntityMap::Config config;
+  config.growthFactor = 1;
+  s_namedDataMap =
+    new NamedEntityMap(RuntimeOption::EvalInitialNamedEntityTableSize,
+                       config);
+}
+
 NamedEntity* Unit::GetNamedEntity(const StringData* str) {
   if (UNLIKELY(!s_namedDataMap)) {
-    NamedEntityMap::Config config;
-    config.growthFactor = 1;
-    s_namedDataMap =
-      new NamedEntityMap(RuntimeOption::EvalInitialNamedEntityTableSize,
-                         config);
+    initializeNamedDataMap();
   }
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;

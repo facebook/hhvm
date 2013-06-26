@@ -64,7 +64,6 @@ public: // ArrayData implementation
   // are visible in this class, to avoid triggering implicit conversions
   // from a CVarRef key to int64.
   using ArrayData::exists;
-  using ArrayData::get;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
@@ -86,9 +85,6 @@ public: // ArrayData implementation
   virtual bool exists(int64_t k) const;
   virtual bool exists(const StringData* k) const;
   virtual bool idxExists(ssize_t idx) const;
-
-  virtual CVarRef get(int64_t k, bool error = false) const;
-  virtual CVarRef get(const StringData* k, bool error = false) const;
 
   virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;

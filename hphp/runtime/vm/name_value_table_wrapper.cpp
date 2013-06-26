@@ -68,23 +68,6 @@ bool NameValueTableWrapper::idxExists(ssize_t idx) const {
   return false;
 }
 
-CVarRef NameValueTableWrapper::get(int64_t k, bool error) const {
-  return get(String(k), error);
-}
-
-CVarRef NameValueTableWrapper::get(const StringData* k, bool error) const {
-  TypedValue* tv = m_tab->lookup(k);
-  if (tv) {
-    return tvAsCVarRef(tv);
-  }
-  // NOTE: ignoring error on these, as global_array_wrapper does so too,
-  // but I'm not sure why.
-  // if (error) {
-  //   raise_notice("Undefined index: %s", k->data());
-  // }
-  return null_variant;
-}
-
 TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
   return m_tab->lookup(k);
 }

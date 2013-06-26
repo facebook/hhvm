@@ -479,6 +479,13 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
   return false;
 }
 
+CVarRef ArrayData::get(CVarRef k, bool error) const {
+  assert(IsValidKey(k));
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? get(getIntKey(cell), error)
+                        : get(getStringKey(cell), error);
+}
+
 // nvGet has to search twice when using the ArrayData api so as not to
 // conflate no-key with have-key && value == null_varaint.  Subclasses
 // can easily do this with one key search.
@@ -522,13 +529,23 @@ CVarRef ArrayData::getNotFound(int64_t k) {
   return null_variant;
 }
 
-CVarRef ArrayData::getNotFound(CStrRef k) {
-  raise_notice("Undefined index: %s", k.data());
+CVarRef ArrayData::getNotFound(const StringData* k) {
+  raise_notice("Undefined index: %s", k->data());
   return null_variant;
 }
 
-CVarRef ArrayData::getNotFound(const StringData* k) {
-  raise_notice("Undefined index: %s", k->data());
+CVarRef ArrayData::getNotFound(int64_t k, bool error) const {
+  return error && m_kind != ArrayKind::kNameValueTableWrapper ? getNotFound(k) :
+         null_variant;
+}
+
+CVarRef ArrayData::getNotFound(const StringData* k, bool error) const {
+  return error && m_kind != ArrayKind::kNameValueTableWrapper ? getNotFound(k) :
+         null_variant;
+}
+
+CVarRef ArrayData::getNotFound(CStrRef k) {
+  raise_notice("Undefined index: %s", k.data());
   return null_variant;
 }
 

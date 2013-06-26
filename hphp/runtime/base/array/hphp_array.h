@@ -80,7 +80,6 @@ public:
   // are visible in this class, to avoid triggering implicit conversions
   // from a CVarRef key to int64.
   using ArrayData::exists;
-  using ArrayData::get;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::createLvalPtr;
@@ -117,10 +116,6 @@ public:
   // implements ArrayData
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
-
-  // implements ArrayData
-  CVarRef get(int64_t k, bool error=false) const FLATTEN;
-  CVarRef get(const StringData* k, bool error=false) const FLATTEN;
 
   // implements ArrayData
   ArrayData* lval(int64_t k, Variant*& ret, bool copy, bool checkExist=false);

@@ -211,12 +211,6 @@ public:
   virtual bool exists(const StringData* k) const = 0;
 
   /**
-   * Getting value at specified key.
-   */
-  virtual CVarRef get(int64_t k, bool error = false) const = 0;
-  virtual CVarRef get(const StringData* k, bool error = false) const = 0;
-
-  /**
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may do better.
    */
@@ -293,6 +287,8 @@ public:
    */
   bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
+  CVarRef get(int64_t k, bool error = false) const;
+  CVarRef get(const StringData* k, bool error = false) const;
   CVarRef get(CStrRef k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
   ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
@@ -472,6 +468,8 @@ public:
   // error-handling helpers
   static CVarRef getNotFound(int64_t k);
   static CVarRef getNotFound(const StringData* k);
+  CVarRef getNotFound(int64_t k, bool error) const;
+  CVarRef getNotFound(const StringData* k, bool error) const;
   static CVarRef getNotFound(CStrRef k);
   static CVarRef getNotFound(CVarRef k);
   static TypedValue* nvGetNotFound(int64_t k);

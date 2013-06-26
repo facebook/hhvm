@@ -91,22 +91,6 @@ bool SharedMap::exists(int64_t k) const {
   return m_map->indexOf(k) != -1;
 }
 
-CVarRef SharedMap::get(const StringData* k, bool error /* = false */) const {
-  int index = getIndex(k);
-  if (index == -1) {
-    return error ? getNotFound(k) : null_variant;
-  }
-  return getValueRef(index);
-}
-
-CVarRef SharedMap::get(int64_t k, bool error /* = false */) const {
-  int index = getIndex(k);
-  if (index == -1) {
-    return error ? getNotFound(k) : null_variant;
-  }
-  return getValueRef(index);
-}
-
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
 inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   if (a1 != a2) a1->release();

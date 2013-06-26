@@ -362,16 +362,6 @@ TypedValue* PolicyArray::nvGetCellImpl(K k) const {
 // }
 
 template <class K>
-const Variant& PolicyArray::getImpl(K k, bool error) const {
-  APILOG << "(" << keystr(k) << ", " << error << ")";
-  auto const pos = find(k, m_size);
-  if (pos != PosType::invalid) {
-    return val(pos);
-  }
-  return error ? getNotFound(k) : null_variant;
-}
-
-template <class K>
 ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret,
                                   bool copy, bool checkExist) {
   APILOG << "(" << keystr(k) << ", " << ret << ", "

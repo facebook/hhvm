@@ -56,11 +56,14 @@ inline CVarRef ArrayData::get(CStrRef k, bool error) const {
   return get(k.get(), error);
 }
 
-inline CVarRef ArrayData::get(CVarRef k, bool error) const {
-  assert(IsValidKey(k));
-  auto const cell = k.asCell();
-  return isIntKey(cell) ? get(getIntKey(cell), error)
-                        : get(getStringKey(cell), error);
+inline CVarRef ArrayData::get(int64_t k, bool error) const {
+  auto tv = nvGet(k);
+  return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
+}
+
+inline CVarRef ArrayData::get(const StringData* k, bool error) const {
+  auto tv = nvGet(k);
+  return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
 inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,

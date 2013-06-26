@@ -46,7 +46,6 @@ public:
   // are visible in this class, to avoid triggering implicit conversions
   // from a CVarRef key to int64.
   using ArrayData::exists;
-  using ArrayData::get;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
@@ -76,9 +75,6 @@ public:
 
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
-
-  CVarRef get(int64_t k, bool error = false) const;
-  CVarRef get(const StringData* k, bool error = false) const;
 
   virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
                           bool checkExist = false);

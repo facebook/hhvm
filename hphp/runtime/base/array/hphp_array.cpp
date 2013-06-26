@@ -571,24 +571,6 @@ bool HphpArray::exists(const StringData* k) const {
   return pos != ssize_t(ElmIndEmpty);
 }
 
-CVarRef HphpArray::get(int64_t k, bool error /* = false */) const {
-  ElmInd pos = find(k);
-  if (pos != ElmIndEmpty) {
-    Elm* e = &m_data[pos];
-    return tvAsCVarRef(&e->data);
-  }
-  return error ? getNotFound(k) : null_variant;
-}
-
-CVarRef HphpArray::get(const StringData* key, bool error /* = false */) const {
-  ElmInd pos = find(key, key->hash());
-  if (pos != ElmIndEmpty) {
-    Elm* e = &m_data[pos];
-    return tvAsCVarRef(&e->data);
-  }
-  return error ? getNotFound(key) : null_variant;
-}
-
 //=============================================================================
 // Append/insert/update.
 

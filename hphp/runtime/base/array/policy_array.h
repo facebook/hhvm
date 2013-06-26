@@ -405,26 +405,6 @@ public:
     return Store::find(k, m_size) < toPos(m_size);
   }
 
-  /**
-   * Getting value at specified key.
-   */
-private:
-  template <class K>
-  const Variant& getImpl(K k, bool error) const;
-
-public:
-  // aalexandre: this API forces storage to store variants in the
-  // TypedValue/Variant layout, thus disallowing e.g. implementations
-  // that store type tags and values separately.
-  virtual const Variant&
-  get(int64_t k, bool error = false) const FOLLY_OVERRIDE {
-    return getImpl(k, error);
-  }
-  virtual const Variant&
-  get(const StringData* k, bool error = false) const FOLLY_OVERRIDE {
-    return getImpl(k, error);
-  }
-
 private:
   template <class K> TypedValue* nvGetImpl(K k) const;
 

@@ -157,9 +157,11 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
     if (WEXITSTATUS(status) != 0) {
       Logger::Verbose("Status %d running command: `%s'\n",
                       WEXITSTATUS(status), path);
-      while (*argv) {
-        Logger::Verbose("  arg: `%s'\n", *argv);
-        argv++;
+      if (argv) {
+        while (*argv) {
+          Logger::Verbose("  arg: `%s'\n", *argv);
+          argv++;
+        }
       }
     } else {
       ret = true;

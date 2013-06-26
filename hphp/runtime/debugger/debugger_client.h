@@ -349,6 +349,8 @@ public:
   void usageLogEvent(const std::string &eventName,
                      const std::string &data = "");
 
+  std::string getZendExecutable() const { return m_zendExe; }
+
 private:
   enum InputState {
     TakingCommand,
@@ -494,6 +496,9 @@ private:
 
   // usage logging
   const char *getUsageMode();
+
+  // Zend executable for CmdZend, overridable via config.
+  std::string m_zendExe;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

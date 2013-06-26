@@ -2385,6 +2385,7 @@ void DebuggerClient::loadConfig() {
   }
 
   m_sourceRoot = m_config["SourceRoot"].getString();
+  m_zendExe = m_config["ZendExecutable"].getString("php");
 
   if (needToWriteFile) {
     saveConfig(); // so to generate a starter for people

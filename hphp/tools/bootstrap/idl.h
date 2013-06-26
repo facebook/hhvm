@@ -371,6 +371,27 @@ class PhpClass {
   fbstring m_desc;
 };
 
+class PhpExtension {
+ public:
+  explicit PhpExtension(const folly::dynamic& e)
+    : m_extension(e) { }
+
+  /* The C++ symbol name of the Extension struct.
+   * Only needed if s_(name)_extension is not correct.
+   * Set to blank if this ext doens't declare an Extension.
+   */
+  fbstring symbol() const {
+    auto it = m_extension.find("symbol");
+    if (it != m_extension.items().end()) {
+      return it->second.asString();
+    }
+    return "";
+  }
+
+ private:
+  folly::dynamic m_extension;
+};
+
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
               fbvector<PhpClass>& classVec);
@@ -378,7 +399,8 @@ void parseIDL(const char* idlFilePath,
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
               fbvector<PhpClass>& classVec,
-              fbvector<PhpConst>& constVec);
+              fbvector<PhpConst>& constVec,
+              fbvector<PhpExtension>& extVec);
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::IDL

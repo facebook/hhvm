@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/util/util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -745,6 +746,14 @@ void ClassInfoUnique::postInit() {
 void ClassInfo::Load() {
   if (s_loaded) return;
   const char **p = g_class_map;
+
+  while (*p) {
+    Extension *ext = (Extension*)*p++;
+    // TODO: Do something useful with this
+    // For now, it's here to anchor "empty" extensions
+  }
+  p++;
+
   while (*p) {
     Attribute attribute = (Attribute)(int64_t)*p;
     always_assert(!(attribute & IsRedeclared));

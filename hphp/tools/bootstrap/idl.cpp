@@ -699,7 +699,8 @@ PhpClass::PhpClass(const folly::dynamic &c) :
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
               fbvector<PhpClass>& classVec,
-              fbvector<PhpConst>& constVec) {
+              fbvector<PhpConst>& constVec,
+              fbvector<PhpExtension>& extVec) {
   std::ostringstream jsonString;
   std::ifstream infile(idlFilePath);
   infile >> jsonString.rdbuf();
@@ -718,13 +719,19 @@ void parseIDL(const char* idlFilePath,
     PhpConst cns(c);
     constVec.push_back(cns);
   }
+  auto it = parsed.find("extension");
+  if (it != parsed.items().end()) {
+    PhpExtension ext(it->second);
+    extVec.push_back(ext);
+  }
 }
 
 void parseIDL(const char* idlFilePath,
               fbvector<PhpFunc>& funcVec,
               fbvector<PhpClass>& classVec) {
   fbvector<PhpConst> consts; // dummy
-  parseIDL(idlFilePath, funcVec, classVec, consts);
+  fbvector<PhpExtension> exts; // dummy
+  parseIDL(idlFilePath, funcVec, classVec, consts, exts);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -87,8 +87,14 @@ class c_WaitHandle : public ExtObjectData {
   bool isFinished() { return getState() <= STATE_FAILED; }
   bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
   bool isFailed() { return getState() == STATE_FAILED; }
-  TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
-  ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
+  TypedValue* getResult() {
+    assert(isSucceeded());
+    return &m_resultOrException;
+  }
+  ObjectData* getException() {
+    assert(isFailed());
+    return m_resultOrException.m_data.pobj;
+  }
   virtual String getName() = 0;
 
  protected:
@@ -190,7 +196,10 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
 
  public:
-  AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
+  AsioContext* getContext() {
+    assert(isInContext());
+    return AsioSession::Get()->getContext(getContextIdx());
+  }
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
@@ -339,7 +348,8 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void initialize(CObjRef exception, CArrRef deps, ssize_t iter_pos, c_WaitableWaitHandle* child);
+  void initialize(CObjRef exception, CArrRef deps,
+                  ssize_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
   Array m_deps;
@@ -377,7 +387,8 @@ class c_GenMapWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void initialize(CObjRef exception, c_Map* deps, int64_t iter_pos, c_WaitableWaitHandle* child);
+  void initialize(CObjRef exception, c_Map* deps,
+                  ssize_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
   p_Map m_deps;
@@ -415,7 +426,8 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void initialize(CObjRef exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child);
+  void initialize(CObjRef exception, c_Vector* deps,
+                  int64_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
   p_Vector m_deps;
@@ -517,12 +529,22 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
   public: void t___construct();
 
  public:
-  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
+  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event,
+                                                 ObjectData* priv_data);
 
-  c_ExternalThreadEventWaitHandle* getNextToProcess() { assert(getState() == STATE_WAITING); return m_nextToProcess; }
-  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) { assert(getState() == STATE_WAITING); m_nextToProcess = next; }
+  c_ExternalThreadEventWaitHandle* getNextToProcess() {
+    assert(getState() == STATE_WAITING);
+    return m_nextToProcess;
+  }
+  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) {
+    assert(getState() == STATE_WAITING);
+    m_nextToProcess = next;
+  }
   ObjectData* getPrivData() { return m_privData.get(); }
-  void setIndex(uint32_t ete_idx) { assert(getState() == STATE_WAITING); m_index = ete_idx; }
+  void setIndex(uint32_t ete_idx) {
+    assert(getState() == STATE_WAITING);
+    m_index = ete_idx;
+  }
 
   void abandon(bool sweeping);
   void process();

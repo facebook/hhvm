@@ -573,7 +573,7 @@ function run_test($options, $test) {
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
 
-    return preg_match("/^$wanted_re\$/s", $output);
+    return quoted_printable_encode(preg_match("/^$wanted_re\$/s", $output));
 
   } else if (file_exists("$test.expectregex")) {
     $wanted_re = file_get_contents("$test.expectregex");
@@ -581,7 +581,7 @@ function run_test($options, $test) {
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");
 
-    return preg_match("/^$wanted_re\$/s", $output);
+    return quoted_printable_encode(preg_match("/^$wanted_re\$/s", $output));
   }
 }
 

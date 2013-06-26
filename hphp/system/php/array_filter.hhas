@@ -1,4 +1,4 @@
-.function array_filter($arr = no_args, $func = no_func, $res = entry) {
+.function array_filter($arr = no_args, $func = no_func("""null"""), $res = entry) {
           .numiters 2;
 
 # if we get here, a value was supplied for $res

@@ -439,7 +439,8 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_nullable, true_varNR);
       }
 
-      if (fpi.hasDefaultValue()) {
+      if (fpi.phpCode()) {
+        assert(fpi.hasDefaultValue());
         if (fpi.hasScalarDefaultValue()) {
           // Most of the time the default value is scalar, so we can
           // avoid evaling in the common case

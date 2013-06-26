@@ -1118,16 +1118,12 @@ struct Initializer {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * php-serialized : long-string-literal
- *                ;
+ * long-string-literal: <string>
  *
  * `long-string-literal' is a python-style longstring.  See
  * readLongString for more details.
- *
- * Returns a Variant representing the serialized data.  It's up to the
- * caller to make sure it is a legal literal.
  */
-Variant parse_php_serialized(AsmState& as) {
+String parse_long_string(AsmState& as) {
   as.in.skipWhitespace();
 
   std::vector<char> buffer;
@@ -1141,8 +1137,21 @@ Variant parse_php_serialized(AsmState& as) {
   // String wants a null, and dereferences one past the size we give
   // it.
   buffer.push_back('\0');
-  String data(&buffer[0], buffer.size() - 1, AttachLiteral);
-  return unserialize_from_string(data);
+  return String(&buffer[0], buffer.size() - 1, AttachLiteral);
+}
+
+/*
+ * php-serialized : long-string-literal
+ *                ;
+ *
+ * `long-string-literal' is a python-style longstring.  See
+ * readLongString for more details.
+ *
+ * Returns a Variant representing the serialized data.  It's up to the
+ * caller to make sure it is a legal literal.
+ */
+Variant parse_php_serialized(AsmState& as) {
+  return unserialize_from_string(parse_long_string(as));
 }
 
 /*
@@ -1369,8 +1378,12 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
  *            ;
  *
  * dv-initializer : empty
- *                | '=' identifier
+ *                | '=' identifier arg-default
  *                ;
+ *
+ * arg-default : empty
+ *             | '(' long-string-literal ')'
+ *             ;
  */
 void parse_parameter_list(AsmState& as) {
   as.in.skipWhitespace();
@@ -1396,8 +1409,6 @@ void parse_parameter_list(AsmState& as) {
       as.error("expected parameter name after $");
     }
 
-    as.fe->appendParam(StringData::GetStaticString(name), param);
-
     as.in.skipWhitespace();
     ch = as.in.getc();
     if (ch == '=') {
@@ -1407,15 +1418,37 @@ void parse_parameter_list(AsmState& as) {
       if (!as.in.readword(label)) {
         as.error("expected label name for dv-initializer");
       }
-      as.addLabelDVInit(label, as.fe->numParams() - 1);
+      as.addLabelDVInit(label, as.fe->numParams());
 
       ch = as.in.getc();
+      if (ch == '(') {
+        String str = parse_long_string(as);
+        param.setPhpCode(StringData::GetStaticString(str));
+        TypedValue tv;
+        tvWriteUninit(&tv);
+        if (str.size() == 4) {
+          if (!strcasecmp("null", str.data())) {
+            tvWriteNull(&tv);
+          } else if (!strcasecmp("true", str.data())) {
+            tv = make_tv<KindOfBoolean>(true);
+          }
+        } else if (str.size() == 5 && !strcasecmp("false", str.data())) {
+          tv = make_tv<KindOfBoolean>(false);
+        }
+        if (tv.m_type != KindOfUninit) {
+          param.setDefaultValue(tv);
+        }
+        as.in.expectWs(')');
+        ch = as.in.getc();
+      }
     } else {
       if (inDVInits) {
         as.error("all parameters after the first with a dv-initializer "
                  "must have a dv-initializer");
       }
     }
+
+    as.fe->appendParam(StringData::GetStaticString(name), param);
 
     if (ch == ')') break;
     if (ch != ',') as.error("expected , between parameter names");

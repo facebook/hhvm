@@ -2586,7 +2586,7 @@ void HhbcTranslator::assertString(const Location& loc, const StringData* str) {
  */
 RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
   Type t;
-  SSATmp* val;
+  SSATmp* val = nullptr;
   switch (loc.space) {
     case Location::Stack: {
       auto i = loc.offset;

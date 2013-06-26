@@ -86,7 +86,7 @@ inline void assert_fail(const char* e,
                         const char* file,
                         unsigned int line,
                         const char* func) {
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__APPLE__)
   __assert_fail(e, file, line, func);
 #else
   extern void impl_assert_fail(const char*,

@@ -340,7 +340,7 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
     goto error;
   }
 
-  long lval;
+  int64_t lval;
   double dval;
   switch (is_numeric_string(p.data(), p.length(), &lval, &dval, 0)) {
     case KindOfInt64:

@@ -2693,30 +2693,48 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
 }
 
 void VMExecutionContext::enterDebuggerDummyEnv() {
-  static Unit* s_debuggerDummy = nullptr;
-  if (!s_debuggerDummy) {
-    s_debuggerDummy = compile_string("<?php?>", 7);
-  }
-  if (!getFP()) {
-    assert(m_stack.count() == 0);
-    ActRec* ar = m_stack.allocA();
-    ar->m_func = s_debuggerDummy->getMain();
-    ar->setThis(nullptr);
-    ar->m_soff = 0;
-    ar->m_savedRbp = 0;
-    ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
-    assert(isReturnHelper(ar->m_savedRip));
-    m_fp = ar;
-    m_pc = s_debuggerDummy->entry();
-    m_firstAR = ar;
-  }
+  static Unit* s_debuggerDummy = compile_string("<?php?>", 7);
+  // Ensure that the VM stack is completely empty (m_fp should be null)
+  // and that we're not in a nested VM (reentrancy)
+  assert(getFP() == nullptr);
+  assert(m_nestedVMs.size() == 0);
+  assert(m_nesting == 0);
+  assert(m_stack.count() == 0);
+  ActRec* ar = m_stack.allocA();
+  ar->m_func = s_debuggerDummy->getMain();
+  ar->setThis(nullptr);
+  ar->m_soff = 0;
+  ar->m_savedRbp = 0;
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
+  assert(isReturnHelper(ar->m_savedRip));
+  m_fp = ar;
+  m_pc = s_debuggerDummy->entry();
+  m_firstAR = ar;
   m_fp->setVarEnv(m_globalVarEnv);
   m_globalVarEnv->attach(m_fp);
 }
 
 void VMExecutionContext::exitDebuggerDummyEnv() {
   assert(m_globalVarEnv);
-  m_globalVarEnv->detach(getFP());
+  // Ensure that m_fp is valid
+  assert(getFP() != nullptr);
+  // Ensure that m_fp points to the only frame on the call stack.
+  // In other words, make sure there are no VM frames directly below
+  // this one and that we are not in a nested VM (reentrancy)
+  assert(m_fp->arGetSfp() == m_fp);
+  assert(m_nestedVMs.size() == 0);
+  assert(m_nesting == 0);
+  // Teardown the frame we erected by enterDebuggerDummyEnv()
+  const Func* func = m_fp->m_func;
+  try {
+    frame_free_locals_inl_no_hook<true>(m_fp, func->numLocals());
+  } catch (...) {}
+  m_stack.ndiscard(func->numSlotsInFrame());
+  m_stack.discardAR();
+  // After tearing down this frame, the VM stack should be completely empty
+  assert(m_stack.count() == 0);
+  m_fp = nullptr;
+  m_pc = nullptr;
 }
 
 // Identifies the set of return helpers that we may set m_savedRip to in an

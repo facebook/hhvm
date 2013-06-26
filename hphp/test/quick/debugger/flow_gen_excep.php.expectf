@@ -10,6 +10,12 @@ Breakpoint 1 set upon entering foo()
 next
 Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 next
+Break on line 40 of %s/flow_gen_excep.php
+  39 
+  40 main(1);
+  41 
+
+next
 Breakpoint 1 reached at foo() on line 23 of %s/flow_gen_excep.php
   22 function foo($a) {
   23   $gen1 = genFoo($a);

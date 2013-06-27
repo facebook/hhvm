@@ -74,7 +74,7 @@ class Redis {
 
   public function auth($password) {
     $this->password = $password;
-    $this->processComment('AUTH', $password);
+    $this->processCommand('AUTH', $password);
     return $this->processBooleanResponse();
   }
 
@@ -133,7 +133,7 @@ class Redis {
       $this->processCommand('CONFIG', 'GET', $key);
       return $this->processMapResponse(false, false);
     } else if ($op == 'SET') {
-      $this->processCommand('CONFIG', 'SET', $key, $value);
+      $this->processCommand('CONFIG', 'SET', $key, $val);
       return $this->processBooleanResponse();
     } else {
       throw new RedisException('First arg must be GET or SET');
@@ -610,7 +610,7 @@ class Redis {
   }
 
   public function getPort() {
-    return $this->post;
+    return $this->port;
   }
 
   public function getDBNum() {
@@ -1073,7 +1073,7 @@ class Redis {
         return serialize($str);
       case self::SERIALIZER_IGBINARY:
       default:
-        throw new RedisException("Not Iplemented");
+        throw new RedisException("Not Implemented");
     }
   }
 

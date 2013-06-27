@@ -5545,7 +5545,7 @@ void genCodeForTrace(IRTrace* trace,
   }
 }
 
-ALWAYS_INLINE
+inline ALWAYS_INLINE
 TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
   if (UNLIKELY(nullptr == tv)) {
     // refcount is already correct since def was never decrefed

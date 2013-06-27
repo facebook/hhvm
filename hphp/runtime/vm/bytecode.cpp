@@ -3712,14 +3712,14 @@ void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
   NEXT();
   auto const c1 = m_stack.topC();
   auto const c2 = m_stack.indC(1);
-  bool const result = op(c2, c1);
+  bool const result = op(*c2, *c1);
   tvRefcountedDecRefCell(c2);
   *c2 = make_tv<KindOfBoolean>(result);
   m_stack.popC();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) -> bool {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) -> bool {
     return cellToBool(c1) ^ cellToBool(c2);
   });
 }
@@ -3729,25 +3729,25 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSame(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopNSame(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
     return !cellSame(c1, c2);
   });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEq(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
     return cellEqual(c1, c2);
   });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopNeq(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
     return !cellEqual(c1, c2);
   });
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLt(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
     return cellLess(c1, c2);
   });
 }
@@ -3757,7 +3757,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopLte(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
-  implCellBinOpBool(pc, [&] (const Cell* c1, const Cell* c2) {
+  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
     return cellGreater(c1, c2);
   });
 }
@@ -4169,7 +4169,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
   for (i = 0; i < cases; ++i) {
     auto& item = jmptab[i];
     const StringData* str = u->lookupLitstrId(item.str);
-    if (cellEqual(val, str)) {
+    if (cellEqual(*val, str)) {
       pc = origPC + item.dest;
       break;
     }

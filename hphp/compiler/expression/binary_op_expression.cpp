@@ -544,11 +544,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case '<':
           result = less(v1, v2); break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = cellLessOrEqual(v1.asCell(), v2.asCell()); break;
+          result = cellLessOrEqual(*v1.asCell(), *v2.asCell()); break;
         case '>':
           result = more(v1, v2); break;
         case T_IS_GREATER_OR_EQUAL:
-          result = cellGreaterOrEqual(v1.asCell(), v2.asCell()); break;
+          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell()); break;
         case '+':
           *result.asCell() = cellAdd(*v1.asCell(), *v2.asCell());
           break;

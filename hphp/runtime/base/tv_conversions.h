@@ -25,8 +25,8 @@ namespace HPHP {
 /*
  * Convert a cell to various types, without changing the Cell.
  */
-bool cellToBool(const Cell*);
-int64_t cellToInt(const Cell*);
+bool cellToBool(Cell);
+int64_t cellToInt(Cell);
 
 /*
  * Convert a string to a TypedNum following php semantics, allowing

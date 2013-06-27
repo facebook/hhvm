@@ -18,15 +18,15 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool cellEqual(const Cell* cell, int ival) {
+inline bool cellEqual(Cell cell, int ival) {
   return cellEqual(cell, static_cast<int64_t>(ival));
 }
 
-inline bool cellLess(const Cell* cell, int ival) {
+inline bool cellLess(Cell cell, int ival) {
   return cellLess(cell, static_cast<int64_t>(ival));
 }
 
-inline bool cellGreater(const Cell* cell, int ival) {
+inline bool cellGreater(Cell cell, int ival) {
   return cellGreater(cell, static_cast<int64_t>(ival));
 }
 

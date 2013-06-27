@@ -172,8 +172,8 @@ Cell cellDiv(Cell c1, Cell c2) {
 }
 
 Cell cellMod(Cell c1, Cell c2) {
-  auto const i1 = cellToInt(&c1);
-  auto const i2 = cellToInt(&c2);
+  auto const i1 = cellToInt(c1);
+  auto const i2 = cellToInt(c2);
   if (UNLIKELY(i2 == 0)) {
     raise_warning(Strings::DIVISION_BY_ZERO);
     return make_tv<KindOfBoolean>(false);

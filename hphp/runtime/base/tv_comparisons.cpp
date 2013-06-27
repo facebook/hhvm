@@ -46,31 +46,31 @@ namespace {
  */
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, bool val) {
+bool cellRelOp(Op op, Cell cell, bool val) {
   return op(cellToBool(cell), val);
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, int64_t val) {
-  assert(cellIsPlausible(cell));
+bool cellRelOp(Op op, Cell cell, int64_t val) {
+  assert(cellIsPlausible(&cell));
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:           return op(false, !!val);
-  case KindOfBoolean:        return op(!!cell->m_data.num, val != 0);
-  case KindOfInt64:          return op(cell->m_data.num, val);
-  case KindOfDouble:         return op(cell->m_data.dbl, val);
+  case KindOfBoolean:        return op(!!cell.m_data.num, val != 0);
+  case KindOfInt64:          return op(cell.m_data.num, val);
+  case KindOfDouble:         return op(cell.m_data.dbl, val);
   case KindOfArray:          return op(true, false);
 
   case KindOfObject:
-    return cell->m_data.pobj->isCollection()
+    return cell.m_data.pobj->isCollection()
       ? op.collectionVsNonObj()
-      : op(cell->m_data.pobj->o_toInt64(), val);
+      : op(cell.m_data.pobj->o_toInt64(), val);
 
   case KindOfStaticString:
   case KindOfString:
     {
-      auto const sdata = cell->m_data.pstr;
+      auto const sdata = cell.m_data.pstr;
       int64_t ival;
       double dval;
       auto const dt = sdata->isNumericWithVal(ival, dval,
@@ -87,25 +87,25 @@ bool cellRelOp(Op op, const Cell* cell, int64_t val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, double val) {
-  assert(cellIsPlausible(cell));
+bool cellRelOp(Op op, Cell cell, double val) {
+  assert(cellIsPlausible(&cell));
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:            return op(false, val != 0);
-  case KindOfBoolean:         return op(!!cell->m_data.num, val != 0);
-  case KindOfInt64:           return op(cell->m_data.num, val);
-  case KindOfDouble:          return op(cell->m_data.dbl, val);
+  case KindOfBoolean:         return op(!!cell.m_data.num, val != 0);
+  case KindOfInt64:           return op(cell.m_data.num, val);
+  case KindOfDouble:          return op(cell.m_data.dbl, val);
   case KindOfArray:           return op(true, false);
 
   case KindOfObject:
-    return cell->m_data.pobj->isCollection()
+    return cell.m_data.pobj->isCollection()
       ? op.collectionVsNonObj()
-      : op(cell->m_data.pobj->o_toDouble(), val);
+      : op(cell.m_data.pobj->o_toDouble(), val);
 
   case KindOfStaticString:
   case KindOfString:
-    return op(toDouble(cell->m_data.pstr), val);
+    return op(toDouble(cell.m_data.pstr), val);
 
   default:
     break;
@@ -114,17 +114,17 @@ bool cellRelOp(Op op, const Cell* cell, double val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, const StringData* val) {
-  assert(cellIsPlausible(cell));
+bool cellRelOp(Op op, Cell cell, const StringData* val) {
+  assert(cellIsPlausible(&cell));
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:         return op(empty_string.get(), val);
-  case KindOfBoolean:      return op(!!cell->m_data.num, toBoolean(val));
-  case KindOfDouble:       return op(cell->m_data.dbl, val->toDouble());
+  case KindOfBoolean:      return op(!!cell.m_data.num, toBoolean(val));
+  case KindOfDouble:       return op(cell.m_data.dbl, val->toDouble());
   case KindOfArray:        return op(true, false);
   case KindOfString:
-  case KindOfStaticString: return op(cell->m_data.pstr, val);
+  case KindOfStaticString: return op(cell.m_data.pstr, val);
 
   case KindOfInt64:
     {
@@ -132,15 +132,15 @@ bool cellRelOp(Op op, const Cell* cell, const StringData* val) {
       double dval;
       auto const dt = val->isNumericWithVal(ival, dval,
         /* allow_error */ true);
-      return dt == KindOfInt64 ? op(cell->m_data.num, ival) :
-             dt == KindOfDouble ? op(cell->m_data.num, dval) :
-             op(cell->m_data.num, 0);
+      return dt == KindOfInt64 ? op(cell.m_data.num, ival) :
+             dt == KindOfDouble ? op(cell.m_data.num, dval) :
+             op(cell.m_data.num, 0);
     }
 
   case KindOfObject:
     {
-      auto const od = cell->m_data.pobj;
-      if (od->isResource()) return op(od->o_toDouble(), val->toDouble());
+      auto const od = cell.m_data.pobj;
+      if (od->isResource())   return op(od->o_toDouble(), val->toDouble());
       if (od->isCollection()) return op.collectionVsNonObj();
       try {
         String str(const_cast<ObjectData*>(od)->t___tostring());
@@ -157,21 +157,21 @@ bool cellRelOp(Op op, const Cell* cell, const StringData* val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, const ArrayData* ad) {
-  assert(cellIsPlausible(cell));
+bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
+  assert(cellIsPlausible(&cell));
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:         return op(false, !ad->empty());
-  case KindOfBoolean:      return op(cell->m_data.num, !ad->empty());
+  case KindOfBoolean:      return op(cell.m_data.num, !ad->empty());
   case KindOfInt64:        return op(false, true);
   case KindOfDouble:       return op(false, true);
-  case KindOfArray:        return op(cell->m_data.parr, ad);
+  case KindOfArray:        return op(cell.m_data.parr, ad);
   case KindOfStaticString:
   case KindOfString:       return op(false, true);
   case KindOfObject:
     {
-      auto const od = cell->m_data.pobj;
+      auto const od = cell.m_data.pobj;
       if (od->isResource()) return op(false, true);
       return od->isCollection()
         ? op.collectionVsNonObj()
@@ -185,40 +185,36 @@ bool cellRelOp(Op op, const Cell* cell, const ArrayData* ad) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* cell, const ObjectData* od) {
-  assert(cellIsPlausible(cell));
+bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
+  assert(cellIsPlausible(&cell));
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:        // TODO: should use o_toBoolean
                           return op(false, true);
-  case KindOfBoolean:     return op(!!cell->m_data.num, true);
+  case KindOfBoolean:     return op(!!cell.m_data.num, true);
   case KindOfInt64:
     return od->isCollection() ? op.collectionVsNonObj()
-                              : op(cell->m_data.num, od->o_toInt64());
+                              : op(cell.m_data.num, od->o_toInt64());
   case KindOfDouble:
     return od->isCollection() ? op.collectionVsNonObj()
-                              : op(cell->m_data.dbl, od->o_toDouble());
+                              : op(cell.m_data.dbl, od->o_toDouble());
   case KindOfArray:
       if (od->isResource()) return op(true, false);
       return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
   case KindOfString:
   case KindOfStaticString:
-    {
-      auto const str  = cell->m_data.pstr;
-      if (od->isResource()) return op(str->toDouble(), od->o_toDouble());
-
-      if (od->isCollection()) return op.collectionVsNonObj();
-      try {
-        String str(const_cast<ObjectData*>(od)->t___tostring());
-        return op(cell->m_data.pstr, str.get());
-      } catch (BadTypeConversionException&) {
-        return op(false, true);
-      }
+    if (od->isResource())   return op(cell.m_data.pstr->toDouble(),
+                                      od->o_toDouble());
+    if (od->isCollection()) return op.collectionVsNonObj();
+    try {
+      String str(const_cast<ObjectData*>(od)->t___tostring());
+      return op(cell.m_data.pstr, str.get());
+    } catch (BadTypeConversionException&) {
+      return op(false, true);
     }
   case KindOfObject:
-    return op(cell->m_data.pobj, od);
-
+    return op(cell.m_data.pobj, od);
   default:
     break;
   }
@@ -227,23 +223,23 @@ bool cellRelOp(Op op, const Cell* cell, const ObjectData* od) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, const Cell* c1, const Cell* c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+bool cellRelOp(Op op, Cell c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
 
-  switch (c2->m_type) {
+  switch (c2.m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return IS_STRING_TYPE(c1->m_type)
-      ? op(c1->m_data.pstr, empty_string.get())
+    return IS_STRING_TYPE(c1.m_type)
+      ? op(c1.m_data.pstr, empty_string.get())
       : cellRelOp(op, c1, false);
-  case KindOfInt64:        return cellRelOp(op, c1, c2->m_data.num);
-  case KindOfBoolean:      return cellRelOp(op, c1, !!c2->m_data.num);
-  case KindOfDouble:       return cellRelOp(op, c1, c2->m_data.dbl);
+  case KindOfInt64:        return cellRelOp(op, c1, c2.m_data.num);
+  case KindOfBoolean:      return cellRelOp(op, c1, !!c2.m_data.num);
+  case KindOfDouble:       return cellRelOp(op, c1, c2.m_data.dbl);
   case KindOfStaticString:
-  case KindOfString:       return cellRelOp(op, c1, c2->m_data.pstr);
-  case KindOfArray:        return cellRelOp(op, c1, c2->m_data.parr);
-  case KindOfObject:       return cellRelOp(op, c1, c2->m_data.pobj);
+  case KindOfString:       return cellRelOp(op, c1, c2.m_data.pstr);
+  case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
+  case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
   default:
     break;
   }
@@ -251,10 +247,10 @@ bool cellRelOp(Op op, const Cell* c1, const Cell* c2) {
 }
 
 template<class Op>
-bool tvRelOp(Op op, const TypedValue* tv1, const TypedValue* tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
-  return cellRelOp(op, tvToCell(tv1), tvToCell(tv2));
+bool tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
+  assert(tvIsPlausible(&tv1));
+  assert(tvIsPlausible(&tv2));
+  return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
 }
 
 /*
@@ -372,36 +368,36 @@ struct Gt {
 
 }
 
-bool cellSame(const Cell* c1, const Cell* c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+bool cellSame(Cell c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
 
-  bool const null1 = IS_NULL_TYPE(c1->m_type);
-  bool const null2 = IS_NULL_TYPE(c2->m_type);
+  bool const null1 = IS_NULL_TYPE(c1.m_type);
+  bool const null2 = IS_NULL_TYPE(c2.m_type);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
 
-  switch (c1->m_type) {
+  switch (c1.m_type) {
   case KindOfInt64:
   case KindOfBoolean:
-    if (c2->m_type != c1->m_type) return false;
-    return c1->m_data.num == c2->m_data.num;
+    if (c2.m_type != c1.m_type) return false;
+    return c1.m_data.num == c2.m_data.num;
   case KindOfDouble:
-    if (c2->m_type != c1->m_type) return false;
-    return c1->m_data.dbl == c2->m_data.dbl;
+    if (c2.m_type != c1.m_type) return false;
+    return c1.m_data.dbl == c2.m_data.dbl;
 
   case KindOfStaticString:
   case KindOfString:
-    if (!IS_STRING_TYPE(c2->m_type)) return false;
-    return c1->m_data.pstr->same(c2->m_data.pstr);
+    if (!IS_STRING_TYPE(c2.m_type)) return false;
+    return c1.m_data.pstr->same(c2.m_data.pstr);
 
   case KindOfArray:
-    if (c2->m_type != KindOfArray) return false;
-    return c1->m_data.parr->equal(c2->m_data.parr, true);
+    if (c2.m_type != KindOfArray) return false;
+    return c1.m_data.parr->equal(c2.m_data.parr, true);
 
   case KindOfObject:
-    return c2->m_type == KindOfObject &&
-      c1->m_data.pobj == c2->m_data.pobj;
+    return c2.m_type == KindOfObject &&
+      c1.m_data.pobj == c2.m_data.pobj;
 
   default:
     break;
@@ -409,10 +405,10 @@ bool cellSame(const Cell* c1, const Cell* c2) {
   not_reached();
 }
 
-bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
-  return cellSame(tvToCell(tv1), tvToCell(tv2));
+bool tvSame(TypedValue tv1, TypedValue tv2) {
+  assert(tvIsPlausible(&tv1));
+  assert(tvIsPlausible(&tv2));
+  return cellSame(*tvToCell(&tv1), *tvToCell(&tv2));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -422,125 +418,125 @@ bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
  * in the old code ... we should probably re-evaluate this.
  */
 
-bool cellEqual(const Cell* cell, bool val) {
+bool cellEqual(Cell cell, bool val) {
   return cellRelOp(Eq(), cell, val);
 }
 
 HOT_FUNC
-bool cellEqual(const Cell* cell, int64_t val) {
+bool cellEqual(Cell cell, int64_t val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-bool cellEqual(const Cell* cell, double val) {
+bool cellEqual(Cell cell, double val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-bool cellEqual(const Cell* cell, const StringData* val) {
+bool cellEqual(Cell cell, const StringData* val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-bool cellEqual(const Cell* cell, const ArrayData* val) {
+bool cellEqual(Cell cell, const ArrayData* val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-bool cellEqual(const Cell* cell, const ObjectData* val) {
+bool cellEqual(Cell cell, const ObjectData* val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-bool cellEqual(const Cell* c1, const Cell* c2) {
+bool cellEqual(Cell c1, Cell c2) {
   return cellRelOp(Eq(), c1, c2);
 }
 
 HOT_FUNC
-bool tvEqual(const TypedValue* tv1, const TypedValue* tv2) {
+bool tvEqual(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Eq(), tv1, tv2);
 }
 
-bool cellLess(const Cell* cell, bool val) {
+bool cellLess(Cell cell, bool val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* cell, int64_t val) {
+bool cellLess(Cell cell, int64_t val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* cell, double val) {
+bool cellLess(Cell cell, double val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* cell, const StringData* val) {
+bool cellLess(Cell cell, const StringData* val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* cell, const ArrayData* val) {
+bool cellLess(Cell cell, const ArrayData* val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* cell, const ObjectData* val) {
+bool cellLess(Cell cell, const ObjectData* val) {
   return cellRelOp(Lt(), cell, val);
 }
 
-bool cellLess(const Cell* c1, const Cell* c2) {
+bool cellLess(Cell c1, Cell c2) {
   return cellRelOp(Lt(), c1, c2);
 }
 
 HOT_FUNC
-bool tvLess(const TypedValue* tv1, const TypedValue* tv2) {
+bool tvLess(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Lt(), tv1, tv2);
 }
 
-bool cellGreater(const Cell* cell, bool val) {
+bool cellGreater(Cell cell, bool val) {
   return cellRelOp(Gt(), cell, val);
 }
 
 //NB: was HOT_FUNC in old code ... dunno if this makes sense anymore.
-bool cellGreater(const Cell* cell, int64_t val) {
+bool cellGreater(Cell cell, int64_t val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-bool cellGreater(const Cell* cell, double val) {
+bool cellGreater(Cell cell, double val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-bool cellGreater(const Cell* cell, const StringData* val) {
+bool cellGreater(Cell cell, const StringData* val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-bool cellGreater(const Cell* cell, const ArrayData* val) {
+bool cellGreater(Cell cell, const ArrayData* val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-bool cellGreater(const Cell* cell, const ObjectData* val) {
+bool cellGreater(Cell cell, const ObjectData* val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-bool cellGreater(const Cell* c1, const Cell* c2) {
+bool cellGreater(Cell c1, Cell c2) {
   return cellRelOp(Gt(), c1, c2);
 }
 
-bool tvGreater(const TypedValue* tv1, const TypedValue* tv2) {
+bool tvGreater(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Gt(), tv1, tv2);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-bool cellLessOrEqual(const Cell* c1, const Cell* c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+bool cellLessOrEqual(Cell c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
 
-  if ((c1->m_type == KindOfArray && c2->m_type == KindOfArray) ||
-      (c1->m_type == KindOfObject && c2->m_type == KindOfObject)) {
+  if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
+      (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {
     return cellLess(c1, c2) || cellEqual(c1, c2);
   }
   return !cellGreater(c1, c2);
 }
 
-bool cellGreaterOrEqual(const Cell* c1, const Cell* c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+bool cellGreaterOrEqual(Cell c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
 
-  if ((c1->m_type == KindOfArray && c2->m_type == KindOfArray) ||
-      (c1->m_type == KindOfObject && c2->m_type == KindOfObject)) {
+  if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
+      (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {
     return cellGreater(c1, c2) || cellEqual(c1, c2);
   }
   return !cellLess(c1, c2);

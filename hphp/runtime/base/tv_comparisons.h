@@ -27,13 +27,13 @@ namespace HPHP {
  * Returns whether two Cells have the same value, in the sense of
  * php's === operator.
  */
-bool cellSame(const Cell*, const Cell*);
+bool cellSame(Cell, Cell);
 
 /*
  * Returns whether two TypedValues have the same value, in sense of
  * php's === operator.
  */
-bool tvSame(const TypedValue*, const TypedValue*);
+bool tvSame(TypedValue, TypedValue);
 
 //////////////////////////////////////////////////////////////////////
 // Php's operator ==
@@ -42,25 +42,25 @@ bool tvSame(const TypedValue*, const TypedValue*);
  * Returns whether a Cell has the same value as an unpackaged type, in
  * the sense of php's == operator.
  */
-bool cellEqual(const Cell*, bool);
-bool cellEqual(const Cell*, int);
-bool cellEqual(const Cell*, int64_t);
-bool cellEqual(const Cell*, double);
-bool cellEqual(const Cell*, const StringData*);
-bool cellEqual(const Cell*, const ArrayData*);
-bool cellEqual(const Cell*, const ObjectData*);
+bool cellEqual(Cell, bool);
+bool cellEqual(Cell, int);
+bool cellEqual(Cell, int64_t);
+bool cellEqual(Cell, double);
+bool cellEqual(Cell, const StringData*);
+bool cellEqual(Cell, const ArrayData*);
+bool cellEqual(Cell, const ObjectData*);
 
 /*
  * Returns whether two Cells have the same value, in the same of php's
  * == operator.
  */
-bool cellEqual(const Cell*, const Cell*);
+bool cellEqual(Cell, Cell);
 
 /*
  * Returns whether two TypedValues have the same value, in the sense
  * of php's == operator.
  */
-bool tvEqual(const TypedValue*, const TypedValue*);
+bool tvEqual(TypedValue, TypedValue);
 
 //////////////////////////////////////////////////////////////////////
 // Php's operator <
@@ -69,24 +69,24 @@ bool tvEqual(const TypedValue*, const TypedValue*);
  * Returns whether a Cell is less than an unpackaged type, in the
  * sense of php's < operator.
  */
-bool cellLess(const Cell*, bool);
-bool cellLess(const Cell*, int);
-bool cellLess(const Cell*, int64_t);
-bool cellLess(const Cell*, double);
-bool cellLess(const Cell*, const StringData*);
-bool cellLess(const Cell*, const ArrayData*);
-bool cellLess(const Cell*, const ObjectData*);
+bool cellLess(Cell, bool);
+bool cellLess(Cell, int);
+bool cellLess(Cell, int64_t);
+bool cellLess(Cell, double);
+bool cellLess(Cell, const StringData*);
+bool cellLess(Cell, const ArrayData*);
+bool cellLess(Cell, const ObjectData*);
 
 /*
  * Returns whether a Cell is greater than another Cell, in the sense
  * of php's < operator.
  */
-bool cellLess(const Cell*, const Cell*);
+bool cellLess(Cell, Cell);
 
 /*
  * Returns whether tv1 is less than tv2, as in php's < operator.
  */
-bool tvLess(const TypedValue*, const TypedValue*);
+bool tvLess(TypedValue, TypedValue);
 
 //////////////////////////////////////////////////////////////////////
 // Php's operator >
@@ -95,24 +95,24 @@ bool tvLess(const TypedValue*, const TypedValue*);
  * Returns whether a Cell is greater than an unpackaged type, in the
  * sense of php's > operator.
  */
-bool cellGreater(const Cell*, bool);
-bool cellGreater(const Cell*, int);
-bool cellGreater(const Cell*, int64_t);
-bool cellGreater(const Cell*, double);
-bool cellGreater(const Cell*, const StringData*);
-bool cellGreater(const Cell*, const ArrayData*);
-bool cellGreater(const Cell*, const ObjectData*);
+bool cellGreater(Cell, bool);
+bool cellGreater(Cell, int);
+bool cellGreater(Cell, int64_t);
+bool cellGreater(Cell, double);
+bool cellGreater(Cell, const StringData*);
+bool cellGreater(Cell, const ArrayData*);
+bool cellGreater(Cell, const ObjectData*);
 
 /*
  * Returns whether a Cell is greater than another Cell, in the sense
  * of php's > operator.
  */
-bool cellGreater(const Cell*, const Cell*);
+bool cellGreater(Cell, Cell);
 
 /*
  * Returns whether tv1 is greather than tv2, as in php's > operator.
  */
-bool tvGreater(const TypedValue*, const TypedValue*);
+bool tvGreater(TypedValue, TypedValue);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -124,8 +124,8 @@ bool tvGreater(const TypedValue*, const TypedValue*);
  *
  * These functions are necessary to handle those cases specially.
  */
-bool cellLessOrEqual(const Cell*, const Cell*);
-bool cellGreaterOrEqual(const Cell*, const Cell*);
+bool cellLessOrEqual(Cell, Cell);
+bool cellGreaterOrEqual(Cell, Cell);
 
 //////////////////////////////////////////////////////////////////////
 

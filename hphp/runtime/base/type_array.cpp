@@ -1007,12 +1007,12 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
 
 int Array::SortRegularAscending(CVarRef v1, CVarRef v2, const void *data) {
   if (HPHP::less(v1, v2)) return -1;
-  if (tvEqual(v1.asTypedValue(), v2.asTypedValue())) return 0;
+  if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return 1;
 }
 int Array::SortRegularDescending(CVarRef v1, CVarRef v2, const void *data) {
   if (HPHP::less(v1, v2)) return 1;
-  if (tvEqual(v1.asTypedValue(), v2.asTypedValue())) return 0;
+  if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return -1;
 }
 

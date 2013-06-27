@@ -184,8 +184,8 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
       if (!v2->exists(key)) return false;
-      if (!tvEqual(iter.second().asTypedValue(),
-                   v2->get(key).asTypedValue())) {
+      if (!tvEqual(*iter.second().asTypedValue(),
+                   *v2->get(key).asTypedValue())) {
         return false;
       }
     }

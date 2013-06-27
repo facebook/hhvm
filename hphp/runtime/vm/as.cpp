@@ -1400,6 +1400,15 @@ void parse_parameter_list(AsmState& as) {
     as.in.skipWhitespace();
     int ch = as.in.getc();
     if (ch == ')') break; // allow empty param lists
+    if (ch == '.') {
+      if (as.in.getc() != '.' ||
+          as.in.getc() != '.') {
+        as.error("expecting '...'");
+      }
+      as.in.expectWs(')');
+      as.fe->setAttrs(as.fe->attrs() | AttrMayUseVV);
+      break;
+    }
     if (ch == '&') { param.setRef(true); ch = as.in.getc(); }
     if (ch != '$') {
       as.error("function parameters must have a $ prefix");

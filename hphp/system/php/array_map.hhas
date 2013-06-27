@@ -1,4 +1,4 @@
-.function array_map($func = no_args, $arr = one_arg, $res = one_array) {
+.function array_map($func = no_args, $arr = one_arg, $res = one_array, ...) {
           .numiters 2;
 
 # If we get here, a value was supplied for $res

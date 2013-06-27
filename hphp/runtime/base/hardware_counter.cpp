@@ -14,10 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#define _GNU_SOURCE 1
 #include "hphp/runtime/base/hardware_counter.h"
+
+#ifndef NO_HARDWARE_COUNTERS
+
 #include "hphp/util/logger.h"
 
+#define _GNU_SOURCE 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -414,3 +417,16 @@ void HardwareCounter::GetPerfEvents(Array& ret) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+
+#else // NO_HARDWARE_COUNTERS
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+HardwareCounter HardwareCounter::s_counter;
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif // NO_HARDWARE_COUNTERS

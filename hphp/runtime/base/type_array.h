@@ -430,7 +430,6 @@ class Array : protected SmartPtr<ArrayData> {
   CVarRef append(RefResult v) { return appendRef(variant(v)); }
   CVarRef appendRef(CVarRef v);
   CVarRef appendWithRef(CVarRef v);
-  Variant appendOpEqual(int op, CVarRef v);
   Variant pop();
   Variant dequeue();
   void prepend(CVarRef v);

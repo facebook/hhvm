@@ -541,36 +541,36 @@ class Variant : private TypedValue {
 
   Variant  operator +  () const;
   Variant unary_plus() const { return Variant(*this).operator+();}
-  Variant &operator += (CVarRef v);
-  Variant &operator += (int     n) { return operator+=((int64_t)n);}
-  Variant &operator += (int64_t   n);
-  Variant &operator += (double  n);
+  Variant &operator += (CVarRef v) = delete;
+  Variant &operator += (int     n) = delete;
+  Variant &operator += (int64_t   n) = delete;
+  Variant &operator += (double  n)  = delete;
 
   Variant negate() const { return Variant(*this).operator-();}
   Variant  operator -  () const;
   Variant  operator -  (CVarRef v) const = delete;
-  Variant &operator -= (CVarRef v);
-  Variant &operator -= (int     n) { return operator-=((int64_t)n);}
-  Variant &operator -= (int64_t   n);
-  Variant &operator -= (double  n);
+  Variant &operator -= (CVarRef v) = delete;
+  Variant &operator -= (int     n) = delete;
+  Variant &operator -= (int64_t   n) = delete;
+  Variant &operator -= (double  n) = delete;
 
   Variant  operator *  (CVarRef v) const = delete;
-  Variant &operator *= (CVarRef v);
-  Variant &operator *= (int     n) { return operator*=((int64_t)n);}
-  Variant &operator *= (int64_t   n);
-  Variant &operator *= (double  n);
+  Variant &operator *= (CVarRef v) = delete;
+  Variant &operator *= (int     n) = delete;
+  Variant &operator *= (int64_t   n) = delete;
+  Variant &operator *= (double  n) = delete;
 
   Variant  operator /  (CVarRef v) const = delete;
-  Variant &operator /= (CVarRef v);
-  Variant &operator /= (int     n) { return operator/=((int64_t)n);}
-  Variant &operator /= (int64_t   n);
-  Variant &operator /= (double  n);
+  Variant &operator /= (CVarRef v) = delete;
+  Variant &operator /= (int     n) = delete;
+  Variant &operator /= (int64_t   n) = delete;
+  Variant &operator /= (double  n) = delete;
 
   int64_t    operator %  (CVarRef v) const = delete;
-  Variant &operator %= (CVarRef v);
-  Variant &operator %= (int     n) { return operator%=((int64_t)n);}
-  Variant &operator %= (int64_t   n);
-  Variant &operator %= (double  n);
+  Variant &operator %= (CVarRef v) = delete;
+  Variant &operator %= (int     n) = delete;
+  Variant &operator %= (int64_t   n) = delete;
+  Variant &operator %= (double  n) = delete;
 
   Variant  operator |  (CVarRef v) const;
   Variant &operator |= (CVarRef v);
@@ -1338,6 +1338,24 @@ inline const Variant Array::operator[](CVarRef key) const {
 
 inline Variant uninit_null() {
   return Variant();
+}
+
+// TODO(#2298051) litstr must die
+inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
+
+inline Variant &concat_assign(Variant &v1, CStrRef s2) {
+  if (v1.getType() == KindOfString) {
+    StringData *data = v1.getStringData();
+    if (data->getCount() == 1) {
+      data->append(s2.data(), s2.size());
+      return v1;
+    }
+  }
+  String s1 = v1.toString();
+  s1 += s2;
+
+  v1 = s1;
+  return v1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

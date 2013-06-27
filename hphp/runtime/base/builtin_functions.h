@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/binary_operations.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -110,35 +109,6 @@ inline String concat(CStrRef s1, CStrRef s2)         {
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3);
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4);
-
-inline Variant &concat_assign(Variant &v1, litstr s2) {
-  if (v1.getType() == KindOfString) {
-    StringData *data = v1.getStringData();
-    if (data->getCount() == 1) {
-      data->append(s2, strlen(s2));
-      return v1;
-    }
-  }
-  String s1 = v1.toString();
-  s1 += s2;
-  v1 = s1;
-  return v1;
-}
-
-inline Variant &concat_assign(Variant &v1, CStrRef s2) {
-  if (v1.getType() == KindOfString) {
-    StringData *data = v1.getStringData();
-    if (data->getCount() == 1) {
-      data->append(s2.data(), s2.size());
-      return v1;
-    }
-  }
-  String s1 = v1.toString();
-  s1 += s2;
-
-  v1 = s1;
-  return v1;
-}
 
 template <class K, class V>
 const V &String::set(K key, const V &value) {

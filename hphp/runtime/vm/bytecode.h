@@ -22,6 +22,7 @@
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/tv_arith.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/vm/class.h"
@@ -32,29 +33,30 @@
 
 namespace HPHP {
 
-// SETOP_BODY() would ideally be an inline function, but the header
-// dependencies for concat_assign() make this unfeasible.
-#define SETOP_BODY(lhs, op, rhs) do {                                   \
-  switch (op) {                                                         \
-  case SetOpPlusEqual: tvAsVariant(lhs) += tvCellAsCVarRef(rhs); break; \
-  case SetOpMinusEqual: tvAsVariant(lhs) -= tvCellAsCVarRef(rhs); break; \
-  case SetOpMulEqual: tvAsVariant(lhs) *= tvCellAsCVarRef(rhs); break;  \
-  case SetOpDivEqual: tvAsVariant(lhs) /= tvCellAsCVarRef(rhs); break;  \
-  case SetOpConcatEqual: {                                              \
-    concat_assign(tvAsVariant(lhs), tvCellAsCVarRef(rhs).toString());   \
-    break;                                                              \
-  }                                                                     \
-  case SetOpModEqual: tvAsVariant(lhs) %= tvCellAsCVarRef(rhs); break;  \
-  case SetOpAndEqual: tvAsVariant(lhs) &= tvCellAsCVarRef(rhs); break;  \
-  case SetOpOrEqual: tvAsVariant(lhs) |= tvCellAsCVarRef(rhs); break;   \
-  case SetOpXorEqual: tvAsVariant(lhs) ^= tvCellAsCVarRef(rhs); break;  \
-  case SetOpSlEqual: tvAsVariant(lhs) <<=                               \
-                       tvCellAsCVarRef(rhs).toInt64(); break;           \
-  case SetOpSrEqual: tvAsVariant(lhs) >>=                               \
-                       tvCellAsCVarRef(rhs).toInt64(); break;           \
-  default: assert(false);                                               \
-  }                                                                     \
-} while (0)
+inline ALWAYS_INLINE
+void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+  assert(cellIsPlausible(rhs));
+  lhs = tvToCell(lhs);
+
+  switch (op) {
+  case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
+  case SetOpMinusEqual:     cellSubEq(*lhs, *rhs); break;
+  case SetOpMulEqual:       cellMulEq(*lhs, *rhs); break;
+  case SetOpDivEqual:       cellDivEq(*lhs, *rhs); break;
+  case SetOpModEqual:       cellModEq(*lhs, *rhs); break;
+  case SetOpConcatEqual:
+    concat_assign(tvAsVariant(lhs), tvCellAsCVarRef(rhs).toString());
+    break;
+  case SetOpAndEqual: tvAsVariant(lhs) &= tvCellAsCVarRef(rhs); break;
+  case SetOpOrEqual: tvAsVariant(lhs) |= tvCellAsCVarRef(rhs); break;
+  case SetOpXorEqual: tvAsVariant(lhs) ^= tvCellAsCVarRef(rhs); break;
+  case SetOpSlEqual: tvAsVariant(lhs) <<=
+                       tvCellAsCVarRef(rhs).toInt64(); break;
+  case SetOpSrEqual: tvAsVariant(lhs) >>=
+                       tvCellAsCVarRef(rhs).toInt64(); break;
+  default: not_reached();
+  }
+}
 
 class Func;
 class ActRec;

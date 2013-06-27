@@ -37,6 +37,14 @@ bool tvIsPlausible(const TypedValue*);
 bool cellIsPlausible(const Cell*);
 bool varIsPlausible(const Var*);
 
+/*
+ * Returns: true if the supplied TypedValue is KindOfDouble or
+ * KindOfInt64.  I.e. if it is a TypedNum.
+ */
+inline bool isTypedNum(const TypedValue& tv) {
+  return tv.m_type == KindOfInt64 || tv.m_type == KindOfDouble;
+}
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
@@ -303,6 +311,19 @@ inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
   auto const oldDatum = to.m_data.num;
   cellDup(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/*
+ * Assigned the value of the Cell in `fr' to the Cell `to', with
+ * appropriate reference count modifications.
+ *
+ * This function has the same effects as tvSetIgnoreRef, with stronger
+ * assertions on `to'.
+ */
+inline void cellSet(const Cell& fr, Cell& to) {
+  assert(cellIsPlausible(&fr));
+  assert(cellIsPlausible(&to));
+  tvSetIgnoreRef(fr, to);
 }
 
 // Assumes 'to' and 'fr' are live

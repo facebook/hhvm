@@ -23,17 +23,13 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Functions that implement php arithmetic.
- *
  * These functions return Cells by value.  In cases where they may
  * return reference counted types, the value is already incRef'd when
  * returned.
  */
 
-//////////////////////////////////////////////////////////////////////
-
 /*
- * Operator +.
+ * PHP operator +
  *
  * Returns a TypedNum, unless both arguments are KindOfArray, in which
  * case it returns an Cell that contains an Array.
@@ -41,7 +37,7 @@ namespace HPHP {
 Cell cellAdd(Cell, Cell);
 
 /*
- * Operators - and *.
+ * PHP operators - and *.
  *
  * These arithmetic operators on any php value only return numbers.
  */
@@ -49,13 +45,49 @@ TypedNum cellSub(Cell, Cell);
 TypedNum cellMul(Cell, Cell);
 
 /*
- * Operators / and %.
+ * PHP operators / and %.
  *
  * The operators return numbers unless the second argument converts to
  * zero, in which case they return boolean false.
  */
 Cell cellDiv(Cell, Cell);
 Cell cellMod(Cell, Cell);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * PHP operator +=
+ *
+ * Mutates the first argument in place, by adding the second argument
+ * to it in the sense of php's operator +=.
+ *
+ * Post: isTypedNum(c1), unless both arguments are KindOfArray, in
+ * which case it will contain a Cell of KindOfArray.
+ */
+void cellAddEq(Cell& c1, Cell);
+
+/*
+ * PHP operators -= and *=.
+ *
+ * Mutates the first argument in place, by combining the second
+ * argument with it in the sense of either php operator -= or *=.
+ *
+ * Post: isTypedNum(c1)
+ */
+void cellSubEq(Cell& c1, Cell);
+void cellMulEq(Cell& c1, Cell);
+
+/*
+ * PHP operators /= and %=.
+ *
+ * Mutates the first argument in place, by combining the second
+ * argument with it in the sense of either php operator /= or %=.
+ *
+ * Post: isTypedNum(c1), unless the second argument converts to zero,
+ * in which case c1 will contain boolean false.
+ */
+void cellDivEq(Cell& c1, Cell);
+void cellModEq(Cell& c1, Cell);
 
 //////////////////////////////////////////////////////////////////////
 

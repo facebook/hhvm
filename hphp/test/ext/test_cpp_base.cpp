@@ -621,15 +621,6 @@ bool TestCppBase::TestObject() {
 }
 
 bool TestCppBase::TestVariant() {
-  // operators
-  {
-    Variant v(15);
-    v += 20;
-    VERIFY(v.isNumeric());
-    VERIFY(v.is(KindOfInt64));
-    VERIFY(equal(v, Variant(35)));
-  }
-
   // conversions
   {
     Variant v("123");

@@ -28,7 +28,7 @@ namespace HPHP {
 namespace {
 
 // Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
-// Other types must be handled outside of this.
+// Other types (i.e. Int and Double) must be handled outside of this.
 TypedNum numericConvHelper(Cell cell) {
   assert(cellIsPlausible(&cell));
 
@@ -48,32 +48,32 @@ TypedNum numericConvHelper(Cell cell) {
 
 template<class Op>
 Cell cellArith(Op o, Cell c1, Cell c2) {
-  for (;;) {
-    if (c1.m_type == KindOfInt64) {
-      for (;;) {
-        if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
-        if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
-        c2 = numericConvHelper(c2);
-        assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
-      }
+again:
+  if (c1.m_type == KindOfInt64) {
+    for (;;) {
+      if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
+      if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
+      c2 = numericConvHelper(c2);
+      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
-
-    if (c1.m_type == KindOfDouble) {
-      for (;;) {
-        if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
-        if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
-        c2 = numericConvHelper(c2);
-        assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
-      }
-    }
-
-    if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
-      return make_tv<KindOfArray>(o(c1.m_data.parr, c2.m_data.parr));
-    }
-
-    c1 = numericConvHelper(c1);
-    assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   }
+
+  if (c1.m_type == KindOfDouble) {
+    for (;;) {
+      if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
+      if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
+      c2 = numericConvHelper(c2);
+      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+    }
+  }
+
+  if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
+    return make_tv<KindOfArray>(o(c1.m_data.parr, c2.m_data.parr));
+  }
+
+  c1 = numericConvHelper(c1);
+  assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
+  goto again;
 }
 
 Cell num(int64_t n) { return make_tv<KindOfInt64>(n); }
@@ -152,6 +152,91 @@ struct Div {
   }
 };
 
+template<class Op>
+void cellOpEq(Op op, Cell& c1, Cell c2) {
+again:
+  if (c1.m_type == KindOfInt64) {
+    for (;;) {
+      if (c2.m_type == KindOfInt64) {
+        c1.m_data.num = op(c1.m_data.num, c2.m_data.num);
+        return;
+      }
+      if (c2.m_type == KindOfDouble) {
+        c1.m_type = KindOfDouble;
+        c1.m_data.dbl = op(c1.m_data.num, c2.m_data.dbl);
+        return;
+      }
+      c2 = numericConvHelper(c2);
+      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+    }
+  }
+
+  if (c1.m_type == KindOfDouble) {
+    for (;;) {
+      if (c2.m_type == KindOfInt64) {
+        c1.m_data.dbl = op(c1.m_data.dbl, c2.m_data.num);
+        return;
+      }
+      if (c2.m_type == KindOfDouble) {
+        c1.m_data.dbl = op(c1.m_data.dbl, c2.m_data.dbl);
+        return;
+      }
+      c2 = numericConvHelper(c2);
+      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+    }
+  }
+
+  if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
+    auto const ad1    = c1.m_data.parr;
+    auto const newArr = op(ad1, c2.m_data.parr);
+    if (newArr != ad1) {
+      newArr->incRefCount();
+      c1.m_data.parr = newArr;
+      decRefArr(ad1);
+    }
+    return;
+  }
+
+  cellCopy(numericConvHelper(c1), c1);
+  assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
+  goto again;
+}
+
+struct AddEq {
+  int64_t operator()(int64_t a, int64_t b) const { return a + b; }
+  double  operator()(double  a, int64_t b) const { return a + b; }
+  double  operator()(int64_t a, double  b) const { return a + b; }
+  double  operator()(double  a, double  b) const { return a + b; }
+
+  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+    if (ad2->empty() || ad1 == ad2) return ad1;
+    if (ad1->empty()) return ad2;
+    return ad1->plus(ad2, ad1->getCount() > 1 /* copy */);
+  }
+};
+
+struct SubEq {
+  int64_t operator()(int64_t a, int64_t b) const { return a - b; }
+  double  operator()(double  a, int64_t b) const { return a - b; }
+  double  operator()(int64_t a, double  b) const { return a - b; }
+  double  operator()(double  a, double  b) const { return a - b; }
+
+  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+    throw BadArrayOperandException();
+  }
+};
+
+struct MulEq {
+  int64_t operator()(int64_t a, int64_t b) const { return a * b; }
+  double  operator()(double  a, int64_t b) const { return a * b; }
+  double  operator()(int64_t a, double  b) const { return a * b; }
+  double  operator()(double  a, double  b) const { return a * b; }
+
+  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+    throw BadArrayOperandException();
+  }
+};
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -184,6 +269,31 @@ Cell cellMod(Cell c1, Cell c2) {
   if (i2 == -1) return make_tv<KindOfInt64>(0);
 
   return make_tv<KindOfInt64>(i1 % i2);
+}
+
+void cellAddEq(Cell& c1, Cell c2) {
+  cellOpEq(AddEq(), c1, c2);
+}
+
+void cellSubEq(Cell& c1, Cell c2) {
+  cellOpEq(SubEq(), c1, c2);
+}
+
+void cellMulEq(Cell& c1, Cell c2) {
+  cellOpEq(MulEq(), c1, c2);
+}
+
+void cellDivEq(Cell& c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
+  if (!isTypedNum(c1)) {
+    cellSet(numericConvHelper(c1), c1);
+  }
+  cellCopy(cellDiv(c1, c2), c1);
+}
+
+void cellModEq(Cell& c1, Cell c2) {
+  cellCopy(cellMod(c1, c2), c1);
 }
 
 //////////////////////////////////////////////////////////////////////

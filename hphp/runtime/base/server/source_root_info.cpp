@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/server/http_request_handler.h"
 #include "hphp/runtime/base/server/transport.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/base/tv_arith.h"
 
 using std::map;
 
@@ -198,7 +199,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   }
 
   if (!m_serverVars.empty()) {
-    server += m_serverVars;
+    cellAddEq(*server.asCell(), make_tv<KindOfArray>(m_serverVars.get()));
   }
 }
 

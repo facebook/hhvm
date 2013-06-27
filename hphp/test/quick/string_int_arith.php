@@ -26,4 +26,60 @@ function main() {
   var_dump(foo() * twelve());
 }
 
+function setop_main() {
+  $a = array(zero());
+  $a[0] += foo();
+  var_dump($a[0]);
+  $a = array(zero());
+  $a[0] -= foo();
+  var_dump($a[0]);
+  $a = array(zero());
+  $a[0] /= foo();
+  var_dump($a[0]);
+  $a = array(zero());
+  $a[0] *= foo();
+  var_dump($a[0]);
+
+  $a = array(foo());
+  $a[0] += zero();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] -= zero();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] /= zero();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] *= zero();
+  var_dump($a[0]);
+
+  $a = array(twelve());
+  $a[0] += foo();
+  var_dump($a[0]);
+  $a = array(twelve());
+  $a[0] -= foo();
+  var_dump($a[0]);
+  $a = array(twelve());
+  $a[0] /= foo();
+  var_dump($a[0]);
+  $a = array(twelve());
+  $a[0] *= foo();
+  var_dump($a[0]);
+
+  $a = array(foo());
+  $a[0] += twelve();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] -= twelve();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] /= twelve();
+  var_dump($a[0]);
+  $a = array(foo());
+  $a[0] *= twelve();
+  var_dump($a[0]);
+}
+
 main();
+setop_main();
+

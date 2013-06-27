@@ -325,7 +325,6 @@ class Status {
   }
 
   public static function skip($test) {
-    array_push(self::$results, array('name'=>$test,'status'=>'skipped'));
     switch (self::$mode) {
       case self::MODE_NORMAL:
         if (self::hasColor()) {

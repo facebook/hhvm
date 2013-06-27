@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/core_types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/tv_conversions.h"
 
 namespace HPHP {
 
@@ -642,11 +643,7 @@ template<KeyType keyType>
 inline int64_t castKeyToInt(TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  if (key->m_type == KindOfInt64) {
-    return key->m_data.num;
-  } else {
-    return tvCastToInt64(key);
-  }
+  return cellToInt(*tvToCell(key));
 }
 
 template<>

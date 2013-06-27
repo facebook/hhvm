@@ -110,79 +110,10 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   tv->m_type = KindOfBoolean;
 }
 
-void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
-  assert(tvIsPlausible(tv));
-  tvUnboxIfNeeded(tv);
-  int64_t i;
-  switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    tv->m_data.num = 0LL;
-    // Fall through
-  case KindOfBoolean:
-    assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
-    tv->m_type = KindOfInt64;
-    // Fall through
-  case KindOfInt64:
-    return;
-  case KindOfDouble:  {
-    i = toInt64(tv->m_data.dbl);
-    break;
-  }
-  case KindOfStaticString: i = (tv->m_data.pstr->toInt64(base)); break;
-  case KindOfString:  {
-    i = (tv->m_data.pstr->toInt64(base));
-    tvDecRefStr(tv);
-    break;
-  }
-  case KindOfArray:   {
-    i = (tv->m_data.parr->empty() ? 0LL : 1LL);
-    tvDecRefArr(tv);
-    break;
-  }
-  case KindOfObject:  {
-    i = (tv->m_data.pobj ? tv->m_data.pobj->o_toInt64() : 0LL);
-    tvDecRefObj(tv);
-    break;
-  }
-  default:            assert(false); i = 0LL; break;
-  }
-  tv->m_data.num = i;
-  tv->m_type = KindOfInt64;
-}
-
-int64_t tvCastToInt64(TypedValue* tv, int base /* = 10 */) {
-  assert(tvIsPlausible(tv));
-  if (tv->m_type == KindOfRef) {
-    tv = tv->m_data.pref->tv();
-  }
-
-  switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    return 0;
-  case KindOfBoolean:
-    assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
-    // Fall through
-  case KindOfInt64:
-    return tv->m_data.num;
-  case KindOfDouble:
-    return toInt64(tv->m_data.dbl);
-  case KindOfStaticString:
-  case KindOfString:
-    return tv->m_data.pstr->toInt64(base);
-  case KindOfArray:
-    return tv->m_data.parr->empty() ? 0 : 1;
-  case KindOfObject:
-    return tv->m_data.pobj->o_toInt64();
-  default:
-    not_reached();
-  }
-}
-
 void tvCastToDoubleInPlace(TypedValue* tv) {
   assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
+
   double d;
   switch (tv->m_type) {
   case KindOfUninit:
@@ -206,6 +137,39 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   }
   tv->m_data.dbl = d;
   tv->m_type = KindOfDouble;
+}
+
+void cellCastToInt64InPlace(Cell* cell) {
+  assert(cellIsPlausible(cell));
+
+  int64_t i;
+  switch (cell->m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    cell->m_data.num = 0LL;
+    // Fall through
+  case KindOfBoolean:
+    assert(cell->m_data.num == 0LL || cell->m_data.num == 1LL);
+    cell->m_type = KindOfInt64;
+    // Fall through
+  case KindOfInt64:
+    return;
+  case KindOfDouble:  {
+    i = toInt64(cell->m_data.dbl);
+    break;
+  }
+  case KindOfStaticString: i = (cell->m_data.pstr->toInt64()); break;
+  case KindOfString:  {
+    i = cell->m_data.pstr->toInt64();
+    tvDecRefStr(cell);
+    break;
+  }
+}
+
+void tvCastToInt64InPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
+  tvUnboxIfNeeded(tv);
+  cellCastToInt64InPlace(tv);
 }
 
 double tvCastToDouble(TypedValue* tv) {

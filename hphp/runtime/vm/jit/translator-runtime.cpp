@@ -158,7 +158,8 @@ int64_t convStrToIntHelper(const StringData* s) {
 }
 
 int64_t convCellToIntHelper(TypedValue tv) {
-  return tvCastToInt64(&tv);
+  // TODO call cellToInt directly from the TC.
+  return cellToInt(tv);
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {

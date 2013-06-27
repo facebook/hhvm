@@ -3597,8 +3597,6 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
   if (type.subtypeOf(Type::Bool)) {
     tvCastHelper = (TCA)tvCastToBooleanInPlace;
   } else if (type.subtypeOf(Type::Int)) {
-    // if casting to integer, pass 10 as the base for the conversion
-    args.imm(10);
     tvCastHelper = (TCA)tvCastToInt64InPlace;
   } else if (type.subtypeOf(Type::Dbl)) {
     tvCastHelper = (TCA)tvCastToDoubleInPlace;

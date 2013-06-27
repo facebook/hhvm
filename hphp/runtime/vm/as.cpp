@@ -1137,7 +1137,7 @@ String parse_long_string(AsmState& as) {
   // String wants a null, and dereferences one past the size we give
   // it.
   buffer.push_back('\0');
-  return String(&buffer[0], buffer.size() - 1, AttachLiteral);
+  return String(&buffer[0], buffer.size() - 1, CopyString);
 }
 
 /*

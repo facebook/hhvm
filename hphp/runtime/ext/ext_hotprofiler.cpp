@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/vdso.h"
+#include "hphp/util/cycles.h"
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>
@@ -64,6 +65,7 @@
 #define HP_STACK_DELIM_LEN    (sizeof(HP_STACK_DELIM) - 1)
 
 namespace HPHP {
+
 IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
 IMPLEMENT_DEFAULT_EXTENSION(xhprof);
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,27 +140,6 @@ static void hp_trunc_time(struct timeval *tv, uint64_t intr) {
 // High precision timer related functions.
 
 /**
- * Get time stamp counter (TSC) value via 'rdtsc' instruction.
- *
- * @return 64 bit unsigned integer
- * @author cjiang
- */
-inline uint64_t tsc() {
-#ifdef __x86_64__
-  uint32_t __a,__d;
-  uint64_t val;
-  asm volatile("rdtsc" : "=a" (__a), "=d" (__d));
-  (val) = ((uint64_t)__a) | (((uint64_t)__d)<<32);
-  return val;
-#else
-  // TODO(2200461): rdtsc isn't portable. Ideally we'd use some higher-level
-  // portable API (clock_gettime maybe?), but that may break assumptions that
-  // clients of this API make about how the underlying clock works.
-  return 0;
-#endif
-}
-
-/**
  * This is a microbenchmark to get cpu frequency the process is running on. The
  * returned value is used to convert TSC counter values to microseconds.
  *
@@ -173,7 +154,7 @@ static int64_t get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64_t tsc_start = tsc();
+  uint64_t tsc_start = cpuCycles();
   // Sleep for 5 miliseconds. Comparaing with gettimeofday's  few microseconds
   // execution time, this should be enough.
   usleep(5000);
@@ -181,7 +162,7 @@ static int64_t get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64_t tsc_end = tsc();
+  uint64_t tsc_end = cpuCycles();
   return nearbyint((tsc_end - tsc_start) * 1.0
                                    / (get_us_interval(&start, &end)));
 }
@@ -747,14 +728,14 @@ public:
   }
 
   virtual void beginFrameEx() {
-    m_stack->m_tsc_start = tsc();
+    m_stack->m_tsc_start = cpuCycles();
     m_stack->m_vtsc_start = vtsc(m_MHz);
   }
 
   virtual void endFrameEx() {
     CountMap &counts = m_stats[m_stack->m_name];
     counts.count++;
-    counts.tsc += tsc() - m_stack->m_tsc_start;
+    counts.tsc += cpuCycles() - m_stack->m_tsc_start;
     counts.vtsc += vtsc(m_MHz) - m_stack->m_vtsc_start;
   }
 
@@ -812,7 +793,7 @@ public:
   }
 
   virtual void beginFrameEx() {
-    m_stack->m_tsc_start = tsc();
+    m_stack->m_tsc_start = cpuCycles();
 
     if (m_flags & TrackCPU) {
       m_stack->m_vtsc_start = vtsc(m_MHz);
@@ -834,7 +815,7 @@ public:
     m_stack->getStack(2, symbol, sizeof(symbol));
     CountMap &counts = m_stats[symbol];
     counts.count++;
-    counts.wall_time += tsc() - m_stack->m_tsc_start;
+    counts.wall_time += cpuCycles() - m_stack->m_tsc_start;
 
     if (m_flags & TrackCPU) {
       counts.cpu += vtsc(m_MHz) - m_stack->m_vtsc_start;
@@ -1145,7 +1126,7 @@ public:
   }
 
   void collectStats(TraceData& te) {
-    te.wall_time = tsc();
+    te.wall_time = cpuCycles();
     te.cpu = 0;
     if (m_flags & TrackCPU) {
       te.cpu = vtsc(m_MHz);
@@ -1393,7 +1374,7 @@ public:
     uint64_t truncated_tsc;
 
     // Init the last_sample in tsc
-    m_last_sample_tsc = tsc();
+    m_last_sample_tsc = cpuCycles();
 
     // Find the microseconds that need to be truncated
     gettimeofday(&m_last_sample_time, 0);
@@ -1473,7 +1454,7 @@ private:
     if (m_stack) {
       // While loop is to handle a single function taking a long time
       // and passing several sampling intervals
-      while ((tsc() - m_last_sample_tsc) > m_sampling_interval_tsc) {
+      while ((cpuCycles() - m_last_sample_tsc) > m_sampling_interval_tsc) {
         m_last_sample_tsc += m_sampling_interval_tsc;
         // HAS TO BE UPDATED BEFORE calling sample_stack
         incr_us_interval(&m_last_sample_time, SAMPLING_INTERVAL);

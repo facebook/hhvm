@@ -59,6 +59,7 @@ typedef __sighandler_t *sighandler_t;
 #include "hphp/util/meta.h"
 #include "hphp/util/util.h"
 #include "hphp/util/repo_schema.h"
+#include "hphp/util/cycles.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/php_debug.h"

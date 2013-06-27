@@ -42,10 +42,11 @@ void checkRank(Rank r) {
      */
     if (prev >= r && r != RankUnranked) {
       if (r == RankLeaf) {
-        fprintf(stderr, "Rank violation in thr%lx! leaf lock from leaf rank; ",
+        fprintf(stderr,
+                "Rank violation in thr%" PRIx64 "! leaf lock from leaf rank; ",
                 pthread_self());
       } else {
-        fprintf(stderr, "Rank violation in thr%lx! lock of rank %d; ",
+        fprintf(stderr, "Rank violation in thr%" PRIx64 "! lock of rank %d; ",
                 pthread_self(), r);
       }
       fprintf(stderr, "held locks:\n");

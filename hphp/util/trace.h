@@ -165,7 +165,8 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-void traceRelease(const char*, ...);
+void traceRelease(const char*, ...)
+  __attribute__((format(printf,1,2)));
 void traceRelease(const std::string& s);
 
 // Trace to the global ring buffer in all builds, and also trace normally
@@ -173,7 +174,8 @@ void traceRelease(const std::string& s);
 #define TRACE_RB(n, ...)                            \
   HPHP::Trace::traceRingBufferRelease(__VA_ARGS__); \
   TRACE(n, __VA_ARGS__);
-void traceRingBufferRelease(const char* fmt, ...);
+void traceRingBufferRelease(const char* fmt, ...)
+  __attribute__((format(printf,1,2)));
 
 extern int levels[NumModules];
 const char* moduleName(Module mod);

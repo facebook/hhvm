@@ -3958,7 +3958,7 @@ uint64_t* Translator::getTransCounterAddr() {
 uint32_t Translator::addTranslation(const TransRec& transRec) {
   if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
     // Log the translation's size, creation time, SrcKey, and size
-    Trace::traceRelease("New translation: %lld %s %u %u %d\n",
+    Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
                         Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
                           curUnit()->filepath()->data(),

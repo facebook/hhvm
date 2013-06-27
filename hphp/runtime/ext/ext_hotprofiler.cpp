@@ -1450,8 +1450,9 @@ private:
    */
   void sample_stack() {
     char key[512];
-    snprintf(key, sizeof(key), "%ld.%06ld",
-             m_last_sample_time.tv_sec, m_last_sample_time.tv_usec);
+    snprintf(key, sizeof(key), "%" PRId64 ".%06" PRId64,
+             (int64_t)m_last_sample_time.tv_sec,
+             (int64_t)m_last_sample_time.tv_usec);
 
     char symbol[5120];
     m_stack->getStack(INT_MAX, symbol, sizeof(symbol));

@@ -635,7 +635,9 @@ struct SpaceRecorder {
   ~SpaceRecorder() {
     if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
       ptrdiff_t diff = m_a.code.frontier - m_start;
-      if (diff) Trace::traceRelease("TCSpace %10s %3d\n", m_name, diff);
+      if (diff) {
+        Trace::traceRelease("TCSpace %10s %3" PRId64 "\n", m_name, diff);
+      }
     }
   }
 };

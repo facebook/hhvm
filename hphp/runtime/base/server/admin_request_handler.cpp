@@ -980,7 +980,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     int64_t start = Timer::GetCurrentTimeMicros();
     if (Transl::Translator::Get()->replace()) {
       string msg;
-      Util::string_printf(msg, "Done %ld ms",
+      Util::string_printf(msg, "Done %" PRId64 " ms",
                           (Timer::GetCurrentTimeMicros() - start) / 1000);
       transport->sendString(msg);
     } else {

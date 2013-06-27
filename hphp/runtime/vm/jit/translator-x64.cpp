@@ -2896,8 +2896,8 @@ newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
   ar->setThis(ret);
   ar->setVarEnv(nullptr);
   arSetSfp(ar, prevAr);
-  TRACE(2, "newInstanceHelper: AR %p: f %p, savedRbp %#lx, savedRip %#lx"
-        " this %p\n",
+  TRACE(2, "newInstanceHelper: AR %p: f %p, savedRbp %#" PRIx64
+        ", savedRip %#" PRIx64 ", this %p\n",
         ar, ar->m_func, ar->m_savedRbp, ar->m_savedRip, ar->m_this);
   return ret;
 }
@@ -3287,7 +3287,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   srcRec.newTranslation(start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-    Trace::traceRelease(getUsage().c_str());
+    Trace::traceRelease("%s", getUsage().c_str());
   }
 }
 
@@ -3698,7 +3698,7 @@ TranslatorX64::requestExit() {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",
                         g_context->getRequestUrl(50).c_str());
     for (int i = 0; i < tpc_num_counters; i++) {
-      Trace::traceRelease("%-20s %10lld\n",
+      Trace::traceRelease("%-20s %10" PRId64 "\n",
                           kPerfCounterNames[i], s_perfCounters[i]);
     }
     Trace::traceRelease("\n");

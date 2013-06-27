@@ -76,14 +76,16 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   if (0 == (blocking ?
             pthread_mutex_lock(&m_lock) :
             pthread_mutex_trylock(&m_lock))) {
-    TRACE(4, "thr%lx: acquired lease, called by %p,%p\n",
+    TRACE(4, "thr%" PRIx64 ": acquired lease, called by %p,%p\n",
           pthread_self(), __builtin_return_address(0),
           __builtin_return_address(1));
     if (debug) {
       pushRank(RankWriteLease);
       if (expire != 0 && m_owner != pthread_self()) {
         m_hintGrabbed++;
-        TRACE(3, "thr%lx acquired hinted lease: expired %" PRId64 "us ago\n",
+        TRACE(3,
+              "thr%" PRIx64 ": acquired hinted lease"
+              ", expired %" PRId64 "us ago\n",
               pthread_self(), -expireDiff);
       } else if (expire != 0 && m_owner == pthread_self()) {
         m_hintKept++;
@@ -97,7 +99,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
     return true;
   }
   if (blocking) {
-    TRACE(3, "thr%lx: failed to acquired lease in blocking mode\n",
+    TRACE(3, "thr%" PRIx64 ": failed to acquired lease in blocking mode\n",
           pthread_self());
   }
   return false;
@@ -105,7 +107,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
 
 void Lease::drop(int64_t hintExpireDelay) {
   assert(amOwner());
-  TRACE(4, "thr%lx: dropping lease, called by %p,%p\n",
+  TRACE(4, "thr%" PRIx64 ": dropping lease, called by %p,%p\n",
         pthread_self(), __builtin_return_address(0),
         __builtin_return_address(1));
   if (debug) {

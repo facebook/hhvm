@@ -578,7 +578,7 @@ struct DataBlock {
   }
   void qword(const uint64_t qword) {
     assert(canEmit(sz::qword));
-    TRACE(10, "%p q : %016lx\n", frontier, qword);
+    TRACE(10, "%p q : %016" PRIx64 "\n", frontier, qword);
     *(uint64_t*)frontier = qword;
     frontier += sz::qword;
   }

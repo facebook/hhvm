@@ -86,7 +86,7 @@ static __thread int64_t epoch;
 void dump() {
   if (!enabledAny()) return;
   auto url = g_context->getRequestUrl(50);
-  TRACE(0, "STATS %ld %s\n", epoch, url.c_str());
+  TRACE(0, "STATS %" PRId64 " %s\n", epoch, url.c_str());
 #include "hphp/runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
   if (!tl_counters[s]) {} else                                  \
@@ -96,7 +96,7 @@ void dump() {
 #undef O
   for (int i=0; helperNames[i]; i++) {
     if (tl_helper_counters[i]) {
-      TRACE(0, "STAT %-50s %15ld\n",
+      TRACE(0, "STAT %-50s %15" PRIu64 "\n",
             helperNames[i],
             tl_helper_counters[i]);
     }

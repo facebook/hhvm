@@ -2739,7 +2739,7 @@ void VMExecutionContext::preventReturnsToTC() {
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
           (tx()->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
-        TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%lx, "
+        TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {

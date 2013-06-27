@@ -644,19 +644,21 @@ void Class::initInstanceBits() {
 
   // Print out stats about what we ended up using
   if (Trace::moduleEnabledRelease(Trace::instancebits, 1)) {
-    Trace::traceRelease("%s: %u classes, %u (%.2f%%) of warmup checks\n",
+    Trace::traceRelease("%s: %u classes, %" PRIu64 " (%.2f%%) of warmup"
+                        " checks\n",
                         __FUNCTION__, i-1, accum, 100.0 * accum / total);
     if (Trace::moduleEnabledRelease(Trace::instancebits, 2)) {
       accum = 0;
       i = 1;
       for (auto& pair : counts) {
         if (i >= 256) {
-          Trace::traceRelease("skipping the remainder of the %llu classes\n",
+          Trace::traceRelease("skipping the remainder of the %" PRIu64
+                              " classes\n",
                               counts.size());
           break;
         }
         accum += pair.second;
-        Trace::traceRelease("%3u %5.2f%% %7u -- %6.2f%% %7u %s\n",
+        Trace::traceRelease("%3u %5.2f%% %7u -- %6.2f%% %7" PRIu64 " %s\n",
                             i++, 100.0 * pair.second / total, pair.second,
                             100.0 * accum / total, accum,
                             pair.first->data());

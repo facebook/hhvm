@@ -80,7 +80,7 @@ void BreakStatement::inferTypes(AnalysisResultPtr ar) {
 
 void BreakStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_depth != 1) {
-    cg_printf("%s %lu;\n", m_name, m_depth);
+    cg_printf("%s %" PRIu64 ";\n", m_name, m_depth);
   } else {
     cg_printf("%s;\n", m_name);
   }

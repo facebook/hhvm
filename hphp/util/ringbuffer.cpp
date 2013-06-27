@@ -175,7 +175,7 @@ void dumpEntry(const RingBufferEntry* e) {
       break;
     }
     default: {
-      printf("%#x %10u %#lx %d %20s\n",
+      printf("%#x %10u %#" PRIx64 " %d %20s\n",
              e->m_threadId, e->m_seq, e->m_funcId, e->m_offset,
              names[e->m_type]);
       break;

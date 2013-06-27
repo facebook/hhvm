@@ -2680,7 +2680,7 @@ Unit* UnitEmitter::create() {
 
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.
-    Trace::traceRelease(u->toString());
+    Trace::traceRelease("%s", u->toString().c_str());
   }
 
   static const bool kVerify        = getenv("HHVM_VERIFY");

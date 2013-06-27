@@ -82,7 +82,7 @@ struct CallInfo {
 };
 
 typedef std::initializer_list<CallInfo> CallInfoList;
-typedef hphp_hash_map<Opcode, CallInfo, int64_hash> CallInfoMap;
+typedef hphp_hash_map<Opcode, CallInfo, std::hash<Opcode>> CallInfoMap;
 
 class CallMap {
 public:

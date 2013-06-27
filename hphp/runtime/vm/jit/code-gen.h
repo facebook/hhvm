@@ -227,10 +227,10 @@ private:
                      Commutativity);
 
   template<class Oper>
-  void cgOpShiftCommon(IRInstruction* inst,
-                       void (Asm::*instrIR)(Immed, Reg64),
-                       void (Asm::*instrR)(Reg64),
-                       Oper oper);
+  void cgShiftCommon(IRInstruction* inst,
+                     void (Asm::*instrIR)(Immed, Reg64),
+                     void (Asm::*instrR)(Reg64),
+                     Oper oper);
 
   void cgNegateWork(SSATmp* dst, SSATmp* src);
   void cgNotWork(SSATmp* dst, SSATmp* src);
@@ -246,15 +246,14 @@ private:
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper
-  void cgOpCmpHelper(
-            IRInstruction* inst,
-            void (Asm::*setter)(Reg8),
-            int64_t (*str_cmp_str)(StringData*, StringData*),
-            int64_t (*str_cmp_int)(StringData*, int64_t),
-            int64_t (*str_cmp_obj)(StringData*, ObjectData*),
-            int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
-            int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-            int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
+  void cgCmpHelper(IRInstruction* inst,
+                   void (Asm::*setter)(Reg8),
+                   int64_t (*str_cmp_str)(StringData*, StringData*),
+                   int64_t (*str_cmp_int)(StringData*, int64_t),
+                   int64_t (*str_cmp_obj)(StringData*, ObjectData*),
+                   int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
+                   int64_t (*obj_cmp_int)(ObjectData*, int64_t),
+                   int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
   template<class Loc>
   void emitSideExitGuard(Type type, Loc typeLoc,

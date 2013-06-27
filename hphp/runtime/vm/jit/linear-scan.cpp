@@ -821,10 +821,10 @@ void LinearScan::computePreColoringHint() {
     case AKExists:
       normalHint(2, 0, 0);
       break;
-    case OpEq:
-    case OpNeq:
-    case OpSame:
-    case OpNSame:
+    case Eq:
+    case Neq:
+    case Same:
+    case NSame:
       {
         auto src1 = inst->src(0);
         auto src2 = inst->src(1);

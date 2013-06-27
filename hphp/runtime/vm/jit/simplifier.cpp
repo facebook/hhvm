@@ -300,31 +300,31 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   Opcode opc = inst->op();
   switch (opc) {
-  case OpAdd:       return simplifyAdd(src1, src2);
-  case OpSub:       return simplifySub(src1, src2);
-  case OpMul:       return simplifyMul(src1, src2);
-  case OpMod:       return simplifyMod(src1, src2);
-  case OpBitAnd:    return simplifyBitAnd(src1, src2);
-  case OpBitOr:     return simplifyBitOr(src1, src2);
-  case OpBitXor:    return simplifyBitXor(src1, src2);
-  case OpLogicXor:  return simplifyLogicXor(src1, src2);
-  case OpShl:       return simplifyShl(inst);
-  case OpShr:       return simplifyShr(inst);
-  case OpDivDbl:    return simplifyDivDbl(inst);
+  case Add:       return simplifyAdd(src1, src2);
+  case Sub:       return simplifySub(src1, src2);
+  case Mul:       return simplifyMul(src1, src2);
+  case Mod:       return simplifyMod(src1, src2);
+  case BitAnd:    return simplifyBitAnd(src1, src2);
+  case BitOr:     return simplifyBitOr(src1, src2);
+  case BitXor:    return simplifyBitXor(src1, src2);
+  case LogicXor:  return simplifyLogicXor(src1, src2);
+  case Shl:       return simplifyShl(inst);
+  case Shr:       return simplifyShr(inst);
+  case DivDbl:    return simplifyDivDbl(inst);
 
-  case OpGt:
-  case OpGte:
-  case OpLt:
-  case OpLte:
-  case OpEq:
-  case OpNeq:
-  case OpSame:
-  case OpNSame:
+  case Gt:
+  case Gte:
+  case Lt:
+  case Lte:
+  case Eq:
+  case Neq:
+  case Same:
+  case NSame:
     return simplifyCmp(opc, inst, src1, src2);
 
   case Concat:        return simplifyConcat(src1, src2);
   case Mov:           return simplifyMov(src1);
-  case OpNot:         return simplifyNot(src1);
+  case Not:           return simplifyNot(src1);
   case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
   case ConvBoolToArr: return simplifyConvToArr(inst);
   case ConvDblToArr:  return simplifyConvToArr(inst);
@@ -348,8 +348,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvCellToBool:return simplifyConvCellToBool(inst);
   case ConvCellToInt: return simplifyConvCellToInt(inst);
   case ConvCellToDbl: return simplifyConvCellToDbl(inst);
-  case OpFloor:       return simplifyFloor(inst);
-  case OpCeil:        return simplifyCeil(inst);
+  case Floor:         return simplifyFloor(inst);
+  case Ceil:          return simplifyCeil(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -627,18 +627,18 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 
   switch (op) {
   // !!X --> X
-  case OpNot:
+  case Not:
     return inst->src(0);
 
   // !(X cmp Y) --> X opposite_cmp Y
-  case OpLt:
-  case OpLte:
-  case OpGt:
-  case OpGte:
-  case OpEq:
-  case OpNeq:
-  case OpSame:
-  case OpNSame:
+  case Lt:
+  case Lte:
+  case Gt:
+  case Gte:
+  case Eq:
+  case Neq:
+  case Same:
+  case NSame:
     // Not for Dbl:  (x < NaN) != !(x >= NaN)
     if (!inst->src(0)->isA(Type::Dbl) &&
         !inst->src(1)->isA(Type::Dbl)) {
@@ -767,24 +767,24 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 #define SIMPLIFY_COMMUTATIVE(OP, NAME) do {                             \
   SIMPLIFY_CONST(OP);                                                   \
   if (src1->isConst() && !src2->isConst()) {                            \
-    return gen(Op##NAME, src2, src1);                                   \
+    return gen(NAME, src2, src1);                                       \
   }                                                                     \
   if (src1->isA(Type::Int) && src2->isA(Type::Int)) {                   \
     IRInstruction* inst1 = src1->inst();                                \
     IRInstruction* inst2 = src2->inst();                                \
-    if (inst1->op() == Op##NAME && inst1->src(1)->isConst()) {          \
+    if (inst1->op() == NAME && inst1->src(1)->isConst()) {              \
       /* (X + C1) + C2 --> X + C3 */                                    \
       if (src2->isConst()) {                                            \
         int64_t right = inst1->src(1)->getValInt();                     \
         right OP##= src2->getValInt();                                  \
-        return gen(Op##NAME, inst1->src(0), cns(right));                \
+        return gen(NAME, inst1->src(0), cns(right));                    \
       }                                                                 \
       /* (X + C1) + (Y + C2) --> X + Y + C3 */                          \
-      if (inst2->op() == Op##NAME && inst2->src(1)->isConst()) {        \
+      if (inst2->op() == NAME && inst2->src(1)->isConst()) {            \
         int64_t right = inst1->src(1)->getValInt();                     \
         right OP##= inst2->src(1)->getValInt();                         \
-        SSATmp* left = gen(Op##NAME, inst1->src(0), inst2->src(0));     \
-        return gen(Op##NAME, left, cns(right));                         \
+        SSATmp* left = gen(NAME, inst1->src(0), inst2->src(0));         \
+        return gen(NAME, left, cns(right));                             \
       }                                                                 \
     }                                                                   \
   }                                                                     \
@@ -798,22 +798,22 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   Opcode op1 = inst1->op();                                             \
   Opcode op2 = inst2->op();                                             \
   /* all combinations of X * Y + X * Z --> X * (Y + Z) */               \
-  if (op1 == Op##INNAME && op2 == Op##INNAME) {                         \
+  if (op1 == INNAME && op2 == INNAME) {                                 \
     if (inst1->src(0) == inst2->src(0)) {                               \
-      SSATmp* fold = gen(Op##OUTNAME, inst1->src(1), inst2->src(1));    \
-      return gen(Op##INNAME, inst1->src(0), fold);                      \
+      SSATmp* fold = gen(OUTNAME, inst1->src(1), inst2->src(1));        \
+      return gen(INNAME, inst1->src(0), fold);                          \
     }                                                                   \
     if (inst1->src(0) == inst2->src(1)) {                               \
-      SSATmp* fold = gen(Op##OUTNAME, inst1->src(1), inst2->src(0));    \
-      return gen(Op##INNAME, inst1->src(0), fold);                      \
+      SSATmp* fold = gen(OUTNAME, inst1->src(1), inst2->src(0));        \
+      return gen(INNAME, inst1->src(0), fold);                          \
     }                                                                   \
     if (inst1->src(1) == inst2->src(0)) {                               \
-      SSATmp* fold = gen(Op##OUTNAME, inst1->src(0), inst2->src(1));    \
-      return gen(Op##INNAME, inst1->src(1), fold);                      \
+      SSATmp* fold = gen(OUTNAME, inst1->src(0), inst2->src(1));        \
+      return gen(INNAME, inst1->src(1), fold);                          \
     }                                                                   \
     if (inst1->src(1) == inst2->src(1)) {                               \
-      SSATmp* fold = gen(Op##OUTNAME, inst1->src(0), inst2->src(0));    \
-      return gen(Op##INNAME, inst1->src(1), fold);                      \
+      SSATmp* fold = gen(OUTNAME, inst1->src(0), inst2->src(0));        \
+      return gen(INNAME, inst1->src(1), fold);                          \
     }                                                                   \
   }                                                                     \
 } while (0)
@@ -831,17 +831,17 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
     }
     // X + -C --> X - C
     if (src2Val < 0) {
-      return gen(OpSub, src1, cns(-src2Val));
+      return gen(Sub, src1, cns(-src2Val));
     }
   }
   // X + (0 - Y) --> X - Y
   IRInstruction* inst2 = src2->inst();
   Opcode op2 = inst2->op();
-  if (op2 == OpSub) {
+  if (op2 == Sub) {
     SSATmp* src = inst2->src(0);
     if (src->isConst() && src->type() == Type::Int) {
       if (src->getValInt() == 0) {
-        return gen(OpSub, src1, inst2->src(1));
+        return gen(Sub, src1, inst2->src(1));
       }
     }
   }
@@ -865,17 +865,17 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
     }
     // X - -C --> X + C
     if (src2Val < 0 && src2Val > std::numeric_limits<int64_t>::min()) {
-      return gen(OpAdd, src1, cns(-src2Val));
+      return gen(Add, src1, cns(-src2Val));
     }
   }
   // X - (0 - Y) --> X + Y
   IRInstruction* inst2 = src2->inst();
   Opcode op2 = inst2->op();
-  if (op2 == OpSub) {
+  if (op2 == Sub) {
     SSATmp* src = inst2->src(0);
     if (src->isConst() && src->type() == Type::Int) {
       if (src->getValInt() == 0) {
-        return gen(OpAdd, src1, inst2->src(1));
+        return gen(Add, src1, inst2->src(1));
       }
     }
   }
@@ -891,7 +891,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   if (src2->isConst() && src2->type() == Type::Int) {
     // X * (-1) --> -X
     if (src2->getValInt() == -1) {
-      return gen(OpSub, cns(0), src1);
+      return gen(Sub, cns(0), src1);
     }
     // X * 0 --> 0
     if (src2->getValInt() == 0) {
@@ -906,7 +906,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     }
     // X * 2 --> X + X
     if (src2->getValInt() == 2) {
-      return gen(OpAdd, src1, src1);
+      return gen(Add, src1, src1);
     }
     // TODO once IR has shifts
     // X * 2^C --> X << C
@@ -1013,7 +1013,7 @@ SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
       return src1;
     }
     if (src2->getValInt() == -1) {
-      return gen(OpBitNot, src1);
+      return gen(BitNot, src1);
     }
   }
   return nullptr;
@@ -1029,7 +1029,7 @@ SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
   // canonicalizes a single const to the right
   if (src2->isConst()) {
     if (src2->getValBool()) {
-      return gen(OpNot, src1);
+      return gen(Not, src1);
     } else {
       return src1;
     }
@@ -1082,14 +1082,14 @@ static SSATmp* chaseIncRefs(SSATmp* tmp) {
 template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
-  case OpGt:   return a > b;
-  case OpGte:  return a >= b;
-  case OpLt:   return a < b;
-  case OpLte:  return a <= b;
-  case OpSame:
-  case OpEq:   return a == b;
-  case OpNSame:
-  case OpNeq:  return a != b;
+  case Gt:   return a > b;
+  case Gte:  return a >= b;
+  case Lt:   return a < b;
+  case Lte:  return a <= b;
+  case Same:
+  case Eq:   return a == b;
+  case NSame:
+  case Neq:  return a != b;
   default:
     not_reached();
   }
@@ -1121,11 +1121,11 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // OpSame and OpNSame have some special rules
   // ---------------------------------------------------------------------
 
-  if (opName == OpSame || opName == OpNSame) {
+  if (opName == Same || opName == NSame) {
     // OpSame and OpNSame do not perform type juggling
     if (src1->type() != src2->type()) {
       if (!(src1->type().isString() && src2->type().isString())) {
-        return cns(opName == OpNSame);
+        return cns(opName == NSame);
       }
     }
 
@@ -1154,10 +1154,10 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
       return nullptr;
     }
     // Type is neither a string nor an object - simplify to OpEq/OpNeq
-    if (opName == OpSame) {
-      return newInst(OpEq, src1, src2);
+    if (opName == Same) {
+      return newInst(Eq, src1, src2);
     }
-    return newInst(OpNeq, src1, src2);
+    return newInst(Neq, src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1215,11 +1215,11 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     // overall expression being true (after type-juggling).
     // Hence we may check for equality with that boolean.
     // E.g. `some-int > false` is equivalent to `some-int == true`
-    if (opName != OpEq) {
+    if (opName != Eq) {
       if (cmpOp(opName, false, b)) {
-        return newInst(OpEq, src1, cns(false));
+        return newInst(Eq, src1, cns(false));
       } else {
-        return newInst(OpEq, src1, cns(true));
+        return newInst(Eq, src1, cns(true));
       }
     }
   }
@@ -1281,12 +1281,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     // Optimize comparison between int and const bool
     if (src1->type() == Type::Int && src2->isConst()) {
       // Based on the const bool optimization (above) opName should be OpEq
-      always_assert(opName == OpEq);
+      always_assert(opName == Eq);
 
       if (src2->getValBool()) {
-        return newInst(OpNeq, src1, cns(0));
+        return newInst(Neq, src1, cns(0));
       } else {
-        return newInst(OpEq, src1, cns(0));
+        return newInst(Eq, src1, cns(0));
       }
     }
 
@@ -1771,7 +1771,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Pull negations into the jump.
-  if (src->inst()->op() == OpNot) {
+  if (src->inst()->op() == Not) {
     return gen(inst->op() == JmpZero ? JmpNZero : JmpZero,
                inst->taken(),
                srcInst->src(0));

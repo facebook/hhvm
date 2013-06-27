@@ -182,10 +182,10 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == OpMod) {
+  if (op == Mod) {
     return Type::Int;
   }
-  assert(op == OpAdd || op == OpSub || op == OpMul);
+  assert(op == Add || op == Sub || op == Mul);
   if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
     return Type::Dbl;
   }

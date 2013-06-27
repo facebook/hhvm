@@ -1397,15 +1397,15 @@ void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
   emitMovRegReg(m_as, outReg, dstReg);
 }
 
-void CodeGenerator::cgOpFloor(IRInstruction* inst) {
+void CodeGenerator::cgFloor(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::floor);
 }
 
-void CodeGenerator::cgOpCeil(IRInstruction* inst) {
+void CodeGenerator::cgCeil(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::ceil);
 }
 
-void CodeGenerator::cgOpAdd(IRInstruction* inst) {
+void CodeGenerator::cgAdd(IRInstruction* inst) {
   SSATmp* dst  = inst->dst();
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
@@ -1423,7 +1423,7 @@ void CodeGenerator::cgOpAdd(IRInstruction* inst) {
              Commutative);
 }
 
-void CodeGenerator::cgOpSub(IRInstruction* inst) {
+void CodeGenerator::cgSub(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src1  = inst->src(0);
   SSATmp* src2  = inst->src(1);
@@ -1446,7 +1446,7 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
              NonCommutative);
 }
 
-void CodeGenerator::cgOpDivDbl(IRInstruction* inst) {
+void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   const SSATmp* dst   = inst->dst();
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
@@ -1477,7 +1477,7 @@ void CodeGenerator::cgOpDivDbl(IRInstruction* inst) {
   emitMovRegReg(m_as, resReg, dstReg);
 }
 
-void CodeGenerator::cgOpBitAnd(IRInstruction* inst) {
+void CodeGenerator::cgBitAnd(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::andq,
                 &Asm::andq,
@@ -1487,7 +1487,7 @@ void CodeGenerator::cgOpBitAnd(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitOr(IRInstruction* inst) {
+void CodeGenerator::cgBitOr(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::orq,
                 &Asm::orq,
@@ -1497,7 +1497,7 @@ void CodeGenerator::cgOpBitOr(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitXor(IRInstruction* inst) {
+void CodeGenerator::cgBitXor(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::xorq,
                 &Asm::xorq,
@@ -1507,14 +1507,14 @@ void CodeGenerator::cgOpBitXor(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitNot(IRInstruction* inst) {
+void CodeGenerator::cgBitNot(IRInstruction* inst) {
   cgUnaryIntOp(inst->dst(),
                inst->src(0),
                &Asm::not,
                [](int64_t i) { return ~i; });
 }
 
-void CodeGenerator::cgOpLogicXor(IRInstruction* inst) {
+void CodeGenerator::cgLogicXor(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::xorb,
                 &Asm::xorb,
@@ -1524,7 +1524,7 @@ void CodeGenerator::cgOpLogicXor(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpMul(IRInstruction* inst) {
+void CodeGenerator::cgMul(IRInstruction* inst) {
   cgBinaryOp(inst,
              &Asm::imul,
              &Asm::imul,
@@ -1535,7 +1535,7 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
              Commutative);
 }
 
-void CodeGenerator::cgOpMod(IRInstruction* inst) {
+void CodeGenerator::cgMod(IRInstruction* inst) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
   auto const dstReg = m_regs[inst->dst()].reg();
@@ -1578,7 +1578,7 @@ void CodeGenerator::cgOpMod(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgOpSqrt(IRInstruction* inst) {
+void CodeGenerator::cgSqrt(IRInstruction* inst) {
   auto src = inst->src(0);
   auto dst = inst->dst();
 
@@ -1599,7 +1599,7 @@ void CodeGenerator::cgOpSqrt(IRInstruction* inst) {
 }
 
 template<class Oper>
-void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
+void CodeGenerator::cgShiftCommon(IRInstruction* inst,
                                     void (Asm::*instrIR)(Immed, Reg64),
                                     void (Asm::*instrR)(Reg64),
                                     Oper oper) {
@@ -1676,21 +1676,21 @@ void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
   }
 }
 
-void CodeGenerator::cgOpShl(IRInstruction* inst) {
-  cgOpShiftCommon(inst,
-                  &Asm::shlq,
-                  &Asm::shlq,
-                  [] (int64_t a, int64_t b) { return a << b; });
+void CodeGenerator::cgShl(IRInstruction* inst) {
+  cgShiftCommon(inst,
+                &Asm::shlq,
+                &Asm::shlq,
+                [] (int64_t a, int64_t b) { return a << b; });
 }
 
-void CodeGenerator::cgOpShr(IRInstruction* inst) {
-  cgOpShiftCommon(inst,
-                  &Asm::sarq,
-                  &Asm::sarq,
-                  [] (int64_t a, int64_t b) { return a >> b; });
+void CodeGenerator::cgShr(IRInstruction* inst) {
+  cgShiftCommon(inst,
+                &Asm::sarq,
+                &Asm::sarq,
+                [] (int64_t a, int64_t b) { return a >> b; });
 }
 
-void CodeGenerator::cgOpNot(IRInstruction* inst) {
+void CodeGenerator::cgNot(IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const dstReg = m_regs[inst->dst()].reg();
   auto& a = m_as;
@@ -1745,9 +1745,9 @@ inline int64_t ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
 template <typename A, typename B>
 inline int64_t ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
 
-#define CG_OP_CMP(inst, setter, name)                                         \
-  cgOpCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,            \
-                ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
+#define CG_OP_CMP(inst, setter, name)                                   \
+  cgCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,        \
+              ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
 
 // SON - string, object, or number
 static bool typeIsSON(Type t) {
@@ -1758,7 +1758,7 @@ static bool typeIsSON(Type t) {
       ;
 }
 
-void CodeGenerator::cgOpCmpHelper(
+void CodeGenerator::cgCmpHelper(
           IRInstruction* inst,
           void (Asm::*setter)(Reg8),
           int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -1903,35 +1903,35 @@ void CodeGenerator::cgOpCmpHelper(
   }
 }
 
-void CodeGenerator::cgOpEq(IRInstruction* inst) {
+void CodeGenerator::cgEq(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, equal);
 }
 
-void CodeGenerator::cgOpNeq(IRInstruction* inst) {
+void CodeGenerator::cgNeq(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nequal);
 }
 
-void CodeGenerator::cgOpSame(IRInstruction* inst) {
+void CodeGenerator::cgSame(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, same);
 }
 
-void CodeGenerator::cgOpNSame(IRInstruction* inst) {
+void CodeGenerator::cgNSame(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nsame);
 }
 
-void CodeGenerator::cgOpLt(IRInstruction* inst) {
+void CodeGenerator::cgLt(IRInstruction* inst) {
   CG_OP_CMP(inst, setl, less);
 }
 
-void CodeGenerator::cgOpGt(IRInstruction* inst) {
+void CodeGenerator::cgGt(IRInstruction* inst) {
   CG_OP_CMP(inst, setg, more);
 }
 
-void CodeGenerator::cgOpLte(IRInstruction* inst) {
+void CodeGenerator::cgLte(IRInstruction* inst) {
   CG_OP_CMP(inst, setle, lte);
 }
 
-void CodeGenerator::cgOpGte(IRInstruction* inst) {
+void CodeGenerator::cgGte(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 

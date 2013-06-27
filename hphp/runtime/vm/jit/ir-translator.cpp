@@ -864,15 +864,15 @@ void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
   Opcode opc;
   switch (i.imm[1].u_OA) {
-    case SetOpPlusEqual:   opc = JIT::OpAdd;    break;
-    case SetOpMinusEqual:  opc = JIT::OpSub;    break;
-    case SetOpMulEqual:    opc = JIT::OpMul;    break;
+    case SetOpPlusEqual:   opc = Add;    break;
+    case SetOpMinusEqual:  opc = Sub;    break;
+    case SetOpMulEqual:    opc = Mul;    break;
     case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpConcatEqual: opc = JIT::Concat;   break;
+    case SetOpConcatEqual: opc = Concat; break;
     case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpAndEqual:    opc = JIT::OpBitAnd; break;
-    case SetOpOrEqual:     opc = JIT::OpBitOr;  break;
-    case SetOpXorEqual:    opc = JIT::OpBitXor; break;
+    case SetOpAndEqual:    opc = BitAnd; break;
+    case SetOpOrEqual:     opc = BitOr;  break;
+    case SetOpXorEqual:    opc = BitXor; break;
     case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     default: not_reached();

@@ -139,7 +139,7 @@ bool cellRelOp(Op op, const Cell* cell, const StringData* val) {
   case KindOfObject:
     {
       auto const od = cell->m_data.pobj;
-      if (od->isResource()) return op(true, false);
+      if (od->isResource()) return op(od->o_toDouble(), val->toDouble());
       if (od->isCollection()) return op.collectionVsNonObj();
       try {
         String str(const_cast<ObjectData*>(od)->t___tostring());
@@ -169,10 +169,13 @@ bool cellRelOp(Op op, const Cell* cell, const ArrayData* ad) {
   case KindOfStaticString:
   case KindOfString:       return op(false, true);
   case KindOfObject:
-    return cell->m_data.pobj->isCollection()
-      ? op.collectionVsNonObj()
-      : op(true, false);
-
+    {
+      auto const od = cell->m_data.pobj;
+      if (od->isResource()) return op(false, true);
+      return od->isCollection()
+        ? op.collectionVsNonObj()
+        : op(true, false);
+    }
   default:
     break;
   }
@@ -196,19 +199,22 @@ bool cellRelOp(Op op, const Cell* cell, const ObjectData* od) {
     return od->isCollection() ? op.collectionVsNonObj()
                               : op(cell->m_data.dbl, od->o_toDouble());
   case KindOfArray:
-    return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
-
+      if (od->isResource()) return op(true, false);
+      return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
   case KindOfString:
   case KindOfStaticString:
-    if (od->isResource()) return op(false, true);
-    if (od->isCollection()) return op.collectionVsNonObj();
-    try {
-      String str(const_cast<ObjectData*>(od)->t___tostring());
-      return op(cell->m_data.pstr, str.get());
-    } catch (BadTypeConversionException&) {
-      return op(false, true);
-    }
+    {
+      auto const str  = cell->m_data.pstr;
+      if (od->isResource()) return op(str->toDouble(), od->o_toDouble());
 
+      if (od->isCollection()) return op.collectionVsNonObj();
+      try {
+        String str(const_cast<ObjectData*>(od)->t___tostring());
+        return op(cell->m_data.pstr, str.get());
+      } catch (BadTypeConversionException&) {
+        return op(false, true);
+      }
+    }
   case KindOfObject:
     return op(cell->m_data.pobj, od);
 

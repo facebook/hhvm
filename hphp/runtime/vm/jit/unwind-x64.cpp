@@ -99,6 +99,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
     TargetCache::header()->unwinderTv = ism->tv();
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
+  tl_regState = VMRegState::DIRTY;
 
   return true;
 }

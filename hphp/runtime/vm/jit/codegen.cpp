@@ -840,12 +840,17 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   PhysRegSaverParity::emitPops(m_as, info.savedRegs);
 }
 
+static void unwindResumeHelper(_Unwind_Exception* data) {
+  tl_regState = VMRegState::CLEAN;
+  _Unwind_Resume(data);
+}
+
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   m_as.cmpb (0, rVmTl[TargetCache::kUnwinderSideExitOff]);
   unlikelyIfBlock(CC_E,
     [&](Asm& as) { // doSideExit == false, so call _Unwind_Resume
       as.loadq(rVmTl[TargetCache::kUnwinderScratchOff], rdi);
-      as.call ((TCA)_Unwind_Resume); // pass control back to the unwinder
+      as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
       as.ud2();
     });
 

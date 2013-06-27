@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/tv_arith.h"
 
 #include <type_traits>
+#include <limits>
 
 #include "hphp/runtime/base/tv_conversions.h"
 
@@ -114,13 +115,18 @@ struct Mul {
 
 struct Div {
   Cell operator()(int64_t t, int64_t u) const {
-    /*
-     * TODO(#2547526): dividing INT64_MIN by -1 crashes.
-     */
-    if (u == 0) {
+    if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
       return make_tv<KindOfBoolean>(false);
     }
+
+    // Avoid SIGFPE when dividing the miniumum respresentable integer
+    // by -1.
+    auto const minInt = std::numeric_limits<int64_t>::min();
+    if (UNLIKELY(u == -1 && t == minInt)) {
+      return make_tv<KindOfDouble>(static_cast<double>(minInt) / -1);
+    }
+
     if (t % u == 0) return make_tv<KindOfInt64>(t / u);
     return make_tv<KindOfDouble>(static_cast<double>(t) / u);
   }
@@ -133,7 +139,7 @@ struct Div {
     static_assert(
       !(std::is_integral<T>::value && std::is_integral<U>::value), ""
     );
-    if (u == 0) {
+    if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
       return make_tv<KindOfBoolean>(false);
     }
@@ -168,7 +174,7 @@ Cell cellDiv(Cell c1, Cell c2) {
 Cell cellMod(Cell c1, Cell c2) {
   auto const i1 = cellToInt(&c1);
   auto const i2 = cellToInt(&c2);
-  if (i2 == 0) {
+  if (UNLIKELY(i2 == 0)) {
     raise_warning(Strings::DIVISION_BY_ZERO);
     return make_tv<KindOfBoolean>(false);
   }

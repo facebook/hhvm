@@ -201,7 +201,7 @@ class ReadWriteMutex {
  * implementation tends to do crazy things when a rwlock is double-wlocked,
  * so check and assert early in debug builds.
  */
-  static const pthread_t InvalidThread = (pthread_t)0;
+  static constexpr pthread_t InvalidThread = (pthread_t)0;
   pthread_t m_writeOwner;
   Rank m_rank;
 #endif

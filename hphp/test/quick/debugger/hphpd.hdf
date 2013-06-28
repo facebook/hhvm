@@ -62,11 +62,5 @@ Color {
     LineNo = GRAY
   }
 }
-Tutorial = 0
-Tutorial {
-  Visited {
-    0 = 376d06037a5af010a610dd885c6817c1
-    1 = d497d02bce18120e9ae2b91992a9ce60
-  }
-}
+Tutorial = -1 
 MaxCodeLines = -1

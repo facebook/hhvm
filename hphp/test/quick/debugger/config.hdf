@@ -3,6 +3,9 @@ Eval {
   AllowHhas = true
   EnableHipHopSyntax = true
   EnableObjDestructCall = true
+  JitASize = 10485760 # 10 MB
+  JitAStubsSize = 10485760 # 10 MB
+  JitGlobalDataSize = 2097152 # 2 MB
   Debugger {
     EnableDebugger = true
     EnableDebuggerColor = false
@@ -11,8 +14,6 @@ Eval {
 }
 
 Repo {
-  Local.Mode = r-
-  Central.Path = /var/facebook/hhvm/cli_%{schema}.hhbc
   Eval.Mode = readonly
   Commit = true
   DebugInfo = true
@@ -39,3 +40,5 @@ ErrorHandling {
 ResourceLimit {
   SerializationSizeLimit=134217728
 }
+
+

@@ -1,14 +1,10 @@
 Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
-step
-Break on line 2 of %s/list.php
-   1 <?php
-   2 $h = new SplMaxHeap();
-   3 (END)
-
-step
-Break at SplHeap::__construct() on line %d of systemlib.php
- %d    */
- %d   public function __construct() {}
- %d 
+%Sbr SplMaxHeap::insert()
+Breakpoint 1 set upon entering SplMaxHeap::insert()
+run
+Breakpoint 1 reached at SplHeap::insert() on line %d of systemlib.php
+ %d   public function insert($value) {
+ %d     $this->checkNotCorrupted();
+ %d     $index = $this->lowestFreeIndex();
 
 quit

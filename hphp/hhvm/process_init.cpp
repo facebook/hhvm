@@ -120,6 +120,10 @@ void ProcessInit() {
     Logger::Error("Unable to find/load systemlib.php");
     _exit(1);
   }
+  // Save this in case the debugger needs it. Once we know if this
+  // process does not have debugger support, we'll clear it.
+  SystemLib::s_source = slib;
+
   SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
                                      "systemlib.php");
   if (!hhas.empty()) {

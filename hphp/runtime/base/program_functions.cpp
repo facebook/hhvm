@@ -923,6 +923,9 @@ static int execute_program_impl(int argc, char **argv) {
 
   po.isTempFile = vm.count("temp-file");
 
+  // forget the source for systemlib.php unless we are debugging
+  if (po.mode != "debug") SystemLib::s_source = "";
+
   // we need to initialize pcre cache table very early
   pcre_init();
 
@@ -1104,6 +1107,9 @@ static int execute_program_impl(int argc, char **argv) {
             free(new_argv);
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
+          // Systemlib.php is not loaded again, so we need this if we
+          // are to hit any breakpoints in systemlib.
+          phpSetBreakPoints(localProxy.get());
           restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, nullptr);
@@ -1207,7 +1213,6 @@ string get_systemlib(string* hhas) {
   std::unique_ptr<char[]> data(new char[desc.m_len]);
   ifs.read(data.get(), desc.m_len);
   string ret = systemlib_split(string(data.get(), desc.m_len), hhas);
-  if (RuntimeOption::EnableDebugger) SystemLib::s_source = ret;
   return ret;
 }
 

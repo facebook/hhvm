@@ -7480,6 +7480,15 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Repo::get().commitUnit(ue, unitOrigin);
     Unit* unit = ue->create();
     delete ue;
+    if (unit->sn() == -1) {
+      // the unit was not committed to the Repo, probably because
+      // another thread did it first. Try to use the winner.
+      Unit* u = Repo::get().loadUnit(filename ? filename : "", md5);
+      if (u != nullptr) {
+        delete unit;
+        return u;
+      }
+    }
     return unit;
   } catch (const std::exception&) {
     // extern "C" function should not be throwing exceptions...

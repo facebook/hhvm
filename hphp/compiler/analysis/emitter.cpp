@@ -3941,17 +3941,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(y->getExpression());
         emitConvertToCell(e);
 
-        // pack continuation and set the return label
+        // suspend continuation and set the return label
         assert(m_evalStack.size() == 1);
         m_metaInfo.addKnownDataType(
           KindOfObject, false, m_ue.bcPos(), false, 1);
-        e.PackCont(2 * y->getLabel());
-
-        // transfer control
-        assert(m_evalStack.size() == 0);
-        e.ContExit();
+        e.ContSuspend(2 * y->getLabel());
 
         // emit return label for raise()
+        assert(m_evalStack.size() == 0);
         e.Null();
         m_yieldLabels[2 * y->getLabel() - 1].set(e);
 

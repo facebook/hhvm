@@ -1101,17 +1101,12 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   assert(m_stackDeficit == 0);
 }
 
-void HhbcTranslator::emitContExitImpl() {
+void HhbcTranslator::emitContReturnControl() {
   auto const retAddr = gen(LdRetAddr, m_tb->fp());
   auto const fp = gen(FreeActRec, m_tb->fp());
   auto const sp = spillStack();
   gen(RetCtrl, sp, fp, retAddr);
   m_hasExit = true;
-}
-
-void HhbcTranslator::emitContExit() {
-  gen(ExitWhenSurprised, getExitSlowTrace());
-  emitContExitImpl();
 }
 
 void HhbcTranslator::emitUnpackCont() {
@@ -1121,7 +1116,9 @@ void HhbcTranslator::emitUnpackCont() {
   push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
 }
 
-void HhbcTranslator::emitPackCont(int64_t labelId) {
+void HhbcTranslator::emitContSuspend(int64_t labelId) {
+  gen(ExitWhenSurprised, getExitSlowTrace());
+
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
   auto const newVal = popC();
@@ -1131,6 +1128,9 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
   gen(
     StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId)
   );
+
+  // transfer control
+  emitContReturnControl();
 }
 
 void HhbcTranslator::emitContRetC() {
@@ -1146,7 +1146,7 @@ void HhbcTranslator::emitContRetC() {
   gen(DecRef, oldVal);
 
   // transfer control
-  emitContExitImpl();
+  emitContReturnControl();
 }
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
@@ -3311,7 +3311,7 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
 uint32_t localOutputId(const NormalizedInstruction& inst) {
   switch (inst.op()) {
     case OpUnpackCont:
-    case OpPackCont:
+    case OpContSuspend:
     case OpContRetC:
     case OpContSend:
     case OpContRaise:

@@ -1265,9 +1265,8 @@ static const struct {
 
   { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpContExit,    {None,             None,         OutNone,           0 }},
   { OpUnpackCont,  {Local,            StackTop2,    OutInt64,          2 }},
-  { OpPackCont,    {Local|Stack1,     None,         OutNone,          -1 }},
+  { OpContSuspend, {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContRetC,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
   { OpContSend,    {Local,            Stack1,       OutUnknown,        1 }},
@@ -1837,7 +1836,7 @@ void Translator::getInputs(SrcKey startSk,
     auto insertAt = inputs.end();
     switch (ni->op()) {
       case OpUnpackCont:
-      case OpPackCont:
+      case OpContSuspend:
       case OpContRetC:
       case OpContSend:
       case OpContRaise:
@@ -2672,7 +2671,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpPopR:
       return DataTypeCountness;
 
-    case OpPackCont:
+    case OpContSuspend:
     case OpContRetC:
       // The stack input is teleported to the continuation's m_value field
       return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;

@@ -107,7 +107,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
     }
   }
   auto excludeContinuationReturns = [] (Op op) {
-    return (op != OpContExit) && (op != OpContRetC);
+    return (op != OpContSuspend) && (op != OpContRetC);
   };
   g_vmContext->m_lastLocFilter->addRanges(unit, ranges,
                                           excludeContinuationReturns);

@@ -985,7 +985,7 @@ opcodeControlFlowInfo(const Op instr) {
     case OpJmpNZ:
     case OpSwitch:
     case OpSSwitch:
-    case OpContExit:
+    case OpContSuspend:
     case OpContRetC:
     case OpRetC:
     case OpRetV:

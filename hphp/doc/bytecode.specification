@@ -3683,8 +3683,8 @@ ArrayIdx    [C C C] -> [C]
 CreateCont <function name>    []  ->  [C]
 
   Creates a Continuation object and pushes it on the stack. The Continuation
-  will capture all defined local variables in the current function. The 
-  Continuation will store a reference to the function named by the string 
+  will capture all defined local variables in the current function. The
+  Continuation will store a reference to the function named by the string
   immediate to be used as its body.
 
 ContEnter [C]  ->  []
@@ -3694,11 +3694,13 @@ ContEnter [C]  ->  []
   associated with the $this object of the Continuation object. The value on the
   stack is sent to the Continuation to be retrieved by UnpackCont.
 
-ContExit    []  ->  []
+ContSuspend  <label id>   [C]  ->  []
 
-  This instruction may only appear in continuation bodies. It transfers control
-  flow to the caller of the continuation body, which must be a non-static method
-  of the Continuation class.
+  Suspend continuation. This instruction may only appear in continuation bodies.
+  Packs all defined local variables into the Continuation object in local 0.
+  Store $1 in the continuation as the result of the current iteration and
+  set the continuation's label to <label id>. Transfer control flow to the
+  caller of the continuation body, which must be a non-static method of the Continuation class.
 
 UnpackCont    []  ->  [C:Int C]
 
@@ -3706,13 +3708,6 @@ UnpackCont    []  ->  [C:Int C]
   0 into the containing environment. The stack will contain the current label of
   the continuation in $1 and the value sent to the continuation in $2. The value
   will be no longer referenced by the Continuation object.
-  
-PackCont <label id>    [C]  ->  []
-
-  Pack continuation. Packs all defined local variables into the Continuation
-  object in local 0. The value on the top of the stack is stored in the
-  continuation as the result of the current iteration and the continuation's
-  label is set to <label id>.
 
 ContRetC    [C]  ->  []
 

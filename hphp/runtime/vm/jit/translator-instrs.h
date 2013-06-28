@@ -129,9 +129,8 @@
   CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(ContEnter) \
-  CASE(ContExit) \
   CASE(UnpackCont) \
-  CASE(PackCont) \
+  CASE(ContSuspend) \
   CASE(ContRetC) \
   CASE(ContCheck) \
   CASE(ContSend) \

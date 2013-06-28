@@ -6698,7 +6698,7 @@ static inline void setContVar(const Func* genFunc,
     if (!contFP->hasVarEnv()) {
       // We pass skipInsert to this VarEnv because it's going to exist
       // independent of the chain; i.e. we can't stack-allocate it. We link it
-      // into the chain in UnpackCont, and take it out in PackCont.
+      // into the chain in UnpackCont, and take it out in ContSuspend.
       contFP->setVarEnv(VarEnv::createLocalOnHeap(contFP));
     }
     contFP->getVarEnv()->setWithRef(name, src);
@@ -6807,15 +6807,6 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   }
 }
 
-void VMExecutionContext::iopContExit(PC& pc) {
-  NEXT();
-
-  EventHook::FunctionExit(m_fp);
-  ActRec* prevFp = m_fp->arGetSfp();
-  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-  m_fp = prevFp;
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
@@ -6829,13 +6820,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   label->m_data.num = cont->m_label;
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopContSuspend(PC& pc) {
   NEXT();
   DECODE_IVA(label);
   c_Continuation* cont = frame_continuation(m_fp);
 
   cont->c_Continuation::t_update(label, tvAsCVarRef(m_stack.topTV()));
   m_stack.popTV();
+
+  EventHook::FunctionExit(m_fp);
+  ActRec* prevFp = m_fp->arGetSfp();
+  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+  m_fp = prevFp;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {

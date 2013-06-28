@@ -178,12 +178,12 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // land back at the callsite of send(). For returns from generators, we follow
   // the execution stack for now, and end up at the caller of ASIO or send().
   if (fp->m_func->isGenerator() &&
-      ((*pc == OpContExit) || (*pc == OpContRetC))) {
+      ((*pc == OpContSuspend) || (*pc == OpContRetC))) {
     TRACE(2, "CmdNext: encountered yield or return from generator\n");
     // Patch the projected return point(s) in both cases, to catch if we exit
     // the the asio iterator or if we are being iterated directly by PHP.
     setupStepOuts();
-    if (*pc == OpContExit) {
+    if (*pc == OpContSuspend) {
       // Patch the next normal execution point so we can pickup the stepping
       // from there if the caller is C++.
       setupStepCont(fp, pc);
@@ -204,18 +204,18 @@ bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
   return (unit == m_stepContUnit) && (o == m_stepContOffset);
 }
 
-// A ContExit is followed by code to support ContRaise, then code for
+// A ContSuspend is followed by code to support ContRaise, then code for
 // ContSend/ContNext. We want to continue stepping on the latter. The normal
 // exception handling logic will take care of the former.
 // This logic is sensitive to the code gen here... we don't have access to the
 // offsets for the labels used to generate this code, so we rely on the
 // simplicity of the exceptional path.
 void CmdNext::setupStepCont(ActRec* fp, PC pc) {
-  assert(*pc == OpContExit); // One byte
-  assert(*(pc+1) == OpNull); // One byte
-  assert(*(pc+2) == OpThrow); // One byte
-  assert(*(pc+3) == OpNull); // One byte
-  Offset nextInst = fp->m_func->unit()->offsetOf(pc + 4);
+  assert(*pc == OpContSuspend); // One byte + one byte argument
+  assert(*(pc+2) == OpNull); // One byte
+  assert(*(pc+3) == OpThrow); // One byte
+  assert(*(pc+4) == OpNull); // One byte
+  Offset nextInst = fp->m_func->unit()->offsetOf(pc + 5);
   m_stepContUnit = fp->m_func->unit();
   m_stepContOffset = nextInst;
   m_stepContTag = getContinuationTag(fp);

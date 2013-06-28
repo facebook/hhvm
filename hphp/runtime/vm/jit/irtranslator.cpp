@@ -548,16 +548,12 @@ void Translator::translateContEnter(const NormalizedInstruction& i) {
   HHIR_EMIT(ContEnter, callOffsetInUnit);
 }
 
-void Translator::translateContExit(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContExit);
-}
-
 void Translator::translateUnpackCont(const NormalizedInstruction& i) {
   HHIR_EMIT(UnpackCont);
 }
 
-void Translator::translatePackCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(PackCont, i.imm[0].u_IVA);
+void Translator::translateContSuspend(const NormalizedInstruction& i) {
+  HHIR_EMIT(ContSuspend, i.imm[0].u_IVA);
 }
 
 void Translator::translateContRetC(const NormalizedInstruction& i) {

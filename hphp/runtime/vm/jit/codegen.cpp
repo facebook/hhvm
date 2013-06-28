@@ -2557,7 +2557,7 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
       m_as.movdqa(srcReg, reg::rsp[sinfo.offset()]);
     } else {
       int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv) {
+      if (locIndex == 0 || packed_tv || src->type().subtypeOf(Type::FuncCtx)) {
         emitStoreReg(m_as, srcReg, reg::rsp[offset]);
       } else {
         // Note that type field is shifted in memory
@@ -2583,7 +2583,7 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
       m_as.movdqa(reg::rsp[sinfo.offset()], dstReg);
     } else {
       int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv) {
+      if (locIndex == 0 || packed_tv || src->type().subtypeOf(Type::FuncCtx)) {
         emitLoadReg(m_as, reg::rsp[offset], dstReg);
       } else {
         // Note that type field is shifted in memory

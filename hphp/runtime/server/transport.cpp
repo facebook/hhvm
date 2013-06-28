@@ -21,8 +21,9 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/zend_url.h"
 #include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/url.h"
+#include "hphp/runtime/base/zend_url.h"
 #include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"
@@ -97,36 +98,12 @@ const char *Transport::getMethodName() {
 
 const char *Transport::getServerObject() {
   const char *url = getUrl();
-  int strip = 0;
-  if (strncmp(url, "http://", 7) == 0) {
-    strip = 7;
-  } else if (strncmp(url, "https://", 8) == 0) {
-    strip = 8;
-  }
-  const char *p = strchr(url + strip, '/');
-  if (p) {
-    while (*(p + 1) == '/') p++;
-    return p;
-  }
-  if (strip == 0) return url;
-  return "";
+  return URL::getServerObject(url);
 }
 
 string Transport::getCommand() {
   const char *url = getServerObject();
-  assert(url);
-  if (!*url) {
-    return "";
-  }
-
-  while (*url == '/') {
-    ++url;
-  }
-  const char *v = strchr(url, '?');
-  if (v) {
-    return string(url, v - url);
-  }
-  return url;
+  return URL::getCommand(url);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

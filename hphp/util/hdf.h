@@ -18,6 +18,7 @@
 #define incl_HPHP_CONFIG_HDF_H_
 
 #include "hphp/util/base.h"
+#include <boost/container/flat_set.hpp>
 #include <string>
 #include "hphp/util/exception.h"
 #include "hphp/util/case_insensitive.h"
@@ -132,6 +133,7 @@ public:
   void get(std::vector<std::string> &values) const;
   void get(std::set<std::string> &values) const;
   void get(std::set<std::string, stdltistr> &values) const;
+  void get(boost::container::flat_set<std::string> &values) const;
   void get(std::map<std::string, std::string> &values) const;
   void get(hphp_string_imap<std::string> &values) const;
 

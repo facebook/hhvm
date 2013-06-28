@@ -121,8 +121,8 @@ TEST(JobQueue, Expiration) {
     lifo_queue.setJobReaperId(1);
 
     // manipulate m_jobs timestamp to simulate time passing.
-    lifo_queue.m_jobs[0].second.tv_sec -= 32;
-    lifo_queue.m_jobs[1].second.tv_sec -= 31;
+    lifo_queue.m_jobQueues[0][0].second.tv_sec -= 32;
+    lifo_queue.m_jobQueues[0][1].second.tv_sec -= 31;
 
     // having job reaper should not affect anything other threads are doing.
     bool expired = false;
@@ -147,7 +147,7 @@ TEST(JobQueue, Expiration) {
     EXPECT_FALSE(expired);
 
     // now set the first job to be expired.
-    lifo_queue.m_jobs[0].second.tv_sec -= 32;
+    lifo_queue.m_jobQueues[0][0].second.tv_sec -= 32;
     lifo_queue.notify();
 
     // busy wait until value is updated.
@@ -168,6 +168,24 @@ TEST(JobQueue, Expiration) {
     thread1.join();
     EXPECT_TRUE(exceptionCaught);
   }
+}
+
+TEST(JobQueue, Priority) {
+  JobQueue<int> fifo_queue(1, false, 0, false, INT_MAX, 30, 3);
+  fifo_queue.enqueue(1);
+  fifo_queue.enqueue(2);
+  fifo_queue.enqueue(3, 2);
+  fifo_queue.enqueue(4, 0);
+  fifo_queue.enqueue(5, 1);
+  fifo_queue.enqueue(6, 2);
+
+  bool expired;
+  EXPECT_EQ(3, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(6, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(5, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(1, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(2, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(4, fifo_queue.dequeueMaybeExpired(0, true, &expired));
 }
 
 }

@@ -1031,7 +1031,7 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 
 static void setGlobal(void* cacheAddr, TypedValue *value,
                       StringData *name) {
-  tvSet(value, TargetCache::GlobalCache::lookupCreateAddr(cacheAddr, name));
+  tvSet(*value, *TargetCache::GlobalCache::lookupCreateAddr(cacheAddr, name));
 }
 
 void Unit::merge() {

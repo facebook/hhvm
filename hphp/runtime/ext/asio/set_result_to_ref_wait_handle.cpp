@@ -56,7 +56,7 @@ void c_SetResultToRefWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref) {
   TypedValue* var_or_cell = ref->asTypedValue();
   if (wait_handle.isNull()) {
-    tvSetNull(var_or_cell);
+    tvSet(make_tv<KindOfNull>(), *var_or_cell);
     return wait_handle;
   }
 
@@ -70,13 +70,13 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
 
   // succeeded? set result to ref and give back succeeded wait handle
   if (wh->isSucceeded()) {
-    tvSet(wh->getResult(), var_or_cell);
+    tvSet(*wh->getResult(), *var_or_cell);
     return wh;
   }
 
   // failed? reset ref and give back failed wait handle
   if (wh->isFailed()) {
-    tvSetNull(var_or_cell);
+    tvSet(make_tv<KindOfNull>(), *var_or_cell);
     return wh;
   }
 
@@ -128,7 +128,7 @@ void c_SetResultToRefWaitHandle::markAsSucceeded(const TypedValue* result) {
   RefData* ref = m_ref;
 
   m_ref = nullptr;
-  tvSetIgnoreRef(result, ref->tv());
+  tvSetIgnoreRef(*result, *ref->tv());
   decRefRef(ref);
 
   setResult(result);
@@ -139,7 +139,7 @@ void c_SetResultToRefWaitHandle::markAsFailed(CObjRef exception) {
   RefData* ref = m_ref;
 
   m_ref = nullptr;
-  tvSetNullIgnoreRef(ref->tv());
+  tvSetIgnoreRef(make_tv<KindOfNull>(), *ref->tv());
   decRefRef(ref);
 
   setException(exception.get());

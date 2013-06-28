@@ -352,7 +352,7 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
       if (UNLIKELY(bindingAssignment)) {
         tvBind(val, propVal);
       } else {
-        tvSet(val, propVal);
+        tvSet(*val, *propVal);
       }
     }
     // Return a pointer to the property if it's a declared property
@@ -562,7 +562,7 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
     Slot propInd = declPropInd(propVal);
     if (propInd != kInvalidSlot) {
       // Declared property.
-      tvSetIgnoreRef((TypedValue*)&null_variant, propVal);
+      tvSetIgnoreRef(*null_variant.asTypedValue(), *propVal);
     } else {
       // Dynamic property.
       assert(o_properties.get() != nullptr);

@@ -167,8 +167,8 @@ struct NameValueTable : private boost::noncopyable {
    */
   TypedValue* set(const StringData* name, const TypedValue* val) {
     TypedValue* target = findTypedValue(name);
-    tvSet(val->m_type == KindOfRef ? val->m_data.pref->tv() : val,
-          target);
+    tvSet(*(val->m_type == KindOfRef ? val->m_data.pref->tv() : val),
+          *target);
     return target;
   }
 

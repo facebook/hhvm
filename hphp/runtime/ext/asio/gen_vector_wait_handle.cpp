@@ -87,7 +87,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      tvSetIgnoreRef(child->getResult(), current);
+      tvSetIgnoreRef(*child->getResult(), *current);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -136,7 +136,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      tvSetIgnoreRef(child->getResult(), current);
+      tvSetIgnoreRef(*child->getResult(), *current);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

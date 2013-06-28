@@ -4718,7 +4718,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetL(PC& pc) {
   assert(local < m_fp->m_func->numLocals());
   Cell* fr = m_stack.topC();
   TypedValue* to = frame_local(m_fp, local);
-  tvSet(fr, to);
+  tvSet(*fr, *to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
@@ -4729,7 +4729,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
   TypedValue* to = nullptr;
   lookupd_var(m_fp, name, tv2, to);
   assert(to != nullptr);
-  tvSet(fr, to);
+  tvSet(*fr, *to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
   decRefStr(name);
@@ -4743,7 +4743,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
   TypedValue* to = nullptr;
   lookupd_gbl(m_fp, name, tv2, to);
   assert(to != nullptr);
-  tvSet(fr, to);
+  tvSet(*fr, *to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
   decRefStr(name);
@@ -4764,7 +4764,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetS(PC& pc) {
                 classref->m_data.pcls->name()->data(),
                 name->data());
   }
-  tvSet(tv1, val);
+  tvSet(*tv1, *val);
   tvRefcountedDecRefCell(propn);
   memcpy(output, tv1, sizeof(TypedValue));
   m_stack.ndiscard(2);
@@ -6846,7 +6846,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
   cont->setDone();
-  tvSetIgnoreRef(m_stack.topC(), cont->m_value.asTypedValue());
+  tvSetIgnoreRef(*m_stack.topC(), *cont->m_value.asTypedValue());
   m_stack.popC();
 
   EventHook::FunctionExit(m_fp);

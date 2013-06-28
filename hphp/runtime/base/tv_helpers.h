@@ -217,7 +217,6 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
   tvRefcountedIncRef(&to);
 }
 
-
 /*
  * Duplicate a Cell from one location to another.  Is equivalent to
  * tvDup, with some added assertions.
@@ -269,74 +268,46 @@ inline const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
-template <bool respectRef>
-inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
-  assert(fr->m_type != KindOfRef);
-  if (respectRef) to = tvToCell(to);
-  DataType oldType = to->m_type;
-  uint64_t oldDatum = to->m_data.num;
-  cellDup(*fr, *to);
+/*
+ * Assign the value of the Cell in `fr' to `to', with appropriate
+ * reference count modifications.
+ *
+ * If `to' is KindOfRef, places the value of `fr' in the RefData
+ * pointed to by `to'.
+ *
+ * `to' must contain a live php value; use cellDup when it doesn't.
+ */
+inline void tvSet(const Cell& fr, TypedValue& inTo) {
+  assert(cellIsPlausible(&fr));
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  cellDup(fr, *to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
-// Assumes 'to' and 'fr' are live
-// Assumes that 'fr->m_type != KindOfRef'
-// If 'to->m_type == KindOfRef', this will perform the set
-// operation on the inner cell (to->m_data.pref)
-inline void tvSet(const TypedValue* fr, TypedValue* to) {
-  tvSetImpl<true>(fr, to);
-}
-
-// Same as tvSet, but does not dereference 'to' if it's KindOfRef.
-inline void tvSetIgnoreRef(const TypedValue* fr, TypedValue* to) {
-  tvSetImpl<false>(fr, to);
-}
-
-template <bool respectRef>
-inline void tvSetNullImpl(TypedValue* to) {
-  if (respectRef) to = tvToCell(to);
-  DataType oldType = to->m_type;
-  uint64_t oldDatum = to->m_data.num;
-  tvWriteNull(to);
+/*
+ * Assign the value of the Cell in `fr' to `to', with appropriate
+ * reference count modifications.
+ *
+ * If `to' is KindOfRef, this function will decref the RefData and
+ * replace it with the value in `fr', unlike tvSet.
+ *
+ * `to' must contain a live php value; use cellDup when it doesnt.
+ *
+ * Post: `to' is a Cell.
+ */
+inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
+  assert(cellIsPlausible(&fr));
+  auto const oldType = to.m_type;
+  auto const oldDatum = to.m_data.num;
+  cellDup(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-// Assumes 'to' is live
-// If 'to->m_type == KindOfRef', this will perform the set
-// operation on the inner cell (to->m_data.pref)
-inline void tvSetNull(TypedValue* to) {
-  tvSetNullImpl<true>(to);
-}
-
-// Same as tvSetNull, but does not dereference 'to' if it's KindOfRef.
-inline void tvSetNullIgnoreRef(TypedValue* to) {
-  tvSetNullImpl<false>(to);
-}
-
-template <bool respectRef>
-inline void tvSetObjectImpl(ObjectData* pobj, TypedValue* to) {
-  if (respectRef) to = tvToCell(to);
-  DataType oldType = to->m_type;
-  uint64_t oldDatum = to->m_data.num;
-  tvWriteObject(pobj, to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-// Assumes 'to' is live
-// If 'to->m_type == KindOfRef', this will perform the set
-// operation on the inner cell (to->m_data.pref)
-inline void tvSetObject(ObjectData* pobj, TypedValue* to) {
-  tvSetObjectImpl<true>(pobj, to);
-}
-
-// Same as tvSetObject, but does not dereference 'to' if it's KindOfRef.
-inline void tvSetObjectIgnoreRef(ObjectData* pobj, TypedValue* to) {
-  tvSetObjectImpl<false>(pobj, to);
 }
 
 // Assumes 'to' and 'fr' are live
 // Assumes that 'fr->m_type == KindOfRef'
-inline void tvBind(TypedValue * fr, TypedValue * to) {
+inline void tvBind(TypedValue* fr, TypedValue* to) {
   assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;

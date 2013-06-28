@@ -305,6 +305,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvDblToStr:  return simplifyConvDblToStr(inst);
   case ConvIntToStr:  return simplifyConvIntToStr(inst);
   case ConvCellToBool:return simplifyConvCellToBool(inst);
+  case ConvCellToInt: return simplifyConvCellToInt(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -1442,6 +1443,21 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
   if (srcType.isObj())    return cns(true);
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvCellToInt(IRInstruction* inst) {
+  auto const src      = inst->src(0);
+  auto const srcType  = src->type();
+
+  if (srcType.isInt())    return src;
+  if (srcType.isNull())   return cns(0);
+  if (srcType.isArray())  return gen(ConvArrToInt, src);
+  if (srcType.isBool())   return gen(ConvBoolToInt, src);
+  if (srcType.isDbl())    return gen(ConvDblToInt, src);
+  if (srcType.isString()) return gen(ConvStrToInt, src);
+  if (srcType.isObj())    return gen(ConvObjToInt, inst->taken(), src);
 
   return nullptr;
 }

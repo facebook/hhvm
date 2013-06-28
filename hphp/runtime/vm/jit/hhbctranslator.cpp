@@ -2880,26 +2880,8 @@ void HhbcTranslator::emitCastDouble() {
 void HhbcTranslator::emitCastInt() {
   IRTrace* catchTrace = getCatchTrace();
   SSATmp* src = popC();
-  Type fromType = src->type();
-  if (fromType.isInt()) {
-    push(src);
-  } else if (fromType.isNull()) {
-    push(cns(0));
-  } else if (fromType.isArray()) {
-    push(gen(ConvArrToInt, src));
-    gen(DecRef, src);
-  } else if (fromType.isBool()) {
-    push(gen(ConvBoolToInt, src));
-  } else if (fromType.isDbl()) {
-    push(gen(ConvDblToInt, src));
-  } else if (fromType.isString()) {
-    push(gen(ConvStrToInt, src));
-    gen(DecRef, src);
-  } else if (fromType.isObj()) {
-    push(gen(ConvObjToInt, catchTrace, src));
-  } else {
-    push(gen(ConvCellToInt, catchTrace, src));
-  }
+  push(gen(ConvCellToInt, catchTrace, src));
+  gen(DecRef, src);
 }
 
 void HhbcTranslator::emitCastObject() {

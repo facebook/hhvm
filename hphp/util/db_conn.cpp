@@ -154,8 +154,7 @@ void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
 DBConn::DBConn(int maxRetryOpenOnFail, int maxRetryQueryOnFail)
   : m_conn(nullptr), m_connectTimeout(DefaultConnectTimeout),
     m_readTimeout(DefaultReadTimeout),
-    m_maxRetryOpenOnFail(maxRetryOpenOnFail),
-    m_maxRetryQueryOnFail(maxRetryQueryOnFail) {
+    m_maxRetryOpenOnFail(maxRetryOpenOnFail) {
 }
 
 DBConn::~DBConn() {

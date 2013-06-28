@@ -65,16 +65,16 @@ struct is_malloc_size_class
   : boost::mpl::bool_<
       // Small classes:
          Size == 8
-      || Size <=  128 && !(Size % 16)
-      || Size <=  256 && !(Size % 32)
-      || Size <=  512 && !(Size % 64)
-      || Size <= 1024 && !(Size % 128)
-      || Size <= 2048 && !(Size % 256)
-      || Size <= 4096 && !(Size % 512)
-      // Large:
-      || Size <= 4096 * 1024 && !(Size % 4096)
-      // Huge:
-      || !(Size % (4096 * 1024))
+     || (Size <=  128 && !(Size % 16))
+     || (Size <=  256 && !(Size % 32))
+     || (Size <=  512 && !(Size % 64))
+     || (Size <= 1024 && !(Size % 128))
+     || (Size <= 2048 && !(Size % 256))
+     || (Size <= 4096 && !(Size % 512))
+     // Large:
+     || (Size <= 4096 * 1024 && !(Size % 4096))
+     // Huge:
+     || !(Size % (4096 * 1024))
     >
 {};
 
@@ -115,4 +115,3 @@ public:
 }
 
 #endif
-

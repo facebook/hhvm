@@ -365,8 +365,7 @@ public:
     struct __attribute__((__packed__)) {
       // Calculate padding so that node, shared, and cap are pointer aligned,
       // and ensure cap overlaps the last byte of m_small.
-      static const size_t kPadding = sizeof(m_small) - sizeof(uint64_t);
-      char junk[kPadding];
+      char junk[sizeof(m_small) - sizeof(uint64_t)];
       uint64_t cap;
     } m_big;
   };

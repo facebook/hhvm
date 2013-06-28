@@ -45,7 +45,7 @@ template <unsigned int i, bool p, unsigned int m>
 struct BitPhaseImpl {
   enum {
     value = ((i & m) ? (p ? 0 : 1) : (p ? 1 : 0)) +
-             BitPhaseImpl<i, i & m, (m >> 1)>::value
+            BitPhaseImpl<i, ((i & m) != 0), (m >> 1)>::value
   };
 };
 

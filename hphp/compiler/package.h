@@ -71,8 +71,6 @@ public:
 
 private:
   std::string m_root;
-  bool m_bShortTags;
-  bool m_bAspTags;
   std::set<std::string> m_filesToParse;
   StringBag m_files;
   void *m_dispatcher;

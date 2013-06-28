@@ -29,7 +29,7 @@ void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
-      m_threadStack(nullptr), m_stackSize(0), m_threadId(0),
+      m_threadStack(nullptr), m_threadId(0),
       m_exception(nullptr), m_stopped(false), m_noInit(false) {
 }
 

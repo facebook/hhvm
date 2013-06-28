@@ -465,7 +465,7 @@ public:
   bool isNull() const { return pthread_getspecific(s_key) == nullptr; }
 
   void destroy() {
-    void* p = pthread_get_specific(s_key);
+    void* p = pthread_getspecific(s_key);
     T::Delete((T*)p);
     free(p);
     pthread_setspecific(s_key, nullptr);

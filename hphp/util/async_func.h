@@ -171,7 +171,6 @@ private:
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
   void* m_threadStack;
-  size_t m_stackSize;
   pthread_attr_t m_attr;
   pthread_t m_threadId;
   Exception* m_exception; // exception was thrown and thread was terminated

@@ -76,7 +76,6 @@ private:
   unsigned       m_buffered:1;
   unsigned       m_emulate_prepare:1;
   unsigned       m_fetch_table_names:1;
-  unsigned       m__reserved:31;
   unsigned long  m_max_buffer_size;
   PDOMySqlError  m_einfo;
 };
@@ -226,7 +225,7 @@ static String pdo_attr_strval(CArrRef options, int opt, const char *def) {
 
 PDOMySqlConnection::PDOMySqlConnection()
     : m_server(NULL), m_attached(0), m_buffered(0), m_emulate_prepare(0),
-      m_fetch_table_names(0), m__reserved(0), m_max_buffer_size(0) {
+      m_fetch_table_names(0), m_max_buffer_size(0) {
 }
 
 PDOMySqlConnection::~PDOMySqlConnection() {
@@ -939,9 +938,6 @@ bool PDOMySqlStatement::executer() {
     column_count = (int) mysql_num_fields(m_result);
     m_fields = mysql_fetch_fields(m_result);
 
-  } else {
-    /* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
-    row_count = row_count;
   }
 
   return true;
@@ -1233,7 +1229,6 @@ bool PDOMySqlStatement::nextRowset() {
     return false;
   }
 
-  row_count = row_count;
   column_count = (int)mysql_num_fields(m_result);
   m_fields = mysql_fetch_fields(m_result);
   return true;

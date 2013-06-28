@@ -194,7 +194,6 @@ class DBConn {
   unsigned int m_connectTimeout;
   unsigned int m_readTimeout;
   int m_maxRetryOpenOnFail;
-  int m_maxRetryQueryOnFail;
 
   static int parallelExecute(DBConnQueryJobPtrVec &jobs, ErrorInfoMap &errors,
                              int maxThread);

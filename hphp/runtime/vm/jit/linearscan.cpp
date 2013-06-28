@@ -788,7 +788,7 @@ void LinearScan::computePreColoringHint() {
   // For instructions that want to hint a continuous increasing range
   // of sources to a continuous increasing range of argument
   // registers.
-  auto normalHint = [&](int count, int srcBase = 0, int argBase = 0) {
+  auto normalHint = [&](int count, int srcBase, int argBase) {
     for (int i = 0; i < count; ++i) {
       m_preColoringHint.add(inst->src(i + srcBase), 0,
                             i + argBase);
@@ -817,7 +817,7 @@ void LinearScan::computePreColoringHint() {
       }
       break;
     case AKExists:
-      normalHint(2);
+      normalHint(2, 0, 0);
       break;
     case OpEq:
     case OpNeq:
@@ -846,26 +846,26 @@ void LinearScan::computePreColoringHint() {
       }
       break;
     case InstanceOf:
-      normalHint(2);
+      normalHint(2, 0, 0);
       break;
     case LdSSwitchDestFast:
-      normalHint(1);
+      normalHint(1, 0, 0);
       break;
     case LdSSwitchDestSlow:
-      normalHint(1);
+      normalHint(1, 0, 0);
       break;
     case LdGblAddr:
     case LdGblAddrDef:
-      normalHint(1);
+      normalHint(1, 0, 0);
       break;
     case LdClsPropAddr:
-      normalHint(3);
+      normalHint(3, 0, 0);
       break;
     case LdCls:
       m_preColoringHint.add(inst->src(0), 0, 1);
       break;
     case BoxPtr:
-      normalHint(1);
+      normalHint(1, 0, 0);
       break;
     default:
       break;

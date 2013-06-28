@@ -73,7 +73,7 @@
 #endif
 
 #if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || \
-  __INTEL_COMPILER
+  __INTEL_COMPILER || defined(__clang__)
 
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>

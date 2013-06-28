@@ -119,9 +119,9 @@ static_assert(KindOfUninit == 0,
 
 static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
 
-static_assert(kNotConstantValueTypeMask & KindOfArray &&
-              kNotConstantValueTypeMask & KindOfObject &&
-              kNotConstantValueTypeMask & KindOfRef,
+static_assert((kNotConstantValueTypeMask & KindOfArray) != 0  &&
+              (kNotConstantValueTypeMask & KindOfObject) != 0 &&
+              (kNotConstantValueTypeMask & KindOfRef) != 0,
               "DataType & kNotConstantValueTypeMask must be non-zero for "
               "Array, Object and Ref types");
 static_assert(!(kNotConstantValueTypeMask &

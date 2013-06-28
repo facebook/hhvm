@@ -1713,15 +1713,15 @@ void TranslatorX64::traceCodeGen() {
 
   HPHP::JIT::IRTrace* trace = m_hhbcTrans->trace();
   auto finishPass = [&](const char* msg, int level,
-                        const RegAllocInfo* regs = nullptr,
-                        const LifetimeInfo* lifetime = nullptr) {
+                        const RegAllocInfo* regs,
+                        const LifetimeInfo* lifetime) {
     dumpTrace(level, trace, msg, regs, lifetime);
     assert(checkCfg(trace, *m_irFactory));
   };
 
-  finishPass(" after initial translation ", kIRLevel);
+  finishPass(" after initial translation ", kIRLevel, nullptr, nullptr);
   optimizeTrace(trace, m_hhbcTrans->traceBuilder());
-  finishPass(" after optimizing ", kOptLevel);
+  finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
 
   auto* factory = m_irFactory.get();
   recordBCInstr(OpTraceletGuard, a, a.code.frontier);
@@ -1742,7 +1742,7 @@ void TranslatorX64::traceCodeGen() {
     }
   } else {
     RegAllocInfo regs = allocRegsForTrace(trace, factory);
-    finishPass(" after reg alloc ", kRegAllocLevel);
+    finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
     assert(checkRegisters(trace, *factory, regs));
     genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs);
   }

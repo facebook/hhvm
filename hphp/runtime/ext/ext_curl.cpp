@@ -1098,7 +1098,6 @@ public:
   }
 
 private:
-  int m_still_running;
   CURLM *m_multi;
   Array m_easyh;
 };

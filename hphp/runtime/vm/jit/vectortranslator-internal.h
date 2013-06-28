@@ -35,8 +35,10 @@ static const MInstrAttr None = MIA_none;
 static const MInstrAttr WarnDefine = MInstrAttr(Warn | Define);
 static const MInstrAttr DefineReffy = MInstrAttr(Define | Reffy);
 static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
-#define WDU(attrs) attrs & Warn, attrs & Define, attrs & Unset
-#define WDRU(attrs) attrs & Warn, attrs & Define, attrs & Reffy, attrs & Unset
+#define WDU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
+                   (attrs & Unset) != 0
+#define WDRU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
+                    (attrs & Reffy) != 0, (attrs & Unset) != 0
 
 /* The following bunch of macros and functions are used to build up tables of
  * helper function pointers and determine which helper should be called based

@@ -357,7 +357,7 @@ namespace reg {
   constexpr Reg64 r14(14);
   constexpr Reg64 r15(15);
 
-  constexpr RegRIP rip;
+  constexpr RegRIP rip = RegRIP();
 
   constexpr Reg32 eax (0);
   constexpr Reg32 ecx (1);

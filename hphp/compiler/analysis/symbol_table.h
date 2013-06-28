@@ -234,10 +234,12 @@ private:
       unsigned m_reseated : 1;
     } m_flags;
 
-    static_assert(
-      sizeof(m_flags_val) == sizeof(m_flags),
-      "m_flags_val must cover all the flags");
+
   };
+  static_assert(
+    sizeof(m_flags_val) == sizeof(m_flags),
+    "m_flags_val must cover all the flags");
+
   ConstructPtr        m_declaration;
   ConstructPtr        m_value;
   TypePtr             m_coerced;

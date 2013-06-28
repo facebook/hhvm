@@ -83,10 +83,6 @@ uint64_t toDataTypeForCall(Type type) {
   return uint64_t(type.toDataType()) << kTypeShiftBits;
 }
 
-int64_t spillSlotsToSize(int n) {
-  return n * sizeof(int64_t);
-}
-
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc) {
   if (dumpIREnabled()) {

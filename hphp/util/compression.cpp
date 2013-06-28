@@ -165,7 +165,7 @@ bool is_compressible_file(const char *filename) {
 // StreamCompressor
 
 StreamCompressor::StreamCompressor(int level, int encoding_mode, bool header)
-  : m_level(level), m_encoding(encoding_mode), m_header(header),
+  : m_encoding(encoding_mode), m_header(header),
     m_ended(false) {
   if (level < -1 || level > 9) {
     throw Exception("compression level(%ld) must be within -1..9", level);

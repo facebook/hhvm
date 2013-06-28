@@ -293,6 +293,7 @@ struct ActRec {
   static void* encodeThis(ObjectData* obj, Class* cls) {
     if (obj) return obj;
     if (cls) return (char*)cls + 1;
+    not_reached();
   }
 
   static void* encodeThis(ObjectData* obj) { return obj; }

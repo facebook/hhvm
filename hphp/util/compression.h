@@ -46,7 +46,6 @@ public:
   char *compress(const char *data, int &len, bool trailer);
 
 private:
-  int m_level;
   int m_encoding;
   bool m_header;
   z_stream m_stream;

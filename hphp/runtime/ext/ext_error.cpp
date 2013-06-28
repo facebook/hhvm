@@ -129,19 +129,46 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
                  CStrRef extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
   // so we use Logger::Error() instead of raise_warning()
-  std::string line(message.data(),
-                   // Truncate to 512k
-                   message.size() > (1<<19) ? (1<<19) : message.size());
+  /*author:huzhiguang
+    edit date:20130628
+    add message_type=3 funtcion
+  */
+   switch(message_type){
+        case 3:
+        {
+                Variant outfile=f_fopen(destination,"a");
+                if(outfile.isNull()){
+                        raise_error("can't open error_log file!\n");
+                        return false;
+                }
+                f_fwrite(outfile,message);
+                f_fclose(outfile);
+                return true;
+        }
+        case 0:
+        {
+                std::string line(message.data(),
+                                // Truncate to 512k
+                                message.size() > (1<<19) ? (1<<19) : message.size());
 
-  Logger::Error(line);
+                if (RuntimeOption::serverExecutionMode() ||
+                                RuntimeOption::AlwaysEscapeLog) {
+                        Logger::Error(line);
+                } else {
+                        Logger::RawError(line);
 
-  if (!RuntimeOption::ServerExecutionMode() &&
-      Logger::UseLogFile && Logger::Output) {
-    // otherwise errors will go to error log without displaying on screen
-    std::cerr << line;
+                        // otherwise errors will go to error log without displaying on screen
+                        if (Logger::UseLogFile && Logger::Output) {
+                                std::cerr << line;
+                        }
+                }
+                return true;
+        }
+        defult:
+                raise_error("can't support message_type=%d!",message_type);
   }
+  return false;
 
-  return true;
 }
 
 int64_t f_error_reporting(CVarRef level /* = null */) {

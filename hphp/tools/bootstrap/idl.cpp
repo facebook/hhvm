@@ -227,6 +227,42 @@ static const std::unordered_map<fbstring,fbstring> g_phpDefaults = {
   {"INT_MAX",           "null"},
 };
 
+static fbstring unescapeString(fbstring val) {
+  fbstring s = "";
+  for (int i = 0; i < val.size(); ) {
+    int ch = val[i++];
+    if (ch == '\\') {
+      if (i == val.size()) {
+        throw std::logic_error(
+          folly::format("Malformed string: '{0}'", val).str());
+      }
+      ch = val[i++];
+      switch (ch) {
+        case 'n': ch = '\n'; break;
+        case 'r': ch = '\r'; break;
+        case 't': ch = '\t'; break;
+        case '/':
+        case '"':
+        case '\'':
+        case '\\':break;
+        case '0':
+          ch = 0;
+          if (i == val.size() ||
+              (!isdigit(val[i]) && val[i] != 'x' && val[i] != 'X')) {
+            break;
+          }
+          // fall through
+        default:
+          throw std::logic_error(
+            folly::format("Malformed string: '{0}'", val).str());
+          break;
+      }
+    }
+    s += (char)ch;
+  }
+  return s;
+}
+
 /**
  * From idl/base.php:get_serialized_default()
  */
@@ -275,7 +311,8 @@ fbstring PhpParam::getDefaultSerialized() const {
 
   // Quoted string:  "foo"
   if ((val.size() >= 2) && (val[0] == '"') && (val[val.size()-1] == '"')) {
-    return phpSerialize(val.substr(1, val.size() - 2));
+    auto s = unescapeString(val.substr(1, val.size() - 2));
+    return phpSerialize(s);
   }
 
   // Integers and Floats

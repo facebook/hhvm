@@ -517,18 +517,6 @@ class Variant : private TypedValue {
   }
 
   /**
-   * Can just swap the data between variants sometimes to avoid inc and decref
-   */
-  void swap(Variant &other) {
-    static_assert(sizeof(Variant) == sizeof(TypedValue), "Reimplement this");
-    auto& lhs = reinterpret_cast<TypedValue&>(*this);
-    auto& rhs = reinterpret_cast<TypedValue&>(other);
-    auto val = lhs;
-    lhs = rhs;
-    rhs = val;
-  }
-
-  /**
    * Operators
    */
   Variant &assign(CVarRef v);

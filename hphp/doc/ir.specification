@@ -469,6 +469,8 @@ D:{Int|Bool|Dbl} = OpDiv    S0:{Int|Dbl} S1:{Int|Dbl}
 D:Int            = OpBitAnd S0:Int S1:Int
 D:Int            = OpBitOr  S0:Int S1:Int
 D:Int            = OpBitXor S0:Int S1:Int
+D:Int            = OpShl    S0:Int S1:Int
+D:Int            = OpShr    S0:Int S1:Int
 
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
@@ -479,6 +481,8 @@ D:Int            = OpBitXor S0:Int S1:Int
   OpDiv produces boolean false when the divisor is zero-like. Ints are
   not closed under OpDiv, as OpDiv produces doubles when there is a
   non-zero remainder.
+
+  Note that OpShr is an arithmetic right shift.
 
 D:Bool = OpLogicXor S0:Bool S1:Bool
 

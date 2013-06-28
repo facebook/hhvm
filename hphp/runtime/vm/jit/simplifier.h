@@ -71,6 +71,8 @@ private:
   SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyBitOr(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyBitXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyShl(IRInstruction* inst);
+  SSATmp* simplifyShr(IRInstruction* inst);
   SSATmp* simplifyLogicXor(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
@@ -135,6 +137,9 @@ private:
   SSATmp* simplifyLdLoc(IRInstruction*);
   SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
+
+  template<class Oper>
+  SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);

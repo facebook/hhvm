@@ -219,6 +219,8 @@ O(OpBitXor,                     D(Int), S(Int) S(Int),                     C) \
 O(OpBitNot,                     D(Int), S(Int),                            C) \
 O(OpLogicXor,                  D(Bool), S(Bool) S(Bool),                   C) \
 O(OpNot,                       D(Bool), S(Bool),                           C) \
+O(OpShl,                        D(Int), S(Int) S(Int),                     C) \
+O(OpShr,                        D(Int), S(Int) S(Int),                     C) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \

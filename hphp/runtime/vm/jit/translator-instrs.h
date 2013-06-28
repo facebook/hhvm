@@ -165,6 +165,8 @@
   CASE(FPassV) \
   CASE(UnsetN) \
   CASE(DecodeCufIter) \
+  CASE(Shl) \
+  CASE(Shr)
 
   // These are instruction-like functions which cover more than one
   // opcode.

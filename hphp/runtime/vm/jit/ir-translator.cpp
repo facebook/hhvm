@@ -472,6 +472,16 @@ IRTranslator::translateBitNot(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateShl(const NormalizedInstruction& i) {
+  HHIR_EMIT(Shl);
+}
+
+void
+IRTranslator::translateShr(const NormalizedInstruction& i) {
+  HHIR_EMIT(Shr);
+}
+
+void
 IRTranslator::translateCastInt(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
 

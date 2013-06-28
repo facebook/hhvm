@@ -1175,10 +1175,14 @@ public:
 
   void shlq  (Immed i, Reg64 r) { instrIR(instr_shl, i.b(), r); }
   void shrq  (Immed i, Reg64 r) { instrIR(instr_shr, i.b(), r); }
+  void sarq  (Immed i, Reg64 r) { instrIR(instr_sar, i.b(), r); }
   void shll  (Immed i, Reg32 r) { instrIR(instr_shl, i.b(), r); }
   void shrl  (Immed i, Reg32 r) { instrIR(instr_shr, i.b(), r); }
   void shlw  (Immed i, Reg16 r) { instrIR(instr_shl, i.b(), r); }
   void shrw  (Immed i, Reg16 r) { instrIR(instr_shr, i.b(), r); }
+
+  void shlq (Reg64 r) { instrR(instr_shl, r); }
+  void sarq (Reg64 r) { instrR(instr_sar, r); }
 
   /*
    * Control-flow directives.  Primitive labeling/patching facilities

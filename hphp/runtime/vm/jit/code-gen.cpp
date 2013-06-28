@@ -1521,6 +1521,98 @@ void CodeGenerator::cgOpMod(IRInstruction* inst) {
   }
 }
 
+template<class Oper>
+void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
+                                    void (Asm::*instrIR)(Immed, Reg64),
+                                    void (Asm::*instrR)(Reg64),
+                                    Oper oper) {
+  const SSATmp* dst   = inst->dst();
+  const SSATmp* src1  = inst->src(0);
+  const SSATmp* src2  = inst->src(1);
+
+  auto const srcReg1 = m_regs[src1].reg();
+  auto const srcReg2 = m_regs[src2].reg();
+  auto const dstReg  = m_regs[dst].reg();
+
+  // two immediates
+  if (srcReg1 == InvalidReg && srcReg2 == InvalidReg) {
+    assert(src1->isConst() && src2->isConst());
+    int64_t value = oper(src1->getValInt(), src2->getValInt());
+    emitLoadImm(m_as, value, dstReg);
+    return;
+  }
+
+  // one immediate (right), see below for a lhs immediate
+  if (srcReg2 == InvalidReg) {
+    assert(src2->isConst() && src2->type() == Type::Int);
+    emitMovRegReg(m_as, srcReg1, dstReg);
+    (m_as.*instrIR)(src2->getValInt(), dstReg);
+    return;
+  }
+
+  // in order to shift by a variable amount src2 must be in rcx :(
+  bool swapRCX = srcReg2 != reg::rcx;
+
+  // will we be using dstReg as scratch storage?
+  bool dstIsRHS = dstReg == srcReg2;
+  bool tmpIsRCX = m_rScratch == reg::rcx;
+  bool dstIsRCX = dstReg == reg::rcx;
+
+  // we need rcx for srcReg2 so we use srcReg2 as a temp for rcx, we also need
+  // to handle the cases where the destination is rcx or src2 or both...
+  auto resReg = dstIsRCX ? (dstIsRHS ? PhysReg(m_rScratch) : srcReg2)
+                         : (dstIsRHS ? (tmpIsRCX ? dstReg : PhysReg(m_rScratch))
+                                     : dstReg);
+
+  // if srcReg1 was in rcx it will be swapped with srcReg2 below
+  auto regLeft = srcReg1 == reg::rcx ? srcReg2 : srcReg1;
+
+  // we use srcReg2 as a scratch for whatever is in rcx
+  if (swapRCX) {
+    m_as.   xchgq(reg::rcx, srcReg2);
+  }
+
+  // one immeidate (left)
+  if (srcReg1 == InvalidReg) {
+    assert(src1->isConst());
+    emitLoadImm(m_as, src1->getValInt(), resReg);
+  } else {
+    emitMovRegReg(m_as, regLeft, resReg);
+  }
+
+  (m_as.*instrR)(resReg);
+
+  if (resReg == dstReg && srcReg2 == dstReg) {
+    // If we get here it means that m_rScratch was rcx and we shouldn't do any
+    // more swapping because we stored the result in the right place
+    return;
+  }
+
+  if (swapRCX) {
+    m_as.   xchgq(reg::rcx, srcReg2);
+  }
+
+  // if resReg == srcReg2 then dstReg must have been rcx and the above swap
+  // already repaired the situation
+  if (resReg != srcReg2) {
+    emitMovRegReg(m_as, resReg, dstReg);
+  }
+}
+
+void CodeGenerator::cgOpShl(IRInstruction* inst) {
+  cgOpShiftCommon(inst,
+                  &Asm::shlq,
+                  &Asm::shlq,
+                  [] (int64_t a, int64_t b) { return a << b; });
+}
+
+void CodeGenerator::cgOpShr(IRInstruction* inst) {
+  cgOpShiftCommon(inst,
+                  &Asm::sarq,
+                  &Asm::sarq,
+                  [] (int64_t a, int64_t b) { return a >> b; });
+}
+
 void CodeGenerator::cgOpNot(IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const dstReg = m_regs[inst->dst()].reg();

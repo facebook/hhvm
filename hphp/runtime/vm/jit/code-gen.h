@@ -227,6 +227,12 @@ private:
                      RegType (*conv)(PhysReg),
                      Commutativity);
 
+  template<class Oper>
+  void cgOpShiftCommon(IRInstruction* inst,
+                       void (Asm::*instrIR)(Immed, Reg64),
+                       void (Asm::*instrR)(Reg64),
+                       Oper oper);
+
   void cgNegateWork(SSATmp* dst, SSATmp* src);
   void cgNotWork(SSATmp* dst, SSATmp* src);
 

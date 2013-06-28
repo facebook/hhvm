@@ -704,4 +704,24 @@ asm_label(a, loop);
   test_case(127);
 }
 
+TEST(Asm, ShiftingWithCl) {
+  Asm a;
+  a.init(10 << 24);
+
+  a.    shlq(rax);
+  a.    shlq(rdx);
+  a.    shlq(r8);
+  a.    sarq(rbx);
+  a.    sarq(rsi);
+  a.    sarq(r8);
+  expect_asm(a, R"(
+shl %cl,%rax
+shl %cl,%rdx
+shl %cl,%r8
+sar %cl,%rbx
+sar %cl,%rsi
+sar %cl,%r8
+)");
+}
+
 }}

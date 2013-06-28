@@ -3434,6 +3434,30 @@ void HhbcTranslator::emitXor() {
   gen(DecRef, btr);
 }
 
+void HhbcTranslator::emitShl() {
+  auto shiftAmount = popC();
+  auto lhs         = popC();
+
+  auto lhsInt         = gen(ConvCellToInt, lhs);
+  auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
+
+  push(gen(OpShl, lhsInt, shiftAmountInt));
+  gen(DecRef, lhs);
+  gen(DecRef, shiftAmount);
+}
+
+void HhbcTranslator::emitShr() {
+  auto shiftAmount = popC();
+  auto lhs         = popC();
+
+  auto lhsInt         = gen(ConvCellToInt, lhs);
+  auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
+
+  push(gen(OpShr, lhsInt, shiftAmountInt));
+  gen(DecRef, lhs);
+  gen(DecRef, shiftAmount);
+}
+
 namespace {
 
 Type arithOpResult(Type t1, Type t2) {

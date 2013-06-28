@@ -303,6 +303,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpBitOr:     return simplifyBitOr(src1, src2);
   case OpBitXor:    return simplifyBitXor(src1, src2);
   case OpLogicXor:  return simplifyLogicXor(src1, src2);
+  case OpShl:       return simplifyShl(inst);
+  case OpShr:       return simplifyShr(inst);
 
   case OpGt:
   case OpGte:
@@ -1000,6 +1002,41 @@ SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
     }
   }
   return nullptr;
+}
+
+template<class Oper>
+SSATmp* Simplifier::simplifyShift(SSATmp* src1, SSATmp* src2, Oper op) {
+  if (src1->isConst()) {
+    if (src1->getValInt() == 0) {
+      return cns(0);
+    }
+
+    if (src2->isConst()) {
+      return cns(op(src1->getValInt(), src2->getValInt()));
+    }
+  }
+
+  if (src2->isConst() && src2->getValInt() == 0) {
+    return src1;
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyShl(IRInstruction* inst) {
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
+
+  return simplifyShift(src1, src2, [] (int64_t a, int64_t b) {
+                       return a << b; });
+}
+
+SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
+
+  return simplifyShift(src1, src2, [] (int64_t a, int64_t b) {
+                       return a >> b; });
 }
 
 static SSATmp* chaseIncRefs(SSATmp* tmp) {

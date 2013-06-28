@@ -2015,7 +2015,7 @@ void setWithRefElemC(TypedValue* base, TypedValue keyVal, TypedValue* val,
                      MInstrState* mis) {
   base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, &keyVal);
   if (base != &mis->tvScratch) {
-    tvDup(val, base);
+    tvDup(*val, *base);
   } else {
     assert(base->m_type == KindOfUninit);
   }
@@ -2025,7 +2025,7 @@ void setWithRefNewElem(TypedValue* base, TypedValue* val,
                        MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
   if (base != &mis->tvScratch) {
-    tvDup(val, base);
+    tvDup(*val, *base);
   } else {
     assert(base->m_type == KindOfUninit);
   }

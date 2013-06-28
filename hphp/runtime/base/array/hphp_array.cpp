@@ -838,7 +838,7 @@ void HphpArray::compact(bool renumber /* = false */) {
 }
 
 static inline void elemConstruct(const TypedValue* fr, TypedValue* to) {
-  tvDupCell(tvToCell(fr), to);
+  cellDup(*tvToCell(fr), *to);
 }
 
 bool HphpArray::nextInsert(CVarRef data) {

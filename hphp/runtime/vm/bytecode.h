@@ -628,10 +628,10 @@ public:
     assert(m_top != m_base);
     assert(m_top != m_elms);
     assert(m_top->m_type != KindOfRef);
-    Cell* fr = (Cell*)m_top;
+    Cell* fr = m_top;
     m_top--;
-    Cell* to = (Cell*)m_top;
-    tvDupCell(fr, to);
+    Cell* to = m_top;
+    cellDup(*fr, *to);
   }
 
   inline void ALWAYS_INLINE box() {

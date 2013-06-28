@@ -243,8 +243,8 @@ struct ElmUCompare {
   bool operator()(ElmT left, ElmT right) const {
     Variant ret;
     TypedValue args[2];
-    tvDup(acc.getValue(left).asTypedValue(), args+0);
-    tvDup(acc.getValue(right).asTypedValue(), args+1);
+    tvDup(*acc.getValue(left).asTypedValue(), args[0]);
+    tvDup(*acc.getValue(right).asTypedValue(), args[1]);
     g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx,
                                2, args);
     if (ret.isInteger()) {
@@ -274,8 +274,8 @@ struct ElmUCompare {
         return false;
       }
       Variant ret2;
-      tvDup(acc.getValue(right).asTypedValue(), args+0);
-      tvDup(acc.getValue(left).asTypedValue(), args+1);
+      tvDup(*acc.getValue(right).asTypedValue(), args[0]);
+      tvDup(*acc.getValue(left).asTypedValue(), args[1]);
       g_vmContext->invokeFuncFew(ret2.asTypedValue(), *ctx,
                                  2, args);
       if (ret2.isBoolean()) {

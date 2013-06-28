@@ -880,7 +880,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
         auto const* value = propArr->nvGet(k);
         assert(value);
-        tvDup(value, &prop);
+        tvDup(*value, prop);
       }
     }
   }
@@ -2590,7 +2590,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);
   }
-  tvDup(&v, &m_data[m_size++]);
+  tvDup(v, m_data[m_size++]);
 }
 
 using Transl::TargetCache::handleToRef;

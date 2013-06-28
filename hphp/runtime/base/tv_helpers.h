@@ -35,6 +35,7 @@ class Variant;
  */
 bool tvIsPlausible(const TypedValue*);
 bool cellIsPlausible(const Cell*);
+bool varIsPlausible(const Var*);
 
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
@@ -180,49 +181,63 @@ inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
   tvRefcountedIncRef(to);
 }
 
-// Assumes 'fr' is live and 'to' is dead
-// Assumes 'fr->m_type != KindOfRef'
-// NOTE: this helper will not modify to->_count
-inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
-  assert(tvIsPlausible(fr));
-  assert(fr->m_type != KindOfRef);
-  to->m_data.num = fr->m_data.num;
-  to->m_type = fr->m_type;
-  tvRefcountedIncRef(to);
+/*
+ * Raw copy of a TypedValue from one location to another, without
+ * doing any reference count manipulation.
+ *
+ * Copies the m_data and m_type fields, but not m_aux.  (For that you
+ * need TypedValue::operator=.)
+ */
+inline void tvCopy(const TypedValue& fr, TypedValue& to) {
+  assert(tvIsPlausible(&fr));
+  to.m_data.num = fr.m_data.num;
+  to.m_type = fr.m_type;
 }
 
-// Assumes 'fr' is live and 'to' is dead
-// Assumes 'fr->m_type == KindOfRef'
-// NOTE: this helper will not modify to->_count
-inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
-  assert(tvIsPlausible(fr));
-  assert(fr->m_type == KindOfRef);
-  to->m_data.num = fr->m_data.num;
-  to->m_type = KindOfRef;
-  tvIncRefNotShared(to);
+/*
+ * Equivalent of tvCopy for Cells and Vars.  These functions have the
+ * same effects as tvCopy, but have some added assertions.
+ */
+inline void cellCopy(const Cell& fr, Cell& to) {
+  assert(cellIsPlausible(&fr));
+  tvCopy(fr, to);
+}
+inline void varCopy(const Var& fr, Var& to) {
+  assert(cellIsPlausible(&fr));
+  tvCopy(fr, to);
 }
 
-// Assumes 'fr' is live and 'to' is dead
-inline void tvDupRef(RefData* fr, TypedValue* to) {
-  assert(tvIsPlausible(fr->tv()));
-  to->m_data.pref = fr;
-  to->m_type = KindOfRef;
-  fr->incRefCount();
+/*
+ * Duplicate a TypedValue to a new location.  Copies the m_data and
+ * m_type fields, and increments reference count.  Does not perform a
+ * decRef on to.
+ */
+inline void tvDup(const TypedValue& fr, TypedValue& to) {
+  tvCopy(fr, to);
+  tvRefcountedIncRef(&to);
 }
 
-// Assumes 'fr' is live and 'to' is dead
-// After this operation, 'fr' is dead and 'to' live.
-inline void tvTeleport(const TypedValue* fr, TypedValue* to) {
-  assert(tvIsPlausible(fr));
-  to->m_data.num = fr->m_data.num;
-  to->m_type = fr->m_type;
+
+/*
+ * Duplicate a Cell from one location to another.  Is equivalent to
+ * tvDup, with some added assertions.
+ */
+inline void cellDup(const Cell& fr, Cell& to) {
+  assert(cellIsPlausible(&fr));
+  tvDup(fr, to);
 }
 
-// Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper does not modify to->_count
-inline void tvDup(const TypedValue* fr, TypedValue* to) {
-  tvTeleport(fr, to);
-  tvRefcountedIncRef(to);
+/*
+ * Duplicate a Var from one location to another.
+ *
+ * This has the same effects as tvDup(fr, to), but is slightly more
+ * efficient because we don't need to check the type tag.
+ */
+inline void varDup(const Var& fr, Var& to) {
+  assert(varIsPlausible(&fr));
+  to.m_data.num = fr.m_data.num;
+  to.m_type = KindOfRef;
+  tvIncRefNotShared(&to);
 }
 
 // Assumes 'tv' is dead
@@ -260,7 +275,7 @@ inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
   if (respectRef) to = tvToCell(to);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
-  tvDupCell(fr, to);
+  cellDup(*fr, *to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -325,15 +340,16 @@ inline void tvBind(TypedValue * fr, TypedValue * to) {
   assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
-  tvDupVar(fr, to);
+  varDup(*fr, *to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
 // Assumes 'to' and 'fr' are live
 inline void tvBindRef(RefData* fr, TypedValue* to) {
-  DataType oldType = to->m_type;
-  uint64_t oldDatum = to->m_data.num;
-  tvDupRef(fr, to);
+  auto const oldType  = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  tvCopy(make_tv<KindOfRef>(fr), *to);
+  fr->incRefCount();
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -427,13 +443,13 @@ inline bool tvIsStronglyBound(const TypedValue* tv) {
 inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
   if (LIKELY(fr->m_type != KindOfRef)) {
-    tvDupCell(fr, to);
+    cellDup(*fr, *to);
   } else if (fr->m_data.pref->_count <= 1 &&
              (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
     fr = fr->m_data.pref->tv();
-    tvDupCell(fr, to);
+    cellDup(*fr, *to);
   } else {
-    tvDupVar(fr, to);
+    varDup(*fr, *to);
   }
 }
 

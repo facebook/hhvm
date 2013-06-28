@@ -163,7 +163,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
     Stack& stack = g_vmContext->getStack();
     stack.top() = (Cell*)(ar + 1);
-    tvDup(ret.asTypedValue(), stack.allocTV());
+    tvDup(*ret.asTypedValue(), *stack.allocTV());
 
     g_vmContext->m_fp = outer;
     g_vmContext->m_pc = outer ? outer->m_func->unit()->at(pcOff) : nullptr;

@@ -624,7 +624,7 @@ Variant Instance::t___destruct() {
   const Func* method = m_cls->lookupMethod(sd__destruct);
   if (method) {
     Variant v;
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this);
     return v;
   } else {
     return uninit_null();
@@ -637,9 +637,10 @@ Variant Instance::t___call(Variant v_name, Variant v_arguments) {
   if (method) {
     Variant v;
     TypedValue args[2];
-    tvDup(v_name.asTypedValue(), args + 0);
-    tvDup(v_arguments.asTypedValue(), args + 1);
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 2, args);
+    tvDup(*v_name.asTypedValue(), args[0]);
+    tvDup(*v_arguments.asTypedValue(), args[1]);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 2,
+                               args);
     return v;
   } else {
     return uninit_null();
@@ -650,7 +651,7 @@ Variant Instance::t___set(Variant v_name, Variant v_value) {
   const Func* method = m_cls->lookupMethod(s___set.get());
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method,
+    g_vmContext->invokeFunc(v.asTypedValue(), method,
       Array(ArrayInit(2).set(v_name).set(withRefBind(v_value)).create()),
       this);
     return v;
@@ -664,8 +665,9 @@ Variant Instance::t___get(Variant v_name) {
   if (method) {
     Variant v;
     TypedValue args[1];
-    tvDup(v_name.asTypedValue(), args + 0);
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
+    tvDup(*v_name.asTypedValue(), args[0]);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
+                               args);
     return v;
   } else {
     return uninit_null();
@@ -677,8 +679,9 @@ bool Instance::t___isset(Variant v_name) {
   if (method) {
     Variant v;
     TypedValue args[1];
-    tvDup(v_name.asTypedValue(), args + 0);
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
+    tvDup(*v_name.asTypedValue(), args[0]);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
+                               args);
     return v.toBoolean();
   } else {
     return false;
@@ -690,8 +693,9 @@ Variant Instance::t___unset(Variant v_name) {
   if (method) {
     Variant v;
     TypedValue args[1];
-    tvDup(v_name.asTypedValue(), args + 0);
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
+    tvDup(*v_name.asTypedValue(), args[0]);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
+                               args);
     return v;
   } else {
     return uninit_null();
@@ -729,8 +733,9 @@ Variant Instance::t___set_state(Variant v_properties) {
   if (method) {
     Variant v;
     TypedValue args[1];
-    tvDup(v_properties.asTypedValue(), args + 0);
-    g_vmContext->invokeFuncFew((TypedValue*)&v, method, this, nullptr, 1, args);
+    tvDup(*v_properties.asTypedValue(), args[0]);
+    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
+                               args);
     return v;
   } else {
     return false;

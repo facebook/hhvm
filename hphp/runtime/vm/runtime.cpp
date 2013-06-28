@@ -484,7 +484,7 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   TypedValue* prop = closure->getUseVars();
   int n = closure->getNumUseVars();
   for (int i=0; i < n; i++) {
-    tvDup(prop++, --sp);
+    tvDup(*prop++, *--sp);
   }
 
   return n + 1;

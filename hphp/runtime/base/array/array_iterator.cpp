@@ -818,14 +818,14 @@ HOT_FUNC static
 void iterValue(ArrayIter* iter, TypedValue* out) {
   Variant val = iter->iterValue<Coll>(Style());
   assert(val.getRawType() != KindOfRef);
-  tvDupCell(val.asTypedValue(), out);
+  cellDup(*val.asTypedValue(), *out);
 }
 
 template<class Coll, class Style>
 HOT_FUNC static
 void iterKey(ArrayIter* iter, TypedValue* out) {
   Variant key = iter->iterKey<Coll>(Style());
-  tvDupCell(key.asTypedValue(), out);
+  cellDup(*key.asTypedValue(), *out);
 }
 
 template<class Coll, class Style>
@@ -909,11 +909,11 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
         cur = cur->m_data.pref->tv();
       }
     }
-    tvDup(cur, out);
+    tvDup(*cur, *out);
   } else {
     Variant val = arrIter.second();
     assert(val.getRawType() != KindOfRef);
-    tvDupCell(val.asTypedValue(), out);
+    cellDup(*val.asTypedValue(), *out);
   }
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
@@ -931,7 +931,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
     arr.nvFirst(out);
   } else {
     Variant key = arr.first();
-    tvDupCell(key.asTypedValue(), out);
+    cellDup(*key.asTypedValue(), *out);
   }
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
@@ -978,7 +978,7 @@ void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
     }
   } else {
     TypedValue* cur = tvToCell(&elm->data);
-    tvDupCell(cur, valOut);
+    cellDup(*cur, *valOut);
     if (keyOut) {
       HphpArray::getElmKey(elm, keyOut);
     }

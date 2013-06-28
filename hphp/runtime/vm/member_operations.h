@@ -1007,13 +1007,13 @@ inline void IncDecBody(unsigned char op, TypedValue* fr,
     case PreInc: {
       ++(fr->m_data.num);
       if (setResult) {
-        tvDupCell(fr, to);
+        cellDup(*fr, *to);
       }
       break;
     }
     case PostInc: {
       if (setResult) {
-        tvDupCell(fr, to);
+        cellDup(*fr, *to);
       }
       ++(fr->m_data.num);
       break;
@@ -1021,13 +1021,13 @@ inline void IncDecBody(unsigned char op, TypedValue* fr,
     case PreDec: {
       --(fr->m_data.num);
       if (setResult) {
-        tvDupCell(fr, to);
+        cellDup(*fr, *to);
       }
       break;
     }
     case PostDec: {
       if (setResult) {
-        tvDupCell(fr, to);
+        cellDup(*fr, *to);
       }
       --(fr->m_data.num);
       break;
@@ -1440,7 +1440,7 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfString: {
     TypedValue tv;
     initScratchKey<keyType>(scratch, key);
-    tvDup(key, &tv);
+    tvDup(*key, tv);
     tvCastToInt64InPlace(&tv);
     int64_t x = tv.m_data.num;
     if (x < 0 || x >= base->m_data.pstr->size()) {

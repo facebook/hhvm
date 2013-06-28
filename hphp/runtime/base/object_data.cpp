@@ -526,24 +526,24 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   switch(count) {
     default: not_implemented();
 #if INVOKE_FEW_ARGS_COUNT > 6
-    case 10: tvDup(a9.asTypedValue(), args + 9);
-    case  9: tvDup(a8.asTypedValue(), args + 8);
-    case  8: tvDup(a7.asTypedValue(), args + 7);
-    case  7: tvDup(a6.asTypedValue(), args + 6);
+    case 10: tvDup(*a9.asTypedValue(), args[9]);
+    case  9: tvDup(*a8.asTypedValue(), args[8]);
+    case  8: tvDup(*a7.asTypedValue(), args[7]);
+    case  7: tvDup(*a6.asTypedValue(), args[6]);
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 3
-    case  6: tvDup(a5.asTypedValue(), args + 5);
-    case  5: tvDup(a4.asTypedValue(), args + 4);
-    case  4: tvDup(a3.asTypedValue(), args + 3);
+    case  6: tvDup(*a5.asTypedValue(), args[5]);
+    case  5: tvDup(*a4.asTypedValue(), args[4]);
+    case  4: tvDup(*a3.asTypedValue(), args[3]);
 #endif
-    case  3: tvDup(a2.asTypedValue(), args + 2);
-    case  2: tvDup(a1.asTypedValue(), args + 1);
-    case  1: tvDup(a0.asTypedValue(), args + 0);
+    case  3: tvDup(*a2.asTypedValue(), args[2]);
+    case  2: tvDup(*a1.asTypedValue(), args[1]);
+    case  1: tvDup(*a0.asTypedValue(), args[0]);
     case  0: break;
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew((TypedValue*)&ret, ctx, count, args);
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
   return ret;
 }
 
@@ -747,8 +747,8 @@ Variant ObjectData::offsetGet(Variant key) {
   }
   Variant v;
   TypedValue args[1];
-  tvDup(key.asTypedValue(), args + 0);
-  g_vmContext->invokeFuncFew((TypedValue*)(&v), method,
+  tvDup(*key.asTypedValue(), args[0]);
+  g_vmContext->invokeFuncFew(v.asTypedValue(), method,
                              this, nullptr, 1, args);
   return v;
 }

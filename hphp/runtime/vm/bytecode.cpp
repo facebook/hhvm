@@ -1750,7 +1750,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         // (i.e. the last extra arg has the lowest address)
         to = extraArgs->getExtraArg(paramId - numParams);
       }
-      tvDup(from, to);
+      tvDup(*from, *to);
       if (LIKELY(!f->byRef(paramId))) {
         if (to->m_type == KindOfRef) {
           tvUnbox(to);
@@ -1875,7 +1875,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   ar->setVarEnv(nullptr);
 
   if (param != nullptr) {
-    tvDup(param, m_stack.allocTV());
+    tvDup(*param, *m_stack.allocTV());
   }
 
   TypedValue retval;
@@ -3029,7 +3029,7 @@ VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
   tvWriteUninit(dest);
   TypedValue* result = Elem<true>(*dest, *dest, base, key);
   if (result != dest) {
-    tvDup(result, dest);
+    tvDup(*result, *dest);
   }
 }
 
@@ -3272,7 +3272,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
     if (base != &tvScratch) {
       // Acquire a reference to the result via tvDup(); base points to the
       // result but does not own a reference.
-      tvDup(base, &tvScratch);
+      tvDup(*base, tvScratch);
     }
   }
 
@@ -4291,7 +4291,7 @@ static void raise_undefined_local(ActRec* fp, Id pind) {
 
 static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
   assert(fr->m_type != KindOfUninit);
-  tvDup(fr, to);
+  tvDup(*fr, *to);
   if (to->m_type == KindOfRef) {
     tvUnbox(to);
   }
@@ -4403,10 +4403,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
                 name->data());                            \
   }                                                       \
   if (box) {                                              \
-    if (val->m_type != KindOfRef) {                   \
+    if (val->m_type != KindOfRef) {                       \
       tvBox(val);                                         \
     }                                                     \
-    tvDupVar(val, output);                                \
+    varDup(*val, *output);                                \
   } else {                                                \
     tvReadCell(val, output);                              \
   }                                                       \
@@ -4444,7 +4444,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   if (fr->m_type != KindOfRef) {
     tvBox(fr);
   }
-  tvDup(fr, to);
+  tvDup(*fr, *to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetL(PC& pc) {
@@ -4495,7 +4495,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetM(PC& pc) {
     if (base->m_type != KindOfRef) {
       tvBox(base);
     }
-    tvDupVar(base, tv1);
+    varDup(*base, *tv1);
   } else {
     tvWriteNull(tv1);
     tvBox(tv1);
@@ -5771,7 +5771,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
       if (base->m_type != KindOfRef) {
         tvBox(base);
       }
-      tvDupVar(base, tv1);
+      varDup(*base, *tv1);
     } else {
       tvWriteNull(tv1);
       tvBox(tv1);
@@ -6007,9 +6007,9 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
           return false;
         }
       }
-      tvDup(from, to);
+      tvDup(*from, *to);
     } else {
-      tvDup(from, to);
+      tvDup(*from, *to);
       if (UNLIKELY(to->m_type == KindOfRef)) {
         tvUnbox(to);
       }
@@ -6020,7 +6020,7 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
-      tvDup(args->getValueRef(pos).asTypedValue(), to);
+      tvDup(*args->getValueRef(pos).asTypedValue(), *to);
       if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
         tvUnbox(to);
       }
@@ -6535,7 +6535,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
   assert(fr != nullptr);
   if (!inited) {
     Cell* initVal = m_stack.topC();
-    tvDup(initVal, fr);
+    tvDup(*initVal, *fr);
   }
   if (fr->m_type != KindOfRef) {
     assert(!inited);
@@ -6709,7 +6709,7 @@ static inline void setContVar(const Func* genFunc,
   if (destId != kInvalidId) {
     // Copy the value of the local to the cont object and set the
     // local to uninit so that we don't need to change refcounts.
-    tvTeleport(src, frame_local(cont->actRec(), destId));
+    tvCopy(*src, *frame_local(cont->actRec(), destId));
     tvWriteUninit(src);
   } else {
     ActRec *contFP = cont->actRec();
@@ -6896,7 +6896,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
   NEXT();
 
   // prepare value to be sent by ContEnter
-  tvTeleport(frame_local(m_fp, 0), m_stack.allocTV());
+  tvCopy(*frame_local(m_fp, 0), *m_stack.allocTV());
   tvWriteUninit(frame_local(m_fp, 0));
 }
 
@@ -6907,7 +6907,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
   --cont->m_label;
 
   // prepare exception to be sent by ContEnter
-  tvTeleport(frame_local(m_fp, 0), m_stack.allocTV());
+  tvCopy(*frame_local(m_fp, 0), *m_stack.allocTV());
   tvWriteUninit(frame_local(m_fp, 0));
 }
 

@@ -650,7 +650,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     }
     explicit Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr),
         pListLast(nullptr), pNext(nullptr) {
-      tvDup(tv, &data);
+      tvDup(*tv, data);
       data.hash() = 0;
     }
     ~Bucket();

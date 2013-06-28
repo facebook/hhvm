@@ -94,7 +94,7 @@ void c_WaitableWaitHandle::setResult(const TypedValue* result) {
   assert(result->m_type != KindOfRef);
 
   setState(STATE_SUCCEEDED);
-  tvDupCell(result, &m_resultOrException);
+  cellDup(*result, m_resultOrException);
 
   // unref creator
   if (m_creator) {

@@ -93,6 +93,7 @@ public:
   explicit DebuggerCommand(Type type)
     : m_type(type), m_version(0), m_exitInterrupt(false),
       m_incomplete(false) {}
+  virtual ~DebuggerCommand() {}
 
   bool is(Type type) const { return m_type == type;}
   Type getType() const { return m_type;}

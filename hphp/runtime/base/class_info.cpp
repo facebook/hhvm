@@ -748,7 +748,7 @@ void ClassInfo::Load() {
   const char **p = g_class_map;
 
   while (*p) {
-    Extension *ext = (Extension*)*p++;
+    UNUSED Extension *ext = (Extension*)*p++;
     // TODO: Do something useful with this
     // For now, it's here to anchor "empty" extensions
   }

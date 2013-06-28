@@ -3873,6 +3873,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // The parser generated a unique name for the function,
         // use that for the class
         std::string clsName = ce->getClosureFunction()->getOriginalName();
+
+        if (m_curFunc->isPseudoMain()) {
+          std::ostringstream oss;
+          oss << clsName << '$' << std::hex <<
+            m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0] << '$';
+          clsName = oss.str();
+        }
+
         StringData* className = StringData::GetStaticString(clsName);
 
         // We're still at the closure definition site. Emit code to instantiate

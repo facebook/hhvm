@@ -609,6 +609,23 @@ predictOutputs(SrcKey startSk,
     // Integers can produce integers if there's no residue, but $i / $j in
     // general produces a double. $i / 0 produces boolean false, so we have
     // actually check the result.
+    auto lhs = ni->inputs[0];
+    auto rhs = ni->inputs[1];
+
+    if (lhs->valueType() == KindOfDouble || rhs->valueType() == KindOfDouble) {
+      return KindOfDouble;
+    }
+
+    if (rhs->isLiteral()) {
+      if (ni->imm[1].u_I64A == 0) return KindOfBoolean;
+      if (ni->imm[1].u_I64A == 1) return lhs->valueType();
+
+      if (rhs->isLiteral()) {
+        return ni->imm[0].u_I64A % ni->imm[1].u_I64A ? KindOfDouble
+                                                     : KindOfInt64;
+      }
+    }
+
     return KindOfDouble;
   }
 
@@ -1007,7 +1024,7 @@ static const struct {
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
   /* Div and mod might return boolean false. Sigh. */
-  { OpDiv,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},

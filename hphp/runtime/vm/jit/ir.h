@@ -211,7 +211,7 @@ O(DeleteUnwinderException,          ND, NA,                          N|E|Mem) \
 O(OpAdd,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpSub,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpMul,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
-O(OpDiv,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(OpDivDbl,                     D(Dbl), S(Dbl) S(Dbl),                     C) \
 O(OpMod,                        D(Int), S(Int) S(Int),                     C) \
 O(OpBitAnd,                     D(Int), S(Int) S(Int),                     C) \
 O(OpBitOr,                      D(Int), S(Int) S(Int),                     C) \

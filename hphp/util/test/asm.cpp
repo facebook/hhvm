@@ -724,4 +724,21 @@ sar %cl,%r8
 )");
 }
 
+TEST(Asm, SSEDivision) {
+  Asm a;
+  a.init(10 << 24);
+  a.    divsd(xmm0, xmm1);
+  a.    divsd(xmm1, xmm2);
+  a.    divsd(xmm2, xmm0);
+  a.    divsd(xmm15, xmm0);
+  a.    divsd(xmm12, xmm8);
+  expect_asm(a, R"(
+divsd %xmm0,%xmm1
+divsd %xmm1,%xmm2
+divsd %xmm2,%xmm0
+divsd %xmm15,%xmm0
+divsd %xmm12,%xmm8
+)");
+}
+
 }}

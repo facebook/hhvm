@@ -305,6 +305,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpLogicXor:  return simplifyLogicXor(src1, src2);
   case OpShl:       return simplifyShl(inst);
   case OpShr:       return simplifyShr(inst);
+  case OpDivDbl:    return simplifyDivDbl(inst);
 
   case OpGt:
   case OpGte:
@@ -928,6 +929,30 @@ SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
       return src1;
     }
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
+
+  if (!src2->isConst()) return nullptr;
+
+  // not supporting integers (#2570625)
+  double src2Val = src2->getValDbl();
+
+  // X / 0 -> bool(false)
+  if (src2Val == 0.0) {
+    gen(RaiseWarning,
+        cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+    return cns(false);
+  }
+
+  // statically compute X / Y
+  if (src1->isConst()) {
+    return cns(src1->getValDbl() / src2Val);
+  }
+
   return nullptr;
 }
 

@@ -1415,8 +1415,35 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
              NonCommutative);
 }
 
-void CodeGenerator::cgOpDiv(IRInstruction* inst) {
-  not_implemented();
+void CodeGenerator::cgOpDivDbl(IRInstruction* inst) {
+  const SSATmp* dst   = inst->dst();
+  const SSATmp* src1  = inst->src(0);
+  const SSATmp* src2  = inst->src(1);
+  Block*  exit        = inst->taken();
+
+  auto dstReg  = m_regs[dst].reg();
+  auto resReg  = dstReg.isXMM() && dstReg != m_regs[src2].reg() ?
+                    dstReg : PhysReg(rCgXMM0);
+  assert(resReg.isXMM());
+
+  // only load divisor
+  PhysReg srcReg2 = prepXMMReg(src2, m_as, m_regs, rCgXMM1);
+  assert(srcReg2 != rCgXMM0);
+
+  // divide by zero check
+  m_as.pxor_xmm_xmm(rCgXMM0, rCgXMM0);
+  m_as.ucomisd_xmm_xmm(rCgXMM0, srcReg2);
+  unlikelyIfBlock(CC_NP, [&] (Asm& a) {
+    emitFwdJcc(a, CC_E, exit);
+  });
+
+  // now load dividend
+  PhysReg srcReg1 = prepXMMReg(src1, m_as, m_regs, resReg);
+  assert(srcReg1 != rCgXMM1);
+
+  emitMovRegReg(m_as, srcReg1, resReg);
+  m_as.divsd(srcReg2, resReg);
+  emitMovRegReg(m_as, resReg, dstReg);
 }
 
 void CodeGenerator::cgOpBitAnd(IRInstruction* inst) {

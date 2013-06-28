@@ -3337,7 +3337,95 @@ BINOP(BitXor)
 #undef BINOP
 
 void HhbcTranslator::emitDiv() {
-  emitInterpOne(Type::Cell, 2);
+  auto divisorType  = topC(0)->type();
+  auto dividendType = topC(1)->type();
+
+  auto isNumeric = [&] (Type type) {
+    return type.subtypeOfAny(Type::Int, Type::Dbl, Type::Bool);
+  };
+
+  // not going to bother with string division etc.
+  if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
+    emitInterpOne(Type::Cell, 2);
+    checkTypeTopOfStack(Type::Dbl, nextBcOff());
+    return;
+  }
+
+  auto divisor  = topC(0);
+  auto dividend = topC(1);
+
+  // we can't codegen this but we may be able to special case it away
+  if (!divisorType.subtypeOf(Type::Dbl) && !dividendType.subtypeOf(Type::Dbl)) {
+    // TODO(#2570625): support integer-integer division, move this to simlifier:
+    if (divisor->isConst()) {
+      int64_t divisorVal;
+      if (divisor->isA(Type::Int)) {
+        divisorVal = divisor->getValInt();
+      } else {
+        assert(divisor->isA(Type::Bool));
+        divisorVal = divisor->getValBool();
+      }
+
+      if (divisorVal == 0) {
+        popC();
+        popC();
+        gen(RaiseWarning,
+            cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+        push(cns(false));
+        return;
+      }
+
+      if (dividend->isConst()) {
+        int64_t dividendVal;
+        if (dividend->isA(Type::Int)) {
+          dividendVal = dividend->getValInt();
+        } else {
+          assert(dividend->isA(Type::Bool));
+          dividendVal = dividend->getValBool();
+        }
+        popC();
+        popC();
+        if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
+          push(cns((double)dividendVal / divisorVal));
+        } else {
+          push(cns(dividendVal / divisorVal));
+        }
+        return;
+      }
+      /* fall through */
+    }
+    emitInterpOne(Type::Cell, 2);
+
+    // interpOne could return an int bool or double
+    checkTypeTopOfStack(Type::Dbl, nextBcOff());
+    return;
+  }
+
+  auto make_double = [&] (SSATmp* src) {
+    if (src->isA(Type::Int)) {
+      return gen(ConvIntToDbl, src);
+    } else if (src->isA(Type::Bool)) {
+      return gen(ConvBoolToDbl, src);
+    }
+    assert(src->isA(Type::Dbl));
+    return src;
+  };
+
+  divisor  = make_double(popC());
+  dividend = make_double(popC());
+
+  // on division by zero we spill false and exit with a warning
+  auto exitSpillValues = peekSpillValues();
+  exitSpillValues.push_back(cns(false));
+
+  auto const exit = getExitTraceWarn(
+    nextBcOff(),
+    exitSpillValues,
+    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+  );
+
+  assert(divisor->isA(Type::Dbl) && dividend->isA(Type::Dbl));
+  push(gen(OpDivDbl, exit, dividend, divisor));
 }
 
 void HhbcTranslator::emitMod() {

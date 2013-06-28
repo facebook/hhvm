@@ -701,6 +701,7 @@ struct X64Instr {
 };
 
 //                                    0    1    2    3    4    5     flags
+const X64Instr instr_divsd     { { 0x5E,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10102 };
 const X64Instr instr_movdqa =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x4103  };
 const X64Instr instr_movdqu =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x8103  };
 const X64Instr instr_movsd =   { { 0x11,0x10,0xF1,0x00,0xF1,0xF1 }, 0x10102 };
@@ -2323,6 +2324,10 @@ public:
   }
   void ucomisd_xmm_xmm(RegXMM l, RegXMM r) {
     emitRR(instr_ucomisd, rn(l), rn(r));
+  }
+
+  void divsd(RegXMM src, RegXMM srcdest) {
+    emitRR(instr_divsd, rn(srcdest), rn(src));
   }
 
 private:

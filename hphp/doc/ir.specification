@@ -465,7 +465,7 @@ D:{Int|Dbl}      = OpAdd    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpSub    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpMul    S0:{Int|Dbl} S1:{Int|Dbl}
 D:Int            = OpMod    S0:Int       S1:Int
-D:{Int|Bool|Dbl} = OpDiv    S0:{Int|Dbl} S1:{Int|Dbl}
+D:Dbl            = OpDivDbl S0:Dbl S1:Dbl -> L
 D:Int            = OpBitAnd S0:Int S1:Int
 D:Int            = OpBitOr  S0:Int S1:Int
 D:Int            = OpBitXor S0:Int S1:Int
@@ -478,9 +478,10 @@ D:Int            = OpShr    S0:Int S1:Int
   Undefined behavior occurs if OpMod is given a divisor of zero, or if
   the divisor is -1 and the dividend is the minimum representable integer.
 
-  OpDiv produces boolean false when the divisor is zero-like. Ints are
-  not closed under OpDiv, as OpDiv produces doubles when there is a
-  non-zero remainder.
+  OpDivDbl Will branch to L when S1 is zero (signed or unsigned).  When the 
+  result of the division is a real valued number OpDivDbl conforms to IEEE 754.
+  In particular should the result of a division be zero the sign will follow
+  normal sign rules for division.
 
   Note that OpShr is an arithmetic right shift.
 

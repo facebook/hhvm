@@ -179,6 +179,12 @@ IRTranslator::translateMod(const NormalizedInstruction& i) {
   HHIR_EMIT(Mod);
 }
 
+
+void
+IRTranslator::translateDiv(const NormalizedInstruction& i) {
+  HHIR_EMIT(Div);
+}
+
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
   auto const op = i.op();

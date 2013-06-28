@@ -180,9 +180,6 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == OpDiv) {
-    return Type::Int | Type::Dbl | Type::Bool;
-  }
   if (op == OpMod) {
     return Type::Int;
   }

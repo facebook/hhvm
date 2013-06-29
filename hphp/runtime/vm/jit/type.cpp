@@ -174,7 +174,7 @@ Type binArithResultType(Opcode op, Type t1, Type t2) {
     return Type::Int | Type::Dbl | Type::Bool;
   }
   if (op == OpMod) {
-    return Type::Int | Type::Bool;
+    return Type::Int;
   }
   assert(op == OpAdd || op == OpSub || op == OpMul);
   if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {

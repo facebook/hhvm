@@ -1008,7 +1008,7 @@ static const struct {
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
-  { OpMod,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},

@@ -418,7 +418,6 @@ CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(StaticLocInit)
 CALL_OPCODE(StaticLocInitCached)
-CALL_OPCODE(OpMod)
 CALL_OPCODE(ArrayIdx)
 
 // Vector instruction helpers
@@ -1484,6 +1483,49 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
              std::multiplies<int64_t>(),
              &convertToReg64,
              Commutative);
+}
+
+void CodeGenerator::cgOpMod(IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+  auto const dstReg = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  // spill rax and/or rdx
+  bool spillRax = dstReg != reg::rax && m_rScratch != reg::rax;
+  bool spillRdx = dstReg != reg::rdx && m_rScratch != reg::rdx;
+  if (spillRax) {
+    a.  push   (reg::rax);
+  }
+  if (spillRdx) {
+    a.  push   (reg::rdx);
+  }
+  // put divisor in rAsm
+  if (src1->isConst()) {
+    a.  movq   (src1->getValInt(), rAsm);
+  } else {
+    a.  movq   (m_regs[src1].reg(), rAsm);
+  }
+  // put dividend in rax
+  if (src0->isConst()) {
+    a.  movq   (src0->getValInt(), reg::rax);
+  } else if (m_regs[src0].reg() != reg::rax) {
+    a.  movq   (m_regs[src0].reg(), reg::rax);
+  }
+  // sign-extend rax to rdx:rax
+  a.    cqo    ();
+  // divide
+  a.    idiv   (rAsm);
+  if (dstReg != reg::rdx) {
+    a.  movq   (reg::rdx, dstReg);
+  }
+  // restore rax and/or rdx
+  if (spillRdx) {
+    a.  pop    (reg::rdx);
+  }
+  if (spillRax) {
+    a.  pop    (reg::rax);
+  }
 }
 
 void CodeGenerator::cgOpNot(IRInstruction* inst) {

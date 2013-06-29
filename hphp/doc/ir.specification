@@ -446,7 +446,7 @@ D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
 D:{Int|Dbl}      = OpAdd    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpSub    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpMul    S0:{Int|Dbl} S1:{Int|Dbl}
-D:{Int|Bool}     = OpMod    S0:{Int|Dbl} S1:{Int|Dbl}
+D:Int            = OpMod    S0:Int       S1:Int
 D:{Int|Bool|Dbl} = OpDiv    S0:{Int|Dbl} S1:{Int|Dbl}
 D:Int            = OpBitAnd S0:Int S1:Int
 D:Int            = OpBitOr  S0:Int S1:Int
@@ -455,9 +455,12 @@ D:Int            = OpBitXor S0:Int S1:Int
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
 
-  Note that OpMod and OpDiv produce boolean false when the divisor is
-  zero-like. Ints are not closed under OpDiv, as OpDiv produces doubles
-  when there is a non-zero remainder.
+  Undefined behavior occurs if OpMod is given a divisor of zero, or if
+  the divisor is -1 and the dividend is the minimum representable integer.
+
+  OpDiv produces boolean false when the divisor is zero-like. Ints are
+  not closed under OpDiv, as OpDiv produces doubles when there is a
+  non-zero remainder.
 
 D:Bool = OpLogicXor S0:Bool S1:Bool
 

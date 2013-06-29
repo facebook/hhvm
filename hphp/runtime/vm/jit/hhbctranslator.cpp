@@ -3171,20 +3171,13 @@ void HhbcTranslator::emitDiv() {
 }
 
 void HhbcTranslator::emitMod() {
-  // XXX: Disabled until t2299606 is fixed
-  PUNT(emitMod);
-
-  auto tl = topC(1)->type();
-  auto tr = topC(0)->type();
-  auto isInty = [&](Type t) {
-    return t.subtypeOf(Type::Null | Type::Bool | Type::Int);
-  };
-  if (!(isInty(tl) && isInty(tr))) {
-    emitInterpOne(Type::Cell, 2);
-    return;
-  }
-  SSATmp* r = popC();
-  SSATmp* l = popC();
+  IRTrace* catchTrace = getCatchTrace();
+  SSATmp* btr = popC();
+  SSATmp* btl = popC();
+  SSATmp* tr = gen(ConvCellToInt, catchTrace, btr);
+  SSATmp* tl = gen(ConvCellToInt, catchTrace, btl);
+  gen(DecRef, btr);
+  gen(DecRef, btl);
   // Exit path spills an additional false
   auto exitSpillValues = peekSpillValues();
   exitSpillValues.push_back(cns(false));
@@ -3197,8 +3190,38 @@ void HhbcTranslator::emitMod() {
     exitSpillValues,
     StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
   );
-  gen(JmpZero, exit, r);
-  push(gen(OpMod, l, r));
+  gen(JmpZero, exit, tr);
+
+  // We unfortunately need to special-case r = -1 here. In two's
+  // complement, trying to divide INT_MIN by -1 will cause an integer
+  // overflow.
+  if (tr->isConst()) {
+    // This crap only exists so m_tb->cond doesn't get mad when one
+    // of the branches gets optimized out due to constant folding.
+    if (tr->getValInt() == -1LL) {
+      push(cns(0));
+    } else {
+      push(gen(OpMod, tl, tr));
+    }
+    return;
+  }
+
+  // check for -1 (dynamic version)
+  SSATmp *res = m_tb->cond(
+    curFunc(),
+    [&] (Block* taken) {
+      SSATmp* negone = gen(OpEq, tr, cns(-1LL));
+      gen(JmpNZero, taken, negone);
+    },
+    [&] {
+      return gen(OpMod, tl, tr);
+    },
+    [&] {
+      m_tb->hint(Block::Hint::Unlikely);
+      return cns(0);
+    }
+  );
+  push(res);
 }
 
 void HhbcTranslator::emitBitNot() {

@@ -198,6 +198,34 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   tv->m_type = KindOfDouble;
 }
 
+double tvCastToDouble(TypedValue* tv) {
+  if (tv->m_type == KindOfRef) {
+    tv = tv->m_data.pref->tv();
+  }
+
+  switch(tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    return 0;
+  case KindOfBoolean:
+    assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+    // Fall through
+  case KindOfInt64:
+    return (double)(tv->m_data.num);
+  case KindOfDouble:
+    return tv->m_data.dbl;
+  case KindOfStaticString:
+  case KindOfString:
+    return tv->m_data.pstr->toDouble();
+  case KindOfArray:
+    return tv->m_data.parr->empty() ? 0.0 : 1.0;
+  case KindOfObject:
+    return tv->m_data.pobj ? tv->m_data.pobj->o_toDouble() : 0.0;
+  default:
+    not_reached();
+  }
+}
+
 const StaticString
   s_1("1"),
   s_Array("Array");

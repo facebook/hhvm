@@ -140,19 +140,7 @@ int64_t convStrToDblHelper(const StringData* s) {
 }
 
 int64_t convCellToDblHelper(TypedValue tv) {
-  try {
-    tvCastToDoubleInPlace(&tv); // consumes a ref on counted values
-                                // but not if an exception happens. (REVIEW)
-    return tv.m_data.num;
-  } catch (...) {
-    // spill tv back to stack. unwinder
-    // will take care of decreffing it.
-    VMRegAnchor _;
-    TypedValue* spillSlot = (TypedValue *)vmsp();
-    spillSlot->m_data.num = tv.m_data.num;
-    spillSlot->m_type = tv.m_type;
-    throw;
-  }
+  return reinterpretDblAsInt(tvCastToDouble(&tv));
 }
 
 int64_t convArrToIntHelper(ArrayData* a) {

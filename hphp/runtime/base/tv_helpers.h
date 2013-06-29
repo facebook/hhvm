@@ -456,6 +456,7 @@ void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
 int64_t tvCastToInt64(TypedValue* tv, int base = 10);
 void tvCastToDoubleInPlace(TypedValue* tv);
+double tvCastToDouble(TypedValue* tv);
 void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);

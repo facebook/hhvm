@@ -2852,25 +2852,8 @@ void HhbcTranslator::emitCastBool() {
 void HhbcTranslator::emitCastDouble() {
   IRTrace* catchTrace = getCatchTrace();
   SSATmp* src = popC();
-  Type fromType = src->type();
-  if (fromType.isDbl()) {
-    push(src);
-  } else if (fromType.isNull()) {
-    push(cns(0.0));
-  } else if (fromType.isArray()) {
-    push(gen(ConvArrToDbl, src));
-    gen(DecRef, src);
-  } else if (fromType.isBool()) {
-    push(gen(ConvBoolToDbl, src));
-  } else if (fromType.isInt()) {
-    push(gen(ConvIntToDbl, src));
-  } else if (fromType.isString()) {
-    push(gen(ConvStrToDbl, src));
-  } else if (fromType.isObj()) {
-    push(gen(ConvObjToDbl, catchTrace, src));
-  } else {
-    push(gen(ConvCellToDbl, catchTrace, src));
-  }
+  push(gen(ConvCellToDbl, catchTrace, src));
+  gen(DecRef, src);
 }
 
 void HhbcTranslator::emitCastInt() {

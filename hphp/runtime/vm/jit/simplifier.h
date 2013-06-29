@@ -102,6 +102,7 @@ private:
   SSATmp* simplifyConvIntToStr(IRInstruction*);
   SSATmp* simplifyConvCellToBool(IRInstruction*);
   SSATmp* simplifyConvCellToInt(IRInstruction*);
+  SSATmp* simplifyConvCellToDbl(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);

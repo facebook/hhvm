@@ -149,10 +149,84 @@ String c_Continuation::t_getcalledclass() {
   return called_class;
 }
 
+void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
+  ActRec *fp = actRec();
+  Id destId = fp->m_func->lookupVarId(name);
+  if (destId != kInvalidId) {
+    // Copy the value of the local to the cont object.
+    tvDupFlattenVars(src, frame_local(fp, destId), nullptr);
+  } else {
+    ActRec *contFP = fp;
+    if (!fp->hasVarEnv()) {
+      // This VarEnv may potentially outlive the most recently stack-allocated
+      // VarEnv, so we need to heap allocate it.
+      fp->setVarEnv(VarEnv::createLocalOnHeap(fp));
+    }
+    fp->getVarEnv()->setWithRef(name, src);
+  }
+}
+
+static const StaticString s_this("this");
+
+void c_Continuation::copyContinuationVars(ActRec* fp) {
+  // For functions that contain only named locals, we can copy TVs
+  // right to the local space.
+  static const StringData* thisStr = s_this.get();
+  bool skipThis;
+  if (fp->hasVarEnv()) {
+    Stats::inc(Stats::Cont_CreateVerySlow);
+    Array definedVariables = fp->getVarEnv()->getDefinedVariables();
+    skipThis = definedVariables.exists(s_this, true);
+
+    for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
+      if (iter.first().getStringData()->same(s___cont__.get())) {
+        continue;
+      }
+      dupContVar(iter.first().getStringData(),
+                 const_cast<TypedValue *>(iter.secondRef().asTypedValue()));
+    }
+  } else {
+    const Func *genFunc = actRec()->m_func;
+    skipThis = genFunc->lookupVarId(thisStr) != kInvalidId;
+    // skip local 0 because that's the old continuation
+    for (Id i = 1; i < genFunc->numNamedLocals(); ++i) {
+      dupContVar(genFunc->localVarName(i), frame_local(fp, i));
+    }
+  }
+
+  // If $this is used as a local inside the body and is not provided
+  // by our containing environment, just prefill it here instead of
+  // using InitThisLoc inside the body
+  if (!skipThis && fp->hasThis()) {
+    Id id = actRec()->m_func->lookupVarId(thisStr);
+    if (id != kInvalidId) {
+      tvAsVariant(frame_local(actRec(), id)) = fp->getThis();
+    }
+  }
+}
+
+// unused
 Variant c_Continuation::t___clone() {
-  throw_fatal(
-      "Trying to clone an uncloneable object of class Continuation");
-  return uninit_null();
+  not_reached();
+}
+
+c_Continuation *c_Continuation::clone() {
+  const Func *origFunc = m_origFunc;
+  const Func *genFunc = actRec()->m_func;
+
+  ActRec *fp = g_vmContext->getFP();
+  c_Continuation* cont = origFunc->isMethod()
+    ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
+    : g_vmContext->createContFunc(origFunc, genFunc);
+
+  cont->copyContinuationVars(actRec());
+
+  cont->o_subclassData.u16 = o_subclassData.u16;
+  cont->m_label = m_label;
+  cont->m_index = m_index;
+  cont->m_value = m_value;
+
+  return cont;
 }
 
 namespace {

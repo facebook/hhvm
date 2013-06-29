@@ -71,6 +71,8 @@ public:
   String t_getcalledclass();
   Variant t___clone();
 
+  c_Continuation* clone();
+
   static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);
     assert(genFunc);
@@ -127,6 +129,9 @@ private:
   size_t getObjectSize() {
     return (char*)(m_arPtr + 1) - (char*)this;
   }
+
+  void dupContVar(const StringData *name, TypedValue *src);
+  void copyContinuationVars(ActRec *fp);
 
 public:
   /* 32-bit o_id from ObjectData */

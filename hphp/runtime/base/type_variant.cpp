@@ -624,54 +624,6 @@ Variant Variant::bitNot() const {
   throw InvalidOperandException("only numerics and strings can be negated");
 }
 
-Variant Variant::operator|(CVarRef v) const {
-  if (isString() && v.isString()) {
-    return toString() | v.toString();
-  }
-  return toInt64() | v.toInt64();
-}
-
-Variant Variant::operator&(CVarRef v) const {
-  if (isString() && v.isString()) {
-    return toString() & v.toString();
-  }
-  return toInt64() & v.toInt64();
-}
-
-Variant Variant::operator^(CVarRef v) const {
-  if (isString() && v.isString()) {
-    return toString() ^ v.toString();
-  }
-  return toInt64() ^ v.toInt64();
-}
-
-Variant &Variant::operator|=(CVarRef v) {
-  if (isString() && v.isString()) {
-    set(toString() | v.toString());
-  } else {
-    set(toInt64() | v.toInt64());
-  }
-  return *this;
-}
-
-Variant &Variant::operator&=(CVarRef v) {
-  if (isString() && v.isString()) {
-    set(toString() & v.toString());
-  } else {
-    set(toInt64() & v.toInt64());
-  }
-  return *this;
-}
-
-Variant &Variant::operator^=(CVarRef v) {
-  if (isString() && v.isString()) {
-    set(toString() ^ v.toString());
-  } else {
-    set(toInt64() ^ v.toInt64());
-  }
-  return *this;
-}
-
 Variant &Variant::operator<<=(int64_t n) {
   set(toInt64() << n);
   return *this;

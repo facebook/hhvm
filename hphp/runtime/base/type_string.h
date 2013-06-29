@@ -311,12 +311,12 @@ public:
   String &operator += (CStrRef v);
   String &operator += (const StringSlice& slice);
   String &operator += (const MutableSlice& slice);
-  String  operator |  (CStrRef v) const;
-  String  operator &  (CStrRef v) const;
-  String  operator ^  (CStrRef v) const;
-  String &operator |= (CStrRef v);
-  String &operator &= (CStrRef v);
-  String &operator ^= (CStrRef v);
+  String  operator |  (CStrRef v) const = delete;
+  String  operator &  (CStrRef v) const = delete;
+  String  operator ^  (CStrRef v) const = delete;
+  String &operator |= (CStrRef v) = delete;
+  String &operator &= (CStrRef v) = delete;
+  String &operator ^= (CStrRef v) = delete;
   String  operator ~  () const;
   explicit operator std::string () const {
     return std::string(c_str(), size());

@@ -90,9 +90,6 @@ bool empty(CVarRef v, CStrRef, bool = false) = delete;
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
-inline Variant bitwise_or (CVarRef v1, CVarRef v2) { return v1 | v2;}
-inline Variant bitwise_and(CVarRef v1, CVarRef v2) { return v1 & v2;}
-inline Variant bitwise_xor(CVarRef v1, CVarRef v2) { return v1 ^ v2;}
 inline int64_t shift_left(int64_t v1, int64_t v2)        { return v1 << v2; }
 inline int64_t shift_right(int64_t v1, int64_t v2)       { return v1 >> v2; }
 

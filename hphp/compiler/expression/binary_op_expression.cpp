@@ -524,31 +524,44 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       Variant result;
       switch (m_op) {
         case T_LOGICAL_XOR:
-          result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean()); break;
+          result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean());
+          break;
         case '|':
-          result = bitwise_or(v1, v2); break;
+          *result.asCell() = cellBitOr(*v1.asCell(), *v2.asCell());
+          break;
         case '&':
-          result = bitwise_and(v1, v2); break;
+          *result.asCell() = cellBitAnd(*v1.asCell(), *v2.asCell());
+          break;
         case '^':
-          result = bitwise_xor(v1, v2); break;
+          *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
+          break;
         case '.':
-          result = concat(v1.toString(), v2.toString()); break;
+          result = concat(v1.toString(), v2.toString());
+          break;
         case T_IS_IDENTICAL:
-          result = same(v1, v2); break;
+          result = same(v1, v2);
+          break;
         case T_IS_NOT_IDENTICAL:
-          result = !same(v1, v2); break;
+          result = !same(v1, v2);
+          break;
         case T_IS_EQUAL:
-          result = equal(v1, v2); break;
+          result = equal(v1, v2);
+          break;
         case T_IS_NOT_EQUAL:
-          result = !equal(v1, v2); break;
+          result = !equal(v1, v2);
+          break;
         case '<':
-          result = less(v1, v2); break;
+          result = less(v1, v2);
+          break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = cellLessOrEqual(*v1.asCell(), *v2.asCell()); break;
+          result = cellLessOrEqual(*v1.asCell(), *v2.asCell());
+          break;
         case '>':
-          result = more(v1, v2); break;
+          result = more(v1, v2);
+          break;
         case T_IS_GREATER_OR_EQUAL:
-          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell()); break;
+          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
+          break;
         case '+':
           *result.asCell() = cellAdd(*v1.asCell(), *v2.asCell());
           break;

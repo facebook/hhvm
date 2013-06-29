@@ -234,15 +234,13 @@ public:
             Util::s_stackSize));
   }
 
-  /**
-   * Informational.
-   */
   const char *data() const {
     // TODO: t1800106: re-enable this assert
     //assert(rawdata()[size()] == 0); // all strings must be null-terminated
     return rawdata();
   }
-  // This method should only be used internally by the String class.
+  char* mutableData() const { return m_data; }
+
   int size() const { return m_len; }
   static uint sizeOffset() { return offsetof(StringData, m_len); }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }

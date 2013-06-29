@@ -168,14 +168,6 @@ bool TestCppBase::TestString() {
     s = String("c") + String("d"); VS(s.c_str(), "cd");
     s += "efg";                    VS(s.c_str(), "cdefg");
     s += String("hij");            VS(s.c_str(), "cdefghij");
-
-    s = String("\x50\x51") | "\x51\x51"; VS(s.c_str(), "\x51\x51");
-    s = String("\x50\x51") & "\x51\x51"; VS(s.c_str(), "\x50\x51");
-    s = String("\x50\x51") ^ "\x51\x51"; VS(s.c_str(), "\x01");
-    s = "\x50\x51"; s |= "\x51\x51";     VS(s.c_str(), "\x51\x51");
-    s = "\x50\x51"; s &= "\x51\x51";     VS(s.c_str(), "\x50\x51");
-    s = "\x50\x51"; s ^= "\x51\x51";     VS(s.c_str(), "\x01");
-    s = "\x50\x51"; s = ~s;              VS(s.c_str(), "\xAF\xAE");
   }
 
   // manipulations

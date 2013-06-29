@@ -230,10 +230,12 @@ inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 // Helper macro for checking if a given type is refcounted
 #define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
 
-// Helper macro for checking if a type is KindOfString or KindOfStaticString.
+// Helper function for checking if a type is KindOfString or KindOfStaticString.
 static_assert(KindOfStaticString == 0x0C, "");
 static_assert(KindOfString       == 0x14, "");
-#define IS_STRING_TYPE(t) (((t) & ~0x18) == KindOfStringBit)
+inline bool IS_STRING_TYPE(DataType t) {
+  return (t & ~0x18) == KindOfStringBit;
+}
 
 // Check if a type is KindOfUninit or KindOfNull
 #define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)

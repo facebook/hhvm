@@ -17,6 +17,7 @@
 
 #include <type_traits>
 #include <limits>
+#include <algorithm>
 
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/tv_conversions.h"
@@ -237,6 +238,51 @@ struct MulEq {
   }
 };
 
+
+template<class SzOp, class BitOp>
+StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
+  auto const newLen = sop(s1->size(), s2->size());
+  auto const newStr = NEW(StringData)(newLen);
+  auto const s1Data = s1->data();
+  auto const s2Data = s2->data();
+  auto const outData = newStr->mutableData();
+
+  for (uint32_t i = 0; i < newLen; ++i) {
+    outData[i] = bop(s1Data[i], s2Data[i]);
+  }
+  newStr->setSize(newLen);
+
+  newStr->setRefCount(1);
+  return newStr;
+}
+
+template<template<class> class BitOp, class StrLenOp>
+Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
+  assert(cellIsPlausible(&c1));
+  assert(cellIsPlausible(&c2));
+
+  if (IS_STRING_TYPE(c1.m_type) && IS_STRING_TYPE(c2.m_type)) {
+    return make_tv<KindOfString>(
+      stringBitOp(
+        BitOp<char>(),
+        strLenOp,
+        c1.m_data.pstr,
+        c2.m_data.pstr
+      )
+    );
+  }
+
+  return make_tv<KindOfInt64>(
+    BitOp<int64_t>()(cellToInt(c1), cellToInt(c2))
+  );
+}
+
+template<class Op>
+void cellBitOpEq(Op op, Cell& c1, Cell c2) {
+  auto const result = op(c1, c2);
+  cellSet(result, c1);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -271,6 +317,27 @@ Cell cellMod(Cell c1, Cell c2) {
   return make_tv<KindOfInt64>(i1 % i2);
 }
 
+Cell cellBitAnd(Cell c1, Cell c2) {
+  return cellBitOp<std::bit_and>(
+    [] (uint32_t a, uint32_t b) { return std::min(a, b); },
+    c1, c2
+  );
+}
+
+Cell cellBitOr(Cell c1, Cell c2) {
+  return cellBitOp<std::bit_or>(
+    [] (uint32_t a, uint32_t b) { return std::max(a, b); },
+    c1, c2
+  );
+}
+
+Cell cellBitXor(Cell c1, Cell c2) {
+  return cellBitOp<std::bit_xor>(
+    [] (uint32_t a, uint32_t b) { return std::min(a, b); },
+    c1, c2
+  );
+}
+
 void cellAddEq(Cell& c1, Cell c2) {
   cellOpEq(AddEq(), c1, c2);
 }
@@ -294,6 +361,18 @@ void cellDivEq(Cell& c1, Cell c2) {
 
 void cellModEq(Cell& c1, Cell c2) {
   cellCopy(cellMod(c1, c2), c1);
+}
+
+void cellBitAndEq(Cell& c1, Cell c2) {
+  cellBitOpEq(cellBitAnd, c1, c2);
+}
+
+void cellBitOrEq(Cell& c1, Cell c2) {
+  cellBitOpEq(cellBitOr, c1, c2);
+}
+
+void cellBitXorEq(Cell& c1, Cell c2) {
+  cellBitOpEq(cellBitXor, c1, c2);
 }
 
 //////////////////////////////////////////////////////////////////////

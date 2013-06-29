@@ -3708,6 +3708,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMod(PC& pc) {
   implCellBinOp(pc, cellMod);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopBitAnd(PC& pc) {
+  implCellBinOp(pc, cellBitAnd);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopBitOr(PC& pc) {
+  implCellBinOp(pc, cellBitOr);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopBitXor(PC& pc) {
+  implCellBinOp(pc, cellBitXor);
+}
+
 template<class Op>
 void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
   NEXT();
@@ -3766,41 +3778,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopGte(PC& pc) {
   implCellBinOpBool(pc, cellGreaterOrEqual);
 }
-
-#define MATHOP(OP, VOP) do {                                            \
-  NEXT();                                                               \
-  Cell* c1 = m_stack.topC();                                            \
-  Cell* c2 = m_stack.indC(1);                                           \
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {         \
-    int64_t a = c2->m_data.num;                                         \
-    int64_t b = c1->m_data.num;                                         \
-    MATHOP_DIVCHECK(0)                                                  \
-    c2->m_data.num = a OP b;                                            \
-    m_stack.popX();                                                     \
-  }                                                                     \
-  MATHOP_DOUBLE(OP)                                                     \
-  else {                                                                \
-    tvCellAsVariant(c2) = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1)); \
-    m_stack.popC();                                                     \
-  }                                                                     \
-} while (0)
-
-#define MATHOP_DOUBLE(OP)
-#define MATHOP_DIVCHECK(x)
-inline void OPTBLD_INLINE VMExecutionContext::iopBitAnd(PC& pc) {
-  MATHOP(&, bitwise_and);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopBitOr(PC& pc) {
-  MATHOP(|, bitwise_or);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopBitXor(PC& pc) {
-  MATHOP(^, bitwise_xor);
-}
-#undef MATHOP
-#undef MATHOP_DOUBLE
-#undef MATHOP_DIVCHECK
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
   NEXT();

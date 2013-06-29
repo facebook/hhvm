@@ -53,6 +53,16 @@ TypedNum cellMul(Cell, Cell);
 Cell cellDiv(Cell, Cell);
 Cell cellMod(Cell, Cell);
 
+/*
+ * PHP operators &, |, and ^.
+ *
+ * These functions return a KindOfInt64, unless both arguments are
+ * KindOfString, in which case they return a KindOfString.
+ */
+Cell cellBitAnd(Cell, Cell);
+Cell cellBitOr(Cell, Cell);
+Cell cellBitXor(Cell, Cell);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -88,6 +98,18 @@ void cellMulEq(Cell& c1, Cell);
  */
 void cellDivEq(Cell& c1, Cell);
 void cellModEq(Cell& c1, Cell);
+
+/*
+ * PHP operators &=, |=, and ^=.
+ *
+ * Mutates the first argument in place, by combining the second
+ * argument with it in the sense of the appropriate operator.
+ *
+ * Post: c1.m_type == KindOfString || c1.m_type == KindOfInt64
+ */
+void cellBitAndEq(Cell& c1, Cell);
+void cellBitOrEq(Cell& c1, Cell);
+void cellBitXorEq(Cell& c1, Cell);
 
 //////////////////////////////////////////////////////////////////////
 

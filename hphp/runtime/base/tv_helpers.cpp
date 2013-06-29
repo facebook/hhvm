@@ -85,6 +85,7 @@ inline void tvUnboxIfNeeded(TypedValue *tv) {
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   bool b;
   switch (tv->m_type) {
@@ -104,6 +105,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 }
 
 void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   int64_t i;
   switch (tv->m_type) {
@@ -144,6 +146,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
 }
 
 int64_t tvCastToInt64(TypedValue* tv, int base /* = 10 */) {
+  assert(tvIsPlausible(tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
@@ -172,6 +175,7 @@ int64_t tvCastToInt64(TypedValue* tv, int base /* = 10 */) {
 }
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   double d;
   switch (tv->m_type) {
@@ -188,7 +192,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
     break;
   }
   case KindOfObject:  {
-    d = (double)(tv->m_data.pobj ? tv->m_data.pobj->o_toDouble() : 0LL);
+    d = tv->m_data.pobj->o_toDouble();
     tvDecRefObj(tv);
     break;
   }
@@ -199,6 +203,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
 }
 
 double tvCastToDouble(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
@@ -220,7 +225,7 @@ double tvCastToDouble(TypedValue* tv) {
   case KindOfArray:
     return tv->m_data.parr->empty() ? 0.0 : 1.0;
   case KindOfObject:
-    return tv->m_data.pobj ? tv->m_data.pobj->o_toDouble() : 0.0;
+    return tv->m_data.pobj->o_toDouble();
   default:
     not_reached();
   }
@@ -231,6 +236,7 @@ const StaticString
   s_Array("Array");
 
 void tvCastToStringInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   StringData * s;
   switch (tv->m_type) {
@@ -265,6 +271,7 @@ static_string:
 }
 
 StringData* tvCastToString(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
@@ -288,6 +295,7 @@ StringData* tvCastToString(TypedValue* tv) {
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   ArrayData * a;
   switch (tv->m_type) {
@@ -316,6 +324,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   ObjectData* o;
   switch (tv->m_type) {
@@ -349,6 +358,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   if (tv->m_type == KindOfArray || tv->m_type == KindOfObject) {
     return false;
@@ -379,6 +389,7 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
 }
 
 bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
@@ -388,6 +399,7 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
@@ -397,6 +409,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToStringInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   switch (tv->m_type) {
   case KindOfArray:
@@ -416,6 +429,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   if (tv->m_type == KindOfArray) {
     return true;
@@ -427,6 +441,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfObject;
 }

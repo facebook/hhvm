@@ -229,9 +229,13 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
       case '!':
         result = (!toBoolean(value)); break;
       case '+':
-        result = value.unary_plus(); break;
+        cellSet(cellAdd(make_tv<KindOfInt64>(0), *value.asCell()),
+                *result.asCell());
+        break;
       case '-':
-        result = value.negate(); break;
+        cellSet(cellSub(make_tv<KindOfInt64>(0), *value.asCell()),
+                *result.asCell());
+        break;
       case '~':
         result = value.bitNot(); break;
       case '@':

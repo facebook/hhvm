@@ -96,13 +96,6 @@ inline Variant bitwise_xor(CVarRef v1, CVarRef v2) { return v1 ^ v2;}
 inline int64_t shift_left(int64_t v1, int64_t v2)        { return v1 << v2; }
 inline int64_t shift_right(int64_t v1, int64_t v2)       { return v1 >> v2; }
 
-inline char    negate(char v)    { return -v; }
-inline short   negate(short v)   { return -v; }
-inline int     negate(int v)     { return -v; }
-inline int64_t   negate(int64_t v)   { return -v; }
-inline double  negate(double v)  { return -v; }
-inline Variant negate(CVarRef v) { return -(Variant)v; }
-
 inline String concat(CStrRef s1, CStrRef s2)         {
   return s1 + s2;
 }

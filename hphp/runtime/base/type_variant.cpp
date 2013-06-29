@@ -606,63 +606,6 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// unary plus
-Variant Variant::operator+() const {
-  if (is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  if (isDouble()) {
-    return toDouble();
-  }
-  if (isIntVal()) {
-    return toInt64();
-  }
-  if (isString()) {
-    int64_t lval; double dval;
-    DataType ret = convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return dval;
-    }
-    if (ret == KindOfInt64) {
-      return lval;
-    }
-    return toInt64();
-  }
-
-  assert(false);
-  return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// minus
-
-Variant Variant::operator-() const {
-  if (is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  if (isDouble()) {
-    return -toDouble();
-  } else if (isIntVal()) {
-    return -toInt64();
-  } else {
-    if (isString()) {
-      int64_t lval; double dval;
-      DataType ret = convertToNumeric(&lval, &dval);
-      if (ret == KindOfDouble) {
-        return -dval;
-      } else if (ret == KindOfInt64) {
-        return -lval;
-      } else {
-        return -toInt64();
-      }
-    } else {
-      assert(false);
-    }
-  }
-  return *this;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // bitwise
 
 Variant Variant::bitNot() const {

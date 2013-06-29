@@ -544,15 +544,13 @@ class Variant : private TypedValue {
     return *this;
   }
 
-  Variant  operator +  () const;
-  Variant unary_plus() const { return Variant(*this).operator+();}
+  Variant  operator +  () const = delete;
   Variant &operator += (CVarRef v) = delete;
   Variant &operator += (int     n) = delete;
   Variant &operator += (int64_t   n) = delete;
   Variant &operator += (double  n)  = delete;
 
-  Variant negate() const { return Variant(*this).operator-();}
-  Variant  operator -  () const;
+  Variant  operator -  () const = delete;
   Variant  operator -  (CVarRef v) const = delete;
   Variant &operator -= (CVarRef v) = delete;
   Variant &operator -= (int     n) = delete;

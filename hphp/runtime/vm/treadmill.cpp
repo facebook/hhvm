@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/treadmill.h"
+
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -24,8 +26,7 @@
 #include "hphp/util/base.h"
 #include "hphp/util/rank.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {  namespace Treadmill {

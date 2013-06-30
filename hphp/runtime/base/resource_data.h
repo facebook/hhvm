@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/memory/sweepable.h"
-#include "hphp/runtime/vm/instance.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"

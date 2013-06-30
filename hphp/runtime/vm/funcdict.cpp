@@ -20,6 +20,7 @@
 #include "hphp/util/base.h"
 
 #include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/targetcache.h"

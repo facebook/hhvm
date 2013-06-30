@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/server/virtual_host.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/array/array_init.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"

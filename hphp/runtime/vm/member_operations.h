@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/tv_conversions.h"

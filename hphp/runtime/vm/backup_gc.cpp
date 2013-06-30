@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/backup_gc.h"
+#include "hphp/runtime/base/runtime_error.h"
 
 #include <fstream>
 #include <algorithm>

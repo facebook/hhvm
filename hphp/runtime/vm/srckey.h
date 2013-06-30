@@ -20,7 +20,7 @@
 #include <boost/operators.hpp>
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {
 

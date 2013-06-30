@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/file/php_stream_wrapper.h"
+#include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/file/plain_file.h"
 #include "hphp/runtime/base/file/temp_file.h"
 #include "hphp/runtime/base/file/mem_file.h"

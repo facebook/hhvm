@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <limits>
 
+#include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/tv_conversions.h"
 
 namespace HPHP {

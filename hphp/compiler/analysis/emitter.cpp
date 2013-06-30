@@ -90,6 +90,7 @@
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
 

@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/instance.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/tv_arith.h"

@@ -16,6 +16,7 @@
 
 #include "hphp/compiler/analysis/peephole.h"
 #include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/vm/preclass-emit.h"
 
 namespace HPHP { namespace Compiler {
 

@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/fixed_string_map.h"
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/macros.h"
 
 namespace HPHP {

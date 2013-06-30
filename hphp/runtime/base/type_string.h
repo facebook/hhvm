@@ -442,26 +442,6 @@ extern const String null_string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct string_data_hash {
-  size_t operator()(const StringData *s) const {
-    return s->hash();
-  }
-};
-
-struct string_data_same {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->same(s2);
-  }
-};
-
-struct string_data_isame {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->isame(s2);
-  }
-};
-
 struct string_data_lt {
   bool operator()(const StringData *s1, const StringData *s2) const {
     int len1 = s1->size();

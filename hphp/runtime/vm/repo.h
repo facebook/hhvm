@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/func.h"
 
 #include <sqlite3.h>

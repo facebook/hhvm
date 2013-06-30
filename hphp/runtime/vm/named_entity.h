@@ -20,8 +20,6 @@
 #include "tbb/concurrent_unordered_map.h"
 #include <boost/operators.hpp>
 
-#include "hphp/runtime/base/complex_types.h"
-
 #include "hphp/util/atomic.h"
 #include "folly/AtomicHashMap.h"
 

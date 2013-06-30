@@ -23,7 +23,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/targetcache.h"

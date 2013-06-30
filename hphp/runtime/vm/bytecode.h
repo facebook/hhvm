@@ -18,17 +18,13 @@
 #define incl_HPHP_VM_BYTECODE_H_
 
 #include <type_traits>
-
 #include <boost/optional.hpp>
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/array/array_iterator.h"
-
-#include "hphp/runtime/vm/core_types.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/instance.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name_value_table.h"

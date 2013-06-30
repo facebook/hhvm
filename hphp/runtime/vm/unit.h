@@ -20,7 +20,7 @@
 // Expects that runtime/vm/core_types.h is already included.
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/repo_helpers.h"
 #include "hphp/runtime/vm/named_entity.h"
 #include "hphp/runtime/base/array/hphp_array.h"
@@ -39,6 +39,7 @@ class FuncEmitter;
 class Repo;
 class FuncDict;
 class Unit;
+class PreClassEmitter;
 
 enum class UnitOrigin {
   File = 0,

@@ -29,6 +29,7 @@ const int kNumFixedPrologues = 6;
 
 struct ActRec;
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
+class PreClassEmitter;
 
 /*
  * Unique identifier for a Func*.

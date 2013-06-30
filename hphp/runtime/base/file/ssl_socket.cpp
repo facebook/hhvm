@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/file/ssl_socket.h"
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/runtime_error.h"
 #include "hphp/util/util.h"
 #include <poll.h>
 

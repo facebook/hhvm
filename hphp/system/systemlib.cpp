@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/instance.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

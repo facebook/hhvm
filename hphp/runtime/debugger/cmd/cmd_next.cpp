@@ -178,12 +178,14 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // land back at the callsite of send(). For returns from generators, we follow
   // the execution stack for now, and end up at the caller of ASIO or send().
   if (fp->m_func->isGenerator() &&
-      ((*pc == OpContSuspend) || (*pc == OpContRetC))) {
+      ((*pc == OpContSuspend) ||
+       (*pc == OpContSuspendK) ||
+       (*pc == OpContRetC))) {
     TRACE(2, "CmdNext: encountered yield or return from generator\n");
     // Patch the projected return point(s) in both cases, to catch if we exit
     // the the asio iterator or if we are being iterated directly by PHP.
     setupStepOuts();
-    if (*pc == OpContSuspend) {
+    if ((*pc == OpContSuspend) || (*pc == OpContSuspendK)) {
       // Patch the next normal execution point so we can pickup the stepping
       // from there if the caller is C++.
       setupStepCont(fp, pc);
@@ -211,7 +213,8 @@ bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
 // offsets for the labels used to generate this code, so we rely on the
 // simplicity of the exceptional path.
 void CmdNext::setupStepCont(ActRec* fp, PC pc) {
-  assert(*pc == OpContSuspend); // One byte + one byte argument
+  // One byte + one byte argument
+  assert((*pc == OpContSuspend) || (*pc == OpContSuspendK));
   assert(*(pc+2) == OpNull); // One byte
   assert(*(pc+3) == OpThrow); // One byte
   assert(*(pc+4) == OpNull); // One byte

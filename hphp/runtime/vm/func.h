@@ -343,6 +343,7 @@ struct Func {
   bool isGeneratorFromClosure() const {
     return shared()->m_isGeneratorFromClosure;
   }
+  bool isPairGenerator() const { return shared()->m_isPairGenerator; }
   /**
    * If this function is a generator then it is implemented as a simple
    * function that just returns another function. hasGeneratorAsBody() will be
@@ -477,6 +478,7 @@ private:
     bool m_isClosureBody : 1;
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
+    bool m_isPairGenerator : 1;
     bool m_hasGeneratorAsBody : 1;
     bool m_isGenerated : 1;
     UserAttributeMap m_userAttributes;
@@ -643,6 +645,9 @@ public:
   void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
   bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }
 
+  void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
+  bool isPairGenerator() const { return m_isPairGenerator; }
+
   void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
   bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
 
@@ -696,6 +701,7 @@ private:
   bool m_isClosureBody;
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
+  bool m_isPairGenerator;
   bool m_hasGeneratorAsBody;
   bool m_containsCalls;
 

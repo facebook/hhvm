@@ -96,7 +96,7 @@ void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
     throw e;
   }
 
-  if (UNLIKELY(continuation->m_index != -1)) {
+  if (UNLIKELY(continuation->started())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       continuation->running()
       ? "Encountered an attempt to start currently running continuation"

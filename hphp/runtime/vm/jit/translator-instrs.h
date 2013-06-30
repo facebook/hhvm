@@ -131,11 +131,13 @@
   CASE(ContEnter) \
   CASE(UnpackCont) \
   CASE(ContSuspend) \
+  CASE(ContSuspendK) \
   CASE(ContRetC) \
   CASE(ContCheck) \
   CASE(ContSend) \
   CASE(ContRaise) \
   CASE(ContValid) \
+  CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
   CASE(ContHandle) \

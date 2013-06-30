@@ -106,7 +106,7 @@
                 {
                     "name": "key",
                     "return": {
-                        "type": "Int64"
+                        "type": "Variant"
                     },
                     "flags": [
                     ],

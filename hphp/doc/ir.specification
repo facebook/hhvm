@@ -1528,6 +1528,22 @@ ContStartedCheck S0:Obj -> L
   Checks if the continuation object S0 has started, and if not
   branches to the label L.
 
+ContSetRunning S0:Obj S1:ConstBool
+
+  Sets the continuation object S0 to running if S1 is true, or
+  sets it as stopped otherwise.
+
+ContIncKey S0:Obj
+
+  Special-case key update for continuation S0, which increments the
+  key of a continuation if that continuation's key is an Int. This will
+  cause undefined behavior if the continuation's key is not an Int.
+
+ContUpdateIdx S0:Obj S1:Int
+
+  Updates the internal index of continuation S0 from S1 if necessary,
+  i.e. if S1 is larger than the index.
+
 
 17. Debugging and instrumentation
 

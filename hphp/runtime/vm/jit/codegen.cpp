@@ -5221,23 +5221,78 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = m_regs[inst->src(0)].reg();
 
-  const Offset doneOffset = c_Continuation::doneOffset();
-  static_assert((doneOffset + 1) == c_Continuation::runningOffset(),
-                "done should immediately precede running");
+  const Offset startedOffset = c_Continuation::startedOffset();
+  const Offset stateOffset = c_Continuation::stateOffset();
   // Check done and running at the same time
-  m_as.testw(0x0101, contReg[doneOffset]);
+  m_as.testb(0x3, contReg[stateOffset]);
   emitFwdJcc(CC_NZ, inst->taken());
 
-  // ++m_index
-  m_as.addq(0x1, contReg[CONTOFF(m_index)]);
-  // running = true
-  m_as.storeb(0x1, contReg[c_Continuation::runningOffset()]);
+  static_assert(startedOffset + 1 == stateOffset,
+                "started should immediately precede state");
+  m_as.storew(0x101, contReg[startedOffset]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
-  m_as.cmp_imm64_disp_reg64(0, CONTOFF(m_index),
-                            m_regs[inst->src(0)].reg());
-  emitFwdJcc(CC_L, inst->taken());
+  auto contReg = m_regs[inst->src(0)].reg();
+  const Offset startedOffset = c_Continuation::startedOffset();
+
+  m_as.testb(0x1, contReg[startedOffset]);
+  emitFwdJcc(CC_Z, inst->taken());
+}
+
+void CodeGenerator::cgContSetRunning(IRInstruction* inst) {
+  auto contReg = m_regs[inst->src(0)].reg();
+  bool running = inst->src(1)->getValBool();
+
+  const Offset stateOffset = c_Continuation::stateOffset();
+  if (running) {
+    m_as.storeb(0x1, contReg[stateOffset]);
+  } else {
+    m_as.andb  (0x2, contReg[stateOffset]);
+  }
+}
+
+void CodeGenerator::cgContDone(IRInstruction* inst) {
+  auto contReg = m_regs[inst->src(0)].reg();
+
+  const Offset stateOffset = c_Continuation::stateOffset();
+  m_as.storeb(0x2, contReg[stateOffset]);
+}
+
+void CodeGenerator::cgContValid(IRInstruction* inst) {
+  auto contReg = m_regs[inst->src(0)].reg();
+  auto destReg = m_regs[inst->dst()].reg();
+
+  m_as.loadzbl(contReg[c_Continuation::stateOffset()], r32(destReg));
+  m_as.shrl(0x1, r32(destReg));
+  m_as.xorb(0x1, rbyte(destReg));
+}
+
+void CodeGenerator::cgContIncKey(IRInstruction* inst) {
+  auto contReg = m_regs[inst->src(0)].reg();
+  m_as.incq(contReg[CONTOFF(m_key) + TVOFF(m_data)]);
+}
+
+void CodeGenerator::cgContUpdateIdx(IRInstruction* inst) {
+  auto contReg = m_regs[inst->src(0)].reg();
+  auto newIdx = inst->src(1);
+
+  // this is hacky and awful oh god
+  if (newIdx->isConst()) {
+    auto const val = newIdx->getValRawInt();
+    m_as.emitImmReg(
+                val, m_rScratch);
+    m_as.cmpq  (m_rScratch, contReg[CONTOFF(m_index)]);
+    m_as.cload_reg64_disp_reg64(
+                CC_G, contReg, CONTOFF(m_index), m_rScratch);
+  } else {
+    auto newIdxReg = m_regs[newIdx].reg();
+    m_as.loadq (contReg[CONTOFF(m_index)], m_rScratch);
+    m_as.cmpq  (m_rScratch, newIdxReg);
+    m_as.cmov_reg64_reg64(
+                CC_G, newIdxReg, m_rScratch);
+  }
+  m_as.storeq  (m_rScratch, contReg[CONTOFF(m_index)]);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

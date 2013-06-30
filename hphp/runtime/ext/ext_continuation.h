@@ -45,23 +45,33 @@ class c_Continuation : public ExtObjectData {
   ~c_Continuation();
 
 public:
-  bool done() const { return o_subclassData.u8[0]; }
-  bool running() const { return o_subclassData.u8[1]; }
-  void setDone(bool done) { o_subclassData.u8[0] = done; }
-  void setRunning(bool running) { o_subclassData.u8[1] = running; }
-  static constexpr uint doneOffset() {
+  static constexpr uint startedOffset() {
     return offsetof(c_Continuation, o_subclassData);
   }
-  static constexpr uint runningOffset() {
+  bool started() const { return o_subclassData.u8[0]; }
+  void start() { o_subclassData.u8[0] = true; }
+
+  enum ContState : uint8_t {
+    Running = 1,
+    Done    = 2
+  };
+  static constexpr uint stateOffset() {
     return offsetof(c_Continuation, o_subclassData) + 1;
   }
+  bool done() const { return o_subclassData.u8[1] & ContState::Done; }
+  void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
+
+  bool running() const { return o_subclassData.u8[1] & ContState::Running; }
+  void setRunning() { o_subclassData.u8[1]  =  ContState::Running; }
+  void setStopped() { o_subclassData.u8[1] &= ~ContState::Running; }
 
   void t___construct();
   void t_update(int64_t label, CVarRef value);
+  void t_update_key(int64_t label, CVarRef value, CVarRef key);
   Object t_getwaithandle();
   int64_t t_getlabel();
   Variant t_current();
-  int64_t t_key();
+  Variant t_key();
   void t_next();
   void t_rewind();
   bool t_valid();
@@ -114,12 +124,12 @@ public:
       throw_exception(Object(SystemLib::AllocExceptionObject(
                                "Continuation is already running")));
     }
-    setRunning(true);
-    ++m_index;
+    setRunning();
+    start();
   }
 
   inline void startedCheck() {
-    if (m_index < 0LL) {
+    if (!started()) {
       throw_exception(
         Object(SystemLib::AllocExceptionObject("Need to call next() first")));
     }
@@ -137,8 +147,10 @@ public:
   /* 32-bit o_id from ObjectData */
   int32_t m_label;
   int64_t m_index;
+  Variant m_key;
   Variant m_value;
   Func *m_origFunc;
+
   ActRec* m_arPtr;
   p_ContinuationWaitHandle m_waitHandle;
 
@@ -162,7 +174,7 @@ class c_DummyContinuation : public ExtObjectData {
   public: ~c_DummyContinuation();
   public: void t___construct();
   public: Variant t_current();
-  public: int64_t t_key();
+  public: Variant t_key();
   public: void t_next();
   public: void t_rewind();
   public: bool t_valid();

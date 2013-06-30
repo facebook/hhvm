@@ -550,11 +550,13 @@ enum SetOpOp {
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
   O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF) \
+  O(ContSuspendK,    ONE(IVA),         TWO(CV,CV),      NOV,        CF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContSend,        NA,               NOV,             ONE(CV),    NF) \
   O(ContRaise,       NA,               NOV,             ONE(CV),    NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
+  O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \

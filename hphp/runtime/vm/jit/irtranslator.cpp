@@ -556,6 +556,10 @@ void Translator::translateContSuspend(const NormalizedInstruction& i) {
   HHIR_EMIT(ContSuspend, i.imm[0].u_IVA);
 }
 
+void Translator::translateContSuspendK(const NormalizedInstruction& i) {
+  HHIR_EMIT(ContSuspendK, i.imm[0].u_IVA);
+}
+
 void Translator::translateContRetC(const NormalizedInstruction& i) {
   HHIR_EMIT(ContRetC);
 }
@@ -574,6 +578,10 @@ void Translator::translateContRaise(const NormalizedInstruction& i) {
 
 void Translator::translateContValid(const NormalizedInstruction& i) {
   HHIR_EMIT(ContValid);
+}
+
+void Translator::translateContKey(const NormalizedInstruction& i) {
+  HHIR_EMIT(ContKey);
 }
 
 void Translator::translateContCurrent(const NormalizedInstruction& i) {

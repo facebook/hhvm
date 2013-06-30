@@ -1121,9 +1121,47 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
   auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
   gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
   gen(DecRef, oldValue);
-  gen(
-    StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId)
-  );
+
+  // take a fast path if this generator has no yield k => v;
+  if (curFunc()->isPairGenerator()) {
+    // this needs optimization
+    auto const idx = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContIndex));
+    auto const newIdx = gen(OpAdd, idx, cns(1));
+    gen(StRaw, cont, cns(RawMemSlot::ContIndex), newIdx);
+    auto const oldKey = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_key)));
+    gen(StProp, cont, cns(CONTOFF(m_key)), newIdx);
+    gen(DecRef, oldKey);
+  } else {
+    // we're guaranteed that the key is an int
+    gen(ContIncKey, cont);
+  }
+
+  gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId));
+
+  // transfer control
+  emitContReturnControl();
+}
+
+void HhbcTranslator::emitContSuspendK(int64_t labelId) {
+  gen(ExitWhenSurprised, getExitSlowTrace());
+
+  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
+  auto const cont = ldLoc(0);
+  auto const newVal = popC();
+  auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
+  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
+  gen(DecRef, oldValue);
+  auto const newKey = popC();
+  auto const oldKey = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_key)));
+  gen(StProp, cont, cns(CONTOFF(m_key)), newKey);
+  gen(DecRef, oldKey);
+
+  auto const keyType = newKey->type();
+  if (keyType.subtypeOf(Type::Int)) {
+    gen(ContUpdateIdx, cont, newKey);
+  }
+
+  gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId));
 
   // transfer control
   emitContReturnControl();
@@ -1133,9 +1171,7 @@ void HhbcTranslator::emitContRetC() {
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
   auto const cont = ldLoc(0);
   gen(ExitWhenSurprised, getExitSlowTrace());
-  gen(
-    StRaw, cont, cns(RawMemSlot::ContDone), cns(true)
-  );
+  gen(ContDone, cont);
   auto const newVal = popC();
   auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
   gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
@@ -1177,10 +1213,17 @@ void HhbcTranslator::emitContRaise() {
 void HhbcTranslator::emitContValid() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
-  SSATmp* done = gen(
-    LdRaw, Type::Bool, cont, cns(RawMemSlot::ContDone)
-  );
-  push(gen(OpNot, done));
+  push(gen(ContValid, cont));
+}
+
+void HhbcTranslator::emitContKey() {
+  assert(curClass());
+  SSATmp* cont = gen(LdThis, m_tb->fp());
+  gen(ContStartedCheck, getExitSlowTrace(), cont);
+  SSATmp* offset = cns(CONTOFF(m_key));
+  SSATmp* value = gen(LdProp, Type::Cell, cont, offset);
+  value = gen(IncRef, value);
+  push(value);
 }
 
 void HhbcTranslator::emitContCurrent() {
@@ -1196,9 +1239,7 @@ void HhbcTranslator::emitContCurrent() {
 void HhbcTranslator::emitContStopped() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
-  gen(
-    StRaw, cont, cns(RawMemSlot::ContRunning), cns(false)
-  );
+  gen(ContSetRunning, cont, cns(false));
 }
 
 void HhbcTranslator::emitContHandle() {

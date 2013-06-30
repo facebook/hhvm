@@ -475,6 +475,13 @@ O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
 O(ContStartedCheck,                 ND, S(Obj),                            E) \
+O(ContSetRunning,                   ND, S(Obj)                                \
+                                          C(Bool),                     E|Mem) \
+O(ContDone,                         ND, S(Obj),                        E|Mem) \
+O(ContValid,                   D(Bool), S(Obj),                            E) \
+O(ContIncKey,                       ND, S(Obj),                        E|Mem) \
+O(ContUpdateIdx,                    ND, S(Obj)                                \
+                                          S(Int),                      E|Mem) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
@@ -816,16 +823,14 @@ class RawMemSlot {
  public:
 
   enum Kind {
-    ContLabel, ContDone, ContRunning, ContARPtr,
-    StrLen, FuncNumParams, ContEntry, MisCtx,
-    MaxKind
+    ContLabel, ContIndex, ContARPtr,
+    StrLen, FuncNumParams, ContEntry, MisCtx, MaxKind
   };
 
   static RawMemSlot& Get(Kind k) {
     switch (k) {
       case ContLabel:       return GetContLabel();
-      case ContDone:        return GetContDone();
-      case ContRunning:     return GetContRunning();
+      case ContIndex:       return GetContIndex();
       case ContARPtr:       return GetContARPtr();
       case StrLen:          return GetStrLen();
       case FuncNumParams:   return GetFuncNumParams();
@@ -848,14 +853,8 @@ class RawMemSlot {
     static RawMemSlot m(CONTOFF(m_label), Transl::sz::dword, Type::Int);
     return m;
   }
-  static RawMemSlot& GetContDone() {
-    static RawMemSlot m(c_Continuation::doneOffset(), Transl::sz::byte,
-                        Type::Bool);
-    return m;
-  }
-  static RawMemSlot& GetContRunning() {
-    static RawMemSlot m(c_Continuation::runningOffset(), Transl::sz::byte,
-                        Type::Bool);
+  static RawMemSlot& GetContIndex() {
+    static RawMemSlot m(CONTOFF(m_index), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContARPtr() {

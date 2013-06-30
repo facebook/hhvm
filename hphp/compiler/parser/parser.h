@@ -223,6 +223,7 @@ public:
   void onContinue(Token &out, Token *expr);
   void onReturn(Token &out, Token *expr);
   void onYield(Token &out, Token &expr);
+  void onYieldPair(Token &out, Token &key, Token &val);
   void onYieldBreak(Token &out);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);

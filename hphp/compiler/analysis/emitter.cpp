@@ -3945,20 +3945,43 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
         assert(m_evalStack.size() == 0);
 
-        // evaluate expression passed to yield
-        visit(y->getExpression());
+        // evaluate key passed to yield, if applicable
+        ExpressionPtr keyExp = y->getKeyExpression();
+        if (keyExp) {
+          m_curFunc->setIsPairGenerator(true);
+          visit(keyExp);
+          emitConvertToCell(e);
+        }
+
+        // evaluate value expression passed to yield
+        visit(y->getValueExpression());
         emitConvertToCell(e);
 
-        // suspend continuation and set the return label
-        assert(m_evalStack.size() == 1);
-        m_metaInfo.addKnownDataType(
-          KindOfObject, false, m_ue.bcPos(), false, 1);
-        e.ContSuspend(2 * y->getLabel());
+        // calculate labels:
+        // each continuation is allotted two labels,
+        // one for exception handling and one for normal
+        // control flow. both labels are encoded in the
+        // label number stored in the expression.
+        int64_t normalLabel = 2 * y->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+
+        // pack continuation and set the return label
+        if (keyExp) {
+          assert(m_evalStack.size() == 2);
+          m_metaInfo.addKnownDataType(
+            KindOfObject, false, m_ue.bcPos(), false, 2);
+          e.ContSuspendK(normalLabel);
+        } else {
+          assert(m_evalStack.size() == 1);
+          m_metaInfo.addKnownDataType(
+            KindOfObject, false, m_ue.bcPos(), false, 1);
+          e.ContSuspend(normalLabel);
+        }
 
         // emit return label for raise()
         assert(m_evalStack.size() == 0);
         e.Null();
-        m_yieldLabels[2 * y->getLabel() - 1].set(e);
+        m_yieldLabels[exceptLabel].set(e);
 
         // throw received exception on the stack
         assert(m_evalStack.size() == 1);
@@ -3966,7 +3989,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // emit return label for next()/send()
         e.Null();
-        m_yieldLabels[2 * y->getLabel()].set(e);
+        m_yieldLabels[normalLabel].set(e);
 
         // continue with the received result on the stack
         assert(m_evalStack.size() == 1);
@@ -6998,6 +7021,7 @@ enum ContinuationMethod {
   METH_RAISE,
   METH_VALID,
   METH_CURRENT,
+  METH_KEY,
 };
 typedef hphp_hash_map<const StringData*, ContinuationMethod,
                       string_data_hash, string_data_same> ContMethMap;
@@ -7056,6 +7080,11 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       ue.emitOp(OpRetC);
       break;
     }
+    case METH_KEY: {
+      ue.emitOp(OpContKey);
+      ue.emitOp(OpRetC);
+      break;
+    }
 
     default:
       not_reached();
@@ -7077,6 +7106,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   contMethods[StringData::GetStaticString("raise")] = METH_RAISE;
   contMethods[StringData::GetStaticString("valid")] = METH_VALID;
   contMethods[StringData::GetStaticString("current")] = METH_CURRENT;
+  contMethods[StringData::GetStaticString("key")] = METH_KEY;
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors

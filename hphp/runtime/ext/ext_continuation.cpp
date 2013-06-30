@@ -44,12 +44,13 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation(Class* cb) :
-    ExtObjectData(cb),
-    m_label(0),
-    m_index(-1LL),
-    m_value(Variant::NullInit()),
-    m_origFunc(nullptr) {
+c_Continuation::c_Continuation(Class* cb)
+    : ExtObjectData(cb)
+    , m_label(0)
+    , m_index(-1LL)
+    , m_key(-1LL)
+    , m_value(Variant::NullInit())
+    , m_origFunc(nullptr) {
   o_subclassData.u16 = 0;
 }
 
@@ -76,6 +77,18 @@ void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
   assert(m_label == label); // check m_label for truncation
   m_value.assignVal(value);
+  m_key = ++m_index;
+}
+
+void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
+  m_label = label;
+  assert(m_label == label); // check m_label for truncation
+  m_key.assignVal(key);
+  m_value.assignVal(value);
+  if (m_key.isInteger()) {
+    int64_t new_index = m_key.toInt64Val();
+    m_index = new_index > m_index ? new_index : m_index;
+  }
 }
 
 Object c_Continuation::t_getwaithandle() {
@@ -95,9 +108,9 @@ Variant c_Continuation::t_current() {
   return m_value;
 }
 
-int64_t c_Continuation::t_key() {
+Variant c_Continuation::t_key() {
   startedCheck();
-  return m_index;
+  return m_key;
 }
 
 bool c_Continuation::php_sleep(Variant &ret) {
@@ -224,6 +237,7 @@ c_Continuation *c_Continuation::clone() {
   cont->o_subclassData.u16 = o_subclassData.u16;
   cont->m_label = m_label;
   cont->m_index = m_index;
+  cont->m_key   = m_key;
   cont->m_value = m_value;
 
   return cont;
@@ -273,9 +287,9 @@ Variant c_DummyContinuation::t_current() {
   return uninit_null();
 }
 
-int64_t c_DummyContinuation::t_key() {
+Variant c_DummyContinuation::t_key() {
   throw_fatal("Tring to use a DummyContinuation");
-  return 0;
+  return uninit_null();
 }
 
 void c_DummyContinuation::t_next() {

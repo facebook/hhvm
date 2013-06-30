@@ -1455,7 +1455,15 @@ void Parser::onYield(Token &out, Token &expr) {
     return;
   }
 
-  out->exp = NEW_EXP(YieldExpression, expr->exp);
+  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
+}
+
+void Parser::onYieldPair(Token &out, Token &key, Token &val) {
+  if (!setIsGenerator()) {
+    return;
+  }
+
+  out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
 
 void Parser::onYieldBreak(Token &out) {

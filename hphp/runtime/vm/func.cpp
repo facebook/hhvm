@@ -646,8 +646,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_isGenerated(false),
-    m_originalFilename(nullptr) {
+    m_isPairGenerator(false), m_hasGeneratorAsBody(false),
+    m_isGenerated(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -695,6 +695,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_isClosureBody(false)
   , m_isGenerator(false)
   , m_isGeneratorFromClosure(false)
+  , m_isPairGenerator(false)
   , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
   , m_info(nullptr)
@@ -719,6 +720,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_isClosureBody(false)
   , m_isGenerator(false)
   , m_isGeneratorFromClosure(false)
+  , m_isPairGenerator(false)
   , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
   , m_info(nullptr)
@@ -970,6 +972,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isClosureBody = m_isClosureBody;
   f->shared()->m_isGenerator = m_isGenerator;
   f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
+  f->shared()->m_isPairGenerator = m_isPairGenerator;
   f->shared()->m_hasGeneratorAsBody = m_hasGeneratorAsBody;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
@@ -1055,6 +1058,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isClosureBody)
     (m_isGenerator)
     (m_isGeneratorFromClosure)
+    (m_isPairGenerator)
     (m_hasGeneratorAsBody)
     (m_containsCalls)
 

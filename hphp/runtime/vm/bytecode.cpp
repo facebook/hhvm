@@ -6852,10 +6852,27 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContSuspend(PC& pc) {
   m_fp = prevFp;
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopContSuspendK(PC& pc) {
+  NEXT();
+  DECODE_IVA(label);
+  c_Continuation* cont = frame_continuation(m_fp);
+
+  TypedValue* val = m_stack.topTV();
+  m_stack.popTV();
+  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.topTV()),
+                                     tvAsCVarRef(val));
+  m_stack.popTV();
+
+  EventHook::FunctionExit(m_fp);
+  ActRec* prevFp = m_fp->arGetSfp();
+  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+  m_fp = prevFp;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-  cont->setDone(true);
+  cont->setDone();
   tvSetIgnoreRef(m_stack.topC(), cont->m_value.asTypedValue());
   m_stack.popC();
 
@@ -6901,6 +6918,16 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {
   tvAsVariant(tv) = !this_continuation(m_fp)->done();
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopContKey(PC& pc) {
+  NEXT();
+  c_Continuation* cont = this_continuation(m_fp);
+  cont->startedCheck();
+
+  TypedValue* tv = m_stack.allocTV();
+  tvWriteUninit(tv);
+  tvAsVariant(tv) = cont->m_key;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
@@ -6913,14 +6940,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContStopped(PC& pc) {
   NEXT();
-  this_continuation(m_fp)->setRunning(false);
+  this_continuation(m_fp)->setStopped();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->setRunning(false);
-  cont->setDone(true);
+  cont->setDone();
   cont->m_value.setNull();
 
   Variant exn = tvAsVariant(m_stack.topTV());

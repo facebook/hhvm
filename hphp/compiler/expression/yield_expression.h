@@ -27,16 +27,18 @@ DECLARE_BOOST_TYPES(YieldExpression);
 class YieldExpression : public Expression {
 public:
   YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                  ExpressionPtr exp);
+                  ExpressionPtr keyExp, ExpressionPtr valExp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-  ExpressionPtr getExpression() { return m_exp; }
+  ExpressionPtr getKeyExpression() { return m_keyExp; }
+  ExpressionPtr getValueExpression() { return m_valExp; }
   int getLabel() { assert(m_label >= 1); return m_label; }
   void setLabel(int label) { assert(m_label == -1); m_label = label; }
 
 private:
-  ExpressionPtr m_exp;
+  ExpressionPtr m_keyExp;
+  ExpressionPtr m_valExp;
   int m_label;
 };
 

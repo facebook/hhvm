@@ -448,6 +448,10 @@ struct Parser : ParserBase {
     X(expr);
   }
 
+  void onYieldPair(Token &out, Token &key, Token &val) {
+    X(key, val);
+  }
+
   void onYieldBreak(Token &out) { X(); }
 
   void onGlobal(Token &out, Token &expr) { X(expr); }

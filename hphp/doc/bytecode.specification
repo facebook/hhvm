@@ -3700,7 +3700,17 @@ ContSuspend  <label id>   [C]  ->  []
   Packs all defined local variables into the Continuation object in local 0.
   Store $1 in the continuation as the result of the current iteration and
   set the continuation's label to <label id>. Transfer control flow to the
-  caller of the continuation body, which must be a non-static method of the Continuation class.
+  caller of the continuation body, which must be a non-static method of the
+  Continuation class.
+
+ContSuspendK  <label id>    [C C]  ->  []
+
+  Suspend continuation. This instruction may only appear in continuation bodies.
+  Packs all defined local variables into the Continuation object in local 0.
+  Store $1 in the continuation as the result of the current iteration,
+  store $2 as the key of the current iteration, and set the continuation's label
+  to <label id>. Transfer control flow to the caller of the continuation body,
+  which must be a non-static method of the Continuation class.
 
 UnpackCont    []  ->  [C:Int C]
 
@@ -3739,9 +3749,14 @@ ContValid    []  ->  [C:Bool]
   Check continuation validity. $this must be a Continuation object. Pushes true
   onto the stack if the continuation can be iterated further, false otherwise.
 
+ContKey    []  ->  [C]
+
+  Get continuation key. $this must be a Continuation object. Pushes the most
+  recently yielded key from the continuation onto the stack.
+
 ContCurrent    []  ->  [C]
 
-  Get continuation value. $this must be a Contination object. Pushes the most
+  Get continuation value. $this must be a Continuation object. Pushes the most
   recently yielded value from the continuation onto the stack.
 
 ContStopped    []  ->  []

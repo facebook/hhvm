@@ -164,6 +164,19 @@ void cellCastToInt64InPlace(Cell* cell) {
     tvDecRefStr(cell);
     break;
   }
+  case KindOfArray:
+    i = cell->m_data.parr->empty() ? 0 : 1;
+    tvDecRefArr(cell);
+    break;
+  case KindOfObject:
+    i = cell->m_data.pobj->o_toInt64();
+    tvDecRefObj(cell);
+    break;
+  default:
+    not_reached();
+  }
+  cell->m_data.num = i;
+  cell->m_type = KindOfInt64;
 }
 
 void tvCastToInt64InPlace(TypedValue* tv) {

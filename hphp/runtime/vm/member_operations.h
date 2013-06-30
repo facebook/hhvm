@@ -643,7 +643,7 @@ template<KeyType keyType>
 inline int64_t castKeyToInt(TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  return cellToInt(*tvToCell(key));
+  return cellToInt(tvToCell(key));
 }
 
 template<>

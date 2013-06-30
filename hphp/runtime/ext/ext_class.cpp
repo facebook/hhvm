@@ -105,7 +105,7 @@ Array f_get_class_methods(CVarRef class_or_object) {
 }
 
 Array vm_get_class_constants(CStrRef className) {
-  HPHP::Class* cls = HPHP::Unit::loadClass(className.get());
+  Class* cls = Unit::loadClass(className.get());
   if (cls == NULL) {
     return ArrayData::Make(0);
   }
@@ -135,7 +135,7 @@ Array f_get_class_constants(CStrRef class_name) {
 }
 
 Array vm_get_class_vars(CStrRef className) {
-  HPHP::Class* cls = HPHP::Unit::lookupClass(className.get());
+  Class* cls = Unit::lookupClass(className.get());
   if (cls == NULL) {
     raise_error("Unknown class %s", className->data());
   }
@@ -157,7 +157,7 @@ Array vm_get_class_vars(CStrRef className) {
 
   // For visibility checks
   CallerFrame cf;
-  HPHP::Class* ctx = arGetContextClass(cf());
+  Class* ctx = arGetContextClass(cf());
 
   auto ret = ArrayData::Make(numDeclProps + numSProps);
 
@@ -194,7 +194,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
     // No arg passed.
     String ret;
     CallerFrame cf;
-    HPHP::Class* cls = arGetContextClassImpl<true>(cf());
+    Class* cls = arGetContextClassImpl<true>(cf());
     if (cls) {
       ret = CStrRef(cls->nameRef());
     }
@@ -212,7 +212,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   if (!object.isInitialized()) {
     CallerFrame cf;
-    HPHP::Class* cls = arGetContextClass(cf());
+    Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
       return CStrRef(cls->parentRef());
     }
@@ -230,7 +230,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
 
   Class* cls = Unit::lookupClass(class_name.toString().get());
   if (cls) {
-    CStrRef parentClass = *(const String*)(&cls->parentRef());
+    auto& parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
       return parentClass;
     }

@@ -242,8 +242,6 @@ static void add_registered_namespaces(Array &out, xmlNodePtr node,
 ///////////////////////////////////////////////////////////////////////////////
 // simplexml
 
-static StaticString s_SimpleXMLElement("SimpleXMLElement");
-
 Variant f_simplexml_import_dom(CObjRef node,
                                CStrRef class_name /* = "SimpleXMLElement" */) {
 
@@ -275,14 +273,9 @@ Variant f_simplexml_load_string(CStrRef data,
                                 int64_t options /* = 0 */,
                                 CStrRef ns /* = "" */,
                                 bool is_prefix /* = false */) {
-  if (!f_class_exists(class_name)) {
-    throw_invalid_argument("class %s does not exist", class_name.data());
-    return uninit_null();
-  }
-
   Class* cls;
   if (!class_name.empty()) {
-    cls = Unit::lookupClass(class_name.get());
+    cls = Unit::loadClass(class_name.get());
     if (!cls) {
       throw_invalid_argument("class not found: %s", class_name.data());
       return uninit_null();
@@ -357,7 +350,8 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
 
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
-    m_doc = Object(NEWOBJ(XmlDocWrapper)(doc, s_SimpleXMLElement));
+    m_doc =
+      Object(NEWOBJ(XmlDocWrapper)(doc, c_SimpleXMLElement::s_class_name));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);

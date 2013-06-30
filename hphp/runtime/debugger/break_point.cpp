@@ -904,14 +904,13 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
 
   StackStringData sdBClsName(bcls.c_str());
   Class* clsB = Unit::lookupClass(&sdBClsName);
+  if (!clsB) return false;
   StackStringData sdFClsName(fcls);
   Class* clsF = Unit::lookupClass(&sdFClsName);
-  if (!clsB) return false;
   if (clsB == clsF) return true;
   StackStringData sdFuncName(func);
   Func* f = clsB->lookupMethod(&sdFuncName);
-  if (!f) return false;
-  return (f->baseCls() == clsF);
+  return f && f->baseCls() == clsF;
 }
 
 bool BreakPointInfo::Match(const char *haystack, int haystack_len,

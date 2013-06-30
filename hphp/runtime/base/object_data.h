@@ -72,9 +72,9 @@ class ObjectData : public CountableNF {
   };
 
   enum {
-    RealPropCreate = 1,    // Property should be created if it doesnt exist
-    RealPropNoDynamic = 4, // Dont return dynamic properties
-    RealPropUnchecked = 8, // Dont check property accessibility
+    RealPropCreate = 1,    // Property should be created if it doesn't exist
+    RealPropNoDynamic = 4, // Don't return dynamic properties
+    RealPropUnchecked = 8, // Don't check property accessibility
     RealPropExist = 16,    // For property_exists
   };
 

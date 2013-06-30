@@ -55,7 +55,7 @@ ObjectData::~ObjectData() {
   }
 }
 
-bool ObjectData::instanceof(const HPHP::Class* c) const {
+bool ObjectData::instanceof(const Class* c) const {
   return m_cls->classof(c);
 }
 
@@ -113,7 +113,7 @@ CStrRef ObjectData::o_getClassNameHook() const {
 
 HOT_FUNC
 bool ObjectData::o_instanceof(CStrRef s) const {
-  HPHP::Class* cls = Unit::lookupClass(s.get());
+  Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
   return m_cls->classof(cls);
 }
@@ -185,7 +185,7 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
 }
 
 void ObjectData::initProperties(int nProp) {
-  if (!o_properties.get()) ((HPHP::Instance*)this)->initDynProps(nProp);
+  if (!o_properties.get()) ((Instance*)this)->initDynProps(nProp);
 }
 
 Variant* ObjectData::o_realProp(CStrRef propName, int flags,
@@ -196,12 +196,12 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
    * behavior in cases where the named property is nonexistent or
    * inaccessible.
    */
-  HPHP::Class* ctx = nullptr;
+  Class* ctx = nullptr;
   if (!context.empty()) {
     ctx = Unit::lookupClass(context.get());
   }
 
-  HPHP::Instance* thiz = (HPHP::Instance*)(this);  // sigh
+  Instance* thiz = (Instance*)this;  // sigh
   bool visible, accessible, unset;
   TypedValue* ret = (flags & RealPropNoDynamic)
                     ? thiz->getDeclProp(ctx, propName.get(), visible,
@@ -270,7 +270,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   }
 
   bool useSet = !forInit && getAttribute(UseSet);
-  int flags = useSet ? 0 : RealPropCreate;
+  auto flags = useSet ? 0 : RealPropCreate;
   if (forInit) flags |= RealPropUnchecked;
 
   if (Variant *t = o_realProp(propName, flags, context)) {
@@ -357,7 +357,7 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
   auto thiz = static_cast<const Instance*>(this);
   do {
     thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    const std::vector<ClassPtr> &usedTraits = cls->m_usedTraits;
+    auto& usedTraits = cls->m_usedTraits;
     for (unsigned t = 0; t < usedTraits.size(); t++) {
       const ClassPtr& trait = usedTraits[t];
       thiz->getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
@@ -622,7 +622,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = (Instance*)(this);
+      auto thiz = (Instance*)this;
       Array wanted = Array::Create();
       Array props = ret.toArray();
       for (ArrayIter iter(props); iter; ++iter) {
@@ -710,7 +710,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData *ObjectData::clone() {
-  HPHP::Instance* instance = static_cast<HPHP::Instance*>(this);
+  Instance* instance = static_cast<Instance*>(this);
   return instance->cloneImpl();
 }
 

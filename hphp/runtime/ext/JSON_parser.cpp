@@ -431,12 +431,14 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
   }
 }
 
+StaticString s__empty_("_empty_");
+
 static void object_set(Variant &var, CStrRef key, CVarRef value,
                        int assoc) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->o_set("_empty_", value);
+      var.getObjectData()->o_set(s__empty_, value);
     } else {
       var.getObjectData()->o_set(key, value);
     }

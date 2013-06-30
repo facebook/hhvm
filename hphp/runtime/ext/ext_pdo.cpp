@@ -574,7 +574,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
   if (!cls) {
     return Object();
   }
-  return HPHP::Instance::newInstance(cls);
+  return ObjectData::newInstance(cls);
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
@@ -588,7 +588,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   }
   object->o_set("queryString", stmt->query_string);
   TypedValue ret;
-  Instance* inst = static_cast<Instance*>(object.get());
+  ObjectData* inst = object.get();
   inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
   tvRefcountedDecRef(&ret);
 }

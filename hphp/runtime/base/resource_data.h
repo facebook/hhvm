@@ -27,7 +27,7 @@ namespace HPHP {
  * Base class of all resources used by extensions for opaquely passing object
  * pointers.
  */
-class ResourceData : public Instance {
+class ResourceData : public ObjectData {
 public:
   ResourceData();
   virtual ~ResourceData();

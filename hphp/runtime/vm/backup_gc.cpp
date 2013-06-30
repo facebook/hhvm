@@ -246,12 +246,12 @@ void traceImpl(const Visitor& visit, ObjectData* obj) {
   // Dynamic properties.  We have to visit the dynamic property array
   // itself, since it is an object living in the smart heap (all the
   // top-level walks visit it anyway).
-  if (ArrayData* dyn = obj->getProperties().get()) {
+  if (ArrayData* dyn = obj->getDynProps().get()) {
     visit(dyn);
   }
 
-  // Declared properties.  We need to indirect through the TypedValue
-  // before visiting, since these are in-situ in the Instance.
+  // Declared properties. We need to indirect through the TypedValue
+  // before visiting, since these are in-situ in the ObjectData.
   void* vpObj = obj;
   unsigned char* address = static_cast<unsigned char*>(vpObj);
 

@@ -360,11 +360,6 @@ void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void throw_call_non_object(const char *methodName)
   ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-/**
- * Cloning an object.
- */
-Object f_clone(CVarRef v);
-
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"
 char const kUnserializableString[] = "\x01";

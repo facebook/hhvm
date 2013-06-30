@@ -226,7 +226,7 @@ void raisePropertyOnNonObject() {
 }
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {
-  static_cast<Instance*>(base)->raiseUndefProp(name);
+  base->raiseUndefProp(name);
 }
 
 void raise_error_sd(const StringData *msg) {

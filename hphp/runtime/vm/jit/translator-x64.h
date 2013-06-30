@@ -637,13 +637,13 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);
 void defFuncHelper(Func *f);
-Instance* newInstanceHelper(Class* cls, int numArgs, ActRec* ar,
-                            ActRec* prevAr);
-Instance* newInstanceHelperCached(Class** classCache,
-                                  const StringData* clsName, int numArgs,
-                                  ActRec* ar, ActRec* prevAr);
-Instance* newInstanceHelperNoCtorCached(Class** classCache,
-                                        const StringData* clsName);
+ObjectData* newInstanceHelper(Class* cls, int numArgs, ActRec* ar,
+                              ActRec* prevAr);
+ObjectData* newInstanceHelperCached(Class** classCache,
+                                    const StringData* clsName, int numArgs,
+                                    ActRec* ar, ActRec* prevAr);
+ObjectData* newInstanceHelperNoCtorCached(Class** classCache,
+                                          const StringData* clsName);
 
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,

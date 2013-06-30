@@ -217,11 +217,6 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
   }
 }
 
-// unused
-Variant c_Continuation::t___clone() {
-  not_reached();
-}
-
 c_Continuation *c_Continuation::clone() {
   const Func *origFunc = m_origFunc;
   const Func *genFunc = actRec()->m_func;

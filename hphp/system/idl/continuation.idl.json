@@ -190,16 +190,6 @@
                     ],
                     "args": [
                     ]
-                },
-                {
-                    "name": "__clone",
-                    "return": {
-                        "type": "Variant"
-                    },
-                    "flags": [
-                    ],
-                    "args": [
-                    ]
                 }
             ],
             "consts": [

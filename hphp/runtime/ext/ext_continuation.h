@@ -79,7 +79,6 @@ public:
   void t_raise(CVarRef v);
   String t_getorigfuncname();
   String t_getcalledclass();
-  Variant t___clone();
 
   c_Continuation* clone();
 

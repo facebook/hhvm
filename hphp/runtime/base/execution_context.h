@@ -417,7 +417,7 @@ public:
   VMExecutionContext();
   ~VMExecutionContext();
 
-  typedef std::set<HPHP::ObjectData*> LiveObjSet;
+  typedef std::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
   // pcre ini_settings
@@ -535,10 +535,10 @@ public:
   MethodLookup::LookupResult lookupCtorMethod(const HPHP::Func*& f,
                                               const HPHP::Class* cls,
                                               bool raise = false);
-  HPHP::ObjectData* createObject(StringData* clsName,
-                                 CArrRef params,
-                                 bool init = true);
-  HPHP::ObjectData* createObjectOnly(StringData* clsName);
+  ObjectData* createObject(StringData* clsName,
+                           CArrRef params,
+                           bool init = true);
+  ObjectData* createObjectOnly(StringData* clsName);
 
   HphpArray* getFuncStaticCtx(const HPHP::Func* f) {
     FuncStaticCtxMap::iterator it = m_funcStaticCtx.find(f);

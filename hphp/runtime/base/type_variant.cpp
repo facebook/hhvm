@@ -2455,12 +2455,12 @@ void Variant::unserialize(VariableUnserializer *uns,
         }
       }
       if (cls) {
-        obj = Instance::newInstance(cls);
+        obj = ObjectData::newInstance(cls);
         if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
           throw Exception("Pair objects must have exactly 2 elements");
         }
       } else {
-        obj = Instance::newInstance(
+        obj = ObjectData::newInstance(
           SystemLib::s___PHP_Incomplete_ClassClass);
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }

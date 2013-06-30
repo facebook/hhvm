@@ -126,17 +126,17 @@ inline void initScratchKey(TypedValue& tv, TypedValue*& key) {
   }
 }
 
-void objArrayAccess(Instance* base);
-TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
+void objArrayAccess(ObjectData* base);
+TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
                          CVarRef offset, bool validate=true);
-bool objOffsetIsset(TypedValue& tvRef, Instance* base, CVarRef offset,
+bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, CVarRef offset,
                     bool validate=true);
-bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, CVarRef offset,
                     bool validate=true);
-void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
                   bool validate=true);
-void objOffsetAppend(Instance* base, TypedValue* val, bool validate=true);
-void objOffsetUnset(Instance* base, CVarRef offset);
+void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate=true);
+void objOffsetUnset(ObjectData* base, CVarRef offset);
 
 StringData* prepareAnyKey(TypedValue* tv);
 
@@ -169,14 +169,12 @@ inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   }
 }
 
-inline TypedValue* ElemArrayRawKey(ArrayData* base,
-                                          int64_t key) {
+inline TypedValue* ElemArrayRawKey(ArrayData* base, int64_t key) {
   TypedValue* result = base->nvGet(key);
   return result ? result : (TypedValue*)&null_variant;
 }
 
-inline TypedValue* ElemArrayRawKey(ArrayData* base,
-                                          StringData* key) {
+inline TypedValue* ElemArrayRawKey(ArrayData* base, StringData* key) {
   int64_t n;
   TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
                        base->nvGet(n);
@@ -184,8 +182,7 @@ inline TypedValue* ElemArrayRawKey(ArrayData* base,
 }
 
 template <bool warn, KeyType keyType>
-inline TypedValue* ElemArray(ArrayData* base,
-                                    TypedValue* key) {
+inline TypedValue* ElemArray(ArrayData* base, TypedValue* key) {
   TypedValue* result;
   if (keyType == KeyType::Any) {
     DataType rtt = key->m_type;
@@ -323,7 +320,7 @@ inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
 //   $result
 template <bool warn, bool reffy, KeyType keyType = KeyType::Any>
 inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
-                                TypedValue* base, TypedValue* key) {
+                         TypedValue* base, TypedValue* key) {
   TypedValue scratch;
   TypedValue* result;
   DataType type;
@@ -414,7 +411,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
 //   $result
 template <KeyType keyType = KeyType::Any>
 inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
-                                TypedValue* base, TypedValue* key) {
+                         TypedValue* base, TypedValue* key) {
   TypedValue* result = nullptr;
   DataType type;
   opPre(base, type);
@@ -589,16 +586,16 @@ arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
 }
 
 inline ArrayData* SetElemArrayRawKey(ArrayData* a,
-                                            int64_t key,
-                                            Cell* value,
-                                            bool copy) {
+                                     int64_t key,
+                                     Cell* value,
+                                     bool copy) {
   return a->set(key, tvCellAsCVarRef(value), copy);
 }
 
 inline ArrayData* SetElemArrayRawKey(ArrayData* a,
-                                            StringData* key,
-                                            Cell* value,
-                                            bool copy) {
+                                     StringData* key,
+                                     Cell* value,
+                                     bool copy) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
     return a->set(n, tvCellAsCVarRef(value), copy);
@@ -609,7 +606,7 @@ inline ArrayData* SetElemArrayRawKey(ArrayData* a,
 
 template <bool setResult, KeyType keyType>
 inline void SetElemArray(TypedValue* base, TypedValue* key,
-                                Cell* value) {
+                         Cell* value) {
   ArrayData* a = base->m_data.parr;
   ArrayData* newData = a;
   bool copy = (a->getCount() > 1)
@@ -849,7 +846,7 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
 }
 
 inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
-                                            TypedValue* key, Cell* rhs) {
+                                     TypedValue* key, Cell* rhs) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
   tvAsVariant(base) = a;
@@ -868,8 +865,8 @@ inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
 
 template <KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                    unsigned char op, TypedValue* base,
-                                    TypedValue* key, Cell* rhs) {
+                             unsigned char op, TypedValue* base,
+                             TypedValue* key, Cell* rhs) {
   TypedValue scratch;
   TypedValue* result;
   DataType type;
@@ -930,7 +927,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
-                                               TypedValue* base, Cell* rhs) {
+                                        TypedValue* base, Cell* rhs) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
@@ -943,8 +940,8 @@ inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
   return &tvScratch;
 }
 inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                       unsigned char op, TypedValue* base,
-                                       Cell* rhs) {
+                                unsigned char op, TypedValue* base,
+                                Cell* rhs) {
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -1001,7 +998,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 
 template <bool setResult>
 inline void IncDecBody(unsigned char op, TypedValue* fr,
-                              TypedValue* to) {
+                       TypedValue* to) {
   if (fr->m_type == KindOfInt64) {
     switch ((IncDecOp)op) {
     case PreInc: {
@@ -1083,7 +1080,7 @@ inline void IncDecBody(unsigned char op, TypedValue* fr,
 
 template <bool setResult>
 inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
-                                      TypedValue* key, TypedValue& dest) {
+                               TypedValue* key, TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
   tvAsVariant(base) = a;
@@ -1102,8 +1099,8 @@ inline void IncDecElemNumberish(TypedValue& dest) {
 }
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
-                              unsigned char op, TypedValue* base,
-                              TypedValue* key, TypedValue& dest) {
+                       unsigned char op, TypedValue* base,
+                       TypedValue* key, TypedValue& dest) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -1159,7 +1156,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
 
 template <bool setResult>
 inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
-                                         TypedValue& dest) {
+                                  TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
@@ -1174,8 +1171,8 @@ inline void IncDecNewElemNumberish(TypedValue& dest) {
 }
 template <bool setResult>
 inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                 unsigned char op, TypedValue* base,
-                                 TypedValue& dest) {
+                          unsigned char op, TypedValue* base,
+                          TypedValue& dest) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1226,12 +1223,12 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
-                                              bool copy) {
+                                       bool copy) {
   return a->remove(key, copy);
 }
 
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
-                                              bool copy) {
+                                       bool copy) {
   int64_t n;
   if (!key->isStrictlyInteger(n)) {
     return a->remove(StrNR(key), copy);
@@ -1303,19 +1300,19 @@ inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   }
   return KindOfNull;
 }
-inline Instance* createDefaultObject() {
+inline ObjectData* createDefaultObject() {
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  ObjectData* obj = newInstance(SystemLib::s_stdclassClass);
   return obj;
 }
 template <bool warn, bool define>
 inline DataType propPreStdclass(TypedValue& tvScratch,
-                                       TypedValue*& result, TypedValue* base) {
+                                TypedValue*& result, TypedValue* base) {
   if (!define) {
     return propPreNull<warn>(tvScratch, result);
   }
   // TODO(#1124706): We don't want to do this anymore.
-  Instance* obj = createDefaultObject();
+  ObjectData* obj = createDefaultObject();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
@@ -1326,7 +1323,7 @@ inline DataType propPreStdclass(TypedValue& tvScratch,
 
 template <bool warn, bool define, bool issetEmpty>
 inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
-                               TypedValue*& base) {
+                        TypedValue*& base) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1378,9 +1375,9 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
   assert(!warn || !unset);
   TypedValue* result = nullptr;
   StringData* keySD = nullptr;
-  Instance* instance;
+  ObjectData* instance;
   if (baseIsObj) {
-    instance = reinterpret_cast<Instance*>(base);
+    instance = reinterpret_cast<ObjectData*>(base);
   } else {
     DataType t = propPre<warn, define, false>(tvScratch, result, base);
     if (t == KindOfNull) {
@@ -1404,7 +1401,7 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template<bool useEmpty>
-inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
+inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
                               TypedValue* key) {
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
@@ -1423,13 +1420,12 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
 
 template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
 inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                  TypedValue* base,
-                                  TypedValue* key) {
+                           TypedValue* base, TypedValue* key) {
   TypedValue scratch;
   if (isObj) {
     initScratchKey<keyType>(scratch, key);
     return IssetEmptyElemObj<useEmpty>(
-      tvRef, reinterpret_cast<Instance*>(base), key);
+      tvRef, reinterpret_cast<ObjectData*>(base), key);
   }
 
   TypedValue* result;
@@ -1461,8 +1457,7 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfObject: {
     initScratchKey<keyType>(scratch, key);
-    return IssetEmptyElemObj<useEmpty>(
-      tvRef, static_cast<Instance*>(base->m_data.pobj), key);
+    return IssetEmptyElemObj<useEmpty>(tvRef, base->m_data.pobj, key);
     break;
   }
   default: {
@@ -1478,8 +1473,8 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool useEmpty, KeyType keyType>
-inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
-                                     TypedValue* key) {
+inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
+                              TypedValue* key) {
   StringData* keySD;
   bool issetEmptyResult;
   keySD = prepareKey<keyType>(key);
@@ -1491,11 +1486,10 @@ inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
 }
 
 template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
-                                  TypedValue* key) {
+inline bool IssetEmptyProp(Class* ctx, TypedValue* base, TypedValue* key) {
   if (isObj) {
     return IssetEmptyPropObj<useEmpty, keyType>(
-      ctx, reinterpret_cast<Instance*>(base), key);
+      ctx, reinterpret_cast<ObjectData*>(base), key);
   }
 
   TypedValue tvScratch;
@@ -1523,8 +1517,8 @@ inline void SetPropNull(Cell* val) {
   }
 }
 inline void SetPropStdclass(TypedValue* base, TypedValue* key,
-                                   Cell* val) {
-  Instance* obj = createDefaultObject();
+                            Cell* val) {
+  ObjectData* obj = createDefaultObject();
   obj->incRefCount();
   StringData* keySD = prepareKey(key);
   obj->setProp(nullptr, keySD, (TypedValue*)val);
@@ -1535,8 +1529,8 @@ inline void SetPropStdclass(TypedValue* base, TypedValue* key,
 }
 
 template <KeyType keyType>
-inline void SetPropObj(Class* ctx, Instance* instance,
-                              TypedValue* key, Cell* val) {
+inline void SetPropObj(Class* ctx, ObjectData* instance,
+                       TypedValue* key, Cell* val) {
   StringData* keySD = prepareKey<keyType>(key);
   // Set property.
   instance->setProp(ctx, keySD, val);
@@ -1545,11 +1539,9 @@ inline void SetPropObj(Class* ctx, Instance* instance,
 
 // $base->$key = $val
 template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
-inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
-                           Cell* val) {
+inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key, Cell* val) {
   if (isObj) {
-    SetPropObj<keyType>(ctx, reinterpret_cast<Instance*>(base),
-                        key, val);
+    SetPropObj<keyType>(ctx, reinterpret_cast<ObjectData*>(base), key, val);
     return;
   }
 
@@ -1583,8 +1575,7 @@ inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
     break;
   }
   case KindOfObject: {
-    SetPropObj<keyType>(ctx, static_cast<Instance*>(base->m_data.pobj),
-                        key, val);
+    SetPropObj<keyType>(ctx, base->m_data.pobj, key, val);
     break;
   }
   default: {
@@ -1600,9 +1591,9 @@ inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
   return &tvScratch;
 }
 inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
-                                            TypedValue* base, TypedValue* key,
-                                            Cell* rhs) {
-  Instance* obj = createDefaultObject();
+                                     TypedValue* base, TypedValue* key,
+                                     Cell* rhs) {
+  ObjectData* obj = createDefaultObject();
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
@@ -1618,8 +1609,8 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
 
 template <KeyType keyType>
 inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
-                                       unsigned char op, Instance* instance,
-                                       TypedValue* key, Cell* rhs) {
+                                unsigned char op, ObjectData* instance,
+                                TypedValue* key, Cell* rhs) {
   StringData* keySD = prepareKey<keyType>(key);
   TypedValue* result = instance->setOpProp(tvRef, ctx, op, keySD, rhs);
   releaseKey<keyType>(keySD);
@@ -1629,13 +1620,14 @@ inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 // $base->$key <op>= $rhs
 template<bool isObj = false, KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
-                                    Class* ctx, unsigned char op,
-                                    TypedValue* base, TypedValue* key,
-                                    Cell* rhs) {
+                             Class* ctx, unsigned char op,
+                             TypedValue* base, TypedValue* key,
+                             Cell* rhs) {
   TypedValue scratch;
   if (isObj) {
     return SetOpPropObj<keyType>(tvRef, ctx, op,
-                                 reinterpret_cast<Instance*>(base), key, rhs);
+                                 reinterpret_cast<ObjectData*>(base),
+                                 key, rhs);
   }
 
   TypedValue* result;
@@ -1689,8 +1681,8 @@ inline void IncDecPropNull(TypedValue& dest) {
 }
 template <bool setResult>
 inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
-                                      TypedValue* key, TypedValue& dest) {
-  Instance* obj = createDefaultObject();
+                               TypedValue* key, TypedValue& dest) {
+  ObjectData* obj = createDefaultObject();
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
@@ -1717,8 +1709,8 @@ inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
 
 template <bool setResult, KeyType keyType>
 inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
-                                 unsigned char op, Instance* base,
-                                 TypedValue* key, TypedValue& dest) {
+                          unsigned char op, ObjectData* base,
+                          TypedValue* key, TypedValue& dest) {
   StringData* keySD = prepareKey<keyType>(key);
   base->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
   releaseKey<keyType>(keySD);
@@ -1726,13 +1718,13 @@ inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
 
 template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
 inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
-                              Class* ctx, unsigned char op,
-                              TypedValue* base, TypedValue* key,
-                              TypedValue& dest) {
+                       Class* ctx, unsigned char op,
+                       TypedValue* base, TypedValue* key,
+                       TypedValue& dest) {
   TypedValue scratch;
   if (isObj) {
     IncDecPropObj<setResult, keyType>(tvRef, ctx, op,
-                                      reinterpret_cast<Instance*>(base),
+                                      reinterpret_cast<ObjectData*>(base),
                                       key, dest);
     return;
   }
@@ -1778,9 +1770,8 @@ inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template<bool isObj = false, KeyType keyType = KeyType::Any>
-inline void UnsetProp(Class* ctx, TypedValue* base,
-                             TypedValue* key) {
-  Instance* instance;
+inline void UnsetProp(Class* ctx, TypedValue* base, TypedValue* key) {
+  ObjectData* instance;
   if (!isObj) {
     DataType type;
     opPre(base, type);
@@ -1791,7 +1782,7 @@ inline void UnsetProp(Class* ctx, TypedValue* base,
     }
     instance = instanceFromTv(base);
   } else {
-    instance = reinterpret_cast<Instance*>(base);
+    instance = reinterpret_cast<ObjectData*>(base);
   }
   // Prepare key.
   StringData* keySD = prepareKey<keyType>(key);

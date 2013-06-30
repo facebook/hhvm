@@ -2893,11 +2893,11 @@ bool TranslatorX64::eagerRecord(const Func* func) {
   return false;
 }
 
-Instance*
+ObjectData*
 HOT_FUNC_VM
 newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
   const Func* f = cls->getCtor();
-  Instance* ret = nullptr;
+  ObjectData* ret = nullptr;
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     VMRegAnchor _;
     UNUSED MethodLookup::LookupResult res =

@@ -43,7 +43,6 @@ class FuncEmitter;
 class Unit;
 class UnitEmitter;
 class Class;
-class Instance;
 class NamedEntity;
 class PreClass;
 
@@ -51,7 +50,7 @@ typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;
 typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
 
-typedef Instance*(*BuiltinCtorFunction)(Class*);
+typedef ObjectData*(*BuiltinCtorFunction)(Class*);
 
 /*
  * A PreClass represents the source-level definition of a php class,
@@ -364,8 +363,7 @@ typedef AtomicSmartPtr<Class> ClassPtr;
 class Class : public AtomicCountable {
 public:
   friend class ExecutionContext;
-  friend class HPHP::ObjectData;
-  friend class Instance;
+  friend class ObjectData;
   friend class Unit;
 
   enum class Avail {
@@ -540,7 +538,7 @@ public:
   const InitVec& pinitVec() const { return m_pinitVec; }
   const PropInitVec& declPropInit() const { return m_declPropInit; }
 
-  // ObjectData attributes, to be set during Instance initialization.
+  // ObjectData attributes, to be set during instance initialization.
   int getODAttrs() const { return m_ODAttrs; }
 
   int builtinPropSize() const { return m_builtinPropSize; }
@@ -819,14 +817,14 @@ private:
 
   // Properties.
   //
-  // Each Instance is created with enough trailing space to directly store the
-  // vector of declared properties.  To look up a property by name and
-  // determine whether it is declared, use m_declPropMap.  If the declared
-  // property index is already known (as may be the case when executing via the
-  // TC), property metadata in m_declPropInfo can be directly accessed.
+  // Each ObjectData is created with enough trailing space to directly store
+  // the vector of declared properties. To look up a property by name and
+  // determine whether it is declared, use m_declPropMap. If the declared
+  // property index is already known (as may be the case when executing via
+  // the TC), property metadata in m_declPropInfo can be directly accessed.
   //
-  // m_declPropInit is indexed by the Slot values from
-  // m_declProperties, and contains initialization information.
+  // m_declPropInit is indexed by the Slot values from m_declProperties, and
+  // contains initialization information.
 
   PropMap m_declProperties;
   PropInitVec m_declPropInit;
@@ -866,6 +864,6 @@ struct class_same {
   }
 };
 
- } // HPHP::VM
+} // HPHP
 
 #endif

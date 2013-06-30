@@ -37,16 +37,11 @@ class TypedValue;
 class PreClass;
 class Class;
 
-extern StaticString ssIterator;
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+                    size_t nProps);
 
 /**
  * Base class of all PHP objects and PHP resources.
- *
- * 1. Properties:
- *    o_get() -> t___get() as fallback
- *    o_set() -> t___set() as fallback
- * 2. Methods:
- *    o_invoke() -> t___call() as fallback
  */
 class ObjectData : public CountableNF {
  public:
@@ -77,375 +72,49 @@ class ObjectData : public CountableNF {
     RealPropExist = 16,    // For property_exists
   };
 
-  ObjectData(bool noId, Class* type)
-      : o_attribute(0), m_cls(type) {
-    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    if (!noId) {
-      o_id = ++(*os_max_id);
-    }
-  }
-
-  void setId(const ObjectData *r) { if (r) o_id = r->o_id; }
-
-  virtual ~ObjectData(); // all PHP classes need virtual tables
-
-  Class* getVMClass() const {
-    return m_cls;
-  }
-  static size_t getVMClassOffset() {
-    // For assembly linkage.
-    return offsetof(ObjectData, m_cls);
-  }
-  static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  bool instanceof(const Class* c) const;
-
-  bool isCollection() const {
-    return getCollectionType() != Collection::InvalidType;
-  }
-  Collection::Type getCollectionType() const {
-    // Return the upper 3 bits of o_attribute
-    return (Collection::Type)((uint16_t)(o_attribute >> 13) & 7);
-  }
-
-  bool implementsIterator() {
-    return (instanceof(SystemLib::s_IteratorClass));
-  }
-
-  void setAttributes(int attrs) { o_attribute |= attrs; }
-  void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
-  bool getAttribute(Attribute attr) const { return o_attribute & attr; }
-  void setAttribute(Attribute attr) const { o_attribute |= attr;}
-  void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
-  bool noDestruct() const { return getAttribute(NoDestructor); }
-  void setNoDestruct() { setAttribute(NoDestructor); }
-  ObjectData *clearNoDestruct() { clearAttribute(NoDestructor); return this; }
-
-  Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
-  ArrayIter begin(CStrRef context = null_string);
-  MutableArrayIter begin(Variant *key, Variant &val,
-                         CStrRef context = null_string);
-
-  /**
-   * o_instanceof() can be used for both classes and interfaces.
-   * It is also worth noting that o_instanceof will always return
-   * false for classes that are descendents of ResourceData.
-   */
-  bool o_instanceof(CStrRef s) const;
-
-  // class info
-  CStrRef o_getClassName() const;
-  CStrRef o_getParentName() const;
-  virtual CStrRef o_getClassNameHook() const;
-  virtual bool isResource() const { return false; }
-  int o_getId() const { return o_id;}
-
-  bool o_toBoolean() const {
-    if (getAttribute(CallToImpl)) {
-      return o_toBooleanImpl();
-    }
-    return true;
-  }
-
-  static void raiseObjToIntNotice(const char*);
-
-  int64_t o_toInt64() const {
-    if (getAttribute(CallToImpl)) {
-      return o_toInt64Impl();
-    }
-    raiseObjToIntNotice(o_getClassName().data());
-    return 1;
-  }
-
-  double o_toDouble() const {
-    if (getAttribute(CallToImpl)) {
-      return o_toDoubleImpl();
-    }
-    return o_toInt64();
-  }
-
-  // overridable casting
-  virtual bool o_toBooleanImpl() const noexcept;
-  virtual int64_t o_toInt64Impl() const noexcept;
-  virtual double o_toDoubleImpl() const noexcept;
-
-  void destruct();
-
-  // properties
-  virtual Array o_toArray() const;
-  Array o_toIterArray(CStrRef context, bool getRef = false);
-
-  Array o_getDynamicProperties() const {
-    return o_properties;
-  }
-
-  Variant* o_realProp(CStrRef s, int flags,
-                      CStrRef context = null_string) const;
-
-  Variant o_get(CStrRef s, bool error = true,
-                CStrRef context = null_string);
-
-  Variant o_set(CStrRef s, CVarRef v);
-  Variant o_set(CStrRef s, RefResult v);
-  Variant o_setRef(CStrRef s, CVarRef v);
-
-  Variant o_set(CStrRef s, CVarRef v, CStrRef context);
-  Variant o_set(CStrRef s, RefResult v, CStrRef context);
-  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context);
-
-  void o_setArray(CArrRef properties);
-  void o_getArray(Array &props, bool pubOnly = false) const;
-
-  static Object FromArray(ArrayData *properties);
-
-  // method invocation with CStrRef
-  Variant o_invoke(CStrRef s, CArrRef params, bool fatal = true);
-  Variant o_invoke_few_args(CStrRef s, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
-
-  // misc
-  void serialize(VariableSerializer *serializer) const;
-  virtual void serializeImpl(VariableSerializer *serializer) const;
-  bool hasInternalReference(PointerSet &vars, bool ds = false) const;
-  virtual void dump() const;
-  virtual ObjectData *clone();
-
-  Variant offsetGet(Variant key);
-
-  // magic methods
-  // __construct is handled in a special way
-  virtual Variant t___destruct();
-  virtual Variant t___call(Variant v_name, Variant v_arguments);
-  virtual Variant t___set(Variant v_name, Variant v_value);
-  virtual Variant t___get(Variant v_name);
-  virtual bool t___isset(Variant v_name);
-  virtual Variant t___unset(Variant v_name);
-  virtual Variant t___sleep();
-  virtual Variant t___wakeup();
-  virtual String t___tostring();
-  virtual Variant t___clone();
-
-  static int GetMaxId() ATTRIBUTE_COLD;
- protected:
-  virtual bool php_sleep(Variant &ret);
- public:
-  CArrRef getProperties() const { return o_properties; }
-  void initProperties(int nProp);
- private:
-  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
-  ObjectData(const ObjectData &) { assert(false);}
-  inline Variant o_getImpl(CStrRef propName, int flags,
-                           bool error = true, CStrRef context = null_string);
-  template <typename T>
-  inline Variant o_setImpl(CStrRef propName, T v,
-                           bool forInit, CStrRef context);
- public:
+  // ResourceData overrides this setting IsResourceClass to true;
+  // various macros check whether type T is a resource type by
+  // inspecting "T::IsResourceClass".
   static const bool IsResourceClass = false;
 
-  // this will be hopefully packed together with _count from parent class
+  static int ObjAllocatorSizeClassCount;
  private:
-  mutable int16_t o_attribute;     // various flags
- protected:
-  // 16 bits of unused memory that can be reused by subclasses
-  union {
-    uint16_t u16;
-    uint8_t u8[2];
-  } o_subclassData;
-
- protected:
-  Class* m_cls;
-
- protected:
-  ArrNR         o_properties;    // dynamic properties (VM and hphpc)
-  int           o_id;            // a numeric identifier of this object
-
- private:
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET,
-                  "Offset of ObjectData._count must be FAST_REFCOUNT_OFFSET");
-  }
-
- public:
-  void release() {
-    assert(getCount() == 0);
-    destruct();
-    if (UNLIKELY(getCount() != 0)) {
-      // Object was resurrected.
-      return;
-    }
-    delete this;
-  }
-
- public:
-  void getChildren(std::vector<TypedValue *> &out) {
-    ArrayData *props = o_properties.get();
-    if (props) {
-      props->getChildren(out);
-    }
-  }
-} __attribute__((aligned(16)));
-
-template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
-
-typedef GlobalNameValueTableWrapper GlobalVariables;
-
-///////////////////////////////////////////////////////////////////////////////
-// Calculate item sizes for object allocators
-
-#define WORD_SIZE sizeof(TypedValue)
-#define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
-
-// Mapping from index to size class for objects.  Mapping in the other
-// direction is available from ObjectSizeClass<> below.
-template<int Idx> class ObjectSizeTable {
-  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
-public:
-  enum {
-    value = ALIGN_WORD(prevSize + (prevSize >> 1))
-  };
-};
-
-template<> struct ObjectSizeTable<0> {
-  enum { value = sizeof(ObjectData) };
-};
-
-#undef WORD_SIZE
-#undef ALIGN_WORD
-
-/*
- * This determines the highest size class we can have by looking for
- * the first entry in our table that is larger than the hard coded
- * SmartAllocator SLAB_SIZE.  This is because you can't (currently)
- * SmartAllocate chunks that are potentially bigger than a slab. If
- * you introduce a bigger size class, SmartAllocator will hit an
- * assertion at runtime.  The last size class currently goes up to
- * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
- * enough.
- */
-template<int Index>
-struct DetermineLargestSizeClass {
-  typedef typename boost::mpl::eval_if_c<
-    (ObjectSizeTable<Index>::value > SLAB_SIZE),
-    boost::mpl::int_<Index>,
-    DetermineLargestSizeClass<Index + 1>
-  >::type type;
-};
-const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
-
-template<size_t Sz, int Index> struct LookupObjSizeIndex {
-  enum { index =
-    Sz <= ObjectSizeTable<Index>::value
-      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
-};
-template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
-  enum { index = NumObjectSizeClasses };
-};
-
-template<size_t Sz>
-struct ObjectSizeClass {
-  enum {
-    index = LookupObjSizeIndex<Sz,0>::index,
-    value = ObjectSizeTable<index>::value
-  };
-};
-
-typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
-
-class ObjectAllocatorCollector {
-public:
-  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
-    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
-    return wrappers;
-  }
-};
-
-template <typename T>
-void *ObjectAllocatorInitSetup() {
-  ThreadLocalSingleton<ObjectAllocator<
-    ObjectSizeClass<sizeof(T)>::value> > tls;
-  int index = ObjectSizeClass<sizeof(T)>::index;
-  ObjectAllocatorCollector::getWrappers()[index] =
-    (ObjectAllocatorBaseGetter)tls.getCheck;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
-  return (void*)tls.getNoCheck;
-}
-
-/*
- * Return the index in ThreadInfo::m_allocators for the allocator
- * responsible for a given object size.
- *
- * There is a maximum limit on the size of allocatable objects.  If
- * this is reached, this function returns -1.
- */
-int object_alloc_size_to_index(size_t size);
-
-///////////////////////////////////////////////////////////////////////////////
-// Attribute helpers
-class AttributeSetter {
-public:
-  AttributeSetter(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
-    o->setAttribute(a);
-  }
-  ~AttributeSetter() {
-    m_o->clearAttribute(m_a);
-  }
-private:
-  ObjectData::Attribute m_a;
-  ObjectData *m_o;
-};
-
-class AttributeClearer {
-public:
-  AttributeClearer(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
-    o->clearAttribute(a);
-  }
-  ~AttributeClearer() {
-    m_o->setAttribute(m_a);
-  }
-private:
-  ObjectData::Attribute m_a;
-  ObjectData *m_o;
-};
-
-ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
-  if (obj->decRefCount() == 0) obj->release();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
-                    size_t nProps);
-
-class Instance : public ObjectData {
-  // Do not declare any fields directly in Instance; instead embed them in
-  // ObjectData, so that a property vector can always reside immediately past
-  // the end of an object.
-
- private:
-  // This constructor is used for all pure classes that are not
-  // descendents of cppext classes
-  explicit Instance(Class* cls) : ObjectData(false, cls) {
-    instanceInit(cls);
-  }
-
-  enum class NoInit { noinit };
-  explicit Instance(Class* cls, NoInit) : ObjectData(false, cls) {}
+  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
 
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
-  Instance(Class* cls, bool isResource)
-      : ObjectData(isResource, cls) {
+  ObjectData(Class* cls, bool isResource) : o_attribute(0), m_cls(cls) {
+    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    if (!isResource) {
+      o_id = ++(*os_max_id);
+    }
     instanceInit(cls);
   }
 
-  virtual ~Instance() {}
+ private:
+  // The two constructors below are used for all pure classes that are not
+  // descendents of cppext classes
+  explicit ObjectData(Class* cls) : o_attribute(0), m_cls(cls) {
+    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    o_id = ++(*os_max_id);
+    instanceInit(cls);
+  }
 
-  static int ObjAllocatorSizeClassCount;
+  enum class NoInit { noinit };
+  explicit ObjectData(Class* cls, NoInit) : o_attribute(0), m_cls(cls) {
+    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    o_id = ++(*os_max_id);
+  }
 
-  static void raiseAbstractClassError(Class* cls);
+  // Disallow copy construction
+  ObjectData(const ObjectData&) = delete;
 
-  // Call newInstance() to instantiate an Instance
-  static Instance* newInstance(Class* cls) {
+ public:
+  virtual ~ObjectData(); // all PHP classes need virtual tables
+
+  // Call newInstance() to instantiate a PHP object
+  static ObjectData* newInstance(Class* cls) {
     if (cls->m_InstanceCtor) {
       return cls->m_InstanceCtor(cls);
     }
@@ -455,13 +124,13 @@ class Instance : public ObjectData {
     }
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    Instance* obj = (Instance*)ALLOCOBJSZ(size);
-    new (obj) Instance(cls);
+    ObjectData* obj = (ObjectData*)ALLOCOBJSZ(size);
+    new (obj) ObjectData(cls);
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
       /*
         This must happen after the constructor finishes,
         because it can leak references to obj AND it can
-        throw exceptions. If we have this in the Instance
+        throw exceptions. If we have this in the ObjectData
         constructor, and it throws, obj will be partially
         destroyed (ie ~ObjectData will be called, resetting
         the vtable pointer) leaving dangling references
@@ -475,7 +144,7 @@ class Instance : public ObjectData {
   // Given a Class that is assumed to be a concrete, regular (not a
   // trait or interface), pure PHP class, and an allocator index,
   // return a new, uninitialized object of that class.
-  static Instance* newInstanceRaw(Class* cls, int idx);
+  static ObjectData* newInstanceRaw(Class* cls, int idx);
 
  private:
   void instanceInit(Class* cls) {
@@ -501,30 +170,166 @@ class Instance : public ObjectData {
     }
   }
 
+ public:
+  void operator delete(void* p);
+
+  void release() {
+    assert(getCount() == 0);
+    destruct();
+    if (UNLIKELY(getCount() != 0)) {
+      // Object was resurrected.
+      return;
+    }
+    delete this;
+  }
+
+  void setId(const ObjectData* r) { if (r) o_id = r->o_id; }
+
+  Class* getVMClass() const {
+    return m_cls;
+  }
+  static size_t getVMClassOffset() {
+    // For assembly linkage.
+    return offsetof(ObjectData, m_cls);
+  }
+  static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
+  bool instanceof(const Class* c) const;
+
+  bool isCollection() const {
+    return getCollectionType() != Collection::InvalidType;
+  }
+  Collection::Type getCollectionType() const {
+    // Return the upper 3 bits of o_attribute
+    return (Collection::Type)((uint16_t)(o_attribute >> 13) & 7);
+  }
+
+  bool implementsIterator() {
+    return (instanceof(SystemLib::s_IteratorClass));
+  }
+
+  void setAttributes(int attrs) { o_attribute |= attrs; }
+  void setAttributes(const ObjectData* o) { o_attribute |= o->o_attribute; }
+  bool getAttribute(Attribute attr) const { return o_attribute & attr; }
+  void setAttribute(Attribute attr) const { o_attribute |= attr;}
+  void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
+  bool noDestruct() const { return getAttribute(NoDestructor); }
+  void setNoDestruct() { setAttribute(NoDestructor); }
+  ObjectData* clearNoDestruct() { clearAttribute(NoDestructor); return this; }
+
+  Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
+  ArrayIter begin(CStrRef context = null_string);
+  MutableArrayIter begin(Variant* key, Variant& val,
+                         CStrRef context = null_string);
+
+  /**
+   * o_instanceof() can be used for both classes and interfaces.
+   * It is also worth noting that o_instanceof will always return
+   * false for classes that are descendents of ResourceData.
+   */
+  bool o_instanceof(CStrRef s) const;
+
+  // class info
+  CStrRef o_getClassName() const;
+  CStrRef o_getParentName() const;
+  virtual CStrRef o_getClassNameHook() const;
+  virtual bool isResource() const { return false; }
+  int o_getId() const { return o_id;}
+
+  bool o_toBoolean() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toBooleanImpl();
+    }
+    return true;
+  }
+
+  int64_t o_toInt64() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toInt64Impl();
+    }
+    raiseObjToIntNotice(o_getClassName().data());
+    return 1;
+  }
+
+  double o_toDouble() const {
+    if (getAttribute(CallToImpl)) {
+      return o_toDoubleImpl();
+    }
+    return o_toInt64();
+  }
+
+  // overridable casting
+  virtual bool o_toBooleanImpl() const noexcept;
+  virtual int64_t o_toInt64Impl() const noexcept;
+  virtual double o_toDoubleImpl() const noexcept;
+  virtual Array o_toArray() const;
+
+  void destruct();
+
+  Array o_toIterArray(CStrRef context, bool getRef = false);
+
+  Variant* o_realProp(CStrRef s, int flags,
+                      CStrRef context = null_string) const;
+
+  Variant o_get(CStrRef s, bool error = true,
+                CStrRef context = null_string);
+
+  Variant o_set(CStrRef s, CVarRef v);
+  Variant o_set(CStrRef s, RefResult v);
+  Variant o_setRef(CStrRef s, CVarRef v);
+
+  Variant o_set(CStrRef s, CVarRef v, CStrRef context);
+  Variant o_set(CStrRef s, RefResult v, CStrRef context);
+  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context);
+
+  void o_setArray(CArrRef properties);
+  void o_getArray(Array& props, bool pubOnly = false) const;
+
+  static Object FromArray(ArrayData* properties);
+
+  // TODO Task #2584896: o_invoke and o_invoke_few_args are deprecated. These
+  // APIs don't properly take class context into account when looking up the
+  // method, and they duplicate some of the functionality from invokeFunc(),
+  // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
+  // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
+  // vm_decode_function() instead.
+  Variant o_invoke(CStrRef s, CArrRef params, bool fatal = true);
+  Variant o_invoke_few_args(CStrRef s, int count,
+                            INVOKE_FEW_ARGS_DECL_ARGS);
+
+  void serialize(VariableSerializer* serializer) const;
+  virtual void serializeImpl(VariableSerializer* serializer) const;
+  bool hasInternalReference(PointerSet& vars, bool ds = false) const;
+  virtual void dump() const;
+  virtual ObjectData* clone();
+
+  Variant offsetGet(Variant key);
+
+  virtual Variant t___sleep();
+  virtual Variant t___wakeup();
+  virtual String t___tostring();
+
+  static int GetMaxId() ATTRIBUTE_COLD;
+
+ protected:
+  virtual bool php_sleep(Variant& ret);
+
+ public:
+  CArrRef getDynProps() const { return o_properties; }
+  void initProperties(int nProp);
+
+  void getChildren(std::vector<TypedValue*> &out) {
+    ArrayData* props = o_properties.get();
+    if (props) {
+      props->getChildren(out);
+    }
+  }
+
  protected:
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
  public:
-  Instance* callCustomInstanceInit();
-
-  void operator delete(void* p);
-
-  //============================================================================
-  // Virtual ObjectData methods that we need to override
-
- public:
-  virtual Variant t___destruct();
-  virtual Variant t___call(Variant v_name, Variant v_arguments);
-  virtual Variant t___set(Variant v_name, Variant v_value);
-  virtual Variant t___get(Variant v_name);
-  virtual bool t___isset(Variant v_name);
-  virtual Variant t___unset(Variant v_name);
-  virtual Variant t___sleep();
-  virtual Variant t___wakeup();
-  virtual Variant t___set_state(Variant v_properties);
-  virtual String t___tostring();
-  virtual Variant t___clone();
+  ObjectData* callCustomInstanceInit();
 
   //============================================================================
   // Miscellaneous.
@@ -540,24 +345,25 @@ class Instance : public ObjectData {
   }
 
   static size_t sizeForNProps(Slot nProps) {
-    size_t sz = sizeof(Instance) + (sizeof(TypedValue) * nProps);
+    size_t sz = sizeof(ObjectData) + (sizeof(TypedValue) * nProps);
     assert((sz & (sizeof(TypedValue) - 1)) == 0);
     return sz;
   }
 
-  static Object FromArray(ArrayData *properties);
-
   //============================================================================
   // Properties.
  public:
-  int builtinPropSize() const {
-    return m_cls->builtinPropSize();
-  }
+  int builtinPropSize() const { return m_cls->builtinPropSize(); }
 
-  // public for ObjectData access
+ private:
   void initDynProps(int numDynamic = 0);
   Slot declPropInd(TypedValue* prop) const;
- private:
+
+  inline Variant o_getImpl(CStrRef propName, int flags,
+                           bool error = true, CStrRef context = null_string);
+  template <typename T>
+  inline Variant o_setImpl(CStrRef propName, T v,
+                           bool forInit, CStrRef context);
   template <bool declOnly>
   TypedValue* getPropImpl(Class* ctx, const StringData* key, bool& visible,
                           bool& accessible, bool& unset);
@@ -606,20 +412,176 @@ class Instance : public ObjectData {
                   const StringData* key, TypedValue& dest);
   void unsetProp(Class* ctx, const StringData* key);
 
+  static void raiseObjToIntNotice(const char*);
+  static void raiseAbstractClassError(Class* cls);
   void raiseUndefProp(const StringData* name);
 
-  friend class ObjectData;
+ private:
+  static void compileTimeAssertions() {
+    static_assert(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET,
+                  "Offset of ObjectData._count must be FAST_REFCOUNT_OFFSET");
+  }
+
+  //============================================================================
+  // ObjectData fields
+
+  // o_attribute and o_subclassData will hopefully be packed together
+  // with _count from parent class
+ private:
+  // Various per-instance flags
+  mutable int16_t o_attribute;
+ protected:
+  // 16 bits of memory that can be reused by subclasses
+  union {
+    uint16_t u16;
+    uint8_t u8[2];
+  } o_subclassData;
+  // Pointer to this object's class
+  Class* m_cls;
+  // Storage for dynamic properties
+  ArrNR o_properties;
+  // Numeric identifier of this object (used for var_dump())
+  int o_id;
+
+} __attribute__((aligned(16)));
+
+template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
+
+typedef GlobalNameValueTableWrapper GlobalVariables;
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculate item sizes for object allocators
+
+#define WORD_SIZE sizeof(TypedValue)
+#define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
+
+// Mapping from index to size class for objects. Mapping in the other
+// direction is available from ObjectSizeClass<> below.
+template<int Idx> class ObjectSizeTable {
+  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
+public:
+  enum {
+    value = ALIGN_WORD(prevSize + (prevSize >> 1))
+  };
 };
 
-inline Instance* instanceFromTv(TypedValue* tv) {
-  assert(dynamic_cast<Instance*>(tv->m_data.pobj));
-  return static_cast<Instance*>(tv->m_data.pobj);
+template<> struct ObjectSizeTable<0> {
+  enum { value = sizeof(ObjectData) };
+};
+
+#undef WORD_SIZE
+#undef ALIGN_WORD
+
+/*
+ * This determines the highest size class we can have by looking for
+ * the first entry in our table that is larger than the hard coded
+ * SmartAllocator SLAB_SIZE. This is because you can't (currently)
+ * SmartAllocate chunks that are potentially bigger than a slab. If
+ * you introduce a bigger size class, SmartAllocator will hit an
+ * assertion at runtime. The last size class currently goes up to
+ * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
+ * enough.
+ */
+template<int Index>
+struct DetermineLargestSizeClass {
+  typedef typename boost::mpl::eval_if_c<
+    (ObjectSizeTable<Index>::value > SLAB_SIZE),
+    boost::mpl::int_<Index>,
+    DetermineLargestSizeClass<Index + 1>
+  >::type type;
+};
+const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
+
+template<size_t Sz, int Index> struct LookupObjSizeIndex {
+  enum { index =
+    Sz <= ObjectSizeTable<Index>::value
+      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
+};
+template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
+  enum { index = NumObjectSizeClasses };
+};
+
+template<size_t Sz>
+struct ObjectSizeClass {
+  enum {
+    index = LookupObjSizeIndex<Sz,0>::index,
+    value = ObjectSizeTable<index>::value
+  };
+};
+
+typedef ObjectAllocatorBase*(*ObjectAllocatorBaseGetter)(void);
+
+class ObjectAllocatorCollector {
+public:
+  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
+    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
+    return wrappers;
+  }
+};
+
+template <typename T>
+void* ObjectAllocatorInitSetup() {
+  ThreadLocalSingleton<ObjectAllocator<
+    ObjectSizeClass<sizeof(T)>::value> > tls;
+  int index = ObjectSizeClass<sizeof(T)>::index;
+  ObjectAllocatorCollector::getWrappers()[index] =
+    (ObjectAllocatorBaseGetter)tls.getCheck;
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
+  return (void*)tls.getNoCheck;
 }
 
-class ExtObjectData : public HPHP::Instance {
+/*
+ * Return the index in ThreadInfo::m_allocators for the allocator
+ * responsible for a given object size.
+ *
+ * There is a maximum limit on the size of allocatable objects.  If
+ * this is reached, this function returns -1.
+ */
+int object_alloc_size_to_index(size_t size);
+
+///////////////////////////////////////////////////////////////////////////////
+// Attribute helpers
+class AttributeSetter {
+public:
+  AttributeSetter(ObjectData::Attribute a, ObjectData* o) : m_a(a), m_o(o) {
+    o->setAttribute(a);
+  }
+  ~AttributeSetter() {
+    m_o->clearAttribute(m_a);
+  }
+private:
+  ObjectData::Attribute m_a;
+  ObjectData* m_o;
+};
+
+class AttributeClearer {
+public:
+  AttributeClearer(ObjectData::Attribute a, ObjectData* o) : m_a(a), m_o(o) {
+    o->clearAttribute(a);
+  }
+  ~AttributeClearer() {
+    m_o->setAttribute(m_a);
+  }
+private:
+  ObjectData::Attribute m_a;
+  ObjectData* m_o;
+};
+
+ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
+  if (obj->decRefCount() == 0) obj->release();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline ObjectData* instanceFromTv(TypedValue* tv) {
+  assert(tv->m_type == KindOfObject);
+  assert(dynamic_cast<ObjectData*>(tv->m_data.pobj));
+  return tv->m_data.pobj;
+}
+
+class ExtObjectData : public ObjectData {
  public:
-  explicit ExtObjectData(HPHP::Class* cls)
-    : HPHP::Instance(cls, false) {
+  explicit ExtObjectData(HPHP::Class* cls) : ObjectData(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
 };

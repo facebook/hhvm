@@ -19,16 +19,16 @@
 
 namespace HPHP {
 
-// SmartAllocator (or, to be more specific, ObjectAllocator) is templatized by
-// the size of the chunks it allocates. This works fine when we're only
-// allocating objects of fixed sizes, known at compile time. However, the VM
-// class "Instance" is of variable size (having room for a property vector at
-// the end), and the range of sizes it will take on is unknowable at compile
-// time.
+// SmartAllocator (or, to be more specific, ObjectAllocator) is templatized
+// by the size of the chunks it allocates. This works fine when we're only
+// allocating objects of fixed sizes, known at compile time. However, the
+// ObjectData class is of variable size (having room for a property vector
+// at the end), and the range of sizes it will take on is unknowable at
+// compile time.
 //
 // To work around this, we instantiate the ObjectAllocator template with a size
-// from every possible size class. This way, any size class that Instance might
-// end up falling into will have an ObjectAllocator.
+// from every possible size class. This way, any size class that ObjectData
+// might end up falling into will have an ObjectAllocator.
 int InitializeAllocators();
 
 }

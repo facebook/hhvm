@@ -54,7 +54,7 @@ static StaticString s_serialize("serialize");
 
 ObjectData::~ObjectData() {
   if (ArrayData* a = o_properties.get()) decRefArr(a);
-  int &pmax = *os_max_id;
+  int& pmax = *os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
@@ -123,10 +123,6 @@ bool ObjectData::o_instanceof(CStrRef s) const {
   return m_cls->classof(cls);
 }
 
-void ObjectData::raiseObjToIntNotice(const char* clsName) {
-  raise_notice("Object of class %s could not be converted to int", clsName);
-}
-
 bool ObjectData::o_toBooleanImpl() const noexcept {
   not_reached();
 }
@@ -177,7 +173,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
   }
 }
 
-MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
+MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
                                    CStrRef context /* = null_string */) {
   bool isIterable;
   if (isCollection()) {
@@ -189,12 +185,12 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
                               "foreach by reference");
   }
   Array properties = iterable->o_toIterArray(context, true);
-  ArrayData *arr = properties.detach();
+  ArrayData* arr = properties.detach();
   return MutableArrayIter(arr, key, val);
 }
 
 void ObjectData::initProperties(int nProp) {
-  if (!o_properties.get()) ((Instance*)this)->initDynProps(nProp);
+  if (!o_properties.get()) initDynProps(nProp);
 }
 
 Variant* ObjectData::o_realProp(CStrRef propName, int flags,
@@ -210,7 +206,7 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
     ctx = Unit::lookupClass(context.get());
   }
 
-  Instance* thiz = (Instance*)this;  // sigh
+  auto thiz = const_cast<ObjectData*>(this);
   bool visible, accessible, unset;
   TypedValue* ret = (flags & RealPropNoDynamic)
                     ? thiz->getDeclProp(ctx, propName.get(), visible,
@@ -247,14 +243,16 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
     throw_invalid_property_name(propName);
   }
 
-  if (Variant *t = o_realProp(propName, flags, context)) {
+  if (Variant* t = o_realProp(propName, flags, context)) {
     if (t->isInitialized())
       return *t;
   }
 
   if (getAttribute(UseGet)) {
-    AttributeClearer a(UseGet, this);
-    return t___get(propName);
+    TypedValue tvResult;
+    tvWriteNull(&tvResult);
+    invokeGet(&tvResult, propName.get());
+    return tvAsCVarRef(&tvResult);
   }
 
   if (error) {
@@ -282,7 +280,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   auto flags = useSet ? 0 : RealPropCreate;
   if (forInit) flags |= RealPropUnchecked;
 
-  if (Variant *t = o_realProp(propName, flags, context)) {
+  if (Variant* t = o_realProp(propName, flags, context)) {
     if (!useSet || t->isInitialized()) {
       *t = v;
       return variant(v);
@@ -290,8 +288,9 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   }
 
   if (useSet) {
-    AttributeClearer a(UseSet, this);
-    t___set(propName, variant(v));
+    TypedValue ignored;
+    invokeSet(&ignored, propName.get(), (TypedValue*)(&variant(v)));
+    tvRefcountedDecRef(&ignored);
     return variant(v);
   }
 
@@ -324,7 +323,6 @@ Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
 
 HOT_FUNC
 void ObjectData::o_setArray(CArrRef properties) {
-  auto thiz = static_cast<Instance*>(this);
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
     Class* ctx = nullptr;
@@ -345,12 +343,12 @@ void ObjectData::o_setArray(CArrRef properties) {
     }
 
     CVarRef secondRef = iter.secondRef();
-    thiz->setProp(ctx, k.get(), (TypedValue*)(&secondRef),
-                  secondRef.isReferenced());
+    setProp(ctx, k.get(), (TypedValue*)(&secondRef),
+            secondRef.isReferenced());
   }
 }
 
-void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
+void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // The declared properties in the resultant array should be a permutation of
   // propVec. They appear in the following order: go most-to-least-derived in
   // the inheritance hierarchy, inserting properties in declaration order (with
@@ -363,13 +361,12 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
 
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* cls = m_cls;
-  auto thiz = static_cast<const Instance*>(this);
   do {
-    thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
+    getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
     auto& usedTraits = cls->m_usedTraits;
     for (unsigned t = 0; t < usedTraits.size(); t++) {
       const ClassPtr& trait = usedTraits[t];
-      thiz->getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
+      getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
     }
     cls = cls->m_parent.get();
   } while (cls);
@@ -382,14 +379,6 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
       props.addLval(key, true).setWithRef(value);
     }
   }
-}
-
-Object ObjectData::FromArray(ArrayData *properties) {
-  ObjectData *ret = SystemLib::AllocStdClassObject();
-  if (!properties->empty()) {
-    ret->o_properties.asArray() = properties;
-  }
-  return ret;
 }
 
 Array ObjectData::o_toArray() const {
@@ -418,8 +407,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       bool visible, accessible, unset;
-      TypedValue* val = ((Instance*)this)->getProp(
-        ctx, key, visible, accessible, unset);
+      TypedValue* val = getProp(ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
         if (getRef) {
           if (val->m_type != KindOfRef) {
@@ -479,15 +467,10 @@ Array ObjectData::o_toIterArray(CStrRef context,
 
 static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
                           CallCtx& ctx) {
-  // TODO This duplicates some logic from vm_decode_function and
-  // vm_call_user_func, we should refactor this in the near future
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
   ctx.invName = nullptr;
 
-  // XXX The lookup below doesn't take context into account, so it will lead
-  // to incorrect behavior in some corner cases. o_invoke is gradually being
-  // removed from the HPHP runtime this should be ok for the short term.
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
     if (ctx.func->attrs() & AttrStatic) {
@@ -556,7 +539,7 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   return ret;
 }
 
-bool ObjectData::php_sleep(Variant &ret) {
+bool ObjectData::php_sleep(Variant& ret) {
   setAttribute(HasSleep);
   ret = t___sleep();
   return getAttribute(HasSleep);
@@ -564,7 +547,7 @@ bool ObjectData::php_sleep(Variant &ret) {
 
 StaticString s_zero("\0", 1);
 
-void ObjectData::serialize(VariableSerializer *serializer) const {
+void ObjectData::serialize(VariableSerializer* serializer) const {
   if (UNLIKELY(serializer->incNestedLevel((void*)this, true))) {
     serializer->writeOverflow((void*)this, true);
   } else {
@@ -576,7 +559,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
 static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 
-void ObjectData::serializeImpl(VariableSerializer *serializer) const {
+void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
   Variant ret;
   if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
@@ -631,7 +614,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = (Instance*)this;
+      auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
       for (ArrayIter iter(props); iter; ++iter) {
@@ -706,7 +689,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   }
 }
 
-bool ObjectData::hasInternalReference(PointerSet &vars,
+bool ObjectData::hasInternalReference(PointerSet& vars,
                                       bool ds /* = false */) const {
   if (isCollection()) {
     return true;
@@ -718,33 +701,8 @@ void ObjectData::dump() const {
   o_toArray().dump();
 }
 
-ObjectData *ObjectData::clone() {
-  Instance* instance = static_cast<Instance*>(this);
-  return instance->cloneImpl();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// magic methods that user classes can override, and these are default handlers
-// or actions to take:
-
-Variant ObjectData::t___destruct() {
-  // do nothing
-  return uninit_null();
-}
-
-Variant ObjectData::t___call(Variant v_name, Variant v_arguments) {
-  // do nothing
-  return uninit_null();
-}
-
-Variant ObjectData::t___set(Variant v_name, Variant v_value) {
-  // not called
-  return uninit_null();
-}
-
-Variant ObjectData::t___get(Variant v_name) {
-  // not called
-  return uninit_null();
+ObjectData* ObjectData::clone() {
+  return cloneImpl();
 }
 
 Variant ObjectData::offsetGet(Variant key) {
@@ -760,36 +718,6 @@ Variant ObjectData::offsetGet(Variant key) {
   g_vmContext->invokeFuncFew(v.asTypedValue(), method,
                              this, nullptr, 1, args);
   return v;
-}
-
-bool ObjectData::t___isset(Variant v_name) {
-  return false;
-}
-
-Variant ObjectData::t___unset(Variant v_name) {
-  // not called
-  return uninit_null();
-}
-
-Variant ObjectData::t___sleep() {
-  clearAttribute(HasSleep);
-  return uninit_null();
-}
-
-Variant ObjectData::t___wakeup() {
-  // do nothing
-  return uninit_null();
-}
-
-String ObjectData::t___tostring() {
-  string msg = o_getClassName().data();
-  msg += "::__toString() was not defined";
-  throw BadTypeConversionException(msg.c_str());
-}
-
-Variant ObjectData::t___clone() {
-  // do nothing
-  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -850,8 +778,7 @@ static StaticString s___unset(LITSTR_INIT("__unset"));
 
 TRACE_SET_MOD(runtime);
 
-int HPHP::Instance::ObjAllocatorSizeClassCount =
-  HPHP::InitializeAllocators();
+int ObjectData::ObjAllocatorSizeClassCount = InitializeAllocators();
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -867,26 +794,18 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
   }
 }
 
-void Instance::raiseAbstractClassError(Class* cls) {
-  Attr attrs = cls->attrs();
-  raise_error("Cannot instantiate %s %s",
-              (attrs & AttrInterface) ? "interface" :
-              (attrs & AttrTrait)     ? "trait" : "abstract class",
-              cls->preClass()->name()->data());
-}
-
-TypedValue* Instance::propVec() {
+TypedValue* ObjectData::propVec() {
   uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
   // TODO(#1432007): some builtins still do not have TypedValue-aligned sizes.
   assert(ret % sizeof(TypedValue) == builtinPropSize() % sizeof(TypedValue));
   return (TypedValue*) ret;
 }
 
-const TypedValue* Instance::propVec() const {
-  return const_cast<Instance*>(this)->propVec();
+const TypedValue* ObjectData::propVec() const {
+  return const_cast<ObjectData*>(this)->propVec();
 }
 
-Instance* Instance::callCustomInstanceInit() {
+ObjectData* ObjectData::callCustomInstanceInit() {
   static StringData* sd_init = StringData::GetStaticString("__init__");
   const Func* init = m_cls->lookupMethod(sd_init);
   if (init != nullptr) {
@@ -908,13 +827,20 @@ Instance* Instance::callCustomInstanceInit() {
   return this;
 }
 
-void Instance::operator delete(void* p) {
-  Instance* this_ = (Instance*)p;
+HOT_FUNC_VM
+ObjectData* ObjectData::newInstanceRaw(Class* cls, int idx) {
+  ObjectData* obj = (ObjectData*)ALLOCOBJIDX(idx);
+  new (obj) ObjectData(cls, NoInit::noinit);
+  return obj;
+}
+
+void ObjectData::operator delete(void* p) {
+  ObjectData* this_ = (ObjectData*)p;
   Class* cls = this_->getVMClass();
   size_t nProps = cls->numDeclProperties();
   // cppext classes have their own implementation of delete
   assert(this_->builtinPropSize() == 0);
-  TypedValue* propVec = (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData));
+  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData));
   for (unsigned i = 0; i < nProps; ++i) {
     TypedValue* prop = &propVec[i];
     tvRefcountedDecRef(prop);
@@ -922,20 +848,13 @@ void Instance::operator delete(void* p) {
   DELETEOBJSZ(sizeForNProps(nProps))(this_);
 }
 
-HOT_FUNC_VM
-Instance* Instance::newInstanceRaw(Class* cls, int idx) {
-  Instance* obj = (Instance*)ALLOCOBJIDX(idx);
-  new (obj) Instance(cls, NoInit::noinit);
-  return obj;
-}
-
-void Instance::invokeUserMethod(TypedValue* retval, const Func* method,
-                                CArrRef params) {
+void ObjectData::invokeUserMethod(TypedValue* retval, const Func* method,
+                                  CArrRef params) {
   g_vmContext->invokeFunc(retval, method, params, this);
 }
 
-Object Instance::FromArray(ArrayData *properties) {
-  Instance* retval = Instance::newInstance(SystemLib::s_stdclassClass);
+Object ObjectData::FromArray(ArrayData* properties) {
+  ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
   HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
   for (ssize_t pos = properties->iter_begin(); pos != ArrayData::invalid_index;
@@ -955,12 +874,12 @@ Object Instance::FromArray(ArrayData *properties) {
   return retval;
 }
 
-void Instance::initDynProps(int numDynamic /* = 0 */) {
+void ObjectData::initDynProps(int numDynamic /* = 0 */) {
   // Create o_properties with room for numDynamic
   o_properties.asArray() = ArrayData::Make(numDynamic);
 }
 
-Slot Instance::declPropInd(TypedValue* prop) const {
+Slot ObjectData::declPropInd(TypedValue* prop) const {
   // Do an address range check to determine whether prop physically resides
   // in propVec.
   const TypedValue* pv = propVec();
@@ -972,9 +891,9 @@ Slot Instance::declPropInd(TypedValue* prop) const {
 }
 
 template <bool declOnly>
-TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
-                                  bool& visible, bool& accessible,
-                                  bool& unset) {
+TypedValue* ObjectData::getPropImpl(Class* ctx, const StringData* key,
+                                    bool& visible, bool& accessible,
+                                    bool& unset) {
   TypedValue* prop = nullptr;
   unset = false;
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
@@ -1005,19 +924,19 @@ TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
   return prop;
 }
 
-TypedValue* Instance::getProp(Class* ctx, const StringData* key,
-                              bool& visible, bool& accessible, bool& unset) {
+TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
+                                bool& visible, bool& accessible, bool& unset) {
   return getPropImpl<false>(ctx, key, visible, accessible, unset);
 }
 
-TypedValue* Instance::getDeclProp(Class* ctx, const StringData* key,
-                                  bool& visible, bool& accessible,
-                                  bool& unset) {
+TypedValue* ObjectData::getDeclProp(Class* ctx, const StringData* key,
+                                    bool& visible, bool& accessible,
+                                    bool& unset) {
   return getPropImpl<true>(ctx, key, visible, accessible, unset);
 }
 
-void Instance::invokeSet(TypedValue* retval, const StringData* key,
-                         TypedValue* val) {
+void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
+                           TypedValue* val) {
   AttributeClearer a(UseSet, this);
   const Func* meth = m_cls->lookupMethod(s___set.get());
   assert(meth);
@@ -1031,28 +950,28 @@ void Instance::invokeSet(TypedValue* retval, const StringData* key,
   assert(meth); \
   invokeUserMethod(retval, meth, CREATE_VECTOR1(CStrRef(key))); \
 
-void Instance::invokeGet(TypedValue* retval, const StringData* key) {
+void ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
   MAGIC_PROP_BODY(s___get.get(), UseGet);
 }
 
-void Instance::invokeIsset(TypedValue* retval, const StringData* key) {
+void ObjectData::invokeIsset(TypedValue* retval, const StringData* key) {
   MAGIC_PROP_BODY(s___isset.get(), UseIsset);
 }
 
-void Instance::invokeUnset(TypedValue* retval, const StringData* key) {
+void ObjectData::invokeUnset(TypedValue* retval, const StringData* key) {
   MAGIC_PROP_BODY(s___unset.get(), UseUnset);
 }
 
-void Instance::invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
-                             const StringData* key) {
+void ObjectData::invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
+                               const StringData* key) {
   invokeGet(&tvRef, key);
   retval = &tvRef;
 }
 
 template <bool warn, bool define>
-void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
-                        Class* ctx,
-                        const StringData* key) {
+void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
+                          Class* ctx,
+                          const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
 
@@ -1111,27 +1030,27 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
   }
 }
 
-void Instance::prop(TypedValue*& retval, TypedValue& tvRef,
-                    Class* ctx, const StringData* key) {
+void ObjectData::prop(TypedValue*& retval, TypedValue& tvRef,
+                      Class* ctx, const StringData* key) {
   propImpl<false, false>(retval, tvRef, ctx, key);
 }
 
-void Instance::propD(TypedValue*& retval, TypedValue& tvRef,
-                     Class* ctx, const StringData* key) {
+void ObjectData::propD(TypedValue*& retval, TypedValue& tvRef,
+                       Class* ctx, const StringData* key) {
   propImpl<false, true>(retval, tvRef, ctx, key);
 }
 
-void Instance::propW(TypedValue*& retval, TypedValue& tvRef,
-                     Class* ctx, const StringData* key) {
+void ObjectData::propW(TypedValue*& retval, TypedValue& tvRef,
+                       Class* ctx, const StringData* key) {
   propImpl<true, false>(retval, tvRef, ctx, key);
 }
 
-void Instance::propWD(TypedValue*& retval, TypedValue& tvRef,
-                      Class* ctx, const StringData* key) {
+void ObjectData::propWD(TypedValue*& retval, TypedValue& tvRef,
+                        Class* ctx, const StringData* key) {
   propImpl<true, true>(retval, tvRef, ctx, key);
 }
 
-bool Instance::propIsset(Class* ctx, const StringData* key) {
+bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
@@ -1147,7 +1066,7 @@ bool Instance::propIsset(Class* ctx, const StringData* key) {
   return tv.m_data.num;
 }
 
-bool Instance::propEmpty(Class* ctx, const StringData* key) {
+bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
@@ -1172,9 +1091,9 @@ bool Instance::propEmpty(Class* ctx, const StringData* key) {
   return false;
 }
 
-TypedValue* Instance::setProp(Class* ctx, const StringData* key,
-                              TypedValue* val,
-                              bool bindingAssignment /* = false */) {
+TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
+                                TypedValue* val,
+                                bool bindingAssignment /* = false */) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -1228,9 +1147,9 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
   return nullptr;
 }
 
-TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
-                                unsigned char op, const StringData* key,
-                                Cell* val) {
+TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
+                                  unsigned char op, const StringData* key,
+                                  Cell* val) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -1303,9 +1222,9 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
 }
 
 template <bool setResult>
-void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
-                              unsigned char op, const StringData* key,
-                              TypedValue& dest) {
+void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
+                                unsigned char op, const StringData* key,
+                                TypedValue& dest) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -1321,7 +1240,7 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
         tvRefcountedDecRef(&ignored);
         propVal = &tvResult;
       } else {
-        memcpy((void *)propVal, (void *)&tvResult, sizeof(TypedValue));
+        memcpy((void*)propVal, (void*)&tvResult, sizeof(TypedValue));
       }
     } else {
       IncDecBody<setResult>(op, propVal, &dest);
@@ -1375,20 +1294,20 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
 }
 
 template <>
-void Instance::incDecProp<false>(TypedValue& tvRef, Class* ctx,
-                                 unsigned char op, const StringData* key,
-                                 TypedValue& dest) {
+void ObjectData::incDecProp<false>(TypedValue& tvRef, Class* ctx,
+                                   unsigned char op, const StringData* key,
+                                   TypedValue& dest) {
   incDecPropImpl<false>(tvRef, ctx, op, key, dest);
 }
 
 template <>
-void Instance::incDecProp<true>(TypedValue& tvRef, Class* ctx,
-                                unsigned char op, const StringData* key,
-                                TypedValue& dest) {
+void ObjectData::incDecProp<true>(TypedValue& tvRef, Class* ctx,
+                                  unsigned char op, const StringData* key,
+                                  TypedValue& dest) {
   incDecPropImpl<true>(tvRef, ctx, op, key, dest);
 }
 
-void Instance::unsetProp(Class* ctx, const StringData* key) {
+void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -1415,15 +1334,27 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
   }
 }
 
-void Instance::raiseUndefProp(const StringData* key) {
+void ObjectData::raiseObjToIntNotice(const char* clsName) {
+  raise_notice("Object of class %s could not be converted to int", clsName);
+}
+
+void ObjectData::raiseAbstractClassError(Class* cls) {
+  Attr attrs = cls->attrs();
+  raise_error("Cannot instantiate %s %s",
+              (attrs & AttrInterface) ? "interface" :
+              (attrs & AttrTrait)     ? "trait" : "abstract class",
+              cls->preClass()->name()->data());
+}
+
+void ObjectData::raiseUndefProp(const StringData* key) {
   raise_notice("Undefined property: %s::$%s",
                m_cls->name()->data(), key->data());
 }
 
-void Instance::getProp(const Class* klass, bool pubOnly,
-                       const PreClass::Prop* prop,
-                       Array& props,
-                       std::vector<bool>& inserted) const {
+void ObjectData::getProp(const Class* klass, bool pubOnly,
+                         const PreClass::Prop* prop,
+                         Array& props,
+                         std::vector<bool>& inserted) const {
   if (prop->attrs() & AttrStatic) {
     return;
   }
@@ -1441,10 +1372,10 @@ void Instance::getProp(const Class* klass, bool pubOnly,
   }
 }
 
-void Instance::getProps(const Class* klass, bool pubOnly,
-                        const PreClass* pc,
-                        Array& props,
-                        std::vector<bool>& inserted) const {
+void ObjectData::getProps(const Class* klass, bool pubOnly,
+                          const PreClass* pc,
+                          Array& props,
+                          std::vector<bool>& inserted) const {
   PreClass::Prop const* propVec = pc->properties();
   size_t count = pc->numProperties();
   for (size_t i = 0; i < count; ++i) {
@@ -1452,92 +1383,9 @@ void Instance::getProps(const Class* klass, bool pubOnly,
   }
 }
 
-Variant Instance::t___destruct() {
-  static StringData* sd__destruct = StringData::GetStaticString("__destruct");
-  const Func* method = m_cls->lookupMethod(sd__destruct);
-  if (method) {
-    Variant v;
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this);
-    return v;
-  } else {
-    return uninit_null();
-  }
-}
-
-Variant Instance::t___call(Variant v_name, Variant v_arguments) {
-  static StringData* sd__call = StringData::GetStaticString("__call");
-  const Func* method = m_cls->lookupMethod(sd__call);
-  if (method) {
-    Variant v;
-    TypedValue args[2];
-    tvDup(*v_name.asTypedValue(), args[0]);
-    tvDup(*v_arguments.asTypedValue(), args[1]);
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 2,
-                               args);
-    return v;
-  } else {
-    return uninit_null();
-  }
-}
-
-Variant Instance::t___set(Variant v_name, Variant v_value) {
-  const Func* method = m_cls->lookupMethod(s___set.get());
-  if (method) {
-    Variant v;
-    g_vmContext->invokeFunc(v.asTypedValue(), method,
-      Array(ArrayInit(2).set(v_name).set(withRefBind(v_value)).create()),
-      this);
-    return v;
-  } else {
-    return uninit_null();
-  }
-}
-
-Variant Instance::t___get(Variant v_name) {
-  const Func* method = m_cls->lookupMethod(s___get.get());
-  if (method) {
-    Variant v;
-    TypedValue args[1];
-    tvDup(*v_name.asTypedValue(), args[0]);
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
-                               args);
-    return v;
-  } else {
-    return uninit_null();
-  }
-}
-
-bool Instance::t___isset(Variant v_name) {
-  const Func* method = m_cls->lookupMethod(s___isset.get());
-  if (method) {
-    Variant v;
-    TypedValue args[1];
-    tvDup(*v_name.asTypedValue(), args[0]);
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
-                               args);
-    return v.toBoolean();
-  } else {
-    return false;
-  }
-}
-
-Variant Instance::t___unset(Variant v_name) {
-  const Func* method = m_cls->lookupMethod(s___unset.get());
-  if (method) {
-    Variant v;
-    TypedValue args[1];
-    tvDup(*v_name.asTypedValue(), args[0]);
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
-                               args);
-    return v;
-  } else {
-    return uninit_null();
-  }
-}
-
-Variant Instance::t___sleep() {
+Variant ObjectData::t___sleep() {
   static StringData* sd__sleep = StringData::GetStaticString("__sleep");
-  const Func *method = m_cls->lookupMethod(sd__sleep);
+  const Func* method = m_cls->lookupMethod(sd__sleep);
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);
@@ -1548,9 +1396,9 @@ Variant Instance::t___sleep() {
   }
 }
 
-Variant Instance::t___wakeup() {
+Variant ObjectData::t___wakeup() {
   static StringData* sd__wakeup = StringData::GetStaticString("__wakeup");
-  const Func *method = m_cls->lookupMethod(sd__wakeup);
+  const Func* method = m_cls->lookupMethod(sd__wakeup);
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);
@@ -1560,28 +1408,13 @@ Variant Instance::t___wakeup() {
   }
 }
 
-Variant Instance::t___set_state(Variant v_properties) {
-  static StringData* sd__set_state = StringData::GetStaticString("__set_state");
-  const Func* method = m_cls->lookupMethod(sd__set_state);
-  if (method) {
-    Variant v;
-    TypedValue args[1];
-    tvDup(*v_properties.asTypedValue(), args[0]);
-    g_vmContext->invokeFuncFew(v.asTypedValue(), method, this, nullptr, 1,
-                               args);
-    return v;
-  } else {
-    return false;
-  }
-}
-
-String Instance::t___tostring() {
-  const Func *method = m_cls->getToString();
+String ObjectData::t___tostring() {
+  const Func* method = m_cls->getToString();
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);
     if (!IS_STRING_TYPE(tv.m_type)) {
-      void (*notify_user)(const char *, ...) = &raise_error;
+      void (*notify_user)(const char*, ...) = &raise_error;
       if (hphpiCompat) {
         tvCastToStringInPlace(&tv);
         notify_user = &raise_warning;
@@ -1597,29 +1430,16 @@ String Instance::t___tostring() {
   }
 }
 
-Variant Instance::t___clone() {
-  static StringData* sd__clone = StringData::GetStaticString("__clone");
-  const Func *method = m_cls->lookupMethod(sd__clone);
-  if (method) {
-    TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
-    return false;
-  } else {
-    return false;
-  }
-}
-
-void Instance::cloneSet(ObjectData* clone) {
-  Instance* iclone = static_cast<Instance*>(clone);
+void ObjectData::cloneSet(ObjectData* clone) {
   Slot nProps = m_cls->numDeclProperties();
-  TypedValue* iclonePropVec = (TypedValue *)((uintptr_t)iclone +
+  TypedValue* clonePropVec = (TypedValue*)((uintptr_t)clone +
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
-    tvRefcountedDecRef(&iclonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &iclonePropVec[i], nullptr);
+    tvRefcountedDecRef(&clonePropVec[i]);
+    tvDupFlattenVars(&propVec()[i], &clonePropVec[i], nullptr);
   }
   if (o_properties.get()) {
-    iclone->initDynProps();
+    clone->initDynProps();
     ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {
       auto props = static_cast<HphpArray*>(o_properties.get());
@@ -1627,9 +1447,9 @@ void Instance::cloneSet(ObjectData* clone) {
       props->nvGetKey(&key, iter);
       assert(tvIsString(&key));
       StringData* strKey = key.m_data.pstr;
-      TypedValue *val = props->nvGet(strKey);
-      TypedValue *retval;
-      auto cloneProps = iclone->o_properties.get();
+      TypedValue* val = props->nvGet(strKey);
+      TypedValue* retval;
+      auto cloneProps = clone->o_properties.get();
       cloneProps->createLvalPtr(strKey, *(Variant**)&retval, false);
       tvDupFlattenVars(val, retval, cloneProps);
       iter = o_properties.get()->iter_advance(iter);
@@ -1638,14 +1458,21 @@ void Instance::cloneSet(ObjectData* clone) {
   }
 }
 
-ObjectData* Instance::cloneImpl() {
-  Instance* obj = Instance::newInstance(m_cls);
+ObjectData* ObjectData::cloneImpl() {
+  ObjectData* obj;
+  Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
-  obj->incRefCount();
-  obj->t___clone();
-  return obj;
+  static StringData* sd__clone = StringData::GetStaticString("__clone");
+  const Func* method = obj->m_cls->lookupMethod(sd__clone);
+  if (method) {
+    TypedValue tv;
+    tvWriteNull(&tv);
+    g_vmContext->invokeFuncFew(&tv, method, obj);
+    tvRefcountedDecRef(&tv);
+  }
+  return o.detach();
 }
 
- } // HPHP::VM
+} // HPHP
 
 

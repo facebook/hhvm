@@ -253,12 +253,12 @@ void *SmartAllocatorInitSetup() {
   public:                                                               \
   /* static void *ObjAllocatorInitSetup; */                             \
   inline ALWAYS_INLINE void operator delete(void *p) {                  \
-    if (T::IsResourceClass) {                                  \
+    if (T::IsResourceClass) {                                           \
       RELEASEOBJ(NS, T, p);                                             \
       return;                                                           \
     }                                                                   \
-    HPHP::Instance* this_ = (HPHP::Instance*)p;                 \
-    HPHP::Class* cls = this_->getVMClass();                         \
+    ObjectData* this_ = (ObjectData*)p;                                 \
+    Class* cls = this_->getVMClass();                                   \
     size_t nProps = cls->numDeclProperties();                           \
     size_t builtinPropSize = cls->builtinPropSize();                    \
     TypedValue* propVec =                                               \
@@ -268,7 +268,7 @@ void *SmartAllocatorInitSetup() {
       TypedValue* prop = &propVec[i];                                   \
       tvRefcountedDecRef(prop);                                         \
     }                                                                   \
-    DELETEOBJSZ(HPHP::Instance::sizeForNProps(nProps) +             \
+    DELETEOBJSZ(ObjectData::sizeForNProps(nProps) +                     \
                 builtinPropSize)(this_);                                \
   }
 

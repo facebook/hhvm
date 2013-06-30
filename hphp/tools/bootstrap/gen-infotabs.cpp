@@ -69,7 +69,7 @@ int main(int argc, const char* argv[]) {
 
   for (auto const& klass : classes) {
     if (!(klass.flags() & IsCppAbstract)) {
-      cpp << "Instance* new_" << klass.name() << "_Instance(Class*);\n";
+      cpp << "ObjectData* new_" << klass.name() << "_Instance(Class*);\n";
       classesWithCtors.insert(klass.name());
     }
     for (auto const& func : klass.methods()) {

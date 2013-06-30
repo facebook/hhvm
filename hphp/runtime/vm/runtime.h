@@ -182,10 +182,10 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
 
-inline Instance*
+inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);
-  auto* inst = Instance::newInstance(cls);
+  auto* inst = ObjectData::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);
   }

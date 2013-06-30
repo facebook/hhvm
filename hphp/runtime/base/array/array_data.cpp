@@ -136,7 +136,7 @@ void ArrayData::release() {
 // reads
 
 Object ArrayData::toObject() const {
-  return Instance::FromArray(const_cast<ArrayData *>(this));
+  return ObjectData::FromArray(const_cast<ArrayData*>(this));
 }
 
 int ArrayData::compare(const ArrayData *v2) const {

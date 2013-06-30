@@ -2531,9 +2531,8 @@ void VMExecutionContext::treadmillSharedVars() {
 void VMExecutionContext::destructObjects() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     while (!m_liveBCObjs.empty()) {
-      ObjectData* o = *m_liveBCObjs.begin();
-      Instance* instance = static_cast<Instance*>(o);
-      instance->destruct(); // Let the instance remove the node.
+      ObjectData* obj = *m_liveBCObjs.begin();
+      obj->destruct(); // Let the instance remove the node.
     }
     m_liveBCObjs.clear();
   }
@@ -4270,8 +4269,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnwind(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopThrow(PC& pc) {
   Cell* c1 = m_stack.topC();
   if (c1->m_type != KindOfObject ||
-      !static_cast<Instance*>(c1->m_data.pobj)->
-        instanceof(SystemLib::s_ExceptionClass)) {
+      !c1->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");
   }

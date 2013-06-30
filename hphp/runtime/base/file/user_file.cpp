@@ -49,7 +49,7 @@ UserFile::UserFile(Class *cls, int options /*= 0 */,
                                    cls->name()->data());
   }
 
-  m_obj = Instance::newInstance(cls);
+  m_obj = ObjectData::newInstance(cls);
   m_obj.o_set("context", context);
   Variant ret;
   g_vmContext->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());

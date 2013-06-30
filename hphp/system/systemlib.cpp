@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define ALLOC_OBJECT_STUB_RETURN(name)                                    \
-  HPHP::Instance::newInstance(SystemLib::s_##name##Class)
+  ObjectData::newInstance(SystemLib::s_##name##Class)
 
 #define ALLOC_OBJECT_STUB(name)                                           \
   ObjectData* SystemLib::Alloc##name##Object() {                          \
@@ -45,16 +45,16 @@ SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
 ObjectData* SystemLib::AllocStdClassObject() {
-  return HPHP::Instance::newInstance(SystemLib::s_stdclassClass);
+  return ObjectData::newInstance(SystemLib::s_stdclassClass);
 }
 
 ObjectData* SystemLib::AllocPinitSentinel() {
-  return HPHP::Instance::newInstance(SystemLib::s_pinitSentinelClass);
+  return ObjectData::newInstance(SystemLib::s_pinitSentinelClass);
 }
 
 #define CREATE_AND_CONSTRUCT(clsname, params)                               \
-  HPHP::Instance* inst =                                                \
-    HPHP::Instance::newInstance(SystemLib::s_##clsname##Class);         \
+  ObjectData* inst =                                                        \
+    ObjectData::newInstance(SystemLib::s_##clsname##Class);                 \
   TypedValue ret;                                                           \
   {                                                                         \
     /* Increment refcount across call to ctor, so the object doesn't */     \

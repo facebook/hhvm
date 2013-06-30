@@ -29,14 +29,14 @@ StringData* prepareAnyKey(TypedValue* tv) {
   }
 }
 
-void objArrayAccess(Instance* base) {
+void objArrayAccess(ObjectData* base) {
   assert(!base->isCollection());
   if (!base->getVMClass()->classof(SystemLib::s_ArrayAccessClass)) {
     raise_error("Object does not implement ArrayAccess");
   }
 }
 
-TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
+TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
                          CVarRef offset, bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
@@ -51,7 +51,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
   return result;
 }
 
-static bool objOffsetExists(Instance* base, CVarRef offset) {
+static bool objOffsetExists(ObjectData* base, CVarRef offset) {
   objArrayAccess(base);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
@@ -65,12 +65,12 @@ static bool objOffsetExists(Instance* base, CVarRef offset) {
   return bool(tvResult.m_data.num);
 }
 
-bool objOffsetIsset(TypedValue& tvRef, Instance* base, CVarRef offset,
+bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, CVarRef offset,
                     bool validate /* = true */) {
   return objOffsetExists(base, offset);
 }
 
-bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, CVarRef offset,
                     bool validate /* = true */) {
   if (!objOffsetExists(base, offset)) {
     return true;
@@ -80,7 +80,7 @@ bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
   return empty(tvAsCVarRef(result));
 }
 
-void objOffsetAppend(Instance* base, TypedValue* val,
+void objOffsetAppend(ObjectData* base, TypedValue* val,
                      bool validate /* = true */) {
   assert(!base->isCollection());
   if (validate) {
@@ -89,7 +89,7 @@ void objOffsetAppend(Instance* base, TypedValue* val,
   objOffsetSet(base, init_null_variant, val, false);
 }
 
-void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
                   bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
@@ -105,7 +105,7 @@ void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
   tvRefcountedDecRef(&tvResult);
 }
 
-void objOffsetUnset(Instance* base, CVarRef offset) {
+void objOffsetUnset(ObjectData* base, CVarRef offset) {
   objArrayAccess(base);
   static StringData* sd__offsetUnset
     = StringData::GetStaticString("offsetUnset");

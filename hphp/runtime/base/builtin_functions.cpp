@@ -339,7 +339,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   HPHP::Transl::CallerFrame cf;
   StringData* invName = nullptr;
   const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
-                                               obj, cls, invName);
+                                           obj, cls, invName);
   if (f == nullptr) {
     return uninit_null();
   }
@@ -679,16 +679,6 @@ void throw_call_non_object(const char *methodName) {
   }
 
   throw FatalErrorException(msg.c_str());
-}
-
-Object f_clone(CVarRef v) {
-  if (v.isObject()) {
-    Object clone = Object(v.toObject()->clone());
-    clone->t___clone();
-    return clone;
-  }
-  raise_error("Cannot clone non-object");
-  return Object();
 }
 
 String f_serialize(CVarRef value) {

@@ -3925,7 +3925,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 
-        // Instance variables.
+        // Instance properties.
         TypedValue uninit;
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {

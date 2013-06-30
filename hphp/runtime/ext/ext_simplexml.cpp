@@ -870,7 +870,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  return m_node != NULL || getProperties().size();
+  return (m_node || getDynProps().size());
 }
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {

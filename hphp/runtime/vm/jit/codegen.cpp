@@ -3402,8 +3402,9 @@ const Func* loadClassCtor(Class* cls) {
   return f;
 }
 
-Instance* createClHelper(Class* cls, int numArgs, ActRec* ar, TypedValue* sp) {
-  Instance* newObj = newInstance(cls);
+ObjectData* createClHelper(Class* cls, int numArgs, ActRec* ar,
+                           TypedValue* sp) {
+  ObjectData* newObj = newInstance(cls);
   newObj->incRefCount();
   return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
 }
@@ -3449,11 +3450,11 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm((uint64_t)cls));
   } else {
-    size_t size = Instance::sizeForNProps(cls->numDeclProperties());
+    size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
     int allocator = object_alloc_size_to_index(size);
     assert(allocator != -1);
     cgCallHelper(m_as,
-                 (TCA)getMethodPtr(&Instance::newInstanceRaw),
+                 (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
                  dstReg,
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
@@ -3518,7 +3519,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   if (cls->callsCustomInstanceInit()) {
     // callCustomInstanceInit returns the instance in rax
     cgCallHelper(m_as,
-                 (TCA)getMethodPtr(&Instance::callCustomInstanceInit),
+                 (TCA)getMethodPtr(&ObjectData::callCustomInstanceInit),
                  dstReg,
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).reg(dstReg));

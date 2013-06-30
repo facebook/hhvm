@@ -547,7 +547,7 @@ private:
 
 const Func* loadClassCtor(Class* cls);
 
-Instance* createClHelper(Class*, int, ActRec*, TypedValue*);
+ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
 void genCodeForTrace(IRTrace*                trace,
                      CodeGenerator::Asm&     a,

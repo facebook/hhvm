@@ -58,11 +58,11 @@ constexpr char* g_allIncludes = R"(
 void emitCtorHelper(const fbstring& className, std::ostream& out) {
   out << folly::format(
     R"(
-HPHP::Instance* new_{0:s}_Instance(HPHP::Class* cls) {{
+ObjectData* new_{0:s}_Instance(HPHP::Class* cls) {{
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_{0:s}) - sizeof(ObjectData);
-  size_t size = HPHP::Instance::sizeForNProps(nProps) + builtinPropSize;
-  HPHP::Instance *inst = (HPHP::Instance*)ALLOCOBJSZ(size);
+  size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
+  ObjectData *inst = (ObjectData*)ALLOCOBJSZ(size);
   new ((void *)inst) c_{0:s}(cls);
   return inst;
 }})",

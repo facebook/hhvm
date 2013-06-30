@@ -47,19 +47,18 @@ class StackTraceProfiler {
     void* const addr;
     Node* callers;
     Node* next;
-    int hits;
+    size_t hits;
   };
 
 public:
-  explicit StackTraceProfiler(const char* name, int skip = 1) :
-    m_name(name), m_root(nullptr), m_skip(skip) {
-  }
+  explicit StackTraceProfiler(std::string name, int skip = 1);
   ~StackTraceProfiler();
   StackTraceProfiler(const StackTraceProfiler& other) = delete;
   StackTraceProfiler& operator=(const StackTraceProfiler& other) = delete;
 
   // count one call in this probe.
   void count();
+  size_t hits() const { return m_root.hits; }
 
 private:
   static bool compareNodes(Node* a, Node* b);
@@ -70,10 +69,36 @@ private:
 
 private:
   Arena m_arena;
-  const char* m_name;
+  const std::string m_name;
   std::mutex m_mutex;
+  std::atomic<bool> finishing;
   Node m_root;
   int m_skip;
+};
+
+/*
+ * BoolProfiler is used to collect profiled samples of a bool variable.
+ */
+struct BoolProfiler {
+  explicit BoolProfiler(std::string name);
+  ~BoolProfiler();
+  bool operator()(bool b);
+private:
+  const std::string name;
+  StackTraceProfiler p1, p0;
+};
+
+/*
+ * IntProfiler is used to collect profiled samples of an unsiged variable.
+ * A histogram of samples are collected in power-of-2 buckets up to 64.
+ */
+struct IntProfiler {
+  explicit IntProfiler(std::string name);
+  ~IntProfiler();
+  void operator()(unsigned i);
+private:
+  const std::string name;
+  StackTraceProfiler pN, p64, p32, p16, p8, p4, p2, p1, p0;
 };
 
 }

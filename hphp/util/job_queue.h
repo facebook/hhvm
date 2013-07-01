@@ -63,6 +63,22 @@ namespace HPHP {
  * store prepared jobs. With JobQueueDispatcher, job queue is normally empty
  * initially and new jobs are pushed into the queue over time. Also, workers
  * can be stopped individually.
+ *
+ * Job process ordering
+ * ====================
+ * By default, requests are processed in FIFO order.
+ *
+ * In addition, we support an option where the request processing order can flip
+ * between FIFO or LIFO based on the length of the queue. This can be enabled by
+ * setting the 'lifoSwitchThreshold' parameter. If the job queue is configured
+ * to be in FIFO mode, and the current queue length exceeds
+ * lifoSwitchThreshold, then the workers will begin work on requests in LIFO
+ * order until the queue size is below the threshold in which case we resume in
+ * FIFO order. Setting the queue to be in LIFO mode initially will have the
+ * opposite behavior. This is useful when we are in a loaded situation and we
+ * want to prioritize the newest requests.
+ *
+ * You can configure a LIFO ordered queue by setting lifoSwitchThreshold to 0.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,11 +103,11 @@ public:
    * Constructor.
    */
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool dropStack, bool lifo)
+           bool dropStack, int lifoSwitchThreshold=INT_MAX)
       : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
         m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
-        m_lifo(lifo) {
+        m_lifoSwitchThreshold(lifoSwitchThreshold) {
   }
 
   /**
@@ -133,7 +149,8 @@ public:
     }
     if (inc) incActiveWorker();
     m_jobCount = m_jobs.size() - 1;
-    if (m_lifo) {
+
+    if (m_jobCount >= m_lifoSwitchThreshold) {
       TJob job = m_jobs.back();
       m_jobs.pop_back();
       return job;
@@ -182,18 +199,18 @@ public:
   int m_workerCount;
   int m_dropCacheTimeout;
   bool m_dropStack;
-  bool m_lifo;
+  int m_lifoSwitchThreshold;
 };
 
 template<class TJob, class Policy>
 struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool dropStack, bool lifo) :
+           bool dropStack, int lifoSwitchThreshold=INT_MAX) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 threadRoundRobin,
                                 dropCacheTimeout,
                                 dropStack,
-                                lifo) {
+                                lifoSwitchThreshold) {
     pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() {
@@ -321,11 +338,11 @@ public:
    */
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
                      int dropCacheTimeout, bool dropStack, void *opaque,
-                     bool lifo = false)
+                     int lifoSwitchThreshold = INT_MAX)
       : m_stopped(true), m_id(0), m_opaque(opaque),
         m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
-                lifo) {
+                lifoSwitchThreshold) {
     assert(threadCount >= 1);
     if (!TWorker::CountActive) {
       // If TWorker does not support counting the number of

@@ -108,7 +108,7 @@ constexpr int kDefaultWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerWarmupThrottleRequestCount =
   kDefaultWarmupThrottleRequestCount;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
-bool RuntimeOption::ServerThreadJobLIFO = false;
+int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = true;
@@ -689,7 +689,12 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       );
     ServerThreadDropCacheTimeoutSeconds =
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
-    ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
+    if (server["ThreadJobLIFO"].getBool()) {
+      ServerThreadJobLIFOSwitchThreshold = 0;
+    }
+    ServerThreadJobLIFOSwitchThreshold =
+      server["ThreadJobLIFOSwitchThreshold"].getInt32(
+        ServerThreadJobLIFOSwitchThreshold);
     ServerThreadDropStack = server["ThreadDropStack"].getBool();
     ServerHttpSafeMode = server["HttpSafeMode"].getBool();
     ServerStatCache = server["StatCache"].getBool(true);

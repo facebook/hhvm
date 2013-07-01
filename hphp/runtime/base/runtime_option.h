@@ -100,7 +100,7 @@ public:
   static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
-  static bool ServerThreadJobLIFO;
+  static int ServerThreadJobLIFOSwitchThreshold;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;

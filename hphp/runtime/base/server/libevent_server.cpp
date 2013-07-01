@@ -158,7 +158,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
-                 this, RuntimeOption::ServerThreadJobLIFO),
+                 this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);

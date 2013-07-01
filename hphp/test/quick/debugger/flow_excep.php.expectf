@@ -1,5 +1,5 @@
 Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Sbreak main()
+break main()
 Breakpoint 1 set upon entering main()
 But wont break until function main has been loaded.
 run

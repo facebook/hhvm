@@ -1,5 +1,5 @@
 Program %s/flow.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Sbreak cls::pub()
+break cls::pub()
 Breakpoint 1 set upon entering cls::pub()
 But wont break until class cls has been loaded.
 run

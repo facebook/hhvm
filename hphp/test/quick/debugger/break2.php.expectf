@@ -1,7 +1,7 @@
 Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Sbreak quick/debugger/break2.php:7
-Breakpoint 1 set on line 7 of quick/debugger/break2.php
-But wont break until file quick/debugger/break2.php has been loaded.
+break %s/break2.php:7
+Breakpoint 1 set on line 7 of %s/break2.php
+But wont break until file %s/break2.php has been loaded.
 break foo2()
 Breakpoint 2 set upon entering foo2()
 But wont break until function foo2 has been loaded.
@@ -12,7 +12,7 @@ break cls2::pubCls()
 Breakpoint 4 set upon entering cls2::pubCls()
 But wont break until class cls2 has been loaded.
 break list
-  1	ALWAYS    on line 7 of quick/debugger/break2.php (unbound)
+  1	ALWAYS    on line 7 of %s/break2.php (unbound)
   2	ALWAYS    upon entering foo2() (unbound)
   3	ALWAYS    upon entering cls2::pubObj() (unbound)
   4	ALWAYS    upon entering cls2::pubCls() (unbound)
@@ -26,12 +26,12 @@ Breakpoint 2 reached at foo2() on line 6 of %s/break2.php
    7   error_log($y);
 
 break list
-  1	ALWAYS    on line 7 of quick/debugger/break2.php
+  1	ALWAYS    on line 7 of %s/break2.php
   2	ALWAYS    upon entering foo2()
   3	ALWAYS    upon entering cls2::pubObj()
   4	ALWAYS    upon entering cls2::pubCls()
 continue
-Breakpoint 1 reached at foo2() on line 7 of %s/quick/debugger/break2.php
+Breakpoint 1 reached at foo2() on line 7 of %s/break2.php
    6   $y = $x.'_suffix';
    7   error_log($y);
    8 }

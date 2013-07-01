@@ -1,5 +1,5 @@
 Program %s/info1.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%S@
+@
 
 info array_key_exists
 /**

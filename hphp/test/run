@@ -255,6 +255,7 @@ function extra_args($options) {
   return idx($options, 'args', '');
 }
 
+// Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
   if ($test_run === null) {
     $test_run = $test;
@@ -271,12 +272,17 @@ function hhvm_cmd($options, $test, $test_run = null) {
     '--file',
     escapeshellarg($test_run)
   ));
-
+  $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {
     $cmd .= ' < ' . escapeshellarg($in);
+    // If we're piping the input into the command then setup a simple
+    // dumb terminal so hhvm doesn't try to control it and pollute the
+    // output with control characters, which could change depending on
+    // a wide variety of terminal settings.
+    $env["TERM"] = "dumb";
   }
-  return $cmd;
+  return array($cmd, $env);
 }
 
 function hphp_cmd($options, $test) {
@@ -432,14 +438,14 @@ function skip_test($options, $test) {
     return false;
   }
 
-  $hhvm = hhvm_cmd($options, $test, $skipif_test);
+  list($hhvm, $_) = hhvm_cmd($options, $test, $skipif_test);
   $out = shell_exec($hhvm . ' 2> /dev/null');
   $out = trim($out);
   return (bool)strlen($out);
 }
 
 function run_test($options, $test) {
-  $hhvm = hhvm_cmd($options, $test);
+  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   $hhvm = __DIR__."/../tools/timeout.sh -t 300 $hhvm";
   $output = "";
 
@@ -466,7 +472,7 @@ function run_test($options, $test) {
      1 => array("pipe", "w"),
      2 => array("pipe", "w"),
   );
-  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes);
+  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $hhvm");
     return false;
@@ -691,7 +697,7 @@ SHIP
       print $header_start."Run these by hand:".$header_end;
 
       foreach ($failed as $test) {
-        $command = hhvm_cmd($options, $test);
+        list($command, $_) = hhvm_cmd($options, $test);
         if (isset($options['repo'])) {
           $command .= " -vRepo.Authoritative=true ";
           $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",

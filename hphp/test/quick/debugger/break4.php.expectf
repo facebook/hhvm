@@ -1,5 +1,5 @@
 Program %s/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Sbreak :fb:my:thing::doIt()
+break :fb:my:thing::doIt()
 Breakpoint 1 set upon entering xhp_fb__my__thing::doIt()
 But wont break until class xhp_fb__my__thing has been loaded.
 continue

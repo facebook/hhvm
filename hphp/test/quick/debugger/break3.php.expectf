@@ -1,5 +1,5 @@
 Program %s/break3.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Scontinue
+continue
 break3.php loaded
 Program %s/break3.php exited normally.
 break \TestNs\foo()

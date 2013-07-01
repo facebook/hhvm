@@ -1,5 +1,5 @@
 Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Srun
+run
 flow2.php done
 Program %s/flow2.php exited normally.
 break test()

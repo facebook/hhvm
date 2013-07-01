@@ -1,5 +1,5 @@
 Program %s/break1.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Srun
+run
 break1.php loaded
 Program %s/break1.php exited normally.
 break break1.php:7

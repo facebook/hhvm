@@ -1,5 +1,5 @@
 Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Srun
+run
 eval1.php loaded
 Program %s/eval1.php exited normally.
 print function_exists('test1')

@@ -1,5 +1,5 @@
 Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Sbr SplMaxHeap::insert()
+br SplMaxHeap::insert()
 Breakpoint 1 set upon entering SplMaxHeap::insert()
 run
 Breakpoint 1 reached at SplHeap::insert() on line %d of systemlib.php

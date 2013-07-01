@@ -1,5 +1,5 @@
 Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
-%Srun
+run
 flow_gen.php loaded
 Program %s/flow_gen.php exited normally.
 break flow_gen.php:12

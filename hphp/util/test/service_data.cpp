@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <atomic>
 #include "hphp/util/service_data.h"
 #include "gtest/gtest.h"
 namespace HPHP {
@@ -57,10 +58,11 @@ TEST(ServiceDataTest, CounterTest) {
   counter1->setValue(5);
   counter2->increment();
   counter1->increment();
+  ServiceData::createCounter("c2")->increment();
   {
     std::map<std::string, int64_t> values;
     ServiceData::exportAll(values);
-    EXPECT_EQ(7, values["c2"]);
+    EXPECT_EQ(8, values["c2"]);
   }
 }
 

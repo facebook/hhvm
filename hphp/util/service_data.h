@@ -30,6 +30,7 @@
 #include "folly/stats/MultiLevelTimeSeries.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -96,6 +97,11 @@ namespace ServiceData {
 class ExportedCounter;
 class ExportedHistogram;
 class ExportedTimeSeries;
+
+namespace detail {
+template <class ClassWithPrivateDestructor>
+class FriendDeleter;
+};
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
 
@@ -167,6 +173,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap);
 // Interface for a flat counter. All methods are thread safe.
 class ExportedCounter {
  public:
+  ExportedCounter() : m_value(0) {}
   void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
   void decrement() { m_value.fetch_sub(1, std::memory_order_relaxed); }
   void setValue(int64_t value) {
@@ -175,9 +182,10 @@ class ExportedCounter {
   int64_t getValue() const { return m_value.load(std::memory_order_relaxed); }
 
  private:
-  std::atomic_int_fast64_t m_value;
+  friend class detail::FriendDeleter<ExportedCounter>;
+  ~ExportedCounter() {}
 
-  ~ExportedCounter() = delete;
+  std::atomic_int_fast64_t m_value;
 };
 
 // Interface for timeseries data. All methods are thread safe.
@@ -195,11 +203,12 @@ class ExportedTimeSeries {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
+  friend class detail::FriendDeleter<ExportedTimeSeries>;
+  ~ExportedTimeSeries() {}
+
   folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>,
                       folly::RWSpinLock > m_timeseries;
   const std::vector<ServiceData::StatsType> m_exportTypes;
-
-  ~ExportedTimeSeries() = delete;
 };
 
 // Interface for histogram data. All methods are thread safe.
@@ -213,10 +222,11 @@ class ExportedHistogram {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
+  friend class detail::FriendDeleter<ExportedHistogram>;
+  ~ExportedHistogram() {}
+
   folly::Synchronized<folly::Histogram<int64_t>, folly::RWSpinLock> m_histogram;
   const std::vector<double> m_exportPercentiles;
-
-  ~ExportedHistogram() = delete;
 };
 
 };  // namespace ServiceData

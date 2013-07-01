@@ -35,13 +35,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 InitFiniNode *extra_init, *extra_fini, *extra_process_init, *extra_process_exit;
+InitFiniNode *extra_server_init, *extra_server_exit;
 
 InitFiniNode::InitFiniNode(void(*f)(), When init) {
   InitFiniNode *&ifn =
     init == When::ThreadInit ? extra_init :
     init == When::ThreadFini ? extra_fini :
-    init == When::ProcessInit ? extra_process_init : extra_process_exit;
-
+    init == When::ProcessInit ? extra_process_init :
+    init == When::ProcessExit ? extra_process_exit :
+    init == When::ServerInit ? extra_server_init : extra_server_exit;
   func = f;
   next = ifn;
   ifn = this;

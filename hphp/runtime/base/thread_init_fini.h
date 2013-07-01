@@ -32,7 +32,9 @@ struct InitFiniNode {
     ThreadInit,
     ThreadFini,
     ProcessInit,
-    ProcessExit
+    ProcessExit,
+    ServerInit,
+    ServerExit
   };
   InitFiniNode(void(*f)(), When when);
   void (*func)();

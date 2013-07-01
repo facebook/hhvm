@@ -200,7 +200,9 @@ public:
   static const ssize_t EventHookFlag        = 1 << 3;
   static const ssize_t PendingExceptionFlag = 1 << 4;
   static const ssize_t InterceptFlag        = 1 << 5;
-  static const ssize_t LastFlag             = InterceptFlag;
+  // Set by the debugger to break out of loops in translated code.
+  static const ssize_t DebuggerSignalFlag   = 1 << 6;
+  static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
     : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
@@ -265,6 +267,7 @@ public:
   void clearPendingExceptionFlag();
   void setInterceptFlag();
   void clearInterceptFlag();
+  void setDebuggerSignalFlag();
   ssize_t fetchAndClearFlags();
 
   void onSessionInit();

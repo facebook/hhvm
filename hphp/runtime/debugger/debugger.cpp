@@ -405,20 +405,25 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \
 
-// Ask every thread in this proxy's sandbox and the dummy sandbox to "stop".
-// Gaining control of these threads is the intention... the mechanism is to
-// force them all to start interpreting all of their code in an effort to gain
-// control in phpDebuggerOpcodeHook().
+// Ask every thread in this proxy's sandbox and the dummy sandbox to
+// "stop".  Gaining control of these threads is the intention... the
+// mechanism is to force them all to start interpreting all of their
+// code in an effort to gain control in phpDebuggerOpcodeHook(). We
+// set the "debugger interrupt" flag to ensure we interpret code
+// rather than entering translated code, and we set the "debugger
+// signal" surprise flag to pop out of loops in translated code.
 void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::requestInterrupt\n");
   const StringData* sid = StringData::GetStaticString(proxy->getSandboxId());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
+    ti->m_reqInjectionData.setDebuggerSignalFlag();
   FOREACH_SANDBOX_THREAD_END()
 
   sid = StringData::GetStaticString(proxy->getDummyInfo().id());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
+    ti->m_reqInjectionData.setDebuggerSignalFlag();
   FOREACH_SANDBOX_THREAD_END()
 }
 

@@ -324,6 +324,10 @@ void TestDebugger::testWebRequestHelperPhase1() {
   // let the original request for web_request_t.php run, and it should now be
   // spinning in an infinite loop in test_sleep(). This will issue a ctrl-c
   // which will break within that loop.
+  //
+  // NB: sleep a bit first to give the request thread time to settle
+  // into the infinite loop.
+  sleep(2);
   if (!getResponse("web_request_interrupt.php", result) ||
       result != "interrupt done") {
     printf("failed on web_request_interrupt.php\n");

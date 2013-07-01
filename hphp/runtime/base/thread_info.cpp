@@ -188,6 +188,11 @@ void RequestInjectionData::clearInterceptFlag() {
                        ~RequestInjectionData::InterceptFlag);
 }
 
+void RequestInjectionData::setDebuggerSignalFlag() {
+  __sync_fetch_and_or(getConditionFlags(),
+                      RequestInjectionData::DebuggerSignalFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
   return __sync_fetch_and_and(getConditionFlags(),
                               (RequestInjectionData::EventHookFlag |

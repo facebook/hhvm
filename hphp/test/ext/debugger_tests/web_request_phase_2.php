@@ -15,7 +15,13 @@ function signal1($c) {
   $o = $c->processCmd('continue', null);
   VS($o['output_type'], 'code_loc');
   VS(substr($o['file'],-17), 'web_request_t.php');
-  VS($o['line_no'], 20);
+  // The interrupt could stop the loop on either the 'sleep' or the
+  // 'while'. In practice it seems to always hit the 'while', but
+  // either is valid so be safe and allow both.
+  $line_no = $o['line_no'];
+  if (($line_no != 19) && ($line_no != 20)) {
+    throw new TestFailure($line_no, '19 or 20');
+  }
   $o = $c->processCmd('print', array('$a'));
   VS($o['values']['value'], 1);
   // Break the endless loop in web_request_t.php.

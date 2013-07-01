@@ -160,6 +160,17 @@ void CmdBreak::help(DebuggerClient &client) {
     "So every time it breaks at mypage.php line 123, it will print out $a."
   );
 
+  client.helpTitle("Call chains");
+  client.helpSection(
+    "Function/method call breakpoints can be qualified with the names of "
+    "functions or methods that must be calling the right most function/method "
+    "name for execution to stop at the breakpoint. These calls need not be "
+    "direct calls. The syntax looks like this:\n"
+    "  {call}=>{call}()\n"
+    "where call is either a {func} or {cls}::{method} and zero or more "
+    "\"{call}=>\" clauses can be specified."
+   );
+
   client.helpTitle("Breakpoint States and List");
   client.helpSection(
     "Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword "

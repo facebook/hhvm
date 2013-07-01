@@ -33,7 +33,39 @@ break noSuchFunction()
 break list
 break clear all
 break derived::pubObj()
+break list
 @ $break6 = new derived()
 @ $break6->pubObj('test_break6')
+continue
+break clear all
+b cls::pubObj() if $x == 'yes'
+@ $break7 = new cls()
+@ $break7->pubObj('yes');
+break list
+b 12 if $x == 'yes sir'
+@ $this->pubObj('yes sir');
+break list
+break clear all
+continue
+break derived::callPubObj=>cls::pubObj()
+break list
+@ $break8 = new derived();
+@ $break8->pubObj('no')
+@ $break8->callPubObj('yes')
+break clear all
+continue
+break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
+break list
+@ $break9 = new derived();
+@ $break9->callPubObj('no')
+@ $break9->callCallPubObj('yes')
+break clear all
+continue
+break derived::callCallPubObj=>cls::pubObj()
+break list
+@ $break10 = new derived();
+@ $break10->callPubObj('no')
+@ $break10->callCallPubObj('yes')
+break clear all
 continue
 quit

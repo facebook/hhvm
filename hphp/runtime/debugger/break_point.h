@@ -62,6 +62,7 @@ class InterruptSite {
 public:
   InterruptSite(bool hardBreakPoint, CVarRef e);
 
+  const InterruptSite *getCallingSite() const;
   const char *getFile() const { return m_file.data(); }
   const char *getClass() const { return m_class ? m_class : ""; }
   const char *getFunction() const { return m_function ? m_function : ""; }
@@ -89,9 +90,14 @@ public:
   bool funcEntry() const { return m_funcEntry; }
 
 private:
+  InterruptSite(ActRec* fp, Offset offset, CVarRef error);
+  void Initialize(ActRec *fp);
+
   Variant m_error;
+  ActRec *m_activationRecord;
 
   // cached
+  mutable std::unique_ptr<const InterruptSite> m_callingSite;
   mutable const char *m_class;
   mutable const char *m_function;
   mutable String m_file;

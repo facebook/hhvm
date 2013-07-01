@@ -22,6 +22,12 @@ class cls {
 }
 
 class derived extends cls {
+  public function callPubObj($x) {
+    $this->pubObj($x);
+  }
+  public function callCallPubObj($x) {
+    $this->callPubObj($x);
+  }
 }
 
 error_log('break1.php loaded');

@@ -76,13 +76,13 @@ std::string InterruptSite::desc() const {
 }
 
 InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
-    : m_error(error), m_class(nullptr), m_function(nullptr),
-      m_file((StringData*)nullptr),
+    : m_error(error), m_activationRecord(nullptr),
+      m_callingSite(nullptr), m_class(nullptr),
+      m_function(nullptr), m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
       m_offset(InvalidAbsoluteOffset), m_unit(nullptr), m_valid(false),
       m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
-  Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
@@ -91,10 +91,6 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
     fp = context->getPrevVMState(fp, &m_offset);
-    assert(fp);
-    bail_on(!fp->m_func);
-    m_unit = fp->m_func->unit();
-    bail_on(!m_unit);
   } else {
     const uchar *pc = context->getPC();
     bail_on(!fp->m_func);
@@ -105,6 +101,32 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
       m_funcEntry = true;
     }
   }
+#undef bail_on
+  this->Initialize(fp);
+}
+
+// Only used to look for callers by function name. No need to
+// to retrieve source line information for this kind of site.
+InterruptSite::InterruptSite(ActRec *fp, Offset offset, CVarRef error)
+  : m_error(error), m_activationRecord(nullptr),
+    m_callingSite(nullptr), m_class(nullptr),
+    m_function(nullptr), m_file((StringData*)nullptr),
+    m_line0(0), m_char0(0), m_line1(0), m_char1(0),
+    m_offset(offset), m_unit(nullptr), m_valid(false),
+    m_funcEntry(false) {
+  TRACE(2, "InterruptSite::InterruptSite(fp)\n");
+  this->Initialize(fp);
+}
+
+void InterruptSite::Initialize(ActRec *fp) {
+  TRACE(2, "InterruptSite::Initialize\n");
+
+#define bail_on(c) if (c) { return; }
+  assert(fp);
+  m_activationRecord = fp;
+  bail_on(!fp->m_func);
+  m_unit = fp->m_func->unit();
+  bail_on(!m_unit);
   m_file = m_unit->filepath()->data();
   if (m_unit->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
@@ -120,6 +142,21 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
   }
 #undef bail_on
   m_valid = true;
+}
+
+// Returns an Interrupt site for the function that called the
+// function that contains this site. This site retains ownership
+// of the returned site and it will be deleted when this site
+// is destructed, so do not hold on to the returned object for
+// longer than there is a guarantee that this site will be alive.
+const InterruptSite *InterruptSite::getCallingSite() const {
+  if (m_callingSite != nullptr) return m_callingSite.get();
+  VMExecutionContext* context = g_vmContext;
+  Offset parentOffset;
+  auto parentFp = context->getPrevVMState(m_activationRecord, &parentOffset);
+  if (parentFp == nullptr) return nullptr;
+  m_callingSite.reset(new InterruptSite(parentFp, parentOffset, m_error));
+  return m_callingSite.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -294,7 +331,7 @@ bool BreakPointInfo::valid() {
             return false;
           }
         }
-        if (m_regex || m_funcs.size() > 1) {
+        if (m_regex) {
           return false;
         }
         return (m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty();
@@ -674,6 +711,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
       // check for {something other than a name}
       if (offset2 == offset1) goto returnInvalid;
       name = exp.substr(offset1, offset2-offset1);
+      offset1 = offset2;
     }
     while (offset1 < len && exp[offset1] == '\\') {
       if (!m_namespace.empty()) m_namespace += "\\";
@@ -939,17 +977,26 @@ bool BreakPointInfo::checkLines(int line) {
   return true;
 }
 
+// Checks if m_funcs[0] matches the top of the execution stack and
+// if m_funcs[1] (if not null) matches an earlier stack frame, and so on.
+// I.e. m_funcs[1] need only be caller, not a direct caller, of m_funcs[0].
 bool BreakPointInfo::checkStack(InterruptSite &site) {
   TRACE(2, "BreakPointInfo::checkStack\n");
-  if (m_funcs.empty()) return true;
-
-  if (!Match(site.getNamespace(), 0, m_funcs[0]->m_namespace, m_regex, true) ||
-      !Match(site.getFunction(),  0, m_funcs[0]->m_function,  m_regex, true) ||
-      !MatchClass(site.getClass(), m_funcs[0]->m_class, m_regex,
-                  site.getFunction())) {
-    return false;
+  const InterruptSite* s = &site;
+  for (int i = 0; i < m_funcs.size(); ) {
+    if (s == nullptr) return false;
+    if (!Match(s->getNamespace(), 0, m_funcs[i]->m_namespace, m_regex, true) ||
+        !Match(s->getFunction(),  0, m_funcs[i]->m_function,  m_regex, true) ||
+        !MatchClass(s->getClass(), m_funcs[i]->m_class, m_regex,
+                    s->getFunction())) {
+      if (i == 0) return false; //m_funcs[0] must match the very first frame.
+      // there is a mismatch for this frame, but the calling frame may match
+      // so carry on.
+    } else {
+      i++; // matched m_funcs[i], proceed to match m_funcs[i+1]
+    }
+    s = s->getCallingSite();
   }
-
   return true;
 }
 

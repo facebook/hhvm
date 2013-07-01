@@ -99,6 +99,8 @@ break clear all
 All breakpoints are cleared.
 break derived::pubObj()
 Breakpoint 1 set upon entering derived::pubObj()
+break list
+  1	ALWAYS    upon entering derived::pubObj()
 @ $break6 = new derived()
 
 @ $break6->pubObj('test_break6')
@@ -109,5 +111,95 @@ Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
 
 continue
 pubObj:test_break6
+
+break clear all
+All breakpoints are cleared.
+b cls::pubObj() if $x == 'yes'
+Breakpoint 1 set upon entering cls::pubObj() if $x == 'yes'
+@ $break7 = new cls()
+
+@ $break7->pubObj('yes');
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break list
+  1	ALWAYS    upon entering cls::pubObj() if $x == 'yes'
+b 12 if $x == 'yes sir'
+Breakpoint 2 set on line 12 of %s/break1.php if $x == 'yes sir'
+@ $this->pubObj('yes sir');
+Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break list
+  1	ALWAYS    upon entering cls::pubObj() if $x == 'yes'
+  2	ALWAYS    on line 12 of %s/break1.php if $x == 'yes sir'
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes sir
+
+break derived::callPubObj=>cls::pubObj()
+Breakpoint 2 set upon entering cls::pubObj() called by derived::callPubObj()
+break list
+  2	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
+@ $break8 = new derived();
+
+@ $break8->pubObj('no')
+pubObj:no
+
+@ $break8->callPubObj('yes')
+Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
+
+break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
+Breakpoint 2 set upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+break list
+  2	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+@ $break9 = new derived();
+
+@ $break9->callPubObj('no')
+pubObj:no
+
+@ $break9->callCallPubObj('yes')
+Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
+
+break derived::callCallPubObj=>cls::pubObj()
+Breakpoint 2 set upon entering cls::pubObj() called by derived::callCallPubObj()
+break list
+  2	ALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
+@ $break10 = new derived();
+
+@ $break10->callPubObj('no')
+pubObj:no
+
+@ $break10->callCallPubObj('yes')
+Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
 
 quit

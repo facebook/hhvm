@@ -76,6 +76,16 @@ variables at breakpoints. For example,
 
 So every time it breaks at mypage.php line 123, it will print out $a.
 
+    -------------------------- Call chains -------------------------------
+    
+Function/method call breakpoints can be qualified with the names of
+functions or methods that must be calling the right most function/method
+name for execution to stop at the breakpoint. These calls need not be 
+direct calls. The syntax looks like this:
+    {call}=>{call}()
+where call is either a {func} or {cls}::{method} and zero or more 
+"{call}=>" clauses can be specified.
+
     --------------------- Breakpoint States and List ---------------------
 
 Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword "once",
@@ -265,7 +275,7 @@ will not be affected by this setting. This directory will be stored in
 configuration file for future sessions as well.
 
 
-    ────────────────────────── Machine Command ──────────────────────────
+    -------------------------- Machine Command ---------------------------
 
     [m]achine            debugging remote server natively
       [c]onnect {host}

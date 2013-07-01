@@ -84,10 +84,10 @@ public:
   static void Info(const std::string &msg);
   static void Verbose(const std::string &msg);
 
-  static void Error(const char *fmt, ...);
-  static void Warning(const char *fmt, ...);
-  static void Info(const char *fmt, ...);
-  static void Verbose(const char *fmt, ...);
+  static void Error(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+  static void Warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+  static void Info(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+  static void Verbose(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
   static void Log(LogLevelType level, const char *type, const Exception &e,
                   const char *file = nullptr, int line = 0);
@@ -130,8 +130,10 @@ protected:
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(LogLevelType level, const char *fmt, va_list ap);
-  static void LogEscapeMore(LogLevelType level, const char *fmt, va_list ap);
+  static void Log(LogLevelType level, const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF(2,0);
+  static void LogEscapeMore(LogLevelType level, const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF(2,0);
   static void Log(LogLevelType level, const std::string &msg,
                   const StackTrace *stackTrace,
                   bool escape = false, bool escapeMore = false);

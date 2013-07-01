@@ -136,11 +136,11 @@ public:
   /**
    * Output functions
    */
-  void print  (const char *fmt, ...);
-  void help   (const char *fmt, ...);
-  void info   (const char *fmt, ...);
-  void output (const char *fmt, ...);
-  void error  (const char *fmt, ...);
+  void print  (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void help   (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void info   (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void output (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void error  (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
   void print  (const std::string &s);
   void help   (const std::string &s);
@@ -157,7 +157,7 @@ public:
   bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   void shortCode(BreakPointInfoPtr bp);
-  char ask(const char *fmt, ...);
+  char ask(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
   std::string wrap(const std::string &s);
   void helpTitle(const char *title);

@@ -20,6 +20,8 @@
 #include <cstdarg>
 #include <cinttypes>
 
+#include "hphp/util/util.h"
+
 namespace HPHP {
 namespace Trace {
 
@@ -39,7 +41,7 @@ enum RingBufferType {
 #undef RBTYPE
 };
 
-void vtraceRingbuffer(const char* fmt, va_list ap);
+void vtraceRingbuffer(const char* fmt, va_list ap) ATTRIBUTE_PRINTF(1,0);
 void ringbufferMsg(const char* msg, size_t msgLen, RingBufferType t = RBTypeMsg);
 void ringbufferEntry(RingBufferType t, uint64_t funcId, int offset);
 

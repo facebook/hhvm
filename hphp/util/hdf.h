@@ -360,9 +360,7 @@ private:
  */
 class HdfException : public Exception {
 public:
-  HdfException(const char *fmt, ...) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
+  HdfException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   EXCEPTION_COMMON_IMPL(HdfException);
 };
 

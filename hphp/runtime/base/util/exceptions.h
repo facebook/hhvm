@@ -31,7 +31,7 @@ public:
   ExtendedException();
   explicit ExtendedException(const std::string &msg);
   ExtendedException(SkipFrame frame, const std::string &msg);
-  ExtendedException(const char *fmt, ...);
+  ExtendedException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   Array getBackTrace() const;
   virtual ~ExtendedException() throw() {}
   EXCEPTION_COMMON_IMPL(ExtendedException);
@@ -143,10 +143,7 @@ public:
 class ParseTimeFatalException : public Exception {
 public:
   ParseTimeFatalException(const char* file, int line,
-                          const char* msg, ...)
-      : m_file(file), m_line(line) {
-    va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
-  }
+                          const char* msg, ...) ATTRIBUTE_PRINTF(4,5);
   virtual ~ParseTimeFatalException() throw() {}
   EXCEPTION_COMMON_IMPL(ParseTimeFatalException);
 
@@ -158,9 +155,7 @@ class FatalErrorException : public ExtendedException {
 public:
   explicit FatalErrorException(const char *msg)
     : ExtendedException("%s", msg) {}
-  FatalErrorException(int, const char *msg, ...) {
-    va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
-  }
+  FatalErrorException(int, const char *msg, ...) ATTRIBUTE_PRINTF(3,4);
   FatalErrorException(const std::string &msg, const Array& backtrace);
   virtual ~FatalErrorException() throw() {}
   EXCEPTION_COMMON_IMPL(FatalErrorException);
@@ -168,7 +163,8 @@ public:
 
 class UncatchableException : public ExtendedException {
 public:
-  explicit UncatchableException(const char *msg) : ExtendedException(msg) {}
+  explicit UncatchableException(const char *msg)
+    : ExtendedException("%s", msg) {}
   virtual ~UncatchableException() throw() {}
   EXCEPTION_COMMON_IMPL(UncatchableException);
 };
@@ -214,9 +210,7 @@ public:
     : ExtendedException("Invalid argument \"%s\": [%s]", param,
                         value.c_str()) {}
 
-  InvalidArgumentException(int, const char *fmt, ...) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
+  InvalidArgumentException(int, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 
   explicit InvalidArgumentException(const char *param)
     : ExtendedException("Invalid argument: %s", param) {}

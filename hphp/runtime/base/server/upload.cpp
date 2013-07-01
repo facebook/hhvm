@@ -942,13 +942,13 @@ void rfc1867PostHandler(Transport *transport,
 
         if (VirtualHost::GetUploadMaxFileSize() > 0 &&
             total_bytes > VirtualHost::GetUploadMaxFileSize()) {
-          Logger::Verbose("upload_max_filesize of %ld bytes exceeded - file "
-                          "[%s=%s] not saved",
+          Logger::Verbose("upload_max_filesize of %" PRId64 " bytes exceeded "
+                          "- file [%s=%s] not saved",
                           VirtualHost::GetUploadMaxFileSize(),
                           param, filename);
           cancel_upload = UPLOAD_ERROR_A;
         } else if (max_file_size && (total_bytes > max_file_size)) {
-          Logger::Verbose("MAX_FILE_SIZE of %ld bytes exceeded - "
+          Logger::Verbose("MAX_FILE_SIZE of %d bytes exceeded - "
                           "file [%s=%s] not saved",
                           max_file_size, param, filename);
           cancel_upload = UPLOAD_ERROR_B;
@@ -957,8 +957,8 @@ void rfc1867PostHandler(Transport *transport,
           wlen = write(fd, buff, blen);
 
           if (wlen < blen) {
-            Logger::Verbose("Only %d bytes were written, expected to "
-                            "write %d", wlen, blen);
+            Logger::Verbose("Only %zd bytes were written, expected to "
+                            "write %zd", wlen, blen);
             cancel_upload = UPLOAD_ERROR_F;
           } else {
             total_bytes += wlen;

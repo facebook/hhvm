@@ -265,7 +265,8 @@ const void *buffer_append(const void *buf1, int size1,
  */
 void string_printf(std::string &msg,
                    const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-void string_vsnprintf(std::string &msg, const char *fmt, va_list ap);
+void string_vsnprintf(std::string &msg,
+                      const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
 /**
  * Escaping strings for code generation.

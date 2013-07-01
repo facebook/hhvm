@@ -43,7 +43,7 @@ void SharedMemoryManager::Init(int size, bool clean) {
         (boost::interprocess::open_or_create, Name, size);
     }
   } catch (std::exception &e) {
-    throw Exception(e.what()); // so we have stacktrace
+    throw Exception("%s", e.what()); // so we have stacktrace
   }
 }
 

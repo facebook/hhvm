@@ -31,6 +31,7 @@
 
 namespace HPHP { namespace Transl {
 
+static void panic(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);  // decls only
 static void panic(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

@@ -90,11 +90,11 @@ public:
     if (!m_refs[id-1].canBeReferenced()) {
       // If the low bit is set, that means the value cannot
       // be taken by reference
-      throw Exception("Collection values cannot be taken by reference", id);
+      throw Exception("Collection values cannot be taken by reference");
     }
     Variant* ret = m_refs[id-1].var();
     if (!ret) {
-      throw Exception("Collection keys cannot be taken by reference", id);
+      throw Exception("Collection keys cannot be taken by reference");
     }
     return ret;
   }

@@ -55,7 +55,11 @@ extern bool libxml_use_internal_error();
 extern void libxml_add_error(const std::string &msg);
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
-                                              const char *fmt, va_list ap) {
+                                              const char *fmt,
+                                              va_list ap) ATTRIBUTE_PRINTF(3,0);
+static void php_libxml_internal_error_handler(int error_type, void *ctx,
+                                              const char *fmt,
+                                              va_list ap) {
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
 
@@ -121,7 +125,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
  * error handler callbacks.
  */
 
-static void php_libxml_ctx_error(void *ctx, const char *msg, ...) {
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -130,7 +137,10 @@ static void php_libxml_ctx_error(void *ctx, const char *msg, ...) {
   va_end(args);
 }
 
-static void php_libxml_ctx_warning(void *ctx, const char *msg, ...) {
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {

@@ -665,8 +665,15 @@ void Hdf::CheckNeoError(NEOERR *err) {
     NEOSTRING str;
     string_init(&str);
     nerr_error_string(err, &str);
-    throw HdfException(str.buf);
+    throw HdfException("%s", str.buf);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// exceptions
+
+HdfException::HdfException(const char *fmt, ...) {
+  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

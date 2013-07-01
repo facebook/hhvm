@@ -59,9 +59,9 @@ void CmdExtended::helpImpl(DebuggerClient &client, const char *name) {
 
   const ExtendedCommandMap &cmds = getCommandMap();
   if (!cmds.empty()) {
-    client.help("");
+    client.help("%s", "");
     client.help("where {cmd} can be:");
-    client.help("");
+    client.help("%s", "");
     vector<string> vcmds;
     for (ExtendedCommandMap::const_iterator iter = cmds.begin();
          iter != cmds.end(); ++iter) {
@@ -72,7 +72,7 @@ void CmdExtended::helpImpl(DebuggerClient &client, const char *name) {
                    (vcmds[i], i ? vcmds[i-1] : "",
                     i < vcmds.size() - 1 ? vcmds[i+1] : "").c_str());
     }
-    client.help("");
+    client.help("%s", "");
     client.help("Type '%s [h]elp|? {cmd} to read their usages.", name);
   }
 }

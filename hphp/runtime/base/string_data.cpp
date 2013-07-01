@@ -390,7 +390,7 @@ void StringData::append(const char *s, int len) {
     throw InvalidArgumentException("len > 2^31-2", len);
   }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw FatalErrorException(0, "String length exceeded 2^31-2: %ul",
+    throw FatalErrorException(0, "String length exceeded 2^31-2: %zu",
                               size_t(len) + size_t(m_len));
   }
   uint32_t newlen = m_len + len;

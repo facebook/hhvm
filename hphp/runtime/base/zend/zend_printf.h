@@ -28,6 +28,9 @@ namespace HPHP {
  */
 char *string_printf(const char *format, int len, CArrRef args, int *outlen);
 
+// XXX: vspprintf and spprintf have slightly different semantics and flags than
+// C99 printf (because PHP) so we can't annotate them with ATTRIBUTE_PRINTF
+
 int vspprintf(char **pbuf, size_t max_len, const char *format, ...);
 int vspprintf_ap(char **pbuf, size_t max_len, const char *format, va_list ap);
 int spprintf(char **pbuf, size_t max_len, const char *format, ...);

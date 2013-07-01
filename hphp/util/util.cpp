@@ -269,7 +269,7 @@ int Util::copy(const char *srcfile, const char *dstfile) {
       Logger::Error("read failed: %s", safe_strerror(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      Logger::Error("write failed: %d, %s", wbytes,
+      Logger::Error("write failed: %zd, %s", wbytes,
                     safe_strerror(errno).c_str());
     }
     if (err) {
@@ -334,7 +334,7 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
                     safe_strerror(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      Logger::Error("write failed: %d, %s", wbytes,
+      Logger::Error("write failed: %zd, %s", wbytes,
                     safe_strerror(errno).c_str());
     } else if (force_sync(dstFd) == -1) {
       err = true;

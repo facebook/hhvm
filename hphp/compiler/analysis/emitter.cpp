@@ -3153,7 +3153,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (p->getScalarValue(v)) {
               assert(v.isString());
               StringData* msg = StringData::GetStaticString(v.toString());
-              throw IncludeTimeFatalException(call, msg->data());
+              throw IncludeTimeFatalException(call, "%s", msg->data());
             }
             not_reached();
           }
@@ -5369,6 +5369,7 @@ void EmitterVisitor::emitPostponedMeths() {
       if (!m_topMethodEmitted.insert(p.m_meth->getOriginalName()).second) {
         throw IncludeTimeFatalException(
           p.m_meth,
+          "%s",
           (string("Function already defined: ") +
            p.m_meth->getOriginalName()).c_str());
       }

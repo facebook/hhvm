@@ -91,14 +91,14 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
 
       // we knew this is the last system global
       if (global && name == "http_response_header") {
-        client.output("");
+        client.output("%s", "");
         system = false;
       }
 
       ++i;
       if (!client.isApiMode() &&
           i % DebuggerClient::ScrollBlockSize == 0 &&
-          client.ask("There are %d more variables. Continue? [Y/n]",
+          client.ask("There are %zd more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;
       }

@@ -45,6 +45,16 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   computeBacktrace();
 }
 
+ParseTimeFatalException::ParseTimeFatalException(const char* file, int line,
+                                                 const char* msg, ...)
+  : m_file(file), m_line(line) {
+  va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
+}
+
+FatalErrorException::FatalErrorException(int, const char *msg, ...) {
+  va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
+}
+
 FatalErrorException::FatalErrorException(const std::string &msg,
                                          CArrRef backtrace) {
   m_msg = msg;
@@ -61,6 +71,10 @@ Array ExtendedException::getBackTrace() const {
  */
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
   m_btp = g_vmContext->debugBacktrace(skipFrame, true).get();
+}
+
+InvalidArgumentException::InvalidArgumentException(int, const char *fmt, ...) {
+  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
 void throw_null_pointer_exception() {

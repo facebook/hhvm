@@ -334,7 +334,7 @@ void handle_destructor_exception(const char* situation = "Destructor");
  * If RuntimeOption::ThrowBadTypeExceptions is off, we will log a
  * warning and swallow the error.
  */
-void throw_bad_type_exception(const char *fmt, ...);
+void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_bad_array_exception();
 
 /**
@@ -343,7 +343,7 @@ void throw_bad_array_exception();
  * If RuntimeOption::ThrowInvalidArguments is off, we will log a
  * warning and swallow the error.
  */
-void throw_invalid_argument(const char *fmt, ...);
+void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
 /**
  * Unsetting ClassName::StaticProperty.

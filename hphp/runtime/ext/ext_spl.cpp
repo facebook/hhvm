@@ -101,6 +101,7 @@ Array f_spl_classes() {
   return ret.create();
 }
 
+void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

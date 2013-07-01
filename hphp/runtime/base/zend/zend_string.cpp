@@ -1085,7 +1085,7 @@ char *string_wordwrap(const char *text, int &textlen, int linelength,
   }
 
   if (linelength == 0 && docut) {
-    throw_invalid_argument("width", "can't force cut when width = 0");
+    throw_invalid_argument("width: can't force cut when width = 0");
     return nullptr;
   }
 

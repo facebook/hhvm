@@ -203,19 +203,19 @@ bool SharedStoreFileStorage::hashCheck() {
       current += sizeof(len);
       if (len < 0 ||
           len + PaddingSize >= (int64_t)boundary - (int64_t)current) {
-        Logger::Error("invalid len %d at chunk %d offset %lld", len, i,
+        Logger::Error("invalid len %d at chunk %d offset %" PRId64, len, i,
                       (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
       strhash_t h_data = hash_string_inline(current, len);
       if (h_data != h) {
-        Logger::Error("invalid hash at chunk %d offset %lld", i,
+        Logger::Error("invalid hash at chunk %d offset %" PRId64, i,
                       (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
       current += len;
       if (*current != '\0') {
-        Logger::Error("missing \\0 at chunk %d offset %lld", i,
+        Logger::Error("missing \\0 at chunk %d offset %" PRId64, i,
                       (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
@@ -246,7 +246,7 @@ bool SharedStoreFileStorage::addFile() {
     return false;
   }
   if (posix_fallocate(fd, 0, m_chunkSize)) {
-    Logger::Error("Failred to posix_fallocate of size %llu", m_chunkSize);
+    Logger::Error("Failred to posix_fallocate of size %" PRId64, m_chunkSize);
     close(fd);
     return false;
   }
@@ -258,7 +258,7 @@ bool SharedStoreFileStorage::addFile() {
   char *addr = (char *)mmap(nullptr, m_chunkSize, PROT_READ | PROT_WRITE,
                             MAP_SHARED, fd, 0);
   if (addr == (char *)-1) {
-    Logger::Error("Failed to mmap of size %llu", name, m_chunkSize);
+    Logger::Error("Failed to mmap %s of size %" PRId64, name, m_chunkSize);
     close(fd);
     return false;
   }

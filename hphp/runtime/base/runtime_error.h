@@ -80,21 +80,6 @@ void raise_param_type_warning(
     DataType expected_type,
     DataType actual_type);
 
-template<bool Error>
-void
-warn_or_error(const char* fmt, ...) {
-  std::string msg;
-  va_list ap;
-  va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-  if (Error) {
-    raise_error(msg);
-  } else {
-    raise_warning(msg);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

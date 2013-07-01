@@ -1532,9 +1532,9 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
 
 void DebuggerClient::helpBody(const std::string &s) {
   TRACE(2, "DebuggerClient::helpBody\n");
-  help("");
+  help("%s", "");
   help(wrap(s));
-  help("");
+  help("%s", "");
 }
 
 void DebuggerClient::helpSection(const std::string &s) {

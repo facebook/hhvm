@@ -34,7 +34,7 @@ namespace HPHP {
 
 class Exception : public std::exception {
 public:
-  Exception(const char *fmt, ...);
+  Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   Exception(const Exception &e);
   Exception();
 
@@ -48,7 +48,7 @@ public:
    *   }
    * };
    */
-  void format(const char *fmt, va_list ap);
+  void format(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
   void setMessage(const char *msg) { m_msg = msg ? msg : "";}
 

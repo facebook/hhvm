@@ -678,11 +678,11 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
   auto sk = args.m_sk;
   curFunc()->validate();
   SKTRACE(2, sk,
-          "getTranslation: curUnit %s funcId %" PRIx64 " offset %d\n",
+          "getTranslation: curUnit %s funcId %x offset %d\n",
           curUnit()->filepath()->data(),
           sk.getFuncId(),
           sk.offset());
-  SKTRACE(2, sk, "   funcId: %" PRIx64 "\n",
+  SKTRACE(2, sk, "   funcId: %x \n",
           curFunc()->getFuncId());
 
   if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
@@ -3053,23 +3053,23 @@ TranslatorX64::checkTranslationLimit(SrcKey sk,
       TRACE(1, "Too many (%" PRId64 ") translations: %s, BC offset %d\n",
             tns.size(), curUnit()->filepath()->data(),
             sk.offset());
-      SKTRACE(2, sk, "{\n", tns.size());
+      SKTRACE(2, sk, "{\n");
       TCA topTrans = srcRec.getTopTranslation();
       for (size_t i = 0; i < tns.size(); ++i) {
         const TransRec* rec = getTransRec(tns[i]);
         assert(rec);
-        SKTRACE(2, sk, "%d %p\n", i, tns[i]);
+        SKTRACE(2, sk, "%zd %p\n", i, tns[i]);
         if (tns[i] == topTrans) {
-          SKTRACE(2, sk, "%d: *Top*\n", i);
+          SKTRACE(2, sk, "%zd: *Top*\n", i);
         }
         if (rec->kind == TransAnchor) {
-          SKTRACE(2, sk, "%d: Anchor\n", i);
+          SKTRACE(2, sk, "%zd: Anchor\n", i);
         } else {
-          SKTRACE(2, sk, "%d: guards {\n", i);
+          SKTRACE(2, sk, "%zd: guards {\n", i);
           for (unsigned j = 0; j < rec->dependencies.size(); ++j) {
             TRACE(2, rec->dependencies[j]);
           }
-          SKTRACE(2, sk, "%d } guards\n", i);
+          SKTRACE(2, sk, "%zd } guards\n", i);
         }
       }
       SKTRACE(2, sk, "} /* Too many translations */\n");

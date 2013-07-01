@@ -103,4 +103,10 @@ ServerFactoryPtr ServerFactoryRegistry::getFactory(const std::string &name) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+ServerException::ServerException(const char *fmt, ...) {
+  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

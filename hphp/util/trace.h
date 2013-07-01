@@ -165,8 +165,7 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-void traceRelease(const char*, ...)
-  __attribute__((format(printf,1,2)));
+void traceRelease(const char*, ...) ATTRIBUTE_PRINTF(1,2);
 void traceRelease(const std::string& s);
 
 // Trace to the global ring buffer in all builds, and also trace normally
@@ -174,8 +173,7 @@ void traceRelease(const std::string& s);
 #define TRACE_RB(n, ...)                            \
   HPHP::Trace::traceRingBufferRelease(__VA_ARGS__); \
   TRACE(n, __VA_ARGS__);
-void traceRingBufferRelease(const char* fmt, ...)
-  __attribute__((format(printf,1,2)));
+void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
 extern int levels[NumModules];
 const char* moduleName(Module mod);
@@ -216,14 +214,13 @@ const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-void trace(const char *, ...)
-  __attribute__((format(printf,1,2)));
+void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);
 
 template<typename Pretty>
 inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
-void vtrace(const char *fmt, va_list args);
+void vtrace(const char *fmt, va_list args) ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
 /*

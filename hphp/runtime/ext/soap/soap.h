@@ -175,7 +175,7 @@ public:
 
 class SoapException : public ExtendedException {
 public:
-  SoapException(const char *fmt, ...);
+  SoapException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

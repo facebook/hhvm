@@ -230,7 +230,7 @@ Variant f_fgetc(CObjRef handle) {
 
 Variant f_fgets(CObjRef handle, int64_t length /* = 0 */) {
   if (length < 0) {
-    throw_invalid_argument("length (negative): %d", length);
+    throw_invalid_argument("length (negative): %" PRId64, length);
     return false;
   }
   CHECK_HANDLE(handle, f);

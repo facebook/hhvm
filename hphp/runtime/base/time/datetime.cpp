@@ -626,7 +626,7 @@ String DateTime::rfcFormat(CStrRef format) const {
                  abs(offset / 3600), abs((offset % 3600) / 60));
       }
       break;
-    case 'U': s.printf("%lld", toTimeStamp(error)); break;
+    case 'U': s.printf("%" PRId64, toTimeStamp(error)); break;
     case '\\':
       if (i < format.size()) i++; /* break intentionally missing */
     default:

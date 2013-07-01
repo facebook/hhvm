@@ -247,7 +247,7 @@ void CmdInterrupt::onClientImpl(DebuggerClient &client) {
     default: {
       DebuggerClient::WatchPtrVec &watches = client.getWatches();
       for (int i = 0; i < (int)watches.size(); i++) {
-        if (i > 0) client.output("");
+        if (i > 0) client.output("%s", "");
         client.info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
         Variant v = CmdPrint().processWatch(client, watches[i]->first,
                                             watches[i]->second);

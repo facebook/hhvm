@@ -59,7 +59,7 @@ void CmdMacro::processList(DebuggerClient &client) {
   for (unsigned int i = 0; i < macros.size(); i++) {
     MacroPtr macro = macros[i];
     client.output("%4d  %s", i + 1, macro->m_name.c_str());
-    client.print(macro->desc("     > ").c_str());
+    client.print("%s", macro->desc("     > ").c_str());
   }
 }
 

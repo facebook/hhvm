@@ -2092,7 +2092,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           assert(inLoc->location.isLocal());
           RuntimeType newLhsRtt = RuntimeType(KindOfUninit);
           Location locLocation = inLoc->location;
-          SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
+          SKTRACE(2, ni->source, "(%s, %" PRId64 ") <- type %d\n",
                   locLocation.spaceName(), locLocation.offset,
                   newLhsRtt.valueType());
           DynLocation* unsetLoc = t.newDynLocation(locLocation, newLhsRtt);
@@ -2133,7 +2133,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                 RuntimeType newLhsRtt = inLoc->rtt.setValueType(
                   mcodeMaybePropName(ni->immVecM[0]) ?
                   KindOfObject : KindOfArray);
-                SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
+                SKTRACE(2, ni->source, "(%s, %" PRId64 ") <- type %d\n",
                         locLoc.spaceName(), locLoc.offset,
                         newLhsRtt.valueType());
                 DynLocation* baseLoc = t.newDynLocation(locLoc, newLhsRtt);
@@ -2175,7 +2175,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           if (inLoc->isRef()) {
             dl->rtt = dl->rtt.box();
           }
-          SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
+          SKTRACE(2, ni->source, "(%s, %" PRId64 ") <- type %d\n",
                   inLoc->location.spaceName(), inLoc->location.offset,
                   dl->rtt.valueType());
           assert(dl->location.isLocal());
@@ -2233,7 +2233,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           assert(op == OpBindL ||
                  newLhsRtt.outerType() != KindOfRef);
         }
-        SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
+        SKTRACE(2, ni->source, "(%s, %" PRId64 ") <- type %d\n",
                 locLocation.spaceName(), locLocation.offset,
                 inVal->rtt.valueType());
         DynLocation* outLhsLoc = t.newDynLocation(locLocation, newLhsRtt);
@@ -2280,7 +2280,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     DynLocation* dl = t.newDynLocation();
     dl->location = loc;
     dl->rtt = getDynLocType(t.m_sk, ni, typeInfo);
-    SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %d)\n",
+    SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %" PRId64 ")\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);
     assert(dl->location.isStack());
@@ -3397,7 +3397,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     for (size_t i = 0; i < sizeof(outputs) / sizeof(*outputs); ++i) {
       if (outputs[i]) {
         DynLocation* o = outputs[i];
-        SKTRACE(2, sk, "inserting output t(%d->%d) #(%s, %d)\n",
+        SKTRACE(2, sk, "inserting output t(%d->%d) #(%s, %" PRId64 ")\n",
                 o->rtt.outerType(), o->rtt.innerType(),
                 o->location.spaceName(), o->location.offset);
         tas.recordWrite(o);

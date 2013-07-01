@@ -49,7 +49,7 @@ void CmdComplete::onClientImpl(DebuggerClient &client) {
   std::string text = client.lineRest(1);
   std::vector<std::string> res = client.getAllCompletions(text);
   for (size_t i = 0; i < res.size(); ++i) {
-    client.print(res[i].c_str());
+    client.print("%s", res[i].c_str());
   }
 }
 

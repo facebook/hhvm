@@ -1055,7 +1055,7 @@ static int execute_program_impl(int argc, char** argv) {
         rlim.rlim_max = stackSizeMinimum;
       }
       if (setrlimit(RLIMIT_STACK, &rlim)) {
-        Logger::Error("failed to set stack limit to %lld\n", stackSizeMinimum);
+        Logger::Error("failed to set stack limit to %zd\n", stackSizeMinimum);
       }
     }
   }

@@ -182,7 +182,7 @@ void CmdBreak::help(DebuggerClient &client) {
     "this function for more details with '[i]nfo hphpd_break'."
   );
 
-  client.help("");
+  client.help("%s", "");
 }
 
 // Carries out the "break list" command.

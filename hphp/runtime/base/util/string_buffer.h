@@ -130,7 +130,7 @@ public:
   /**
    * Write data.
    */
-  void printf(const char *format, ...);
+  void printf(const char *format, ...) ATTRIBUTE_PRINTF(2,3);
 
   /**
    * Read a file into this buffer. Use a larger page size to read more bytes
@@ -164,7 +164,7 @@ DECLARE_BOOST_TYPES(CstrBuffer);
 class CstrBuffer {
  public:
   static const unsigned kMaxCap = INT_MAX;
-  CstrBuffer(int len); // reserve space
+  explicit CstrBuffer(int len); // reserve space
   CstrBuffer(char* data, int len); // attach a malloc'd buffer
   explicit CstrBuffer(const char *filename); // read in a file
   ~CstrBuffer();

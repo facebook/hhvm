@@ -98,7 +98,7 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
       ++i;
       if (!client.isApiMode() &&
           i % DebuggerClient::ScrollBlockSize == 0 &&
-          client.ask("There are %d more frames. Continue? [Y/n]",
+          client.ask("There are %zd more frames. Continue? [Y/n]",
                       st.size() - i) == 'n') {
         break;
       }

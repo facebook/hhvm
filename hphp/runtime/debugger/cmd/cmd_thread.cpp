@@ -94,7 +94,7 @@ void CmdThread::processList(DebuggerClient &client, bool output /* = true */) {
     if (thread->m_id == client.getCurrentThreadId()) {
       flag = "*";
     }
-    client.print("%4d %s %s (%lld) %s\n     %s", thread->m_index,
+    client.print("%4d %s %s (%" PRId64 ") %s\n     %s", thread->m_index,
                   flag, thread->m_type.c_str(), thread->m_id,
                   thread->m_url.c_str(), thread->m_desc.c_str());
   }

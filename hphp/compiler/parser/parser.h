@@ -111,7 +111,7 @@ public:
   // implementing ParserBase
   virtual bool parseImpl();
   bool parse();
-  virtual void error(const char* fmt, ...);
+  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
   virtual bool enableXHP();
   virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;

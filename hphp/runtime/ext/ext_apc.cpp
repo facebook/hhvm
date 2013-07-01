@@ -63,7 +63,7 @@ bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -75,7 +75,7 @@ bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -87,7 +87,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -126,7 +126,7 @@ Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -152,7 +152,7 @@ bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   return s_apc_store[cache_id].clear();
@@ -163,7 +163,7 @@ Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   bool found = false;
@@ -177,7 +177,7 @@ Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   bool found = false;
@@ -191,7 +191,7 @@ bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   return s_apc_store[cache_id].cas(key, old_cas, new_cas);
@@ -201,7 +201,7 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 

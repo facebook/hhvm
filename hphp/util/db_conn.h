@@ -27,10 +27,7 @@ namespace HPHP {
 
 class DatabaseException : public Exception {
 public:
-  DatabaseException(int code, const char *fmt, ...)
-      : m_code(code) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
+  DatabaseException(int code, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
   int m_code;
   EXCEPTION_COMMON_IMPL(DatabaseException);
 };

@@ -184,7 +184,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         if (content_length > VirtualHost::GetMaxPostSize()) {
           // $_POST and $_FILES are empty
           Logger::Warning("POST Content-Length of %d bytes exceeds "
-                          "the limit of %lld bytes",
+                          "the limit of %" PRId64 " bytes",
                           content_length, VirtualHost::GetMaxPostSize());
           while (transport->hasMorePostData()) {
             int delta = 0;

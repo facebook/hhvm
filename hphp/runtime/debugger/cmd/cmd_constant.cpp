@@ -88,7 +88,7 @@ void CmdConstant::onClientImpl(DebuggerClient &client) {
         ++i;
         if (!client.isApiMode() &&
             i % DebuggerClient::ScrollBlockSize == 0 &&
-            client.ask("There are %d more constants. Continue? [Y/n]",
+            client.ask("There are %zd more constants. Continue? [Y/n]",
                         m_constants.size() - i) == 'n') {
           break;
         }

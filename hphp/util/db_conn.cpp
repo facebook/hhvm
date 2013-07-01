@@ -26,6 +26,12 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+DatabaseException::DatabaseException(int code,
+                                     const char *fmt, ...) : m_code(code) {
+  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
+}
+
 // Class ServerData
 
 int ServerData::DefaultPort = 3306;

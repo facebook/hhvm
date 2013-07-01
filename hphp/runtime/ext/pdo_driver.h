@@ -212,7 +212,7 @@ public:
   static const PDODriverMap &GetDrivers() { return s_drivers;}
 
 public:
-  PDODriver(const char *name);
+  explicit PDODriver(const char *name);
   virtual ~PDODriver() {}
 
   const char *getName() const { return m_name;}
@@ -607,7 +607,8 @@ public:
 int pdo_parse_params(PDOStatement *stmt, CStrRef in, String &out);
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
-void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...);
+void throw_pdo_exception(CVarRef code, CVarRef info,
+                         const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

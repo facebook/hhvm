@@ -733,7 +733,7 @@ Variant f_count_chars(CStrRef str, int64_t mode /* = 0 */) {
     return String(retstr, retlen, CopyString);
   }
 
-  throw_invalid_argument("mode: %d", mode);
+  throw_invalid_argument("mode: %" PRId64, mode);
   return false;
 }
 
@@ -764,7 +764,7 @@ Variant f_str_word_count(CStrRef str, int64_t format /* = 0 */,
     }
     break;
   default:
-    throw_invalid_argument("format: %d", format);
+    throw_invalid_argument("format: %" PRId64, format);
     return false;
   }
 

@@ -324,9 +324,7 @@ private:
  */
 class ServerException : public Exception {
 public:
-  ServerException(const char *fmt, ...) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
+  ServerException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 };
 
 class FailedToListenException : public ServerException {

@@ -561,7 +561,7 @@ public:
 
     default:
       m_error_no = CURLE_FAILED_INIT;
-      throw_invalid_argument("option: %d", option);
+      throw_invalid_argument("option: %ld", option);
       break;
     }
 

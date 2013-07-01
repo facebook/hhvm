@@ -168,7 +168,7 @@ StreamCompressor::StreamCompressor(int level, int encoding_mode, bool header)
   : m_encoding(encoding_mode), m_header(header),
     m_ended(false) {
   if (level < -1 || level > 9) {
-    throw Exception("compression level(%ld) must be within -1..9", level);
+    throw Exception("compression level(%d) must be within -1..9", level);
   }
   if (encoding_mode != CODING_GZIP && encoding_mode != CODING_DEFLATE) {
     throw Exception("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
@@ -276,7 +276,7 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
 
 char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   if (level < -1 || level > 9) {
-    Logger::Warning("compression level(%ld) must be within -1..9", level);
+    Logger::Warning("compression level(%d) must be within -1..9", level);
     return nullptr;
   }
 

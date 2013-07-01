@@ -157,11 +157,11 @@ Variant f_octdec(CStrRef octal_string) {
 
 Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase) {
   if (!string_validate_base(frombase)) {
-    throw_invalid_argument("Invalid frombase: %d", frombase);
+    throw_invalid_argument("Invalid frombase: %" PRId64, frombase);
     return false;
   }
   if (!string_validate_base(tobase)) {
-    throw_invalid_argument("Invalid tobase: %d", tobase);
+    throw_invalid_argument("Invalid tobase: %" PRId64, tobase);
     return false;
   }
   Variant v = string_base_to_numeric(number.data(), number.size(), frombase);

@@ -178,7 +178,8 @@ public:
     return m_blockScope->getContainingClass();
   }
   void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
-  void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...);
+  void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;

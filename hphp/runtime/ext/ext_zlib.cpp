@@ -114,7 +114,7 @@ static Variant gzcompress(const char *data, int len, int level /* = -1 */) {
 
 static Variant gzuncompress(const char *data, int len, int limit /* = 0 */) {
   if (limit < 0) {
-    Logger::Warning("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%d) must be greater or equal zero", limit);
     return false;
   }
 
@@ -192,7 +192,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
   }
 
   if (limit < 0) {
-    Logger::Warning("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%d) must be greater or equal zero", limit);
     return false;
   }
   unsigned long plength = limit;

@@ -79,7 +79,7 @@ public:
   /**
    * Raise a parser error.
    */
-  virtual void error(const char* fmt, ...) = 0;
+  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3) = 0;
 
   /**
    * How to decide whether to turn on XHP.

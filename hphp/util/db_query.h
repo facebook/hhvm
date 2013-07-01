@@ -65,7 +65,7 @@ class DBQuery {
    *
    *   DBQuery(&conn, "SELECT * FROM %s", tableName);
    */
-  DBQuery(DBConn *conn, const char *sql, ...);
+  DBQuery(DBConn *conn, const char *sql, ...) ATTRIBUTE_PRINTF(3,4);
 
   /**
    * Composing where clause. String values will be escaped properly.
@@ -91,7 +91,7 @@ class DBQuery {
   /**
    * Append (...) value list for an insertion.
    */
-  void insert(const char *fmt, ...);
+  void insert(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
   /**
    * Append extra SQL components. For example, ON DUPLICATE KEY UPDATE.
@@ -114,7 +114,7 @@ class DBQuery {
    *
    * q.filterBy(q.Format("(%s > 0 or %s = 2)", field1, field2));
    */
-  const char *format(const char *fmt, ...);
+  const char *format(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   const char *format(const char *fmt, va_list ap);
 
   /**

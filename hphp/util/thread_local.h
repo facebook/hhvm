@@ -57,7 +57,7 @@ inline void ThreadLocalCreateKey(pthread_key_t *key, void (*del)(void*)) {
       msg = "Out-of-memory";
       break;
     }
-    throw Exception("pthread_key_create", ret, msg);
+    throw Exception("pthread_key_create returned %d: %s", ret, msg);
   }
 }
 

@@ -123,7 +123,7 @@ struct Parser : ParserBase {
 
   bool parseImpl();
 
-  void error(const char* fmt, ...) {
+  void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3) {
     va_list ap;
     va_start(ap, fmt);
     std::string msg;

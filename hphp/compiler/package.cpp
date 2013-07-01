@@ -377,7 +377,7 @@ int Package::saveStatsToDB(ServerDataPtr server, int totalSeconds,
 
   const char *sql = "INSERT INTO hphp_run (branch, revision, file, line, "
     "byte, program, function, class, types, time)";
-  DBQuery q(&conn, sql);
+  DBQuery q(&conn, "%s", sql);
   q.insert("'%s', %d, %d, %d, %d, %d, %d, %d, '%s', %d",
            branch.c_str(), revision,
            getFileCount(), getLineCount(), getCharCount(),

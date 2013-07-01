@@ -516,6 +516,15 @@ public:
   static long PregRecursionLimit;
   static bool EnablePregErrorLog;
 
+#ifdef FACEBOOK
+  // fb303 server
+  static bool EnableFb303Server;
+  static int Fb303ServerPort;
+  static int Fb303ServerThreadStackSizeMb;
+  static int Fb303ServerWorkerThreads;
+  static int Fb303ServerPoolThreads;
+#endif
+
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.
   static int EnableAlternative;

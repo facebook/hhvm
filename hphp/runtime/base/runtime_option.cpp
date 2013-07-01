@@ -463,6 +463,14 @@ int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
+#ifdef FACEBOOK
+bool RuntimeOption::EnableFb303Server = true;
+int RuntimeOption::Fb303ServerPort;
+int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
+int RuntimeOption::Fb303ServerWorkerThreads = 1;
+int RuntimeOption::Fb303ServerPoolThreads = 1;
+#endif
+
 int RuntimeOption::EnableAlternative = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1283,6 +1291,16 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     PregRecursionLimit = preg["RecursionLimit"].getInt64(100000);
     EnablePregErrorLog = preg["ErrorLog"].getBool(true);
   }
+#ifdef FACEBOOK
+  {
+    Hdf fb303Server = config["Fb303Server"];
+    EnableFb303Server = fb303Server["Enable"].getBool(true);
+    Fb303ServerPort = fb303Server["Port"].getInt16(0);
+    Fb303ServerThreadStackSizeMb = fb303Server["ThreadStackSizeMb"].getInt16(8);
+    Fb303ServerWorkerThreads = fb303Server["WorkerThreads"].getInt16(1);
+    Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
+  }
+#endif
 
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;

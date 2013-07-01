@@ -160,8 +160,24 @@ struct ConstData : IRExtraData {
                   "Constant data was larger than supported");
     static_assert(std::is_pod<T>::value,
                   "Constant data wasn't a pod?");
-    std::memcpy(&m_dataBits, &data, sizeof data);
+    const auto toCopy = promoteIfNeeded(data);
+    std::memcpy(&m_dataBits, &toCopy, sizeof(toCopy));
   }
+
+  template<typename T>
+  struct needsPromotion {
+    static constexpr bool value = std::is_integral<T>::value  ||
+                                  std::is_same<T,bool>::value ||
+                                  std::is_enum<T>::value;
+  };
+
+  template<class T>
+  typename std::enable_if<needsPromotion<T>::value, int64_t>::type
+  promoteIfNeeded(T t) { return t; }
+
+  template<class T>
+  typename std::enable_if<!needsPromotion<T>::value, T>::type
+  promoteIfNeeded(T t) { return t; }
 
   template<class T>
   T as() const {

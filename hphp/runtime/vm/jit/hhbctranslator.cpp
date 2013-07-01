@@ -3251,7 +3251,7 @@ void HhbcTranslator::emitMod() {
   SSATmp *res = m_tb->cond(
     curFunc(),
     [&] (Block* taken) {
-      SSATmp* negone = gen(OpEq, tr, cns(-1LL));
+      SSATmp* negone = gen(OpEq, tr, cns(-1));
       gen(JmpNZero, taken, negone);
     },
     [&] {

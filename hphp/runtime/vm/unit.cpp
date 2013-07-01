@@ -670,7 +670,7 @@ void Unit::defTypedef(Id id) {
   }
 
   // There might also be a class with this name already.
-  if (Class* cls = nameList->getCachedClass()) {
+  if (nameList->getCachedClass()) {
     raise_error("The name %s is already defined as a class",
                 thisType->name->data());
     return;

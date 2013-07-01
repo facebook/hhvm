@@ -308,7 +308,7 @@ private:
   public: void print(const char *msg, bool indent = true);
 
  private:
-  void print(const char *fmt, va_list ap);
+  void print(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
   void printSubstring(const char *start, int length);
   void printIndent();
   std::string getFormattedName(const std::string &file);

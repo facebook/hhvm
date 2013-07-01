@@ -652,8 +652,7 @@ void Class::initInstanceBits() {
       i = 1;
       for (auto& pair : counts) {
         if (i >= 256) {
-          Trace::traceRelease("skipping the remainder of the %" PRIu64
-                              " classes\n",
+          Trace::traceRelease("skipping the remainder of the %zu classes\n",
                               counts.size());
           break;
         }

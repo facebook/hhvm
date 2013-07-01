@@ -115,7 +115,7 @@ class DBQuery {
    * q.filterBy(q.Format("(%s > 0 or %s = 2)", field1, field2));
    */
   const char *format(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  const char *format(const char *fmt, va_list ap);
+  const char *format(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
   /**
    * Use "`" to escape all field names in a comma delimited field list.

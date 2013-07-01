@@ -1062,11 +1062,13 @@ static int get_php_tiff_bytes_per_format(int format) {
 #define TAG_FMT_DOUBLE    12
 
 static int php_vspprintf(char **pbuf, size_t max_len,
-                         const char *format, ...) {
+                         const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+static int php_vspprintf(char **pbuf, size_t max_len,
+                         const char *fmt, ...) {
   va_list arglist;
   char *buf;
-  va_start(arglist, format);
-  int len = vspprintf_ap(&buf, max_len, format, arglist);
+  va_start(arglist, fmt);
+  int len = vspprintf_ap(&buf, max_len, fmt, arglist);
   if (buf) {
 #ifdef IM_MEMORY_CHECK
     *pbuf = php_strndup_impl(buf, len, __LINE__);
@@ -1080,9 +1082,11 @@ static int php_vspprintf(char **pbuf, size_t max_len,
 }
 
 static int php_vspprintf_ap(char **pbuf, size_t max_len,
-                            const char *format, va_list ap) {
+                            const char *fmt, va_list ap) ATTRIBUTE_PRINTF(3,0);
+static int php_vspprintf_ap(char **pbuf, size_t max_len,
+                            const char *fmt, va_list ap) {
   char *buf;
-  int len = vspprintf_ap(&buf, max_len, format, ap);
+  int len = vspprintf_ap(&buf, max_len, fmt, ap);
   if (buf) {
 #ifdef IM_MEMORY_CHECK
     *pbuf = php_strndup_impl(buf, len, __LINE__);

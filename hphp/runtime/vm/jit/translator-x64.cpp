@@ -2307,8 +2307,8 @@ TranslatorX64::enterTC(TCA start, void* data) {
       start = TCA(0xbee5face);
     }
 
-    TRACE(2, "enterTC: request(%s) args: %" PRIx64 " %" PRIx64 " %"
-             PRIx64 " %" PRIx64 " %" PRIx64 "\n",
+    TRACE(2, "enterTC: request(%s) args: %" PRIxPTR " %" PRIxPTR " %"
+             PRIxPTR " %" PRIxPTR " %" PRIxPTR "\n",
           reqName(info.requestNum),
           info.args[0], info.args[1], info.args[2], info.args[3],
           info.args[4]);
@@ -3050,7 +3050,7 @@ TranslatorX64::checkTranslationLimit(SrcKey sk,
     INC_TPC(max_trans);
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
       const vector<TCA>& tns = srcRec.translations();
-      TRACE(1, "Too many (%" PRId64 ") translations: %s, BC offset %d\n",
+      TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
             tns.size(), curUnit()->filepath()->data(),
             sk.offset());
       SKTRACE(2, sk, "{\n");
@@ -3817,12 +3817,12 @@ std::string TranslatorX64::getUsage() {
     TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
   Util::string_printf(
     usage,
-    "tx64: %9zd bytes (%" PRId64 "%%) in ahot.code\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in a.code\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in m_globalData\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in persistentCache\n",
+    "tx64: %9zd bytes (%zd%%) in ahot.code\n"
+    "tx64: %9zd bytes (%zd%%) in a.code\n"
+    "tx64: %9zd bytes (%zd%%) in astubs.code\n"
+    "tx64: %9zd bytes (%zd%%) in m_globalData\n"
+    "tx64: %9zd bytes (%zd%%) in targetCache\n"
+    "tx64: %9zd bytes (%zd%%) in persistentCache\n",
     aHotUsage,  100 * aHotUsage / ahot.code.size,
     aUsage,     100 * aUsage / a.code.size,
     stubsUsage, 100 * stubsUsage / astubs.code.size,

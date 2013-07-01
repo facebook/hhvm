@@ -111,7 +111,8 @@ typedef char BOOL;
 #define FALSE 0
 #endif
 
-void ne_vwarn (const char *fmt, va_list ap);
+void ne_vwarn (const char *fmt, va_list ap)
+               ATTRIBUTE_PRINTF(1,0);
 void ne_warn (const char *fmt, ...)
               ATTRIBUTE_PRINTF(1,2);
 void ne_set_log (int level);

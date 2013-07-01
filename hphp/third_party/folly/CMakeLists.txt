@@ -21,4 +21,7 @@ include_directories(${LIBGLOG_INCLUDE_DIR})
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
 
-target_link_libraries(folly ${Boost_LIBRARIES} ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES})
+find_package(Libunwind REQUIRED)
+include_directories(${LIBUNWIND_INCLUDE_DIR})
+
+target_link_libraries(folly ${Boost_LIBRARIES} ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES} ${LIBUNWIND_LIBRARY})

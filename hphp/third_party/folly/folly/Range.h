@@ -35,6 +35,10 @@
 #include "folly/Traits.h"
 #include "folly/Likely.h"
 
+// Ignore shadowing warnings within this file, so includers can use -Wshadow.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+
 namespace folly {
 
 template <class T> class Range;
@@ -56,6 +60,15 @@ inline size_t qfind(const Range<T> & haystack,
  */
 template <class T>
 size_t qfind(const Range<T> & haystack,
+             const typename Range<T>::value_type& needle);
+
+/**
+ * Finds the last occurrence of needle in haystack. The result is the
+ * offset reported to the beginning of haystack, or string::npos if
+ * needle wasn't found.
+ */
+template <class T>
+size_t rfind(const Range<T> & haystack,
              const typename Range<T>::value_type& needle);
 
 
@@ -119,7 +132,8 @@ public:
     typename std::iterator_traits<Iter>::reference>::type
   value_type;
   typedef typename std::iterator_traits<Iter>::reference reference;
-  typedef std::char_traits<value_type> traits_type;
+  typedef std::char_traits<typename std::remove_const<value_type>::type>
+    traits_type;
 
   static const size_type npos;
 
@@ -385,6 +399,10 @@ public:
 
   size_type find(value_type c) const {
     return qfind(*this, c);
+  }
+
+  size_type rfind(value_type c) const {
+    return folly::rfind(*this, c);
   }
 
   size_type find(value_type c, size_t pos) const {
@@ -668,11 +686,29 @@ size_t qfind(const Range<T>& haystack,
   return pos == haystack.end() ? std::string::npos : pos - haystack.data();
 }
 
+template <class T>
+size_t rfind(const Range<T>& haystack,
+             const typename Range<T>::value_type& needle) {
+  for (auto i = haystack.size(); i-- > 0; ) {
+    if (haystack[i] == needle) {
+      return i;
+    }
+  }
+  return std::string::npos;
+}
+
 // specialization for StringPiece
 template <>
 inline size_t qfind(const Range<const char*>& haystack, const char& needle) {
   auto pos = static_cast<const char*>(
     ::memchr(haystack.data(), needle, haystack.size()));
+  return pos == nullptr ? std::string::npos : pos - haystack.data();
+}
+
+template <>
+inline size_t rfind(const Range<const char*>& haystack, const char& needle) {
+  auto pos = static_cast<const char*>(
+    ::memrchr(haystack.data(), needle, haystack.size()));
   return pos == nullptr ? std::string::npos : pos - haystack.data();
 }
 
@@ -682,6 +718,14 @@ inline size_t qfind(const Range<const unsigned char*>& haystack,
                     const unsigned char& needle) {
   auto pos = static_cast<const unsigned char*>(
     ::memchr(haystack.data(), needle, haystack.size()));
+  return pos == nullptr ? std::string::npos : pos - haystack.data();
+}
+
+template <>
+inline size_t rfind(const Range<const unsigned char*>& haystack,
+                    const unsigned char& needle) {
+  auto pos = static_cast<const unsigned char*>(
+    ::memrchr(haystack.data(), needle, haystack.size()));
   return pos == nullptr ? std::string::npos : pos - haystack.data();
 }
 
@@ -706,6 +750,8 @@ inline size_t qfind_first_of(const Range<const unsigned char*>& haystack,
                                      StringPiece(needles));
 }
 }  // !namespace folly
+
+#pragma GCC diagnostic pop
 
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(folly::Range);
 

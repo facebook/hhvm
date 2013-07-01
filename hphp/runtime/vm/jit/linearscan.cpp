@@ -1191,7 +1191,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
         assert(!spill->block()->trace()->isMain());
         spill = spill->clone(m_irFactory);
       }
-      block->trace()->front()->prepend(spill);
+      trace->front()->prepend(spill);
     } else if (inst->isBlockEnd()) {
       block->next()->prepend(spill);
     } else {

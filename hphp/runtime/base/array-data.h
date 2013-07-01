@@ -485,6 +485,13 @@ public:
 
   static ArrayData *GetScalarArray(ArrayData *arr,
                                    const StringData *key = nullptr);
+
+  static constexpr size_t offsetofKind() {
+    return offsetof(ArrayData, m_kind);
+  }
+
+  static const char* kindToString(ArrayKind kind);
+
  private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {

@@ -149,6 +149,24 @@ inline HphpArray* HphpArray::copyImpl() const {
   return isVector() ? copyVec() : copyGeneric();
 }
 
+inline TypedValue HphpArray::GetCellIntVec(const ArrayData* ad, int64_t ki) {
+  auto a = asVector(ad);
+  if (LIKELY(size_t(ki) < a->m_size)) {
+    TypedValue* ret = &a->m_data[ki].data;
+    ret = tvToCell(ret);
+    tvRefcountedIncRef(ret);
+    return *ret;
+  }
+  Variant v = getNotFound(ki);
+  return *v.asTypedValue();
+}
+
+inline uint64_t HphpArray::IssetIntVec(const ArrayData* ad, int64_t ki) {
+  auto a = asVector(ad);
+  return (size_t(ki) < a->m_size) &&
+         (a->m_data[ki].data.m_type != KindOfNull);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

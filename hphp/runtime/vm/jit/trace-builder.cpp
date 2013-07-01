@@ -800,8 +800,8 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // guard on KindOfStaticString vs. KindOfString.
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
   auto const sameUnboxed = curType != Type::None && // TODO(#2135185)
-    curType.isKnownDataType() &&
-    curType.equals(newType) && !curType.isString();
+    curType.isSameKindOf(newType) &&
+    !curType.isString();
   if (bothBoxed || sameUnboxed) {
     inst->setOpcode(StLocNT);
   }

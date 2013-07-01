@@ -1938,19 +1938,20 @@ void CodeGenerator::cgGte(IRInstruction* inst) {
 // Type check operators
 ///////////////////////////////////////////////////////////////////////////////
 
-// Overloads to put the ObjectData* into a register so emitTypeTest
-// can cmp to the Class* expected by the specialized Type
+// Overloads to put the {Object,Array}Data* into a register so
+// emitTypeTest can cmp to the Class*/ArrayKind expected by the
+// specialized Type
 
 // Nothing to do, return the register that contain the ObjectData already
-Reg64 getObjectDataEnregistered(Asm& as, PhysReg dataSrc, Reg64 scratch) {
+Reg64 getDataPtrEnregistered(Asm& as, PhysReg dataSrc, Reg64 scratch) {
   return dataSrc;
 }
 
 // Enregister the meoryRef so it can be used with an offset by the
 // cmp instruction
-Reg64 getObjectDataEnregistered(Asm& as,
-                                MemoryRef dataSrc,
-                                Reg64 scratch) {
+Reg64 getDataPtrEnregistered(Asm& as,
+                             MemoryRef dataSrc,
+                             Reg64 scratch) {
   as.loadq(dataSrc, scratch);
   return scratch;
 }
@@ -1987,8 +1988,12 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
-    auto reg = getObjectDataEnregistered(m_as, dataSrc, m_rScratch);
+    auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
+    doJcc(cc);
+  } else if (type.subtypeOf(Type::Arr) && type.hasArrayKind()) {
+    auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
+    m_as.cmpb(type.getArrayKind(), reg[ArrayData::offsetofKind()]);
     doJcc(cc);
   }
 }
@@ -4515,6 +4520,17 @@ void CodeGenerator::cgGuardCls(IRInstruction* inst) {
   auto const type = inst->typeParam();
   assert(type.strictSubtypeOf(Type::Obj));
   m_as.cmpq(type.getClass(), srcReg[ObjectData::getVMClassOffset()]);
+  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
+  auto const destSR = m_tx64->getSrcRec(destSK);
+  m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(CC_E));
+}
+
+void CodeGenerator::cgGuardArrayKind(IRInstruction* inst) {
+  auto const srcReg = m_regs[inst->src(0)].reg();
+  auto const type = inst->typeParam();
+  assert(type.canSpecializeArrayKind() && type.hasArrayKind());
+  static_assert(sizeof(ArrayData::ArrayKind) == 1, "");
+  m_as.cmpb(type.getArrayKind(), srcReg[ArrayData::offsetofKind()]);
   auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
   m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(CC_E));

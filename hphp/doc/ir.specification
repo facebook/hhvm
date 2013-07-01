@@ -362,6 +362,10 @@ GuardCls<T<Cls>> S0:Obj
 
   Guard that the object S0 has class Cls; else make a fallback jump.
 
+GuardArrayKind<T<AK>> S0:Obj
+
+  Guard that the array S0 has kind AK; else make a fallback jump.
+
 CheckLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
@@ -2039,8 +2043,7 @@ DeleteUnwinderException
 
   Deletes the current unwinder exception.
 
-TypeProfileFunc<paramIndex, functionName> S0:Gen 
-  
+TypeProfileFunc<paramIndex, functionName> S0:Gen
+
   Profiles that function's parameter/return value for a particular parameter index.
   Calls into native c++ function.
-

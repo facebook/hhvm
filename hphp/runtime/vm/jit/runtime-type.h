@@ -200,7 +200,13 @@ class RuntimeType {
       DataType innerType;
       // Set when we want to transfer the type information to the
       // IR type system (Type object)
-      const Class* knownClass;
+      union {
+        const Class* knownClass;
+        struct {
+          bool arrayKindValid;
+          ArrayData::ArrayKind arrayKind;
+        };
+      };
       union {
         // We may have even more precise data about this set of values.
         const StringData* string; // KindOfString: The exact value.
@@ -240,10 +246,14 @@ class RuntimeType {
              m_value.klass == nullptr);
       assert(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
-      assert(m_value.knownClass == nullptr ||
-             m_value.outerType == KindOfObject ||
-             (m_value.outerType == KindOfRef &&
-                 m_value.innerType == KindOfObject));
+      assert((m_value.knownClass == nullptr ||
+              m_value.outerType == KindOfObject ||
+              (m_value.outerType == KindOfRef &&
+               m_value.innerType == KindOfObject)) ||
+             (!m_value.arrayKindValid ||
+              m_value.outerType == KindOfArray ||
+              (m_value.outerType == KindOfRef &&
+               m_value.innerType == KindOfArray)));
     }
   }
 
@@ -271,6 +281,7 @@ class RuntimeType {
   RuntimeType unbox() const;
   RuntimeType setValueType(DataType vt) const;
   RuntimeType setKnownClass(const Class* klass) const;
+  RuntimeType setArrayKind(ArrayData::ArrayKind arrayKind) const;
 
   // Accessors
   DataType outerType() const;
@@ -284,6 +295,8 @@ class RuntimeType {
   int64_t valueInt() const;
   int64_t valueGeneric() const;
   const Class* knownClass() const;
+  bool hasArrayKind() const;
+  ArrayData::ArrayKind arrayKind() const;
 
   // Helpers for typechecking
   DataType typeCheckValue() const;
@@ -304,7 +317,7 @@ class RuntimeType {
   bool isString() const;
   bool isObject() const;
   bool isClass() const;
-  bool hasKnownType() const;
+  bool hasKnownClass() const;
   bool operator==(const RuntimeType& r) const;
   RuntimeType &operator=(const RuntimeType& r) = default;
   size_t operator()(const RuntimeType& r) const; // hash function

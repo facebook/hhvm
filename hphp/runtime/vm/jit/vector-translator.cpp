@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+
+#include "hphp/runtime/base/hphp-array-defs.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
@@ -553,7 +555,12 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       isSimpleCollectionOp() != SimpleOp::None) {
     // In these cases we can pass the base by value, after unboxing if needed.
     m_base = gen(Unbox, failedRef, getBase());
-    assert(m_base->isA(baseType.unbox()));
+    // With array kind specialization it's possible that the base
+    // could become a less-specialized kind due to an earlier SetM.
+    // That's ok, we just have to generate generic code for later
+    // operations.
+    assert(m_base->isA(baseType.unbox()) ||
+           (m_base->isArray() && baseType.isArray()));
   } else {
     // Everything else is passed by reference. We don't have to worry about
     // unboxing here, since all the generic helpers understand boxed bases.
@@ -1534,6 +1541,11 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   return v;
 }
 
+static TypedValue arrayVectorGetI(ArrayData* a, TypedValue* key) {
+  int64_t ki = keyAsRaw<KeyType::Int>(key);
+  return HphpArray::GetCellIntVec(a, ki);
+}
+
 template<KeyType keyType, bool checkForInt>
 static inline TypedValue arrayGetImpl(
   ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
@@ -1571,6 +1583,13 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB_HOT(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
+
+  auto baseType = m_base->type();
+  if (baseType.hasArrayKind() &&
+      baseType.getArrayKind() == ArrayData::ArrayKind::kVectorKind &&
+      key->isA(Type::Int)) {
+    opFunc = arrayVectorGetI;
+  }
   m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1808,6 +1827,11 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
 }
 #undef HELPER_TABLE
 
+static uint64_t arrayVectorIssetI(ArrayData* a, TypedValue* key) {
+  int64_t ki = keyAsRaw<KeyType::Int>(key);
+  return HphpArray::IssetIntVec(a, ki);
+}
+
 template<KeyType keyType, bool checkForInt>
 static inline uint64_t arrayIssetImpl(
   ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
@@ -1841,6 +1865,12 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
   typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
+  auto baseType = m_base->type();
+  if (baseType.hasArrayKind() &&
+      baseType.getArrayKind() == ArrayData::ArrayKind::kVectorKind &&
+      key->isA(Type::Int)) {
+    opFunc = arrayVectorIssetI;
+  }
   m_result = gen(ArrayIsset, getCatchTrace(),
                  cns((TCA)opFunc), m_base, key);
 }

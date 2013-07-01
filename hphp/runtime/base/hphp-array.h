@@ -229,6 +229,12 @@ public:
    */
   static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
 
+  /**
+   * Inline helpers to be called directly from the TC
+   */
+  static TypedValue GetCellIntVec(const ArrayData* ad, int64_t ki);
+  static uint64_t IssetIntVec(const ArrayData* ad, int64_t ki);
+
 private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);

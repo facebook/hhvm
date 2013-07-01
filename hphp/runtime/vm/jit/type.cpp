@@ -68,8 +68,7 @@ RuntimeType Type::toRuntimeType() const {
 }
 
 Type Type::fromDataType(DataType outerType,
-                        DataType innerType /* = KindOfInvalid */,
-                        const Class* klass /* = nullptr */) {
+                        DataType innerType /* = KindOfInvalid */) {
   assert(innerType != KindOfRef);
 
   switch (outerType) {
@@ -82,14 +81,8 @@ Type Type::fromDataType(DataType outerType,
     case KindOfStaticString  : return StaticStr;
     case KindOfString        : return Str;
     case KindOfArray         : return Arr;
-    case KindOfObject        : {
-      if (klass != nullptr) {
-        return Obj.specialize(klass);
-      } else {
-        return Obj;
-      }
-    }
     case KindOfResource      : return Res;
+    case KindOfObject        : return Obj;
     case KindOfClass         : return Cls;
     case KindOfUncountedInit : return UncountedInit;
     case KindOfUncounted     : return Uncounted;
@@ -106,7 +99,14 @@ Type Type::fromDataType(DataType outerType,
 }
 
 Type Type::fromRuntimeType(const RuntimeType& rtt) {
-  return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
+  Type t = fromDataType(rtt.outerType(), rtt.innerType());
+  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
+    return t.specialize(rtt.knownClass());
+  }
+  if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
+    return t.specialize(rtt.arrayKind());
+  }
+  return t;
 }
 
 Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
@@ -122,8 +122,14 @@ Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
 
 Type liveTVType(const TypedValue* tv) {
   if (tv->m_type == KindOfObject) {
-    return Type::fromDataType(KindOfObject, KindOfInvalid,
-      tv->m_data.pobj->getVMClass());
+    Type t = Type::fromDataType(KindOfObject, KindOfInvalid);
+    t.specialize(tv->m_data.pobj->getVMClass());
+    return t;
+  }
+  if (tv->m_type == KindOfArray) {
+    Type t = Type::fromDataType(KindOfArray, KindOfInvalid);
+    t.specialize(tv->m_data.parr->kind());
+    return t;
   }
 
   auto outer = tv->m_type;

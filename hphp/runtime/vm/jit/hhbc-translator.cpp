@@ -143,6 +143,9 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
     } else if (tmp->type().isNull() && type.isNull()) {
       // Refining Null to Uninit or InitNull is supported
       tmp->setType(type);
+    } else if (tmp->type().isArray() && type.isArray()) {
+      // Refine array kind
+      tmp->setType(type);
     } else {
       // At this point, we have no business refining the type of any
       // instructions other than the following, which all control
@@ -2636,6 +2639,12 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
     gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
     SSATmp* loc = gen(LdLoc, type, LocalId(locId), m_tb->fp());
     gen(GuardCls, type, loc);
+    return;
+  }
+  if (type.canSpecializeArrayKind() && type.hasArrayKind()) {
+    gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
+    SSATmp* loc = gen(LdLoc, type, LocalId(locId), m_tb->fp());
+    gen(GuardArrayKind, type, loc);
     return;
   }
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());

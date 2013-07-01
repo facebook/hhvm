@@ -229,11 +229,19 @@ class GuardType {
   GuardType        dropSpecialization() const;
   RuntimeType      getRuntimeType() const;
   bool             isEqual(GuardType other) const;
+  bool             hasArrayKind() const;
+  ArrayData::ArrayKind getArrayKind() const;
 
  private:
   DataType outerType;
   DataType innerType;
-  const Class* klass;
+  union {
+    const Class* klass;
+    struct {
+      bool arrayKindValid;
+      ArrayData::ArrayKind arrayKind;
+    };
+  };
 };
 
 typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;

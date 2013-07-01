@@ -217,16 +217,19 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   } else {
     FTRACE(2, "liveType {}: {}\n", l.pretty(), tname(outerType));
   }
-  const Class *klass = nullptr;
-  if (valueType == KindOfObject) {
-    // Only infer the class if specialization requested
-    if (specialize) {
-      klass = valCell->m_data.pobj->getVMClass();
-    }
-  }
   RuntimeType retval = RuntimeType(outerType, innerType);
-  if (klass != nullptr) {
-    retval = retval.setKnownClass(klass);
+  const Class *klass = nullptr;
+  if (specialize) {
+    // Only infer the class/array kind if specialization requested
+    if (valueType == KindOfObject) {
+      klass = valCell->m_data.pobj->getVMClass();
+      if (klass != nullptr) {
+        retval = retval.setKnownClass(klass);
+      }
+    } else if (valueType == KindOfArray) {
+      ArrayData::ArrayKind arrayKind = valCell->m_data.parr->kind();
+      retval = retval.setArrayKind(arrayKind);
+    }
   }
   return retval;
 }
@@ -2432,13 +2435,19 @@ GuardType::GuardType(const RuntimeType& rtt) {
   assert(rtt.isValue());
   outerType = rtt.outerType();
   innerType = rtt.innerType();
-  klass = rtt.hasKnownType() ? rtt.knownClass() : nullptr;
+  if (rtt.hasKnownClass()) {
+    klass = rtt.knownClass();
+  } else if (rtt.hasArrayKind()) {
+    arrayKindValid = true;
+    arrayKind = rtt.arrayKind();
+  } else {
+    klass = nullptr;
+  }
 }
 
 GuardType::GuardType(const GuardType& other) {
   *this = other;
 }
-
 
 const DataType GuardType::getOuterType() const {
   return outerType;
@@ -2457,7 +2466,8 @@ bool GuardType::isSpecific() const {
 }
 
 bool GuardType::isSpecialized() const {
-  return outerType == KindOfObject && klass != nullptr;
+  return (outerType == KindOfObject && klass != nullptr) ||
+    (outerType == KindOfArray && arrayKindValid);
 }
 
 bool GuardType::isRelaxed() const {
@@ -2499,7 +2509,7 @@ DataTypeCategory GuardType::getCategory() const {
     case KindOfAny:           return DataTypeGeneric;
     case KindOfUncounted:     return DataTypeCountness;
     case KindOfUncountedInit: return DataTypeCountnessInit;
-    default:                  return klass != nullptr ?
+    default:                  return (klass != nullptr || arrayKindValid) ?
                                                 DataTypeSpecialized :
                                                 DataTypeSpecific;
   }
@@ -2536,8 +2546,11 @@ GuardType GuardType::dropSpecialization() const {
 }
 
 RuntimeType GuardType::getRuntimeType() const {
-  if (klass != nullptr) {
+  if (outerType == KindOfObject && klass != nullptr) {
     return RuntimeType(outerType, innerType).setKnownClass(klass);
+  }
+  if (outerType == KindOfArray && arrayKindValid) {
+    return RuntimeType(outerType, innerType).setArrayKind(arrayKind);
   }
   return RuntimeType(outerType, innerType);
 }
@@ -2559,6 +2572,13 @@ GuardType GuardType::getCountnessInit() const {
   }
 }
 
+bool GuardType::hasArrayKind() const {
+  return arrayKindValid;
+}
+
+ArrayData::ArrayKind GuardType::getArrayKind() const {
+  return arrayKind;
+}
 
 /**
  * Returns true iff loc is consumed by a Pop* instruction in the sequence
@@ -2650,18 +2670,29 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpCGetM:
     case OpIssetM:
     case OpFPassM:
-      if (instr->inputs.size() == 2 && opndIdx == 0) {
-        const Class* klass = specType.getSpecializedClass();
-        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
-          return DataTypeSpecialized;
+      if (specType.getOuterType() == KindOfArray) {
+        if (instr->inputs.size() == 2 && opndIdx == 0) {
+          if (specType.hasArrayKind() &&
+              specType.getArrayKind() == ArrayData::ArrayKind::kVectorKind) {
+            return DataTypeSpecialized;
+          }
+        }
+      } else if (specType.getOuterType() == KindOfObject) {
+        if (instr->inputs.size() == 2 && opndIdx == 0) {
+          const Class* klass = specType.getSpecializedClass();
+          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+            return DataTypeSpecialized;
+          }
         }
       }
       return DataTypeSpecific;
     case OpSetM:
-      if (instr->inputs.size() == 3 && opndIdx == 1) {
-        const Class* klass = specType.getSpecializedClass();
-        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
-          return DataTypeSpecialized;
+      if (specType.getOuterType() == KindOfObject) {
+        if (instr->inputs.size() == 3 && opndIdx == 1) {
+          const Class* klass = specType.getSpecializedClass();
+          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+            return DataTypeSpecialized;
+          }
         }
       }
       return DataTypeSpecific;

@@ -59,6 +59,17 @@ std::string Type::toString() const {
     return folly::format("Obj<{}>", m_class->name()->data()).str();
   }
 
+  if (canSpecializeArrayKind() && hasArrayKind()) {
+    std::string typeName = [&] {
+#     define IRT(name, ...) if (subtypeOf(name)) return #name;
+      IR_TYPES
+#     undef IRT
+      not_reached();
+    }();
+    return folly::format("{}<{}>", typeName,
+                         ArrayData::kindToString(m_arrayKind)).str();
+  }
+
   // Concat all of the primitive types in the custom union type
   std::vector<std::string> types;
 # define IRT(name, ...) if (name.subtypeOf(*this)) types.push_back(#name);

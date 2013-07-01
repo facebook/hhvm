@@ -1401,7 +1401,7 @@ ArrayData* HphpArray::CopyWithStrongIterators(const ArrayData* ad) {
 
 TypedValue* HphpArray::NvGetIntVec(const ArrayData* ad, int64_t ki) {
   auto a = asVector(ad);
-  return size_t(ki) < a->m_size ? &a->m_data[ki].data : nullptr;
+  return LIKELY(size_t(ki) < a->m_size) ? &a->m_data[ki].data : nullptr;
 }
 
 TypedValue* HphpArray::NvGetInt(const ArrayData* ad, int64_t ki) {

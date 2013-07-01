@@ -730,6 +730,17 @@ ArrayData* ArrayData::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
+const char* ArrayData::kindToString(ArrayKind kind) {
+  const char* names[] = {
+    "VectorKind",
+    "MixedKind",
+    "SharedKind",
+    "NvtwKind",
+    "PolicyKind"
+  };
+  return names[kind];
+}
+
 void ArrayData::dump() {
   string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }

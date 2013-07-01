@@ -4848,38 +4848,32 @@ void CodeGenerator::cgLookupCns(IRInstruction* inst) {
 }
 
 HOT_FUNC_VM
-static inline int64_t ak_exist_string_helper(StringData* key, ArrayData* arr) {
+static inline int64_t ak_exist_string(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
     return arr->exists(n);
   }
-  return arr->exists(StrNR(key));
+  return arr->exists(key);
 }
 
 HOT_FUNC_VM
-static int64_t ak_exist_string(StringData* key, ArrayData* arr) {
-  int64_t res = ak_exist_string_helper(key, arr);
-  return res;
-}
-
-HOT_FUNC_VM
-static int64_t ak_exist_int(int64_t key, ArrayData* arr) {
+static int64_t ak_exist_int(ArrayData* arr, int64_t key) {
   bool res = arr->exists(key);
   return res;
 }
 
 HOT_FUNC_VM
-static int64_t ak_exist_string_obj(StringData* key, ObjectData* obj) {
+static int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
   CArrRef arr = obj->o_toArray();
-  int64_t res = ak_exist_string_helper(key, arr.get());
+  int64_t res = ak_exist_string(arr.get(), key);
   return res;
 }
 
 HOT_FUNC_VM
-static int64_t ak_exist_int_obj(int64_t key, ObjectData* obj) {
+static int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
@@ -4892,29 +4886,33 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
   SSATmp* arr = inst->src(0);
   SSATmp* key = inst->src(1);
 
+  int64_t (*obj_int_helper)(ObjectData*, int64_t) = &ak_exist_int_obj;
+  int64_t (*obj_str_helper)(ObjectData*, StringData*) = &ak_exist_string_obj;
+  int64_t (*arr_int_helper)(ArrayData*, int64_t) = &ak_exist_int;
+  int64_t (*arr_str_helper)(ArrayData*, StringData*) = &ak_exist_string;
+
   if (key->type().isNull()) {
     if (arr->isA(Type::Arr)) {
       cgCallHelper(m_as,
-                   (TCA)ak_exist_string,
+                   (TCA)arr_str_helper,
                    inst->dst(),
                    SyncOptions::kNoSyncPoint,
-                   ArgGroup(m_regs).immPtr(empty_string.get()).ssa(arr));
+                   ArgGroup(m_regs).ssa(arr).immPtr(empty_string.get()));
     } else {
       m_as.mov_imm64_reg(0, m_regs[inst->dst()].reg());
     }
     return;
   }
 
-  TCA helper_func =
-    arr->isA(Type::Obj)
-    ? (key->isA(Type::Int) ? (TCA)ak_exist_int_obj : (TCA)ak_exist_string_obj)
-    : (key->isA(Type::Int) ? (TCA)ak_exist_int : (TCA)ak_exist_string);
+  TCA helper_func =  arr->isA(Type::Obj)
+    ? (key->isA(Type::Int) ? (TCA)obj_int_helper : (TCA)obj_str_helper)
+    : (key->isA(Type::Int) ? (TCA)arr_int_helper : (TCA)arr_str_helper);
 
   cgCallHelper(m_as,
                helper_func,
                inst->dst(),
                SyncOptions::kNoSyncPoint,
-               ArgGroup(m_regs).ssa(key).ssa(arr));
+               ArgGroup(m_regs).ssa(arr).ssa(key));
 }
 
 HOT_FUNC_VM static TypedValue* ldGblAddrHelper(StringData* name) {

@@ -7186,7 +7186,8 @@ void VMExecutionContext::recordCodeCoverage(PC pc) {
   Unit* unit = getFP()->m_func->unit();
   assert(unit != nullptr);
   if (unit == SystemLib::s_nativeFuncUnit ||
-      unit == SystemLib::s_nativeClassUnit) {
+      unit == SystemLib::s_nativeClassUnit ||
+      unit == SystemLib::s_hhas_unit) {
     return;
   }
   int line = unit->getLineNumber(pcOff());

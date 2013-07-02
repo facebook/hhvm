@@ -1689,11 +1689,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     }
     else if (s[0])
     {
-      /* Valid hdf name is [0-9a-zA-Z_.]+ */
+      /* Valid hdf name is [0-9a-zA-Z_.*\]+ */
       int splice = *s == '@';
       if (splice) s++;
       name = s;
-      while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '*')) s++;
+      while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '*' || *s == '\\')) s++;
       SKIPWS(s);
 
       char num[256];

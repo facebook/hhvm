@@ -66,9 +66,6 @@ no_import = (
     # too large input
     '/tests/lang/024.phpt',
 
-    # conscious decision not to match these
-    '/ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt',
-
     # spews files until they work
     '/ext/standard/tests/file/fopen_variation14-win32.phpt',
     '/ext/standard/tests/file/fopen_variation15-win32.phpt',
@@ -132,6 +129,13 @@ no_import = (
     '/ext/xsl',
     '/ext/zip',
     '/sapi',
+
+    # conscious decision not to match these
+    '/ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt',
+
+    # Zend's "run-tests" uses the cgi-fcgi sapi to run tests
+    # our implementation is simply different by design
+    '/ext/standard/versioning/php_sapi_name_variation001.phpt',
 )
 
 # For marking tests as always failing. Used to keep flaky tests in bad/.

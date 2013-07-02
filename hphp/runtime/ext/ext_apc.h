@@ -52,8 +52,9 @@ Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant);
 bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0);
 Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
                            CStrRef filename, int64_t flags = 0,
-                           CObjRef context = uninit_null());
-bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = uninit_null(),
+                           CObjRef context = Object());
+bool f_apc_bin_loadfile(CStrRef filename,
+                        CObjRef context = Object(),
                         int64_t flags = 0, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

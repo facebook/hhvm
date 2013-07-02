@@ -151,6 +151,9 @@ static Variant filter_map_apply(CStrRef value, filter_map *map) {
   return buf.detach();
 }
 
+template <typename T>
+unsigned char uc(T c) { return (unsigned char)c; }
+
 Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
   unsigned char enc[256] = {0};
 
@@ -158,10 +161,10 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
   String stripped(php_filter_strip(value, flags));
 
   if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
-    enc['\''] = enc['"'] = 1;
+    enc[uc('\'')] = enc[uc('"')] = 1;
   }
   if (flags & k_FILTER_FLAG_ENCODE_AMP) {
-    enc['&'] = 1;
+    enc[uc('&')] = 1;
   }
   if (flags & k_FILTER_FLAG_ENCODE_LOW) {
     memset(enc, 1, 32);
@@ -208,7 +211,7 @@ Variant php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL) {
   php_filter_strip(value, flags);
 
   /* encodes ' " < > & \0 to numerical entities */
-  enc['\''] = enc['"'] = enc['<'] = enc['>'] = enc['&'] = enc[0] = 1;
+  enc[uc('\'')] = enc[uc('"')] = enc[uc('<')] = enc[uc('>')] = enc[uc('&')] = enc[0] = 1;
 
   /* if strip low is not set, then we encode them as &#xx; */
   memset(enc, 1, 32);
@@ -238,7 +241,7 @@ Variant php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL) {
     php_filter_strip(value, flags);
 
     if (flags & k_FILTER_FLAG_ENCODE_AMP) {
-      enc['&'] = 1;
+      enc[uc('&')] = 1;
     }
     if (flags & k_FILTER_FLAG_ENCODE_LOW) {
       memset(enc, 1, 32);

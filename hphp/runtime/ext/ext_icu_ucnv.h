@@ -105,7 +105,7 @@ class c_UConverter : public ExtObjectData {
   public: Variant t_convert(CStrRef str, bool reverse = false);
   public: static Variant ti_transcode(CStrRef str,
                                       CStrRef toEncoding, CStrRef fromEncoding,
-                                      CArrRef options = null_variant);
+                                      CArrRef options = Array());
   public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
   public: static String ti_reasontext(int64_t reason);

@@ -3417,7 +3417,7 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
   using namespace Transl::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return;
 
-  auto setImmLocType = [&](uint32_t id, Type t = Type::Gen) {
+  auto setImmLocType = [&](uint32_t id, Type t) {
     gen(OverrideLoc, t, LocalId(inst.imm[id].u_HA), m_tb->fp());
   };
 

@@ -50,7 +50,7 @@ Variant f_dom_document_schema_validate_file(CVarRef obj, CStrRef filename);
 Variant f_dom_document_schema_validate_xml(CVarRef obj, CStrRef source);
 Variant f_dom_document_relaxng_validate_file(CVarRef obj, CStrRef filename);
 Variant f_dom_document_relaxng_validate_xml(CVarRef obj, CStrRef source);
-Variant f_dom_node_insert_before(CVarRef obj, CObjRef newnode, CObjRef refnode = uninit_null());
+Variant f_dom_node_insert_before(CVarRef obj, CObjRef newnode, CObjRef refnode = Object());
 Variant f_dom_node_replace_child(CVarRef obj, CObjRef newchildobj, CObjRef oldchildobj);
 Variant f_dom_node_remove_child(CVarRef obj, CObjRef node);
 Variant f_dom_node_append_child(CVarRef obj, CObjRef newnode);
@@ -116,7 +116,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   public: int64_t t_getlineno();
   public: bool t_hasattributes();
   public: bool t_haschildnodes();
-  public: Variant t_insertbefore(CObjRef newnode, CObjRef refnode = uninit_null());
+  public: Variant t_insertbefore(CObjRef newnode, CObjRef refnode = Object());
   public: bool t_isdefaultnamespace(CStrRef namespaceuri);
   public: bool t_issamenode(CObjRef node);
   public: bool t_issupported(CStrRef feature, CStrRef version);

@@ -3357,6 +3357,8 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     return t.isBoxed() ? t : boxType(t);
   };
 
+  if (inst.outputPredicted) return Type::Gen;
+
   auto outFlag = getInstrInfo(inst.op()).type;
   if (outFlag == OutFInputL) {
     outFlag = inst.preppedByRef ? OutVInputL : OutCInputL;

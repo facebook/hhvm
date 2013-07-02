@@ -584,7 +584,8 @@
             "desc": "Enables code coverage. The coverage information is cleared.",
             "flags": [
                 "HasDocComment",
-                "HipHopSpecific"
+                "HipHopSpecific",
+                "NeedsActRec"
             ],
             "return": {
                 "type": null

@@ -278,6 +278,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpAdd:       return simplifyAdd(src1, src2);
   case OpSub:       return simplifySub(src1, src2);
   case OpMul:       return simplifyMul(src1, src2);
+  case OpMod:       return simplifyMod(src1, src2);
   case OpBitAnd:    return simplifyBitAnd(src1, src2);
   case OpBitOr:     return simplifyBitOr(src1, src2);
   case OpBitXor:    return simplifyBitXor(src1, src2);
@@ -880,6 +881,30 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     // X * 2^C --> X << C
     // X * (2^C + 1) --> ((X << C) + X)
     // X * (2^C - 1) --> ((X << C) - X)
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
+  if (src2->isConst()) {
+    int64_t src2Val = src2->getValInt();
+    // refrain from generating undefined IR
+    assert(src2Val != 0);
+    // simplify const
+    if (src1->isConst()) {
+      // still don't want undefined IR
+      assert(src1->getValInt() != std::numeric_limits<int64_t>::min() ||
+             src2Val != -1);
+      return cns(src1->getValInt() % src2Val);
+    }
+    // X % 1, X % -1 --> 0
+    if (src2Val == 1 || src2Val == -1LL) {
+      return cns(0);
+    }
+    // X % LONG_MIN = X (largest magnitude possible as rhs)
+    if (src2Val == std::numeric_limits<int64_t>::min()) {
+      return src1;
+    }
   }
   return nullptr;
 }

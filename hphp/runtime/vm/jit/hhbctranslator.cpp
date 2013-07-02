@@ -3539,7 +3539,9 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped) {
 
 void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed) {
   auto sp = spillStack();
-  gen(InterpOne, outType, InterpOneData(bcOff(), popped, pushed),
+  Unit *u = curFunc()->unit();
+  gen(InterpOne, outType, InterpOneData(bcOff(), popped, pushed,
+                                        u->getOpcode(bcOff())),
       m_tb->fp(), sp);
   assert(m_stackDeficit == 0);
 }

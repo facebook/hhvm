@@ -324,8 +324,8 @@ struct CheckDefinedClsData : IRExtraData {
  * Offset and stack deltas for InterpOne.
  */
 struct InterpOneData : IRExtraData {
-  InterpOneData(Offset o, int64_t pop, int64_t push)
-    : bcOff(o), cellsPopped(pop), cellsPushed(push) {}
+  InterpOneData(Offset o, int64_t pop, int64_t push, Op op)
+    : bcOff(o), cellsPopped(pop), cellsPushed(push), opcode(op) {}
 
   // Offset of the instruction to interpret, in the Unit indicated by
   // the current Marker.
@@ -335,6 +335,10 @@ struct InterpOneData : IRExtraData {
   // instruction, respectively. Includes ActRecs.
   int64_t cellsPopped;
   int64_t cellsPushed;
+
+  // Opcode, in case we need to fix the stack differently. Some byte-
+  // code instructions modify things below the top of the stack.
+  Op opcode;
 };
 
 //////////////////////////////////////////////////////////////////////

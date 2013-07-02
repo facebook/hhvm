@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/vm/jit/tracebuilder.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
@@ -132,8 +133,27 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     auto const& extra = *inst->extra<InterpOne>();
     int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
     Type resultType = inst->typeParam();
-    if (index == 0 && !resultType.equals(Type::None)) {
-      return StackValueInfo { resultType };
+    switch (extra.opcode) {
+    // some instructions are kinda funny and mess with the stack
+    // in places other than the top
+    case Op::CGetL2:
+      if (index == 1) return StackValueInfo { resultType };
+      if (index == 0) return getStackValue(prevSp, index);
+      break;
+    case Op::CGetL3:
+      if (index == 2) return StackValueInfo { resultType };
+      if (index < 2)  return getStackValue(prevSp, index);
+      break;
+    case Op::UnpackCont:
+      if (index == 0) return StackValueInfo { Type::Cell };
+      if (index == 1) return StackValueInfo { Type::Int };
+      break;
+
+    default:
+      if (index == 0 && !resultType.equals(Type::None)) {
+        return StackValueInfo { resultType };
+      }
+      break;
     }
 
     // If the index we're looking for is a cell pushed by the InterpOne (other

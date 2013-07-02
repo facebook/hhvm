@@ -308,10 +308,10 @@ public:
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
-  virtual ssize_t iter_begin() const;
-  virtual ssize_t iter_end() const;
-  virtual ssize_t iter_advance(ssize_t prev) const;
-  virtual ssize_t iter_rewind(ssize_t prev) const;
+  virtual ssize_t iter_begin() const = 0;
+  virtual ssize_t iter_end() const = 0;
+  virtual ssize_t iter_advance(ssize_t prev) const = 0;
+  virtual ssize_t iter_rewind(ssize_t prev) const = 0;
 
   /**
    * Mutable iteration APIs

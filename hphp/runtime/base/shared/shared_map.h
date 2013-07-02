@@ -114,6 +114,11 @@ public:
 
   bool isVectorData() const;
 
+  ssize_t iter_begin() const;
+  ssize_t iter_end() const;
+  ssize_t iter_advance(ssize_t prev) const;
+  ssize_t iter_rewind(ssize_t prev) const;
+
   /**
    * Memory allocator methods.
    */

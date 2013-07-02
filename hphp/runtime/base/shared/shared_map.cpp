@@ -227,6 +227,31 @@ ArrayData* SharedMap::escalateForSort() {
   return ret;
 }
 
+ssize_t SharedMap::iter_begin() const {
+  if (SharedMap::empty()) return invalid_index;
+  return 0;
+}
+
+ssize_t SharedMap::iter_end() const {
+  if (empty()) return invalid_index;
+  return size() - 1;
+  static_assert(invalid_index == -1, "");
+}
+
+ssize_t SharedMap::iter_advance(ssize_t prev) const {
+  assert(prev >= 0 && prev < size());
+  ssize_t next = prev + 1;
+  if (next >= size()) return invalid_index;
+  return next;
+}
+
+ssize_t SharedMap::iter_rewind(ssize_t prev) const {
+  assert(prev >= 0 && prev < size());
+  ssize_t next = prev - 1;
+  if (next < 0) return invalid_index;
+  return next;
+}
+
 ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {
   uint count = size();
   bool isVec = isVector();

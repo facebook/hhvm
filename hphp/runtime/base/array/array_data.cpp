@@ -344,31 +344,46 @@ ArrayData* ArrayData::copyWithStrongIterators() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Default implementation of position-based iterations.
 
-Variant ArrayData::reset()         { return value(m_pos = 0);}
-Variant ArrayData::prev()          { return value(--m_pos);}
-Variant ArrayData::next()          { return value(++m_pos);}
-Variant ArrayData::end()           { return value(m_pos = size() - 1);}
+Variant ArrayData::reset() {
+  m_pos = iter_begin();
+  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
+}
+
+Variant ArrayData::prev() {
+  if (m_pos != invalid_index) {
+    m_pos = iter_rewind(m_pos);
+    if (m_pos != invalid_index) {
+      return getValue(m_pos);
+    }
+  }
+  return Variant(false);
+}
+
+Variant ArrayData::next() {
+  if (m_pos != invalid_index) {
+    m_pos = iter_advance(m_pos);
+    if (m_pos != invalid_index) {
+      return getValue(m_pos);
+    }
+  }
+  return Variant(false);
+}
+
+Variant ArrayData::end() {
+  m_pos = iter_end();
+  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
+}
 
 Variant ArrayData::key() const {
-  if (size_t(m_pos) < size_t(size())) {
-    return getKey(m_pos);
-  }
-  return uninit_null();
+  return m_pos != invalid_index ? getKey(m_pos) : uninit_null();
 }
 
 Variant ArrayData::value(int32_t &pos) const {
-  if (size_t(pos) < size_t(size())) {
-    return getValue(pos);
-  }
-  pos = ArrayData::invalid_index;
-  return false;
+  return pos != invalid_index ? getValue(pos) : Variant(false);
 }
 
 Variant ArrayData::current() const {
-  if (size_t(m_pos) < size_t(size())) {
-    return getValue(m_pos);
-  }
-  return false;
+  return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
 }
 
 const StaticString
@@ -376,42 +391,18 @@ const StaticString
   s_key("key");
 
 Variant ArrayData::each() {
-  if (size_t(m_pos) < size_t(size())) {
-    Array ret;
+  if (m_pos != invalid_index) {
+    ArrayInit ret(4);
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));
     ret.set(1, value);
     ret.set(s_value, value);
     ret.set(0, key);
     ret.set(s_key, key);
-    ++m_pos;
-    return ret;
+    m_pos = iter_advance(m_pos);
+    return ret.toVariant();
   }
-  return false;
-}
-
-ssize_t ArrayData::iter_begin() const {
-  if (empty()) return ArrayData::invalid_index;
-  return 0;
-}
-
-ssize_t ArrayData::iter_end() const {
-  if (empty()) return ArrayData::invalid_index;
-  return size() - 1;
-}
-
-ssize_t ArrayData::iter_advance(ssize_t prev) const {
-  assert(prev >= 0 && prev < size());
-  ssize_t next = prev + 1;
-  if (next >= size()) return ArrayData::invalid_index;
-  return next;
-}
-
-ssize_t ArrayData::iter_rewind(ssize_t prev) const {
-  assert(prev >= 0 && prev < size());
-  ssize_t next = prev - 1;
-  if (next < 0) return ArrayData::invalid_index;
-  return next;
+  return Variant(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

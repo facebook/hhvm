@@ -344,12 +344,6 @@ bool TestCppBase::TestArray() {
     arr.lvalAt(name) = String("value");
     VS(arr, CREATE_MAP1("name", "value"));
   }
-  {
-    Array arr;
-    arr.lvalAt(s_A) = 10;
-    arr.lvalAt(s_A)++;
-    VS(arr[s_A], 11);
-  }
 
   {
     Array arr;
@@ -740,21 +734,6 @@ bool TestCppBase::TestVariant() {
     v2.lvalAt() = ref(v1);
     v1 = 20;
     VS(v2[1], 20);
-  }
-  {
-    Variant v1 = 10;
-    Variant v2 = strongBind(v1);
-    v2++;
-    VS(v2, 11);
-    VS(v1, 11);
-  }
-  {
-    Variant arr = CREATE_VECTOR2(1, 2);
-    Variant v;
-    for (MutableArrayIter iter = arr.begin(nullptr, v); iter.advance();) {
-      v++;
-    }
-    VS(arr, CREATE_VECTOR2(2, 3));
   }
 
   // array escalation

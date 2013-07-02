@@ -112,6 +112,15 @@ void cellBitAndEq(Cell& c1, Cell);
 void cellBitOrEq(Cell& c1, Cell);
 void cellBitXorEq(Cell& c1, Cell);
 
+/*
+ * PHP operator ++ and --.
+ *
+ * Mutates the argument in place, with the effects of php's
+ * pre-increment or pre-decrement operators.
+ */
+void cellInc(Cell&);
+void cellDec(Cell&);
+
 //////////////////////////////////////////////////////////////////////
 
 }

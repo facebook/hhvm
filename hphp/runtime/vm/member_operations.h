@@ -997,45 +997,11 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-inline void IncDecBody(unsigned char op, TypedValue* fr,
-                       TypedValue* to) {
-  if (fr->m_type == KindOfInt64) {
-    switch ((IncDecOp)op) {
-    case PreInc: {
-      ++(fr->m_data.num);
-      if (setResult) {
-        cellDup(*fr, *to);
-      }
-      break;
-    }
-    case PostInc: {
-      if (setResult) {
-        cellDup(*fr, *to);
-      }
-      ++(fr->m_data.num);
-      break;
-    }
-    case PreDec: {
-      --(fr->m_data.num);
-      if (setResult) {
-        cellDup(*fr, *to);
-      }
-      break;
-    }
-    case PostDec: {
-      if (setResult) {
-        cellDup(*fr, *to);
-      }
-      --(fr->m_data.num);
-      break;
-    }
-    default: assert(false);
-    }
-    return;
-  }
+NEVER_INLINE
+void incDecBodySlow(unsigned char op, TypedValue* fr, TypedValue* to) {
   if (fr->m_type == KindOfUninit) {
     ActRec* fp = g_vmContext->m_fp;
-    size_t pind = ((uintptr_t(fp) - uintptr_t(fr)) / sizeof(TypedValue)) - 1;
+    size_t pind = reinterpret_cast<TypedValue*>(fp) - fr - 1;
     if (pind < size_t(fp->m_func->numNamedLocals())) {
       // Only raise a warning if fr points to a local variable
       raise_notice(Strings::UNDEFINED_VARIABLE,
@@ -1044,38 +1010,77 @@ inline void IncDecBody(unsigned char op, TypedValue* fr,
     // Convert uninit null to null so that we don't write out an uninit null
     // to the eval stack for PostInc and PostDec.
     fr->m_type = KindOfNull;
+  } else {
+    fr = tvToCell(fr);
   }
-  switch ((IncDecOp)op) {
-  case PreInc: {
-    ++(tvAsVariant(fr));
+
+  assert(cellIsPlausible(fr));
+
+  switch (static_cast<IncDecOp>(op)) {
+  case PreInc:
+    cellInc(*fr);
     if (setResult) {
-      tvReadCell(fr, to);
+      cellDup(*fr, *to);
     }
     break;
-  }
-  case PostInc: {
+  case PostInc:
     if (setResult) {
-      tvReadCell(fr, to);
+      cellDup(*fr, *to);
     }
-    ++(tvAsVariant(fr));
+    cellInc(*fr);
     break;
-  }
-  case PreDec: {
-    --(tvAsVariant(fr));
+  case PreDec:
+    cellDec(*fr);
     if (setResult) {
-      tvReadCell(fr, to);
+      cellDup(*fr, *to);
     }
     break;
-  }
-  case PostDec: {
+  case PostDec:
     if (setResult) {
-      tvReadCell(fr, to);
+      cellDup(*fr, *to);
     }
-    --(tvAsVariant(fr));
+    cellDec(*fr);
+    break;
+  case IncDec_invalid:
+    not_reached();
+  }
+}
+
+template <bool setResult>
+inline void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to) {
+  if (UNLIKELY(fr->m_type != KindOfInt64)) {
+    return incDecBodySlow<setResult>(op, fr, to);
+  }
+
+  switch (static_cast<IncDecOp>(op)) {
+  case PreInc:
+    ++fr->m_data.num;
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    return;
+  case PostInc:
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    ++fr->m_data.num;
+    return;
+  case PreDec:
+    --fr->m_data.num;
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    return;
+  case PostDec:
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    --fr->m_data.num;
+    return;
+  case IncDec_invalid:
     break;
   }
-  default: assert(false);
-  }
+  not_reached();
 }
 
 template <bool setResult>

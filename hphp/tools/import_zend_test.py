@@ -88,6 +88,7 @@ no_import = (
     '/ext/xmlwriter/tests/OO_006.phpt',
 
     # not tests
+    '/ext/spl/examples/',
     '/ext/xmlwriter/examples/',
 
     # not implemented extensions

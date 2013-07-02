@@ -584,9 +584,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
           break;
         case T_SL:
-          result = shift_left(v1.toInt64(), v2.toInt64()); break;
+          result = v1.toInt64() << v2.toInt64();
+          break;
         case T_SR:
-          result = shift_right(v1.toInt64(), v2.toInt64()); break;
+          result = v1.toInt64() >> v2.toInt64();
+          break;
         case T_BOOLEAN_OR:
           result = v1.toBoolean() || v2.toBoolean(); break;
         case T_BOOLEAN_AND:

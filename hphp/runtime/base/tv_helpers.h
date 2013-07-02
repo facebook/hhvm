@@ -457,6 +457,7 @@ void tvUnboxIfNeeded(TypedValue* tv);
  */
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv);
+void cellCastToInt64InPlace(Cell*);
 void tvCastToDoubleInPlace(TypedValue* tv);
 double tvCastToDouble(TypedValue* tv);
 void tvCastToStringInPlace(TypedValue* tv);

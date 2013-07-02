@@ -3688,6 +3688,17 @@ void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
   m_stack.popC();
 }
 
+template<class Op>
+void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
+  NEXT();
+  auto const c1 = m_stack.topC();
+  auto const c2 = m_stack.indC(1);
+  bool const result = op(*c2, *c1);
+  tvRefcountedDecRefCell(c2);
+  *c2 = make_tv<KindOfBoolean>(result);
+  m_stack.popC();
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopAdd(PC& pc) {
   implCellBinOp(pc, cellAdd);
 }
@@ -3718,17 +3729,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitOr(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBitXor(PC& pc) {
   implCellBinOp(pc, cellBitXor);
-}
-
-template<class Op>
-void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
-  NEXT();
-  auto const c1 = m_stack.topC();
-  auto const c2 = m_stack.indC(1);
-  bool const result = op(*c2, *c1);
-  tvRefcountedDecRefCell(c2);
-  *c2 = make_tv<KindOfBoolean>(result);
-  m_stack.popC();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopXor(PC& pc) {
@@ -3779,6 +3779,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopGte(PC& pc) {
   implCellBinOpBool(pc, cellGreaterOrEqual);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopShl(PC& pc) {
+  implCellBinOp(pc, [&] (Cell c1, Cell c2) {
+    return make_tv<KindOfInt64>(cellToInt(c1) << cellToInt(c2));
+  });
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopShr(PC& pc) {
+  implCellBinOp(pc, [&] (Cell c1, Cell c2) {
+    return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
+  });
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
@@ -3793,30 +3805,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
     raise_error("Unsupported operand type for ~");
   }
 }
-
-#define SHIFTOP(OP) do {                                                      \
-  NEXT();                                                                     \
-  Cell* c1 = m_stack.topC();                                                  \
-  Cell* c2 = m_stack.indC(1);                                                 \
-  if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64_t a = c2->m_data.num;                                                 \
-    int64_t b = c1->m_data.num;                                                 \
-    c2->m_data.num = a OP b;                                                  \
-    m_stack.popX();                                                           \
-  } else {                                                                    \
-    tvCellAsVariant(c2) = tvCellAsVariant(c2).toInt64() OP                    \
-                          tvCellAsCVarRef(c1).toInt64();                      \
-    m_stack.popC();                                                           \
-  }                                                                           \
-} while (0)
-inline void OPTBLD_INLINE VMExecutionContext::iopShl(PC& pc) {
-  SHIFTOP(<<);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopShr(PC& pc) {
-  SHIFTOP(>>);
-}
-#undef SHIFTOP
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCastBool(PC& pc) {
   NEXT();

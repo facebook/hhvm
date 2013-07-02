@@ -23,6 +23,7 @@
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/tv_arith.h"
+#include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/array/array_iterator.h"
 #include "hphp/runtime/vm/class.h"
@@ -50,11 +51,17 @@ void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
   case SetOpAndEqual:       cellBitAndEq(*lhs, *rhs); break;
   case SetOpOrEqual:        cellBitOrEq(*lhs, *rhs);  break;
   case SetOpXorEqual:       cellBitXorEq(*lhs, *rhs); break;
-  case SetOpSlEqual: tvAsVariant(lhs) <<=
-                       tvCellAsCVarRef(rhs).toInt64(); break;
-  case SetOpSrEqual: tvAsVariant(lhs) >>=
-                       tvCellAsCVarRef(rhs).toInt64(); break;
-  default: not_reached();
+
+  case SetOpSlEqual:
+    cellCastToInt64InPlace(lhs);
+    lhs->m_data.num <<= cellToInt(*rhs);
+    break;
+  case SetOpSrEqual:
+    cellCastToInt64InPlace(lhs);
+    lhs->m_data.num >>= cellToInt(*rhs);
+    break;
+  default:
+    not_reached();
   }
 }
 

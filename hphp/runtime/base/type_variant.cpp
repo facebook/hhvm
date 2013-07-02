@@ -624,16 +624,6 @@ Variant Variant::bitNot() const {
   throw InvalidOperandException("only numerics and strings can be negated");
 }
 
-Variant &Variant::operator<<=(int64_t n) {
-  set(toInt64() << n);
-  return *this;
-}
-
-Variant &Variant::operator>>=(int64_t n) {
-  set(toInt64() >> n);
-  return *this;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // increment/decrement
 

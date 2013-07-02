@@ -90,10 +90,7 @@ bool empty(CVarRef v, CStrRef, bool = false) = delete;
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
-inline int64_t shift_left(int64_t v1, int64_t v2)        { return v1 << v2; }
-inline int64_t shift_right(int64_t v1, int64_t v2)       { return v1 >> v2; }
-
-inline String concat(CStrRef s1, CStrRef s2)         {
+inline String concat(CStrRef s1, CStrRef s2) {
   return s1 + s2;
 }
 

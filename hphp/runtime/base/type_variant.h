@@ -581,8 +581,8 @@ class Variant : private TypedValue {
   Variant &operator &= (CVarRef v) = delete;
   Variant  operator ^  (CVarRef v) const = delete;
   Variant &operator ^= (CVarRef v) = delete;
-  Variant &operator <<=(int64_t n);
-  Variant &operator >>=(int64_t n);
+  Variant &operator <<=(int64_t n) = delete;
+  Variant &operator >>=(int64_t n) = delete;
 
   Variant &operator ++ ();
   Variant  operator ++ (int);

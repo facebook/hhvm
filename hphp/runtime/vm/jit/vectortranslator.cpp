@@ -519,8 +519,11 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       if (!val->isA(t) && !(val->isBoxed() && t.isBoxed())) {
         FTRACE(1, "{}: hhir stack has a {} where Translator had a {}\n",
                __func__, val->type().toString(), t.toString());
-        // They'd better not be completely unrelated types...
-        assert(t.subtypeOf(val->type()));
+        // Normally here we would make sure that Translator gave us a sensical
+        // type, but since we could be getting inputs from type-predicted
+        // instructions, we can't actually be sure that the types are going to
+        // match up. refineType is just going to ignore the Translator type
+        // if the runtime type is completely unrelated.
         m_ht.refineType(val, t);
       }
       return val;

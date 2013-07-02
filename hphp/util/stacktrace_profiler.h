@@ -19,6 +19,7 @@
 
 #include <string>
 #include <mutex>
+#include <atomic>
 #include "hphp/util/arena.h"
 
 namespace HPHP {

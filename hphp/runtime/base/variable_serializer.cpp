@@ -69,6 +69,7 @@ void VariableSerializer::getResourceInfo(String &rsrcName, int &rsrcId) {
 void VariableSerializer::setResourceInfo(CStrRef rsrcName, int rsrcId) {
   m_rsrcName = rsrcName;
   m_rsrcId = rsrcId;
+  m_objCode = 0;
 }
 
 String VariableSerializer::serialize(CVarRef v, bool ret) {
@@ -849,7 +850,7 @@ void VariableSerializer::writeArrayFooter() {
   case Type::VarExport:
   case Type::PHPOutput:
     indent();
-    if (info.is_object) {
+    if (info.is_object && m_objCode) {
       if (m_objCode == 'O') {
         m_buf->append("))");
       } else {

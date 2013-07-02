@@ -64,6 +64,8 @@
 #include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/ref_dict.h"
 
+#include "hphp/runtime/base/builtin_functions.h"
+
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/util/parser/location.h"
 #include "hphp/util/util.h"
@@ -2638,6 +2640,10 @@ private:
     if (sv && se) {
       const string &s = se->getLiteralString();
       if (s.empty()) return ExpressionPtr();
+      if (interface_supports_array(s)) {
+        // This could be an array, so don't assert anything
+        return ExpressionPtr();
+      }
       TypePtr o(Type::CreateObjectType(Util::toLower(s)));
 
       // don't do specific type assertions for unknown classes

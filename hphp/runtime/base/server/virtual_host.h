@@ -42,6 +42,7 @@ public:
   void init(Hdf vh);
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   void setRequestTimeoutSeconds() const;
+  int getRequestTimeoutSeconds() const;
 
   const std::string &getName() const { return m_name;}
   const std::string &getPathTranslation() const { return m_pathTranslation;}

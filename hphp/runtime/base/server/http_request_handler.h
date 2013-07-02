@@ -26,6 +26,11 @@ namespace HPHP {
 
 class SourceRootInfo;
 class RequestURI;
+
+namespace ServiceData {
+class ExportedTimeSeries;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class HttpRequestHandler : public RequestHandler {
@@ -43,6 +48,7 @@ public:
 
 private:
   bool m_pathTranslation;
+  ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
 
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,

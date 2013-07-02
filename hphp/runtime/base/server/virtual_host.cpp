@@ -136,6 +136,10 @@ void VirtualHost::setRequestTimeoutSeconds() const {
   }
 }
 
+int VirtualHost::getRequestTimeoutSeconds() const {
+  return m_runtimeOption.requestTimeoutSeconds;
+}
+
 VirtualHost::VirtualHost() : m_disabled(false) {
   Hdf empty;
   initRuntimeOption(empty);

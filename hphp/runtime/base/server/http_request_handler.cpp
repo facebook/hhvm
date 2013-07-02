@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/time/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/service_data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +44,10 @@ AccessLog HttpRequestHandler::s_accessLog(
   &(HttpRequestHandler::getAccessLogThreadData));
 
 HttpRequestHandler::HttpRequestHandler()
-  : m_pathTranslation(true) {
+    : m_pathTranslation(true),
+      m_requestTimedOutOnQueue(ServiceData::createTimeseries(
+                                 "requests_timed_out_on_queue",
+                                 {ServiceData::StatsType::COUNT})) {
 }
 
 void HttpRequestHandler::sendStaticContent(Transport *transport,
@@ -129,6 +133,24 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     transport->sendString("Not Found", 404);
     return;
   }
+
+  // don't serve the request if it's been sitting in queue for longer than our
+  // allowed request timeout.
+  int requestTimeoutSeconds = (vhost->getRequestTimeoutSeconds() > 0 ?
+                               vhost->getRequestTimeoutSeconds() :
+                               RuntimeOption::RequestTimeoutSeconds);
+  if (requestTimeoutSeconds > 0) {
+    timespec now;
+    gettime(CLOCK_MONOTONIC, &now);
+    const timespec& queueTime = transport->getQueueTime();
+
+    if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000) {
+      transport->sendString("Service Unavailable", 503);
+      m_requestTimedOutOnQueue->addValue(1);
+      return;
+    }
+  }
+
   ServerStats::StartRequest(transport->getCommand().c_str(),
                             transport->getRemoteHost(),
                             vhost->getName().c_str());

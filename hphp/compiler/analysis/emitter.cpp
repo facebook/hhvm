@@ -7050,12 +7050,21 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       ue.emitIVA(m == METH_SEND || m == METH_RAISE);
 
       const Offset ehStart = ue.bcPos();
-      static Op mOps[] = {
-        OpNull,
-        OpContSend,
-        OpContRaise,
-      };
-      ue.emitOp(mOps[m]);
+      switch(m) {
+        case METH_NEXT:
+          ue.emitOp(OpNull);
+          break;
+        case METH_RAISE:
+          ue.emitOp(OpContRaise);
+          // intentional fallthrough to push the exception on the stack
+        case METH_SEND:
+          ue.emitOp(OpCGetL); ue.emitIVA(0);
+          ue.emitOp(OpUnsetL); ue.emitIVA(0);
+          break;
+        default:
+          not_reached();
+      }
+
       ue.emitOp(OpContEnter);
       ue.emitOp(OpContStopped);
       ue.emitOp(OpNull);

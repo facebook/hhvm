@@ -3732,17 +3732,10 @@ ContCheck <check started>    []  ->  []
   object. If the continuation is finished, already running, or not yet started
   and <check started> is enabled, an exception will be thrown.
 
-ContSend    []  ->  [C]
-
-  Prepare continuation to receive a value. $this must be a Continuation object
-  that passed ContCheck<true> check. The value in local 0 is moved to the stack
-  for sending to the Continuation by ContEnter.
-
-ContRaise    []  ->  [C:Obj:Exception]
+ContRaise    []  ->  []
 
   Prepare continuation to receive a thrown exception. $this must be a
-  Continuation object that passed ContCheck<true> check. The exception in
-  local 0 is moved to the stack for sending to the Continuation by ContEnter.
+  Continuation object that passed ContCheck<true> check.
 
 ContValid    []  ->  [C:Bool]
 

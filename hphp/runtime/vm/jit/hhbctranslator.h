@@ -381,7 +381,6 @@ struct HhbcTranslator {
   void emitContSuspendK(int64_t labelId);
   void emitContRetC();
   void emitContCheck(bool checkStarted);
-  void emitContSend();
   void emitContRaise();
   void emitContValid();
   void emitContKey();

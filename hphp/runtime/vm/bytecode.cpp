@@ -6865,23 +6865,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCheck(PC& pc) {
   cont->preNext();
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
-  NEXT();
-
-  // prepare value to be sent by ContEnter
-  tvCopy(*frame_local(m_fp, 0), *m_stack.allocTV());
-  tvWriteUninit(frame_local(m_fp, 0));
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   assert(cont->m_label);
   --cont->m_label;
-
-  // prepare exception to be sent by ContEnter
-  tvCopy(*frame_local(m_fp, 0), *m_stack.allocTV());
-  tvWriteUninit(frame_local(m_fp, 0));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {

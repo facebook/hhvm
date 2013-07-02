@@ -1270,8 +1270,7 @@ static const struct {
   { OpContSuspendK,{Local|StackTop2,  None,         OutNone,          -2 }},
   { OpContRetC,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
-  { OpContSend,    {Local,            Stack1,       OutUnknown,        1 }},
-  { OpContRaise,   {Local,            Stack1,       OutUnknown,        1 }},
+  { OpContRaise,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
@@ -1841,8 +1840,6 @@ void Translator::getInputs(SrcKey startSk,
       case OpContSuspend:
       case OpContSuspendK:
       case OpContRetC:
-      case OpContSend:
-      case OpContRaise:
         loc = 0;
         break;
 

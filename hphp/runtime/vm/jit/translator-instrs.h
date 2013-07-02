@@ -134,7 +134,6 @@
   CASE(ContSuspendK) \
   CASE(ContRetC) \
   CASE(ContCheck) \
-  CASE(ContSend) \
   CASE(ContRaise) \
   CASE(ContValid) \
   CASE(ContKey) \

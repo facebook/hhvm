@@ -1190,24 +1190,12 @@ void HhbcTranslator::emitContCheck(bool checkStarted) {
   gen(ContPreNext, getExitSlowTrace(), cont);
 }
 
-void HhbcTranslator::emitContSend() {
-  assert(curClass());
-
-  // prepare value to be sent by ContEnter
-  push(gen(LdLoc, Type::Cell, LocalId(0), m_tb->fp()));
-  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
-}
-
 void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
   SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
   label = gen(OpSub, label, cns(1));
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
-
-  // prepare value to be sent by ContEnter
-  push(gen(LdLoc, Type::Cell, LocalId(0), m_tb->fp()));
-  gen(StLoc, LocalId(0), m_tb->fp(), m_tb->genDefUninit());
 }
 
 void HhbcTranslator::emitContValid() {
@@ -3339,8 +3327,6 @@ uint32_t localOutputId(const NormalizedInstruction& inst) {
     case OpUnpackCont:
     case OpContSuspend:
     case OpContRetC:
-    case OpContSend:
-    case OpContRaise:
       return 0;
 
     case OpSetWithRefLM:

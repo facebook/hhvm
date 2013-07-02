@@ -214,8 +214,8 @@ public:
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may do better.
    */
-  virtual TypedValue* nvGet(int64_t k) const;
-  virtual TypedValue* nvGet(const StringData* k) const;
+  virtual TypedValue* nvGet(int64_t k) const = 0;
+  virtual TypedValue* nvGet(const StringData* k) const = 0;
   virtual void nvGetKey(TypedValue* out, ssize_t pos);
   virtual TypedValue* nvGetValueRef(ssize_t pos);
   virtual TypedValue* nvGetCell(int64_t ki) const;

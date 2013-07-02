@@ -486,19 +486,6 @@ CVarRef ArrayData::get(CVarRef k, bool error) const {
                         : get(getStringKey(cell), error);
 }
 
-// nvGet has to search twice when using the ArrayData api so as not to
-// conflate no-key with have-key && value == null_varaint.  Subclasses
-// can easily do this with one key search.
-
-TypedValue* ArrayData::nvGet(int64_t k) const {
-  return exists(k) ? (TypedValue*)&get(k, false) :
-         nullptr;
-}
-
-TypedValue* ArrayData::nvGet(const StringData* key) const {
-  return exists(key) ? (TypedValue*)&get(key, false) : nullptr;
-}
-
 void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) {
   Variant k = getKey(pos);
   TypedValue* tv = k.asTypedValue();

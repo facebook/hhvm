@@ -2347,7 +2347,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       int64_t id = uns->readInt();
       Variant *v = uns->getByVal(id);
       if (v == nullptr) {
-        throw Exception("Id %ld out of range", id);
+        throw Exception("Id %" PRId64 " out of range", id);
       }
       operator=(*v);
     }
@@ -2357,7 +2357,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       int64_t id = uns->readInt();
       Variant *v = uns->getByRef(id);
       if (v == nullptr) {
-        throw Exception("Id %ld out of range", id);
+        throw Exception("Id %" PRId64 " out of range", id);
       }
       assignRef(*v);
     }

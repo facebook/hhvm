@@ -2649,7 +2649,7 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
     const auto& argInfo = argv[i];
     switch(argv[i].m_kind) {
       case ServiceReqArgInfo::Immediate: {
-        TRACE(3, "%lx, ", argInfo.m_imm);
+        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
         as.    emitImmReg(argInfo.m_imm, reg);
       } break;
       case ServiceReqArgInfo::CondCode: {

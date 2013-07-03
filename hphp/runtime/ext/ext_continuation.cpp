@@ -169,7 +169,6 @@ void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
     // Copy the value of the local to the cont object.
     tvDupFlattenVars(src, frame_local(fp, destId), nullptr);
   } else {
-    ActRec *contFP = fp;
     if (!fp->hasVarEnv()) {
       // This VarEnv may potentially outlive the most recently stack-allocated
       // VarEnv, so we need to heap allocate it.

@@ -239,7 +239,7 @@ static Impl& getServiceDataInstance() {
 // creating and starting threads statically before main() starts. If that
 // happens, we'll have to wrap getServiceDataInstance around a pthread_once and
 // pay some runtime synchronization cost.
-const Impl& s_dummy = getServiceDataInstance();
+UNUSED const Impl& s_dummy = getServiceDataInstance();
 
 }  // namespace
 

@@ -207,7 +207,7 @@ class Variant : private TypedValue {
   /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
   inline ALWAYS_INLINE
   /* implicit */ Variant(CVarWithRefBind v) {
-    constructWithRefHelper(variant(v), 0);
+    constructWithRefHelper(variant(v));
   }
 #else
   /* implicit */ Variant(CVarRef v);
@@ -287,7 +287,7 @@ class Variant : private TypedValue {
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(CVarRef v, const ArrayData *arr = nullptr);
+  Variant &setWithRef(CVarRef v);
 
   /**
    * Fast accessors that can be used by generated code when type inference can
@@ -1076,12 +1076,11 @@ public:
   }
 
   inline ALWAYS_INLINE
-  void setWithRefHelper(CVarRef v, const ArrayData *arr, bool destroy) {
+  void setWithRefHelper(CVarRef v, bool destroy) {
     assert(this != &v);
 
-    CVarRef rhs = v.m_type == KindOfRef && v.m_data.pref->getCount() <= 1 &&
-      (!arr || v.m_data.pref->var()->m_data.parr != arr) ?
-      *v.m_data.pref->var() : v;
+    CVarRef rhs = v.m_type == KindOfRef && v.m_data.pref->getCount() <= 1
+      ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);
       rhs.m_data.pstr->incRefCount();
@@ -1096,8 +1095,8 @@ public:
   }
 
   inline ALWAYS_INLINE
-  void constructWithRefHelper(CVarRef v, const ArrayData *arr) {
-    setWithRefHelper(v, arr, false);
+  void constructWithRefHelper(CVarRef v) {
+    setWithRefHelper(v, false);
   }
 
 #ifdef INLINE_VARIANT_HELPER

@@ -196,7 +196,7 @@ Variant::Variant(CVarStrongBind v) {
 }
 
 Variant::Variant(CVarWithRefBind v) {
-  constructWithRefHelper(variant(v), 0);
+  constructWithRefHelper(variant(v));
 }
 
 /*
@@ -272,8 +272,8 @@ Variant &Variant::assignRef(CVarRef v) {
 }
 
 HOT_FUNC
-Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
-  setWithRefHelper(v, arr, IS_REFCOUNTED_TYPE(m_type));
+Variant &Variant::setWithRef(CVarRef v) {
+  setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }
 

@@ -531,7 +531,7 @@ inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
-                                   Cell* value) {
+                            Cell* value) {
   Array a = Array::Create();
   a.set(tvAsCVarRef(key), tvAsCVarRef(value));
   tvAsVariant(base) = a;
@@ -687,6 +687,7 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       initScratchKey<keyType>(scratch, key);
       SetElemEmptyish(base, key, value);
       if (!setResult) {
+        tvRefcountedIncRef(value);
         throw InvalidSetMException(*value);
       }
     } else {
@@ -696,8 +697,10 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         // Can't use PRId64 here because of order of inclusion issues
         raise_warning("Illegal string offset: %lld", (long long)x);
         if (!setResult) {
-          throw InvalidSetMException(*value);
+          throw InvalidSetMException(make_tv<KindOfNull>());
         } else {
+          tvRefcountedDecRef(value);
+          tvWriteNull(value);
           break;
         }
       }

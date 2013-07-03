@@ -1,0 +1,13 @@
+object(X)#1 (0) {
+}
+array(1) {
+  [-1]=>
+  object(X)#1 (0) {
+  }
+}
+string(13) "X::__destruct"
+1
+string(13) "X::__destruct"
+NULL
+string(1) "x"
+2

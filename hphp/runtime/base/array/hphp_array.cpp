@@ -1297,7 +1297,7 @@ ArrayData* HphpArray::plus(const ArrayData* elems, bool copy) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
-    if (key.isNumeric()) {
+    if (key.asTypedValue()->m_type == KindOfInt64) {
       a->addValWithRef(key.toInt64(), value);
     } else {
       a->addValWithRef(key.getStringData(), value);
@@ -1311,7 +1311,7 @@ ArrayData* HphpArray::merge(const ArrayData* elems, bool copy) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
-    if (key.isNumeric()) {
+    if (key.asTypedValue()->m_type == KindOfInt64) {
       a->nextInsertWithRef(value);
     } else {
       Variant *p;

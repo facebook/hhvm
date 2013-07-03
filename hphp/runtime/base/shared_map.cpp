@@ -56,6 +56,23 @@ SharedMap::~SharedMap() {
   }
 }
 
+HOT_FUNC
+void SharedMap::Release(ArrayData* ad) {
+  asSharedMap(ad)->release();
+}
+
+inline SharedMap* SharedMap::asSharedMap(ArrayData* ad) {
+  assert(ad->kind() == ArrayKind::kSharedMap);
+  assert(dynamic_cast<SharedMap*>(ad));
+  return static_cast<SharedMap*>(ad);
+}
+
+inline const SharedMap* SharedMap::asSharedMap(const ArrayData* ad) {
+  assert(ad->kind() == ArrayKind::kSharedMap);
+  assert(dynamic_cast<const SharedMap*>(ad));
+  return static_cast<const SharedMap*>(ad);
+}
+
 ssize_t SharedMap::getIndex(const StringData* k) const {
   if (isVector()) return -1;
   return m_map->indexOf(k);
@@ -110,13 +127,15 @@ ArrayData *SharedMap::lvalNew(Variant *&ret, bool copy) {
   return releaseIfCopied(escalated, escalated->lvalNew(ret, false));
 }
 
-ArrayData *SharedMap::set(int64_t k, CVarRef v, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData*
+SharedMap::SetInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
-ArrayData *SharedMap::set(StringData* k, CVarRef v, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData*
+SharedMap::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
@@ -144,8 +163,9 @@ ArrayData *SharedMap::copy() const {
   return SharedMap::escalate();
 }
 
-ArrayData *SharedMap::append(CVarRef v, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::Append(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asSharedMap(ad);
+  ArrayData *escalated = a->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->append(v, false));
 }
 
@@ -180,24 +200,27 @@ ArrayData *SharedMap::escalate() const {
   return ret;
 }
 
-TypedValue* SharedMap::nvGet(int64_t k) const {
-  int index = getIndex(k);
+TypedValue* SharedMap::NvGetInt(const ArrayData* ad, int64_t k) {
+  auto a = asSharedMap(ad);
+  auto index = a->getIndex(k);
   if (index == -1) return nullptr;
-  return (TypedValue*)&getValueRef(index);
+  return (TypedValue*)&a->getValueRef(index);
 }
 
-TypedValue* SharedMap::nvGet(const StringData* key) const {
-  int index = getIndex(key);
+TypedValue* SharedMap::NvGetStr(const ArrayData* ad, const StringData* key) {
+  auto a = asSharedMap(ad);
+  auto index = a->getIndex(key);
   if (index == -1) return nullptr;
-  return (TypedValue*)&getValueRef(index);
+  return (TypedValue*)&a->getValueRef(index);
 }
 
-void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) const {
-  if (isVector()) {
+void SharedMap::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+  auto a = asSharedMap(ad);
+  if (a->isVector()) {
     out->m_data.num = pos;
     out->m_type = KindOfInt64;
   } else {
-    Variant k = m_map->getKey(pos);
+    Variant k = a->m_map->getKey(pos);
     TypedValue* tv = k.asTypedValue();
     // copy w/out clobbering out->_count.
     out->m_type = tv->m_type;

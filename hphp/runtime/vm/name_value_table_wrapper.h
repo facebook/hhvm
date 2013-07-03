@@ -59,10 +59,10 @@ struct NameValueTableWrapper : public ArrayData {
   { }
 
 public: // ArrayData implementation
+  static void Release(ArrayData*) {}
 
-  // these using directives ensure the full set of overloaded functions
-  // are visible in this class, to avoid triggering implicit conversions
-  // from a CVarRef key to int64.
+  // These using directives ensure the full set of overloaded functions
+  // are visible in this class, to avoid triggering implicit conversions.
   using ArrayData::exists;
   using ArrayData::lval;
   using ArrayData::lvalNew;
@@ -71,21 +71,22 @@ public: // ArrayData implementation
   using ArrayData::add;
   using ArrayData::addLval;
   using ArrayData::remove;
+  using ArrayData::nvGet;
 
   Variant& getRef(CStrRef k) {
     return tvAsVariant(nvGet(k.get()));
   }
 
   virtual ssize_t vsize() const;
-  virtual void nvGetKey(TypedValue* out, ssize_t pos) const;
+  static void NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos);
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool noCopyOnWrite() const;
 
   virtual bool exists(int64_t k) const;
   virtual bool exists(const StringData* k) const;
 
-  virtual TypedValue* nvGet(int64_t k) const;
-  virtual TypedValue* nvGet(const StringData* k) const;
+  static TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
   virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
                           bool checkExist = false);
@@ -93,8 +94,8 @@ public: // ArrayData implementation
                           bool copy, bool checkExist = false);
   virtual ArrayData* lvalNew(Variant*& ret, bool copy);
 
-  virtual ArrayData* set(int64_t k, CVarRef v, bool copy);
-  virtual ArrayData* set(StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   virtual ArrayData* setRef(int64_t k, CVarRef v, bool copy);
   virtual ArrayData* setRef(StringData* k, CVarRef v, bool copy);
   virtual ArrayData* remove(int64_t k, bool copy);
@@ -102,7 +103,7 @@ public: // ArrayData implementation
 
   virtual ArrayData* copy() const { return 0; }
 
-  virtual ArrayData* append(CVarRef v, bool copy);
+  static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
   virtual ArrayData* appendRef(CVarRef v, bool copy);
   virtual ArrayData* appendWithRef(CVarRef v, bool copy);
 
@@ -127,6 +128,10 @@ public: // ArrayData implementation
   virtual void uksort(CVarRef cmp_function);
   virtual void usort(CVarRef cmp_function);
   virtual void uasort(CVarRef cmp_function);
+
+private:
+  static NameValueTableWrapper* asNVTW(ArrayData* ad);
+  static const NameValueTableWrapper* asNVTW(const ArrayData* ad);
 
 private:
   NameValueTable* const m_tab;

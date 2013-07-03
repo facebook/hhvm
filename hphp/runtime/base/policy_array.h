@@ -318,9 +318,14 @@ class PolicyArray : public ArrayData, private SimpleArrayStore {
   // Copy to a brand new HphpArray
   HphpArray* toHphpArray() const;
 
+  // Safe downcast helpers
+  static PolicyArray* asPolicyArray(ArrayData* ad);
+  static const PolicyArray* asPolicyArray(const ArrayData* ad);
+
 public:
   // Memory allocator methods.
   DECLARE_SMART_ALLOCATION(PolicyArray);
+  static void Release(ArrayData*);
 
   explicit PolicyArray(uint size);
 
@@ -364,13 +369,9 @@ public:
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may do better.
    */
-  virtual TypedValue* nvGet(int64_t k) const FOLLY_OVERRIDE {
-    return nvGetImpl(k);
-  }
-  virtual TypedValue* nvGet(const StringData* k) const FOLLY_OVERRIDE {
-    return nvGetImpl(k);
-  }
-  virtual void nvGetKey(TypedValue* out, ssize_t pos) const FOLLY_OVERRIDE;
+  static TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
 private:
   template <class K>
@@ -425,12 +426,8 @@ private:
   PolicyArray* setImpl(K k, CVarRef v, bool copy);
 
 public:
-  virtual ArrayData* set(int64_t k, CVarRef v, bool copy) FOLLY_OVERRIDE {
-    return setImpl(k, v, copy);
-  }
-  virtual ArrayData* set(StringData* k, CVarRef v, bool copy) FOLLY_OVERRIDE {
-    return setImpl(k, v, copy);
-  }
+  static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
 private:
   template <class K>
@@ -558,7 +555,7 @@ public:
    * then append the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual PolicyArray *append(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
   virtual PolicyArray *appendRef(CVarRef v, bool copy) FOLLY_OVERRIDE;
 
   /**

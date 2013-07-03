@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/shared_map.h"
 #include "hphp/runtime/base/policy_array.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/vm/name_value_table_wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,49 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
   }
   return acc->second;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+// order: kVector, kHphpArray, kSharedMap, kNameValueTableWrapper, kPolicyArray
+extern const ArrayFunctions g_array_funcs = {
+  // release
+  { &HphpArray::ReleaseVec, &HphpArray::Release,
+    &SharedMap::Release,
+    &NameValueTableWrapper::Release,
+    &PolicyArray::Release },
+  // append
+  { &HphpArray::AppendVec, &HphpArray::Append,
+    &SharedMap::Append,
+    &NameValueTableWrapper::Append,
+    &PolicyArray::Append },
+  // nvGetInt
+  { &HphpArray::NvGetIntVec, &HphpArray::NvGetInt,
+    &SharedMap::NvGetInt,
+    &NameValueTableWrapper::NvGetInt,
+    &PolicyArray::NvGetInt },
+  // nvGetStr
+  { &HphpArray::NvGetStrVec, &HphpArray::NvGetStr,
+    &SharedMap::NvGetStr,
+    &NameValueTableWrapper::NvGetStr,
+    &PolicyArray::NvGetStr },
+  // nvGetKey
+  { &HphpArray::NvGetKeyVec, &HphpArray::NvGetKey,
+    &SharedMap::NvGetKey,
+    &NameValueTableWrapper::NvGetKey,
+    &PolicyArray::NvGetKey },
+  // setInt
+  { &HphpArray::SetIntVec, &HphpArray::SetInt,
+    &SharedMap::SetInt,
+    &NameValueTableWrapper::SetInt,
+    &PolicyArray::SetInt },
+  // setStr
+  { &HphpArray::SetStrVec, &HphpArray::SetStr,
+    &SharedMap::SetStr,
+    &NameValueTableWrapper::SetStr,
+    &PolicyArray::SetStr },
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 // In general, arrays can contain int-valued-strings, even though
 // plain array access converts them to integers.  non-int-string
@@ -110,27 +154,6 @@ ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
 
 ArrayData *ArrayData::nonSmartCopy() const {
   throw FatalErrorException("nonSmartCopy not implemented.");
-}
-
-HOT_FUNC
-void ArrayData::release() {
-  if (isHphpArray()) {
-    HphpArray* that = static_cast<HphpArray*>(this);
-    that->release();
-    return;
-  }
-  if (isSharedMap()) {
-    SharedMap* that = static_cast<SharedMap*>(this);
-    that->release();
-    return;
-  }
-  if (isPolicyArray()) {
-    auto that = static_cast<PolicyArray*>(this);
-    that->release();
-    return;
-  }
-  assert(m_kind == ArrayKind::kNameValueTableWrapper);
-  // NameValueTableWrapper: nop.
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,7 +285,7 @@ void ArrayData::newFullPos(FullPos &fp) {
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
-  assert(strongIterators() != 0 && fp.getContainer() == (ArrayData*)this);
+  assert(strongIterators() && fp.getContainer() == this);
   // search for fp in our list, then remove it. Usually its the first one.
   FullPos* p = strongIterators();
   if (p == &fp) {
@@ -286,7 +309,7 @@ void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);
   }
-  setStrongIterators(0);
+  setStrongIterators(nullptr);
 }
 
 void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {

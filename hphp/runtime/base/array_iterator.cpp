@@ -22,6 +22,9 @@
 #include "hphp/runtime/base/object_data.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
+// inline methods of HphpArray.
+#include "hphp/runtime/base/hphp_array-defs.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Static strings.
@@ -909,27 +912,6 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   return 0LL;
 }
 
-template <bool withRef>
-inline ALWAYS_INLINE
-void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
-                     TypedValue* keyOut) {
-  if (withRef) {
-    tvAsVariant(valOut) = withRefBind(tvAsVariant(&elm->data));
-    if (LIKELY(keyOut != nullptr)) {
-      DataType t = keyOut->m_type;
-      uint64_t d = keyOut->m_data.num;
-      HphpArray::getElmKey(elm, keyOut);
-      tvRefcountedDecRefHelper(t, d);
-    }
-  } else {
-    TypedValue* cur = tvToCell(&elm->data);
-    cellDup(*cur, *valOut);
-    if (keyOut) {
-      HphpArray::getElmKey(elm, keyOut);
-    }
-  }
-}
-
 HOT_FUNC
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
@@ -948,8 +930,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->arr().setIterType(ArrayIter::TypeArray);
-      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
-      getHphpArrayElm<false>(elm, valOut, nullptr);
+      arr->getArrayElm<false>(dest->arr().m_pos, valOut, nullptr);
       return 1LL;
     }
     // We did not transfer ownership of the array to an iterator, so we need
@@ -991,8 +972,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->arr().setIterType(ArrayIter::TypeArray);
-      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
-      getHphpArrayElm<withRef>(elm, valOut, keyOut);
+      arr->getArrayElm<withRef>(dest->arr().m_pos, valOut, keyOut);
       return 1LL;
     }
     // We did not transfer ownership of the array to an iterator, so we need
@@ -1236,7 +1216,6 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     }
     const HphpArray* arr = (HphpArray*)ad;
     ssize_t pos = arrIter->getPos();
-    HphpArray::Elm* elm;
     do {
       if (size_t(++pos) >= size_t(arr->iterLimit())) {
         if (UNLIKELY(arr->getCount() == 1)) {
@@ -1248,14 +1227,13 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         }
         return 0;
       }
-      elm = arr->getElm(pos);
-    } while (HphpArray::isTombstone(elm->data.m_type));
+    } while (arr->isTombstone(pos));
     if (UNLIKELY(tvWillBeReleased(valOut))) {
       goto cold;
     }
     tvDecRefOnly(valOut);
     arrIter->setPos(pos);
-    getHphpArrayElm<false>(elm, valOut, nullptr);
+    arr->getArrayElm<false>(pos, valOut, nullptr);
     return 1;
   }
 cold:
@@ -1283,7 +1261,6 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     }
     const HphpArray* arr = (HphpArray*)ad;
     ssize_t pos = arrIter->getPos();
-    HphpArray::Elm* elm;
     do {
       ++pos;
       if (size_t(pos) >= size_t(arr->iterLimit())) {
@@ -1296,8 +1273,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         }
         return 0;
       }
-      elm = arr->getElm(pos);
-    } while (HphpArray::isTombstone(elm->data.m_type));
+    } while (arr->isTombstone(pos));
     if (!withRef) {
       if (UNLIKELY(tvWillBeReleased(valOut))) {
         goto cold;
@@ -1309,7 +1285,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       tvDecRefOnly(keyOut);
     }
     arrIter->setPos(pos);
-    getHphpArrayElm<withRef>(elm, valOut, keyOut);
+    arr->getArrayElm<withRef>(pos, valOut, keyOut);
     return 1;
   }
   cold:

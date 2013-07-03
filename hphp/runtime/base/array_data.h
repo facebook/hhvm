@@ -40,10 +40,12 @@ class ArrayData : public Countable {
   // enum of possible array types, so we can guard nonvirtual
   // fast paths in runtime code.
   enum class ArrayKind : uint8_t {
+    kVector,
     kHphpArray,
     kSharedMap,
     kNameValueTableWrapper,
     kPolicyArray,
+    kNumKinds // insert new values before kNumKinds.
   };
 
 public:
@@ -162,7 +164,11 @@ public:
    * Specific derived class type querying operators.
    */
   bool isPolicyArray() const { return m_kind == ArrayKind::kPolicyArray; }
-  bool isHphpArray() const { return m_kind == ArrayKind::kHphpArray; }
+  bool isVector() const { return m_kind == ArrayKind::kVector; }
+  bool isHphpArray() const {
+    return m_kind <= ArrayKind::kHphpArray;
+    static_assert(ArrayKind::kVector < ArrayKind::kHphpArray, "");
+  }
   bool isSharedMap() const { return m_kind == ArrayKind::kSharedMap; }
   bool isNameValueTableWrapper() const {
     return m_kind == ArrayKind::kNameValueTableWrapper;
@@ -208,11 +214,14 @@ public:
 
   /**
    * Interface for VM helpers.  ArrayData implements generic versions
-   * using the other ArrayData api; subclasses may do better.
+   * using the other ArrayData api; subclasses may customize methods either
+   * by overriding a virtual method or providing a custom static method,
+   * depending on how the method is dispatched.
+   * todo: t2608483 eliminate the remaining virtual methods.
    */
-  virtual TypedValue* nvGet(int64_t k) const = 0;
-  virtual TypedValue* nvGet(const StringData* k) const = 0;
-  virtual void nvGetKey(TypedValue* out, ssize_t pos) const = 0;
+  TypedValue* nvGet(int64_t k) const;
+  TypedValue* nvGet(const StringData* k) const;
+  void nvGetKey(TypedValue* out, ssize_t pos) const;
 
   // nonvirtual wrappers that call virtual getValueRef()
   TypedValue* nvGetValueRef(ssize_t pos);
@@ -250,8 +259,8 @@ public:
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *set(int64_t k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *set(StringData* k, CVarRef v, bool copy) = 0;
+  ArrayData *set(int64_t k, CVarRef v, bool copy);
+  ArrayData *set(StringData* k, CVarRef v, bool copy);
 
   virtual ArrayData *setRef(int64_t k, CVarRef v, bool copy) = 0;
   virtual ArrayData *setRef(StringData* k, CVarRef v, bool copy) = 0;
@@ -381,8 +390,8 @@ public:
    * then append the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *append(CVarRef v, bool copy) = 0;
-  virtual ArrayData *appendRef(CVarRef v, bool copy) = 0;
+  ArrayData* append(CVarRef v, bool copy);
+  virtual ArrayData* appendRef(CVarRef v, bool copy) = 0;
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
@@ -454,6 +463,9 @@ public:
     static_assert(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET,
                   "Offset of _count in ArrayData must be FAST_REFCOUNT_OFFSET");
   }
+  // safely convert m_kind to an array index for dispatching
+  unsigned index() const;
+
  protected:
   void freeStrongIterators();
   static void moveStrongIterators(ArrayData* dest, ArrayData* src);
@@ -475,6 +487,12 @@ public:
   static bool IsValidKey(CVarRef k);
   static bool IsValidKey(const StringData* k) { return k; }
 
+  // allocation helpers either call smart_malloc api or regular
+  // malloc, depending on m_allocMode
+  void* modeAlloc(size_t nbytes) const;
+  void* modeRealloc(void* ptr, size_t nbytes) const;
+  void modeFree(void* ptr) const;
+
  protected:
   // Layout starts with 64 bits for vtable, then 32 bits for m_count
   // from Countable base, then...
@@ -483,7 +501,7 @@ private:
   FullPos* m_strongIterators; // head of linked list
 protected:
   int32_t m_pos;
-  const ArrayKind m_kind;
+  ArrayKind m_kind;
   const AllocationMode m_allocMode;
 
  public: // for the JIT
@@ -494,6 +512,26 @@ protected:
  public:
   void getChildren(std::vector<TypedValue *> &out);
 };
+
+/*
+ * ArrayFunctions is a hand-built virtual dispatch table.  Each field represents
+ * one virtual method with an array of function pointers, one per ArrayKind.
+ * There is one global instance of this table.  Arranging it this way allows
+ * dispatch to be done with a single indexed load, using m_kind as the index.
+ */
+struct ArrayFunctions {
+  // NK stands for number of array kinds; here just for shorthand.
+  static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
+  void (*release[NK])(ArrayData*);
+  ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
+  TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
+  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
+  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
+};
+
+extern const ArrayFunctions g_array_funcs;
 
 ALWAYS_INLINE inline
 void decRefArr(ArrayData* arr) {

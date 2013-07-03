@@ -23,6 +23,9 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
+// inline methods of HphpArray
+#include "hphp/runtime/base/hphp_array-defs.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,6 +64,10 @@ template <typename AccessorT>
 HphpArray::SortFlavor
 HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
+  if (isVector()) {
+    // todo t2607563: this is pessimistic.
+    vectorToGeneric();
+  }
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -117,8 +124,7 @@ done:
 void HphpArray::postSort(bool resetKeys) {
   assert(m_size > 0);
   size_t tableSize = computeTableSize(m_tableMask);
-  initHash(m_hash, tableSize);
-  m_hLoad = 0;
+  initHash(tableSize);
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       Elm* e = &m_data[pos];

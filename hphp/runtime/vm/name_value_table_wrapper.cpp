@@ -23,6 +23,19 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
+  assert(ad->kind() == ArrayKind::kNameValueTableWrapper);
+  assert(dynamic_cast<NameValueTableWrapper*>(ad));
+  return static_cast<NameValueTableWrapper*>(ad);
+}
+
+inline const NameValueTableWrapper*
+NameValueTableWrapper::asNVTW(const ArrayData* ad) {
+  assert(ad->kind() == ArrayKind::kNameValueTableWrapper);
+  assert(dynamic_cast<const NameValueTableWrapper*>(ad));
+  return static_cast<const NameValueTableWrapper*>(ad);
+}
+
 ssize_t NameValueTableWrapper::vsize() const {
   // We need to iterate to find out the actual size, since
   // KindOfIndirect elements in the array may have been set to
@@ -36,8 +49,10 @@ ssize_t NameValueTableWrapper::vsize() const {
   return count;
 }
 
-void NameValueTableWrapper::nvGetKey(TypedValue* out, ssize_t pos) const {
-  NameValueTable::Iterator iter(m_tab, pos);
+void NameValueTableWrapper::NvGetKey(const ArrayData* ad, TypedValue* out,
+                                     ssize_t pos) {
+  auto a = asNVTW(ad);
+  NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
     auto k = iter.curKey();
     out->m_data.pstr = const_cast<StringData*>(k);
@@ -67,12 +82,13 @@ bool NameValueTableWrapper::exists(const StringData* k) const {
   return m_tab->lookup(k);
 }
 
-TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
-  return m_tab->lookup(k);
+TypedValue*
+NameValueTableWrapper::NvGetStr(const ArrayData* ad, const StringData* k) {
+  return asNVTW(ad)->m_tab->lookup(k);
 }
 
-TypedValue* NameValueTableWrapper::nvGet(int64_t k) const {
-  return m_tab->lookup(String(k).get());
+TypedValue* NameValueTableWrapper::NvGetInt(const ArrayData* ad, int64_t k) {
+  return asNVTW(ad)->m_tab->lookup(String(k).get());
 }
 
 ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,
@@ -97,14 +113,16 @@ ArrayData* NameValueTableWrapper::lvalNew(Variant*& ret, bool copy) {
   return this;
 }
 
-ArrayData* NameValueTableWrapper::set(int64_t k, CVarRef v, bool copy) {
-  return set(String(k), v, copy);
+ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad, int64_t k,
+                                         CVarRef v, bool copy) {
+  return SetStr(ad, String(k).get(), v, copy);
 }
 
-ArrayData* NameValueTableWrapper::set(StringData* k, CVarRef v,
-                                      bool copy) {
-  tvAsVariant(m_tab->lookupAdd(k)).assignVal(v);
-  return this;
+ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
+                                         CVarRef v, bool copy) {
+  auto a = asNVTW(ad);
+  tvAsVariant(a->m_tab->lookupAdd(k)).assignVal(v);
+  return a;
 }
 
 ArrayData* NameValueTableWrapper::setRef(int64_t k, CVarRef v, bool copy) {
@@ -131,7 +149,7 @@ ArrayData* NameValueTableWrapper::remove(const StringData* k, bool copy) {
  * is currently $GLOBALS.
  */
 
-ArrayData* NameValueTableWrapper::append(CVarRef v, bool copy) {
+ArrayData* NameValueTableWrapper::Append(ArrayData*, CVarRef v, bool copy) {
   throw NotImplementedException("append on $GLOBALS");
 }
 

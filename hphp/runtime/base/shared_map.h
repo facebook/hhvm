@@ -73,8 +73,8 @@ public:
                           bool checkExist = false);
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
-  ArrayData *set(int64_t k, CVarRef v, bool copy);
-  ArrayData *set(StringData* k, CVarRef v, bool copy);
+  static ArrayData *SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData *SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   ArrayData *setRef(int64_t k, CVarRef v, bool copy);
   ArrayData *setRef(StringData* k, CVarRef v, bool copy);
 
@@ -85,7 +85,7 @@ public:
   /**
    * Copy (escalate) the SharedMap without triggering local cache.
    */
-  ArrayData *append(CVarRef v, bool copy);
+  static ArrayData *Append(ArrayData* a, CVarRef v, bool copy);
   ArrayData *appendRef(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
   ArrayData *plus(const ArrayData *elems, bool copy);
@@ -96,9 +96,9 @@ public:
   /**
    * Non-Variant virtual methods that override ArrayData
    */
-  TypedValue* nvGet(int64_t k) const;
-  TypedValue* nvGet(const StringData* k) const;
-  void nvGetKey(TypedValue* out, ssize_t pos) const;
+  static TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
   bool isVectorData() const;
 
@@ -114,6 +114,7 @@ public:
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(SharedMap);
+  static void Release(ArrayData*);
 
   virtual ArrayData *escalate() const;
   virtual ArrayData* escalateForSort();
@@ -123,6 +124,8 @@ public:
 private:
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
+  static SharedMap* asSharedMap(ArrayData* ad);
+  static const SharedMap* asSharedMap(const ArrayData* ad);
 
 private:
   bool m_isVector;

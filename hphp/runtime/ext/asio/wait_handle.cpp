@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitHandle::c_WaitHandle(Class* cb)
-    : ExtObjectData(cb) {
+    : ExtObjectData(cb), m_resultOrException(make_tv<KindOfNull>()) {
 }
 
 c_WaitHandle::~c_WaitHandle() {

@@ -31,7 +31,7 @@ c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(Class* cb)
 }
 
 c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
-  tvDecRefObj(&m_resultOrException);
+  tvRefcountedDecRefCell(&m_resultOrException);
 }
 
 void c_StaticExceptionWaitHandle::t___construct() {

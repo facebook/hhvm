@@ -1,0 +1,4 @@
+int(42)
+string(3) "Hi!"
+string(34) "O:22:"StaticResultWaitHandle":0:{}"
+string(37) "O:25:"StaticExceptionWaitHandle":0:{}"

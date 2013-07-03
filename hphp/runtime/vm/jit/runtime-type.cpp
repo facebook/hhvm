@@ -371,15 +371,18 @@ string RuntimeType::pretty() const {
     sprintf(buf, "(Value %s)", tname(m_value.outerType).c_str());
   }
   string retval = buf;
-  if (valueType() == KindOfObject && valueClass() != nullptr) {
-    char buf2[1024];
-    sprintf(buf2, "(OfClass %s)", valueClass()->preClass()->name()->data());
-    retval += string(buf2);
+  if (valueType() == KindOfObject) {
+    if (valueClass() != nullptr) {
+      retval += folly::format("(OfClass {})",
+                knownClass()->name()->data()).str();
+    } else if (hasKnownType()) {
+      retval += folly::format("(Known Class {})",
+                knownClass()->name()->data()).str();
+    }
   }
   if (valueType() == KindOfClass && valueClass() != nullptr) {
-    char buf2[1024];
-    sprintf(buf2, "(Class %s)", valueClass()->preClass()->name()->data());
-    retval += string(buf2);
+    retval += folly::format("(Class {})",
+              knownClass()->name()->data()).str();
   }
   return retval;
 }

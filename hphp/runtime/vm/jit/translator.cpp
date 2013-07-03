@@ -2327,7 +2327,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      RuntimeType rtt = tx64->liveType(l, *curUnit());
+      RuntimeType rtt = tx64->liveType(l, *curUnit(), true);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
@@ -2502,13 +2502,14 @@ bool NormalizedInstruction::isAnyOutputUsed() const
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
-  : outerType(outer), innerType(inner) {
+  : outerType(outer), innerType(inner), klass(nullptr) {
 }
 
 GuardType::GuardType(const RuntimeType& rtt) {
   assert(rtt.isValue());
   outerType = rtt.outerType();
   innerType = rtt.innerType();
+  klass = rtt.hasKnownType() ? rtt.knownClass() : nullptr;
 }
 
 GuardType::GuardType(const GuardType& other) {
@@ -2524,8 +2525,16 @@ const DataType GuardType::getInnerType() const {
   return innerType;
 }
 
+const Class* GuardType::getSpecializedClass() const {
+  return klass;
+}
+
 bool GuardType::isSpecific() const {
   return outerType > KindOfInvalid;
+}
+
+bool GuardType::isSpecialized() const {
+  return outerType == KindOfObject && klass != nullptr;
 }
 
 bool GuardType::isRelaxed() const {
@@ -2566,7 +2575,9 @@ DataTypeCategory GuardType::getCategory() const {
     case KindOfAny:           return DataTypeGeneric;
     case KindOfUncounted:     return DataTypeCountness;
     case KindOfUncountedInit: return DataTypeCountnessInit;
-    default:                  return DataTypeSpecific;
+    default:                  return klass != nullptr ?
+                                                DataTypeSpecialized :
+                                                DataTypeSpecific;
   }
 }
 
@@ -2592,8 +2603,25 @@ GuardType GuardType::getCountness() const {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:  return GuardType(KindOfUncounted);
-    default:            return *this;
+    default:            return GuardType(outerType, innerType);
   }
+}
+
+GuardType GuardType::dropSpecialization() const {
+  return GuardType(outerType, innerType);
+}
+
+RuntimeType GuardType::getRuntimeType() const {
+  if (klass != nullptr) {
+    return RuntimeType(outerType, innerType).setKnownClass(klass);
+  }
+  return RuntimeType(outerType, innerType);
+}
+
+bool GuardType::isEqual(GuardType other) const {
+  return outerType == other.outerType &&
+         innerType == other.innerType &&
+         klass == other.klass;
 }
 
 GuardType GuardType::getCountnessInit() const {
@@ -2603,7 +2631,7 @@ GuardType GuardType::getCountnessInit() const {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:  return GuardType(KindOfUncountedInit);
-    default:            return *this;
+    default:            return GuardType(outerType, innerType);
   }
 }
 
@@ -2625,7 +2653,8 @@ bool isPopped(DynLocation* loc, NormalizedInstruction* instr) {
 
 DataTypeCategory
 Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
-                                         size_t opndIdx) {
+                                         size_t opndIdx,
+                                         const GuardType& specType) {
   auto opc = instr->op();
 
   switch (opc) {
@@ -2691,6 +2720,28 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       // which takes care of dec-refing it if needed
       return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
 
+    //
+    // Collections and Iterator related specializations
+    //
+    case OpCGetM:
+    case OpIssetM:
+    case OpFPassM:
+      if (instr->inputs.size() == 2 && opndIdx == 0) {
+        const Class* klass = specType.getSpecializedClass();
+        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+          return DataTypeSpecialized;
+        }
+      }
+      return DataTypeSpecific;
+    case OpSetM:
+      if (instr->inputs.size() == 3 && opndIdx == 1) {
+        const Class* klass = specType.getSpecializedClass();
+        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+          return DataTypeSpecialized;
+        }
+      }
+      return DataTypeSpecific;
+
     default:
       return DataTypeSpecific;
   }
@@ -2700,21 +2751,25 @@ GuardType
 Translator::getOperandConstraintType(NormalizedInstruction* instr,
                                      size_t                 opndIdx,
                                      const GuardType&       specType) {
-  DataTypeCategory dtCategory = getOperandConstraintCategory(instr, opndIdx);
+  DataTypeCategory dtCategory = getOperandConstraintCategory(instr,
+                                                             opndIdx,
+                                                             specType);
   switch (dtCategory) {
     case DataTypeGeneric:       return GuardType(KindOfAny);
     case DataTypeCountness:     return specType.getCountness();
     case DataTypeCountnessInit: return specType.getCountnessInit();
-    case DataTypeSpecific:
-    default:                    return specType;
+    case DataTypeSpecific:      return specType.dropSpecialization();
+    case DataTypeSpecialized:
+                                return specType;
   }
+  return specType;
 }
 
 void Translator::constrainOperandType(GuardType&             relxType,
                                       NormalizedInstruction* instr,
                                       size_t                 opndIdx,
                                       const GuardType&       specType) {
-  if (relxType.isSpecific()) return; // Can't constrain any further
+  if (relxType.isEqual(specType)) return; // Can't constrain any further
 
   GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
   if (consType.isMoreRefinedThan(relxType)) {
@@ -2733,7 +2788,7 @@ void Translator::constrainDep(const DynLocation* loc,
                               NormalizedInstruction* firstInstr,
                               GuardType specType,
                               GuardType& relxType) {
-  if (relxType.isSpecific()) return; // can't contrain it any further
+  if (relxType.isEqual(specType)) return; // can't contrain it any further
 
   for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
     if (instr->noOp) continue;
@@ -2765,13 +2820,17 @@ void Translator::constrainDep(const DynLocation* loc,
             if (specType.getOuterType() == KindOfRef &&
                 instr->isAnyOutputUsed()) {
               // Value gets unboxed along the way. Pessimize it for now.
-              relxType = specType;
+              if (!relxType.isSpecialized()) {
+                relxType = specType.dropSpecialization();
+              }
               return;
             }
             break;
 
           default:
-            relxType = specType;
+            if (!relxType.isSpecialized()) {
+              relxType = specType.dropSpecialization();
+            }
             return;
         }
 
@@ -2797,67 +2856,6 @@ void Translator::constrainDep(const DynLocation* loc,
   }
 }
 
-/**
- * Propagates the relaxed type relxType for loc to all its consumers,
- * starting at firstInstr.
- */
-void Translator::propagateRelaxedType(Tracelet& tclet,
-                                      NormalizedInstruction* firstInstr,
-                                      DynLocation* loc,
-                                      const GuardType& relxType) {
-  assert(relxType.isRelaxed());
-
-  for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
-    if (instr->noOp) continue;
-    auto opc = instr->op();
-    size_t nInputs = instr->inputs.size();
-    for (size_t i = 0; i < nInputs; i++) {
-      DynLocation* usedLoc = instr->inputs[i];
-      if (usedLoc == loc) {
-        auto outKind = instrInfo[opc].type;
-
-        // stack input propagates to outputs
-        bool outputIsStackInput = (i == 0 && // stack input is inputs[0]
-                         (outKind == OutSameAsInput || outKind == OutCInput));
-        bool outputIsLocalInput = (i == nInputs - 1 && // local input is last
-                                   outKind == OutCInputL);
-        bool outputIsInput = outputIsStackInput || outputIsLocalInput;
-
-        if (outputIsInput) {
-          // if instr has outStack, update its type and propagate to consumers
-          if (instr->outStack) {
-
-            TRACE(6,
-                  "propagateRelaxedType: Loc: %s oldType: %s => newType: %s\n",
-                  instr->outStack->location.pretty().c_str(),
-                  instr->outStack->rtt.pretty().c_str(),
-                  RuntimeType(relxType.getOuterType(),
-                              relxType.getInnerType()).pretty().c_str());
-
-            instr->outStack->rtt = RuntimeType(relxType.getOuterType(),
-                                               relxType.getInnerType());
-            propagateRelaxedType(tclet, instr->next, instr->outStack, relxType);
-          }
-          // if instr has outLocal, update its type and propagate to consumers
-          if (instr->outLocal) {
-
-            TRACE(6,
-                  "propagateRelaxedType: Loc: %s oldType: %s => newType: %s\n",
-                  instr->outLocal->location.pretty().c_str(),
-                  instr->outLocal->rtt.pretty().c_str(),
-                  RuntimeType(relxType.getOuterType(),
-                              relxType.getInnerType()).pretty().c_str());
-
-            instr->outLocal->rtt = RuntimeType(relxType.getOuterType(),
-                                               relxType.getInnerType());
-            propagateRelaxedType(tclet, instr->next, instr->outLocal, relxType);
-          }
-        }
-      }
-    }
-  }
-}
-
 /*
  * This method looks at all the uses of the tracelet dependencies in the
  * instruction stream and tries to relax the type associated with each location.
@@ -2876,7 +2874,9 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
       GuardType relxType = GuardType(KindOfAny);
       GuardType specType = GuardType(rtt);
       constrainDep(loc, tclet.m_instrStream.first, specType, relxType);
-      locRelxTypeMap[loc] = relxType;
+      if (!specType.isEqual(relxType)) {
+        locRelxTypeMap[loc] = relxType;
+      }
     }
   }
 
@@ -2885,56 +2885,15 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   for (auto& kv : locRelxTypeMap) {
     DynLocation* loc = kv.first;
     const GuardType& relxType = kv.second;
-    if (relxType.isRelaxed()) {
-      TRACE(1, "relaxDeps: Loc: %s   oldType: %s   =>   newType: %s\n",
-            loc->location.pretty().c_str(),
-            deps[loc->location]->rtt.pretty().c_str(),
-            RuntimeType(relxType.getOuterType(),
-                        relxType.getInnerType()).pretty().c_str());
-      assert(deps[loc->location] == loc);
-      assert(relxType.getOuterType() != KindOfInvalid);
-      deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
-                                             relxType.getInnerType());
-      propagateRelaxedType(tclet, tclet.m_instrStream.first, loc, relxType);
-    }
-  }
-}
-
-/*
- * This method looks at all the uses of the tracelet dependencies in the
- * instruction stream and tries to specialize the type associated
- * with each location.
- */
-void Translator::specializeDeps(Tracelet& tclet, TraceletContext& tctxt) {
-  // Process the instruction stream, look for CGetM/SetM/IssetM and if the
-  // instructions are for Vector types and consistent with Vector usage
-  // specialize the guard
-  for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
-       instr = instr->next) {
-    auto op = instr->op();
-    if ((op == OpCGetM || op == OpIssetM || op == OpFPassM) &&
-        instr->inputs.size() == 2) {
-      specializeCollections(instr, 0, tctxt);
-    } else if (op == OpSetM && instr->inputs.size() == 3) {
-      specializeCollections(instr, 1, tctxt);
-    }
-  }
-}
-
-void Translator::specializeCollections(NormalizedInstruction* instr,
-                                       int index,
-                                       TraceletContext& tctxt) {
-  if (instr->inputs[index]->isObject()
-      || instr->inputs[index]->isRefToObject()) {
-    Location l = instr->inputs[index]->location;
-    auto dep = tctxt.m_dependencies.find(l);
-    if (dep != tctxt.m_dependencies.end()) {
-      RuntimeType specialized = liveType(l, *curUnit(), true);
-      const Class* klass = specialized.knownClass();
-      if (klass != nullptr && isOptimizableCollectionClass(klass)) {
-        tctxt.m_dependencies[l]->rtt = specialized;
-      }
-    }
+    TRACE(1, "relaxDeps: Loc: %s   oldType: %s   =>   newType: %s\n",
+          loc->location.pretty().c_str(),
+          deps[loc->location]->rtt.pretty().c_str(),
+          RuntimeType(relxType.getOuterType(),
+                      relxType.getInnerType(),
+                      relxType.getSpecializedClass()).pretty().c_str());
+    assert(deps[loc->location] == loc);
+    assert(relxType.getOuterType() != KindOfInvalid);
+    deps[loc->location]->rtt = relxType.getRuntimeType();
   }
 }
 
@@ -3510,7 +3469,6 @@ breakBB:
   }
 
   relaxDeps(t, tas);
-  specializeDeps(t, tas);
 
   // Mark the last instruction appropriately
   assert(t.m_instrStream.last);

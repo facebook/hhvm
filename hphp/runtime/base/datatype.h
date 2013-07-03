@@ -81,7 +81,8 @@ enum DataTypeCategory {
   DataTypeGeneric,
   DataTypeCountness,
   DataTypeCountnessInit,
-  DataTypeSpecific
+  DataTypeSpecific,
+  DataTypeSpecialized
 };
 
 ///////////////////////////////////////////////////////////////////////////////

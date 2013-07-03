@@ -371,7 +371,9 @@ class GuardType {
            GuardType(const GuardType& other);
   const DataType   getOuterType() const;
   const DataType   getInnerType() const;
+  const Class*     getSpecializedClass() const;
   bool             isSpecific() const;
+  bool             isSpecialized() const;
   bool             isRelaxed() const;
   bool             isGeneric() const;
   bool             isCounted() const;
@@ -380,10 +382,14 @@ class GuardType {
   GuardType        getCountness() const;
   GuardType        getCountnessInit() const;
   DataTypeCategory getCategory() const;
+  GuardType        dropSpecialization() const;
+  RuntimeType      getRuntimeType() const;
+  bool             isEqual(GuardType other) const;
 
  private:
   DataType outerType;
   DataType innerType;
+  const Class* klass;
 };
 
 /*
@@ -705,20 +711,13 @@ private:
                   int& currentStackOffset,
                   bool& varEnvTaint);
   void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
-  void propagateRelaxedType(Tracelet& tclet,
-                            NormalizedInstruction* firstInstr,
-                            DynLocation* loc,
-                            const GuardType& relxType);
   void constrainDep(const DynLocation* loc,
                     NormalizedInstruction* firstInstr,
                     GuardType specType,
                     GuardType& relxType);
-  void specializeDeps(Tracelet& tclet, TraceletContext& tctxt);
-  void specializeCollections(NormalizedInstruction* instr,
-                             int index,
-                             TraceletContext& tctxt);
   DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
-                                                size_t opndIdx);
+                                                size_t opndIdx,
+                                                const GuardType& specType);
   GuardType getOperandConstraintType(NormalizedInstruction* instr,
                                      size_t                 opndIdx,
                                      const GuardType&       specType);

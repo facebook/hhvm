@@ -27,6 +27,13 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct GraphFormat {
+  const std::string prologue;
+  const std::function<std::string(TypedValue *, const char *)> stringifyNode;
+  const std::function<std::string(TypedValue *, TypedValue *)> stringifyEdge;
+  const std::string epilogue;
+};
+
 DECLARE_BOOST_TYPES(CmdHeaptrace);
 class CmdHeaptrace : public CmdExtended {
 public:
@@ -41,7 +48,9 @@ protected:
 
 private:
   void printHeap(DebuggerClient &client);
-  void printGraphToFile(DebuggerClient &client, String filename);
+  void printGraphToFile(DebuggerClient &client,
+                        String filename,
+                        const GraphFormat &gf);
 
   struct Accum {
     std::map<int64_t, int8_t> typesMap;

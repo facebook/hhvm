@@ -21,6 +21,58 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static GraphFormat GraphViz = {
+  // prologue
+  "digraph {\n  node [shape=box];\n",
+  // node
+  [](TypedValue *n, const char *type) {
+    return folly::stringPrintf(
+      "  node%p [label=\"TV at %p\\ntype %s\"];\n", n, n, type
+    );
+  },
+  // edge
+  [](TypedValue *u, TypedValue *v) {
+    return folly::stringPrintf(
+      "  node%p -> node%p;\n", u, v
+    );
+  },
+  // epilogue
+  "}\n"
+};
+
+static GraphFormat GML = {
+  // prologue
+  "graph [\n  directed 1\n",
+  // node
+  [](TypedValue *n, const char *type) {
+    return folly::stringPrintf(
+      "  node [\n"
+      "    id \"node%p\"\n"
+      "    label \"%s at %p\"\n"
+      "  ]\n",
+      n, type, n
+    );
+  },
+  // edge
+  [](TypedValue *u, TypedValue *v) {
+    return folly::stringPrintf(
+      "  edge [\n"
+      "    source \"node%p\"\n"
+      "    target \"node%p\"\n"
+      "  ]\n",
+      u,
+      v
+    );
+  },
+  // epilogue
+  "]\n"
+};
+
+static std::map<std::string, GraphFormat> s_formatMap = {
+  { "graphviz", GraphViz   },
+  { "gml"     , GML        }
+};
+
 void CmdHeaptrace::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_accum.typesMap);
@@ -39,13 +91,19 @@ void CmdHeaptrace::list(DebuggerClient &client) {
 void CmdHeaptrace::help(DebuggerClient &client) {
   client.helpTitle("Heaptrace Command");
   client.helpCmds(
-    "[h]eaptrace",              "dumps all currently reachable values",
-    "[h]eaptrace {filename}",   "dumps heap to GraphViz graph file",
+    "[h]eaptrace",                     "dumps all currently reachable values",
+    "[h]eaptrace {format} {filename}", "dumps heap to graph file",
     nullptr
   );
   client.helpBody(
     "This will print the locations and types of all reachable values "
-    "in the heap."
+    "in the heap. The long form dumps it to a file of a supported format.\n"
+    "Supported formats are currently:\n"
+    " - graphviz : Dumps to a GraphViz file, which can be used with e.g. "
+    "dot, twopi or some other GraphViz tool to render an image.\n"
+    " - gml      : Dumps to a GML (Graph Modelling Language) file, which can "
+    "be viewed interactively with programs like yEd. yEd can be found at "
+    "www.yworks.com."
   );
 }
 
@@ -100,7 +158,9 @@ void CmdHeaptrace::printHeap(DebuggerClient &client) {
   }
 }
 
-void CmdHeaptrace::printGraphToFile(DebuggerClient &client, String filename) {
+void CmdHeaptrace::printGraphToFile(DebuggerClient &client,
+                                    String filename,
+                                    const GraphFormat &gf) {
   const char *name = filename->data();
   FILE *graphFile = fopen(name, "w");
   if (!graphFile) {
@@ -108,27 +168,19 @@ void CmdHeaptrace::printGraphToFile(DebuggerClient &client, String filename) {
     return;
   }
 
-  fprintf(graphFile, "digraph {\n  node [shape=box];\n");
+  fprintf(graphFile, "%s", gf.prologue.c_str());
   for (const auto &pair : m_accum.typesMap) {
-    void *ptr = (void *)pair.first;
-    std::string n = folly::stringPrintf(
-      "  node%p [label=\"TV at %p\\ntype %s\"];\n",
-      ptr,
-      ptr,
-      typeName(pair.second)
-    );
+    std::string n = gf.stringifyNode((TypedValue *)pair.first,
+                                     typeName(pair.second));
     fprintf(graphFile, "%s", n.c_str());
     std::vector<int64_t> &adjList = m_accum.adjacencyList[pair.first];
     for (const int64_t adjacent : adjList) {
-      std::string e = folly::stringPrintf(
-        "  node%p -> node%p;\n",
-        ptr,
-        (void *)adjacent
-      );
+      std::string e = gf.stringifyEdge((TypedValue *)pair.first,
+                                       (TypedValue *)adjacent);
       fprintf(graphFile, "%s", e.c_str());
     }
   }
-  fprintf(graphFile, "}\n");
+  fprintf(graphFile, "%s", gf.epilogue.c_str());
   fclose(graphFile);
 
   client.print(folly::stringPrintf("Wrote heap graph to %s.", name));
@@ -137,9 +189,11 @@ void CmdHeaptrace::printGraphToFile(DebuggerClient &client, String filename) {
 void CmdHeaptrace::onClientImpl(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
+  String format;
   String file;
-  if (client.argCount() == 2) {
-    file = client.argValue(2);
+  if (client.argCount() == 3) {
+    format = client.argValue(2);
+    file = client.argValue(3);
   } else if (client.argCount() != 1) {
     help(client);
     return;
@@ -150,7 +204,14 @@ void CmdHeaptrace::onClientImpl(DebuggerClient &client) {
   if (file.empty()) {
     cmd->printHeap(client);
   } else {
-    cmd->printGraphToFile(client, file);
+    std::string formatStr = format->data();
+    const auto it = s_formatMap.find(formatStr);
+
+    if (it == s_formatMap.end()) {
+      client.print("Unsupported format type");
+      return;
+    }
+    cmd->printGraphToFile(client, file, it->second);
   }
 
 }

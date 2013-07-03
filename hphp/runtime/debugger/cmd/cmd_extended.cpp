@@ -177,12 +177,11 @@ bool CmdExtended::onServer(DebuggerProxy &proxy) {
 ///////////////////////////////////////////////////////////////////////////////
 
 const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
-  static ExtendedCommandMap s_command_map;
-  if (s_command_map.empty()) {
-    // add one line for each command
-    s_command_map["ample"]   = "CmdExample";
-    s_command_map["tension"] = "CmdExtension";
-  }
+  static ExtendedCommandMap s_command_map = {
+    { "ample"    , "CmdExample" },
+    { "tension"  , "CmdExtension" },
+    { "heaptrace", "CmdHeaptrace" }
+  };
   return s_command_map;
 }
 
@@ -196,7 +195,7 @@ DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
     // add one line for each command
     ELSE_IF_CMD(Example);
     ELSE_IF_CMD(Extension);
-
+    ELSE_IF_CMD(Heaptrace);
   }
 
   if (ret) {

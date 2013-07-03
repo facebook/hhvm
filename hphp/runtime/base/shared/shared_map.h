@@ -136,6 +136,9 @@ private:
   };
   mutable TypedValue* m_localCache;
   bool isVector() const { return m_isVector; }
+
+public:
+  void getChildren(std::vector<TypedValue *> &out);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

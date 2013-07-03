@@ -251,5 +251,18 @@ ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {
   return elems;
 }
 
+void SharedMap::getChildren(std::vector<TypedValue *> &out) {
+  if (m_localCache) {
+    TypedValue *localCacheEnd = m_localCache + size();
+    for (TypedValue *tv = m_localCache;
+         tv < localCacheEnd;
+         ++tv) {
+      if (tv->m_type != KindOfUninit) {
+        out.push_back(tv);
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

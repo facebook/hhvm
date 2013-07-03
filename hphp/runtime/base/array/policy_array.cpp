@@ -941,5 +941,4 @@ ArrayData *PolicyArray::escalate() const {
   return ArrayData::escalate();
 }
 
-
 } // namespace HPHP

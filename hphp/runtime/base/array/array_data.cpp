@@ -581,5 +581,19 @@ void ArrayData::dump(std::ostream &out) {
   }
 }
 
+void ArrayData::getChildren(std::vector<TypedValue *> &out) {
+  if (isSharedMap()) {
+    SharedMap *sm = static_cast<SharedMap *>(this);
+    sm->getChildren(out);
+    return;
+  }
+  for (ssize_t pos = iter_begin();
+      pos != ArrayData::invalid_index;
+      pos = iter_advance(pos)) {
+    TypedValue *tv = nvGetValueRef(pos);
+    out.push_back(tv);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

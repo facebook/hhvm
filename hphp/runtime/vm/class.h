@@ -1027,6 +1027,9 @@ private:
 
   MethodToTraitListMap m_importMethToTraitMap;
 
+public:
+  void getChildren(std::vector<TypedValue *> &out);
+
 public: // used in Unit
   Class* m_nextClass;
 private:

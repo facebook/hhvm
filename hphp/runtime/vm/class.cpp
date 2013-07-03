@@ -2640,4 +2640,11 @@ void Class::setSPropData(TypedValue* sPropData) const {
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 
+void Class::getChildren(std::vector<TypedValue *> &out) {
+  for (Slot i = 0; i < m_staticProperties.size(); ++i) {
+    if (m_staticProperties[i].m_class != this) continue;
+    out.push_back(&m_staticProperties[i].m_val);
+  }
+}
+
  } // HPHP::VM

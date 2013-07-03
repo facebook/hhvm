@@ -225,6 +225,34 @@ public:
       write(data[i]);
     }
   }
+  template<typename T1, typename T2>
+  void read(std::pair<T1, T2> &data) {
+    read(data.first);
+    read(data.second);
+  }
+  template<typename T1, typename T2>
+  void write(const std::pair<T1, T2> &data) {
+    write(data.first);
+    write(data.second);
+  }
+  template<typename T1, typename T2>
+  void read(std::map<T1, T2> &data) {
+    int32_t size;
+    read(size);
+    for (int i = 0; i < size; i++) {
+      std::pair<T1, T2> entry;
+      read(entry);
+      data.insert(entry);
+    }
+  }
+  template<typename T1, typename T2>
+  void write(const std::map<T1, T2> &data) {
+    int32_t size = data.size();
+    write(size);
+    for (const std::pair<T1, T2> &entry : data) {
+      write(entry);
+    }
+  }
   template<typename T>
   void read(boost::shared_ptr<T> &data) {
     bool has;

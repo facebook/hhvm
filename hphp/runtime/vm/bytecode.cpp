@@ -64,6 +64,7 @@
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/base/server/source_root_info.h"
 #include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/memory/tracer.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"

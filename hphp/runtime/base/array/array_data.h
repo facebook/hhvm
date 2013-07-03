@@ -494,6 +494,9 @@ protected:
   static uint32_t getKindOff() {
     return (uintptr_t)&((ArrayData*)0)->m_kind;
   }
+
+ public:
+  void getChildren(std::vector<TypedValue *> &out);
 };
 
 ALWAYS_INLINE inline

@@ -279,6 +279,14 @@ class ObjectData : public CountableNF {
     }
     delete this;
   }
+
+ public:
+  void getChildren(std::vector<TypedValue *> &out) {
+    ArrayData *props = o_properties.get();
+    if (props) {
+      props->getChildren(out);
+    }
+  }
 } __attribute__((aligned(16)));
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}

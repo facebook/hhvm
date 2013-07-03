@@ -397,7 +397,14 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     assert(!fromCompiler);
   } else {
     const string &s = name.text();
-    if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
+    // strip out namespaces for func_get_args and friends check
+    size_t lastBackslash = s.find_last_of(NAMESPACE_SEP);
+    const string stripped = lastBackslash == string::npos
+                            ? s
+                            : s.substr(lastBackslash+1);
+    if (stripped == "func_num_args" ||
+        stripped == "func_get_args" ||
+        stripped == "func_get_arg") {
       if (m_hasCallToGetArgs.size() > 0) {
         m_hasCallToGetArgs.back() = true;
       }
@@ -876,9 +883,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       func->setOrigGeneratorFunc(origStmt);
       origStmt->setGeneratorFunc(func);
       origStmt->setHasCallToGetArgs(hasCallToGetArgs);
-      func->setHasCallToGetArgs(hasCallToGetArgs);
     }
-
   } else {
     ExpressionListPtr attrList;
     if (attr && attr->exp) {
@@ -904,6 +909,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       out->stmt = NEW_STMT0(StatementList);
     }
   }
+  func->setHasCallToGetArgs(hasCallToGetArgs);
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
@@ -1250,7 +1256,6 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     mth->setOrigGeneratorFunc(origStmt);
     origStmt->setGeneratorFunc(mth);
     origStmt->setHasCallToGetArgs(hasCallToGetArgs);
-    mth->setHasCallToGetArgs(hasCallToGetArgs);
   } else {
     ExpressionListPtr attrList;
     if (attr && attr->exp) {
@@ -1268,6 +1273,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     }
     completeScope(mth->onInitialParse(m_ar, m_file));
   }
+  mth->setHasCallToGetArgs(hasCallToGetArgs);
 }
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {

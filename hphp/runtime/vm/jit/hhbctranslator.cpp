@@ -1005,19 +1005,14 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 typedef std::map<int, int> ContParamMap;
 /*
  * mapContParams builds a mapping between named locals in origFunc and
- * corresponding named locals in genFunc. If this step succeeds and
- * there's no VarEnv at runtime, the continuation's variables can be
- * filled completely inline in the TC (assuming there aren't too
- * many).
+ * corresponding named locals in genFunc.
  */
 static
 void mapContParams(ContParamMap& map,
                    const Func* origFunc, const Func* genFunc) {
   const StringData* const* varNames = origFunc->localNames();
   for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
-    Id id = genFunc->lookupVarId(varNames[i]);
-    assert(id != kInvalidId);
-    map[i] = id;
+    map[i] = genFunc->lookupVarId(varNames[i]);
   }
 }
 
@@ -1055,13 +1050,15 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   SSATmp* contAR = gen(
     LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
   for (int i = 0; i < origLocals; ++i) {
-    // We must generate an AssertLoc because we don't have tracelet
-    // guards on the object type in these outer generator functions.
-    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-    // Copy the value of the local to the cont object and set the
-    // local to uninit so that we don't need to change refcounts.
-    gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
-    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
+    if (params[i] != kInvalidId) {
+      // We must generate an AssertLoc because we don't have tracelet
+      // guards on the object type in these outer generator functions.
+      gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
+      // Copy the value of the local to the cont object and set the
+      // local to uninit so that we don't need to change refcounts.
+      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
+      gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
+    }
   }
   if (fillThis) {
     assert(thisId != kInvalidId);

@@ -3229,6 +3229,12 @@ void HhbcTranslator::emitMod() {
     // of the branches gets optimized out due to constant folding.
     if (tr->getValInt() == -1LL) {
       push(cns(0));
+    } else if (tr->getValInt() == 0) {
+      // mod by zero is undefined. don't emit opmod for it because
+      // this could cause issues in simplifier/codegen
+      // this should never get reached anyway, we just need to dump
+      // something on the stack
+      push(cns(false));
     } else {
       push(gen(OpMod, tl, tr));
     }

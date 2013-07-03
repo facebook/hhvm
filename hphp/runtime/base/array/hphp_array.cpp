@@ -307,102 +307,6 @@ bool HphpArray::isVectorData() const {
   return true;
 }
 
-Variant HphpArray::reset() {
-  Elm* elms = m_data;
-  m_pos = ssize_t(nextElm(elms, ElmIndEmpty));
-  if (m_pos != ArrayData::invalid_index) {
-    Elm* e = &elms[(ElmInd)m_pos];
-    return tvAsCVarRef(&e->data);
-  }
-  m_pos = ArrayData::invalid_index;
-  return false;
-}
-
-Variant HphpArray::prev() {
-  if (m_pos != ArrayData::invalid_index) {
-    Elm* elms = m_data;
-    m_pos = prevElm(elms, m_pos);
-    if (m_pos != ArrayData::invalid_index) {
-      Elm* e = &elms[m_pos];
-      return tvAsCVarRef(&e->data);
-    }
-  }
-  return false;
-}
-
-Variant HphpArray::next() {
-  if (m_pos != ArrayData::invalid_index) {
-    Elm* elms = m_data;
-    m_pos = nextElm(elms, m_pos);
-    if (m_pos != ArrayData::invalid_index) {
-      Elm* e = &elms[m_pos];
-      assert(!isTombstone(e->data.m_type));
-      return tvAsCVarRef(&e->data);
-    }
-  }
-  return false;
-}
-
-Variant HphpArray::end() {
-  Elm* elms = m_data;
-  m_pos = prevElm(elms, m_used);
-  if (m_pos != ArrayData::invalid_index) {
-    Elm* e = &elms[m_pos];
-    assert(!isTombstone(e->data.m_type));
-    return tvAsCVarRef(&e->data);
-  }
-  return false;
-}
-
-Variant HphpArray::key() const {
-  if (m_pos != ArrayData::invalid_index) {
-    assert(size_t(m_pos) < m_used);
-    Elm* e = &m_data[m_pos];
-    assert(!isTombstone(e->data.m_type));
-    if (e->hasStrKey()) {
-      return e->key;
-    }
-    return e->ikey;
-  }
-  return uninit_null();
-}
-
-Variant HphpArray::value(int32_t& pos) const {
-  if (pos != ArrayData::invalid_index) {
-    Elm* e = &m_data[pos];
-    assert(!isTombstone(e->data.m_type));
-    return tvAsCVarRef(&e->data);
-  }
-  return false;
-}
-
-Variant HphpArray::current() const {
-  if (m_pos != ArrayData::invalid_index) {
-    Elm* e = &m_data[m_pos];
-    assert(!isTombstone(e->data.m_type));
-    return tvAsCVarRef(&e->data);
-  }
-  return false;
-}
-
-static StaticString s_value("value");
-static StaticString s_key("key");
-
-Variant HphpArray::each() {
-  if (m_pos != ArrayData::invalid_index) {
-    ArrayInit init(4);
-    Variant key = HphpArray::getKey(m_pos);
-    Variant value = HphpArray::getValue(m_pos);
-    init.set(int64_t(1), value);
-    init.set(s_value, value, true);
-    init.set(int64_t(0), key);
-    init.set(s_key, key, true);
-    m_pos = nextElm(m_data, m_pos);
-    return Array(init.create());
-  }
-  return false;
-}
-
 //=============================================================================
 // Lookup.
 
@@ -1542,12 +1446,6 @@ bool HphpArray::advanceFullPos(FullPos& fp) {
   // cursor to point to the next element.
   m_pos = nextElm(elms, fp.m_pos);
   return true;
-}
-
-CVarRef HphpArray::endRef() {
-  assert(m_used > 0);
-  Elm* e = &m_data[m_used - 1];
-  return tvAsCVarRef(&e->data);
 }
 
 //=============================================================================

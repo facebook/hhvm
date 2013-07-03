@@ -118,15 +118,6 @@ public: // ArrayData implementation
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
-  virtual Variant reset();
-  virtual Variant prev();
-  virtual Variant current() const;
-  virtual Variant next();
-  virtual Variant end();
-  virtual CVarRef endRef();
-  virtual Variant key() const;
-  virtual Variant value(int32_t &pos) const;
-  virtual Variant each();
   virtual bool validFullPos(const FullPos & fp) const;
   virtual bool advanceFullPos(FullPos&);
   virtual bool isVectorData() const;

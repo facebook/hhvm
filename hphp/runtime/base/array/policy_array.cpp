@@ -236,94 +236,7 @@ bool PolicyArray::isVectorData() const {
   return true;
 }
 
-Variant PolicyArray::reset() {
-  APILOG << "()";
-  if (m_size) {
-    auto const first = firstIndex(m_size);
-    m_pos = toUint32(first);
-    return val(first);
-  }
-  m_pos = invalid_index;
-  return false;
-}
-
-Variant PolicyArray::prev() {
-  APILOG << "()";
-  if (m_pos == invalid_index
-      || (m_pos = iter_rewind(m_pos)) == invalid_index) {
-    return false;
-  }
-  assert(size_t(m_pos) < m_size);
-  return val(toPos(m_pos));
-}
-
-Variant PolicyArray::current() const {
-  APILOG << "()";
-  if (m_pos == invalid_index) {
-    return false;
-  }
-  assert(size_t(m_pos) < m_size);
-  return val(toPos(m_pos));
-}
-
-Variant PolicyArray::next() {
-  APILOG << "()";
-  if (m_pos == invalid_index
-      || (m_pos = iter_advance(m_pos)) == invalid_index) {
-    return false;
-  }
-  assert(size_t(m_pos) < m_size);
-  return val(toPos(m_pos));
-}
-
-Variant PolicyArray::end() {
-  if (m_size) {
-    auto const last = lastIndex(m_size);;
-    m_pos = toUint32(last);
-    return val(last);
-  }
-  m_pos = invalid_index;
-  return false;
-}
-
-Variant PolicyArray::key() const {
-  APILOG << ")";
-  if (m_pos == invalid_index) {
-    return uninit_null();
-  }
-  assert(size_t(m_pos) < m_size);
-  return key(toPos(m_pos));
-}
-
-Variant PolicyArray::value(int32_t &pos) const {
-  if (pos == ArrayData::invalid_index) {
-    return false;
-  }
-  assert(uint32_t(pos) < m_size);
-  return Variant(Store::val(toPos(pos)));
-}
-
-const StaticString
-  s_value("value"),
-  s_key("key");
-
 static_assert(ArrayData::invalid_index == size_t(-1), "ehm");
-
-Variant PolicyArray::each() {
-  APILOG << "()";
-  if (m_pos == invalid_index) return false;
-  assert(m_size);
-  ArrayInit init(4);
-  assert(size_t(m_pos) < m_size);
-  Variant key = Store::key(toPos(m_pos));
-  Variant value = val(toPos(m_pos));
-  init.set(int64_t(1), value);
-  init.set(s_value, value, true);
-  init.set(int64_t(0), key);
-  init.set(s_key, key, true);
-  m_pos = toInt64(nextIndex(toPos(m_pos), m_size));
-  return Array(init.create());
-}
 
 template <class K>
 TypedValue* PolicyArray::nvGetImpl(K k) const {
@@ -598,19 +511,6 @@ bool PolicyArray::advanceFullPos(FullPos &fp) {
   // cursor to point to the next element.
   m_pos = toInt64(nextIndex(toPos(fp.m_pos), m_size));
   return true;
-}
-
-// CVarRef PolicyArray::currentRef() {
-//   APILOG << "()";
-//   assert(m_pos != ArrayData::invalid_index);
-//   assert(size_t(m_pos) < m_size);
-//   return val(toPos(m_pos));
-// }
-
-CVarRef PolicyArray::endRef() {
-  APILOG << "()";
-  assert(m_size > 0);
-  return val(toPos(m_size - 1));
 }
 
 HphpArray* PolicyArray::toHphpArray() const {

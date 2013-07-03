@@ -103,16 +103,6 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
-  // overrides ArrayData
-  Variant reset();
-  Variant prev();
-  Variant current() const;
-  Variant next();
-  Variant end();
-  Variant key() const;
-  Variant value(int32_t& pos) const;
-  Variant each();
-
   // implements ArrayData
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
@@ -166,7 +156,6 @@ public:
   // overrides ArrayData
   bool validFullPos(const FullPos &fp) const;
   bool advanceFullPos(FullPos& fp);
-  CVarRef endRef();
 
   // END overide/implements section
 

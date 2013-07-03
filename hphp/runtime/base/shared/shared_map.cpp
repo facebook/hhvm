@@ -227,29 +227,30 @@ ArrayData* SharedMap::escalateForSort() {
   return ret;
 }
 
+ssize_t SharedMap::vsize() const {
+  assert(false); // should never be called since we set size already.
+  return m_size;
+}
+
 ssize_t SharedMap::iter_begin() const {
-  if (SharedMap::empty()) return invalid_index;
-  return 0;
+  return !empty() ? 0 : invalid_index;
 }
 
 ssize_t SharedMap::iter_end() const {
-  if (empty()) return invalid_index;
-  return size() - 1;
-  static_assert(invalid_index == -1, "");
+  auto n = size();
+  return n > 0 ? ssize_t(n - 1) : invalid_index;
 }
 
 ssize_t SharedMap::iter_advance(ssize_t prev) const {
   assert(prev >= 0 && prev < size());
   ssize_t next = prev + 1;
-  if (next >= size()) return invalid_index;
-  return next;
+  return next < size() ? next : invalid_index;
 }
 
 ssize_t SharedMap::iter_rewind(ssize_t prev) const {
   assert(prev >= 0 && prev < size());
   ssize_t next = prev - 1;
-  if (next < 0) return invalid_index;
-  return next;
+  return next >= 0 ? next : invalid_index;
 }
 
 ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {

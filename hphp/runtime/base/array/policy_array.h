@@ -380,22 +380,6 @@ public:
   virtual bool isVectorData() const FOLLY_OVERRIDE;
 
   /**
-   * Position-based iterations.
-   */
-  virtual Variant reset() FOLLY_OVERRIDE;
-  virtual Variant prev() FOLLY_OVERRIDE;
-  virtual Variant current() const FOLLY_OVERRIDE;
-  virtual Variant next() FOLLY_OVERRIDE;
-  virtual Variant end() FOLLY_OVERRIDE;
-  virtual Variant key() const FOLLY_OVERRIDE;
-  virtual Variant value(int32_t &pos) const FOLLY_OVERRIDE;
-  virtual Variant each() FOLLY_OVERRIDE;
-
-  virtual bool isInvalid() const FOLLY_OVERRIDE {
-    return m_pos == invalid_index;
-  }
-
-  /**
    * Testing whether a key exists.
    */
   virtual bool exists(int64_t k) const FOLLY_OVERRIDE {
@@ -583,8 +567,6 @@ public:
    * true.
    */
   virtual bool advanceFullPos(FullPos& fp) FOLLY_OVERRIDE;
-
-  virtual CVarRef endRef() FOLLY_OVERRIDE;
 
   virtual ArrayData* escalateForSort() FOLLY_OVERRIDE;
 

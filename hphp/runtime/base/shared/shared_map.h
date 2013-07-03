@@ -36,6 +36,7 @@ public:
       , m_localCache(nullptr) {
     m_map      = source->getMap();
     m_isVector = source->getIsVector();
+    m_size = isVector() ? m_vec->m_size : m_map->size();
   }
 
   ~SharedMap();
@@ -54,9 +55,7 @@ public:
   using ArrayData::addLval;
   using ArrayData::remove;
 
-  ssize_t vsize() const {
-    return isVector() ? m_vec->m_size : m_map->size();
-  }
+  ssize_t vsize() const;
 
   Variant getKey(ssize_t pos) const {
     if (isVector()) {

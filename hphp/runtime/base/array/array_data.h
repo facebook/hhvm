@@ -189,20 +189,21 @@ public:
                             bool detectSerializable = false) const;
 
   /**
-   * Position-based iterations.
+   * non-virtual Position-based iterations, implemented using iter_begin,
+   * iter_advance, iter_prev, iter_rewind pure virtual methods.
    */
-  virtual Variant reset();
-  virtual Variant prev();
-  virtual Variant current() const;
-  virtual Variant next();
-  virtual Variant end();
-  virtual Variant key() const;
-  virtual Variant value(int32_t &pos) const;
-  virtual Variant each();
+  Variant reset();
+  Variant prev();
+  Variant current() const;
+  Variant next();
+  Variant end();
+  Variant key() const;
+  Variant value(int32_t &pos) const;
+  Variant each();
 
   bool isHead()            const { return m_pos == iter_begin(); }
   bool isTail()            const { return m_pos == iter_end(); }
-  virtual bool isInvalid() const { return m_pos == invalid_index; }
+  bool isInvalid()         const { return m_pos == invalid_index; }
 
   /**
    * Testing whether a key exists.
@@ -357,7 +358,7 @@ public:
    */
   virtual bool advanceFullPos(FullPos& fp);
 
-  virtual CVarRef endRef();
+  CVarRef endRef();
 
   virtual ArrayData* escalateForSort();
   virtual void ksort(int sort_flags, bool ascending);

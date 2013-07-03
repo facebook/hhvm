@@ -307,8 +307,8 @@ void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
 }
 
 CVarRef ArrayData::endRef() {
-  if (size_t(m_pos) < size_t(size())) {
-    return getValueRef(size() - 1);
+  if (m_pos != invalid_index) {
+    return getValueRef(iter_end());
   }
   throw FatalErrorException("invalid ArrayData::m_pos");
 }

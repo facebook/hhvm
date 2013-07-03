@@ -92,8 +92,6 @@ public:
 
   // implements ArrayData
   ssize_t vsize() const;
-  Variant getKey(ssize_t pos) const;
-  Variant getValue(ssize_t pos) const;
   CVarRef getValueRef(ssize_t pos) const;
 
   // overrides ArrayData
@@ -184,8 +182,7 @@ public:
     nextInsert(tvAsCVarRef(v));
   }
   ArrayData* nvNew(TypedValue*& v, bool copy);
-  TypedValue* nvGetValueRef(ssize_t pos);
-  void nvGetKey(TypedValue* out, ssize_t pos);
+  void nvGetKey(TypedValue* out, ssize_t pos) const;
   bool nvInsert(StringData* k, TypedValue *v);
 
   /**

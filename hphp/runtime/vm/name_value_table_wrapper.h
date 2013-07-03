@@ -77,8 +77,7 @@ public: // ArrayData implementation
   }
 
   virtual ssize_t vsize() const;
-  virtual Variant getKey(ssize_t pos) const;
-  virtual Variant getValue(ssize_t pos) const;
+  virtual void nvGetKey(TypedValue* out, ssize_t pos) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool noCopyOnWrite() const;
 
@@ -88,6 +87,8 @@ public: // ArrayData implementation
 
   virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;
+  virtual TypedValue* nvGetCell(int64_t ki) const;
+  virtual TypedValue* nvGetCell(const StringData* k) const;
 
   virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
                           bool checkExist = false);

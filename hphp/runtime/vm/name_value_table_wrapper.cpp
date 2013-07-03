@@ -35,14 +35,16 @@ ssize_t NameValueTableWrapper::vsize() const {
   return count;
 }
 
-Variant NameValueTableWrapper::getKey(ssize_t pos) const {
+void NameValueTableWrapper::nvGetKey(TypedValue* out, ssize_t pos) const {
   NameValueTable::Iterator iter(m_tab, pos);
-  return iter.valid() ? Variant(StrNR(iter.curKey())) : uninit_null();
-}
-
-Variant NameValueTableWrapper::getValue(ssize_t pos) const {
-  NameValueTable::Iterator iter(m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
+  if (iter.valid()) {
+    auto k = iter.curKey();
+    out->m_data.pstr = const_cast<StringData*>(k);
+    out->m_type = KindOfString;
+    k->incRefCount();
+  } else {
+    out->m_type = KindOfUninit;
+  }
 }
 
 CVarRef NameValueTableWrapper::getValueRef(ssize_t pos) const {
@@ -74,6 +76,16 @@ TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
 
 TypedValue* NameValueTableWrapper::nvGet(int64_t k) const {
   return m_tab->lookup(String(k).get());
+}
+
+TypedValue* NameValueTableWrapper::nvGetCell(int64_t k) const {
+  TypedValue* tv = NameValueTableWrapper::nvGet(k);
+  return tv ? tvToCell(tv) : nvGetNotFound(k);
+}
+
+TypedValue* NameValueTableWrapper::nvGetCell(const StringData* key) const {
+  TypedValue* tv = NameValueTableWrapper::nvGet(key);
+  return tv ? tvToCell(tv) : nvGetNotFound(key);
 }
 
 ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,

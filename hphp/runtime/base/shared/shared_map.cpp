@@ -196,17 +196,18 @@ TypedValue* SharedMap::nvGet(const StringData* key) const {
   return (TypedValue*)&getValueRef(index);
 }
 
-void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) {
-  Variant k = getKey(pos);
-  TypedValue* tv = k.asTypedValue();
-  // copy w/out clobbering out->_count.
-  out->m_type = tv->m_type;
-  out->m_data.num = tv->m_data.num;
-  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
-}
-
-TypedValue* SharedMap::nvGetValueRef(ssize_t pos) {
-  return const_cast<TypedValue*>(SharedMap::getValueRef(pos).asTypedValue());
+void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) const {
+  if (isVector()) {
+    out->m_data.num = pos;
+    out->m_type = KindOfInt64;
+  } else {
+    Variant k = m_map->getKey(pos);
+    TypedValue* tv = k.asTypedValue();
+    // copy w/out clobbering out->_count.
+    out->m_type = tv->m_type;
+    out->m_data.num = tv->m_data.num;
+    if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+  }
 }
 
 TypedValue* SharedMap::nvGetCell(int64_t k) const {
@@ -251,6 +252,15 @@ ssize_t SharedMap::iter_rewind(ssize_t prev) const {
   assert(prev >= 0 && prev < size());
   ssize_t next = prev - 1;
   return next >= 0 ? next : invalid_index;
+}
+
+bool SharedMap::validFullPos(const FullPos& fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
+  return false;
+}
+
+bool SharedMap::advanceFullPos(FullPos& fp) {
+  return false;
 }
 
 ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {

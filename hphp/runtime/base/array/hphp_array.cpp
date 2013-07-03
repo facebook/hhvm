@@ -264,23 +264,6 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
   return prevElm(m_data, pos);
 }
 
-Variant HphpArray::getKey(ssize_t pos) const {
-  assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[pos];
-  assert(!isTombstone(e->data.m_type));
-  if (e->hasStrKey()) {
-    return e->key; // String key.
-  }
-  return e->ikey; // Integer key.
-}
-
-Variant HphpArray::getValue(ssize_t pos) const {
-  assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[pos];
-  assert(!isTombstone(e->data.m_type));
-  return tvAsCVarRef(&e->data);
-}
-
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
   assert(pos != ArrayData::invalid_index);
   Elm* e = &m_data[pos];
@@ -1202,16 +1185,9 @@ ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
   return a;
 }
 
-TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
-  assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[/*(ElmInd)*/pos];
-  assert(!isTombstone(e->data.m_type));
-  return &e->data;
-}
-
 // nvGetKey does not touch out->_count, so can be used
 // for inner or outer cells.
-void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
+void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) const {
   assert(pos != ArrayData::invalid_index);
   assert(!isTombstone(m_data[pos].data.m_type));
   Elm* e = &m_data[/*(ElmInd)*/pos];

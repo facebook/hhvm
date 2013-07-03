@@ -358,20 +358,9 @@ public:
   }
 
   /**
-   * For ArrayIter to work. Get key or value at position "pos".
-   */
-  virtual Variant getKey(ssize_t pos) const FOLLY_OVERRIDE;
-  virtual Variant getValue(ssize_t pos) const FOLLY_OVERRIDE;
-
-  /**
    * getValueRef() gets a reference to value at position "pos".
    */
   virtual CVarRef getValueRef(ssize_t pos) const FOLLY_OVERRIDE;
-
-  /*
-   * Return true for array types that don't have COW semantics.
-   */
-  virtual bool noCopyOnWrite() const FOLLY_OVERRIDE { return false; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -403,8 +392,7 @@ public:
   virtual TypedValue* nvGet(const StringData* k) const FOLLY_OVERRIDE {
     return nvGetImpl(k);
   }
-  virtual void nvGetKey(TypedValue* out, ssize_t pos) FOLLY_OVERRIDE;
-  virtual TypedValue* nvGetValueRef(ssize_t pos) FOLLY_OVERRIDE;
+  virtual void nvGetKey(TypedValue* out, ssize_t pos) const FOLLY_OVERRIDE;
 
 private:
   template <class K> TypedValue* nvGetCellImpl(K k) const;

@@ -57,19 +57,10 @@ public:
 
   ssize_t vsize() const;
 
-  Variant getKey(ssize_t pos) const {
-    if (isVector()) {
-      assert(pos < (ssize_t)m_vec->m_size);
-      return pos;
-    }
-    return m_map->getKey(pos);
-  }
-
   SharedVariant* getValueImpl(ssize_t pos) const {
     return isVector() ? m_vec->getValue(pos) : m_map->getValue(pos);
   }
 
-  Variant getValue(ssize_t pos) const { return getValueRef(pos); }
   CVarRef getValueRef(ssize_t pos) const;
 
   bool exists(int64_t k) const;
@@ -106,8 +97,7 @@ public:
    */
   TypedValue* nvGet(int64_t k) const;
   TypedValue* nvGet(const StringData* k) const;
-  void nvGetKey(TypedValue* out, ssize_t pos);
-  TypedValue* nvGetValueRef(ssize_t pos);
+  void nvGetKey(TypedValue* out, ssize_t pos) const;
   TypedValue* nvGetCell(int64_t ki) const;
   TypedValue* nvGetCell(const StringData* k) const;
 
@@ -117,6 +107,9 @@ public:
   ssize_t iter_end() const;
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
+
+  bool validFullPos(const FullPos& fp) const;
+  bool advanceFullPos(FullPos& fp);
 
   /**
    * Memory allocator methods.

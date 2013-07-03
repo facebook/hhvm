@@ -210,18 +210,6 @@ PolicyArray::~PolicyArray() {
   destroy(m_size, m_allocMode);
 }
 
-Variant PolicyArray::getKey(ssize_t pos) const {
-  APILOG << "(" << pos << ")";
-  assert(size_t(pos) < m_size);
-  return key(toPos(pos));
-}
-
-Variant PolicyArray::getValue(ssize_t pos) const {
-  APILOG << "(" << pos << ")";
-  assert(size_t(pos) < m_size);
-  return getValueRef(pos);
-}
-
 const Variant& PolicyArray::getValueRef(ssize_t pos) const {
   APILOG << "(" << pos << ")";
   assert(size_t(pos) < m_size);
@@ -247,16 +235,10 @@ TypedValue* PolicyArray::nvGetImpl(K k) const {
     : nullptr;
 }
 
-void PolicyArray::nvGetKey(TypedValue* out, ssize_t pos) {
+void PolicyArray::nvGetKey(TypedValue* out, ssize_t pos) const {
   APILOG << "(" << out << ", " << pos << ")";
   assert(size_t(pos) < m_size);
   new(out) Variant(key(toPos(pos)));
-}
-
-TypedValue* PolicyArray::nvGetValueRef(ssize_t pos) {
-  APILOG << "(" << pos << ")";
-  assert(size_t(pos) < m_size);
-  return reinterpret_cast<TypedValue*>(&lval(toPos(pos)));
 }
 
 template <class K>

@@ -148,12 +148,6 @@ public:
   virtual ssize_t vsize() const = 0;
 
   /**
-   * For ArrayIter to work. Get key or value at position "pos".
-   */
-  virtual Variant getKey(ssize_t pos) const = 0;
-  virtual Variant getValue(ssize_t pos) const = 0;
-
-  /**
    * getValueRef() gets a reference to value at position "pos".
    */
   virtual CVarRef getValueRef(ssize_t pos) const = 0;
@@ -217,10 +211,14 @@ public:
    */
   virtual TypedValue* nvGet(int64_t k) const = 0;
   virtual TypedValue* nvGet(const StringData* k) const = 0;
-  virtual void nvGetKey(TypedValue* out, ssize_t pos);
-  virtual TypedValue* nvGetValueRef(ssize_t pos);
-  virtual TypedValue* nvGetCell(int64_t ki) const;
-  virtual TypedValue* nvGetCell(const StringData* k) const;
+  virtual void nvGetKey(TypedValue* out, ssize_t pos) const = 0;
+  virtual TypedValue* nvGetCell(int64_t ki) const = 0;
+  virtual TypedValue* nvGetCell(const StringData* k) const = 0;
+
+  // nonvirtual wrappers that call virtual getValueRef()
+  TypedValue* nvGetValueRef(ssize_t pos);
+  Variant getValue(ssize_t pos) const;
+  Variant getKey(ssize_t pos) const;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
@@ -349,14 +347,14 @@ public:
    * This will return false if the iterator points past the last element, or
    * if the iterator points before the first element.
    */
-  virtual bool validFullPos(const FullPos& fp) const;
+  virtual bool validFullPos(const FullPos& fp) const = 0;
 
   /**
    * Advances the mutable iterator to the next element in the array. Returns
    * false if the iterator has moved past the last element, otherwise returns
    * true.
    */
-  virtual bool advanceFullPos(FullPos& fp);
+  virtual bool advanceFullPos(FullPos& fp) = 0;
 
   CVarRef endRef();
 

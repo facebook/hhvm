@@ -281,15 +281,6 @@ void ArrayData::freeFullPos(FullPos &fp) {
   assert(false);
 }
 
-bool ArrayData::validFullPos(const FullPos& fp) const {
-  assert(fp.getContainer() == (ArrayData*)this);
-  return false;
-}
-
-bool ArrayData::advanceFullPos(FullPos& fp) {
-  return false;
-}
-
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);
@@ -475,31 +466,6 @@ CVarRef ArrayData::get(CVarRef k, bool error) const {
   auto const cell = k.asCell();
   return isIntKey(cell) ? get(getIntKey(cell), error)
                         : get(getStringKey(cell), error);
-}
-
-void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) {
-  Variant k = getKey(pos);
-  TypedValue* tv = k.asTypedValue();
-  // copy w/out clobbering out->_count.
-  out->m_type = tv->m_type;
-  out->m_data.num = tv->m_data.num;
-  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
-}
-
-TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
-  return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
-}
-
-TypedValue* ArrayData::nvGetCell(int64_t k) const {
-  TypedValue* tv = (TypedValue*)&get(k, false);
-  return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
-         nvGetNotFound(k);
-}
-
-TypedValue* ArrayData::nvGetCell(const StringData* key) const {
-  TypedValue* tv = (TypedValue*)&get(key, false);
-  return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
-         nvGetNotFound(key);
 }
 
 CVarRef ArrayData::getNotFound(int64_t k) {

@@ -440,6 +440,16 @@ IRTranslator::translateAddElemC(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateFloor(const NormalizedInstruction& i) {
+  HHIR_EMIT(Floor);
+}
+
+void
+IRTranslator::translateCeil(const NormalizedInstruction& i) {
+  HHIR_EMIT(Ceil);
+}
+
+void
 IRTranslator::translateAddNewElemC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
   assert(i.inputs[0]->outerType() != KindOfRef);

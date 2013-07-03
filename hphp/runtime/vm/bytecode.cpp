@@ -6825,6 +6825,24 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   throw exn.asObjRef();
 }
 
+template<class Op>
+inline void OPTBLD_INLINE VMExecutionContext::roundOpImpl(Op op) {
+  TypedValue* val = m_stack.topTV();
+
+  tvCastToDoubleInPlace(val);
+  val->m_data.dbl = op(val->m_data.dbl);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFloor(PC& pc) {
+  NEXT();
+  roundOpImpl(floor);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCeil(PC& pc) {
+  NEXT();
+  roundOpImpl(ceil);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
   NEXT();
   TypedValue* subj = m_stack.topTV();

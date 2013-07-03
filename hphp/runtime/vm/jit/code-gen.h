@@ -206,6 +206,8 @@ private:
 
   enum Commutativity { Commutative, NonCommutative };
 
+  void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
+
   template<class Oper, class RegType>
   void cgBinaryOp(IRInstruction*,
                   void (Asm::*intImm)(Immed, RegType),

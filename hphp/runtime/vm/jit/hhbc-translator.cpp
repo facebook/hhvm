@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 
+#include "folly/CpuId.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
@@ -3317,6 +3318,30 @@ void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
   push(gen(OpNot, gen(ConvCellToBool, src)));
   gen(DecRef, src);
+}
+
+void HhbcTranslator::emitFloor() {
+  // need SSE 4.1 support to use roundsd
+  if (!folly::CpuId().sse41()) {
+    PUNT(Floor);
+  }
+
+  auto val    = popC();
+  auto dblVal = gen(ConvCellToDbl, val);
+  gen(DecRef, val);
+  push(gen(OpFloor, dblVal));
+}
+
+void HhbcTranslator::emitCeil() {
+  // need SSE 4.1 support to use roundsd
+  if (!folly::CpuId().sse41()) {
+    PUNT(Ceil);
+  }
+
+  auto val = popC();
+  auto dblVal = gen(ConvCellToDbl, val);
+  gen(DecRef, val);
+  push(gen(OpCeil, dblVal));
 }
 
 #define BINOP(Opp) \

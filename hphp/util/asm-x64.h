@@ -678,6 +678,8 @@ enum instrFlags {
   IF_66PREFIXED = 0x4000, // instruction requires a manditory 0x66 prefix
   IF_F3PREFIXED = 0x8000, // instruction requires a manditory 0xf3 prefix
   IF_F2PREFIXED = 0x10000, // instruction requires a manditory 0xf2 prefix
+  IF_THREEBYTEOP = 0x20000, // instruction requires a 0x0F 0x3A prefix
+  IF_ROUND       = 0x40000, // instruction is round(sp)d
 };
 
 /*
@@ -773,6 +775,14 @@ const X64Instr instr_nop =     { { 0xF1,0xF1,0xF1,0x00,0xF1,0x90 }, 0x0500  };
 const X64Instr instr_shld =    { { 0xA5,0xF1,0xA4,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_shrd =    { { 0xAD,0xF1,0xAC,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500  };
+const X64Instr instr_roundsd   { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
+
+enum class RoundDirection : ssize_t {
+  nearest  = 0,
+  floor    = 1,
+  ceil     = 2,
+  truncate = 3,
+};
 
 enum ConditionCode {
   CC_None = -1,
@@ -1184,6 +1194,10 @@ public:
 
   void shlq (Reg64 r) { instrR(instr_shl, r); }
   void sarq (Reg64 r) { instrR(instr_sar, r); }
+
+  void roundsd (RoundDirection d, RegXMM src, RegXMM dst) {
+    emitIRR(instr_roundsd, rn(dst), rn(src), ssize_t(d));
+  }
 
   /*
    * Control-flow directives.  Primitive labeling/patching facilities
@@ -1645,19 +1659,31 @@ public:
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
     // Opsize prefix
-    prefixBytes(0, opSz);
+    prefixBytes(op.flags, opSz);
     // REX
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
+    bool highByteReg = false;
+    if (opSz == sz::byte || (op.flags & IF_BYTEREG)) {
+      if (byteRegNeedsRex(r1) ||
+          (!(op.flags & IF_BYTEREG) && byteRegNeedsRex(r2))) {
+        rex |= 0x40;
+      }
+      r1 = byteRegEncodeNumber(r1, highByteReg);
+      r2 = byteRegEncodeNumber(r2, highByteReg);
+    }
     if (r1 & 8) rex |= (reverse ? 1 : 4);
     if (r2 & 8) rex |= (reverse ? 4 : 1);
-    if (rex) byte(0x40 | rex);
+    if (rex) {
+      byte(0x40 | rex);
+      if (highByteReg) byteRegMisuse();
+    }
     // Determine the size of the immediate
     int immSize = computeImmediateSize(op, imm, opSz);
-    // Use 2-byte opcode for cmovcc, setcc, movsx, movzx, movsx8, movzx8
-    // instructions
-    if ((op.flags & IF_TWOBYTEOP) != 0) byte(0x0F);
-    int opcode = (immSize == sz::byte && opSz != sz::byte) ?
+    if (op.flags & IF_TWOBYTEOP || op.flags & IF_THREEBYTEOP) byte(0x0F);
+    if (op.flags & IF_THREEBYTEOP) byte(0x3a);
+    int opcode = (immSize == sz::byte && opSz != sz::byte &&
+                  (op.flags & IF_ROUND) == 0) ?
       (op.table[2] | 2) : op.table[2];
     byte(opcode);
     if (reverse) {

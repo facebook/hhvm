@@ -724,6 +724,25 @@ sar %cl,%r8
 )");
 }
 
+TEST(Asm, FloatRounding) {
+  if (folly::CpuId().sse41()) {
+    Asm a;
+    a.init(10 << 24);
+
+    a.    roundsd(RoundDirection::nearest,  xmm1, xmm2);
+    a.    roundsd(RoundDirection::floor,    xmm2, xmm4);
+    a.    roundsd(RoundDirection::ceil,     xmm8, xmm7);
+    a.    roundsd(RoundDirection::truncate, xmm12, xmm9);
+
+    expect_asm(a, R"(
+roundsd $0x0,%xmm1,%xmm2
+roundsd $0x1,%xmm2,%xmm4
+roundsd $0x2,%xmm8,%xmm7
+roundsd $0x3,%xmm12,%xmm9
+)");
+  }
+}
+
 TEST(Asm, SSEDivision) {
   Asm a;
   a.init(10 << 24);

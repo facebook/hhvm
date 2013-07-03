@@ -485,6 +485,7 @@ private:
                      Offset offset, Ref* r1, TypedValue* val, TypedValue* key);
   void jmpSurpriseCheck(Offset o);
   template<Op op> void jmpOpImpl(PC& pc);
+  template<class Op> void roundOpImpl(Op op);
 #define O(name, imm, pusph, pop, flags)                                       \
   void iop##name(PC& pc);
 OPCODES

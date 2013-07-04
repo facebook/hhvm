@@ -353,7 +353,7 @@ void assertOperandTypes(const IRInstruction* inst) {
       // SpillStack slots may be stack types or None, if the
       // simplifier removed some.
       auto const valid = inst->src(curSrc)->type()
-        .subtypeOfAny(Type::Gen, Type::Cls, Type::None);
+        .subtypeOfAny(Type::StackElem, Type::None);
       check(valid, "Gen|Cls|None");
     }
   };

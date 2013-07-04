@@ -169,6 +169,11 @@ above PHP-facing types.
   TCA             Machine code address
   Nullptr         Represents a null pointer
 
+There is also one special type which represents all the possible types that
+can be on the stack.
+
+  StackElem       {Gen|Cls}
+
 In the instruction descriptions below, we also use a "Const" prefix on
 several types loosly, which means the operand must be the requested
 type and must be a compile-time constant.  The optimizer relies on

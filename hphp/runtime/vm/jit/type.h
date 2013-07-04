@@ -89,6 +89,7 @@ using Transl::RuntimeType;
   IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
   IRT(PtrToCounted, kCounted << kPtrShift)                          \
   IRT(Gen,          kCell|kBoxedCell)                               \
+  IRT(StackElem,    kGen|kCls)                                      \
   IRT(Init,         kGen & ~kUninit)                                \
   IRT(PtrToGen,     kGen << kPtrShift)                              \
   IRT(PtrToInit,    kInit << kPtrShift)

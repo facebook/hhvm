@@ -190,6 +190,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Obj | Type::Func);
   expectTrue(Type::Init);
   expectTrue(Type::Top);
+  expectTrue(Type::StackElem);
 
   for (Type t : types) {
     EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";

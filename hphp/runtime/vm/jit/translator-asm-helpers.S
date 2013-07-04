@@ -19,10 +19,10 @@
   .globl enterTCHelper
 enterTCHelper:
   // Prologue
-  .cfi_startproc
+  .cfi_startproc            // amongst other things, cfa reg is now rsp, and offset is 8
   push %rbp
-  .cfi_adjust_cfa_offset 8  // offset to previous frame relative to %rsp
-  .cfi_offset rbp, -16      // Where to find previous value of rbp
+  .cfi_adjust_cfa_offset 8  // cfa is now 8 bytes further from rsp than it was before
+  .cfi_offset rbp, -16      // Where to find previous value of rbp, relative to cfa
 
   // Set firstAR->m_savedRbp to point to this frame.
   mov %rsp, (%r8)
@@ -46,6 +46,7 @@ enterTCHelper:
    */
 
   sub $0x280, %rsp // kReservedRSPScratchSpace
+  .cfi_adjust_cfa_offset 0x280
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -59,11 +60,11 @@ enterTCHelper:
   push 0x8(%r15)
   jmp *%rdx
 .LenterTCHelper$jumpToTC:
-  // May need cfi_adjust_cfa_offset annotations: Task #1747813
   call *%rdx
 .LenterTCHelper$serviceReqLabel:
 
   add $0x280, %rsp // kReservedRSPScratchSpace
+  .cfi_adjust_cfa_offset -0x280
   // Restore infoPtr into %rbx
   pop %rbx
   .cfi_adjust_cfa_offset -8

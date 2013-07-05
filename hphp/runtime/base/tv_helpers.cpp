@@ -25,39 +25,38 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-bool cellIsPlausible(const Cell* cell) {
-  assert(cell);
-  assert(cell->m_type != KindOfRef);
+bool cellIsPlausible(const Cell cell) {
+  assert(cell.m_type != KindOfRef);
 
   auto assertPtr = [](void* ptr) {
     assert(ptr && (uintptr_t(ptr) % sizeof(ptr) == 0));
   };
 
-  switch (cell->m_type) {
+  switch (cell.m_type) {
   case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfBoolean:
-    assert(cell->m_data.num == 0 || cell->m_data.num == 1);
+    assert(cell.m_data.num == 0 || cell.m_data.num == 1);
     break;
   case KindOfInt64:
   case KindOfDouble:
     break;
   case KindOfStaticString:
-    assertPtr(cell->m_data.pstr);
-    assert(cell->m_data.pstr->isStatic());
+    assertPtr(cell.m_data.pstr);
+    assert(cell.m_data.pstr->isStatic());
     break;
   case KindOfString:
-    assertPtr(cell->m_data.pstr);
-    assert(is_refcount_realistic(cell->m_data.pstr->getCount()));
+    assertPtr(cell.m_data.pstr);
+    assert(is_refcount_realistic(cell.m_data.pstr->getCount()));
     break;
   case KindOfArray:
-    assertPtr(cell->m_data.parr);
-    assert(is_refcount_realistic(cell->m_data.parr->getCount()));
+    assertPtr(cell.m_data.parr);
+    assert(is_refcount_realistic(cell.m_data.parr->getCount()));
     break;
   case KindOfObject:
-    assertPtr(cell->m_data.pobj);
-    assert(!cell->m_data.pobj->isStatic());
+    assertPtr(cell.m_data.pobj);
+    assert(!cell.m_data.pobj->isStatic());
     break;
   case KindOfRef:
     assert(!"KindOfRef found in a Cell");
@@ -68,20 +67,18 @@ bool cellIsPlausible(const Cell* cell) {
   return true;
 }
 
-bool tvIsPlausible(const TypedValue* tv) {
-  assert(tv);
-  if (tv->m_type == KindOfRef) {
-    assert(tv->m_data.pref);
-    assert(uintptr_t(tv->m_data.pref) % sizeof(void*) == 0);
-    assert(is_refcount_realistic(tv->m_data.pref->getCount()));
-    tv = tv->m_data.pref->tv();
+bool tvIsPlausible(TypedValue tv) {
+  if (tv.m_type == KindOfRef) {
+    assert(tv.m_data.pref);
+    assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
+    assert(is_refcount_realistic(tv.m_data.pref->getCount()));
+    tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);
 }
 
-bool refIsPlausible(const Ref* ref) {
-  assert(ref);
-  assert(ref->m_type == KindOfRef);
+bool refIsPlausible(const Ref ref) {
+  assert(ref.m_type == KindOfRef);
   return tvIsPlausible(ref);
 }
 
@@ -92,7 +89,7 @@ inline void tvUnboxIfNeeded(TypedValue *tv) {
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   bool b;
   switch (tv->m_type) {
@@ -114,7 +111,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 }
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
   double d;
@@ -143,7 +140,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
 }
 
 void cellCastToInt64InPlace(Cell* cell) {
-  assert(cellIsPlausible(cell));
+  assert(cellIsPlausible(*cell));
 
   int64_t i;
   switch (cell->m_type) {
@@ -183,13 +180,13 @@ void cellCastToInt64InPlace(Cell* cell) {
 }
 
 void tvCastToInt64InPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   cellCastToInt64InPlace(tv);
 }
 
 double tvCastToDouble(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
@@ -222,7 +219,7 @@ const StaticString
   s_Array("Array");
 
 void tvCastToStringInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   StringData * s;
   switch (tv->m_type) {
@@ -257,7 +254,7 @@ static_string:
 }
 
 StringData* tvCastToString(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
@@ -281,7 +278,7 @@ StringData* tvCastToString(TypedValue* tv) {
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   ArrayData * a;
   switch (tv->m_type) {
@@ -310,7 +307,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   ObjectData* o;
   switch (tv->m_type) {
@@ -344,7 +341,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (tv->m_type == KindOfArray || tv->m_type == KindOfObject) {
     return false;
@@ -375,7 +372,7 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
 }
 
 bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
@@ -385,7 +382,7 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
@@ -395,7 +392,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToStringInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   switch (tv->m_type) {
   case KindOfArray:
@@ -415,7 +412,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (tv->m_type == KindOfArray) {
     return true;
@@ -427,7 +424,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
 }
 
 bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfObject;
 }

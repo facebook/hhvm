@@ -137,7 +137,7 @@ bool SimpleArrayStore::update(K key, const Variant& val, uint length,
   auto const pos = find(key, length);
   if (pos != PosType::invalid) {
     // found, overwrite
-    assert(tvIsPlausible(m_vals + toInt<uint32_t>(pos)));
+    assert(tvIsPlausible(m_vals[toInt<uint32_t>(pos)]));
     lval(pos) = val;
     return false;
   }

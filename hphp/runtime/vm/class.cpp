@@ -945,7 +945,7 @@ Cell* Class::cnsNameToTV(const StringData* clsCnsName,
     return nullptr;
   }
   auto const ret = const_cast<Cell*>(&m_constants[clsCnsInd].m_val);
-  assert(cellIsPlausible(ret));
+  assert(cellIsPlausible(*ret));
   return ret;
 }
 
@@ -976,7 +976,7 @@ Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
     g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
                                nullptr, 1, tv);
   }
-  assert(cellIsPlausible(clsCns));
+  assert(cellIsPlausible(*clsCns));
   return clsCns;
 }
 

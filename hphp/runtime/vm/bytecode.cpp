@@ -6724,7 +6724,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   c_Continuation* cont = frame_continuation(m_fp);
 
   // check sanity of received value
-  assert(tvIsPlausible(m_stack.topC()));
+  assert(tvIsPlausible(*m_stack.topC()));
 
   // Return the label in a stack cell
   TypedValue* label = m_stack.allocTV();

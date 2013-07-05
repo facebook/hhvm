@@ -32,7 +32,7 @@ namespace {
 // Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
 // Other types (i.e. Int and Double) must be handled outside of this.
 TypedNum numericConvHelper(Cell cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfString:
@@ -261,8 +261,8 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
 
 template<template<class> class BitOp, class StrLenOp>
 Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   if (IS_STRING_TYPE(c1.m_type) && IS_STRING_TYPE(c2.m_type)) {
     return make_tv<KindOfString>(
@@ -332,7 +332,7 @@ void stringIncDecOp(Op op, Cell& cell) {
  */
 template<class Op>
 void cellIncDecOp(Op op, Cell& cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfInt64:
@@ -456,8 +456,8 @@ void cellMulEq(Cell& c1, Cell c2) {
 }
 
 void cellDivEq(Cell& c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
   if (!isTypedNum(c1)) {
     cellSet(numericConvHelper(c1), c1);
   }
@@ -489,7 +489,7 @@ void cellDec(Cell& cell) {
 }
 
 void cellBitNot(Cell& cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfInt64:

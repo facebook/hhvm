@@ -928,7 +928,7 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
   if (LIKELY(handle != 0)) {
     TypedValue& tv = TargetCache::handleToRef<TypedValue>(handle);
     if (LIKELY(tv.m_type != KindOfUninit)) {
-      assert(cellIsPlausible(&tv));
+      assert(cellIsPlausible(tv));
       return &tv;
     }
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
@@ -936,7 +936,7 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
         (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
       auto const tvRet = const_cast<Variant&>(
         ci->getDeferredValue()).asTypedValue();
-      assert(cellIsPlausible(tvRet));
+      assert(cellIsPlausible(*tvRet));
       return tvRet;
     }
   }
@@ -950,7 +950,7 @@ Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
   if (!TargetCache::isPersistentHandle(handle)) return nullptr;
   auto const ret = &TargetCache::handleToRef<TypedValue>(handle);
-  assert(cellIsPlausible(ret));
+  assert(cellIsPlausible(*ret));
   return ret;
 }
 

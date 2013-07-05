@@ -223,9 +223,6 @@ void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value);
 void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
                             TypedValue* value);
 
-// return true if tv is plausible
-bool checkTv(const TypedValue* tv);
-
 // always_assert tv is a plausible TypedValue*
 void assertTv(const TypedValue* tv);
 

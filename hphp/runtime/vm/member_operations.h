@@ -1014,7 +1014,7 @@ void incDecBodySlow(unsigned char op, TypedValue* fr, TypedValue* to) {
     fr = tvToCell(fr);
   }
 
-  assert(cellIsPlausible(fr));
+  assert(cellIsPlausible(*fr));
 
   switch (static_cast<IncDecOp>(op)) {
   case PreInc:

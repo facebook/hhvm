@@ -122,7 +122,7 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assert(cellIsPlausible(&result));
+  assert(cellIsPlausible(result));
   setResult(result);
   tvRefcountedDecRefCell(&result);
 }

@@ -2532,7 +2532,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
       if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
         continue;
       }
-      assert(checkTv(frame_local(fp, i)));
+      assert(tvIsPlausible(*frame_local(fp, i)));
     }
   }
   // We unfortunately can't do the same kind of check for the stack

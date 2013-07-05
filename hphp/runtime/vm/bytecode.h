@@ -36,7 +36,7 @@ namespace HPHP {
 
 inline ALWAYS_INLINE
 void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
-  assert(cellIsPlausible(rhs));
+  assert(cellIsPlausible(*rhs));
   lhs = tvToCell(lhs);
 
   switch (op) {
@@ -562,8 +562,7 @@ public:
 
   inline void ALWAYS_INLINE popC() {
     assert(m_top != m_base);
-    assert(tvIsPlausible(m_top));
-    assert(m_top->m_type != KindOfRef);
+    assert(cellIsPlausible(*m_top));
     tvRefcountedDecRefCell(m_top);
     m_top++;
   }
@@ -576,15 +575,14 @@ public:
 
   inline void ALWAYS_INLINE popV() {
     assert(m_top != m_base);
-    assert(m_top->m_type == KindOfRef);
-    assert(m_top->m_data.pref != nullptr);
+    assert(refIsPlausible(*m_top));
     tvDecRefRef(m_top);
     m_top++;
   }
 
   inline void ALWAYS_INLINE popTV() {
     assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass || tvIsPlausible(m_top));
+    assert(m_top->m_type == KindOfClass || tvIsPlausible(*m_top));
     tvRefcountedDecRef(m_top);
     m_top++;
   }

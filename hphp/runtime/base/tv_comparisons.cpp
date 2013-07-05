@@ -53,7 +53,7 @@ bool cellRelOp(Op op, Cell cell, bool val) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell cell, int64_t val) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -85,7 +85,7 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell cell, double val) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -112,7 +112,7 @@ bool cellRelOp(Op op, Cell cell, double val) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell cell, const StringData* val) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -152,7 +152,7 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -180,7 +180,7 @@ bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -217,8 +217,8 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
 
 template<class Op>
 bool cellRelOp(Op op, Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   switch (c2.m_type) {
   case KindOfUninit:
@@ -241,8 +241,8 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
 
 template<class Op>
 bool tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(&tv1));
-  assert(tvIsPlausible(&tv2));
+  assert(tvIsPlausible(tv1));
+  assert(tvIsPlausible(tv2));
   return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -362,8 +362,8 @@ struct Gt {
 }
 
 bool cellSame(Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   bool const null1 = IS_NULL_TYPE(c1.m_type);
   bool const null2 = IS_NULL_TYPE(c2.m_type);
@@ -399,8 +399,8 @@ bool cellSame(Cell c1, Cell c2) {
 }
 
 bool tvSame(TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(&tv1));
-  assert(tvIsPlausible(&tv2));
+  assert(tvIsPlausible(tv1));
+  assert(tvIsPlausible(tv2));
   return cellSame(*tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -514,8 +514,8 @@ bool tvGreater(TypedValue tv1, TypedValue tv2) {
 //////////////////////////////////////////////////////////////////////
 
 bool cellLessOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {
@@ -525,8 +525,8 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
 }
 
 bool cellGreaterOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {

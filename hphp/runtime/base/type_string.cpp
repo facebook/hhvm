@@ -396,12 +396,6 @@ String operator+(const String & lhs, const String & rhs) {
   return NEW(StringData)(lhs.slice(), rhs.slice());
 }
 
-String String::operator~() const {
-  String ret(NEW(StringData)(slice(), CopyString));
-  ret->negate();
-  return ret;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // conversions
 

@@ -239,7 +239,6 @@ struct MulEq {
   }
 };
 
-
 template<class SzOp, class BitOp>
 StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   auto const s1Size = s1->size();
@@ -487,6 +486,38 @@ void cellInc(Cell& cell) {
 
 void cellDec(Cell& cell) {
   cellIncDecOp(Dec(), cell);
+}
+
+void cellBitNot(Cell& cell) {
+  assert(cellIsPlausible(&cell));
+
+  switch (cell.m_type) {
+  case KindOfInt64:
+    cell.m_data.num = ~cell.m_data.num;
+    break;
+  case KindOfDouble:
+    cell.m_type     = KindOfInt64;
+    cell.m_data.num = ~toInt64(cell.m_data.dbl);
+    break;
+
+  case KindOfString:
+    if (cell.m_data.pstr->getCount() > 1) {
+    case KindOfStaticString:
+      auto const newSd = NEW(StringData)(
+        cell.m_data.pstr->slice(),
+        CopyString
+      );
+      newSd->incRefCount();
+      cell.m_data.pstr->decRefCount(); // can't go to zero
+      cell.m_data.pstr = newSd;
+      cell.m_type = KindOfString;
+    }
+    cell.m_data.pstr->negate();
+    break;
+
+  default:
+    raise_error("Unsupported operand type for ~");
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

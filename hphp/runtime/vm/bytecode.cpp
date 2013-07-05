@@ -3768,17 +3768,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopShr(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
   NEXT();
-  Cell* c1 = m_stack.topC();
-  if (LIKELY(c1->m_type == KindOfInt64)) {
-    c1->m_data.num = ~c1->m_data.num;
-  } else if (c1->m_type == KindOfDouble) {
-    c1->m_type = KindOfInt64;
-    c1->m_data.num = ~int64_t(c1->m_data.dbl);
-  } else if (IS_STRING_TYPE(c1->m_type)) {
-    cellAsVariant(*c1) = cellAsVariant(*c1).bitNot();
-  } else {
-    raise_error("Unsupported operand type for ~");
-  }
+  cellBitNot(*m_stack.topC());
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCastBool(PC& pc) {

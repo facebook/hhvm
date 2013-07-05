@@ -112,6 +112,8 @@ void cellBitAndEq(Cell& c1, Cell);
 void cellBitOrEq(Cell& c1, Cell);
 void cellBitXorEq(Cell& c1, Cell);
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * PHP operator ++ and --.
  *
@@ -120,6 +122,15 @@ void cellBitXorEq(Cell& c1, Cell);
  */
 void cellInc(Cell&);
 void cellDec(Cell&);
+
+
+/*
+ * PHP unary operator ~.
+ *
+ * Mutates the argument in place, with the effects of php's unary
+ * bitwise not operator.
+ */
+void cellBitNot(Cell&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -523,25 +523,6 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// bitwise
-
-Variant Variant::bitNot() const {
-  auto const cell = asCell();
-  switch (cell->m_type) {
-  case KindOfInt64:
-    return ~cell->m_data.num;
-  case KindOfDouble:
-    return ~toInt64(cell->m_data.dbl);
-  case KindOfStaticString:
-  case KindOfString:
-    return ~String(cell->m_data.pstr);
-  default:
-    break;
-  }
-  throw InvalidOperandException("only numerics and strings can be negated");
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
 HOT_FUNC

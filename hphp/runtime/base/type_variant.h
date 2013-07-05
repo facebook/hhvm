@@ -590,10 +590,6 @@ class Variant : private TypedValue {
   Variant &operator -- () = delete;
   Variant  operator -- (int) = delete;
 
-  // Return the result of applying the php bitwise not operator to
-  // this value.
-  Variant bitNot() const;
-
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */

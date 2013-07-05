@@ -237,21 +237,30 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
                 *result.asCell());
         break;
       case '~':
-        result = value.bitNot(); break;
+        tvSet(*value.asCell(), *result.asTypedValue());
+        cellBitNot(*result.asCell());
+        break;
       case '@':
-        result = value; break;
+        result = value;
+        break;
       case T_INT_CAST:
-        result = value.toInt64(); break;
+        result = value.toInt64();
+        break;
       case T_DOUBLE_CAST:
-        result = toDouble(value); break;
+        result = toDouble(value);
+        break;
       case T_STRING_CAST:
-        result = toString(value); break;
+        result = toString(value);
+        break;
       case T_BOOL_CAST:
-        result = toBoolean(value); break;
+        result = toBoolean(value);
+        break;
       case T_EMPTY:
-        result = empty(value); break;
+        result = empty(value);
+        break;
       case T_ISSET:
-        result = isset(value); break;
+        result = isset(value);
+        break;
       case T_INC:
       case T_DEC:
         assert(false);

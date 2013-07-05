@@ -318,7 +318,7 @@ public:
   String &operator |= (CStrRef v) = delete;
   String &operator &= (CStrRef v) = delete;
   String &operator ^= (CStrRef v) = delete;
-  String  operator ~  () const;
+  String  operator ~  () const = delete;
   explicit operator std::string () const {
     return std::string(c_str(), size());
   }

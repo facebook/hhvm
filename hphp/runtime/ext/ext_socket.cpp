@@ -281,7 +281,8 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
 }
 
 static bool create_new_socket(const char *&name, int port, Variant &errnum,
-                              Variant &errstr, Object &ret, Socket *&sock) {
+                              Variant &errstr, Object &ret, Socket *&sock,
+                              double timeout) {
   int domain = AF_INET;
   int type = SOCK_STREAM;
   if (strncmp(name, "udp://", 6) == 0 || strncmp(name, "udg://", 6) == 0) {
@@ -294,7 +295,7 @@ static bool create_new_socket(const char *&name, int port, Variant &errnum,
     name += 7;
   }
 
-  sock = new Socket(socket(domain, type, 0), domain, name, port);
+  sock = new Socket(socket(domain, type, 0), domain, name, port, timeout);
   ret = Object(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
@@ -664,7 +665,7 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   Object ret;
   Socket *sock = NULL;
   const char *name = hostname.data();
-  if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
+  if (!create_new_socket(name, port, errnum, errstr, ret, sock, 0.0)) {
     return false;
   }
   assert(ret.get() && sock);
@@ -1000,12 +1001,14 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
   const char *name = hostname.data();
   Socket *sock = NULL;
 
+  if (timeout <= 0) timeout = RuntimeOption::SocketDefaultTimeout;
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(name, port, timeout);
   if (sslsock) {
     sock = sslsock;
     ret = sock;
-  } else if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
+  } else if (!create_new_socket(name, port, errnum, errstr,
+                                ret, sock, timeout)) {
     return false;
   }
   assert(ret.get() && sock);

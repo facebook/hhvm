@@ -53,15 +53,20 @@ Socket::Socket()
 }
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
-               int port /* = 0 */)
+               int port /* = 0 */, double timeout /* = 0 */)
   : File(true), m_port(port), m_type(type), m_error(0), m_eof(false),
     m_timeout(0), m_timedOut(false), m_bytesSent(0) {
   if (address) m_address = address;
   m_fd = sockfd;
 
   struct timeval tv;
-  tv.tv_sec = RuntimeOption::SocketDefaultTimeout;
-  tv.tv_usec = 0;
+  if (timeout <= 0) {
+    tv.tv_sec = RuntimeOption::SocketDefaultTimeout;
+    tv.tv_usec = 0;
+  } else {
+    tv.tv_sec = (int)timeout;
+    tv.tv_usec = (timeout - tv.tv_sec) * 1e6;
+  }
   setsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
   s_socket_data->m_lastErrno = errno;
   setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));

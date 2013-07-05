@@ -938,18 +938,20 @@ HphpArray* Class::initClsCnsData() const {
   return constants;
 }
 
-TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
-                               Slot& clsCnsInd) const {
+Cell* Class::cnsNameToTV(const StringData* clsCnsName,
+                         Slot& clsCnsInd) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  return const_cast<TypedValue*>(&m_constants[clsCnsInd].m_val);
+  auto const ret = const_cast<Cell*>(&m_constants[clsCnsInd].m_val);
+  assert(cellIsPlausible(ret));
+  return ret;
 }
 
-TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
+Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
   Slot clsCnsInd;
-  TypedValue* clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
+  Cell* clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
   if (!clsCns || clsCns->m_type != KindOfUninit) {
     return clsCns;
   }
@@ -974,12 +976,13 @@ TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
     g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
                                nullptr, 1, tv);
   }
+  assert(cellIsPlausible(clsCns));
   return clsCns;
 }
 
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
-  TypedValue* cns = cnsNameToTV(cnsName, slot);
+  auto const cns = cnsNameToTV(cnsName, slot);
   // TODO: lookup the constant in target cache in case it's dynamic
   // and already initialized.
   if (!cns) return KindOfUninit;

@@ -627,7 +627,7 @@ public:
    *
    * Performs dynamic initialization if necessary.
    */
-  TypedValue* clsCnsGet(const StringData* clsCnsName) const;
+  Cell* clsCnsGet(const StringData* clsCnsName) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require
@@ -638,7 +638,7 @@ public:
    * class constants need to run 86cinit code to determine their value
    * at runtime.)
    */
-  TypedValue* cnsNameToTV(const StringData* name, Slot& slot) const;
+  Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
 
   /*
    * Provide the current runtime type of this class constant.  This

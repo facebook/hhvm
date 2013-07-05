@@ -176,20 +176,6 @@ inline void tvUnbox(TypedValue* tv) {
   assert(tvIsPlausible(tv));
 }
 
-// Assumes 'fr' is live and 'to' is dead. Store a reference to 'fr',
-// as a Cell, into 'to'.
-inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
-  assert(tvIsPlausible(fr));
-  if (fr->m_type != KindOfRef) {
-    memcpy(to, fr, sizeof(TypedValue));
-  } else {
-    TypedValue* fr2 = fr->m_data.pref->tv();
-    to->m_data.num = fr2->m_data.num;
-    to->m_type = fr2->m_type;
-  }
-  tvRefcountedIncRef(to);
-}
-
 /*
  * Raw copy of a TypedValue from one location to another, without
  * doing any reference count manipulation.

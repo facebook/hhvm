@@ -916,14 +916,14 @@ ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   return nullptr;
 }
 
-TypedValue* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
+Cell* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
                                              const StringData* cls,
                                              const StringData* cns) {
   Class* class_ = Unit::loadClass(ne, cls);
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
-  TypedValue* clsCns = class_->clsCnsGet(cns);
+  Cell* clsCns = class_->clsCnsGet(cns);
   if (clsCns == nullptr) {
     raise_error("Couldn't find constant %s::%s",
                 cls->data(), cns->data());
@@ -3559,8 +3559,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
     m_stack.pushStaticString(s);
     return;
   }
-  Cell* c1 = m_stack.allocC();
-  tvReadCell(cns, c1);
+  auto const c1 = m_stack.allocC();
+  cellDup(*cns, *c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCnsE(PC& pc) {
@@ -3570,8 +3570,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCnsE(PC& pc) {
   if (cns == nullptr) {
     raise_error("Undefined constant '%s'", s->data());
   }
-  Cell* c1 = m_stack.allocC();
-  tvReadCell(cns, c1);
+  auto const c1 = m_stack.allocC();
+  cellDup(*cns, *c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCnsU(PC& pc) {
@@ -3591,8 +3591,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCnsU(PC& pc) {
       return;
     }
   }
-  Cell* c1 = m_stack.allocC();
-  tvReadCell(cns, c1);
+  auto const c1 = m_stack.allocC();
+  cellDup(*cns, *c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopDefCns(PC& pc) {
@@ -3609,12 +3609,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCns(PC& pc) {
   assert(tv->m_type == KindOfClass);
   Class* class_ = tv->m_data.pcls;
   assert(class_ != nullptr);
-  TypedValue* clsCns = class_->clsCnsGet(clsCnsName);
+  auto const clsCns = class_->clsCnsGet(clsCnsName);
   if (clsCns == nullptr) {
     raise_error("Couldn't find constant %s::%s",
                 class_->name()->data(), clsCnsName->data());
   }
-  tvReadCell(clsCns, tv);
+  cellDup(*clsCns, *tv);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
@@ -3624,11 +3624,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
   const NamedEntityPair& classNamedEntity =
     m_fp->m_func->unit()->lookupNamedEntityPairId(classId);
 
-  TypedValue* clsCns = lookupClsCns(classNamedEntity.second,
-                                    classNamedEntity.first, clsCnsName);
+  auto const clsCns = lookupClsCns(classNamedEntity.second,
+                                   classNamedEntity.first, clsCnsName);
   assert(clsCns != nullptr);
-  Cell* c1 = m_stack.allocC();
-  tvReadCell(clsCns, c1);
+  auto const c1 = m_stack.allocC();
+  cellDup(*clsCns, *c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
@@ -4353,7 +4353,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
     }                                                     \
     refDup(*val, *output);                                \
   } else {                                                \
-    tvReadCell(val, output);                              \
+    cellDup(*tvToCell(val), *output);                     \
   }                                                       \
   m_stack.popA();                                         \
   SPROP_OP_POSTLUDE                                       \
@@ -4793,7 +4793,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpL(PC& pc) {
   TypedValue* to = frame_local(m_fp, local);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRefCell(fr);
-  tvReadCell(to, fr);
+  cellDup(*tvToCell(to), *fr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
@@ -4809,7 +4809,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
-  tvReadCell(to, tv2);
+  cellDup(*tvToCell(to), *tv2);
   m_stack.discard();
   decRefStr(name);
 }
@@ -4827,7 +4827,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
-  tvReadCell(to, tv2);
+  cellDup(*tvToCell(to), *tv2);
   m_stack.discard();
   decRefStr(name);
 }
@@ -4851,7 +4851,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpS(PC& pc) {
   SETOP_BODY(val, op, fr);
   tvRefcountedDecRefCell(propn);
   tvRefcountedDecRef(fr);
-  tvReadCell(val, output);
+  cellDup(*tvToCell(val), *output);
   m_stack.ndiscard(2);
   decRefStr(name);
 }
@@ -4891,7 +4891,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
     }
 
     tvRefcountedDecRef(rhs);
-    tvReadCell(result, rhs);
+    cellDup(*tvToCell(result), *rhs);
   }
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }

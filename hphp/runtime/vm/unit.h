@@ -495,9 +495,9 @@ struct Unit {
   static bool aliasClass(Class* original, const StringData* alias);
   void defTypedef(Id id);
 
-  static TypedValue* lookupCns(const StringData* cnsName);
-  static TypedValue* lookupPersistentCns(const StringData* cnsName);
-  static TypedValue* loadCns(const StringData* cnsName);
+  static Cell* lookupCns(const StringData* cnsName);
+  static Cell* lookupPersistentCns(const StringData* cnsName);
+  static Cell* loadCns(const StringData* cnsName);
   static bool defCns(const StringData* cnsName, const TypedValue* value,
                      bool persistent = false);
   static uint64_t defCnsHelper(uint64_t ch,

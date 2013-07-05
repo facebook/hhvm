@@ -4978,15 +4978,15 @@ void CodeGenerator::cgLdCns(IRInstruction* inst) {
   cgLoad(rVmTl, ch, inst);
 }
 
-static TypedValue lookupCnsHelper(const TypedValue* tv, StringData* nm) {
+static Cell lookupCnsHelper(const TypedValue* tv, StringData* nm) {
   assert(tv->m_type == KindOfUninit);
-  TypedValue *cns = nullptr;
-  TypedValue c1;
+  Cell *cns = nullptr;
+  Cell c1;
   if (UNLIKELY(tv->m_data.pref != nullptr)) {
     ClassInfo::ConstantInfo* ci =
       (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
     cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
-    tvReadCell(cns, &c1);
+    cellDup(*cns, c1);
   } else {
     if (UNLIKELY(TargetCache::s_constants != nullptr)) {
       cns = TargetCache::s_constants->HphpArray::nvGet(nm);

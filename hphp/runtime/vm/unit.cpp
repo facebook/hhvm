@@ -923,15 +923,21 @@ void Unit::initialMerge() {
   }
 }
 
-TypedValue* Unit::lookupCns(const StringData* cnsName) {
+Cell* Unit::lookupCns(const StringData* cnsName) {
   TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
   if (LIKELY(handle != 0)) {
     TypedValue& tv = TargetCache::handleToRef<TypedValue>(handle);
-    if (LIKELY(tv.m_type != KindOfUninit)) return &tv;
+    if (LIKELY(tv.m_type != KindOfUninit)) {
+      assert(cellIsPlausible(&tv));
+      return &tv;
+    }
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
       ClassInfo::ConstantInfo* ci =
         (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
-      return const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+      auto const tvRet = const_cast<Variant&>(
+        ci->getDeferredValue()).asTypedValue();
+      assert(cellIsPlausible(tvRet));
+      return tvRet;
     }
   }
   if (UNLIKELY(TargetCache::s_constants != nullptr)) {
@@ -940,10 +946,12 @@ TypedValue* Unit::lookupCns(const StringData* cnsName) {
   return nullptr;
 }
 
-TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
+Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
   if (!TargetCache::isPersistentHandle(handle)) return nullptr;
-  return &TargetCache::handleToRef<TypedValue>(handle);
+  auto const ret = &TargetCache::handleToRef<TypedValue>(handle);
+  assert(cellIsPlausible(ret));
+  return ret;
 }
 
 TypedValue* Unit::loadCns(const StringData* cnsName) {

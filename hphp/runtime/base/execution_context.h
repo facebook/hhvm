@@ -561,12 +561,12 @@ public:
     m_clsCnsData[class_] = clsCnsData;
   }
 
-  TypedValue* lookupClsCns(const HPHP::NamedEntity* ne,
-                           const StringData* cls,
-                           const StringData* cns);
+  Cell* lookupClsCns(const HPHP::NamedEntity* ne,
+                     const StringData* cls,
+                     const StringData* cns);
 
-  TypedValue* lookupClsCns(const StringData* cls,
-                           const StringData* cns);
+  Cell* lookupClsCns(const StringData* cls,
+                     const StringData* cns);
 
   // Get the next outermost VM frame, even accross re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);

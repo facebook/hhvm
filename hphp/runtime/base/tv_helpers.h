@@ -203,7 +203,7 @@ inline void cellCopy(const Cell& fr, Cell& to) {
   tvCopy(fr, to);
 }
 inline void varCopy(const Var& fr, Var& to) {
-  assert(cellIsPlausible(&fr));
+  assert(varIsPlausible(&fr));
   tvCopy(fr, to);
 }
 

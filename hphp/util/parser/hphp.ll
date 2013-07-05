@@ -172,6 +172,7 @@ static int getNextTokenType(int t) {
 %x ST_XHP_END_SINGLETON_TAG
 %x ST_XHP_END_CLOSE_TAG
 %x ST_XHP_CHILD
+%x ST_XHP_COMMENT
 
 %option stack
 
@@ -811,6 +812,20 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         yymore();
 }
 
+<ST_XHP_COMMENT>[^-]+ {
+        yymore();
+}
+
+<ST_XHP_COMMENT>"-->" {
+        STEPPOS;
+        yy_pop_state(yyscanner);
+        return T_COMMENT;
+}
+
+<ST_XHP_COMMENT>"-" {
+        yymore();
+}
+
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
         if (_scanner->isHackMode()) {
           _scanner->error("Hack mode: ?> not allowed");
@@ -953,6 +968,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   STEPPOS;
   yy_pop_state(yyscanner);
   return T_XHP_TAG_GT;
+}
+
+<ST_XHP_CHILD>"<!--" {
+  yy_push_state(ST_XHP_COMMENT, yyscanner);
+  yymore();
 }
 
 <ST_XHP_CHILD>[^{<]+ {

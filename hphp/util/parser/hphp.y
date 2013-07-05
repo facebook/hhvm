@@ -286,7 +286,7 @@ static void xhp_attribute(Parser *_p, Token &out, Token &type, Token &label,
                           Token &def, Token &req) {
   /**
    * The basic builtin types "bool", "int", "double", and "string" all map to
-   * T_STRING in the parser, and the parser uses always uses type code 5 for
+   * T_STRING in the parser, and the parser always uses type code 5 for
    * T_STRING. However, XHP uses different type codes for these basic builtin
    * types, so we need to fix up the type code here to make XHP happy.
    */

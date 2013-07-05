@@ -52,7 +52,7 @@ fwrite($f,
          "Connection: Close\r\n".
          "\r\n");
 $response = '';
-while (!feof($f)) {
+while ($f && !feof($f)) {
   $line = fgets($f, 128);
   $response .= $line;
 }

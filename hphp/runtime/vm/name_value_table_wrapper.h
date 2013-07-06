@@ -77,27 +77,31 @@ public: // ArrayData implementation
     return tvAsVariant(nvGet(k.get()));
   }
 
-  virtual ssize_t vsize() const;
+  static size_t Vsize(const ArrayData*);
   static void NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos);
-  virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual bool noCopyOnWrite() const;
+  static CVarRef GetValueRef(const ArrayData*, ssize_t pos);
 
-  virtual bool exists(int64_t k) const;
-  virtual bool exists(const StringData* k) const;
+  static bool ExistsInt(const ArrayData* ad, int64_t k);
+  static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
   static TypedValue* NvGetInt(const ArrayData*, int64_t k);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
-  virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy);
-  virtual ArrayData* lval(StringData* k, Variant*& ret, bool copy);
-  virtual ArrayData* lvalNew(Variant*& ret, bool copy);
+  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
+  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
+                            bool copy);
+  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-  virtual ArrayData* setRef(int64_t k, CVarRef v, bool copy);
-  virtual ArrayData* setRef(StringData* k, CVarRef v, bool copy);
-  virtual ArrayData* remove(int64_t k, bool copy);
-  virtual ArrayData* remove(const StringData* k, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, CVarRef v, bool copy);
+  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant*& ret,
+                               bool copy);
+  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant*& ret,
+                               bool copy);
+  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 
   virtual ArrayData* copy() const { return 0; }
 
@@ -110,14 +114,14 @@ public: // ArrayData implementation
 
   virtual ArrayData* prepend(CVarRef v, bool copy);
 
-  virtual ssize_t iter_begin() const;
-  virtual ssize_t iter_end() const;
-  virtual ssize_t iter_advance(ssize_t prev) const;
-  virtual ssize_t iter_rewind(ssize_t prev) const;
+  static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterEnd(const ArrayData*);
+  static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
+  static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
   virtual bool validFullPos(const FullPos & fp) const;
   virtual bool advanceFullPos(FullPos&);
-  virtual bool isVectorData() const;
+  static bool IsVectorData(const ArrayData*);
 
   virtual ArrayData* escalateForSort();
   virtual void ksort(int sort_flags, bool ascending);

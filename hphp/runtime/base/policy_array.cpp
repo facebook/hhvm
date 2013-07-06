@@ -227,18 +227,30 @@ inline const PolicyArray* PolicyArray::asPolicyArray(const ArrayData* ad) {
   return static_cast<const PolicyArray*>(ad);
 }
 
-const Variant& PolicyArray::getValueRef(ssize_t pos) const {
-  APILOG(this) << "(" << pos << ")";
-  assert(size_t(pos) < m_size);
-  return val(toPos(pos));
+const Variant& PolicyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "(" << pos << ")";
+  assert(size_t(pos) < a->m_size);
+  return a->val(toPos(pos));
 }
 
-bool PolicyArray::isVectorData() const {
-  APILOG(this) << "()";
-  for (ssize_t i = 0; i < m_size; ++i) {
-    if (Store::find(i, m_size) != toPos(i)) return false;
+bool PolicyArray::IsVectorData(const ArrayData* ad) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "()";
+  for (ssize_t i = 0; i < a->m_size; ++i) {
+    if (a->Store::find(i, a->m_size) != toPos(i)) return false;
   }
   return true;
+}
+
+bool PolicyArray::ExistsInt(const ArrayData* ad, int64_t k) {
+  auto a = asPolicyArray(ad);
+  return a->Store::find(k, a->m_size) < toPos(a->m_size);
+}
+
+bool PolicyArray::ExistsStr(const ArrayData* ad, const StringData* k) {
+  auto a = asPolicyArray(ad);
+  return a->Store::find(k, a->m_size) < toPos(a->m_size);
 }
 
 static_assert(ArrayData::invalid_index == size_t(-1), "ehm");
@@ -295,41 +307,53 @@ ArrayData *PolicyArray::lvalImpl(K k, Variant*& ret, bool copy) {
   return this;
 }
 
-ArrayData *PolicyArray::lvalNew(Variant *&ret, bool copy) {
-  if (copy) {
-    return PolicyArray::copy()->lvalNew(ret, false);
-  }
+ArrayData* PolicyArray::LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
+                                bool copy) {
+  return asPolicyArray(ad)->lvalImpl(k, ret, copy);
+}
+
+ArrayData* PolicyArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
+                                bool copy) {
+  return asPolicyArray(ad)->lvalImpl(k, ret, copy);
+}
+
+ArrayData *PolicyArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
+  auto a = asPolicyArray(ad);
+  if (copy) a = a->PolicyArray::copy();
 
   // Andrei: TODO - append() currently never fails, probably it
   // should.
-  auto oldSize = m_size;
-  append(uninit_null(), false);
-  assert(m_size == oldSize + 1);
-  if (UNLIKELY(oldSize == m_size)) {
+  auto oldSize = a->m_size;
+  a->append(uninit_null(), false);
+  assert(a->m_size == oldSize + 1);
+  if (UNLIKELY(oldSize == a->m_size)) {
     ret = &Variant::lvalBlackHole();
   } else {
-    assert(lastIndex(m_size) != PosType::invalid);
-    ret = &lval(lastIndex(m_size));
+    assert(a->lastIndex(a->m_size) != PosType::invalid);
+    ret = &a->lval(a->lastIndex(a->m_size));
   }
-
-  return this;
+  return a;
 }
 
-ArrayData *PolicyArray::createLvalPtr(StringData* k, Variant *&ret, bool copy) {
-  APILOG(this) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
-  return addLval(k, ret, copy);
+ArrayData *PolicyArray::CreateLvalPtr(ArrayData* ad, StringData* k,
+                                      Variant *&ret, bool copy) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
+  return a->addLval(k, ret, copy);
 }
 
-ArrayData *PolicyArray::getLvalPtr(StringData* k, Variant *&ret, bool copy) {
-  APILOG(this) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
+ArrayData *PolicyArray::GetLvalPtr(ArrayData* ad, StringData* k,
+                                   Variant *&ret, bool copy) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
   if (copy) {
-    return PolicyArray::copy()->getLvalPtr(k, ret, false);
+    return a->PolicyArray::copy()->getLvalPtr(k, ret, false);
   }
-  const auto pos = find(k, m_size);
+  const auto pos = a->find(k, a->m_size);
   ret = pos != PosType::invalid
-    ? &Store::lval(pos)
+    ? &a->Store::lval(pos)
     : nullptr;
-  return this;
+  return a;
 }
 
 template <class K>
@@ -381,6 +405,16 @@ ArrayData *PolicyArray::setRefImpl(K k, CVarRef v, bool copy) {
   return this;
 }
 
+ArrayData*
+PolicyArray::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  return asPolicyArray(ad)->setRefImpl(k, v, copy);
+}
+
+ArrayData*
+PolicyArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  return asPolicyArray(ad)->setRefImpl(k, v, copy);
+}
+
 template <class K>
 ArrayData *PolicyArray::addImpl(K k, const Variant& v, bool copy) {
   APILOG(this) << "(" << keystr(k) << ", " << valstr(v) << ", " << copy << ");";
@@ -398,8 +432,18 @@ ArrayData *PolicyArray::addImpl(K k, const Variant& v, bool copy) {
   return this;
 }
 
+ArrayData*
+PolicyArray::AddInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  return asPolicyArray(ad)->addImpl(k, v, copy);
+}
+
+ArrayData*
+PolicyArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  return asPolicyArray(ad)->addImpl(k, v, copy);
+}
+
 template <class K>
-PolicyArray *PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
+ArrayData* PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
   APILOG(this) << "(" << k << ", " << ret << ", " << copy << ")";
   if (copy) {
     return PolicyArray::copy()->addLval(k, ret, false);
@@ -411,6 +455,16 @@ PolicyArray *PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
   ret = appendNoGrow(k, Variant::NullInit());
   MYLOG << (void*)this << "->lval:" << "added";
   return this;
+}
+
+ArrayData* PolicyArray::AddLvalInt(ArrayData* ad, int64_t k,
+                                   Variant *&ret, bool copy) {
+  return asPolicyArray(ad)->addLvalImpl(k, ret, copy);
+}
+
+ArrayData* PolicyArray::AddLvalStr(ArrayData* ad, StringData* k,
+                                   Variant *&ret, bool copy) {
+  return asPolicyArray(ad)->addLvalImpl(k, ret, copy);
 }
 
 template <class K>
@@ -451,26 +505,40 @@ ArrayData *PolicyArray::removeImpl(K k, bool copy) {
   return this;
 }
 
-ssize_t PolicyArray::iter_begin() const {
-  APILOG(this) << "()";
-  return m_size ? toInt<int64_t>(firstIndex(m_size)) : invalid_index;
+ArrayData*
+PolicyArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+  return asPolicyArray(ad)->removeImpl(k, copy);
 }
 
-ssize_t PolicyArray::iter_end() const {
-  APILOG(this) << "()";
-  return ssize_t(lastIndex(m_size));
+ArrayData*
+PolicyArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
+  return asPolicyArray(ad)->removeImpl(k, copy);
 }
 
-ssize_t PolicyArray::iter_advance(ssize_t prev) const {
-  APILOG(this) << "(" << prev << ")";
-  auto const result = toInt<int64_t>(nextIndex(toPos(prev), m_size));
+ssize_t PolicyArray::IterBegin(const ArrayData* ad) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "()";
+  return a->m_size ? toInt<int64_t>(a->firstIndex(a->m_size)) : invalid_index;
+}
+
+ssize_t PolicyArray::IterEnd(const ArrayData* ad) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "()";
+  return ssize_t(a->lastIndex(a->m_size));
+}
+
+ssize_t PolicyArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "(" << prev << ")";
+  auto const result = toInt<int64_t>(a->nextIndex(toPos(prev), a->m_size));
   MYLOG << "returning " << result;
   return result;
 }
 
-ssize_t PolicyArray::iter_rewind(ssize_t prev) const {
-  APILOG(this) << "(" << prev << ")";
-  return toInt<int64_t>(prevIndex(toPos(prev), m_size));
+ssize_t PolicyArray::IterRewind(const ArrayData* ad, ssize_t prev) {
+  auto a = asPolicyArray(ad);
+  APILOG(a) << "(" << prev << ")";
+  return toInt<int64_t>(a->prevIndex(toPos(prev), a->m_size));
 }
 
 bool PolicyArray::validFullPos(const FullPos& fp) const {
@@ -659,7 +727,7 @@ ArrayData *PolicyArray::merge(const ArrayData *elems, bool copy) {
       StringData *s = key.getStringData();
       Variant *p;
       // Andrei TODO: make sure this is the right semantics
-      lval(s, p, false);
+      LvalStr(this, s, p, false);
       p->setWithRef(value);
     }
   }

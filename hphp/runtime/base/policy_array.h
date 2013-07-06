@@ -332,34 +332,21 @@ public:
   virtual ~PolicyArray() FOLLY_OVERRIDE;
 
   /**
-   * Number of elements this array has.
-   */
-  virtual ssize_t vsize() const FOLLY_OVERRIDE {
-    // vsize() called, but m_size should never be -1 in PolicyArray
-    assert(false);
-    return m_size;
-  }
-
-  /**
    * getValueRef() gets a reference to value at position "pos".
    */
-  virtual CVarRef getValueRef(ssize_t pos) const FOLLY_OVERRIDE;
+  static CVarRef GetValueRef(const ArrayData*, ssize_t pos);
 
   /*
    * Returns whether or not this array contains "vector-like" data.
    * I.e. all the keys are contiguous increasing integers.
    */
-  virtual bool isVectorData() const FOLLY_OVERRIDE;
+  static bool IsVectorData(const ArrayData*);
 
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64_t k) const FOLLY_OVERRIDE {
-    return Store::find(k, m_size) < toPos(m_size);
-  }
-  virtual bool exists(const StringData* k) const FOLLY_OVERRIDE {
-    return Store::find(k, m_size) < toPos(m_size);
-  }
+  static bool ExistsInt(const ArrayData*, int64_t k);
+  static bool ExistsStr(const ArrayData*, const StringData* k);
 
 private:
   template <class K> TypedValue* nvGetImpl(K k) const;
@@ -384,16 +371,10 @@ public:
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(int64_t k,
-                          Variant *&ret,
-                          bool copy) FOLLY_OVERRIDE {
-    return lvalImpl(k, ret, copy);
-  }
-  virtual ArrayData *lval(StringData* k,
-                          Variant*& ret,
-                          bool copy) FOLLY_OVERRIDE {
-    return lvalImpl(k, ret, copy);
-  }
+  static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
+                            bool copy);
+  static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
+                            bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -402,17 +383,17 @@ public:
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see Variant::lvalBlackHole() for details).
    */
-  virtual ArrayData *lvalNew(Variant *&ret, bool copy) FOLLY_OVERRIDE;
+  static ArrayData *LvalNew(ArrayData* ad, Variant *&ret, bool copy);
 
   /**
    * Helper functions used for getting a reference to elements of
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE;
-  virtual ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE;
+  static ArrayData *CreateLvalPtr(ArrayData*, StringData* k, Variant *&ret,
+                                  bool copy);
+  static ArrayData *GetLvalPtr(ArrayData*, StringData* k, Variant *&ret,
+                               bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -432,12 +413,9 @@ private:
   ArrayData *setRefImpl(K k, CVarRef v, bool copy);
 
 public:
-  virtual ArrayData *setRef(int64_t k, CVarRef v, bool copy) FOLLY_OVERRIDE {
-    return setRefImpl(k, v, copy);
-  }
-  virtual ArrayData *setRef(StringData* k, CVarRef v, bool cpy) FOLLY_OVERRIDE {
-    return setRefImpl(k, v, cpy);
-  }
+  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, CVarRef v,
+                              bool cpy);
 
   /**
    * The same as set(), but with the precondition that the key does
@@ -446,15 +424,11 @@ public:
    */
 private:
   template <class K>
-  ArrayData *addImpl(K k, CVarRef v, bool copy);
+  ArrayData* addImpl(K k, CVarRef v, bool copy);
 
 public:
-  virtual ArrayData *add(int64_t k, CVarRef v, bool copy) FOLLY_OVERRIDE {
-    return addImpl(k, v, copy);
-  }
-  virtual ArrayData *add(StringData* k, CVarRef v, bool copy) FOLLY_OVERRIDE {
-    return addImpl(k, v, copy);
-  }
+  static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
   /*
    * Same semantics as lval(), except with the precondition that the
@@ -462,17 +436,13 @@ public:
    */
 private:
   template <class K>
-  PolicyArray* addLvalImpl(K k, Variant*& ret, bool copy);
+  ArrayData* addLvalImpl(K k, Variant*& ret, bool copy);
 
 public:
-  virtual PolicyArray *addLval(int64_t k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE {
-    return addLvalImpl(k, ret, copy);
-  }
-  virtual PolicyArray *addLval(StringData* k, Variant *&ret, bool copy)
-    FOLLY_OVERRIDE {
-    return addLvalImpl(k, ret, copy);
-  }
+  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant *&ret,
+                               bool copy);
+  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant *&ret,
+                               bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
@@ -483,17 +453,13 @@ private:
   template <class K> ArrayData *removeImpl(K k, bool copy);
 
 public:
-  virtual ArrayData *remove(int64_t k, bool copy) FOLLY_OVERRIDE {
-    return removeImpl(k, copy);
-  }
-  virtual ArrayData *remove(const StringData* k, bool copy) FOLLY_OVERRIDE {
-    return removeImpl(k, copy);
-  }
+  static ArrayData *RemoveInt(ArrayData*, int64_t k, bool copy);
+  static ArrayData *RemoveStr(ArrayData*, const StringData* k, bool copy);
 
-  virtual ssize_t iter_begin() const FOLLY_OVERRIDE;
-  virtual ssize_t iter_end() const FOLLY_OVERRIDE;
-  virtual ssize_t iter_advance(ssize_t prev) const FOLLY_OVERRIDE;
-  virtual ssize_t iter_rewind(ssize_t prev) const FOLLY_OVERRIDE;
+  static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterEnd(const ArrayData*);
+  static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
+  static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
   /**
    * Mutable iteration APIs

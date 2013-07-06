@@ -103,6 +103,20 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
   }
 }
 
+inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
+  assert(ad->isHphpArray());
+  auto a = static_cast<HphpArray*>(ad);
+  assert(a->checkInvariants());
+  return a;
+}
+
+inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
+  assert(ad->isHphpArray());
+  auto a = static_cast<const HphpArray*>(ad);
+  assert(a->checkInvariants());
+  return a;
+}
+
 inline HphpArray* HphpArray::asVector(ArrayData* ad) {
   assert(ad->kind() == kVectorKind);
   assert(dynamic_cast<HphpArray*>(ad));
@@ -119,17 +133,15 @@ inline const HphpArray* HphpArray::asVector(const ArrayData* ad) {
   return a;
 }
 
-inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
+inline HphpArray* HphpArray::asGeneric(ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
-  assert(dynamic_cast<HphpArray*>(ad));
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
+inline const HphpArray* HphpArray::asGeneric(const ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
-  assert(dynamic_cast<const HphpArray*>(ad));
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;

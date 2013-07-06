@@ -244,7 +244,7 @@ void HphpArray::ReleaseVec(ArrayData* ad) {
 
 HOT_FUNC_VM
 void HphpArray::Release(ArrayData* ad) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   a->destroy();
   if (UNLIKELY(a->strongIterators() != nullptr)) a->freeStrongIterators();
   HphpArray::AllocatorType::getNoCheck()->dealloc(a);
@@ -345,12 +345,6 @@ bool HphpArray::checkInvariants() const {
   return true;
 }
 
-ssize_t HphpArray::vsize() const {
-  assert(false && "vsize() called, but m_size should "
-                  "never be -1 in HphpArray");
-  return m_size;
-}
-
 //=============================================================================
 // Iteration.
 
@@ -365,26 +359,26 @@ inline ssize_t HphpArray::prevElm(Elm* elms, ssize_t ei) const {
   return (ssize_t)ElmIndEmpty;
 }
 
-ssize_t HphpArray::iter_begin() const {
-  assert(checkInvariants());
-  return nextElm(m_data, ElmIndEmpty);
+ssize_t HphpArray::IterBegin(const ArrayData* ad) {
+  auto a = asHphpArray(ad);
+  return a->nextElm(a->m_data, ElmIndEmpty);
 }
 
-ssize_t HphpArray::iter_end() const {
-  assert(checkInvariants());
-  return prevElm(m_data, m_used);
+ssize_t HphpArray::IterEnd(const ArrayData* ad) {
+  auto a = asHphpArray(ad);
+  return a->prevElm(a->m_data, a->m_used);
 }
 
-ssize_t HphpArray::iter_advance(ssize_t pos) const {
-  assert(checkInvariants());
-  assert(ArrayData::invalid_index == -1);
+ssize_t HphpArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
+  auto a = asHphpArray(ad);
   // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead
   // of a signed comparison.
-  if (size_t(++pos) < m_used && !isTombstone(m_data[pos].data.m_type)) {
+  if (size_t(++pos) < a->m_used && !isTombstone(a->m_data[pos].data.m_type)) {
     return pos;
   }
-  return iter_advance_helper(pos);
+  return a->iter_advance_helper(pos);
+  static_assert(invalid_index == -1, "");
 }
 
 // caller has already incremented pos but encountered a tombstone
@@ -398,40 +392,43 @@ ssize_t HphpArray::iter_advance_helper(ssize_t next_pos) const {
       return next_pos;
     }
   }
-  return ArrayData::invalid_index;
+  return invalid_index;
 }
 
-ssize_t HphpArray::iter_rewind(ssize_t pos) const {
-  assert(checkInvariants());
-  if (pos == ArrayData::invalid_index) {
-    return ArrayData::invalid_index;
-  }
-  return prevElm(m_data, pos);
+ssize_t HphpArray::IterRewind(const ArrayData* ad, ssize_t pos) {
+  if (pos == invalid_index) return invalid_index;
+  auto a = asHphpArray(ad);
+  return a->prevElm(a->m_data, pos);
 }
 
-CVarRef HphpArray::getValueRef(ssize_t pos) const {
-  assert(checkInvariants());
+CVarRef HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  auto a = asHphpArray(ad);
+  assert(a->checkInvariants());
   assert(pos != ArrayData::invalid_index);
-  Elm* e = &m_data[pos];
+  Elm* e = &a->m_data[pos];
   assert(!isTombstone(e->data.m_type));
   return tvAsCVarRef(&e->data);
 }
 
-bool HphpArray::isVectorData() const {
-  assert(checkInvariants());
-  if (m_size == 0 || isVector()) {
+bool HphpArray::IsVectorDataVec(const ArrayData*) {
+  return true;
+}
+
+bool HphpArray::IsVectorData(const ArrayData* ad) {
+  auto a = asGeneric(ad);
+  if (a->m_size == 0) {
     // any 0-length array is "vector-like" for the sake of this
     // function, even if m_kind != kVector.
     return true;
   }
-  Elm* elms = m_data;
+  auto const elms = a->m_data;
   int64_t i = 0;
-  for (uint32_t pos = 0, limit = m_used; pos < limit; ++pos) {
-    Elm* e = &elms[pos];
-    if (isTombstone(e->data.m_type)) {
+  for (uint32_t pos = 0, limit = a->m_used; pos < limit; ++pos) {
+    auto const& e = elms[pos];
+    if (isTombstone(e.data.m_type)) {
       continue;
     }
-    if (e->hasStrKey() || e->ikey != i) {
+    if (e.hasStrKey() || e.ikey != i) {
       return false;
     }
     ++i;
@@ -606,16 +603,24 @@ HphpArray::findForNewInsertLoop(size_t tableMask, size_t h0) const {
   }
 }
 
-bool HphpArray::exists(int64_t k) const {
-  assert(checkInvariants());
-  if (isVector()) return size_t(k) < m_size;
-  return find(k) != ElmIndEmpty;
+bool HphpArray::ExistsIntVec(const ArrayData* ad, int64_t k) {
+  auto a = asVector(ad);
+  return size_t(k) < a->m_size;
 }
 
-bool HphpArray::exists(const StringData* k) const {
-  assert(checkInvariants());
-  if (isVector()) return false;
-  return find(k, k->hash()) != ElmIndEmpty;
+bool HphpArray::ExistsInt(const ArrayData* ad, int64_t k) {
+  auto a = asGeneric(ad);
+  return a->find(k) != ElmIndEmpty;
+}
+
+bool HphpArray::ExistsStrVec(const ArrayData* ad, const StringData* k) {
+  assert(asVector(ad));
+  return false;
+}
+
+bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
+  auto a = asGeneric(ad);
+  return a->find(k, k->hash()) != ElmIndEmpty;
 }
 
 //=============================================================================
@@ -1069,19 +1074,7 @@ ArrayData* HphpArray::update(StringData* key, CVarRef data) {
 }
 
 ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
-  if (isVector()) {
-    if (size_t(ki) < m_size) {
-      tvAsVariant(&m_data[ki].data).assignRefHelper(data);
-      return this;
-    }
-    if (size_t(ki) == m_size) {
-      auto& tv = allocNextElm(ki);
-      tvAsUninitializedVariant(&tv).constructRefHelper(data);
-      return this;
-    }
-    vectorToGeneric();
-    // todo t2606310: key can't exist.  use add/findForNewInsert
-  }
+  assert(!isVector());
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1096,10 +1089,7 @@ ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
 }
 
 ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
-  if (isVector()) {
-    vectorToGeneric();
-    // todo t2606310: key can't exist. use add/findForNewInsert
-  }
+  assert(!isVector());
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
@@ -1111,44 +1101,90 @@ ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
   return this;
 }
 
-ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  return (!copy ? this : copyImpl())->addLvalImpl(k, &ret);
+// return true if Elm contains a Reference that won't be flattened
+// by a copy, or an object.
+static inline bool isContainer(const TypedValue& tv) {
+  auto& v = tvAsCVarRef(&tv);
+  return v.isReferenced() || v.isObject();
 }
 
-ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  return (!copy ? this : copyImpl())->addLvalImpl(key, key->hash(), &ret);
+ArrayData* HphpArray::LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
+                                 bool copy) {
+  auto a = asVector(ad);
+  return (!copy ? a : a->copyImpl())->addLvalImpl(k, &ret);
 }
 
-ArrayData *HphpArray::createLvalPtr(StringData* key, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
+ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
+                              bool copy) {
+  auto a = asGeneric(ad);
+  return (!copy ? a : a->copyImpl())->addLvalImpl(k, &ret);
+}
+
+ArrayData* HphpArray::LvalStrVec(ArrayData* ad, StringData* key, Variant*& ret,
+                                 bool copy) {
+  auto a = asVector(ad);
+  return (!copy ? a : a->copyImpl())->addLvalImpl(key, key->hash(), &ret);
+}
+
+ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
+                              bool copy) {
+  auto a = asGeneric(ad);
+  return (!copy ? a : a->copyImpl())->addLvalImpl(key, key->hash(), &ret);
+}
+
+ArrayData *HphpArray::CreateLvalPtrVec(ArrayData* ad, StringData* key,
+                                       Variant*& ret, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  return a->vectorToGeneric()->addLvalImpl(key, key->hash(), &ret);
+  // todo: we know the key can't exist; use specialized addLvalImpl
+}
+
+ArrayData *HphpArray::CreateLvalPtr(ArrayData* ad, StringData* key,
+                                    Variant*& ret, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->addLvalImpl(key, key->hash(), &ret);
 }
 
-ArrayData *HphpArray::getLvalPtr(StringData* key, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  auto pos = a->find(key, key->hash());
-  if (pos != ElmIndEmpty) {
-    Elm* e = &a->m_data[pos];
-    ret = &tvAsVariant(&e->data);
-  } else {
-    ret = nullptr;
-  }
+ArrayData *HphpArray::GetLvalPtrVec(ArrayData* ad, StringData* key,
+                                    Variant*& ret, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  // todo: we didn't have to copy since we didn't mutate.  Or, should
+  // we have just escalate to generic anyway?  and, why isn't this
+  // method const?
+  ret = nullptr;
   return a;
 }
 
-ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  TypedValue* tv;
-  ArrayData* a = nvNew(tv, copy);
-  if (tv == nullptr) {
-    ret = &(Variant::lvalBlackHole());
-  } else {
-    ret = &tvAsVariant(tv);
+ArrayData *HphpArray::GetLvalPtr(ArrayData* ad, StringData* key,
+                                 Variant*& ret, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
+  auto pos = a->find(key, key->hash());
+  ret = pos != ElmIndEmpty ? &tvAsVariant(&a->m_data[pos].data) :
+        nullptr;
+  return a;
+}
+
+ArrayData* HphpArray::LvalNewVec(ArrayData* ad, Variant*& ret, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  auto& tv = a->allocNextElm(a->m_size);
+  tvWriteUninit(&tv);
+  ret = &tvAsVariant(&tv);
+  return a;
+}
+
+ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
+  if (UNLIKELY(!a->nextInsert(uninit_null()))) {
+    ret = &Variant::lvalBlackHole();
+    return a;
   }
+  ret = &tvAsVariant(&a->m_data[a->m_used - 1].data);
   return a;
 }
 
@@ -1170,7 +1206,7 @@ HphpArray::SetIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
   return a->update(k, v);
 }
@@ -1185,58 +1221,127 @@ HphpArray::SetStrVec(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 
 ArrayData*
 HphpArray::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
   return a->update(k, v);
 }
 
-ArrayData* HphpArray::setRef(int64_t k, CVarRef v, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  return a->updateRef(k, v);
-}
-
-ArrayData* HphpArray::setRef(StringData* k, CVarRef v, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  return a->updateRef(k, v);
-}
-
-ArrayData* HphpArray::add(int64_t k, CVarRef v, bool copy) {
-  assert(checkInvariants());
-  assert(!exists(k));
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) {
-    if (size_t(k) == a->m_size) {
-      auto& tv = a->allocNextElm(k);
-      elemConstruct((TypedValue*)&v, &tv);
-      return a;
-    }
-    a->vectorToGeneric();
+ArrayData*
+HphpArray::SetRefIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  if (size_t(k) < a->m_size) {
+    tvAsVariant(&a->m_data[k].data).assignRefHelper(v);
+    return a;
   }
+  if (size_t(k) == a->m_size) {
+    auto& tv = a->allocNextElm(k);
+    tvAsUninitializedVariant(&tv).constructRefHelper(v);
+    return a;
+  }
+  // todo t2606310: key can't exist.  use add/findForNewInsert
+  return a->vectorToGeneric()->updateRef(k, v);
+}
+
+ArrayData*
+HphpArray::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
+  return a->updateRef(k, v);
+}
+
+ArrayData*
+HphpArray::SetRefStrVec(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  return a->vectorToGeneric()->updateRef(k, v);
+}
+
+ArrayData*
+HphpArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyVec();
+  // todo t2606310: key can't exist.  use add/findForNewInsert
+  return a->updateRef(k, v);
+}
+
+ArrayData*
+HphpArray::AddIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  if (size_t(k) == a->m_size) {
+    auto& tv = a->allocNextElm(k);
+    elemConstruct((TypedValue*)&v, &tv);
+    return a;
+  }
+  return a->vectorToGeneric()->addVal(k, v);
+}
+
+ArrayData*
+HphpArray::AddInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->addVal(k, v);
 }
 
-ArrayData* HphpArray::add(StringData* k, CVarRef v, bool copy) {
-  assert(checkInvariants());
-  assert(!exists(k));
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) a->vectorToGeneric();
+ArrayData*
+HphpArray::AddStrVec(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  return a->vectorToGeneric()->addVal(k, v);
+}
+
+ArrayData*
+HphpArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->addVal(k, v);
 }
 
-ArrayData* HphpArray::addLval(int64_t k, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  assert(!exists(k));
-  HphpArray* a = !copy ? this : copyImpl();
+ArrayData*
+HphpArray::AddLvalIntVec(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  if (size_t(k) < a->m_size) {
+    ret = &tvAsVariant(&a->m_data[k].data);
+    return a;
+  }
+  if (size_t(k) == a->m_size) {
+    auto& tv = a->allocNextElm(k);
+    tvWriteNull(&tv);
+    ret = &(tvAsVariant(&tv));
+    return a;
+  }
+  return a->vectorToGeneric()->addLvalImpl(k, &ret);
+}
+
+ArrayData*
+HphpArray::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->addLvalImpl(k, &ret);
 }
 
-ArrayData* HphpArray::addLval(StringData* k, Variant*& ret, bool copy) {
-  assert(checkInvariants());
-  assert(!exists(k));
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) a->vectorToGeneric();
+ArrayData*
+HphpArray::AddLvalStrVec(ArrayData* ad, StringData* k, Variant*& ret,
+                         bool copy) {
+  assert(!ad->exists(k));
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  return a->vectorToGeneric()->addLvalImpl(k, k->hash(), &ret);
+}
+
+ArrayData*
+HphpArray::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
+  assert(!ad->exists(k));
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyVec();
   return a->addLvalImpl(k, k->hash(), &ret);
 }
 
@@ -1319,20 +1424,34 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   return this;
 }
 
-ArrayData* HphpArray::remove(int64_t k, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) {
-    // todo t2606310: what is probability of (k == size-1)
+ArrayData* HphpArray::RemoveIntVec(ArrayData* ad, int64_t k, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyImpl();
+  // todo t2606310: what is probability of (k == size-1)
+  if (size_t(k) < a->m_size) {
     a->vectorToGeneric();
+    return a->erase(a->findForInsert(k));
   }
+  return a; // key didn't exist, so we're still vector
+}
+
+ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyImpl();
   return a->erase(a->findForInsert(k));
 }
 
-ArrayData* HphpArray::remove(const StringData* key, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) return a; // since key cannot exist
+ArrayData*
+HphpArray::RemoveStrVec(ArrayData* ad, const StringData* key, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyImpl();
+  return a;
+}
+
+ArrayData*
+HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyImpl();
   return a->erase(a->findForInsert(key, key->hash()));
 }
 
@@ -1357,7 +1476,7 @@ TypedValue* HphpArray::NvGetIntVec(const ArrayData* ad, int64_t ki) {
 }
 
 TypedValue* HphpArray::NvGetInt(const ArrayData* ad, int64_t ki) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   auto i = a->find(ki);
   return LIKELY(i != ElmIndEmpty) ? &a->m_data[i].data : nullptr;
 }
@@ -1368,30 +1487,12 @@ TypedValue* HphpArray::NvGetStrVec(const ArrayData* ad, const StringData* k) {
 }
 
 TypedValue* HphpArray::NvGetStr(const ArrayData* ad, const StringData* k) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   auto i = a->find(k, k->hash());
   if (LIKELY(i != ElmIndEmpty)) {
     return &a->m_data[i].data;
   }
   return nullptr;
-}
-
-ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
-  if (a->isVector()) {
-    auto& tv = a->allocNextElm(a->m_size);
-    tv.m_type = KindOfUninit;
-    ret = &tv;
-    return a;
-  }
-  if (UNLIKELY(!a->nextInsert(uninit_null()))) {
-    ret = nullptr;
-    return a;
-  }
-  assert(a->m_used > 0);
-  ret = &a->m_data[a->m_used - 1].data;
-  return a;
 }
 
 // nvGetKey does not touch out->_count, so can be used
@@ -1405,7 +1506,7 @@ void HphpArray::NvGetKeyVec(const ArrayData* ad, TypedValue* out, ssize_t pos) {
 }
 
 void HphpArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   assert(pos != ArrayData::invalid_index);
   assert(!isTombstone(a->m_data[pos].data.m_type));
   getElmKey(a->m_data[pos], out);
@@ -1444,7 +1545,7 @@ ArrayData* HphpArray::AppendVec(ArrayData* ad, CVarRef v, bool copy) {
 }
 
 ArrayData* HphpArray::Append(ArrayData* ad, CVarRef v, bool copy) {
-  auto a = asHphpArray(ad);
+  auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
   a->nextInsert(v);
   return a;
@@ -1557,7 +1658,7 @@ ArrayData* HphpArray::pop(Variant& value) {
   assert(checkInvariants());
   HphpArray* a = getCount() <= 1 ? this : copyImpl();
   Elm* elms = a->m_data;
-  ElmInd pos = a->HphpArray::iter_end();
+  ElmInd pos = IterEnd(a);
   if (validElmInd(pos)) {
     Elm* e = &elms[pos];
     assert(!isTombstone(e->data.m_type));

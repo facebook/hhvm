@@ -193,6 +193,100 @@ inline ArrayData* ArrayData::set(StringData* k, CVarRef v, bool copy) {
   return g_array_funcs.setStr[m_kind](this, k, v, copy);
 }
 
+inline size_t ArrayData::vsize() const {
+  return g_array_funcs.vsize[m_kind](this);
+}
+
+inline CVarRef ArrayData::getValueRef(ssize_t pos) const {
+  return g_array_funcs.getValueRef[m_kind](this, pos);
+}
+
+inline bool ArrayData::noCopyOnWrite() const {
+  return g_array_funcs.noCopyOnWrite[m_kind];
+}
+
+inline bool ArrayData::isVectorData() const {
+  return g_array_funcs.isVectorData[m_kind](this);
+}
+
+inline bool ArrayData::exists(int64_t k) const {
+  return g_array_funcs.existsInt[m_kind](this, k);
+}
+
+inline bool ArrayData::exists(const StringData* k) const {
+  return g_array_funcs.existsStr[m_kind](this, k);
+}
+
+inline ArrayData* ArrayData::lval(int64_t k, Variant*& ret, bool copy) {
+  return g_array_funcs.lvalInt[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::lval(StringData* k, Variant*& ret, bool copy) {
+  return g_array_funcs.lvalStr[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
+  return g_array_funcs.lvalNew[m_kind](this, ret, copy);
+}
+
+inline ArrayData* ArrayData::createLvalPtr(StringData* k, Variant*& ret,
+                                           bool copy) {
+  return g_array_funcs.createLvalPtr[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::getLvalPtr(StringData* k, Variant*& ret,
+                                        bool copy) {
+  return g_array_funcs.getLvalPtr[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::setRef(int64_t k, CVarRef v, bool copy) {
+  return g_array_funcs.setRefInt[m_kind](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::setRef(StringData* k, CVarRef v, bool copy) {
+  return g_array_funcs.setRefStr[m_kind](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::add(int64_t k, CVarRef v, bool copy) {
+  return g_array_funcs.addInt[m_kind](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::add(StringData* k, CVarRef v, bool copy) {
+  return g_array_funcs.addStr[m_kind](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::addLval(int64_t k, Variant *&ret, bool copy) {
+  return g_array_funcs.addLvalInt[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::addLval(StringData* k, Variant *&ret, bool copy) {
+  return g_array_funcs.addLvalStr[m_kind](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::remove(int64_t k, bool copy) {
+  return g_array_funcs.removeInt[m_kind](this, k, copy);
+}
+
+inline ArrayData* ArrayData::remove(const StringData* k, bool copy) {
+  return g_array_funcs.removeStr[m_kind](this, k, copy);
+}
+
+inline ssize_t ArrayData::iter_begin() const {
+  return g_array_funcs.iterBegin[m_kind](this);
+}
+
+inline ssize_t ArrayData::iter_end() const {
+  return g_array_funcs.iterEnd[m_kind](this);
+}
+
+inline ssize_t ArrayData::iter_advance(ssize_t pos) const {
+  return g_array_funcs.iterAdvance[m_kind](this, pos);
+}
+
+inline ssize_t ArrayData::iter_rewind(ssize_t pos) const {
+  return g_array_funcs.iterRewind[m_kind](this, pos);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -56,28 +56,34 @@ public:
   using ArrayData::addLval;
   using ArrayData::remove;
 
-  ssize_t vsize() const;
-
   SharedVariant* getValueImpl(ssize_t pos) const {
     return isVector() ? m_vec->getValue(pos) : m_map->getValue(pos);
   }
 
   CVarRef getValueRef(ssize_t pos) const;
+  static CVarRef GetValueRef(const ArrayData* ad, ssize_t pos);
 
-  bool exists(int64_t k) const;
-  bool exists(const StringData* k) const;
+  static bool ExistsInt(const ArrayData* ad, int64_t k);
+  static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
-  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy);
-  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy);
-  ArrayData *lvalNew(Variant *&ret, bool copy);
+  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant *&ret,
+                            bool copy);
+  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant *&ret,
+                            bool copy);
+  static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
 
-  static ArrayData *SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
-  static ArrayData *SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-  ArrayData *setRef(int64_t k, CVarRef v, bool copy);
-  ArrayData *setRef(StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
-  ArrayData *remove(int64_t k, bool copy);
-  ArrayData *remove(const StringData* k, bool copy);
+  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant *&ret,
+                               bool copy);
+  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant *&ret,
+                               bool copy);
+
+  static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
+  static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
 
   ArrayData *copy() const;
   /**
@@ -98,12 +104,12 @@ public:
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
-  bool isVectorData() const;
+  static bool IsVectorData(const ArrayData* ad);
 
-  ssize_t iter_begin() const;
-  ssize_t iter_end() const;
-  ssize_t iter_advance(ssize_t prev) const;
-  ssize_t iter_rewind(ssize_t prev) const;
+  static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterEnd(const ArrayData*);
+  static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
+  static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
   bool validFullPos(const FullPos& fp) const;
   bool advanceFullPos(FullPos& fp);

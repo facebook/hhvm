@@ -45,6 +45,10 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   return tvAsCVarRef(tv);
 }
 
+CVarRef SharedMap::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  return asSharedMap(ad)->getValueRef(pos);
+}
+
 HOT_FUNC
 SharedMap::~SharedMap() {
   if (m_localCache) {
@@ -86,22 +90,24 @@ ssize_t SharedMap::getIndex(int64_t k) const {
   return m_map->indexOf(k);
 }
 
-bool SharedMap::isVectorData() const {
-  if (isVector()) return true;
-  const auto n = size();
+bool SharedMap::IsVectorData(const ArrayData* ad) {
+  auto a = asSharedMap(ad);
+  if (a->isVector()) return true;
+  const auto n = a->size();
   for (ssize_t i = 0; i < n; i++) {
-    if (m_map->indexOf(i) != i) return false;
+    if (a->m_map->indexOf(i) != i) return false;
   }
   return true;
 }
 
-bool SharedMap::exists(const StringData* k) const {
-  if (isVector()) return false;
-  return m_map->indexOf(k) != -1;
+bool SharedMap::ExistsStr(const ArrayData* ad, const StringData* k) {
+  auto a = asSharedMap(ad);
+  if (a->isVector()) return false;
+  return a->m_map->indexOf(k) != -1;
 }
 
-bool SharedMap::exists(int64_t k) const {
-  return getIndex(k) != -1;
+bool SharedMap::ExistsInt(const ArrayData* ad, int64_t k) {
+  return asSharedMap(ad)->getIndex(k) != -1;
 }
 
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
@@ -110,18 +116,20 @@ inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   return a2;
 }
 
-ArrayData *SharedMap::lval(int64_t k, Variant *&ret, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
+                              bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
-ArrayData *SharedMap::lval(StringData* k, Variant *&ret, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::LvalStr(ArrayData* ad, StringData* k, Variant *&ret,
+                              bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
-ArrayData *SharedMap::lvalNew(Variant *&ret, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->lvalNew(ret, false));
 }
 
@@ -137,23 +145,37 @@ SharedMap::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
-ArrayData *SharedMap::setRef(int64_t k, CVarRef v, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData*
+SharedMap::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
-ArrayData *SharedMap::setRef(StringData* k, CVarRef v, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData*
+SharedMap::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
-ArrayData *SharedMap::remove(int64_t k, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::AddLvalInt(ArrayData* ad, int64_t k, Variant *&ret,
+                                 bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->addLval(k, ret, false));
+}
+
+ArrayData *SharedMap::AddLvalStr(ArrayData* ad, StringData* k, Variant *&ret,
+                                 bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->addLval(k, ret, false));
+}
+
+ArrayData *SharedMap::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->remove(k, false));
 }
 
-ArrayData *SharedMap::remove(const StringData* k, bool copy) {
-  ArrayData *escalated = SharedMap::escalate();
+ArrayData *SharedMap::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
+  ArrayData *escalated = asSharedMap(ad)->SharedMap::escalate();
   return releaseIfCopied(escalated, escalated->remove(k, false));
 }
 
@@ -233,28 +255,27 @@ ArrayData* SharedMap::escalateForSort() {
   return ret;
 }
 
-ssize_t SharedMap::vsize() const {
-  assert(false); // should never be called since we set size already.
-  return m_size;
+ssize_t SharedMap::IterBegin(const ArrayData* ad) {
+  auto a = asSharedMap(ad);
+  return a->m_size > 0 ? 0 : invalid_index;
 }
 
-ssize_t SharedMap::iter_begin() const {
-  return !empty() ? 0 : invalid_index;
-}
-
-ssize_t SharedMap::iter_end() const {
-  auto n = size();
+ssize_t SharedMap::IterEnd(const ArrayData* ad) {
+  auto a = asSharedMap(ad);
+  auto n = a->m_size;
   return n > 0 ? ssize_t(n - 1) : invalid_index;
 }
 
-ssize_t SharedMap::iter_advance(ssize_t prev) const {
-  assert(prev >= 0 && prev < size());
+ssize_t SharedMap::IterAdvance(const ArrayData* ad, ssize_t prev) {
+  auto a = asSharedMap(ad);
+  assert(prev >= 0 && prev < a->m_size);
   ssize_t next = prev + 1;
-  return next < size() ? next : invalid_index;
+  return next < a->m_size ? next : invalid_index;
 }
 
-ssize_t SharedMap::iter_rewind(ssize_t prev) const {
-  assert(prev >= 0 && prev < size());
+ssize_t SharedMap::IterRewind(const ArrayData* ad, ssize_t prev) {
+  auto a = asSharedMap(ad);
+  assert(prev >= 0 && prev < a->m_size);
   ssize_t next = prev - 1;
   return next >= 0 ? next : invalid_index;
 }

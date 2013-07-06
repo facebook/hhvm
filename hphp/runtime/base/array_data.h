@@ -144,25 +144,32 @@ public:
   /**
    * Number of elements this array has.
    */
-  ssize_t size() const {
+  size_t size() const {
     if (UNLIKELY((int)m_size) < 0) return vsize();
+    return m_size;
+  }
+
+  // unlike ArrayData::size(), this functions doesn't delegate
+  // to the virtual Vsize() function, so its more efficient to
+  // use this when you know you don't have a NameValueTableWrapper.
+  size_t getSize() const {
     return m_size;
   }
 
   /**
    * Number of elements this array has.
    */
-  virtual ssize_t vsize() const = 0;
+  size_t vsize() const;
 
   /**
    * getValueRef() gets a reference to value at position "pos".
    */
-  virtual CVarRef getValueRef(ssize_t pos) const = 0;
+  CVarRef getValueRef(ssize_t pos) const;
 
   /*
    * Return true for array types that don't have COW semantics.
    */
-  virtual bool noCopyOnWrite() const { return false; }
+  bool noCopyOnWrite() const;
 
   /*
    * Specific derived class type querying operators.
@@ -183,7 +190,7 @@ public:
    * Returns whether or not this array contains "vector-like" data.
    * I.e. all the keys are contiguous increasing integers.
    */
-  virtual bool isVectorData() const = 0;
+  bool isVectorData() const;
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -213,8 +220,8 @@ public:
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64_t k) const = 0;
-  virtual bool exists(const StringData* k) const = 0;
+  bool exists(int64_t k) const;
+  bool exists(const StringData* k) const;
 
   /**
    * Interface for VM helpers.  ArrayData implements generic versions
@@ -236,8 +243,8 @@ public:
    * Getting l-value (that Variant pointer) at specified key. Return this if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy) = 0;
-  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy) = 0;
+  ArrayData *lval(int64_t k, Variant *&ret, bool copy);
+  ArrayData *lval(StringData* k, Variant *&ret, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -246,15 +253,19 @@ public:
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see Variant::lvalBlackHole() for details).
    */
-  virtual ArrayData *lvalNew(Variant *&ret, bool copy) = 0;
+  ArrayData *lvalNew(Variant *&ret, bool copy);
 
   /**
    * Helper functions used for getting a reference to elements of
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy);
-  virtual ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy);
+  ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy);
+  ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy);
+  static ArrayData *CreateLvalPtr(ArrayData* ad, StringData* k,
+                                  Variant *&ret, bool copy);
+  static ArrayData *GetLvalPtr(ArrayData* ad, StringData* k,
+                               Variant *&ret, bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -264,31 +275,31 @@ public:
   ArrayData *set(int64_t k, CVarRef v, bool copy);
   ArrayData *set(StringData* k, CVarRef v, bool copy);
 
-  virtual ArrayData *setRef(int64_t k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *setRef(StringData* k, CVarRef v, bool copy) = 0;
+  ArrayData *setRef(int64_t k, CVarRef v, bool copy);
+  ArrayData *setRef(StringData* k, CVarRef v, bool copy);
 
   /**
    * The same as set(), but with the precondition that the key does
    * not already exist in this array.  (This is to allow more
    * efficient implementation of this case in some derived classes.)
    */
-  virtual ArrayData *add(int64_t k, CVarRef v, bool copy);
-  virtual ArrayData *add(StringData* k, CVarRef v, bool copy);
+  ArrayData *add(int64_t k, CVarRef v, bool copy);
+  ArrayData *add(StringData* k, CVarRef v, bool copy);
 
   /*
    * Same semantics as lval(), except with the precondition that the
    * key doesn't already exist in the array.
    */
-  virtual ArrayData *addLval(int64_t k, Variant *&ret, bool copy);
-  virtual ArrayData *addLval(StringData* k, Variant *&ret, bool copy);
+  ArrayData *addLval(int64_t k, Variant *&ret, bool copy);
+  ArrayData *addLval(StringData* k, Variant *&ret, bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return this if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *remove(int64_t k, bool copy) = 0;
-  virtual ArrayData *remove(const StringData* k, bool copy) = 0;
+  ArrayData *remove(int64_t k, bool copy);
+  ArrayData *remove(const StringData* k, bool copy);
 
   /**
    * Inline accessors that convert keys to StringData* before delegating to
@@ -317,10 +328,10 @@ public:
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
-  virtual ssize_t iter_begin() const = 0;
-  virtual ssize_t iter_end() const = 0;
-  virtual ssize_t iter_advance(ssize_t prev) const = 0;
-  virtual ssize_t iter_rewind(ssize_t prev) const = 0;
+  ssize_t iter_begin() const;
+  ssize_t iter_end() const;
+  ssize_t iter_advance(ssize_t prev) const;
+  ssize_t iter_rewind(ssize_t prev) const;
 
   /**
    * Mutable iteration APIs
@@ -529,6 +540,35 @@ struct ArrayFunctions {
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
+  size_t (*vsize[NK])(const ArrayData*);
+  CVarRef (*getValueRef[NK])(const ArrayData*, ssize_t pos);
+  bool noCopyOnWrite[NK];
+  bool (*isVectorData[NK])(const ArrayData*);
+  bool (*existsInt[NK])(const ArrayData*, int64_t k);
+  bool (*existsStr[NK])(const ArrayData*, const StringData* k);
+  ArrayData* (*lvalInt[NK])(ArrayData*, int64_t k, Variant*& ret,
+                            bool copy);
+  ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
+                            bool copy);
+  ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
+  ArrayData* (*createLvalPtr[NK])(ArrayData*, StringData* k, Variant *&ret,
+                                  bool copy);
+  ArrayData* (*getLvalPtr[NK])(ArrayData*, StringData* k, Variant *&ret,
+                               bool copy);
+  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
+  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
+  ArrayData* (*addInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
+  ArrayData* (*addStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
+  ArrayData* (*addLvalInt[NK])(ArrayData*, int64_t k, Variant *&ret,
+                               bool copy);
+  ArrayData* (*addLvalStr[NK])(ArrayData*, StringData* k, Variant *&ret,
+                               bool copy);
+  ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
+  ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
+  ssize_t (*iterBegin[NK])(const ArrayData*);
+  ssize_t (*iterEnd[NK])(const ArrayData*);
+  ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
+  ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
 };
 
 extern const ArrayFunctions g_array_funcs;

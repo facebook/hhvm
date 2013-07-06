@@ -57,6 +57,8 @@ private:
   // Safe downcast helpers
   static HphpArray* asVector(ArrayData* ad);
   static const HphpArray* asVector(const ArrayData* ad);
+  static HphpArray* asGeneric(ArrayData* ad);
+  static const HphpArray* asGeneric(const ArrayData* ad);
   static HphpArray* asHphpArray(ArrayData* ad);
   static const HphpArray* asHphpArray(const ArrayData* ad);
 
@@ -71,13 +73,6 @@ public:
   virtual ~HphpArray();
   void destroyVec();
   void destroy();
-
-  // unlike ArrayData::size(), this functions doesn't delegate
-  // to the virtual vsize() functions, so its more efficient to
-  // use this when you know you have an HphpArray.
-  ssize_t getSize() const {
-    return m_size;
-  }
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -107,28 +102,43 @@ public:
   using ArrayData::nvGet;
 
   // implements ArrayData
-  ssize_t vsize() const;
-  CVarRef getValueRef(ssize_t pos) const;
+  static CVarRef GetValueRef(const ArrayData*, ssize_t pos);
 
   // overrides ArrayData
-  bool isVectorData() const;
-  ssize_t iter_begin() const;
-  ssize_t iter_end() const;
-  ssize_t iter_advance(ssize_t prev) const;
-  ssize_t iter_rewind(ssize_t prev) const;
+  static bool IsVectorData(const ArrayData*);
+  static bool IsVectorDataVec(const ArrayData*);
+  static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterEnd(const ArrayData*);
+  static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
+  static ssize_t IterRewind(const ArrayData*, ssize_t pos);
 
   // implements ArrayData
-  bool exists(int64_t k) const;
-  bool exists(const StringData* k) const;
+  static bool ExistsInt(const ArrayData*, int64_t k);
+  static bool ExistsStr(const ArrayData*, const StringData* k);
+  static bool ExistsIntVec(const ArrayData*, int64_t k);
+  static bool ExistsStrVec(const ArrayData*, const StringData* k);
 
   // implements ArrayData
-  ArrayData* lval(int64_t k, Variant*& ret, bool copy);
-  ArrayData* lval(StringData* k, Variant*& ret, bool copy);
-  ArrayData* lvalNew(Variant*& ret, bool copy);
+  static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
+                            bool copy);
+  static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
+                            bool copy);
+  static ArrayData* LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
+                               bool copy);
+  static ArrayData* LvalStrVec(ArrayData* ad, StringData* k, Variant*& ret,
+                               bool copy);
+  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayData* LvalNewVec(ArrayData*, Variant*& ret, bool copy);
 
   // overrides ArrayData
-  ArrayData* createLvalPtr(StringData* k, Variant*& ret, bool copy);
-  ArrayData* getLvalPtr(StringData* k, Variant*& ret, bool copy);
+  static ArrayData* CreateLvalPtr(ArrayData*, StringData* k, Variant*& ret,
+                                  bool copy);
+  static ArrayData* GetLvalPtr(ArrayData*, StringData* k, Variant*& ret,
+                               bool copy);
+  static ArrayData* CreateLvalPtrVec(ArrayData*, StringData* k, Variant*& ret,
+                                     bool copy);
+  static ArrayData* GetLvalPtrVec(ArrayData*, StringData* k, Variant*& ret,
+                                  bool copy);
 
   // implements ArrayData
   static ArrayData* SetIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
@@ -137,18 +147,35 @@ public:
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
   // implements ArrayData
-  ArrayData* setRef(int64_t k, CVarRef v, bool copy);
-  ArrayData* setRef(StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, CVarRef v,
+                              bool copy);
+  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, CVarRef v,
+                              bool copy);
+  static ArrayData* SetRefIntVec(ArrayData* ad, int64_t k, CVarRef v,
+                                 bool copy);
+  static ArrayData* SetRefStrVec(ArrayData* ad, StringData* k, CVarRef v,
+                                 bool copy);
 
   // overrides ArrayData
-  ArrayData *add(int64_t k, CVarRef v, bool copy);
-  ArrayData *add(StringData* k, CVarRef v, bool copy);
-  ArrayData *addLval(int64_t k, Variant*& ret, bool copy);
-  ArrayData *addLval(StringData* k, Variant*& ret, bool copy);
+  static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
+  static ArrayData* AddIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* AddStrVec(ArrayData*, StringData* k, CVarRef v, bool copy);
+
+  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant*& ret,
+                               bool copy);
+  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant*& ret,
+                               bool copy);
+  static ArrayData* AddLvalIntVec(ArrayData*, int64_t k, Variant*& ret,
+                                  bool copy);
+  static ArrayData* AddLvalStrVec(ArrayData*, StringData* k, Variant*& ret,
+                                  bool copy);
 
   // implements ArrayData
-  ArrayData* remove(int64_t k, bool copy);
-  ArrayData* remove(const StringData* k, bool copy);
+  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
+  static ArrayData* RemoveIntVec(ArrayData*, int64_t k, bool copy);
+  static ArrayData* RemoveStrVec(ArrayData*, const StringData* k, bool copy);
 
   // overrides/implements ArrayData
   ArrayData* copy() const;
@@ -189,16 +216,15 @@ public:
   static TypedValue* NvGetStrVec(const ArrayData*, const StringData* k);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
-  void nvBind(int64_t ki, const TypedValue* v) {
-    updateRef(ki, tvAsCVarRef(v));
+  void nvBind(int64_t k, const TypedValue* v) {
+    ArrayData::setRef(k, tvAsCVarRef(v), false);
   }
   void nvBind(StringData* k, const TypedValue* v) {
-    updateRef(k, tvAsCVarRef(v));
+    ArrayData::setRef(k, tvAsCVarRef(v), false);
   }
   void nvAppend(const TypedValue* v) {
     nextInsertVec(tvAsCVarRef(v));
   }
-  ArrayData* nvNew(TypedValue*& v, bool copy);
   static void NvGetKeyVec(const ArrayData*, TypedValue* out, ssize_t pos);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);

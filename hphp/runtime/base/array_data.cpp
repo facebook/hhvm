@@ -64,6 +64,11 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static size_t VsizeNop(const ArrayData* ad) {
+  assert(false);
+  return ad->getSize();
+}
+
 // order: kVectorKind, kMixedKind, kSharedKind, kNvtwKind, kPolicyKind
 extern const ArrayFunctions g_array_funcs = {
   // release
@@ -101,6 +106,121 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::SetStr,
     &NameValueTableWrapper::SetStr,
     &PolicyArray::SetStr },
+  // vsize
+  { &VsizeNop, &VsizeNop,
+    &VsizeNop,
+    &NameValueTableWrapper::Vsize,
+    &VsizeNop },
+  // getValueRef
+  { &HphpArray::GetValueRef, &HphpArray::GetValueRef,
+    &SharedMap::GetValueRef,
+    &NameValueTableWrapper::GetValueRef,
+    &PolicyArray::GetValueRef },
+  // noCopyOnWrite
+  { false, false,
+    false,
+    true, // NameValueTableWrapper doesn't support COW.
+    false },
+  // isVectorData
+  { &HphpArray::IsVectorDataVec, &HphpArray::IsVectorData,
+    &SharedMap::IsVectorData,
+    &NameValueTableWrapper::IsVectorData,
+    &PolicyArray::IsVectorData },
+  // existsInt
+  { &HphpArray::ExistsIntVec, &HphpArray::ExistsInt,
+    &SharedMap::ExistsInt,
+    &NameValueTableWrapper::ExistsInt,
+    &PolicyArray::ExistsInt },
+  // existsStr
+  { &HphpArray::ExistsStrVec, &HphpArray::ExistsStr,
+    &SharedMap::ExistsStr,
+    &NameValueTableWrapper::ExistsStr,
+    &PolicyArray::ExistsStr },
+  // lvalInt
+  { &HphpArray::LvalIntVec, &HphpArray::LvalInt,
+    &SharedMap::LvalInt,
+    &NameValueTableWrapper::LvalInt,
+    &PolicyArray::LvalInt },
+  // lvalStr
+  { &HphpArray::LvalStrVec, &HphpArray::LvalStr,
+    &SharedMap::LvalStr,
+    &NameValueTableWrapper::LvalStr,
+    &PolicyArray::LvalStr },
+  // lvalNew
+  { &HphpArray::LvalNewVec, &HphpArray::LvalNew,
+    &SharedMap::LvalNew,
+    &NameValueTableWrapper::LvalNew,
+    &PolicyArray::LvalNew },
+  // createLvalPtr
+  { &HphpArray::CreateLvalPtrVec, &HphpArray::CreateLvalPtr,
+    &ArrayData::CreateLvalPtr, // fatal
+    &ArrayData::CreateLvalPtr, // fatal
+    &PolicyArray::CreateLvalPtr },
+  // getLvalPtr
+  { &HphpArray::GetLvalPtrVec, &HphpArray::GetLvalPtr,
+    &ArrayData::GetLvalPtr, // fatal
+    &ArrayData::GetLvalPtr, // fatal
+    &PolicyArray::GetLvalPtr },
+  // setRefInt
+  { &HphpArray::SetRefIntVec, &HphpArray::SetRefInt,
+    &SharedMap::SetRefInt,
+    &NameValueTableWrapper::SetRefInt,
+    &PolicyArray::SetRefInt },
+  // setRefStr
+  { &HphpArray::SetRefStrVec, &HphpArray::SetRefStr,
+    &SharedMap::SetRefStr,
+    &NameValueTableWrapper::SetRefStr,
+    &PolicyArray::SetRefStr },
+  // addInt
+  { &HphpArray::AddIntVec, &HphpArray::AddInt,
+    &SharedMap::SetInt, // reuse set
+    &NameValueTableWrapper::SetInt, // reuse set
+    &PolicyArray::AddInt },
+  // addStr
+  { &HphpArray::AddStrVec, &HphpArray::AddStr,
+    &SharedMap::SetStr, // reuse set
+    &NameValueTableWrapper::SetStr, // reuse set
+    &PolicyArray::AddStr },
+  // addLvalInt
+  { &HphpArray::AddLvalIntVec, &HphpArray::AddLvalInt,
+    &SharedMap::AddLvalInt,
+    &NameValueTableWrapper::AddLvalInt,
+    &PolicyArray::AddLvalInt },
+  // addLvalStr
+  { &HphpArray::AddLvalStrVec, &HphpArray::AddLvalStr,
+    &SharedMap::AddLvalStr,
+    &NameValueTableWrapper::AddLvalStr,
+    &PolicyArray::AddLvalStr },
+  // removeInt
+  { &HphpArray::RemoveIntVec, &HphpArray::RemoveInt,
+    &SharedMap::RemoveInt,
+    &NameValueTableWrapper::RemoveInt,
+    &PolicyArray::RemoveInt },
+  // removeStr
+  { &HphpArray::RemoveStrVec, &HphpArray::RemoveStr,
+    &SharedMap::RemoveStr,
+    &NameValueTableWrapper::RemoveStr,
+    &PolicyArray::RemoveStr },
+  // iterBegin
+  { &HphpArray::IterBegin, &HphpArray::IterBegin,
+    &SharedMap::IterBegin,
+    &NameValueTableWrapper::IterBegin,
+    &PolicyArray::IterBegin },
+  // iterEnd
+  { &HphpArray::IterEnd, &HphpArray::IterEnd,
+    &SharedMap::IterEnd,
+    &NameValueTableWrapper::IterEnd,
+    &PolicyArray::IterEnd },
+  // iterAdvance
+  { &HphpArray::IterAdvance, &HphpArray::IterAdvance,
+    &SharedMap::IterAdvance,
+    &NameValueTableWrapper::IterAdvance,
+    &PolicyArray::IterAdvance },
+  // iterRewind
+  { &HphpArray::IterRewind, &HphpArray::IterRewind,
+    &SharedMap::IterRewind,
+    &NameValueTableWrapper::IterRewind,
+    &PolicyArray::IterRewind },
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,32 +338,14 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   return true;
 }
 
-ArrayData *ArrayData::createLvalPtr(StringData* k, Variant *&ret, bool copy) {
+ArrayData *ArrayData::CreateLvalPtr(ArrayData* ad, StringData* k,
+                                    Variant *&ret, bool copy) {
   throw FatalErrorException("Unimplemented ArrayData::createLvalPtr");
 }
 
-ArrayData *ArrayData::getLvalPtr(StringData* k, Variant *&ret, bool copy) {
+ArrayData *ArrayData::GetLvalPtr(ArrayData* ad, StringData* k,
+                                 Variant *&ret, bool copy) {
   throw FatalErrorException("Unimplemented ArrayData::getLvalPtr");
-}
-
-ArrayData *ArrayData::add(int64_t k, CVarRef v, bool copy) {
-  assert(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::add(StringData* k, CVarRef v, bool copy) {
-  assert(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::addLval(int64_t k, Variant *&ret, bool copy) {
-  assert(!exists(k));
-  return lval(k, ret, copy);
-}
-
-ArrayData *ArrayData::addLval(StringData* k, Variant *&ret, bool copy) {
-  assert(!exists(k));
-  return lval(k, ret, copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

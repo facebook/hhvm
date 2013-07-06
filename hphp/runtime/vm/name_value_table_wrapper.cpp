@@ -36,14 +36,15 @@ NameValueTableWrapper::asNVTW(const ArrayData* ad) {
   return static_cast<const NameValueTableWrapper*>(ad);
 }
 
-ssize_t NameValueTableWrapper::vsize() const {
+size_t NameValueTableWrapper::Vsize(const ArrayData* ad) {
   // We need to iterate to find out the actual size, since
   // KindOfIndirect elements in the array may have been set to
   // KindOfUninit.
-  ssize_t count = 0;
-  for (ssize_t iter = iter_begin();
-      iter != ArrayData::invalid_index;
-      iter = iter_advance(iter)) {
+  auto a = asNVTW(ad);
+  size_t count = 0;
+  for (auto iter = IterBegin(a);
+      iter != invalid_index;
+      iter = IterAdvance(a, iter)) {
     ++count;
   }
   return count;
@@ -63,23 +64,20 @@ void NameValueTableWrapper::NvGetKey(const ArrayData* ad, TypedValue* out,
   }
 }
 
-CVarRef NameValueTableWrapper::getValueRef(ssize_t pos) const {
-  NameValueTable::Iterator iter(m_tab, pos);
+CVarRef NameValueTableWrapper::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  auto a = asNVTW(ad);
+  NameValueTable::Iterator iter(a->m_tab, pos);
   return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
 }
 
-bool NameValueTableWrapper::noCopyOnWrite() const {
-  // This just disables a few places that will call copy() on an array
-  // if it has more than one reference.
-  return true;
+bool
+NameValueTableWrapper::ExistsInt(const ArrayData* ad, int64_t k) {
+  return ExistsStr(ad, String(k).get());
 }
 
-bool NameValueTableWrapper::exists(int64_t k) const {
-  return exists(String(k));
-}
-
-bool NameValueTableWrapper::exists(const StringData* k) const {
-  return m_tab->lookup(k);
+bool
+NameValueTableWrapper::ExistsStr(const ArrayData* ad, const StringData* k) {
+  return asNVTW(ad)->m_tab->lookup(k) != nullptr;
 }
 
 TypedValue*
@@ -91,24 +89,42 @@ TypedValue* NameValueTableWrapper::NvGetInt(const ArrayData* ad, int64_t k) {
   return asNVTW(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool) {
-  return lval(String(k), ret, false);
+ArrayData*
+NameValueTableWrapper::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
+                               bool copy) {
+  return LvalStr(ad, String(k).get(), ret, copy);
 }
 
-ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret, bool) {
-  TypedValue* tv = m_tab->lookup(k);
+ArrayData*
+NameValueTableWrapper::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
+                               bool copy) {
+  auto a = asNVTW(ad);
+  TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
     TypedValue nulVal;
     tvWriteNull(&nulVal);
-    tv = m_tab->set(k, &nulVal);
+    tv = a->m_tab->set(k, &nulVal);
   }
   ret = &tvAsVariant(tv);
-  return this;
+  return a;
 }
 
-ArrayData* NameValueTableWrapper::lvalNew(Variant*& ret, bool copy) {
+ArrayData*
+NameValueTableWrapper::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret,
+                                  bool copy) {
+  return LvalStr(ad, String(k).get(), ret, copy);
+}
+
+ArrayData*
+NameValueTableWrapper::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret,
+                                  bool copy) {
+  return LvalStr(ad, k, ret, copy);
+}
+
+ArrayData*
+NameValueTableWrapper::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   ret = &Variant::lvalBlackHole();
-  return this;
+  return ad;
 }
 
 ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad, int64_t k,
@@ -123,22 +139,29 @@ ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
   return a;
 }
 
-ArrayData* NameValueTableWrapper::setRef(int64_t k, CVarRef v, bool copy) {
-  return setRef(String(k), v, copy);
+ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad, int64_t k,
+                                            CVarRef v, bool copy) {
+  return asNVTW(ad)->setRef(String(k).get(), v, copy);
 }
 
-ArrayData* NameValueTableWrapper::setRef(StringData* k, CVarRef v, bool copy) {
-  tvAsVariant(m_tab->lookupAdd(k)).assignRef(v);
-  return this;
+ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad, StringData* k,
+                                            CVarRef v, bool copy) {
+  auto a = asNVTW(ad);
+  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
+  return a;
 }
 
-ArrayData* NameValueTableWrapper::remove(int64_t k, bool copy) {
-  return remove(String(k), copy);
+ArrayData*
+NameValueTableWrapper::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+  return RemoveStr(ad, String(k).get(), copy);
 }
 
-ArrayData* NameValueTableWrapper::remove(const StringData* k, bool copy) {
-  m_tab->unset(k);
-  return this;
+ArrayData*
+NameValueTableWrapper::RemoveStr(ArrayData* ad, const StringData* k,
+                                 bool copy) {
+  auto a = asNVTW(ad);
+  a->m_tab->unset(k);
+  return a;
 }
 
 /*
@@ -171,23 +194,27 @@ ArrayData* NameValueTableWrapper::prepend(CVarRef v, bool copy) {
   throw NotImplementedException("prepend on $GLOBALS");
 }
 
-ssize_t NameValueTableWrapper::iter_begin() const {
-  NameValueTable::Iterator iter(m_tab);
+ssize_t NameValueTableWrapper::IterBegin(const ArrayData* ad) {
+  auto a = asNVTW(ad);
+  NameValueTable::Iterator iter(a->m_tab);
   return iter.toInteger();
 }
 
-ssize_t NameValueTableWrapper::iter_end() const {
-  return NameValueTable::Iterator::getEnd(m_tab).toInteger();
+ssize_t NameValueTableWrapper::IterEnd(const ArrayData* ad) {
+  auto a = asNVTW(ad);
+  return NameValueTable::Iterator::getEnd(a->m_tab).toInteger();
 }
 
-ssize_t NameValueTableWrapper::iter_advance(ssize_t prev) const {
-  NameValueTable::Iterator iter(m_tab, prev);
+ssize_t NameValueTableWrapper::IterAdvance(const ArrayData* ad, ssize_t prev) {
+  auto a = asNVTW(ad);
+  NameValueTable::Iterator iter(a->m_tab, prev);
   iter.next();
   return iter.toInteger();
 }
 
-ssize_t NameValueTableWrapper::iter_rewind(ssize_t prev) const {
-  NameValueTable::Iterator iter(m_tab, prev);
+ssize_t NameValueTableWrapper::IterRewind(const ArrayData* ad, ssize_t prev) {
+  auto a = asNVTW(ad);
+  NameValueTable::Iterator iter(a->m_tab, prev);
   iter.prev();
   return iter.toInteger();
 }
@@ -233,7 +260,7 @@ void NameValueTableWrapper::uksort(CVarRef cmp_function) {}
 void NameValueTableWrapper::usort(CVarRef cmp_function) {}
 void NameValueTableWrapper::uasort(CVarRef cmp_function) {}
 
-bool NameValueTableWrapper::isVectorData() const {
+bool NameValueTableWrapper::IsVectorData(const ArrayData*) {
   return false;
 }
 

@@ -764,19 +764,21 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
   }
 
   // needed if any date part is missing
-  timelib_fill_holes(t, m_time.get(), 0);
+  timelib_fill_holes(t, m_time.get(), TIMELIB_NO_CLONE);
   timelib_update_ts(t, m_tz->get());
 
   int error2;
   m_timestamp = timelib_date_to_int(t, &error2);
   if (error1 || error2) {
-    timelib_tzinfo_dtor(t->tz_info);
+    // Don't free t->tz_info, it belongs to GetTimeZoneInfo
     timelib_time_dtor(t);
     return false;
   }
 
   m_time = TimePtr(t, time_deleter());
-  m_tz = NEWOBJ(TimeZone)(timelib_tzinfo_clone(t->tz_info));
+  if (t->tz_info != m_tz->get()) {
+    m_tz = NEWOBJ(TimeZone)(timelib_tzinfo_clone(t->tz_info));
+  }
   return true;
 }
 

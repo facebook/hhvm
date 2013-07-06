@@ -798,10 +798,6 @@ Translator::translateIncDecL(const NormalizedInstruction& i) {
   bool pre  = !post;
   bool inc  = (oplet == PostInc || oplet == PreInc);
 
-  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfBoolean) &&
-                          (i.inputs[0]->valueType() != KindOfInt64) &&
-                          (i.inputs[0]->valueType() != KindOfDouble),
-                          IncDecL_unsupported);
   HHIR_EMIT(IncDecL, pre, inc, inputs[0]->location.offset);
 }
 

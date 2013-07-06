@@ -720,13 +720,31 @@ void HhbcTranslator::emitSetL(int32_t id) {
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
-  IRTrace* exitTrace = getExitTrace();
-  auto const src = ldLocInner(id, exitTrace);
+  auto const exitTrace = getExitTrace();
+  auto const src = ldLocInnerWarn(id, exitTrace);
 
-  // Inc/Dec of a bool is a no-op.
   if (src->isA(Type::Bool)) {
     push(src);
     return;
+  }
+
+  if (src->type().subtypeOfAny(Type::Arr, Type::Obj)) {
+    pushIncRef(src);
+    return;
+  }
+
+  if (src->isA(Type::Null)) {
+    if (inc) {
+      push(cns(1));
+      stLoc(id, exitTrace, cns(1));
+    } else {
+      push(src);
+    }
+    return;
+  }
+
+  if (!src->type().subtypeOfAny(Type::Int, Type::Dbl)) {
+    PUNT(IncDecL);
   }
 
   auto const res = emitIncDec(pre, inc, src);

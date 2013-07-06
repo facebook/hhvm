@@ -70,13 +70,9 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
   case KindOfStaticString:
   case KindOfString:
     {
-      auto const sdata = cell.m_data.pstr;
-      int64_t ival;
-      double dval;
-      auto const dt = sdata->isNumericWithVal(ival, dval,
-        /* allow_error */ true);
-      return dt == KindOfInt64 ? op(ival, val) :
-             dt == KindOfDouble ? op(dval, val) :
+      auto const num = stringToNumeric(cell.m_data.pstr);
+      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
+             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
              op(0, val);
     }
 
@@ -128,12 +124,9 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 
   case KindOfInt64:
     {
-      int64_t ival;
-      double dval;
-      auto const dt = val->isNumericWithVal(ival, dval,
-        /* allow_error */ true);
-      return dt == KindOfInt64 ? op(cell.m_data.num, ival) :
-             dt == KindOfDouble ? op(cell.m_data.num, dval) :
+      auto const num = stringToNumeric(val);
+      return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
+             num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
              op(cell.m_data.num, 0);
     }
 

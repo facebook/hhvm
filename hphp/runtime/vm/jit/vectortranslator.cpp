@@ -1470,23 +1470,43 @@ void HhbcTranslator::VectorTranslator::emitUnsetProp() {
 }
 #undef HELPER_TABLE
 
-static inline TypedValue* checkedGetCell(ArrayData* a, StringData* key) {
-  int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGetCell(i)
-                                             : a->nvGetCell(key);
+// Keep these error handlers in sync with ArrayData::getNotFound();
+NEVER_INLINE
+static TypedValue arrayGetNotFound(int64_t k) {
+  raise_notice("Undefined index: %" PRId64, k);
+  TypedValue v;
+  tvWriteNull(&v);
+  return v;
 }
 
-static inline TypedValue* checkedGetCell(ArrayData* a, int64_t key) {
+NEVER_INLINE
+static TypedValue arrayGetNotFound(const StringData* k) {
+  raise_notice("Undefined index: %s", k->data());
+  TypedValue v;
+  tvWriteNull(&v);
+  return v;
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key);
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt>
 static inline TypedValue arrayGetImpl(
   ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
-  TypedValue* ret = checkForInt ? checkedGetCell(a, key)
-                                : a->nvGetCell(key);
-  tvRefcountedIncRef(ret);
-  return *ret;
+  TypedValue* ret = checkForInt ? checkedGet(a, key)
+                                : a->nvGet(key);
+  if (ret) {
+    ret = tvToCell(ret);
+    tvRefcountedIncRef(ret);
+    return *ret;
+  }
+  return arrayGetNotFound(key);
 }
 
 #define HELPER_TABLE(m)                                 \
@@ -1749,16 +1769,6 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
                  cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
-
-static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
-  int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i)
-                                             : a->nvGet(key);
-}
-
-static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
-  not_reached();
-}
 
 template<KeyType keyType, bool checkForInt>
 static inline uint64_t arrayIssetImpl(

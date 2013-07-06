@@ -212,8 +212,6 @@ public:
   virtual TypedValue* nvGet(int64_t k) const = 0;
   virtual TypedValue* nvGet(const StringData* k) const = 0;
   virtual void nvGetKey(TypedValue* out, ssize_t pos) const = 0;
-  virtual TypedValue* nvGetCell(int64_t ki) const = 0;
-  virtual TypedValue* nvGetCell(const StringData* k) const = 0;
 
   // nonvirtual wrappers that call virtual getValueRef()
   TypedValue* nvGetValueRef(ssize_t pos);
@@ -471,8 +469,6 @@ public:
   CVarRef getNotFound(const StringData* k, bool error) const;
   static CVarRef getNotFound(CStrRef k);
   static CVarRef getNotFound(CVarRef k);
-  static TypedValue* nvGetNotFound(int64_t k);
-  static TypedValue* nvGetNotFound(const StringData* k);
 
   static bool IsValidKey(CStrRef k);
   static bool IsValidKey(CVarRef k);

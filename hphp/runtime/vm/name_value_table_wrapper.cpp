@@ -79,16 +79,6 @@ TypedValue* NameValueTableWrapper::nvGet(int64_t k) const {
   return m_tab->lookup(String(k).get());
 }
 
-TypedValue* NameValueTableWrapper::nvGetCell(int64_t k) const {
-  TypedValue* tv = NameValueTableWrapper::nvGet(k);
-  return tv ? tvToCell(tv) : nvGetNotFound(k);
-}
-
-TypedValue* NameValueTableWrapper::nvGetCell(const StringData* key) const {
-  TypedValue* tv = NameValueTableWrapper::nvGet(key);
-  return tv ? tvToCell(tv) : nvGetNotFound(key);
-}
-
 ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,
                                        bool checkExist) {
   return lval(String(k), ret, copy, checkExist);

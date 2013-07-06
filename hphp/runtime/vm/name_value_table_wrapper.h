@@ -87,8 +87,6 @@ public: // ArrayData implementation
 
   virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;
-  virtual TypedValue* nvGetCell(int64_t ki) const;
-  virtual TypedValue* nvGetCell(const StringData* k) const;
 
   virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
                           bool checkExist = false);

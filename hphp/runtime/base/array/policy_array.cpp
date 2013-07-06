@@ -241,15 +241,6 @@ void PolicyArray::nvGetKey(TypedValue* out, ssize_t pos) const {
   new(out) Variant(key(toPos(pos)));
 }
 
-template <class K>
-TypedValue* PolicyArray::nvGetCellImpl(K k) const {
-  APILOG << "(" << keystr(k) << ")";
-  auto const pos = find(k, m_size);
-  return LIKELY(pos != PosType::invalid)
-    ? tvToCell(reinterpret_cast<TypedValue*>(&lval(pos)))
-    : nvGetNotFound(k);
-}
-
 // template <class K>
 // ssize_t PolicyArray::getIndexImpl(K k) const {
 //   APILOG << "(" << keystr(k) << ")";

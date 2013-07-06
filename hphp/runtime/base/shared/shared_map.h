@@ -98,8 +98,6 @@ public:
   TypedValue* nvGet(int64_t k) const;
   TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
-  TypedValue* nvGetCell(int64_t ki) const;
-  TypedValue* nvGetCell(const StringData* k) const;
 
   bool isVectorData() const;
 

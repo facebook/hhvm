@@ -1144,18 +1144,6 @@ ArrayData* HphpArray::copyWithStrongIterators() const {
 //=============================================================================
 // non-variant interface
 
-TypedValue* HphpArray::nvGetCell(int64_t k) const {
-  ElmInd pos = find(k);
-  return LIKELY(pos != ElmIndEmpty) ? tvToCell(&m_data[pos].data) :
-         nvGetNotFound(k);
-}
-
-TypedValue* HphpArray::nvGetCell(const StringData* k) const {
-  ElmInd pos = find(k, k->hash());
-  return LIKELY(pos != ElmIndEmpty) ? tvToCell(&m_data[pos].data) :
-         nvGetNotFound(k);
-}
-
 TypedValue* HphpArray::nvGet(int64_t ki) const {
   ElmInd pos = find(ki);
   if (LIKELY(pos != ElmIndEmpty)) {

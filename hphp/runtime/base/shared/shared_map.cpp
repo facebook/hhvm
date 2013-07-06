@@ -210,18 +210,6 @@ void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) const {
   }
 }
 
-TypedValue* SharedMap::nvGetCell(int64_t k) const {
-  int index = getIndex(k);
-  return index != -1 ? const_cast<Cell*>(getValueRef(index).asCell())
-                     : nvGetNotFound(k);
-}
-
-TypedValue* SharedMap::nvGetCell(const StringData* key) const {
-  int index = getIndex(key);
-  return index != -1 ? const_cast<Cell*>(getValueRef(index).asCell())
-                     : nvGetNotFound(key);
-}
-
 ArrayData* SharedMap::escalateForSort() {
   ArrayData *ret = loadElems(true /* mapInit */);
   assert(!ret->isStatic());

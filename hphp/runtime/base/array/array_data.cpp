@@ -498,16 +498,6 @@ CVarRef ArrayData::getNotFound(CVarRef k) {
   return null_variant;
 }
 
-TypedValue* ArrayData::nvGetNotFound(int64_t k) {
-  raise_notice("Undefined index: %" PRId64, k);
-  return (TypedValue*)&init_null_variant;
-}
-
-TypedValue* ArrayData::nvGetNotFound(const StringData* k) {
-  raise_notice("Undefined index: %s", k->data());
-  return (TypedValue*)&init_null_variant;
-}
-
 void ArrayData::dump() {
   string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }

@@ -395,17 +395,6 @@ public:
   virtual void nvGetKey(TypedValue* out, ssize_t pos) const FOLLY_OVERRIDE;
 
 private:
-  template <class K> TypedValue* nvGetCellImpl(K k) const;
-
-public:
-  virtual TypedValue* nvGetCell(int64_t k) const FOLLY_OVERRIDE {
-    return nvGetCellImpl(k);
-  }
-  virtual TypedValue* nvGetCell(const StringData* k) const FOLLY_OVERRIDE {
-    return nvGetCellImpl(k);
-  }
-
-private:
   template <class K>
   ArrayData *lvalImpl(K k, Variant *&ret, bool copy, bool checkExist);
 

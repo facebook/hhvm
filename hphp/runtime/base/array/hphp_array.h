@@ -167,11 +167,6 @@ public:
   TypedValue* nvGet(int64_t ki) const;
   TypedValue* nvGet(const StringData* k) const;
 
-  // nvGetCell is a variation of get, however it unwraps a KindOfRef,
-  // returns KindOfNull if the key doesn't exist, and always warns.
-  TypedValue* nvGetCell(int64_t ki) const;
-  TypedValue* nvGetCell(const StringData* k) const;
-
   void nvBind(int64_t ki, const TypedValue* v) {
     updateRef(ki, tvAsCVarRef(v));
   }

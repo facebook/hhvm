@@ -5843,48 +5843,32 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
-    if (zendParamMode) {
-#define CASE(kind) case KindOf ## kind : do {           \
-  if (!tvCoerceParamTo ## kind ## InPlace(&args[-i])) { \
-    ret.m_type = KindOfNull;                            \
-    goto free_frame;                                    \
-  }                                                     \
-  break;                                                \
-} while (0); break;
-      switch (pi.builtinType()) {
-        CASE(Boolean)
-        CASE(Int64)
-        CASE(Double)
-        CASE(String)
-        CASE(Array)
-        CASE(Object)
-        case KindOfUnknown:
-                  break;
-        default:
-                  not_reached();
-      }
-#undef CASE
-
-    } else {
-
-#define CASE(kind) case KindOf ## kind : do { \
-  tvCastTo ## kind ## InPlace(&args[-i]); break; \
-} while (0); break;
-      switch (pi.builtinType()) {
-        CASE(Boolean)
-        CASE(Int64)
-        CASE(Double)
-        CASE(String)
-        CASE(Array)
-        CASE(Object)
-        case KindOfUnknown:
-                  break;
-        default:
-                  not_reached();
-      }
-#undef CASE
-
+#define CASE(kind)                                      \
+  case KindOf##kind:                                    \
+    if (zendParamMode) {                                \
+      if (!tvCoerceParamTo##kind##InPlace(&args[-i])) { \
+        ret.m_type = KindOfNull;                        \
+        goto free_frame;                                \
+      }                                                 \
+    } else {                                            \
+      tvCastTo##kind##InPlace(&args[-1]);               \
     }
+    break;
+
+    switch (pi.builtinType()) {
+      CASE(Boolean)
+      CASE(Int64)
+      CASE(Double)
+      CASE(String)
+      CASE(Array)
+      CASE(Object)
+      case KindOfUnknown:
+        break;
+      default:
+        not_reached();
+    }
+
+#undef CASE
   }
 
   ret.m_type = func->returnType();

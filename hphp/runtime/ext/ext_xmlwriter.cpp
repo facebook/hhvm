@@ -315,7 +315,7 @@ bool c_XMLWriter::t_openuri(CStrRef uri) {
   if (same(file, false)) {
     return false;
   }
-  m_uri = file.toObject().getTyped<File>();
+  m_uri = file.toResource().getTyped<File>();
 
   m_uri_output = xmlOutputBufferCreateIO(write_file, close_file, this, NULL);
   if (m_uri_output == NULL) {

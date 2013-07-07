@@ -33,7 +33,7 @@ Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
 bool f_libxml_use_internal_errors(CVarRef use_errors = null_variant);
-void f_libxml_set_streams_context(CObjRef streams_context);
+void f_libxml_set_streams_context(CResRef streams_context);
 bool f_libxml_disable_entity_loader(bool disable = true);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ class c_SimpleXMLElement :
 
 
  public:
-  Object m_doc;
+  Resource m_doc;
   xmlNodePtr m_node;
   Variant m_children;
   Variant m_attributes;

@@ -24,8 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Base class of all resources used by extensions for opaquely passing object
- * pointers.
+ * Base class of all PHP resources.
  */
 class ResourceData : public ObjectData {
 public:

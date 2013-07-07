@@ -203,7 +203,7 @@ static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
                                  short flag) {
   assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
-    File *sock = iter.second().toObject().getTyped<File>();
+    File *sock = iter.second().toResource().getTyped<File>();
     pollfd &fd = fds[nfds++];
     fd.fd = sock->fd();
     fd.events = flag;
@@ -218,7 +218,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   Array ret;
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
-    assert(fd.fd == iter.second().toObject().getTyped<File>()->fd());
+    assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
       count++;
@@ -281,7 +281,7 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
 }
 
 static bool create_new_socket(const char *&name, int port, Variant &errnum,
-                              Variant &errstr, Object &ret, Socket *&sock,
+                              Variant &errstr, Resource &ret, Socket *&sock,
                               double timeout) {
   int domain = AF_INET;
   int type = SOCK_STREAM;
@@ -296,7 +296,7 @@ static bool create_new_socket(const char *&name, int port, Variant &errnum,
   }
 
   sock = new Socket(socket(domain, type, 0), domain, name, port, timeout);
-  ret = Object(sock);
+  ret = Resource(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
@@ -317,7 +317,7 @@ Variant f_socket_create(int domain, int type, int protocol) {
     return false;
   }
   Socket *sock = new Socket(socketId, domain);
-  Object ret(sock);
+  Resource ret(sock);
   return ret;
 }
 
@@ -335,7 +335,7 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
 
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             "0.0.0.0", port);
-  Object ret(sock);
+  Resource ret(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create listening socket", errno);
     return false;
@@ -365,8 +365,8 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   }
 
   Array ret;
-  ret.set(0, Object(new Socket(fds_array[0], domain)));
-  ret.set(1, Object(new Socket(fds_array[1], domain)));
+  ret.set(0, Resource(new Socket(fds_array[0], domain)));
+  ret.set(1, Resource(new Socket(fds_array[1], domain)));
   fd = ret;
   return true;
 }
@@ -376,7 +376,7 @@ static const StaticString s_l_linger("l_linger");
 static const StaticString s_sec("sec");
 static const StaticString s_usec("usec");
 
-Variant f_socket_get_option(CObjRef socket, int level, int optname) {
+Variant f_socket_get_option(CResRef socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
   Array ret;
   socklen_t optlen;
@@ -425,7 +425,7 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
   return ret;
 }
 
-bool f_socket_getpeername(CObjRef socket, VRefParam address,
+bool f_socket_getpeername(CResRef socket, VRefParam address,
                           VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -439,7 +439,7 @@ bool f_socket_getpeername(CObjRef socket, VRefParam address,
   return get_sockaddr(sa, address, port);
 }
 
-bool f_socket_getsockname(CObjRef socket, VRefParam address,
+bool f_socket_getsockname(CResRef socket, VRefParam address,
                           VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -453,17 +453,17 @@ bool f_socket_getsockname(CObjRef socket, VRefParam address,
   return get_sockaddr(sa, address, port);
 }
 
-bool f_socket_set_block(CObjRef socket) {
+bool f_socket_set_block(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(true);
 }
 
-bool f_socket_set_nonblock(CObjRef socket) {
+bool f_socket_set_nonblock(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(false);
 }
 
-bool f_socket_set_option(CObjRef socket, int level, int optname,
+bool f_socket_set_option(CResRef socket, int level, int optname,
                          CVarRef optval) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -532,7 +532,7 @@ bool f_socket_set_option(CObjRef socket, int level, int optname,
   return true;
 }
 
-bool f_socket_connect(CObjRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_connect(CResRef socket, CStrRef address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   switch (sock->getType()) {
@@ -569,7 +569,7 @@ bool f_socket_connect(CObjRef socket, CStrRef address, int port /* = 0 */) {
   return true;
 }
 
-bool f_socket_bind(CObjRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_bind(CResRef socket, CStrRef address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   const char *addr = address.data();
@@ -593,7 +593,7 @@ bool f_socket_bind(CObjRef socket, CStrRef address, int port /* = 0 */) {
   return true;
 }
 
-bool f_socket_listen(CObjRef socket, int backlog /* = 0 */) {
+bool f_socket_listen(CResRef socket, int backlog /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (listen(sock->fd(), backlog) != 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
@@ -662,7 +662,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
 Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
                         VRefParam errnum /* = null */,
                         VRefParam errstr /* = null */) {
-  Object ret;
+  Resource ret;
   Socket *sock = NULL;
   const char *name = hostname.data();
   if (!create_new_socket(name, port, errnum, errstr, ret, sock, 0.0)) {
@@ -688,7 +688,7 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   return ret;
 }
 
-Variant f_socket_accept(CObjRef socket) {
+Variant f_socket_accept(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
@@ -699,10 +699,10 @@ Variant f_socket_accept(CObjRef socket) {
     delete new_sock;
     return false;
   }
-  return Object(new_sock);
+  return Resource(new_sock);
 }
 
-Variant f_socket_read(CObjRef socket, int length, int type /* = 0 */) {
+Variant f_socket_read(CResRef socket, int length, int type /* = 0 */) {
   if (length <= 0) {
     return false;
   }
@@ -733,7 +733,7 @@ Variant f_socket_read(CObjRef socket, int length, int type /* = 0 */) {
   return String(tmpbuf, retval, AttachString);
 }
 
-Variant f_socket_write(CObjRef socket, CStrRef buffer, int length /* = 0 */) {
+Variant f_socket_write(CResRef socket, CStrRef buffer, int length /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
@@ -746,7 +746,7 @@ Variant f_socket_write(CObjRef socket, CStrRef buffer, int length /* = 0 */) {
   return retval;
 }
 
-Variant f_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
+Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -759,7 +759,7 @@ Variant f_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
   return retval;
 }
 
-Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
+Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
                         CStrRef addr, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
@@ -820,7 +820,7 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
   return retval;
 }
 
-Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
+Variant f_socket_recv(CResRef socket, VRefParam buf, int len, int flags) {
   if (len <= 0) {
     return false;
   }
@@ -847,7 +847,7 @@ static const StaticString
   s_2colons("::"),
   s_0_0_0_0("0.0.0.0");
 
-Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
+Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
                       VRefParam name, VRefParam port /* = 0 */) {
   if (len <= 0) {
     return false;
@@ -940,7 +940,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
   return retval;
 }
 
-bool f_socket_shutdown(CObjRef socket, int how /* = 0 */) {
+bool f_socket_shutdown(CResRef socket, int how /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (shutdown(sock->fd(), how) != 0) {
     SOCKET_ERROR(sock, "unable to shutdown socket", errno);
@@ -949,7 +949,7 @@ bool f_socket_shutdown(CObjRef socket, int how /* = 0 */) {
   return true;
 }
 
-void f_socket_close(CObjRef socket) {
+void f_socket_close(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   sock->close();
 }
@@ -958,7 +958,7 @@ String f_socket_strerror(int errnum) {
   return String(Util::safe_strerror(errnum));
 }
 
-int64_t f_socket_last_error(CObjRef socket /* = null_object */) {
+int64_t f_socket_last_error(CResRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();
@@ -966,7 +966,7 @@ int64_t f_socket_last_error(CObjRef socket /* = null_object */) {
   return Socket::getLastError();
 }
 
-void f_socket_clear_error(CObjRef socket /* = null_object */) {
+void f_socket_clear_error(CResRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     sock->setError(0);
@@ -988,7 +988,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
       dynamic_cast<Socket*>(g_persistentObjects->get("socket", key.c_str()));
     if (sock) {
       if (sock->getError() == 0 && sock->checkLiveness()) {
-        return Object(sock);
+        return Resource(sock);
       }
 
       // socket had an error earlier, we need to remove it from persistent
@@ -997,7 +997,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
     }
   }
 
-  Object ret;
+  Resource ret;
   const char *name = hostname.data();
   Socket *sock = NULL;
 

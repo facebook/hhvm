@@ -46,10 +46,10 @@ String f_base64_encode(CStrRef data) {
 
 Variant f_get_headers(CStrRef url, int format /* = 0 */) {
   Variant c = f_curl_init();
-  f_curl_setopt(c.toObject(), k_CURLOPT_URL, url);
-  f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c.toObject(), k_CURLOPT_HEADER, 1);
-  Variant res = f_curl_exec(c.toObject());
+  f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
+  f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+  f_curl_setopt(c.toResource(), k_CURLOPT_HEADER, 1);
+  Variant res = f_curl_exec(c.toResource());
   if (same(res, false)) {
     return false;
   }

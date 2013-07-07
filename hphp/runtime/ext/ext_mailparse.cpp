@@ -127,21 +127,21 @@ int64_t f_ezmlm_hash(CStrRef addr) {
 ///////////////////////////////////////////////////////////////////////////////
 // mailparse
 
-Object f_mailparse_msg_create() {
+Resource f_mailparse_msg_create() {
   return NEWOBJ(MimePart)();
 }
 
-bool f_mailparse_msg_free(CObjRef mimemail) {
+bool f_mailparse_msg_free(CResRef mimemail) {
   return true;
 }
 
 Variant f_mailparse_msg_parse_file(CStrRef filename) {
   Variant stream = File::Open(filename, "rb");
   if (same(stream, false)) return false;
-  File *f = stream.toObject().getTyped<File>();
+  File *f = stream.toResource().getTyped<File>();
 
   MimePart *p = NEWOBJ(MimePart)();
-  Object ret(p);
+  Resource ret(p);
   while (!f->eof()) {
     String line = f->readLine();
     if (!line.isNull()) {
@@ -153,37 +153,38 @@ Variant f_mailparse_msg_parse_file(CStrRef filename) {
   return ret;
 }
 
-bool f_mailparse_msg_parse(CObjRef mimemail, CStrRef data) {
+bool f_mailparse_msg_parse(CResRef mimemail, CStrRef data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
-Variant f_mailparse_msg_extract_part_file(CObjRef mimemail, CVarRef filename,
+Variant f_mailparse_msg_extract_part_file(CResRef mimemail, CVarRef filename,
                                           CVarRef callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
 
-Variant f_mailparse_msg_extract_whole_part_file(CObjRef mimemail,
+Variant f_mailparse_msg_extract_whole_part_file(CResRef mimemail,
                                                 CVarRef filename,
                                                 CVarRef callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
-Variant f_mailparse_msg_extract_part(CObjRef mimemail, CVarRef msgbody,
+Variant f_mailparse_msg_extract_part(CResRef mimemail, CVarRef msgbody,
                                      CVarRef callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
 }
 
-Array f_mailparse_msg_get_part_data(CObjRef mimemail) {
+Array f_mailparse_msg_get_part_data(CResRef mimemail) {
   return mimemail.getTyped<MimePart>()->getPartData().toArray();
 }
 
-Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
-  Object part = mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
+Variant f_mailparse_msg_get_part(CResRef mimemail, CStrRef mimesection) {
+  Resource part =
+    mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
     raise_warning("cannot find section %s in message", mimesection.data());
     return false;
@@ -191,7 +192,7 @@ Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
   return part;
 }
 
-Array f_mailparse_msg_get_structure(CObjRef mimemail) {
+Array f_mailparse_msg_get_structure(CResRef mimemail) {
   return mimemail.getTyped<MimePart>()->getStructure();
 }
 
@@ -233,7 +234,7 @@ static int mailparse_stream_flush(void *stream) {
   return ((File*)stream)->flush() ? 1 : 0;
 }
 
-bool f_mailparse_stream_encode(CObjRef sourcefp, CObjRef destfp,
+bool f_mailparse_stream_encode(CResRef sourcefp, CResRef destfp,
                                CStrRef encoding) {
   File *srcstream = sourcefp.getTyped<File>(true, true);
   File *deststream = destfp.getTyped<File>(true, true);
@@ -349,12 +350,12 @@ const StaticString
   s_filename("filename"),
   s_origfilename("origfilename");
 
-Variant f_mailparse_uudecode_all(CObjRef fp) {
+Variant f_mailparse_uudecode_all(CResRef fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
 
   File *outstream = NEWOBJ(TempFile)(false);
-  Object deleter(outstream);
+  Resource deleter(outstream);
 
   Array return_value;
   int nparts = 0;
@@ -390,7 +391,7 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
 
       /* create a temp file for the data */
       File *partstream = NEWOBJ(TempFile)(false);
-      Object deleter(partstream);
+      Resource deleter(partstream);
       if (partstream)  {
         nparts++;
         item.set(s_filename, String(((TempFile*)partstream)->getName()));
@@ -412,7 +413,7 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
   return return_value;
 }
 
-Variant f_mailparse_determine_best_xfer_encoding(CObjRef fp) {
+Variant f_mailparse_determine_best_xfer_encoding(CResRef fp) {
   File *stream = fp.getTyped<File>();
   stream->rewind();
 

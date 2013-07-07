@@ -94,14 +94,14 @@ Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
   MessageQueue *q = NEWOBJ(MessageQueue)();
   q->key = key;
   q->id = id;
-  return Object(q);
+  return Resource(q);
 }
 
 bool f_msg_queue_exists(int64_t key) {
   return msgget(key, 0) >= 0;
 }
 
-bool f_msg_remove_queue(CObjRef queue) {
+bool f_msg_remove_queue(CResRef queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -123,7 +123,7 @@ const StaticString
   s_msg_lspid("msg_lspid"),
   s_msg_lrpid("msg_lrpid");
 
-bool f_msg_set_queue(CObjRef queue, CArrRef data) {
+bool f_msg_set_queue(CResRef queue, CArrRef data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -148,7 +148,7 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   return false;
 }
 
-Array f_msg_stat_queue(CObjRef queue) {
+Array f_msg_stat_queue(CResRef queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -174,7 +174,7 @@ Array f_msg_stat_queue(CObjRef queue) {
   return Array();
 }
 
-bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
+bool f_msg_send(CResRef queue, int64_t msgtype, CVarRef message,
                 bool serialize /* = true */, bool blocking /* = true */,
                 VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
@@ -209,7 +209,7 @@ bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
   return true;
 }
 
-bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
+bool f_msg_receive(CResRef queue, int64_t desiredmsgtype, VRefParam msgtype,
                    int64_t maxsize, VRefParam message,
                    bool unserialize /* = true */,
                    int64_t flags /* = 0 */, VRefParam errorcode /* = null */) {
@@ -364,11 +364,11 @@ public:
 
 StaticString Semaphore::s_class_name("Semaphore");
 
-bool f_sem_acquire(CObjRef sem_identifier) {
+bool f_sem_acquire(CResRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(true);
 }
 
-bool f_sem_release(CObjRef sem_identifier) {
+bool f_sem_release(CResRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(false);
 }
 
@@ -457,14 +457,14 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   sem_ptr->semid = semid;
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
-  return Object(sem_ptr);
+  return Resource(sem_ptr);
 }
 
 /**
  * contributed by Gavin Sherry gavin@linuxworld.com.au
  * Fri Mar 16 00:50:13 EST 2001
  */
-bool f_sem_remove(CObjRef sem_identifier) {
+bool f_sem_remove(CResRef sem_identifier) {
   Semaphore *sem_ptr = sem_identifier.getTyped<Semaphore>();
 
   union semun un;

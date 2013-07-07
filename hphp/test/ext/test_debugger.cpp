@@ -94,10 +94,10 @@ bool TestDebugger::getResponse(const string& path, string& result,
   server += "/" + path;
   printf("\n  Getting URL '%s'...\n", server.get()->data());
   Variant c = f_curl_init();
-  f_curl_setopt(c.toObject(), k_CURLOPT_URL, server);
-  f_curl_setopt(c.toObject(), k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c.toObject(), CURLOPT_TIMEOUT, 120);
-  Variant res = f_curl_exec(c.toObject());
+  f_curl_setopt(c.toResource(), k_CURLOPT_URL, server);
+  f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+  f_curl_setopt(c.toResource(), CURLOPT_TIMEOUT, 120);
+  Variant res = f_curl_exec(c.toResource());
   if (same(res, false)) {
     printf("  Request failed\n");
     return false;

@@ -260,7 +260,7 @@ String SessionModule::create_sid() {
     Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
     return String();
   }
-  if (!f_hash_update(context.toObject(), buf.detach())) {
+  if (!f_hash_update(context.toResource(), buf.detach())) {
     Logger::Error("hash_update() failed");
     return String();
   }
@@ -275,7 +275,7 @@ String SessionModule::create_sid() {
         n = ::read(fd, rbuf, (to_read < (int)sizeof(rbuf) ?
                               to_read : (int)sizeof(buf)));
         if (n <= 0) break;
-        if (!f_hash_update(context.toObject(),
+        if (!f_hash_update(context.toResource(),
                            String((const char *)rbuf, n, AttachLiteral))) {
           Logger::Error("hash_update() failed");
           ::close(fd);
@@ -287,7 +287,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context.toObject());
+  String hashed = f_hash_final(context.toResource());
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;

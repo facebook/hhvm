@@ -102,7 +102,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   private: bool set_relaxng_schema(String source, int type);
 
  public:
-  SmartObject<File>  m_uri;
+  SmartResource<File>  m_uri;
  private:
   xmlTextReaderPtr        m_ptr;
   xmlParserInputBufferPtr m_input;

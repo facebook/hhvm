@@ -580,7 +580,7 @@
             "args": [
                 {
                     "name": "key",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "Resource holding the key."
                 }
             ]
@@ -598,7 +598,7 @@
             "args": [
                 {
                     "name": "key",
-                    "type": "Object"
+                    "type": "Resource"
                 }
             ]
         },
@@ -615,7 +615,7 @@
             "args": [
                 {
                     "name": "key",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "Resource holding the key."
                 }
             ]
@@ -1073,7 +1073,7 @@
             "args": [
                 {
                     "name": "x509cert",
-                    "type": "Object"
+                    "type": "Resource"
                 }
             ]
         },

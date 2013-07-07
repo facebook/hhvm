@@ -101,7 +101,7 @@ public:
     totalRowCount = 0;
   }
 
-  Object defaultConn;
+  Resource defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 };
@@ -116,7 +116,7 @@ MySQL *MySQL::Get(CVarRef link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  MySQL *mysql = link_identifier.toObject().getTyped<MySQL>
+  MySQL *mysql = link_identifier.toResource().getTyped<MySQL>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   return mysql;
@@ -332,7 +332,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
 // helpers
 
 static MySQLResult *get_result(CVarRef result) {
-  MySQLResult *res = result.toObject().getTyped<MySQLResult>
+  MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   if (res == NULL || (res->get() == NULL && !res->isLocalized())) {
@@ -533,7 +533,7 @@ static Variant php_mysql_do_connect(String server, String username,
     socket = MySQL::GetDefaultSocket();
   }
 
-  Object ret;
+  Resource ret;
   MySQL *mySQL = NULL;
   if (persistent) {
     mySQL = MySQL::GetPersistent(host, port, socket, username, password,
@@ -872,7 +872,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result = Object(NEWOBJ(MySQLResult)(NULL, true));
+  Variant result = Resource(NEWOBJ(MySQLResult)(nullptr, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return false;
   }
@@ -1045,7 +1045,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
   }
 
   MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
-  Object ret(r);
+  Resource ret(r);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&
       (s_mysql_data->totalRowCount += r->getRowCount())
@@ -1111,7 +1111,7 @@ Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
       return true;
     }
 
-    return Object(NEWOBJ(MySQLResult)(mysql_result));
+    return Resource(NEWOBJ(MySQLResult)(mysql_result));
 }
 
 Variant f_mysql_unbuffered_query(CStrRef query,
@@ -1133,7 +1133,7 @@ Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_tables(CStrRef database,
@@ -1148,7 +1148,7 @@ Variant f_mysql_list_tables(CStrRef database,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_fields(CStrRef database_name, CStrRef table_name,
@@ -1166,7 +1166,7 @@ Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1347,12 +1347,12 @@ Variant f_mysql_async_query_result(CVarRef link_identifier) {
   MYSQL_RES* mysql_result = mysql_use_result(conn);
   MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
   r->setAsyncConnection(mySQL);
-  Object ret(r);
+  Resource ret(r);
   return ret;
 }
 
 bool f_mysql_async_query_completed(CVarRef result) {
-  MySQLResult *res = result.toObject().getTyped<MySQLResult>
+  MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   return !res || res->get() == NULL;
@@ -1450,7 +1450,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
       return Array::Create();
     }
 
-    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
     MYSQL* conn = mySQL->get();
     if (conn->async_op_status == ASYNC_OP_UNSET) {
       raise_warning("runtime/ext_mysql: no pending async operation in "
@@ -1489,7 +1489,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
                    nfds);
       return Array::Create();
     }
-    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
     MYSQL* conn = mySQL->get();
 
     pollfd* fd = &fds[nfds++];
@@ -1637,7 +1637,7 @@ Variant f_mysql_result(CVarRef result, int row,
     mysql_result = res->get();
     if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
       raise_warning("Unable to jump to row %d on MySQL result index %d",
-                      row, result.toObject()->o_getId());
+                      row, result.toResource()->o_getId());
       return false;
     }
     mysql_data_seek(mysql_result, row);
@@ -1682,7 +1682,7 @@ Variant f_mysql_result(CVarRef result, int row,
       if (!found) { /* no match found */
         raise_warning("%s%s%s not found in MySQL result index %d",
                         table_name.data(), (table_name.empty() ? "" : "."),
-                        field_name.data(), result.toObject()->o_getId());
+                        field_name.data(), result.toResource()->o_getId());
         return false;
       }
     } else {

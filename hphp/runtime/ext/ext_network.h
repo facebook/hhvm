@@ -59,11 +59,11 @@ Variant f_fsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_n
 Variant f_pfsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
                      VRefParam errstr = uninit_null(), double timeout = 0.0);
 
-Variant f_socket_get_status(CObjRef stream);
+Variant f_socket_get_status(CResRef stream);
 
-bool f_socket_set_blocking(CObjRef stream, int mode);
+bool f_socket_set_blocking(CResRef stream, int mode);
 
-bool f_socket_set_timeout(CObjRef stream, int seconds,
+bool f_socket_set_timeout(CResRef stream, int seconds,
                           int microseconds = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

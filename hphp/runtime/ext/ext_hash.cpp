@@ -181,8 +181,9 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   ops->hash_init(context);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
-         chunk = f_fread(f.toObject(), 1024)) {
+    for (Variant chunk = f_fread(f.toResource(), 1024);
+         !is_empty_string(chunk);
+         chunk = f_fread(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -272,8 +273,9 @@ static Variant php_hash_do_hash_hmac(CStrRef algo, CStrRef data,
   char *K = prepare_hmac_key(ops, context, key);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
-         chunk = f_fread(f.toObject(), 1024)) {
+    for (Variant chunk = f_fread(f.toResource(), 1024);
+         !is_empty_string(chunk);
+         chunk = f_fread(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -324,26 +326,27 @@ Variant f_hash_init(CStrRef algo, int options /* = 0 */,
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
-  return Object(hash);
+  return Resource(hash);
 }
 
-bool f_hash_update(CObjRef context, CStrRef data) {
+bool f_hash_update(CResRef context, CStrRef data) {
   HashContext *hash = context.getTyped<HashContext>();
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
 }
 
-bool f_hash_update_file(CObjRef init_context, CStrRef filename,
-                        CObjRef stream_context /* = null */) {
+bool f_hash_update_file(CResRef init_context, CStrRef filename,
+                        CResRef stream_context /* = null */) {
   Variant f = f_fopen(filename, "rb");
   if (same(f, false)) {
     return false;
   }
 
   HashContext *hash = init_context.getTyped<HashContext>();
-  for (Variant chunk = f_fread(f.toObject(), 1024); !is_empty_string(chunk);
-       chunk = f_fread(f.toObject(), 1024)) {
+  for (Variant chunk = f_fread(f.toResource(), 1024);
+       !is_empty_string(chunk);
+       chunk = f_fread(f.toResource(), 1024)) {
     String schunk = chunk.toString();
     hash->ops->hash_update(hash->context, (unsigned char *)schunk.data(),
                            schunk.size());
@@ -351,7 +354,7 @@ bool f_hash_update_file(CObjRef init_context, CStrRef filename,
   return true;
 }
 
-int64_t f_hash_update_stream(CObjRef context, CObjRef handle,
+int64_t f_hash_update_stream(CResRef context, CResRef handle,
                          int length /* = -1 */) {
   HashContext *hash = context.getTyped<HashContext>();
   int didread = 0;
@@ -369,7 +372,7 @@ int64_t f_hash_update_stream(CObjRef context, CObjRef handle,
   return didread;
 }
 
-String f_hash_final(CObjRef context, bool raw_output /* = false */) {
+String f_hash_final(CResRef context, bool raw_output /* = false */) {
   HashContext *hash = context.getTyped<HashContext>();
 
   String raw = String(hash->ops->digest_size, ReserveString);

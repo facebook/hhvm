@@ -48,6 +48,7 @@ class StaticString;
 class Array;
 class Object;
 template<typename T> class SmartObject;
+#define SmartResource SmartObject
 class Variant;
 class VarNR;
 class RefData;
@@ -151,6 +152,7 @@ typedef const char * litstr; /* literal string */
 typedef const String & CStrRef;
 typedef const Array & CArrRef;
 typedef const Object & CObjRef;
+typedef const Object & CResRef;
 typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;

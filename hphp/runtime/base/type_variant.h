@@ -413,6 +413,11 @@ class Variant : private TypedValue {
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
+  inline ALWAYS_INLINE Resource & asResRef() {
+    assert(m_type == KindOfObject && m_data.pobj);
+    return *reinterpret_cast<Object*>(&m_data.pobj);
+  }
+
   inline ALWAYS_INLINE Object& toObjRef() {
     assert(is(KindOfObject));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
@@ -657,6 +662,10 @@ class Variant : private TypedValue {
     return toArrayHelper();
   }
   Object toObject () const {
+    if (m_type == KindOfObject) return m_data.pobj;
+    return toObjectHelper();
+  }
+  Resource toResource () const {
     if (m_type == KindOfObject) return m_data.pobj;
     return toObjectHelper();
   }
@@ -1202,6 +1211,7 @@ public:
   StringData *getStringData() const { return m_var.getStringData(); }
   Array toArray() const { return m_var.toArray(); }
   Object toObject() const { return m_var.toObject(); }
+  Resource toResource() const { return m_var.toResource(); }
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
 
   CVarRef append(CVarRef v) const { return m_var.append(v); }

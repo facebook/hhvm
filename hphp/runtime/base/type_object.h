@@ -219,6 +219,9 @@ private:
   }
 };
 
+typedef Object Resource;
+#define null_resource Object::s_nullObject
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

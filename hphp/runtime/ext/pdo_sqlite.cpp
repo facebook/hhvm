@@ -401,11 +401,11 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Object(new PDOColumn()));
+      columns.set(i, Resource(new PDOColumn()));
     }
   }
 
-  PDOColumn *col = columns[colno].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = columns[colno].toResource().getTyped<PDOColumn>();
   col->name = String(sqlite3_column_name(m_stmt, colno), CopyString);
   col->maxlen = 0xffffffff;
   col->precision = 0;
@@ -499,7 +499,7 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
 
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toObject());
+          Variant buf = f_stream_get_contents(param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {

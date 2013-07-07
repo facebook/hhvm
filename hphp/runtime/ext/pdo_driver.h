@@ -232,7 +232,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 class PDOStatement;
-typedef SmartObject<PDOStatement> sp_PDOStatement;
+typedef SmartResource<PDOStatement> sp_PDOStatement;
 
 /* represents a connection to a database */
 class PDOConnection : public ResourceData {
@@ -383,7 +383,7 @@ public:
   /* defaults for fetches */
   PDOFetchType default_fetch_type;
 };
-typedef SmartObject<PDOConnection> sp_PDOConnection;
+typedef SmartResource<PDOConnection> sp_PDOConnection;
 
 ///////////////////////////////////////////////////////////////////////////////
 

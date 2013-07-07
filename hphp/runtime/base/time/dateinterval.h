@@ -70,8 +70,8 @@ public:
   CStrRef o_getClassNameHook() const { return s_class_name; }
 
   DateInterval();
-  DateInterval(CStrRef date_interval, bool date_string = false);
-  DateInterval(timelib_rel_time *di);
+  explicit DateInterval(CStrRef date_interval, bool date_string = false);
+  explicit DateInterval(timelib_rel_time *di);
 
   int64_t getYears()      const    { return m_di->y;                      }
   int64_t getMonths()     const    { return m_di->m;                      }
@@ -101,7 +101,7 @@ public:
   String format(CStrRef format_spec);
 
   bool isValid() const { return get(); }
-  SmartObject<DateInterval> cloneDateInterval() const;
+  SmartResource<DateInterval> cloneDateInterval() const;
 
 protected:
   friend class DateTime;

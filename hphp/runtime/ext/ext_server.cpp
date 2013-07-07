@@ -113,10 +113,10 @@ bool f_pagelet_server_is_enabled() {
 
 static const StaticString s_Host("Host");
 
-Object f_pagelet_server_task_start(CStrRef url,
-                                   CArrRef headers /* = null_array */,
-                                   CStrRef post_data /* = null_string */,
-                                   CArrRef files /* = null_array */) {
+Resource f_pagelet_server_task_start(CStrRef url,
+                                     CArrRef headers /* = null_array */,
+                                     CStrRef post_data /* = null_string */,
+                                     CArrRef files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -130,11 +130,11 @@ Object f_pagelet_server_task_start(CStrRef url,
   return PageletServer::TaskStart(url, headers, remote_host, post_data);
 }
 
-int64_t f_pagelet_server_task_status(CObjRef task) {
+int64_t f_pagelet_server_task_status(CResRef task) {
   return PageletServer::TaskStatus(task);
 }
 
-String f_pagelet_server_task_result(CObjRef task, VRefParam headers,
+String f_pagelet_server_task_result(CResRef task, VRefParam headers,
                                     VRefParam code, int64_t timeout_ms /* = 0 */) {
   Array rheaders;
   int rcode;
@@ -172,15 +172,15 @@ bool f_xbox_post_message(CStrRef msg, CStrRef host /* = "localhost" */) {
   return XboxServer::PostMessage(msg, host);
 }
 
-Object f_xbox_task_start(CStrRef message) {
+Resource f_xbox_task_start(CStrRef message) {
   return XboxServer::TaskStart(message);
 }
 
-bool f_xbox_task_status(CObjRef task) {
+bool f_xbox_task_status(CResRef task) {
   return XboxServer::TaskStatus(task);
 }
 
-int64_t f_xbox_task_result(CObjRef task, int64_t timeout_ms, VRefParam ret) {
+int64_t f_xbox_task_result(CResRef task, int64_t timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 

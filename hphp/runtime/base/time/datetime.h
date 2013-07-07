@@ -211,7 +211,7 @@ public:
   /**
    * What time is it?
    */
-  static SmartObject<DateTime> Current(bool utc = false);
+  static SmartResource<DateTime> Current(bool utc = false);
 
   /**
    * Returns are really in special PHP formats, and please read datetime.cpp
@@ -247,7 +247,7 @@ public:
   int isoYear() const;
   int isoDow() const;
   int offset() const;  // timezone offset from UTC
-  SmartObject<TimeZone> timezone() const { return m_tz->cloneTimeZone();}
+  SmartResource<TimeZone> timezone() const { return m_tz->cloneTimeZone();}
 
   const char *weekdayName() const;
   const char *shortWeekdayName() const;
@@ -259,10 +259,10 @@ public:
   void setDate(int year, int month, int day);
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
-  void setTimezone(SmartObject<TimeZone> tz);
+  void setTimezone(SmartResource<TimeZone> tz);
   void modify(CStrRef diff); // PHP's date_modify() function, very powerful
-  void add(const SmartObject<DateInterval> &interval);
-  void sub(const SmartObject<DateInterval> &interval);
+  void add(const SmartResource<DateInterval> &interval);
+  void sub(const SmartResource<DateInterval> &interval);
   void internalModify(timelib_rel_time *rel, bool have_relative, char bias);
 
   // conversions
@@ -273,13 +273,15 @@ public:
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64_t timestamp, bool utc = false);
-  bool fromString(CStrRef input, SmartObject<TimeZone> tz, const char* format=nullptr);
+  bool fromString(CStrRef input, SmartResource<TimeZone> tz,
+                  const char* format=nullptr);
 
   // comparison
-  SmartObject<DateInterval> diff(SmartObject<DateTime> datetime2, bool absolute = false);
+  SmartResource<DateInterval> diff(SmartResource<DateTime> datetime2,
+                                   bool absolute = false);
 
   // cloning
-  SmartObject<DateTime> cloneDateTime() const;
+  SmartResource<DateTime> cloneDateTime() const;
 
   // sun info
   Array getSunInfo(double latitude, double longitude) const;
@@ -343,7 +345,7 @@ private:
   typedef boost::shared_ptr<timelib_time> TimePtr;
 
   TimePtr m_time;
-  SmartObject<TimeZone> m_tz;
+  SmartResource<TimeZone> m_tz;
   mutable int64_t m_timestamp;
   mutable bool m_timestampSet;
 

@@ -126,7 +126,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
   if (file != nullptr) {
     file->m_name = filename.data();
     file->m_mode = mode.data();
-    return Object(file);
+    return Resource(file);
   }
   return false;
 }

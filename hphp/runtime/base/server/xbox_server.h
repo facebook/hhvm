@@ -47,9 +47,9 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Object TaskStart(CStrRef msg, CStrRef reqInitDoc = "");
-  static bool TaskStatus(CObjRef task);
-  static int TaskResult(CObjRef task, int timeout_ms, Variant &ret);
+  static Resource TaskStart(CStrRef msg, CStrRef reqInitDoc = "");
+  static bool TaskStatus(CResRef task);
+  static int TaskResult(CResRef task, int timeout_ms, Variant &ret);
 
   /**
    * Gets the ServerInfo and RequestHandler for the current xbox worker thread.

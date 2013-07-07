@@ -996,7 +996,7 @@ static sdlFunctionPtr deserialize_function_call
           }
         }
         h = NEWOBJ(soapHeader)();
-        Object hobj(h);
+        Resource hobj(h);
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
         h->hdr = NULL;
@@ -1199,7 +1199,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       encodePtr hdr_enc;
       int hdr_use = SOAP_LITERAL;
       Variant hdr_ret = obj->o_get("headerfault");
-      soapHeader *h = headers[0].toObject().getTyped<soapHeader>();
+      soapHeader *h = headers[0].toResource().getTyped<soapHeader>();
       const char *hdr_ns   = h->hdr ? h->hdr->ns.c_str() : NULL;
       const char *hdr_name = h->function_name.data();
 
@@ -1403,7 +1403,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
     if (!headers.empty()) {
       head = xmlNewChild(envelope, ns, BAD_CAST("Header"), NULL);
       for (ArrayIter iter(headers); iter; ++iter) {
-        soapHeader *h = iter.second().toObject().getTyped<soapHeader>();
+        soapHeader *h = iter.second().toResource().getTyped<soapHeader>();
         if (!h->retval.isNull()) {
           encodePtr hdr_enc;
           int hdr_use = SOAP_LITERAL;
@@ -1768,7 +1768,7 @@ static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
   output_xml_header(SOAP_GLOBAL(soap_version));
 
   Array headers;
-  if (hdr) headers.append(Object(hdr));
+  if (hdr) headers.append(Resource(hdr));
   xmlDocPtr doc_return = serialize_response_call
     (function, NULL, NULL, fault, headers, SOAP_GLOBAL(soap_version));
 
@@ -2162,7 +2162,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
 
   // 4. process soap headers
   for (ArrayIter iter(m_soap_headers); iter; ++iter) {
-    soapHeader *h = iter.second().toObject().getTyped<soapHeader>();
+    soapHeader *h = iter.second().toResource().getTyped<soapHeader>();
     if (m_sdl && !h->function && !h->hdr) {
       if (h->mustUnderstand) {
         throw_soap_server_fault("MustUnderstand","Header not understood");
@@ -2287,7 +2287,7 @@ void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
 void c_SoapServer::t_addsoapheader(CObjRef fault) {
   SoapServerScope ss(this);
   soapHeader *p = NEWOBJ(soapHeader)();
-  Object obj(p);
+  Resource obj(p);
   p->function = NULL;
   p->mustUnderstand = false;
   p->retval = fault;
@@ -2351,8 +2351,8 @@ void c_SoapClient::t___construct(CVarRef wsdl,
 
     if (options.exists(s_stream_context)) {
       StreamContext *sc = NULL;
-      if (options[s_stream_context].isObject()) {
-        sc = options[s_stream_context].toObject()
+      if (options[s_stream_context].isResource()) {
+        sc = options[s_stream_context].toResource()
                                       .getTyped<StreamContext>();
       }
       if (!sc) {

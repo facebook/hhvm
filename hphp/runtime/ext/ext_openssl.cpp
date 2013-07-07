@@ -179,14 +179,14 @@ public:
    *   passphrase - NULL causes a passphrase prompt to be emitted in
    *   the Apache error log!
    */
-  static Object Get(CVarRef var, bool public_key,
-                    const char *passphrase = NULL) {
+  static Resource Get(CVarRef var, bool public_key,
+                      const char *passphrase = nullptr) {
     if (var.is(KindOfArray)) {
       Array arr = var.toArray();
       if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
         raise_warning("key array must be of the form "
                         "array(0 => key, 1 => phrase)");
-        return Object();
+        return Resource();
       }
 
       String zphrase = arr[1].toString();
@@ -195,29 +195,29 @@ public:
     return GetHelper(var, public_key, passphrase);
   }
 
-  static Object GetHelper(CVarRef var, bool public_key,
-                          const char *passphrase) {
-    Object ocert;
+  static Resource GetHelper(CVarRef var, bool public_key,
+                            const char *passphrase) {
+    Resource ocert;
     EVP_PKEY *key = NULL;
 
     if (var.isResource()) {
-      Certificate *cert = var.toObject().getTyped<Certificate>(true, true);
-      Key *key = var.toObject().getTyped<Key>(true, true);
+      Certificate *cert = var.toResource().getTyped<Certificate>(true, true);
+      Key *key = var.toResource().getTyped<Key>(true, true);
       if (cert == NULL && key == NULL) {
-        return Object();
+        return Resource();
       }
       if (key) {
         bool is_priv = key->isPrivate();
         if (!public_key && !is_priv) {
           raise_warning("supplied key param is a public key");
-          return Object();
+          return Resource();
         }
         if (public_key && is_priv) {
           raise_warning("Don't know how to get public key from "
                           "this private key");
-          return Object();
+          return Resource();
         }
-        return var.toObject();
+        return var.toResource();
       }
       ocert = cert;
     } else {
@@ -228,14 +228,14 @@ public:
         if (ocert.isNull()) {
           /* not a X509 certificate, try to retrieve public key */
           BIO *in = Certificate::ReadData(var);
-          if (in == NULL) return Object();
+          if (in == nullptr) return Resource();
           key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
           BIO_free(in);
         }
       } else {
         /* we want the private key */
         BIO *in = Certificate::ReadData(var);
-        if (in == NULL) return Object();
+        if (in == nullptr) return Resource();
         key = PEM_read_bio_PrivateKey(in, NULL,NULL, (void*)passphrase);
         BIO_free(in);
       }
@@ -247,9 +247,10 @@ public:
     }
 
     if (key) {
-      return Object(new Key(key));
+      return Resource(new Key(key));
     }
-    return Object();
+    // Is it okay to return a "null" resource?
+    return Resource();
   }
 };
 
@@ -268,7 +269,7 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  static X509_REQ *Get(CVarRef var, Object &ocsr) {
+  static X509_REQ *Get(CVarRef var, Resource &ocsr) {
     ocsr = Get(var);
     CSRequest *csr = ocsr.getTyped<CSRequest>(true);
     if (csr == NULL || csr->m_csr == NULL) {
@@ -278,21 +279,21 @@ public:
     return csr->m_csr;
   }
 
-  static Object Get(CVarRef var) {
+  static Resource Get(CVarRef var) {
     if (var.isResource()) {
-      return var.toObject();
+      return var.toResource();
     }
     if (var.isString() || var.isObject()) {
       BIO *in = Certificate::ReadData(var);
-      if (in == NULL) return Object();
+      if (in == nullptr) return Resource();
 
       X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
       BIO_free(in);
       if (csr) {
-        return Object(new CSRequest(csr));
+        return Resource(new CSRequest(csr));
       }
     }
-    return Object();
+    return Resource();
   }
 };
 
@@ -887,7 +888,7 @@ static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
 
 bool f_openssl_csr_export_to_file(CVarRef csr, CStrRef outfilename,
                                   bool notext /* = true */) {
-  Object ocsr;
+  Resource ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
@@ -906,7 +907,7 @@ bool f_openssl_csr_export_to_file(CVarRef csr, CStrRef outfilename,
 }
 
 bool f_openssl_csr_export(CVarRef csr, VRefParam out, bool notext /* = true */) {
-  Object ocsr;
+  Resource ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
@@ -928,16 +929,16 @@ bool f_openssl_csr_export(CVarRef csr, VRefParam out, bool notext /* = true */) 
 }
 
 Variant f_openssl_csr_get_public_key(CVarRef csr) {
-  Object ocsr;
+  Resource ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
-  return Object(new Key(X509_REQ_get_pubkey(pcsr)));
+  return Resource(new Key(X509_REQ_get_pubkey(pcsr)));
 }
 
 Variant f_openssl_csr_get_subject(CVarRef csr,
                                   bool use_shortnames /* = true */) {
-  Object ocsr;
+  Resource ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
@@ -954,7 +955,7 @@ Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
 
-  Object okey;
+  Resource okey;
   X509_REQ *csr = NULL;
   vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
@@ -968,7 +969,7 @@ Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
     if (req.priv_key == NULL) {
       req.generatePrivateKey();
       if (req.priv_key) {
-        okey = Object(new Key(req.priv_key));
+        okey = Resource(new Key(req.priv_key));
       }
     }
     if (req.priv_key == NULL) {
@@ -989,7 +990,7 @@ Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
         } else {
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-            ret = Object(new CSRequest(csr));
+            ret = Resource(new CSRequest(csr));
             csr = NULL;
           } else {
             raise_warning("Error signing request");
@@ -1010,11 +1011,11 @@ Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
 Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key,
                            int days, CVarRef configargs /* = null_variant */,
                            int serial /* = 0 */) {
-  Object ocsr;
+  Resource ocsr;
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
-  Object ocert;
+  Resource ocert;
   if (!cacert.isNull()) {
     ocert = Certificate::Get(cacert);
     if (ocert.isNull()) {
@@ -1022,7 +1023,7 @@ Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key,
       return false;
     }
   }
-  Object okey = Key::Get(priv_key, false);
+  Resource okey = Key::Get(priv_key, false);
   if (okey.isNull()) {
     raise_warning("cannot get private key from parameter 3");
     return false;
@@ -1037,7 +1038,7 @@ Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key,
     return false;
   }
 
-  Object onewcert;
+  Resource onewcert;
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
   Variant ret = false;
@@ -1071,7 +1072,7 @@ Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key,
     raise_warning("No memory");
     goto cleanup;
   }
-  onewcert = Object(new Certificate(new_cert));
+  onewcert = Resource(new Certificate(new_cert));
   /* Version 3 cert */
   if (!X509_set_version(new_cert, 2)) {
     goto cleanup;
@@ -1124,13 +1125,13 @@ Variant f_openssl_error_string() {
   return false;
 }
 
-void f_openssl_free_key(CObjRef key) {
+void f_openssl_free_key(CResRef key) {
   return f_openssl_pkey_free(key);
 }
 
 bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
                     CVarRef priv_key_id) {
-  Object okey = Key::Get(priv_key_id, false);
+  Resource okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
     raise_warning("unable to coerce parameter 4 into a private key");
     return false;
@@ -1163,7 +1164,7 @@ static STACK_OF(X509) *php_array_to_X509_sk(CVarRef certs) {
     arrCerts.append(certs);
   }
   for (ArrayIter iter(arrCerts); iter; ++iter) {
-    Object ocert = Certificate::Get(iter.second());
+    Resource ocert = Certificate::Get(iter.second());
     if (ocert.isNull()) {
       break;
     }
@@ -1178,12 +1179,12 @@ static const StaticString s_extracerts("extracerts");
 static bool openssl_pkcs12_export_impl(CVarRef x509, BIO *bio_out,
                                        CVarRef priv_key, CStrRef pass,
                                        CVarRef args /* = null_variant */) {
-  Object ocert = Certificate::Get(x509);
+  Resource ocert = Certificate::Get(x509);
   if (ocert.isNull()) {
     raise_warning("cannot get cert from parameter 1");
     return false;
   }
-  Object okey = Key::Get(priv_key, false);
+  Resource okey = Key::Get(priv_key, false);
   if (okey.isNull()) {
     raise_warning("cannot get private key from parameter 3");
     return false;
@@ -1317,9 +1318,9 @@ bool f_openssl_pkcs7_decrypt(CStrRef infilename, CStrRef outfilename,
   bool ret = false;
   BIO *in = NULL, *out = NULL, *datain = NULL;
   PKCS7 *p7 = NULL;
-  Object okey;
+  Resource okey;
 
-  Object ocert = Certificate::Get(recipcert);
+  Resource ocert = Certificate::Get(recipcert);
   if (ocert.isNull()) {
     raise_warning("unable to coerce parameter 3 to x509 cert");
     goto clean_exit;
@@ -1445,7 +1446,7 @@ bool f_openssl_pkcs7_sign(CStrRef infilename, CStrRef outfilename,
   STACK_OF(X509) *others = NULL;
   BIO *infile = NULL, *outfile = NULL;
   PKCS7 *p7 = NULL;
-  Object okey, ocert;
+  Resource okey, ocert;
 
   if (!extracerts.empty()) {
     others = load_all_certs_from_file(extracerts.data());
@@ -1586,7 +1587,7 @@ Variant f_openssl_pkcs7_verify(CStrRef filename, int flags,
 static bool openssl_pkey_export_impl(CVarRef key, BIO *bio_out,
                                      CStrRef passphrase /* = null_string */,
                                      CVarRef configargs /* = null_variant */) {
-  Object okey = Key::Get(key, false, passphrase.data());
+  Resource okey = Key::Get(key, false, passphrase.data());
   if (okey.isNull()) {
     raise_warning("cannot get key from parameter 1");
     return false;
@@ -1641,7 +1642,7 @@ bool f_openssl_pkey_export(CVarRef key, VRefParam out,
   return ret;
 }
 
-void f_openssl_pkey_free(CObjRef key) {
+void f_openssl_pkey_free(CResRef key) {
   // do nothing
 }
 
@@ -1689,7 +1690,7 @@ static void add_bignum_as_string(Array &arr,
   smart_free(out);
 }
 
-Array f_openssl_pkey_get_details(CObjRef key) {
+Array f_openssl_pkey_get_details(CResRef key) {
   EVP_PKEY *pkey = key.getTyped<Key>()->m_key;
   BIO *out = BIO_new(BIO_s_mem());
   PEM_write_bio_PUBKEY(out, pkey);
@@ -1753,7 +1754,7 @@ Array f_openssl_pkey_get_details(CObjRef key) {
 
 Variant f_openssl_pkey_get_private(CVarRef key,
                                    CStrRef passphrase /* = null_string */) {
-  Object okey = Key::Get(key, false, passphrase.data());
+  Resource okey = Key::Get(key, false, passphrase.data());
   if (okey.isNull()) {
     return false;
   }
@@ -1766,7 +1767,7 @@ Variant f_openssl_get_privatekey(CVarRef key,
 }
 
 Variant f_openssl_pkey_get_public(CVarRef certificate) {
-  Object okey = Key::Get(certificate, true);
+  Resource okey = Key::Get(certificate, true);
   if (okey.isNull()) {
     return false;
   }
@@ -1777,15 +1778,15 @@ Variant f_openssl_get_publickey(CVarRef certificate) {
   return f_openssl_pkey_get_public(certificate);
 }
 
-Object f_openssl_pkey_new(CVarRef configargs /* = null_variant */) {
+Resource f_openssl_pkey_new(CVarRef configargs /* = null_variant */) {
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
 
-  Object ret;
+  Resource ret;
   vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Object(new Key(req.priv_key));
+    ret = Resource(new Key(req.priv_key));
   }
 
   php_openssl_dispose_config(&req);
@@ -1794,7 +1795,7 @@ Object f_openssl_pkey_new(CVarRef configargs /* = null_variant */) {
 
 bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
                                int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Object okey = Key::Get(key, false);
+  Resource okey = Key::Get(key, false);
   if (okey.isNull()) {
     raise_warning("key parameter is not a valid private key");
     return false;
@@ -1832,7 +1833,7 @@ bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
 
 bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
                                int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Object okey = Key::Get(key, false);
+  Resource okey = Key::Get(key, false);
   if (okey.isNull()) {
     raise_warning("key param is not a valid private key");
     return false;
@@ -1866,7 +1867,7 @@ bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
 
 bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
                               int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Object okey = Key::Get(key, true);
+  Resource okey = Key::Get(key, true);
   if (okey.isNull()) {
     raise_warning("key parameter is not a valid public key");
     return false;
@@ -1904,7 +1905,7 @@ bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
 
 bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
                               int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Object okey = Key::Get(key, true);
+  Resource okey = Key::Get(key, true);
   if (okey.isNull()) {
     raise_warning("key parameter is not a valid public key");
     return false;
@@ -1949,7 +1950,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   int *eksl = (int*)malloc(nkeys * sizeof(*eksl));
   unsigned char **eks = (unsigned char **)malloc(nkeys * sizeof(*eks));
   memset(eks, 0, sizeof(*eks) * nkeys);
-  vector<Object> holder;
+  vector<Resource> holder;
 
   /* get the public keys we are using to seal this data */
   bool ret = true;
@@ -1957,7 +1958,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   String s;
   unsigned char *buf = NULL;
   for (ArrayIter iter(pub_key_ids); iter; ++iter, ++i) {
-    Object okey = Key::Get(iter.second(), true);
+    Resource okey = Key::Get(iter.second(), true);
     if (okey.isNull()) {
       raise_warning("not a public key (%dth member of pubkeys)", i + 1);
       ret = false;
@@ -2032,7 +2033,7 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
 
 bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id,
                     int signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
-  Object okey = Key::Get(priv_key_id, false);
+  Resource okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
     raise_warning("supplied key param cannot be coerced into a private key");
     return false;
@@ -2075,7 +2076,7 @@ Variant f_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id,
     return false;
   }
 
-  Object okey = Key::Get(pub_key_id, true);
+  Resource okey = Key::Get(pub_key_id, true);
   if (okey.isNull()) {
     raise_warning("supplied key param cannot be coerced into a public key");
     return false;
@@ -2093,11 +2094,11 @@ Variant f_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id,
 }
 
 bool f_openssl_x509_check_private_key(CVarRef cert, CVarRef key) {
-  Object ocert = Certificate::Get(cert);
+  Resource ocert = Certificate::Get(cert);
   if (ocert.isNull()) {
     return false;
   }
-  Object okey = Key::Get(key, false);
+  Resource okey = Key::Get(key, false);
   if (okey.isNull()) {
     return false;
   }
@@ -2129,7 +2130,7 @@ int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
   int ret = -1;
   STACK_OF(X509) *untrustedchain = NULL;
   X509_STORE *pcainfo = NULL;
-  Object ocert;
+  Resource ocert;
 
   if (!untrustedfile.empty()) {
     untrustedchain = load_all_certs_from_file(untrustedfile.data());
@@ -2166,7 +2167,7 @@ int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
 
 static bool openssl_x509_export_impl(CVarRef x509, BIO *bio_out,
                                      bool notext /* = true */) {
-  Object ocert = Certificate::Get(x509);
+  Resource ocert = Certificate::Get(x509);
   if (ocert.isNull()) {
     raise_warning("cannot get cert from parameter 1");
     return false;
@@ -2206,7 +2207,7 @@ bool f_openssl_x509_export(CVarRef x509, VRefParam output,
   return ret;
 }
 
-void f_openssl_x509_free(CObjRef x509cert) {
+void f_openssl_x509_free(CResRef x509cert) {
   // do nothing
 }
 
@@ -2261,7 +2262,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
 }
 
 Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames /* = true */) {
-  Object ocert = Certificate::Get(x509cert);
+  Resource ocert = Certificate::Get(x509cert);
   if (ocert.isNull()) {
     return false;
   }
@@ -2353,7 +2354,7 @@ Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames /* = true */) {
 }
 
 Variant f_openssl_x509_read(CVarRef x509certdata) {
-  Object ocert = Certificate::Get(x509certdata);
+  Resource ocert = Certificate::Get(x509certdata);
   if (ocert.isNull()) {
     raise_warning("supplied parameter cannot be coerced into "
                     "an X509 certificate!");

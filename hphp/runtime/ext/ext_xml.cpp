@@ -320,7 +320,7 @@ static Variant php_xml_parser_create_impl(CStrRef encoding_param,
 
   XML_SetUserData(parser->parser, parser);
 
-  return Object(parser);
+  return Resource(parser);
 }
 
 static String _xml_string_zval(const char *str) {
@@ -689,7 +689,7 @@ Object f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
   return php_xml_parser_create_impl(encoding, separator, 1).toObject();
 }
 
-bool f_xml_parser_free(CObjRef parser) {
+bool f_xml_parser_free(CResRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   if (p->isparsing == 1) {
     raise_warning("Parser cannot be freed while it is parsing.");
@@ -698,7 +698,7 @@ bool f_xml_parser_free(CObjRef parser) {
   return true;
 }
 
-int64_t f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
+int64_t f_xml_parse(CResRef parser, CStrRef data, bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
   // the frame pointer by calling through the system's copy of XML_Parse
   // in libexpat.so.
@@ -713,7 +713,7 @@ int64_t f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
   return ret;
 }
 
-int64_t f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
+int64_t f_xml_parse_into_struct(CResRef parser, CStrRef data, VRefParam values,
                             VRefParam index /* = null */) {
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
@@ -736,7 +736,7 @@ int64_t f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
   return ret;
 }
 
-Variant f_xml_parser_get_option(CObjRef parser, int option) {
+Variant f_xml_parser_get_option(CResRef parser, int option) {
   XmlParser * p = parser.getTyped<XmlParser>();
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -750,7 +750,7 @@ Variant f_xml_parser_get_option(CObjRef parser, int option) {
   return false;
 }
 
-bool f_xml_parser_set_option(CObjRef parser, int option, CVarRef value) {
+bool f_xml_parser_set_option(CResRef parser, int option, CVarRef value) {
   XmlParser * p = parser.getTyped<XmlParser>();
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -780,21 +780,21 @@ bool f_xml_parser_set_option(CObjRef parser, int option, CVarRef value) {
   return true;
 }
 
-bool f_xml_set_character_data_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_character_data_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->characterDataHandler, handler);
   XML_SetCharacterDataHandler(p->parser, _xml_characterDataHandler);
   return true;
 }
 
-bool f_xml_set_default_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_default_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->defaultHandler, handler);
   XML_SetDefaultHandler(p->parser, _xml_defaultHandler);
   return true;
 }
 
-bool f_xml_set_element_handler(CObjRef parser, CVarRef start_element_handler,
+bool f_xml_set_element_handler(CResRef parser, CVarRef start_element_handler,
                                CVarRef end_element_handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startElementHandler, start_element_handler);
@@ -804,7 +804,7 @@ bool f_xml_set_element_handler(CObjRef parser, CVarRef start_element_handler,
   return true;
 }
 
-bool f_xml_set_processing_instruction_handler(CObjRef parser, CVarRef handler){
+bool f_xml_set_processing_instruction_handler(CResRef parser, CVarRef handler){
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->processingInstructionHandler, handler);
   XML_SetProcessingInstructionHandler(p->parser,
@@ -812,63 +812,63 @@ bool f_xml_set_processing_instruction_handler(CObjRef parser, CVarRef handler){
   return true;
 }
 
-bool f_xml_set_start_namespace_decl_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_start_namespace_decl_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startNamespaceDeclHandler, handler);
   XML_SetStartNamespaceDeclHandler(p->parser, _xml_startNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_end_namespace_decl_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_end_namespace_decl_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->endNamespaceDeclHandler, handler);
   XML_SetEndNamespaceDeclHandler(p->parser, _xml_endNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_unparsed_entity_decl_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_unparsed_entity_decl_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->unparsedEntityDeclHandler, handler);
   XML_SetUnparsedEntityDeclHandler(p->parser, _xml_unparsedEntityDeclHandler);
   return true;
 }
 
-bool f_xml_set_external_entity_ref_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_external_entity_ref_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->externalEntityRefHandler, handler);
   XML_SetExternalEntityRefHandler(p->parser, _xml_externalEntityRefHandler);
   return true;
 }
 
-bool f_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler) {
+bool f_xml_set_notation_decl_handler(CResRef parser, CVarRef handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->notationDeclHandler, handler);
   XML_SetNotationDeclHandler(p->parser, _xml_notationDeclHandler);
   return true;
 }
 
-bool f_xml_set_object(CObjRef parser, VRefParam object) {
+bool f_xml_set_object(CResRef parser, VRefParam object) {
   XmlParser * p = parser.getTyped<XmlParser>();
   p->object.assignRef(object);
   return true;
 }
 
-int64_t f_xml_get_current_byte_index(CObjRef parser) {
+int64_t f_xml_get_current_byte_index(CResRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentByteIndex(p->parser);
 }
 
-int64_t f_xml_get_current_column_number(CObjRef parser) {
+int64_t f_xml_get_current_column_number(CResRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
-int64_t f_xml_get_current_line_number(CObjRef parser) {
+int64_t f_xml_get_current_line_number(CResRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentLineNumber(p->parser);
 }
 
-int64_t f_xml_get_error_code(CObjRef parser) {
+int64_t f_xml_get_error_code(CResRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetErrorCode(p->parser);
 }

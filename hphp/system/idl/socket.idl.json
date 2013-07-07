@@ -705,7 +705,7 @@
                 {
                     "name": "socket",
                     "type": "Resource",
-                    "value": "null_object",
+                    "value": "null_resource",
                     "desc": "A valid socket resource created with socket_create()."
                 }
             ]
@@ -724,7 +724,7 @@
                 {
                     "name": "socket",
                     "type": "Resource",
-                    "value": "null_object",
+                    "value": "null_resource",
                     "desc": "A valid socket resource created with socket_create()."
                 }
             ]

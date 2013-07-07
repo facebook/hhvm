@@ -147,7 +147,8 @@ Variant f_fopen(CStrRef filename, CStrRef mode,
                 bool use_include_path /* = false */,
                 CVarRef context /* = null */) {
   if (!context.isNull() &&
-      (!context.isObject() || !context.toObject().getTyped<StreamContext>())) {
+      (!context.isResource() ||
+       !context.toResource().getTyped<StreamContext>())) {
     raise_warning("$context must be a valid Stream Context or NULL");
     return false;
   }
@@ -159,7 +160,7 @@ Variant f_fopen(CStrRef filename, CStrRef mode,
 
 Variant f_popen(CStrRef command, CStrRef mode) {
   File *file = NEWOBJ(Pipe)();
-  Object handle(file);
+  Resource handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
     return false;
@@ -167,29 +168,29 @@ Variant f_popen(CStrRef command, CStrRef mode) {
   return handle;
 }
 
-bool f_fclose(CObjRef handle) {
+bool f_fclose(CResRef handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->close());
 }
 
-Variant f_pclose(CObjRef handle) {
+Variant f_pclose(CResRef handle) {
   CHECK_HANDLE(handle, f);
   CHECK_ERROR(f->close());
   return s_file_data->m_pcloseRet;
 }
 
-Variant f_fseek(CObjRef handle, int64_t offset,
+Variant f_fseek(CResRef handle, int64_t offset,
                 int64_t whence /* = k_SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
 
-bool f_rewind(CObjRef handle) {
+bool f_rewind(CResRef handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->rewind());
 }
 
-Variant f_ftell(CObjRef handle) {
+Variant f_ftell(CResRef handle) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->tell();
   if (!CHECK_ERROR(ret != -1)) {
@@ -198,12 +199,12 @@ Variant f_ftell(CObjRef handle) {
   return ret;
 }
 
-bool f_feof(CObjRef handle) {
+bool f_feof(CResRef handle) {
   CHECK_HANDLE(handle, f);
   return f->eof();
 }
 
-Variant f_fstat(CObjRef handle) {
+Variant f_fstat(CResRef handle) {
   PlainFile *file = handle.getTyped<PlainFile>(true, true);
   if (file == NULL) {
     raise_warning("Not a valid stream resource");
@@ -214,12 +215,12 @@ Variant f_fstat(CObjRef handle) {
   return stat_impl(&sb);
 }
 
-Variant f_fread(CObjRef handle, int64_t length) {
+Variant f_fread(CResRef handle, int64_t length) {
   CHECK_HANDLE(handle, f);
   return f->read(length);
 }
 
-Variant f_fgetc(CObjRef handle) {
+Variant f_fgetc(CResRef handle) {
   CHECK_HANDLE(handle, f);
   int result = f->getc();
   if (result == EOF) {
@@ -228,7 +229,7 @@ Variant f_fgetc(CObjRef handle) {
   return String::FromChar(result);
 }
 
-Variant f_fgets(CObjRef handle, int64_t length /* = 0 */) {
+Variant f_fgets(CResRef handle, int64_t length /* = 0 */) {
   if (length < 0) {
     throw_invalid_argument("length (negative): %" PRId64, length);
     return false;
@@ -241,7 +242,7 @@ Variant f_fgets(CObjRef handle, int64_t length /* = 0 */) {
   return false;
 }
 
-Variant f_fgetss(CObjRef handle, int64_t length /* = 0 */,
+Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
                  CStrRef allowable_tags /* = null_string */) {
   Variant ret = f_fgets(handle, length);
   if (!same(ret, false)) {
@@ -250,53 +251,55 @@ Variant f_fgetss(CObjRef handle, int64_t length /* = 0 */,
   return ret;
 }
 
-Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv /* = null_array */) {
+Variant f_fscanf(int _argc, CResRef handle, CStrRef format,
+                 CArrRef _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f_sscanf(_argc, f->readLine(), format, _argv);
 }
 
-Variant f_fpassthru(CObjRef handle) {
+Variant f_fpassthru(CResRef handle) {
   CHECK_HANDLE(handle, f);
   return f->print();
 }
 
-Variant f_fwrite(CObjRef handle, CStrRef data, int64_t length /* = 0 */) {
+Variant f_fwrite(CResRef handle, CStrRef data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fputs(CObjRef handle, CStrRef data, int64_t length /* = 0 */) {
+Variant f_fputs(CResRef handle, CStrRef data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv /* = null_array */) {
+Variant f_fprintf(int _argc, CResRef handle, CStrRef format,
+                  CArrRef _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, _argv);
 }
 
-Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args) {
+Variant f_vfprintf(CResRef handle, CStrRef format, CArrRef args) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, args);
 }
 
-bool f_fflush(CObjRef handle) {
+bool f_fflush(CResRef handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->flush());
 }
 
-bool f_ftruncate(CObjRef handle, int64_t size) {
+bool f_ftruncate(CResRef handle, int64_t size) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->truncate(size));
 }
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-bool f_flock(CObjRef handle, int operation, VRefParam wouldblock /* = null */) {
+bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
   CHECK_HANDLE(handle, f);
   bool block = false;
   int act;
@@ -312,7 +315,7 @@ bool f_flock(CObjRef handle, int operation, VRefParam wouldblock /* = null */) {
   return ret;
 }
 
-Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
+Variant f_fputcsv(CResRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
                   CStrRef enclosure /* = "\"" */) {
   if (delimiter.size() != 1) {
     throw_invalid_argument("delimiter: %s", delimiter.data());
@@ -326,7 +329,7 @@ Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
   return f->writeCSV(fields, delimiter.charAt(0), enclosure.charAt(0));
 }
 
-Variant f_fgetcsv(CObjRef handle, int64_t length /* = 0 */,
+Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
                   CStrRef delimiter /* = "," */,
                   CStrRef enclosure /* = "\"" */,
                   CStrRef escape /* = "\\" */) {
@@ -360,7 +363,7 @@ Variant f_file_get_contents(CStrRef filename,
                             int64_t maxlen /* = 0 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
-  return f_stream_get_contents(stream.toObject(), maxlen, offset);
+  return f_stream_get_contents(stream.toResource(), maxlen, offset);
 }
 
 Variant f_file_put_contents(CStrRef filename, CVarRef data,
@@ -370,7 +373,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   if (!fvar.toBoolean()) {
     return false;
   }
-  File *f = fvar.asObjRef().getTyped<File>();
+  File *f = fvar.asResRef().getTyped<File>();
 
   if ((flags & LOCK_EX) && flock(f->fd(), LOCK_EX)) {
     return false;
@@ -380,7 +383,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   switch (data.getType()) {
   case KindOfObject:
     {
-      File *fsrc = data.toObject().getTyped<File>(true, true);
+      File *fsrc = data.toResource().getTyped<File>(true, true);
       if (fsrc == NULL) {
         raise_warning("Not a valid stream resource");
         return false;
@@ -500,7 +503,7 @@ Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
                     Util::safe_strerror(errno).c_str());
     return false;
   }
-  Variant ret = f_fpassthru(f.toObject());
+  Variant ret = f_fpassthru(f.toResource());
   return ret;
 }
 
@@ -1038,8 +1041,8 @@ bool f_copy(CStrRef source, CStrRef dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile.toObject(),
-      dfile.toObject()).toBoolean();
+    return f_stream_copy_to_stream(sfile.toResource(),
+      dfile.toResource()).toBoolean();
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?
@@ -1232,7 +1235,7 @@ Variant f_tempnam(CStrRef dir, CStrRef prefix) {
 Variant f_tmpfile() {
   FILE *f = tmpfile();
   if (f) {
-    return Object(NEWOBJ(PlainFile)(f));
+    return Resource(NEWOBJ(PlainFile)(f));
   }
   return false;
 }
@@ -1321,7 +1324,7 @@ public:
     defaultDirectory.reset();
   }
 
-  Object defaultDirectory;
+  Resource defaultDirectory;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryRequestData, s_directory_data);
 
@@ -1329,14 +1332,14 @@ const StaticString
   s_handle("handle"),
   s_path("path");
 
-static DIR *get_dir(CObjRef dir_handle) {
-  Object obj;
+static DIR *get_dir(CResRef dir_handle) {
+  Resource obj;
   if (dir_handle.isNull()) {
     obj = s_directory_data->defaultDirectory;
   } else {
     Array arr = dir_handle.toArray();
     if (arr.exists(s_handle)) {
-      obj = arr[s_handle].toObject();
+      obj = arr[s_handle].toResource();
     } else {
       obj = dir_handle;
     }
@@ -1371,10 +1374,10 @@ Variant f_opendir(CStrRef path, CVarRef context /* = null */) {
 
   Directory *p = new Directory(dir);
   s_directory_data->defaultDirectory = p;
-  return Object(p);
+  return Resource(p);
 }
 
-Variant f_readdir(CObjRef dir_handle) {
+Variant f_readdir(CResRef dir_handle) {
   DIR *dir = get_dir(dir_handle);
   if (dir) {
     struct dirent entry;
@@ -1387,7 +1390,7 @@ Variant f_readdir(CObjRef dir_handle) {
   return false;
 }
 
-void f_rewinddir(CObjRef dir_handle) {
+void f_rewinddir(CResRef dir_handle) {
   DIR *dir = get_dir(dir_handle);
   if (dir) {
     rewinddir(dir);
@@ -1408,7 +1411,7 @@ Variant f_scandir(CStrRef directory, bool descending /* = false */,
   if (dir == NULL) {
     return false;
   }
-  Object deleter(new Directory(dir));
+  Resource deleter(new Directory(dir));
 
   std::vector<String> names;
   while (true) {
@@ -1434,12 +1437,12 @@ Variant f_scandir(CStrRef directory, bool descending /* = false */,
   return ret;
 }
 
-void f_closedir(CObjRef dir_handle) {
+void f_closedir(CResRef dir_handle) {
   if (!dir_handle.isNull()) {
-    Object obj;
+    Resource obj;
     Array arr = dir_handle.toArray();
     if (arr.exists(s_handle)) {
-      obj = arr[s_handle].toObject();
+      obj = arr[s_handle].toResource();
     } else {
       obj = dir_handle;
     }

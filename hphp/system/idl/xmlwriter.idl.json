@@ -23,7 +23,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Resource",
+                "type": "Object",
                 "desc": "Object oriented style: Returns TRUE on success or FALSE on failure.\n\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error."
             },
             "args": [
@@ -47,7 +47,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -70,7 +70,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -93,7 +93,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -129,7 +129,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -152,7 +152,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -185,7 +185,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -224,7 +224,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -253,7 +253,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -271,7 +271,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -289,7 +289,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -322,7 +322,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -345,7 +345,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -383,7 +383,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -411,7 +411,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -429,7 +429,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -447,7 +447,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -470,7 +470,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -488,7 +488,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -506,7 +506,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -529,7 +529,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -547,7 +547,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -565,7 +565,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -588,7 +588,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -616,7 +616,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -634,7 +634,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -657,7 +657,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -680,7 +680,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -715,7 +715,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -756,7 +756,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -779,7 +779,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -807,7 +807,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -825,7 +825,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -848,7 +848,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -876,7 +876,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -894,7 +894,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -921,7 +921,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -969,7 +969,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -987,7 +987,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 }
             ]
@@ -1005,7 +1005,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {
@@ -1029,7 +1029,7 @@
             "args": [
                 {
                     "name": "xmlwriter",
-                    "type": "Resource",
+                    "type": "Object",
                     "desc": "Only for procedural calls. The XMLWriter resource that is being modified. This resource comes from a call to xmlwriter_open_uri() or xmlwriter_open_memory()."
                 },
                 {

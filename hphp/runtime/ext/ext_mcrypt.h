@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_mcrypt_module_open(CStrRef algorithm, CStrRef algorithm_directory, CStrRef mode, CStrRef mode_directory);
-bool f_mcrypt_module_close(CObjRef td);
+bool f_mcrypt_module_close(CResRef td);
 Array f_mcrypt_list_algorithms(CStrRef lib_dir = null_string);
 Array f_mcrypt_list_modes(CStrRef lib_dir = null_string);
 int64_t f_mcrypt_module_get_algo_block_size(CStrRef algorithm, CStrRef lib_dir = null_string);
@@ -47,21 +47,21 @@ Variant f_mcrypt_get_block_size(CStrRef cipher, CStrRef module = null_string);
 Variant f_mcrypt_get_cipher_name(CStrRef cipher);
 Variant f_mcrypt_get_iv_size(CStrRef cipher, CStrRef mode);
 int64_t f_mcrypt_get_key_size(CStrRef cipher, CStrRef module);
-String f_mcrypt_enc_get_algorithms_name(CObjRef td);
-int64_t f_mcrypt_enc_get_block_size(CObjRef td);
-int64_t f_mcrypt_enc_get_iv_size(CObjRef td);
-int64_t f_mcrypt_enc_get_key_size(CObjRef td);
-String f_mcrypt_enc_get_modes_name(CObjRef td);
-Array f_mcrypt_enc_get_supported_key_sizes(CObjRef td);
-bool f_mcrypt_enc_is_block_algorithm_mode(CObjRef td);
-bool f_mcrypt_enc_is_block_algorithm(CObjRef td);
-bool f_mcrypt_enc_is_block_mode(CObjRef td);
-int64_t f_mcrypt_enc_self_test(CObjRef td);
-Variant f_mcrypt_generic(CObjRef td, CStrRef data);
-int64_t f_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv);
-Variant f_mdecrypt_generic(CObjRef td, CStrRef data);
-bool f_mcrypt_generic_deinit(CObjRef td);
-bool f_mcrypt_generic_end(CObjRef td);
+String f_mcrypt_enc_get_algorithms_name(CResRef td);
+int64_t f_mcrypt_enc_get_block_size(CResRef td);
+int64_t f_mcrypt_enc_get_iv_size(CResRef td);
+int64_t f_mcrypt_enc_get_key_size(CResRef td);
+String f_mcrypt_enc_get_modes_name(CResRef td);
+Array f_mcrypt_enc_get_supported_key_sizes(CResRef td);
+bool f_mcrypt_enc_is_block_algorithm_mode(CResRef td);
+bool f_mcrypt_enc_is_block_algorithm(CResRef td);
+bool f_mcrypt_enc_is_block_mode(CResRef td);
+int64_t f_mcrypt_enc_self_test(CResRef td);
+Variant f_mcrypt_generic(CResRef td, CStrRef data);
+int64_t f_mcrypt_generic_init(CResRef td, CStrRef key, CStrRef iv);
+Variant f_mdecrypt_generic(CResRef td, CStrRef data);
+bool f_mcrypt_generic_deinit(CResRef td);
+bool f_mcrypt_generic_end(CResRef td);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

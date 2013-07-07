@@ -43,7 +43,7 @@ public:
    * Get/set current timezone that controls how local time is interpreted.
    */
   static String CurrentName();            // current timezone's name
-  static SmartObject<TimeZone> Current(); // current timezone
+  static SmartResource<TimeZone> Current(); // current timezone
   static bool SetCurrent(CStrRef name);   // returns false if invalid
 
   /**
@@ -109,7 +109,7 @@ public:
   /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
-  SmartObject<TimeZone> cloneTimeZone() const;
+  SmartResource<TimeZone> cloneTimeZone() const;
 
 protected:
   friend class DateTime;

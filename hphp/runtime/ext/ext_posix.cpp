@@ -295,7 +295,7 @@ bool f_posix_initgroups(CStrRef name, int base_group_id) {
 static int php_posix_get_fd(CVarRef fd) {
   int nfd;
   if (fd.isResource()) {
-    File *f = fd.toObject().getTyped<File>();
+    File *f = fd.toResource().getTyped<File>();
     if (!f) {
       return false;
     }

@@ -22,15 +22,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_bzclose(CObjRef bz) {
+Variant f_bzclose(CResRef bz) {
   return f_fclose(bz);
 }
 
-Variant f_bzread(CObjRef bz, int length /* = 1024 */) {
+Variant f_bzread(CResRef bz, int length /* = 1024 */) {
   return f_fread(bz, length);
 }
 
-Variant f_bzwrite(CObjRef bz, CStrRef data, int length /* = 0 */) {
+Variant f_bzwrite(CResRef bz, CStrRef data, int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
@@ -61,7 +61,7 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
       raise_warning("first parameter has to be string or file-resource");
       return false;
     }
-    PlainFile* f = filename.cast<PlainFile>();
+    PlainFile* f = filename.toResource().getTyped<PlainFile>();
     if (!f) {
       return false;
     }
@@ -91,26 +91,26 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
 
     bz = NEWOBJ(BZ2File)(f);
   }
-  Object handle(bz);
+  Resource handle(bz);
   return handle;
 }
 
-Variant f_bzflush(CObjRef bz) {
+Variant f_bzflush(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->flush();
 }
 
-String f_bzerrstr(CObjRef bz) {
+String f_bzerrstr(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errstr();
 }
 
-Variant f_bzerror(CObjRef bz) {
+Variant f_bzerror(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->error();
 }
 
-int64_t f_bzerrno(CObjRef bz) {
+int64_t f_bzerrno(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errnu();
 }

@@ -562,7 +562,7 @@
                 {
                     "name": "context",
                     "type": "Resource",
-                    "value": "null_object",
+                    "value": "null_resource",
                     "desc": "A valid context resource created with stream_context_create()."
                 }
             ]
@@ -773,7 +773,7 @@
                 {
                     "name": "context",
                     "type": "Resource",
-                    "value": "null_object"
+                    "value": "null_resource"
                 }
             ]
         },
@@ -822,7 +822,7 @@
                 {
                     "name": "context",
                     "type": "Resource",
-                    "value": "null_object",
+                    "value": "null_resource",
                     "desc": "A valid context resource created with stream_context_create()."
                 }
             ]
@@ -856,7 +856,7 @@
                 {
                     "name": "session_stream",
                     "type": "Resource",
-                    "value": "null_object",
+                    "value": "null_resource",
                     "desc": "Seed the stream with settings from session_stream."
                 }
             ]

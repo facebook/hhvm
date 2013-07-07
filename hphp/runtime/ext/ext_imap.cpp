@@ -772,7 +772,7 @@ Variant f_imap_alerts() {
   return ret;
 }
 
-bool f_imap_append(CObjRef imap_stream, CStrRef mailbox, CStrRef message,
+bool f_imap_append(CResRef imap_stream, CStrRef mailbox, CStrRef message,
                    CStrRef options /* = "" */) {
   throw NotImplementedException(__func__);
 }
@@ -805,7 +805,7 @@ Variant f_imap_binary(CStrRef str) {
   return ret;
 }
 
-Variant f_imap_body(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_body(CResRef imap_stream, int64_t msg_number,
                     int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
     raise_warning("invalid value for the options parameter");
@@ -838,7 +838,7 @@ Variant f_imap_body(CObjRef imap_stream, int64_t msg_number,
   }
 }
 
-Variant f_imap_bodystruct(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_bodystruct(CResRef imap_stream, int64_t msg_number,
                           CStrRef section) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (!obj->checkMsgNumber(msg_number)) {
@@ -856,7 +856,7 @@ Variant f_imap_bodystruct(CObjRef imap_stream, int64_t msg_number,
   return ret;
 }
 
-Variant f_imap_check(CObjRef imap_stream) {
+Variant f_imap_check(CResRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_ping(obj->m_stream) == NIL) {
     return false;
@@ -875,7 +875,7 @@ Variant f_imap_check(CObjRef imap_stream) {
   return false;
 }
 
-bool f_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
+bool f_imap_clearflag_full(CResRef imap_stream, CStrRef sequence, CStrRef flag,
                            int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_clearflag_full(obj->m_stream, (char *)sequence.data(),
@@ -883,7 +883,7 @@ bool f_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
   return true;
 }
 
-bool f_imap_close(CObjRef imap_stream, int64_t flag /* = 0 */) {
+bool f_imap_close(CResRef imap_stream, int64_t flag /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (flag) {
     if (flag != PHP_EXPUNGE) {
@@ -897,7 +897,7 @@ bool f_imap_close(CObjRef imap_stream, int64_t flag /* = 0 */) {
   return true;
 }
 
-bool f_imap_createmailbox(CObjRef imap_stream, CStrRef mailbox) {
+bool f_imap_createmailbox(CResRef imap_stream, CStrRef mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_create(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -906,7 +906,7 @@ bool f_imap_createmailbox(CObjRef imap_stream, CStrRef mailbox) {
   }
 }
 
-bool f_imap_delete(CObjRef imap_stream, CStrRef msg_number,
+bool f_imap_delete(CResRef imap_stream, CStrRef msg_number,
                    int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_setflag_full(obj->m_stream, (char *)msg_number.data(),
@@ -915,7 +915,7 @@ bool f_imap_delete(CObjRef imap_stream, CStrRef msg_number,
   return true;
 }
 
-bool f_imap_deletemailbox(CObjRef imap_stream, CStrRef mailbox) {
+bool f_imap_deletemailbox(CResRef imap_stream, CStrRef mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_delete(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -939,13 +939,13 @@ Variant f_imap_errors() {
   return ret;
 }
 
-bool f_imap_expunge(CObjRef imap_stream) {
+bool f_imap_expunge(CResRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_expunge(obj->m_stream);
   return true;
 }
 
-Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
+Variant f_imap_fetch_overview(CResRef imap_stream, CStrRef sequence,
                               int64_t options /* = 0 */) {
   if (options && options != FT_UID) {
     Logger::Warning("invalid value for the options parameter");
@@ -1008,7 +1008,7 @@ Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
   return ret;
 }
 
-Variant f_imap_fetchbody(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_fetchbody(CResRef imap_stream, int64_t msg_number,
                          CStrRef section, int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
     raise_warning("invalid value for the options parameter");
@@ -1036,7 +1036,7 @@ Variant f_imap_fetchbody(CObjRef imap_stream, int64_t msg_number,
   return String(body, len, CopyString);
 }
 
-Variant f_imap_fetchheader(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_fetchheader(CResRef imap_stream, int64_t msg_number,
                            int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
     Logger::Warning("invalid value for the options parameter");
@@ -1062,7 +1062,7 @@ Variant f_imap_fetchheader(CObjRef imap_stream, int64_t msg_number,
                                       (options ? options : NIL)), CopyString);
 }
 
-Variant f_imap_fetchstructure(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_fetchstructure(CResRef imap_stream, int64_t msg_number,
                               int64_t options /* = 0 */) {
   if (options && ((options & ~FT_UID) != 0)) {
     raise_warning("invalid value for the options parameter");
@@ -1104,7 +1104,7 @@ Variant f_imap_fetchstructure(CObjRef imap_stream, int64_t msg_number,
   return ret;
 }
 
-bool f_imap_gc(CObjRef imap_stream, int64_t caches) {
+bool f_imap_gc(CResRef imap_stream, int64_t caches) {
   if (caches && ((caches & ~(GC_TEXTS | GC_ELT | GC_ENV)) != 0)) {
     raise_warning("invalid value for the caches parameter");
     return false;
@@ -1115,29 +1115,29 @@ bool f_imap_gc(CObjRef imap_stream, int64_t caches) {
   return true;
 }
 
-Variant f_imap_get_quota(CObjRef imap_stream, CStrRef quota_root) {
+Variant f_imap_get_quota(CResRef imap_stream, CStrRef quota_root) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_get_quotaroot(CObjRef imap_stream, CStrRef quota_root) {
+Variant f_imap_get_quotaroot(CResRef imap_stream, CStrRef quota_root) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_getacl(CObjRef imap_stream, CStrRef mailbox) {
+Variant f_imap_getacl(CResRef imap_stream, CStrRef mailbox) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_getmailboxes(CObjRef imap_stream, CStrRef ref,
+Variant f_imap_getmailboxes(CResRef imap_stream, CStrRef ref,
                             CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_getsubscribed(CObjRef imap_stream, CStrRef ref,
+Variant f_imap_getsubscribed(CResRef imap_stream, CStrRef ref,
                              CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_header(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_header(CResRef imap_stream, int64_t msg_number,
                       int64_t fromlength /* = 0 */,
                       int64_t subjectlength /* = 0 */,
                       CStrRef defaulthost /* = "" */) {
@@ -1145,7 +1145,7 @@ Variant f_imap_header(CObjRef imap_stream, int64_t msg_number,
                            fromlength, subjectlength, defaulthost);
 }
 
-Variant f_imap_headerinfo(CObjRef imap_stream, int64_t msg_number,
+Variant f_imap_headerinfo(CResRef imap_stream, int64_t msg_number,
                           int64_t fromlength /* = 0 */,
                           int64_t subjectlength /* = 0 */,
                           CStrRef defaulthost /* = "" */) {
@@ -1207,7 +1207,7 @@ Variant f_imap_headerinfo(CObjRef imap_stream, int64_t msg_number,
   return ret;
 }
 
-Variant f_imap_headers(CObjRef imap_stream) {
+Variant f_imap_headers(CResRef imap_stream) {
   throw NotImplementedException(__func__);
 }
 
@@ -1224,7 +1224,7 @@ Variant f_imap_last_error() {
   return uninit_null();
 }
 
-Variant f_imap_list(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_list(CResRef imap_stream, CStrRef ref, CStrRef pattern) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
 
   /* set flag for normal, old mailbox list */
@@ -1245,21 +1245,21 @@ Variant f_imap_list(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   return ret;
 }
 
-Variant f_imap_listmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_listmailbox(CResRef imap_stream, CStrRef ref, CStrRef pattern) {
   return f_imap_list(imap_stream, ref, pattern);
 }
 
-Variant f_imap_listscan(CObjRef imap_stream, CStrRef ref, CStrRef pattern,
+Variant f_imap_listscan(CResRef imap_stream, CStrRef ref, CStrRef pattern,
                         CStrRef content) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_listsubscribed(CObjRef imap_stream, CStrRef ref,
+Variant f_imap_listsubscribed(CResRef imap_stream, CStrRef ref,
                               CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_lsub(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_lsub(CResRef imap_stream, CStrRef ref, CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
@@ -1267,7 +1267,7 @@ Variant f_imap_mail_compose(CArrRef envelope, CArrRef body) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_mail_copy(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox,
+bool f_imap_mail_copy(CResRef imap_stream, CStrRef msglist, CStrRef mailbox,
                       int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
@@ -1278,7 +1278,7 @@ bool f_imap_mail_copy(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox,
   }
 }
 
-bool f_imap_mail_move(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox,
+bool f_imap_mail_move(CResRef imap_stream, CStrRef msglist, CStrRef mailbox,
                       int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
@@ -1340,7 +1340,7 @@ bool f_imap_mail(CStrRef to, CStrRef subject, CStrRef message,
   }
 }
 
-Variant f_imap_mailboxmsginfo(CObjRef imap_stream) {
+Variant f_imap_mailboxmsginfo(CResRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   Object ret(SystemLib::AllocStdClassObject());
 
@@ -1379,16 +1379,16 @@ Variant f_imap_mime_header_decode(CStrRef text) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_msgno(CObjRef imap_stream, int64_t uid) {
+Variant f_imap_msgno(CResRef imap_stream, int64_t uid) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return (int64_t)mail_msgno(obj->m_stream, uid);
 }
 
-Variant f_imap_num_msg(CObjRef imap_stream) {
+Variant f_imap_num_msg(CResRef imap_stream) {
   return (int64_t)imap_stream.getTyped<ImapStream>()->m_stream->nmsgs;
 }
 
-Variant f_imap_num_recent(CObjRef imap_stream) {
+Variant f_imap_num_recent(CResRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return (int64_t)obj->m_stream->recent;
 }
@@ -1423,7 +1423,7 @@ Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
   return NEWOBJ(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
 }
 
-bool f_imap_ping(CObjRef imap_stream) {
+bool f_imap_ping(CResRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return mail_ping(obj->m_stream);
 }
@@ -1442,7 +1442,7 @@ Variant f_imap_qprint(CStrRef str) {
   return ret;
 }
 
-bool f_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox,
+bool f_imap_renamemailbox(CResRef imap_stream, CStrRef old_mbox,
                           CStrRef new_mbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_rename(obj->m_stream, (char *)old_mbox.data(),
@@ -1453,7 +1453,7 @@ bool f_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox,
   }
 }
 
-bool f_imap_reopen(CObjRef imap_stream, CStrRef mailbox,
+bool f_imap_reopen(CResRef imap_stream, CStrRef mailbox,
                    int64_t options /* = 0 */, int64_t retries /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   long flags = NIL;
@@ -1494,17 +1494,17 @@ Variant f_imap_rfc822_write_address(CStrRef mailbox, CStrRef host,
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_savebody(CObjRef imap_stream, CVarRef file, int64_t msg_number,
+bool f_imap_savebody(CResRef imap_stream, CVarRef file, int64_t msg_number,
                      CStrRef part_number /* = "" */, int64_t options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_scanmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern,
+Variant f_imap_scanmailbox(CResRef imap_stream, CStrRef ref, CStrRef pattern,
                            CStrRef content) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_search(CObjRef imap_stream, CStrRef criteria,
+Variant f_imap_search(CResRef imap_stream, CStrRef criteria,
                       int64_t options /* = 0 */, CStrRef charset /* = "" */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
 
@@ -1537,17 +1537,17 @@ Variant f_imap_search(CObjRef imap_stream, CStrRef criteria,
   return ret;
 }
 
-bool f_imap_set_quota(CObjRef imap_stream, CStrRef quota_root,
+bool f_imap_set_quota(CResRef imap_stream, CStrRef quota_root,
                       int64_t quota_limit) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_setacl(CObjRef imap_stream, CStrRef mailbox, CStrRef id,
+bool f_imap_setacl(CResRef imap_stream, CStrRef mailbox, CStrRef id,
                    CStrRef rights) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
+bool f_imap_setflag_full(CResRef imap_stream, CStrRef sequence, CStrRef flag,
                          int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_setflag_full(obj->m_stream, (char*)sequence.data(), (char*)flag.data(),
@@ -1555,14 +1555,14 @@ bool f_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
   return true;
 }
 
-Variant f_imap_sort(CObjRef imap_stream, int64_t criteria, int64_t reverse,
+Variant f_imap_sort(CResRef imap_stream, int64_t criteria, int64_t reverse,
                     int64_t options /* = 0 */,
                     CStrRef search_criteria /* = "" */,
                     CStrRef charset /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_status(CObjRef imap_stream, CStrRef mailbox,
+Variant f_imap_status(CResRef imap_stream, CStrRef mailbox,
                       int64_t options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   Object ret(SystemLib::AllocStdClassObject());
@@ -1591,7 +1591,7 @@ Variant f_imap_status(CObjRef imap_stream, CStrRef mailbox,
   return ret;
 }
 
-bool f_imap_subscribe(CObjRef imap_stream, CStrRef mailbox) {
+bool f_imap_subscribe(CResRef imap_stream, CStrRef mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_subscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
@@ -1600,7 +1600,7 @@ bool f_imap_subscribe(CObjRef imap_stream, CStrRef mailbox) {
   }
 }
 
-Variant f_imap_thread(CObjRef imap_stream, int64_t options /* = 0 */) {
+Variant f_imap_thread(CResRef imap_stream, int64_t options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1649,7 +1649,7 @@ Variant f_imap_timeout(int64_t timeout_type, int64_t timeout /* = -1 */) {
   return false;
 }
 
-Variant f_imap_uid(CObjRef imap_stream, int64_t msg_number) {
+Variant f_imap_uid(CResRef imap_stream, int64_t msg_number) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
@@ -1657,7 +1657,7 @@ Variant f_imap_uid(CObjRef imap_stream, int64_t msg_number) {
   return (int64_t)mail_uid(obj->m_stream, msg_number);
 }
 
-bool f_imap_undelete(CObjRef imap_stream, CStrRef msg_number,
+bool f_imap_undelete(CResRef imap_stream, CStrRef msg_number,
                      int64_t flags /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   mail_clearflag_full(obj->m_stream, (char *)msg_number.data(),
@@ -1665,7 +1665,7 @@ bool f_imap_undelete(CObjRef imap_stream, CStrRef msg_number,
   return true;
 }
 
-bool f_imap_unsubscribe(CObjRef imap_stream, CStrRef mailbox) {
+bool f_imap_unsubscribe(CResRef imap_stream, CStrRef mailbox) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (mail_unsubscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;

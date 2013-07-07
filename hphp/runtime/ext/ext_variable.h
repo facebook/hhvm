@@ -40,7 +40,7 @@ bool f_is_resource(CVarRef v);
 bool f_is_null(CVarRef v);
 
 String f_gettype(CVarRef v);
-String f_get_resource_type(CObjRef handle);
+String f_get_resource_type(CResRef handle);
 
 ///////////////////////////////////////////////////////////////////////////////
 // type conversion

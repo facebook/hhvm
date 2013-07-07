@@ -55,7 +55,7 @@ public:
                   bool isfile);
   Variant getPartData();
   Array getStructure();
-  Object findByName(const char *name);
+  Resource findByName(const char *name);
 
   bool isVersion1();
   int filter(int c);
@@ -65,7 +65,7 @@ private:
   public:
     MimeHeader();
     explicit MimeHeader(const char *value);
-    MimeHeader(php_rfc822_tokenized_t *toks);
+    explicit MimeHeader(php_rfc822_tokenized_t *toks);
 
     bool empty() const { return m_empty;}
     void clear();
@@ -86,7 +86,7 @@ private:
   static void UpdatePositions(MimePart *part, int newendpos,
                               int newbodyend, int deltanlines);
 
-  Object m_parent;
+  Resource m_parent;
   Array  m_children;   /* child parts */
 
   int m_startpos, m_endpos;   /* offsets of this part in the message */
@@ -119,7 +119,7 @@ private:
 
     String workbuf;
     String headerbuf;
-    Object lastpart;
+    Resource lastpart;
   } m_parsedata;
 
   int extractImpl(int decode, File *src);

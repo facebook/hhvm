@@ -315,24 +315,24 @@ void PageletServer::Stop() {
   }
 }
 
-Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
-                                CStrRef remote_host,
-                                CStrRef post_data /* = null_string */,
-                                CArrRef files /* = null_array */) {
+Resource PageletServer::TaskStart(CStrRef url, CArrRef headers,
+                                  CStrRef remote_host,
+                                  CStrRef post_data /* = null_string */,
+                                  CArrRef files /* = null_array */) {
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
-      return null_object;
+      return null_resource;
     }
     if (RuntimeOption::PageletServerQueueLimit > 0 &&
         s_dispatcher->getQueuedJobs() >
         RuntimeOption::PageletServerQueueLimit) {
-      return null_object;
+      return null_resource;
     }
   }
   PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
                                           get_uploaded_files(), files);
-  Object ret(task);
+  Resource ret(task);
   PageletTransport *job = task->getJob();
   Lock l(s_dispatchMutex);
   if (s_dispatcher) {
@@ -340,10 +340,10 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
     s_dispatcher->enqueue(job);
     return ret;
   }
-  return null_object;
+  return null_resource;
 }
 
-int64_t PageletServer::TaskStatus(CObjRef task) {
+int64_t PageletServer::TaskStatus(CResRef task) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   PageletTransport *job = ptask->getJob();
   if (!job->isPipelineEmpty()) {
@@ -355,7 +355,7 @@ int64_t PageletServer::TaskStatus(CObjRef task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(CObjRef task, Array &headers, int &code,
+String PageletServer::TaskResult(CResRef task, Array &headers, int &code,
                                  int64_t timeout_ms) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   return ptask->getJob()->getResults(headers, code, timeout_ms);

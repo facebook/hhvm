@@ -261,10 +261,10 @@ bool f_apc_bin_load(CStrRef data, int64_t flags /* = 0 */, int64_t cache_id /* =
 }
 Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
                            CStrRef filename, int64_t flags /* = 0 */,
-                           CObjRef context /* =  uninit_null() */) {
+                           CResRef context /* =  uninit_null() */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-bool f_apc_bin_loadfile(CStrRef filename, CObjRef context /* = uninit_null() */,
+bool f_apc_bin_loadfile(CStrRef filename, CResRef context /* = uninit_null() */,
                         int64_t flags /* = 0 */, int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "feature not supported");
 }

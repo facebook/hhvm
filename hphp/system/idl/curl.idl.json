@@ -626,7 +626,7 @@
             "args": [
                 {
                     "name": "handle",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "The object created by calling evhttp_async_get() or evhttp_async_post()."
                 }
             ]

@@ -608,7 +608,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
         /* allow the script to capture the peer cert
          * and/or the certificate chain */
         if (m_context[s_capture_peer_cert].toBoolean()) {
-          Object cert(new Certificate(peer_cert));
+          Resource cert(new Certificate(peer_cert));
           m_context.set(s_peer_certificate, cert);
           peer_cert = nullptr;
         }
@@ -619,7 +619,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
           if (chain) {
             for (int i = 0; i < sk_X509_num(chain); i++) {
               X509 *mycert = X509_dup(sk_X509_value(chain, i));
-              arr.append(Object(new Certificate(mycert)));
+              arr.append(Resource(new Certificate(mycert)));
             }
           }
           m_context.set(s_peer_certificate_chain, arr);
@@ -705,14 +705,14 @@ BIO *Certificate::ReadData(CVarRef var, bool *file /* = NULL */) {
 }
 
 
-Object Certificate::Get(CVarRef var) {
+Resource Certificate::Get(CVarRef var) {
   if (var.isResource()) {
-    return var.toObject();
+    return var.toResource();
   }
   if (var.isString() || var.isObject()) {
     bool file;
     BIO *in = ReadData(var, &file);
-    if (in == nullptr) return Object();
+    if (in == nullptr) return Resource();
 
     X509 *cert;
     /*
@@ -726,10 +726,10 @@ Object Certificate::Get(CVarRef var) {
     cert = PEM_read_bio_X509(in, nullptr, nullptr, nullptr);
     BIO_free(in);
     if (cert) {
-      return Object(new Certificate(cert));
+      return Resource(new Certificate(cert));
     }
   }
-  return Object();
+  return Resource();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

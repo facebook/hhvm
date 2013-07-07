@@ -177,7 +177,7 @@ static Variant php_mcrypt_do_crypt(CStrRef cipher, CStrRef key, CStrRef data,
   return s.setSize(data_size);
 }
 
-static Variant mcrypt_generic(CObjRef td, CStrRef data, bool dencrypt) {
+static Variant mcrypt_generic(CResRef td, CStrRef data, bool dencrypt) {
   MCrypt *pm = td.getTyped<MCrypt>();
   if (!pm->m_init) {
     raise_warning("Operation disallowed prior to mcrypt_generic_init().");
@@ -232,10 +232,10 @@ Variant f_mcrypt_module_open(CStrRef algorithm, CStrRef algorithm_directory,
     return false;
   }
 
-  return Object(new MCrypt(td));
+  return Resource(new MCrypt(td));
 }
 
-bool f_mcrypt_module_close(CObjRef td) {
+bool f_mcrypt_module_close(CResRef td) {
   td.getTyped<MCrypt>()->close();
   return true;
 }
@@ -464,33 +464,33 @@ int64_t f_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
   return ret;
 }
 
-String f_mcrypt_enc_get_algorithms_name(CObjRef td) {
+String f_mcrypt_enc_get_algorithms_name(CResRef td) {
   char *name = mcrypt_enc_get_algorithms_name(td.getTyped<MCrypt>()->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
 
-int64_t f_mcrypt_enc_get_block_size(CObjRef td) {
+int64_t f_mcrypt_enc_get_block_size(CResRef td) {
   return mcrypt_enc_get_block_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_enc_get_iv_size(CObjRef td) {
+int64_t f_mcrypt_enc_get_iv_size(CResRef td) {
   return mcrypt_enc_get_iv_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_enc_get_key_size(CObjRef td) {
+int64_t f_mcrypt_enc_get_key_size(CResRef td) {
   return mcrypt_enc_get_key_size(td.getTyped<MCrypt>()->m_td);
 }
 
-String f_mcrypt_enc_get_modes_name(CObjRef td) {
+String f_mcrypt_enc_get_modes_name(CResRef td) {
   char *name = mcrypt_enc_get_modes_name(td.getTyped<MCrypt>()->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
 
-Array f_mcrypt_enc_get_supported_key_sizes(CObjRef td) {
+Array f_mcrypt_enc_get_supported_key_sizes(CResRef td) {
   int count = 0;
   int *key_sizes =
     mcrypt_enc_get_supported_key_sizes(td.getTyped<MCrypt>()->m_td, &count);
@@ -503,23 +503,23 @@ Array f_mcrypt_enc_get_supported_key_sizes(CObjRef td) {
   return ret;
 }
 
-bool f_mcrypt_enc_is_block_algorithm_mode(CObjRef td) {
+bool f_mcrypt_enc_is_block_algorithm_mode(CResRef td) {
   return mcrypt_enc_is_block_algorithm_mode(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-bool f_mcrypt_enc_is_block_algorithm(CObjRef td) {
+bool f_mcrypt_enc_is_block_algorithm(CResRef td) {
   return mcrypt_enc_is_block_algorithm(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-bool f_mcrypt_enc_is_block_mode(CObjRef td) {
+bool f_mcrypt_enc_is_block_mode(CResRef td) {
   return mcrypt_enc_is_block_mode(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-int64_t f_mcrypt_enc_self_test(CObjRef td) {
+int64_t f_mcrypt_enc_self_test(CResRef td) {
   return mcrypt_enc_self_test(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
+int64_t f_mcrypt_generic_init(CResRef td, CStrRef key, CStrRef iv) {
   MCrypt *pm = td.getTyped<MCrypt>();
   int max_key_size = mcrypt_enc_get_key_size(pm->m_td);
   int iv_size = mcrypt_enc_get_iv_size(pm->m_td);
@@ -576,15 +576,15 @@ int64_t f_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
   return result;
 }
 
-Variant f_mcrypt_generic(CObjRef td, CStrRef data) {
+Variant f_mcrypt_generic(CResRef td, CStrRef data) {
   return mcrypt_generic(td, data, false);
 }
 
-Variant f_mdecrypt_generic(CObjRef td, CStrRef data) {
+Variant f_mdecrypt_generic(CResRef td, CStrRef data) {
   return mcrypt_generic(td, data, true);
 }
 
-bool f_mcrypt_generic_deinit(CObjRef td) {
+bool f_mcrypt_generic_deinit(CResRef td) {
   MCrypt *pm = td.getTyped<MCrypt>();
   if (mcrypt_generic_deinit(pm->m_td) < 0) {
     raise_warning("Could not terminate encryption specifier");
@@ -594,7 +594,7 @@ bool f_mcrypt_generic_deinit(CObjRef td) {
   return true;
 }
 
-bool f_mcrypt_generic_end(CObjRef td) {
+bool f_mcrypt_generic_end(CResRef td) {
   return f_mcrypt_generic_deinit(td);
 }
 

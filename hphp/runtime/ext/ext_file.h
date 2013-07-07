@@ -34,30 +34,30 @@ namespace HPHP {
 Variant f_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false,
                 CVarRef context = uninit_null());
 Variant f_popen(CStrRef command, CStrRef mode);
-bool f_fclose(CObjRef handle);
-Variant f_pclose(CObjRef handle);
-Variant f_fseek(CObjRef handle, int64_t offset, int64_t whence = k_SEEK_SET);
-bool f_rewind(CObjRef handle);
-Variant f_ftell(CObjRef handle);
-bool f_feof(CObjRef handle);
-Variant f_fstat(CObjRef handle);
-Variant f_fread(CObjRef handle, int64_t length);
-Variant f_fgetc(CObjRef handle);
-Variant f_fgets(CObjRef handle, int64_t length = 0);
-Variant f_fgetss(CObjRef handle, int64_t length = 0,
+bool f_fclose(CResRef handle);
+Variant f_pclose(CResRef handle);
+Variant f_fseek(CResRef handle, int64_t offset, int64_t whence = k_SEEK_SET);
+bool f_rewind(CResRef handle);
+Variant f_ftell(CResRef handle);
+bool f_feof(CResRef handle);
+Variant f_fstat(CResRef handle);
+Variant f_fread(CResRef handle, int64_t length);
+Variant f_fgetc(CResRef handle);
+Variant f_fgets(CResRef handle, int64_t length = 0);
+Variant f_fgetss(CResRef handle, int64_t length = 0,
                 CStrRef allowable_tags = null_string);
-Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array);
-Variant f_fpassthru(CObjRef handle);
-Variant f_fwrite(CObjRef handle, CStrRef data, int64_t length = 0);
-Variant f_fputs(CObjRef handle, CStrRef data, int64_t length = 0);
-Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array);
-Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args);
-bool f_fflush(CObjRef handle);
-bool f_ftruncate(CObjRef handle, int64_t size);
-bool f_flock(CObjRef handle, int operation, VRefParam wouldblock = uninit_null());
-Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",",
+Variant f_fscanf(int _argc, CResRef handle, CStrRef format, CArrRef _argv = null_array);
+Variant f_fpassthru(CResRef handle);
+Variant f_fwrite(CResRef handle, CStrRef data, int64_t length = 0);
+Variant f_fputs(CResRef handle, CStrRef data, int64_t length = 0);
+Variant f_fprintf(int _argc, CResRef handle, CStrRef format, CArrRef _argv = null_array);
+Variant f_vfprintf(CResRef handle, CStrRef format, CArrRef args);
+bool f_fflush(CResRef handle);
+bool f_ftruncate(CResRef handle, int64_t size);
+bool f_flock(CResRef handle, int operation, VRefParam wouldblock = uninit_null());
+Variant f_fputcsv(CResRef handle, CArrRef fields, CStrRef delimiter = ",",
                   CStrRef enclosure = "\"");
-Variant f_fgetcsv(CObjRef handle, int64_t length = 0, CStrRef delimiter = ",",
+Variant f_fgetcsv(CResRef handle, int64_t length = 0, CStrRef delimiter = ",",
                   CStrRef enclosure = "\"", CStrRef escape = "\\");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,11 +149,11 @@ bool f_chdir(CStrRef directory);
 bool f_chroot(CStrRef directory);
 Variant f_dir(CStrRef directory);
 Variant f_opendir(CStrRef path, CVarRef context = uninit_null());
-Variant f_readdir(CObjRef dir_handle);
-void f_rewinddir(CObjRef dir_handle);
+Variant f_readdir(CResRef dir_handle);
+void f_rewinddir(CResRef dir_handle);
 Variant f_scandir(CStrRef directory, bool descending = false,
                   CVarRef context = uninit_null());
-void f_closedir(CObjRef dir_handle);
+void f_closedir(CResRef dir_handle);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

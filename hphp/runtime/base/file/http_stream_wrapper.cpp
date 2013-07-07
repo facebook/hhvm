@@ -45,8 +45,8 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
   }
 
   std::unique_ptr<UrlFile> file;
-  StreamContext *ctx = !context.isObject() ? nullptr :
-                        context.toObject().getTyped<StreamContext>();
+  StreamContext *ctx = !context.isResource() ? nullptr :
+                        context.toResource().getTyped<StreamContext>();
   if (!ctx || ctx->m_options.isNull() || ctx->m_options[s_http].isNull()) {
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());
   } else {

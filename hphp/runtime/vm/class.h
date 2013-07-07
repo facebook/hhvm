@@ -364,6 +364,7 @@ class Class : public AtomicCountable {
 public:
   friend class ExecutionContext;
   friend class ObjectData;
+  friend class ResourceData;
   friend class Unit;
 
   enum class Avail {

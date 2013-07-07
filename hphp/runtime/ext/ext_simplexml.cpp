@@ -129,7 +129,7 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
   }
 }
 
-static Object create_text(CObjRef doc, xmlNodePtr node,
+static Object create_text(CResRef doc, xmlNodePtr node,
                           CStrRef value, CStrRef ns,
                           bool is_prefix, bool free_text) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
@@ -144,10 +144,10 @@ static Object create_text(CObjRef doc, xmlNodePtr node,
   return obj;
 }
 
-static Array create_children(CObjRef doc, xmlNodePtr root,
+static Array create_children(CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix);
 
-static Object create_element(CObjRef doc, xmlNodePtr node,
+static Object create_element(CResRef doc, xmlNodePtr node,
                              CStrRef ns, bool is_prefix) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
@@ -161,7 +161,7 @@ static Object create_element(CObjRef doc, xmlNodePtr node,
   return obj;
 }
 
-static Array create_children(CObjRef doc, xmlNodePtr root,
+static Array create_children(CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix) {
   Array properties = Array::Create();
   for (xmlNodePtr node = root->children; node; node = node->next) {
@@ -260,7 +260,8 @@ Variant f_simplexml_import_dom(CObjRef node,
   }
 
   if (nodep && nodep->type == XML_ELEMENT_NODE) {
-    Object obj = Object(NEWOBJ(XmlDocWrapper)(nodep->doc, class_name, node));
+    Resource obj =
+      Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, class_name, node));
     return create_element(obj, nodep, String(), false);
   } else {
     raise_warning("Invalid Nodetype to import");
@@ -297,7 +298,7 @@ Variant f_simplexml_load_string(CStrRef data,
     return false;
   }
 
-  return create_element(Object(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
+  return create_element(Resource(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
                                            root, ns, is_prefix);
 }
 
@@ -351,7 +352,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
     m_doc =
-      Object(NEWOBJ(XmlDocWrapper)(doc, c_SimpleXMLElement::s_class_name));
+      Resource(NEWOBJ(XmlDocWrapper)(doc, c_SimpleXMLElement::s_class_name));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
@@ -1274,7 +1275,7 @@ bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
   return ret;
 }
 
-void f_libxml_set_streams_context(CObjRef streams_context) {
+void f_libxml_set_streams_context(CResRef streams_context) {
   throw NotImplementedException(__func__);
 }
 

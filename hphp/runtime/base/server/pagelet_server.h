@@ -32,22 +32,22 @@ public:
    * Create a task. This returns a task handle, or null object
    * if there are no worker threads.
    */
-  static Object TaskStart(CStrRef url, CArrRef headers,
-                          CStrRef remote_host,
-                          CStrRef post_data = null_string,
-                          CArrRef files = null_array);
+  static Resource TaskStart(CStrRef url, CArrRef headers,
+                            CStrRef remote_host,
+                            CStrRef post_data = null_string,
+                            CArrRef files = null_array);
 
   /**
    * Query if a task is finished. This is non-blocking and can be called as
    * many times as desired.
    */
-  static int64_t TaskStatus(CObjRef task);
+  static int64_t TaskStatus(CResRef task);
 
   /**
    * Get results of a task. This is blocking until task is finished or times
    * out. The status code is set to -1 in the event of a timeout.
    */
-  static String TaskResult(CObjRef task,
+  static String TaskResult(CResRef task,
                            Array &headers,
                            int &code,
                            int64_t timeout_ms);

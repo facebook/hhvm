@@ -27,20 +27,20 @@ namespace HPHP {
 
 bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers = null_string, CStrRef additional_parameters = null_string);
 int64_t f_ezmlm_hash(CStrRef addr);
-Object f_mailparse_msg_create();
-bool f_mailparse_msg_free(CObjRef mimemail);
+Resource f_mailparse_msg_create();
+bool f_mailparse_msg_free(CResRef mimemail);
 Variant f_mailparse_msg_parse_file(CStrRef filename);
-bool f_mailparse_msg_parse(CObjRef mimemail, CStrRef data);
-Variant f_mailparse_msg_extract_part_file(CObjRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
-Variant f_mailparse_msg_extract_whole_part_file(CObjRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
-Variant f_mailparse_msg_extract_part(CObjRef mimemail, CVarRef msgbody, CVarRef callbackfunc = "");
-Array f_mailparse_msg_get_part_data(CObjRef mimemail);
-Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection);
-Array f_mailparse_msg_get_structure(CObjRef mimemail);
+bool f_mailparse_msg_parse(CResRef mimemail, CStrRef data);
+Variant f_mailparse_msg_extract_part_file(CResRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
+Variant f_mailparse_msg_extract_whole_part_file(CResRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
+Variant f_mailparse_msg_extract_part(CResRef mimemail, CVarRef msgbody, CVarRef callbackfunc = "");
+Array f_mailparse_msg_get_part_data(CResRef mimemail);
+Variant f_mailparse_msg_get_part(CResRef mimemail, CStrRef mimesection);
+Array f_mailparse_msg_get_structure(CResRef mimemail);
 Array f_mailparse_rfc822_parse_addresses(CStrRef addresses);
-bool f_mailparse_stream_encode(CObjRef sourcefp, CObjRef destfp, CStrRef encoding);
-Variant f_mailparse_uudecode_all(CObjRef fp);
-Variant f_mailparse_determine_best_xfer_encoding(CObjRef fp);
+bool f_mailparse_stream_encode(CResRef sourcefp, CResRef destfp, CStrRef encoding);
+Variant f_mailparse_uudecode_all(CResRef fp);
+Variant f_mailparse_determine_best_xfer_encoding(CResRef fp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

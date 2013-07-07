@@ -645,7 +645,7 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
       return false;
     }
 
-    String &name = stmt->columns[col].toObject().getTyped<PDOColumn>()->name;
+    String &name = stmt->columns[col].toResource().getTyped<PDOColumn>()->name;
 
     /* if we are applying case conversions on column names, do so now */
     if (stmt->dbh->native_case != stmt->dbh->desired_case &&
@@ -663,7 +663,7 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
 
     if (stmt->bound_columns.exists(name)) {
       PDOBoundParam *param =
-        stmt->bound_columns[name].toObject().getTyped<PDOBoundParam>();
+        stmt->bound_columns[name].toResource().getTyped<PDOBoundParam>();
       param->paramno = col;
     }
   }
@@ -951,7 +951,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
     if (same(stream, false)) {
       throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source URI");
     }
-    data_source = stream.toObject().getTyped<File>()->readLine(1024);
+    data_source = stream.toResource().getTyped<File>()->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
       throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via URI)");
@@ -1545,13 +1545,13 @@ static bool dispatch_param_event(sp_PDOStatement stmt,
     return true;
   }
   for (ArrayIter iter(stmt->bound_params); iter; ++iter) {
-    PDOBoundParam *param = iter.second().toObject().getTyped<PDOBoundParam>();
+    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
     if (!stmt->paramHook(param, event_type)) {
       return false;
     }
   }
   for (ArrayIter iter(stmt->bound_columns); iter; ++iter) {
-    PDOBoundParam *param = iter.second().toObject().getTyped<PDOBoundParam>();
+    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
     if (!stmt->paramHook(param, event_type)) {
       return false;
     }
@@ -1586,7 +1586,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
   if (!is_param && !param->name.empty() && !stmt->columns.empty()) {
     /* try to map the name to the column */
     for (int i = 0; i < stmt->column_count; i++) {
-      if (stmt->columns[i].toObject().getTyped<PDOColumn>()->name ==
+      if (stmt->columns[i].toResource().getTyped<PDOColumn>()->name ==
           param->name) {
         param->paramno = i;
         break;
@@ -1655,7 +1655,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
 
 static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
                                int *type_override) {
-  PDOColumn *col = stmt->columns[colno].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = stmt->columns[colno].toResource().getTyped<PDOColumn>();
   int type = PDO_PARAM_TYPE(col->param_type);
   int new_type =  type_override ? PDO_PARAM_TYPE(*type_override) : type;
 
@@ -1700,7 +1700,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
     /* update those bound column variables now */
     for (ArrayIter iter(stmt->bound_columns); iter; ++iter) {
       PDOBoundParam *param =
-        iter.second().toObject().getTyped<PDOBoundParam>();
+        iter.second().toResource().getTyped<PDOBoundParam>();
       if (param->paramno >= 0) {
         param->parameter.reset();
         /* set new value */
@@ -1888,7 +1888,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   }
 
   for (int idx = 0; i < stmt->column_count; i++, idx++) {
-    String name = stmt->columns[i].toObject().getTyped<PDOColumn>()->name;
+    String name = stmt->columns[i].toResource().getTyped<PDOColumn>()->name;
     Variant val;
     fetch_value(stmt, val, i, NULL);
 
@@ -2005,7 +2005,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
 static int register_bound_param(CVarRef paramno, VRefParam param, int64_t type,
                                 int64_t max_value_len, CVarRef driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
-  SmartObject<PDOBoundParam> p(new PDOBoundParam);
+  SmartResource<PDOBoundParam> p(new PDOBoundParam);
   // need to make sure this is NULL, in case a fatal errors occurs before its set
   // inside really_register_bound_param
   p->stmt = NULL;
@@ -2455,11 +2455,11 @@ safe:
                              "parameter was not defined");
         goto clean_up;
       }
-      param = vparam.toObject().getTyped<PDOBoundParam>();
+      param = vparam.toResource().getTyped<PDOBoundParam>();
       if (stmt->dbh->support(PDOConnection::MethodQuoter)) {
         if (param->param_type == PDO_PARAM_LOB &&
             param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toObject());
+          Variant buf = f_stream_get_contents(param->parameter.toResource());
           if (!same(buf, false)) {
             if (!stmt->dbh->quoter(buf.toString(), plc->quoted,
                                    param->param_type)) {
@@ -2623,7 +2623,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
   if (!params.empty()) {
     m_stmt->bound_params.reset();
     for (ArrayIter iter(params); iter; ++iter) {
-      SmartObject<PDOBoundParam> param(new PDOBoundParam);
+      SmartResource<PDOBoundParam> param(new PDOBoundParam);
       param->param_type = PDO_PARAM_STR;
       param->parameter = iter.second();
       param->stmt = NULL;
@@ -3010,7 +3010,7 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   }
 
   /* add stock items */
-  PDOColumn *col = m_stmt->columns[column].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = m_stmt->columns[column].toResource().getTyped<PDOColumn>();
   ret.set(s_name, col->name);
   ret.set(s_len, (int64_t)col->maxlen); /* FIXME: unsigned ? */
   ret.set(s_precision, (int64_t)col->precision);
@@ -3077,7 +3077,7 @@ Variant c_PDOStatement::t_debugdumpparams() {
   if (same(fobj, false)) {
     return false;
   }
-  File *f = fobj.toObject().getTyped<File>();
+  File *f = fobj.toResource().getTyped<File>();
 
   Array params;
   params.append(m_stmt->query_string.size());
@@ -3096,7 +3096,7 @@ Variant c_PDOStatement::t_debugdumpparams() {
                 CREATE_VECTOR1(iter.first().toInt64()));
     }
 
-    PDOBoundParam *param = iter.second().toObject().getTyped<PDOBoundParam>();
+    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
     params.clear();
     params.append(param->paramno);
     params.append(param->name.size());

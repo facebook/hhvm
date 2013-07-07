@@ -101,7 +101,7 @@ bool DateTime::IsValid(int y, int m, int d) {
     d <= timelib_days_in_month(y, m);
 }
 
-SmartObject<DateTime> DateTime::Current(bool utc /* = false */) {
+SmartResource<DateTime> DateTime::Current(bool utc /* = false */) {
   return NEWOBJ(DateTime)(time(0), utc);
 }
 
@@ -411,7 +411,7 @@ void DateTime::setTime(int hour, int minute, int second) {
   update();
 }
 
-void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
+void DateTime::setTimezone(SmartResource<TimeZone> timezone) {
   if (!timezone.isNull()) {
     m_tz = timezone->cloneTimeZone();
     if (m_tz.get() && m_tz->get()) {
@@ -447,12 +447,12 @@ void DateTime::internalModify(timelib_rel_time *rel,
   timelib_update_from_sse(m_time.get());
 }
 
-void DateTime::add(const SmartObject<DateInterval> &interval) {
+void DateTime::add(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
   internalModify(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
 }
 
-void DateTime::sub(const SmartObject<DateInterval> &interval) {
+void DateTime::sub(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
   internalModify(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
 }
@@ -734,7 +734,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   return ret;
 }
 
-bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
+bool DateTime::fromString(CStrRef input, SmartResource<TimeZone> tz,
                           const char* format /*=NUL*/) {
   struct timelib_error_container *error;
   timelib_time *t;
@@ -782,9 +782,9 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
   return true;
 }
 
-SmartObject<DateTime> DateTime::cloneDateTime() const {
+SmartResource<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartObject<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
+  SmartResource<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
   ret->setTimezone(m_tz);
   return ret;
 }
@@ -792,13 +792,14 @@ SmartObject<DateTime> DateTime::cloneDateTime() const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparison
 
-SmartObject<DateInterval> DateTime::diff(SmartObject<DateTime> datetime2, bool absolute) {
+SmartResource<DateInterval>
+DateTime::diff(SmartResource<DateTime> datetime2, bool absolute) {
 #ifdef TIMELIB_HAVE_INTERVAL
   timelib_rel_time *rel = timelib_diff(m_time.get(), datetime2.get()->m_time.get());
   if (absolute) {
     TIMELIB_REL_INVERT_SET(rel, 0);
   }
-  SmartObject<DateInterval> di(NEWOBJ(DateInterval)(rel));
+  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(rel));
   return di;
 #else
   throw NotImplementedException("timelib version too old");

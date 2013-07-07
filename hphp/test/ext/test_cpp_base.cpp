@@ -616,7 +616,7 @@ bool TestCppBase::TestObject() {
     auto os = f_serialize(o);
     VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }
-  VERIFY(!equal(Object(new TestResource()), Object(new TestResource()) ));
+  VERIFY(!equal(Resource(new TestResource()), Resource(new TestResource()) ));
   return Count(true);
 }
 

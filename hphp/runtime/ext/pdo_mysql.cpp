@@ -987,17 +987,17 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Object(new PDOColumn()));
+      columns.set(i, Resource(new PDOColumn()));
     }
   }
 
   // fetch all on demand, this seems easiest if we've been here before bail out
-  PDOColumn *col = columns[0].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = columns[0].toResource().getTyped<PDOColumn>();
   if (!col->name.empty()) {
     return true;
   }
   for (int i = 0; i < column_count; i++) {
-    col = columns[i].toObject().getTyped<PDOColumn>();
+    col = columns[i].toResource().getTyped<PDOColumn>();
 
     if (m_conn->fetch_table_names()) {
       col->name = String(m_fields[i].table) + "." +
@@ -1096,7 +1096,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
         return false;
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toObject());
+          Variant buf = f_stream_get_contents(param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {

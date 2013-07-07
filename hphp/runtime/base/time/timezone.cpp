@@ -136,7 +136,7 @@ String TimeZone::CurrentName() {
   return String(s_guessed_timezone.m_tzid);
 }
 
-SmartObject<TimeZone> TimeZone::Current() {
+SmartResource<TimeZone> TimeZone::Current() {
   return NEWOBJ(TimeZone)(CurrentName());
 }
 
@@ -213,7 +213,7 @@ TimeZone::TimeZone(timelib_tzinfo *tzi) {
   m_tzi = TimeZoneInfo(tzi, tzinfo_deleter());
 }
 
-SmartObject<TimeZone> TimeZone::cloneTimeZone() const {
+SmartResource<TimeZone> TimeZone::cloneTimeZone() const {
   if (!m_tzi) return NEWOBJ(TimeZone)();
   return NEWOBJ(TimeZone)(timelib_tzinfo_clone(m_tzi.get()));
 }

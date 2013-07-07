@@ -67,7 +67,7 @@ class c_DateTime : public ExtObjectData {
   public: Object t_sub(CObjRef interval);
 
   // Helper for DateTime -> c_DateTime conversion
-  public: static Object wrap(SmartObject<DateTime> dt) {
+  public: static Object wrap(SmartResource<DateTime> dt) {
     c_DateTime *cdt = NEWOBJ(c_DateTime)();
     Object ret(cdt);
     cdt->m_dt = dt;
@@ -75,15 +75,15 @@ class c_DateTime : public ExtObjectData {
   }
 
   // Helper for c_DateTime -> DateTime conversion
-  public: static SmartObject<DateTime> unwrap(CObjRef datetime) {
+  public: static SmartResource<DateTime> unwrap(CObjRef datetime) {
     SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
     if (cdt.get() == NULL)
-      return SmartObject<DateTime>();
+      return SmartResource<DateTime>();
     return cdt->m_dt;
   }
 
  private:
-  SmartObject<DateTime> m_dt;
+  SmartResource<DateTime> m_dt;
  public:
   virtual c_DateTime* clone();
 };
@@ -123,7 +123,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: static Array ti_listidentifiers();
 
   // Helper for TimeZone -> c_DateTimeZone conversion
-  public: static Object wrap(SmartObject<TimeZone> tz) {
+  public: static Object wrap(SmartResource<TimeZone> tz) {
     c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
     Object ret(ctz);
     ctz->m_tz = tz;
@@ -131,15 +131,15 @@ class c_DateTimeZone : public ExtObjectData {
   }
 
   // Helper for c_DateTimeZone -> TimeZone conversion
-  public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {
+  public: static SmartResource<TimeZone> unwrap(CObjRef timezone) {
     SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
     if (ctz.get() == NULL)
-      return SmartObject<TimeZone>();
+      return SmartResource<TimeZone>();
     return ctz->m_tz;
   }
 
  private:
-  SmartObject<TimeZone> m_tz;
+  SmartResource<TimeZone> m_tz;
  public:
   virtual c_DateTimeZone* clone();
 };
@@ -162,23 +162,23 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
   public: String t_format(CStrRef format);
 
 
-  public: static Object wrap(SmartObject<DateInterval> di) {
+  public: static Object wrap(SmartResource<DateInterval> di) {
     c_DateInterval *cdi = NEWOBJ(c_DateInterval)();
     Object ret(cdi);
     cdi->m_di = di;
     return ret;
   }
 
-  public: static SmartObject<DateInterval> unwrap(CObjRef dateinterval) {
+  public: static SmartResource<DateInterval> unwrap(CObjRef dateinterval) {
     SmartObject<c_DateInterval>
       cdi = dateinterval.getTyped<c_DateInterval>(true);
     if (cdi.get() == NULL)
-      return SmartObject<DateInterval>();
+      return SmartResource<DateInterval>();
     return cdi->m_di;
   }
 
  private:
-  SmartObject<DateInterval> m_di;
+  SmartResource<DateInterval> m_di;
  public:
   virtual c_DateInterval* clone();
 

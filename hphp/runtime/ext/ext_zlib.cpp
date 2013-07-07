@@ -252,7 +252,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
-  Object stream = f_gzopen(filename, "rb", use_include_path);
+  Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
   }
@@ -260,7 +260,7 @@ Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
 }
 
 Variant f_gzfile(CStrRef filename, bool use_include_path /* = false */) {
-  Object stream = f_gzopen(filename, "rb", use_include_path);
+  Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
   }
@@ -315,10 +315,10 @@ String f_zlib_get_coding_type() {
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Object f_gzopen(CStrRef filename, CStrRef mode,
-                bool use_include_path /* = false */) {
+Resource f_gzopen(CStrRef filename, CStrRef mode,
+                  bool use_include_path /* = false */) {
   File *file = NEWOBJ(ZipFile)();
-  Object handle(file);
+  Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
     raise_warning("%s",Util::safe_strerror(errno).c_str());
@@ -327,41 +327,41 @@ Object f_gzopen(CStrRef filename, CStrRef mode,
   return handle;
 }
 
-bool f_gzclose(CObjRef zp) {
+bool f_gzclose(CResRef zp) {
   return f_fclose(zp);
 }
-Variant f_gzread(CObjRef zp, int64_t length /* = 0 */) {
+Variant f_gzread(CResRef zp, int64_t length /* = 0 */) {
   return f_fread(zp, length);
 }
-Variant f_gzseek(CObjRef zp, int64_t offset, int64_t whence /* = k_SEEK_SET */) {
+Variant f_gzseek(CResRef zp, int64_t offset, int64_t whence /* = k_SEEK_SET */) {
   return f_fseek(zp, offset, whence);
 }
-Variant f_gztell(CObjRef zp) {
+Variant f_gztell(CResRef zp) {
   return f_ftell(zp);
 }
-bool f_gzeof(CObjRef zp) {
+bool f_gzeof(CResRef zp) {
   return f_feof(zp);
 }
-bool f_gzrewind(CObjRef zp) {
+bool f_gzrewind(CResRef zp) {
   return f_rewind(zp);
 }
-Variant f_gzgetc(CObjRef zp) {
+Variant f_gzgetc(CResRef zp) {
   return f_fgetc(zp);
 }
-Variant f_gzgets(CObjRef zp, int64_t length /* = 1024 */) {
+Variant f_gzgets(CResRef zp, int64_t length /* = 1024 */) {
   return f_fgets(zp, length);
 }
-Variant f_gzgetss(CObjRef zp, int64_t length /* = 0 */,
+Variant f_gzgetss(CResRef zp, int64_t length /* = 0 */,
                   CStrRef allowable_tags /* = null_string */) {
   return f_fgetss(zp, length, allowable_tags);
 }
-Variant f_gzpassthru(CObjRef zp) {
+Variant f_gzpassthru(CResRef zp) {
   return f_fpassthru(zp);
 }
-Variant f_gzputs(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzputs(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
-Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzwrite(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
 

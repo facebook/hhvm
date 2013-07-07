@@ -217,6 +217,7 @@ static const std::unordered_map<fbstring,fbstring> g_serializedDefaults = {
   {"null_string",       "N;"},
   {"null_array",        "N;"},
   {"null_object",       "N;"},
+  {"null_resource",     "N;"},
   {"null_variant",      "N;"},
   {"INT_MAX",           "i:2147483647;"}, // (1 << 31) - 1
 };
@@ -229,6 +230,7 @@ static const std::unordered_map<fbstring,fbstring> g_phpDefaults = {
   {"null_string",       "null"},
   {"null_array",        "null"},
   {"null_object",       "null"},
+  {"null_resource",     "null"},
   {"null_variant",      "null"},
   {"INT_MAX",           "null"},
 };
@@ -566,7 +568,8 @@ bool PhpParam::defValueNeedsVariable() const {
   if ((cppKindOf == KindOfArray) && (defVal == "null_array")) {
     return false;
   }
-  if ((cppKindOf == KindOfObject) && (defVal == "null_object")) {
+  if ((cppKindOf == KindOfObject) &&
+      (defVal == "null_object" || defVal == "null_resource")) {
     return false;
   }
   if ((cppKindOf == KindOfAny) && (defVal == "null_variant")) {

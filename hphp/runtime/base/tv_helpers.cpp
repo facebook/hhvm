@@ -429,6 +429,5 @@ bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
   return tv->m_type == KindOfObject;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 }

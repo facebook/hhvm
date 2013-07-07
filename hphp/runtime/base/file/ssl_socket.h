@@ -114,7 +114,7 @@ public:
    *    to that cert
    *  . it will be interpreted as the cert data
    */
-  static Object Get(CVarRef var);
+  static Resource Get(CVarRef var);
   static BIO *ReadData(CVarRef var, bool *file = nullptr);
 };
 

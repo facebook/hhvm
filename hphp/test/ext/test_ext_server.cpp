@@ -82,13 +82,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
   String baseheader("MyHeader: ");
   String basepost("postparam=");
 
-  std::vector<Object> tasks;
+  std::vector<Resource> tasks;
   for (int i = 0; i < TEST_SIZE; ++i) {
     String url = baseurl + String(i);
     String header = baseheader + String(i);
     String post = basepost + String(i);
-    Object task = f_pagelet_server_task_start(url, CREATE_VECTOR1(header),
-                                              post);
+    Resource task = f_pagelet_server_task_start(url, CREATE_VECTOR1(header),
+                                                post);
     tasks.push_back(task);
   }
 
@@ -155,7 +155,7 @@ bool TestExtServer::test_xbox_task_status() {
 }
 
 bool TestExtServer::test_xbox_task_result() {
-  Object task = f_xbox_task_start("hello");
+  Resource task = f_xbox_task_start("hello");
   f_xbox_task_status(task);
   Variant ret;
   VS(f_xbox_task_result(task, 0, ref(ret)), 200);

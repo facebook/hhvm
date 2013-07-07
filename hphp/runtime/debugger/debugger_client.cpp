@@ -530,7 +530,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   // API mode, and in client mode we expect to destruct it ourselves
   // when ~DebuggerClient runs.
   sock->unregister();
-  Object obj(sock); // Destroy sock if we don't connect.
+  Resource obj(sock); // Destroy sock if we don't connect.
   if (f_socket_connect(sock, String(host), port)) {
     DMachineInfoPtr machine(new DMachineInfo());
     machine->m_name = host;
@@ -555,7 +555,7 @@ bool DebuggerClient::reconnect() {
     Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                               host.c_str(), port);
     sock->unregister();
-    Object obj(sock); // Destroy sock if we don't connect.
+    Resource obj(sock); // Destroy sock if we don't connect.
     if (f_socket_connect(sock, String(host), port)) {
       for (unsigned int i = 0; i < m_machines.size(); i++) {
         if (m_machines[i] == m_machine) {

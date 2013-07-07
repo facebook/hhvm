@@ -392,7 +392,7 @@ StaticString XboxTask::s_class_name("XboxTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
+Resource XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
   {
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
@@ -401,7 +401,7 @@ Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
          s_dispatcher->getQueuedJobs() <
          RuntimeOption::XboxServerMaxQueueLength)) {
       XboxTask *task = NEWOBJ(XboxTask)(msg, reqInitDoc);
-      Object ret(task);
+      Resource ret(task);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
       Transport *transport = g_context->getTransport();
@@ -422,15 +422,15 @@ Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
 
   Object e = SystemLib::AllocExceptionObject(errMsg);
   throw_exception(e);
-  return Object();
+  return Resource();
 }
 
-bool XboxServer::TaskStatus(CObjRef task) {
+bool XboxServer::TaskStatus(CResRef task) {
   XboxTask *ptask = task.getTyped<XboxTask>();
   return ptask->getJob()->isDone();
 }
 
-int XboxServer::TaskResult(CObjRef task, int timeout_ms, Variant &ret) {
+int XboxServer::TaskResult(CResRef task, int timeout_ms, Variant &ret) {
   XboxTask *ptask = task.getTyped<XboxTask>();
 
   int code = 0;

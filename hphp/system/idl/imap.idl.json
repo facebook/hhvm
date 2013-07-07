@@ -47,7 +47,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -117,7 +117,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -146,7 +146,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -174,7 +174,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -192,7 +192,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -226,7 +226,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -250,7 +250,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -273,7 +273,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -302,7 +302,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -338,7 +338,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -356,7 +356,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -385,7 +385,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -419,7 +419,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -447,7 +447,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -476,7 +476,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -499,7 +499,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -522,7 +522,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -545,7 +545,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -568,7 +568,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -596,7 +596,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -623,7 +623,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -662,7 +662,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -702,7 +702,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -733,7 +733,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -761,7 +761,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -789,7 +789,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -822,7 +822,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -850,7 +850,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -901,7 +901,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -935,7 +935,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1020,7 +1020,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -1056,7 +1056,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1079,7 +1079,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -1097,7 +1097,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -1155,7 +1155,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 }
             ]
@@ -1191,7 +1191,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1219,7 +1219,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1329,7 +1329,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1369,7 +1369,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1402,7 +1402,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1436,7 +1436,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1464,7 +1464,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1497,7 +1497,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1531,7 +1531,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1575,7 +1575,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1604,7 +1604,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1627,7 +1627,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1674,7 +1674,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1697,7 +1697,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {
@@ -1725,7 +1725,7 @@
             "args": [
                 {
                     "name": "imap_stream",
-                    "type": "Object",
+                    "type": "Resource",
                     "desc": "An IMAP stream returned by imap_open()."
                 },
                 {

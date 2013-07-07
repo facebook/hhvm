@@ -55,7 +55,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartObject<File>  fp;
+    SmartResource<File> fp;
     StringBuffer       buf;
     String             content;
     int                type;
@@ -67,7 +67,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartObject<File>  fp;
+    SmartResource<File> fp;
   };
 
   DECLARE_BOOST_TYPES(ToFree);
@@ -409,11 +409,11 @@ public:
     case CURLOPT_WRITEHEADER:
     case CURLOPT_STDERR:
       {
-        if (!value.is(KindOfObject)) {
+        if (!value.isResource()) {
           return false;
         }
 
-        Object obj = value.toObject();
+        Resource obj = value.toResource();
         if (obj.isNull() || obj.getTyped<File>(true) == NULL) {
           return false;
         }
@@ -627,7 +627,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, CREATE_VECTOR3(Object(ch), t->fp->fd(), data_size));
+          t->callback, CREATE_VECTOR3(Resource(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -659,7 +659,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -689,7 +689,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -759,7 +759,7 @@ Variant f_curl_init(CStrRef url /* = null_string */) {
   return NEWOBJ(CurlResource)(url);
 }
 
-Variant f_curl_copy_handle(CObjRef ch) {
+Variant f_curl_copy_handle(CResRef ch) {
   CHECK_RESOURCE(curl);
   return NEWOBJ(CurlResource)(curl);
 }
@@ -801,12 +801,12 @@ Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   return ret.create();
 }
 
-bool f_curl_setopt(CObjRef ch, int option, CVarRef value) {
+bool f_curl_setopt(CResRef ch, int option, CVarRef value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
 
-bool f_curl_setopt_array(CObjRef ch, CArrRef options) {
+bool f_curl_setopt_array(CResRef ch, CArrRef options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {
@@ -816,12 +816,12 @@ bool f_curl_setopt_array(CObjRef ch, CArrRef options) {
   return true;
 }
 
-Variant f_fb_curl_getopt(CObjRef ch, int opt /* = 0 */) {
+Variant f_fb_curl_getopt(CResRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   return curl->getOption(opt);
 }
 
-Variant f_curl_exec(CObjRef ch) {
+Variant f_curl_exec(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->execute();
 }
@@ -850,7 +850,7 @@ const StaticString
   s_redirect_time("redirect_time"),
   s_request_header("request_header");
 
-Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
+Variant f_curl_getinfo(CResRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -998,17 +998,17 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
   return uninit_null();
 }
 
-Variant f_curl_errno(CObjRef ch) {
+Variant f_curl_errno(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getError();
 }
 
-Variant f_curl_error(CObjRef ch) {
+Variant f_curl_error(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getErrorString();
 }
 
-Variant f_curl_close(CObjRef ch) {
+Variant f_curl_close(CResRef ch) {
   CHECK_RESOURCE(curl);
   curl->close();
   return uninit_null();
@@ -1040,13 +1040,13 @@ public:
     }
   }
 
-  void add(CObjRef ch) {
+  void add(CResRef ch) {
     m_easyh.append(ch);
   }
 
   void remove(CurlResource *curle) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (iter.second().toObject().getTyped<CurlResource>()->get(true) ==
+      if (iter.second().toResource().getTyped<CurlResource>()->get(true) ==
           curle->get()) {
         m_easyh.remove(iter.first());
         return;
@@ -1054,20 +1054,21 @@ public:
     }
   }
 
-  Object find(CURL *cp) {
+  Resource find(CURL *cp) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (iter.second().toObject().getTyped<CurlResource>()->get(true) == cp) {
-        return iter.second().toObject();
+      if (iter.second().toResource().
+            getTyped<CurlResource>()->get(true) == cp) {
+        return iter.second().toResource();
       }
     }
-    return Object();
+    return Resource();
   }
 
   void check_exceptions() {
     ObjectData* phpException = 0;
     Exception* cppException = 0;
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      CurlResource* curl = iter.second().toCObjRef(). getTyped<CurlResource>();
+      CurlResource* curl = iter.second().toResource().getTyped<CurlResource>();
       if (ObjectData* e = curl->getAndClearPhpException()) {
         if (phpException) {
           e->o_set(s_previous, Variant(phpException), s_exception);
@@ -1119,25 +1120,25 @@ StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
     return uninit_null();                                                        \
   }                                                                     \
 
-Object f_curl_multi_init() {
+Resource f_curl_multi_init() {
   return NEWOBJ(CurlMultiResource)();
 }
 
-Variant f_curl_multi_add_handle(CObjRef mh, CObjRef ch) {
+Variant f_curl_multi_add_handle(CResRef mh, CResRef ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
+Variant f_curl_multi_remove_handle(CResRef mh, CResRef ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
+Variant f_curl_multi_exec(CResRef mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = still_running;
   IOStatusHelper io("curl_multi_exec");
@@ -1192,7 +1193,7 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 # endif
 #endif
 
-Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
+Variant f_curl_multi_select(CResRef mh, double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
   unsigned long timeout_ms = (unsigned long)(timeout * 1000.0);
@@ -1201,7 +1202,7 @@ Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
   return ret;
 }
 
-Variant f_curl_multi_getcontent(CObjRef ch) {
+Variant f_curl_multi_getcontent(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
@@ -1217,7 +1218,7 @@ Array f_curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   return ret;
 }
 
-Variant f_fb_curl_multi_fdset(CObjRef mh,
+Variant f_fb_curl_multi_fdset(CResRef mh,
                               VRefParam read_fd_set,
                               VRefParam write_fd_set,
                               VRefParam exc_fd_set,
@@ -1249,7 +1250,7 @@ const StaticString
   s_headers("headers"),
   s_requests("requests");
 
-Variant f_curl_multi_info_read(CObjRef mh,
+Variant f_curl_multi_info_read(CResRef mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
@@ -1264,14 +1265,14 @@ Variant f_curl_multi_info_read(CObjRef mh,
   Array ret;
   ret.set(s_msg, tmp_msg->msg);
   ret.set(s_result, tmp_msg->data.result);
-  Object curle = curlm->find(tmp_msg->easy_handle);
+  Resource curle = curlm->find(tmp_msg->easy_handle);
   if (!curle.isNull()) {
     ret.set(s_handle, curle);
   }
   return ret;
 }
 
-Variant f_curl_multi_close(CObjRef mh) {
+Variant f_curl_multi_close(CResRef mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
   return uninit_null();
@@ -1424,7 +1425,7 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 true, false);
   if (client) {
-    return Object(NEWOBJ(LibEventHttpHandle)(client));
+    return Resource(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }
@@ -1438,12 +1439,12 @@ Variant f_evhttp_async_post(CStrRef url, CStrRef data,
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 true, true);
   if (client) {
-    return Object(NEWOBJ(LibEventHttpHandle)(client));
+    return Resource(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }
 
-Variant f_evhttp_recv(CObjRef handle) {
+Variant f_evhttp_recv(CResRef handle) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_recv is disabled");
   }

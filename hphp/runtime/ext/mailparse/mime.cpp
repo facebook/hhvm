@@ -330,7 +330,7 @@ bool MimePart::enumeratePartsImpl(Enumerator *top, Enumerator **child,
 
   for (ArrayIter iter(m_children); iter; ++iter) {
     if (next.id) {
-      MimePart *childpart = iter.second().toObject().getTyped<MimePart>();
+      MimePart *childpart = iter.second().toResource().getTyped<MimePart>();
       if (!childpart->enumeratePartsImpl(top, &next.next, callback, ptr)) {
         return false;
       }
@@ -411,7 +411,7 @@ bool MimePart::findPart(Enumerator *id, void *ptr) {
   return true;
 }
 
-Object MimePart::findByName(const char *name) {
+Resource MimePart::findByName(const char *name) {
   struct find_part_struct find;
   find.searchfor = name;
   find.foundpart = NULL;
@@ -623,7 +623,7 @@ MimePart *MimePart::createChild(int startpos, bool inherit) {
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
-  m_children.append(Object(child));
+  m_children.append(Resource(child));
   child->m_startpos = child->m_endpos = child->m_bodystart =
     child->m_bodyend = startpos;
 
@@ -905,21 +905,21 @@ void MimePart::UpdatePositions(MimePart *part, int newendpos,
 Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
                           bool isfile) {
   /* filename can be a filename or a stream */
-  Object file;
+  Resource file;
   File *f = NULL;
   if (filename.isResource()) {
-    f = filename.toObject().getTyped<File>();
+    f = filename.toResource().getTyped<File>();
   } else if (isfile) {
     Variant stream = File::Open(filename.toString(), "rb");
     if (!same(stream, false)) {
-      file = stream.toObject();
+      file = stream.toResource();
       f = file.getTyped<File>();
     }
   } else {
     /* filename is the actual data */
     String data = filename.toString();
     f = NEWOBJ(MemFile)(data.data(), data.size());
-    file = Object(f);
+    file = Resource(f);
   }
 
   if (f == NULL) {
@@ -944,7 +944,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
       return m_extract_context;
     }
     if (callbackfunc.isResource()) {
-      return f_stream_get_contents(callbackfunc.toObject());
+      return f_stream_get_contents(callbackfunc.toResource());
     }
     return true;
   }
@@ -990,7 +990,7 @@ void MimePart::outputToStdout(CStrRef s) {
 }
 
 void MimePart::outputToFile(CStrRef s) {
-  m_extract_context.toObject().getTyped<File>()->write(s);
+  m_extract_context.toResource().getTyped<File>()->write(s);
 }
 
 void MimePart::outputToString(CStrRef s) {

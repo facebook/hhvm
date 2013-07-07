@@ -28,7 +28,7 @@ String f_gettype(CVarRef v) {
   return getDataTypeString(v.getType());
 }
 
-String f_get_resource_type(CObjRef handle) {
+String f_get_resource_type(CResRef handle) {
   if (handle.isResource()) {
     return handle->o_getClassName();
   }

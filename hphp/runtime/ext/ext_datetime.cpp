@@ -118,7 +118,7 @@ int64_t c_DateTime::t_gettimestamp() {
 }
 
 Variant c_DateTime::t_gettimezone() {
-  SmartObject<TimeZone> tz = m_dt->timezone();
+  SmartResource<TimeZone> tz = m_dt->timezone();
   if (tz->isValid()) {
     return c_DateTimeZone::wrap(tz);
   }
@@ -308,7 +308,7 @@ Variant c_DateInterval::t___set(Variant member, Variant value) {
 }
 
 Object c_DateInterval::ti_createfromdatestring(CStrRef time) {
-  SmartObject<DateInterval> di(NEWOBJ(DateInterval)(time, true));
+  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(time, true));
   return c_DateInterval::wrap(di);
 }
 
@@ -429,7 +429,7 @@ Variant f_strtotime(CStrRef input,
   }
 
   DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartObject<TimeZone>())) {
+  if (!dt.fromString(input, SmartResource<TimeZone>())) {
     return false;
   }
   bool error;

@@ -162,7 +162,7 @@ String DateInterval::format(CStrRef format_spec) {
   return s.detach();
 }
 
-SmartObject<DateInterval> DateInterval::cloneDateInterval() const {
+SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
   if (!m_di) return NEWOBJ(DateInterval)();
   return NEWOBJ(DateInterval)(timelib_rel_time_clone(m_di.get()));
 }

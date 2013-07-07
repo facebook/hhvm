@@ -527,7 +527,7 @@ public:
     // explicitly pclose()'ed, it seems that Zend is implicitly closing the
     // pipes when proc_close() is called.
     for (ArrayIter iter(pipes); iter; ++iter) {
-      iter.second().toObject().getTyped<PlainFile>()->close();
+      iter.second().toResource().getTyped<PlainFile>()->close();
     }
     pipes.clear();
 
@@ -641,17 +641,17 @@ public:
 
   /* clean up all the child ends and then open streams on the parent
    * ends, where appropriate */
-  Object dupParent() {
+  Resource dupParent() {
     close(childend); childend = -1;
 
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Object(NEWOBJ(PlainFile)(parentend, true));
+      return Resource(NEWOBJ(PlainFile)(parentend, true));
     }
 
-    return Object();
+    return Resource();
   }
 };
 
@@ -678,7 +678,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {
-      File *file = descitem.toObject().getTyped<File>();
+      File *file = descitem.toResource().getTyped<File>();
       if (!item.readFile(file)) break;
     } else if (!descitem.is(KindOfArray)) {
       raise_warning("Descriptor must be either an array or a File-Handle");
@@ -740,13 +740,13 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   proc->child = child;
   proc->env = env;
   for (int i = 0; i < (int)items.size(); i++) {
-    Object f = items[i].dupParent();
+    Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
     }
     pipes.set(items[i].index, f);
   }
-  return Object(proc);
+  return Resource(proc);
 }
 
 Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
@@ -858,12 +858,12 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
   _exit(127);
 }
 
-bool f_proc_terminate(CObjRef process, int signal /* = 0 */) {
+bool f_proc_terminate(CResRef process, int signal /* = 0 */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
   return kill(proc->child, signal <= 0 ? SIGTERM : signal) == 0;
 }
 
-int64_t f_proc_close(CObjRef process) {
+int64_t f_proc_close(CResRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
@@ -876,7 +876,7 @@ static const StaticString s_exitcode("exitcode");
 static const StaticString s_termsig("termsig");
 static const StaticString s_stopsig("stopsig");
 
-Array f_proc_get_status(CObjRef process) {
+Array f_proc_get_status(CResRef process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
   errno = 0;

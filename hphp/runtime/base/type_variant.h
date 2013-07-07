@@ -863,17 +863,6 @@ class Variant : private TypedValue {
   void prepend(CVarRef v);
 
   /**
-   * Position-based iterations.
-   */
-  Variant array_iter_reset();
-  Variant array_iter_prev();
-  Variant array_iter_current() const;
-  Variant array_iter_next();
-  Variant array_iter_end();
-  Variant array_iter_key() const;
-  Variant array_iter_each();
-
-  /**
    * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
    */
   template<typename T>
@@ -1220,14 +1209,6 @@ public:
 
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
-
-  Variant array_iter_reset() const { return m_var.array_iter_reset(); }
-  Variant array_iter_prev() const { return m_var.array_iter_prev(); }
-  Variant array_iter_current() const { return m_var.array_iter_current(); }
-  Variant array_iter_next() const { return m_var.array_iter_next(); }
-  Variant array_iter_end() const { return m_var.array_iter_end(); }
-  Variant array_iter_key() const { return m_var.array_iter_key(); }
-  Variant array_iter_each() const { return m_var.array_iter_each(); }
 
 private:
   mutable Variant m_var;

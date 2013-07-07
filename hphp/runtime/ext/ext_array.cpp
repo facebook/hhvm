@@ -228,6 +228,7 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   raise_warning("Array key should be either a string or an integer");
   return false;
 }
+
 bool f_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
@@ -250,6 +251,7 @@ static Variant map_func(CArrRef params, const void *data) {
   g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, params);
   return ret;
 }
+
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;
   if (!arr1.isArray()) {
@@ -565,7 +567,7 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
     }
     // Reset the array's internal pointer
     if (array.is(KindOfArray)) {
-      array.array_iter_reset();
+      f_reset(array);
     }
   }
   return array.toArray().size();
@@ -586,6 +588,7 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
   tvDup(*userdata.asTypedValue(), args[2]);
   g_vmContext->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
 }
+
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
@@ -602,6 +605,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
   return true;
 }
+
 bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
@@ -690,29 +694,92 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
 int64_t f_sizeof(CVarRef var, bool recursive /* = false */) {
   return f_count(var, recursive);
 }
-Variant f_each(VRefParam array) {
-  return array.array_iter_each();
+
+namespace {
+
+enum class CowTag {
+  Yes,
+  No
+};
+
+template<CowTag Cow, class Op, class NonArrayRet>
+static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
+  auto& cell = *refParam.wrapped().asCell();
+  if (cell.m_type != KindOfArray) {
+    throw_bad_type_exception("expecting an array");
+    return Variant(nonArray);
+  }
+
+  auto ad = cell.m_data.parr;
+  if (Cow == CowTag::Yes) {
+    if (ad->getCount() > 1 && !ad->isInvalid() && !ad->noCopyOnWrite()) {
+      ad = ad->copy();
+      cellSet(make_tv<KindOfArray>(ad), cell);
+    }
+  }
+  return op(ad);
 }
-Variant f_current(VRefParam array) {
-  return array.array_iter_current();
+
 }
-Variant f_next(VRefParam array) {
-  return array.array_iter_next();
+
+Variant f_each(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->each(); },
+    Variant::NullInit()
+  );
 }
-Variant f_pos(VRefParam array) {
-  return array.array_iter_current();
+
+Variant f_current(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->current(); },
+    false
+  );
 }
-Variant f_prev(VRefParam array) {
-  return array.array_iter_prev();
+
+Variant f_pos(VRefParam refParam) {
+  return f_current(refParam);
 }
-Variant f_reset(VRefParam array) {
-  return array.array_iter_reset();
+
+Variant f_key(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->key(); },
+    false
+  );
 }
-Variant f_end(VRefParam array) {
-  return array.array_iter_end();
+
+Variant f_next(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->next(); },
+    false
+  );
 }
-Variant f_key(VRefParam array) {
-  return array.array_iter_key();
+
+Variant f_prev(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->prev(); },
+    false
+  );
+}
+
+Variant f_reset(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->reset(); },
+    false
+  );
+}
+
+Variant f_end(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->end(); },
+    false
+  );
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {

@@ -2,6 +2,15 @@
 
 //////////////////////////////////////////////////////////////////////
 
+function tryopen($u, $p) {
+  for ($i = 0; $i < 10; $i++) {
+    $r = fsockopen($u, $p);
+    if ($r) return $r;
+    sleep(1);
+  }
+  return $r;
+}
+
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
@@ -39,13 +48,13 @@ var_dump(!empty($hosts));
 var_dump(getmxrr("facebook.com", $hosts));
 var_dump(!empty($hosts));
 
-$f = fsockopen("facebook.com", 80);
+$f = tryopen("facebook.com", 80);
 var_dump($f);
 fputs($f, "GET / HTTP/1.0\n\n");
 $r = fread($f, 15);
 var_dump(!empty($r));
 
-$f = fsockopen("ssl://www.facebook.com", 443);
+$f = tryopen("ssl://www.facebook.com", 443);
 fwrite($f,
          "GET / HTTP/1.1\r\n".
          "Host: www.facebook.com\r\n".
@@ -60,11 +69,11 @@ var_dump(!empty($response));
 
 var_dump(socket_get_status(new stdclass));
 
-$f = fsockopen("facebook.com", 80);
+$f = tryopen("facebook.com", 80);
 var_dump($f);
 socket_set_blocking($f, 0);
 
-$f = fsockopen("facebook.com", 80);
+$f = tryopen("facebook.com", 80);
 var_dump($f);
 socket_set_timeout($f, 0);
 

@@ -688,7 +688,7 @@ bool Iter::init(TypedValue* c1) {
         Class* ctx = arGetContextClass(g_vmContext->getFP());
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
-        ArrayData* ad = iterArray.getArrayData();
+        ArrayData* ad = iterArray.get();
         (void) new (&arr()) ArrayIter(ad);
       }
     }
@@ -1075,7 +1075,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
               __func__, dest, obj, ctx);
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(itObj->o_toIterArray(ctxStr));
-        ArrayData* ad = iterArray.getArrayData();
+        ArrayData* ad = iterArray.get();
         (void) new (&dest->arr()) ArrayIter(ad);
         itType = ArrayIter::TypeArray;
       }

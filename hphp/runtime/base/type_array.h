@@ -450,10 +450,6 @@ class Array : protected SmartPtr<ArrayData> {
 
   void dump();
 
-  ArrayData *getArrayData() const {
-    return m_px;
-  }
-
   void setEvalScalar() const;
 
  private:

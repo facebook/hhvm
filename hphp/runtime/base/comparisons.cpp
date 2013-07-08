@@ -84,6 +84,16 @@ bool same(CVarRef v1, CObjRef v2) {
   return od == v2.get();
 }
 
+bool same(CVarRef v1, CResRef v2) {
+  bool null1 = v1.isNull();
+  bool null2 = v2.isNull();
+  if (null1 && null2) return true;
+  if (null1 || null2) return false;
+  if (!v1.isResource()) return false;
+  auto const rd = v1.getResourceData();
+  return rd == v2.get();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool equal(int v1, const StringData *v2) {

@@ -98,7 +98,7 @@
                 "HipHopSpecific"
             ],
             "return": {
-                "type": "Int32",
+                "type": "Int64",
                 "desc": "The tid of the current running thread. In Linux, this is gettid()"
             },
             "args": [

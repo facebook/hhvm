@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/smart_object.h"
 #include "hphp/runtime/base/list_assignment.h"
-#include "hphp/runtime/base/resource_data.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/plain_file.h"

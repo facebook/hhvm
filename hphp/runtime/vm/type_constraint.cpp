@@ -242,6 +242,8 @@ static const char* describe_actual_type(const TypedValue* tv) {
   case KindOfArray:         return "array";
   case KindOfObject:
     return tv->m_data.pobj->o_getClassName().c_str();
+  case KindOfResource:
+    return tv->m_data.pres->o_getClassName().c_str();
   default:
     assert(false);
   }

@@ -392,6 +392,7 @@ CALL_OPCODE(ConvCellToObj);
 CALL_OPCODE(ConvDblToStr);
 CALL_OPCODE(ConvIntToStr);
 CALL_OPCODE(ConvObjToStr);
+CALL_OPCODE(ConvResToStr);
 CALL_OPCODE(ConvCellToStr);
 
 CALL_OPCODE(CreateContFunc)
@@ -1716,6 +1717,9 @@ inline int64_t ccmp_nsame(A a, B b) { return !ccmp_same(a, b); }
 template <typename A, typename B>
 inline int64_t ccmp_nequal(A a, B b) { return !ccmp_equal(a, b); }
 
+// TODO Task #2661083: We cannot assume that "(a <= b) === !(a > b)" for
+// all types. In particular, this assumption does not hold when comparing
+// two arrays or comparing two objects. We should fix this.
 template <typename A, typename B>
 inline int64_t ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
 
@@ -1726,10 +1730,10 @@ inline int64_t ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
   cgOpCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,            \
                 ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
 
-// SRON - string, resource, object, or number
-static bool typeIsSRON(Type t) {
+// SON - string, object, or number
+static bool typeIsSON(Type t) {
   return t.isString()
-      || t == Type::Obj // encompases object and resource
+      || t == Type::Obj
       || t == Type::Int
       || t == Type::Dbl
       ;
@@ -1743,7 +1747,7 @@ void CodeGenerator::cgOpCmpHelper(
           int64_t (*str_cmp_obj)(StringData*, ObjectData*),
           int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
           int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-          int64_t (*arr_cmp_arr)( ArrayData*, ArrayData*)
+          int64_t (*arr_cmp_arr)(ArrayData*,  ArrayData*)
         ) {
   SSATmp* dst   = inst->dst();
   SSATmp* src1  = inst->src(0);
@@ -1796,7 +1800,7 @@ void CodeGenerator::cgOpCmpHelper(
   // These cases must be amalgamated because Type::Obj can refer to an object
   //  or to a resource.
   // strings are canonicalized to the left, ints to the right
-  else if (typeIsSRON(type1) && typeIsSRON(type2)) {
+  else if (typeIsSON(type1) && typeIsSON(type2)) {
     // the common case: int cmp int
     if (type1 == Type::Int && type2 == Type::Int) {
       if (src2->isConst()) {
@@ -1832,7 +1836,7 @@ void CodeGenerator::cgOpCmpHelper(
       } else if (type2 == Type::Obj) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_obj,  dst,
+        cgCallHelper(m_as, (TCA)str_cmp_obj, dst,
                      SyncOptions::kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_sx);
@@ -1840,7 +1844,7 @@ void CodeGenerator::cgOpCmpHelper(
     }
 
     else if (type1 == Type::Obj) {
-      // string cmp object/resource is dealt with above
+      // string cmp object is dealt with above
       // object cmp double is punted above
 
       if (type2 == Type::Obj) {
@@ -1858,7 +1862,7 @@ void CodeGenerator::cgOpCmpHelper(
       }
     }
 
-   else NOT_REACHED();
+    else NOT_REACHED();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1957,12 +1961,12 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     assert(type.isKnownDataType());
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
-           (dataType >= KindOfUninit && dataType <= KindOfObject));
+           (dataType >= KindOfUninit && dataType <= KindOfResource));
     emitCmpTVType(m_as, dataType, typeSrc);
     cc = CC_E;
   }
   doJcc(cc);
-  if (type.strictSubtypeOf(Type::Obj)) {
+  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
     auto reg = getObjectDataEnregistered(m_as, dataSrc, m_rScratch);
@@ -1976,10 +1980,12 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   auto const src = inst->src(0);
 
   // punt if specialized object for now
-  if (inst->typeParam().strictSubtypeOf(Type::Obj)) {
+  if (inst->typeParam().strictSubtypeOf(Type::Obj) ||
+      inst->typeParam().strictSubtypeOf(Type::Res)) {
     CG_PUNT(IsType-SpecializedUnsupported);
   }
-  if (inst->typeParam().equals(Type::Obj)) {
+  if (inst->typeParam().equals(Type::Obj) ||
+      inst->typeParam().equals(Type::Res)) {
     auto const srcReg = m_regs[src].reg();
     if (src->isA(Type::PtrToGen)) {
       emitTestTVType(m_as, KindOfObject, srcReg[TVOFF(m_type)]);
@@ -1994,7 +2000,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
       m_as.patchJcc8(toPatch, m_as.frontier());
     } else {
       // Cases where src isn't an Obj should have been simplified away
-      if (!src->isA(Type::Obj)) {
+      if (!src->isA(Type::Obj) && !src->isA(Type::Res)) {
         CG_PUNT(IsType-KnownWrongType);
       }
       m_as.   cmpq(SystemLib::s_resourceClass,
@@ -3094,14 +3100,18 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 static void
 tv_release_generic(TypedValue* tv) {
   assert(Transl::tx64->stateIsDirty());
-  assert(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
+  assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
+         tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
+         tv->m_type == KindOfRef);
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
 static void
 tv_release_typed(RefData* pv, DataType dt) {
   assert(Transl::tx64->stateIsDirty());
-  assert(dt >= KindOfString && dt <= KindOfRef);
+  assert(dt == KindOfString || dt == KindOfArray ||
+         dt == KindOfObject || dt == KindOfResource ||
+         dt == KindOfRef);
   g_destructors[typeToDestrIndex(dt)](pv);
 }
 
@@ -3809,6 +3819,8 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
     tvCastHelper = (TCA)tvCastToStringInPlace;
   } else if (type.subtypeOf(Type::Obj)) {
     tvCastHelper = (TCA)tvCastToObjectInPlace;
+  } else if (type.subtypeOf(Type::Res)) {
+    tvCastHelper = (TCA)tvCastToResourceInPlace;
   } else {
     not_reached();
   }
@@ -3841,6 +3853,8 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     tvCoerceHelper = (TCA)tvCoerceParamToStringInPlace;
   } else if (type.subtypeOf(Type::Obj)) {
     tvCoerceHelper = (TCA)tvCoerceParamToObjectInPlace;
+  } else if (type.subtypeOf(Type::Res)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToResourceInPlace;
   } else {
     not_reached();
   }
@@ -5361,8 +5375,9 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
     cgCallHelper(m_as, (TCA)fptr, dst, SyncOptions::kNoSyncPoint,
                  ArgGroup(m_regs).ssa(tl).ssa(tr));
   } else {
-    if (lType.subtypeOf(Type::Obj) || lType.needsReg() ||
-        rType.subtypeOf(Type::Obj) || rType.needsReg()) {
+    if (lType.subtypeOf(Type::Obj) || lType.subtypeOf(Type::Res) ||
+        lType.needsReg() || rType.subtypeOf(Type::Obj) ||
+        rType.subtypeOf(Type::Res) || rType.needsReg()) {
       CG_PUNT(cgConcat);
     }
     cgCallHelper(m_as, (TCA)concat_value, dst, SyncOptions::kNoSyncPoint,

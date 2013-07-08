@@ -51,6 +51,7 @@ DataType Type::toDataType() const {
   if (subtypeOf(Str))           return KindOfString;
   if (subtypeOf(Arr))           return KindOfArray;
   if (subtypeOf(Obj))           return KindOfObject;
+  if (subtypeOf(Res))           return KindOfResource;
   if (subtypeOf(Cls))           return KindOfClass;
   if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
   if (subtypeOf(Uncounted))     return KindOfUncounted;
@@ -88,6 +89,7 @@ Type Type::fromDataType(DataType outerType,
         return Obj;
       }
     }
+    case KindOfResource      : return Res;
     case KindOfClass         : return Cls;
     case KindOfUncountedInit : return UncountedInit;
     case KindOfUncounted     : return Uncounted;

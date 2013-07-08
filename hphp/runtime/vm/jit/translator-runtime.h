@@ -96,6 +96,7 @@ ObjectData* convCellToObjHelper(TypedValue tv);
 StringData* convDblToStrHelper(int64_t i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
+StringData* convResToStrHelper(ResourceData* o);
 StringData* convCellToStrHelper(TypedValue tv);
 
 void raisePropertyOnNonObject();

@@ -46,7 +46,7 @@ static const std::unordered_map<fbstring, DataType> g_kindOfMap =
   {"StringMap",   KindOfArray},
   {"VariantMap",  KindOfArray},
   {"Object",      KindOfObject},
-  {"Resource",    KindOfObject},
+  {"Resource",    KindOfResource},
   {"Variant",     KindOfAny},
   {"Numeric",     KindOfAny},
   {"Primitive",   KindOfAny},
@@ -65,6 +65,7 @@ static const std::unordered_map<int, fbstring> g_typeMap =
   {(int)KindOfString,      "HPHP::String"},
   {(int)KindOfArray,       "HPHP::Array"},
   {(int)KindOfObject,      "HPHP::Object"},
+  {(int)KindOfResource,    "HPHP::Resource"},
   {(int)KindOfAny,         "HPHP::Variant"},
 };
 
@@ -78,6 +79,7 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
   {(int)KindOfString,      "String"},
   {(int)KindOfArray,       "Array"},
   {(int)KindOfObject,      "Object"},
+  {(int)KindOfResource,    "Resource"},
   {(int)KindOfAny,         "mixed"},
 };
 
@@ -569,8 +571,10 @@ bool PhpParam::defValueNeedsVariable() const {
   if ((cppKindOf == KindOfArray) && (defVal == "null_array")) {
     return false;
   }
-  if ((cppKindOf == KindOfObject) &&
-      (defVal == "null_object" || defVal == "null_resource")) {
+  if ((cppKindOf == KindOfObject) && (defVal == "null_object")) {
+    return false;
+  }
+  if ((cppKindOf == KindOfResource) && (defVal == "null_resource")) {
     return false;
   }
   if ((cppKindOf == KindOfAny) && (defVal == "null_variant")) {

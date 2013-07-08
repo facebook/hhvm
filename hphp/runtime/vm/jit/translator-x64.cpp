@@ -176,7 +176,7 @@ void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
 
 static bool
 typeCanBeStatic(DataType t) {
-  return t != KindOfObject && t != KindOfRef;
+  return t != KindOfObject && t != KindOfResource && t != KindOfRef;
 }
 
 // IfCountNotStatic --
@@ -485,6 +485,8 @@ CppCall TranslatorX64::getDtorCall(DataType type) {
     return CppCall(getMethodPtr(&ArrayData::release));
   case KindOfObject:
     return CppCall(getMethodPtr(&ObjectData::release));
+  case KindOfResource:
+    return CppCall(getMethodPtr(&ResourceData::release));
   case KindOfRef:
     return CppCall(getMethodPtr(&RefData::release));
   default:
@@ -515,10 +517,11 @@ static IndexedMemoryRef lookupDestructor(X64Assembler& a,
   assert(typeReg != r32(argNumToRegName[0]));
   assert(scratch != argNumToRegName[0]);
 
-  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 0) &&
-                (KindOfArray         >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfObject        >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfRef           >> kShiftDataTypeToDestrIndex == 3),
+  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 1) &&
+                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
+                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
+                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
+                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
 
   a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
@@ -3817,16 +3820,20 @@ TranslatorX64::TranslatorX64()
   // translations.
   typedef void* vp;
 
-  TCA strDtor, arrDtor, objDtor, refDtor;
+  TCA strDtor, arrDtor, objDtor, resDtor, refDtor;
   strDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&StringData::release)));
   arrDtor = emitUnaryStub(astubs,
                           CppCall(getVTableOffset(&HphpArray::release)));
   objDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&ObjectData::release)));
+  resDtor = emitUnaryStub(astubs,
+                          CppCall(getMethodPtr(&ResourceData::release)));
   refDtor = emitUnaryStub(astubs, CppCall(vp(getMethodPtr(&RefData::release))));
 
+  m_dtorStubs[0] = nullptr;
   m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
   m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
   m_dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
+  m_dtorStubs[typeToDestrIndex(KindOfResource)]      = resDtor;
   m_dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
 
   // Hot helper stubs in A:

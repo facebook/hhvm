@@ -677,6 +677,9 @@ Variant f_strlen(CVarRef vstr) {
   case KindOfArray:
     raise_warning("strlen() expects parameter 1 to be string, array given");
     return uninit_null();
+  case KindOfResource:
+    raise_warning("strlen() expects parameter 1 to be string, resource given");
+    return uninit_null();
   case KindOfObject:
     if (!f_method_exists(vstr, "__toString")) {
       raise_warning("strlen() expects parameter 1 to be string, object given");

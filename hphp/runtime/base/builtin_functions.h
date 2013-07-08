@@ -174,13 +174,7 @@ inline bool is_int(CVarRef v)    { return v.isInteger();}
 inline bool is_double(CVarRef v) { return v.is(KindOfDouble);}
 inline bool is_string(CVarRef v) { return v.isString();}
 inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
-inline bool is_object(CVarRef var) {
-  // NB: just doing !var.isResource() is not right. isResource can have custom
-  // implementations in extension classes, and even if that returns false,
-  // is_object is still supposed to return false. Because PHP.
-  return var.is(KindOfObject) &&
-    var.getObjectData()->getVMClass() != SystemLib::s_resourceClass;
-}
+inline bool is_object(CVarRef var) { return var.is(KindOfObject); }
 inline bool is_empty_string(CVarRef v) {
   return v.isString() && v.getStringData()->empty();
 }

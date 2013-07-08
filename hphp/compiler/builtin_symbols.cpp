@@ -109,6 +109,7 @@ static TypePtr typePtrFromDataType(DataType dt, TypePtr unknown) {
     case KindOfString:  return Type::String;
     case KindOfArray:   return Type::Array;
     case KindOfObject:  return Type::Object;
+    case KindOfResource: return Type::Resource;
     case KindOfUnknown:
     default:
       return unknown;

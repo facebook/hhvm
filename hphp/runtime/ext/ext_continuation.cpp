@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-p_Continuation f_hphp_create_continuation(CStrRef clsname,
+Object f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {

@@ -133,6 +133,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvObjToStr,       (TCA)convObjToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
+    {ConvResToStr,       (TCA)convResToStrHelper, DSSA, SSync,
+                           {{SSA, 0}}},
     {ConvCellToStr,      (TCA)convCellToStrHelper, DSSA, SSync,
                            {{TV, 0}}},
 

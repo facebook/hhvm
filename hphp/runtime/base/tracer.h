@@ -95,6 +95,7 @@ private:
         case KindOfDouble:
         case KindOfStaticString:
         case KindOfString:
+        case KindOfResource:
           break;
         case KindOfArray:
         case KindOfObject:

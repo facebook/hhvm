@@ -104,18 +104,7 @@ void ObjectData::destruct() {
 // class info
 
 CStrRef ObjectData::o_getClassName() const {
-  if (isResource()) return o_getClassNameHook();
   return *(const String*)(&m_cls->m_preClass->nameRef());
-}
-
-CStrRef ObjectData::o_getParentName() const {
-  if (isResource()) return empty_string;
-  return *(const String*)(&m_cls->m_preClass->parentRef());
-}
-
-CStrRef ObjectData::o_getClassNameHook() const {
-  throw FatalErrorException("Class didnt provide a name");
-  return empty_string;
 }
 
 HOT_FUNC

@@ -59,8 +59,7 @@ Array Object::toArray() const {
 }
 
 Variant Object::toKey() const {
-  return m_px ? (isResource() ? m_px->o_toInt64() : m_px->t___tostring())
-    : String();
+  return m_px ? m_px->t___tostring() : String();
 }
 
 int64_t Object::toInt64ForCompare() const {
@@ -78,9 +77,6 @@ bool Object::equal(CObjRef v2) const {
     return true;
   }
   if (!m_px || !v2.get()) {
-    return false;
-  }
-  if (isResource() || v2.isResource()) {
     return false;
   }
   if (v2.get()->getVMClass() != m_px->getVMClass()) {
@@ -155,5 +151,4 @@ void Object::setToDefaultObject() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 }

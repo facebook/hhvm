@@ -712,6 +712,15 @@ static std::string toStringElm(const TypedValue* tv) {
        << tvAsCVarRef(tv).asCObjRef().get()->o_getClassName().get()->data()
        << ")";
     break;
+  case KindOfResource:
+    assert(tv->m_data.pres->getCount() > 0);
+    os << tv->m_data.pres
+       << "c(" << tv->m_data.pres->getCount() << ")"
+       << ":Resource("
+       << const_cast<ResourceData*>(tv->m_data.pres)
+            ->o_getClassName().get()->data()
+       << ")";
+    break;
   case KindOfRef:
     not_reached();
   case KindOfClass:
@@ -4080,6 +4089,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
         tvDecRef(val);
         break;
 
+      case KindOfResource:
+        intval = val->m_data.pres->o_toInt64();
+        tvDecRef(val);
+        break;
+
       default:
         not_reached();
     }
@@ -5727,7 +5741,8 @@ template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
       // pass TV.m_data.num by value
       return NextArgT::call(func, tvs - 1, args..., tvs->m_data.num);
     }
-    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject) {
+    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject ||
+        type == KindOfResource) {
       // pass ptr to TV.m_data for String&, Array&, or Object&
       return NextArgT::call(func, tvs - 1, args..., &tvs->m_data);
     }
@@ -5818,6 +5833,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
       CASE(String)
       CASE(Array)
       CASE(Object)
+      CASE(Resource)
       case KindOfUnknown:
         break;
       default:
@@ -5840,6 +5856,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   case KindOfStaticString:
   case KindOfArray:
   case KindOfObject:
+  case KindOfResource:
     makeNativeRefCall(func, &ret.m_data, args, numArgs);
     if (ret.m_data.num == 0) {
       ret.m_type = KindOfNull;

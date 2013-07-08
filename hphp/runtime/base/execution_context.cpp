@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/debugger/debugger.h"

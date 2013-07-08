@@ -469,11 +469,10 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfObject:
-    if (key.isResource()) {
-      return m_px->get(key.toInt64(), flags & AccessFlags::Error);
-    }
     throw_bad_type_exception("Invalid type used as key");
     break;
+  case KindOfResource:
+    return m_px->get(key.toInt64(), flags & AccessFlags::Error);
   case KindOfRef:
     return rvalAtRef(*(key.m_data.pref->var()), flags);
   default:

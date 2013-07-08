@@ -711,6 +711,7 @@ String f_serialize(CVarRef value) {
     // fall-through
   }
   case KindOfObject:
+  case KindOfResource:
   case KindOfDouble: {
     VariableSerializer vs(VariableSerializer::Type::Serialize);
     return vs.serialize(value, true);

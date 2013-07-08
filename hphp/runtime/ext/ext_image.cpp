@@ -4080,7 +4080,7 @@ Variant f_imagettftext(CResRef image, double size, double angle,
 #endif
 }
 
-Object f_imagepsloadfont(CStrRef filename) {
+Resource f_imagepsloadfont(CStrRef filename) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else

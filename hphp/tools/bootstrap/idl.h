@@ -80,6 +80,7 @@ static inline fbstring kindOfString(DataType t) {
     case KindOfString:       return "String";
     case KindOfArray:        return "Array";
     case KindOfObject:       return "Object";
+    case KindOfResource:     return "Resource";
     case KindOfRef:          return "Ref";
     default:
       // No other enums should occur in IDL parsing

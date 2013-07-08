@@ -680,13 +680,13 @@ static void xml_set_handler(Variant * handler, CVarRef data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_xml_parser_create(CStrRef encoding /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, null_string, 0).toObject();
+Resource f_xml_parser_create(CStrRef encoding /* = null_string */) {
+  return php_xml_parser_create_impl(encoding, null_string, 0).toResource();
 }
 
-Object f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
+Resource f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
                               CStrRef separator /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, separator, 1).toObject();
+  return php_xml_parser_create_impl(encoding, separator, 1).toResource();
 }
 
 bool f_xml_parser_free(CResRef parser) {

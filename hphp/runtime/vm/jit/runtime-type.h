@@ -231,6 +231,8 @@ class RuntimeType {
              m_value.innerType == KindOfClass ||
              m_value.outerType == KindOfObject ||
              m_value.innerType == KindOfObject ||
+             m_value.outerType == KindOfResource ||
+             m_value.innerType == KindOfResource ||
              m_value.outerType == KindOfArray ||
              m_value.innerType == KindOfArray ||
              m_value.outerType == KindOfBoolean ||

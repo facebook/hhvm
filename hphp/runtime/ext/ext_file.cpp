@@ -418,6 +418,12 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   switch (data.getType()) {
   case KindOfObject:
     {
+      raise_warning("Not a valid stream resource");
+      return false;
+    }
+    break;
+  case KindOfResource:
+    {
       File *fsrc = data.toResource().getTyped<File>(true, true);
       if (fsrc == NULL) {
         raise_warning("Not a valid stream resource");

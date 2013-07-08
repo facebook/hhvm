@@ -68,6 +68,9 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
       ? op.collectionVsNonObj()
       : op(cell.m_data.pobj->o_toInt64(), val);
 
+  case KindOfResource:
+    return op(cell.m_data.pres->o_toInt64(), val);
+
   case KindOfStaticString:
   case KindOfString:
     {
@@ -99,6 +102,9 @@ bool cellRelOp(Op op, Cell cell, double val) {
     return cell.m_data.pobj->isCollection()
       ? op.collectionVsNonObj()
       : op(cell.m_data.pobj->o_toDouble(), val);
+
+  case KindOfResource:
+    return op(cell.m_data.pres->o_toDouble(), val);
 
   case KindOfStaticString:
   case KindOfString:
@@ -134,7 +140,6 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
   case KindOfObject:
     {
       auto const od = cell.m_data.pobj;
-      if (od->isResource())   return op(od->o_toDouble(), val->toDouble());
       if (od->isCollection()) return op.collectionVsNonObj();
       try {
         String str(const_cast<ObjectData*>(od)->t___tostring());
@@ -142,6 +147,12 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
       } catch (BadTypeConversionException&) {
         return op(true, false);
       }
+    }
+
+  case KindOfResource:
+    {
+      auto const rd = cell.m_data.pres;
+      return op(rd->o_toDouble(), val->toDouble());
     }
 
   default:
@@ -166,11 +177,11 @@ bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
   case KindOfObject:
     {
       auto const od = cell.m_data.pobj;
-      if (od->isResource()) return op(false, true);
       return od->isCollection()
         ? op.collectionVsNonObj()
         : op(true, false);
     }
+  case KindOfResource:     return op(false, true);
   default:
     break;
   }
@@ -193,12 +204,9 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
     return od->isCollection() ? op.collectionVsNonObj()
                               : op(cell.m_data.dbl, od->o_toDouble());
   case KindOfArray:
-      if (od->isResource()) return op(true, false);
       return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
   case KindOfString:
   case KindOfStaticString:
-    if (od->isResource())   return op(cell.m_data.pstr->toDouble(),
-                                      od->o_toDouble());
     if (od->isCollection()) return op.collectionVsNonObj();
     try {
       String str(const_cast<ObjectData*>(od)->t___tostring());
@@ -208,6 +216,39 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
     }
   case KindOfObject:
     return op(cell.m_data.pobj, od);
+  case KindOfResource:
+    return op(false, true);
+  default:
+    break;
+  }
+
+  not_reached();
+}
+
+template<class Op>
+bool cellRelOp(Op op, Cell cell, const ResourceData* rd) {
+  assert(cellIsPlausible(cell));
+
+  switch (cell.m_type) {
+  case KindOfUninit:
+  case KindOfNull:        return op(false, true);
+  case KindOfBoolean:     return op(!!cell.m_data.num, rd->o_toBoolean());
+  case KindOfInt64:
+    return op(cell.m_data.num, rd->o_toInt64());
+  case KindOfDouble:
+    return op(cell.m_data.dbl, rd->o_toDouble());
+  case KindOfArray:
+    return op(true, false);
+  case KindOfString:
+  case KindOfStaticString:
+    {
+      auto const str = cell.m_data.pstr;
+      return op(str->toDouble(), rd->o_toDouble());
+    }
+  case KindOfObject:
+    return op(true, false);
+  case KindOfResource:
+    return op(cell.m_data.pres, rd);
   default:
     break;
   }
@@ -233,6 +274,7 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfString:       return cellRelOp(op, c1, c2.m_data.pstr);
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
+  case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
   default:
     break;
   }
@@ -278,7 +320,6 @@ struct Eq {
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     if (od1 == od2) return true;
-    if (od1->isResource() || od2->isResource()) return false;
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (od1->isCollection()) {
       // TODO constness
@@ -288,6 +329,10 @@ struct Eq {
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return ar1->equal(ar2.get(), false);
+  }
+
+  bool operator()(const ResourceData* od1, const ResourceData* od2) const {
+    return od1 == od2;
   }
 
   bool collectionVsNonObj() const { return false; }
@@ -317,6 +362,10 @@ struct Lt {
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());
+  }
+
+  bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
+    return rd1->o_toInt64() < rd2->o_toInt64();
   }
 
   bool collectionVsNonObj() const {
@@ -349,6 +398,10 @@ struct Gt {
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());
+  }
+
+  bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
+    return rd1->o_toInt64() > rd2->o_toInt64();
   }
 
   bool collectionVsNonObj() const {
@@ -391,6 +444,10 @@ bool cellSame(Cell c1, Cell c2) {
   case KindOfObject:
     return c2.m_type == KindOfObject &&
       c1.m_data.pobj == c2.m_data.pobj;
+
+  case KindOfResource:
+    return c2.m_type == KindOfResource &&
+      c1.m_data.pres == c2.m_data.pres;
 
   default:
     break;
@@ -436,6 +493,10 @@ bool cellEqual(Cell cell, const ObjectData* val) {
   return cellRelOp(Eq(), cell, val);
 }
 
+bool cellEqual(Cell cell, const ResourceData* val) {
+  return cellRelOp(Eq(), cell, val);
+}
+
 bool cellEqual(Cell c1, Cell c2) {
   return cellRelOp(Eq(), c1, c2);
 }
@@ -466,6 +527,10 @@ bool cellLess(Cell cell, const ArrayData* val) {
 }
 
 bool cellLess(Cell cell, const ObjectData* val) {
+  return cellRelOp(Lt(), cell, val);
+}
+
+bool cellLess(Cell cell, const ResourceData* val) {
   return cellRelOp(Lt(), cell, val);
 }
 
@@ -503,6 +568,10 @@ bool cellGreater(Cell cell, const ObjectData* val) {
   return cellRelOp(Gt(), cell, val);
 }
 
+bool cellGreater(Cell cell, const ResourceData* val) {
+  return cellRelOp(Gt(), cell, val);
+}
+
 bool cellGreater(Cell c1, Cell c2) {
   return cellRelOp(Gt(), c1, c2);
 }
@@ -518,7 +587,8 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
   assert(cellIsPlausible(c2));
 
   if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
-      (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {
+      (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
+      (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
     return cellLess(c1, c2) || cellEqual(c1, c2);
   }
   return !cellGreater(c1, c2);
@@ -529,7 +599,8 @@ bool cellGreaterOrEqual(Cell c1, Cell c2) {
   assert(cellIsPlausible(c2));
 
   if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
-      (c1.m_type == KindOfObject && c2.m_type == KindOfObject)) {
+      (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
+      (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
     return cellGreater(c1, c2) || cellEqual(c1, c2);
   }
   return !cellLess(c1, c2);

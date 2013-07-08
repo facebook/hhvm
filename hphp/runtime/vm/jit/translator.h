@@ -714,7 +714,8 @@ static inline bool isCppByRef(DataType t) {
 // return true if type is passed in/out of C++ as String&/Array&/Object&
 static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
-         t == KindOfArray || t == KindOfObject;
+         t == KindOfArray || t == KindOfObject ||
+         t == KindOfResource;
 }
 
 void populateImmediates(NormalizedInstruction&);
@@ -751,6 +752,7 @@ enum OutTypeConstraints {
   OutArray,
   OutArrayImm,
   OutObject,
+  OutResource,
   OutThisObject,        // Object from current environment
   OutFDesc,             // Blows away the current function desc
 

@@ -130,6 +130,8 @@ static const char *typeName(int8_t type) {
       return "array";
     case KindOfObject:
       return "object";
+    case KindOfResource:
+      return "resource";
     case KindOfRef:
       return "reference";
     case KindOfIndirect:

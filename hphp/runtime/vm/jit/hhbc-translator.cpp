@@ -2262,6 +2262,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
       case KindOfInt64:
       case KindOfArray:
       case KindOfObject:
+      case KindOfResource:
       case KindOfString:
         if (zendParamMode) {
           gen(
@@ -3061,6 +3062,8 @@ void HhbcTranslator::emitCastString() {
     push(gen(ConvIntToStr, src));
   } else if (fromType.isObj()) {
     push(gen(ConvObjToStr, catchTrace, src));
+  } else if (fromType.isRes()) {
+    push(gen(ConvResToStr, catchTrace, src));
   } else {
     push(gen(ConvCellToStr, catchTrace, src));
   }
@@ -3666,6 +3669,7 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     case OutArrayImm:    return Type::Arr; // Should be StaticArr: t2124292
     case OutObject:
     case OutThisObject:  return Type::Obj;
+    case OutResource:    return Type::Res;
 
     case OutFDesc:       return Type::None;
     case OutUnknown:     return Type::Gen;

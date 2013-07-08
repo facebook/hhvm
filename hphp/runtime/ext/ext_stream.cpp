@@ -55,7 +55,7 @@ Resource f_stream_context_create(CArrRef options /* = null_array */,
   return Resource(NEWOBJ(StreamContext)(options, params));
 }
 
-Object f_stream_context_get_default(CArrRef options /* = null_array */) {
+Resource f_stream_context_get_default(CArrRef options /* = null_array */) {
   throw NotImplementedException(__func__);
 }
 
@@ -125,11 +125,11 @@ void f_stream_bucket_prepend(CResRef brigade, CResRef bucket) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-Object f_stream_bucket_make_writeable(CResRef brigade) {
+Resource f_stream_bucket_make_writeable(CResRef brigade) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-Object f_stream_bucket_new(CResRef stream, CStrRef buffer) {
+Resource f_stream_bucket_new(CResRef stream, CStrRef buffer) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
@@ -141,13 +141,13 @@ bool f_stream_filter_remove(CResRef stream_filter) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Object f_stream_filter_append(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_append(CResRef stream, CStrRef filtername,
                               int read_write /* = 0 */,
                               CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Object f_stream_filter_prepend(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
                                int read_write /* = 0 */,
                                CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");

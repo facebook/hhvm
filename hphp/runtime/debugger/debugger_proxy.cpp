@@ -433,7 +433,7 @@ void DebuggerProxy::pollSignal() {
 // Grab the ip address and port of the client that is connected to this proxy.
 bool DebuggerProxy::getClientConnectionInfo(VRefParam address,
                                             VRefParam port) {
-  Object s(getSocket().get());
+  Resource s(getSocket().get());
   return f_socket_getpeername(s, address, port);
 }
 

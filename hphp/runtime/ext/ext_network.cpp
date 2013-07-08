@@ -968,7 +968,7 @@ void f_header(CStrRef str, bool replace /* = true */,
   }
 }
 
-Variant f_http_response_code(int response_code /*= 0 */) {
+Variant f_http_response_code(int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     raise_warning("Unable to access response code, no transport");

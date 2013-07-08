@@ -51,7 +51,7 @@ $TYPENAMES = array
                         'idlname' => 'VariantMap', 'phpname' => 'map'),
    Object      => array('name' => 'Object',        'enum' => 'Object',
                         'idlname' => 'Object',     'phpname' => 'object'),
-   Resource    => array('name' => 'Object',        'enum' => 'Object',
+   Resource    => array('name' => 'Resource',      'enum' => 'Resource',
                         'idlname' => 'Resource',   'phpname' => 'resource'),
    Variant     => array('name' => 'Variant',       'enum' => 'Variant',
                         'idlname' => 'Variant',    'phpname' => 'mixed'),
@@ -70,6 +70,7 @@ $TYPENAMES = array
 $REFNAMES = array('String'      => 'CStrRef',
                   'Array'       => 'CArrRef',
                   'Object'      => 'CObjRef',
+                  'Resource'    => 'CResRef',
                   'Variant'     => 'CVarRef',
                   'Numeric'     => 'CVarRef',
                   'Primitive'   => 'CVarRef',
@@ -493,7 +494,7 @@ function get_serialized_default($s) {
     return serialize(eval("return $s;"));
   }
   if ($s == "empty_array") return serialize(array());
-  if (preg_match('/^null_(string|array|object|variant)$/', $s)) {
+  if (preg_match('/^null_(string|array|object|resource|variant)$/', $s)) {
     return serialize(null);
   }
   if (preg_match('/^k_\w+( ?\| ?k_\w+)*$/', $s, $m)) {

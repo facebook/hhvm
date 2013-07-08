@@ -4445,6 +4445,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
         case KindOfString:
         case KindOfStaticString:
         case KindOfObject:
+        case KindOfResource:
         case KindOfArray:
           e.Int(0);
           break;

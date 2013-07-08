@@ -24,15 +24,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_unknown_type("unknown type");
+
 String f_gettype(CVarRef v) {
+  if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
+    return s_unknown_type;
+  }
   return getDataTypeString(v.getType());
 }
 
 String f_get_resource_type(CResRef handle) {
-  if (handle.isResource()) {
-    return static_cast<ResourceData*>(handle.get())->o_getResourceName();
-  }
-  return "";
+  return handle->o_getResourceName();
 }
 
 int64_t f_intval(CVarRef v, int64_t base /* = 10 */) { return v.toInt64(base);}
@@ -103,7 +105,7 @@ bool f_is_object(CVarRef v) {
 }
 
 bool f_is_resource(CVarRef v) {
-  return v.isResource();
+  return (v.getType() == KindOfResource && !v.getResourceData()->isInvalid());
 }
 
 bool f_is_null(CVarRef v) {

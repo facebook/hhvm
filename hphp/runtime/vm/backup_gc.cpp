@@ -104,6 +104,18 @@ bool is_smart_allocated(ObjectData* obj) {
   return false;
 }
 
+bool is_smart_allocated(ResourceData* obj) {
+  MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
+  while (SmartAllocatorImpl* sa = aIter.current()) {
+    // ResourceData piggybacks on the ObjectData allocators
+    if (sa->getAllocatorType() == typeid(ObjectData)) {
+      if (sa->isFromThisAllocator(obj)) return true;
+    }
+    aIter.next();
+  }
+  return false;
+}
+
 template<class T>
 bool UNUSED is_smart_allocated(T* p) {
   return T::AllocatorType::getNoCheck()->isFromThisAllocator(p);
@@ -117,6 +129,18 @@ template<class ObjectType, class Visitor>
 void walk_allocator(const Visitor& visit, SmartAllocatorImpl* sa) {
   SmartAllocatorImpl::Iterator saIter(sa);
   while (ObjectType* p = static_cast<ObjectType*>(saIter.current())) {
+    visit(sa, p);
+    saIter.next();
+  }
+}
+
+template<class Visitor>
+void walk_object_allocator(const Visitor& visit, SmartAllocatorImpl* sa) {
+  SmartAllocatorImpl::Iterator saIter(sa);
+  while (ObjectData* p = static_cast<ObjectData*>(saIter.current())) {
+    if (p->getVMClass() == SystemLib::s_resourceClass) {
+      continue;
+    }
     visit(sa, p);
     saIter.next();
   }
@@ -139,7 +163,7 @@ void walk_smart_heap(const Visitor& visit) {
     } else if (t == typeid(RefData)) {
       walk_allocator<RefData>(visit, sa);
     } else  if (t == typeid(ObjectData)) {
-      walk_allocator<ObjectData>(visit, sa);
+      walk_object_allocator<>(visit, sa);
     } else if (t == typeid(StringData)) {
       // Unneccesary for the first level walk, because strings can't
       // have references to other objects.
@@ -163,6 +187,20 @@ struct VisitStringHelper {
 template<class Visitor>
 struct VisitStringHelper<false,Visitor> {
   static void visit(const Visitor&, StringData*) {}
+};
+
+// This just exists so that visitors that don't want to visit strings
+// don't need to have an instantiable operator() for a ResourceData*
+// argument.
+template<bool DoIt, class Visitor>
+struct VisitResourceHelper {
+  static void visit(const Visitor& visit, ResourceData* sd) {
+    visit(sd);
+  }
+};
+template<class Visitor>
+struct VisitResourceHelper<false,Visitor> {
+  static void visit(const Visitor&, ResourceData*) {}
 };
 
 template<class Visitor>
@@ -191,6 +229,14 @@ void traceImpl(const Visitor& visit, TypedValue* tv) {
     assert(!is_static(tv->m_data.pref));
     if (is_smart_allocated(tv->m_data.pobj)) {
       visit(tv->m_data.pobj);
+    }
+    break;
+  case KindOfResource:
+    if (is_smart_allocated(tv->m_data.pres)) {
+      VisitResourceHelper<Visitor::visits_strings,Visitor>::visit(
+        visit,
+        tv->m_data.pres
+      );
     }
     break;
   case KindOfArray:
@@ -547,6 +593,10 @@ void gc_detect_cycles(const std::string& filename) {
       color = "#FFCC00";
       break;
     }
+    case KindOfResource:
+      name = "resource()";
+      color = "#FFCC00";
+      break;
     case KindOfArray:
       name = "array()";
       color = "#CCCCFF";

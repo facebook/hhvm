@@ -256,6 +256,7 @@ O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
 O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
 O(ConvIntToStr,                 D(Str), S(Int),                            N) \
 O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
+O(ConvResToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
 O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \

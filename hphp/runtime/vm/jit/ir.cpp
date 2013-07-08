@@ -556,6 +556,7 @@ bool IRInstruction::killsSource(int idx) const {
     case ConvCellToInt:
     case ConvCellToObj:
     case ConvObjToStr:
+    case ConvResToStr:
     case ConvCellToStr:
       assert(idx == 0);
       return true;
@@ -1029,6 +1030,8 @@ Variant SSATmp::getValVariant() const {
       ->as<ArrayData*>()));
   case KindOfObject:
     return m_inst->extra<ConstData>()->as<const Object*>();
+  case KindOfResource:
+    return m_inst->extra<ConstData>()->as<const Resource*>();
   default:
     assert(false);
     return uninit_null();

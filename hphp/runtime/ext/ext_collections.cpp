@@ -4675,6 +4675,7 @@ void collectionDeepCopyTV(TypedValue* tv) {
       tv->m_data.pobj = obj;
       break;
     }
+    case KindOfResource:
     case KindOfRef: {
       assert(false);
       break;

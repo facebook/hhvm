@@ -42,6 +42,8 @@ TypedNum numericConvHelper(Cell cell) {
   case KindOfNull:         return make_tv<KindOfInt64>(0);
   case KindOfObject:       return make_tv<KindOfInt64>(
                              cell.m_data.pobj->o_toInt64());
+  case KindOfResource:     return make_tv<KindOfInt64>(
+                             cell.m_data.pres->o_toInt64());
   case KindOfArray:        throw BadArrayOperandException();
   default:                 break;
   }
@@ -354,6 +356,7 @@ void cellIncDecOp(Op op, Cell& cell) {
 
   case KindOfBoolean:
   case KindOfObject:
+  case KindOfResource:
   case KindOfArray:
     break;
   default:

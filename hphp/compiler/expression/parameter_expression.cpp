@@ -262,6 +262,7 @@ void ParameterExpression::compatibleDefault() {
     case KindOfNull:    compat = true; break;
     /* KindOfClass is an hhvm internal type, can not occur here */
     case KindOfObject:  /* fall through */
+    case KindOfResource: /* fall through */
     case KindOfRef: assert(false /* likely parser bug */);
     default:            compat = false; break;
     }

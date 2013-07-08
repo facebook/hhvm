@@ -19,7 +19,6 @@
 #define incl_HPHP_FILE_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/request_local.h"
 
@@ -73,11 +72,7 @@ public:
   // overriding ResourceData
   CStrRef o_getClassNameHook() const { return s_class_name; }
   CStrRef o_getResourceName() const { return s_resource_name; }
-  int o_getResourceId() const {
-    // This is different from Zend where each resource is assigned a unique id.
-    return o_id;
-  }
-  virtual bool isResource() const { return !m_closed;}
+  virtual bool isInvalid() const { return m_closed; }
 
   int fd() const { return m_fd;}
   bool valid() const { return m_fd >= 0;}

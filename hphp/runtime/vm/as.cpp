@@ -1600,6 +1600,8 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
       as.ue->mergeArray(tvInit.m_data.parr);
     } else if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
+    } else if (tvInit.m_type == KindOfResource) {
+      as.error("property initializer can't be a resource");
     }
     as.in.expectWs(';');
   } else if (what == ';') {

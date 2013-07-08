@@ -15,9 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/builtin_functions.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -25,19 +26,17 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-static IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, os_max_resource_id);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, ResourceData::os_max_resource_id);
+
+ResourceData::ResourceData() : m_count(0), m_cls(SystemLib::s_resourceClass) {
+  assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+  int& pmax = *os_max_resource_id;
+  if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
+  o_id = ++pmax;
+}
 
 int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());
-}
-
-ResourceData::ResourceData()
-    : ObjectData(SystemLib::s_resourceClass, true) {
-  assert(!m_cls->callsCustomInstanceInit());
-  ObjectData::setAttributes(ObjectData::CallToImpl);
-  int &pmax = *os_max_resource_id;
-  if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
-  o_id = ++pmax;
 }
 
 void ResourceData::o_setId(int id) {
@@ -57,21 +56,45 @@ ResourceData::~ResourceData() {
   o_id = -1;
 }
 
-String ResourceData::t___tostring() {
-  return String("Resource id #") + String(o_getId());
+Array ResourceData::o_toArray() const {
+  return empty_array;
+}
+
+void ResourceData::dump() const {
+  o_toArray().dump();
+}
+
+const StaticString s_Unknown("Unknown");
+
+CStrRef ResourceData::o_getClassName() const {
+  if (isInvalid()) return s_Unknown;
+  return o_getClassNameHook();
+}
+
+CStrRef ResourceData::o_getClassNameHook() const {
+  throw FatalErrorException("Resource did not provide a name");
 }
 
 void ResourceData::serializeImpl(VariableSerializer *serializer) const {
   String saveName;
   int saveId;
   serializer->getResourceInfo(saveName, saveId);
-  serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
+  serializer->setResourceInfo(o_getResourceName(), o_id);
   o_toArray().serialize(serializer);
   serializer->setResourceInfo(saveName, saveId);
 }
 
 CStrRef ResourceData::o_getResourceName() const {
   return o_getClassName();
+}
+
+void ResourceData::serialize(VariableSerializer* serializer) const {
+  if (UNLIKELY(serializer->incNestedLevel((void*)this, true))) {
+    serializer->writeOverflow((void*)this, true);
+  } else {
+    serializeImpl(serializer);
+  }
+  serializer->decNestedLevel((void*)this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

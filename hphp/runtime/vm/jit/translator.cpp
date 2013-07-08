@@ -518,6 +518,7 @@ predictOutputs(SrcKey startSk,
         case KindOfString:
         case KindOfArray:
         case KindOfObject:
+        case KindOfResource:
           break;
         // KindOfRef and KindOfUninit can't happen for lots of predicted
         // types.
@@ -669,6 +670,7 @@ getDynLocType(const SrcKey startSk,
     CS(OutFDesc,       KindOfInvalid); // Unclear if OutFDesc has a purpose.
     CS(OutArray,       KindOfArray);
     CS(OutObject,      KindOfObject);
+    CS(OutResource,    KindOfResource);
 #undef CS
     case OutPred: {
       auto dt = predictOutputs(startSk, ni);
@@ -1908,6 +1910,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutArray:
     case OutArrayImm:
     case OutObject:
+    case OutResource:
     case OutThisObject:
     case OutUnknown:
     case OutVUnknown:
@@ -2480,6 +2483,7 @@ bool GuardType::isCounted() const {
     case KindOfString:
     case KindOfArray:
     case KindOfObject:
+    case KindOfResource:
     case KindOfRef:
       return true;
     default:

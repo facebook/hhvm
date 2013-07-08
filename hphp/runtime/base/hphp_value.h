@@ -44,6 +44,7 @@ union Value {
   StringData *pstr; // KindOfString, KindOfStaticString
   ArrayData  *parr; // KindOfArray
   ObjectData *pobj; // KindOfObject
+  ResourceData *pres; // KindOfResource
   Class      *pcls; // only in vm stack, no type tag.
   RefData    *pref; // KindOfRef
   TypedValue *pind; // only for KindOfIndirect
@@ -185,6 +186,7 @@ namespace detail {
   X(KindOfDouble,       double);
   X(KindOfArray,        ArrayData*);
   X(KindOfObject,       ObjectData*);
+  X(KindOfResource,     ResourceData*);
   X(KindOfRef,          RefData*);
   X(KindOfString,       StringData*);
   X(KindOfStaticString, StringData*);

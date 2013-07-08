@@ -704,7 +704,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Object",
+                "type": "Resource",
                 "desc": "Returns a resource identifier for the pkey on success, or FALSE on error."
             },
             "args": [

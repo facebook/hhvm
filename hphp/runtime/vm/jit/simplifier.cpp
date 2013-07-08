@@ -1145,6 +1145,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     if (src1->type() == Type::Obj && src2->type() == Type::Obj) {
       return nullptr;
     }
+    if (src1->type() == Type::Res || src2->type() == Type::Res) {
+      return nullptr;
+    }
     // for arrays, don't simplify Same to Eq
     if (src1->type() == Type::Arr && src2->type() == Type::Arr) {
       return nullptr;

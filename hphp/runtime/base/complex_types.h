@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/type_string.h"
 #include "hphp/runtime/base/type_array.h"
 #include "hphp/runtime/base/type_object.h"
+#include "hphp/runtime/base/type_resource.h"
 #include "hphp/runtime/base/ref_data.h"
 #include "hphp/runtime/base/tv_helpers.h"
 #include "hphp/runtime/base/type_variant.h"

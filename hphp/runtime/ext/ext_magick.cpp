@@ -1220,8 +1220,7 @@ bool f_magickpaintopaqueimage(CResRef mgck_wnd, CResRef target_pxl_wnd,
   throw NotImplementedException(__func__);
 }
 
-bool
-f_magickpainttransparentimage(CResRef mgck_wnd,
+bool f_magickpainttransparentimage(CResRef mgck_wnd,
                               CResRef target,
                               double opacity /* = k_MW_TransparentOpacity */,
                               double fuzz /* = 0.0 */) {

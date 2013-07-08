@@ -47,6 +47,60 @@ bool f_session_unregister(CStrRef varname);
 bool f_session_is_registered(CStrRef varname);
 
 ///////////////////////////////////////////////////////////////////////////////
+// SessionModule
+
+/**
+ * Session modules are implemeted by extending this class and
+ * implementing its virtual methods, usually registering by
+ * name as a by-product of the constructor.
+ *
+ * open() is called on session_init() (or request startup is autostart)
+ * read()/write() should load and save serialized session data, respectively
+ * destroy() should remove the session from the underlying storage media
+ * gc() should look for an clean up expired sessions
+ * close() is called on session_destroy() (or request end)
+ */
+class SessionModule {
+public:
+  enum {
+    md5,
+    sha1,
+  };
+
+public:
+  explicit SessionModule(const char *name) : m_name(name) {
+    RegisteredModules.push_back(this);
+  }
+  virtual ~SessionModule() {}
+
+  const char *getName() const { return m_name; }
+
+  virtual bool open(const char *save_path, const char *session_name) = 0;
+  virtual bool close() = 0;
+  virtual bool read(const char *key, String &value) = 0;
+  virtual bool write(const char *key, CStrRef value) = 0;
+  virtual bool destroy(const char *key) = 0;
+  virtual bool gc(int maxlifetime, int *nrdels) = 0;
+  virtual String create_sid();
+
+public:
+  static SessionModule *Find(const char *name) {
+    for (unsigned int i = 0; i < RegisteredModules.size(); i++) {
+      SessionModule *mod = RegisteredModules[i];
+      if (mod && strcasecmp(name, mod->m_name) == 0) {
+        return mod;
+      }
+    }
+    return nullptr;
+  }
+
+private:
+  static std::vector<SessionModule*> RegisteredModules;
+
+  const char *m_name;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // class SessionHandler
 
 class SessionModule;

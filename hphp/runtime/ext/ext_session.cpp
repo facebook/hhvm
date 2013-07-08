@@ -47,7 +47,6 @@ bool ini_on_update_save_dir(CStrRef value, void *p);
 ///////////////////////////////////////////////////////////////////////////////
 // global data
 
-class SessionModule;
 class SessionSerializer;
 class Session {
 public:
@@ -183,50 +182,6 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
 
-///////////////////////////////////////////////////////////////////////////////
-// SessionModule
-
-class SessionModule {
-public:
-  enum {
-    md5,
-    sha1,
-  };
-
-public:
-  SessionModule(const char *name) : m_name(name) {
-    RegisteredModules.push_back(this);
-  }
-  virtual ~SessionModule() {}
-
-  const char *getName() const { return m_name;}
-
-  virtual bool open(const char *save_path, const char *session_name) = 0;
-  virtual bool close() = 0;
-  virtual bool read(const char *key, String &value) = 0;
-  virtual bool write(const char *key, CStrRef value) = 0;
-  virtual bool destroy(const char *key) = 0;
-  virtual bool gc(int maxlifetime, int *nrdels) = 0;
-  virtual String create_sid();
-
-public:
-  static SessionModule *Find(const char *name) {
-    for (unsigned int i = 0; i < RegisteredModules.size(); i++) {
-      SessionModule *mod = RegisteredModules[i];
-      if (mod && strcasecmp(name, mod->m_name) == 0) {
-        return mod;
-      }
-    }
-    return NULL;
-  }
-
-private:
-  static std::vector<SessionModule*> RegisteredModules;
-
-  const char *m_name;
-};
-std::vector<SessionModule*> SessionModule::RegisteredModules;
-
 void SessionRequestData::requestShutdownImpl() {
   if (m_mod) {
     try {
@@ -235,6 +190,8 @@ void SessionRequestData::requestShutdownImpl() {
   }
   m_id.reset();
 }
+
+std::vector<SessionModule*> SessionModule::RegisteredModules;
 
 /*
  * Note that we cannot use the BASE64 alphabet here, because

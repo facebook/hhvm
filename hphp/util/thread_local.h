@@ -31,12 +31,22 @@ namespace HPHP {
 // Clang seems to have added this feature, or at the very least it is ignoring
 // __thread keyword and compiling anyway
 //
+// On OSX, gcc does emulate TLS but in a manner that invalidates assumptions
+// we have made about __thread and makes accessing thread-local variables in a
+// JIT-friendly fashion difficult (as the compiler is doing a lot of magic that
+// is not contractual or documented that we would need to duplicate in emitted
+// code) so for now we're not going to use it. One possibility if we really
+// want to do this is to generate functions that access variables of interest
+// in ThreadLocal* (all of them are NoCheck right now) and use the bytes of
+// gcc's compiled functions to find the values we would need to pass to
+// __emutls_get_address.
+//
 // icc 13.0.0 appears to support it as well but we end up with
 // assembler warnings of unknown importance about incorrect section
 // types
 
-#if !defined(NO_TLS) &&                                         \
-  ((__llvm__ && __clang__) ||                                  \
+#if !defined(NO_TLS) && !defined(__APPLE__) &&                  \
+  ((__llvm__ && __clang__) ||                                   \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||     \
    __INTEL_COMPILER)
 #define USE_GCC_FAST_TLS
@@ -65,7 +75,7 @@ inline void ThreadLocalCreateKey(pthread_key_t *key, void (*del)(void*)) {
 
 /**
  * A thread-local object is a "global" object within a thread. This is useful
- * for writing apartment-threaded code, where nothing is actullay shared
+ * for writing apartment-threaded code, where nothing is actually shared
  * between different threads (hence no locking) but those variables are not
  * on stack in local scope. To use it, just do something like this,
  *
@@ -426,7 +436,7 @@ public:
     return *getNoCheck();
   }
 
-private:
+public:
   pthread_key_t m_key;
 };
 

@@ -481,6 +481,9 @@ private:
   template <unsigned mdepth>
   void setHelperPost(unsigned ndiscard, Variant& tvRef,
                      Variant& tvRef2);
+  template <bool isEmpty>
+  void isSetEmptyM(PC& pc);
+
   template<class Op> void implCellBinOp(PC&, Op op);
   template<class Op> void implCellBinOpBool(PC&, Op op);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);

@@ -4559,19 +4559,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
   SPROP_OP_POSTLUDE
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
+template <bool isEmpty>
+inline void OPTBLD_INLINE VMExecutionContext::isSetEmptyM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelperPre<false, false, VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS);
   // Process last member specially, in order to employ the IssetElem/IssetProp
-  // operations.  (TODO combine with EmptyM.)
-  bool issetResult = false;
+  // operations.
+  bool isSetEmptyResult = false;
   switch (mcode) {
   case MEL:
   case MEC:
   case MET:
   case MEI: {
-    issetResult = IssetEmptyElem<false>(tvScratch, *tvRef.asTypedValue(),
+    isSetEmptyResult = IssetEmptyElem<isEmpty>(tvScratch, *tvRef.asTypedValue(),
         base, curMember);
     break;
   }
@@ -4579,14 +4580,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   case MPC:
   case MPT: {
     Class* ctx = arGetContextClass(m_fp);
-    issetResult = IssetEmptyProp<false>(ctx, base, curMember);
+    isSetEmptyResult = IssetEmptyProp<isEmpty>(ctx, base, curMember);
     break;
   }
   default: assert(false);
   }
   getHelperPost<false>(GETHELPERPOST_ARGS);
-  tvRet->m_data.num = issetResult;
+  tvRet->m_data.num = isSetEmptyResult;
   tvRet->m_type = KindOfBoolean;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
+  isSetEmptyM<false>(pc);
 }
 
 #define IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)          \
@@ -4690,33 +4695,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
-  NEXT();
-  DECLARE_GETHELPER_ARGS
-  getHelperPre<false, false, VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS);
-  // Process last member specially, in order to employ the EmptyElem/EmptyProp
-  // operations.  (TODO combine with IssetM)
-  bool emptyResult = false;
-  switch (mcode) {
-  case MEL:
-  case MEC:
-  case MET:
-  case MEI: {
-    emptyResult = IssetEmptyElem<true>(tvScratch, *tvRef.asTypedValue(),
-        base, curMember);
-    break;
-  }
-  case MPL:
-  case MPC:
-  case MPT: {
-    Class* ctx = arGetContextClass(m_fp);
-    emptyResult = IssetEmptyProp<true>(ctx, base, curMember);
-    break;
-  }
-  default: assert(false);
-  }
-  getHelperPost<false>(GETHELPERPOST_ARGS);
-  tvRet->m_data.num = emptyResult;
-  tvRet->m_type = KindOfBoolean;
+  isSetEmptyM<true>(pc);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopAKExists(PC& pc) {

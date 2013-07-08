@@ -2430,4 +2430,11 @@ void Class::getChildren(std::vector<TypedValue *> &out) {
   }
 }
 
+// True if a CPP extension class has opted into serialization.
+bool Class::isCppSerializable() const {
+  assert(builtinPropSize() > 0); // Only call this on CPP classes
+  return clsInfo() &&
+    (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
+}
+
  } // HPHP::VM

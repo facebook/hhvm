@@ -26,9 +26,15 @@ function main() {
   // each other's memory. We want to confirm that all fields are
   // initialized correctly and that the destructor does not segfault.
   $sewh = unserialize($s2);
+  var_dump($sewh);
   $sewh = null; // Let it go
   $srwh = unserialize($s1);
+  var_dump($srwh);
   $srwh = null; // Let it go
+
+  // Confirm that we can't deserialize one of these as well.
+  $c1 = unserialize("O:12:\"Continuation\":0:{}");
+  var_dump($c1);
 }
 
 main();

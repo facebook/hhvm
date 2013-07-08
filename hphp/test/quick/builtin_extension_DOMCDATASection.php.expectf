@@ -1,9 +1,11 @@
 DOMCDATASection
-HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
+HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMCDATASection)#1 (0) {
 }
-string(27) "O:15:"DOMCDATASection":0:{}"
-object(DOMCDATASection)#2 (0) {
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMCDATASection";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMCDATASection"
 }
 array(28) {
   [0]=>
@@ -65,15 +67,15 @@ array(28) {
 }
 ================
 A_DOMCDATASection
-HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
+HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMCDATASection)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(42) "O:17:"A_DOMCDATASection":1:{s:4:"___x";N;}"
-object(A_DOMCDATASection)#4 (1) {
-  ["___x"]=>
-  NULL
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMCDATASection";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMCDATASection"
 }
 array(28) {
   [0]=>

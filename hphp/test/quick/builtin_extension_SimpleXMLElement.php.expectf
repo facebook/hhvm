@@ -1,9 +1,11 @@
 SimpleXMLElement
-HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
+HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(SimpleXMLElement)#1 (0) {
 }
-string(28) "O:16:"SimpleXMLElement":0:{}"
-object(SimpleXMLElement)#2 (0) {
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"SimpleXMLElement";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "SimpleXMLElement"
 }
 array(22) {
   [0]=>
@@ -53,11 +55,13 @@ array(22) {
 }
 ================
 A_SimpleXMLElement
-HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
+HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_SimpleXMLElement)#3 (0) {
 }
-string(30) "O:18:"A_SimpleXMLElement":0:{}"
-object(A_SimpleXMLElement)#4 (0) {
+string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_SimpleXMLElement";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(18) "A_SimpleXMLElement"
 }
 array(22) {
   [0]=>

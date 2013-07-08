@@ -25,26 +25,6 @@
             ],
             "consts": [
             ]
-        },
-        {
-            "name": "DummyClosure",
-            "desc": "Represents an invalid closure which will fatal when used.",
-            "flags": [
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "args": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "flags": [
-                    ]
-                }
-            ],
-            "consts": [
-            ]
         }
     ]
 }

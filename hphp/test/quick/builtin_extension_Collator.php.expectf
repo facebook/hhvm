@@ -1,9 +1,11 @@
 Collator
-HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
+HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(Collator)#1 (0) {
 }
-string(19) "O:8:"Collator":0:{}"
-object(Collator)#2 (0) {
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"Collator";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "Collator"
 }
 array(13) {
   [0]=>
@@ -35,15 +37,15 @@ array(13) {
 }
 ================
 A_Collator
-HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
+HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_Collator)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(35) "O:10:"A_Collator":1:{s:4:"___x";N;}"
-object(A_Collator)#4 (1) {
-  ["___x"]=>
-  NULL
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_Collator";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_Collator"
 }
 array(13) {
   [0]=>

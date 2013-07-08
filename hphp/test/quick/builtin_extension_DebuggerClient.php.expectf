@@ -1,8 +1,10 @@
 DebuggerClient
 object(DebuggerClient)#1 (0) {
 }
-string(26) "O:14:"DebuggerClient":0:{}"
-object(DebuggerClient)#2 (0) {
+string(99) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:14:"DebuggerClient";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(14) "DebuggerClient"
 }
 array(4) {
   [0]=>
@@ -20,10 +22,10 @@ object(A_DebuggerClient)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(41) "O:16:"A_DebuggerClient":1:{s:4:"___x";N;}"
-object(A_DebuggerClient)#4 (1) {
-  ["___x"]=>
-  NULL
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"A_DebuggerClient";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "A_DebuggerClient"
 }
 array(4) {
   [0]=>

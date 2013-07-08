@@ -7,5 +7,5 @@ $f = function($a) {
  var_dump($f('x'));
  apc_store('key', $f);
  $g = apc_fetch('key');
- print_r($g);
+ var_dump($g);
 

@@ -104,11 +104,6 @@ Variant c_Continuation::t_key() {
   return m_key;
 }
 
-bool c_Continuation::php_sleep(Variant &ret) {
-  ret = false;
-  return true;
-}
-
 void c_Continuation::t_next() {
   const_assert(false);
 }
@@ -250,40 +245,6 @@ void c_Continuation::call_raise(ObjectData* e) {
   arg.m_data.pobj = e;
 
   g_vmContext->invokeContFunc(func, this, &arg);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_DummyContinuation::c_DummyContinuation(Class* cb) :
-  ExtObjectData(cb) {
-}
-
-c_DummyContinuation::~c_DummyContinuation() {}
-
-void c_DummyContinuation::t___construct() {
-}
-
-Variant c_DummyContinuation::t_current() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return uninit_null();
-}
-
-Variant c_DummyContinuation::t_key() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return uninit_null();
-}
-
-void c_DummyContinuation::t_next() {
-  throw_fatal("Tring to use a DummyContinuation");
-}
-
-void c_DummyContinuation::t_rewind() {
-  throw_fatal("Tring to use a DummyContinuation");
-}
-
-bool c_DummyContinuation::t_valid() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

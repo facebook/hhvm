@@ -64,6 +64,7 @@ namespace Eval {
   x(IterableView)                               \
   x(KeyedIterableView)                          \
   x(__PHP_Incomplete_Class)                     \
+  x(__PHP_Unserializable_Class)                 \
 
 class SystemLib {
  public:

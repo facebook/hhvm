@@ -55,33 +55,12 @@ public:
   static size_t funcOffset() { return offsetof(c_Closure, m_func); }
   static size_t thisOffset() { return offsetof(c_Closure, m_thisOrClass); }
 
-protected:
-  virtual bool php_sleep(Variant &ret);
 private:
   SmartPtr<HphpArray> m_VMStatics;
   ObjectData* m_thisOrClass;
   const Func* m_func;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// class DummyClosure
-
-FORWARD_DECLARE_CLASS_BUILTIN(DummyClosure);
-class c_DummyClosure : public ExtObjectData {
- public:
-  DECLARE_CLASS(DummyClosure, DummyClosure, ObjectData)
-
-  // need to implement
-  public: c_DummyClosure(Class* cls = c_DummyClosure::s_cls);
-  public: ~c_DummyClosure();
-  public: void t___construct();
-
-  // implemented by HPHP
-  public: c_DummyClosure *create();
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_CLOSURE_H_

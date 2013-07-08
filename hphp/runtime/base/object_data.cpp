@@ -557,6 +557,8 @@ void ObjectData::serialize(VariableSerializer* serializer) const {
 
 static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+static StaticString s_PHP_Unserializable_Class_Name(
+                      "__PHP_Unserializable_Class_Name");
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -575,6 +577,15 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         raise_error("%s::serialize() must return a string or NULL",
                     o_getClassName().data());
       }
+      return;
+    }
+    // Only serialize CPP extension type instances which can actually
+    // be deserialized.
+    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+      Object placeholder = ObjectData::newInstance(
+        SystemLib::s___PHP_Unserializable_ClassClass);
+      placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());
+      placeholder->serialize(serializer);
       return;
     }
     handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
@@ -602,12 +613,18 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       }
       return;
     }
+    // Don't try to serialize a CPP extension class which doesn't
+    // support serialization. Just send the class name instead.
+    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+      serializer->write(o_getClassName());
+      return;
+    }
     try {
       handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
     } catch (...) {
       raise_warning("%s::sleep() throws exception", o_getClassName().data());
-      ret = uninit_null();
-      handleSleep = true;
+      serializer->writeNull();
+      return;
     }
   }
   if (UNLIKELY(handleSleep)) {
@@ -639,32 +656,10 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
-      if (instanceof(c_Closure::s_cls)) {
-        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
-          p_DummyClosure dummy(NEWOBJ(c_DummyClosure));
-          serializer->write(dummy);
-        } else if (serializer->getType() ==
-                   VariableSerializer::Type::DebuggerSerialize) {
-          serializer->write("Closure");
-        } else {
-          throw_fatal("Serialization of Closure is not allowed");
-        }
-      } else if (instanceof(c_Continuation::s_cls)) {
-        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
-          p_DummyContinuation dummy(NEWOBJ(c_DummyContinuation));
-          serializer->write(dummy);
-        } else if (serializer->getType() ==
-                   VariableSerializer::Type::DebuggerSerialize) {
-          serializer->write("Continuation");
-        } else {
-          throw_fatal("Serialization of Continuation is not allowed");
-        }
-      } else {
-        raise_warning("serialize(): __sleep should return an array only "
-                      "containing the names of instance-variables to "
-                      "serialize");
-        uninit_null().serialize(serializer);
-      }
+      raise_warning("serialize(): __sleep should return an array only "
+                    "containing the names of instance-variables to "
+                    "serialize");
+      uninit_null().serialize(serializer);
     }
   } else {
     if (isCollection()) {

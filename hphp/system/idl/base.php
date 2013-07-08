@@ -130,6 +130,7 @@ define('IsReference',                    1 << 11);
 define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);
 define('HasDocComment',                  1 << 14);
+define('IsCppSerializable',              1 << 15);
 define('HipHopSpecific',                 1 << 16);
 define('VariableArguments',              1 << 17);
 define('RefVariableArguments',           1 << 18);

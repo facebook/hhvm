@@ -1,8 +1,10 @@
 DOMCharacterData
 object(DOMCharacterData)#1 (0) {
 }
-string(28) "O:16:"DOMCharacterData":0:{}"
-object(DOMCharacterData)#2 (0) {
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"DOMCharacterData";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "DOMCharacterData"
 }
 array(26) {
   [0]=>
@@ -64,10 +66,10 @@ object(A_DOMCharacterData)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(43) "O:18:"A_DOMCharacterData":1:{s:4:"___x";N;}"
-object(A_DOMCharacterData)#4 (1) {
-  ["___x"]=>
-  NULL
+string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_DOMCharacterData";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(18) "A_DOMCharacterData"
 }
 array(26) {
   [0]=>

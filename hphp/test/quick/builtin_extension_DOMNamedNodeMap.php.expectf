@@ -1,8 +1,10 @@
 DOMNamedNodeMap
 object(DOMNamedNodeMap)#1 (0) {
 }
-string(27) "O:15:"DOMNamedNodeMap":0:{}"
-object(DOMNamedNodeMap)#2 (0) {
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMNamedNodeMap";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMNamedNodeMap"
 }
 array(8) {
   [0]=>
@@ -28,10 +30,10 @@ object(A_DOMNamedNodeMap)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(42) "O:17:"A_DOMNamedNodeMap":1:{s:4:"___x";N;}"
-object(A_DOMNamedNodeMap)#4 (1) {
-  ["___x"]=>
-  NULL
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMNamedNodeMap";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMNamedNodeMap"
 }
 array(8) {
   [0]=>

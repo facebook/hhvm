@@ -78,28 +78,11 @@ c_Closure* c_Closure::clone() {
   return closure;
 }
 
-
-bool c_Closure::php_sleep(Variant &ret) {
-  ret = false;
-  return true;
-}
-
 HphpArray* c_Closure::getStaticLocals() {
   if (m_VMStatics.get() == NULL) {
     m_VMStatics = ArrayData::Make(1);
   }
   return m_VMStatics.get();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_DummyClosure::c_DummyClosure(Class* cb) :
-  ExtObjectData(cb) {
-}
-
-c_DummyClosure::~c_DummyClosure() {}
-
-void c_DummyClosure::t___construct() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

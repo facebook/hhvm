@@ -62,6 +62,8 @@ static StaticString s_1("1");
 static StaticString s_unserialize("unserialize");
 static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+static StaticString s_PHP_Unserializable_Class_Name(
+  "__PHP_Unserializable_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
@@ -1880,9 +1882,18 @@ void Variant::unserialize(VariableUnserializer *uns,
         }
       }
       if (cls) {
-        obj = ObjectData::newInstance(cls);
-        if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
-          throw Exception("Pair objects must have exactly 2 elements");
+        // Only unserialize CPP extension types which can actually
+        // support it. Otherwise, we risk creating a CPP object
+        // without having it intialized completely.
+        if ((cls->builtinPropSize() > 0) && !cls->isCppSerializable()) {
+          obj = ObjectData::newInstance(
+            SystemLib::s___PHP_Unserializable_ClassClass);
+          obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
+        } else {
+          obj = ObjectData::newInstance(cls);
+          if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
+            throw Exception("Pair objects must have exactly 2 elements");
+          }
         }
       } else {
         obj = ObjectData::newInstance(

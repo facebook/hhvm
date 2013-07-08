@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/server/server_note.h"
 #include "hphp/runtime/base/server/transport.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +46,7 @@ Array f_apache_request_headers() {
     for (HeaderMap::const_iterator iter = headers.begin();
          iter != headers.end(); ++iter) {
       const vector<string> &values = iter->second;
-      ret.set(String(iter->first), String(values.back()));
+      ret.set(String(iter->first), String(folly::join(", ", values)));
     }
     return ret;
   }

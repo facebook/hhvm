@@ -258,6 +258,11 @@ static CallMap s_callMap({
     {EmptyElem,{FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
 
+    /* instanceof checks */
+    {InstanceOf, (TCA)instanceOfHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {InstanceOfIface, (TCA)Util::getMethodPtr(&Class::ifaceofDirect), DSSA,
+                 SNone, {{SSA, 0}, {SSA, 1}}},
+
     /* debug assert helpers */
     {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
 });

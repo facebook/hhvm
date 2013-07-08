@@ -57,6 +57,11 @@ bool classIsUniqueNormalClass(const Class* cls) {
     !(cls->attrs() & (AttrInterface | AttrTrait));
 }
 
+bool classIsUniqueInterface(const Class* cls) {
+  return classIsUnique(cls) &&
+    (cls->attrs() & AttrInterface);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2909,6 +2914,16 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   const bool isUnique = classIsUnique(maybeCls);
 
   /*
+   * If the class is a unique interface, we can just hit the class's
+   * interfaces map and call it a day.
+   */
+  if (!haveBit && classIsUniqueInterface(maybeCls)) {
+    push(gen(InstanceOfIface, objClass, ssaClassName));
+    gen(DecRef, src);
+    return;
+  }
+
+  /*
    * If the class is unique or a parent of the current context, we
    * don't need to load it out of target cache because it must
    * already exist and be defined.
@@ -2930,8 +2945,7 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
                                           checkClass) :
     gen(InstanceOf,
               objClass,
-              checkClass,
-              cns(maybeCls && !isNormalClass))
+              checkClass)
   );
   gen(DecRef, src);
 }

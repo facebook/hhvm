@@ -117,6 +117,8 @@ RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val);
 RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
                              TargetCache::CacheHandle ch);
 
+bool instanceOfHelper(const Class* objClass, const Class* testClass);
+
 } }
 
 #endif

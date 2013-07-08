@@ -845,9 +845,6 @@ void LinearScan::computePreColoringHint() {
         m_preColoringHint.add(inst->src(0), 0, 1);
       }
       break;
-    case InstanceOf:
-      normalHint(2, 0, 0);
-      break;
     case LdSSwitchDestFast:
       normalHint(1, 0, 0);
       break;

@@ -255,7 +255,8 @@ O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
 O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
-O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
+O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
+O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
 /*    name                      dstinfo srcinfo                      flags */ \

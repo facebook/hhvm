@@ -510,6 +510,9 @@ public:
     }
     return false;
   }
+  bool ifaceofDirect(const StringData* name) const {
+    return m_interfaces.lookupDefault(name, nullptr) != nullptr;
+  }
   const StringData* name() const {
     return m_preClass->name();
   }

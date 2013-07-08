@@ -326,4 +326,10 @@ RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
   return staticLocInitImpl<true>(name, fp, val, ch);
 }
 
+HOT_FUNC_VM
+bool instanceOfHelper(const Class* objClass,
+                      const Class* testClass) {
+  return testClass && objClass->classof(testClass);
+}
+
 } }

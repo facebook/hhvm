@@ -465,6 +465,9 @@ CALL_OPCODE(StableMapIsset)
 CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
+CALL_OPCODE(InstanceOf)
+CALL_OPCODE(InstanceOfIface)
+
 #undef NOOP_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
@@ -1950,21 +1953,6 @@ void CodeGenerator::cgIsNTypeMem(IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-HOT_FUNC_VM static bool instanceOfHelper(const Class* objClass,
-                                         const Class* testClass) {
-  return testClass && objClass->classof(testClass);
-}
-
-void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               TCA(instanceOfHelper),
-               inst->dst(),
-               SyncOptions::kNoSyncPoint,
-               ArgGroup(m_regs)
-                 .ssa(inst->src(0))
-                 .ssa(inst->src(1)));
-}
 
 /*
  * Check instanceof using instance bitmasks.

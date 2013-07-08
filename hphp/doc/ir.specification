@@ -534,14 +534,17 @@ D:Bool = OpNSame S0:Gen S1:Gen
   Perform comparisons with PHP semantics on S0 and S1, and put the
   result in D.
 
-D:Bool = InstanceOf S0:Cls S1:Cls S2:ConstBool
+D:Bool = InstanceOf S0:Cls S1:Cls
 
   Sets D based on whether S0 is a descendant of the class, interface,
   or trait in S1.  (Note that this is always false for a trait).  S1
-  may be null at runtime if the class is not defined.  The flag S2 is
-  just a hint that is true if we should assume S1 might be an
-  interface---the instruction must still handle it correctly if this
-  hint is wrong at runtime.
+  may be null at runtime if the class is not defined.
+
+D:Bool = InstanceOfIface S0:Cls S1:Cls
+
+  Fast path for interface checks. Sets D based on whether S0 implements
+  S1, but S1 must be a unique interface. This should only be used in
+  repo-authoritative mode.
 
 D:Bool = ExtendsClass S0:Cls S1:Cls
 

@@ -4247,7 +4247,17 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     m_as.testq (rData, rData);
     doJcc(CC_E);
   } else {
-    emitTypeTest(inst->typeParam(), rType, rData, doJcc);
+    Type typeParam = inst->typeParam();
+    if (rType != InvalidReg) {
+      emitTypeTest(typeParam, rType, rData, doJcc);
+    } else {
+      Type srcType = src->type();
+      if (srcType.isBoxed() && typeParam.isBoxed()) {
+        // Nothing to do here, since we check the inner type at the uses
+      } else {
+        CG_PUNT(CheckType-known-srcType);
+      }
+    }
   }
 
   auto const dstReg = m_regs[inst->dst()].reg();

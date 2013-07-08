@@ -328,6 +328,14 @@ Instruction set
 
 1. Checks and Asserts
 
+Note: Instructions that guard or check boxed types only check that the
+operand is boxed, and they ignore the type of the value inside the box
+(the inner type).  The inner type is normally checked when the value
+within the box is loaded by a LdRef instruction (which takes box/ref
+values, and only checks the inner type).  The reasoning for this
+approach is that boxed values may alias.  Therefore, in lack of memory
+alias analysis, the inner types generally need to be rechecked before
+each use.
 
 D:T = CheckType<T> S0:{Gen|Nullptr} -> L
 

@@ -183,7 +183,7 @@ class FailedCodeGen : public std::runtime_error {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,                    DParam, S(Gen,Nullptr),        C|E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen,Nullptr),          E|CRc|PRc|P) \
 O(AssertType,                   DParam, S(Gen,Nullptr),        C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \

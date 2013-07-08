@@ -16,7 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_debugger.h"
+#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/debugger/cmd/cmd_user.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/vm/debugger_hook.h"
@@ -24,6 +26,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/network.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -81,6 +84,33 @@ void f_hphpd_break(bool condition /* = true */) {
     throw VMSwitchModeBuiltin();
   }
   TRACE(5, "out f_hphpd_break()\n");
+}
+
+// Quickly determine if a debugger is attached to the current thread.
+bool f_hphp_debugger_attached() {
+  return (RuntimeOption::EnableDebugger && (Debugger::GetProxy() != nullptr));
+}
+
+const StaticString
+  s_clientIP("clientIP"),
+  s_clientPort("clientPort");
+
+// Determine if a debugger is attached to the current thread, and
+// return information about where it is connected from. The client IP
+// and port will be null if the connection is local.
+Variant f_hphp_get_debugger_info() {
+  Array ret(Array::Create());
+  if (!RuntimeOption::EnableDebugger) return ret;
+  DebuggerProxyPtr proxy = Debugger::GetProxy();
+  if (!proxy) return ret;
+  Object s(proxy->getSocket().get());
+  Variant address;
+  Variant port;
+  if (f_socket_getpeername(s, ref(address), ref(port))) {
+    ret.set(s_clientIP, address);
+    ret.set(s_clientPort, port);
+  }
+  return ret;
 }
 
 typedef tbb::concurrent_hash_map<std::string, DebuggerClient*> DbgCltMap;

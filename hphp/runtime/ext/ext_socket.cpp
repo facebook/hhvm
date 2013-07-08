@@ -58,7 +58,8 @@ static void check_socket_parameters(int &domain, int &type) {
   }
 }
 
-static bool get_sockaddr(sockaddr *sa, Variant &address, Variant &port) {
+static bool get_sockaddr(sockaddr *sa, socklen_t salen,
+                         Variant &address, Variant &port) {
   switch (sa->sa_family) {
   case AF_INET6:
     {
@@ -78,8 +79,13 @@ static bool get_sockaddr(sockaddr *sa, Variant &address, Variant &port) {
     return true;
   case AF_UNIX:
     {
+      // NB: an unnamed socket has no path, and sun_path should not be
+      // inspected. In that case the length is just the size of the
+      // struct without sun_path.
       struct sockaddr_un *s_un = (struct sockaddr_un *)sa;
-      address = String(s_un->sun_path, CopyString);
+      if (salen > offsetof(sockaddr_un, sun_path)) {
+        address = String(s_un->sun_path, CopyString);
+      }
     }
     return true;
 
@@ -436,7 +442,7 @@ bool f_socket_getpeername(CResRef socket, VRefParam address,
     SOCKET_ERROR(sock, "unable to retrieve peer name", errno);
     return false;
   }
-  return get_sockaddr(sa, address, port);
+  return get_sockaddr(sa, salen, address, port);
 }
 
 bool f_socket_getsockname(CResRef socket, VRefParam address,
@@ -450,7 +456,7 @@ bool f_socket_getsockname(CResRef socket, VRefParam address,
     SOCKET_ERROR(sock, "unable to retrieve peer name", errno);
     return false;
   }
-  return get_sockaddr(sa, address, port);
+  return get_sockaddr(sa, salen, address, port);
 }
 
 bool f_socket_set_block(CResRef socket) {

@@ -100,6 +100,8 @@ public:
   void checkStop();
   void forceQuit();
 
+  SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
+
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);

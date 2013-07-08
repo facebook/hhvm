@@ -62,6 +62,36 @@
             ]
         },
         {
+            "name": "hphp_debugger_attached",
+            "desc": "Quickly determine if a debugger is attached to this process and configured to debug this thread.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if a debugger is attached, FALSE if not."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphp_get_debugger_info",
+            "desc": "Determine if a debugger is attached to this process and configured to debug this thread, and return information about the attached debugger.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array of information about the debugger as array('clientIP' => {ip address of client}, 'clientPort' => {port of the client}). If no debugger is attached, an empty array is returned. If a script is being debugged within hphpd, the ip address and port will be null."
+            },
+            "args": [
+            ]
+        },
+        {
             "name": "hphpd_get_client",
             "desc": "Gets an hphpd client with a string key (creating on-demand). With the same key, it guarantees to get the same debugger client across multiple requests. One hphpd client can only be gotten by a single request at any given time. Will return null if the client is already gotten.",
             "flags": [

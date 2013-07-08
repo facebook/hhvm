@@ -1,8 +1,8 @@
 <?php // $Id$
 
-define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
+define('LONG_MAX', is_int(5000000000)? (double)9223372036854775807 : (double)0x7FFFFFFF);
 define('LONG_MIN', -LONG_MAX - 1);
-printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
+printf("%d,%d,%d,%d\n",is_float(LONG_MIN  ),is_float(LONG_MAX  ),
 					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
 
 $tests = <<<TESTS
@@ -138,4 +138,4 @@ LONG_MIN*LONG_MIN ~== pow(LONG_MIN,2.0)
 TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
- include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+ include(dirname(__FILE__) . '/../tests/quicktester.inc');

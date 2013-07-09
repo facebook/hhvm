@@ -822,6 +822,7 @@ TranslatorX64::translate(const TranslArgs& args) {
     if (m_numHHIRTrans == RuntimeOption::EvalJitGlobalTranslationLimit) {
       RuntimeOption::EvalJit = false;
       ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
+      return nullptr;
     }
   }
 

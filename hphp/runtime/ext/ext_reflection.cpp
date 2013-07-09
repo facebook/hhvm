@@ -423,8 +423,13 @@ static void set_function_info(Array &ret, const Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.typeConstraint().hasConstraint() ?
-        fpi.typeConstraint().typeName() : empty_string.get();
+
+      auto const nonExtendedConstraint =
+        fpi.typeConstraint().hasConstraint() &&
+        !fpi.typeConstraint().isExtended();
+      auto const type = nonExtendedConstraint ? fpi.typeConstraint().typeName()
+                                              : empty_string.get();
+
       param.set(s_type, VarNR(type));
       const StringData* typeHint = fpi.userType() ?
         fpi.userType() : empty_string.get();
@@ -434,8 +439,7 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
       }
-      if (!fpi.typeConstraint().hasConstraint() ||
-          fpi.typeConstraint().nullable()) {
+      if (!nonExtendedConstraint || fpi.typeConstraint().nullable()) {
         param.set(s_nullable, true_varNR);
       }
 

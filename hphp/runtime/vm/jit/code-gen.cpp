@@ -5483,8 +5483,10 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   args.addr(fpReg, iterOffset).ssa(src);
 
   assert(src->type().isBoxed());
+  auto innerType = src->type().innerType();
+  assert(innerType.isKnownDataType());
 
-  if (src->type().innerType().isArray()) {
+  if (innerType.isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
       args.addr(fpReg, localOffset(inst->src(4)));
@@ -5493,7 +5495,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
     }
     cgCallHelper(m_as, (TCA)new_miter_array_key, inst->dst(),
                  SyncOptions::kSyncPoint, args);
-  } else if (src->type() == Type::BoxedObj) {
+  } else if (innerType.isObj()) {
     args.immPtr(curClass()).addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
       args.addr(fpReg, localOffset(inst->src(4)));

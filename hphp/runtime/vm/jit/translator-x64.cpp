@@ -725,7 +725,7 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
 
   uint32_t stackOff = 0;
   visitStackElems(
-    fp, sp, ctx.offset,
+    fp, sp, ctx.bcOffset,
     [&](const ActRec* ar) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
@@ -3183,9 +3183,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(srcRec.inProgressTailJumps().empty());
   };
 
-  if (!args.m_interp && !checkTranslationLimit(t.m_sk, srcRec)) {
+  if (!args.m_interp && !checkTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
-    JIT::RegionContext rContext { curFunc(), args.m_sk.offset() };
+    JIT::RegionContext rContext { curFunc(), args.m_sk.offset(), curSpOff() };
     FTRACE(2, "populating live context for region\n");
     populateLiveContext(rContext);
     auto region = JIT::selectRegion(rContext, &t);
@@ -3216,7 +3216,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       if (!region || result == Failure) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
-        result = translateTracelet(*tp);
+        result = translateTracelet(t);
         DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
         assert(IMPLIES(region && reqRegion, result != Success));
       }
@@ -3256,7 +3256,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   }
   m_pendingFixups.clear();
 
-  addTranslation(TransRec(t.m_sk, curUnit()->md5(), transKind, t, start,
+  addTranslation(TransRec(sk, curUnit()->md5(), transKind, t, start,
                           a.frontier() - start, stubStart,
                           astubs.frontier() - stubStart,
                           counterStart, counterLen,

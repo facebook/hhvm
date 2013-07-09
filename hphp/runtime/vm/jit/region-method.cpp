@@ -57,7 +57,7 @@ int numInstrs(PC start, PC end) {
 RegionDescPtr regionMethod(const RegionContext& context) {
   using namespace HPHP::Verifier;
 
-  if (!isFuncEntry(context.func, context.offset)) return nullptr;
+  if (!isFuncEntry(context.func, context.bcOffset)) return nullptr;
   FTRACE(1, "function entry for {}: using regionMethod\n",
             context.func->fullName()->data());
 

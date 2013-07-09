@@ -27,10 +27,10 @@ namespace HPHP { namespace JIT {
  */
 RegionDescPtr regionOneBC(const RegionContext& ctx) {
   auto ret = smart::make_unique<RegionDesc>();
-  auto blk = smart::make_unique<RegionDesc::Block>(ctx.func, ctx.offset, 1);
+  auto blk = smart::make_unique<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
 
   for (auto& live : ctx.liveTypes) {
-    blk->addPredicted(SrcKey{ctx.func, ctx.offset},
+    blk->addPredicted(SrcKey{ctx.func, ctx.bcOffset},
                       {live.location, live.type});
   }
 

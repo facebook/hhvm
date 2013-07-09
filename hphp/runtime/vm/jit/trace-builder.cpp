@@ -598,8 +598,16 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
 
   if (!prevType.equals(Type::None) && !typeParam.strictSubtypeOf(prevType)) {
-    assert(prevType.subtypeOf(typeParam));
-    inst->convertToNop();
+    if (!prevType.subtypeOf(typeParam)) {
+      static auto const error =
+        StringData::GetStaticString("Internal error: static analysis was "
+                                    "wrong about a local variable's type.");
+      auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
+      inst->become(&m_irFactory, errorInst);
+      assert(false && "Incorrect local type from static analysis");
+    } else {
+      inst->convertToNop();
+    }
   }
   return nullptr;
 }

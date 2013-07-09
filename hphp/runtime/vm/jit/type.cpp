@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -122,7 +123,16 @@ Type liveTVType(const TypedValue* tv) {
     return Type::fromDataType(KindOfObject, KindOfInvalid,
       tv->m_data.pobj->getVMClass());
   }
-  return Type::fromDataType(tv->m_type);
+
+  auto outer = tv->m_type;
+  auto inner = KindOfInvalid;
+
+  if (outer == KindOfStaticString) outer = KindOfString;
+  if (outer == KindOfRef) {
+    inner = tv->m_data.pref->tv()->m_type;
+    if (inner == KindOfStaticString) inner = KindOfString;
+  }
+  return Type::fromDataType(outer, inner);
 }
 
 //////////////////////////////////////////////////////////////////////

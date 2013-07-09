@@ -3474,29 +3474,13 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
 breakBB:
   NormalizedInstruction* ni = t.m_instrStream.last;
   while (ni) {
-    switch (ni->op()) {
-      // We dont want to end a tracelet with a literal;
-      // it will cause the literal to be pushed on the
-      // stack, and the next tracelet will have to guard
-      // on the type.
-      case OpNull:
-      case OpNullUninit:
-      case OpTrue:
-      case OpFalse:
-      case OpInt:
-      case OpDouble:
-      case OpString:
-      case OpArray:
-      // Similarly, This, Self and Parent will lose
-      // type information thats only useful in the
-      // following tracelet.
-      case OpThis:
-      case OpSelf:
-      case OpParent:
-        ni = ni->prev;
-        continue;
-      default:
-        break;
+    // We dont want to end a tracelet with a literal; it will cause the literal
+    // to be pushed on the stack, and the next tracelet will have to guard on
+    // the type. Similarly, This, Self and Parent will lose type information
+    // thats only useful in the following tracelet.
+    if (isLiteral(ni->op()) || isThisSelfOrParent(ni->op())) {
+      ni = ni->prev;
+      continue;
     }
     break;
   }
@@ -3892,6 +3876,11 @@ Translator::translateRegion(const RegionDesc& region,
         always_assert(!toInterp.count(sk));
         toInterp.insert(sk);
         return Retry;
+      }
+
+      if (isFCallStar(inst.op()) || inst.op() == OpFCallBuiltin) {
+        // This is much more conservative than it needs to be.
+        ht.emitSmashLocals();
       }
 
       // Check the prediction. If the predicted type is less specific than what

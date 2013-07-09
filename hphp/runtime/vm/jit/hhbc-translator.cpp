@@ -3501,7 +3501,7 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   not_reached();
 }
 
-uint32_t localOutputId(const NormalizedInstruction& inst) {
+uint32_t localInputId(const NormalizedInstruction& inst) {
   switch (inst.op()) {
     case OpUnpackCont:
     case OpContSuspend:
@@ -3522,7 +3522,7 @@ uint32_t localOutputId(const NormalizedInstruction& inst) {
 Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
   using namespace Transl::InstrFlags;
   auto localType = [&]{
-    auto locId = localOutputId(inst);
+    auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
     auto t = m_tb->getLocalType(locId);
     return t.equals(Type::None) ? Type::Gen : t;
@@ -3611,8 +3611,9 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
 
     case OpSetOpL:
     case OpIncDecL: {
-      auto locType = m_tb->getLocalType(inst.imm[0].u_HA);
-      auto stackType = topType(0);
+      auto locType = m_tb->getLocalType(localInputId(inst));
+      assert(!locType.equals(Type::None));
+      auto stackType = inst.outputPredicted ? inst.outPred : topType(0);
       setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
       break;
     }
@@ -3734,6 +3735,10 @@ void HhbcTranslator::emitInterpOneCF(int numPopped) {
   gen(InterpOneCF, m_tb->fp(), sp, cns(bcOff()));
   m_stackDeficit = 0;
   m_hasExit = true;
+}
+
+void HhbcTranslator::emitSmashLocals() {
+  gen(SmashLocals, m_tb->fp());
 }
 
 std::string HhbcTranslator::showStack() const {

@@ -439,6 +439,11 @@ public:
     return Type(m_bits, klass);
   }
 
+  Type unspecialize() const {
+    assert(isObj() && m_class != nullptr);
+    return Type(m_bits, nullptr);
+  }
+
   bool canRunDtor() const {
     return
       (*this & (Obj | CountedArr | BoxedObj | BoxedCountedArr))

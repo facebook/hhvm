@@ -31,6 +31,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -197,7 +198,8 @@ class NormalizedInstruction {
     // For FCall's, an opaque identifier that is either null, or uniquely
     // identifies the (functionName, -arity) pair of this call site.
   const Unit* m_unit;
-  vector<DynLocation*> inputs;
+
+  std::vector<DynLocation*> inputs;
   DynLocation* outStack;
   DynLocation* outLocal;
   DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK,
@@ -336,6 +338,18 @@ class NormalizedInstruction {
   bool isAnyOutputUsed() const;
 
   std::string toString() const;
+
+  // Returns a DynLocation that will be destroyed with this
+  // NormalizedInstruction.
+  template<typename... Args>
+  DynLocation* newDynLoc(Args&&... args) {
+    m_dynLocs.push_back(
+      smart::make_unique<DynLocation>(std::forward<Args>(args)...));
+    return m_dynLocs.back().get();
+  }
+
+ private:
+  smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
 };
 
 // Return a summary string of the bytecode in a tracelet.

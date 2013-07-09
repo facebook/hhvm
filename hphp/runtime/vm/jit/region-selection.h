@@ -58,6 +58,13 @@ struct RegionDesc {
     No,
   };
 
+  template<typename... Args>
+  Block* addBlock(Args&&... args) {
+    blocks.push_back(
+      smart::make_unique<Block>(std::forward<Args>(args)...));
+    return blocks.back().get();
+  }
+
   smart::vector<BlockPtr> blocks;
 };
 typedef smart::unique_ptr<RegionDesc>::type RegionDescPtr;
@@ -234,7 +241,8 @@ struct RegionContext {
   struct PreLiveAR;
 
   const Func* func;
-  Offset offset;
+  Offset bcOffset;
+  Offset spOffset;
   smart::vector<LiveType> liveTypes;
   smart::vector<PreLiveAR> preLiveARs;
 };

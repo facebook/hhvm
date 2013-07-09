@@ -374,7 +374,7 @@ string RuntimeType::pretty() const {
   if (valueType() == KindOfObject) {
     if (valueClass() != nullptr) {
       retval += folly::format("(OfClass {})",
-                knownClass()->name()->data()).str();
+                valueClass()->name()->data()).str();
     } else if (hasKnownType()) {
       retval += folly::format("(Known Class {})",
                 knownClass()->name()->data()).str();
@@ -382,7 +382,7 @@ string RuntimeType::pretty() const {
   }
   if (valueType() == KindOfClass && valueClass() != nullptr) {
     retval += folly::format("(Class {})",
-              knownClass()->name()->data()).str();
+              valueClass()->name()->data()).str();
   }
   return retval;
 }

@@ -34,6 +34,7 @@ TRACE_SET_MOD(region);
 
 extern RegionDescPtr regionMethod(const RegionContext&);
 extern RegionDescPtr regionOneBC(const RegionContext&);
+extern RegionDescPtr regionTracelet(const RegionContext&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,6 +45,7 @@ enum class RegionMode {
   OneBC,
   Method,
   Tracelet,
+  Legacy,
 };
 
 RegionMode regionMode() {
@@ -52,6 +54,7 @@ RegionMode regionMode() {
   if (s == "onebc")  return RegionMode::OneBC;
   if (s == "method") return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
+  if (s == "legacy") return RegionMode::Legacy;
   FTRACE(1, "unknown region mode {}: using none\n", s);
   if (debug) abort();
   return RegionMode::None;
@@ -257,7 +260,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
   FTRACE(1,
     "Select region: {}@{} mode={} context:\n{}{}",
     context.func->fullName()->data(),
-    context.offset,
+    context.bcOffset,
     static_cast<int>(mode),
     [&]{
       std::string ret;
@@ -281,7 +284,8 @@ RegionDescPtr selectRegion(const RegionContext& context,
       case RegionMode::None:   return RegionDescPtr{nullptr};
       case RegionMode::OneBC:  return regionOneBC(context);
       case RegionMode::Method: return regionMethod(context);
-      case RegionMode::Tracelet: always_assert(t); return createRegion(*t);
+      case RegionMode::Tracelet: return regionTracelet(context);
+      case RegionMode::Legacy: always_assert(t); return createRegion(*t);
       }
       not_reached();
     } catch (const std::exception& e) {

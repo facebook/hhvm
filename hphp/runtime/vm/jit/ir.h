@@ -975,7 +975,7 @@ struct VectorEffects {
   bool baseValChanged;
 
 private:
-  void init(Opcode op, const Type base, const Type key, const Type val);
+  void init(const Opcode op, const Type base, const Type key, const Type val);
 };
 
 struct CatchInfo {

@@ -74,8 +74,8 @@ TEST(VectorEffects, PromoteNull) {
 
 TEST(VectorEffects, UnknownBase) {
   VectorEffects ve(SetElem, Type::PtrToCell, Type::Int, Type::Obj);
-  EXPECT_TEQ(Type::PtrToCell, ve.baseType);
-  EXPECT_FALSE(ve.baseTypeChanged);
+  EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, ve.baseType);
+  EXPECT_TRUE(ve.baseTypeChanged);
   EXPECT_TRUE(ve.baseValChanged);
 }
 

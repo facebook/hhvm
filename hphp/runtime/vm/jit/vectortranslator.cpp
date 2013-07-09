@@ -125,61 +125,63 @@ VectorEffects::VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
        valIdx == -1 ? Type::None : srcs[valIdx]->type());
 }
 
-void VectorEffects::init(Opcode op, const Type origBase,
+void VectorEffects::init(const Opcode rawOp, const Type origBase,
                          const Type key, const Type origVal) {
   baseType = origBase;
   bool basePtr, baseBoxed;
   stripBase(baseType, basePtr, baseBoxed);
-  // Only certain types of bases are supported now, but this list may expand in
+  // Only certain types of bases are supported now but this list may expand in
   // the future.
   assert_not_implemented(basePtr ||
                          baseType.subtypeOfAny(Type::Obj, Type::Arr));
-
   baseTypeChanged = baseValChanged = false;
 
   // Canonicalize the op to SetProp/SetElem/UnsetElem/SetWithRefElem
-  op = canonicalOp(op);
+  auto const op = canonicalOp(rawOp);
 
-  // We're not expecting types other than specific known data types
-  // (or for keys, Cell).  (At least for keys it might work since the
-  // helpers generally operate on cells, but we're asserting anyway
-  // since this shouldn't actually happen.)
+  /* Although it should work fine in practice, if we have a key it should
+   * either be a known DataType or Cell for now. */
   assert(key.equals(Type::None) || key.isKnownDataType() ||
          key.equals(Type::Cell));
 
+  // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp || op == SetWithRefElem) &&
       baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
-    // stdClass or array promotion might happen
-    auto newBase = op == SetElem ? Type::Arr : Type::Obj;
-    // If the base is known to be null, promotion will happen. If we can ever
-    // prove that the base is false or the empty string, promotion will
-    // definitely happen but those cases aren't handled yet. In a perfect world
-    // we would remove Type::Null from baseType here but that can produce types
-    // that are tricky to guard against and doesn't buy us much right now.
-    if (!baseBoxed && (!baseType.isString() || op == SetProp)) {
-      /*
-       * Uses of boxed types are always guarded, in case the inner
-       * type was modified. If the base type was String, its extremely
-       * likely to still be a String, so leave it as such, and we'll
-       * exit in the rare case that it changed.
-       */
-      baseType = baseType.isNull() ? newBase : (baseType | newBase);
+    auto newBase = op == SetProp ? Type::Obj : Type::Arr;
+
+    if (baseBoxed) {
+      /* We always guard when loading from a Boxed type, so we don't *have* to
+       * fix the type when the base is boxed. But it's still a good idea to do
+       * something with it, since the inner type is used as a hint by
+       * LdRef. And since the next load of the base will be guarded anyway we
+       * can be optimistic and assume no promotion for string bases and
+       * promotion in other cases. */
+      baseType = baseType.isString() ? Type::Str : newBase;
+    } else if (baseType.isString() &&
+               (rawOp == SetElem || rawOp == SetElemStk)) {
+      /* If the base is known to be a string and the operation is exactly
+       * SetElem, we're guaranteed that either the base will end as a
+       * CountedStr or the instruction will throw an exception and side
+       * exit. */
+      baseType = Type::CountedStr;
+    } else {
+      /* Regardless of whether or not promotion happens, we know the base
+       * cannot be Null after the operation. If the base was a subtype of Null
+       * this will give newBase. */
+      baseType = (baseType - Type::Null) | newBase;
     }
-    baseValChanged = !baseBoxed;
+
+    baseValChanged = true;
   }
-  if (op == SetElem || op == UnsetElem || op == SetWithRefElem) {
-    if (baseType.maybe(Type::Arr)) {
-      // possible COW when modifying an array, unless the base was boxed. If the
-      // base is a box then the value of the box itself won't change, just what
-      // it points to.
-      baseValChanged = !baseBoxed;
-    }
-    if (baseType.maybe(Type::StaticArr)) {
-      // the base might get promoted to a CountedArr. We can ignore the change
-      // if the base is boxed, (for the same reasons as above).
-      baseType = baseType | Type::CountedArr;
-      baseValChanged = !baseBoxed;
-    }
+
+  if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
+      baseType.maybe(Type::Arr | Type::Str)) {
+    /* Modifying an array or string element, even when COW doesn't kick in,
+     * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
+     * to CountedArr/CountedStr. */
+    baseValChanged = true;
+    if (baseType.maybe(Type::StaticArr)) baseType |= Type::CountedArr;
+    if (baseType.maybe(Type::StaticStr)) baseType |= Type::CountedStr;
   }
 
   // The final baseType should be a pointer/box iff the input was
@@ -187,7 +189,10 @@ void VectorEffects::init(Opcode op, const Type origBase,
   baseType = basePtr   ? baseType.ptr() : baseType;
 
   baseTypeChanged = baseTypeChanged || baseType != origBase;
-  baseValChanged = baseValChanged || baseTypeChanged;
+
+  /* Boxed bases may have their inner value changed but the value of the box
+   * will never change. */
+  baseValChanged = !baseBoxed && (baseValChanged || baseTypeChanged);
 }
 
 // vectorBaseIdx returns the src index for inst's base operand.

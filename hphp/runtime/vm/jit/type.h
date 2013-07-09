@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
-#include "hphp/runtime/vm/jit/runtime-type.h"
-
 namespace HPHP {
 namespace Transl {
 struct DynLocation;
+struct RuntimeType;
 }
 namespace JIT {
 
@@ -153,6 +152,9 @@ public:
   Type operator|(Type other) const {
     assert(m_class == nullptr && other.m_class == nullptr);
     return Type(m_bits | other.m_bits);
+  }
+  Type& operator|=(Type other) {
+    return *this = *this | other;
   }
 
   Type operator&(Type other) const {

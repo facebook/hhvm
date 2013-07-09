@@ -84,7 +84,7 @@ class Exception {
     $next = $cur->getPrevious();
     while ($next instanceof Exception) {
       $cur = $next;
-      $next = $cur->getPrevious;
+      $next = $cur->getPrevious();
     }
     $cur->setPrevious($previous);
   }

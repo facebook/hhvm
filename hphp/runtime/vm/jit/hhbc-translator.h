@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 
 using HPHP::Transl::NormalizedInstruction;
@@ -103,14 +104,14 @@ private:
  * made at this level.
  */
 struct HhbcTranslator {
-  HhbcTranslator(IRFactory& irFactory,
-                 Offset startOffset,
+  HhbcTranslator(Offset startOffset,
                  uint32_t initialSpOffsetFromFp,
                  const Func* func);
 
   // Accessors.
   IRTrace* trace() const { return m_tb->trace(); }
   TraceBuilder* traceBuilder() const { return m_tb.get(); }
+  IRFactory& irFactory() { return m_irFactory; }
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
@@ -120,7 +121,7 @@ struct HhbcTranslator {
   // Tracelet guards.
   void guardTypeStack(uint32_t stackIndex, Type type);
   void guardTypeLocal(uint32_t locId, Type type);
-  void guardTypeLocation(const Location& loc, Type type);
+  void guardTypeLocation(const RegionDesc::Location& loc, Type type);
   void guardRefs(int64_t entryArDelta,
                  const vector<bool>& mask,
                  const vector<bool>& vals);
@@ -132,9 +133,10 @@ struct HhbcTranslator {
   void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
-  void assertTypeLocation(const Location& loc, Type type);
-  void checkTypeLocation(const Location& loc, Type type, Offset dest);
-  void assertString(const Location& loc, const StringData* sd);
+  void assertTypeLocation(const RegionDesc::Location& loc, Type type);
+  void checkTypeLocation(const RegionDesc::Location& loc, Type type,
+                         Offset dest);
+  void assertString(const RegionDesc::Location& loc, const StringData* sd);
 
   RuntimeType rttFromLocation(const Location& loc);
 
@@ -564,7 +566,7 @@ private:
       return m_tb.gen(std::forward<Args>(args)...);
     }
 
-    const Transl::NormalizedInstruction& m_ni;
+    const NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
     TraceBuilder& m_tb;
     IRFactory& m_irf;
@@ -839,7 +841,7 @@ private:
   };
 
 private:
-  IRFactory& m_irFactory;
+  IRFactory m_irFactory;
   std::unique_ptr<TraceBuilder> const m_tb;
 
   std::vector<BcState> m_bcStateStack;

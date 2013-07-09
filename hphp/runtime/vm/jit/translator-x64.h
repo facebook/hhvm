@@ -284,7 +284,6 @@ private:
 
   static uint64_t toStringHelper(ObjectData *obj);
   void invalidateSrcKey(SrcKey sk);
-  bool dontGuardAnyInputs(Op op);
  public:
   template<typename T>
   void invalidateSrcKeys(const T& keys) {
@@ -352,7 +351,7 @@ public:
 
   void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
     const RefDeps&, SrcRec&);
-  void irEmitResolvedDeps(const ChangeMap& resolvedDeps);
+  void emitResolvedDeps(const ChangeMap& resolvedDeps);
 
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
@@ -365,13 +364,7 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  TranslateResult irTranslateTracelet(Tracelet& t);
-
-  void irAssertType(const Location& l, const RuntimeType& rtt);
-  void checkType(Asm&, const Location& l, const RuntimeType& rtt,
-    SrcRec& fail);
-  void irCheckType(Asm&, const Location& l, const RuntimeType& rtt,
-                   SrcRec& fail);
+  TranslateResult translateTracelet(Tracelet& t);
 
   void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
 

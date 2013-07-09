@@ -53,6 +53,13 @@ inline Class* curClass() {
   }
   return cls;
 }
+inline Offset curSpOff() {
+  Cell* fp = vmfp();
+  if (curFunc()->isGenerator()) {
+    fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
+  }
+  return fp - vmsp();
+}
 
 namespace Transl {
 

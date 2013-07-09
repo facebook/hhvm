@@ -224,7 +224,7 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
   assert_not_implemented((l.space == Location::Stack ||
                           l.space == Location::Local ||
                           l.space == Location::Iter));
-  *outdisp = cellsToBytes(Translator::locPhysicalOffset(l, f));
+  *outdisp = cellsToBytes(locPhysicalOffset(l, f));
   *outbase = l.space == Location::Stack ? rVmSp : rVmFp;
 }
 

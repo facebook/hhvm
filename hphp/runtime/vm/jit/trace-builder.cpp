@@ -291,6 +291,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
                  inst->typeParam());
     break;
 
+  case OverrideLocVal:
+    setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
+    break;
+
   case SmashLocals:
     clearLocals();
     break;

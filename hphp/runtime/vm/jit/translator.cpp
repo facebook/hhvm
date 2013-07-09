@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -211,8 +212,7 @@ SrcKey Tracelet::nextSk() const {
  *   to skip for iterators; if the current frame pointer is not the context
  *   you're looking for, be sure to pass in a non-default f.
  */
-int
-Translator::locPhysicalOffset(Location l, const Func* f) {
+int locPhysicalOffset(Location l, const Func* f) {
   f = f ? f : curFunc();
   assert_not_implemented(l.space == Location::Stack ||
                          l.space == Location::Local ||
@@ -1409,6 +1409,24 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
   return ni;
 }
 
+bool outputIsPredicted(SrcKey startSk,
+                       NormalizedInstruction& inst) {
+  auto const& iInfo = getInstrInfo(inst.op());
+  auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
+  if (doPrediction) {
+    // All OutPred ops have a single stack output for now.
+    assert(iInfo.out == Stack1);
+    auto dt = predictOutputs(startSk, &inst);
+    if (dt != KindOfInvalid) {
+      inst.outPred = Type::fromDataType(dt);
+    } else {
+      doPrediction = false;
+    }
+  }
+
+  return doPrediction;
+}
+
 /*
  * For MetaData information that affects whether we want to even put a
  * value in the ni->inputs, we need to look at it before we call
@@ -1417,8 +1435,8 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
  * We also check GuardedThis here, since RetC is short-circuited in
  * applyInputMetaData.
  */
-void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
-                                       NormalizedInstruction* ni) {
+void preInputApplyMetaData(Unit::MetaHandle metaHand,
+                           NormalizedInstruction* ni) {
   if (!metaHand.findMeta(ni->unit(), ni->offset())) return;
 
   Unit::MetaInfo info;
@@ -1754,8 +1772,21 @@ static void addMVectorInputs(NormalizedInstruction& ni,
                         "inputs, %d locals\n", stackCount, localCount);
 }
 
+void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
+               const LocalTypeFn& localType) {
+  // TranslatorX64 expected top of stack to be index -1, with indexes growing
+  // down from there. hhir defines top of stack to be index 0, with indexes
+  // growing up from there. To compensate we start with a stack offset of 1 and
+  // negate the index of any stack input after the call to getInputs.
+  int stackOff = 1;
+  getInputsImpl(startSk, &inst, stackOff, infos, localType);
+  for (auto& info : infos) {
+    if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
+  }
+}
+
 /*
- * getInputs --
+ * getInputsImpl --
  *   Returns locations for this instruction's inputs.
  *
  * Throws:
@@ -1768,11 +1799,11 @@ static void addMVectorInputs(NormalizedInstruction& ni,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
-void Translator::getInputs(SrcKey startSk,
-                           NormalizedInstruction* ni,
-                           int& currentStackOffset,
-                           InputInfos& inputs,
-                           std::function<Type(int)> localType) {
+void getInputsImpl(SrcKey startSk,
+                   NormalizedInstruction* ni,
+                   int& currentStackOffset,
+                   InputInfos& inputs,
+                   const LocalTypeFn& localType) {
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
@@ -1880,7 +1911,7 @@ void Translator::getInputs(SrcKey startSk,
       }
       numRefCounted += curType.maybeCounted();
     }
-    return numRefCounted <= kMaxInlineReturnDecRefs;
+    return numRefCounted <= Translator::kMaxInlineReturnDecRefs;
   }();
 
   if ((input & AllLocals) && wantInlineReturn) {
@@ -1906,6 +1937,21 @@ void Translator::getInputs(SrcKey startSk,
   if (input & This) {
     inputs.emplace_back(Location(Location::This));
   }
+}
+
+bool dontGuardAnyInputs(Op op) {
+  switch (op) {
+#define CASE(iNm) case Op ## iNm:
+#define NOOP(...)
+  INSTRS
+  PSEUDOINSTR_DISPATCH(NOOP)
+    return false;
+
+  default:
+    return true;
+  }
+#undef NOOP
+#undef CASE
 }
 
 bool outputDependsOnInput(const Op instr) {
@@ -2470,7 +2516,7 @@ NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
         if (succ->inputWasInferred(i)) {
           return OutputUse::Inferred;
         }
-        if (Translator::Get()->dontGuardAnyInputs(succ->op())) {
+        if (dontGuardAnyInputs(succ->op())) {
           /* the consumer doesnt care about its inputs
              but we may still have inferred something about
              its outputs that a later instruction may depend on
@@ -2971,10 +3017,6 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
   return false;
 }
 
-extern bool shouldIRInline(const Func* curFunc,
-                           const Func* func,
-                           const Tracelet& callee);
-
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
@@ -3094,7 +3136,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * (potentially increasing the specificity of guards), and we don't
    * want to do that unnecessarily.
    */
-  if (!shouldIRInline(callerFunc, target, *subTrace)) {
+  if (!JIT::shouldIRInline(callerFunc, target, *subTrace)) {
     if (UNLIKELY(Stats::enabledAny() && getenv("HHVM_STATS_FAILEDINL"))) {
       subTrace->m_inliningFailed = true;
       // Save the trace for stats purposes but don't waste time doing any
@@ -3223,8 +3265,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
     ni->fuseBranch = false;
-    ni->outputPredicted = false;
-    ni->outputPredictionStatic = false;
 
     assert(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
@@ -3237,7 +3277,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     try {
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
-      getInputs(t.m_sk, ni, stackFrameOffset, inputInfos, [&](int i) {
+      getInputsImpl(t.m_sk, ni, stackFrameOffset, inputInfos, [&](int i) {
         return Type::fromRuntimeType(
           tas.currentType(Location(Location::Local, i)));
       });
@@ -3488,9 +3528,7 @@ breakBB:
 }
 
 Translator::Translator()
-  : m_curTrace(nullptr)
-  , m_curNI(nullptr)
-  , m_resumeHelper(nullptr)
+  : m_resumeHelper(nullptr)
   , m_createdTime(Timer::GetCurrentTimeMicros())
   , m_analysisDepth(0)
 {
@@ -3541,11 +3579,11 @@ Translator::addDbgBLPC(PC pc) {
 
 // Return the SrcKey for the operation that should follow the supplied
 // NormalizedInstruction.
-SrcKey Translator::nextSrcKey(const NormalizedInstruction& i) {
+SrcKey nextSrcKey(const NormalizedInstruction& i) {
   return i.source.advanced(curUnit());
 }
 
-void Translator::populateImmediates(NormalizedInstruction& inst) {
+void populateImmediates(NormalizedInstruction& inst) {
   for (int i = 0; i < numImmediates(inst.op()); i++) {
     inst.imm[i] = getImm((Op*)inst.pc(), i);
   }
@@ -3568,11 +3606,11 @@ const char* Translator::translateResultName(TranslateResult r) {
 
 /*
  * Similar to applyInputMetaData, but designed to be used during ir
- * generation. Reads and writes types of values using m_hhbcTrans. This will
+ * generation. Reads and writes types of values using hhbcTrans. This will
  * eventually replace applyInputMetaData.
  */
-void Translator::readMetaData(Unit::MetaHandle& handle,
-                              NormalizedInstruction& inst) {
+void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
+                  HhbcTranslator& hhbcTrans) {
   if (!handle.findMeta(inst.unit(), inst.offset())) return;
 
   Unit::MetaInfo info;
@@ -3614,7 +3652,7 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
     auto updateType = [&]{
       auto& input = *inst.inputs[arg];
-      input.rtt = m_hhbcTrans->rttFromLocation(input.location);
+      input.rtt = hhbcTrans.rttFromLocation(input.location);
     };
 
     switch (info.m_kind) {
@@ -3628,28 +3666,28 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        auto const& loc = inst.inputs[arg]->location;
+        auto const loc = inst.inputs[arg]->location.toLocation();
         auto const t = Type::fromDataType(DataType(info.m_data));
         auto const offset = inst.source.offset();
 
         // These 'predictions' mean the type is InitNull or the predicted type,
         // so we assert InitNull | t, then guard t. This allows certain
         // optimizations in the IR.
-        m_hhbcTrans->assertTypeLocation(loc, Type::InitNull | t);
-        m_hhbcTrans->checkTypeLocation(loc, t, offset);
+        hhbcTrans.assertTypeLocation(loc, Type::InitNull | t);
+        hhbcTrans.checkTypeLocation(loc, t, offset);
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::DataTypeInferred: {
-        m_hhbcTrans->assertTypeLocation(
-          inst.inputs[arg]->location,
+        hhbcTrans.assertTypeLocation(
+          inst.inputs[arg]->location.toLocation(),
           Type::fromDataType(DataType(info.m_data)));
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::String: {
-        m_hhbcTrans->assertString(inst.inputs[arg]->location,
-                                  inst.unit()->lookupLitstrId(info.m_data));
+        hhbcTrans.assertString(inst.inputs[arg]->location.toLocation(),
+                               inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
       }
@@ -3705,7 +3743,7 @@ void Translator::readMetaData(Unit::MetaHandle& handle,
   } while (handle.nextArg(info));
 }
 
-bool Translator::instrMustInterp(const NormalizedInstruction& inst) {
+bool instrMustInterp(const NormalizedInstruction& inst) {
   if (RuntimeOption::EvalJitAlwaysInterpOne) return true;
 
   switch (inst.op()) {
@@ -3723,16 +3761,30 @@ bool Translator::instrMustInterp(const NormalizedInstruction& inst) {
   }
 }
 
-static Location toLocation(const RegionDesc::Location& loc) {
-  typedef RegionDesc::Location::Tag T;
-  switch (loc.tag()) {
-    case T::Stack:
-      return Location(Location::Stack, loc.stackOffset());
+void Translator::traceStart(Offset bcStartOffset) {
+  assert(!m_irTrans);
 
-    case T::Local:
-      return Location(Location::Local, loc.localId());
-  }
-  not_reached();
+  FTRACE(1, "{}{:-^40}{}\n",
+         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+         " HHIR during translation ",
+         color(ANSI_COLOR_END));
+
+  m_irTrans.reset(new JIT::IRTranslator(
+    bcStartOffset, curSpOff(), curFunc()));
+}
+
+void Translator::traceEnd() {
+  m_irTrans->hhbcTrans().end();
+  FTRACE(1, "{}{:-^40}{}\n",
+         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+         "",
+         color(ANSI_COLOR_END));
+}
+
+void Translator::traceFree() {
+  FTRACE(1, "HHIR free: arena size: {}\n",
+         m_irTrans->hhbcTrans().irFactory().arena().size());
+  m_irTrans.reset();
 }
 
 Translator::TranslateResult
@@ -3740,8 +3792,10 @@ Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
   typedef JIT::RegionDesc::Block Block;
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+  HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
+  Unit::MetaHandle metaHand;
 
   for (auto const& block : region.blocks) {
     SrcKey sk = block->start();
@@ -3758,10 +3812,9 @@ Translator::translateRegion(const RegionDesc& region,
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
         if (block == region.blocks.front() && i == 0) {
-          m_hhbcTrans->guardTypeLocation(toLocation(pred.location), pred.type);
+          ht.guardTypeLocation(pred.location, pred.type);
         } else {
-          m_hhbcTrans->checkTypeLocation(toLocation(pred.location), pred.type,
-                                         sk.offset());
+          ht.checkTypeLocation(pred.location, pred.type, sk.offset());
         }
       }
 
@@ -3770,7 +3823,7 @@ Translator::translateRegion(const RegionDesc& region,
       while (refPreds.hasNext(sk)) {
         assert(sk == startSk);
         auto const& pred = refPreds.next();
-        m_hhbcTrans->guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+        ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
       // Update the current funcd, if we have a new one.
@@ -3795,29 +3848,19 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Apply the first round of metadata from the repo and get a list of
       // input locations.
-      InputInfos inputInfos;
-      Unit::MetaHandle metaHand;
       preInputApplyMetaData(metaHand, &inst);
 
-      // TranslatorX64 expected top of stack to be index -1, with indexes
-      // growing down from there. hhir defines top of stack to be index 1, with
-      // indexes growing up from there. To compensate we start with a stack
-      // offset of 1 and negate the index of any stack input after the call to
-      // getInputs.
-      int stackOff = 1;
-      getInputs(startSk, &inst, stackOff, inputInfos, [&](int i) {
-          return m_hhbcTrans->traceBuilder()->getLocalType(i);
+      InputInfos inputInfos;
+      getInputs(startSk, inst, inputInfos, [&](int i) {
+          return ht.traceBuilder()->getLocalType(i);
         });
-      for (auto& info : inputInfos) {
-        if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
-      }
 
       // Populate the NormalizedInstruction's input vector, using types from
       // HhbcTranslator.
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
       auto newDynLoc = [&](const InputInfo& ii) {
-        dynLocs.emplace_back(ii.loc, m_hhbcTrans->rttFromLocation(ii.loc));
+        dynLocs.emplace_back(ii.loc, ht.rttFromLocation(ii.loc));
         FTRACE(2, "rttFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt.pretty());
         return &dynLocs.back();
@@ -3829,7 +3872,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Apply the remaining metadata. This may change the types of some of
       // inst's inputs.
-      readMetaData(metaHand, inst);
+      readMetaData(metaHand, inst, ht);
       if (!inst.noOp && inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
         auto byRef = byRefs.next();
@@ -3838,24 +3881,11 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Check for a type prediction. Put it in the NormalizedInstruction so
       // the emit* method can use it if needed.
-      auto const& iInfo = instrInfo[inst.op()];
-      auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
-      if (doPrediction) {
-        // All OutPred ops have a single stack output for now.
-        assert(iInfo.out == Stack1);
-        auto dt = predictOutputs(startSk, &inst);
-        if (dt != KindOfInvalid) {
-          inst.outPred = Type::fromDataType(dt);
-        } else {
-          doPrediction = false;
-        }
-      }
+      auto const doPrediction = outputIsPredicted(startSk, inst);
 
       // Emit IR for the body of the instruction.
-      Util::Nuller<NormalizedInstruction> niNuller(&m_curNI);
-      m_curNI = &inst;
       try {
-        translateInstr(inst);
+        m_irTrans->translateInstr(inst);
       } catch (const JIT::FailedIRGen& exn) {
         FTRACE(1, "ir generation for {} failed with {}\n",
                inst.toString(), exn.what());
@@ -3867,9 +3897,8 @@ Translator::translateRegion(const RegionDesc& region,
       // Check the prediction. If the predicted type is less specific than what
       // is currently on the eval stack, checkTypeLocation won't emit any code.
       if (doPrediction) {
-        m_hhbcTrans->checkTypeLocation(Location(Location::Stack, 0),
-                                       inst.outPred,
-                                       sk.advanced(block->unit()).offset());
+        ht.checkTypeStack(0, inst.outPred,
+                          sk.advanced(block->unit()).offset());
       }
     }
 

@@ -18,13 +18,14 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
-#include "hphp/runtime/vm/jit/code-gen.h" // ArrayIdx helpers
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"
@@ -66,12 +67,10 @@ bool classIsUniqueInterface(const Class* cls) {
 
 //////////////////////////////////////////////////////////////////////
 
-HhbcTranslator::HhbcTranslator(IRFactory& irFactory,
-                               Offset startOffset,
+HhbcTranslator::HhbcTranslator(Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
                                const Func* func)
-  : m_irFactory(irFactory)
-  , m_tb(new TraceBuilder(startOffset,
+  : m_tb(new TraceBuilder(startOffset,
                           initialSpOffsetFromFp,
                           m_irFactory,
                           func))
@@ -2602,16 +2601,13 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
 }
 
-void HhbcTranslator::guardTypeLocation(const Location& loc, Type type) {
+void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
+                                       Type type) {
   assert(type.subtypeOf(Type::Gen | Type::Cls));
-
-  if (loc.isStack()) {
-    guardTypeStack(loc.offset, type);
-  } else if (loc.isLocal()) {
-    assert(type.not(Type::Cls));
-    guardTypeLocal(loc.offset, type);
-  } else {
-    not_reached();
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack: guardTypeStack(loc.stackOffset(), type); break;
+    case T::Local: guardTypeLocal(loc.localId(), type);     break;
   }
 }
 
@@ -2628,29 +2624,23 @@ void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
   gen(OverrideLoc, type, LocalId(locId), m_tb->fp());
 }
 
-void HhbcTranslator::checkTypeLocation(const Location& loc, Type type,
-                                       Offset dest) {
+void HhbcTranslator::checkTypeLocation(const RegionDesc::Location& loc,
+                                       Type type, Offset dest) {
   assert(type.subtypeOf(Type::Gen));
-
-  if (loc.isStack()) {
-    checkTypeStack(loc.offset, type, dest);
-  } else if (loc.isLocal()) {
-    checkTypeLocal(loc.offset, type, dest);
-  } else {
-    not_reached();
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack: checkTypeStack(loc.stackOffset(), type, dest); break;
+    case T::Local: checkTypeLocal(loc.localId(), type, dest);     break;
   }
 }
 
-void HhbcTranslator::assertTypeLocation(const Location& loc, Type type) {
+void HhbcTranslator::assertTypeLocation(const RegionDesc::Location& loc,
+                                        Type type) {
   assert(type.subtypeOf(Type::Gen | Type::Cls));
-
-  if (loc.isStack()) {
-    assertTypeStack(loc.offset, type);
-  } else if (loc.isLocal()) {
-    assert(type.not(Type::Cls));
-    assertTypeLocal(loc.offset, type);
-  } else {
-    not_reached();
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack: assertTypeStack(loc.stackOffset(), type); break;
+    case T::Local: assertTypeLocal(loc.localId(), type);     break;
   }
 }
 
@@ -2698,23 +2688,28 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   }
 }
 
-void HhbcTranslator::assertString(const Location& loc, const StringData* str) {
-  auto idx = loc.offset;
-
-  if (loc.isStack()) {
-    if (idx < m_evalStack.size()) {
-      DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(idx);
-      assert(oldStr->type().maybe(Type::Str));
-      m_evalStack.replace(idx, cns(str));
-    } else {
-      gen(AssertStkVal, StackOffset(idx - m_evalStack.size() + m_stackDeficit),
-          m_tb->sp(), cns(str));
+void HhbcTranslator::assertString(const RegionDesc::Location& loc,
+                                  const StringData* str) {
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack: {
+      auto idx = loc.stackOffset();
+      if (idx < m_evalStack.size()) {
+        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(idx);
+        assert(oldStr->type().maybe(Type::Str));
+        m_evalStack.replace(idx, cns(str));
+      } else {
+        gen(AssertStkVal,
+            StackOffset(idx - m_evalStack.size() + m_stackDeficit),
+            m_tb->sp(), cns(str));
+      }
     }
-  } else if (loc.isLocal()) {
-    assert(m_tb->getLocalType(loc.offset).maybe(Type::Str));
-    m_tb->setLocalValue(idx, cns(str));
-  } else {
-    not_reached();
+    break;
+
+    case T::Local:
+      assert(m_tb->getLocalType(loc.localId()).maybe(Type::Str));
+      gen(OverrideLocVal, LocalId(loc.localId()), m_tb->fp(), cns(str));
+      break;
   }
 }
 
@@ -3491,10 +3486,10 @@ uint32_t localOutputId(const NormalizedInstruction& inst) {
 
     case OpSetWithRefLM:
     case OpFPassL:
-      return inst.imm[1].u_IVA;
+      return inst.imm[1].u_HA;
 
     default:
-      return inst.imm[0].u_IVA;
+      return inst.imm[0].u_HA;
   }
 }
 
@@ -3727,8 +3722,7 @@ std::string HhbcTranslator::showStack() const {
     out << folly::format("+{:-^62}+\n", str);
   };
 
-  const int32_t frameCells = curFunc()->numLocals() +
-    curFunc()->numIterators() * kNumIterCells;
+  const int32_t frameCells = curFunc()->numSlotsInFrame();
   const int32_t stackDepth =
     m_tb->spOffset() + m_evalStack.size() - m_stackDeficit -
     (curFunc()->isGenerator() ? 0 : frameCells);

@@ -18,6 +18,7 @@
 #define incl_HPHP_RUNTIME_TYPE_H_
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {
 namespace Transl {
@@ -118,6 +119,15 @@ struct Location {
 
   bool isIter() const {
     return space == Iter;
+  }
+
+  JIT::RegionDesc::Location toLocation() const {
+    typedef JIT::RegionDesc::Location L;
+    switch (space) {
+      case Stack: return L::Stack{safe_cast<uint32_t>(offset)};
+      case Local: return L::Local{safe_cast<uint32_t>(offset)};
+      default:    not_reached();
+    }
   }
 
 public:

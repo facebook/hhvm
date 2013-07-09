@@ -48,7 +48,7 @@
 namespace HPHP {
 namespace JIT {
 class HhbcTranslator;
-class IRFactory;
+class IRTranslator;
 }
 namespace Debug {
 class DebugInfo;
@@ -57,6 +57,7 @@ namespace Transl {
 
 using JIT::Type;
 using JIT::RegionDesc;
+using JIT::HhbcTranslator;
 static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
@@ -236,7 +237,6 @@ class NormalizedInstruction {
   // stack at tracelet entry.
   int stackOffset;
   int sequenceNum;
-  bool startsBB:1;
   bool breaksTracelet:1;
   bool changesPC:1;
   bool fuseBranch:1;
@@ -304,6 +304,8 @@ class NormalizedInstruction {
     , outStack3(nullptr)
     , outPred(Type::Gen)
     , checkedInputs(0)
+    , outputPredicted(false)
+    , outputPredictionStatic(false)
     , ignoreInnerType(false)
     , guardedThis(false)
     , guardedCls(false)
@@ -360,7 +362,7 @@ class UnknownInputExc : public std::exception {
 } while(0)
 
 #define throwUnknownInput() do { \
-  throw UnknownInputExc(__FILE__, __LINE__); \
+  throw Transl::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
 class GuardType {
@@ -680,12 +682,11 @@ struct TranslArgs {
  * Translator annotates a tracelet with input/output locations/types.
  */
 class Translator {
-  static const int MaxJmpsTracedThrough = 5;
-
 public:
   // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
   // generate an inline return for.
   static const int kMaxInlineReturnDecRefs = 1;
+  static const int MaxJmpsTracedThrough = 5;
 
 private:
   friend struct TraceletContext;
@@ -694,18 +695,10 @@ private:
   void analyzeCallee(TraceletContext&,
                      Tracelet& parent,
                      NormalizedInstruction* fcall);
-  void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
   bool applyInputMetaData(Unit::MetaHandle&,
                           NormalizedInstruction* ni,
                           TraceletContext& tas,
                           InputInfos& ii);
-  void readMetaData(Unit::MetaHandle& handle,
-                    NormalizedInstruction& inst);
-  void getInputs(SrcKey startSk,
-                 NormalizedInstruction* ni,
-                 int& currentStackOffset,
-                 InputInfos& inputs,
-                 std::function<Type(int)> localType);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
@@ -748,34 +741,13 @@ protected:
     Success
   };
   static const char* translateResultName(TranslateResult r);
-  void translateInstr(const NormalizedInstruction& i);
   void traceStart(Offset bcStartOffset);
   virtual void traceCodeGen() = 0;
   void traceEnd();
   void traceFree();
-  static bool instrMustInterp(const NormalizedInstruction&);
-
-private:
-  void interpretInstr(const NormalizedInstruction& i);
-  void translateInstrWork(const NormalizedInstruction& i);
-  void passPredictedAndInferredTypes(const NormalizedInstruction& i);
-#define CASE(nm) void translate ## nm(const NormalizedInstruction& i);
-INSTRS
-PSEUDOINSTRS
-#undef CASE
-
-public:
-  SrcKey nextSrcKey(const NormalizedInstruction& i);
-
-  // Currently translating trace or instruction---only valid during
-  // translate phase.
-  const Tracelet*              m_curTrace;
-  const NormalizedInstruction* m_curNI;
 
 protected:
   void requestResetHighLevelTranslator();
-
-  void populateImmediates(NormalizedInstruction&);
 
   /* translateRegion reads from the RegionBlacklist to determine when
    * to interpret an instruction, and adds failed instructions to the
@@ -794,8 +766,7 @@ protected:
 
   int64_t              m_createdTime;
 
-  std::unique_ptr<JIT::IRFactory> m_irFactory;
-  std::unique_ptr<JIT::HhbcTranslator> m_hhbcTrans;
+  std::unique_ptr<JIT::IRTranslator> m_irTrans;
 
   SrcDB              m_srcDB;
 
@@ -903,7 +874,6 @@ public:
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
-  static int locPhysicalOffset(Location l, const Func* f = nullptr);
   static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
   static bool typeIsString(DataType type) {
     return type == KindOfString || type == KindOfStaticString;
@@ -922,13 +892,6 @@ public:
   inline bool isTransDBEnabled() const {
     return debug || RuntimeOption::EvalDumpTC;
   }
-
-  /*
-   * If this returns true, we dont generate guards for any of the
-   * inputs to this instruction (this is essentially to avoid
-   * generating guards on behalf of interpreted instructions).
-   */
-  virtual bool dontGuardAnyInputs(Op op) { return false; }
 
 protected:
   PCFilter m_dbgBLPC;
@@ -1047,6 +1010,12 @@ opcodeBreaksBB(const Op instr) {
   return opcodeControlFlowInfo(instr) == ControlFlowInfo::BreaksBB;
 }
 
+/*
+ * If this returns true, we dont generate guards for any of the inputs
+ * to this instruction (this is essentially to avoid generating guards
+ * on behalf of interpreted instructions).
+ */
+bool dontGuardAnyInputs(Op op);
 bool outputDependsOnInput(const Op instr);
 
 extern bool tc_dump();
@@ -1066,6 +1035,22 @@ static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject;
 }
+
+SrcKey nextSrcKey(const NormalizedInstruction& i);
+
+void populateImmediates(NormalizedInstruction&);
+void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
+void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&);
+bool instrMustInterp(const NormalizedInstruction&);
+
+typedef std::function<Type(int)> LocalTypeFn;
+void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
+               const LocalTypeFn& localType);
+void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
+                   int& currentStackOffset, InputInfos& inputs,
+                   const LocalTypeFn& localType);
+bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
+int locPhysicalOffset(Location l, const Func* f = nullptr);
 
 namespace InstrFlags {
 enum OutTypeConstraints {

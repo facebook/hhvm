@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace Transl {
 

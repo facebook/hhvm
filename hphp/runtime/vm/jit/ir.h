@@ -202,6 +202,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int),                          E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
+O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(SmashLocals,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
 O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \
@@ -999,11 +1000,6 @@ struct CatchInfo {
 };
 
 typedef folly::Range<TCA> TcaRange;
-
-/**
- * Run all optimization passes on this trace
- */
-void optimizeTrace(IRTrace*, IRFactory* irFactory);
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

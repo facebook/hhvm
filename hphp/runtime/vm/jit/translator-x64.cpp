@@ -77,11 +77,6 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/x64-util.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -89,8 +84,18 @@
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/x64-util.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
@@ -2017,16 +2022,10 @@ TranslatorX64::emitBindJmp(SrcKey dest) {
   emitBindJmp(a, dest);
 }
 
-void
-TranslatorX64::checkType(X64Assembler& a,
-                         const Location& l,
-                         const RuntimeType& rtt,
-                         SrcRec& fail) {
-  // We can get invalid inputs as a side effect of reading invalid
-  // items out of BBs we truncate; they don't need guards.
-  if (rtt.isVagueValue() || l.isThis()) return;
-
-  irCheckType(a, l, rtt, fail);
+void TranslatorX64::emitResolvedDeps(const ChangeMap& resolvedDeps) {
+  for (const auto dep : resolvedDeps) {
+    m_irTrans->assertType(dep.first, dep.second->rtt);
+  }
 }
 
 void
@@ -2091,9 +2090,9 @@ TranslatorX64::checkRefs(X64Assembler& a,
 
     int entryArDelta = it->first;
 
-    m_hhbcTrans->guardRefs(entryArDelta,
-                           it->second.m_mask,
-                           it->second.m_vals);
+    m_irTrans->hhbcTrans().guardRefs(entryArDelta,
+                                     it->second.m_mask,
+                                     it->second.m_vals);
   }
 }
 
@@ -3032,22 +3031,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 }
 
 bool
-TranslatorX64::dontGuardAnyInputs(Op op) {
-  switch (op) {
-#define CASE(iNm) case Op ## iNm:
-#define NOOP(...)
-  INSTRS
-    PSEUDOINSTR_DISPATCH(NOOP)
-    return false;
-
-  default:
-    return true;
-  }
-#undef NOOP
-#undef CASE
-}
-
-bool
 TranslatorX64::checkTranslationLimit(SrcKey sk,
                                      const SrcRec& srcRec) const {
   if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
@@ -3101,7 +3084,7 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
        dep != dependencies.end();
        ++dep) {
     if (!pseudoMain || !dep->second->isLocal() || !dep->second->isValue()) {
-      checkType(a, dep->first, dep->second->rtt, fail);
+      m_irTrans->checkType(dep->first, dep->second->rtt);
     } else {
       TRACE(3, "Skipping tracelet guard for %s %d\n",
             dep->second->location.pretty().c_str(),
@@ -3171,8 +3154,6 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp = analyze(sk);
   Tracelet& t = *tp;
-  m_curTrace = &t;
-  Nuller<Tracelet> ctNuller(&m_curTrace);
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_srcDB.find(sk));
@@ -3235,7 +3216,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       if (!region || result == Failure) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
-        result = irTranslateTracelet(*tp);
+        result = translateTracelet(*tp);
         DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
         assert(IMPLIES(region && reqRegion, result != Success));
       }
@@ -3296,6 +3277,156 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getUsage().c_str());
   }
+}
+
+TranslatorX64::TranslateResult
+TranslatorX64::translateTracelet(Tracelet& t) {
+  FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
+  const SrcKey &sk = t.m_sk;
+  SrcRec& srcRec = *getSrcRec(sk);
+  HhbcTranslator& ht = m_irTrans->hhbcTrans();
+
+  assert(srcRec.inProgressTailJumps().size() == 0);
+  try {
+    emitResolvedDeps(t.m_resolvedDeps);
+    emitGuardChecks(a, sk, t.m_dependencies, t.m_refDeps, srcRec);
+
+    dumpTranslationInfo(t, a.frontier());
+
+    // after guards, add a counter for the translation if requested
+    if (RuntimeOption::EvalJitTransCounters) {
+      ht.emitIncTransCounter();
+    }
+
+    emitRB(a, RBTypeTraceletBody, t.m_sk);
+    Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
+
+    // Profiling on function entry.
+    if (t.m_sk.offset() == curFunc()->base()) {
+      ht.profileFunctionEntry("Normal");
+    }
+
+    /*
+     * Profiling on the shapes of tracelets that are whole functions.
+     * (These are the things we might consider trying to support
+     * inlining.)
+     */
+    [&]{
+      static const bool enabled = Stats::enabledAny() &&
+                                  getenv("HHVM_STATS_FUNCSHAPE");
+      if (!enabled) return;
+      if (t.m_sk.offset() != curFunc()->base()) return;
+      if (auto last = t.m_instrStream.last) {
+        if (last->op() != OpRetC && last->op() != OpRetV) {
+          return;
+        }
+      }
+      ht.profileSmallFunctionShape(traceletShape(t));
+    }();
+
+    // Translate each instruction in the tracelet
+    for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
+         ni = ni->next) {
+      try {
+        SKTRACE(1, ni->source, "HHIR: translateInstr\n");
+        m_irTrans->translateInstr(*ni);
+      } catch (JIT::FailedIRGen& fcg) {
+        always_assert(!ni->interp);
+        ni->interp = true;
+        return Retry;
+      }
+      assert(ni->source.offset() >= curFunc()->base());
+      // We sometimes leave the tail of a truncated tracelet in place to aid
+      // analysis, but breaksTracelet is authoritative.
+      if (ni->breaksTracelet) break;
+    }
+    traceEnd();
+
+    try {
+      traceCodeGen();
+      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
+            getCurrentTransID());
+      return Success;
+    } catch (JIT::FailedCodeGen& fcg) {
+      // Code-gen failed. Search for the bytecode instruction that caused the
+      // problem, flag it to be interpreted, and retranslate the tracelet.
+      for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
+        if (ni->source.offset() == fcg.bcOff) {
+          always_assert(!ni->interp);
+          ni->interp = true;
+          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
+                "after failing to code-gen \n\n",
+                getCurrentTransID(), ni->toString().c_str());
+          return Retry;
+        }
+      }
+      throw fcg;
+    }
+  } catch (JIT::FailedCodeGen& fcg) {
+    TRACE(1, "HHIR: FAILED to generate code for Translation %d "
+          "@ %s:%d (%s)\n", getCurrentTransID(),
+          fcg.file, fcg.line, fcg.func);
+    // HHIR:TODO Remove extra TRACE and adjust tools
+    TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
+          fcg.file, fcg.line, fcg.func);
+  } catch (JIT::FailedIRGen& x) {
+    TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
+          x.file, x.line, x.func);
+  } catch (const FailedAssertion& fa) {
+    fa.print();
+    StackTraceNoHeap::AddExtraLogging(
+      "Assertion failure",
+      folly::format("{}\n\nActive Trace:\n{}\n",
+                    fa.summary, ht.trace()->toString()).str());
+    abort();
+  } catch (const std::exception& e) {
+    FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
+    assert(0);
+  }
+  return Failure;
+}
+
+void TranslatorX64::traceCodeGen() {
+  using namespace JIT;
+
+  HhbcTranslator& ht = m_irTrans->hhbcTrans();
+  HPHP::JIT::IRTrace* trace = ht.trace();
+  auto finishPass = [&](const char* msg, int level,
+                        const RegAllocInfo* regs,
+                        const LifetimeInfo* lifetime) {
+    dumpTrace(level, trace, msg, regs, lifetime);
+    assert(checkCfg(trace, ht.irFactory()));
+  };
+
+  finishPass(" after initial translation ", kIRLevel, nullptr, nullptr);
+  optimizeTrace(trace, ht.traceBuilder());
+  finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
+
+  auto* factory = &ht.irFactory();
+  recordBCInstr(OpTraceletGuard, a, a.frontier());
+  if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
+    LifetimeInfo lifetime(factory);
+    RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
+    finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
+    assert(checkRegisters(trace, *factory, regs));
+    AsmInfo ai(factory);
+    genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs,
+                    &lifetime, &ai);
+    if (RuntimeOption::EvalJitCompareHHIR) {
+      std::ostringstream out;
+      dumpTraceImpl(trace, out, &regs, &lifetime, &ai);
+    } else {
+      dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
+                &lifetime, &ai);
+    }
+  } else {
+    RegAllocInfo regs = allocRegsForTrace(trace, factory);
+    finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
+    assert(checkRegisters(trace, *factory, regs));
+    genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs);
+  }
+
+  m_numHHIRTrans++;
 }
 
 /*

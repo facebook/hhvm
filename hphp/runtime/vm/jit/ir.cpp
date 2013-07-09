@@ -307,9 +307,7 @@ bool BCMarker::valid() const {
   return
     func != nullptr &&
     bcOff >= func->base() && bcOff < func->past() &&
-    spOff <= func->numLocals() +
-             func->numIterators() * kNumIterCells +
-             func->maxStackCells();
+    spOff <= func->numSlotsInFrame() + func->maxStackCells();
 }
 
 

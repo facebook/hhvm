@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 

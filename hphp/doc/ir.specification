@@ -376,6 +376,11 @@ OverrideLoc<T,localId> S0:FramePtr
   T doesn't have to be related to the local's current type, so this
   may be used to update tracked state after InterpOne instructions.
 
+OverrideLocVal<localId> S0:FramePtr S1:Gen
+
+  Overrides tracked information about the value of a local in frame
+  S0, updating it to be S1.
+
 SmashLocals S0:FramePtr
 
   Erases the tracked types and values of all locals in the frame

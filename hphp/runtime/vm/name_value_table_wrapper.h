@@ -83,7 +83,6 @@ public: // ArrayData implementation
 
   virtual bool exists(int64_t k) const;
   virtual bool exists(const StringData* k) const;
-  virtual bool idxExists(ssize_t idx) const;
 
   virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;

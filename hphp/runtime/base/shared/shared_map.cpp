@@ -84,11 +84,6 @@ bool SharedMap::exists(const StringData* k) const {
 
 bool SharedMap::exists(int64_t k) const {
   return getIndex(k) != -1;
-  if (isVector()) {
-    if (k < 0 || (size_t)k >= m_vec->m_size) return false;
-    return true;
-  }
-  return m_map->indexOf(k) != -1;
 }
 
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */

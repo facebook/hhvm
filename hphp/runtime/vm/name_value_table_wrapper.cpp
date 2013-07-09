@@ -67,10 +67,6 @@ bool NameValueTableWrapper::exists(const StringData* k) const {
   return m_tab->lookup(k);
 }
 
-bool NameValueTableWrapper::idxExists(ssize_t idx) const {
-  return false;
-}
-
 TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
   return m_tab->lookup(k);
 }

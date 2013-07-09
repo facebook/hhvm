@@ -48,9 +48,11 @@ template <class T>
 struct HasLockUnlock {
   enum { value = IsOneOf<T,
          std::mutex, std::recursive_mutex,
-         std::timed_mutex, std::recursive_timed_mutex,
          boost::mutex, boost::recursive_mutex, boost::shared_mutex,
+#ifndef __APPLE__ // OSX doesn't have timed mutexes
+         std::timed_mutex, std::recursive_timed_mutex,
          boost::timed_mutex, boost::recursive_timed_mutex
+#endif
          >::value };
 };
 
@@ -95,6 +97,7 @@ acquireReadWrite(T& mutex) {
   mutex.lock();
 }
 
+#ifndef __APPLE__ // OSX doesn't have timed mutexes
 /**
  * Acquires a mutex for reading and writing with timeout by calling
  * .try_lock_for(). This applies to two of the std mutex classes as
@@ -121,6 +124,7 @@ acquireReadWrite(T& mutex,
                  unsigned int milliseconds) {
   return mutex.timed_lock(boost::posix_time::milliseconds(milliseconds));
 }
+#endif // __APPLE__
 
 /**
  * Releases a mutex previously acquired for reading by calling
@@ -186,8 +190,8 @@ struct Synchronized {
    * constructor.
    */
   Synchronized() = default;
-  /**
 
+  /**
    * Copy constructor copies the data (with locking the source and
    * all) but does NOT copy the mutex. Doing so would result in
    * deadlocks.
@@ -216,7 +220,7 @@ struct Synchronized {
    * Constructor taking a datum rvalue as argument moves it. Again,
    * there is no need to lock the constructing object.
    */
-  explicit Synchronized(T && rhs) : datum_(std::move(rhs)) {}
+  explicit Synchronized(T&& rhs) : datum_(std::move(rhs)) {}
 
   /**
    * The canonical assignment operator only assigns the data, NOT the
@@ -224,7 +228,9 @@ struct Synchronized {
    * addresses.
    */
   Synchronized& operator=(const Synchronized& rhs) {
-    if (this < *rhs) {
+    if (this == &rhs) {
+      // Self-assignment, pass.
+    } else if (this < &rhs) {
       auto guard1 = operator->();
       auto guard2 = rhs.operator->();
       datum_ = rhs.datum_;
@@ -237,11 +243,40 @@ struct Synchronized {
   }
 
   /**
+   * Move assignment operator, only assigns the data, NOT the
+   * mutex. It locks the two objects in ascending order of their
+   * addresses.
+   */
+  Synchronized& operator=(Synchronized&& rhs) {
+    if (this == &rhs) {
+      // Self-assignment, pass.
+    } else if (this < &rhs) {
+      auto guard1 = operator->();
+      auto guard2 = rhs.operator->();
+      datum_ = std::move(rhs.datum_);
+    } else {
+      auto guard1 = rhs.operator->();
+      auto guard2 = operator->();
+      datum_ = std::move(rhs.datum_);
+    }
+    return *this;
+  }
+
+  /**
    * Lock object, assign datum.
    */
   Synchronized& operator=(const T& rhs) {
     auto guard = operator->();
     datum_ = rhs;
+    return *this;
+  }
+
+  /**
+   * Lock object, move-assign datum.
+   */
+  Synchronized& operator=(T&& rhs) {
+    auto guard = operator->();
+    datum_ = std::move(rhs);
     return *this;
   }
 
@@ -515,7 +550,9 @@ struct Synchronized {
     }
     auto guard1 = operator->();
     auto guard2 = rhs.operator->();
-    datum_.swap(rhs.datum_);
+
+    using std::swap;
+    swap(datum_, rhs.datum_);
   }
 
   /**
@@ -524,7 +561,9 @@ struct Synchronized {
    */
   void swap(T& rhs) {
     LockedPtr guard = operator->();
-    datum_.swap(rhs);
+
+    using std::swap;
+    swap(datum_, rhs);
   }
 
   /**

@@ -146,7 +146,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
 
 void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, Offset& faultOffset) {
   auto const func = fp->m_func;
-  auto const curOp = *reinterpret_cast<const Opcode*>(pc);
+  auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const unwindingGeneratorFrame = func->isGenerator();
   auto const unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
   auto const prevFp = fp->arGetSfp();

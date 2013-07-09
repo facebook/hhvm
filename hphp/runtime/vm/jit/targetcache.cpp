@@ -1094,7 +1094,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
   assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
-  assert(*vmpc() == OpFPushClsMethodD);
+  assert(toOp(*vmpc()) == OpFPushClsMethodD);
   Stats::inc(Stats::Instr_InterpOneFPushClsMethodD);
   Stats::inc(Stats::Instr_TC, -1);
   ec->opFPushClsMethodD();

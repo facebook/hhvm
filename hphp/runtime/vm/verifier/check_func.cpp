@@ -251,7 +251,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     m_instrs.set(offset(pc) - m_func->base());
     if (isSwitch(toOp(*pc)) ||
         instrJumpTarget((Op*)bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (*pc == OpSwitch && getImm((Op*)pc, 2).u_IVA != 0) {
+      if (toOp(*pc) == OpSwitch && getImm((Op*)pc, 2).u_IVA != 0) {
         int64_t switchBase = getImm((Op*)pc, 1).u_I64A;
         int32_t len = getImmVector((Op*)pc).size();
         if (len <= 2) {
@@ -261,7 +261,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         if (switchBase > std::numeric_limits<int64_t>::max() - len + 2) {
           error("Overflow in Switch bounds [%d:%d]\n", base, past);
         }
-      } else if (*pc == OpSSwitch) {
+      } else if (toOp(*pc) == OpSSwitch) {
         foreachSwitchString((Opcode*)pc, [&](Id& id) {
           ok &= checkString(pc, id);
         });

@@ -448,7 +448,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   const Opcode* pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
-  if (*pc != OpString) {
+  if (toOp(*pc) != OpString) {
     return false;
   }
   pc++;
@@ -458,7 +458,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   pc += sizeof(Id);
   // String <id>; Fatal;
   //              ^^^^^
-  if (*pc != OpFatal) {
+  if (toOp(*pc) != OpFatal) {
     return false;
   }
   msg = lookupLitstrId(id);
@@ -1581,7 +1581,8 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
         switch (info.m_kind) {
           case Unit::MetaInfo::Kind::DataTypeInferred:
           case Unit::MetaInfo::Kind::DataTypePredicted:
-            out << " i" << argKind << arg << ":t=" << (int)info.m_data;
+            out << " i" << argKind << arg
+                << ":t=" << tname(DataType(info.m_data));
             if (info.m_kind == Unit::MetaInfo::Kind::DataTypePredicted) {
               out << "*";
             }

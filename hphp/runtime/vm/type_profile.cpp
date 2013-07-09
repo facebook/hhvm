@@ -295,7 +295,8 @@ PredVal predictType(TypeProfileKey key) {
 }
 
 bool isProfileOpcode(const PC& pc) {
-  return *pc == OpRetC || *pc == OpCGetM;
+  auto const op = toOp(*pc);
+  return op == OpRetC || op == OpCGetM;
 }
 
 }

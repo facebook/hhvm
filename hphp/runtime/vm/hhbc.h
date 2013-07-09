@@ -604,11 +604,6 @@ inline Op toOp(Opcode o) {
   return op;
 }
 
-inline bool operator==(Op a, Opcode b) { return a == toOp(b); }
-inline bool operator==(Opcode a, Op b) { return b == a; }
-inline bool operator!=(Op a, Opcode b) { return !(a == b); }
-inline bool operator!=(Opcode a, Op b) { return b != a; }
-
 const MInstrInfo& getMInstrInfo(Op op);
 
 enum AstubsOp {
@@ -808,7 +803,14 @@ inline bool isFPush(Op opcode) {
 }
 
 inline bool isFCallStar(Op opcode) {
-  return opcode == OpFCall || opcode == OpFCallArray;
+  switch (opcode) {
+    case OpFCall:
+    case OpFCallArray:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isFPassStar(Op opcode) {
@@ -841,7 +843,7 @@ inline bool isSwitch(Opcode op) {
 template<typename L>
 void foreachSwitchTarget(Op* op, L func) {
   assert(isSwitch(*op));
-  bool isStr = readData<Opcode>(op) == OpSSwitch;
+  bool isStr = readData<Op>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);
   for (int i = 0; i < size; ++i) {
     if (isStr) readData<Id>(op);
@@ -851,7 +853,7 @@ void foreachSwitchTarget(Op* op, L func) {
 
 template<typename L>
 void foreachSwitchString(Opcode* op, L func) {
-  assert(*op == OpSSwitch);
+  assert(toOp(*op) == OpSSwitch);
   readData<Opcode>(op);
   int32_t size = readData<int32_t>(op) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {

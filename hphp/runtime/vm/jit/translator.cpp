@@ -2446,7 +2446,7 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
     SrcKey src = sk;
     const Unit* unit = ni->m_unit;
     src.advance(unit);
-    Opcode next = *unit->at(src.offset());
+    Op next = toOp(*unit->at(src.offset()));
     if (next == OpInstanceOfD || next == OpIsNullC) {
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
@@ -3326,13 +3326,14 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         assert(fpi);
         Offset fpushOff = fpi->m_fpushOff;
         PC fpushPc = curUnit()->at(fpushOff);
-        if (*fpushPc == OpFPushFunc) {
+        auto const op = toOp(*fpushPc);
+        if (op == OpFPushFunc) {
           doVarEnvTaint = true;
-        } else if (*fpushPc == OpFPushFuncD) {
+        } else if (op == OpFPushFuncD) {
           StringData *funcName =
             curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 1).u_SA);
           doVarEnvTaint = checkTaintFuncs(funcName);
-        } else if (*fpushPc == OpFPushFuncU) {
+        } else if (op == OpFPushFuncU) {
           StringData *fallbackName =
             curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 2).u_SA);
           doVarEnvTaint = checkTaintFuncs(fallbackName);
@@ -3413,7 +3414,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // If we've gotten this far, it mostly boils down to control-flow
     // instructions. However, we'll trace through a few unconditional jmps.
     if (ni->op() == OpJmp &&
-        ni->imm[0].u_IA > 0 &&
+        ni->imm[0].u_BA > 0 &&
         tas.m_numJmps < MaxJmpsTracedThrough) {
       // Continue tracing through jumps. To prevent pathologies, only trace
       // through a finite number of forward jumps.
@@ -3709,7 +3710,7 @@ bool Translator::instrMustInterp(const NormalizedInstruction& inst) {
 
   switch (inst.op()) {
     // Generate a case for each instruction we support at least partially.
-# define CASE(name) case Op##name:
+# define CASE(name) case Op::name:
   INSTRS
 # undef CASE
 # define NOTHING(...) // PSEUDOINSTR_DISPATCH has the cases in it

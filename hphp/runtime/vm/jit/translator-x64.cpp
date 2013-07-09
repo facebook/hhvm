@@ -1782,7 +1782,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    */
   assert(func->numIterators() == 0 && func->isBuiltin());
   assert(func->numLocals() == func->numParams());
-  assert(*func->getEntry() == OpNativeImpl);
+  assert(toOp(*func->getEntry()) == OpNativeImpl);
   assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no

@@ -2053,7 +2053,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.
       auto const opAtPrevPc =
-        *reinterpret_cast<const Opcode*>(prevUnit->at(prevPc));
+        toOp(*reinterpret_cast<const Opcode*>(prevUnit->at(prevPc)));
       Offset pcAdjust = 0;
       if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
         pcAdjust = 1;
@@ -7055,7 +7055,7 @@ void VMExecutionContext::op##name() {                                         \
   condStackTraceSep("op"#name" ");                                            \
   COND_STACKTRACE("op"#name" pre:  ");                                        \
   PC pc = m_pc;                                                               \
-  assert(*pc == Op##name);                                                    \
+  assert(toOp(*pc) == Op##name);                                              \
   ONTRACE(1,                                                                  \
           int offset = m_fp->m_func->unit()->offsetOf(pc);                    \
           Trace::trace("op"#name" offset: %d\n", offset));                    \

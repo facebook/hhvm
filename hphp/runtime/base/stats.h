@@ -217,8 +217,10 @@ inline void inc(StatCounter stat, int n = 1) {
   }
 }
 
+static_assert(static_cast<uint64_t>(OpLowInvalid) == 0,
+              "stats.h assumes OpLowInvalid == 0");
+
 inline StatCounter opcodeToStatCounter(Op opc) {
-  assert(static_cast<uint64_t>(OpLowInvalid) == 0);
   return StatCounter(Instr_InterpBBLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
 }
@@ -228,19 +230,16 @@ inline void incOp(Op opc) {
 }
 
 inline StatCounter opcodeToTranslStatCounter(Op opc) {
-  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
 }
 
 inline StatCounter opcodeToIRPreStatCounter(Op opc) {
-  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPreLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
 }
 
 inline StatCounter opcodeToIRPostStatCounter(Op opc) {
-  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPostLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
 }

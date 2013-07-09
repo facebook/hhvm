@@ -356,4 +356,16 @@ class SplObjectStorage
     current($this->storage)['inf'] = $data;;
   }
 
+
+  /**
+   * ( excerpt from http://php.net/manual/en/splobjectstorage.getinfo.php )
+   *
+   * Returns the data associated with the current iterator entry.
+   *
+   * @return     mixed   Returns the data, or info, associated with the
+   *                     object pointed by the current iterator position.
+   */
+  public function getInfo() {
+    return current($this->storage)['inf'];
+  }
 }

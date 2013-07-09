@@ -1414,7 +1414,7 @@ bool HphpArray::advanceFullPos(FullPos& fp) {
 
 //=============================================================================
 
-ALWAYS_INLINE HphpArray* HphpArray::clone(AllocationMode am) const {
+inline ALWAYS_INLINE HphpArray* HphpArray::clone(AllocationMode am) const {
   const auto p = am == AllocationMode::smart
     ? HphpArray::AllocatorType::getNoCheck()->alloc(sizeof(HphpArray))
     : operator new(sizeof(HphpArray));

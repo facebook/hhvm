@@ -891,7 +891,6 @@ std::vector<uint32_t> read_itervec(AsmState& as) {
   as.in.expect('<');
 
   std::string word;
-  char *end;
 
   for (;;) {
     as.in.expectWs('(');

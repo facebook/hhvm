@@ -11,6 +11,16 @@
  *   r9  / x5:  uint8_t* targetCacheBase
  */
 
+#ifndef __APPLE__
+#define CFI(x)         .cfi_##x
+#define CFI2(x, y)     .cfi_##x y
+#define CFI3C(x, y, z) .cfi_##x y##, z
+#else
+#define CFI(x)         /* not used on OSX */
+#define CFI2(x, y)     /* not used on OSX */
+#define CFI3C(x, y, z) /* not used on OSX */
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(__x86_64__)
   .byte 0
@@ -19,17 +29,17 @@
   .globl enterTCHelper
 enterTCHelper:
   // Prologue
-  .cfi_startproc            // amongst other things, cfa reg is now rsp, and offset is 8
+  CFI(startproc)             // amongst other things, cfa reg is now rsp, and offset is 8
   push %rbp
-  .cfi_adjust_cfa_offset 8  // cfa is now 8 bytes further from rsp than it was before
-  .cfi_offset rbp, -16      // Where to find previous value of rbp, relative to cfa
+  CFI2(adjust_cfa_offset, 8) // cfa is now 8 bytes further from rsp than it was before
+  CFI3C(offset, rbp, -16)    // Where to find previous value of rbp, relative to cfa
 
   // Set firstAR->m_savedRbp to point to this frame.
   mov %rsp, (%r8)
 
   // Save infoPtr
   push %rcx
-  .cfi_adjust_cfa_offset 8
+  CFI2(adjust_cfa_offset, 8)
 
   // Set up special registers used for translated code.
   mov %rdi, %rbx          // rVmSp
@@ -46,7 +56,7 @@ enterTCHelper:
    */
 
   sub $0x280, %rsp // kReservedRSPScratchSpace
-  .cfi_adjust_cfa_offset 0x280
+  CFI2(adjust_cfa_offset, 0x280)
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -64,23 +74,23 @@ enterTCHelper:
 .LenterTCHelper$serviceReqLabel:
 
   add $0x280, %rsp // kReservedRSPScratchSpace
-  .cfi_adjust_cfa_offset -0x280
+  CFI2(adjust_cfa_offset, -0x280)
   // Restore infoPtr into %rbx
   pop %rbx
-  .cfi_adjust_cfa_offset -8
+  CFI2(adjust_cfa_offset, -8)
 
   // Copy the values passed from jitted code into *infoPtr
   mov %rdi, 0x0(%rbx)
   test %rdi,%rdi
   jnz .LenterTCHelper$copyReqArgs
-  .cfi_remember_state
+  CFI(remember_state)
   pop %rbp
-  .cfi_restore rbp
-  .cfi_adjust_cfa_offset -8
+  CFI2(restore, rbp)
+  CFI2(adjust_cfa_offset, -8)
   ret
 
 .LenterTCHelper$copyReqArgs:
-  .cfi_restore_state
+  CFI(restore_state)
   mov %rsi, 0x8(%rbx)
   mov %rdx, 0x10(%rbx)
   mov %rcx, 0x18(%rbx)
@@ -95,10 +105,10 @@ enterTCHelper:
 
   // Epilogue
   pop %rbp
-  .cfi_restore rbp
-  .cfi_adjust_cfa_offset -8
+  CFI2(restore, rbp)
+  CFI2(adjust_cfa_offset, -8)
   ret
-  .cfi_endproc
+  CFI(endproc)
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

@@ -13,26 +13,46 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef PTHREAD_SPIN_LOCK_SHIM
+#define PTHREAD_SPIN_LOCK_SHIM
 
-#ifndef incl_HPHP_DB_MYSQL_H_
-#define incl_HPHP_DB_MYSQL_H_
+#include <errno.h>
 
-#include "hphp/util/base.h"
-#include "mysql.h"
+typedef int pthread_spinlock_t;
 
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-class MySQLUtil {
-public:
-  enum TimeoutType {
-    ConnectTimeout,
-    ReadTimeout,
-    WriteTimeout
-  };
-
-  static int set_mysql_timeout(MYSQL *mysql, MySQLUtil::TimeoutType type, int ms);
-};
-///////////////////////////////////////////////////////////////////////////////
+inline int pthread_spin_init(pthread_spinlock_t *lock, int pshared) {
+  __asm__ __volatile__ ("" ::: "memory");
+  *lock = 0;
+  return 0;
 }
 
-#endif // incl_HPHP_DB_MYSQL_H_
+inline int pthread_spin_destroy(pthread_spinlock_t *lock) {
+  return 0;
+}
+
+inline int pthread_spin_lock(pthread_spinlock_t *lock) {
+  while (1) {
+    int i;
+    for (i=0; i < 10000; i++) {
+      if (__sync_bool_compare_and_swap(lock, 0, 1)) {
+        return 0;
+      }
+    }
+    sched_yield();
+  }
+}
+
+inline int pthread_spin_trylock(pthread_spinlock_t *lock) {
+  if (__sync_bool_compare_and_swap(lock, 0, 1)) {
+    return 0;
+  }
+  return EBUSY;
+}
+
+inline int pthread_spin_unlock(pthread_spinlock_t *lock) {
+  __asm__ __volatile__ ("" ::: "memory");
+  *lock = 0;
+  return 0;
+}
+
+#endif

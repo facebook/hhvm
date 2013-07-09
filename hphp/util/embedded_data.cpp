@@ -27,9 +27,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __APPLE__
+#include <mach-o/getsect.h>
+#endif
+
 namespace HPHP { namespace Util {
 
 bool get_embedded_data(const char *section, embedded_data* desc) {
+#ifndef __APPLE__
   GElf_Shdr shdr;
   size_t shstrndx;
   char *name;
@@ -68,6 +73,15 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
       return true;
     }
   }
+#else // __APPLE__
+  const struct section_64 *sect = getsectbyname("__text", section);
+  if (sect) {
+    desc->m_filename = "hhvm";
+    desc->m_start = sect->offset;
+    desc->m_len = sect->size;
+    return true;
+  }
+#endif // __APPLE__
   return false;
 }
 

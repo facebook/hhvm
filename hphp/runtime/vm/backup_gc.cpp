@@ -503,7 +503,7 @@ std::string gc_collect_cycles() {
 
   const uint64_t live = state.m_totalCount - state.m_collectedCount;
   const float survivalRate = 100 * float(live) /
-                             std::max(state.m_totalCount, 1ul);
+                             std::max(state.m_totalCount, (uint64_t)1);
   std::string ret = str(
     boost::format("released %d/%d objects; survival%% = %02.2f; "
                   "cpu time = %5lld; wall time = %5lld\n")

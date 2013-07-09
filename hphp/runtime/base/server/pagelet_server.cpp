@@ -26,6 +26,7 @@
 #include "hphp/util/job_queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 
 using std::set;
 using std::deque;
@@ -40,7 +41,7 @@ public:
                    CArrRef files)
     : m_refCount(0), m_done(false), m_code(0) {
 
-    gettime(CLOCK_MONOTONIC, &m_queueTime);
+    Timer::GetMonotonicTime(m_queueTime);
     m_threadType = ThreadType::PageletThread;
 
     m_url.append(url.data(), url.size());

@@ -141,7 +141,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                                RuntimeOption::RequestTimeoutSeconds);
   if (requestTimeoutSeconds > 0) {
     timespec now;
-    gettime(CLOCK_MONOTONIC, &now);
+    Timer::GetMonotonicTime(now);
     const timespec& queueTime = transport->getQueueTime();
 
     if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000) {

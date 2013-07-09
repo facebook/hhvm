@@ -35,9 +35,9 @@ foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	list(APPEND ASM_SOURCES ${files})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
-# Disable hardware counters off of Linux
 if(NOT LINUX)
 	add_definitions(-DNO_HARDWARE_COUNTERS)
+	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/vm/debug/elfwriter.cpp)
 endif()
 
 # remove ext_hhvm, and anything in a test folder

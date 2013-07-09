@@ -23,6 +23,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler
@@ -50,13 +51,13 @@ namespace HPHP {
 // LibEventJob
 
 LibEventJob::LibEventJob(evhttp_request *req) : request(req) {
-  gettime(CLOCK_MONOTONIC, &start);
+  Timer::GetMonotonicTime(start);
 }
 
 void LibEventJob::stopTimer() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     timespec end;
-    gettime(CLOCK_MONOTONIC, &end);
+    Timer::GetMonotonicTime(end);
     time_t dsec = end.tv_sec - start.tv_sec;
     long dnsec = end.tv_nsec - start.tv_nsec;
     int64_t dusec = dsec * 1000000 + dnsec / 1000;
@@ -413,13 +414,13 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
   if (RuntimeOption::LibEventSyncSend && !skip_sync) {
     const char *reason = HttpProtocol::GetReasonString(code);
     timespec begin, end;
-    gettime(CLOCK_MONOTONIC, &begin);
+    Timer::GetMonotonicTime(begin);
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN
     nwritten = evhttp_send_reply_sync(request, code, reason, nullptr, &totalSize);
 #else
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, nullptr);
 #endif
-    gettime(CLOCK_MONOTONIC, &end);
+    Timer::GetMonotonicTime(end);
     int64_t delay = gettime_diff_us(begin, end);
     transport->onFlushBegin(totalSize);
     transport->onFlushProgress(nwritten, delay);

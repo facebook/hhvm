@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/memory/memory_manager.h"
+
 // Get SIZE_MAX definition.  Do this before including any other files, to make
 // sure that this is the first place that stdint.h is included.
 #ifndef __STDC_LIMIT_MACROS
@@ -21,7 +23,6 @@
 #endif
 #define __STDC_LIMIT_MACROS
 
-#include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/base/memory/smart_allocator.h"
 #include "hphp/runtime/base/memory/leak_detectable.h"
 #include "hphp/runtime/base/memory/sweepable.h"
@@ -77,8 +78,16 @@ static void threadStatsInit() {
   // where
   //   s_cactiveLimitCeiling == MemTotal - footprint
   size_t footprint = Process::GetCodeFootprint(Process::GetProcessId());
+  size_t MemTotal  = 0;
+#ifndef __APPLE__
   size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
-  size_t MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
+  MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
+#else
+  int mib[2] = { CTL_HW, HW_MEMSIZE };
+  u_int namelen = sizeof(mib) / sizeof(mib[0]);
+  size_t len = sizeof(MemTotal);
+  sysctl(mib, namelen, &MemTotal, &len, nullptr, 0);
+#endif
   if (MemTotal > footprint) {
     MemoryManager::s_cactiveLimitCeiling = MemTotal - footprint;
   }

@@ -26,6 +26,7 @@
 #include "hphp/util/json.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware_counter.h"
 
 using std::list;
@@ -923,7 +924,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     // we output the iostatus, and ioInProcessDuationMicros
     if (ts.m_ioInProcess) {
       timespec now;
-      gettime(CLOCK_MONOTONIC, &now);
+      Timer::GetMonotonicTime(now);
       w->writeEntry("iostatus", string(ts.m_ioName) + " " + ts.m_ioAddr);
       w->writeEntry("ioduration", gettime_diff_us(ts.m_ioStart, now));
     }
@@ -1163,7 +1164,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
     // an io, and record the time that the io started.
     m_threadStatus.m_ioInProcess = true;
     if (usWallTime < 0) {
-      gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
+      Timer::GetMonotonicTime(m_threadStatus.m_ioStart);
     }
   }
 
@@ -1174,7 +1175,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
       int64_t wt = usWallTime;
       if (wt < 0) {
         timespec now;
-        gettime(CLOCK_MONOTONIC, &now);
+        Timer::GetMonotonicTime(now);
         wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
       }
 
@@ -1236,7 +1237,7 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
                                      uint32_t track /* = false */)
   : m_section(section), m_instStart(0), m_track(track) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-    gettime(CLOCK_MONOTONIC, &m_wallStart);
+    Timer::GetMonotonicTime(m_wallStart);
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
     if (m_track & TRACK_HWINST) {
       m_instStart = HardwareCounter::GetInstructionCount();
@@ -1247,7 +1248,7 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
 ServerStatsHelper::~ServerStatsHelper() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     timespec wallEnd, cpuEnd;
-    gettime(CLOCK_MONOTONIC, &wallEnd);
+    Timer::GetMonotonicTime(wallEnd);
     gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEnd);
 
     logTime("page.wall.", m_wallStart, wallEnd);

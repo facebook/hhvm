@@ -18,6 +18,11 @@
 #define incl_HPHP_TIMER_H_
 
 #include "hphp/util/base.h"
+#include "hphp/util/compatibility.h"
+
+#ifdef __APPLE__
+typedef int clockid_t;
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,9 +45,11 @@ public:
   };
 
 public:
-  Timer(Type type, const char *name = nullptr, ReportType r = Log);
+  explicit Timer(Type type, const char *name = nullptr, ReportType r = Log);
   ~Timer();
 
+  static void GetRealtimeTime(timespec &sp);
+  static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
   const char *getName() const;
   int64_t getMicroSeconds() const;

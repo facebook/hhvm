@@ -18,6 +18,11 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
+#ifdef __APPLE__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +64,30 @@ void Timer::report() const {
   int seconds = ms / 1000000;
   PRINT_MSG("%s took %d'%02d\" (%" PRId64 " us) %s", m_name.c_str(),
             seconds / 60, seconds % 60, ms, getName());
+}
+
+void Timer::GetMonotonicTime(timespec &ts) {
+#ifndef __APPLE__
+  gettime(CLOCK_MONOTONIC, &ts);
+#else
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  TIMEVAL_TO_TIMESPEC(&tv, &ts);
+#endif
+}
+
+void Timer::GetRealtimeTime(timespec &ts) {
+#ifndef __APPLE__
+  clock_gettime(CLOCK_REALTIME, &ts);
+#else
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  ts.tv_sec = mts.tv_sec;
+  ts.tv_nsec = mts.tv_nsec;
+#endif
 }
 
 static int64_t to_usec(const timeval& tv) {

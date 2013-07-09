@@ -177,8 +177,7 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
 	endif()
 endif()
 
-if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
 	if (JEMALLOC_LIB)
 		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
@@ -186,8 +185,7 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
 	endif()
 endif()
 
-if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_MIN_LIB tcmalloc_minimal)
 	if (GOOGLE_TCMALLOC_MIN_LIB)
 		message(STATUS "Found minimal tcmalloc: ${GOOGLE_TCMALLOC_MIN_LIB}")
@@ -199,6 +197,9 @@ endif()
 
 if (JEMALLOC_ENABLED)
 	add_definitions(-DUSE_JEMALLOC=1)
+	if (APPLE)
+		add_definitions(-DJEMALLOC_MANGLE=1 -DJEMALLOC_EXPERIMENTAL=1)
+	endif()
 else()
 	add_definitions(-DNO_JEMALLOC=1)
 endif()
@@ -332,6 +333,11 @@ if (FREEBSD)
 	endif()
 endif()
 
+if (APPLE)
+	find_library(LIBINTL_LIBRARIES NAMES intl libintl)
+	find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
+
 #find_package(BISON REQUIRED)
 #find_package(FLEX REQUIRED)
 
@@ -361,7 +367,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBUNWIND_LIBRARY})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
-	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
+	target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
@@ -390,6 +396,11 @@ endif()
 
 if (FREEBSD)
 	target_link_libraries(${target} ${EXECINFO_LIB})
+endif()
+
+if (APPLE)
+	target_link_libraries(${target} ${LIBINTL_LIBRARIES})
+	target_link_libraries(${target} ${KERBEROS_LIB})
 endif()
 
 	target_link_libraries(${target} ${BFD_LIB})

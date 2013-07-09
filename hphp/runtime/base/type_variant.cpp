@@ -236,7 +236,7 @@ inline ALWAYS_INLINE void Variant::destructImpl() {
 }
 
 HOT_FUNC_VM
-void tvDecRefHelper(DataType type, uintptr_t datum) {
+void tvDecRefHelper(DataType type, uint64_t datum) {
   assert(type >= KindOfString && type <= KindOfRef);
   if (((RefData*)datum)->decRefCount() == 0) {
     g_destructors[typeToDestrIndex(type)]((void*)datum);

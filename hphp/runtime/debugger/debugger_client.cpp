@@ -1378,7 +1378,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   return tolower(getchar());
 }
 
-#define FWRITE(ptr, size, nmemb, stream)                                \
+#define DWRITE(ptr, size, nmemb, stream)                                \
 do {                                                                    \
   if (isApiMode()) {                                                    \
     m_outputBuf.append(ptr, size * nmemb);                              \
@@ -1405,28 +1405,28 @@ void DebuggerClient::print(const char *fmt, ...) {
 
 void DebuggerClient::print(const std::string &s) {
   TRACE(2, "DebuggerClient::print(const std::string &s)\n");
-  FWRITE(s.data(), 1, s.length(), stdout);
-  FWRITE("\n", 1, 1, stdout);
+  DWRITE(s.data(), 1, s.length(), stdout);
+  DWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 void DebuggerClient::print(CStrRef msg) {
   TRACE(2, "DebuggerClient::print(CStrRef msg)\n");
-  FWRITE(msg.data(), 1, msg.length(), stdout);
-  FWRITE("\n", 1, 1, stdout);
+  DWRITE(msg.data(), 1, msg.length(), stdout);
+  DWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
   void DebuggerClient::name(CStrRef msg) {                              \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
-      FWRITE(color, 1, strlen(color), where);                           \
+      DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
-    FWRITE(msg.data(), 1, msg.length(), where);                         \
+    DWRITE(msg.data(), 1, msg.length(), where);                         \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
-      FWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
+      DWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
-    FWRITE("\n", 1, 1, where);                                          \
+    DWRITE("\n", 1, 1, where);                                          \
     fflush(where);                                                      \
   }                                                                     \
   void DebuggerClient::name(const char *fmt, ...) {                     \
@@ -1445,7 +1445,7 @@ IMPLEMENT_COLOR_OUTPUT(info,     stdout,  InfoColor);
 IMPLEMENT_COLOR_OUTPUT(output,   stdout,  OutputColor);
 IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
-#undef FWRITE
+#undef DWRITE
 #undef IMPLEMENT_COLOR_OUTPUT
 
 string DebuggerClient::wrap(const std::string &s) {

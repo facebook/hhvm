@@ -143,7 +143,11 @@ Variant f_posix_getgroups() {
 }
 
 Variant f_posix_getlogin() {
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
   char buf[L_cuserid];
+#else
+  char buf[MAXLOGNAME];
+#endif
   if (!getlogin_r(buf, sizeof(buf) - 1)) {
     return String(buf, CopyString);
   }

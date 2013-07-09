@@ -23,6 +23,12 @@
 #include "folly/Format.h"
 #include "folly/json.h"
 
+#ifdef __APPLE__
+#define INT64_TYPE "long long"
+#else
+#define INT64_TYPE "long"
+#endif
+
 namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +60,7 @@ static const std::unordered_map<int, fbstring> g_typeMap =
   {(int)KindOfInvalid,     "void"},
   {(int)KindOfNull,        "HPHP::Variant"},
   {(int)KindOfBoolean,     "bool"},
-  {(int)KindOfInt64,       "long"},
+  {(int)KindOfInt64,       INT64_TYPE},
   {(int)KindOfDouble,      "double"},
   {(int)KindOfString,      "HPHP::String"},
   {(int)KindOfArray,       "HPHP::Array"},
@@ -67,7 +73,7 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
   {(int)KindOfInvalid,     "void"},
   {(int)KindOfNull,        "void"},
   {(int)KindOfBoolean,     "bool"},
-  {(int)KindOfInt64,       "long"},
+  {(int)KindOfInt64,       INT64_TYPE},
   {(int)KindOfDouble,      "double"},
   {(int)KindOfString,      "String"},
   {(int)KindOfArray,       "Array"},

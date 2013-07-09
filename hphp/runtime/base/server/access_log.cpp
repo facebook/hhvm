@@ -24,6 +24,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/hardware_counter.h"
 
@@ -284,7 +285,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
   case 'D':
     {
       struct timespec now;
-      gettime(CLOCK_MONOTONIC, &now);
+      Timer::GetMonotonicTime(now);
       out << gettime_diff_us(transport->getWallTime(), now);
     }
     break;

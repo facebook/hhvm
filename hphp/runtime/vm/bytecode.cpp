@@ -6528,7 +6528,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVerifyParamType(PC& pc) {
   assert(param < func->numParams());
   assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param].typeConstraint();
-  assert(tc.hasConstraint() || !RuntimeOption::EvalCheckExtendedTypeHints);
+  assert(tc.hasConstraint());
+  if (UNLIKELY(!RuntimeOption::EvalCheckExtendedTypeHints &&
+               tc.isExtended())) {
+    return;
+  }
   const TypedValue *tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }

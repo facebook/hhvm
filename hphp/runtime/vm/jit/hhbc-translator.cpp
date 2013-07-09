@@ -2823,6 +2823,10 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   Type locType = locVal->type().unbox();
   assert(locType.isKnownDataType());
 
+  if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
+    return;
+  }
+
   if (tc.nullable() && locType.isNull()) {
     return;
   }

@@ -145,6 +145,8 @@ public:
     return m_type.m_dt == KindOfObject;
   }
 
+  bool isExtended() const { return m_flags & ExtendedHint; }
+
   bool compat(const TypeConstraint& other) const {
     if (other.isExtended() || isExtended()) {
       /*
@@ -188,9 +190,8 @@ public:
   // Can not be private as it needs to be used by the translator
   void selfToClass(const Func* func, const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
-private:
-  bool isExtended() const { return m_flags & ExtendedHint; }
 
+private:
   void selfToTypeName(const Func* func, const StringData **typeName) const;
   void parentToTypeName(const Func* func, const StringData **typeName) const;
 };

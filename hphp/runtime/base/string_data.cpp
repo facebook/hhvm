@@ -308,9 +308,10 @@ HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0) {
   assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
-  m_hash = shared->stringHash();
+  m_hash = 0;
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
+  m_big.shared = shared;
   m_big.cap = m_len | IsShared;
 }
 
@@ -923,8 +924,8 @@ int StringData::compare(const StringData *v2) const {
 
 HOT_FUNC
 strhash_t StringData::hashHelper() const {
-  assert(!isShared());
-  strhash_t h = hash_string_inline(m_data, m_len);
+  strhash_t h = isShared() ? m_big.shared->stringHash() :
+                             hash_string_inline(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;

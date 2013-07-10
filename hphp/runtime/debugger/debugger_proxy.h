@@ -100,7 +100,7 @@ public:
   void checkStop();
   void forceQuit();
 
-  SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
+  bool getClientConnectionInfo(VRefParam address, VRefParam port);
 
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
@@ -113,6 +113,8 @@ private:
   void changeBreakPointDepth(CmdInterrupt& cmd);
 
   void stop();
+
+  SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
 
   bool m_stopped;
 

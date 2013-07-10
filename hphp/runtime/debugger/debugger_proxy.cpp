@@ -20,6 +20,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
@@ -37,8 +38,21 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
-  Debugger::UsageLog("server", m_dummyInfo.id(),
-                     "connnect", socket->getAddress());
+  Variant address;
+  Variant port;
+  std::string clientDetails;
+  if (!local) {
+    if (getClientConnectionInfo(ref(address), ref(port))) {
+      clientDetails = folly::stringPrintf("From %s:%d",
+                                          address.toString().data(),
+                                          port.toInt32());
+    } else {
+      clientDetails = "Failed to get client connection details";
+    }
+  } else {
+    clientDetails = "Local script connection";
+  }
+  Debugger::UsageLog("server", m_dummyInfo.id(), "connect", clientDetails);
 }
 
 DebuggerProxy::~DebuggerProxy() {
@@ -371,6 +385,13 @@ void DebuggerProxy::forceQuit() {
   Debugger::RemoveProxy(shared_from_this());
   stop();
   throw DebuggerClientExitException();
+}
+
+// Grab the ip address and port of the client that is connected to this proxy.
+bool DebuggerProxy::getClientConnectionInfo(VRefParam address,
+                                            VRefParam port) {
+  Object s(getSocket().get());
+  return f_socket_getpeername(s, address, port);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

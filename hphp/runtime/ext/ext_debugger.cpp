@@ -103,10 +103,9 @@ Variant f_hphp_get_debugger_info() {
   if (!RuntimeOption::EnableDebugger) return ret;
   DebuggerProxyPtr proxy = Debugger::GetProxy();
   if (!proxy) return ret;
-  Object s(proxy->getSocket().get());
   Variant address;
   Variant port;
-  if (f_socket_getpeername(s, ref(address), ref(port))) {
+  if (proxy->getClientConnectionInfo(ref(address), ref(port))) {
     ret.set(s_clientIP, address);
     ret.set(s_clientPort, port);
   }

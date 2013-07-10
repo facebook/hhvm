@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/server/replay_transport.h"
 #include "hphp/runtime/base/server/virtual_host.h"
 #include "hphp/runtime/base/util/http_client.h"
-#include "folly/String.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -282,10 +281,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       }
     }
 
-    {
+    for (unsigned int i = 0; i < values.size(); i++) {
       String key = "HTTP_";
       key += StringUtil::ToUpper(iter->first).replace("-", "_");
-      server.set(key, String(folly::join(", ", values)));
+      server.set(key, String(values[i]));
     }
   }
 

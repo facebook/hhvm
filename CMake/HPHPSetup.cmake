@@ -45,8 +45,12 @@ endif()
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
+add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
 add_definitions(-DHHVM_LIB_PATH_DEFAULT="${HPHP_HOME}/bin")
+
+if (LINUX)
+	add_definitions(-D_GNU_SOURCE)
+endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)
@@ -104,9 +108,6 @@ endif()
 if(APPLE OR FREEBSD)
 	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
-
-# Build folly without config.h
-add_definitions(-DFOLLY_NO_CONFIG=1)
 
 if(APPLE)
 	# We have to be a little more permissive in some cases.

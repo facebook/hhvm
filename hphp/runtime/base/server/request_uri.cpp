@@ -234,10 +234,14 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
                AttachString);
   if (!vhost->getDocumentRoot().empty()) {
     string fullname = canon.data();
-    while (fullname[0] == '/') {
-      fullname = fullname.substr(1);
+    int i = 0;
+    while (i < fullname.size() && fullname[i] == '/') ++i;
+    if (i) {
+      fullname = fullname.substr(i);
     }
-    fullname = pathTranslation + fullname;
+    if (!i || !m_rewritten) {
+      fullname = pathTranslation + fullname;
+    }
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();

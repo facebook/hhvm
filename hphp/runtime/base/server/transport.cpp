@@ -67,7 +67,9 @@ Transport::~Transport() {
 void Transport::onRequestStart(const timespec &queueTime) {
   m_queueTime = queueTime;
   Timer::GetMonotonicTime(m_wallTime);
+#ifdef CLOCK_THREAD_CPUTIME_ID
   gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuTime);
+#endif
   /*
    * The hardware counter is only 48 bits, so reset this at the beginning
    * of every request to make sure we don't overflow.

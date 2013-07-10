@@ -18,7 +18,7 @@
 #define incl_HPHP_STAT_CACHE_H_
 
 #ifdef __linux__
- #include <sys/inotify.h>
+#include <sys/inotify.h>
 #endif
 
 #include "tbb/concurrent_hash_map.h"

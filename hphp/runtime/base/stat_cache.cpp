@@ -498,7 +498,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
   node->setPath(path);
   return node;
 #else
-  return nullptr;
+  return NodePtr(nullptr);
 #endif
 }
 

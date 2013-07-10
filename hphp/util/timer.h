@@ -20,10 +20,6 @@
 #include "hphp/util/base.h"
 #include "hphp/util/compatibility.h"
 
-#ifdef __APPLE__
-typedef int clockid_t;
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

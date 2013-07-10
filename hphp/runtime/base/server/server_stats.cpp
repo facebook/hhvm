@@ -1238,7 +1238,9 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
   : m_section(section), m_instStart(0), m_track(track) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     Timer::GetMonotonicTime(m_wallStart);
+#ifdef CLOCK_THREAD_CPUTIME_ID
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
+#endif
     if (m_track & TRACK_HWINST) {
       m_instStart = HardwareCounter::GetInstructionCount();
     }
@@ -1247,12 +1249,17 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
 
 ServerStatsHelper::~ServerStatsHelper() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-    timespec wallEnd, cpuEnd;
+    timespec wallEnd;
     Timer::GetMonotonicTime(wallEnd);
+#ifdef CLOCK_THREAD_CPUTIME_ID
+    timespec cpuEnd;
     gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEnd);
+#endif
 
     logTime("page.wall.", m_wallStart, wallEnd);
+#ifdef CLOCK_THREAD_CPUTIME_ID
     logTime("page.cpu.", m_cpuStart, cpuEnd);
+#endif
 
     if (m_track & TRACK_MEMORY) {
       MemoryManager *mm = MemoryManager::TheMemoryManager();

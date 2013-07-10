@@ -32,7 +32,9 @@
 #include "hphp/runtime/base/time/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
+#ifndef __APPLE__
 #include "hphp/util/service_data.h"
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,10 +46,13 @@ AccessLog HttpRequestHandler::s_accessLog(
   &(HttpRequestHandler::getAccessLogThreadData));
 
 HttpRequestHandler::HttpRequestHandler()
-    : m_pathTranslation(true),
-      m_requestTimedOutOnQueue(ServiceData::createTimeseries(
+    : m_pathTranslation(true)
+#ifndef __APPLE__
+     ,m_requestTimedOutOnQueue(ServiceData::createTimeseries(
                                  "requests_timed_out_on_queue",
-                                 {ServiceData::StatsType::COUNT})) {
+                                 {ServiceData::StatsType::COUNT}))
+#endif
+{
 }
 
 void HttpRequestHandler::sendStaticContent(Transport *transport,
@@ -146,7 +151,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
     if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000) {
       transport->sendString("Service Unavailable", 503);
+#ifndef __APPLE__
       m_requestTimedOutOnQueue->addValue(1);
+#endif
       return;
     }
   }

@@ -21,6 +21,14 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/stats.h"
 
+#ifndef __APPLE__
+#define ASM_HELPER_ALIGNMENT ".align 16\n"
+#define ASM_HELPER_FUNC_NAME(name) #name
+#else
+#define ASM_HELPER_ALIGNMENT ".align 4\n" // on OSX this is 2^value
+#define ASM_HELPER_FUNC_NAME(name) "_" #name
+#endif
+
 namespace HPHP {
 namespace Transl {
 
@@ -78,7 +86,7 @@ static_assert(rStashedAR == reg::r15,
   "__fcallHelperThunk needs to be modified for ABI changes");
 asm(
   ".byte 0\n"
-  ".align 16\n"
+  ASM_HELPER_ALIGNMENT
   ".globl __fcallHelperThunk\n"
 "__fcallHelperThunk:\n"
 #if defined(__x86_64__)
@@ -89,11 +97,7 @@ asm(
   "mov %r15, %rdi\n"
   "cmp %r15, %rbp\n"
   "jne 1f\n"
-#ifndef __APPLE__
-  "call fcallHelper\n"
-#else
-  "call _fcallHelper\n"
-#endif
+  "call " ASM_HELPER_FUNC_NAME(fcallHelper) "\n"
   "jmp *%rax\n"
   // fcallHelper may call doFCall. doFCall changes the return ip
   // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
@@ -107,11 +111,7 @@ asm(
   // a number of c++ frames. The new actrec is linked onto the c++
   // frames, however, so switch it into rbp in case fcallHelper throws.
   "xchg %r15,%rbp\n"
-#ifndef __APPLE__
-  "call fcallHelper\n"
-#else
-  "call _fcallHelper\n"
-#endif
+  "call " ASM_HELPER_FUNC_NAME(fcallHelper) "\n"
   "xchg %r15,%rbp\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
@@ -179,7 +179,7 @@ TCA fcallHelper(ActRec* ar) {
 
 asm (
   ".byte 0\n"
-  ".align 16\n"
+  ASM_HELPER_ALIGNMENT
   ".globl __funcBodyHelperThunk\n"
 "__funcBodyHelperThunk:\n"
 #if defined(__x86_64__)
@@ -190,11 +190,7 @@ asm (
    * need to worry about stack parity
    */
   "mov %rbp, %rdi\n"
-#ifndef __APPLE__
-  "call funcBodyHelper\n"
-#else
-  "call _funcBodyHelper\n"
-#endif
+  "call " ASM_HELPER_FUNC_NAME(funcBodyHelper) "\n"
   "jmp *%rax\n"
   "ud2\n"
 #elif defined(__AARCH64EL__)

@@ -291,9 +291,13 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'd':
     {
+#ifdef CLOCK_THREAD_CPUTIME_ID
       struct timespec now;
       gettime(CLOCK_THREAD_CPUTIME_ID, &now);
       out << gettime_diff_us(transport->getCpuTime(), now);
+#else
+      return false;
+#endif
     }
     break;
   case 'h':

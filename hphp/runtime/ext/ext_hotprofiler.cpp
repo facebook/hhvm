@@ -294,8 +294,12 @@ tv_to_cycles(const struct timeval& tv, int64_t MHz)
 static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
+#ifdef CLOCK_THREAD_CPUTIME_ID
   static int64_t vdso_usable =
     Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+#else
+  static int64_t vdso_usable = -1;
+#endif
 
   if (cpu_time && vdso_usable >= 0)
     return cycles / 1000;
@@ -305,10 +309,12 @@ to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 static esyscall vtsc_syscall("vtsc");
 
 static inline uint64_t vtsc(int64_t MHz) {
+#ifdef CLOCK_THREAD_CPUTIME_ID
   int64_t rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
   }
+#endif
   if (vtsc_syscall.num > 0) {
     return syscall(vtsc_syscall.num);
   }
@@ -1640,8 +1646,13 @@ void f_xhprof_frame_end() {
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
-  if (vtsc_syscall.num <= 0 &&
-      Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1) {
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  bool missingClockGetTimeNS =
+    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
+#else
+  bool missingClockGetTimeNS = true;
+#endif
+  if (vtsc_syscall.num <= 0 && missingClockGetTimeNS) {
     flags &= ~TrackVtsc;
   }
   if (flags & TrackVtsc) {

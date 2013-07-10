@@ -17,10 +17,6 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/vdso.h"
 
-#if defined(__APPLE__)
-# include <mach/mach_time.h>
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,11 +55,7 @@ int dprintf(int fd, const char *format, ...) {
 
 int gettime(clockid_t which_clock, struct timespec *tp) {
 #if defined(__APPLE__)
-  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
-    tp->tv_sec = 0;
-    tp->tv_nsec = mach_absolute_time();
-    return 0;
-  }
+  // XXX: OSX doesn't support realtime so we ignore which_clock
   struct timeval tv;
   int ret = gettimeofday(&tv, nullptr);
   tp->tv_sec = tv.tv_sec;

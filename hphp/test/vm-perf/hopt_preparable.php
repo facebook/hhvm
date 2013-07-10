@@ -272,7 +272,7 @@ abstract class Preparable {
 
 class C extends Preparable {
   public function foo() {
-    for ( $i = 0 ; $i < 100 ; $i++ ) {
+    for ( $i = 0 ; $i < 10000000 ; $i++ ) {
       $this->__doRound();
     }
   }
@@ -284,4 +284,3 @@ $c = new C;
 $c->foo();
 
 echo "Done\n";
-

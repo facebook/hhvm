@@ -77,7 +77,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
@@ -89,8 +89,8 @@
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/hhbctranslator.h"
-#include "hphp/runtime/vm/jit/region_selection.h"
+#include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 

@@ -15,7 +15,7 @@
 */
 #include "hphp/util/arena.h"
 #include "hphp/runtime/base/memory/smart_containers.h"
-#include "hphp/runtime/vm/jit/region_selection.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP { namespace JIT {
@@ -109,4 +109,3 @@ RegionDescPtr regionMethod(const RegionContext& context) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

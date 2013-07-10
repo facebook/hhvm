@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/base/builtin_functions.h"

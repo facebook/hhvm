@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/ssatmp.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace JIT {
 

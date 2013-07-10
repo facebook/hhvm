@@ -19,9 +19,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
-#include "hphp/runtime/vm/jit/state_vector.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 
 namespace HPHP {

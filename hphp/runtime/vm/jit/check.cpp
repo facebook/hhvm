@@ -19,9 +19,9 @@
 #include <unordered_set>
 
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
-#include "hphp/runtime/vm/jit/linearscan.h"
-#include "hphp/runtime/vm/jit/physreg.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP {  namespace JIT {
 

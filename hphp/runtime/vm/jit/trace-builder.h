@@ -23,10 +23,10 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
-#include "hphp/runtime/vm/jit/state_vector.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP {  namespace JIT {
 

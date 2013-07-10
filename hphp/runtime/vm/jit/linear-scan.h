@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_VM_LINEAR_SCAN_H_
 #define incl_HPHP_VM_LINEAR_SCAN_H_
 
-#include "hphp/runtime/vm/jit/state_vector.h"
-#include "hphp/runtime/vm/jit/physreg.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP {  namespace JIT {

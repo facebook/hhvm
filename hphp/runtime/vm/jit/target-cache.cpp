@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/types.h"
@@ -92,7 +92,7 @@ undefinedError(const char* msg, const char* name) {
   raise_error(msg, name);
 }
 
-// Targetcache memory. See the comment in targetcache.h
+// Targetcache memory. See the comment in target-cache.h
 __thread void* tl_targetCaches = nullptr;
 __thread HphpArray* s_constants = nullptr;
 

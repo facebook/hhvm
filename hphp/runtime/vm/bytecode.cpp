@@ -50,7 +50,7 @@
 #include "hphp/runtime/vm/php_debug.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/type_constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

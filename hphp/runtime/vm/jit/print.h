@@ -19,7 +19,7 @@
 
 #include <iosfwd>
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/linearscan.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
 
 namespace HPHP {
 namespace JIT {

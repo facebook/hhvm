@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/linearscan.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
 
 #include "hphp/runtime/base/memory/smart_containers.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
-#include "hphp/runtime/vm/jit/nativecalls.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/tracebuilder.h"
-#include "hphp/runtime/vm/jit/codegen.h"
-#include "hphp/runtime/vm/jit/state_vector.h"
+#include "hphp/runtime/vm/jit/trace-builder.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/physreg.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include <boost/noncopyable.hpp>
 

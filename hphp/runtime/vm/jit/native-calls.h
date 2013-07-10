@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/codegen.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 

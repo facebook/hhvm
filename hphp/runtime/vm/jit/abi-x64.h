@@ -27,7 +27,7 @@
 #define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/runtime/vm/jit/physreg.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace Transl {
 

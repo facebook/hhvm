@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 
 namespace HPHP {
 

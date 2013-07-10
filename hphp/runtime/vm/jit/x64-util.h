@@ -20,7 +20,7 @@
 #ifndef USE_GCC_FAST_TLS
 #include <pthread.h>
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/physreg.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 #endif
 #include "hphp/runtime/vm/jit/translator-inline.h"
 

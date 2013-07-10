@@ -16,14 +16,14 @@
 
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member_operations.h"
-#include "hphp/runtime/vm/jit/hhbctranslator.h"
+#include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/irinstruction.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert_throw.h"
-#include "hphp/runtime/vm/jit/vectortranslator-internal.h"
+#include "hphp/runtime/vm/jit/vector-translator-internal.h"
 
 namespace HPHP { namespace JIT {
 

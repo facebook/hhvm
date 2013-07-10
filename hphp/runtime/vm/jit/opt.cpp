@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/tracebuilder.h"
+#include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/check.h"
 

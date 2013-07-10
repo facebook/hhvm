@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/nativecalls.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
 

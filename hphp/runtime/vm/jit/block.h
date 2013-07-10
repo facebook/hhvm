@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
-#include "hphp/runtime/vm/jit/irinstruction.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 
 namespace HPHP { namespace JIT {
 

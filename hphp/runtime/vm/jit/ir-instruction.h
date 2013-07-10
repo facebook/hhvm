@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
-#include "hphp/runtime/vm/jit/extradata.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 
 namespace HPHP { namespace JIT {
 

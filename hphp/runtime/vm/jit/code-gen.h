@@ -19,11 +19,11 @@
 
 #include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
-#include "hphp/runtime/vm/jit/linearscan.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/state_vector.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP {
 namespace JIT {

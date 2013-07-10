@@ -19,8 +19,8 @@
 #include "folly/Optional.h"
 #include "folly/Lazy.h"
 
-#include "hphp/runtime/vm/jit/irfactory.h"
-#include "hphp/runtime/vm/jit/state_vector.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mutation.h"

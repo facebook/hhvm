@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 
 #include "hphp/runtime/vm/jit/block.h"
 

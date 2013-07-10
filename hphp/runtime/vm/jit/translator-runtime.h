@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 
 namespace HPHP { namespace Transl {
 

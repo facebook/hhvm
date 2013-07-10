@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/region_selection.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <algorithm>
 #include <boost/range/adaptors.hpp>

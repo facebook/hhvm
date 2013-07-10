@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 
 namespace HPHP { namespace JIT {
 

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member_operations.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
-#include "hphp/runtime/vm/jit/tracebuilder.h"
+#include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/srckey.h"
 
 using HPHP::Transl::NormalizedInstruction;

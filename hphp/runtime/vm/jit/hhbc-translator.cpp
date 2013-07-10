@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/hhbctranslator.h"
+#include "hphp/runtime/vm/jit/hhbc-translator.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -23,8 +23,8 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
-#include "hphp/runtime/vm/jit/codegen.h" // ArrayIdx helpers
+#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/code-gen.h" // ArrayIdx helpers
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"

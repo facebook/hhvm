@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array/hphp_array.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
-#include "hphp/runtime/vm/jit/targetcache.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/name_value_table.h"

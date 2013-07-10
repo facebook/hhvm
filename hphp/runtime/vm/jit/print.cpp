@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/base/memory/smart_containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linearscan.h"
-#include "hphp/runtime/vm/jit/codegen.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/text_color.h"

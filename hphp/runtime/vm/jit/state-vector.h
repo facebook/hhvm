@@ -20,7 +20,7 @@
 #include <type_traits>
 
 #include "hphp/runtime/base/memory/smart_containers.h"
-#include "hphp/runtime/vm/jit/irfactory.h"
+#include "hphp/runtime/vm/jit/ir-factory.h"
 
 namespace HPHP { namespace JIT {
 

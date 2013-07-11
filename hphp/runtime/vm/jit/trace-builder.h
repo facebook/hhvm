@@ -124,6 +124,9 @@ struct TraceBuilder {
   SSATmp* localValue(unsigned id, DataTypeCategory cat);
   SSATmp* localValueSource(unsigned id) const;
   void setLocalValue(unsigned id, SSATmp* value);
+  bool inlinedFrameSpansCall() const {
+    return m_frameSpansCall;
+  }
 
   /*
    * Updates the marker used for instructions generated without one
@@ -334,6 +337,8 @@ private:
     int32_t spOffset;
     bool thisAvailable;
     smart::vector<LocalState> locals;
+    bool frameSpansCall;
+    bool needsFPAnchor;
     SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
     BCMarker curMarker;
@@ -463,6 +468,8 @@ private:
   SSATmp*    m_curFunc;      // current function context
   CSEHash    m_cseHash;
   bool       m_thisIsAvailable; // true only if current ActRec has non-null this
+  bool       m_frameSpansCall;  // does the inlined frame span a function call
+  bool       m_needsFPAnchor;
 
   // state of values in memory
   SSATmp*    m_refCountedMemValue;

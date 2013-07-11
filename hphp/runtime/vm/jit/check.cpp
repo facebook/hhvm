@@ -256,6 +256,19 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
     [&] (Block* b, State& state) {
       for (auto& inst : *b) {
         for (auto& src : inst.srcs()) {
+          /*
+           * These SSATmp's are used only for stack analysis in the
+           * simplifier and therefore may live across calls.  In particular
+           * these instructions are used to bridge the logical stack of the
+           * caller when a callee is inlined so that analysis does not scan
+           * into the callee stack when searching for a type of value in the
+           * caller.
+           */
+          if (inst.op() == ReDefSP && src->isA(Type::StkPtr)) continue;
+          if (inst.op() == ReDefGeneratorSP && src->isA(Type::StkPtr)) {
+            continue;
+          }
+
           if (src->isA(Type::FramePtr)) continue;
           if (src->isConst()) continue;
           if (!state[src]) {

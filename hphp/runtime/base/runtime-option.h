@@ -398,6 +398,9 @@ public:
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         -1)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
+  F(uint32_t, HHIRInliningMaxCost,     7)                               \
+  F(uint32_t, HHIRInliningMaxDepth,    4)                               \
+  F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

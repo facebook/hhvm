@@ -1072,7 +1072,7 @@ D:FramePtr = FreeActRec S0:FramePtr
   Load the saved frame pointer from the activation record pointed to
   by S0 into D.
 
-D:FramePtr = DefInlineFP<func,retBCOff,retSPOff> S0:StkPtr S1:StkPtr
+D:FramePtr = DefInlineFP<func,retBCOff,retSPOff> S0:StkPtr S1:StkPtr S2:FramePtr
 
   Defines a frame pointer for an inlined function.  S0 is a StkPtr
   that points to the ActRec for the callee (i.e. after parameters have
@@ -1090,6 +1090,9 @@ D:FramePtr = DefInlineFP<func,retBCOff,retSPOff> S0:StkPtr S1:StkPtr
   callee-side responsibilities for setting up an activation record
   (i.e. setting the return ip and m_soff, storing the frame pointer
   into D).
+
+  The caller frame pointer is passed as S2.  This is used to keep track of the
+  call chain of inlined functions for simplification and dead code elimination.
 
 InlineReturn S0:FramePtr
 
@@ -1395,22 +1398,25 @@ D:StkPtr = DefSP<stackOff> S0:StkPtr
   This instruction is used at the beginning of tracelets to represent
   the state of the stack on entry and does not emit code.
 
-D:StkPtr = ReDefSP<offset> S0:FramePtr S1:StkPtr
+D:StkPtr = ReDefSP<offset,spansCall> S0:FramePtr S1:StkPtr
 
   Re-define a stack in terms of a frame pointer S0 and an offset,
   putting the resulting pointer in D.  The resulting stack is assumed
   to give the same view as S1, which is a previous stack pointer.
-  (I.e. for getStackValue we just chain to S1.)
+  (I.e. for getStackValue we just chain to S1.)  The S1 stack pointer is
+  only used for analysis.
 
   This instruction is used when entering or "returning" from an
   inlined call.  The one used on entry will be DCE'd when the actrec
   can be eliminated.  The one on exit is only needed until TODO(#2288359).
 
-D:StkPtr = StashGeneratorSP S0:StkPtr
+  The spansCall boolean indicates that the inlined frame spanned a procedure
+  call and that any SSATmps created before inlining are now invalid.  This is
+  required for several analysis steps including the simplifier.
+
+D:StkPtr = StashGeneratorSP<offset> S0:FramePtr S1:StkPtr
 
   Store a generator stack pointer, for later use.
-
-  This instruction has exactly the effects of Mov.
 
   The point of this is a bit of a hack to handle the fact that we
   currently assign the same registers to frame (rVmFp) and stack
@@ -1419,17 +1425,36 @@ D:StkPtr = StashGeneratorSP S0:StkPtr
   restore it using a frame pointer like with ReDefSP, because the
   values of rVmSp and rVmFp are not related like that in a generator.
 
-  This instruction moves the value of rVmSp into a temporary, which we
-  can get back using ReDefGeneratorSP.
+  This instruction moves the value of rVmSp into a continuation object.  It
+  can be retrieved using ReDefGeneratorSP.
 
   TODO(#2288359): this shouldn't be needed.
 
-D:StkPtr = ReDefGeneratorSP<offset> S0:StkPtr
+D:StkPtr = ReDefGeneratorSP<offset,spansCall> S0:FramePtr S1:StkPtr
 
-  Restore a generator stack pointer.  See StashGeneratorSP.
+  Restore a generator stack pointer.  See StashGeneratorSP.  The S1 stack
+  pointer refers to the stack pointer before inlining, it is used for stack
+  value analysis but never used outside of analysis (see ReDefSP).  The
+  spansCall boolean value indicates that the inlined frame spanned a function
+  call, this is important as it indicates to later analysis steps that SSATmps
+  created before the inlined frame have been invalidated.
 
-  This instruction has exactly the effects of Mov, except that the
-  destination is allocated to rVmSp.
+D:StkPtr PassSP S0:StkPtr
+
+  Indicates that every use of StkPtr D is actually an alias to S0.  This is a
+  hack to make dead code elimination easier when removing callee frames from
+  inlined functions.  It is effectively the same as a nop as we currently use
+  a specialized register for every stack pointer (#2288359).
+
+D:FramePtr PassSP S0:FramePtr
+
+  Alias a frame pointer to a different SSATmp (see PassSP).
+
+InlinedFPAnchor S0:FramePtr
+
+  Indicates that an inlined frame cannot be elided during dead code elimination
+  because it is required by a either the VM for its ActRec or the routine itself
+  for local storage.  Is semantically equivalent to a Nop.
 
 Nop
 

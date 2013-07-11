@@ -512,18 +512,19 @@ public:
 
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
-                                        HPHP::Class* pctx,
+                                        const HPHP::Class* pctx,
                                         MethodLookup::CallType lookupType,
                                         bool raise = false);
   MethodLookup::LookupResult lookupObjMethod(const HPHP::Func*& f,
                                              const HPHP::Class* cls,
                                              const StringData* methodName,
+                                             const Class* ctx,
                                              bool raise = false);
   MethodLookup::LookupResult lookupClsMethod(const HPHP::Func*& f,
                                              const HPHP::Class* cls,
                                              const StringData* methodName,
                                              ObjectData* this_,
-                                             ActRec* vmfp,
+                                             const Class* ctx,
                                              bool raise = false);
   MethodLookup::LookupResult lookupCtorMethod(const HPHP::Func*& f,
                                               const HPHP::Class* cls,

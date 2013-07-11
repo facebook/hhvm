@@ -416,7 +416,7 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef ||
+  assert(m_op == IncRef || m_op == PassFP || m_op == PassSP ||
          m_op == CheckType || m_op == AssertType ||
          m_op == Mov);
   return src(0);

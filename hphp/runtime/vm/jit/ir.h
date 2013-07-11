@@ -452,13 +452,17 @@ O(DecRefMem,                        ND, S(PtrToGen)                           \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, NA,                                E) \
-O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr),              NF) \
+O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr) S(FramePtr),  NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
+O(DefInlineSP,               D(StkPtr), S(FramePtr) S(StkPtr),             E) \
 O(ReDefSP,                   D(StkPtr), S(FramePtr) S(StkPtr),            NF) \
-O(StashGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
-O(ReDefGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
+O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
+O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \
+O(InlineFPAnchor,                   ND, S(FramePtr),                       E) \
+O(StashGeneratorSP,                 ND, S(FramePtr) S(StkPtr),         E|Mem) \
+O(ReDefGeneratorSP,          D(StkPtr), S(FramePtr) S(StkPtr),         E|Mem) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \

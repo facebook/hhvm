@@ -642,10 +642,7 @@ void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
   auto after = i.nextSk().offset();
 
-  // ContEnter can't exist in an inlined function right now.  (If it
-  // ever can, this curFunc() needs to change.)
-  assert(!m_hhbcTrans.isInlining());
-  const Func* srcFunc = i.func();
+  const Func* srcFunc = m_hhbcTrans.curFunc();
   int32_t callOffsetInUnit = after - srcFunc->base();
 
   HHIR_EMIT(ContEnter, callOffsetInUnit);
@@ -1097,7 +1094,8 @@ findCuf(const NormalizedInstruction& ni,
   }
 
   bool magicCall = false;
-  const Func* f = lookupImmutableMethod(cls, sname, magicCall, true);
+  const Func* f = lookupImmutableMethod(cls, sname, magicCall,
+                                        /* staticLookup = */ true, ctx);
   if (!f || (forward && !ctx->classof(f->cls()))) {
     /*
      * To preserve the invariant that the lsb class
@@ -1156,9 +1154,12 @@ bool shouldIRInline(const Func* curFunc,
     return false;
   }
 
+  const NormalizedInstruction* cursor;
+  Op current;
+
   auto refuse = [&](const char* why) -> bool {
-    FTRACE(1, "shouldIRInline: refusing {} <reason: {}>\n",
-              func->fullName()->data(), why);
+    FTRACE(1, "shouldIRInline: refusing {} <reason: {}> [NI = {}]\n",
+              func->fullName()->data(), why, cursor->toString());
     return false;
   };
   auto accept = [&](const char* kind) -> bool {
@@ -1167,22 +1168,19 @@ bool shouldIRInline(const Func* curFunc,
     return true;
   };
 
-  if (func->numLocals() != func->numParams()) {
-    return refuse("more locals than params (unsupported)");
-  }
   if (func->numIterators() != 0) {
     return refuse("iterators");
   }
-  if (func->maxStackCells() >= kStackCheckLeafPadding) {
-    FTRACE(1, "{} >= {}\n", func->maxStackCells(), kStackCheckLeafPadding);
-    return refuse("too many stack cells");
+  if (func->isMagic() || Func::isSpecial(func->name())) {
+    return refuse("special or magic function");
+  }
+  if (func->attrs() & AttrMayUseVV) {
+    return refuse("may use dynamic environment");
+  }
+  if (!(func->attrs() & AttrHot) && (curFunc->attrs() & AttrHot)) {
+    return refuse("inlining cold func into hot func");
   }
 
-  /////////////
-
-  // Little pattern recognition helpers:
-  const NormalizedInstruction* cursor;
-  Op current;
   auto resetCursor = [&] {
     cursor = callee.m_instrStream.first;
     current = cursor->op();
@@ -1193,153 +1191,42 @@ bool shouldIRInline(const Func* curFunc,
     current = cursor->op();
     return op;
   };
-  auto nextIf = [&](Op op) -> bool {
-    if (current != op) return false;
-    next();
-    return true;
-  };
-  auto atRet = [&] { return current == OpRetC || current == OpRetV; };
 
-  // Simple operations that just put a Cell on the stack.  There must
-  // either be no inputs, or a single local as an input.  For now
-  // avoid CreateCont because it depends on the frame.
-  auto simpleCell = [&]() -> bool {
-    if (current == OpCreateCont) return false;
-    if (cursor->outStack && cursor->inputs.empty()) {
-      next();
-      return true;
-    }
-    if (current == OpCGetL || current == OpVGetL) {
-      next();
-      return true;
-    }
-    return false;
-  };
-
-  // Simple two-cell comparison operators.
-  auto simpleCmp = [&]() -> bool {
-    switch (current) {
-    case Op::Add: case Op::Sub: case Op::Mul: case Op::Div: case Op::Mod:
-    case Op::Xor: case Op::Not: case Op::Same: case Op::NSame: case Op::Eq:
-    case Op::Neq: case Op::Lt: case Op::Lte: case Op::Gt: case Op::Gte:
-    case Op::BitAnd: case Op::BitOr: case Op::BitXor: case Op::BitNot:
-    case Op::Shl: case Op::Shr:
-      next();
-      return true;
-    default:
-      return false;
-    }
-  };
-
-  // In the various patterns below, when we're down to a cell on the
-  // stack, this is used to allow simple constant-foldable
-  // manipulations of it before return.
-  auto cellManipRet = [&]() -> bool {
-    if (nextIf(Op::Not)) return atRet();
-    if (simpleCell() && simpleCmp()) return atRet();
-    return atRet();
-  };
-
-  // Constants that can be printed without an InterpOne.
-  auto simplePrintConstant = [&]() -> bool {
-    switch (current) {
-    case OpFalse: case OpInt: case OpString: case OpTrue: case OpNull:
-      next();
-      return true;
-    default:
-      return false;
-    }
+  auto atRet = [&] {
+    return current == OpRetC || current == OpRetV;
   };
 
   resetCursor();
 
-  ////////////
+  uint64_t cost = 0;
+  for (; !atRet(); next()) {
+    if (current == OpFCallArray) return refuse("FCallArray");
 
-  // Simple property accessors.
-  resetCursor();
-  if (current == OpCheckThis) next();
-  if (cursor->op() == OpCGetM &&
-      cursor->immVec.locationCode() == LH &&
-      cursor->immVecM.size() == 1 &&
-      cursor->immVecM.front() == MPT &&
-      !mInstrHasUnknownOffsets(*cursor, func->cls())) {
-    next();
-    // Can't currently support cellManipRet because it's usually going
-    // to be CGetM-prediction, which will use the frame.
-    if (atRet()) {
-      return accept("simple property accessor");
+    cost += 1;
+
+    // static cost + scale factor for vector ops
+    if (cursor->immVecM.size()) {
+      cost += cursor->immVecM.size();
+    }
+
+    if (cursor->breaksTracelet) {
+      return refuse("breaks tracelet");
+    }
+
+    if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {
+      return refuse("too expensive");
     }
   }
 
-  /*
-   * Functions that set an object property to a simple cell value.
-   * E.g. something that does $this->foo = null;
-   */
-  resetCursor();
-  if (current == OpCheckThis) next();
-  if (simpleCell()) {
-    if (cursor->op() == OpSetM &&
-        cursor->immVec.locationCode() == LH &&
-        cursor->immVecM.size() == 1 &&
-        cursor->immVecM.front() == MPT &&
-        !mInstrHasUnknownOffsets(*cursor, func->cls())) {
-      next();
-      if (nextIf(OpPopC) && simpleCell() && atRet()) {
-        return accept("simpleCell prop setter");
-      }
-    }
-  }
-
-  /*
-   * Continuation allocation functions.
-   */
-  resetCursor();
-  if (current == OpCreateCont) {
-    if (func->numParams()) {
-      FTRACE(1, "CreateCont with {} args\n", func->numParams());
-    }
-    next();
-    if (atRet()) {
-      return accept("continuation creator");
-    }
-  }
-
-  /*
-   * Anything that just puts a value on the stack with no inputs, and
-   * then returns it, after possibly doing some comparison with
-   * another such thing.
-   *
-   * E.g. String; String; Same; RetC, or Null; RetC.
-   */
-  resetCursor();
-  if (simpleCell() && cellManipRet()) {
-    return accept("simple returner");
-  }
-
-  // BareThis; InstanceOfD; RetC
-  resetCursor();
-  if (nextIf(OpBareThis) && nextIf(OpInstanceOfD) && atRet()) {
-    return accept("$this instanceof D");
-  }
-
-  // E.g. String; Print; PopC; Null; RetC
-  // Useful primarily for debugging.
-  resetCursor();
-  if (simplePrintConstant() && nextIf(OpPrint) && nextIf(OpPopC) &&
-      simpleCell() && cellManipRet()) {
-    return accept("constant printer");
-  }
-
-  return refuse("unknown kind of function");
+  return accept("function is okay");
 }
 
 void
 IRTranslator::translateFCall(const NormalizedInstruction& i) {
   auto const numArgs = i.imm[0].u_IVA;
 
-  always_assert(!m_hhbcTrans.isInlining() && "curUnit and curFunc calls");
-  const PC after = i.m_unit->at(i.nextSk().offset());
-  const Func* srcFunc = i.func();
+  const PC after = m_hhbcTrans.curUnit()->at(i.nextSk().offset());
+  const Func* srcFunc = m_hhbcTrans.curFunc();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
 
@@ -1348,8 +1235,8 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
    * the call.
    */
   if (i.calleeTrace) {
-    if (!i.calleeTrace->m_inliningFailed && !m_hhbcTrans.isInlining()) {
-      assert(shouldIRInline(i.func(), i.funcd, *i.calleeTrace));
+    if (!i.calleeTrace->m_inliningFailed) {
+      assert(shouldIRInline(m_hhbcTrans.curFunc(), i.funcd, *i.calleeTrace));
 
       m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&

@@ -259,18 +259,20 @@ size_t HhbcTranslator::spOffset() const {
  *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
+ *           [ StashGeneratorSP fp0 sp0 ]
  *     sp1   = SpillStack sp_pre, ...
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
  *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
- *     sp4   = ReDefSP<numLocals> fp2
+ *     sp4   = DefInlineSP<numLocals> fp2 sp1
  *
  *         // ... callee body ...
  *
  *           = InlineReturn fp2
  *
- *   sp5  = ReDefSP<returnOffset> fp0 sp1
+ * [ sp5  = ReDefGeneratorSP<spansCall> fp0 sp1     ]
+ * [ sp5  = ReDefSP<returnOffset,spansCall> fp0 sp1 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -278,8 +280,34 @@ size_t HhbcTranslator::spOffset() const {
  * before the return address is pushed but after the activation record
  * is popped.
  *
- * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP
- * instructions if they aren't needed.
+ * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP/
+ * DefInlineSP instructions if they aren't needed.  DefInlineSP and DefInlineFP
+ * become PassSP and PassFP respectively to avoid the need to relabel inlined
+ * IR instructions that refer to them.
+ *
+ * In the case of generators StashGeneratorSP and ReDefGeneratorSP are used to
+ * store/extract the value of the StkPtr from a field in the continuation class.
+ * This behavior is important because the StkPtr cannot be computed from the
+ * FramePtr and if a call occurs it cannot live across the FCall in a register.
+ *
+ * ReDefSP and ReDefGeneratorSP both take sp1, the stack pointer from before the
+ * inlined frame.  While this SSATmp may be dead if an FCall occurs in the
+ * inlined frame it is still useful for determining stack types in the
+ * simplifier.  Additionally these instructions both take an extradata
+ * `spansCall' which is true iff an FCall occurs anywhere between the start and
+ * end of the inlined function.  This is information is also used in the
+ * simplifier to determine when an SSATmp may be used in lieu of a load from
+ * the stack.
+ *
+ * At this time StLoc, ReDefSP, DefInlineSP, PassSP, SpillFrame, and DefInlineFP
+ * are all considered weak references to a frame pointer.  Additionally any
+ * instruction which calls native or may raise an error is considered a
+ * reference to the FP and prevent it from being elided.  This is done by
+ * inserting an InlineFPAnchor instruction when they are encountered.  These
+ * instructions are inserted initially by trace-builder and later removed and
+ * re-inserted during the reoptimize pass to ensure that they are not associated
+ * with instructions that have been removed in DCE or modified in the
+ * simplifier.
  */
 void HhbcTranslator::beginInlining(unsigned numParams,
                                    const Func* target,
@@ -306,10 +334,11 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   data.target   = target;
   data.retBCOff = returnBcOffset;
   data.retSPOff = prevSPOff;
-  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP);
+
+  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_tb->fp());
 
   m_bcStateStack.emplace_back(target->base(), target);
-  gen(ReDefSP, StackOffset(target->numLocals()), m_tb->fp(), m_tb->sp());
+  gen(DefInlineSP, StackOffset(target->numLocals()), m_tb->fp(), m_tb->sp());
 
   profileFunctionEntry("Inline");
 
@@ -322,11 +351,13 @@ void HhbcTranslator::beginInlining(unsigned numParams,
      * initialize non-parameter locals to KindOfUnknownin case we have
      * to leave the trace.
      */
-    always_assert(0 && "unimplemented");
     gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
   }
 
   updateMarker();
+
+  m_fpiActiveStack.push(std::move(m_fpiStack.top()));
+  m_fpiStack.pop();
 }
 
 bool HhbcTranslator::isInlining() const {
@@ -1890,21 +1921,8 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  /*
-   * XXX. In a generator, we can't use ReDefSP to restore the stack
-   * pointer from the frame pointer if we inline the callee.  (This is
-   * because we don't really pay attention to usedefs for allocating
-   * registers to stack pointers, and rVmFp and rVmSp are not related
-   * to each other in a generator frame.)
-   *
-   * Instead, save it somewhere so we can move it back after.  This
-   * instruction will be dce'd if we don't inline the callee.
-   *
-   * TODO(#2288359): freeing up the special-ness of %rbx should
-   * allow us to avoid this sort of thing.
-   */
   if (curFunc()->isGenerator()) {
-    returnSp = gen(StashGeneratorSP, m_tb->sp());
+    gen(StashGeneratorSP, m_tb->fp(), m_tb->sp());
   }
 
   m_fpiStack.emplace(returnSp, m_tb->spOffset());
@@ -2113,14 +2131,16 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
-                                                             false);
+                                                             false,
+                                                             curClass());
   SSATmp* obj = popC();
   SSATmp* objOrCls = obj;
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
       MethodLookup::LookupResult res =
-        g_vmContext->lookupObjMethod(func, baseClass, methodName, false);
+        g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
+                                     false);
       if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
            res == MethodLookup::LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
@@ -2226,7 +2246,8 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
-                                                             true);
+                                                             true,
+                                                             curClass());
   if (func) {
     SSATmp* objOrCls = genClsMethodCtx(func, baseClass);
     emitFPushActRec(cns(func),
@@ -2266,7 +2287,8 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
 
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
-                                           true /* staticLookup */);
+                                           true /* staticLookup */,
+                                           curClass());
   SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   if (func) {
     SSATmp*   funcTmp = cns(func);
@@ -2414,9 +2436,9 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   assert(!(curFunc()->attrs() & AttrMayUseVV));
   assert(!curFunc()->isPseudoMain());
-  assert(!m_fpiStack.empty());
+  assert(!m_fpiActiveStack.empty());
 
-  emitDecRefLocalsInline(retVal);
+  auto useRet = emitDecRefLocalsInline(retVal);
 
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's
@@ -2428,14 +2450,16 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   // Return to the caller function.  Careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
   m_bcStateStack.pop_back();
-  m_fpiStack.pop();
+  m_fpiActiveStack.pop();
 
   // See the comment in beginInlining about generator frames.
   if (curFunc()->isGenerator()) {
-    gen(ReDefGeneratorSP, StackOffset(m_tb->spOffset()), m_tb->sp());
+    gen(ReDefGeneratorSP,
+        ReDefGeneratorSPData(m_tb->inlinedFrameSpansCall()),
+        m_tb->fp(), m_tb->sp());
   } else {
-    gen(ReDefSP,
-        StackOffset(m_tb->spOffset()), m_tb->fp(), m_tb->sp());
+    gen(ReDefSP,ReDefSPData(m_tb->spOffset(), m_tb->inlinedFrameSpansCall()),
+        m_tb->fp(), m_tb->sp());
   }
 
   /*
@@ -2449,9 +2473,14 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   m_stackDeficit = 0;
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
-  push(retVal);
+  push(useRet);
 
   updateMarker();
+}
+
+static bool isLoadInFrame(const SSATmp* fp, const IRInstruction* inst) {
+  return ((inst->op() == LdThis || inst->op() == LdLoc) &&
+          inst->src(0) == fp);
 }
 
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
@@ -2469,7 +2498,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
   if (retValSrcInstr->op() == IncRef) {
     retValSrcLoc = retValSrcInstr->src(0);
     retValSrcOpc = retValSrcLoc->inst()->op();
-    if (retValSrcOpc != LdLoc && retValSrcOpc != LdThis) {
+    if (!isLoadInFrame(m_tb->fp(), retValSrcLoc->inst())) {
       retValSrcLoc = nullptr;
       retValSrcOpc = Nop;
     }
@@ -2499,7 +2528,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_tb->fp());
   }
 
-  return retValSrcLoc ? retValSrcLoc : retVal;
+  return !isInlining() && retValSrcLoc ? retValSrcLoc : retVal;
 }
 
 void HhbcTranslator::emitRet(Type type, bool freeInline) {

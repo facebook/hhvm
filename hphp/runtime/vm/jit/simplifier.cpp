@@ -38,16 +38,28 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   IRInstruction* inst = sp->inst();
 
   switch (inst->op()) {
+  case DefInlineSP:
   case DefSP:
     return StackValueInfo { inst };
 
-  case ReDefGeneratorSP:
-  case StashGeneratorSP:
-    return getStackValue(inst->src(0), index);
+  case ReDefGeneratorSP: {
+    auto const extra = inst->extra<ReDefGeneratorSP>();
+    auto info = getStackValue(inst->src(1), index);
+    if (extra->spansCall) info.spansCall = true;
+    return info;
+  }
 
-  case ReDefSP:
+  case StashGeneratorSP:
     return getStackValue(inst->src(1), index);
 
+  case ReDefSP: {
+    auto const extra = inst->extra<ReDefSP>();
+    auto info = getStackValue(inst->src(1), index);
+    if (extra->spansCall) info.spansCall = true;
+    return info;
+  }
+
+  case PassSP:
   case ExceptionBarrier:
     return getStackValue(inst->src(0), index);
 
@@ -391,7 +403,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case AssertNonNull:return simplifyAssertNonNull(inst);
 
   case LdCls:        return simplifyLdCls(inst);
-  case LdThis:       return simplifyLdThis(inst);
   case LdCtx:        return simplifyLdCtx(inst);
   case LdClsCtx:     return simplifyLdClsCtx(inst);
   case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
@@ -1681,26 +1692,6 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
                propName,
                cns(clsNameStr),
                inst->src(2));
-  }
-
-  return nullptr;
-}
-
-/*
- * If we're in an inlined frame, use the this that we put in the
- * inlined ActRec.  (This could chase more intervening SpillStack
- * instructions to find the SpillFrame, but for now we don't inline
- * calls that will have that.)
- */
-SSATmp* Simplifier::simplifyLdThis(IRInstruction* inst) {
-  auto fpInst = inst->src(0)->inst();
-  if (fpInst->op() == DefInlineFP) {
-    auto spInst = fpInst->src(0)->inst();
-    if (spInst->op() == SpillFrame &&
-        spInst->src(3)->isA(Type::Obj)) {
-      return spInst->src(3);
-    }
-    return nullptr;
   }
 
   return nullptr;

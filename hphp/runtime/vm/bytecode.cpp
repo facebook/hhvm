@@ -934,7 +934,7 @@ TypedValue* VMExecutionContext::lookupClsCns(const StringData* cls,
 
 const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                                                 const StringData* methodName,
-                                                Class* ctx,
+                                                const Class* ctx,
                                                 CallType callType,
                                                 bool raise /* = false */) {
   const Func* method;
@@ -1057,8 +1057,8 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
 LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
                                                  const Class* cls,
                                                  const StringData* methodName,
+                                                 const Class* ctx,
                                                  bool raise /* = false */) {
-  Class* ctx = arGetContextClass(getFP());
   f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, false);
   if (!f) {
     f = cls->lookupMethod(s___call.get());
@@ -1082,9 +1082,8 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
                                     const Class* cls,
                                     const StringData* methodName,
                                     ObjectData* obj,
-                                    ActRec* vmfp,
+                                    const Class* ctx,
                                     bool raise /* = false */) {
-  Class* ctx = arGetContextClass(vmfp);
   f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, false);
   if (!f) {
     if (obj && obj->instanceof(cls)) {
@@ -5211,7 +5210,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncU(PC& pc) {
 void VMExecutionContext::fPushObjMethodImpl(
     Class* cls, StringData* name, ObjectData* obj, int numArgs) {
   const Func* f;
-  LookupResult res = lookupObjMethod(f, cls, name, true);
+  LookupResult res = lookupObjMethod(f, cls, name,
+                                     arGetContextClass(getFP()), true);
   assert(f);
   ActRec* ar = m_stack.allocA();
   arSetSfp(ar, m_fp);
@@ -5274,7 +5274,8 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
                                            ObjectData* obj,
                                            int numArgs) {
   const Func* f;
-  LookupResult res = lookupClsMethod(f, cls, name, obj, getFP(), true);
+  LookupResult res = lookupClsMethod(f, cls, name, obj,
+                                     arGetContextClass(getFP()), true);
   if (res == LookupResult::MethodFoundNoThis ||
       res == LookupResult::MagicCallStaticFound) {
     obj = nullptr;

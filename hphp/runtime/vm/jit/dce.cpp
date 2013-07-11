@@ -414,7 +414,9 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
 
   bool killedFrames = false;
 
+  smart::map<SSATmp*, Offset> retFixupMap;
   forEachInst(trace, [&](IRInstruction* inst) {
+    if (!state[inst].isDead()) return;
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be
     // eliminated.
@@ -422,6 +424,30 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
       {
         auto const frameInst = inst->src(0)->inst();
         if (frameInst->op() == DefInlineFP) {
+          FTRACE(5, "Marking StLoc for {}\n", frameInst->id());
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
+    case SpillFrame:
+      {
+        auto const frameInst = inst->src(1)->inst();
+        auto const reason = inst->src(2);
+        if (frameInst->op() == DefInlineFP &&
+            reason->type().subtypeOf(Type::Func)) {
+            FTRACE(5, "Marking SpillFrame for {}\n", frameInst->id());
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
+    case ReDefSP:
+    case DefInlineSP:
+      {
+        auto const frameInst = inst->src(0)->inst();
+        if (frameInst->op() == DefInlineFP) {
+          FTRACE(5, "Marking DefSP for {}\n", frameInst->id());
           state[frameInst].incWeakUse();
         }
       }
@@ -438,13 +464,49 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
           if (frameUses - weakUses == 1) {
             FTRACE(5, "killing frame {}\n", srcInst->id());
             killedFrames = true;
-            state[srcInst].setDead();
+            auto const stkInst = srcInst->src(0)->inst();
+
+            Offset retBCOff = srcInst->extra<DefInlineFP>()->retBCOff;
+            retFixupMap[srcInst->dst()] = retBCOff;
+            factory->replace(srcInst, PassFP, srcInst->src(2));
+            if (stkInst->op() == SpillFrame) {
+              factory->replace(stkInst, PassSP, stkInst->src(0));
+            }
           }
         }
       }
       break;
 
+    case PassFP:
+      {
+        auto frameInst = inst->src(0)->inst();
+        if (frameInst->op() == DefInlineFP) {
+          FTRACE(5, "Marking PassFP for {}\n", frameInst->id());
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
+    case DefInlineFP:
+      {
+        auto outerInst = inst->src(2)->inst();
+        if (outerInst->op() == DefInlineFP) {
+          FTRACE(5, "Marking DefInlineFP for {}\n", outerInst->id());
+          state[outerInst].incWeakUse();
+        }
+      }
+      break;
+
     default:
+      {
+        for (uint32_t i = 0; i < inst->numSrcs(); i++) {
+          auto src = inst->src(i);
+          if (src->inst()->op() == DefInlineFP) {
+            FTRACE(5, "not killing frame {} b/c: {}\n", src->inst()->id(),
+                   inst->toString());
+          }
+        }
+      }
       break;
     }
   });
@@ -459,10 +521,23 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
    */
   forEachInst(trace, [&](IRInstruction* inst) {
     switch (inst->op()) {
+    case DefInlineSP:
+      {
+        auto const fp = inst->src(0);
+        if (fp->inst()->op() == PassFP) {
+          FTRACE(5, "{} ({}) masking\n",
+                 opcodeName(inst->op()),
+                 inst->id());
+          factory->replace(inst, PassSP, inst->src(1));
+          break;
+        }
+      }
+      break;
+
     case StLoc: case InlineReturn:
       {
         auto const fp = inst->src(0);
-        if (state[fp->inst()].isDead()) {
+        if (fp->inst()->op() == PassFP) {
           FTRACE(5, "{} ({}) setDead\n",
                  opcodeName(inst->op()),
                  inst->id());
@@ -470,6 +545,34 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
         }
       }
       break;
+
+      /*
+       * When we unroll the stack during an exception the unwinder relies on
+       * m_soff whenever it encounters an ActRec to properly restore the
+       * PC once the frame has been destroyed.  When we elide a frame from the
+       * stack we also update the PC pushed in any ActRec's pushed by a Call
+       * so that they reflect the frame that they logically fall inside of.
+       */
+      case Call:
+        {
+          auto const arInst = inst->src(0)->inst();
+          if (arInst->op() == SpillFrame) {
+            auto const fp = arInst->src(1);
+            if (fp->inst()->op() == PassFP) {
+              auto fpInst = fp->inst();
+              while (fpInst->src(0)->inst()->op() == PassFP) {
+                fpInst = fpInst->src(0)->inst();
+              }
+              assert(retFixupMap.find(fpInst->dst()) != retFixupMap.end());
+              FTRACE(5, "{} ({}) repairing\n",
+                     opcodeName(inst->op()),
+                     inst->id());
+              Offset retBCOff = retFixupMap[fpInst->dst()];
+              inst->setSrc(1, factory->cns(retBCOff));
+            }
+          }
+        }
+        break;
 
     case DefInlineFP:
       FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
@@ -569,6 +672,12 @@ void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
       if (srcInst->op() == DefConst) {
         continue;
       }
+
+      if (srcInst->op() == DefInlineFP) {
+        FTRACE(5, "adding use to frame {} b/c: {}\n", srcInst->id(),
+               inst->toString());
+      }
+
       uses[src]++;
       if (state[srcInst].isDead()) {
         state[srcInst].setLive();

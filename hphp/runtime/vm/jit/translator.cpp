@@ -1847,7 +1847,7 @@ void getInputsImpl(SrcKey startSk,
       }
       numRefCounted += curType.maybeCounted();
     }
-    return numRefCounted <= Translator::kMaxInlineReturnDecRefs;
+    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
   };
 
   if ((input & AllLocals) && wantInlineReturn()) {
@@ -2909,20 +2909,15 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     return false;
   }
 
-  constexpr int kMaxSubtraceAnalysisDepth = 2;
-  if (depth + 1 >= kMaxSubtraceAnalysisDepth) {
+  if (depth + 1 > RuntimeOption::EvalHHIRInliningMaxDepth) {
     FTRACE(1, "analyzeCallee: max inlining depth reached\n");
     return false;
   }
 
+  // TODO(2716400): support __call and friends
   if (numArgs != target->numParams()) {
     FTRACE(1, "analyzeCallee: param count mismatch {} != {}\n",
            numArgs, target->numParams());
-    return false;
-  }
-  if (target->numLocals() != target->numParams()) {
-    FTRACE(1, "analyzeCallee: not inlining functions with more locals "
-              "than params\n");
     return false;
   }
 
@@ -4151,13 +4146,13 @@ ActRecState::currentState() {
 }
 
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup) {
+                                  bool& magicCall, bool staticLookup,
+                                  Class* ctx) {
   if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {
-    Class* ctx = liveFunc()->cls();
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }
@@ -4166,9 +4161,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   MethodLookup::LookupResult res = staticLookup ?
-    g_vmContext->lookupClsMethod(func, cls, name, 0,
-                                 g_vmContext->getFP(), false) :
-    g_vmContext->lookupObjMethod(func, cls, name, false);
+    g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
+    g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
 
   if (res == MethodLookup::LookupResult::MethodNotFound) return nullptr;
 

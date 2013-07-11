@@ -233,6 +233,7 @@ NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
+NOOP_OPCODE(InlineFPAnchor)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -549,6 +550,14 @@ void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   auto reg = m_regs[src].reg(0);
   m_as.testq (reg, reg);
   emitFwdJcc(CC_NZ, inst->taken());
+}
+
+void CodeGenerator::cgPassFP(IRInstruction* inst) {
+  cgMov(inst);
+}
+
+void CodeGenerator::cgPassSP(IRInstruction* inst) {
+  cgMov(inst);
 }
 
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
@@ -2656,6 +2665,13 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   m_as.    loadq  (fpReg[AROFF(m_savedRbp)], rVmFp);
 }
 
+void CodeGenerator::cgDefInlineSP(IRInstruction* inst) {
+  auto fp  = m_regs[inst->src(0)].reg();
+  auto dst = m_regs[inst->dst()].reg();
+  auto off = -inst->extra<StackOffset>()->offset * sizeof(Cell);
+  emitLea(m_as, fp[off], dst);
+}
+
 void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // TODO(#2288359): this instruction won't be necessary (for
   // non-generator frames) when we don't track rVmSp independently
@@ -2668,11 +2684,23 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
-  cgMov(inst);
+  auto fpReg = m_regs[inst->src(0)].reg();
+  auto spReg = m_regs[inst->src(1)].reg();
+  auto func = curFunc();
+
+  ssize_t stashLoc = CONTOFF(m_stashedSP) - c_Continuation::getArOffset(func);
+
+  m_as.    storeq(spReg, fpReg[stashLoc]);
 }
 
 void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
-  cgMov(inst);
+  auto fpReg = m_regs[inst->src(0)].reg();
+  auto dstReg = m_regs[inst->dst()].reg();
+  auto func = curFunc();
+
+  ssize_t stashLoc = CONTOFF(m_stashedSP) - c_Continuation::getArOffset(func);
+
+  m_as.    loadq (fpReg[stashLoc], dstReg);
 }
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {

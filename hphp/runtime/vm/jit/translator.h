@@ -354,9 +354,6 @@ struct TranslArgs {
  */
 class Translator {
 public:
-  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
-  // generate an inline return for.
-  static const int kMaxInlineReturnDecRefs = 1;
   static const int MaxJmpsTracedThrough = 5;
 
 private:
@@ -692,7 +689,8 @@ bool outputDependsOnInput(const Op instr);
 
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup);
+                                  bool& magicCall, bool staticLookup,
+                                  Class* ctx);
 
 // This is used to check that return types of builtins are not simple
 // types. This is different from IS_REFCOUNTED_TYPE because builtins

@@ -44,6 +44,8 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
   , m_thisIsAvailable(false)
+  , m_frameSpansCall(false)
+  , m_needsFPAnchor(false)
   , m_refCountedMemValue(nullptr)
   , m_locals(func->numLocals())
 {
@@ -71,7 +73,8 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
     IRInstruction* srcInstr = tmp->inst();
     Opcode srcOpcode = srcInstr->op();
 
-    if (srcOpcode == LdThis) return true;
+    // ensure that the LdThis is in the same frame
+    if (srcOpcode == LdThis && srcInstr->src(0) == m_fpValue) return true;
 
     if (srcInstr->isPassthrough()) {
       tmp = srcInstr->getPassthroughValue();
@@ -137,6 +140,8 @@ void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
   m_spValue         = calleeSP;
   m_thisIsAvailable = target->cls() != nullptr && !target->isStatic();
   m_curFunc         = cns(target);
+  m_frameSpansCall  = false;
+  m_needsFPAnchor   = false;
 
   /*
    * Keep the outer locals somewhere for isValueAvailable() to know
@@ -174,8 +179,11 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(inst); break;
 
+  case InlineFPAnchor: m_needsFPAnchor = true;  break;
+
   case Call:
     m_spValue = inst->dst();
+    m_frameSpansCall = true;
     // A call pops the ActRec and pushes a return value.
     m_spOffset -= kNumActRecCells;
     m_spOffset += 1;
@@ -186,6 +194,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case CallArray:
     m_spValue = inst->dst();
+    m_frameSpansCall = true;
     // A CallArray pops the ActRec an array arg and pushes a return value.
     m_spOffset -= kNumActRecCells;
     assert(m_spOffset >= 0);
@@ -204,8 +213,16 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case ReDefGeneratorSP:
-  case DefSP:
+    m_spValue = inst->dst();
+    break;
+
   case ReDefSP:
+    m_spValue = inst->dst();
+    m_spOffset = inst->extra<ReDefSP>()->offset;
+    break;
+
+  case DefInlineSP:
+  case DefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<StackOffset>()->offset;
     break;
@@ -378,6 +395,8 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
   state->callerAvailableValues = m_callerAvailableValues;
   state->refCountedMemValue = m_refCountedMemValue;
   state->curMarker = m_curMarker;
+  state->frameSpansCall = m_frameSpansCall;
+  state->needsFPAnchor = m_needsFPAnchor;
   assert(state->curMarker.valid());
   return state;
 }
@@ -390,6 +409,11 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
 void TraceBuilder::saveState(Block* block) {
   if (State* state = m_snapshots[block]) {
     mergeState(state);
+
+    // reset caller's available values for all inlined frames
+    for (auto& state : m_inlineSavedStates) {
+      state->callerAvailableValues.clear();
+    }
   } else {
     m_snapshots[block] = createState().release();
   }
@@ -460,6 +484,8 @@ void TraceBuilder::useState(std::unique_ptr<State> state) {
   m_locals = std::move(state->locals);
   m_callerAvailableValues = std::move(state->callerAvailableValues);
   m_curMarker = state->curMarker;
+  m_needsFPAnchor = state->needsFPAnchor;
+  m_frameSpansCall = m_frameSpansCall || state->frameSpansCall;
   // If spValue is null, we merged two different but equivalent values.
   // Define a new sp using the known-good spOffset.
   if (!m_spValue) {
@@ -478,6 +504,8 @@ void TraceBuilder::clearTrackedState() {
   killCse(); // clears m_cseHash
   clearLocals();
   m_callerAvailableValues.clear();
+  m_frameSpansCall = false;
+  m_needsFPAnchor = false;
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
@@ -663,7 +691,18 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
-  if (isThisAvailable()) inst->setTaken(nullptr);
+  if (isThisAvailable()) {
+    auto fpInst = inst->src(0)->inst();
+    if (fpInst->op() == DefInlineFP) {
+      if (!m_frameSpansCall) { // check that we haven't nuked the SSATmp
+        auto spInst = fpInst->src(0)->inst();
+        if (spInst->op() == SpillFrame && spInst->src(3)->isA(Type::Obj)) {
+          return spInst->src(3);
+        }
+      }
+    }
+    inst->setTaken(nullptr);
+  }
   return nullptr;
 }
 
@@ -843,6 +882,15 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
 
   FTRACE(1, "{}{}\n", indent(), inst->toString());
 
+  // turn off ActRec optimization for instructions that will require a frame
+  if (m_inlineSavedStates.size() && !m_needsFPAnchor) {
+    if (inst->isNative() || inst->mayRaiseError()) {
+      m_needsFPAnchor = true;
+      gen(InlineFPAnchor, m_fpValue);
+      FTRACE(2, "Anchor for: {}\n", inst->toString());
+    }
+  }
+
   // First pass of tracebuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
@@ -963,6 +1011,13 @@ void TraceBuilder::reoptimize() {
     while (!instructions.empty()) {
       auto *inst = &instructions.front();
       instructions.pop_front();
+
+      // last attempt to elide ActRecs, if we still need the InlineFPAnchor
+      // it will be added back to the trace when we re-add instructions that
+      // rely on it
+      if (inst->op() == InlineFPAnchor) {
+        continue;
+      }
 
       // merging state looks at the current marker, and optimizeWork
       // below may create new instructions. Use the marker from this
@@ -1232,13 +1287,31 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
   assert(oldRef->type().isBoxed());
   assert(newRef->type().isBoxed());
 
-  Type newRefType = newRef->type();
-  for (auto& loc : m_locals) {
-    if (loc.value == oldRef) {
-      assert(!loc.unsafe);
-      loc.value = newRef;
-      loc.type  = newRefType;
+  auto findAndReplaceLocal = [&] (smart::vector<LocalState>& locals) {
+    Type newRefType = newRef->type();
+    for (auto& loc : locals) {
+      if (loc.value == oldRef) {
+        assert(!loc.unsafe);
+        loc.value = newRef;
+        loc.type  = newRefType;
+      }
     }
+  };
+
+  auto findAndReplaceCallerAvailable = [&] (std::vector<SSATmp*>& vec) {
+    size_t nTrackedLocs = vec.size();
+    for (size_t id = 0; id < nTrackedLocs; id++) {
+      if (vec[id] == oldRef) {
+        vec[id] = newRef;
+      }
+    }
+  };
+
+  findAndReplaceLocal(m_locals);
+  findAndReplaceCallerAvailable(m_callerAvailableValues);
+  for (auto& state : m_inlineSavedStates) {
+    findAndReplaceLocal(state->locals);
+    findAndReplaceCallerAvailable(state->callerAvailableValues);
   }
 }
 
@@ -1246,8 +1319,14 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
  * This method changes any boxed local into a BoxedCell type.
  */
 void TraceBuilder::dropLocalRefsInnerTypes() {
-  for (auto& loc : m_locals) {
-    if (loc.type.isBoxed()) loc.type = Type::BoxedCell;
+  auto dropTypes = [] (smart::vector<LocalState>& locals) {
+    for (auto& loc : locals) {
+      if (loc.type.isBoxed()) loc.type = Type::BoxedCell;
+    }
+  };
+  dropTypes(m_locals);
+  for (auto& state : m_inlineSavedStates) {
+    dropTypes(state->locals);
   }
 }
 
@@ -1258,20 +1337,30 @@ void TraceBuilder::dropLocalRefsInnerTypes() {
  * locals, however.
  */
 void TraceBuilder::killLocalsForCall() {
-  for (auto& loc : m_locals) {
-    SSATmp* t = loc.value;
-    // should not kill DefConst, and LdConst should be replaced by DefConst
-    if (!t || t->inst()->op() == DefConst) continue;
+  auto doKill = [&](smart::vector<LocalState>& locals) {
+    for (auto& loc : locals) {
+      SSATmp* t = loc.value;
+      // should not kill DefConst, and LdConst should be replaced by DefConst
+      if (!t || t->inst()->op() == DefConst) continue;
 
-    if (t->inst()->op() == LdConst) {
-      // make the new DefConst instruction
-      IRInstruction* clone = t->inst()->clone(&m_irFactory);
-      clone->setOpcode(DefConst);
-      loc.value = clone->dst();
-      continue;
+      if (t->inst()->op() == LdConst) {
+        // make the new DefConst instruction
+        IRInstruction* clone = t->inst()->clone(&m_irFactory);
+        clone->setOpcode(DefConst);
+        loc.value = clone->dst();
+        continue;
+      }
+      assert(!t->isConst());
+      loc.unsafe = true;
     }
-    assert(!t->isConst());
-    loc.unsafe = true;
+  };
+
+  doKill(m_locals);
+  m_callerAvailableValues.clear();
+
+  for (auto& state : m_inlineSavedStates) {
+    doKill(state->locals);
+    state->callerAvailableValues.clear();
   }
 }
 

@@ -149,10 +149,14 @@ public:
   int64_t m_index;
   Variant m_key;
   Variant m_value;
-  Func *m_origFunc;
+  Func* m_origFunc;
 
+  /* ActRec for continuation (does not live on stack) */
   ActRec* m_arPtr;
   p_ContinuationWaitHandle m_waitHandle;
+
+  /* temporary storage used to save the SP when inlining into a continuation */
+  void* m_stashedSP;
 
   String& getCalledClass() { not_reached(); }
 

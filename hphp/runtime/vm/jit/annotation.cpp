@@ -112,7 +112,9 @@ static void recordActRecPush(NormalizedInstruction& i,
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);
     bool magic = false;
-    const Func* func = lookupImmutableMethod(cls, name, magic, staticCall);
+    Class* ctx = i.source.func()->cls();
+    const Func* func = lookupImmutableMethod(cls, name, magic,
+                                             staticCall, ctx);
     if (func) {
       recordFunc(i, fcall, func);
     }

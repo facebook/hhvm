@@ -107,7 +107,8 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
     return uninit_null();
   }
 
-  switch(g_vmContext->lookupObjMethod(func, m_cls, name.get())) {
+  Class* ctx = arGetContextClass(g_vmContext->getFP());
+  switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case MethodLookup::LookupResult::MethodFoundWithThis:
     {
       Variant ret;

@@ -120,7 +120,6 @@ private:
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);
   SSATmp* simplifyCheckType(IRInstruction* inst);
   SSATmp* simplifyCheckStk(IRInstruction* inst);
-  SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
   SSATmp* simplifyLdCtx(IRInstruction*);

@@ -932,7 +932,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
-                                         (ActRec*)vmfp,
+                                         arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -975,7 +975,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
-                                         ec->getFP(),
+                                         arGetContextClass(ec->getFP()),
                                          false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -1020,7 +1020,7 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
   VMExecutionContext* ec = g_vmContext;
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
                                          nullptr,
-                                         (ActRec*)vmfp,
+                                         arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
   assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {

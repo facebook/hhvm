@@ -235,7 +235,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
         assert(cni->op() == OpRetC ||
                cni->op() == OpContRetC ||
                cni->op() == OpNativeImpl ||
-               !instrIsControlFlow(cni->op()));
+               !instrIsNonCallControlFlow(cni->op()));
 
         curBlock->addInstruction();
         cSk.advance(cUnit);

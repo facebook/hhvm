@@ -918,6 +918,18 @@ private:
    * that can be used after the inlined callee "returns".
    */
   std::stack<std::pair<SSATmp*,int32_t>> m_fpiStack;
+
+  /*
+   * When we know that a call site is being inlined we add its StkPtr
+   * offset pair to this stack to prevent it from being erroneously
+   * popped during an FCall.
+   *
+   * XXX: There should be a better way to do this.  We don't allow
+   * the tracelet to break during inlining so if we're careful it
+   * should be possible to make sure FPush* and FCall[Array|Builtin]
+   * is always matched with corresponding push()/pop().
+   */
+  std::stack<std::pair<SSATmp*,int32_t>> m_fpiActiveStack;
 };
 
 //////////////////////////////////////////////////////////////////////

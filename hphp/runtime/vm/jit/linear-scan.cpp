@@ -454,6 +454,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
         assert(opc == DefSP ||
                opc == ReDefSP ||
                opc == ReDefGeneratorSP ||
+               opc == PassSP ||
+               opc == DefInlineSP ||
                opc == Call ||
                opc == CallArray ||
                opc == SpillStack ||

@@ -1,6 +1,7 @@
 Next? 2-Sep-2013
   - Implement CachingIterator
   - Implement RecursiveCachingIterator
+  - Generalized heuristic for choosing when to inline in the jit
 
 "Achiote" 19-Aug-2013
   - Async stack traces in the debugger via the "wa" command

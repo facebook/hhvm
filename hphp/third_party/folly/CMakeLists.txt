@@ -3,7 +3,7 @@
 # add_definitions as needed
 add_definitions(-DFOLLY_NO_CONFIG=1)
 
-set(FOLLY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/folly/")
+set(FOLLY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/folly")
 
 # Generated files from folly/build/generate_*.py
 auto_sources(genfiles "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/gen")

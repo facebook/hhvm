@@ -439,7 +439,7 @@ char *url_raw_encode(const char *s, int &len) {
     if ((str[y] < '0' && str[y] != '-' && str[y] != '.') ||
       (str[y] < 'A' && str[y] > '9') ||
         (str[y] > 'Z' && str[y] < 'a' && str[y] != '_') ||
-      (str[y] > 'z')) {
+      (str[y] > 'z' && str[y] != '~')) {
       str[y++] = '%';
       str[y++] = hexchars[(unsigned char) s[x] >> 4];
       str[y] = hexchars[(unsigned char) s[x] & 15];

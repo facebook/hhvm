@@ -88,6 +88,7 @@
   CASE(UnsetM) \
   CASE(BindM) \
   CASE(FPushFuncD) \
+  CASE(FPushFuncU) \
   CASE(FPushFunc) \
   CASE(FPushClsMethodD) \
   CASE(FPushClsMethodF) \

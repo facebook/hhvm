@@ -1965,35 +1965,48 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   push(closure);
 }
 
-void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
-  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
-  const StringData* name = nep.first;
-  const Func* func       = Unit::lookupFunc(nep.second);
-  if (!func) {
-    // function lookup failed so just do the same as FPushFunc
-    emitFPushFunc(numParams, cns(name));
-    return;
+void HhbcTranslator::emitFPushFuncCommon(const Func* func,
+                                         const StringData* name,
+                                         const StringData* fallback,
+                                         int32_t numParams) {
+  if (func) {
+    func->validate();
+    if (func->isNameBindingImmutable(curUnit())) {
+      emitFPushActRec(cns(func),
+                      m_tb->genDefInitNull(),
+                      numParams,
+                      nullptr);
+      return;
+    }
   }
-  func->validate();
 
-  const bool immutable = func->isNameBindingImmutable(curUnit());
-
-  IRTrace* catchTrace = nullptr;
-  if (!immutable) {
-    catchTrace = getCatchTrace();  // LdFuncCached can throw
-  }
-  SSATmp* ssaFunc = immutable ? cns(func)
-                              : gen(LdFuncCached, catchTrace, cns(name));
+  // LdFuncCached can throw
+  IRTrace* catchTrace = getCatchTrace();
+  SSATmp* ssaFunc = fallback
+    ? gen(LdFuncCachedU, catchTrace, cns(name), cns(fallback))
+    : gen(LdFuncCached,  catchTrace, cns(name));
   emitFPushActRec(ssaFunc,
                   m_tb->genDefInitNull(),
                   numParams,
                   nullptr);
 }
 
+void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
+  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
+  const StringData* name = nep.first;
+  const Func* func       = Unit::lookupFunc(nep.second);
+  emitFPushFuncCommon(func, name, nullptr, numParams);
+}
+
 void HhbcTranslator::emitFPushFuncU(int32_t numParams,
                                     int32_t funcId,
                                     int32_t fallbackFuncId) {
-  PUNT(FPushFuncU);
+  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
+  const StringData* name     = nep.first;
+  const Func* func           = Unit::lookupFunc(nep.second);
+  const NamedEntityPair& fallbackNep = lookupNamedEntityPairId(fallbackFuncId);
+  const StringData* fallbackName     = fallbackNep.first;
+  emitFPushFuncCommon(func, name, fallbackName, numParams);
 }
 
 void HhbcTranslator::emitFPushFunc(int32_t numParams) {

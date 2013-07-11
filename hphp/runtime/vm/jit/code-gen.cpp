@@ -2248,6 +2248,43 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   });
 }
 
+void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
+  SSATmp* dst          = inst->dst();
+  SSATmp* methodName   = inst->src(0);
+  SSATmp* fallbackName = inst->src(1);
+
+  // allocate both cache handles
+  const StringData* name = methodName->getValStr();
+  CacheHandle ch = TargetCache::allocFixedFunction(name);
+  size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
+
+  const StringData* fallback = fallbackName->getValStr();
+  CacheHandle fch = TargetCache::allocFixedFunction(fallback);
+  size_t fallbackCacheOff = fch + offsetof(FixedFuncCache, m_func);
+
+  // check the first cache handle, then the fallback
+  auto dstReg = m_regs[dst].reg();
+  Label end;
+  if (dstReg == InvalidReg) {
+    m_as.   cmpq (0, rVmTl[funcCacheOff]);
+    m_as.   jcc8 (CC_NZ, end);
+    m_as.   cmpq (0, rVmTl[fallbackCacheOff]);
+  } else {
+    m_as.   loadq(rVmTl[funcCacheOff], dstReg);
+    m_as.   testq(dstReg, dstReg);
+    m_as.   jcc8 (CC_NZ, end);
+    m_as.   loadq(rVmTl[fallbackCacheOff], dstReg);
+    m_as.   testq(dstReg, dstReg);
+  }
+
+  // finally, jump to native call in astubs if neither hits
+  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+    // same helper as LdFuncCached
+    cgCallNative(a, inst);
+  });
+  asm_label(m_as, end);
+}
+
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
   cgLdFuncCachedCommon(inst);
   if (Block* taken = inst->taken()) {

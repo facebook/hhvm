@@ -911,6 +911,11 @@ Translator::translateFPushFuncD(const NormalizedInstruction& i) {
 }
 
 void
+Translator::translateFPushFuncU(const NormalizedInstruction& i) {
+  HHIR_EMIT(FPushFuncU, i.imm[0].u_IVA, i.imm[1].u_SA, i.imm[2].u_SA);
+}
+
+void
 Translator::translateFPassCOp(const NormalizedInstruction& i) {
   auto const op = i.op();
   if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {

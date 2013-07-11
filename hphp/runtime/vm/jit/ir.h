@@ -359,6 +359,7 @@ O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
+O(LdFuncCachedU,               D(Func), CStr CStr,                  N|C|E|Er) \
 O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \

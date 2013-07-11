@@ -2036,7 +2036,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       // Pseudo-outputs that affect translator state
       case FStack: {
         currentStackOffset += kNumActRecCells;
-        if (op == OpFPushFuncD) {
+        if (op == OpFPushFuncD || op == OpFPushFuncU) {
           const Unit& cu = *ni->unit();
           Id funcId = ni->imm[1].u_SA;
           const NamedEntityPair &nep = cu.lookupNamedEntityPairId(funcId);

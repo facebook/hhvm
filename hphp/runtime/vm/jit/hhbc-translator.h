@@ -255,6 +255,10 @@ struct HhbcTranslator {
                       const Func* func, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName = nullptr);
+  void emitFPushFuncCommon(const Func* func,
+                           const StringData* name,
+                           const StringData* fallback,
+                           int32_t numParams);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
   void emitFPushFuncU(int32_t numParams,
                       int32_t funcId,

@@ -318,6 +318,13 @@ class ObjectData : public CountableNF {
   void initProperties(int nProp);
 
   void getChildren(std::vector<TypedValue*> &out) {
+    // statically declared properties
+    Slot nProps = m_cls->numDeclProperties();
+    for (Slot i = 0; i < nProps; ++i) {
+      out.push_back(&propVec()[i]);
+    }
+
+    // dynamic properties
     ArrayData* props = o_properties.get();
     if (props) {
       props->getChildren(out);

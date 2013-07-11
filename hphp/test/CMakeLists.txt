@@ -1,12 +1,11 @@
 set(CXX_SOURCES)
 
-set(RECURSIVE_SOURCE_SUBDIRS vm)
+set(RECURSIVE_SOURCE_SUBDIRS ext)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND CXX_SOURCES ${files})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
-auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cpp")

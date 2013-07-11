@@ -65,3 +65,8 @@ if (FOLLY_IFUNC)
 endif()
 
 target_link_libraries(folly ${Boost_LIBRARIES} ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES} ${LIBUNWIND_LIBRARY})
+
+if (JEMALLOC_ENABLED)
+	target_link_libraries(folly ${JEMALLOC_LIB})
+endif()
+

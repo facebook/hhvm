@@ -196,11 +196,7 @@ struct Func {
   bool isNameBindingImmutable(const Unit* fromUnit) const;
 
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
-  int maxStackCells() const {
-    // All functions have to return something, which pushes at least 1 cell
-    assert(m_maxStackCells > 0);
-    return m_maxStackCells;
-  }
+  int maxStackCells() const { return m_maxStackCells; }
 
   bool byRef(int32_t arg) const;
   bool mustBeRef(int32_t arg) const;

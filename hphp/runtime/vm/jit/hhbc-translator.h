@@ -155,7 +155,6 @@ struct HhbcTranslator {
   void emitInterpOne(Type t, int popped);
   void emitInterpOne(Type t, int popped, int pushed);
   void emitInterpOne(const NormalizedInstruction&);
-  void emitInterpOneCF(int numPopped);
   void emitSmashLocals();
   std::string showStack() const;
   bool hasExit() const {
@@ -428,7 +427,6 @@ struct HhbcTranslator {
   void emitContKey();
   void emitContCurrent();
   void emitContStopped();
-  void emitContHandle();
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);

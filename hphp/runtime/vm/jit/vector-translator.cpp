@@ -98,36 +98,24 @@ Opcode canonicalOp(Opcode op) {
 }
 
 VectorEffects::VectorEffects(const IRInstruction* inst) {
-  int keyIdx = vectorKeyIdx(inst);
-  int valIdx = vectorValIdx(inst);
-  init(inst->op(),
-       inst->src(vectorBaseIdx(inst))->type(),
-       keyIdx == -1 ? Type::None : inst->src(keyIdx)->type(),
-       valIdx == -1 ? Type::None : inst->src(valIdx)->type());
+  init(inst->op(), inst->src(vectorBaseIdx(inst))->type());
 }
 
-VectorEffects::VectorEffects(Opcode op, Type base, Type key, Type val) {
-  init(op, base, key, val);
+VectorEffects::VectorEffects(Opcode op, Type base) {
+  init(op, base);
 }
 
-VectorEffects::VectorEffects(Opcode op,
-                             SSATmp* base, SSATmp* key, SSATmp* val) {
+VectorEffects::VectorEffects(Opcode op, SSATmp* base) {
   auto typeOrNone =
     [](SSATmp* val){ return val ? val->type() : Type::None; };
-  init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
+  init(op, typeOrNone(base));
 }
 
 VectorEffects::VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
-  int keyIdx = vectorKeyIdx(opc);
-  int valIdx = vectorValIdx(opc);
-  init(opc,
-       srcs[vectorBaseIdx(opc)]->type(),
-       keyIdx == -1 ? Type::None : srcs[keyIdx]->type(),
-       valIdx == -1 ? Type::None : srcs[valIdx]->type());
+  init(opc, srcs[vectorBaseIdx(opc)]->type());
 }
 
-void VectorEffects::init(const Opcode rawOp, const Type origBase,
-                         const Type key, const Type origVal) {
+void VectorEffects::init(const Opcode rawOp, const Type origBase) {
   baseType = origBase;
   bool basePtr, baseBoxed;
   stripBase(baseType, basePtr, baseBoxed);
@@ -139,11 +127,6 @@ void VectorEffects::init(const Opcode rawOp, const Type origBase,
 
   // Canonicalize the op to SetProp/SetElem/UnsetElem/SetWithRefElem
   auto const op = canonicalOp(rawOp);
-
-  /* Although it should work fine in practice, if we have a key it should
-   * either be a known DataType or Cell for now. */
-  assert(key.equals(Type::None) || key.isKnownDataType() ||
-         key.equals(Type::Cell));
 
   // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp || op == SetWithRefElem) &&
@@ -317,8 +300,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
 // Inspect the instruction we're about to translate and determine if
 // it can be executed without using an MInstrState struct.
 void HhbcTranslator::VectorTranslator::checkMIState() {
-  auto const& baseRtt = m_ni.inputs[m_mii.valCount()]->rtt;
-  Type baseType = Type::fromRuntimeType(baseRtt);
+  Type baseType = getInput(m_mii.valCount())->type();
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
   const bool isIssetM = m_ni.mInstrOp() == OpIssetM;
@@ -515,25 +497,8 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
 
   assert(mapContains(m_stackInputs, i) == (l.space == Location::Stack));
   switch (l.space) {
-    case Location::Stack: {
-      SSATmp* val = m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i]);
-      // Check if the type on our eval stack is at least as specific as what
-      // Transl::Translator came up with. We allow boxed types with differing
-      // inner types because of the different ways the two systems deal with
-      // reference types.
-      auto t = Type::fromRuntimeType(dl.rtt);
-      if (!val->isA(t) && !(val->isBoxed() && t.isBoxed())) {
-        FTRACE(1, "{}: hhir stack has a {} where Translator had a {}\n",
-               __func__, val->type().toString(), t.toString());
-        // Normally here we would make sure that Translator gave us a sensical
-        // type, but since we could be getting inputs from type-predicted
-        // instructions, we can't actually be sure that the types are going to
-        // match up. refineType is just going to ignore the Translator type
-        // if the runtime type is completely unrelated.
-        m_ht.refineType(val, t);
-      }
-      return val;
-    }
+    case Location::Stack:
+      return m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i]);
 
     case Location::Local:
       return m_ht.ldLoc(l.offset);
@@ -554,7 +519,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
 void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
   const DynLocation& base = *m_ni.inputs[m_iInd];
-  auto baseType = Type::fromRuntimeType(base.rtt);
+  auto baseType = getInput(m_iInd)->type();
   assert(baseType.isKnownDataType());
 
   if (base.location.isLocal()) {

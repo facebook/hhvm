@@ -478,8 +478,8 @@ O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr),                \
                                                              E|N|Mem|Refs|Er) \
-O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
-                                          C(Int),          T|E|N|Mem|Refs|Er) \
+O(InterpOneCF,               D(StkPtr), S(FramePtr) S(StkPtr),                \
+                                                           T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
@@ -1029,8 +1029,8 @@ struct VectorEffects {
                   SetLocTypeFunc setLocType);
 
   explicit VectorEffects(const IRInstruction* inst);
-  VectorEffects(Opcode op, Type base, Type key, Type val);
-  VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val);
+  VectorEffects(Opcode op, Type base);
+  VectorEffects(Opcode op, SSATmp* base);
   VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
 
   Type baseType;
@@ -1038,7 +1038,7 @@ struct VectorEffects {
   bool baseValChanged;
 
 private:
-  void init(const Opcode op, const Type base, const Type key, const Type val);
+  void init(const Opcode op, const Type base);
 };
 
 struct CatchInfo {

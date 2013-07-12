@@ -778,7 +778,6 @@ enum OutTypeConstraints {
   OutIncDec,            // For IncDecL
   OutStrlen,            // OpStrLen
   OutClassRef,          // KindOfClass
-  OutSetM,              // SetM is a very special snowflake
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
   OutNone

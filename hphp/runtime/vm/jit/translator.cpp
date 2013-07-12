@@ -582,6 +582,33 @@ predictOutputs(SrcKey startSk,
     }
   }
 
+  if (ni->op() == OpSetM) {
+    /*
+     * SetM pushes null for certain rare combinations of input types, a string
+     * if the base was a string, or (most commonly) its first stack input. We
+     * mark the output as predicted here and do a very rough approximation of
+     * what really happens; most of the time the prediction will be a noop
+     * since VectorTranslator side exits in all uncommon cases.
+     */
+
+    // If the base is a string, the output is probably a string.
+    Type baseType;
+    switch (ni->immVec.locationCode()) {
+      case LGL: case LGC:
+      case LNL: case LNC:
+      case LSL: case LSC:
+        baseType = Type::Gen;
+        break;
+
+      default:
+        baseType = Type::fromRuntimeType(ni->inputs[1]->rtt);
+    }
+    if (baseType.isString()) return KindOfString;
+
+    // Otherwise, it's probably the input type.
+    return ni->inputs[0]->rtt.valueType();
+  }
+
   static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfInvalid, 0.0);
   // Type predictions grow tracelets, and can have a side effect of making
@@ -792,51 +819,6 @@ getDynLocType(const SrcKey startSk,
         }
       }
       return inputs[idx]->rtt;
-    }
-
-    case OutSetM: {
-      /*
-       * SetM returns null for "invalid" inputs, or a string if the base was a
-       * string. VectorTranslator ensures that invalid inputs or a string
-       * output when we weren't expecting it will cause a side exit, so we can
-       * keep this fairly simple.
-       */
-
-      if (ni->immVecM.size() > 1) {
-        // We don't know the type of the base for the final operation so we
-        // can't assume anything about the output
-        // type.
-        return RuntimeType(KindOfAny);
-      }
-
-      // For single-element vectors, we can determine the output type from the
-      // base.
-      Type baseType;
-      switch (ni->immVec.locationCode()) {
-        case LGL: case LGC:
-        case LNL: case LNC:
-        case LSL: case LSC:
-          baseType = Type::Gen;
-          break;
-
-        default:
-          baseType = Type::fromRuntimeType(inputs[1]->rtt);
-      }
-
-      const bool setElem = mcodeMaybeArrayOrMapKey(ni->immVecM[0]);
-      const Type valType = Type::fromRuntimeType(inputs[0]->rtt);
-      if (setElem && baseType.maybe(Type::Str)) {
-        if (baseType.isString()) {
-          // The base is a string so our output is a string.
-          return RuntimeType(KindOfString);
-        } else if (!valType.isString()) {
-          // The base might be a string and our value isn't known to
-          // be a string. The output type could be Str or valType.
-          return RuntimeType(KindOfAny);
-        }
-      }
-
-      return inputs[0]->rtt;
     }
 
     case OutCInputL: {
@@ -1075,7 +1057,7 @@ static const struct {
   { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput,   -1 }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
-  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutSetM,           0 }},
+  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutPred,           0 }},
   { OpSetWithRefLM,{MVector|Local ,   Local,        OutNone,           0 }},
   { OpSetWithRefRM,{MVector|Stack1,   Local,        OutNone,          -1 }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp,          0 }},
@@ -1097,7 +1079,7 @@ static const struct {
   { OpUnsetL,      {Local,            Local,        OutNone,           0 }},
   { OpUnsetN,      {Stack1,           Local,        OutNone,          -1 }},
   { OpUnsetG,      {Stack1,           None,         OutNone,          -1 }},
-  { OpUnsetM,      {MVector,          None,         OutNone,           0 }},
+  { OpUnsetM,      {MVector,          Local,        OutNone,           0 }},
 
   /*** 8. Call instructions ***/
 
@@ -1145,7 +1127,7 @@ static const struct {
   { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassS,      {StackTop2|FuncdRef,
                                       Stack1,       OutUnknown,       -1 }},
-  { OpFPassM,      {MVector|FuncdRef, Stack1,       OutUnknown,        1 }},
+  { OpFPassM,      {MVector|FuncdRef, Stack1|Local, OutUnknown,        1 }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -1940,7 +1922,6 @@ bool outputDependsOnInput(const Op instr) {
     case OutBitOp:
     case OutSetOp:
     case OutIncDec:
-    case OutSetM:
     case OutFPushCufSafe:
       return true;
   }
@@ -2055,8 +2036,9 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
                                op == OpSetWithRefLM || op == OpSetWithRefRM ||
+                               op == OpUnsetM ||
                                op == OpIncDecL ||
-                               op == OpVGetM ||
+                               op == OpVGetM || op == OpFPassM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
                                op == OpSetL || op == OpBindL ||
                                op == OpUnsetL ||
@@ -2066,6 +2048,10 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpIterNext || op == OpIterNextK ||
                                op == OpMIterNext || op == OpMIterNextK ||
                                op == OpWIterNext || op == OpWIterNextK);
+        if (op == OpFPassM && !ni->preppedByRef) {
+          // Equivalent to CGetM. Won't mutate the base.
+          continue;
+        }
         if (op == OpIncDecL) {
           assert(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
@@ -2099,7 +2085,8 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         }
         if (op == OpSetM || op == OpSetOpM ||
             op == OpVGetM || op == OpBindM ||
-            op == OpSetWithRefLM || op == OpSetWithRefRM) {
+            op == OpSetWithRefLM || op == OpSetWithRefRM ||
+            op == OpUnsetM || op == OpFPassM) {
           switch (ni->immVec.locationCode()) {
             case LL: {
               const int kVecStart = (op == OpSetM ||
@@ -2111,7 +2098,12 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               DynLocation* inLoc = ni->inputs[kVecStart];
               assert(inLoc->location.isLocal());
               Location locLoc = inLoc->location;
-              if (inLoc->rtt.isString() ||
+              if (op == OpUnsetM) {
+                // UnsetM can change the value of its base local when it's an
+                // array. Output a new DynLocation with a the same type to
+                // reflect the new value.
+                ni->outLocal = t.newDynLocation(locLoc, inLoc->rtt);
+              } else if (inLoc->rtt.isString() ||
                   inLoc->rtt.valueType() == KindOfBoolean) {
                 // Strings and bools produce value-dependent results; "" and
                 // false upgrade to an array successfully, while other values

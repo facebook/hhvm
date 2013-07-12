@@ -462,6 +462,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == ExceptionBarrier ||
                opc == RetAdjustStack ||
                opc == InterpOne ||
+               opc == InterpOneCF ||
                opc == GenericRetDecRefs ||
                opc == CheckStk ||
                opc == GuardStk ||

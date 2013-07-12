@@ -1360,10 +1360,6 @@ void HhbcTranslator::emitContStopped() {
   gen(ContSetRunning, cont, cns(false));
 }
 
-void HhbcTranslator::emitContHandle() {
-  emitInterpOneCF(1);
-}
-
 void HhbcTranslator::emitStrlen() {
   Type inType = topC()->type();
 
@@ -3744,8 +3740,6 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
                                                            : Type::Cell;
     case OutStrlen:     return topType(0).isString() ? Type::Int : Type::Cell;
     case OutClassRef:   return Type::Cls;
-    case OutSetM:       return Type::Cell; // Imprecise but we can translate
-                                           // all cases that matter.
     case OutFPushCufSafe: return Type::None;
 
     case OutNone:       return Type::None;
@@ -3810,29 +3804,30 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
     case OpVGetM:
     case OpSetWithRefLM:
     case OpSetWithRefRM:
+    case OpUnsetM:
+    case OpFPassM:
       switch (inst.immVec.locationCode()) {
         case LL: {
           auto const& mii = getMInstrInfo(inst.mInstrOp());
           auto const& base = inst.inputs[mii.valCount()]->location;
           assert(base.space == Location::Local);
-          Type baseType = m_tb->getLocalType(base.offset);
-          assert(baseType.isBoxed() || baseType.notBoxed() ||
-                 baseType.equals(Type::Gen));
-          const bool baseBoxed = baseType.isBoxed();
-          baseType = baseType.strip();
 
-          // This is a simple, conservative approximation of the real type flow
-          // logic that happens in VectorTranslator.
-          if (baseType.maybe(Type::Str | Type::Bool | Type::Null)) {
-            auto promoted = mcodeMaybePropName(inst.immVecM[0]) ? Type::Obj
-                                                                : Type::Arr;
-            if (!baseType.isNull()) {
-              // Promotion isn't guaranteed to happen so the base might keep
-              // its original type.
-              promoted = promoted | baseType;
-            }
-            if (baseBoxed) promoted = boxType(promoted);
-            gen(OverrideLoc, promoted, LocalId(base.offset), m_tb->fp());
+          // VectorEffects expects to be used in the context of a normally
+          // translated instruction, not an interpOne. The two important
+          // differences are that the base is normally a PtrTo* and we need to
+          // supply an IR opcode representing the operation. SetWithRefElem is
+          // used instead of SetElem because SetElem makes a few assumptions
+          // about side exits that interpOne won't do.
+          auto const baseType = m_tb->getLocalType(base.offset).ptr();
+          auto const isUnset = inst.op() == OpUnsetM;
+          auto const isProp = mcodeMaybePropName(inst.immVecM[0]);
+
+          if (isUnset && isProp) break;
+          auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
+          VectorEffects ve(op, baseType);
+          if (ve.baseValChanged) {
+            gen(OverrideLoc, ve.baseType.deref(),
+                LocalId(base.offset), m_tb->fp());
           }
           break;
         }
@@ -3896,19 +3891,11 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed) {
   idata.cellsPushed = pushed;
   idata.opcode = u->getOpcode(bcOff());
 
-  gen(InterpOne, outType, idata, m_tb->fp(), sp);
+  auto const changesPC = opcodeChangesPC(idata.opcode);
+  gen(changesPC ? InterpOneCF : InterpOne, outType, idata, m_tb->fp(), sp);
   assert(m_stackDeficit == 0);
-}
 
-void HhbcTranslator::emitInterpOneCF(int numPopped) {
-  // We're calling into the interpreter so we want the stack synced to memory.
-  SSATmp* sp = spillStack();
-  // discard the top elements of the stack, which are consumed by this instr
-  discard(numPopped);
-  assert(numPopped == m_stackDeficit);
-  gen(InterpOneCF, m_tb->fp(), sp, cns(bcOff()));
-  m_stackDeficit = 0;
-  m_hasExit = true;
+  if (changesPC) m_hasExit = true;
 }
 
 void HhbcTranslator::emitSmashLocals() {

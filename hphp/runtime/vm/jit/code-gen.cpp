@@ -5450,11 +5450,10 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgInterpOne(IRInstruction* inst) {
+void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   SSATmp* fp = inst->src(0);
   SSATmp* sp = inst->src(1);
-  auto const& extra = *inst->extra<InterpOne>();
-  int64_t pcOff = extra.bcOff;
+  int64_t pcOff = inst->extra<InterpOneData>()->bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
   void* interpOneHelper = interpOneEntryPoints[opc];
@@ -5462,9 +5461,14 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   auto dstReg = InvalidReg;
   cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, SyncOptions::kSyncPoint,
                ArgGroup(m_regs).ssa(fp).ssa(sp).imm(pcOff));
+}
 
+void CodeGenerator::cgInterpOne(IRInstruction* inst) {
+  cgInterpOneCommon(inst);
+
+  auto const& extra = *inst->extra<InterpOne>();
   auto newSpReg = m_regs[inst->dst()].reg();
-  assert(newSpReg == m_regs[sp].reg());
+  assert(newSpReg == m_regs[inst->src(1)].reg());
 
   int64_t spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
   if (spAdjustBytes != 0) {
@@ -5473,16 +5477,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
-  SSATmp* fp = inst->src(0);
-  SSATmp* sp = inst->src(1);
-  int64_t pcOff = inst->src(2)->getValInt();
-
-  auto opc = *(curFunc()->unit()->at(pcOff));
-  void* interpOneHelper = interpOneEntryPoints[opc];
-
-  auto dstReg = InvalidReg;
-  cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, SyncOptions::kSyncPoint,
-               ArgGroup(m_regs).ssa(fp).ssa(sp).imm(pcOff));
+  cgInterpOneCommon(inst);
 
   // The interpOne method returns a pointer to the current ExecutionContext
   // in rax.  Use it read the 'm_fp' and 'm_stack.m_top' fields into the

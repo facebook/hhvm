@@ -129,9 +129,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
                          index - (numPushed - numPopped));
   }
 
-  case InterpOne: {
+  case InterpOne:
+  case InterpOneCF: {
     SSATmp* prevSp = inst->src(1);
-    auto const& extra = *inst->extra<InterpOne>();
+    auto const& extra = *inst->extra<InterpOneData>();
     int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
     Type resultType = inst->typeParam();
     switch (extra.opcode) {

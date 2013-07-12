@@ -3476,12 +3476,15 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       } catch (JIT::FailedIRGen& fcg) {
         always_assert(!ni->interp);
         ni->interp = true;
+        FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
+               "after failing to generate ir: {} \n\n",
+               getCurrentTransID(), ni->toString(), fcg.what());
         return Retry;
       }
       assert(ni->source.offset() >= t.func()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
       // analysis, but breaksTracelet is authoritative.
-      if (ni->breaksTracelet) break;
+      if (ni->breaksTracelet || m_irTrans->hhbcTrans().hasExit()) break;
     }
     traceEnd();
 
@@ -3497,9 +3500,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         if (ni->source.offset() == fcg.bcOff) {
           always_assert(!ni->interp);
           ni->interp = true;
-          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
-                "after failing to code-gen \n\n",
-                getCurrentTransID(), ni->toString().c_str());
+          FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
+                 "after failing to code-gen \n\n",
+                 getCurrentTransID(), ni->toString(), fcg.what());
           return Retry;
         }
       }

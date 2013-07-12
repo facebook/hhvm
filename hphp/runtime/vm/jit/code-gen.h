@@ -175,6 +175,7 @@ private:
                     ArgGroup& args,
                     RegSet toSave,
                     DestType destType = DestType::SSA);
+  void cgInterpOneCommon(IRInstruction* inst);
 
   void cgStore(PhysReg base,
                int64_t off,

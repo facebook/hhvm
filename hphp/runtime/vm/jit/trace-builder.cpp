@@ -237,9 +237,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     m_spOffset += kNumActRecCells;
     break;
 
-  case InterpOne: {
+  case InterpOne:
+  case InterpOneCF: {
     m_spValue = inst->dst();
-    auto const& extra = *inst->extra<InterpOne>();
+    auto const& extra = *inst->extra<InterpOneData>();
     int64_t stackAdjustment = extra.cellsPopped - extra.cellsPushed;
     // push the return value if any and adjust for the popped values
     m_spOffset -= stackAdjustment;

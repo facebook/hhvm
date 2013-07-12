@@ -5851,9 +5851,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
         goto free_frame;                                \
       }                                                 \
     } else {                                            \
-      tvCastTo##kind##InPlace(&args[-1]);               \
-    }
-    break;
+      tvCastTo##kind##InPlace(&args[-i]);               \
+    }                                                   \
+    break; /* end of case */
 
     switch (pi.builtinType()) {
       CASE(Boolean)

@@ -3678,7 +3678,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
 }
 
 template<class Op>
-void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
+inline void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
   NEXT();
   auto const c1 = m_stack.topC();
   auto const c2 = m_stack.indC(1);
@@ -3689,7 +3689,7 @@ void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
 }
 
 template<class Op>
-void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
+inline void OPTBLD_INLINE VMExecutionContext::implCellBinOpBool(PC& pc, Op op) {
   NEXT();
   auto const c1 = m_stack.topC();
   auto const c2 = m_stack.indC(1);

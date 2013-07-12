@@ -3250,8 +3250,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
         result = irTranslateTracelet(*tp);
-        static const bool requireRegion = getenv("HHVM_REQUIRE_REGION");
-        assert(IMPLIES(region && requireRegion, result != Success));
+        DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
+        assert(IMPLIES(region && reqRegion, result != Success));
       }
 
       if (result != Success) {

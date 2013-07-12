@@ -214,7 +214,7 @@ bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
 // simplicity of the exceptional path.
 void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   // One byte + one byte argument
-  auto ops = reinterpret_cast<const Op*>(pc);
+  DEBUG_ONLY auto ops = reinterpret_cast<const Op*>(pc);
   assert(ops[0] == OpContSuspend || ops[0] == OpContSuspendK);
   assert(ops[2] == OpNull); // One byte
   assert(ops[3] == OpThrow); // One byte

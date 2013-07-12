@@ -7134,22 +7134,23 @@ void VMExecutionContext::dispatch() {
   }
 }
 
-void VMExecutionContext::dispatchN(int numInstrs) {
-  dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
-  // We are about to go back to Jit, check whether we should
-  // stick with interpreter
-  if (DEBUGGER_FORCE_INTR) {
+// We are about to go back to translated code, check whether we should
+// stick with the interpreter. NB: if we've just executed a return
+// from pseudomain, then there's no PC and no more code to interpret.
+void VMExecutionContext::switchModeForDebugger() {
+  if (DEBUGGER_FORCE_INTR && (getPC() != 0)) {
     throw VMSwitchMode();
   }
 }
 
+void VMExecutionContext::dispatchN(int numInstrs) {
+  dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
+  switchModeForDebugger();
+}
+
 void VMExecutionContext::dispatchBB() {
   dispatchImpl<BreakOnCtlFlow>(0);
-  // We are about to go back to Jit, check whether we should
-  // stick with interpreter
-  if (DEBUGGER_FORCE_INTR) {
-    throw VMSwitchMode();
-  }
+  switchModeForDebugger();
 }
 
 void VMExecutionContext::recordCodeCoverage(PC pc) {

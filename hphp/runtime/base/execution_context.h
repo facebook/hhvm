@@ -687,6 +687,7 @@ private:
   bool prepareArrayArgs(ActRec* ar, ArrayData* args);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
+  void switchModeForDebugger();
   int m_coverPrevLine;
   HPHP::Unit* m_coverPrevUnit;
   Array m_evaledArgs;

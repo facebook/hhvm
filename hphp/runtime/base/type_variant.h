@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/type_object.h"
 #include "hphp/runtime/base/type_array.h"
 #include "hphp/runtime/base/memory/smart_allocator.h"
-#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/macros.h"
 
 namespace HPHP {

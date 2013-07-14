@@ -16,9 +16,9 @@
 
 #define INLINE_VARIANT_HELPER 1
 
-#include "hphp/runtime/base/array/hphp_array.h"
-#include "hphp/runtime/base/array/array_init.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/runtime_error.h"

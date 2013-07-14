@@ -22,7 +22,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array_init.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;

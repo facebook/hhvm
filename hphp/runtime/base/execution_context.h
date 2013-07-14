@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/server/virtual_host.h"
 #include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"

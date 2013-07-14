@@ -36,7 +36,7 @@
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"

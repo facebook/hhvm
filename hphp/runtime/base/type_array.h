@@ -26,7 +26,7 @@
 
 #include "hphp/runtime/base/util/smart_ptr.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/array/array_data.h"
+#include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/type_string.h"
 #include "hphp/runtime/base/hphp_value.h"
 

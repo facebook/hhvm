@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_collections.h"
 

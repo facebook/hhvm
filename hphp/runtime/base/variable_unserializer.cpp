@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/variable_unserializer.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/zend/zend_strtod.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/ext/ext_class.h"
 
 namespace HPHP {

@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/zend/zend_string.h"
 #include "hphp/runtime/base/zend/zend_qsort.h"
 #include "hphp/runtime/base/zend/zend_printf.h"
-#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/array_util.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/ext/ext_iconv.h"
 #include "unicode/coll.h" // icu

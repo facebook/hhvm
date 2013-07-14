@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array/array_util.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array_util.h"
+#include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/runtime_error.h"

@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/tv_arith.h"
 #include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"

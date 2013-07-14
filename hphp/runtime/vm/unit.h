@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/repo_helpers.h"
 #include "hphp/runtime/vm/named_entity.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/hphp_array.h"
 #include "hphp/util/range.h"
 #include "hphp/util/parser/location.h"
 #include "hphp/runtime/base/md5.h"

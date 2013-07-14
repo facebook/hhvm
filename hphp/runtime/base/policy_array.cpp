@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array/policy_array.h"
-#include "hphp/runtime/base/array/array_init.h"
-#include "hphp/runtime/base/array/array_iterator.h"
-#include "hphp/runtime/base/array/hphp_array.h"
-#include "hphp/runtime/base/array/sort_helpers.h"
+#include "hphp/runtime/base/policy_array.h"
+#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/sort_helpers.h"
 #include "folly/Foreach.h"
 
 TRACE_SET_MOD(runtime);
@@ -596,9 +596,9 @@ void PolicyArray::nextInsertWithRef(const Variant& v) {
   // We need to define k here (before the if/grow) because otherwise
   // the overzealous gcc issues a spurious warning as such:
   //
-  // hphp/runtime/base/array/policy_array.h: In member function 'void
+  // hphp/runtime/base/policy_array.h: In member function 'void
   // HPHP::PolicyArray::nextInsertWithRef(const HPHP::Variant&)':
-  // hphp/runtime/base/array/policy_array.h:114:5: error: assuming
+  // hphp/runtime/base/policy_array.h:114:5: error: assuming
   // signed overflow does not occur when assuming that (X + c) < X is
   // always false [-Werror=strict-overflow]
   auto const k = nextKeyBump();

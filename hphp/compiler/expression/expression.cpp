@@ -35,7 +35,7 @@
 #include "hphp/compiler/expression/function_call.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/array_iterator.h"
 
 using namespace HPHP;
 

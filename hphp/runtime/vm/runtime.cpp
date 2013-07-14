@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"

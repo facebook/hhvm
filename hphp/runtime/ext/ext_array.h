@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ARRAY_H_
 
 #include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/array_util.h"
 #include "hphp/runtime/base/zend/zend_collator.h"
 
 namespace HPHP {

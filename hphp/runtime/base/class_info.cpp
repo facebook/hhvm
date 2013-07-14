@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/array/array_util.h"
+#include "hphp/runtime/base/array_util.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/hphp_system.h"

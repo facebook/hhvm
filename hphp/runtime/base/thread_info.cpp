@@ -16,7 +16,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"

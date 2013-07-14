@@ -83,7 +83,7 @@
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/variable_serializer.h"

@@ -21,7 +21,7 @@
 #include "hphp/util/thread_local.h"
 #include "curl/curl.h"
 #include <time.h>
-#include "hphp/runtime/base/shared/shared_string.h"
+#include "hphp/runtime/base/shared_string.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {

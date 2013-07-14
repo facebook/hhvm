@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_extended.h"
 
-#include "hphp/runtime/base/memory/tracer.h"
+#include "hphp/runtime/base/tracer.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

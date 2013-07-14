@@ -16,13 +16,13 @@
 */
 
 #include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/base/zend/zend_url.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_url.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/runtime/base/ini_setting.h"
 
 extern "C" {

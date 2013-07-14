@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 #define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 
-#include "hphp/runtime/base/util/thrift_buffer.h"
-#include "hphp/runtime/base/file/socket.h"
+#include "hphp/runtime/base/thrift_buffer.h"
+#include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/variable_serializer.h"
 
 namespace HPHP {

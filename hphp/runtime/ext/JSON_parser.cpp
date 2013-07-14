@@ -31,7 +31,7 @@ SOFTWARE.
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend/utf8_decode.h"
+#include "hphp/runtime/base/utf8_decode.h"
 
 #include "hphp/system/systemlib.h"
 

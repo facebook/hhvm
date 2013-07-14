@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/rpc_request_handler.h"
 #include "hphp/runtime/server/satellite_server.h"
-#include "hphp/runtime/base/util/libevent_http_client.h"
+#include "hphp/runtime/base/libevent_http_client.h"
 #include "hphp/runtime/server/job_queue_vm_stack.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/job_queue.h"

@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/mailparse/mime.h"
 #include "hphp/runtime/ext/ext_stream.h"
-#include "hphp/runtime/base/file/mem_file.h"
+#include "hphp/runtime/base/mem_file.h"
 #include "hphp/runtime/base/runtime_error.h"
 
 #define MAXLEVELS  20

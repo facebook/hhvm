@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/soap/encoding.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

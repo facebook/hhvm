@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_list.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
-#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/ext_file.h"
 
 namespace HPHP { namespace Eval {

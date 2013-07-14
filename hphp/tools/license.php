@@ -24,12 +24,12 @@ $excluded = array(
 
   // non-PHP licenses
   'compiler/parser/hphp.tab.cpp',
-  'runtime/base/zend/utf8_decode.c',
-  'runtime/base/zend/utf8_to_utf16.c',
-  'runtime/base/zend/zend_strtod.cpp',
+  'runtime/base/utf8_decode.c',
+  'runtime/base/utf8_to_utf16.c',
+  'runtime/base/zend_strtod.cpp',
   'runtime/ext/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
-  'runtime/base/zend/zend_ini.tab.cpp',
+  'runtime/base/zend_ini.tab.cpp',
   'third_party/',
   'util/safesort.h',
 );
@@ -43,7 +43,7 @@ $files_external_party = array(
 
 $files_zend = array(
   'util/zend/',
-  'runtime/base/zend/',
+  'runtime/base/',
 );
 $files_php = array(
   'runtime/ext/',

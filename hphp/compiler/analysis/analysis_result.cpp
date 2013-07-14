@@ -46,7 +46,7 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend_printf.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/logger.h"

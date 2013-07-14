@@ -18,16 +18,16 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/zend_string.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/plain_file.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)

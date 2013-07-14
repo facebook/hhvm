@@ -42,7 +42,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat_cache.h"
-#include "hphp/runtime/base/shared/shared_variant.h"
+#include "hphp/runtime/base/shared_variant.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
 #include "hphp/runtime/vm/hhbc.h"
@@ -64,8 +64,8 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/server/source_root_info.h"
-#include "hphp/runtime/base/util/extended_logger.h"
-#include "hphp/runtime/base/memory/tracer.h"
+#include "hphp/runtime/base/extended_logger.h"
+#include "hphp/runtime/base/tracer.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"

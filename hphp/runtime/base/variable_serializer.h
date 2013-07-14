@@ -18,8 +18,8 @@
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 

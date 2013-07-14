@@ -24,7 +24,7 @@
 
 #include <boost/static_assert.hpp>
 
-#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/smart_ptr.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/type_string.h"

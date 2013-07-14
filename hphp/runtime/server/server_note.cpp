@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/server_note.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/request_local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

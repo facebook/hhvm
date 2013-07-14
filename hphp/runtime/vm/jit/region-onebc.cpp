@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/smart_containers.h"
 
 namespace HPHP { namespace JIT {
 

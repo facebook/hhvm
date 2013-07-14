@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/exceptions.h"
 
 #include "hphp/system/systemlib.h"
 

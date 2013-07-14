@@ -19,7 +19,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/trace.h"
 

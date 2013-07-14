@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/zend/zend_url.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_url.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/source_root_info.h"
@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/replay_transport.h"
 #include "hphp/runtime/server/virtual_host.h"
-#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/http_client.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 

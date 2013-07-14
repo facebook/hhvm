@@ -24,7 +24,7 @@
 #include "libxml/tree.h"
 #include "libxml/xmlwriter.h"
 #include "libxml/uri.h"
-#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

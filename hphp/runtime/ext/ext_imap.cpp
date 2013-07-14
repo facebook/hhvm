@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_imap.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/system/systemlib.h"

@@ -16,12 +16,12 @@
 */
 
 #include "hphp/runtime/ext/ext_zlib.h"
-#include "hphp/runtime/base/file/file.h"
-#include "hphp/runtime/base/file/mem_file.h"
-#include "hphp/runtime/base/file/zip_file.h"
-#include "hphp/runtime/base/file/stream_wrapper.h"
-#include "hphp/runtime/base/file/stream_wrapper_registry.h"
-#include "hphp/runtime/base/file/file_stream_wrapper.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/mem_file.h"
+#include "hphp/runtime/base/zip_file.h"
+#include "hphp/runtime/base/stream_wrapper.h"
+#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file_stream_wrapper.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 #ifdef HAVE_SNAPPY

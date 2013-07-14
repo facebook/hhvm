@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HTTP_REQUEST_HANDLER_H_
 #define incl_HPHP_HTTP_REQUEST_HANDLER_H_
 
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/server/virtual_host.h"
 #include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/server/server.h"

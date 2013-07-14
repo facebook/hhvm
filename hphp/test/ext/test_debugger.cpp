@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_preg.h"
 #include "hphp/runtime/ext/ext_options.h"
-#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/zend_math.h"
 #include "hphp/util/async_func.h"
 #include "hphp/util/process.h"
 

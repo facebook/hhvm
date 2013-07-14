@@ -24,7 +24,7 @@
 #include "libxml/tree.h"
 #include "libxml/xmlreader.h"
 #include "libxml/uri.h"
-#include "hphp/runtime/base/file/file.h"
+#include "hphp/runtime/base/file.h"
 
 typedef int (*xmlreader_read_int_t)(xmlTextReaderPtr reader);
 typedef unsigned char *(*xmlreader_read_char_t)(xmlTextReaderPtr reader);

@@ -17,9 +17,9 @@
 
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/libevent_http_client.h"
-#include "hphp/runtime/base/util/curl_tls_workarounds.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/libevent_http_client.h"
+#include "hphp/runtime/base/curl_tls_workarounds.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

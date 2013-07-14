@@ -16,10 +16,10 @@
 */
 
 #include "hphp/runtime/ext/ext_iconv.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend_string.h"
 
 #define ICONV_SUPPORTS_ERRNO 1
 #include <iconv.h>

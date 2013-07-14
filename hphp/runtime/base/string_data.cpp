@@ -15,14 +15,14 @@
 */
 
 #include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/shared/shared_variant.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"
 #include <math.h>
-#include "hphp/runtime/base/zend/zend_printf.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/zend/zend_strtod.h"
+#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend_strtod.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/runtime_error.h"

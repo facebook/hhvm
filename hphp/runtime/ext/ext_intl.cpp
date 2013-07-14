@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/zend/intl_convert.h"
-#include "hphp/runtime/base/zend/zend_collator.h"
-#include "hphp/runtime/base/zend/zend_qsort.h"
+#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/intl_convert.h"
+#include "hphp/runtime/base/zend_collator.h"
+#include "hphp/runtime/base/zend_qsort.h"
 #include "unicode/uidna.h"
 #include "unicode/ustring.h"
 #include "unicode/ucol.h" // icu

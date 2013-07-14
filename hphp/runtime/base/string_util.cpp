@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/util/zend/zend_html.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/zend/zend_url.h"
+#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend_url.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/builtin_functions.h"

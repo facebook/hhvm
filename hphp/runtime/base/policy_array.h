@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array_data.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/util/trace.h"
 

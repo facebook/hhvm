@@ -19,9 +19,9 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/zend/zend_printf.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend_printf.h"
 
 namespace HPHP {
 

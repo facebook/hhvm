@@ -31,7 +31,7 @@
 #include "hphp/runtime/server/admin_request_handler.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/server_note.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory_manager.h"
 #include "hphp/util/process.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded_data.h"
@@ -48,9 +48,9 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
-#include "hphp/runtime/base/util/simple_counter.h"
-#include "hphp/runtime/base/util/extended_logger.h"
-#include "hphp/runtime/base/file/stream_wrapper_registry.h"
+#include "hphp/runtime/base/simple_counter.h"
+#include "hphp/runtime/base/extended_logger.h"
+#include "hphp/runtime/base/stream_wrapper_registry.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>

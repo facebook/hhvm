@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/server/http_request_handler.h"
-#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/http_client.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/libevent_server.h"
 

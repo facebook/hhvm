@@ -19,7 +19,7 @@
 #define incl_HPHP_JSON_PARSER_H_
 
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string_buffer.h"
 
 void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,

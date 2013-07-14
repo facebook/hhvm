@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/shared/shared_map.h"
+#include "hphp/runtime/base/shared_map.h"
 #include "hphp/runtime/base/policy_array.h"
 #include "hphp/runtime/base/comparisons.h"
 

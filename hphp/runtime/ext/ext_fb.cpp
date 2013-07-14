@@ -24,7 +24,7 @@
 #include "netinet/in.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/intercept.h"

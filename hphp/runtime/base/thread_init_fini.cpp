@@ -15,13 +15,13 @@
 */
 
 #include "hphp/runtime/base/thread_init_fini.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/server_note.h"
-#include "hphp/runtime/base/zend/zend_strtod.h"
-#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/zend_strtod.h"
+#include "hphp/runtime/base/zend_math.h"
 #include "hphp/util/async_func.h"
 #include "hphp/util/alloc.h"
 #include "hphp/runtime/base/hardware_counter.h"

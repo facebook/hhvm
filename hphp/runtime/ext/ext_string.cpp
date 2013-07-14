@@ -16,13 +16,13 @@
 */
 
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/zend/zend_url.h"
-#include "hphp/runtime/base/zend/zend_printf.h"
-#include "hphp/runtime/base/zend/zend_scanf.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend_url.h"
+#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend_scanf.h"
 #include "hphp/runtime/base/bstring.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/request_local.h"
 #include "hphp/util/lock.h"
 #include <locale.h>
 #include "hphp/runtime/server/http_request_handler.h"

@@ -19,7 +19,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/hhbc.h"

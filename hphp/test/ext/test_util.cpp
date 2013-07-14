@@ -17,8 +17,8 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/shared/shared_string.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/shared_string.h"
+#include "hphp/runtime/base/zend_string.h"
 
 #define VERIFY_DUMP(map, exp)                                           \
   if (!(exp)) {                                                         \

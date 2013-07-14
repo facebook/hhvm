@@ -18,8 +18,8 @@
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
 #include "hphp/runtime/debugger/break_point.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP { namespace Eval {

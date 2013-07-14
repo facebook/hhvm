@@ -15,8 +15,8 @@
 */
 
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend_string.h"
 
 namespace HPHP {
 

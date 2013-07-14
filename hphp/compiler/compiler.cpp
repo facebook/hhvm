@@ -35,7 +35,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/async_func.h"
 #include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread_init_fini.h"
 #include "hphp/runtime/vm/repo.h"

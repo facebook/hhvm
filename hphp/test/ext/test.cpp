@@ -15,7 +15,7 @@
 */
 
 #include "hphp/test/ext/test.h"
-#include "hphp/runtime/base/shared/shared_store_base.h"
+#include "hphp/runtime/base/shared_store_base.h"
 #include "hphp/compiler/option.h"
 
 using namespace HPHP;

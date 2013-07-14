@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_icu_uspoof.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/exceptions.h"
 
 #include "hphp/system/systemlib.h"
 

@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/server/replay_transport.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {

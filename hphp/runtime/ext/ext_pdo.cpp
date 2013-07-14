@@ -23,8 +23,8 @@
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/macros.h"
 
 #include "hphp/system/systemlib.h"

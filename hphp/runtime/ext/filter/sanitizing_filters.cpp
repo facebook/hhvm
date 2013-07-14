@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_string.h"
 
 namespace HPHP {
 

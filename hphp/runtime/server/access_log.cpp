@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/access_log.h"
-#include "hphp/runtime/base/time/datetime.h"
-#include "hphp/runtime/base/time/timestamp.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/timestamp.h"
 #include <time.h>
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/server_note.h"

@@ -24,23 +24,23 @@
  */
 
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
+#include "hphp/runtime/base/zend_functions.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/util/smart_object.h"
+#include "hphp/runtime/base/smart_object.h"
 #include "hphp/runtime/base/list_assignment.h"
 #include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/file/plain_file.h"
+#include "hphp/runtime/base/plain_file.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/simple_counter.h"
+#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/simple_counter.h"
 #include "hphp/util/shm_counter.h"
 
 namespace HPHP {

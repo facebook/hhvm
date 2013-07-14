@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/print.h"
 
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen.h"

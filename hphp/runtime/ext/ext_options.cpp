@@ -20,12 +20,12 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend_string.h"
 #include "hphp/util/process.h"
 #include <sys/utsname.h>
 #include <pwd.h>

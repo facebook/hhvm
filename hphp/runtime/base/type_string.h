@@ -23,7 +23,7 @@
 #endif
 
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/util/smart_ptr.h"
+#include "hphp/runtime/base/smart_ptr.h"
 #include "hphp/runtime/base/string_data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp_value.h"

@@ -24,7 +24,7 @@
 #include "hphp/util/case_insensitive.h"
 #include <vector>
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory_manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>

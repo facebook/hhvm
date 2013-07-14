@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/base_includes.h"
 #include "mysql.h"
-#include "hphp/runtime/base/memory/smart_containers.h"
+#include "hphp/runtime/base/smart_containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR

@@ -17,7 +17,7 @@
 #include "hphp/runtime/server/libevent_server.h"
 
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/debugger/debugger.h"

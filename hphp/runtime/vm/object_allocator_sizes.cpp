@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/object_allocator_sizes.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/object_data.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/runtime/base/smart_allocator.h"
 
 namespace HPHP {
 

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/util/libevent_http_client.h"
 #include "hphp/runtime/base/util/curl_tls_workarounds.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #define CURLOPT_RETURNTRANSFER 19913

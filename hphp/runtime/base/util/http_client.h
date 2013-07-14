@@ -18,15 +18,15 @@
 #define incl_HPHP_HTTP_CLIENT_H_
 
 #include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class HttpClient {
 public:
-  HttpClient(int timeout = 5 /* seconds */, int maxRedirect = 1,
-             bool use11 = true, bool decompress = false);
+  explicit HttpClient(int timeout = 5 /* seconds */, int maxRedirect = 1,
+                      bool use11 = true, bool decompress = false);
 
   /**
    * Authentication.

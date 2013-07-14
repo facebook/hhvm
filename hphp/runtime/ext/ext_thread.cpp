@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_thread.h"
-#include "hphp/runtime/base/server/service_thread.h"
-#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/server/service_thread.h"
+#include "hphp/runtime/server/http_server.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/util/process.h"
 

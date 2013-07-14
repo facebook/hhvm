@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/memory/memory_manager.h"
 #include "hphp/runtime/base/util/request_local.h"
 #include "hphp/runtime/base/zend/zend_math.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/util/alloc.h"

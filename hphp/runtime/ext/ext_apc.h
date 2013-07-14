@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/base/shared/shared_store_base.h"
-#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/server/upload.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 
 <h2>Server Documents</h2>
 
-This flow is implemented in hphp/runtime/base/server/http_server.cpp:
+This flow is implemented in hphp/runtime/server/http_server.cpp:
 
                               +-------------+
                               | APC Priming |

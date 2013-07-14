@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/base/file/socket.h"
 #include "hphp/runtime/base/file/ssl_socket.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

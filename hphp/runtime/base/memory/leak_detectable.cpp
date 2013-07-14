@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/memory/leak_detectable.h"
 #include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include <stdlib.h>
 #include "tbb/concurrent_hash_map.h"
 #include "hphp/runtime/base/runtime_option.h"

@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/memory/leak_detectable.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/shared/concurrent_shared_store.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"

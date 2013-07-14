@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/file/plain_file.h"
 #include "hphp/runtime/base/util/string_buffer.h"
 #include "hphp/runtime/base/zend/zend_printf.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/file/stream_wrapper.h"
 #include "hphp/runtime/base/file/stream_wrapper_registry.h"
 #include "hphp/runtime/base/file/user_stream_wrapper.h"

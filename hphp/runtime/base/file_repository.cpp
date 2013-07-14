@@ -20,7 +20,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/stat_cache.h"
-#include "hphp/runtime/base/server/source_root_info.h"
+#include "hphp/runtime/server/source_root_info.h"
 
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator.h"

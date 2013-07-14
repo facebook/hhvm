@@ -16,10 +16,10 @@
 */
 
 #include "hphp/runtime/ext/ext_apache.h"
-#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/server/http_server.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_note.h"
-#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/server/server_note.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

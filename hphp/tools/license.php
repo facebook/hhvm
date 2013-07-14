@@ -47,8 +47,8 @@ $files_zend = array(
 );
 $files_php = array(
   'runtime/ext/',
-  'runtime/base/server/upload.h',
-  'runtime/base/server/upload.cpp',
+  'runtime/server/upload.h',
+  'runtime/server/upload.cpp',
   'util/compression.cpp',
 );
 

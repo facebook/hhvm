@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/memory/sweepable.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/http_server.h"
+#include "hphp/runtime/server/http_server.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"

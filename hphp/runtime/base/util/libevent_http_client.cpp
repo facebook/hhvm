@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/util/libevent_http_client.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"

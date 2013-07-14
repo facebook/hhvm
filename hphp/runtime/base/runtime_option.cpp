@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/shared/shared_store_base.h"
-#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/base/memory/leak_detectable.h"
 #include "hphp/runtime/base/util/extended_logger.h"
 #include "hphp/runtime/base/util/simple_counter.h"
@@ -40,7 +40,7 @@
 #include "hphp/runtime/base/hardware_counter.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/parser/scanner.h"
-#include "hphp/runtime/base/server/access_log.h"
+#include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/base/crash_reporter.h"
 
 namespace HPHP {

@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_zlib.h"
-#include "hphp/runtime/base/server/libevent_server.h"
+#include "hphp/runtime/server/libevent_server.h"
 
 #include <boost/make_shared.hpp>
 

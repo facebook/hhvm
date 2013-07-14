@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/util/exceptions.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/util/request_local.h"
 #include "hphp/util/logger.h"
 #include <fcntl.h>

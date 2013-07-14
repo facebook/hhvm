@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/file/file.h"
 #include "netinet/in.h"

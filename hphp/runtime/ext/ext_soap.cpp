@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_soap.h"
 #include "hphp/runtime/base/util/http_client.h"
-#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/soap/packet.h"

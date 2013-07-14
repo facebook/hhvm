@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/util/http_client.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/util/curl_tls_workarounds.h"
 #include "hphp/util/timer.h"
 #include "curl/curl.h"

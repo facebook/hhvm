@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/array_util.h"
 #include "hphp/runtime/base/util/http_client.h"
 #include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/server/static_content_cache.h"
+#include "hphp/runtime/server/static_content_cache.h"
 #include "hphp/runtime/base/zend/zend_scanf.h"
 #include "hphp/runtime/base/file/pipe.h"
 #include "hphp/system/systemlib.h"

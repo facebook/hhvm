@@ -4,6 +4,9 @@ break break1.php:77
 break list
 @ foo('test_break1')
 variable
+break start
+break end
+break psp
 break list
 break clear all
 continue

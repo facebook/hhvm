@@ -18,8 +18,20 @@ Breakpoint 1 reached at foo() on line 7 of %s/break1.php
 variable
 $x = "test_break1"
 $y = "test_break1_suffix"
+break start
+Breakpoint 2 set start of request
+But wont break until connected to a server.
+break end
+Breakpoint 3 set end of request or start of psp
+But wont break until connected to a server.
+break psp
+Breakpoint 4 set end of psp
+But wont break until connected to a server.
 break list
   1	ALWAYS    on line 7 of break1.php
+  2	ALWAYS    start of request (unbound)
+  3	ALWAYS    end of request or start of psp (unbound)
+  4	ALWAYS    end of psp (unbound)
 break clear all
 All breakpoints are cleared.
 continue
@@ -143,16 +155,16 @@ continue
 pubObj:yes sir
 
 break derived::callPubObj=>cls::pubObj()
-Breakpoint 2 set upon entering cls::pubObj() called by derived::callPubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj()
 break list
-  2	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
 @ $break8 = new derived();
 
 @ $break8->pubObj('no')
 pubObj:no
 
 @ $break8->callPubObj('yes')
-Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
   11   public function pubObj($x) {
   12     error_log("pubObj:".$x);
   13   }
@@ -163,16 +175,16 @@ continue
 pubObj:yes
 
 break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
-Breakpoint 2 set upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
 break list
-  2	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
 @ $break9 = new derived();
 
 @ $break9->callPubObj('no')
 pubObj:no
 
 @ $break9->callCallPubObj('yes')
-Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
   11   public function pubObj($x) {
   12     error_log("pubObj:".$x);
   13   }
@@ -183,16 +195,16 @@ continue
 pubObj:yes
 
 break derived::callCallPubObj=>cls::pubObj()
-Breakpoint 2 set upon entering cls::pubObj() called by derived::callCallPubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callCallPubObj()
 break list
-  2	ALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
 @ $break10 = new derived();
 
 @ $break10->callPubObj('no')
 pubObj:no
 
 @ $break10->callCallPubObj('yes')
-Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
   11   public function pubObj($x) {
   12     error_log("pubObj:".$x);
   13   }

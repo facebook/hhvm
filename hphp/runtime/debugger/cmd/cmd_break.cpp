@@ -202,8 +202,14 @@ void CmdBreak::processList(DebuggerClient &client) {
   updateServer(client);
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
     BreakPointInfoPtr bpi = m_breakpoints->at(i);
-    const char* boundStr =
-        bpi->m_bindState == BreakPointInfo::Unknown ? " (unbound)" : "";
+    bool bound = bpi->m_bindState != BreakPointInfo::Unknown;
+    if (!bound && !client.isLocal() &&
+        (bpi->m_interruptType == RequestStarted ||
+        bpi->m_interruptType == RequestEnded ||
+        bpi->m_interruptType == PSPEnded)) {
+      bound = true;
+    }
+    const char* boundStr = bound ? "" : " (unbound)";
     client.print("  %d\t%s  %s%s", bpi->index(), bpi->state(true).c_str(),
                   bpi->desc().c_str(), boundStr);
   }
@@ -276,7 +282,9 @@ void CmdBreak::processStatusChange(DebuggerClient &client) {
 
   if (client.arg(2, "all")) {
     if (hasClearArg(client)) {
-      m_breakpoints->clear();
+      while (m_breakpoints->size() > 0) {
+        m_breakpoints->erase(m_breakpoints->end());
+      }
       updateServer(client);
       client.info("All breakpoints are cleared.");
       return;
@@ -411,6 +419,12 @@ void ReportBreakpointBindState(DebuggerClient &client, BreakPointInfoPtr bpi) {
     } else if (!bpi->getExceptionClass().empty()) {
       client.info("But note that class %s has yet been loaded.",
                   bpi->getExceptionClass().c_str());
+    } else if (bpi->m_interruptType == RequestStarted ||
+        bpi->m_interruptType == RequestEnded ||
+        bpi->m_interruptType == PSPEnded) {
+      if (client.isLocal()) {
+        client.info("But wont break until connected to a server.");
+      }
     } else {
       client.info("But wont break until file %s has been loaded.",
                   bpi->m_file.c_str());

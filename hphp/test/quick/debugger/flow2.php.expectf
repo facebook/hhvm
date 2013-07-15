@@ -151,12 +151,12 @@ object(C1)#3 (1) {
 }
 
 break flow2.php:26
-Breakpoint 2 set on line 26 of flow2.php
+Breakpoint 1 set on line 26 of flow2.php
 @test(3)
 Constructor
 Finished in genFoo
 Constructor
-Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
   25   public function __destruct() {
   26     error_log('Destructor');
   27   }
@@ -170,14 +170,14 @@ Break at foo() on line 44 of %s/flow2.php
 
 continue
 Constructor
-Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
   25   public function __destruct() {
   26     error_log('Destructor');
   27   }
 
 out
 Destructor
-Breakpoint 2 reached at C1::__destruct() on line 26 of %s/flow2.php
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
   25   public function __destruct() {
   26     error_log('Destructor');
   27   }

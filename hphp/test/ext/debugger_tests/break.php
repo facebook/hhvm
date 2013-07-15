@@ -158,7 +158,7 @@ function break9($c) {
 
 function break10($c) {
   $o = $c->processCmd('break', array(':fb:my:thing::doIt()'));
-  VS($o['text'], "Breakpoint 4 set upon entering xhp_fb__my__thing::doIt()\n");
+  VS($o['text'], "Breakpoint 1 set upon entering xhp_fb__my__thing::doIt()\n");
   VS($o['values'][0]['func'], 'doIt');
   VS($o['values'][0]['class'], 'xhp_fb__my__thing');
   VS($o['values'][0]['namespace'], '');

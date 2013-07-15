@@ -28,6 +28,8 @@
 #include <unistd.h>
 
 #ifdef __APPLE__
+#include <limits.h>
+#include <mach-o/dyld.h>
 #include <mach-o/getsect.h>
 #endif
 
@@ -76,7 +78,13 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 #else // __APPLE__
   const struct section_64 *sect = getsectbyname("__text", section);
   if (sect) {
-    desc->m_filename = "hhvm";
+    char path[PATH_MAX];
+    uint32_t size = sizeof(path);
+    if (_NSGetExecutablePath(path, &size) == 0) {
+      desc->m_filename = path;
+    } else {
+      return false;
+    }
     desc->m_start = sect->offset;
     desc->m_len = sect->size;
     return true;

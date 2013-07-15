@@ -535,7 +535,7 @@ bool Debugger::switchSandbox(DebuggerProxyPtr proxy,
 bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
                                  const StringData* newSid,
                                  bool force) {
-  TRACE(2, "Debugger::switchSandboxImpln");
+  TRACE(2, "Debugger::switchSandboxImpl\n");
   // Take the new sandbox
   DebuggerProxyPtr otherProxy;
   {
@@ -565,7 +565,7 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
   setDebuggerFlag(newSid, true);
 
   if (otherProxy) {
-    otherProxy->forceQuit();
+    otherProxy->stop();
   }
 
   return true;

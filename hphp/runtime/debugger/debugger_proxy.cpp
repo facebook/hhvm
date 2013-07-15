@@ -364,8 +364,10 @@ void DebuggerProxy::pollSignal() {
   TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
 }
 
-// Ask this proxy to stop running and exit cleanly. Used during proxy cleanup,
-// and from the signal polling thread.
+// Ask this proxy to stop running and exit cleanly. Used during proxy
+// cleanup, sandbox switching, and from the signal polling
+// thread. This can be used from a thread which is not stopped at the
+// given proxy's interrupt.
 void DebuggerProxy::stop() {
   TRACE_RB(2, "DebuggerProxy::stop\n");
   DSandboxInfo invalid;
@@ -377,9 +379,9 @@ void DebuggerProxy::stop() {
 
 // Used to quit this proxy, typcially in response to either a quit command from
 // the client or loss of communication with the client. The proxy is removed
-// from the proxy map, ensuring no other threads can use the proxy. It stops
-// the proxy, and then tosses the client exit exception to ensure the current
-// request is terminated with a nice message.
+// from the proxy map, ensuring no other threads can use the proxy.
+// NB: It stops the proxy, and then tosses the client exit exception
+// to ensure the current request is terminated with a nice message.
 void DebuggerProxy::forceQuit() {
   TRACE_RB(2, "DebuggerProxy::forceQuit\n");
   Debugger::RemoveProxy(shared_from_this());

@@ -99,6 +99,7 @@ public:
 
   void checkStop();
   void forceQuit();
+  void stop();
 
   bool getClientConnectionInfo(VRefParam address, VRefParam port);
 
@@ -111,8 +112,6 @@ private:
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
   void changeBreakPointDepth(CmdInterrupt& cmd);
-
-  void stop();
 
   SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
 

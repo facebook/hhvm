@@ -32,8 +32,9 @@ using std::set;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
-  : m_requestsSinceReset(0),
+RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
+  : RequestHandler(timeout),
+    m_requestsSinceReset(0),
     m_reset(false),
     m_logResets(info),
     m_returnEncodeType(ReturnEncodeType::Json) {
@@ -145,7 +146,8 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     HttpRequestHandler::GetAccessLog().log(transport, vhost);
     return;
   }
-  vhost->setRequestTimeoutSeconds();
+  ThreadInfo::s_threadInfo->m_reqInjectionData.
+    setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
 
   // resolve source root
   string host = transport->getHeader("Host");
@@ -184,9 +186,6 @@ const StaticString
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            ReturnEncodeType returnEncodeType) {
-  // reset timeout counter
-  ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0);
-
   string rpcFunc = transport->getCommand();
   {
     ServerStatsHelper ssh("input");

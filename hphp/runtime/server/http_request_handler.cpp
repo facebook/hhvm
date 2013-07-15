@@ -43,9 +43,9 @@ IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
 AccessLog HttpRequestHandler::s_accessLog(
   &(HttpRequestHandler::getAccessLogThreadData));
 
-HttpRequestHandler::HttpRequestHandler()
-    : m_pathTranslation(true)
-     ,m_requestTimedOutOnQueue(ServiceData::createTimeseries(
+HttpRequestHandler::HttpRequestHandler(int timeout)
+    : RequestHandler(timeout), m_pathTranslation(true)
+    , m_requestTimedOutOnQueue(ServiceData::createTimeseries(
                                  "requests_timed_out_on_queue",
                                  {ServiceData::StatsType::COUNT})) { }
 
@@ -135,9 +135,8 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // don't serve the request if it's been sitting in queue for longer than our
   // allowed request timeout.
-  int requestTimeoutSeconds = (vhost->getRequestTimeoutSeconds() > 0 ?
-                               vhost->getRequestTimeoutSeconds() :
-                               RuntimeOption::RequestTimeoutSeconds);
+  int requestTimeoutSeconds =
+    vhost->getRequestTimeoutSeconds(RuntimeOption::RequestTimeoutSeconds);
   if (requestTimeoutSeconds > 0) {
     timespec now;
     Timer::GetMonotonicTime(now);
@@ -269,7 +268,8 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // main body
   hphp_session_init();
-  vhost->setRequestTimeoutSeconds();
+  ThreadInfo::s_threadInfo->m_reqInjectionData.
+    setTimeout(requestTimeoutSeconds);
 
   bool ret = false;
   try {

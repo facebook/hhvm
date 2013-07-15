@@ -92,8 +92,9 @@ public:
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>();
+       info->getThreadCount());
+    m_server->setRequestHandlerFactory<HttpRequestHandler>(
+      info->getTimeoutSeconds().count());
     m_server->setUrlChecker(std::bind(&InternalPageServer::checkURL, this,
                                       std::placeholders::_1));
   }
@@ -131,8 +132,9 @@ public:
   explicit DanglingPageServer(SatelliteServerInfoPtr info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>();
+       info->getThreadCount());
+    m_server->setRequestHandlerFactory<HttpRequestHandler>(
+      info->getTimeoutSeconds().count());
   }
 
   virtual void start() {
@@ -154,9 +156,10 @@ public:
   explicit RPCServer(SatelliteServerInfoPtr info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
+       info->getThreadCount());
     m_server->setRequestHandlerFactory([info] {
-      auto handler = make_unique<RPCRequestHandler>();
+        auto handler = make_unique<RPCRequestHandler>(
+          info->getTimeoutSeconds().count(), true);
       handler->setServerInfo(info);
       return handler;
     });

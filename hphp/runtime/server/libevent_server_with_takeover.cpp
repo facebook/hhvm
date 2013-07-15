@@ -83,8 +83,8 @@ static int fd_transfer_request_handler(
 }
 
 LibEventServerWithTakeover::LibEventServerWithTakeover
-(const std::string &address, int port, int thread, int timeoutSeconds)
-  : LibEventServer(address, port, thread, timeoutSeconds),
+(const std::string &address, int port, int thread)
+  : LibEventServer(address, port, thread),
     m_delete_handle(nullptr),
     m_took_over(false),
     m_takeover_state(TakeoverState::NotStarted)

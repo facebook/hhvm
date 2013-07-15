@@ -600,10 +600,7 @@ void
 Stack::requestInit() {
   m_elms = t_se->elms();
   if (Transl::trustSigSegv) {
-    RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-    Lock l(data.surpriseLock);
-    assert(data.surprisePage == nullptr);
-    data.surprisePage = m_elms;
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setSurprisePage(m_elms);
   }
   // Burn one element of the stack, to satisfy the constraint that
   // valid m_top values always have the same high-order (>
@@ -626,11 +623,8 @@ void
 Stack::requestExit() {
   if (m_elms != nullptr) {
     if (Transl::trustSigSegv) {
-      RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-      Lock l(data.surpriseLock);
-      assert(data.surprisePage == m_elms);
+      ThreadInfo::s_threadInfo->m_reqInjectionData.setSurprisePage(nullptr);
       unprotect();
-      data.surprisePage = nullptr;
     }
     m_elms = nullptr;
   }

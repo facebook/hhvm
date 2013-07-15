@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/system/systemlib.h"
+#include "folly/Format.h"
 
 #include <limits>
 
@@ -631,22 +632,19 @@ Exception* generate_request_timeout_exception() {
   Exception* ret = nullptr;
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
-  if (data.timeoutSeconds > 0) {
-    // This extra checking is needed, because there may be a race condition
-    // a TimeoutThread sets flag "true" right after an old request finishes and
-    // right before a new requets resets "started". In this case, we flag
-    // "timedout" back to "false".
-    if (time(0) - data.started >= data.timeoutSeconds) {
-      std::string exceptionMsg = "entire web request took longer than ";
-      exceptionMsg += boost::lexical_cast<std::string>(data.timeoutSeconds);
-      exceptionMsg += " seconds and timed out";
-      ArrayHolder exceptionStack;
-      if (RuntimeOption::InjectedStackTrace) {
-        exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
-      }
-      ret = new FatalErrorException(exceptionMsg, exceptionStack.get());
-    }
+
+  bool cli = RuntimeOption::ClientExecutionMode();
+  std::string exceptionMsg = cli ?
+    "Maximum execution time of " :
+    "entire web request took longer than ";
+  exceptionMsg += folly::to<std::string>(data.getTimeout());
+  exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
+  ArrayHolder exceptionStack;
+  if (RuntimeOption::InjectedStackTrace) {
+    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
+  ret = new FatalErrorException(exceptionMsg, exceptionStack.get());
+
   return ret;
 }
 

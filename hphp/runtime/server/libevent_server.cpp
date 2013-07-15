@@ -132,7 +132,6 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
 void LibEventWorker::onThreadEnter() {
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
-  server->onThreadEnter();
   if (RuntimeOption::EnableDebugger) {
     Eval::Debugger::RegisterThread();
   }
@@ -141,8 +140,6 @@ void LibEventWorker::onThreadEnter() {
 
 void LibEventWorker::onThreadExit() {
   assert(m_opaque);
-  LibEventServer *server = (LibEventServer*)m_opaque;
-  server->onThreadExit();
   m_handler.reset();
 }
 
@@ -150,12 +147,10 @@ void LibEventWorker::onThreadExit() {
 // constructor and destructor
 
 LibEventServer::LibEventServer(const std::string &address, int port,
-                               int thread, int timeoutSeconds)
+                               int thread)
   : Server(address, port, thread),
     m_accept_sock(-1),
     m_accept_sock_ssl(-1),
-    m_timeoutThreadData(timeoutSeconds),
-    m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
@@ -225,14 +220,10 @@ void LibEventServer::start() {
   setStatus(RunStatus::RUNNING);
   m_dispatcher.start();
   m_dispatcherThread.start();
-  m_timeoutThread.start();
 }
 
 void LibEventServer::waitForEnd() {
   m_dispatcherThread.waitForEnd();
-
-  m_timeoutThreadData.stop();
-  m_timeoutThread.waitForEnd();
 }
 
 void LibEventServer::dispatchWithTimeout(int timeoutSeconds) {
@@ -269,7 +260,7 @@ void LibEventServer::dispatch() {
   }
   m_responseQueue.close();
 
-  // flusing all remaining events
+  // flushing all remaining events
   if (RuntimeOption::ServerGracefulShutdownWait) {
     dispatchWithTimeout(RuntimeOption::ServerGracefulShutdownWait);
   }
@@ -325,10 +316,6 @@ void LibEventServer::stop() {
   }
   m_dispatcherThread.waitForEnd();
 
-  // wait for the timeout thread to stop
-  m_timeoutThreadData.stop();
-  m_timeoutThread.waitForEnd();
-
   evhttp_free(m_server);
   m_server = nullptr;
 }
@@ -369,16 +356,6 @@ int LibEventServer::getAcceptSocketSSL() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // request/response handling
-
-void LibEventServer::onThreadEnter() {
-  m_timeoutThreadData.registerRequestThread
-    (&ThreadInfo::s_threadInfo->m_reqInjectionData);
-}
-
-void LibEventServer::onThreadExit() {
-  m_timeoutThreadData.removeRequestThread
-    (&ThreadInfo::s_threadInfo->m_reqInjectionData);
-}
 
 void LibEventServer::onRequest(struct evhttp_request *request) {
   if (RuntimeOption::EnableKeepAlive &&

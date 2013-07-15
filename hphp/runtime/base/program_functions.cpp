@@ -60,6 +60,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
+#include <signal.h>
 #include "libxml/parser.h"
 
 #include "hphp/runtime/base/file_repository.h"
@@ -663,7 +664,7 @@ static int start_server(const std::string &username) {
   // If we have any warmup requests, replay them before listening for
   // real connections
   for (auto& file : RuntimeOption::ServerWarmupRequests) {
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     ReplayTransport rt;
     timespec start;
     Timer::GetMonotonicTime(start);
@@ -1212,7 +1213,7 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::RecordInput = false;
     set_execution_mode("server");
     HttpServer server; // so we initialize runtime properly
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     for (int i = 0; i < po.count; i++) {
       for (unsigned int j = 0; j < po.args.size(); j++) {
         ReplayTransport rt;
@@ -1290,6 +1291,13 @@ extern "C" void hphp_fatal_error(const char *s) {
   throw_fatal(s);
 }
 
+static void on_timeout(int sig, siginfo_t* info, void* context) {
+  if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
+    auto data = (RequestInjectionData*)info->si_value.sival_ptr;
+    data->onTimeout();
+  }
+}
+
 void hphp_process_init() {
   pthread_attr_t attr;
 #ifndef __APPLE__
@@ -1299,6 +1307,11 @@ void hphp_process_init() {
 #endif
   Util::init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
+
+  struct sigaction action = {};
+  action.sa_sigaction = on_timeout;
+  action.sa_flags = SA_SIGINFO | SA_NODEFER;
+  sigaction(SIGVTALRM, &action, nullptr);
 
   init_thread_locals();
   ClassInfo::Load();

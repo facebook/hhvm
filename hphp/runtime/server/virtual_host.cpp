@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/util/util.h"
 
@@ -130,14 +129,9 @@ void VirtualHost::addAllowedDirectories(const std::vector<std::string>& dirs) {
   }
 }
 
-void VirtualHost::setRequestTimeoutSeconds() const {
-  if (m_runtimeOption.requestTimeoutSeconds != -1) {
-    TimeoutThread::DeferTimeout(m_runtimeOption.requestTimeoutSeconds);
-  }
-}
-
-int VirtualHost::getRequestTimeoutSeconds() const {
-  return m_runtimeOption.requestTimeoutSeconds;
+int VirtualHost::getRequestTimeoutSeconds(int defaultTimeout) const {
+  return m_runtimeOption.requestTimeoutSeconds < 0 ?
+    defaultTimeout : m_runtimeOption.requestTimeoutSeconds;
 }
 
 VirtualHost::VirtualHost() : m_disabled(false) {

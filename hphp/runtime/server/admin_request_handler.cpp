@@ -62,7 +62,8 @@ IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
 AccessLog AdminRequestHandler::s_accessLog(
   &(AdminRequestHandler::getAccessLogThreadData));
 
-AdminRequestHandler::AdminRequestHandler() {
+AdminRequestHandler::AdminRequestHandler(int timeout) :
+    RequestHandler(timeout) {
 }
 
 // Helper machinery for jemalloc-stats-print command.

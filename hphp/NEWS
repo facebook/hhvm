@@ -2,6 +2,7 @@ Future (next release):
   - Implement assert with string arguments
   - Implement RecursiveArrayIterator
   - Implement php_strip_whitespace()
+  - Support for timeouts in cli mode
 
 "Tamale" 7/22/2013
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)

@@ -210,7 +210,7 @@ Variant f_xbox_process_call_message(CStrRef msg) {
 }
 
 int64_t f_xbox_get_thread_timeout() {
-  XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
+  auto server_info = XboxServer::GetServerInfo();
   if (server_info) {
     return server_info->getMaxDuration();
   }
@@ -222,7 +222,7 @@ void f_xbox_set_thread_timeout(int timeout) {
     raise_warning("Cannot set timeout/duration to a negative number.");
     return;
   }
-  XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
+  auto server_info = XboxServer::GetServerInfo();
   if (server_info) {
     server_info->setMaxDuration(timeout);
   } else {

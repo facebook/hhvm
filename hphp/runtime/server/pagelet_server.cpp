@@ -239,7 +239,7 @@ struct PageletWorker
   virtual void doJob(PageletTransport *job) {
     try {
       job->onRequestStart(job->getStartTimer());
-      HttpRequestHandler().handleRequest(job);
+      HttpRequestHandler(0).handleRequest(job);
       job->decRefCount();
     } catch (...) {
       Logger::Error("HttpRequestHandler leaked exceptions");

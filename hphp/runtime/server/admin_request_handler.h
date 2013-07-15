@@ -28,7 +28,7 @@ public:
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
 public:
-    AdminRequestHandler();
+  explicit AdminRequestHandler(int timeout);
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
 

@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/zend_functions.h"
 #include "hphp/runtime/base/zend_string.h"
@@ -847,13 +846,9 @@ bool f_set_magic_quotes_runtime(bool new_setting) {
 }
 
 void f_set_time_limit(int seconds) {
-  TimeoutThread::DeferTimeout(seconds);
-  // Just for ini_get
-  g_context->setRequestTimeLimit(seconds);
-  if (RuntimeOption::ClientExecutionMode() &&
-      seconds != 0) {
-    raise_warning("set_time_limit is not supported in client mode");
-  }
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData &data = info->m_reqInjectionData;
+  data.setTimeout(seconds);
 }
 
 String f_sys_get_temp_dir() {

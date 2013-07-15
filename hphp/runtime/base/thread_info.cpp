@@ -22,6 +22,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 
+#include <sys/mman.h>
+
 using std::map;
 
 namespace HPHP {
@@ -116,15 +118,97 @@ void ThreadInfo::setPendingException(Exception* e) {
 }
 
 void ThreadInfo::onSessionExit() {
+  m_reqInjectionData.setTimeout(0);
   m_reqInjectionData.reset();
   Transl::TargetCache::requestExit();
+}
+
+RequestInjectionData::~RequestInjectionData() {
+  if (m_hasTimer) {
+    timer_delete(m_timer_id);
+  }
 }
 
 void RequestInjectionData::onSessionInit() {
   Transl::TargetCache::requestInit();
   cflagsPtr = Transl::TargetCache::conditionFlagsPtr();
   reset();
-  started = time(0);
+}
+
+void RequestInjectionData::onTimeout() {
+  setTimedOutFlag();
+  if (surprisePage) {
+    mprotect(surprisePage, sizeof(void*), PROT_NONE);
+  }
+  m_timerActive.store(false, std::memory_order_relaxed);
+}
+
+void RequestInjectionData::setSurprisePage(void* page) {
+  if (page != surprisePage) {
+    if (!page) {
+      if (m_timerActive.load(std::memory_order_relaxed)) {
+        setTimeout(0);
+      }
+    }
+    assert(!m_timerActive.load(std::memory_order_relaxed));
+    surprisePage = page;
+  }
+}
+
+void RequestInjectionData::setTimeout(int seconds) {
+  m_timeoutSeconds = seconds > 0 ? seconds : 0;
+  if (!m_hasTimer) {
+    if (!m_timeoutSeconds) {
+      // we don't have a timer, and we don't have a timeout
+      return;
+    }
+    sigevent sev;
+    memset(&sev, 0, sizeof(sev));
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIGVTALRM;
+    sev.sigev_value.sival_ptr = this;
+    if (timer_create(CLOCK_REALTIME, &sev, &m_timer_id)) {
+      raise_error("Failed to set timeout: %s", strerror(errno));
+    }
+    m_hasTimer = true;
+  }
+
+  /*
+   * There is a potential race here. Callers want to assume that
+   * if they cancel the timeout (seconds = 0), they *wont* get
+   * a signal after they call this (although they may get a signal
+   * during the call).
+   * So we need to clear the timeout, wait (if necessary) for a
+   * pending signal to be handled, and then set the new timeout
+   */
+  itimerspec ts = {};
+  itimerspec old;
+  timer_settime(m_timer_id, 0, &ts, &old);
+  if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
+    // the timer has gone off...
+    if (m_timerActive.load(std::memory_order_acquire)) {
+      // but m_timerActive is still set, so we haven't processed
+      // the signal yet.
+      // spin until its done.
+      while (m_timerActive.load(std::memory_order_relaxed)) {
+      }
+    }
+  }
+  if (m_timeoutSeconds) {
+    m_timerActive.store(true, std::memory_order_relaxed);
+    ts.it_value.tv_sec = m_timeoutSeconds;
+    timer_settime(m_timer_id, 0, &ts, nullptr);
+  } else {
+    m_timerActive.store(false, std::memory_order_relaxed);
+  }
+}
+
+void RequestInjectionData::resetTimer(int seconds /* = -1 */) {
+  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
+  if (seconds <= 0) seconds = data->getTimeout();
+  data->setTimeout(seconds);
+  data->clearTimedOutFlag();
+
 }
 
 void RequestInjectionData::reset() {
@@ -152,6 +236,11 @@ void RequestInjectionData::setMemExceededFlag() {
 void RequestInjectionData::setTimedOutFlag() {
   __sync_fetch_and_or(getConditionFlags(),
                       RequestInjectionData::TimedOutFlag);
+}
+
+void RequestInjectionData::clearTimedOutFlag() {
+  __sync_fetch_and_and(getConditionFlags(),
+                       ~RequestInjectionData::TimedOutFlag);
 }
 
 void RequestInjectionData::setSignaledFlag() {

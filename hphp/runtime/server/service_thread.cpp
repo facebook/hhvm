@@ -51,7 +51,7 @@ void ServiceThread::threadRun() {
   hdf["url"] = m_url;
   hdf["remote_host"] = RuntimeOption::ServerIP;
 
-  HttpRequestHandler handler;
+  HttpRequestHandler handler(0);
   handler.disablePathTranslation();
 
   do {

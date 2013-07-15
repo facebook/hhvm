@@ -228,8 +228,6 @@ public:
   void setContentType(CStrRef mimetype, CStrRef charset);
   int64_t getRequestMemoryMaxBytes() const { return m_maxMemory; }
   void setRequestMemoryMaxBytes(int64_t max);
-  int64_t getRequestTimeLimit() const { return m_maxTime; }
-  void setRequestTimeLimit(int64_t limit) { m_maxTime = limit;}
   String getCwd() const { return m_cwd;}
   void setCwd(CStrRef cwd) { m_cwd = cwd;}
 
@@ -356,7 +354,6 @@ private:
   // system settings
   Transport *m_transport;
   int64_t m_maxMemory;
-  int64_t m_maxTime;
   String m_cwd;
 
   // output buffering

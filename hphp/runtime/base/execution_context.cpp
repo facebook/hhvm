@@ -59,7 +59,6 @@ const StaticString BaseExecutionContext::s_amp("&");
 BaseExecutionContext::BaseExecutionContext() :
     m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),
-    m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
     m_out(nullptr), m_implicitFlush(false), m_protectedLevel(0),
     m_stdout(nullptr), m_stdoutData(nullptr),
@@ -494,6 +493,8 @@ void BaseExecutionContext::onRequestShutdown() {
 }
 
 void BaseExecutionContext::executeFunctions(CArrRef funcs) {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer();
+
   for (ArrayIter iter(funcs); iter; ++iter) {
     Array callback = iter.second().toArray();
     vm_call_user_func(callback[s_name], callback[s_args].toArray());
@@ -770,7 +771,8 @@ void BaseExecutionContext::debuggerInfo(InfoVec &info) {
   } else {
     Add(info, "Max Memory", FormatSize(m_maxMemory));
   }
-  Add(info, "Max Time", FormatTime(m_maxTime * 1000));
+  Add(info, "Max Time", FormatTime(ThreadInfo::s_threadInfo.getNoCheck()->
+                                   m_reqInjectionData.getTimeout() * 1000));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

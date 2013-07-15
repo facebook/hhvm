@@ -27,8 +27,7 @@ namespace HPHP {
  */
 class LibEventServerWithFd : public LibEventServer {
 public:
-  LibEventServerWithFd(const std::string &address, int port, int thread,
-                       int timeoutSeconds);
+  LibEventServerWithFd(const std::string &address, int port, int thread);
 
   void setServerSocketFd(int sock_fd) {
     m_accept_sock = sock_fd;

@@ -58,9 +58,8 @@ Server::Server(const std::string &address, int port, int threadCount)
 
 ServerPtr ServerFactory::createServer(const std::string &address,
                                       uint16_t port,
-                                      int numThreads,
-                                      std::chrono::seconds timeout) {
-  ServerOptions options(address, port, numThreads, timeout);
+                                      int numThreads) {
+  ServerOptions options(address, port, numThreads);
   return createServer(options);
 }
 
@@ -76,10 +75,9 @@ ServerFactoryRegistry *ServerFactoryRegistry::getInstance() {
 ServerPtr ServerFactoryRegistry::createServer(const std::string &type,
                                               const std::string &address,
                                               uint16_t port,
-                                              int numThreads,
-                                              std::chrono::seconds timeout) {
+                                              int numThreads) {
   auto factory = getInstance()->getFactory(type);
-  ServerOptions options(address, port, numThreads, timeout);
+  ServerOptions options(address, port, numThreads);
   return factory->createServer(options);
 }
 

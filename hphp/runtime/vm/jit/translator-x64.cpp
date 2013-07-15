@@ -2932,7 +2932,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     // helper address and emitCall will the emit the right sequence
     // to call it indirectly
     TRACE(1, "Ran out of space to emit a trampoline for %p\n", helperAddr);
-    assert(false);
+    always_assert(false);
     return helperAddr;
   }
   uint32_t index = m_numNativeTrampolines++;

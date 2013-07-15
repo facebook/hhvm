@@ -559,32 +559,32 @@ struct DataBlock {
   }
 
   void byte(const uint8_t byte) {
-    assert(canEmit(sz::byte));
+    always_assert(canEmit(sz::byte));
     TRACE(10, "%p b : %02x\n", frontier, byte);
     *frontier = byte;
     frontier += sz::byte;
   }
   void word(const uint16_t word) {
-    assert(canEmit(sz::word));
+    always_assert(canEmit(sz::word));
     *(uint16_t*)frontier = word;
     TRACE(10, "%p w : %04x\n", frontier, word);
     frontier += sz::word;
   }
   void dword(const uint32_t dword) {
-    assert(canEmit(sz::dword));
+    always_assert(canEmit(sz::dword));
     TRACE(10, "%p d : %08x\n", frontier, dword);
     *(uint32_t*)frontier = dword;
     frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
-    assert(canEmit(sz::qword));
+    always_assert(canEmit(sz::qword));
     TRACE(10, "%p q : %016" PRIx64 "\n", frontier, qword);
     *(uint64_t*)frontier = qword;
     frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
-    assert(canEmit(n));
+    always_assert(canEmit(n));
     TRACE(10, "%p [%ld b] : [%p]\n", frontier, n, bs);
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine

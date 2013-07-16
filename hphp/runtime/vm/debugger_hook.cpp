@@ -166,7 +166,6 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
     Eval::BreakPointInfoPtr bp = bps[i];
     if (Eval::BreakPointInfo::MatchFile(bp->m_file, efile->getFileName())) {
       addBreakPointInUnit(bp, efile->unit());
-      break;
     }
   }
 }

@@ -653,7 +653,8 @@ static String _dom_get_valid_file_path(const char *source) {
 }
 
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
-                                     char *source, int options) {
+                                     char *source, int source_len,
+                                     int options) {
   xmlDocPtr ret = NULL;
   xmlParserCtxtPtr ctxt = NULL;
 
@@ -672,7 +673,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
       ctxt = xmlCreateFileParserCtxt(file_dest.data());
     }
   } else {
-    ctxt = xmlCreateDocParserCtxt((xmlChar*)source);
+    ctxt = xmlCreateMemoryParserCtxt(source, source_len);
   }
 
   if (ctxt == NULL) {
@@ -752,7 +753,8 @@ static Variant dom_parse_document(c_DOMDocument *domdoc, CStrRef source,
     return false;
   }
   xmlDoc *newdoc =
-    dom_document_parser(domdoc, mode, (char*)source.data(), options);
+    dom_document_parser(domdoc, mode, (char*)source.data(), source.length(),
+                        options);
   if (!newdoc) {
     return false;
   }

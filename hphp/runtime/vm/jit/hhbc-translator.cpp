@@ -3409,19 +3409,24 @@ void HhbcTranslator::emitMod() {
 }
 
 void HhbcTranslator::emitBitNot() {
-  Type srcType = topC()->type();
+  auto const srcType = topC()->type();
   if (srcType.subtypeOf(Type::Int)) {
-    SSATmp* src = popC();
+    auto const src = popC();
     push(gen(OpBitNot, src));
-  } else {
-    Type resultType = Type::Int;
-    if (srcType.isString()) {
-      resultType = Type::Str;
-    } else if (srcType.needsReg()) {
-      resultType = Type::Cell;
-    }
-    emitInterpOne(resultType, 1);
+    return;
   }
+
+  if (srcType.subtypeOf(Type::Dbl)) {
+    auto const src = gen(ConvDblToInt, popC());
+    push(gen(OpBitNot, src));
+    return;
+  }
+
+  auto const resultType =
+    srcType.isString() ? Type::Str :
+    srcType.needsReg() ? Type::Cell :
+    Type::Int;
+  emitInterpOne(resultType, 1);
 }
 
 void HhbcTranslator::emitXor() {

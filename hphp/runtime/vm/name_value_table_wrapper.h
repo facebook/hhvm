@@ -103,33 +103,34 @@ public: // ArrayData implementation
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 
-  virtual ArrayData* copy() const { return 0; }
+  static ArrayData* Copy(const ArrayData* ad) {
+    return const_cast<ArrayData*>(ad);
+  }
 
   static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
-  virtual ArrayData* appendRef(CVarRef v, bool copy);
-  virtual ArrayData* appendWithRef(CVarRef v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
 
-  virtual ArrayData* plus(const ArrayData* elems, bool copy);
-  virtual ArrayData* merge(const ArrayData* elems, bool copy);
-
-  virtual ArrayData* prepend(CVarRef v, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
-  virtual bool validFullPos(const FullPos & fp) const;
-  virtual bool advanceFullPos(FullPos&);
+  static bool ValidFullPos(const ArrayData*, const FullPos & fp);
+  static bool AdvanceFullPos(ArrayData*, FullPos&);
   static bool IsVectorData(const ArrayData*);
 
-  virtual ArrayData* escalateForSort();
-  virtual void ksort(int sort_flags, bool ascending);
-  virtual void sort(int sort_flags, bool ascending);
-  virtual void asort(int sort_flags, bool ascending);
-  virtual void uksort(CVarRef cmp_function);
-  virtual void usort(CVarRef cmp_function);
-  virtual void uasort(CVarRef cmp_function);
+  static ArrayData* EscalateForSort(ArrayData*);
+  static void Ksort(ArrayData*, int sort_flags, bool ascending);
+  static void Sort(ArrayData*, int sort_flags, bool ascending);
+  static void Asort(ArrayData*, int sort_flags, bool ascending);
+  static void Uksort(ArrayData*, CVarRef cmp_function);
+  static void Usort(ArrayData*, CVarRef cmp_function);
+  static void Uasort(ArrayData*, CVarRef cmp_function);
 
 private:
   static NameValueTableWrapper* asNVTW(ArrayData* ad);

@@ -36,7 +36,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static_assert(
-  sizeof(ArrayData) == 32,
+  sizeof(ArrayData) == 24,
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
@@ -76,11 +76,6 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::Release,
     &NameValueTableWrapper::Release,
     &PolicyArray::Release },
-  // append
-  { &HphpArray::AppendVec, &HphpArray::Append,
-    &SharedMap::Append,
-    &NameValueTableWrapper::Append,
-    &PolicyArray::Append },
   // nvGetInt
   { &HphpArray::NvGetIntVec, &HphpArray::NvGetInt,
     &SharedMap::NvGetInt,
@@ -221,6 +216,121 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::IterRewind,
     &NameValueTableWrapper::IterRewind,
     &PolicyArray::IterRewind },
+  // validFullPos
+  { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
+    &SharedMap::ValidFullPos,
+    &NameValueTableWrapper::ValidFullPos,
+    &PolicyArray::ValidFullPos },
+  // advanceFullPos
+  { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
+    &SharedMap::AdvanceFullPos,
+    &NameValueTableWrapper::AdvanceFullPos,
+    &PolicyArray::AdvanceFullPos },
+  // escalateForSort
+  { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
+    &SharedMap::EscalateForSort,
+    &NameValueTableWrapper::EscalateForSort,
+    &PolicyArray::EscalateForSort },
+  // ksort
+  { &HphpArray::Ksort, &HphpArray::Ksort,
+    &ArrayData::Ksort,
+    &NameValueTableWrapper::Ksort,
+    &ArrayData::Ksort },
+  // sort
+  { &HphpArray::Sort, &HphpArray::Sort,
+    &ArrayData::Sort,
+    &NameValueTableWrapper::Sort,
+    &ArrayData::Sort },
+  // asort
+  { &HphpArray::Asort, &HphpArray::Asort,
+    &ArrayData::Asort,
+    &NameValueTableWrapper::Asort,
+    &ArrayData::Asort },
+  // uksort
+  { &HphpArray::Uksort, &HphpArray::Uksort,
+    &ArrayData::Uksort,
+    &NameValueTableWrapper::Uksort,
+    &ArrayData::Uksort },
+  // usort
+  { &HphpArray::Usort, &HphpArray::Usort,
+    &ArrayData::Usort,
+    &NameValueTableWrapper::Usort,
+    &ArrayData::Usort },
+  // uasort
+  { &HphpArray::Uasort, &HphpArray::Uasort,
+    &ArrayData::Uasort,
+    &NameValueTableWrapper::Uasort,
+    &ArrayData::Uasort },
+  // copy
+  { &HphpArray::CopyVec, &HphpArray::Copy,
+    &SharedMap::Copy,
+    &NameValueTableWrapper::Copy,
+    &PolicyArray::Copy },
+  // copyWithStrongIterators
+  { &HphpArray::CopyWithStrongIterators, &HphpArray::CopyWithStrongIterators,
+    &SharedMap::CopyWithStrongIterators,
+    &NameValueTableWrapper::CopyWithStrongIterators,
+    &PolicyArray::CopyWithStrongIterators },
+  // nonSmartCopy
+  { &HphpArray::NonSmartCopy, &HphpArray::NonSmartCopy,
+    &ArrayData::NonSmartCopy,
+    &ArrayData::NonSmartCopy,
+    &PolicyArray::NonSmartCopy },
+  // append
+  { &HphpArray::AppendVec, &HphpArray::Append,
+    &SharedMap::Append,
+    &NameValueTableWrapper::Append,
+    &PolicyArray::Append },
+  // appendRef
+  { &HphpArray::AppendRefVec, &HphpArray::AppendRef,
+    &SharedMap::AppendRef,
+    &NameValueTableWrapper::AppendRef,
+    &PolicyArray::AppendRef },
+  // appendWithRef
+  { &HphpArray::AppendWithRefVec, &HphpArray::AppendWithRef,
+    &SharedMap::AppendRef,
+    &NameValueTableWrapper::AppendRef,
+    &PolicyArray::AppendRef },
+  // plus
+  { &HphpArray::Plus, &HphpArray::Plus,
+    &SharedMap::Plus,
+    &NameValueTableWrapper::Plus,
+    &PolicyArray::Plus },
+  // merge
+  { &HphpArray::Merge, &HphpArray::Merge,
+    &SharedMap::Merge,
+    &NameValueTableWrapper::Merge,
+    &PolicyArray::Merge },
+  // pop
+  { &HphpArray::PopVec, &HphpArray::Pop,
+    &SharedMap::Pop,
+    &NameValueTableWrapper::Pop,
+    &PolicyArray::Pop },
+  // dequeue
+  { &HphpArray::Dequeue, &HphpArray::Dequeue,
+    &SharedMap::Dequeue,
+    &NameValueTableWrapper::Dequeue,
+    &PolicyArray::Dequeue },
+  // prepend
+  { &HphpArray::Prepend, &HphpArray::Prepend,
+    &SharedMap::Prepend,
+    &NameValueTableWrapper::Prepend,
+    &PolicyArray::Prepend },
+  // renumber
+  { &HphpArray::RenumberVec, &HphpArray::Renumber,
+    &SharedMap::Renumber,
+    &NameValueTableWrapper::Renumber,
+    &PolicyArray::Renumber },
+  // onSetEvalScalar
+  { &HphpArray::OnSetEvalScalarVec, &HphpArray::OnSetEvalScalar,
+    &SharedMap::OnSetEvalScalar,
+    &NameValueTableWrapper::OnSetEvalScalar,
+    &PolicyArray::OnSetEvalScalar },
+  // escalate
+  { &ArrayData::Escalate, &ArrayData::Escalate,
+    &SharedMap::Escalate,
+    &ArrayData::Escalate,
+    &PolicyArray::Escalate },
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -272,7 +382,7 @@ ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
   return init.create();
 }
 
-ArrayData *ArrayData::nonSmartCopy() const {
+ArrayData *ArrayData::NonSmartCopy(const ArrayData*) {
   throw FatalErrorException("nonSmartCopy not implemented.");
 }
 
@@ -351,28 +461,28 @@ ArrayData *ArrayData::GetLvalPtr(ArrayData* ad, StringData* k,
 ///////////////////////////////////////////////////////////////////////////////
 // stack and queue operations
 
-ArrayData *ArrayData::pop(Variant &value) {
-  if (!empty()) {
-    ssize_t pos = iter_end();
-    value = getValue(pos);
-    return remove(getKey(pos), getCount() > 1);
+ArrayData *ArrayData::Pop(ArrayData* a, Variant &value) {
+  if (!a->empty()) {
+    ssize_t pos = a->iter_end();
+    value = a->getValue(pos);
+    return a->remove(a->getKey(pos), a->getCount() > 1);
   }
   value = uninit_null();
-  return this;
+  return a;
 }
 
-ArrayData *ArrayData::dequeue(Variant &value) {
-  if (!empty()) {
-    auto const pos = iter_begin();
-    value = getValue(pos);
-    ArrayData *ret = remove(getKey(pos), getCount() > 1);
+ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
+  if (!a->empty()) {
+    auto const pos = a->iter_begin();
+    value = a->getValue(pos);
+    ArrayData *ret = a->remove(a->getKey(pos), a->getCount() > 1);
 
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
     ret->renumber();
     return ret;
   }
   value = uninit_null();
-  return this;
+  return a;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -430,31 +540,31 @@ CVarRef ArrayData::endRef() {
   throw FatalErrorException("invalid ArrayData::m_pos");
 }
 
-ArrayData* ArrayData::escalateForSort() {
-  if (getCount() > 1) {
-    return copy();
-  }
-  return this;
-}
-void ArrayData::ksort(int sort_flags, bool ascending) {
+void ArrayData::Ksort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::ksort");
 }
-void ArrayData::sort(int sort_flags, bool ascending) {
+
+void ArrayData::Sort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::sort");
 }
-void ArrayData::asort(int sort_flags, bool ascending) {
+
+void ArrayData::Asort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::asort");
 }
-void ArrayData::uksort(CVarRef cmp_function) {
+
+void ArrayData::Uksort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uksort");
 }
-void ArrayData::usort(CVarRef cmp_function) {
+
+void ArrayData::Usort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::usort");
 }
-void ArrayData::uasort(CVarRef cmp_function) {
+
+void ArrayData::Uasort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uasort");
 }
-ArrayData* ArrayData::copyWithStrongIterators() const {
+
+ArrayData* ArrayData::CopyWithStrongIterators(const ArrayData* ad) {
   throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
 }
 
@@ -622,6 +732,17 @@ CVarRef ArrayData::getNotFound(CStrRef k) {
 CVarRef ArrayData::getNotFound(CVarRef k) {
   raise_notice("Undefined index: %s", k.toString().data());
   return null_variant;
+}
+
+void ArrayData::Renumber(ArrayData*) {
+}
+
+void ArrayData::OnSetEvalScalar(ArrayData*) {
+  assert(false);
+}
+
+ArrayData* ArrayData::Escalate(const ArrayData* ad) {
+  return const_cast<ArrayData*>(ad);
 }
 
 void ArrayData::dump() {

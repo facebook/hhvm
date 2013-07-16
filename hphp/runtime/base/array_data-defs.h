@@ -173,6 +173,14 @@ inline ArrayData* ArrayData::append(CVarRef v, bool copy) {
   return g_array_funcs.append[m_kind](this, v, copy);
 }
 
+inline ArrayData* ArrayData::appendRef(CVarRef v, bool copy) {
+  return g_array_funcs.appendRef[m_kind](this, v, copy);
+}
+
+inline ArrayData* ArrayData::appendWithRef(CVarRef v, bool copy) {
+  return g_array_funcs.appendWithRef[m_kind](this, v, copy);
+}
+
 inline TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
@@ -285,6 +293,86 @@ inline ssize_t ArrayData::iter_advance(ssize_t pos) const {
 
 inline ssize_t ArrayData::iter_rewind(ssize_t pos) const {
   return g_array_funcs.iterRewind[m_kind](this, pos);
+}
+
+inline bool ArrayData::validFullPos(const FullPos& fp) const {
+  return g_array_funcs.validFullPos[m_kind](this, fp);
+}
+
+inline bool ArrayData::advanceFullPos(FullPos& fp) {
+  return g_array_funcs.advanceFullPos[m_kind](this, fp);
+}
+
+inline ArrayData* ArrayData::escalateForSort() {
+  return g_array_funcs.escalateForSort[m_kind](this);
+}
+
+inline void ArrayData::ksort(int sort_flags, bool ascending) {
+  return g_array_funcs.ksort[m_kind](this, sort_flags, ascending);
+}
+
+inline void ArrayData::sort(int sort_flags, bool ascending) {
+  return g_array_funcs.sort[m_kind](this, sort_flags, ascending);
+}
+
+inline void ArrayData::asort(int sort_flags, bool ascending) {
+  return g_array_funcs.asort[m_kind](this, sort_flags, ascending);
+}
+
+inline void ArrayData::uksort(CVarRef compare) {
+  return g_array_funcs.uksort[m_kind](this, compare);
+}
+
+inline void ArrayData::usort(CVarRef compare) {
+  return g_array_funcs.usort[m_kind](this, compare);
+}
+
+inline void ArrayData::uasort(CVarRef compare) {
+  return g_array_funcs.uasort[m_kind](this, compare);
+}
+
+inline ArrayData* ArrayData::copy() const {
+  return g_array_funcs.copy[m_kind](this);
+}
+
+inline ArrayData* ArrayData::copyWithStrongIterators() const {
+  return g_array_funcs.copyWithStrongIterators[m_kind](this);
+}
+
+inline ArrayData* ArrayData::nonSmartCopy() const {
+  return g_array_funcs.nonSmartCopy[m_kind](this);
+}
+
+inline ArrayData* ArrayData::pop(Variant& value) {
+  return g_array_funcs.pop[m_kind](this, value);
+}
+
+inline ArrayData* ArrayData::dequeue(Variant& value) {
+  return g_array_funcs.dequeue[m_kind](this, value);
+}
+
+inline ArrayData* ArrayData::prepend(CVarRef value, bool copy) {
+  return g_array_funcs.prepend[m_kind](this, value, copy);
+}
+
+inline void ArrayData::renumber() {
+  return g_array_funcs.renumber[m_kind](this);
+}
+
+inline void ArrayData::onSetEvalScalar() {
+  return g_array_funcs.onSetEvalScalar[m_kind](this);
+}
+
+inline ArrayData* ArrayData::escalate() const {
+  return g_array_funcs.escalate[m_kind](this);
+}
+
+inline ArrayData* ArrayData::plus(const ArrayData* elms, bool copy) {
+  return g_array_funcs.plus[m_kind](this, elms, copy);
+}
+
+inline ArrayData* ArrayData::merge(const ArrayData* elms, bool copy) {
+  return g_array_funcs.merge[m_kind](this, elms, copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

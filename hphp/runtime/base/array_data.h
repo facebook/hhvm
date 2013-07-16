@@ -33,7 +33,7 @@ class HphpArray;
 /**
  * Base class/interface for all types of specialized array data.
  */
-class ArrayData : public Countable {
+class ArrayData {
  public:
   enum class AllocationMode : bool { smart, nonSmart };
 
@@ -56,45 +56,53 @@ public:
   static const ssize_t invalid_index = -1;
 
   explicit ArrayData(ArrayKind kind)
-    : m_size(-1)
-    , m_strongIterators(nullptr)
-    , m_pos(0)
-    , m_kind(kind)
+    : m_kind(kind)
     , m_allocMode(AllocationMode::smart)
+    , m_size(-1)
+    , _count(0)
+    , m_pos(0)
+    , m_strongIterators(nullptr)
   {}
 
   explicit ArrayData(ArrayKind kind, AllocationMode m)
-      : m_size(-1)
-      , m_strongIterators(nullptr)
-      , m_pos(0)
-      , m_kind(kind)
-      , m_allocMode(m)
+    : m_kind(kind)
+    , m_allocMode(m)
+    , m_size(-1)
+    , _count(0)
+    , m_pos(0)
+    , m_strongIterators(nullptr)
   {}
 
   ArrayData(ArrayKind kind, AllocationMode m, uint size)
-      : m_size(size)
-      , m_strongIterators(nullptr)
-      , m_pos(size ? 0 : ArrayData::invalid_index)
-      , m_kind(kind)
-      , m_allocMode(m)
+    : m_kind(kind)
+    , m_allocMode(m)
+    , m_size(size)
+    , _count(0)
+    , m_pos(size ? 0 : ArrayData::invalid_index)
+    , m_strongIterators(nullptr)
   {}
 
   ArrayData(const ArrayData *src, ArrayKind kind,
             AllocationMode m = AllocationMode::smart)
-    : m_strongIterators(nullptr)
-    , m_pos(src->m_pos)
-    , m_kind(src->m_kind)
+    : m_kind(src->m_kind)
     , m_allocMode(m)
+    , _count(0)
+    , m_pos(src->m_pos)
+    , m_strongIterators(nullptr)
   {}
 
   static HphpArray* Make(uint capacity);
   static HphpArray* Make(uint size, const TypedValue*);
 
-  virtual ~ArrayData() {
+  void destroy() {
     // If there are any strong iterators pointing to this array, they need
     // to be invalidated.
-    freeStrongIterators();
+    if (UNLIKELY(m_strongIterators != nullptr)) freeStrongIterators();
   }
+
+  ~ArrayData() { destroy(); }
+
+  IMPLEMENT_COUNTABLE_METHODS
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -150,8 +158,8 @@ public:
   }
 
   // unlike ArrayData::size(), this functions doesn't delegate
-  // to the virtual Vsize() function, so its more efficient to
-  // use this when you know you don't have a NameValueTableWrapper.
+  // to the vsize() function, so its more efficient to use this when
+  // you know you don't have a NameValueTableWrapper.
   size_t getSize() const {
     return m_size;
   }
@@ -185,10 +193,9 @@ public:
     return m_kind == kNvtwKind;
   }
 
-
   /*
    * Returns whether or not this array contains "vector-like" data.
-   * I.e. all the keys are contiguous increasing integers.
+   * I.e. iteration order produces int keys 0 to m_size-1 in sequence.
    */
   bool isVectorData() const;
 
@@ -201,8 +208,8 @@ public:
                             bool detectSerializable = false) const;
 
   /**
-   * non-virtual Position-based iterations, implemented using iter_begin,
-   * iter_advance, iter_prev, iter_rewind pure virtual methods.
+   * Position-based iterations, implemented using iter_begin,
+   * iter_advance, iter_prev, iter_rewind.
    */
   Variant reset();
   Variant prev();
@@ -226,15 +233,13 @@ public:
   /**
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
-   * by overriding a virtual method or providing a custom static method,
-   * depending on how the method is dispatched.
-   * todo: t2608483 eliminate the remaining virtual methods.
+   * by providing a custom static method in g_array_funcs.
    */
   TypedValue* nvGet(int64_t k) const;
   TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
-  // nonvirtual wrappers that call virtual getValueRef()
+  // wrappers that call getValueRef()
   TypedValue* nvGetValueRef(ssize_t pos);
   Variant getValue(ssize_t pos) const;
   Variant getKey(ssize_t pos) const;
@@ -303,7 +308,8 @@ public:
 
   /**
    * Inline accessors that convert keys to StringData* before delegating to
-   * the virtual method.
+   * the virtual method.  Helpers that take a CVarRef key dispatch to either
+   * the StringData* or int64_t key-type helpers.
    */
   bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
@@ -368,24 +374,32 @@ public:
    * This will return false if the iterator points past the last element, or
    * if the iterator points before the first element.
    */
-  virtual bool validFullPos(const FullPos& fp) const = 0;
+  bool validFullPos(const FullPos& fp) const;
 
   /**
    * Advances the mutable iterator to the next element in the array. Returns
    * false if the iterator has moved past the last element, otherwise returns
    * true.
    */
-  virtual bool advanceFullPos(FullPos& fp) = 0;
+  bool advanceFullPos(FullPos& fp);
 
   CVarRef endRef();
 
-  virtual ArrayData* escalateForSort();
-  virtual void ksort(int sort_flags, bool ascending);
-  virtual void sort(int sort_flags, bool ascending);
-  virtual void asort(int sort_flags, bool ascending);
-  virtual void uksort(CVarRef cmp_function);
-  virtual void usort(CVarRef cmp_function);
-  virtual void uasort(CVarRef cmp_function);
+  ArrayData* escalateForSort();
+  void ksort(int sort_flags, bool ascending);
+  void sort(int sort_flags, bool ascending);
+  void asort(int sort_flags, bool ascending);
+  void uksort(CVarRef cmp_function);
+  void usort(CVarRef cmp_function);
+  void uasort(CVarRef cmp_function);
+
+  // default sort implementations
+  static void Ksort(ArrayData*, int sort_flags, bool ascending);
+  static void Sort(ArrayData*, int sort_flags, bool ascending);
+  static void Asort(ArrayData*, int sort_flags, bool ascending);
+  static void Uksort(ArrayData*, CVarRef cmp_function);
+  static void Usort(ArrayData*, CVarRef cmp_function);
+  static void Uasort(ArrayData*, CVarRef cmp_function);
 
   /**
    * Make a copy of myself.
@@ -394,9 +408,11 @@ public:
    * Is only implemented for array types that need to be able to go
    * into the static array list.
    */
-  virtual ArrayData *copy() const = 0;
-  virtual ArrayData *copyWithStrongIterators() const;
-  virtual ArrayData *nonSmartCopy() const;
+  ArrayData* copy() const;
+  ArrayData* copyWithStrongIterators() const;
+  ArrayData* nonSmartCopy() const;
+  static ArrayData* CopyWithStrongIterators(const ArrayData*);
+  static ArrayData* NonSmartCopy(const ArrayData*);
 
   /**
    * Append a value to the array. If "copy" is true, make a copy first
@@ -404,42 +420,42 @@ public:
    * escalated array data.
    */
   ArrayData* append(CVarRef v, bool copy);
-  virtual ArrayData* appendRef(CVarRef v, bool copy) = 0;
+  ArrayData* appendRef(CVarRef v, bool copy);
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
    */
-  virtual ArrayData *appendWithRef(CVarRef v, bool copy) = 0;
+  ArrayData* appendWithRef(CVarRef v, bool copy);
 
   /**
    * Implementing array appending and merging. If "copy" is true, make a copy
    * first then append/merge arrays. Return NULL if escalation is not needed,
    * or an escalated array data.
    */
-  virtual ArrayData *plus(const ArrayData *elems, bool copy) = 0;
-  virtual ArrayData *merge(const ArrayData *elems, bool copy) = 0;
+  ArrayData* plus(const ArrayData *elems, bool copy);
+  ArrayData* merge(const ArrayData *elems, bool copy);
 
   /**
    * Stack function: pop the last item and return it.
    */
-  virtual ArrayData *pop(Variant &value);
+  ArrayData* pop(Variant &value);
 
   /**
    * Queue function: remove the 1st item and return it.
    */
-  virtual ArrayData *dequeue(Variant &value);
+  ArrayData* dequeue(Variant &value);
 
   /**
    * Array function: prepend a new item.
    */
-  virtual ArrayData *prepend(CVarRef v, bool copy) = 0;
+  ArrayData* prepend(CVarRef v, bool copy);
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
    */
-  virtual void renumber() {}
+  void renumber();
 
-  virtual void onSetEvalScalar() { assert(false);}
+  void onSetEvalScalar();
 
   /**
    * Serialize this array. We could have made this virtual function to ask
@@ -452,9 +468,9 @@ public:
   void serialize(VariableSerializer *serializer,
                  bool skipNestCheck = false) const;
 
-  virtual void dump();
-  virtual void dump(std::string &out);
-  virtual void dump(std::ostream &os);
+  void dump();
+  void dump(std::string &out);
+  void dump(std::ostream &os);
 
   /**
    * Comparisons.
@@ -464,9 +480,17 @@ public:
 
   void setPosition(ssize_t p) { m_pos = p; }
 
-  virtual ArrayData *escalate() const {
-    return const_cast<ArrayData *>(this);
-  }
+  ArrayData *escalate() const;
+
+  // default implementations
+  static ArrayData* Plus(ArrayData*, const ArrayData *elems, bool copy);
+  static ArrayData* Merge(ArrayData*, const ArrayData *elems, bool copy);
+  static ArrayData* Pop(ArrayData*, Variant &value);
+  static ArrayData* Dequeue(ArrayData*, Variant &value);
+  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
+  static void Renumber(ArrayData*);
+  static void OnSetEvalScalar(ArrayData*);
+  static ArrayData* Escalate(const ArrayData* ad);
 
   static ArrayData *GetScalarArray(ArrayData *arr,
                                    const StringData *key = nullptr);
@@ -505,22 +529,20 @@ public:
   void modeFree(void* ptr) const;
 
  protected:
-  // Layout starts with 64 bits for vtable, then 32 bits for m_count
-  // from Countable base, then...
-  uint m_size;
-private:
-  FullPos* m_strongIterators; // head of linked list
-protected:
-  int32_t m_pos;
   ArrayKind m_kind;
   const AllocationMode m_allocMode;
+  uint32_t m_size;
+  mutable int32_t _count;
+  int32_t m_pos;
+ private:
+  FullPos* m_strongIterators; // head of linked list
 
  public: // for the JIT
   static uint32_t getKindOff() {
     return (uintptr_t)&((ArrayData*)0)->m_kind;
   }
 
- public:
+ public: // for heap profiler
   void getChildren(std::vector<TypedValue *> &out);
 };
 
@@ -534,7 +556,6 @@ struct ArrayFunctions {
   // NK stands for number of array kinds; here just for shorthand.
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
-  ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
   TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
   TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
@@ -569,6 +590,29 @@ struct ArrayFunctions {
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
+  bool (*validFullPos[NK])(const ArrayData*, const FullPos&);
+  bool (*advanceFullPos[NK])(ArrayData*, FullPos&);
+  ArrayData* (*escalateForSort[NK])(ArrayData*);
+  void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
+  void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);
+  void (*asort[NK])(ArrayData* ad, int sort_flags, bool ascending);
+  void (*uksort[NK])(ArrayData* ad, CVarRef cmp_function);
+  void (*usort[NK])(ArrayData* ad, CVarRef cmp_function);
+  void (*uasort[NK])(ArrayData* ad, CVarRef cmp_function);
+  ArrayData* (*copy[NK])(const ArrayData*);
+  ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
+  ArrayData* (*nonSmartCopy[NK])(const ArrayData*);
+  ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
+  ArrayData* (*appendRef[NK])(ArrayData*, CVarRef v, bool copy);
+  ArrayData* (*appendWithRef[NK])(ArrayData*, CVarRef v, bool copy);
+  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems, bool copy);
+  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems, bool copy);
+  ArrayData* (*pop[NK])(ArrayData*, Variant& value);
+  ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
+  ArrayData* (*prepend[NK])(ArrayData*, CVarRef value, bool copy);
+  void (*renumber[NK])(ArrayData*);
+  void (*onSetEvalScalar[NK])(ArrayData*);
+  ArrayData* (*escalate[NK])(const ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

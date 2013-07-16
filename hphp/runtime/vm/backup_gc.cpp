@@ -378,10 +378,6 @@ struct GarbageCollector {
   }
 
   void dealloc(SmartAllocatorImpl* sa, ArrayData* ar) const {
-    if (Sweepable* s = dynamic_cast<Sweepable*>(ar)) {
-      s->sweep();
-      s->unregister();
-    }
     sa->dealloc(ar);
   }
 

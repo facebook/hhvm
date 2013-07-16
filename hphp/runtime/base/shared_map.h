@@ -42,8 +42,6 @@ public:
 
   ~SharedMap();
 
-  virtual bool isSharedMap() const { return true; }
-
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
   // from a CVarRef key to int64.
@@ -85,20 +83,19 @@ public:
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
 
-  ArrayData *copy() const;
+  static ArrayData* Copy(const ArrayData*);
   /**
    * Copy (escalate) the SharedMap without triggering local cache.
    */
-  static ArrayData *Append(ArrayData* a, CVarRef v, bool copy);
-  ArrayData *appendRef(CVarRef v, bool copy);
-  ArrayData *appendWithRef(CVarRef v, bool copy);
-  ArrayData *plus(const ArrayData *elems, bool copy);
-  ArrayData *merge(const ArrayData *elems, bool copy);
-
-  ArrayData *prepend(CVarRef v, bool copy);
+  static ArrayData* Append(ArrayData* a, CVarRef v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData *elems, bool copy);
+  static ArrayData* Merge(ArrayData*, const ArrayData *elems, bool copy);
+  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
   /**
-   * Non-Variant virtual methods that override ArrayData
+   * Non-Variant methods that override ArrayData
    */
   static TypedValue* NvGetInt(const ArrayData*, int64_t k);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
@@ -111,8 +108,8 @@ public:
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
-  bool validFullPos(const FullPos& fp) const;
-  bool advanceFullPos(FullPos& fp);
+  static bool ValidFullPos(const ArrayData*, const FullPos& fp);
+  static bool AdvanceFullPos(ArrayData*, FullPos& fp);
 
   /**
    * Memory allocator methods.
@@ -120,8 +117,8 @@ public:
   DECLARE_SMART_ALLOCATION(SharedMap);
   static void Release(ArrayData*);
 
-  virtual ArrayData *escalate() const;
-  virtual ArrayData* escalateForSort();
+  static ArrayData* Escalate(const ArrayData*);
+  static ArrayData* EscalateForSort(ArrayData*);
 
   ArrayData* loadElems(bool mapInit = false) const;
 

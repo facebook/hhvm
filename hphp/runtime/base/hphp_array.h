@@ -70,7 +70,7 @@ public:
   // moving (without refcounting) and reversing vals.
   HphpArray(uint size, const TypedValue* vals); // make tuple
 
-  virtual ~HphpArray();
+  ~HphpArray();
   void destroyVec();
   void destroy();
 
@@ -177,30 +177,36 @@ public:
   static ArrayData* RemoveIntVec(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStrVec(ArrayData*, const StringData* k, bool copy);
 
-  // overrides/implements ArrayData
-  ArrayData* copy() const;
-  ArrayData* copyWithStrongIterators() const;
+  // overrides ArrayData
+  static ArrayData* Copy(const ArrayData*);
+  static ArrayData* CopyVec(const ArrayData*);
+  static ArrayData* CopyWithStrongIterators(const ArrayData*);
+  static ArrayData* NonSmartCopy(const ArrayData*);
 
-  ArrayData* nonSmartCopy() const;
   HphpArray* copyImpl() const;
   HphpArray* copyVec() const;
   HphpArray* copyGeneric() const;
 
   static ArrayData* AppendVec(ArrayData*, CVarRef v, bool copy);
   static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
-  ArrayData* appendRef(CVarRef v, bool copy);
-  ArrayData* appendWithRef(CVarRef v, bool copy);
-  ArrayData* plus(const ArrayData* elems, bool copy);
-  ArrayData* merge(const ArrayData* elems, bool copy);
-  ArrayData* pop(Variant& value);
-  ArrayData* dequeue(Variant& value);
-  ArrayData* prepend(CVarRef v, bool copy);
-  void renumber();
-  void onSetEvalScalar();
+  static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendRefVec(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendWithRefVec(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Pop(ArrayData*, Variant& value);
+  static ArrayData* PopVec(ArrayData*, Variant& value);
+  static ArrayData* Dequeue(ArrayData*, Variant& value);
+  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
+  static void Renumber(ArrayData*);
+  static void RenumberVec(ArrayData*);
+  static void OnSetEvalScalar(ArrayData*);
+  static void OnSetEvalScalarVec(ArrayData*);
 
   // overrides ArrayData
-  bool validFullPos(const FullPos &fp) const;
-  bool advanceFullPos(FullPos& fp);
+  static bool ValidFullPos(const ArrayData*, const FullPos &fp);
+  static bool AdvanceFullPos(ArrayData*, FullPos& fp);
 
   // END overide/implements section
 
@@ -245,13 +251,13 @@ private:
   void postSort(bool resetKeys);
 
 public:
-  ArrayData* escalateForSort();
-  void ksort(int sort_flags, bool ascending);
-  void sort(int sort_flags, bool ascending);
-  void asort(int sort_flags, bool ascending);
-  void uksort(CVarRef cmp_function);
-  void usort(CVarRef cmp_function);
-  void uasort(CVarRef cmp_function);
+  static ArrayData* EscalateForSort(ArrayData* ad);
+  static void Ksort(ArrayData*, int sort_flags, bool ascending);
+  static void Sort(ArrayData*, int sort_flags, bool ascending);
+  static void Asort(ArrayData*, int sort_flags, bool ascending);
+  static void Uksort(ArrayData*, CVarRef cmp_function);
+  static void Usort(ArrayData*, CVarRef cmp_function);
+  static void Uasort(ArrayData*, CVarRef cmp_function);
 
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {

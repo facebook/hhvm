@@ -25,14 +25,12 @@ namespace HPHP {
 
 inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
   assert(ad->kind() == kNvtwKind);
-  assert(dynamic_cast<NameValueTableWrapper*>(ad));
   return static_cast<NameValueTableWrapper*>(ad);
 }
 
 inline const NameValueTableWrapper*
 NameValueTableWrapper::asNVTW(const ArrayData* ad) {
   assert(ad->kind() == kNvtwKind);
-  assert(dynamic_cast<const NameValueTableWrapper*>(ad));
   return static_cast<const NameValueTableWrapper*>(ad);
 }
 
@@ -170,27 +168,33 @@ NameValueTableWrapper::RemoveStr(ArrayData* ad, const StringData* k,
  * is currently $GLOBALS.
  */
 
-ArrayData* NameValueTableWrapper::Append(ArrayData*, CVarRef v, bool copy) {
+ArrayData*
+NameValueTableWrapper::Append(ArrayData*, CVarRef v, bool copy) {
   throw NotImplementedException("append on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::appendRef(CVarRef v, bool copy) {
+ArrayData*
+NameValueTableWrapper::AppendRef(ArrayData*, CVarRef v, bool copy) {
   throw NotImplementedException("appendRef on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::appendWithRef(CVarRef v, bool copy) {
+ArrayData*
+NameValueTableWrapper::AppendWithRef(ArrayData*, CVarRef v, bool copy) {
   throw NotImplementedException("appendWithRef on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::plus(const ArrayData* elems, bool copy) {
+ArrayData*
+NameValueTableWrapper::Plus(ArrayData*, const ArrayData* elems, bool copy) {
   throw NotImplementedException("plus on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::merge(const ArrayData* elems, bool copy) {
+ArrayData*
+NameValueTableWrapper::Merge(ArrayData*, const ArrayData* elems, bool copy) {
   throw NotImplementedException("merge on $GLOBALS");
 }
 
-ArrayData* NameValueTableWrapper::prepend(CVarRef v, bool copy) {
+ArrayData*
+NameValueTableWrapper::Prepend(ArrayData*, CVarRef v, bool copy) {
   throw NotImplementedException("prepend on $GLOBALS");
 }
 
@@ -219,19 +223,22 @@ ssize_t NameValueTableWrapper::IterRewind(const ArrayData* ad, ssize_t prev) {
   return iter.toInteger();
 }
 
-bool NameValueTableWrapper::validFullPos(const FullPos & fp) const {
-  assert(fp.getContainer() == (ArrayData*)this);
+bool
+NameValueTableWrapper::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
+  assert(fp.getContainer() == ad);
+  auto a = asNVTW(ad);
   if (fp.getResetFlag()) return false;
-  if (fp.m_pos == ArrayData::invalid_index) return false;
-  NameValueTable::Iterator iter(m_tab, fp.m_pos);
-  return (iter.valid());
+  if (fp.m_pos == invalid_index) return false;
+  NameValueTable::Iterator iter(a->m_tab, fp.m_pos);
+  return iter.valid();
 }
 
-bool NameValueTableWrapper::advanceFullPos(FullPos& fp) {
+bool NameValueTableWrapper::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+  auto a = asNVTW(ad);
   bool reset = fp.getResetFlag();
   NameValueTable::Iterator iter = reset ?
-    NameValueTable::Iterator(m_tab) :
-    NameValueTable::Iterator(m_tab, fp.m_pos);
+    NameValueTable::Iterator(a->m_tab) :
+    NameValueTable::Iterator(a->m_tab, fp.m_pos);
   if (reset) {
     fp.setResetFlag(false);
   } else {
@@ -245,20 +252,20 @@ bool NameValueTableWrapper::advanceFullPos(FullPos& fp) {
   // To conform to PHP behavior, we need to set the internal
   // cursor to point to the next element.
   iter.next();
-  m_pos = iter.toInteger();
+  a->m_pos = iter.toInteger();
   return true;
 }
 
-ArrayData* NameValueTableWrapper::escalateForSort() {
+ArrayData* NameValueTableWrapper::EscalateForSort(ArrayData* ad) {
   raise_warning("Sorting the $GLOBALS array is not supported");
-  return this;
+  return ad;
 }
-void NameValueTableWrapper::ksort(int sort_flags, bool ascending) {}
-void NameValueTableWrapper::sort(int sort_flags, bool ascending) {}
-void NameValueTableWrapper::asort(int sort_flags, bool ascending) {}
-void NameValueTableWrapper::uksort(CVarRef cmp_function) {}
-void NameValueTableWrapper::usort(CVarRef cmp_function) {}
-void NameValueTableWrapper::uasort(CVarRef cmp_function) {}
+void NameValueTableWrapper::Ksort(ArrayData*, int sort_flags, bool ascending) {}
+void NameValueTableWrapper::Sort(ArrayData*, int sort_flags, bool ascending) {}
+void NameValueTableWrapper::Asort(ArrayData*, int sort_flags, bool ascending) {}
+void NameValueTableWrapper::Uksort(ArrayData*, CVarRef cmp_function) {}
+void NameValueTableWrapper::Usort(ArrayData*, CVarRef cmp_function) {}
+void NameValueTableWrapper::Uasort(ArrayData*, CVarRef cmp_function) {}
 
 bool NameValueTableWrapper::IsVectorData(const ArrayData*) {
   return false;

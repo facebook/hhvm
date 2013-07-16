@@ -78,7 +78,7 @@ inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
   }                                                                   \
   bool isStatic() const {                                             \
     assert(is_refcount_realistic(_count));                            \
-    return _count == STATIC_FLAG;                                     \
+    return _count == RefCountStaticValue;                             \
   }                                                                   \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
@@ -89,7 +89,6 @@ inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
  */
 class Countable {
  public:
-  static const int32_t STATIC_FLAG = RefCountStaticValue;
   Countable() : _count(0) {}
   IMPLEMENT_COUNTABLE_METHODS
  protected:

@@ -119,7 +119,6 @@ inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
 
 inline HphpArray* HphpArray::asVector(ArrayData* ad) {
   assert(ad->kind() == kVectorKind);
-  assert(dynamic_cast<HphpArray*>(ad));
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
@@ -127,7 +126,6 @@ inline HphpArray* HphpArray::asVector(ArrayData* ad) {
 
 inline const HphpArray* HphpArray::asVector(const ArrayData* ad) {
   assert(ad->kind() == kVectorKind);
-  assert(dynamic_cast<const HphpArray*>(ad));
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;

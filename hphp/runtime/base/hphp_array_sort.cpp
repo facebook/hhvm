@@ -143,19 +143,19 @@ void HphpArray::postSort(bool resetKeys) {
   m_hLoad = m_size;
 }
 
-ArrayData* HphpArray::escalateForSort() {
+ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
   // task #1910931 only do this for refCount() > 1
-  return copyImpl();
+  return asHphpArray(ad)->copyImpl();
 }
 
 #define SORT_CASE(flag, cmp_type, acc_type) \
   case flag: { \
     if (ascending) { \
       cmp_type##Compare<acc_type, flag, true> comp; \
-      HPHP::Sort::sort(m_data, m_data + m_size, comp); \
+      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
     } else { \
       cmp_type##Compare<acc_type, flag, false> comp; \
-      HPHP::Sort::sort(m_data, m_data + m_size, comp); \
+      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
     } \
     break; \
   }
@@ -179,34 +179,37 @@ ArrayData* HphpArray::escalateForSort() {
   }
 #define SORT_BODY(acc_type, resetKeys) \
   do { \
-    freeStrongIterators(); \
-    if (!m_size) { \
+    a->freeStrongIterators(); \
+    if (!a->m_size) { \
       if (resetKeys) { \
-        m_nextKI = 0; \
+        a->m_nextKI = 0; \
       } \
       return; \
     } \
-    SortFlavor flav = preSort<acc_type>(acc_type(), true); \
-    m_pos = ssize_t(0); \
+    SortFlavor flav = a->preSort<acc_type>(acc_type(), true); \
+    a->m_pos = ssize_t(0); \
     try { \
       CALL_SORT(acc_type); \
     } catch (...) { \
       /* Make sure we leave the array in a consistent state */ \
-      postSort(resetKeys); \
+      a->postSort(resetKeys); \
       throw; \
     } \
-    postSort(resetKeys); \
+    a->postSort(resetKeys); \
   } while (0)
 
-void HphpArray::ksort(int sort_flags, bool ascending) {
+void HphpArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = asHphpArray(ad);
   SORT_BODY(KeyAccessor, false);
 }
 
-void HphpArray::sort(int sort_flags, bool ascending) {
+void HphpArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = asHphpArray(ad);
   SORT_BODY(ValAccessor, true);
 }
 
-void HphpArray::asort(int sort_flags, bool ascending) {
+void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = asHphpArray(ad);
   SORT_BODY(ValAccessor, false);
 }
 
@@ -216,39 +219,42 @@ void HphpArray::asort(int sort_flags, bool ascending) {
 
 #define USER_SORT_BODY(acc_type, resetKeys)                     \
   do {                                                          \
-    freeStrongIterators();                                      \
-    if (!m_size) {                                              \
+    a->freeStrongIterators();                                   \
+    if (!a->m_size) {                                           \
       if (resetKeys) {                                          \
-        m_nextKI = 0;                                           \
+        a->m_nextKI = 0;                                        \
       }                                                         \
       return;                                                   \
     }                                                           \
-    preSort<acc_type>(acc_type(), false);                       \
-    m_pos = ssize_t(0);                                         \
+    a->preSort<acc_type>(acc_type(), false);                    \
+    a->m_pos = ssize_t(0);                                      \
     try {                                                       \
       ElmUCompare<acc_type> comp;                               \
-      Transl::CallerFrame cf;                               \
+      Transl::CallerFrame cf;                                   \
       CallCtx ctx;                                              \
       vm_decode_function(cmp_function, cf(), false, ctx);       \
       comp.ctx = &ctx;                                          \
-      HPHP::Sort::sort(m_data, m_data + m_size, comp);          \
+      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
     } catch (...) {                                             \
       /* Make sure we leave the array in a consistent state */  \
-      postSort(resetKeys);                                      \
+      a->postSort(resetKeys);                                   \
       throw;                                                    \
     }                                                           \
-    postSort(resetKeys);                                        \
+    a->postSort(resetKeys);                                     \
   } while (0)
 
-void HphpArray::uksort(CVarRef cmp_function) {
+void HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
+  auto a = asHphpArray(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
-void HphpArray::usort(CVarRef cmp_function) {
+void HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
+  auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
-void HphpArray::uasort(CVarRef cmp_function) {
+void HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
+  auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, false);
 }
 

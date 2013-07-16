@@ -46,7 +46,7 @@
 namespace HPHP {
 
 static_assert(
-  sizeof(HphpArray) == 160,
+  sizeof(HphpArray) == 152,
   "Performance is sensitive to sizeof(HphpArray)."
   " Make sure you changed it with good reason and then update this assert.");
 
@@ -238,7 +238,7 @@ HOT_FUNC_VM
 void HphpArray::ReleaseVec(ArrayData* ad) {
   auto a = asVector(ad);
   a->destroyVec();
-  if (UNLIKELY(a->strongIterators() != nullptr)) a->freeStrongIterators();
+  a->ArrayData::destroy();
   HphpArray::AllocatorType::getNoCheck()->dealloc(a);
 }
 
@@ -246,7 +246,7 @@ HOT_FUNC_VM
 void HphpArray::Release(ArrayData* ad) {
   auto a = asGeneric(ad);
   a->destroy();
-  if (UNLIKELY(a->strongIterators() != nullptr)) a->freeStrongIterators();
+  a->ArrayData::destroy();
   HphpArray::AllocatorType::getNoCheck()->dealloc(a);
 }
 
@@ -1455,15 +1455,18 @@ HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   return a->erase(a->findForInsert(key, key->hash()));
 }
 
-ArrayData* HphpArray::copy() const {
-  assert(checkInvariants());
-  return copyImpl();
+ArrayData* HphpArray::CopyVec(const ArrayData* ad) {
+  return asVector(ad)->copyVec();
 }
 
-ArrayData* HphpArray::copyWithStrongIterators() const {
-  assert(checkInvariants());
-  HphpArray* copied = copyImpl();
-  moveStrongIterators(copied, const_cast<HphpArray*>(this));
+ArrayData* HphpArray::Copy(const ArrayData* ad) {
+  return asGeneric(ad)->copyGeneric();
+}
+
+ArrayData* HphpArray::CopyWithStrongIterators(const ArrayData* ad) {
+  auto a = asHphpArray(ad);
+  auto copied = a->copyImpl();
+  moveStrongIterators(copied, const_cast<HphpArray*>(a));
   return copied;
 }
 
@@ -1590,32 +1593,38 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
   return genericAddNewElemC(a, value);
 }
 
-ArrayData* HphpArray::appendRef(CVarRef v, bool copy) {
-  assert(checkInvariants());
-  HphpArray *a = !copy ? this : copyImpl();
-  if (a->isVector()) {
-    auto &tv = a->allocNextElm(a->m_size);
-    tvAsUninitializedVariant(&tv).constructRefHelper(v);
-    return a;
-  }
+ArrayData* HphpArray::AppendRefVec(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  auto &tv = a->allocNextElm(a->m_size);
+  tvAsUninitializedVariant(&tv).constructRefHelper(v);
+  return a;
+}
+
+ArrayData* HphpArray::AppendRef(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->nextInsertRef(v);
 }
 
-ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
-  assert(checkInvariants());
-  HphpArray *a = !copy ? this : copyImpl();
-  if (a->isVector()) {
-    auto& tv = a->allocNextElm(a->m_size);
-    tvWriteNull(&tv);
-    tvAsVariant(&tv).setWithRef(v);
-    return a;
-  }
+ArrayData *HphpArray::AppendWithRefVec(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asVector(ad);
+  if (copy) a = a->copyVec();
+  auto& tv = a->allocNextElm(a->m_size);
+  tvWriteNull(&tv);
+  tvAsVariant(&tv).setWithRef(v);
+  return a;
+}
+
+ArrayData *HphpArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asGeneric(ad);
+  if (copy) a = a->copyGeneric();
   return a->nextInsertWithRef(v);
 }
 
-ArrayData* HphpArray::plus(const ArrayData* elems, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
+ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems, bool copy) {
+  auto a = asHphpArray(ad);
+  if (copy) a = a->copyImpl();
   if (a->isVector()) {
     // todo t2606310: is there a fast path if elems is also a vector?
     a->vectorToGeneric();
@@ -1632,9 +1641,9 @@ ArrayData* HphpArray::plus(const ArrayData* elems, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::merge(const ArrayData* elems, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = !copy ? this : copyImpl();
+ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems, bool copy) {
+  auto a = asHphpArray(ad);
+  if (copy) a = a->copyImpl();
   if (a->isVector()) {
     // todo t2606310: is there a fast path if elems is also a vector?
     a->vectorToGeneric();
@@ -1654,22 +1663,30 @@ ArrayData* HphpArray::merge(const ArrayData* elems, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::pop(Variant& value) {
-  assert(checkInvariants());
-  HphpArray* a = getCount() <= 1 ? this : copyImpl();
+ArrayData* HphpArray::PopVec(ArrayData* ad, Variant& value) {
+  auto a = asVector(ad);
+  if (a->getCount() > 1) a = a->copyImpl();
+  if (a->m_size > 0) {
+    auto i = a->m_size - 1;
+    value = tvAsCVarRef(&a->m_data[i].data);
+    a->m_size = a->m_used = i;
+    a->m_pos = i > 0 ? 0 : invalid_index; // reset internal iterator
+  } else {
+    value = uninit_null();
+    a->m_pos = invalid_index; // reset internal iterator
+  }
+  return a;
+}
+
+ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
+  auto a = asGeneric(ad);
+  if (a->getCount() > 1) a = a->copyImpl();
   Elm* elms = a->m_data;
   ElmInd pos = IterEnd(a);
   if (validElmInd(pos)) {
     Elm* e = &elms[pos];
     assert(!isTombstone(e->data.m_type));
     value = tvAsCVarRef(&e->data);
-    if (a->isVector()) {
-      assert(pos == a->m_size - 1);
-      a->m_size = a->m_used = pos;
-      a->m_pos = pos ? 0 : invalid_index;
-      tvRefcountedDecRef(&e->data);
-      return a;
-    }
     ElmInd* ei = e->hasStrKey()
         ? a->findForInsert(e->key, e->hash())
         : a->findForInsert(e->ikey);
@@ -1683,9 +1700,9 @@ ArrayData* HphpArray::pop(Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::dequeue(Variant& value) {
-  assert(checkInvariants());
-  HphpArray* a = getCount() <= 1 ? this : copyImpl();
+ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
+  auto a = asHphpArray(ad);
+  if (a->getCount() > 1) a = a->copyImpl();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -1717,9 +1734,9 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
-  assert(checkInvariants());
-  HphpArray* a = getCount() <= 1 ? this : copyImpl();
+ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asHphpArray(ad);
+  if (a->getCount() > 1) a = a->copyImpl();
   if (a->isVector()) {
     // todo t2606310: fast path - same as add for empty vectors
     a->vectorToGeneric();
@@ -1757,69 +1774,71 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   return a;
 }
 
-void HphpArray::renumber() {
-  assert(checkInvariants());
-  if (isVector()) {
-    // iterators don't move and nothing else happens.
-    return;
-  }
-  compact(true);
+void HphpArray::RenumberVec(ArrayData* ad) {
+  assert(asVector(ad)); // for the checkInvariants() call
+  // renumber has no effect on Vector and doesn't move internal pos
 }
 
-void HphpArray::onSetEvalScalar() {
-  assert(checkInvariants());
-  Elm* elms = m_data;
-  if (isVector()) {
-    for (uint32_t i = 0, limit = m_used; i < limit; ++i) {
-      tvAsVariant(&elms[i].data).setEvalScalar();
-    }
-  } else {
-    for (uint32_t i = 0, limit = m_used; i < limit; ++i) {
-      Elm* e = &elms[i];
-      if (!isTombstone(e->data.m_type)) {
-        StringData *key = e->key;
-        if (e->hasStrKey() && !key->isStatic()) {
-          e->key = StringData::GetStaticString(key);
-          decRefStr(key);
-        }
-        tvAsVariant(&e->data).setEvalScalar();
+void HphpArray::Renumber(ArrayData* ad) {
+  asGeneric(ad)->compact(true);
+}
+
+void HphpArray::OnSetEvalScalarVec(ArrayData* ad) {
+  auto a = asVector(ad);
+  Elm* elms = a->m_data;
+  for (uint32_t i = 0, limit = a->m_size; i < limit; ++i) {
+    tvAsVariant(&elms[i].data).setEvalScalar();
+  }
+}
+
+void HphpArray::OnSetEvalScalar(ArrayData* ad) {
+  auto a = asGeneric(ad);
+  Elm* elms = a->m_data;
+  for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
+    Elm* e = &elms[i];
+    if (!isTombstone(e->data.m_type)) {
+      StringData *key = e->key;
+      if (e->hasStrKey() && !key->isStatic()) {
+        e->key = StringData::GetStaticString(key);
+        decRefStr(key);
       }
+      tvAsVariant(&e->data).setEvalScalar();
     }
   }
 }
 
-bool HphpArray::validFullPos(const FullPos &fp) const {
-  assert(checkInvariants());
-  assert(fp.getContainer() == (ArrayData*)this);
+bool HphpArray::ValidFullPos(const ArrayData* ad, const FullPos &fp) {
+  assert(fp.getContainer() == asHphpArray(ad));
   if (fp.getResetFlag()) return false;
   return (fp.m_pos != ssize_t(ElmIndEmpty));
 }
 
-bool HphpArray::advanceFullPos(FullPos& fp) {
-  assert(checkInvariants());
-  Elm* elms = m_data;
+bool HphpArray::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+  auto a = asHphpArray(ad);
+  Elm* elms = a->m_data;
   if (fp.getResetFlag()) {
     fp.setResetFlag(false);
     fp.m_pos = ElmIndEmpty;
   } else if (fp.m_pos == ssize_t(ElmIndEmpty)) {
     return false;
   }
-  fp.m_pos = nextElm(elms, fp.m_pos);
+  fp.m_pos = a->nextElm(elms, fp.m_pos);
   if (fp.m_pos == ssize_t(ElmIndEmpty)) {
     return false;
   }
   // To conform to PHP behavior, we need to set the internal
   // cursor to point to the next element.
-  m_pos = nextElm(elms, fp.m_pos);
+  a->m_pos = a->nextElm(elms, fp.m_pos);
   return true;
 }
 
 //=============================================================================
 
-NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
-  return isVector() ?
-    new HphpArray(*this, AllocationMode::nonSmart, CopyVector()) :
-    new HphpArray(*this, AllocationMode::nonSmart, CopyGeneric());
+NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* ad) {
+  auto a = asHphpArray(ad);
+  return a->isVector() ?
+    new HphpArray(*a, AllocationMode::nonSmart, CopyVector()) :
+    new HphpArray(*a, AllocationMode::nonSmart, CopyGeneric());
 }
 
 NEVER_INLINE HphpArray* HphpArray::copyVec() const {

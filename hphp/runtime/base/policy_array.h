@@ -329,7 +329,7 @@ public:
 
   explicit PolicyArray(uint size);
 
-  virtual ~PolicyArray() FOLLY_OVERRIDE;
+  ~PolicyArray();
 
   /**
    * getValueRef() gets a reference to value at position "pos".
@@ -475,16 +475,16 @@ public:
    * This will return false if the iterator points past the last element, or
    * if the iterator points before the first element.
    */
-  virtual bool validFullPos(const FullPos& fp) const FOLLY_OVERRIDE;
+  static bool ValidFullPos(const ArrayData*, const FullPos& fp);
 
   /**
    * Advances the mutable iterator to the next element in the array. Returns
    * false if the iterator has moved past the last element, otherwise returns
    * true.
    */
-  virtual bool advanceFullPos(FullPos& fp) FOLLY_OVERRIDE;
+  static bool AdvanceFullPos(ArrayData* ad, FullPos& fp);
 
-  virtual ArrayData* escalateForSort() FOLLY_OVERRIDE;
+  static ArrayData* EscalateForSort(ArrayData* ad);
 
   /**
    * Make a copy of myself.
@@ -494,9 +494,9 @@ public:
    * into the static array list.
    */
   PolicyArray* copy(uint minCapacity);
-  virtual PolicyArray *copy() const FOLLY_OVERRIDE;
-  virtual PolicyArray *copyWithStrongIterators() const FOLLY_OVERRIDE;
-  virtual ArrayData *nonSmartCopy() const FOLLY_OVERRIDE;
+  static ArrayData* Copy(const ArrayData* ad);
+  static ArrayData* CopyWithStrongIterators(const ArrayData* ad);
+  static ArrayData* NonSmartCopy(const ArrayData* ad);
 
 private:
   template <class K, class V>
@@ -520,44 +520,45 @@ public:
    * escalated array data.
    */
   static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
-  virtual PolicyArray *appendRef(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
    */
-  virtual ArrayData *appendWithRef(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
 
   /**
    * Implementing array appending and merging. If "copy" is true, make a copy
    * first then append/merge arrays. Return NULL if escalation is not needed,
    * or an escalated array data.
    */
-  virtual ArrayData *plus(const ArrayData *elems, bool copy) FOLLY_OVERRIDE;
-  virtual ArrayData *merge(const ArrayData *elems, bool copy) FOLLY_OVERRIDE;
+  static ArrayData* Plus(ArrayData* ad, const ArrayData *elems, bool copy);
+  static ArrayData* Merge(ArrayData* ad, const ArrayData *elems, bool copy);
 
   /**
    * Stack function: pop the last item and return it.
    */
-  virtual ArrayData *pop(Variant &value) FOLLY_OVERRIDE;
+  static ArrayData* Pop(ArrayData*, Variant &value);
 
   /**
    * Queue function: remove the 1st item and return it.
    */
-  virtual ArrayData *dequeue(Variant &value) FOLLY_OVERRIDE;
+  static ArrayData* Dequeue(ArrayData*, Variant &value);
 
   /**
    * Array function: prepend a new item.
    */
-  virtual ArrayData *prepend(CVarRef v, bool copy) FOLLY_OVERRIDE;
+  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
    */
-  virtual void renumber() FOLLY_OVERRIDE;
+  void renumber();
+  static void Renumber(ArrayData*);
 
-  virtual void onSetEvalScalar() FOLLY_OVERRIDE;
+  static void OnSetEvalScalar(ArrayData*);
 
-  virtual ArrayData *escalate() const FOLLY_OVERRIDE;
+  static ArrayData* Escalate(const ArrayData*);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

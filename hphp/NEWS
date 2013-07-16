@@ -1,3 +1,5 @@
+Future (next release):
+  - Implement assert with string arguments
 
 "Tamale" 7/22/2013
   - Implement RecursiveArrayIterator

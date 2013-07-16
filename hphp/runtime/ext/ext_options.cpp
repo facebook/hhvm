@@ -14,8 +14,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_options.h"
+
+#include "folly/ScopeGuard.h"
+
+#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime_option.h"
@@ -26,6 +30,7 @@
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/zend_functions.h"
 #include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 #include <sys/utsname.h>
 #include <pwd.h>
@@ -41,6 +46,7 @@ public:
     assertActive = RuntimeOption::AssertActive ? 1 : 0;
     assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
     assertBail = 0;
+    assertQuietEval = false;
   }
 
   virtual void requestShutdown() {
@@ -50,6 +56,7 @@ public:
   int assertActive;
   int assertWarning;
   int assertBail;
+  bool assertQuietEval;
   Variant assertCallback;
 };
 
@@ -76,29 +83,91 @@ Variant f_assert_options(int what, CVarRef value /* = null_variant */) {
     if (!value.isNull()) s_option_data->assertCallback = value;
     return oldValue;
   }
+  if (what == k_ASSERT_QUIET_EVAL) {
+    bool oldValue = s_option_data->assertQuietEval;
+    if (!value.isNull()) s_option_data->assertQuietEval = value.toBoolean();
+    return Variant(oldValue);
+  }
   throw_invalid_argument("assert option %d is not supported", what);
   return false;
 }
 
+static Variant eval_for_assert(ActRec* const curFP, CStrRef codeStr) {
+  String prefixedCode = concat3("<?php return ", codeStr, ";");
+
+  auto const oldErrorLevel =
+    s_option_data->assertQuietEval ? f_error_reporting(Variant(0)) : 0;
+  SCOPE_EXIT {
+    if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
+  };
+
+  auto const unit = g_vmContext->compileEvalString(prefixedCode.get());
+  if (unit == nullptr) {
+    raise_recoverable_error("Syntax error in assert()");
+    // Failure to compile the eval string doesn't count as an
+    // assertion failure.
+    return Variant(true);
+  }
+
+  auto const func = unit->getMain();
+  TypedValue retVal;
+  g_vmContext->invokeFunc(
+    &retVal,
+    func,
+    null_array,
+    nullptr,
+    nullptr,
+    // Zend appears to share the variable environment with the assert()
+    // builtin, but we deviate by having no shared env here.
+    nullptr /* VarEnv */,
+    nullptr,
+    VMExecutionContext::InvokePseudoMain
+  );
+
+  return tvAsVariant(&retVal);
+}
+
 Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertActive) return true;
-  if (assertion.isString()) {
-    throw NotSupportedException(__func__,
-                                "assert cannot take string argument");
-  }
-  if (assertion.toBoolean()) return true;
 
-  // assertion failed
+  Transl::CallerFrame cf;
+  Offset callerOffset;
+  auto const fp = cf(&callerOffset);
+
+  auto const passed = [&]() -> bool {
+    if (assertion.isString()) {
+      if (RuntimeOption::RepoAuthoritative) {
+        // We could support this with compile-time string literals,
+        // but it's not yet implemented.
+        throw NotSupportedException(__func__,
+          "assert with strings argument in RepoAuthoritative mode");
+      }
+      return eval_for_assert(fp, assertion.toString()).toBoolean();
+    }
+    return assertion.toBoolean();
+  }();
+  if (passed) return true;
+
   if (!s_option_data->assertCallback.isNull()) {
-    f_call_user_func(1, s_option_data->assertCallback);
+    auto const unit = fp->m_func->unit();
+
+    ArrayInit ai(3, ArrayInit::vectorInit);
+    ai.set(String(unit->filepath()));
+    ai.set(Variant(unit->getLineNumber(callerOffset)));
+    ai.set(assertion.isString() ? assertion.toString() : String(""));
+    f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 
   if (s_option_data->assertWarning) {
-    raise_warning("Assertion failed");
+    auto const str = !assertion.isString()
+      ? String("Assertion failed")
+      : concat3("Assertion \"", assertion.toString(), "\" failed");
+    raise_warning("%s", str.data());
   }
   if (s_option_data->assertBail) {
     throw Assertion();
   }
+
   return uninit_null();
 }
 

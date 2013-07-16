@@ -2405,7 +2405,6 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   }
   Stats::inc(Stats::PseudoMain_Executed);
 
-
   ActRec* ar = m_stack.allocA();
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
   Class* cls = curClass();

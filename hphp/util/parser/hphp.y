@@ -939,10 +939,10 @@ statement:
   | T_SWITCH parenthesis_expr          { _p->pushLabelScope();}
     switch_case_list                   { _p->popLabelScope();
                                          _p->onSwitch($$,$2,$4);}
-  | T_BREAK ';'                        { _p->onBreak($$, NULL);}
-  | T_BREAK T_LNUMBER ';'              { _p->onBreak($$, &$2);}
-  | T_CONTINUE ';'                     { _p->onContinue($$, NULL);}
-  | T_CONTINUE T_LNUMBER ';'           { _p->onContinue($$, &$2);}
+  | T_BREAK ';'                        { _p->onBreakContinue($$, true, NULL);}
+  | T_BREAK expr ';'                   { _p->onBreakContinue($$, true, &$2);}
+  | T_CONTINUE ';'                     { _p->onBreakContinue($$, false, NULL);}
+  | T_CONTINUE expr ';'                { _p->onBreakContinue($$, false, &$2);}
   | T_RETURN ';'                       { _p->onReturn($$, NULL);}
   | T_RETURN expr ';'                  { _p->onReturn($$, &$2);}
   | T_YIELD T_BREAK ';'                { _p->onYieldBreak($$);}

@@ -432,12 +432,8 @@ struct Parser : ParserBase {
     X(cases, cond, stmt);
   }
 
-  void onBreak(Token &out, Token *expr) {
-    X(expr);
-  }
-
-  void onContinue(Token &out, Token *expr) {
-    X(expr);
+  void onBreakContinue(Token &out, bool isBreak, Token *expr) {
+    X(isBreak, expr);
   }
 
   void onReturn(Token &out, Token *expr) {

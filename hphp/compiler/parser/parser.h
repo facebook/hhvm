@@ -219,8 +219,7 @@ public:
              Token &stmt);
   void onSwitch(Token &out, Token &expr, Token &cases);
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
-  void onBreak(Token &out, Token *expr);
-  void onContinue(Token &out, Token *expr);
+  void onBreakContinue(Token &out, bool isBreak, Token *expr);
   void onReturn(Token &out, Token *expr);
   void onYield(Token &out, Token &expr);
   void onYieldPair(Token &out, Token &key, Token &val);

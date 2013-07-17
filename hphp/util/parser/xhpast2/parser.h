@@ -770,12 +770,12 @@ struct Parser : ParserBase {
       .appendChild(&stmt);
   }
 
-  void onBreak(Token &out, Token *expr) {
-    out.setNodeType(ONBREAK).appendChild(expr);
-  }
-
-  void onContinue(Token &out, Token *expr) {
-    out.setNodeType(ONCONTINUE).appendChild(expr);
+  void onBreakContinue(Token &out, bool isBreak, Token *expr) {
+    if (isBreak) {
+      out.setNodeType(ONBREAK).appendChild(expr);
+    } else {
+      out.setNodeType(ONCONTINUE).appendChild(expr);
+    }
   }
 
   void onReturn(Token &out, Token *expr, bool checkYield = true) {

@@ -1445,27 +1445,26 @@ void Parser::onCase(Token &out, Token &cases, Token *cond, Token &stmt) {
                                  stmt->stmt));
 }
 
-void Parser::onBreak(Token &out, Token *expr) {
-  if (expr) {
-    int64_t depth = strtoll(expr->text().c_str(), nullptr, 0);
-    if (depth <= 0) {
-      PARSE_ERROR("'break' operator accepts only positive numbers");
-    }
-    out->stmt = NEW_STMT(BreakStatement, static_cast<uint64_t>(depth));
-  } else {
-    out->stmt = NEW_STMT(BreakStatement, 1UL);
-  }
-}
+void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
+  uint64_t depth = 1;
 
-void Parser::onContinue(Token &out, Token *expr) {
   if (expr) {
-    int64_t depth = strtoll(expr->text().c_str(), nullptr, 0);
-    if (depth <= 0) {
-      PARSE_ERROR("'continue' operator accepts only positive numbers");
+    Variant v;
+    if (!expr->exp->getScalarValue(v)) {
+      PARSE_ERROR("'%s' operator with non-constant operand is no longer "
+                  "supported", (isBreak ? "break" : "continue"));
     }
-    out->stmt = NEW_STMT(ContinueStatement, static_cast<uint64_t>(depth));
+    if (!v.isInteger() || v.toInt64() <= 0) {
+      PARSE_ERROR("'%s' operator accepts only positive numbers",
+                  (isBreak ? "break" : "continue"));
+    }
+    depth = static_cast<uint64_t>(v.toInt64());
+  }
+
+  if (isBreak) {
+    out->stmt = NEW_STMT(BreakStatement, depth);
   } else {
-    out->stmt = NEW_STMT(ContinueStatement, 1UL);
+    out->stmt = NEW_STMT(ContinueStatement, depth);
   }
 }
 

@@ -71,4 +71,9 @@ break list
 @ $break10->callCallPubObj('yes')
 break clear all
 continue
+break foo()
+break break1.php:6
+@ foo('test_break7')
+continue
+break clear all
 quit

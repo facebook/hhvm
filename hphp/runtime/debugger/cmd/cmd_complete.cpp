@@ -34,7 +34,7 @@ void CmdComplete::list(DebuggerClient &client) {
 }
 
 void CmdComplete::help(DebuggerClient &client) {
-  client.helpTitle("Copmplete");
+  client.helpTitle("Complete");
   client.help("complete <cmd>");
   client.helpBody(
     "This command provides the same results as TAB completion does on the"

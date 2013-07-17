@@ -275,30 +275,32 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
   m_check = check;
 }
 
-void BreakPointInfo::changeBreakPointDepth(int stackDepth) {
-  TRACE(2, "BreakPointInfo::changeBreakPointDepth\n");
-  // if the breakpoint is equal or lower than the stack depth
-  // delete it
-  breakDepthStack.remove_if(
-      std::bind2nd(std::greater_equal<int>(), stackDepth)
-  );
-}
-
+// Disables the breakpoint at the given stack level.
+// Following this call, BreakPointInfo::breakable will return false until
+// a subsequent call to BreakPointInfo::setBreakable with a lower or equal
+// stack level.
 void BreakPointInfo::unsetBreakable(int stackDepth) {
   TRACE(2, "BreakPointInfo::unsetBreakable\n");
-  breakDepthStack.push_back(stackDepth);
+  if (breakDepthStack.empty() || breakDepthStack.back() < stackDepth) {
+    breakDepthStack.push_back(stackDepth);
+  }
 }
 
+// Enables the breakpoint at the given stack level.
+// Following this call, BreakPointInfo::breakable will return true until
+// a subsequent call to BreakPointInfo::unsetBreakable with the same or
+// higher stack level.
 void BreakPointInfo::setBreakable(int stackDepth) {
   TRACE(2, "BreakPointInfo::setBreakable\n");
-  if (!breakDepthStack.empty() && breakDepthStack.back() == stackDepth) {
+  while (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
     breakDepthStack.pop_back();
   }
 }
 
+// Returns true if this breakpoint is enabled at the given stack level.
 bool BreakPointInfo::breakable(int stackDepth) const {
   TRACE(2, "BreakPointInfo::breakable\n");
-  if (!breakDepthStack.empty() && breakDepthStack.back() == stackDepth) {
+  if (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
     return false;
   } else {
     return true;
@@ -353,8 +355,23 @@ bool BreakPointInfo::same(BreakPointInfoPtr bpi) {
   return desc() == bpi->desc();
 }
 
+// Checks if the interrupt type and site matches this breakpoint.
+// Does not run any code.
 bool BreakPointInfo::match(DebuggerProxy &proxy, InterruptType interrupt,
-                           InterruptSite &site) {
+    InterruptSite &site) {
+  return match(proxy, interrupt, site, false);
+}
+
+// Checks if the interrupt type and site matches this breakpoint.
+// Evaluates the breakpoint's conditional clause if present.
+// This can cause side effects.
+bool BreakPointInfo::cmatch(DebuggerProxy &proxy, InterruptType interrupt,
+    InterruptSite &site) {
+  return match(proxy, interrupt, site, true);
+}
+
+bool BreakPointInfo::match(DebuggerProxy &proxy, InterruptType interrupt,
+    InterruptSite &site, bool evalClause) {
   TRACE(2, "BreakPointInfo::match\n");
   if (m_interruptType == interrupt) {
     switch (interrupt) {
@@ -366,13 +383,13 @@ bool BreakPointInfo::match(DebuggerProxy &proxy, InterruptType interrupt,
       case ExceptionThrown:
         return
           checkExceptionOrError(site.getError()) &&
-          checkUrl(site.url()) && checkClause(proxy);
+          checkUrl(site.url()) && (!evalClause || checkClause(proxy));
       case BreakPointReached:
       {
         bool match =
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
           checkLines(site.getLine0()) && checkStack(site) &&
-          checkUrl(site.url()) && checkClause(proxy);
+          checkUrl(site.url()) && (!evalClause || checkClause(proxy));
 
         if (!getFuncName().empty()) {
           // function entry breakpoint

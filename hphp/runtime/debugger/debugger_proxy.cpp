@@ -207,7 +207,7 @@ bool DebuggerProxy::needVMInterrupts() {
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   TRACE_RB(2, "DebuggerProxy::interrupt\n");
   // Make any breakpoints that have passed breakable again.
-  changeBreakPointDepth(cmd);
+  setBreakableForBreakpointsNotMatching(cmd);
 
   // At this point we have an interrupt, but we don't know if we're on the
   // thread the proxy considers "current".
@@ -222,6 +222,11 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   // We know we're on the "current" thread, so we can process any active flow
   // command, stop if we're at a breakpoint, handle other interrupts, etc.
   if (checkFlowBreak(cmd)) {
+    // We've hit a breakpoint and now need to make sure that breakpoints
+    // wont be hit again for this site until control leaves this site.
+    // (Breakpoints can still get hit if control reaches this site during
+    // a call that is part of this site because the flags are stacked.)
+    unsetBreakableForBreakpointsMatching(cmd);
     while (true) {
       try {
         // We're about to send the client an interrupt and start
@@ -231,19 +236,6 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         disableSignalPolling();
         SCOPE_EXIT { enableSignalPolling(); };
         processInterrupt(cmd);
-        // If we've just processed a breakpoint, change it so we don't break at
-        // it again until we're off this site.
-        // Note: this feels quite out of place in here... should be part of
-        // processing the break point itself. Added a note to task #2361050.
-        if (cmd.getInterruptType() == BreakPointReached) {
-          BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
-          if (bp) {
-            int stackDepth = getRealStackDepth();
-            if (bp->breakable(stackDepth)) {
-              bp->unsetBreakable(stackDepth);
-            }
-          }
-        }
       } catch (const DebuggerException &e) {
         switchThreadMode(Normal);
         throw;
@@ -683,12 +675,12 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     String code(php.c_str(), php.size(), CopyString);
     // @TODO: enable this once task #2608250 is completed.
 #if 0
-    // We're about to start executing more PHP. This is typcially done
+    // We're about to start executing more PHP. This is typically done
     // in response to commands from the client, and the client expects
     // those commands to send more interrupts since, of course, the
     // user might want to debug the code we're about to run. If we're
     // already processing an interrupt, enable signal polling around
-    // the execution fo the new PHP to ensure that we can handle
+    // the execution of the new PHP to ensure that we can handle
     // signals while doing so.
     if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
     SCOPE_EXIT {
@@ -722,20 +714,6 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   return ret;
 }
 
-// There could be multiple breakpoints at one place but we can manage this
-// with only one breakpoint.
-BreakPointInfoPtr DebuggerProxy::getBreakPointAtCmd(CmdInterrupt& cmd) {
-  TRACE(2, "DebuggerProxy::getBreakPointAtCmd\n");
-  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp->m_state != BreakPointInfo::Disabled &&
-        bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      return bp;
-    }
-  }
-  return BreakPointInfoPtr();
-}
-
 int DebuggerProxy::getRealStackDepth() {
   TRACE(2, "DebuggerProxy::getRealStackDepth\n");
   int depth = 0;
@@ -765,20 +743,31 @@ int DebuggerProxy::getStackDepth() {
   return depth;
 }
 
-/**
- * If a breakpoint is set at that depth,
- * this function clears the current depth information
- * after the breakpoint has passed
- */
-
-void DebuggerProxy::changeBreakPointDepth(CmdInterrupt& cmd) {
-  TRACE(2, "DebuggerProxy::changeBreakPointDepth\n");
+// Allow breaks for previously disabled breakpoints that do not match the site
+// of cmd. (Call this when processing an interrupt since this probably means
+// that execution has moved away from the previous interrupt site.)
+void DebuggerProxy::setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxy::setBreakableForBreakpointsNotMatching\n");
+  auto stackDepth = getRealStackDepth();
   for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    // if the site changes, then update the breakpoint depth
     BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp->m_state != BreakPointInfo::Disabled &&
+    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
         !bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      m_breakpoints[i]->changeBreakPointDepth(getRealStackDepth());
+      bp->setBreakable(stackDepth);
+    }
+  }
+}
+
+// Do not allow further breaks on the site of cmd, except during
+// calls made from the current site.
+void DebuggerProxy::unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxy::unsetBreakableForBreakpointsMatching\n");
+  auto stackDepth = getRealStackDepth();
+  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
+    BreakPointInfoPtr bp = m_breakpoints[i];
+    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
+        bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
+      bp->unsetBreakable(stackDepth);
     }
   }
 }

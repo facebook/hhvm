@@ -159,7 +159,9 @@ public:
   bool valid();
   bool same(BreakPointInfoPtr bpi);
   bool match(DebuggerProxy &proxy, InterruptType interrupt,
-             InterruptSite &site);
+      InterruptSite &site);
+  bool cmatch(DebuggerProxy &proxy, InterruptType interrupt,
+      InterruptSite &site);
 
   int index() const { return m_index;}
   std::string state(bool padding) const;
@@ -179,7 +181,6 @@ public:
   bool breakable(int stackDepth) const;
   void unsetBreakable(int stackDepth);
   void setBreakable(int stackDepth);
-  void changeBreakPointDepth(int stackDepth);
 
   int16_t m_index; // client side index number
 
@@ -230,6 +231,8 @@ private:
                     const std::string &needle, bool regex, bool exact);
   static bool MatchClass(const char *fcls, const std::string &bcls,
                          bool regex, const char *func);
+  bool match(DebuggerProxy &proxy, InterruptType interrupt,
+      InterruptSite &site, bool evalClause);
 
   void createIndex();
   std::string descBreakPointReached() const;

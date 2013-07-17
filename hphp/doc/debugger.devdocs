@@ -524,3 +524,52 @@ criteria for their respective operations. In most cases, the flow
 command will force the first opcode of the catch clause to be
 interpreted and let it's normal logic run its course.
 
+6. Breakpoints
+--------------
+
+Breakpoints are set via commands processed by the client, which keeps a list
+of all breakpoints. This list is sent to the proxy whenever an element is added,
+modified or deleted. The proxy keeps of a copy of the list and updates each
+breakpoint with a flag that indicates if the breakpoint is bound. An unbound
+breakpoint is either invalid because it refers to a non existent source line
+or function, or it refers to a location that has not yet been loaded into the
+VM. The flag distinguishes these cases.
+
+6.1 Checking if breakpoints are hit.
+
+When a breakpoint becomes bound, it is mapped to a range of program counters
+(PCs) in an execution unit. Each of these PCs is then added to a set of
+breakable PCs (called the Breakpoint Filter) kept in the VM's execution context
+object. If a debugger is attached to the VM, the interpreter calls
+phpDebuggerOpcodeHook before executing each operation. This routine checks if
+the PC of the operation is a member of the Breakpoint Filter. If so, it calls
+the Debugger::InterruptVMHook method, which among other things, checks the
+proxy's list of breakpoints to see if any of them apply to the source location
+of the current PC. This involves a check if the breakpoint is enabled by the
+user, a check if the source location is the same, a check if the breakpoint is
+not already active and a check if the breakpoint is conditional on the value
+of an expression.
+
+6.2 Active breakpoints
+
+A breakpoint can be already active when InterruptVMHook is called because it
+can be set on a source line that maps to several interpreter operations.
+(InterruptVMHook will be called for each such operation). It is not safe to
+simply disable the breakpoint until the last of these operations are completed,
+since one or more of those operations may be function calls that recurse back
+to the active breakpoint.
+
+In order to deal with this, each breakpoint keeps track of the depth of the
+execution stack where it was activated. When InterruptVM finds that a breakpoint
+will be hit, it checks that the height of the execution stack is greater than
+the height recorded in the breakpoint before it proceeds with the steps that
+are taken when a breakpoint is first hit. When control leaves the site of a
+breakpoint at the right stack depth, the breakpoint is updated its previous
+active stack depth (it has a stack of stack depths and it pops the top entry).
+
+This pop operation cannot happen before the last operation corresponding to a
+breakpoint has completed. However, it is not convenient for this to happen on
+the very next operation. Instead, InterruptVM hook will update any breakpoints
+that do not correspond to the current operation to ensure they are active if a
+subsequent call to InterruptVMHook matches their location at the current stack
+level.

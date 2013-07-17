@@ -214,4 +214,24 @@ All breakpoints are cleared.
 continue
 pubObj:yes
 
+break foo()
+Breakpoint 1 set upon entering foo()
+break break1.php:6
+Breakpoint 2 set on line 6 of break1.php
+@ foo('test_break7')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+
+Breakpoint 2 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+
+continue
+test_break7_suffix
+
+break clear all
+All breakpoints are cleared.
 quit

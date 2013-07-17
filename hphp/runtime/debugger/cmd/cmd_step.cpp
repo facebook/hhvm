@@ -35,12 +35,6 @@ void CmdStep::help(DebuggerClient &client) {
 
 void CmdStep::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
-  // Allows a breakpoint on this same line to be hit again when control returns
-  // from function call.
-  BreakPointInfoPtr bp = proxy.getBreakPointAtCmd(interrupt);
-  if (bp) {
-    bp->setBreakable(proxy.getRealStackDepth());
-  }
   installLocationFilterForLine(interrupt.getSite());
   m_needsVMInterrupt = true;
 }

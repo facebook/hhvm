@@ -81,7 +81,9 @@ public:
 
   void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
   void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
-  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
+
+  void setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd);
+  void unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd);
 
   bool needInterrupt();
   bool needVMInterrupts();
@@ -119,8 +121,6 @@ private:
   void disableSignalPolling();
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
-
-  void changeBreakPointDepth(CmdInterrupt& cmd);
 
   SmartPtr<Socket> getSocket() { return m_thrift.getSocket(); }
 

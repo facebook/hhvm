@@ -1107,7 +1107,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
                                     uint32_t         offset,
                                     bool             breakTracelet,
                                     bool             noSurprise) {
-  bool backward = (offset - (int32_t)bcOff()) < 0;
+  bool backward = offset <= bcOff();
   if (backward && !noSurprise) {
     gen(ExitWhenSurprised, getExitSlowTrace());
   }
@@ -1615,7 +1615,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
                              bool  breakTracelet,
                              bool  noSurprise) {
   // If surprise flags are set, exit trace and handle surprise
-  bool backward = (offset - (int32_t)bcOff()) < 0;
+  bool backward = (uint32_t)offset <= bcOff();
   if (backward && !noSurprise) {
     gen(ExitWhenSurprised, getExitSlowTrace());
   }

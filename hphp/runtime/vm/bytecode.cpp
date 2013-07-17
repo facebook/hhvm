@@ -3948,7 +3948,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFatal(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::jmpSurpriseCheck(Offset offset) {
-  if (offset < 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+  if (offset <= 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
     EventHook::CheckSurprise();
   }
 }

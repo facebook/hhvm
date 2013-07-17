@@ -127,6 +127,9 @@ void IRTranslator::checkType(const Transl::Location& l,
       break;
 
     case Location::Iter:
+      m_hhbcTrans.guardTypeIter(l.offset, Type::fromRuntimeType(rtt));
+      break;
+
     case Location::Invalid:
     case Location::Litstr:
     case Location::Litint:
@@ -1402,20 +1405,24 @@ IRTranslator::translateIterInitK(const NormalizedInstruction& i) {
 void
 IRTranslator::translateIterNext(const NormalizedInstruction& i) {
 
+  assert(i.inputs[0]->isIter());
   HHIR_EMIT(IterNext,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            i.imm[2].u_IVA,
+            i.inputs[0]->rtt.iterKind());
 }
 
 void
 IRTranslator::translateIterNextK(const NormalizedInstruction& i) {
 
+  assert(i.inputs[0]->isIter());
   HHIR_EMIT(IterNextK,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            i.inputs[0]->rtt.iterKind());
 }
 
 void

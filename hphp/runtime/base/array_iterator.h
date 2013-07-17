@@ -48,12 +48,45 @@ struct Iter;
  */
 class ArrayIter {
  public:
-  enum Type {
-    TypeUndefined = 0,
-    TypeArray,
-    TypeIterator  // for objects that implement Iterator or
-                  // IteratorAggregate
+  enum class IterKind {
+    Undefined = 0,
+    Array,
+    Iterator, // for objects that implement Iterator or
+              // IteratorAggregate
+    Pair,
+    Vector,
+    Map,
+    StableMap,
+    Set
   };
+
+  static const std::string typeAsString(IterKind iterKind) {
+    switch (iterKind) {
+      case IterKind::Undefined:
+        return "Undefined";
+      case IterKind::Array:
+        return "Array";
+      case IterKind::Iterator:
+        return "Iterator";
+      case IterKind::Vector:
+        return "Vector";
+      case IterKind::Map:
+        return "Map";
+      case IterKind::StableMap:
+        return "StableMap";
+      case IterKind::Set:
+        return "Set";
+      case IterKind::Pair:
+        return "Pair";
+    }
+    assert(false);
+    return "Unknown";
+  }
+
+  static size_t getOffsetOfIterKind() {
+    // For assembly linkage.
+    return offsetof(ArrayIter, m_ikind);
+  }
 
   /**
    * Constructors.
@@ -169,57 +202,71 @@ class ArrayIter {
 
   /**
    * Fixed is used for collections that are immutable in size.
-   * Templatized Fixed functions expect the collection to implement
-   * size() and get().
-   * The key is the current position of the iterator.
    */
   enum class Fixed {};
   /**
    * Versionable is used for collections that are mutable and throw if
    * an insertion or deletion is made to the collection while iterating.
-   * Templatized Versionable functions expect the collection to implement
-   * size(), getVersion() and get().
-   * The key is the current position of the iterator.
    */
   enum class Versionable {};
   /**
    * VersionableSparse is used for collections that are mutable and throw if
    * an insertion or deletion is made to the collection while iterating.
-   * Moreover the collection elements are accessed via an iterator.
-   * Templatized VersionableSparse functions expect the collection to implement
-   * getVersion(), iter_begin(), iter_next(), iter_value() and iter_key().
+   * Moreover the collection elements are accessed via an iterator exposed
+   * by the collection class.
    */
   enum class VersionableSparse {};
 
+  /**
+   * Whether the key needs to be refcount'ed or not. For Vector, Pair and
+   * Set there is no reason to refcount the key as that is an int (Pair,
+   * Vecotr) or null (Set).
+   */
+  enum class RefCountKey { DontRefcount, Refcount };
+
   // Constructors
   template<class Tuplish>
-  ArrayIter(Tuplish* coll, Fixed);
+  ArrayIter(Tuplish* coll, IterKind iterKind, Fixed);
   template<class Vectorish>
-  ArrayIter(Vectorish* coll, Versionable);
+  ArrayIter(Vectorish* coll, IterKind iterKind, Versionable);
   template<class Mappish>
-  ArrayIter(Mappish* coll, VersionableSparse);
+  ArrayIter(Mappish* coll, IterKind iterKind, VersionableSparse);
 
-  // iterator "next", "value", "key" functions
+  // Iterator init and next functions.  These methods are modeled after the
+  // corresponding HHIR opcodes IterInit, IterIntK, and so on.  The idea is
+  // to have ArrayIter construct an iterator, and to map the HHIR instructions
+  // directly to these methods.
+  // Todo (#2624480) - We want to create specialized IterInit and IterNext
+  // opcodes for every kind of collection and array shape, and possibly teach
+  // the JIT to inline some of them.
+  // For now only collections go through these helpers.
   template<class Tuplish>
-  bool iterNext(Fixed);
+  int64_t iterInit(Fixed, TypedValue* valOut);
   template<class Vectorish>
-  bool iterNext(Versionable);
+  int64_t iterInit(Versionable, TypedValue* valOut);
   template<class Mappish>
-  bool iterNext(VersionableSparse);
+  int64_t iterInit(VersionableSparse, TypedValue* valOut);
+  template<class Tuplish>
+  int64_t iterInitK(Fixed, TypedValue* valOut, TypedValue* keyOut);
+  template<class Vectorish>
+  int64_t iterInitK(Versionable, TypedValue* valOut, TypedValue* keyOut);
+  template<class Mappish>
+  int64_t iterInitK(
+              VersionableSparse, TypedValue* valOut, TypedValue* keyOut);
 
   template<class Tuplish>
-  Variant iterValue(Fixed);
+  int64_t iterNext(Fixed, TypedValue* valOut);
   template<class Vectorish>
-  Variant iterValue(Versionable);
+  int64_t iterNext(Versionable, TypedValue* valOut);
   template<class Mappish>
-  Variant iterValue(VersionableSparse);
-
+  int64_t iterNext(VersionableSparse, TypedValue* valOut);
   template<class Tuplish>
-  Variant iterKey(Fixed);
+  int64_t iterNextKey(Fixed, TypedValue* valOut, TypedValue* keyOut);
   template<class Vectorish>
-  Variant iterKey(Versionable);
+  int64_t iterNextKey(Versionable, TypedValue* valOut, TypedValue* keyOut);
   template<class Mappish>
-  Variant iterKey(VersionableSparse);
+  int64_t iterNextKey(
+              VersionableSparse, TypedValue* valOut, TypedValue* keyOut);
 
   public:
   const ArrayData* getArrayData() {
@@ -232,11 +279,11 @@ class ArrayIter {
   void setPos(ssize_t newPos) {
     m_pos = newPos;
   }
-  Type getIterType() const {
-    return m_itype;
+  IterKind getIterKind() const {
+    return m_ikind;
   }
-  void setIterType(Type iterType) {
-    m_itype = iterType;
+  void setIterKind(IterKind iterKind) {
+    m_ikind = iterKind;
   }
 
   ObjectData* getObject() {
@@ -296,7 +343,7 @@ class ArrayIter {
   ssize_t m_pos;
  private:
   int m_version;
-  Type m_itype;
+  IterKind m_ikind;
 
   friend struct Iter;
 };
@@ -565,6 +612,17 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 int64_t iter_next(Iter* dest, TypedValue* val);
 template <bool withRef>
 int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
+template <bool withRef>
+int64_t iter_next_any(Iter* dest, TypedValue* val, TypedValue* key);
+template<class Coll, class Style, ArrayIter::IterKind iterKind>
+int64_t iterInit(Iter* dest, Coll* coll, TypedValue* valOut);
+template<class Coll, class Style, ArrayIter::IterKind iterKind>
+int64_t iterInitK(Iter* dest, Coll* coll,
+                  TypedValue* valOut, TypedValue* keyOut);
+template<class Coll, class Style>
+int64_t iterNext(ArrayIter* iter, TypedValue* valOut);
+template<class Coll, class Style, ArrayIter::RefCountKey refCountKey>
+int64_t iterNextK(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
 
 
 int64_t new_miter_array_key(Iter* dest, RefData* arr, TypedValue* val,

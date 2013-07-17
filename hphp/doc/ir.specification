@@ -168,6 +168,8 @@ above PHP-facing types.
   FramePtr        Pointer to a frame on the VM execution stack
   TCA             Machine code address
   Nullptr         Represents a null pointer
+  Iter            Represents an iterator type instantiated by IterInit*
+  Iter<IterType>  Specific iterator type
 
 There is also one special type which represents all the possible types that
 can be on the stack.
@@ -394,6 +396,13 @@ D:StkPtr = GuardStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack but with the
   knowledge that the slot at the index S1 has type T.
+
+GuardIter<Iter<IterType>,iterId> S0:FramePtr
+
+  Guard that the type of the given iterator in iterId on the frame S0 is
+  a subtype of the iterator type Iter<IterType>; if not, make a fallback
+  jump. (A jump to a service request that chains to a retranslation for
+  this tracelet.)
 
 D:StkPtr = CheckStk<T,offset> S0:StkPtr -> L
 
@@ -1660,7 +1669,19 @@ D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   into the new iterator.
 
 D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextArray S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextPair S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextVector S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextMap S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextStableMap S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextSet S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = IterNextKArray S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextKPair S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextKVector S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextKMap S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextKStableMap S0:FramePtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextKSet S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
@@ -1676,9 +1697,9 @@ D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
-  The IterInit and IterInitK instructions always copy the array
+  The IterNext* and IterNextK* instructions always copy the array
   element by value.
-  The WIterInit and WIterInitK instructions copy referenced array
+  The WIterNext and WIterNextK instructions copy referenced array
   elements by reference, and non-referenced array elements by value.
   The MIterNext and MIterNextK instructions always copy the array element
   by reference.

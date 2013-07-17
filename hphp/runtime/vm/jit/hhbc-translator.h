@@ -121,6 +121,7 @@ struct HhbcTranslator {
   // Tracelet guards.
   void guardTypeStack(uint32_t stackIndex, Type type);
   void guardTypeLocal(uint32_t locId, Type type);
+  void guardTypeIter(uint32_t iterId, Type type);
   void guardTypeLocation(const RegionDesc::Location& loc, Type type);
   void guardRefs(int64_t entryArDelta,
                  const vector<bool>& mask,
@@ -360,11 +361,15 @@ struct HhbcTranslator {
                      int targetOffset,
                      uint32_t valLocalId,
                      uint32_t keyLocalId);
-  void emitIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId);
+  void emitIterNext(uint32_t iterId,
+                    int targetOffset,
+                    uint32_t valLocalId,
+                    ArrayIter::IterKind iterKind);
   void emitIterNextK(uint32_t iterId,
                      int targetOffset,
                      uint32_t valLocalId,
-                     uint32_t keyLocalId);
+                     uint32_t keyLocalId,
+                     ArrayIter::IterKind iterKind);
   void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);
   void emitMIterInitK(uint32_t iterId,
                      int targetOffset,

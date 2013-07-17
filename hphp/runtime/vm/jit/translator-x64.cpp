@@ -71,7 +71,6 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source_root_info.h"
 #include "hphp/runtime/base/zend_string.h"
 #include "hphp/runtime/ext/ext_closure.h"

@@ -308,7 +308,11 @@ private:
                    Block* exit);
 
   void cgIterNextCommon(IRInstruction* inst);
+  void loadIterNextArg(ArgGroup& args, IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst);
+  void cgIterInitCommonCollection(IRInstruction* inst,
+                                  const Class* klass,
+                                  ArgGroup& args);
   void cgMIterNextCommon(IRInstruction* inst);
   void cgMIterInitCommon(IRInstruction* inst);
   void cgLdFuncCachedCommon(IRInstruction* inst);

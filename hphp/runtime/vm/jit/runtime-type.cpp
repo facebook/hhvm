@@ -103,10 +103,12 @@ RuntimeType::RuntimeType() :
 
 RuntimeType::RuntimeType(const Iter* it) :
   m_kind(ITER) {
+  m_value.iterKind = ArrayIter::IterKind::Undefined;
 }
 
-RuntimeType::RuntimeType(ArrayIter::Type type) :
+RuntimeType::RuntimeType(ArrayIter::IterKind iterKind) :
   m_kind(ITER) {
+  m_value.iterKind = iterKind;
 }
 
 RuntimeType RuntimeType::box() const {
@@ -204,6 +206,12 @@ RuntimeType::knownClass() const {
   return m_value.knownClass;
 }
 
+ArrayIter::IterKind
+RuntimeType::iterKind() const {
+  consistencyCheck();
+  return m_value.iterKind;
+}
+
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
   assert(m_kind == VALUE);
@@ -231,6 +239,15 @@ RuntimeType::setKnownClass(const Class* klass) const {
   rtt.m_value.klass = m_value.klass;
   rtt.m_value.knownClass = klass;
   rtt.consistencyCheck();
+  return rtt;
+}
+
+RuntimeType
+RuntimeType::setIterKind(ArrayIter::IterKind iterKind) const {
+  assert(isIter());
+  RuntimeType rtt;
+  rtt.m_kind = this->m_kind;
+  rtt.m_value.iterKind = iterKind;
   return rtt;
 }
 
@@ -310,6 +327,10 @@ bool RuntimeType::isClass() const {
 
 bool RuntimeType::hasKnownType() const {
   return isObject() && m_value.knownClass != nullptr;
+}
+
+bool RuntimeType::hasIterKind() const {
+  return isIter() && m_value.iterKind != ArrayIter::IterKind::Undefined;
 }
 
 bool RuntimeType::isArray() const {

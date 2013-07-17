@@ -326,6 +326,13 @@ static void xhp_attribute(Parser *_p, Token &out, Token &type, Token &label,
           type.setNum(3);
         }
         break;
+      case 'm':
+        if ((type.text().size() == 5 &&
+             strcasecmp(type.text().c_str(), "mixed") == 0)) {
+          type.reset();
+          type.setNum(6);
+        }
+        break;
       case 'r':
         if (type.text().size() == 4 &&
             strcasecmp(type.text().c_str(), "real") == 0) {

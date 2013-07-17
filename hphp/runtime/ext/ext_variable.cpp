@@ -30,7 +30,7 @@ String f_gettype(CVarRef v) {
 
 String f_get_resource_type(CResRef handle) {
   if (handle.isResource()) {
-    return handle->o_getClassName();
+    return static_cast<ResourceData*>(handle.get())->o_getResourceName();
   }
   return "";
 }

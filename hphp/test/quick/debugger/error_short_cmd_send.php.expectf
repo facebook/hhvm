@@ -12,4 +12,3 @@ internaltesting shortcmdsend
 Executing internal test...
 DebuggerCommand::recv(): a socket error has happened
 DebuggerProxy::processInterrupt(): socket error receiving command
-Unable to communicate with server. Server's down?

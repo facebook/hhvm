@@ -351,6 +351,9 @@ public:
 
   std::string getZendExecutable() const { return m_zendExe; }
 
+  // Internal testing helpers. Only used by internal tests!!!
+  bool internalTestingIsClientStopped() const { return m_stopped; }
+
 private:
   enum InputState {
     TakingCommand,

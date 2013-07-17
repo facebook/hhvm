@@ -36,6 +36,7 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -2115,6 +2116,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   }
 
   cs->clearVisited();
+  cs->clearChildOfYield();
 
   StatementPtr s = dpc(Statement, cs);
   if (s) {
@@ -2404,6 +2406,9 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         // currently disable inlining for scopes with closure
         // expressions. TODO: revisit this later
         m_inlineAsExpr = false;
+        break;
+      case Expression::KindOfYieldExpression:
+        spc(YieldExpression, e)->getValueExpression()->setChildOfYield();
         break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->

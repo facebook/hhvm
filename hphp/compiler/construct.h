@@ -166,6 +166,10 @@ public:
   void clearKilled() { m_flags.killed = false; }
   bool isKilled() const { return m_flags.killed; }
 
+  void setChildOfYield() { m_flags.childOfYield = true; }
+  void clearChildOfYield() { m_flags.childOfYield = false; }
+  bool isChildOfYield() const { return m_flags.childOfYield; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -295,6 +299,7 @@ private:
       unsigned killed              : 1;
       unsigned refCounted          : 2; // high bit indicates whether its valid
       unsigned inited              : 2; // high bit indicates whether its valid
+      unsigned childOfYield        : 1; // parent node is yield
     } m_flags;
   };
 protected:

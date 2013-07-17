@@ -71,7 +71,6 @@ public:
    */
   static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
-  static void Shutdown();
 
   /**
    * Pre-defined auto-complete lists. Append-only, as they will be used in
@@ -115,13 +114,6 @@ public:
 public:
   explicit DebuggerClient(std::string name = ""); // name only for api usage
   ~DebuggerClient();
-
-  /**
-   * Thread functions.
-   */
-  void start(const DebuggerClientOptions &options);
-  void stop();
-  void run();
 
   /**
    * Main processing functions.
@@ -444,6 +436,9 @@ private:
   ClientState m_clientState;
   std::string m_sourceRoot;
   std::string m_outputBuf;
+
+  void start(const DebuggerClientOptions &options);
+  void run();
 
   // helpers
   std::string getPrompt();

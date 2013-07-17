@@ -51,7 +51,7 @@ static DebuggerClient& getStaticDebuggerClient() {
   TRACE(2, "DebuggerClient::getStaticDebuggerClient\n");
   /*
    * DebuggerClient acquires global mutexes in its constructor, so we
-   * allocate s_debugger_client lazily to ensure that all of the
+   * allocate debugger_client lazily to ensure that all of the
    * global mutexes have been initialized before we enter the
    * constructor.
    *
@@ -291,17 +291,12 @@ SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   return ret;
 }
 
-void DebuggerClient::Shutdown() {
-  TRACE(2, "DebuggerClient::Shutdown\n");
+void DebuggerClient::Stop() {
+  TRACE(2, "DebuggerClient::Stop\n");
   if (debugger_client) {
     debugger_client->resetSmartAllocatedMembers();
     debugger_client.reset();
   }
-}
-
-void DebuggerClient::Stop() {
-  TRACE(2, "DebuggerClient::Stop\n");
-  getStaticDebuggerClient().stop();
 }
 
 void DebuggerClient::AdjustScreenMetrics() {
@@ -654,12 +649,6 @@ void DebuggerClient::start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::start\n");
   init(options);
   m_mainThread.start();
-}
-
-void DebuggerClient::stop() {
-  TRACE(2, "DebuggerClient::stop\n");
-  m_stopped = true;
-  m_mainThread.waitForEnd();
 }
 
 // Executed by m_mainThread to run the command-line debugger.

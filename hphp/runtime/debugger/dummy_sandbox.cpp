@@ -85,7 +85,6 @@ struct CLISession : private boost::noncopyable {
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.setDebugger(false);
     execute_command_line_end(0, false, nullptr);
-    Eval::DebuggerClient::Shutdown();
   }
 };
 

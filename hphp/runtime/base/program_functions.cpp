@@ -1196,7 +1196,6 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     free(new_argv);
-    Eval::DebuggerClient::Shutdown();
     hphp_process_exit();
 
     return ret;

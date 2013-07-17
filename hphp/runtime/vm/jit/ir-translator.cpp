@@ -1705,13 +1705,17 @@ void IRTranslator::translateInstr(const NormalizedInstruction& i) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
     m_hhbcTrans.emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()),
-                             1, true);
+                            1, true);
   }
 
   if (instrMustInterp(i) || i.interp) {
     interpretInstr(i);
   } else {
     translateInstrWork(i);
+  }
+
+  if (Transl::callDestroysLocals(i, m_hhbcTrans.curFunc())) {
+    m_hhbcTrans.emitSmashLocals();
   }
 
   passPredictedAndInferredTypes(i);

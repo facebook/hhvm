@@ -233,6 +233,10 @@ Type HhbcTranslator::topType(uint32_t idx) const {
   }
 }
 
+size_t HhbcTranslator::spOffset() const {
+  return m_tb->spOffset() + m_evalStack.size() - m_stackDeficit;
+}
+
 /*
  * When doing gen-time inlining, we set up a series of IR instructions
  * that looks like this:
@@ -2658,7 +2662,7 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
   } else {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
     gen(CheckStk, type, exitTrace,
-        StackOffset(idx - m_evalStack.size () + m_stackDeficit), m_tb->sp());
+        StackOffset(idx - m_evalStack.size() + m_stackDeficit), m_tb->sp());
   }
 }
 

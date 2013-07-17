@@ -144,12 +144,12 @@ void annotate(NormalizedInstruction* i) {
       const StringData* className = nullptr;
       const StringData* funcName = nullptr;
       if (i->op() == OpFPushFuncD) {
-        funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
+        funcName = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
       } else if (i->op() == OpFPushObjMethodD) {
         if (i->inputs[0]->valueType() != KindOfObject) break;
         const Class* cls = i->inputs[0]->rtt.valueClass();
         if (!cls) break;
-        funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
+        funcName = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
         className = cls->name();
       } else if (i->op() == OpFPushClsMethodF) {
         if (!i->inputs[1]->isString() ||
@@ -162,10 +162,10 @@ void annotate(NormalizedInstruction* i) {
         funcName = i->inputs[1]->rtt.valueString();
         className = cls->name();
       } else if (i->op() == OpFPushClsMethodD) {
-        funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
-        className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
+        funcName = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
+        className = i->m_unit->lookupLitstrId(i->imm[2].u_SA);
       } else if (i->op() == OpFPushCtorD) {
-        className = curUnit()->lookupLitstrId(i->imm[1].u_SA);
+        className = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
         const Class* cls = Unit::lookupUniqueClass(className);
         if (!cls) break;
         funcName = cls->getCtor()->name();
@@ -176,7 +176,7 @@ void annotate(NormalizedInstruction* i) {
         funcName = cls->getCtor()->name();
       }
       assert(funcName->isStatic());
-      recordActRecPush(*i, curUnit(), funcName, className,
+      recordActRecPush(*i, i->m_unit, funcName, className,
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
     } break;

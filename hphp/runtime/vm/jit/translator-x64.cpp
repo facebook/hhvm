@@ -3352,8 +3352,6 @@ TranslatorX64::translateWork(const TranslArgs& args) {
           m_mode = TransLive;
         }
         result = translateTracelet(t);
-        DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
-        assert(IMPLIES(region && reqRegion, result != Success));
       }
 
       if (result != Success) {

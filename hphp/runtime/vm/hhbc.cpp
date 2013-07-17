@@ -1023,8 +1023,7 @@ int instrSpToArDelta(const Op* opcode) {
   // stack are already accounted for by numPops.
   int numPops = instrNumPops(opcode);
   int numExtra = isFCallStar(*opcode) ? 0 : getImm(opcode, 0).u_IVA;
-  int delta = numPops + numExtra;
-  return delta;
+  return numPops + numExtra;
 }
 
 const MInstrInfo& getMInstrInfo(Op op) {

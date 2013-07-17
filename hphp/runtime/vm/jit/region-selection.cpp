@@ -91,7 +91,7 @@ void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
   checkInvariants();
 }
 
-void RegionDesc::Block::setParamByRef(SrcKey sk, ParamByRef byRef) {
+void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
   assert(m_byRefs.find(sk) == m_byRefs.end());
   m_byRefs.insert(std::make_pair(sk, byRef));
   checkInvariants();
@@ -213,9 +213,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
       curBlock->setKnownFunc(sk, topFunc);
     }
     if (!ni->noOp && isFPassStar(ni->op())) {
-      curBlock->setParamByRef(
-        sk, ni->preppedByRef ? RegionDesc::ParamByRef::Yes
-                             : RegionDesc::ParamByRef::No);
+      curBlock->setParamByRef(sk, ni->preppedByRef);
     }
     if (ni->op() == OpJmp && ni->next) {
       // A Jmp that isn't the final instruction in a Tracelet means we traced
@@ -408,14 +406,6 @@ std::string show(const RegionDesc::ReffinessPred& pred) {
   return out.str();
 }
 
-std::string show(RegionDesc::ParamByRef byRef) {
-  switch (byRef) {
-    case RegionDesc::ParamByRef::Yes: return "by value";
-    case RegionDesc::ParamByRef::No:  return "by reference";
-  }
-  not_reached();
-}
-
 std::string show(RegionContext::LiveType ta) {
   return folly::format(
     "{} :: {}",
@@ -445,7 +435,7 @@ std::string show(const RegionDesc::Block& b) {
   auto byRefs    = makeMapWalker(b.paramByRefs());
   auto refPreds  = makeMapWalker(b.reffinessPreds());
   auto knownFuncs= makeMapWalker(b.knownFuncs());
-  auto skIter = b.start();
+  auto skIter    = b.start();
 
   const Func* currentFunc = nullptr;
 
@@ -469,7 +459,8 @@ std::string show(const RegionDesc::Block& b) {
 
     std::string byRef;
     if (byRefs.hasNext(skIter)) {
-      byRef = folly::format(" (passed {})", show(byRefs.next())).str();
+      byRef = folly::format(" (passed by {})", byRefs.next() ? "reference"
+                                                             : "value").str();
     }
 
     folly::toAppend(

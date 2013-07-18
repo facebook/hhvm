@@ -1152,14 +1152,12 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   auto const cont = origFunc->isMethod()
     ? gen(
         CreateContMeth,
-        cns(origFunc),
-        cns(genFunc),
+        CreateContData { origFunc, genFunc },
         gen(LdCtx, m_tb->fp(), cns(curFunc()))
       )
     : gen(
         CreateContFunc,
-        cns(origFunc),
-        cns(genFunc)
+        CreateContData { origFunc, genFunc }
       );
 
   ContParamMap params;
@@ -3805,9 +3803,14 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped) {
 void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed) {
   auto sp = spillStack();
   Unit *u = curFunc()->unit();
-  gen(InterpOne, outType, InterpOneData(bcOff(), popped, pushed,
-                                        u->getOpcode(bcOff())),
-      m_tb->fp(), sp);
+
+  InterpOneData idata;
+  idata.bcOff = bcOff();
+  idata.cellsPopped = popped;
+  idata.cellsPushed = pushed;
+  idata.opcode = u->getOpcode(bcOff());
+
+  gen(InterpOne, outType, idata, m_tb->fp(), sp);
   assert(m_stackDeficit == 0);
 }
 

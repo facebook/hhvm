@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_TRANSL_HOPT_NATIVECALLS_H_
 
 #include <initializer_list>
+#include <functional>
 #include <vector>
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -51,19 +52,33 @@ enum ArgType : unsigned {
   TV,
   VecKeyS,
   VecKeyIS,
+  ExtraImm,
 };
+
+// Function that extracts the bits for an immediate value from extra
+// data.
+typedef std::function<uintptr_t (IRInstruction*)> ExtraDataBits;
+
 struct Arg {
+  Arg(ArgType type, unsigned srcIdx) : type(type), srcIdx(srcIdx) {}
+
+  explicit Arg(ExtraDataBits&& func)
+    : type(ExtraImm)
+    , srcIdx(-1u)
+    , extraFunc(std::move(func))
+  {}
+
   ArgType type;
   unsigned srcIdx;
+  ExtraDataBits extraFunc;
 };
-typedef std::vector<Arg> ArgVec;
 
 struct CallInfo {
   Opcode op;
   FuncPtr func;
   DestType dest;
   SyncOptions sync;
-  ArgVec args;
+  std::vector<Arg> args;
 };
 
 typedef std::initializer_list<CallInfo> CallInfoList;

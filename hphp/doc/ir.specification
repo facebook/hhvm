@@ -1518,20 +1518,14 @@ D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
   object.  Saves the $this and Func* from ActRec S2 into the object,
   and returns the object.
 
-D:Obj = CreateContFunc S0:ConstFunc S1:ConstFunc
+D:Obj = CreateContFunc<origFunc,generatorFunc>
 
-  Create a continuation object from function.  Arguments:
+  Create a continuation object for a generator function.
 
-     S0 - the "original" function
-     S1 - the generator function
+D:Obj = CreateContMeth<origFunc,generatorFunc> S0:Ctx
 
-D:Obj = CreateContMeth S0:ConstFunc S1:ConstFunc S2:Ctx
-
-  Create a continuation object from method.  Arguments:
-
-     S0 - the "original" method
-     S1 - the generator function
-     S2 - the m_this/m_cls field of the current frame pointer
+  Create a continuation object for a generator method.  S0 is the
+  m_this/m_cls field of the current frame pointer.
 
 ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 

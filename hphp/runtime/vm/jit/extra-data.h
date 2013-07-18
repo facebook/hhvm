@@ -154,30 +154,8 @@ struct FPushCufData : IRExtraData {
 struct ConstData : IRExtraData {
   template<class T>
   explicit ConstData(T data)
-    : m_dataBits(0)
-  {
-    static_assert(sizeof(T) <= sizeof m_dataBits,
-                  "Constant data was larger than supported");
-    static_assert(std::is_pod<T>::value,
-                  "Constant data wasn't a pod?");
-    const auto toCopy = promoteIfNeeded(data);
-    std::memcpy(&m_dataBits, &toCopy, sizeof(toCopy));
-  }
-
-  template<typename T>
-  struct needsPromotion {
-    static constexpr bool value = std::is_integral<T>::value  ||
-                                  std::is_same<T,bool>::value ||
-                                  std::is_enum<T>::value;
-  };
-
-  template<class T>
-  typename std::enable_if<needsPromotion<T>::value, int64_t>::type
-  promoteIfNeeded(T t) { return t; }
-
-  template<class T>
-  typename std::enable_if<!needsPromotion<T>::value, T>::type
-  promoteIfNeeded(T t) { return t; }
+    : m_dataBits(constToBits(data))
+  {}
 
   template<class T>
   T as() const {
@@ -324,9 +302,6 @@ struct CheckDefinedClsData : IRExtraData {
  * Offset and stack deltas for InterpOne.
  */
 struct InterpOneData : IRExtraData {
-  InterpOneData(Offset o, int64_t pop, int64_t push, Op op)
-    : bcOff(o), cellsPopped(pop), cellsPushed(push), opcode(op) {}
-
   // Offset of the instruction to interpret, in the Unit indicated by
   // the current Marker.
   Offset bcOff;
@@ -339,6 +314,24 @@ struct InterpOneData : IRExtraData {
   // Opcode, in case we need to fix the stack differently. Some byte-
   // code instructions modify things below the top of the stack.
   Op opcode;
+};
+
+/*
+ * Information for creating continuation objects.
+ * CreateCont{Func,Meth}.
+ */
+struct CreateContData : IRExtraData {
+  CreateContData(const Func* origFunc, const Func* genFunc)
+    : origFunc(origFunc)
+    , genFunc(genFunc)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(origFunc->fullName()->data(), "()");
+  }
+
+  const Func* origFunc;
+  const Func* genFunc;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -405,6 +398,8 @@ X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
+X(CreateContFunc,               CreateContData);
+X(CreateContMeth,               CreateContData);
 
 #undef X
 

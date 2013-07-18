@@ -475,8 +475,8 @@ O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
-O(CreateContFunc,               D(Obj), C(Func) C(Func),             E|N|PRc) \
-O(CreateContMeth,               D(Obj), C(Func) C(Func) S(Ctx),      E|N|PRc) \
+O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
+O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
@@ -838,6 +838,46 @@ inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
   // TODO: Task #2124292, Reintroduce StaticArr
   return Type::Arr;
+}
+
+/*
+ * constToBits(T)
+ *
+ *  Returns a constant value as a 8-byte word (in the shape it would
+ *  need to be to go into a register).  Takes care to ensure that
+ *  various types are safely copied.
+ */
+
+namespace constToBits_detail {
+  template<class T>
+  struct needs_promotion
+    : std::integral_constant<
+        bool,
+        std::is_integral<T>::value  ||
+          std::is_same<T,bool>::value ||
+          std::is_enum<T>::value
+      >
+  {};
+
+  template<class T>
+  typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
+  promoteIfNeeded(T t) { return t; }
+
+  template<class T>
+  typename std::enable_if<!needs_promotion<T>::value,T>::type
+  promoteIfNeeded(T t) { return t; }
+}
+
+template<class T>
+uintptr_t constToBits(T input) {
+  uintptr_t ret;
+  static_assert(sizeof(T) <= sizeof ret,
+                "Constant data was larger than supported");
+  static_assert(std::is_pod<T>::value,
+                "Constant data wasn't a pod?");
+  const auto toCopy = constToBits_detail::promoteIfNeeded(input);
+  std::memcpy(&ret, &toCopy, sizeof toCopy);
+  return ret;
 }
 
 bool cmpOpTypesMayReenter(Opcode, Type t0, Type t1);

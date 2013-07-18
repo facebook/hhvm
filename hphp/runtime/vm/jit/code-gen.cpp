@@ -340,7 +340,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   void CodeGenerator::cg##opcode(IRInstruction*) {}
 
 #define CALL_OPCODE(opcode) \
-  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(i); }
+  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(m_as, i); }
 
 #define CALL_STK_OPCODE(opcode) \
   CALL_OPCODE(opcode)           \
@@ -1045,6 +1045,9 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
         break;
       case VecKeyIS:
         argGroup.vectorKeyIS(src);
+        break;
+      case ExtraImm:
+        argGroup.imm(arg.extraFunc(inst));
         break;
     }
   }
@@ -5768,7 +5771,7 @@ void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   // The native call for this instruction is the slow path that does
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
-  ifThen(m_as, CC_NE, [&]{ cgCallNative(inst); });
+  ifThen(m_as, CC_NE, [&]{ cgCallNative(m_as, inst); });
 }
 
 static void emitTraceCall(CodeGenerator::Asm& as,

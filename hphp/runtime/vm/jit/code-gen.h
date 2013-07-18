@@ -140,9 +140,6 @@ private:
 #undef O
 
   // helper functions for code generation
-  void cgCallNative(IRInstruction* inst) {
-    cgCallNative(m_as, inst);
-  }
   void cgCallNative(Asm& a, IRInstruction* inst);
   void doStackArgs(Asm&, ArgGroup&);
   void cgCallHelper(Asm&,

@@ -27,13 +27,28 @@ namespace HPHP {  namespace JIT { namespace NativeCalls {
 using namespace HPHP::Transl;
 using namespace HPHP::Transl::TargetCache;
 
-const SyncOptions SNone = SyncOptions::kNoSyncPoint;
-const SyncOptions SSync = SyncOptions::kSyncPoint;
-const SyncOptions SSyncAdj1 = SyncOptions::kSyncPointAdjustOne;
+namespace {
 
-const DestType DSSA = DestType::SSA;
-const DestType DTV = DestType::TV;
-const DestType DNone = DestType::None;
+constexpr SyncOptions SNone = SyncOptions::kNoSyncPoint;
+constexpr SyncOptions SSync = SyncOptions::kSyncPoint;
+constexpr SyncOptions SSyncAdj1 = SyncOptions::kSyncPointAdjustOne;
+
+constexpr DestType DSSA = DestType::SSA;
+constexpr DestType DTV = DestType::TV;
+constexpr DestType DNone = DestType::None;
+
+template<class EDType, class MemberType>
+Arg extra(MemberType EDType::*ptr) {
+  auto fun = [ptr] (IRInstruction* inst) {
+    auto const extra = inst->extra<EDType>();
+    return constToBits(extra->*ptr);
+  };
+  return Arg(fun);
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * The table passed to s_callMap's constructor describes helpers calls
@@ -65,8 +80,9 @@ const DestType DNone = DestType::None;
  *     {VecKeyS, idx} - Like TV, but Str values are passed as a raw
  *                      StringData*, in a single register
  *     {VecKeyIS, idx} - Like VecKeyS, including Int
+ *     extra(&EDStruct::member) -- extract an immediate from extra data
  */
-static CallMap s_callMap({
+static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
     {ConvBoolToArr,      (TCA)convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
@@ -175,9 +191,12 @@ static CallMap s_callMap({
 
     /* Continuation support helpers */
     {CreateContFunc,     (TCA)&VMExecutionContext::createContFunc, DSSA, SNone,
-                         {{SSA, 0}, {SSA, 1}}},
+                          { extra(&CreateContData::origFunc),
+                            extra(&CreateContData::genFunc) }},
     {CreateContMeth,     (TCA)&VMExecutionContext::createContMeth, DSSA, SNone,
-                         {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                          { extra(&CreateContData::origFunc),
+                            extra(&CreateContData::genFunc),
+                            {SSA, 0} }},
 
     /* VectorTranslator helpers */
     {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
@@ -267,7 +286,7 @@ static CallMap s_callMap({
 
     /* debug assert helpers */
     {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
-});
+};
 
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {

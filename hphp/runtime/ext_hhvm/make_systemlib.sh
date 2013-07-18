@@ -8,9 +8,13 @@ shift;
 
 SYSTEMLIB=$INSTALL_DIR/systemlib.php
 
+# If we put the line we're generating into this file,
+# then the linter will think the generator itself
+# is generated.  Encode it into a variable for safe keeping.
+AT="@"
+
 echo "<?hh" > ${SYSTEMLIB}
-echo -n "// @" >> ${SYSTEMLIB}
-echo "generated" >> ${SYSTEMLIB}
+echo "// {$AT}generated" >> ${SYSTEMLIB}
 
 for i in $@; do
   if [ ! -f "$i" ]; then

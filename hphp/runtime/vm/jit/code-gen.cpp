@@ -5369,13 +5369,6 @@ void CodeGenerator::cgContSetRunning(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgContDone(IRInstruction* inst) {
-  auto contReg = m_regs[inst->src(0)].reg();
-
-  const Offset stateOffset = c_Continuation::stateOffset();
-  m_as.storeb(0x2, contReg[stateOffset]);
-}
-
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg = m_regs[inst->src(0)].reg();
   auto destReg = m_regs[inst->dst()].reg();
@@ -5385,31 +5378,103 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
   m_as.xorb(0x1, rbyte(destReg));
 }
 
-void CodeGenerator::cgContIncKey(IRInstruction* inst) {
-  auto contReg = m_regs[inst->src(0)].reg();
-  m_as.incq(contReg[CONTOFF(m_key) + TVOFF(m_data)]);
+void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  m_as.incq(contArReg[CONTOFF(m_key) + TVOFF(m_data) -
+                      (int64_t)c_Continuation::getArOffset(curFunc())]);
 }
 
-void CodeGenerator::cgContUpdateIdx(IRInstruction* inst) {
-  auto contReg = m_regs[inst->src(0)].reg();
+void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  int64_t off = CONTOFF(m_index) -
+                (int64_t)c_Continuation::getArOffset(curFunc());
   auto newIdx = inst->src(1);
 
   // this is hacky and awful oh god
   if (newIdx->isConst()) {
     auto const val = newIdx->getValRawInt();
-    m_as.emitImmReg(
-                val, m_rScratch);
-    m_as.cmpq  (m_rScratch, contReg[CONTOFF(m_index)]);
-    m_as.cload_reg64_disp_reg64(
-                CC_G, contReg, CONTOFF(m_index), m_rScratch);
+    m_as.emitImmReg(val, m_rScratch);
+    m_as.cmpq  (m_rScratch, contArReg[off]);
+    m_as.cload_reg64_disp_reg64(CC_G, contArReg, off, m_rScratch);
   } else {
     auto newIdxReg = m_regs[newIdx].reg();
-    m_as.loadq (contReg[CONTOFF(m_index)], m_rScratch);
+    m_as.loadq (contArReg[off], m_rScratch);
     m_as.cmpq  (m_rScratch, newIdxReg);
-    m_as.cmov_reg64_reg64(
-                CC_G, newIdxReg, m_rScratch);
+    m_as.cmov_reg64_reg64(CC_G, newIdxReg, m_rScratch);
   }
-  m_as.storeq  (m_rScratch, contReg[CONTOFF(m_index)]);
+  m_as.storeq  (m_rScratch, contArReg[off]);
+}
+
+void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
+  auto destReg     = m_regs[inst->dst()].reg();
+  auto contArReg   = m_regs[inst->src(0)].reg();
+  int64_t kind     = inst->src(1)->getValInt();
+  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+
+  int64_t off = slot.offset() - (int64_t)c_Continuation::getArOffset(curFunc());
+  switch (slot.size()) {
+    case sz::byte:  m_as.loadzbl(contArReg[off], r32(destReg)); break;
+    case sz::dword: m_as.loadl(contArReg[off], r32(destReg)); break;
+    case sz::qword: m_as.loadq(contArReg[off], destReg); break;
+    default:        not_implemented();
+  }
+}
+
+void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
+  auto contArReg   = m_regs[inst->src(0)].reg();
+  int64_t kind     = inst->src(1)->getValInt();
+  SSATmp* value    = inst->src(2);
+  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+
+  assert(value->type().equals(slot.type()));
+  int64_t off = slot.offset() - (int64_t)c_Continuation::getArOffset(curFunc());
+
+  if (value->isConst()) {
+    switch (slot.size()) {
+      case sz::byte:  m_as.storeb(value->getValRawInt(), contArReg[off]); break;
+      case sz::dword: m_as.storel(value->getValRawInt(), contArReg[off]); break;
+      case sz::qword: m_as.storeq(value->getValRawInt(), contArReg[off]); break;
+      default:        not_implemented();
+    }
+  } else {
+    auto valueReg = m_regs[value].reg();
+    switch (slot.size()) {
+      case sz::byte:  m_as.storeb(rbyte(valueReg), contArReg[off]); break;
+      case sz::dword: m_as.storel(r32(valueReg), contArReg[off]); break;
+      case sz::qword: m_as.storeq(r64(valueReg), contArReg[off]); break;
+      default:        not_implemented();
+    }
+  }
+}
+
+void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  const int64_t valueOff = CONTOFF(m_value);
+  int64_t off = valueOff - (int64_t)c_Continuation::getArOffset(curFunc());
+  cgLoad(contArReg, off, inst);
+}
+
+void CodeGenerator::cgStContArValue(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  SSATmp* value = inst->src(1);
+  const int64_t valueOff = CONTOFF(m_value);
+  int64_t off = valueOff - (int64_t)c_Continuation::getArOffset(curFunc());
+  cgStore(contArReg, off, value, true);
+}
+
+void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  const int64_t keyOff = CONTOFF(m_key);
+  int64_t off = keyOff - (int64_t)c_Continuation::getArOffset(curFunc());
+  cgLoad(contArReg, off, inst);
+}
+
+void CodeGenerator::cgStContArKey(IRInstruction* inst) {
+  auto contArReg = m_regs[inst->src(0)].reg();
+  SSATmp* value = inst->src(1);
+  const int64_t keyOff = CONTOFF(m_key);
+  int64_t off = keyOff - (int64_t)c_Continuation::getArOffset(curFunc());
+  cgStore(contArReg, off, value, true);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

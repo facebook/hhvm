@@ -1228,76 +1228,72 @@ void HhbcTranslator::emitContReturnControl() {
 }
 
 void HhbcTranslator::emitUnpackCont() {
-  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
-  auto const cont = ldLoc(0);
+  push(gen(LdContArRaw, Type::Int, m_tb->fp(), cns(RawMemSlot::ContLabel)));
+}
 
-  push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
+void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
+  gen(ExitWhenSurprised, getExitSlowTrace());
+
+  // set m_value = popC();
+  auto const oldValue = gen(LdContArValue, Type::Cell, m_tb->fp());
+  gen(StContArValue, m_tb->fp(), popC());
+  gen(DecRef, oldValue);
+
+  // set m_label = labelId;
+  gen(StContArRaw, m_tb->fp(), cns(RawMemSlot::ContLabel), cns(labelId));
 }
 
 void HhbcTranslator::emitContSuspend(int64_t labelId) {
-  gen(ExitWhenSurprised, getExitSlowTrace());
-
-  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
-  auto const cont = ldLoc(0);
-  auto const newVal = popC();
-  auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
-  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
-  gen(DecRef, oldValue);
+  emitContSuspendImpl(labelId);
 
   // take a fast path if this generator has no yield k => v;
   if (curFunc()->isPairGenerator()) {
     // this needs optimization
-    auto const idx = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContIndex));
+    auto const idx = gen(LdContArRaw, Type::Int,
+                         m_tb->fp(), cns(RawMemSlot::ContIndex));
     auto const newIdx = gen(OpAdd, idx, cns(1));
-    gen(StRaw, cont, cns(RawMemSlot::ContIndex), newIdx);
-    auto const oldKey = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_key)));
-    gen(StProp, cont, cns(CONTOFF(m_key)), newIdx);
+    gen(StContArRaw, m_tb->fp(), cns(RawMemSlot::ContIndex), newIdx);
+
+    auto const oldKey = gen(LdContArKey, Type::Cell, m_tb->fp());
+    gen(StContArKey, m_tb->fp(), newIdx);
     gen(DecRef, oldKey);
   } else {
     // we're guaranteed that the key is an int
-    gen(ContIncKey, cont);
+    gen(ContArIncKey, m_tb->fp());
   }
-
-  gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId));
 
   // transfer control
   emitContReturnControl();
 }
 
 void HhbcTranslator::emitContSuspendK(int64_t labelId) {
-  gen(ExitWhenSurprised, getExitSlowTrace());
+  emitContSuspendImpl(labelId);
 
-  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
-  auto const cont = ldLoc(0);
-  auto const newVal = popC();
-  auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
-  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
-  gen(DecRef, oldValue);
   auto const newKey = popC();
-  auto const oldKey = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_key)));
-  gen(StProp, cont, cns(CONTOFF(m_key)), newKey);
+  auto const oldKey = gen(LdContArKey, Type::Cell, m_tb->fp());
+  gen(StContArKey, m_tb->fp(), newKey);
   gen(DecRef, oldKey);
 
   auto const keyType = newKey->type();
   if (keyType.subtypeOf(Type::Int)) {
-    gen(ContUpdateIdx, cont, newKey);
+    gen(ContArUpdateIdx, m_tb->fp(), newKey);
   }
-
-  gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId));
 
   // transfer control
   emitContReturnControl();
 }
 
 void HhbcTranslator::emitContRetC() {
-  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->fp());
-  auto const cont = ldLoc(0);
   gen(ExitWhenSurprised, getExitSlowTrace());
-  gen(ContDone, cont);
-  auto const newVal = popC();
-  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
-  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
-  gen(DecRef, oldVal);
+
+  // set state to done
+  gen(StContArRaw, m_tb->fp(), cns(RawMemSlot::ContState),
+      cns(c_Continuation::Done));
+
+  // set m_value = popC();
+  auto const oldValue = gen(LdContArValue, Type::Cell, m_tb->fp());
+  gen(StContArValue, m_tb->fp(), popC());
+  gen(DecRef, oldValue);
 
   // transfer control
   emitContReturnControl();
@@ -1349,6 +1345,7 @@ void HhbcTranslator::emitContCurrent() {
 void HhbcTranslator::emitContStopped() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
+
   gen(ContSetRunning, cont, cns(false));
 }
 

@@ -1537,11 +1537,6 @@ ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
   object. S1 is the address to jump to. S2 is the bytecode offset in the
   caller to return to when the generator body yields. S3 is the current frame.
 
-ContRaiseCheck S0:Obj -> L
-
-  Checks whethre the continuation object S0 has raised an exception,
-  and if so branches to the label L.
-
 ContPreNext S0:Obj -> L
 
   Performs operations needed for the Continuation::next() method.  This
@@ -1558,16 +1553,45 @@ ContSetRunning S0:Obj S1:ConstBool
   Sets the continuation object S0 to running if S1 is true, or
   sets it as stopped otherwise.
 
-ContIncKey S0:Obj
+ContArIncKey S0:FramePtr
 
-  Special-case key update for continuation S0, which increments the
-  key of a continuation if that continuation's key is an Int. This will
-  cause undefined behavior if the continuation's key is not an Int.
+  Special-case key update for continuation, ActRec of which is S0,
+  which increments the key of a continuation if that continuation's key
+  is an Int. This will cause undefined behavior if the continuation's key
+  is not an Int.
 
-ContUpdateIdx S0:Obj S1:Int
+ContArUpdateIdx S0:FramePtr S1:Int
 
-  Updates the internal index of continuation S0 from S1 if necessary,
-  i.e. if S1 is larger than the index.
+  Updates the internal index of continuation with S1 if necessary,  i.e. if
+  S1 is larger than the index. S0 is the pointer to the embedded ActRec.
+
+D:T LdContArRaw<T> S0:FramePtr S1:ConstInt
+
+  Loads raw data from the Continuation object ActRec of which is S0.
+  S1 is a constant from the RawMemSlot::Kind enum, which
+  describes the offset from the continuation base, and the size.
+
+StContArRaw S0:FramePtr S1:ConstInt S2:??
+
+  Stores raw data into the Continuation object ActRec of which is S0.
+  S1 is a constant from the RawMemSlow::Kind enum, which
+  describes the offset from the continutaion base, and the size.
+  S2 is the value.
+
+D:Cell LdContArValue S0:FramePtr
+  Loads 'value' from the Continuation object ActRec of which is S0.
+
+StContArValue S0:FramePtr S1:Cell
+  Stores 'value' into the Continuation object ActRec of which is S0.
+  S1 is the new value.
+
+D:Cell LdContArKey S0:FramePtr
+  Loads 'key' from the Continuation object ActRec of which is S0.
+
+StContArKey S0:FramePtr S1:Cell
+  Stores 'key' into the Continuation object ActRec of which is S0.
+  S1 is the new value.
+
 
 
 17. Debugging and instrumentation

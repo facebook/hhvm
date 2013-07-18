@@ -399,6 +399,7 @@ struct HhbcTranslator {
   void emitContEnter(int32_t returnBcOffset);
   void emitUnpackCont();
   void emitContReturnControl();
+  void emitContSuspendImpl(int64_t labelId);
   void emitContSuspend(int64_t labelId);
   void emitContSuspendK(int64_t labelId);
   void emitContRetC();

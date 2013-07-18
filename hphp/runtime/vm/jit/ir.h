@@ -480,13 +480,16 @@ O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),   E|Mem) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
 O(ContStartedCheck,                 ND, S(Obj),                            E) \
-O(ContSetRunning,                   ND, S(Obj)                                \
-                                          C(Bool),                     E|Mem) \
-O(ContDone,                         ND, S(Obj),                        E|Mem) \
+O(ContSetRunning,                   ND, S(Obj) C(Bool),                E|Mem) \
 O(ContValid,                   D(Bool), S(Obj),                            E) \
-O(ContIncKey,                       ND, S(Obj),                        E|Mem) \
-O(ContUpdateIdx,                    ND, S(Obj)                                \
-                                          S(Int),                      E|Mem) \
+O(ContArIncKey,                     ND, S(FramePtr),                   E|Mem) \
+O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
+O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
+O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
+O(LdContArValue,                DParam, S(FramePtr),                      NF) \
+O(StContArValue,                    ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
+O(LdContArKey,                  DParam, S(FramePtr),                      NF) \
+O(StContArKey,                      ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
@@ -842,7 +845,7 @@ class RawMemSlot {
  public:
 
   enum Kind {
-    ContLabel, ContIndex, ContARPtr,
+    ContLabel, ContIndex, ContARPtr, ContState,
     StrLen, FuncNumParams, ContEntry, MisCtx, MaxKind
   };
 
@@ -851,6 +854,7 @@ class RawMemSlot {
       case ContLabel:       return GetContLabel();
       case ContIndex:       return GetContIndex();
       case ContARPtr:       return GetContARPtr();
+      case ContState:       return GetContState();
       case StrLen:          return GetStrLen();
       case FuncNumParams:   return GetFuncNumParams();
       case ContEntry:       return GetContEntry();
@@ -878,6 +882,11 @@ class RawMemSlot {
   }
   static RawMemSlot& GetContARPtr() {
     static RawMemSlot m(CONTOFF(m_arPtr), Transl::sz::qword, Type::StkPtr);
+    return m;
+  }
+  static RawMemSlot& GetContState() {
+    static RawMemSlot m(c_Continuation::stateOffset(),
+      Transl::sz::byte, Type::Int);
     return m;
   }
   static RawMemSlot& GetStrLen() {

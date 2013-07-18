@@ -1658,9 +1658,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
   Emitter e(m, m_ue, *this);
 
-  Label ctFatal;
   int i, nk = stmts->getCount();
-  CONTROL_BODY(ctFatal, ctFatal);
   for (i = 0; i < nk; i++) {
     StatementPtr s = (*stmts)[i];
     if (MethodStatementPtr meth = dynamic_pointer_cast<MethodStatement>(s)) {
@@ -1796,20 +1794,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     }
     m_ue.setMainReturn(&mainReturn);
     m_ue.setMergeOnly(!notMergeOnly);
-    // If the exitHnd label was used, we need to emit some extra code
-    // to handle stray breaks
-    Label exit;
-    if (ctFatal.isUsed()) {
-      e.Jmp(exit);
-      ctFatal.set(e);
-      static const StringData* msg =
-        StringData::GetStaticString("Cannot break/continue");
-      e.String(msg);
-      e.Fatal(0);
-    }
-    if (exit.isUsed()) {
-      exit.set(e);
-    }
+
     // Pseudo-main returns the integer value 1 by default. If the
     // current position in the bytecode is reachable, emit code to
     // return 1.
@@ -5585,24 +5570,10 @@ void EmitterVisitor::emitPostponedMeths() {
         e.Fatal(1);
       }
     }
-    Label ctFatal;
-    {
-      CONTROL_BODY(ctFatal, ctFatal);
-      // emit body
-      visit(p.m_meth->getStmts());
-    }
-    Label exit;
-    if (ctFatal.isUsed()) {
-      e.Jmp(exit);
-      ctFatal.set(e);
-      static const StringData* msg =
-        StringData::GetStaticString("Cannot break/continue");
-      e.String(msg);
-      e.Fatal(0);
-    }
-    if (exit.isUsed()) {
-      exit.set(e);
-    }
+
+    // emit body
+    visit(p.m_meth->getStmts());
+
     // If the current position in the bytecode is reachable, emit code to
     // return null
     if (currentPositionIsReachable()) {

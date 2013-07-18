@@ -245,10 +245,7 @@ void CmdNext::cleanupStepCont() {
 // continuation, or we'll stop when we get back into it, we know the object
 // will remain alive.
 void* CmdNext::getContinuationTag(ActRec* fp) {
-  TypedValue* tv = frame_local(fp, 0);
-  assert(tv->m_type == HPHP::KindOfObject);
-  assert(dynamic_cast<c_Continuation*>(tv->m_data.pobj));
-  c_Continuation* cont = static_cast<c_Continuation*>(tv->m_data.pobj);
+  c_Continuation* cont = frame_continuation(fp);
   TRACE(2, "CmdNext: continuation tag %p for %s\n", cont,
         cont->t_getorigfuncname()->data());
   return cont;

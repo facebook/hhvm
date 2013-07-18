@@ -142,7 +142,7 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // continuation transformations
 
-void prepare_generator(Parser *_p, Token &stmt, Token &params) {
+void prepare_generator(Parser *_p, Token &stmt) {
   // 1. add prologue and epilogue to original body and store it back to "stmt"
   {
     // hphp_unpack_continuation()
@@ -157,15 +157,6 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params) {
 
     stmt.reset();
     _p->finishStatement(stmt, stmts2); stmt = 1;
-  }
-
-  // 2. prepare a single continuation parameter list and store it in "params"
-  {
-    Token type;    type.setText("Continuation");
-    Token var;     var.setText(CONTINUATION_OBJECT_NAME);
-    params.reset();
-    type.reset();
-    _p->onParam(params, NULL, type, var, false, NULL, NULL, NULL);
   }
 }
 

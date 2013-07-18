@@ -1266,10 +1266,10 @@ static const struct {
 
   { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpUnpackCont,  {Local,            StackTop2,    OutInt64,          2 }},
-  { OpContSuspend, {Local|Stack1,     None,         OutNone,          -1 }},
-  { OpContSuspendK,{Local|StackTop2,  None,         OutNone,          -2 }},
-  { OpContRetC,    {Local|Stack1,     None,         OutNone,          -1 }},
+  { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
+  { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
+  { OpContSuspendK,{StackTop2,        None,         OutNone,          -2 }},
+  { OpContRetC,    {Stack1,           None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
   { OpContRaise,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
@@ -1862,19 +1862,11 @@ void getInputsImpl(SrcKey startSk,
     addMVectorInputs(*ni, currentStackOffset, inputs);
   }
   if (input & Local) {
-    // Many of the continuation instructions read local 0. All other
-    // instructions that take a Local have its index at their first
+    // All instructions that take a Local have its index at their first
     // immediate.
     int loc;
     auto insertAt = inputs.end();
     switch (ni->op()) {
-      case OpUnpackCont:
-      case OpContSuspend:
-      case OpContSuspendK:
-      case OpContRetC:
-        loc = 0;
-        break;
-
       case OpSetWithRefLM:
         insertAt = inputs.begin();
         // fallthrough
@@ -2751,7 +2743,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpContSuspendK:
     case OpContRetC:
       // The stack input is teleported to the continuation's m_value field
-      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+      return DataTypeGeneric;
 
     case OpContHandle:
       // This always calls the interpreter

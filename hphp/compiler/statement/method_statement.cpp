@@ -380,9 +380,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
       MethodStatementRawPtr orig = getOrigGeneratorFunc();
       VariableTablePtr variables = funcScope->getVariables();
 
-      Symbol *cont = variables->getSymbol(CONTINUATION_OBJECT_NAME);
-      cont->setHidden();
-
       orig->getFunctionScope()->addUse(funcScope, BlockScope::UseKindClosure);
       orig->getFunctionScope()->setContainsBareThis(
         funcScope->containsBareThis(), funcScope->containsRefThis());

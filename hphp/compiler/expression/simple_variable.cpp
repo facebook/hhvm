@@ -105,15 +105,6 @@ void SimpleVariable::coalesce(SimpleVariablePtr other) {
   m_name = m_sym->getName();
 }
 
-string SimpleVariable::getNamePrefix() const {
-  bool needsCont = getFunctionScope()->isGenerator();
-  bool isHidden = m_sym && m_sym->isHidden();
-  return (needsCont &&
-          m_name != CONTINUATION_OBJECT_NAME &&
-          !isHidden) ?
-      string(TYPED_CONTINUATION_OBJECT_NAME) + "->" : string("");
-}
-
 /*
   This simple variable is about to go out of scope.
   Is it ok to kill the last assignment?

@@ -360,11 +360,8 @@ HphpArray* get_static_locals(const ActRec* ar) {
     assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
     return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else if (ar->m_func->isGeneratorFromClosure()) {
-    TypedValue* contLoc = frame_local(ar, 0);
-    assert(dynamic_cast<c_Continuation*>(contLoc->m_data.pobj));
-    c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
-
-    TypedValue* closureLoc = frame_local(ar, cont->m_origFunc->numParams() + 1);
+    c_Continuation* cont = frame_continuation(ar);
+    TypedValue* closureLoc = frame_local(ar, cont->m_origFunc->numParams());
     assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
     return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else {

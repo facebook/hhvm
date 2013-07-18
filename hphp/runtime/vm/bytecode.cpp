@@ -2067,10 +2067,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     String funcname = const_cast<StringData*>(fp->m_func->name());
     if (fp->m_func->isGenerator()) {
       // retrieve the original function name from the inner continuation
-      TypedValue* tv = frame_local(fp, 0);
-      assert(tv->m_type == HPHP::KindOfObject);
-      funcname = static_cast<c_Continuation*>(
-                       tv->m_data.pobj)->t_getorigfuncname();
+      funcname = frame_continuation(fp)->t_getorigfuncname();
     }
 
     if (fp->m_func->isClosureBody()) {
@@ -6605,16 +6602,8 @@ static inline c_Continuation* createCont(const Func* origFunc,
   // we enter the generator body.
   ActRec* ar = cont->actRec();
   ar->m_func = genFunc;
-  ar->initNumArgs(1);
+  ar->initNumArgs(0);
   ar->setVarEnv(nullptr);
-
-  TypedValue* contLocal = frame_local(ar, 0);
-  contLocal->m_type = KindOfObject;
-  contLocal->m_data.pobj = cont;
-  // Do not incref the continuation here! Doing so will create a reference
-  // cycle, since this reference is a local in the continuation frame and thus
-  // will be decreffed when the continuation is destroyed. The corresponding
-  // non-decref is in ~c_Continuation.
 
   return cont;
 }
@@ -6728,13 +6717,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   ret->m_data.pobj = cont;
 }
 
-static inline c_Continuation* frame_continuation(ActRec* fp) {
-  ObjectData* obj = frame_local(fp, 0)->m_data.pobj;
-  assert(dynamic_cast<c_Continuation*>(obj));
-  return static_cast<c_Continuation*>(obj);
-}
-
-static inline c_Continuation* this_continuation(ActRec* fp) {
+static inline c_Continuation* this_continuation(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
   assert(dynamic_cast<c_Continuation*>(obj));
   return static_cast<c_Continuation*>(obj);

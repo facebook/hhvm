@@ -48,7 +48,7 @@ array(5) {
 }
 int(4)
 string(32) "Continuation is already finished"
-array(13) {
+array(12) {
   ["b"]=>
   int(2)
   ["g"]=>
@@ -61,23 +61,20 @@ array(13) {
   int(4)
   ["e"]=>
   int(5)
-  ["__cont__"]=>
-  object(Continuation)#5 (0) {
-  }
   ["c"]=>
   int(3)
   ["j"]=>
   int(10)
+  ["k"]=>
+  int(11)
   ["h"]=>
   int(8)
   ["a"]=>
   int(1)
-  ["k"]=>
-  int(11)
   ["l"]=>
   int(12)
 }
-array(13) {
+array(12) {
   ["b"]=>
   int(3735928559)
   ["g"]=>
@@ -90,24 +87,21 @@ array(13) {
   int(4)
   ["e"]=>
   int(5)
-  ["__cont__"]=>
-  object(Continuation)#5 (0) {
-  }
   ["c"]=>
   int(3)
   ["j"]=>
   int(10)
+  ["k"]=>
+  int(11)
   ["h"]=>
   int(8)
   ["a"]=>
   object(stdClass)#6 (0) {
   }
-  ["k"]=>
-  int(11)
   ["l"]=>
   int(12)
 }
-array(13) {
+array(12) {
   ["b"]=>
   int(3735928559)
   ["g"]=>
@@ -120,21 +114,18 @@ array(13) {
   int(3126047761)
   ["e"]=>
   int(3126047761)
-  ["__cont__"]=>
-  object(Continuation)#5 (0) {
-  }
   ["c"]=>
   object(Continuation)#5 (0) {
   }
   ["j"]=>
   int(10)
+  ["k"]=>
+  int(11)
   ["h"]=>
   int(8)
   ["a"]=>
   object(stdClass)#6 (0) {
   }
-  ["k"]=>
-  int(11)
   ["l"]=>
   int(12)
 }

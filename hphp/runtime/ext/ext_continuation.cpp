@@ -42,8 +42,6 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s___cont__("__cont__");
-
 c_Continuation::c_Continuation(Class* cb)
     : ExtObjectData(cb)
     , m_label(0)
@@ -56,13 +54,6 @@ c_Continuation::c_Continuation(Class* cb)
 
 c_Continuation::~c_Continuation() {
   ActRec* ar = actRec();
-
-  // The first local is the object itself, and it wasn't increffed at creation
-  // time (see createContinuation()). Overwrite its type to exempt it from
-  // refcounting here.
-  TypedValue* contLocal = frame_local(ar, 0);
-  assert(contLocal->m_data.pobj == this);
-  contLocal->m_type = KindOfNull;
 
   if (ar->hasVarEnv()) {
     ar->getVarEnv()->detach(ar);
@@ -191,17 +182,13 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
     skipThis = definedVariables.exists(s_this, true);
 
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      if (iter.first().getStringData()->same(s___cont__.get())) {
-        continue;
-      }
       dupContVar(iter.first().getStringData(),
                  const_cast<TypedValue *>(iter.secondRef().asTypedValue()));
     }
   } else {
     const Func *genFunc = actRec()->m_func;
     skipThis = genFunc->lookupVarId(thisStr) != kInvalidId;
-    // skip local 0 because that's the old continuation
-    for (Id i = 1; i < genFunc->numNamedLocals(); ++i) {
+    for (Id i = 0; i < genFunc->numNamedLocals(); ++i) {
       dupContVar(genFunc->localVarName(i), frame_local(fp, i));
     }
   }

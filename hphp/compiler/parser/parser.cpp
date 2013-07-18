@@ -113,7 +113,7 @@
 
 using namespace HPHP::Compiler;
 
-extern void prepare_generator(Parser *_p, Token &stmt, Token &params);
+extern void prepare_generator(Parser *_p, Token &stmt);
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &genName,
                              const char *clsname, Token *modifiers,
@@ -844,12 +844,10 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   if (funcContext.isGenerator) {
     string genName = newContinuationName(funcName);
 
-    Token new_params;
-    prepare_generator(this, stmt, new_params);
+    prepare_generator(this, stmt);
 
     func = NEW_STMT(FunctionStatement, exp, ref->num(), genName,
-                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
-                    ret.typeAnnotationName(),
+                    ExpressionListPtr(), ret.typeAnnotationName(),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, ExpressionListPtr());
     out->stmt = func;
@@ -1225,12 +1223,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
       genName = newContinuationName(funcName + "@" + m_clsName);
     }
 
-    Token new_params;
-    prepare_generator(this, stmt, new_params);
+    prepare_generator(this, stmt);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
     mth = NEW_STMT(MethodStatement, exp2, ref->num(), genName,
-                   dynamic_pointer_cast<ExpressionList>(new_params->exp),
-                   ret.typeAnnotationName(),
+                   ExpressionListPtr(), ret.typeAnnotationName(),
                    dynamic_pointer_cast<StatementList>(stmt->stmt),
                    attribute, comment, ExpressionListPtr());
     out->stmt = mth;

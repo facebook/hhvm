@@ -59,8 +59,6 @@ public:
   void updateSymbol(SimpleVariablePtr src);
   void coalesce(SimpleVariablePtr other);
 private:
-  std::string getNamePrefix() const;
-
   std::string m_name;
   std::string m_docComment;
 

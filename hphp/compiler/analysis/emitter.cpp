@@ -2243,8 +2243,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (m_curFunc->isGenerator()) {
           assert(!retV);
-          m_metaInfo.addKnownDataType(
-            KindOfObject, false, m_ue.bcPos(), false, 1);
           assert(m_evalStack.size() == 1);
           e.ContRetC();
           return false;
@@ -3147,10 +3145,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         SimpleFunctionCallPtr call(
           static_pointer_cast<SimpleFunctionCall>(node));
         ExpressionListPtr params = call->getParams();
-        auto inputIsAnObject = [&](int inputIndex) {
-          m_metaInfo.addKnownDataType(KindOfObject, /* predicted */ false,
-                                      m_ue.bcPos(), false, inputIndex);
-        };
 
         if (call->isFatalFunction()) {
           if (params && params->getCount() == 1) {
@@ -3241,7 +3235,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (call->isCompilerCallToFunction("hphp_unpack_continuation")) {
           assert(!params || params->getCount() == 0);
           int yieldLabelCount = call->getFunctionScope()->getYieldLabelCount();
-          inputIsAnObject(0);
           emitContinuationSwitch(e, yieldLabelCount);
           return false;
         } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
@@ -3273,7 +3266,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           assert(params && params->getCount() == 1);
           visit((*params)[0]);
           emitConvertToCell(e);
-          inputIsAnObject(1);
           assert(m_evalStack.size() == 1);
           e.ContRetC();
           e.Null();
@@ -3971,16 +3963,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         int64_t normalLabel = 2 * y->getLabel();
         int64_t exceptLabel = normalLabel - 1;
 
-        // pack continuation and set the return label
+        // suspend continuation and set the return label
         if (keyExp) {
           assert(m_evalStack.size() == 2);
-          m_metaInfo.addKnownDataType(
-            KindOfObject, false, m_ue.bcPos(), false, 2);
           e.ContSuspendK(normalLabel);
         } else {
           assert(m_evalStack.size() == 1);
-          m_metaInfo.addKnownDataType(
-            KindOfObject, false, m_ue.bcPos(), false, 1);
           e.ContSuspend(normalLabel);
         }
 
@@ -5620,8 +5608,6 @@ void EmitterVisitor::emitPostponedMeths() {
     if (currentPositionIsReachable()) {
       e.Null();
       if (p.m_meth->getFunctionScope()->isGenerator()) {
-        m_metaInfo.addKnownDataType(
-          KindOfObject, false, m_ue.bcPos(), false, 1);
         assert(m_evalStack.size() == 1);
         e.ContRetC();
       } else {

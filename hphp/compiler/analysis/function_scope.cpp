@@ -344,10 +344,7 @@ bool FunctionScope::isClosure() const {
 }
 
 bool FunctionScope::isGenerator() const {
-  assert(!getOrigGenStmt() ||
-         (ParserBase::IsContinuationName(name()) &&
-          m_paramNames.size() == 1 &&
-          m_paramNames[0] == CONTINUATION_OBJECT_NAME));
+  assert(!getOrigGenStmt() || ParserBase::IsContinuationName(name()));
   return !!getOrigGenStmt();
 }
 

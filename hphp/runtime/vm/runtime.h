@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_VM_RUNTIME_H_
 #define incl_HPHP_VM_RUNTIME_H_
 
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/event_hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/funcdict.h"
@@ -78,6 +79,14 @@ inline TypedValue*
 frame_local_inner(const ActRec* fp, int n) {
   TypedValue* ret = frame_local(fp, n);
   return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
+}
+
+inline c_Continuation*
+frame_continuation(const ActRec* fp) {
+  size_t arOffset = c_Continuation::getArOffset(fp->m_func);
+  ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
+  assert(dynamic_cast<c_Continuation*>(obj));
+  return static_cast<c_Continuation*>(obj);
 }
 
 /*

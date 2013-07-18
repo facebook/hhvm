@@ -574,10 +574,7 @@ array(3) {
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }
@@ -674,10 +671,7 @@ array(3) {
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }
@@ -766,10 +760,7 @@ array(3) {
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }

@@ -899,7 +899,7 @@ class RawMemSlot {
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
-      Func::prologueTableOff() + sizeof(HPHP::Transl::TCA),
+      Func::prologueTableOff(),
       Transl::sz::qword, Type::TCA);
     return m;
   }

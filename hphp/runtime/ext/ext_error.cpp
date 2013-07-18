@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -128,20 +129,40 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
                  CStrRef destination /* = null_string */,
                  CStrRef extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
-  // so we use Logger::Error() instead of raise_warning()
-  std::string line(message.data(),
-                   // Truncate to 512k
-                   message.size() > (1<<19) ? (1<<19) : message.size());
+  // so we use Logger::Error() instead of raise_warning() or raise_error()
+  switch (message_type) {
+  case 0:
+  {
+    std::string line(message.data(),
+                     // Truncate to 512k
+                     message.size() > (1<<19) ? (1<<19) : message.size());
 
-  Logger::Error(line);
+    Logger::Error(line);
 
-  if (!RuntimeOption::ServerExecutionMode() &&
-      Logger::UseLogFile && Logger::Output) {
-    // otherwise errors will go to error log without displaying on screen
-    std::cerr << line;
+    if (!RuntimeOption::ServerExecutionMode() &&
+        Logger::UseLogFile && Logger::Output) {
+      // otherwise errors will go to error log without displaying on screen
+      std::cerr << line;
+    }
+    return true;
   }
-
-  return true;
+  case 3:
+  {
+    Variant outfile = f_fopen(destination, "a"); // open for append only
+    if (outfile.isNull()) {
+      Logger::Error("can't open error_log file!\n");
+      return false;
+    }
+    f_fwrite(outfile.toObject(), message);
+    f_fclose(outfile.toObject());
+    return true;
+  }
+  case 2: // not used per PHP
+  default:
+    Logger::Error("error_log does not support message_type %d!", message_type);
+    break;
+  }
+  return false;
 }
 
 int64_t f_error_reporting(CVarRef level /* = null */) {

@@ -167,37 +167,32 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline unsigned ArrayData::index() const {
-  assert(unsigned(m_kind) < unsigned(ArrayKind::kNumKinds));
-  return unsigned(m_kind);
-}
-
 inline void ArrayData::release() {
-  return g_array_funcs.release[index()](this);
+  return g_array_funcs.release[m_kind](this);
 }
 
 inline ArrayData* ArrayData::append(CVarRef v, bool copy) {
-  return g_array_funcs.append[index()](this, v, copy);
+  return g_array_funcs.append[m_kind](this, v, copy);
 }
 
 inline TypedValue* ArrayData::nvGet(int64_t ikey) const {
-  return g_array_funcs.nvGetInt[index()](this, ikey);
+  return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
 inline TypedValue* ArrayData::nvGet(const StringData* skey) const {
-  return g_array_funcs.nvGetStr[index()](this, skey);
+  return g_array_funcs.nvGetStr[m_kind](this, skey);
 }
 
 inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
-  g_array_funcs.nvGetKey[index()](this, out, pos);
+  g_array_funcs.nvGetKey[m_kind](this, out, pos);
 }
 
 inline ArrayData* ArrayData::set(int64_t k, CVarRef v, bool copy) {
-  return g_array_funcs.setInt[index()](this, k, v, copy);
+  return g_array_funcs.setInt[m_kind](this, k, v, copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, CVarRef v, bool copy) {
-  return g_array_funcs.setStr[index()](this, k, v, copy);
+  return g_array_funcs.setStr[m_kind](this, k, v, copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

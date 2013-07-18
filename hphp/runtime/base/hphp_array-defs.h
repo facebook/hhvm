@@ -104,7 +104,7 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
 }
 
 inline HphpArray* HphpArray::asVector(ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kVector);
+  assert(ad->kind() == kVectorKind);
   assert(dynamic_cast<HphpArray*>(ad));
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
@@ -112,7 +112,7 @@ inline HphpArray* HphpArray::asVector(ArrayData* ad) {
 }
 
 inline const HphpArray* HphpArray::asVector(const ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kVector);
+  assert(ad->kind() == kVectorKind);
   assert(dynamic_cast<const HphpArray*>(ad));
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
@@ -120,7 +120,7 @@ inline const HphpArray* HphpArray::asVector(const ArrayData* ad) {
 }
 
 inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kHphpArray);
+  assert(ad->kind() == kMixedKind);
   assert(dynamic_cast<HphpArray*>(ad));
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
@@ -128,7 +128,7 @@ inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
 }
 
 inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kHphpArray);
+  assert(ad->kind() == kMixedKind);
   assert(dynamic_cast<const HphpArray*>(ad));
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());

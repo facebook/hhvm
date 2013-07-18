@@ -64,7 +64,7 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// order: kVector, kHphpArray, kSharedMap, kNameValueTableWrapper, kPolicyArray
+// order: kVectorKind, kMixedKind, kSharedKind, kNvtwKind, kPolicyKind
 extern const ArrayFunctions g_array_funcs = {
   // release
   { &HphpArray::ReleaseVec, &HphpArray::Release,
@@ -503,12 +503,12 @@ CVarRef ArrayData::getNotFound(const StringData* k) {
 }
 
 CVarRef ArrayData::getNotFound(int64_t k, bool error) const {
-  return error && m_kind != ArrayKind::kNameValueTableWrapper ? getNotFound(k) :
+  return error && m_kind != kNvtwKind ? getNotFound(k) :
          null_variant;
 }
 
 CVarRef ArrayData::getNotFound(const StringData* k, bool error) const {
-  return error && m_kind != ArrayKind::kNameValueTableWrapper ? getNotFound(k) :
+  return error && m_kind != kNvtwKind ? getNotFound(k) :
          null_variant;
 }
 

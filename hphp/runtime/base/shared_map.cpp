@@ -62,13 +62,13 @@ void SharedMap::Release(ArrayData* ad) {
 }
 
 inline SharedMap* SharedMap::asSharedMap(ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kSharedMap);
+  assert(ad->kind() == kSharedKind);
   assert(dynamic_cast<SharedMap*>(ad));
   return static_cast<SharedMap*>(ad);
 }
 
 inline const SharedMap* SharedMap::asSharedMap(const ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kSharedMap);
+  assert(ad->kind() == kSharedKind);
   assert(dynamic_cast<const SharedMap*>(ad));
   return static_cast<const SharedMap*>(ad);
 }

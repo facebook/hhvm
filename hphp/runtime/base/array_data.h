@@ -38,13 +38,17 @@ class ArrayData : public Countable {
   enum class AllocationMode : bool { smart, nonSmart };
 
   // enum of possible array types, so we can guard nonvirtual
-  // fast paths in runtime code.
-  enum class ArrayKind : uint8_t {
-    kVector,
-    kHphpArray,
-    kSharedMap,
-    kNameValueTableWrapper,
-    kPolicyArray,
+  // fast paths in runtime code.  This is intentionally not
+  // an enum class, to avoid boilerplate when:
+  //  - doing relational comparisons
+  //  - using kind as an index
+  //  - maybe doing bitops in the future
+  enum ArrayKind : uint8_t {
+    kVectorKind,  // HphpArray vector-shape
+    kMixedKind,   // HphpArray generic shape
+    kSharedKind,  // SharedMap
+    kNvtwKind,    // NameValueTableWrapper
+    kPolicyKind,  // PolicyArray
     kNumKinds // insert new values before kNumKinds.
   };
 
@@ -134,7 +138,7 @@ public:
    * return the array kind for fast typechecks
    */
   ArrayKind kind() const {
-    return (ArrayKind)m_kind;
+    return m_kind;
   }
 
   /**
@@ -163,15 +167,15 @@ public:
   /*
    * Specific derived class type querying operators.
    */
-  bool isPolicyArray() const { return m_kind == ArrayKind::kPolicyArray; }
-  bool isVector() const { return m_kind == ArrayKind::kVector; }
+  bool isPolicyArray() const { return m_kind == kPolicyKind; }
+  bool isVector() const { return m_kind == kVectorKind; }
   bool isHphpArray() const {
-    return m_kind <= ArrayKind::kHphpArray;
-    static_assert(ArrayKind::kVector < ArrayKind::kHphpArray, "");
+    return m_kind <= kMixedKind;
+    static_assert(kVectorKind < kMixedKind, "");
   }
-  bool isSharedMap() const { return m_kind == ArrayKind::kSharedMap; }
+  bool isSharedMap() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const {
-    return m_kind == ArrayKind::kNameValueTableWrapper;
+    return m_kind == kNvtwKind;
   }
 
 
@@ -463,8 +467,6 @@ public:
     static_assert(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET,
                   "Offset of _count in ArrayData must be FAST_REFCOUNT_OFFSET");
   }
-  // safely convert m_kind to an array index for dispatching
-  unsigned index() const;
 
  protected:
   void freeStrongIterators();

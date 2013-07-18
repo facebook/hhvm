@@ -33,7 +33,7 @@ namespace HPHP {
 class SharedMap : public ArrayData {
 public:
   explicit SharedMap(SharedVariant* source)
-      : ArrayData(ArrayKind::kSharedMap)
+      : ArrayData(kSharedKind)
       , m_localCache(nullptr) {
     m_map      = source->getMap();
     m_isVector = source->getIsVector();

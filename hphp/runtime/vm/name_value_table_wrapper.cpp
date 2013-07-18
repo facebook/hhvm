@@ -24,14 +24,14 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kNameValueTableWrapper);
+  assert(ad->kind() == kNvtwKind);
   assert(dynamic_cast<NameValueTableWrapper*>(ad));
   return static_cast<NameValueTableWrapper*>(ad);
 }
 
 inline const NameValueTableWrapper*
 NameValueTableWrapper::asNVTW(const ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kNameValueTableWrapper);
+  assert(ad->kind() == kNvtwKind);
   assert(dynamic_cast<const NameValueTableWrapper*>(ad));
   return static_cast<const NameValueTableWrapper*>(ad);
 }

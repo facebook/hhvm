@@ -186,7 +186,7 @@ void SimpleArrayStore::prepend(const Variant& v, uint length,
 IMPLEMENT_SMART_ALLOCATION(PolicyArray)
 
 PolicyArray::PolicyArray(uint capacity)
-    : ArrayData(ArrayKind::kPolicyArray)
+    : ArrayData(kPolicyKind)
     , Store(m_allocMode, capacity) {
   m_size = 0;
   m_pos = invalid_index;
@@ -197,7 +197,7 @@ PolicyArray::PolicyArray(uint capacity)
 
 PolicyArray::PolicyArray(const PolicyArray& rhs, uint capacity,
                        AllocationMode am)
-    : ArrayData(ArrayKind::kPolicyArray, am)
+    : ArrayData(kPolicyKind, am)
     , Store(rhs, rhs.m_size, capacity, am, &rhs) {
   m_size = rhs.m_size;
   m_pos = rhs.m_pos;
@@ -216,13 +216,13 @@ void PolicyArray::Release(ArrayData* ad) {
 }
 
 inline PolicyArray* PolicyArray::asPolicyArray(ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kPolicyArray);
+  assert(ad->kind() == kPolicyKind);
   assert(dynamic_cast<PolicyArray*>(ad));
   return static_cast<PolicyArray*>(ad);
 }
 
 inline const PolicyArray* PolicyArray::asPolicyArray(const ArrayData* ad) {
-  assert(ad->kind() == ArrayKind::kPolicyArray);
+  assert(ad->kind() == kPolicyKind);
   assert(dynamic_cast<const PolicyArray*>(ad));
   return static_cast<const PolicyArray*>(ad);
 }

@@ -105,7 +105,7 @@ static inline uint32_t computeMaskFromNumElms(const uint32_t n) {
 // Construction/destruction.
 
 HphpArray::HphpArray(uint capacity)
-    : ArrayData(ArrayKind::kVector, AllocationMode::smart, 0)
+    : ArrayData(kVectorKind, AllocationMode::smart, 0)
     , m_used(0) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
@@ -120,7 +120,7 @@ HphpArray::HphpArray(uint capacity)
 }
 
 HphpArray::HphpArray(uint size, const TypedValue* values)
-    : ArrayData(ArrayKind::kVector, AllocationMode::smart, size)
+    : ArrayData(kVectorKind, AllocationMode::smart, size)
     , m_used(size) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
@@ -143,7 +143,7 @@ HphpArray::HphpArray(uint size, const TypedValue* values)
 }
 
 HphpArray::HphpArray(EmptyMode)
-    : ArrayData(ArrayKind::kVector, AllocationMode::smart, 0)
+    : ArrayData(kVectorKind, AllocationMode::smart, 0)
     , m_used(0)
     , m_tableMask(SmallHashSize - 1) {
   allocData(SmallSize, SmallHashSize);
@@ -261,7 +261,7 @@ HphpArray* HphpArray::vectorToGeneric() {
     m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
              (ElmInd*)(uintptr_t(m_data) + dataSize);
   }
-  m_kind = ArrayKind::kHphpArray;
+  m_kind = kMixedKind;
   uint32_t i = 0;
   auto size = m_size;
   for (; i < size; ++i) {
@@ -316,10 +316,10 @@ bool HphpArray::checkInvariants() const {
     assert(!isTombstone(m_data[m_used - 1].data.m_type));
   }
   switch (m_kind) {
-  case ArrayKind::kVector:
+  case kVectorKind:
     assert(m_size == m_used);
     break;
-  case ArrayKind::kHphpArray: {
+  case kMixedKind: {
     assert(m_hash);
     assert(m_hLoad >= m_size);
     size_t load = 0;

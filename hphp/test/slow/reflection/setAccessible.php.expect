@@ -1,0 +1,44 @@
+array(6) {
+  ["b"]=>
+  array(2) {
+    [0]=>
+    string(1) "b"
+    [1]=>
+    string(6) "newval"
+  }
+  ["c"]=>
+  array(2) {
+    [0]=>
+    string(1) "c"
+    [1]=>
+    string(6) "newval"
+  }
+  ["d"]=>
+  array(2) {
+    [0]=>
+    string(1) "d"
+    [1]=>
+    string(6) "newval"
+  }
+  ["f"]=>
+  array(2) {
+    [0]=>
+    string(1) "f"
+    [1]=>
+    string(6) "newval"
+  }
+  ["g"]=>
+  array(2) {
+    [0]=>
+    string(1) "g"
+    [1]=>
+    string(6) "newval"
+  }
+  ["h"]=>
+  array(2) {
+    [0]=>
+    string(1) "h"
+    [1]=>
+    string(6) "newval"
+  }
+}

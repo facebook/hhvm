@@ -208,7 +208,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      CArrRef spec = f_hphp_get_static_property(obj->o_getClassName(), "_TSPEC")
+      CArrRef spec = f_hphp_get_static_property(obj->o_getClassName(), "_TSPEC", false)
         .toArray();
 
       // Write each member
@@ -502,12 +502,12 @@ class CompactReader {
 
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
-        Variant spec = f_hphp_get_static_property(resultClassName, "_TSPEC");
+        Variant spec = f_hphp_get_static_property(resultClassName, "_TSPEC", false);
         readStruct(ret, spec.toArray());
         return ret;
       } else if (type == T_EXCEPTION) {
         Object exn = create_object("TApplicationException", Array());
-        Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC");
+        Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC", false);
         readStruct(exn, spec.toArray());
         throw exn;
       } else {
@@ -629,7 +629,7 @@ class CompactReader {
             }
 
             Variant newStructSpec =
-              f_hphp_get_static_property(classNameString, "_TSPEC");
+              f_hphp_get_static_property(classNameString, "_TSPEC", false);
 
             if (!newStructSpec.is(KindOfArray)) {
               thrift_error("invalid type of spec", ERR_INVALID_DATA);

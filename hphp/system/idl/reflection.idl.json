@@ -34,7 +34,7 @@
             },
             "args": [
                 {
-                    "name": "cname",
+                    "name": "cls",
                     "type": "Variant"
                 },
                 {
@@ -308,6 +308,10 @@
                 {
                     "name": "prop",
                     "type": "String"
+                },
+                {
+                    "name": "force",
+                    "type": "Boolean"
                 }
             ]
         },
@@ -334,6 +338,10 @@
                 {
                     "name": "value",
                     "type": "Variant"
+                },
+                {
+                    "name": "force",
+                    "type": "Boolean"
                 }
             ]
         },

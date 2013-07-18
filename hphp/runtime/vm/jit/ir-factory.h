@@ -231,8 +231,6 @@ public:
   }
 
   template<typename T> SSATmp* cns(T val, Type type) {
-    // Normalize bool values to 0 or 1
-    if (type.equals(Type::Bool)) val = (T)(val != 0);
     ConstData cdata(val);
     return findConst(cdata, type);
   }

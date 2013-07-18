@@ -666,7 +666,6 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
   int64_t val = tmp->getValRawInt();
   if (!tmp->isA(Type::Dbl)) {
     assert(tmp->isA(Type::Bool | Type::Int));
-    if (tmp->isA(Type::Bool)) val = val != 0;  // see task #2401790
     val = convIntToDouble(val);
   }
   emitLoadImm(as, val, m_rScratch);
@@ -2204,7 +2203,6 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   assert(dstReg != InvalidReg);
   if (src->isConst()) {
     int64_t constVal = src->getValRawInt();
-    if (src->isA(Type::Bool)) constVal = constVal != 0; // see task #2401790
     constVal = convIntToDouble(constVal);
     emitLoadImm(m_as, constVal, dstReg);
   } else {

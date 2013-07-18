@@ -92,7 +92,8 @@ private:
 
 public:
   MySQL(const char *host, int port, const char *username,
-        const char *password, const char *database);
+        const char *password, const char *database,
+        MYSQL* raw_connection = nullptr);
   ~MySQL();
   void setLastError(const char *func);
   void close();
@@ -114,6 +115,11 @@ public:
                  int connect_timeout);
 
   MYSQL *get() { return m_conn;}
+  MYSQL *eject_mysql() {
+    auto ret = m_conn;
+    m_conn = nullptr;
+    return ret;
+  }
 
 private:
   MYSQL *m_conn;

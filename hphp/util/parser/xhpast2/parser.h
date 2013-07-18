@@ -1067,11 +1067,11 @@ struct Parser : ParserBase {
     while (params && (params->nodeType == ONPARAM)) {
       std::vector<Token *>::iterator i = params->children.begin();
       params = *i++;
-      Token *type = *i++;
+      UNUSED Token *type = *i++; // TODO
       Token *var = *i++;
-      Token *defValue = *i++;
-      Token *attr = *i++; // TODO
-      Token *mods = *i; // TODO
+      UNUSED Token *defValue = *i++; // TODO
+      UNUSED Token *attr = *i++; // TODO
+      UNUSED Token *mods = *i; // TODO
       // TODO: bool ref
       xhpast::Node *p = new xhpast::Node(n_DECLARATION_PARAMETER);
       // TODO: class type
@@ -1197,12 +1197,12 @@ struct Parser : ParserBase {
       case ONMETHOD: {
         std::vector<Token *>::iterator i = node->children.begin();
         Token *modifiers = *i++;
-        Token *ret = *i++;
-        Token *ref = *i++;
+        UNUSED Token *ret = *i++; // TODO
+        UNUSED Token *ref = *i++; // TODO
         Token *name = *i++;
         Token *params = *i++;
         Token *stmt = *i++;
-        Token *attr = *i;
+        UNUSED Token *attr = *i; // TODO
         // TODO: reloc
         n->type = n_METHOD_DECLARATION;
         // modifiers private public protected, etc.
@@ -1228,13 +1228,13 @@ struct Parser : ParserBase {
         // children are modifiers (maybe null), ret, ref, name, params, stmt,
         // attr (maybe null)
         std::vector<Token *>::iterator i = node->children.begin();
-        Token *modifiers = *i++;
-        Token *ret = *i++;
-        Token *ref = *i++;
+        UNUSED Token *modifiers = *i++; // TODO
+        UNUSED Token *ret = *i++; // TODO
+        UNUSED Token *ref = *i++; // TODO
         Token *name = *i++;
         Token *params = *i++;
         Token *stmt = *i++;
-        Token *attr = *i;
+        UNUSED Token *attr = *i; // TODO
         n->type = n_FUNCTION_DECLARATION;
         // TODO: T_STATIC
         n->appendChild(new xhpast::Node(n_EMPTY));
@@ -1497,7 +1497,7 @@ struct Parser : ParserBase {
         std::vector<Token *>::iterator i = node->children.begin();
         Token *name = *i++;
         Token *params = *i++;
-        Token *cls = *i;
+        UNUSED Token *cls = *i; // TODO
         // TODO: dynamic, fromCompiler, cls
         n->type = n_FUNCTION_CALL;
         n->appendChild(new xhpast::Node(n_SYMBOL_NAME, name->ID()));
@@ -1507,10 +1507,10 @@ struct Parser : ParserBase {
       case ONCLASS: {
         std::vector<Token *>::iterator i = node->children.begin();
         Token *name = *i++;
-        Token *base = *i++;
-        Token *baseInterface = *i++;
+        UNUSED Token *base = *i++; // TODO
+        UNUSED Token *baseInterface = *i++; // TODO
         Token *stmt = *i++;
-        Token *attr = *i;
+        UNUSED Token *attr = *i; // TODO
         n->type = n_CLASS_DECLARATION;
         // TODO attributes
         xhpast::Node *attr_out = new xhpast::Node(n_CLASS_ATTRIBUTES, n->l_tok);

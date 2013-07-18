@@ -54,6 +54,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy);
 // Add/remove breakpoints at a specific offset.
 void phpAddBreakPoint(const Unit* unit, Offset offset);
 void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+bool phpHasBreakpoint(const Unit* unit, Offset offset);
 
 // Is this thread being debugged?
 inline bool isDebuggerAttached() {

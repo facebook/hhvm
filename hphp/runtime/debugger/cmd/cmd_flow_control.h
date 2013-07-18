@@ -59,9 +59,7 @@ class CmdFlowControl : public DebuggerCommand {
 public:
   explicit CmdFlowControl(Type type)
     : DebuggerCommand(type), m_complete(false), m_needsVMInterrupt(false),
-      m_stackDepth(0), m_vmDepth(0), m_stepOutUnit(nullptr),
-      m_stepOutOffset1(InvalidAbsoluteOffset),
-      m_stepOutOffset2(InvalidAbsoluteOffset), m_count(1) { }
+      m_stackDepth(0), m_vmDepth(0), m_count(1) { }
   virtual ~CmdFlowControl();
 
   virtual bool onServer(DebuggerProxy &proxy);
@@ -101,11 +99,32 @@ protected:
   int m_vmDepth;
   std::string m_loc; // last break's source location
 
-  HPHP::Unit *m_stepOutUnit;
-  Offset m_stepOutOffset1;
-  Offset m_stepOutOffset2;
+  // Represents the destination of an internal stepping operation by
+  // unit and offset. Implictly maintains the breakpoint filter.
+  class StepDestination {
+  public:
+    StepDestination();
+    StepDestination(const HPHP::Unit* unit, Offset offset);
+    StepDestination(const StepDestination& other) = delete;
+    StepDestination& operator=(const StepDestination& other) = delete;
+    StepDestination(StepDestination&& other);
+    StepDestination& operator=(StepDestination&& other);
+    ~StepDestination();
+
+    bool valid() const { return m_unit != nullptr; }
+    bool at(const Unit* unit, Offset o) const {
+      return (m_unit == unit) && (m_offset == o);
+    }
+
+  private:
+    const HPHP::Unit* m_unit;
+    Offset m_offset;
+    bool m_ownsInternalBreakpoint;
+  };
 
 private:
+  StepDestination m_stepOut1;
+  StepDestination m_stepOut2;
   int16_t m_count;
   bool m_smallStep;
 };

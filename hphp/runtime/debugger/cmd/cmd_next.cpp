@@ -24,10 +24,6 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debuggerflow);
 
-CmdNext::~CmdNext() {
-  cleanupStepCont();
-}
-
 void CmdNext::help(DebuggerClient& client) {
   client.helpTitle("Next Command");
   client.helpCmds(
@@ -199,11 +195,11 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
 }
 
 bool CmdNext::hasStepCont() {
-  return m_stepContUnit != nullptr;
+  return m_stepCont.valid();
 }
 
 bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
-  return (unit == m_stepContUnit) && (o == m_stepContOffset);
+  return m_stepCont.at(unit, o);
 }
 
 // A ContSuspend is followed by code to support ContRaise, then code for
@@ -220,22 +216,16 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   assert(ops[3] == OpThrow); // One byte
   assert(ops[4] == OpNull); // One byte
   Offset nextInst = fp->m_func->unit()->offsetOf(pc + 5);
-  m_stepContUnit = fp->m_func->unit();
-  m_stepContOffset = nextInst;
   m_stepContTag = getContinuationTag(fp);
   TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
-  phpAddBreakPoint(m_stepContUnit, m_stepContOffset);
+  m_stepCont = StepDestination(fp->m_func->unit(), nextInst);
 }
 
 void CmdNext::cleanupStepCont() {
-  if (m_stepContUnit) {
-    if (m_stepContOffset != InvalidAbsoluteOffset) {
-      phpRemoveBreakPoint(m_stepContUnit, m_stepContOffset);
-      m_stepContOffset = InvalidAbsoluteOffset;
-    }
+  if (m_stepCont.valid()) {
+    m_stepCont = StepDestination();
     m_stepContTag = nullptr;
-    m_stepContUnit = nullptr;
   }
 }
 

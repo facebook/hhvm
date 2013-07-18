@@ -252,6 +252,14 @@ void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
   }
 }
 
+bool phpHasBreakpoint(const Unit* unit, Offset offset) {
+  if (g_vmContext->m_breakPointFilter) {
+    PC pc = unit->at(offset);
+    return g_vmContext->m_breakPointFilter->checkPC(pc);
+  }
+  return false;
+}
+
 void phpDebuggerEvalHook(const Func* f) {
   if (RuntimeOption::EvalJit) {
     blacklistFuncInJit(f);

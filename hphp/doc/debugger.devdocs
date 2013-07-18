@@ -261,6 +261,31 @@ destroy itself. The same actions will occur if the connection with the
 client is lost for any other reason, even if no CmdQuit was
 received. An error reading from the socket, a closed socket, etc.
 
+2.4.1 Cleaning the proxy
+------------------------
+
+There are many cases where the proxy will notice that a client has
+terminated the connection. The easiest one is when a quit command is
+received, but the client may exit for any number of reasons, and in
+any state. At a minimum, the proxy's signal polling thread will, after
+one second, notice that the connection has been dropped and initiate
+cleanup. However, neither the signal polling thread nor the dummy
+sandbox thread can completely perform the cleanup because they are
+owned by the proxy, and destroying the proxy would destroy those
+threads before they have completed.
+
+Thus, proxy cleanup may be initiated by any thread with Proxy::stop(),
+but the final cleanup is performed by another thread doing
+housekeeping work. The cleanup work waits for both the signal polling
+and dummy sandbox threads to exit before completing. Server-side this
+housekeeping work is done by the server thread, which is also
+listening for new debugger connections. Note that this cleanup work
+may complete while a request thread is still using the proxy. The last
+reference to the proxy will finally destroy it, and the cleanup work
+ensures that the proxy is still usable (and communicates that it is
+stopped) by any outstanding request threads.
+
+
 
 3.0 Client Implementation
 -------------------------

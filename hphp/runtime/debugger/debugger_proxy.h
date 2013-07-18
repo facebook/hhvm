@@ -61,13 +61,12 @@ public:
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  ~DebuggerProxy();
 
   bool isLocal() const { return m_local;}
 
   const char *getThreadType() const;
-  DSandboxInfo getSandbox() const;
-  std::string getSandboxId() const;
+  DSandboxInfo getSandbox();
+  std::string getSandboxId();
   const DSandboxInfo& getDummyInfo() const { return m_dummyInfo; }
 
   void getThreads(DThreadInfoPtrVec &threads);
@@ -95,11 +94,8 @@ public:
   int getRealStackDepth();
 
   void startSignalThread();
-  void pollSignal(); // for signal polling thread
-
-  void checkStop();
-  void forceQuit();
   void stop();
+  bool cleanup(int timeout);
 
   bool getClientConnectionInfo(VRefParam address, VRefParam port);
 
@@ -119,6 +115,9 @@ private:
   void processInterrupt(CmdInterrupt &cmd);
   void enableSignalPolling();
   void disableSignalPolling();
+  void checkStop();
+  void pollSignal(); // for signal polling thread
+  void stopAndThrow();
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
@@ -130,7 +129,6 @@ private:
   DebuggerThriftBuffer m_thrift;
   DummySandbox* m_dummySandbox;
 
-  mutable Mutex m_mutex;
   ReadWriteMutex m_breakMutex;
   bool m_hasBreakPoints;
   BreakPointInfoPtrVec m_breakpoints;

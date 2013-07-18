@@ -35,40 +35,21 @@ DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
                            const std::string &startupFile)
     : m_proxy(proxy), m_defaultPath(defaultPath), m_startupFile(startupFile),
-      m_stopped(false),
-      m_signum(CmdSignal::SignalNone) {
-  TRACE(2, "DummySandbox::DummySandbox\n");
-  m_thread = new AsyncFunc<DummySandbox>(this, &DummySandbox::run);
-}
-
-bool DummySandbox::waitForEnd(int seconds) {
-  TRACE(2, "DummySandbox::waitForEnd\n");
-  bool ret = m_thread->waitForEnd(seconds);
-  if (ret) {
-    delete m_thread;
-  }
-  return ret;
-}
+      m_thread(this, &DummySandbox::run), m_stopped(false),
+      m_signum(CmdSignal::SignalNone) { }
 
 void DummySandbox::start() {
   TRACE(2, "DummySandbox::start\n");
-  m_thread->start();
+  m_thread.start();
 }
 
-void DummySandbox::stop() {
+// Stop the sandbox thread, and wait for it to end. Timeout is in
+// seconds. This can be called multiple times.
+bool DummySandbox::stop(int timeout) {
   TRACE(2, "DummySandbox::stop\n");
   m_stopped = true;
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.getDummySandbox()) {
-    // called from dummy sandbox thread itself, schedule retirement
-    Debugger::RetireDummySandboxThread(this);
-  } else {
-    // called from worker thread, we wait for the dummySandbox to end
-    m_thread->waitForEnd();
-    // we are sure it's always created by new and this is the last thing
-    // on this object
-    delete this;
-  }
+  notify(); // Wakeup the sandbox thread so it will notice the stopped flag
+  return m_thread.waitForEnd(timeout);
 }
 
 namespace {
@@ -96,7 +77,6 @@ void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   Debugger::RegisterThread();
-  ti->m_reqInjectionData.setDummySandbox(true);
   while (!m_stopped) {
     try {
       CLISession hphpSession;

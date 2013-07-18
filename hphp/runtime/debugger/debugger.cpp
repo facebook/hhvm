@@ -53,6 +53,7 @@ void Debugger::Stop() {
   LogShutdown(ShutdownKind::Normal);
   s_debugger.m_proxyMap.clear();
   DebuggerServer::Stop();
+  CleanupRetiredProxies();
   if (s_clientStarted) {
     DebuggerClient::Stop();
   }
@@ -118,14 +119,12 @@ void Debugger::RequestInterrupt(DebuggerProxyPtr proxy) {
   s_debugger.requestInterrupt(proxy);
 }
 
-void Debugger::RetireDummySandboxThread(DummySandbox* toRetire) {
-  TRACE(2, "Debugger::RetireDummySandboxThread\n");
-  s_debugger.retireDummySandboxThread(toRetire);
+void Debugger::RetireProxy(DebuggerProxyPtr proxy) {
+  s_debugger.retireProxy(proxy);
 }
 
-void Debugger::CleanupDummySandboxThreads() {
-  TRACE(7, "Debugger::CleanupDummySandboxThreads\n");
-  s_debugger.cleanupDummySandboxThreads();
+void Debugger::CleanupRetiredProxies() {
+  s_debugger.cleanupRetiredProxies();
 }
 
 void Debugger::DebuggerSession(const DebuggerClientOptions& options,
@@ -461,25 +460,35 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   return proxy;
 }
 
-void Debugger::retireDummySandboxThread(DummySandbox* toRetire) {
-  TRACE(2, "Debugger::retireDummySandboxThread\n");
-  m_cleanupDummySandboxQ.push(toRetire);
+// Place the proxy onto the retired proxy queue. It will be cleaned up
+// and destroyed later by another thread.
+void Debugger::retireProxy(DebuggerProxyPtr proxy) {
+  TRACE(2, "Debugger::retireProxy %p\n", proxy.get());
+  m_retiredProxyQueue.push(proxy);
 }
 
-void Debugger::cleanupDummySandboxThreads() {
-  TRACE(7, "Debugger::cleanupDummySandboxThreads\n");
-  DummySandbox* ptr = nullptr;
-  while (m_cleanupDummySandboxQ.try_pop(ptr)) {
-    ptr->notify();
+// Cleanup any proxies in our retired proxy queue. We'll pull a proxy
+// out of the queue, ask it to cleanup which will wait for threads it
+// owns to exit, then drop our shared reference to it. That may
+// destroy the proxy here, or it may remain alive if there is a thread
+// still processing an interrupt with it since such threads have their
+// own shared reference.
+void Debugger::cleanupRetiredProxies() {
+  TRACE(7, "Debugger::cleanupRetiredProxies\n");
+  DebuggerProxyPtr proxy;
+  while (m_retiredProxyQueue.try_pop(proxy)) {
     try {
-      // we can't block the server for waiting
-      if (ptr->waitForEnd(1)) {
-        delete ptr;
-      } else {
-        Logger::Error("Dummy sandbox %p refused to stop", ptr);
+      // We give the proxy a short period of time to wait for any
+      // threads it owns. If it doesn't succeed, we put it back and
+      // try again later.
+      TRACE(2, "Cleanup proxy %p\n", proxy.get());
+      if (!proxy->cleanup(1)) {
+        TRACE(2, "Proxy %p has not stopped yet\n", proxy.get());
+        m_retiredProxyQueue.push(proxy);
       }
     } catch (Exception &e) {
-      Logger::Error("Dummy sandbox exception: " + e.getMessage());
+      Logger::Error("Exception during proxy %p retirement: %s",
+                    proxy.get(), e.getMessage().c_str());
     }
   }
 }

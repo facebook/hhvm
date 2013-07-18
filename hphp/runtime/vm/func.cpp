@@ -19,6 +19,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "hphp/runtime/base/base_includes.h"
+#include "hphp/util/atomic_vector.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
@@ -84,17 +85,32 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
   }
 }
 
-static FuncId s_nextFuncId = 0;
+static std::atomic<FuncId> s_nextFuncId(0);
 
-void Func::setFuncId(FuncId id) {
-  assert(m_funcId == InvalidFuncId);
-  assert(id != InvalidFuncId);
-  m_funcId = id;
-}
+// This size hint will create a ~2MB vector and is rarely hit in
+// practice. Note that this is just a hint and exceeding it won't
+// affect correctness.
+constexpr size_t kFuncVecSizeHint = 250000;
+static AtomicVector<const Func*> s_funcVec(kFuncVecSizeHint, nullptr);
 
 void Func::setNewFuncId() {
   assert(m_funcId == InvalidFuncId);
-  m_funcId = static_cast<FuncId>(__sync_fetch_and_add(&s_nextFuncId, 1));
+  m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+
+  s_funcVec.ensureSize(m_funcId + 1);
+  DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, this);
+  assert(oldVal == nullptr);
+}
+
+FuncId Func::nextFuncId() {
+  return s_nextFuncId.load(std::memory_order_relaxed);
+}
+
+const Func* Func::fromFuncId(FuncId id) {
+  assert(id < s_nextFuncId);
+  auto func = s_funcVec.get(id);
+  func->validate();
+  return func;
 }
 
 void Func::setFullName() {
@@ -226,6 +242,10 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
 Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameRef(), &m_maybeIntercepted);
+  }
+  if (m_funcId != InvalidFuncId) {
+    DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
+    assert(oldVal == this);
   }
 #ifdef DEBUG
   validate();
@@ -1172,4 +1192,4 @@ void FuncRepoProxy::GetFuncsStmt
   txn.commit();
 }
 
- } // HPHP::VM
+} // HPHP::VM

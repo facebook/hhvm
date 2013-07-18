@@ -73,6 +73,14 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     return m_funcId;
   }
 
+  const Func* func() const {
+    return Func::fromFuncId(m_funcId);
+  }
+
+  const Unit* unit() const {
+    return func()->unit();
+  }
+
   void setOffset(Offset o) {
     m_offset = o;
   }
@@ -128,6 +136,10 @@ struct SrcKey::Hasher {
 inline std::string show(SrcKey sk) {
   return folly::format("{}@{}", sk.getFuncId(), sk.offset()).str();
 }
+
+void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+#define SKTRACE(level, sk, ...) \
+  ONTRACE(level, sktrace(sk, __VA_ARGS__))
 
 }
 

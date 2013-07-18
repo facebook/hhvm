@@ -159,10 +159,12 @@ struct Func {
 
   FuncId getFuncId() const {
     assert(m_funcId != InvalidFuncId);
+    assert(fromFuncId(m_funcId) == this);
     return m_funcId;
   }
-  void setFuncId(FuncId id);
   void setNewFuncId();
+  static FuncId nextFuncId();
+  static const Func* fromFuncId(FuncId id);
 
   void rename(const StringData* name);
   int numSlotsInFrame() const;

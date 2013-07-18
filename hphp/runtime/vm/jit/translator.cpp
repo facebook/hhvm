@@ -181,25 +181,6 @@ std::string Tracelet::toString() const {
   return out.str();
 }
 
-void sktrace(SrcKey sk, const char *fmt, ...) {
-  if (!Trace::enabled) {
-    return;
-  }
-  // We don't want to print string literals, so don't pass the unit
-  string s = instrToString((Op*)curUnit()->at(sk.offset()));
-  const char *filepath = "*anonFile*";
-  if (curUnit()->filepath()->data() &&
-      strlen(curUnit()->filepath()->data()) > 0)
-    filepath = curUnit()->filepath()->data();
-  Trace::trace("%s:%llx %6d: %20s ",
-               filepath, (unsigned long long)sk.getFuncId(),
-               sk.offset(), s.c_str());
-  va_list a;
-  va_start(a, fmt);
-  Trace::vtrace(fmt, a);
-  va_end(a);
-}
-
 SrcKey Tracelet::nextSk() const {
   return m_instrStream.last->source.advanced(curUnit());
 }

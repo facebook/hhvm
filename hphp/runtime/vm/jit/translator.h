@@ -77,10 +77,6 @@ enum class VMRegState {
 };
 extern __thread VMRegState tl_regState;
 
-void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-#define SKTRACE(level, sk, ...) \
-  ONTRACE(level, sktrace(sk, __VA_ARGS__))
-
 struct NormalizedInstruction;
 
 // A DynLocation is a Location-in-execution: a location, along with

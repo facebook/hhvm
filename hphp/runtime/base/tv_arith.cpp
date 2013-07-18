@@ -241,14 +241,17 @@ struct MulEq {
 
 template<class SzOp, class BitOp>
 StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
-  auto const newLen = sop(s1->size(), s2->size());
+  auto const s1Size = s1->size();
+  auto const s2Size = s2->size();
+  auto const newLen = sop(s1Size, s2Size);
   auto const newStr = NEW(StringData)(newLen);
   auto const s1Data = s1->data();
   auto const s2Data = s2->data();
   auto const outData = newStr->mutableData();
 
   for (uint32_t i = 0; i < newLen; ++i) {
-    outData[i] = bop(s1Data[i], s2Data[i]);
+    outData[i] = bop((i < s1Size) ? s1Data[i] : 0,
+                     (i < s2Size) ? s2Data[i] : 0);
   }
   newStr->setSize(newLen);
 

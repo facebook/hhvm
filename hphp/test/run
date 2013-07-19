@@ -578,6 +578,10 @@ function run_test($options, $test) {
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
 
+    // Normalize newlines
+    $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
+    $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
+
     return preg_match("/^$wanted_re\$/s", $output);
 
   } else if (file_exists("$test.expectregex")) {

@@ -184,9 +184,8 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
 
   switch (cell.m_type) {
   case KindOfUninit:
-  case KindOfNull:        // TODO: should use o_toBoolean
-                          return op(false, true);
-  case KindOfBoolean:     return op(!!cell.m_data.num, true);
+  case KindOfNull:        return op(false, true);
+  case KindOfBoolean:     return op(!!cell.m_data.num, od->o_toBoolean());
   case KindOfInt64:
     return od->isCollection() ? op.collectionVsNonObj()
                               : op(cell.m_data.num, od->o_toInt64());
@@ -224,9 +223,9 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
   switch (c2.m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return IS_STRING_TYPE(c1.m_type)
-      ? op(c1.m_data.pstr, empty_string.get())
-      : cellRelOp(op, c1, false);
+    return IS_STRING_TYPE(c1.m_type) ? op(c1.m_data.pstr, empty_string.get()) :
+           c1.m_type == KindOfObject ? op(true, false) :
+           cellRelOp(op, c1, false);
   case KindOfInt64:        return cellRelOp(op, c1, c2.m_data.num);
   case KindOfBoolean:      return cellRelOp(op, c1, !!c2.m_data.num);
   case KindOfDouble:       return cellRelOp(op, c1, c2.m_data.dbl);

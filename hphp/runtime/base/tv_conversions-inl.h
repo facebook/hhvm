@@ -33,8 +33,7 @@ inline bool cellToBool(Cell cell) {
   case KindOfStaticString:
   case KindOfString:        return cell.m_data.pstr->toBoolean();
   case KindOfArray:         return !cell.m_data.parr->empty();
-  case KindOfObject:        // TODO: should handle o_toBoolean?
-                            return true;
+  case KindOfObject:        return cell.m_data.pobj->o_toBoolean();
   default:                  break;
   }
   not_reached();

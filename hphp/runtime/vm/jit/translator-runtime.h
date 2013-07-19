@@ -83,6 +83,7 @@ inline double reinterpretIntAsDbl(int64_t i) {
 
 int64_t convArrToBoolHelper(const ArrayData* a);
 int64_t convStrToBoolHelper(const StringData* s);
+int64_t convObjToBoolHelper(const ObjectData* o);
 int64_t convCellToBoolHelper(TypedValue tv);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);

@@ -113,6 +113,10 @@ int64_t convStrToBoolHelper(const StringData* s) {
   return s->toBoolean();
 }
 
+int64_t convObjToBoolHelper(const ObjectData* o) {
+  return o->o_toBoolean();
+}
+
 int64_t convCellToBoolHelper(TypedValue tv) {
   // Cannot call tvCastToBooleanInPlace here because some of the
   // call sites will not be increasing the ref count on tv before
@@ -127,7 +131,7 @@ int64_t convCellToBoolHelper(TypedValue tv) {
     case KindOfStaticString:
     case KindOfString:  return tv.m_data.pstr->toBoolean();
     case KindOfArray:   return !tv.m_data.parr->empty();
-    case KindOfObject:  return tv.m_data.pobj != nullptr;
+    case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
     default:            not_reached();
   }
 }

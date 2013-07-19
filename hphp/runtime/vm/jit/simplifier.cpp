@@ -1211,9 +1211,14 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
-  // case 1: null cmp string. Convert null to ""
+  // case 1a: null cmp string. Convert null to ""
   if (src1->type().isString() && src2->type().isNull()) {
     return newInst(opName, src1, cns(StringData::GetStaticString("")));
+  }
+
+  // case 1b: null cmp object. Convert null to false and the object to true
+  if (src1->type().isObj() && src2->type().isNull()) {
+    return newInst(opName, cns(true), cns(false));
   }
 
   // case 2a: null cmp anything. Convert null to false
@@ -1538,7 +1543,7 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToBool, src);
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
-  if (srcType.isObj())    return cns(true);
+  if (srcType.isObj())    return gen(ConvObjToBool, src);
 
   return nullptr;
 }

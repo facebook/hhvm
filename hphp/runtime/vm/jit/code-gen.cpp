@@ -2195,6 +2195,27 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
+  SSATmp* dst = inst->dst();
+  auto dstReg = m_regs[dst].reg();
+  assert(dstReg != InvalidReg);
+  SSATmp* src = inst->src(0);
+  auto srcReg = m_regs[src].reg();
+
+  m_as.testw   (ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
+  unlikelyIfThenElse(CC_NZ, [&] (Asm& a) {
+    cgCallHelper(
+      a,
+      (TCA)convObjToBoolHelper,
+      dst,
+      SyncOptions::kSyncPoint,
+      ArgGroup(m_regs)
+        .ssa(src));
+  }, [&] (Asm& a) {
+    a.movb(1, rbyte(dstReg));
+  });
+}
+
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   SSATmp* dst = inst->dst();

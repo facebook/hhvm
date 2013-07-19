@@ -104,7 +104,9 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   case KindOfStaticString: b = tv->m_data.pstr->toBoolean(); break;
   case KindOfString:  b = tv->m_data.pstr->toBoolean(); tvDecRefStr(tv); break;
   case KindOfArray:   b = (!tv->m_data.parr->empty()); tvDecRefArr(tv); break;
-  case KindOfObject:  b = (tv->m_data.pobj != nullptr); tvDecRefObj(tv); break;
+  case KindOfObject:  b = tv->m_data.pobj->o_toBoolean();
+                      tvDecRefObj(tv);
+                      break;
   default:            assert(false); b = false; break;
   }
   tv->m_data.num = b;

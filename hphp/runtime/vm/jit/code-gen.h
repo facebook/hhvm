@@ -367,6 +367,30 @@ private:
     asm_label(m_as, done);
   }
 
+  /*
+   * Same as ifThenElse except the first block is off in astubs
+   */
+  template <class Then, class Else>
+  void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock) {
+    if (&m_as == &m_astubs) {
+      Label elseLabel, done;
+      m_as.jcc8(ccNegate(cc), elseLabel);
+      unlikely(m_as);
+      m_as.jmp8(done);
+      asm_label(m_as, elseLabel);
+      elseBlock(m_as);
+      asm_label(m_as, done);
+    } else {
+      Label unlikelyLabel, done;
+      m_as.jcc(cc, unlikelyLabel);
+      elseBlock(m_as);
+      asm_label(m_astubs, unlikelyLabel);
+      unlikely(m_astubs);
+      m_astubs.jmp(done);
+      asm_label(m_as, done);
+    }
+  }
+
   // This is for printing partially-generated traces when debugging
   void print() const;
 

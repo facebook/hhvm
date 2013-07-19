@@ -509,6 +509,7 @@ D:Bool = ConvArrToBool S0:Arr
 D:Bool = ConvDblToBool S0:Dbl
 D:Bool = ConvIntToBool S0:Int
 D:Bool = ConvStrToBool S0:Str
+D:Bool = ConvObjToBool S0:Obj
 D:Bool = ConvCellToBool S0:Cell
 
 D:Dbl  = ConvArrToDbl S0:Arr

@@ -48,9 +48,7 @@ public:
 
 private:
   bool m_pathTranslation;
-#ifndef __APPLE__
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
-#endif
 
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,

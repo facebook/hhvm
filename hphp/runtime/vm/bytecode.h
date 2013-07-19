@@ -46,7 +46,7 @@ void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
   case SetOpDivEqual:       cellDivEq(*lhs, *rhs); break;
   case SetOpModEqual:       cellModEq(*lhs, *rhs); break;
   case SetOpConcatEqual:
-    concat_assign(tvAsVariant(lhs), tvCellAsCVarRef(rhs).toString());
+    concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());
     break;
   case SetOpAndEqual:       cellBitAndEq(*lhs, *rhs); break;
   case SetOpOrEqual:        cellBitOrEq(*lhs, *rhs);  break;

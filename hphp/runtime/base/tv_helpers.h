@@ -405,27 +405,27 @@ inline const Variant& tvAsCVarRef(const TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-inline Variant& tvCellAsVariant(TypedValue* tv) {
-  assert(tv->m_type != KindOfRef);
-  return *(Variant*)(tv);
+inline Variant& cellAsVariant(Cell& cell) {
+  assert(cellIsPlausible(&cell));
+  return *(Variant*)(&cell);
 }
 
 // Assumes 'tv' is live
-inline const Variant& tvCellAsCVarRef(const TypedValue* tv) {
-  assert(tv->m_type != KindOfRef);
-  return *(const Variant*)(tv);
+inline const Variant& cellAsCVarRef(const Cell& cell) {
+  assert(cellIsPlausible(&cell));
+  return *(const Variant*)(&cell);
 }
 
 // Assumes 'tv' is live
-inline Variant& tvVarAsVariant(TypedValue* tv) {
-  assert(tv->m_type == KindOfRef);
-  return *(Variant*)(tv);
+inline Variant& varAsVariant(Var& var) {
+  assert(varIsPlausible(&var));
+  return *(Variant*)(&var);
 }
 
 // Assumes 'tv' is live
-inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
-  assert(tv->m_type == KindOfRef);
-  return *(const Variant*)(tv);
+inline const Variant& varAsCVarRef(const Var& var) {
+  assert(varIsPlausible(&var));
+  return *(const Variant*)(&var);
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {

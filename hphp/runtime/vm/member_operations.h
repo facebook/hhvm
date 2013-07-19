@@ -192,7 +192,7 @@ inline TypedValue* ElemArray(ArrayData* base, TypedValue* key) {
       result = ElemArrayRawKey(base, key->m_data.pstr);
     } else {
       result = (TypedValue*)&ArrNR(base).asArray()
-        .rvalAtRef(tvCellAsCVarRef(key));
+        .rvalAtRef(cellAsCVarRef(*key));
     }
   } else {
     result = ElemArrayRawKey(base, keyAsRaw<keyType>(key));
@@ -249,7 +249,7 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       x = key->m_data.pstr->toInt64(10);
     } else {
       raise_warning("String offset cast occurred");
-      x = tvCellAsCVarRef(key).toInt64();
+      x = cellAsCVarRef(*key).toInt64();
     }
     if (x < 0 || x >= base->m_data.pstr->size()) {
       if (warn) {
@@ -276,7 +276,7 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }
     break;
   }
@@ -330,7 +330,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfNull: {
     initScratchKey<keyType>(scratch, key);
     Array a = Array::Create();
-    result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
+    result = (TypedValue*)&a.lvalAt(cellAsCVarRef(*key));
     if (warn) {
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(key).toString().data());
@@ -346,7 +346,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     } else {
       initScratchKey<keyType>(scratch, key);
       Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
+      result = (TypedValue*)&a.lvalAt(cellAsCVarRef(*key));
       if (warn) {
         raise_notice(Strings::UNDEFINED_INDEX,
                      tvAsCVarRef(key).toString().data());
@@ -367,7 +367,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     if (base->m_data.pstr->size() == 0) {
       initScratchKey<keyType>(scratch, key);
       Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
+      result = (TypedValue*)&a.lvalAt(cellAsCVarRef(*key));
       if (warn) {
         raise_notice(Strings::UNDEFINED_INDEX,
                      tvAsCVarRef(key).toString().data());
@@ -393,7 +393,7 @@ inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
         result = collectionGet(base->m_data.pobj, key);
       }
     } else {
-      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }
     break;
   }
@@ -454,7 +454,7 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }
     break;
   }
@@ -589,7 +589,7 @@ inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                      int64_t key,
                                      Cell* value,
                                      bool copy) {
-  return a->set(key, tvCellAsCVarRef(value), copy);
+  return a->set(key, cellAsCVarRef(*value), copy);
 }
 
 inline ArrayData* SetElemArrayRawKey(ArrayData* a,
@@ -598,9 +598,9 @@ inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                      bool copy) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    return a->set(n, tvCellAsCVarRef(value), copy);
+    return a->set(n, cellAsCVarRef(*value), copy);
   } else {
-    return a->set(StrNR(key), tvCellAsCVarRef(value), copy);
+    return a->set(StrNR(key), cellAsCVarRef(*value), copy);
   }
 }
 
@@ -615,7 +615,7 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
   if (keyType != KeyType::Any) {
     newData = SetElemArrayRawKey(a, keyAsRaw<keyType>(key), value, copy);
   } else if (key->m_type <= KindOfNull) {
-    newData = a->set(empty_string, tvCellAsCVarRef(value), copy);
+    newData = a->set(empty_string, cellAsCVarRef(*value), copy);
   } else if (IS_STRING_TYPE(key->m_type)) {
     newData = SetElemArrayRawKey(a, key->m_data.pstr, value, copy);
   } else if (key->m_type != KindOfArray && key->m_type != KindOfObject) {
@@ -775,7 +775,7 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
 
 inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
   Array a = Array::Create();
-  a.append(tvCellAsCVarRef(value));
+  a.append(cellAsCVarRef(*value));
   tvAsVariant(base) = a;
 }
 template <bool setResult>
@@ -825,7 +825,7 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     ArrayData* a = base->m_data.parr;
     bool copy = (a->getCount() > 1)
                 || (value->m_type == KindOfArray && value->m_data.parr == a);
-    ArrayData* a2 = a->append(tvCellAsCVarRef(value), copy);
+    ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
     if (a2 != a) {
       a2->incRefCount();
       base->m_data.parr->decRefCount();
@@ -912,7 +912,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
       result = collectionGet(base->m_data.pobj, key);
       SETOP_BODY(result, op, rhs);
     } else {
-      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
       SETOP_BODY(result, op, rhs);
       objOffsetSet(instanceFromTv(base), tvAsCVarRef(key), result, false);
     }
@@ -1145,7 +1145,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }
     IncDecBody<setResult>(op, result, &dest);
     break;
@@ -1407,13 +1407,13 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, key);
     } else {
-      return objOffsetEmpty(tvRef, instance, tvCellAsCVarRef(key));
+      return objOffsetEmpty(tvRef, instance, cellAsCVarRef(*key));
     }
   } else {
     if (LIKELY(instance->isCollection())) {
       return collectionIsset(instance, key);
     } else {
-      return objOffsetIsset(tvRef, instance, tvCellAsCVarRef(key));
+      return objOffsetIsset(tvRef, instance, cellAsCVarRef(*key));
     }
   }
 }

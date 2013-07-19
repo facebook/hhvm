@@ -3476,9 +3476,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddElemC(PC& pc) {
     raise_error("AddElemC: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
-    tvCellAsVariant(c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
+    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
   } else {
-    tvCellAsVariant(c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
+    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
   }
   m_stack.popC();
   m_stack.popC();
@@ -3493,9 +3493,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddElemV(PC& pc) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
-    tvCellAsVariant(c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(v1)));
+    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(v1)));
   } else {
-    tvCellAsVariant(c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(v1)));
+    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(v1)));
   }
   m_stack.popV();
   m_stack.popC();
@@ -3508,7 +3508,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemC(PC& pc) {
   if (c2->m_type != KindOfArray) {
     raise_error("AddNewElemC: $2 must be an array");
   }
-  tvCellAsVariant(c2).asArrRef().append(tvAsCVarRef(c1));
+  cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   m_stack.popC();
 }
 
@@ -3519,7 +3519,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemV(PC& pc) {
   if (c2->m_type != KindOfArray) {
     raise_error("AddNewElemV: $2 must be an array");
   }
-  tvCellAsVariant(c2).asArrRef().append(ref(tvAsCVarRef(v1)));
+  cellAsVariant(*c2).asArrRef().append(ref(tvAsCVarRef(v1)));
   m_stack.popV();
 }
 
@@ -3658,11 +3658,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
   if (IS_STRING_TYPE(c1->m_type) && IS_STRING_TYPE(c2->m_type)) {
-    tvCellAsVariant(c2) = concat(
-      tvCellAsVariant(c2).toString(), tvCellAsCVarRef(c1).toString());
+    cellAsVariant(*c2) = concat(
+      cellAsVariant(*c2).toString(), cellAsCVarRef(*c1).toString());
   } else {
-    tvCellAsVariant(c2) = concat(tvCellAsVariant(c2).toString(),
-                                 tvCellAsCVarRef(c1).toString());
+    cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
+                                cellAsCVarRef(*c1).toString());
   }
   assert(c2->m_data.pstr->getCount() > 0);
   m_stack.popC();
@@ -3671,7 +3671,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
-  tvCellAsVariant(c1) = !tvCellAsVariant(c1).toBoolean();
+  cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
 
 template<class Op>
@@ -3797,7 +3797,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
     c1->m_type = KindOfInt64;
     c1->m_data.num = ~int64_t(c1->m_data.dbl);
   } else if (IS_STRING_TYPE(c1->m_type)) {
-    tvCellAsVariant(c1) = tvCellAsVariant(c1).bitNot();
+    cellAsVariant(*c1) = cellAsVariant(*c1).bitNot();
   } else {
     raise_error("Unsupported operand type for ~");
   }
@@ -3894,7 +3894,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOfD(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopPrint(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();
-  echo(tvCellAsVariant(c1).toString());
+  echo(cellAsVariant(*c1).toString());
   tvRefcountedDecRefCell(c1);
   c1->m_type = KindOfInt64;
   c1->m_data.num = 1;
@@ -3922,7 +3922,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopExit(PC& pc) {
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
-    echo(tvCellAsVariant(c1).toString());
+    echo(cellAsVariant(*c1).toString());
   }
   m_stack.popC();
   m_stack.pushNull();
@@ -3980,7 +3980,7 @@ inline void OPTBLD_INLINE VMExecutionContext::jmpOpImpl(PC& pc) {
       m_stack.popX();
     }
   } else {
-    auto const condition = toBoolean(tvCellAsCVarRef(c1));
+    auto const condition = toBoolean(cellAsCVarRef(*c1));
     if (op == OpJmpZ ? !condition : condition) {
       pc += offset - 1;
       m_stack.popC();

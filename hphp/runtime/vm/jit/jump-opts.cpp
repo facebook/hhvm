@@ -26,25 +26,9 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-namespace {
-
 //////////////////////////////////////////////////////////////////////
 
-// If main trace ends with an unconditional jump, and the target is not
-// reached by any other branch, then copy the target of the jump to the
-// end of the trace
-void elimUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
-  Block* lastBlock = trace->back();
-  auto lastInst = lastBlock->backIter(); // iterator to last instruction
-  IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp_ && jmp.taken()->numPreds() == 1) {
-    Block* target = jmp.taken();
-    lastBlock->splice(lastInst, target, target->skipHeader(), target->end(),
-                      lastInst->marker());
-    jmp.convertToNop();         // unlink it from its Edge
-    lastBlock->erase(lastInst); // delete the jmp
-  }
-}
+namespace {
 
 Block* findMainExitBlock(IRTrace* trace, IRFactory* irFactory) {
   assert(trace->isMain());
@@ -214,8 +198,24 @@ void optimizeSideExits(IRTrace* trace, IRFactory* irFactory) {
 
 //////////////////////////////////////////////////////////////////////
 
+// If main trace ends with an unconditional jump, and the target is not
+// reached by any other branch, then copy the target of the jump to the
+// end of the trace
+void eliminateUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
+  Block* lastBlock = trace->back();
+  auto lastInst = lastBlock->backIter(); // iterator to last instruction
+  IRInstruction& jmp = *lastInst;
+  if (jmp.op() == Jmp_ && jmp.taken()->numPreds() == 1) {
+    Block* target = jmp.taken();
+    lastBlock->splice(lastInst, target, target->skipHeader(), target->end(),
+                      lastInst->marker());
+    jmp.convertToNop();         // unlink it from its Edge
+    lastBlock->erase(lastInst); // delete the jmp
+  }
+}
+
 void optimizeJumps(IRTrace* trace, IRFactory* irFactory) {
-  elimUnconditionalJump(trace, irFactory);
+  eliminateUnconditionalJump(trace, irFactory);
 
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(trace, irFactory);

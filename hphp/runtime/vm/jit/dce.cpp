@@ -296,10 +296,14 @@ void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
 
 /*
  * Sink IncRefs consumed off trace.
- * Assumptions: Flow graph must not have critical edges, and the instructions
- * have been annotated already by the DCE algorithm.  This pass uses
- * the REFCOUNT_CONSUMED* flags to copy IncRefs from the main trace to each
- * exit trace that consumes the incremented pointer.
+ * Assumptions:
+ *   a) Flow graph must not have critical edges.
+ *   b) The main trace doesn't unconditionally jump to an exit trace.
+ *   c) The instructions have been annotated already by the DCE algorithm.
+ *      This pass uses the REFCOUNT_CONSUMED* flags to copy IncRefs from the
+ *      main trace to each exit trace that consumes the incremented pointer.
+ *
+ * Algorithm:
  * 1. toSink = {}
  * 2. iterate forwards over the main trace:
  *    * when a movable IncRef is found, insert into toSink list and mark
@@ -315,6 +319,8 @@ void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
  */
 void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
   assert(trace->isMain());
+
+  assert(trace->back()->back()->op() != Jmp_);
 
   auto copyPropTrace = [] (IRTrace* trace) {
     forEachInst(trace, copyProp);
@@ -541,6 +547,10 @@ void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
   // kill unreachable code and remove any traces that are now empty
   BlockList blocks = removeUnreachable(trace, irFactory);
   removeEmptyExitTraces();
+
+  // Ensure that main trace doesn't unconditionally jump to an exit
+  // trace.  This invariant is needed by the ref-counting optimization.
+  eliminateUnconditionalJump(trace, irFactory);
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All

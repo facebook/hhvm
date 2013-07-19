@@ -32,8 +32,9 @@ class IRInstruction;
  */
 void optimizeMemoryAccesses(IRTrace*, IRFactory*);
 void optimizePredictions(IRTrace*, IRFactory*);
-void eliminateDeadCode(IRTrace*, IRFactory*);
 void optimizeJumps(IRTrace*, IRFactory*);
+void eliminateUnconditionalJump(IRTrace*, IRFactory*);
+void eliminateDeadCode(IRTrace*, IRFactory*);
 
 /*
  * Run all the optimization passes.

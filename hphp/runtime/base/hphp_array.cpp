@@ -992,7 +992,6 @@ inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
   e->setIntKey(ki);
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
   // Set the element
-  TypedValue* fr = (TypedValue*)(&data);
   elemConstruct((TypedValue*)&data, &e->data);
   return this;
 }
@@ -1474,7 +1473,6 @@ ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
 ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
   assert(value.m_type != KindOfRef);
   HphpArray* h;
-  ElmInd* ei;
   int64_t k;
   if (LIKELY(a->isVector()) &&
       ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&

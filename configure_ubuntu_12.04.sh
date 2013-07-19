@@ -14,6 +14,7 @@ fi
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 export HPHP_HOME=`/bin/pwd`
 
+sudo apt-get update
 sudo apt-get install git-core cmake g++ libboost1.48-dev libmysqlclient-dev \
   libxml2-dev libmcrypt-dev libicu-dev openssl build-essential binutils-dev \
   libcap-dev libgd2-xpm-dev zlib1g-dev libtbb-dev libonig-dev libpcre3-dev \

@@ -294,6 +294,7 @@ other_files = (
     '/ext-standard-image/test1pix.jpg',
     '/ext-standard-serialize/autoload_implements.p5c',
     '/ext-standard-serialize/autoload_interface.p5c',
+    '/ext-standard-url/urls.inc',
     '/ext-xml/xmltest.xml',
     '/ext-xmlreader/012.dtd',
     '/ext-xmlreader/012.xml',

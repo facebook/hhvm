@@ -232,7 +232,6 @@ static const StaticString
 Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
-    raise_notice("invalid url: %s", url.data());
     return false;
   }
 
@@ -260,14 +259,14 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   ArrayInit ret(8);
   SET_COMPONENT(scheme);
   SET_COMPONENT(host);
+  if (resource.port) {
+    ret.set(s_port, (int64_t)resource.port);
+  }
   SET_COMPONENT(user);
   SET_COMPONENT(pass);
   SET_COMPONENT(path);
   SET_COMPONENT(query);
   SET_COMPONENT(fragment);
-  if (resource.port) {
-    ret.set(s_port, (int64_t)resource.port);
-  }
   return ret.create();
 }
 

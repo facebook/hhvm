@@ -1,3 +1,4 @@
+
 --> 64.246.30.37: array(1) {
   ["path"]=>
   string(12) "64.246.30.37"
@@ -719,6 +720,13 @@
   string(1) ":"
 }
 
+--> http://::#: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(1) ":"
+}
+
 --> x://::6.5: array(3) {
   ["scheme"]=>
   string(1) "x"
@@ -831,6 +839,8 @@
 --> http://:/: bool(false)
 
 --> http://?: bool(false)
+
+--> http://#: bool(false)
 
 --> http://?:: bool(false)
 

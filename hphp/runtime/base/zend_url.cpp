@@ -162,10 +162,15 @@ bool url_parse(Url &output, const char *str, int length) {
   e = ue;
 
   if (!(p = (const char *)memchr(s, '/', (ue - s)))) {
-    if ((p = (const char *)memchr(s, '?', (ue - s)))) {
-      e = p;
-    } else if ((p = (const char *)memchr(s, '#', (ue - s)))) {
-      e = p;
+    const char *query = (const char *)memchr(s, '?', (ue - s));
+    const char *fragment = (const char *)memchr(s, '#', (ue - s));
+
+    if (query && fragment) {
+      e = (query > fragment) ? fragment : query;
+    } else if (query) {
+      e = query;
+    } else if (fragment) {
+      e = fragment;
     }
   } else {
     e = p;
@@ -245,8 +250,12 @@ bool url_parse(Url &output, const char *str, int length) {
     pp = strchr(s, '#');
 
     if (pp && pp < p) {
-      p = pp;
-      pp = strchr(pp+2, '#');
+      if (pp - s) {
+        output.path = string_duplicate(s, (pp-s));
+        replace_controlchars(output.path, (pp - s));
+        p = pp;
+      }
+      goto label_parse;
     }
 
     if (p - s) {

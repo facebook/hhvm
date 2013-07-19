@@ -247,6 +247,12 @@ Func::~Func() {
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
     assert(oldVal == this);
   }
+  int maxNumPrologues = getMaxNumPrologues(numParams());
+  int numPrologues =
+    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                         : kNumFixedPrologues;
+  TranslatorX64::Get()->smashPrologueGuards((TCA *)m_prologueTable,
+                                            numPrologues, this);
 #ifdef DEBUG
   validate();
   m_magic = ~m_magic;

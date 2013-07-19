@@ -1238,6 +1238,30 @@ funcPrologToGuard(TCA prolog, const Func* func) {
      kFuncGuardLen);
 }
 
+static inline void
+funcPrologSmashGuard(TCA prolog, const Func* func) {
+  intptr_t iptr = uintptr_t(func);
+  if (deltaFits(iptr, sz::dword)) {
+    *funcPrologToGuardImm<int32_t>(prolog) = 0;
+    return;
+  }
+  *funcPrologToGuardImm<int64_t>(prolog) = 0;
+}
+
+void
+TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
+                                   const Func* func) {
+#ifdef DEBUG
+  LeaseHolder writer(s_writeLease);
+#endif
+  for (int i = 0; i < numPrologues; i++) {
+    if (prologues[i] != (TCA)fcallHelperThunk
+        && funcPrologHasGuard(prologues[i], func)) {
+      funcPrologSmashGuard(prologues[i], func);
+    }
+  }
+}
+
 TCA
 TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(kScratchCrossTraceRegs.contains(rax));

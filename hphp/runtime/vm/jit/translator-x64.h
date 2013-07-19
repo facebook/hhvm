@@ -237,6 +237,7 @@ public:
   void emitCall(Asm& a, TCA dest);
   void emitCall(Asm& a, CppCall call);
   TCA getCallArrayProlog(Func* func);
+  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 private:
 
   void translateClassExistsImpl(const Tracelet& t,

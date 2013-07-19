@@ -168,12 +168,10 @@ function map_convenience_filename($file) {
     'facebook' => 'hphp/facebook/test',
   );
 
-  $m = null;
-  if (!preg_match('/([^\/]*)/', $file, $m) ||
-      !isset($mappage[$m[1]])) {
+  if (!isset($mappage[$file])) {
     return $file;
   }
-  return hphp_home().'/'.$mappage[$m[1]];
+  return hphp_home().'/'.$mappage[$file];
 }
 
 function find_tests($files) {

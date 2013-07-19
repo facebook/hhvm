@@ -1277,6 +1277,7 @@ bool f_chdir(CStrRef directory) {
     g_context->setCwd(File::TranslatePath(directory));
     return true;
   }
+  raise_warning("No such file or directory (errno 2)");
   return false;
 }
 

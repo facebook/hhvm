@@ -906,13 +906,7 @@ void Unit::initialMerge() {
               }
               break;
             }
-            case UnitMergeKindGlobal: {
-              StringData* s = (StringData*)((char*)obj - (int)k);
-              auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
-              ix += sizeof(*v) / sizeof(void*);
-              v->cacheHandle() = TargetCache::GlobalCache::alloc(s);
-              break;
-            }
+            case UnitMergeKindGlobal: break;
           }
           ix++;
         }
@@ -1026,9 +1020,8 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
   cns->m_data.pref = (RefData*)data;
 }
 
-static void setGlobal(void* cacheAddr, TypedValue *value,
-                      StringData *name) {
-  tvSet(*value, *TargetCache::GlobalCache::lookupCreateAddr(cacheAddr, name));
+static void setGlobal(StringData* name, TypedValue *value) {
+  g_vmContext->m_globalVarEnv->set(name, value);
 }
 
 void Unit::merge() {
@@ -1353,7 +1346,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_global);
           StringData* name = (StringData*)((char*)obj - (int)k);
           auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          setGlobal(&getDataRef<char>(tcbase, v->cacheHandle()), v, name);
+          setGlobal(name, v);
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);

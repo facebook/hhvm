@@ -441,16 +441,6 @@ TypedValue* VarEnv::lookupAdd(const StringData* name) {
   return m_nvTable->lookupAdd(name);
 }
 
-TypedValue* VarEnv::lookupRawPointer(const StringData* name) {
-  ensureNvt();
-  return m_nvTable->lookupRawPointer(name);
-}
-
-TypedValue* VarEnv::lookupAddRawPointer(const StringData* name) {
-  ensureNvt();
-  return m_nvTable->lookupAddRawPointer(name);
-}
-
 bool VarEnv::unset(const StringData* name) {
   if (!m_nvTable) return true;
   m_nvTable->unset(name);

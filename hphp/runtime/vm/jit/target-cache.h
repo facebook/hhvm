@@ -267,57 +267,6 @@ typedef Cache<uintptr_t, const Func*, ActRec*, NSInvalid, 1, void>
 typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
 
 /*
- * GlobalCache --
- *
- *   Records offsets into the current global array.
- *
- *   For both GlobalCache and BoxedGlobalCache, the lookup routine may
- *   return NULL, but lookupCreate will create new entries with
- *   KindOfNull if the global didn't exist.
- *
- *   Both routines will decRef the name on behalf of the caller, but
- *   only if the lookup was successful (or a global was created).
- */
-class GlobalCache {
-  TypedValue* m_tv;
-
-protected:
-  static inline GlobalCache* cacheAtHandle(CacheHandle handle) {
-    return (GlobalCache*)(uintptr_t(tl_targetCaches) + handle);
-  }
-
-  template<bool isBoxed>
-  TypedValue* lookupImpl(StringData *name, bool allowCreate);
-
-public:
-  inline CacheHandle cacheHandle() const {
-    return ptrToHandle(this);
-  }
-
-  static CacheHandle alloc(const StringData* sd) {
-    assert(sd);
-    return namedAlloc<NSGlobal>(sd, sizeof(GlobalCache), sizeof(GlobalCache));
-  }
-
-  static TypedValue* lookup(CacheHandle handle, StringData* nm);
-  static TypedValue* lookupCreate(CacheHandle handle, StringData* nm);
-  static TypedValue* lookupCreateAddr(void* cacheAddr, StringData* nm);
-};
-
-class BoxedGlobalCache : public GlobalCache {
-public:
-  /*
-   * Note: the returned pointer is a pointer to the outer variant.
-   * You'll need to incref (or whatever) it yourself (if desired) and
-   * emitDeref if you are going to put it in a register associated
-   * with some vm location.  (Note that KindOfRef in-register
-   * values are the pointers to inner items.)
-   */
-  static TypedValue* lookup(CacheHandle handle, StringData* nm);
-  static TypedValue* lookupCreate(CacheHandle handle, StringData* nm);
-};
-
-/*
  * Classes.
  *
  * The request-private Class* for a given class name. This is used when

@@ -43,7 +43,8 @@ startOuter:
   PopC
 
   CGetL $0
-  IterInitK 1 endInner $3 $4
+  Box
+  MIterInitK 1 endInner $3 $4
 startInner:
   String "\n"
   CGetL2 $3
@@ -57,8 +58,8 @@ startInner:
   Print
   PopC
 
-  IterBreak <(Iter) 1, (Iter) 0> endOuter
-  IterNextK 1 startInner $3 $4
+  IterBreak <(MIter) 1, (Iter) 0> endOuter
+  MIterNextK 1 startInner $3 $4
 endInner:
   IterNextK 0 startOuter $1 $2
 endOuter:

@@ -905,6 +905,7 @@ std::vector<uint32_t> read_itervec(AsmState& as) {
 
     if (!as.in.readword(word)) as.error("Was expecting iterator id.");
     uint32_t iterId = folly::to<uint32_t>(word);
+    ret.push_back(iterId);
 
     if (!isdigit(word.back())) {
       if (word.back() == '>') break;

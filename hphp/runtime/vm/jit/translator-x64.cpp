@@ -182,7 +182,7 @@ struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
                     RefCountStaticValue,
                     CC_Z,
-                    field_type(RefData, _count)> NonStaticCondBlock;
+                    field_type(RefData, m_count)> NonStaticCondBlock;
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(X64Assembler& a,
                    PhysReg reg,
@@ -392,7 +392,7 @@ TranslatorX64::emitIncRef(X64Assembler &a, PhysReg base, DataType dtype) {
     return;
   }
   SpaceRecorder sr("_IncRef", a);
-  assert(sizeof(Countable) == sizeof(int32_t));
+  static_assert(sizeof(RefCount) == sizeof(int32_t), "");
   { // if !static then
     IfCountNotStatic ins(a, base, dtype);
     /*

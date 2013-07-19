@@ -954,7 +954,9 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
       if (kind == ArgDesc::Kind::Imm) {
         a.emitImmReg(args[i].imm().q(), dst);
       } else if (kind == ArgDesc::Kind::TypeReg) {
-        a.    shlq   (kTypeShiftBits, dst);
+        if (kTypeShiftBits > 0) {
+          a.    shlq   (kTypeShiftBits, dst);
+        }
       } else if (kind == ArgDesc::Kind::Addr) {
         a.    addq   (args[i].imm(), dst);
       } else if (args[i].isZeroExtend()) {
@@ -987,14 +989,13 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
         break;
 
       case ArgDesc::Kind::TypeReg:
-        static_assert(kTypeWordOffset == 4 || kTypeWordOffset == 1,
+        static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
                       "kTypeWordOffset value not supported");
         assert(srcReg.isGP());
         // x86 stacks grow down, so push higher offset items first
-        if (kTypeWordOffset == 4) {
+        if (kTypeWordOffset == 0) {
+          a.  pushl(eax); // 4 bytes of garbage overlapping m_aux
           a.  pushl(r32(srcReg));
-          // 4 bytes of garbage:
-          a.  pushl(eax);
         } else {
           // 4 bytes of garbage:
           a.  pushl(eax);

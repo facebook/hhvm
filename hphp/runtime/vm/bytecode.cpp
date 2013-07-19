@@ -660,9 +660,9 @@ static std::string toStringElm(const TypedValue* tv) {
   }
 
   assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->_count <= 0) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.pref->_count << " ";
+    os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
     return os.str();
   }
 
@@ -1766,7 +1766,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         }
       } else if (!(flags & InvokeIgnoreByRefErrors) &&
                  (from->m_type != KindOfRef ||
-                  from->m_data.pref->_count == 2)) {
+                  from->m_data.pref->m_count == 2)) {
         raise_warning("Parameter %d to %s() expected to be "
                       "a reference, value given",
                       paramId + 1, f->fullName()->data());
@@ -2866,7 +2866,7 @@ static inline void lookupClsRef(TypedValue* input,
 static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     // We're using pref here arbitrarily; any refcounted union member works.
-    return tv->m_data.pref->_count;
+    return tv->m_data.pref->m_count;
   }
   return -1;
 }
@@ -5929,7 +5929,7 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
       tvDup(*args->getValueRef(pos).asTypedValue(), *to);
-      if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
+      if (to->m_type == KindOfRef && to->m_data.pref->m_count == 2) {
         tvUnbox(to);
       }
       pos = args->iter_advance(pos);

@@ -84,9 +84,9 @@ enum CopyMallocMode { CopyMalloc };
  * A StringData can be in two formats, small or big.  Small format
  * stores the string inline by overlapping with some fields, as follows:
  *
- * small: m_data:8, _count:4, m_len:4, m_hash:4,
+ * small: m_data:8, m_len:4, m_count:4, m_hash:4,
  *        m_small[44]
- * big:   m_data:8, _count:4, m_len:4, m_hash:4,
+ * big:   m_data:8, m_len:4, m_count:4, m_hash:4,
  *        junk[12], node:16, shared:8, cap:8
  *
  * If the format is IsLiteral or IsShared, we always use the "big" layout.
@@ -118,12 +118,12 @@ class StringData {
 
   /**
    * StringData does not formally derive from Countable, however it has a
-   * _count field and implements all of the methods from Countable.
+   * m_count field and implements all of the methods from Countable.
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-  void setRefCount(int32_t n) { _count = n;}
-  bool isStatic() const { return _count == RefCountStaticValue; }
+  void setRefCount(RefCount n) { m_count = n;}
+  bool isStatic() const { return m_count == RefCountStaticValue; }
 
   /**
    * Get the wrapped SharedVariant.
@@ -141,7 +141,7 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  StringData() : m_data(m_small), _count(0), m_len(0), m_hash(0) {
+  StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
     m_big.shared = 0;
     m_big.cap = IsSmall;
     m_small[0] = 0;
@@ -356,7 +356,7 @@ public:
   static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
   static Array GetConstants();
   /**
-   * The order of the data members is significant. The _count field must
+   * The order of the data members is significant. The m_count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
    */
  private:
@@ -364,15 +364,15 @@ public:
     const char* m_cdata;
     char* m_data;
   };
+  uint32_t m_len;
  protected:
-  mutable int32_t _count;
+  mutable RefCount m_count;
  private:
   // m_len and m_data are not overlapped with small strings because
   // they are accessed so frequently that even the inline branch to
   // measurably slows things down.  Its worse for m_len than m_data.
   // If frequent callers are refacotred to use slice() then we could
   // revisit this decision.
-  uint32_t m_len;
   mutable strhash_t m_hash;   // precompute hash codes for static strings
   union __attribute__((__packed__)) {
     char m_small[MaxSmallSize + 1];

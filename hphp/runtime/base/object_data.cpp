@@ -809,7 +809,7 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   const Func* init = m_cls->lookupMethod(sd_init);
   if (init != nullptr) {
     TypedValue tv;
-    // We need to incRef/decRef here because we're still a new (_count
+    // We need to incRef/decRef here because we're still a new (m_count
     // == 0) object and invokeFunc is going to expect us to have a
     // reasonable refcount.
     try {
@@ -1126,7 +1126,7 @@ TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
     }
     // when seting a dynamic property, do not write
     // directly to the TypedValue in the HphpArray, since
-    // its _count field is used to store the string hash of
+    // its m_aux field is used to store the string hash of
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
@@ -1188,7 +1188,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
     SETOP_BODY(propVal, op, val);
@@ -1203,7 +1203,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
     propVal->m_type = tvResult.m_type;
@@ -1261,7 +1261,7 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
     IncDecBody<setResult>(op, propVal, &dest);
@@ -1276,7 +1276,7 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
     propVal->m_type = tvResult.m_type;

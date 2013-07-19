@@ -44,7 +44,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 /**
  * Base class of all PHP objects and PHP resources.
  */
-class ObjectData : public CountableNF {
+class ObjectData {
  public:
   enum Attribute {
     NoDestructor  = 0x0001, // __destruct()
@@ -85,7 +85,10 @@ class ObjectData : public CountableNF {
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
-  ObjectData(Class* cls, bool isResource) : o_attribute(0), m_cls(cls) {
+  ObjectData(Class* cls, bool isResource)
+    : o_attribute(0)
+    , m_count(0)
+    , m_cls(cls) {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!isResource) {
       o_id = ++(*os_max_id);
@@ -96,20 +99,31 @@ class ObjectData : public CountableNF {
  private:
   // The two constructors below are used for all pure classes that are not
   // descendents of cppext classes
-  explicit ObjectData(Class* cls) : o_attribute(0), m_cls(cls) {
+  explicit ObjectData(Class* cls)
+    : o_attribute(0)
+    , m_count(0)
+    , m_cls(cls) {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     o_id = ++(*os_max_id);
     instanceInit(cls);
   }
 
   enum class NoInit { noinit };
-  explicit ObjectData(Class* cls, NoInit) : o_attribute(0), m_cls(cls) {
+  explicit ObjectData(Class* cls, NoInit)
+    : o_attribute(0)
+    , m_count(0)
+    , m_cls(cls) {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     o_id = ++(*os_max_id);
   }
 
   // Disallow copy construction
   ObjectData(const ObjectData&) = delete;
+
+ public:
+  void setStatic() const { assert(false); }
+  bool isStatic() const { return false; }
+  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
  public:
   virtual ~ObjectData(); // all PHP classes need virtual tables
@@ -426,15 +440,13 @@ class ObjectData : public CountableNF {
 
  private:
   static void compileTimeAssertions() {
-    static_assert(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET,
-                  "Offset of ObjectData._count must be FAST_REFCOUNT_OFFSET");
+    static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
   //============================================================================
   // ObjectData fields
 
-  // o_attribute and o_subclassData will hopefully be packed together
-  // with _count from parent class
+  // o_attribute and o_subclassData will be packed together with m_count.
  private:
   // Various per-instance flags
   mutable int16_t o_attribute;
@@ -444,6 +456,7 @@ class ObjectData : public CountableNF {
     uint16_t u16;
     uint8_t u8[2];
   } o_subclassData;
+  mutable RefCount m_count;
   // Pointer to this object's class
   Class* m_cls;
   // Storage for dynamic properties
@@ -456,6 +469,16 @@ class ObjectData : public CountableNF {
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
 typedef GlobalNameValueTableWrapper GlobalVariables;
+
+inline
+CountableHelper::CountableHelper(ObjectData* object) : m_object(object) {
+  object->incRefCount();
+}
+
+inline
+CountableHelper::~CountableHelper() {
+  m_object->decRefCount();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators

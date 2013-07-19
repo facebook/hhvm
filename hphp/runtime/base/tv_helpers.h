@@ -82,7 +82,7 @@ inline void tvDecRefObj(TypedValue* tv) {
 inline void tvDecRefRefInternal(RefData* r) {
   assert(tvIsPlausible(r->tv()));
   assert(r->tv()->m_type != KindOfRef);
-  assert(r->_count > 0);
+  assert(r->m_count > 0);
   decRefRef(r);
 }
 
@@ -249,13 +249,13 @@ inline void refDup(const Ref& fr, Ref& to) {
 }
 
 // Assumes 'tv' is dead
-// NOTE: this helper does not modify tv->_count
+// NOTE: this helper does not modify tv->m_aux
 inline void tvWriteNull(TypedValue* tv) {
   tv->m_type = KindOfNull;
 }
 
 // Assumes 'tv' is dead
-// NOTE: this helper does not modify tv->_count
+// NOTE: this helper does not modify tv->m_aux
 inline void tvWriteUninit(TypedValue* tv) {
   tv->m_type = KindOfUninit;
 }
@@ -381,7 +381,7 @@ inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-    tv->m_data.pref->_count == RefCountStaticValue;
+    tv->m_data.pref->m_count == RefCountStaticValue;
 }
 
 /**
@@ -435,15 +435,15 @@ inline const Variant& refAsCVarRef(const Ref& ref) {
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {
-  return (tv->m_type == KindOfRef && tv->m_data.pref->_count > 1);
+  return (tv->m_type == KindOfRef && tv->m_data.pref->m_count > 1);
 }
 
-// Assumes 'fr' is live and 'to' is dead, and does not mutate to->_count
+// Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
 inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
   if (LIKELY(fr->m_type != KindOfRef)) {
     cellDup(*fr, *to);
-  } else if (fr->m_data.pref->_count <= 1 &&
+  } else if (fr->m_data.pref->m_count <= 1 &&
              (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
     fr = fr->m_data.pref->tv();
     cellDup(*fr, *to);

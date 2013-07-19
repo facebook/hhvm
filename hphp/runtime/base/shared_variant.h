@@ -200,16 +200,16 @@ private:
 #else
  #ifdef WORDS_BIGENDIAN
       SharedData m_data;
-      uint32_t m_count;
       bool m_shouldCache;
       uint8_t m_flags;
       uint16_t m_type;
+      uint32_t m_count;
  #else
       SharedData m_data;
-      uint32_t m_count;
       uint16_t m_type;
       bool m_shouldCache;
       uint8_t m_flags;
+      uint32_t m_count;
  #endif
 #endif
     };

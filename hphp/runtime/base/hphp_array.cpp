@@ -323,6 +323,9 @@ bool HphpArray::checkInvariants() const {
     assert(m_hash);
     assert(m_hLoad >= m_size);
     size_t load = 0;
+    return true;
+    // The following loop is for debugging arrays only; it slows
+    // things down too much for general use
     for (size_t i = 0; i <= m_tableMask; i++) {
       load += m_hash[i] != ElmIndEmpty;
     }

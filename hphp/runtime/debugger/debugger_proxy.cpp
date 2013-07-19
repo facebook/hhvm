@@ -306,14 +306,15 @@ void DebuggerProxy::startSignalThread() {
 // it will be passed to the dummy sandbox instead.
 void DebuggerProxy::pollSignal() {
   TRACE_RB(2, "DebuggerProxy::pollSignal: starting\n");
+  int signalTimeout = RuntimeOption::DebuggerSignalTimeout;
   while (!m_stopped) {
     sleep(1);
 
-    // after 1 second that no active thread picks up the signal, we send it
-    // to dummy sandbox
-    if (m_signum != CmdSignal::SignalNone && m_dummySandbox) {
+    // After DebuggerSignalTimeout seconds that no active thread picks
+    // up the signal, we send it to dummy sandbox.
+    if ((m_signum != CmdSignal::SignalNone) && m_dummySandbox) {
       Lock lock(m_signumMutex);
-      if (m_signum != CmdSignal::SignalNone) {
+      if ((m_signum != CmdSignal::SignalNone) && (--signalTimeout <= 0)) {
         TRACE_RB(2, "DebuggerProxy::pollSignal: sending to dummy sandbox\n");
         m_dummySandbox->notifySignal(m_signum);
         m_signum = CmdSignal::SignalNone;
@@ -362,11 +363,13 @@ void DebuggerProxy::pollSignal() {
       break;
     }
 
-    m_signum = sig->getSignal();
+    auto newSignum = sig->getSignal();
 
-    if (m_signum != CmdSignal::SignalNone) {
+    if (newSignum != CmdSignal::SignalNone) {
       TRACE_RB(2, "DebuggerProxy::pollSignal: "
                "got interrupt signal from client\n");
+      m_signum = newSignum;
+      signalTimeout = RuntimeOption::DebuggerSignalTimeout;
       Debugger::RequestInterrupt(shared_from_this());
     }
   }

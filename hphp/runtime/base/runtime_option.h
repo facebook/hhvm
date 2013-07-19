@@ -508,6 +508,7 @@ public:
   static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
+  static int DebuggerSignalTimeout;
 
   // Mail options
   static std::string SendmailPath;

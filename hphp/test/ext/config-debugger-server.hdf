@@ -15,6 +15,7 @@ Eval {
     EnableDebugger = true
     EnableDebuggerServer = true
     StartupDocument = hphpd_startup.php
+    SignalTimeout = 3
   }
 }
 

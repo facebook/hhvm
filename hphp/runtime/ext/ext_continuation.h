@@ -111,7 +111,7 @@ public:
 protected: virtual bool php_sleep(Variant &ret);
 public:
   void call_next();
-  void call_send(TypedValue* v);
+  void call_send(Cell& v);
   void call_raise(ObjectData* e);
 
   inline void preNext() {

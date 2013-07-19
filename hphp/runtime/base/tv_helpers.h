@@ -277,6 +277,12 @@ inline const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
+// assert that tv is cell
+inline Cell* tvAssertCell(TypedValue* tv) {
+  assert(cellIsPlausible(tv));
+  return tv;
+}
+
 /*
  * Assign the value of the Cell in `fr' to `to', with appropriate
  * reference count modifications.

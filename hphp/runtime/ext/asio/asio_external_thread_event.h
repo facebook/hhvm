@@ -58,7 +58,7 @@ FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
  *       markAsFinished();
  *     }
  *   protected:
- *     void unserialize(TypedValue* result) const {
+ *     void unserialize(Cell& result) const {
  *       if (UNLIKELY(m_failed)) {
  *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
  *           "An error has occurred while scheduling the operation"));
@@ -71,8 +71,7 @@ FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
  *         throw e;
  *       }
  *
- *       result->m_type = KindOfInt64;
- *       result->m_data.num = m_value;
+ *       cellDup(make_tv<KindOfInt64>(m_value), result);
  *     }
  *   private:
  *     int m_value, m_maxValue;
@@ -193,7 +192,7 @@ class AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(TypedValue* result) const = 0;
+    virtual void unserialize(Cell& result) const = 0;
 
   protected:
     /**

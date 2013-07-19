@@ -234,9 +234,9 @@ void c_Continuation::call_next() {
   g_vmContext->invokeContFunc(func, this);
 }
 
-void c_Continuation::call_send(TypedValue* v) {
+void c_Continuation::call_send(Cell& v) {
   const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
-  g_vmContext->invokeContFunc(func, this, v);
+  g_vmContext->invokeContFunc(func, this, &v);
 }
 
 void c_Continuation::call_raise(ObjectData* e) {
@@ -245,7 +245,7 @@ void c_Continuation::call_raise(ObjectData* e) {
 
   const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
 
-  TypedValue arg;
+  Cell arg;
   arg.m_type = KindOfObject;
   arg.m_data.pobj = e;
 

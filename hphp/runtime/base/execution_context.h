@@ -737,7 +737,7 @@ public:
   }
   void invokeContFunc(const HPHP::Func* f,
                       ObjectData* this_,
-                      TypedValue* param = nullptr);
+                      Cell* param = nullptr);
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;

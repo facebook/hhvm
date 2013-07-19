@@ -1865,7 +1865,7 @@ void VMExecutionContext::invokeFuncFew(TypedValue* retval,
 
 void VMExecutionContext::invokeContFunc(const Func* f,
                                         ObjectData* this_,
-                                        TypedValue* param /* = NULL */) {
+                                        Cell* param /* = NULL */) {
   assert(f);
   assert(this_);
 
@@ -1887,7 +1887,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   ar->setVarEnv(nullptr);
 
   if (param != nullptr) {
-    tvDup(*param, *m_stack.allocTV());
+    cellDup(*param, *m_stack.allocC());
   }
 
   TypedValue retval;

@@ -70,7 +70,7 @@ Variant c_WaitHandle::t_join() {
 
   if (LIKELY(isSucceeded())) {
     // succeeded? return result
-    return tvAsCVarRef(getResult());
+    return cellAsCVarRef(getResult());
   } else {
     // failed? throw exception
     Object e(getException());

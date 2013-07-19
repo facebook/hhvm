@@ -70,7 +70,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
       tvUnbox(current);
     }
 
-    if (!c_WaitHandle::fromTypedValue(current) &&
+    if (!c_WaitHandle::fromCell(tvAssertCell(current)) &&
         !IS_NULL_TYPE(current->m_type)) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be an array of WaitHandle instances"));
@@ -83,7 +83,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
        iter_pos != ArrayData::invalid_index;
        iter_pos = deps->iter_advance(iter_pos)) {
 
-    TypedValue* current = deps->nvGetValueRef(iter_pos);
+    Cell* current = tvAssertCell(deps->nvGetValueRef(iter_pos));
     if (IS_NULL_TYPE(current->m_type)) {
       // {uninit,null} yields null
       tvWriteNull(current);
@@ -95,7 +95,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      tvSetIgnoreRef(*child->getResult(), *current);
+      cellSet(child->getResult(), *current);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -115,10 +115,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
   }
 
   if (exception.isNull()) {
-    TypedValue tv;
-    tv.m_type = KindOfArray;
-    tv.m_data.parr = deps.get();
-    return c_StaticResultWaitHandle::Create(&tv);
+    return c_StaticResultWaitHandle::Create(make_tv<KindOfArray>(deps.get()));
   } else {
     return c_StaticExceptionWaitHandle::Create(exception.get());
   }
@@ -142,7 +139,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
        m_iterPos != ArrayData::invalid_index;
        m_iterPos = m_deps->iter_advance(m_iterPos)) {
 
-    TypedValue* current = m_deps->nvGetValueRef(m_iterPos);
+    Cell* current = tvAssertCell(m_deps->nvGetValueRef(m_iterPos));
     if (IS_NULL_TYPE(current->m_type)) {
       // {uninit,null} yields null
       tvWriteNull(current);
@@ -154,7 +151,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      tvSetIgnoreRef(*child->getResult(), *current);
+      cellSet(child->getResult(), *current);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
@@ -171,10 +168,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
   }
 
   if (m_exception.isNull()) {
-    TypedValue result;
-    result.m_type = KindOfArray;
-    result.m_data.parr = m_deps.get();
-    setResult(&result);
+    setResult(make_tv<KindOfArray>(m_deps.get()));
     m_deps = nullptr;
   } else {
     setException(m_exception.get());
@@ -211,7 +205,7 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
   // recursively import current child
   {
     assert(m_iterPos != ArrayData::invalid_index);
-    TypedValue* current = m_deps->nvGetValueRef(m_iterPos);
+    Cell* current = tvAssertCell(m_deps->nvGetValueRef(m_iterPos));
 
     assert(current->m_type == KindOfObject);
     assert(dynamic_cast<c_WaitableWaitHandle*>(current->m_data.pobj));
@@ -228,7 +222,7 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
          iter_pos != ArrayData::invalid_index;
          iter_pos = m_deps->iter_advance(iter_pos)) {
 
-      TypedValue* current = m_deps->nvGetValueRef(iter_pos);
+      Cell* current = tvAssertCell(m_deps->nvGetValueRef(iter_pos));
       if (IS_NULL_TYPE(current->m_type)) {
         continue;
       }

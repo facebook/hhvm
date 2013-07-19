@@ -78,18 +78,18 @@ class c_WaitHandle : public ExtObjectData {
 
 
  public:
-  static c_WaitHandle* fromTypedValue(TypedValue* tv) {
+  static c_WaitHandle* fromCell(Cell* cell) {
     return (
-        tv->m_type == KindOfObject &&
-        tv->m_data.pobj->instanceof(s_cls)
-      ) ? static_cast<c_WaitHandle*>(tv->m_data.pobj) : nullptr;
+        cell->m_type == KindOfObject &&
+        cell->m_data.pobj->instanceof(s_cls)
+      ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
   }
   bool isFinished() { return getState() <= STATE_FAILED; }
   bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
   bool isFailed() { return getState() == STATE_FAILED; }
-  TypedValue* getResult() {
+  Cell& getResult() {
     assert(isSucceeded());
-    return &m_resultOrException;
+    return m_resultOrException;
   }
   ObjectData* getException() {
     assert(isFailed());
@@ -104,7 +104,7 @@ class c_WaitHandle : public ExtObjectData {
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;
 
-  TypedValue m_resultOrException;
+  Cell m_resultOrException;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   public: static Object ti_create(CVarRef result);
 
  public:
-  static p_StaticResultWaitHandle Create(const TypedValue* result);
+  static p_StaticResultWaitHandle Create(const Cell& result);
   String getName();
 };
 
@@ -207,7 +207,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void join();
 
  protected:
-  void setResult(const TypedValue* result);
+  void setResult(const Cell& result);
   void setException(ObjectData* exception);
 
   context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
@@ -305,7 +305,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
 
  private:
   void initialize(c_Continuation* continuation, uint16_t depth);
-  void markAsSucceeded(const TypedValue* result);
+  void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 
   p_Continuation m_continuation;
@@ -464,7 +464,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 
  private:
   void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);
-  void markAsSucceeded(const TypedValue* result);
+  void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 
   p_WaitableWaitHandle m_child;

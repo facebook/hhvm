@@ -111,9 +111,9 @@ void c_ExternalThreadEventWaitHandle::process() {
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
 
-  TypedValue result;
+  Cell result;
   try {
-    m_event->unserialize(&result);
+    m_event->unserialize(result);
   } catch (const Object& exception) {
     setException(exception.get());
     return;
@@ -122,8 +122,8 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assert(tvIsPlausible(&result));
-  setResult(&result);
+  assert(cellIsPlausible(&result));
+  setResult(result);
   tvRefcountedDecRefCell(&result);
 }
 

@@ -89,12 +89,11 @@ c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* pa
   return prev;
 }
 
-void c_WaitableWaitHandle::setResult(const TypedValue* result) {
-  assert(result);
-  assert(result->m_type != KindOfRef);
+void c_WaitableWaitHandle::setResult(const Cell& result) {
+  assert(cellIsPlausible(&result));
 
   setState(STATE_SUCCEEDED);
-  cellDup(*result, m_resultOrException);
+  cellDup(result, m_resultOrException);
 
   // unref creator
   if (m_creator) {

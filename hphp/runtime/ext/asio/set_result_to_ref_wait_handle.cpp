@@ -70,7 +70,7 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
 
   // succeeded? set result to ref and give back succeeded wait handle
   if (wh->isSucceeded()) {
-    tvSet(*wh->getResult(), *var_or_cell);
+    tvSet(wh->getResult(), *var_or_cell);
     return wh;
   }
 
@@ -124,11 +124,11 @@ void c_SetResultToRefWaitHandle::onUnblocked() {
   }
 }
 
-void c_SetResultToRefWaitHandle::markAsSucceeded(const TypedValue* result) {
+void c_SetResultToRefWaitHandle::markAsSucceeded(const Cell& result) {
   RefData* ref = m_ref;
 
   m_ref = nullptr;
-  tvSetIgnoreRef(*result, *ref->tv());
+  cellSet(result, *ref->tv());
   decRefRef(ref);
 
   setResult(result);

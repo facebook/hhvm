@@ -160,17 +160,17 @@ void c_ContinuationWaitHandle::run() {
 
       // continuation finished, retrieve result from its m_value
       if (m_continuation->done()) {
-        markAsSucceeded(m_continuation->m_value.asTypedValue());
+        markAsSucceeded(*m_continuation->m_value.asCell());
         return;
       }
 
       // set up dependency
-      TypedValue* value = m_continuation->m_value.asTypedValue();
+      Cell* value = m_continuation->m_value.asCell();
       if (IS_NULL_TYPE(value->m_type)) {
         // null dependency
         m_child = nullptr;
       } else {
-        c_WaitHandle* child = c_WaitHandle::fromTypedValue(value);
+        c_WaitHandle* child = c_WaitHandle::fromCell(value);
         if (UNLIKELY(!child)) {
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(
               "Expected yield argument to be an instance of WaitHandle"));
@@ -206,10 +206,10 @@ void c_ContinuationWaitHandle::onUnblocked() {
   }
 }
 
-void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
+void c_ContinuationWaitHandle::markAsSucceeded(const Cell& result) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnContinuationSuccessCallback())) {
-    session->onContinuationSuccess(this, tvAsCVarRef(result));
+    session->onContinuationSuccess(this, cellAsCVarRef(result));
   }
 
   setResult(result);

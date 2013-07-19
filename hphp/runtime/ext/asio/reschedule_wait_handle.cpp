@@ -79,7 +79,7 @@ void c_RescheduleWaitHandle::run() {
     return;
   }
 
-  setResult(init_null_variant.asTypedValue());
+  setResult(make_tv<KindOfNull>());
 }
 
 String c_RescheduleWaitHandle::getName() {

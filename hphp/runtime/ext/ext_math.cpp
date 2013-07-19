@@ -95,16 +95,37 @@ Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   return ret;
 }
 
+/* Logic based on zend_operators.c::convert_scalar_to_number() */
+static DataType zend_convert_scalar_to_number(CVarRef num,
+                                              int64_t &ival,
+                                              double &dval) {
+  DataType dt = num.toNumeric(ival, dval, true);
+  if ((dt == KindOfDouble) || (dt == KindOfInt64)) {
+    return dt;
+  }
+
+  if (num.isBoolean() || num.isNull() ||
+      num.isObject() || num.isString()) {
+    ival = num.toInt64();
+    return KindOfInt64;
+  }
+
+  // Fallback, callers will handle this as an error
+  ival = 0;
+  dval = 0.0;
+  return num.getType();
+}
+
 Variant f_abs(CVarRef number) {
   int64_t ival;
   double dval;
-  DataType k = number.toNumeric(ival, dval, true);
+  DataType k = zend_convert_scalar_to_number(number, ival, dval);
   if (k == KindOfDouble) {
     return fabs(dval);
   } else if (k == KindOfInt64) {
     return ival >= 0 ? ival : -ival;
   } else {
-    return 0;
+    return false;
   }
 }
 
@@ -112,22 +133,43 @@ bool f_is_finite(double val) { return finite(val);}
 bool f_is_infinite(double val) { return isinf(val);}
 bool f_is_nan(double val) { return isnan(val);}
 
-double f_ceil(double value) { return ceil(value);}
-double f_floor(double value) { return floor(value);}
-
-double f_round(CVarRef val, int64_t precision /* = 0 */,
-               int64_t mode /* = PHP_ROUND_HALF_UP */) {
+Variant f_ceil(CVarRef number) {
   int64_t ival;
   double dval;
-  DataType k = val.toNumeric(ival, dval, true);
+  DataType k = zend_convert_scalar_to_number(number, ival, dval);
+  if (k == KindOfInt64) {
+    dval = (double)ival;
+  } else if (k != KindOfDouble) {
+    return false;
+  }
+  return ceil(dval);
+}
+
+Variant f_floor(CVarRef number) {
+  int64_t ival;
+  double dval;
+  DataType k = zend_convert_scalar_to_number(number, ival, dval);
+  if (k == KindOfInt64) {
+    dval = (double)ival;
+  } else if (k != KindOfDouble) {
+    return false;
+  }
+  return floor(dval);
+}
+
+Variant f_round(CVarRef val, int64_t precision /* = 0 */,
+                int64_t mode /* = PHP_ROUND_HALF_UP */) {
+  int64_t ival;
+  double dval;
+  DataType k = zend_convert_scalar_to_number(val, ival, dval);
   if (k == KindOfInt64) {
     if (precision >= 0) {
-     return ival;
+     return (double)ival;
     } else {
       dval = ival;
     }
   } else if (k != KindOfDouble) {
-    dval = val.toDouble();
+    return false;
   }
   dval = php_math_round(dval, precision, mode);
   return dval;

@@ -57,10 +57,10 @@ bool f_is_finite(double val);
 bool f_is_infinite(double val);
 bool f_is_nan(double val);
 
-double f_ceil(double value);
-double f_floor(double value);
-double f_round(CVarRef val, int64_t precision = 0,
-               int64_t mode = PHP_ROUND_HALF_UP);
+Variant f_ceil(CVarRef value);
+Variant f_floor(CVarRef value);
+Variant f_round(CVarRef val, int64_t precision = 0,
+                int64_t mode = PHP_ROUND_HALF_UP);
 
 double f_deg2rad(double number);
 double f_rad2deg(double number);

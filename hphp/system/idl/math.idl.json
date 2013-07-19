@@ -151,13 +151,13 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Double",
+                "type": "Variant",
                 "desc": "value rounded up to the next highest integer. The return value of ceil() is still of type float as the value range of float is usually bigger than that of integer."
             },
             "args": [
                 {
-                    "name": "value",
-                    "type": "Double",
+                    "name": "number",
+                    "type": "Variant",
                     "desc": "The value to round"
                 }
             ]
@@ -168,13 +168,13 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Double",
+                "type": "Variant",
                 "desc": "value rounded to the next lowest integer. The return value of floor() is still of type float because the value range of float is usually bigger than that of integer."
             },
             "args": [
                 {
-                    "name": "value",
-                    "type": "Double",
+                    "name": "number",
+                    "type": "Variant",
                     "desc": "The numeric value to round"
                 }
             ]
@@ -186,7 +186,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Double",
+                "type": "Variant",
                 "desc": "The rounded value"
             },
             "args": [

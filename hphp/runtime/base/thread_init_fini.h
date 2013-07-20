@@ -30,7 +30,7 @@ void finish_thread_locals(void *arg = nullptr) ATTRIBUTE_COLD
 
 struct InitFiniNode {
   enum class When {
-    ThreadInit,
+    ThreadInit, // actually represents request starts/inits
     ThreadFini,
     ProcessInit,
     ProcessExit,

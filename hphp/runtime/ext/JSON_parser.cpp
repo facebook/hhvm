@@ -32,8 +32,8 @@ SOFTWARE.
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/utf8_decode.h"
-
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/thread_init_fini.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -295,9 +295,46 @@ struct json_parser {
   String the_kstack[JSON_PARSER_MAX_DEPTH];
   int the_top;
   int the_mark; // the watermark
+  json_error_codes error_code;
 };
 
+
 IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
+
+// In Zend, the json_parser struct is publicly
+// accessible. Thus the fields could be accessed
+// directly. Just using setter/accessor functions
+// to get around that.
+json_error_codes json_get_last_error_code() {
+  return s_json_parser->error_code;
+}
+void json_set_last_error_code(json_error_codes ec) {
+  s_json_parser->error_code = ec;
+}
+
+const char *json_get_last_error_msg() {
+  switch (s_json_parser->error_code) {
+    case JSON_ERROR_NONE:
+      return "No error";
+    case JSON_ERROR_DEPTH:
+      return "Maximum stack depth exceeded";
+    case JSON_ERROR_STATE_MISMATCH:
+      return "State mismatch (invalid or malformed JSON)";
+    case JSON_ERROR_CTRL_CHAR:
+      return "Control character error, possibly incorrectly encoded";
+    case JSON_ERROR_SYNTAX:
+      return "Syntax error";
+    case JSON_ERROR_UTF8:
+      return "Malformed UTF-8 characters, possibly incorrectly encoded";
+    default:
+      return "Unknown error";
+  }
+}
+
+// For each request, make sure we start with the default error code.
+// Inline the function to do that reset.
+InitFiniNode init([]{ s_json_parser->error_code = JSON_ERROR_NONE; },
+                  InitFiniNode::When::ThreadInit);
 
 class JsonParserCleaner {
 public:
@@ -509,6 +546,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
     b = decoder.decode();
     if (b == UTF8_END) break; // UTF-8 decoding finishes successfully.
     if (b == UTF8_ERROR) {
+      s_json_parser->error_code = JSON_ERROR_UTF8;
       return false;
     }
     assert(b >= 0);
@@ -518,6 +556,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
       c = byte_class[b];
       /*</fb>*/
       if (c <= S_ERR) {
+       s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
         return false;
       }
     } else {
@@ -683,6 +722,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           }
           /* fall through if not KindOfString */
         default:
+          s_json_parser->error_code = JSON_ERROR_SYNTAX;
           return false;
         }
         break;
@@ -716,6 +756,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             the_state = 28;
             break;
           default:
+            s_json_parser->error_code = JSON_ERROR_SYNTAX;
             return false;
           }
           buf->reset();
@@ -751,6 +792,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           syntax error
         */
       case -1:
+        s_json_parser->error_code = JSON_ERROR_SYNTAX;
         return false;
       }
     } else {
@@ -813,5 +855,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
     }
   }
 
-  return the_state == 9 && pop(the_json, MODE_DONE);
+  if (the_state == 9 && pop(the_json, MODE_DONE)) {
+    s_json_parser->error_code = JSON_ERROR_NONE;
+    return true;
+  }
+
+  s_json_parser->error_code = JSON_ERROR_SYNTAX;
+  return false;
 }

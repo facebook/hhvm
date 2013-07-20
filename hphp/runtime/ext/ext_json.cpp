@@ -37,7 +37,27 @@ const int64_t k_JSON_FB_LOOSE          = 1<<20;
 const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
 const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1<<22;
 
+const int64_t k_JSON_ERROR_NONE
+  = json_error_codes::JSON_ERROR_NONE;
+const int64_t k_JSON_ERROR_DEPTH
+  = json_error_codes::JSON_ERROR_DEPTH;
+const int64_t k_JSON_ERROR_STATE_MISMATCH
+  = json_error_codes::JSON_ERROR_STATE_MISMATCH;
+const int64_t k_JSON_ERROR_CTRL_CHAR
+  = json_error_codes::JSON_ERROR_CTRL_CHAR;
+const int64_t k_JSON_ERROR_SYNTAX
+  = json_error_codes::JSON_ERROR_SYNTAX;
+const int64_t k_JSON_ERROR_UTF8
+  = json_error_codes::JSON_ERROR_UTF8;
+
 ///////////////////////////////////////////////////////////////////////////////
+int f_json_last_error() {
+  return (int) json_get_last_error_code();
+}
+
+String f_json_last_error_msg() {
+  return json_get_last_error_msg();
+}
 
 String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
   int64_t json_options = options.toInt64();
@@ -51,6 +71,9 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
 
 Variant f_json_decode(CStrRef json, bool assoc /* = false */,
                       CVarRef options /* = 0 */) {
+
+  json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+
   if (json.empty()) {
     return uninit_null();
   }
@@ -93,6 +116,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
   }
 
   if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */
+    json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
     return uninit_null();
   }
 

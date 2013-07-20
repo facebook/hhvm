@@ -25,4 +25,17 @@ void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,
                  bool assoc/*<fb>*/, bool loose/*</fb>*/);
 
+enum json_error_codes {
+  JSON_ERROR_NONE = 0,
+  JSON_ERROR_DEPTH,
+  JSON_ERROR_STATE_MISMATCH,
+  JSON_ERROR_CTRL_CHAR,
+  JSON_ERROR_SYNTAX,
+  JSON_ERROR_UTF8,
+};
+
+json_error_codes json_get_last_error_code();
+const char *json_get_last_error_msg();
+void json_set_last_error_code(json_error_codes ec);
+
 #endif // incl_HPHP_JSON_PARSER_H_

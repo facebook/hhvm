@@ -48,9 +48,53 @@
         {
             "name": "JSON_FB_EXTRA_ESCAPES",
             "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_NONE",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_DEPTH",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_STATE_MISMATCH",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_CTRL_CHAR",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_SYNTAX",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_UTF8",
+            "type": "Int64"
         }
     ],
     "funcs": [
+        {
+            "name": "json_last_error",
+            "desc": "Returns the last JSON error that occurred.",
+            "return": {
+                "type": "Int32",
+                "desc": "The JSON error code for the last error."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "json_last_error_msg",
+            "desc": "Returns the message from the JSON error that occurred.",
+            "return": {
+                "type": "String",
+                "desc": "The message corresponding to the last JSON error code."
+            },
+            "args": [
+            ]
+        },
         {
             "name": "json_encode",
             "desc": "Returns a string containing the JSON representation of value.",

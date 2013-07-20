@@ -1141,6 +1141,7 @@ static int execute_program_impl(int argc, char** argv) {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
       RuntimeOption::EnableDebugger = true;
       po.debugger_options.fileName = file;
+      po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =
         Eval::Debugger::StartClient(po.debugger_options);
       if (!localProxy) {
@@ -1456,7 +1457,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
-        include_impl_invoke(cmd.c_str(), once);
+         include_impl_invoke(cmd.c_str(), once);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);

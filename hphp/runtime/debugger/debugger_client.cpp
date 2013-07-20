@@ -118,6 +118,9 @@ void DebuggerClient::onSignal(int sig) {
 
 int DebuggerClient::pollSignal() {
   TRACE(2, "DebuggerClient::pollSignal\n");
+  if (m_scriptMode) {
+    print(".....Debugger client still waiting for server response.....");
+  }
   int ret = m_signum;
   m_signum = CmdSignal::SignalNone;
   return ret;
@@ -397,7 +400,7 @@ String DebuggerClient::FormatTitle(const char *title) {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerClient::DebuggerClient(std::string name /* = "" */)
-    : m_tutorial(0), m_printFunction(""),
+    : m_tutorial(0), m_printFunction(""), m_scriptMode(false),
       m_logFile(""), m_logFileHandler(nullptr),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand),
@@ -608,12 +611,18 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     if (!options.configFName.empty()) {
       m_configFileName = options.configFName;
     }
-    m_options.user = Process::GetCurrentUser();
+    if (options.user.empty())
+      m_options.user = Process::GetCurrentUser();
   }
 
   usageLogEvent("init");
 
   loadConfig();
+
+  if (m_scriptMode) {
+    print("running in script mode, pid=%d\n",
+        (int32_t)Process::GetProcessId());
+  }
 
   if (!options.cmds.empty()) {
     RuntimeOption::EnableDebuggerColor = false;
@@ -1122,6 +1131,9 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
       console(); // Prompt loop
       m_inputState = TakingInterrupt;
       m_machine->m_interrupting = false; // Machine is running again.
+      if (m_scriptMode) {
+        print("Waiting for server response");
+      }
     }
   }
   throw DebuggerClientExitException(); // Stopped, so exit.
@@ -2347,6 +2359,7 @@ void DebuggerClient::loadConfig() {
   }
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
+  m_scriptMode = m_config["ScriptMode"].getBool();
   std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
   setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
   setDebuggerClientSmallStep(m_config["SmallStep"].getBool());

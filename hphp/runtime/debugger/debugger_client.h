@@ -365,6 +365,7 @@ private:
   int m_tutorial;
   std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
+  bool m_scriptMode; // Is this client being scripted by a test?
 
   DECLARE_DBG_SETTING
   DECLARE_DBG_CLIENT_SETTING
@@ -378,7 +379,7 @@ private:
 
   InputState m_inputState;
   int m_signum; // Set when ctrl-c is pressed, used by signal polling
-  int m_sigTime; // The last time ctrl-c was recgonized
+  int m_sigTime; // The last time ctrl-c was recognized
 
   // auto-completion states
   int m_acLen;

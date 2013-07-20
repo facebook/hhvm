@@ -163,6 +163,7 @@ function map_convenience_filename($file) {
   $mappage = array(
     'quick'    => 'hphp/test/quick',
     'slow'     => 'hphp/test/slow',
+    'debugger' => 'hphp/test/server/debugger/tests',
     'zend'     => 'hphp/test/zend/good',
     'zend_bad' => 'hphp/test/zend/bad',
     'facebook' => 'hphp/facebook/test',

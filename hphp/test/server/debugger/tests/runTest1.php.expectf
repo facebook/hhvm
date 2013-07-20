@@ -1,0 +1,94 @@
+
+Connecting to %s
+Attaching to debugger's default sandbox and pre-loading, please wait...
+break break1.php:7
+Breakpoint 1 set on line 7 of break1.php
+But wont break until file break1.php has been loaded.
+continue 
+Waiting for server response
+Requesting test1.php
+Breakpoint 1 reached at foo() on line 7 of %s/break1.php
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+   8 }
+
+variable
+$x = "test_break() in test1.php"
+$y = "test_break() in test1.php_suffix"
+break clear all
+All breakpoints are cleared.
+break foo()
+Breakpoint 1 set upon entering foo()
+continue
+Waiting for server response
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+
+break clear all
+All breakpoints are cleared.
+break cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj()
+continue
+Waiting for server response
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12     error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+break cls::pubCls()
+Breakpoint 1 set upon entering cls::pubCls()
+continue
+Waiting for server response
+Breakpoint 1 reached at cls::pubCls() on line 15 of %s/break1.php
+  14   public static function pubCls($x) {
+  15     error_log("pubCls:".$x);
+  16   }
+
+break clear all
+All breakpoints are cleared.
+continue
+Waiting for server response
+Break at cls::pubHardBreak() on line 19 of %s/break1.php
+  18     error_log("pubHardBreak:".$x);
+  19     hphpd_break();
+  20     error_log("pubHardBreak:done");
+
+continue
+Waiting for server response
+sending SIGINT to the debugger client.
+Pausing program execution, please wait...
+Break at test_sleep() on line 17 of %s/test1.php
+  16   // $a will be set to 0 by debugger after interrupt
+  17   while ($a == 1) { sleep(1); }
+  18   return $a;
+
+@ $a = 0
+
+break test1.php:18
+Breakpoint 1 set on line 18 of test1.php
+continue
+Waiting for server response
+Breakpoint 1 reached at test_sleep() on line 18 of %s/test1.php
+  17   while ($a == 1) { sleep(1); }
+  18   return $a;
+  19 }
+
+p $a
+0
+break clear all
+All breakpoints are cleared.
+break end test1.php
+Breakpoint 1 set end of request or start of psp when request is test1.php
+continue
+Waiting for server response
+Web request /test1.php ended.
+break psp test1.php
+Breakpoint 2 set end of psp when request is test1.php
+continue
+Waiting for server response
+Post-Send Processing for /test1.php was ended.
+quit

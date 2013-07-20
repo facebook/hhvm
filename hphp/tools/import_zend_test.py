@@ -617,6 +617,10 @@ def walk(filename, source):
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
     if '/ext-spl/SplFileObject_rewind_error001.php' in full_dest_filename:
         test = test.replace("?>", "unlink('SplFileObject_rewind_error001.csv');\n?>")
+    if '/ext-zlib/gzfile_basic.php' in full_dest_filename:
+        test = test.replace("plainfile.txt.gz", "gzfile_basic.txt.gz")
+    if '/ext-zlib/gzfile_basic2.php' in full_dest_filename:
+        test = test.replace("plainfile.txt", "gzfile_basic2.txt")
 
     file(full_dest_filename, 'w').write(test)
 

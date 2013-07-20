@@ -57,6 +57,13 @@ namespace HPHP { namespace Util {
 #define ATTRIBUTE_COLD
 #endif
 
+// TODO (#2632955): Remove once 4.7.x+ is the minimum GCC supported
+#if defined(__linux__) && \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+#pragma GCC diagnostic error "-Wmaybe-uninitialized"
+#pragma GCC diagnostic error "-Wunused-variable"
+#endif
+
 #define ALWAYS_INLINE      __attribute__((always_inline))
 #define NEVER_INLINE       __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE

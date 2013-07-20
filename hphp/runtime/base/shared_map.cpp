@@ -274,8 +274,7 @@ ssize_t SharedMap::IterAdvance(const ArrayData* ad, ssize_t prev) {
 }
 
 ssize_t SharedMap::IterRewind(const ArrayData* ad, ssize_t prev) {
-  auto a = asSharedMap(ad);
-  assert(prev >= 0 && prev < a->m_size);
+  assert(prev >= 0 && prev < asSharedMap(ad)->m_size);
   ssize_t next = prev - 1;
   return next >= 0 ? next : invalid_index;
 }

@@ -59,6 +59,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/meta.h"
+#include "hphp/util/process.h"
 #include "hphp/util/util.h"
 #include "hphp/util/repo_schema.h"
 #include "hphp/util/cycles.h"
@@ -3824,7 +3825,7 @@ TranslatorX64::requestExit() {
   }
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
-            pthread_self(), s_writeLease.m_hintKept,
+            Process::GetThreadIdForTrace(), s_writeLease.m_hintKept,
             s_writeLease.m_hintGrabbed);
   PendQ::drain();
   Treadmill::finishRequest(g_vmContext->m_currentThreadIdx);

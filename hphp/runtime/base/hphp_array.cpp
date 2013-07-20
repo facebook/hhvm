@@ -1397,7 +1397,7 @@ ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
 // nvGetKey does not touch out->_count, so can be used
 // for inner or outer cells.
 void HphpArray::NvGetKeyVec(const ArrayData* ad, TypedValue* out, ssize_t pos) {
-  auto a = asVector(ad);
+  DEBUG_ONLY auto a = asVector(ad);
   assert(pos != ArrayData::invalid_index);
   assert(!isTombstone(a->m_data[pos].data.m_type));
   out->m_data.num = pos;

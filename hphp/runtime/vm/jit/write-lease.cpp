@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -77,7 +78,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
             pthread_mutex_lock(&m_lock) :
             pthread_mutex_trylock(&m_lock))) {
     TRACE(4, "thr%" PRIx64 ": acquired lease, called by %p,%p\n",
-          pthread_self(), __builtin_return_address(0),
+          Process::GetThreadIdForTrace(), __builtin_return_address(0),
           __builtin_return_address(1));
     if (debug) {
       pushRank(RankWriteLease);
@@ -86,7 +87,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
         TRACE(3,
               "thr%" PRIx64 ": acquired hinted lease"
               ", expired %" PRId64 "us ago\n",
-              pthread_self(), -expireDiff);
+              Process::GetThreadIdForTrace(), -expireDiff);
       } else if (expire != 0 && m_owner == pthread_self()) {
         m_hintKept++;
       }
@@ -100,7 +101,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   }
   if (blocking) {
     TRACE(3, "thr%" PRIx64 ": failed to acquired lease in blocking mode\n",
-          pthread_self());
+          Process::GetThreadIdForTrace());
   }
   return false;
 }
@@ -108,7 +109,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
 void Lease::drop(int64_t hintExpireDelay) {
   assert(amOwner());
   TRACE(4, "thr%" PRIx64 ": dropping lease, called by %p,%p\n",
-        pthread_self(), __builtin_return_address(0),
+        Process::GetThreadIdForTrace(), __builtin_return_address(0),
         __builtin_return_address(1));
   if (debug) {
     popRank(RankWriteLease);

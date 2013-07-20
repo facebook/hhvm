@@ -115,6 +115,21 @@ public:
     return pthread_self();
   }
 
+  /**
+   * Current thread's identifier.
+   */
+  static uint64_t GetThreadIdForTrace() {
+    // For tracing purposes this just needs to be unique, pthread_t is not
+    // portable but even if it's a pointer to a struct like on OSX this will
+    // produce a unique value. If we support platforms where this isn't the
+    // case we will need to revisit this.
+#ifdef __linux__
+    return pthread_self();
+#else
+    return (uint64_t)pthread_self();
+#endif
+  }
+
   /*
    * Thread's process identifier.
    */

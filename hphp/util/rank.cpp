@@ -18,6 +18,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 #ifdef DEBUG
@@ -44,10 +45,10 @@ void checkRank(Rank r) {
       if (r == RankLeaf) {
         fprintf(stderr,
                 "Rank violation in thr%" PRIx64 "! leaf lock from leaf rank; ",
-                pthread_self());
+                Process::GetThreadIdForTrace());
       } else {
         fprintf(stderr, "Rank violation in thr%" PRIx64 "! lock of rank %d; ",
-                pthread_self(), r);
+                Process::GetThreadIdForTrace(), r);
       }
       fprintf(stderr, "held locks:\n");
       for (int i = tl_curRankDepth - 1; i >= 0; --i) {

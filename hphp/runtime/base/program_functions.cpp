@@ -40,6 +40,7 @@
 #include "hphp/util/stack_trace.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/repo_schema.h"
+#include "hphp/util/current_executable.h"
 #include "hphp/runtime/base/stat_cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -1409,6 +1410,7 @@ void hphp_session_init() {
 
   EnvConstants *g = get_env_constants();
   g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
+  g->k_PHP_BINARY = current_executable_path();
 }
 
 bool hphp_is_warmup_enabled() {

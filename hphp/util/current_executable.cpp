@@ -13,25 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "gtest/gtest.h"
-#include "hphp/hhvm/process_init.h"
+
 #include "hphp/util/current_executable.h"
+#include <unistd.h>
+#include <limits.h>
 
-#include <string>
+namespace HPHP {
 
-int main(int argc, char** argv) {
-  std::string buf = HPHP::current_executable_path();
-  if (!buf.empty()) {
-    size_t idx = buf.length();
-    for (int i = 0; i < 4; i++) {
-      idx = buf.find_last_of('/', idx - 1);
-      assert(idx != std::string::npos);
-    }
-    std::string slib = buf.substr(0, idx);
-    slib += "/ext_hhvm/systemlib.php";
-    setenv("HHVM_SYSTEMLIB", slib.c_str(), true);
-  }
-  testing::InitGoogleTest(&argc, argv);
-  HPHP::init_for_unit_test();
-  return RUN_ALL_TESTS();
+std::string current_executable_path() {
+#ifdef __linux__
+  char result[PATH_MAX];
+  ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+  return std::string(result, (count > 0) ? count : 0);
+#elif defined(__APPLE__)
+  char result[PATH_MAX];
+  uint32_t size = sizeof(result);
+  uint32_t success = _NSGetExecutablePath(result, &size);
+  return std:string(result, (success == 0) ? size : 0);
+#else
+  // Return empty string for all other platforms for now (e.g. FreeBSD)
+  return std::string();
+#endif
+}
+
 }

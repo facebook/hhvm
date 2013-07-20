@@ -15,6 +15,7 @@
 */
 
 #include "hphp/util/embedded_data.h"
+#include "hphp/util/current_executable.h"
 
 #include "folly/ScopeGuard.h"
 
@@ -28,7 +29,6 @@
 #include <unistd.h>
 
 #ifdef __APPLE__
-#include <limits.h>
 #include <mach-o/dyld.h>
 #include <mach-o/getsect.h>
 #endif
@@ -44,7 +44,7 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 
   if (elf_version(EV_CURRENT) == EV_NONE) return false;
 
-  int fd = open("/proc/self/exe", O_RDONLY, 0);
+  int fd = open(current_executable_path().c_str(), O_RDONLY, 0);
   if (fd < 0) return false;
   SCOPE_EXIT { close(fd); };
 
@@ -78,9 +78,8 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 #else // __APPLE__
   const struct section_64 *sect = getsectbyname("__text", section);
   if (sect) {
-    char path[PATH_MAX];
-    uint32_t size = sizeof(path);
-    if (_NSGetExecutablePath(path, &size) == 0) {
+    string path = current_executable();
+    if (!path.empty()) {
       desc->m_filename = path;
     } else {
       return false;

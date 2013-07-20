@@ -72,9 +72,10 @@ struct EnvConstants {
   static void requestInit(EnvConstants* gt);
   static void requestExit();
   Variant __lvalProxy;
-  Variant stgv_Variant[2];
+  Variant stgv_Variant[3];
 #define k_SID stgv_Variant[0]
 #define k_PHP_SAPI stgv_Variant[1]
+#define k_PHP_BINARY stgv_Variant[2]
 };
 extern EnvConstants* get_env_constants();
 

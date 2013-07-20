@@ -34,6 +34,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/async_func.h"
+#include "hphp/util/current_executable.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/base/externals.h"
@@ -866,11 +867,11 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
      */
     string exe = po.outputDir + '/' + po.program;
     string repo = "repo=" + exe + ".hhbc";
-    char buf[PATH_MAX];
-    if (!realpath("/proc/self/exe", buf)) return -1;
+    string buf = current_executable_path();
+    if (buf.empty()) return -1;
 
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
-                           buf, exe.c_str(), 0 };
+                           buf.c_str(), exe.c_str(), 0 };
     string out;
     ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
@@ -909,8 +910,8 @@ int runTarget(const CompilerOptions &po) {
   // run the executable
   string cmd;
   if (po.format.find("exe") == string::npos) {
-    char buf[PATH_MAX];
-    if (!realpath("/proc/self/exe", buf)) return -1;
+    string buf = current_executable_path();
+    if (buf.empty()) return -1;
 
     cmd += buf;
     cmd += " -vRepo.Authoritative=true";

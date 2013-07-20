@@ -13,25 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "gtest/gtest.h"
-#include "hphp/hhvm/process_init.h"
-#include "hphp/util/current_executable.h"
+
+#ifndef incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_
+#define incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_
 
 #include <string>
 
-int main(int argc, char** argv) {
-  std::string buf = HPHP::current_executable_path();
-  if (!buf.empty()) {
-    size_t idx = buf.length();
-    for (int i = 0; i < 4; i++) {
-      idx = buf.find_last_of('/', idx - 1);
-      assert(idx != std::string::npos);
-    }
-    std::string slib = buf.substr(0, idx);
-    slib += "/ext_hhvm/systemlib.php";
-    setenv("HHVM_SYSTEMLIB", slib.c_str(), true);
-  }
-  testing::InitGoogleTest(&argc, argv);
-  HPHP::init_for_unit_test();
-  return RUN_ALL_TESTS();
+namespace HPHP {
+
+  std::string current_executable_path();
+
 }
+
+#endif // incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_

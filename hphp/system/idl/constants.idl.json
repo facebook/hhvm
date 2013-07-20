@@ -4765,7 +4765,7 @@
         },
         {
             "name": "OPENSSL_ALGO_RMD160",
-            "value": 10 
+            "value": 10
         },
         {
             "name": "OPENSSL_ALGO_SHA512",
@@ -4773,11 +4773,11 @@
         },
         {
             "name": "OPENSSL_ALGO_SHA384",
-            "value": 8 
+            "value": 8
         },
         {
             "name": "OPENSSL_ALGO_SHA256",
-            "value": 7 
+            "value": 7
         },
         {
             "name": "OPENSSL_ALGO_SHA224",
@@ -4930,6 +4930,10 @@
         {
             "name": "PEAR_INSTALL_DIR",
             "value": ""
+        },
+        {   "name": "PHP_BINARY",
+            "type": "String",
+            "desc": "Dynamic constant - current_executable_path()"
         },
         {
             "name": "PHP_BINARY_READ",

@@ -549,6 +549,10 @@ D:Str  = ConvCellToStr S0:Cell
   Convert S0 from its current type to the destination type, according to the PHP
   semantics of such a conversion.
 
+D:Cctx = ConvClsToCctx S0:Cls
+
+  Convert a class to a class context (i.e. the class with a 1 or'd
+  into the low bit).
 
 4. Boolean predicates
 
@@ -1288,6 +1292,11 @@ D:Gen = IncRef S0:Gen
   the ud-chain to be used to track whether the reference count is
   consumed or elidable.
 
+D:Ctx = IncRefCtx S0:Ctx
+
+  If the Ctx in S0 is a $this pointer, IncRef it.  If not, has the
+  same effects as Mov.
+
 DecRefLoc<localId> S0:FramePtr
 
   DecRef the local given by localId on the frame S0.
@@ -1541,6 +1550,22 @@ D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
   copies S1 number of parameters from S2 into the properties on the
   object.  Saves the $this and Func* from ActRec S2 into the object,
   and returns the object.
+
+StClosureCtx S0:Obj<Closure> S1:{Ctx|Nullptr}
+
+  Store the context represented by S1 into the closure object S0.  S1
+  may be a Nullptr when there is no context (i.e. the closure is being
+  used in a non-method).
+
+StClosureFunc<func> S0:Obj<Closure>
+
+  Store the Func* clone that should be used for calling this closure
+  into the closure object S0.
+
+StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
+
+  Store one of the closure environment arguments (i.e. from the
+  closure's use clause) from S1 into the closure object S0.
 
 D:Obj = CreateContFunc<origFunc,generatorFunc>
 

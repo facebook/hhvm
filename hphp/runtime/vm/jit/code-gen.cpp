@@ -401,7 +401,6 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor);
-CALL_OPCODE(CreateCl)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
@@ -2352,6 +2351,22 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
+  auto const src  = inst->src(0);
+  auto const sreg = m_regs[src].reg();
+  auto const dreg = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  if (dreg == InvalidReg) return;
+
+  if (src->isConst()) {
+    a.  movq  (reinterpret_cast<uintptr_t>(src->getValClass()) | 1, dreg);
+    return;
+  }
+  emitMovRegReg(a, sreg, dreg);
+  a.    orq   (1, dreg);
+}
+
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
@@ -3005,13 +3020,27 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* dst    = inst->dst();
-  SSATmp* src    = inst->src(0);
-  Type type = src->type();
+  SSATmp* dst = inst->dst();
+  SSATmp* src = inst->src(0);
+  Type type   = src->type();
 
   cgIncRefWork(type, src);
   shuffle2(m_as, m_regs[src].reg(0), m_regs[src].reg(1),
            m_regs[dst].reg(0), m_regs[dst].reg(1));
+}
+
+void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::Obj)) return cgIncRef(inst);
+
+  auto const src = m_regs[inst->src(0)].reg();
+  auto const dst = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  emitMovRegReg(a, src, dst);
+  a.    testb  (0x1, rbyte(dst));
+  ifThen(a, CC_Z, [&] {
+    emitIncRef(a, dst);
+  });
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
@@ -3621,11 +3650,30 @@ const Func* loadClassCtor(Class* cls) {
   return f;
 }
 
-ObjectData* createClHelper(Class* cls, int numArgs, ActRec* ar,
-                           TypedValue* sp) {
-  ObjectData* newObj = newInstance(cls);
-  newObj->incRefCount();
-  return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
+void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
+  auto const obj  = m_regs[inst->src(0)].reg();
+  auto const func = inst->extra<StClosureFunc>()->func;
+  auto& a = m_as;
+  a.    storeq  (func, obj[c_Closure::funcOffset()]);
+}
+
+void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
+  cgStore(
+    m_regs[inst->src(0)].reg(),
+    inst->extra<StClosureArg>()->offsetBytes,
+    inst->src(1)
+  );
+}
+
+void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
+  auto const obj = m_regs[inst->src(0)].reg();
+  auto const ctx = m_regs[inst->src(1)].reg();
+  auto& a = m_as;
+  if (inst->src(1)->isA(Type::Nullptr)) {
+    a.  storeq  (0,   obj[c_Closure::ctxOffset()]);
+  } else {
+    a.  storeq  (ctx, obj[c_Closure::ctxOffset()]);
+  }
 }
 
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
@@ -4033,7 +4081,6 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
   Block* label  = inst->taken();
-  // mov dst, [fp + 0x20]
   auto dstReg = m_regs[dst].reg();
 
   // the destination of LdThis could be dead but the instruction
@@ -4046,12 +4093,10 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   }
   if (label == NULL) return;  // no need to perform its checks
   if (dstReg != InvalidReg) {
-    // test 0x01, dst
     m_as.testb(1, rbyte(dstReg));
   } else {
     m_as.testb(1, m_regs[src].reg()[AROFF(m_this)]);
   }
-  // jnz label
   emitFwdJcc(CC_NZ, label);
 }
 

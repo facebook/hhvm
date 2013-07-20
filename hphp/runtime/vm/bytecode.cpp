@@ -6559,12 +6559,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCl(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(clsName);
-  Class* cls = Unit::loadClass(clsName);
-  c_Closure* cl = static_cast<c_Closure*>(newInstance(cls));
-  c_Closure* cl2 = cl->init(numArgs, m_fp, m_stack.top());
+  auto const cls = Unit::loadClass(clsName);
+  auto const cl = static_cast<c_Closure*>(newInstance(cls));
+  cl->init(numArgs, m_fp, m_stack.top());
   m_stack.ndiscard(numArgs);
-  assert(cl == cl2);
-  m_stack.pushObject(cl2);
+  m_stack.pushObject(cl);
 }
 
 static inline c_Continuation* createCont(const Func* origFunc,

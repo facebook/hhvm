@@ -1684,7 +1684,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     a.  loadq(rVmFp[AROFF(m_this)], rClosure);
 
     // Swap in the $this or late bound class
-    a.  loadq(rClosure[c_Closure::thisOffset()], rAsm);
+    a.  loadq(rClosure[c_Closure::ctxOffset()], rAsm);
     a.  storeq(rAsm, rVmFp[AROFF(m_this)]);
 
     a.  shrq(1, rAsm);

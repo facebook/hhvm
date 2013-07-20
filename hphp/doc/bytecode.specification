@@ -1818,7 +1818,7 @@ FCallArray    [F]  ->  [R]
   call the callee. When the callee returns, it will transfer the return value
   onto the caller's evaluation stack using the R flavor.
 
-FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
+FCallBuiltin  <total params> <passed params> <litstr id> [C|V..C|V]  -> [R]
 
   Optimized builtin call without an ActRec. This instruction attempts to
   lookup a builtin function named %3. If no function named %3 is defined,
@@ -3684,7 +3684,7 @@ AKExists    [C C] -> [C:Bool]
   or object, and raises a warning if $2 is not a string, integer, or
   null.
 
-CreateCl <num args> <class name>  [F..F]  ->  [C]
+CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
 
   Creates an instance of <class name> and pushes it on the stack.  The
   class named by %2 must be a subclass of "Closure", and must be

@@ -336,6 +336,7 @@ O(LdThis,                       D(Obj), S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
+O(ConvClsToCctx,               D(Cctx), S(Cls),                            C) \
 O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
 O(LdCctx,                      D(Cctx), S(FramePtr),                       C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
@@ -379,10 +380,9 @@ O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                     D(Obj), S(Cls),                            N) \
 O(AllocObjFast,                 D(Obj), NA,                                N) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
-O(CreateCl,                     D(Obj), C(Cls)                                \
-                                          C(Int)                              \
-                                          S(FramePtr)                         \
-                                          S(StkPtr),                   Mem|N) \
+O(StClosureFunc,                    ND, S(Obj),                            E) \
+O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
+O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
@@ -433,6 +433,7 @@ O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
+O(IncRefCtx,                    D(Ctx), S(Ctx),                        PRc|P) \
 O(DecRefLoc,                        ND, S(FramePtr),            N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefThis,                       ND, S(FramePtr),            N|E|Mem|Refs) \
@@ -839,6 +840,7 @@ inline Type typeForConst(TCA)                { return Type::TCA; }
 inline Type typeForConst(double)             { return Type::Dbl; }
 inline Type typeForConst(SetOpOp)            { return Type::Int; }
 inline Type typeForConst(IncDecOp)           { return Type::Int; }
+inline Type typeForConst(std::nullptr_t)     { return Type::Nullptr; }
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
   // TODO: Task #2124292, Reintroduce StaticArr

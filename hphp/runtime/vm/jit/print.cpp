@@ -178,7 +178,7 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     } else {
       os << "Array(" << arr << ")";
     }
-  } else if (t.isNull()) {
+  } else if (t.isNull() || t.subtypeOf(Type::Nullptr)) {
     os << t.toString();
   } else if (t.subtypeOf(Type::Func)) {
     auto func = c->as<const Func*>();

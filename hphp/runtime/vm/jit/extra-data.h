@@ -280,6 +280,16 @@ struct ReqRetransOptData : IRExtraData {
 };
 
 /*
+ * Offset to a TypedValue from some base pointer, in bytes.  (E.g. to
+ * a object property slot.)
+ */
+struct PropByteOffset : IRExtraData {
+  explicit PropByteOffset(size_t offsetBytes) : offsetBytes(offsetBytes) {}
+  std::string show() const { return folly::to<std::string>(offsetBytes); }
+  size_t offsetBytes;
+};
+
+/*
  * DefInlineFP is present when we need to create a frame for inlining.
  * This instruction also carries some metadata used by tracebuilder to
  * track state during an inlined call.
@@ -454,6 +464,8 @@ X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
+X(StClosureFunc,                FuncData);
+X(StClosureArg,                 PropByteOffset);
 
 #undef X
 

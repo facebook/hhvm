@@ -1939,6 +1939,8 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   emitFPushCtorCommon(ssaCls, obj, func, numParams, catchTrace2);
 }
 
+const StaticString s_uuinvoke("__invoke");
+
 /*
  * The CreateCl opcode is specified as not being allowed before the
  * class it creates exists, and closure classes are always unique.
@@ -1948,19 +1950,45 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
  * so we can just burn it into the TC without using TargetCache.
  */
 void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
-  auto const sp = spillStack();
   auto const cls = Unit::lookupUniqueClass(lookupStringId(funNameStrId));
+  auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
+  auto const clonedFunc = invokeFunc->cloneAndSetClass(curClass());
   assert(cls && (cls->attrs() & AttrUnique));
 
-  auto const closure = gen(
-    CreateCl,
-    cns(cls),
-    cns(numParams),
-    m_tb->fp(),
-    sp
-  );
+  // Although closures can't have destructors, destructing the
+  // captured values (or captured $this) can lead to user-visible
+  // side-effects, so we can't use AllocObjFast if
+  // EnableObjDestructCall is on.
+  auto const closure =
+    gen(IncRef,
+      RuntimeOption::EnableObjDestructCall ? gen(AllocObj, cns(cls))
+                                           : gen(AllocObjFast, ClassData(cls))
+    );
 
-  discard(numParams);
+  auto const ctx = [&]{
+    if (!curClass()) return cns(nullptr);
+    auto const ldctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
+    if (invokeFunc->attrs() & AttrStatic) {
+      return gen(ConvClsToCctx, gen(LdClsCtx, ldctx));
+    }
+    return gen(IncRefCtx, ldctx);
+  }();
+  gen(StClosureCtx, closure, ctx);
+  gen(StClosureFunc, FuncData(clonedFunc), closure);
+
+  SSATmp* args[numParams];
+  for (int32_t i = 0; i < numParams; ++i) {
+    args[numParams - i - 1] = popF();
+  }
+  for (int32_t i = 0; i < numParams; ++i) {
+    gen(
+      StClosureArg,
+      PropByteOffset(cls->declPropOffset(i)),
+      closure,
+      args[i]
+    );
+  }
+
   push(closure);
 }
 

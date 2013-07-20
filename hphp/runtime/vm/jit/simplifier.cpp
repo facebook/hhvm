@@ -382,6 +382,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
+  case IncRefCtx:    return simplifyIncRefCtx(inst);
   case CheckType:
   case AssertType:   return simplifyCheckType(inst);
   case CheckStk:     return simplifyCheckStk(inst);
@@ -1734,6 +1735,13 @@ SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (!isRefCounted(src)) {
     return src;
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyIncRefCtx(IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::Obj)) {
+    inst->setOpcode(IncRef);
   }
   return nullptr;
 }

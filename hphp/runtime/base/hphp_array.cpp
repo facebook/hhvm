@@ -1111,25 +1111,29 @@ static inline bool isContainer(const TypedValue& tv) {
 ArrayData* HphpArray::LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
                                  bool copy) {
   auto a = asVector(ad);
-  return (!copy ? a : a->copyImpl())->addLvalImpl(k, &ret);
+  if (copy) a = a->copyVec();
+  return a->addLvalImpl(k, &ret);
 }
 
 ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                               bool copy) {
   auto a = asGeneric(ad);
-  return (!copy ? a : a->copyImpl())->addLvalImpl(k, &ret);
+  if (copy) a = a->copyGeneric();
+  return a->addLvalImpl(k, &ret);
 }
 
 ArrayData* HphpArray::LvalStrVec(ArrayData* ad, StringData* key, Variant*& ret,
                                  bool copy) {
   auto a = asVector(ad);
-  return (!copy ? a : a->copyImpl())->addLvalImpl(key, key->hash(), &ret);
+  if (copy) a = a->copyVec();
+  return a->addLvalImpl(key, key->hash(), &ret);
 }
 
 ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
                               bool copy) {
   auto a = asGeneric(ad);
-  return (!copy ? a : a->copyImpl())->addLvalImpl(key, key->hash(), &ret);
+  if (copy) a = a->copyGeneric();
+  return a->addLvalImpl(key, key->hash(), &ret);
 }
 
 ArrayData *HphpArray::CreateLvalPtrVec(ArrayData* ad, StringData* key,
@@ -1254,14 +1258,14 @@ ArrayData*
 HphpArray::SetRefStrVec(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
+  // todo t2606310: key can't exist.  use add/findForNewInsert
   return a->vectorToGeneric()->updateRef(k, v);
 }
 
 ArrayData*
 HphpArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   auto a = asGeneric(ad);
-  if (copy) a = a->copyVec();
-  // todo t2606310: key can't exist.  use add/findForNewInsert
+  if (copy) a = a->copyGeneric();
   return a->updateRef(k, v);
 }
 
@@ -1341,7 +1345,7 @@ ArrayData*
 HphpArray::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
   assert(!ad->exists(k));
   auto a = asGeneric(ad);
-  if (copy) a = a->copyVec();
+  if (copy) a = a->copyGeneric();
   return a->addLvalImpl(k, k->hash(), &ret);
 }
 
@@ -1426,7 +1430,7 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
 
 ArrayData* HphpArray::RemoveIntVec(ArrayData* ad, int64_t k, bool copy) {
   auto a = asVector(ad);
-  if (copy) a = a->copyImpl();
+  if (copy) a = a->copyVec();
   // todo t2606310: what is probability of (k == size-1)
   if (size_t(k) < a->m_size) {
     a->vectorToGeneric();
@@ -1437,21 +1441,21 @@ ArrayData* HphpArray::RemoveIntVec(ArrayData* ad, int64_t k, bool copy) {
 
 ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asGeneric(ad);
-  if (copy) a = a->copyImpl();
+  if (copy) a = a->copyGeneric();
   return a->erase(a->findForInsert(k));
 }
 
 ArrayData*
 HphpArray::RemoveStrVec(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asVector(ad);
-  if (copy) a = a->copyImpl();
+  if (copy) a = a->copyVec();
   return a;
 }
 
 ArrayData*
 HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asGeneric(ad);
-  if (copy) a = a->copyImpl();
+  if (copy) a = a->copyGeneric();
   return a->erase(a->findForInsert(key, key->hash()));
 }
 
@@ -1665,7 +1669,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems, bool copy) {
 
 ArrayData* HphpArray::PopVec(ArrayData* ad, Variant& value) {
   auto a = asVector(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
+  if (a->getCount() > 1) a = a->copyVec();
   if (a->m_size > 0) {
     auto i = a->m_size - 1;
     value = tvAsCVarRef(&a->m_data[i].data);
@@ -1680,7 +1684,7 @@ ArrayData* HphpArray::PopVec(ArrayData* ad, Variant& value) {
 
 ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asGeneric(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
+  if (a->getCount() > 1) a = a->copyGeneric();
   Elm* elms = a->m_data;
   ElmInd pos = IterEnd(a);
   if (validElmInd(pos)) {

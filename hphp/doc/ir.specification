@@ -747,11 +747,12 @@ D:Obj = LdThis S0:FramePtr [ -> L ]
   in S0 is not, this instruction does not load it into D and transfers
   control to the exit label L.
 
-D:Ctx = LdCtx S0:FramePtr S1:Func
+D:Ctx = LdCtx<func> S0:FramePtr
 
   Loads into D the value of the m_this/m_cls field out of the frame
-  pointer S0 in the function given by S1. The result could be either
-  an object representing the this pointer or a class context.
+  pointer S0, which must be a frame of the function in the function
+  parameter. The result could be either an object representing the
+  this pointer or a class context.
 
 D:Cctx = LdCctx S0:FramePtr
 

@@ -140,6 +140,18 @@ struct ClassData : IRExtraData {
   const Class* cls;
 };
 
+struct FuncData : IRExtraData {
+  explicit FuncData(const Func* func) : func(func) {}
+
+  bool cseEquals(FuncData o) const { return func == o.func; }
+  size_t cseHash() const { return std::hash<const Func*>()(func); }
+  std::string show() const {
+    return folly::to<std::string>(func->fullName()->data());
+  }
+
+  const Func* func;
+};
+
 struct FPushCufData : IRExtraData {
   FPushCufData(uint32_t a, int32_t id)
     : args(a), iterId(id)
@@ -368,6 +380,7 @@ X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
 X(DecodeCufIter,                IterId);
 X(AllocObjFast,                 ClassData);
+X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);
 X(DefConst,                     ConstData);
 X(LdConst,                      ConstData);

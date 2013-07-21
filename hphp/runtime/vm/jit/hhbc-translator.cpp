@@ -601,7 +601,7 @@ void HhbcTranslator::emitLateBoundCls() {
     emitInterpOne(Type::Cls, 0);
     return;
   }
-  auto const ctx = gen(LdCtx, m_tb->fp(), cns(curFunc()));
+  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   push(gen(LdClsCtx, ctx));
 }
 
@@ -1153,7 +1153,7 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
     ? gen(
         CreateContMeth,
         CreateContData { origFunc, genFunc },
-        gen(LdCtx, m_tb->fp(), cns(curFunc()))
+        gen(LdCtx, FuncData(curFunc()), m_tb->fp())
       )
     : gen(
         CreateContFunc,
@@ -1755,7 +1755,6 @@ void HhbcTranslator::emitFPushCufIter(int32_t numParams,
 
 void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
                                     const Func* callee, int numArgs) {
-  const Func* curFunc = this->curFunc();
   const bool safe = op == OpFPushCufSafe;
   const bool forward = op == OpFPushCufF;
 
@@ -1775,7 +1774,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
   SSATmp* func = cns(callee);
   if (cls) {
     if (forward) {
-      ctx = gen(LdCtx, m_tb->fp(), cns(curFunc));
+      ctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
       ctx = gen(GetCtxFwdCall, ctx, cns(callee));
     } else {
       ctx = genClsMethodCtx(callee, cls);
@@ -2175,7 +2174,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
                                            true /* staticLookup */);
-  SSATmp* curCtxTmp = gen(LdCtx, m_tb->fp(), cns(curFunc()));
+  SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   if (func) {
     SSATmp*   funcTmp = cns(func);
     SSATmp* newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);

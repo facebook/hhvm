@@ -4029,8 +4029,8 @@ void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
-  PhysReg dstReg = m_regs[inst->dst()].reg();
-  PhysReg srcReg = m_regs[inst->src(0)].reg();
+  auto const dstReg = m_regs[inst->dst()].reg();
+  auto const srcReg = m_regs[inst->src(0)].reg();
   if (dstReg != InvalidReg) {
     m_as.loadq(srcReg[AROFF(m_this)], dstReg);
   }

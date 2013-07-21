@@ -1687,12 +1687,8 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     a.  loadq(rClosure[c_Closure::ctxOffset()], rAsm);
     a.  storeq(rAsm, rVmFp[AROFF(m_this)]);
 
-    a.  shrq(1, rAsm);
-    if (func->attrs() & AttrStatic) {
-      UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
-      astubs.shlq(1, rAsm);
-      emitIncRef(astubs, rAsm, KindOfObject);
-    } else {
+    if (!(func->attrs() & AttrStatic)) {
+      a.shrq(1, rAsm);
       JccBlock<CC_BE> ifRealThis(a);
       a.shlq(1, rAsm);
       emitIncRef(rAsm, KindOfObject);

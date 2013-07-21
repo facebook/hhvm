@@ -3582,8 +3582,21 @@ ObjectData* createClHelper(Class* cls, int numArgs, ActRec* ar,
 }
 
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
-  const Class* cls = inst->src(0)->getValClass();
-  auto dstReg = m_regs[inst->dst()].reg();
+  auto const cls    = inst->extra<AllocObjFast>()->cls;
+  auto const dstReg = m_regs[inst->dst()].reg();
+
+  // If it's an extension class with a custom instance initializer,
+  // that init function does all the work.
+  if (cls->instanceCtor()) {
+    cgCallHelper(m_as,
+                 (TCA)cls->instanceCtor(),
+                 dstReg,
+                 SyncOptions::kSyncPoint,
+                 ArgGroup(m_regs)
+                   .immPtr(cls)
+    );
+    return;
+  }
 
   // First, make sure our property init vectors are all set up
   bool props = cls->pinitVec().size() > 0;
@@ -3615,22 +3628,14 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   }
 
   // Next, allocate the object
-  if (cls->instanceCtor()) {
-    cgCallHelper(m_as,
-                 (TCA)cls->instanceCtor(),
-                 dstReg,
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).imm((uint64_t)cls));
-  } else {
-    size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
-    int allocator = object_alloc_size_to_index(size);
-    assert(allocator != -1);
-    cgCallHelper(m_as,
-                 (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
-                 dstReg,
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
-  }
+  size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
+  int allocator = object_alloc_size_to_index(size);
+  assert(allocator != -1);
+  cgCallHelper(m_as,
+               (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
+               dstReg,
+               SyncOptions::kSyncPoint,
+               ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
 
   // Set the attributes, if any
   int odAttrs = cls->getODAttrs();

@@ -132,6 +132,14 @@ struct IterId : IRExtraData {
   uint32_t iterId;
 };
 
+struct ClassData : IRExtraData {
+  explicit ClassData(const Class* cls) : cls(cls) {}
+  std::string show() const {
+    return folly::to<std::string>(cls->name()->data());
+  }
+  const Class* cls;
+};
+
 struct FPushCufData : IRExtraData {
   FPushCufData(uint32_t a, int32_t id)
     : args(a), iterId(id)
@@ -359,6 +367,7 @@ X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
 X(DecodeCufIter,                IterId);
+X(AllocObjFast,                 ClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(DefConst,                     ConstData);
 X(LdConst,                      ConstData);

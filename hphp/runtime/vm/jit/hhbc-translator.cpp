@@ -1917,21 +1917,13 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     }
   }
 
-  SSATmp* clss = nullptr;
-  if (persistentCls) {
-    clss = cns(cls);
-  } else {
-    clss = gen(LdClsCached, catchTrace1, cns(className));
-  }
-
-  SSATmp* obj = nullptr;
-  if (fastAlloc) {
-    obj = gen(IncRef, gen(AllocObjFast, clss));
-  } else {
-    obj = gen(IncRef, gen(AllocObj, clss));
-  }
-
-  emitFPushCtorCommon(clss, obj, func, numParams, catchTrace2);
+  auto const ssaCls =
+    persistentCls ? cns(cls)
+                  : gen(LdClsCached, catchTrace1, cns(className));
+  auto const obj =
+    fastAlloc ? gen(IncRef, gen(AllocObjFast, ClassData(cls)))
+              : gen(IncRef, gen(AllocObj, ssaCls));
+  emitFPushCtorCommon(ssaCls, obj, func, numParams, catchTrace2);
 }
 
 /*

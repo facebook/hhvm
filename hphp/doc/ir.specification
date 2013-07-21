@@ -953,11 +953,16 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
-D:Obj = AllocObjFast S1:ConstCls
+D:Obj = AllocObjFast<class>
 
-  Allocate a new object of class S1 where S1 is persistent and able to
-  be instantiated (i.e., S1 is not an abstract class, interface, or
-  trait).
+  Allocate a new object of the specified class, which must be
+  persistent and able to be instantiated (i.e., S1 is not an abstract
+  class, interface, or trait).  The class' constructor is also assumed
+  to be accessible in the current context.
+
+  This instruction does not handle adding the object to the global
+  destructor list, so currently is not used when
+  RuntimeOption::EnableObjDestructCall is true.
 
 D:Arr = NewArray S0:ConstInt
 

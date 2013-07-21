@@ -223,7 +223,7 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
     if (!o_properties.get()) {
       thiz->initDynProps();
     }
-    o_properties.get()->createLvalPtr(propName, *(Variant**)(&ret), false);
+    o_properties.get()->lval(propName, *(Variant**)(&ret), false);
     return (Variant*)ret;
   }
 
@@ -1020,8 +1020,8 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
         if (o_properties.get() == nullptr) {
           initDynProps();
         }
-        o_properties.get()->createLvalPtr(*(const String*)&key,
-                                          *(Variant**)(&retval), false);
+        o_properties.get()->lval(*(const String*)&key,
+                                 *(Variant**)(&retval), false);
       } else {
         retval = (TypedValue*)&init_null_variant;
       }
@@ -1186,8 +1186,8 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     if (o_properties.get() == nullptr) {
       initDynProps();
     }
-    o_properties.get()->createLvalPtr(*(const String*)&key,
-                                      *(Variant**)(&propVal), false);
+    o_properties.get()->lval(*(const String*)&key,
+                             *(Variant**)(&propVal), false);
     // don't write propVal->_count because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
@@ -1201,8 +1201,8 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     if (o_properties.get() == nullptr) {
       initDynProps();
     }
-    o_properties.get()->createLvalPtr(*(const String*)&key,
-                                      *(Variant**)(&propVal), false);
+    o_properties.get()->lval(*(const String*)&key,
+                             *(Variant**)(&propVal), false);
     // don't write propVal->_count because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
@@ -1259,8 +1259,8 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     if (o_properties.get() == nullptr) {
       initDynProps();
     }
-    o_properties.get()->createLvalPtr(*(const String*)&key,
-                                      *(Variant**)(&propVal), false);
+    o_properties.get()->lval(*(const String*)&key,
+                             *(Variant**)(&propVal), false);
     // don't write propVal->_count because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
@@ -1274,8 +1274,8 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     if (o_properties.get() == nullptr) {
       initDynProps();
     }
-    o_properties.get()->createLvalPtr(*(const String*)&key,
-                                      *(Variant**)(&propVal), false);
+    o_properties.get()->lval(*(const String*)&key,
+                             *(Variant**)(&propVal), false);
     // don't write propVal->_count because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
@@ -1449,7 +1449,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
       TypedValue* val = props->nvGet(strKey);
       TypedValue* retval;
       auto cloneProps = clone->o_properties.get();
-      cloneProps->createLvalPtr(strKey, *(Variant**)&retval, false);
+      cloneProps->lval(strKey, *(Variant**)&retval, false);
       tvDupFlattenVars(val, retval, cloneProps);
       iter = o_properties.get()->iter_advance(iter);
       decRefStr(strKey);

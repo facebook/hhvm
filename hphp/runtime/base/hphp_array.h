@@ -92,8 +92,6 @@ public:
   using ArrayData::exists;
   using ArrayData::lval;
   using ArrayData::lvalNew;
-  using ArrayData::createLvalPtr;
-  using ArrayData::getLvalPtr;
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
@@ -129,16 +127,6 @@ public:
                                bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* LvalNewVec(ArrayData*, Variant*& ret, bool copy);
-
-  // overrides ArrayData
-  static ArrayData* CreateLvalPtr(ArrayData*, StringData* k, Variant*& ret,
-                                  bool copy);
-  static ArrayData* GetLvalPtr(ArrayData*, StringData* k, Variant*& ret,
-                               bool copy);
-  static ArrayData* CreateLvalPtrVec(ArrayData*, StringData* k, Variant*& ret,
-                                     bool copy);
-  static ArrayData* GetLvalPtrVec(ArrayData*, StringData* k, Variant*& ret,
-                                  bool copy);
 
   // implements ArrayData
   static ArrayData* SetIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);

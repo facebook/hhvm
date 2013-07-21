@@ -789,9 +789,6 @@ class Variant : private TypedValue {
     return *ret;
   }
 
-  Variant *createLvalPtr(CStrRef key, bool forWrite);
-  Variant *getLvalPtr(CStrRef key, bool forWrite);
-
   Variant &lvalAt();
 
   static Variant &lvalInvalid();

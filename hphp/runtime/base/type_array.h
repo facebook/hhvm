@@ -298,9 +298,6 @@ class Array : protected SmartPtr<ArrayData> {
     return *ret;
   }
 
-  Variant *createLvalPtr(CStrRef key, bool forWrite);
-  Variant *getLvalPtr(CStrRef key, bool forWrite);
-
   Variant &lvalAt();
 
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {

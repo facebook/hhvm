@@ -333,25 +333,6 @@ ArrayData *PolicyArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
   return a;
 }
 
-ArrayData *PolicyArray::CreateLvalPtr(ArrayData* ad, StringData* k,
-                                      Variant *&ret, bool copy) {
-  auto a = asPolicyArray(ad);
-  APILOG(a) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
-  return a->addLval(k, ret, copy);
-}
-
-ArrayData *PolicyArray::GetLvalPtr(ArrayData* ad, StringData* k,
-                                   Variant *&ret, bool copy) {
-  auto a = asPolicyArray(ad);
-  APILOG(a) << "(" << keystr(k) << ", " << ret << ", " << copy << ")";
-  if (copy) a = asPolicyArray(Copy(a));
-  const auto pos = a->find(k, a->m_size);
-  ret = pos != PosType::invalid
-    ? &a->Store::lval(pos)
-    : nullptr;
-  return a;
-}
-
 template <class K>
 PolicyArray* PolicyArray::setImpl(K k, const Variant& v, bool copy) {
   APILOG(this) << "(" << keystr(k) << ", " << valstr(v) << ", " << copy

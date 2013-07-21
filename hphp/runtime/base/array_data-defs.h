@@ -78,17 +78,6 @@ inline ArrayData* ArrayData::lval(CVarRef k, Variant *&ret, bool copy) {
                         : lval(getStringKey(cell), ret, copy);
 }
 
-inline
-ArrayData *ArrayData::createLvalPtr(CStrRef k, Variant *&ret, bool copy) {
-  assert(IsValidKey(k));
-  return createLvalPtr(k.get(), ret, copy);
-}
-
-inline ArrayData *ArrayData::getLvalPtr(CStrRef k, Variant *&ret, bool copy) {
-  assert(IsValidKey(k));
-  return getLvalPtr(k.get(), ret, copy);
-}
-
 inline ArrayData* ArrayData::set(CStrRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
   return set(k.get(), v, copy);
@@ -235,16 +224,6 @@ inline ArrayData* ArrayData::lval(StringData* k, Variant*& ret, bool copy) {
 
 inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
   return g_array_funcs.lvalNew[m_kind](this, ret, copy);
-}
-
-inline ArrayData* ArrayData::createLvalPtr(StringData* k, Variant*& ret,
-                                           bool copy) {
-  return g_array_funcs.createLvalPtr[m_kind](this, k, ret, copy);
-}
-
-inline ArrayData* ArrayData::getLvalPtr(StringData* k, Variant*& ret,
-                                        bool copy) {
-  return g_array_funcs.getLvalPtr[m_kind](this, k, ret, copy);
 }
 
 inline ArrayData* ArrayData::setRef(int64_t k, CVarRef v, bool copy) {

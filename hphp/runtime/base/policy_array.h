@@ -386,16 +386,6 @@ public:
   static ArrayData *LvalNew(ArrayData* ad, Variant *&ret, bool copy);
 
   /**
-   * Helper functions used for getting a reference to elements of
-   * the dynamic property array in ObjectData or the local cache array
-   * in ShardMap.
-   */
-  static ArrayData *CreateLvalPtr(ArrayData*, StringData* k, Variant *&ret,
-                                  bool copy);
-  static ArrayData *GetLvalPtr(ArrayData*, StringData* k, Variant *&ret,
-                               bool copy);
-
-  /**
    * Setting a value at specified key. If "copy" is true, make a copy first
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.

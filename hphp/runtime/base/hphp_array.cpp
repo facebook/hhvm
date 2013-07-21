@@ -933,21 +933,7 @@ ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
 }
 
 ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
-  assert(pDest != nullptr);
-  if (isVector()) {
-    if (size_t(ki) < m_size) {
-      *pDest = &tvAsVariant(&m_data[ki].data);
-      return this;
-    }
-    if (size_t(ki) == m_size) {
-      auto& tv = allocNextElm(ki);
-      tvWriteNull(&tv);
-      *pDest = &(tvAsVariant(&tv));
-      return this;
-    }
-    vectorToGeneric();
-    // todo t2606310: we know key is new.  use add/findForNewInsert
-  }
+  assert(pDest && !isVector());
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     *pDest = &tvAsVariant(&m_data[*ei].data);
@@ -965,11 +951,7 @@ ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
 
 ArrayData* HphpArray::addLvalImpl(StringData* key, strhash_t h,
                                   Variant** pDest) {
-  assert(key != nullptr && pDest != nullptr);
-  if (isVector()) {
-    vectorToGeneric();
-    // todo t2606310: now we know key is new. use add/findForNewInsert
-  }
+  assert(key && pDest && !isVector());
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1112,7 +1094,18 @@ ArrayData* HphpArray::LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
                                  bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
-  return a->addLvalImpl(k, &ret);
+  if (size_t(k) < a->m_size) {
+    ret = &tvAsVariant(&a->m_data[k].data);
+    return a;
+  }
+  if (size_t(k) == a->m_size) {
+    auto& tv = a->allocNextElm(k);
+    tvWriteNull(&tv);
+    ret = &(tvAsVariant(&tv));
+    return a;
+  }
+  // todo t2606310: we know key is new.  use add/findForNewInsert
+  return a->vectorToGeneric()->addLvalImpl(k, &ret);
 }
 
 ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
@@ -1126,7 +1119,7 @@ ArrayData* HphpArray::LvalStrVec(ArrayData* ad, StringData* key, Variant*& ret,
                                  bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
-  return a->addLvalImpl(key, key->hash(), &ret);
+  return a->vectorToGeneric()->addLvalImpl(key, key->hash(), &ret);
 }
 
 ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
@@ -1134,42 +1127,6 @@ ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
   return a->addLvalImpl(key, key->hash(), &ret);
-}
-
-ArrayData *HphpArray::CreateLvalPtrVec(ArrayData* ad, StringData* key,
-                                       Variant*& ret, bool copy) {
-  auto a = asVector(ad);
-  if (copy) a = a->copyVec();
-  return a->vectorToGeneric()->addLvalImpl(key, key->hash(), &ret);
-  // todo: we know the key can't exist; use specialized addLvalImpl
-}
-
-ArrayData *HphpArray::CreateLvalPtr(ArrayData* ad, StringData* key,
-                                    Variant*& ret, bool copy) {
-  auto a = asGeneric(ad);
-  if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(key, key->hash(), &ret);
-}
-
-ArrayData *HphpArray::GetLvalPtrVec(ArrayData* ad, StringData* key,
-                                    Variant*& ret, bool copy) {
-  auto a = asVector(ad);
-  if (copy) a = a->copyVec();
-  // todo: we didn't have to copy since we didn't mutate.  Or, should
-  // we have just escalate to generic anyway?  and, why isn't this
-  // method const?
-  ret = nullptr;
-  return a;
-}
-
-ArrayData *HphpArray::GetLvalPtr(ArrayData* ad, StringData* key,
-                                 Variant*& ret, bool copy) {
-  auto a = asGeneric(ad);
-  if (copy) a = a->copyGeneric();
-  auto pos = a->find(key, key->hash());
-  ret = pos != ElmIndEmpty ? &tvAsVariant(&a->m_data[pos].data) :
-        nullptr;
-  return a;
 }
 
 ArrayData* HphpArray::LvalNewVec(ArrayData* ad, Variant*& ret, bool copy) {

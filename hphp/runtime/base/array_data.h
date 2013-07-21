@@ -261,18 +261,6 @@ public:
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
   /**
-   * Helper functions used for getting a reference to elements of
-   * the dynamic property array in ObjectData or the local cache array
-   * in ShardMap.
-   */
-  ArrayData *createLvalPtr(StringData* k, Variant *&ret, bool copy);
-  ArrayData *getLvalPtr(StringData* k, Variant *&ret, bool copy);
-  static ArrayData *CreateLvalPtr(ArrayData* ad, StringData* k,
-                                  Variant *&ret, bool copy);
-  static ArrayData *GetLvalPtr(ArrayData* ad, StringData* k,
-                               Variant *&ret, bool copy);
-
-  /**
    * Setting a value at specified key. If "copy" is true, make a copy first
    * then set the value. Return this if escalation is not needed, or an
    * escalated array data.
@@ -319,8 +307,6 @@ public:
   CVarRef get(CVarRef k, bool error = false) const;
   ArrayData *lval(CStrRef k, Variant *&ret, bool copy);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy);
-  ArrayData *createLvalPtr(CStrRef k, Variant *&ret, bool copy);
-  ArrayData *getLvalPtr(CStrRef k, Variant *&ret, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
   ArrayData *set(const StringData*, CVarRef, bool) = delete;
@@ -572,10 +558,6 @@ struct ArrayFunctions {
   ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
-  ArrayData* (*createLvalPtr[NK])(ArrayData*, StringData* k, Variant *&ret,
-                                  bool copy);
-  ArrayData* (*getLvalPtr[NK])(ArrayData*, StringData* k, Variant *&ret,
-                               bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);

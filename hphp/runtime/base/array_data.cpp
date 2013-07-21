@@ -146,16 +146,6 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::LvalNew,
     &NameValueTableWrapper::LvalNew,
     &PolicyArray::LvalNew },
-  // createLvalPtr
-  { &HphpArray::CreateLvalPtrVec, &HphpArray::CreateLvalPtr,
-    &ArrayData::CreateLvalPtr, // fatal
-    &ArrayData::CreateLvalPtr, // fatal
-    &PolicyArray::CreateLvalPtr },
-  // getLvalPtr
-  { &HphpArray::GetLvalPtrVec, &HphpArray::GetLvalPtr,
-    &ArrayData::GetLvalPtr, // fatal
-    &ArrayData::GetLvalPtr, // fatal
-    &PolicyArray::GetLvalPtr },
   // setRefInt
   { &HphpArray::SetRefIntVec, &HphpArray::SetRefInt,
     &SharedMap::SetRefInt,
@@ -446,16 +436,6 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   }
 
   return true;
-}
-
-ArrayData *ArrayData::CreateLvalPtr(ArrayData* ad, StringData* k,
-                                    Variant *&ret, bool copy) {
-  throw FatalErrorException("Unimplemented ArrayData::createLvalPtr");
-}
-
-ArrayData *ArrayData::GetLvalPtr(ArrayData* ad, StringData* k,
-                                 Variant *&ret, bool copy) {
-  throw FatalErrorException("Unimplemented ArrayData::getLvalPtr");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

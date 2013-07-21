@@ -1651,9 +1651,13 @@ static Array const_data;
 
 Variant f_fb_const_fetch(CVarRef key) {
   String k = key.toString();
-  Variant *ret = const_data.getLvalPtr(k, false);
-  if (ret) return *ret;
-  return false;
+  if (ArrayData* ad = const_data.get()) {
+    auto& v = ad->get(k, /*error*/false);
+    if (&v != &null_variant) {
+      return v;
+    }
+  }
+  return Variant(false);
 }
 
 void const_load_set(CStrRef key, CVarRef value) {

@@ -1219,22 +1219,6 @@ Variant &Variant::lvalRef(CVarRef k, Variant& tmp, ACCESSPARAMS_IMPL) {
   return Variant::LvalAtImpl0<CVarRef>(this, k, &tmp, false, flags);
 }
 
-Variant *Variant::createLvalPtr(CStrRef key, bool forWrite) {
-  Variant *t = m_type == KindOfRef ? m_data.pref->var() : this;
-  if (t->m_type == KindOfArray) {
-    return t->asArrRef().createLvalPtr(key, forWrite);
-  }
-  return nullptr;
-}
-
-Variant *Variant::getLvalPtr(CStrRef key, bool forWrite) {
-  Variant *t = m_type == KindOfRef ? m_data.pref->var() : this;
-  if (t->m_type == KindOfArray) {
-    return t->asArrRef().getLvalPtr(key, forWrite);
-  }
-  return nullptr;
-}
-
 Variant &Variant::lvalAt() {
   switch (m_type) {
   case KindOfUninit:

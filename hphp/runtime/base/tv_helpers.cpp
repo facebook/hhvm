@@ -79,10 +79,10 @@ bool tvIsPlausible(const TypedValue* tv) {
   return cellIsPlausible(tv);
 }
 
-bool varIsPlausible(const Var* var) {
-  assert(var);
-  assert(var->m_type == KindOfRef);
-  return tvIsPlausible(var);
+bool refIsPlausible(const Ref* ref) {
+  assert(ref);
+  assert(ref->m_type == KindOfRef);
+  return tvIsPlausible(ref);
 }
 
 inline void tvUnboxIfNeeded(TypedValue *tv) {

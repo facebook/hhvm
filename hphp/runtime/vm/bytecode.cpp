@@ -3486,16 +3486,16 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddElemC(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopAddElemV(PC& pc) {
   NEXT();
-  Var* v1 = m_stack.topV();
+  Ref* r1 = m_stack.topV();
   Cell* c2 = m_stack.indC(1);
   Cell* c3 = m_stack.indC(2);
   if (c3->m_type != KindOfArray) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
-    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(v1)));
+    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(r1)));
   } else {
-    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(v1)));
+    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(r1)));
   }
   m_stack.popV();
   m_stack.popC();
@@ -3514,12 +3514,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemC(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemV(PC& pc) {
   NEXT();
-  Var* v1 = m_stack.topV();
+  Ref* r1 = m_stack.topV();
   Cell* c2 = m_stack.indC(1);
   if (c2->m_type != KindOfArray) {
     raise_error("AddNewElemV: $2 must be an array");
   }
-  cellAsVariant(*c2).asArrRef().append(ref(tvAsCVarRef(v1)));
+  cellAsVariant(*c2).asArrRef().append(ref(tvAsCVarRef(r1)));
   m_stack.popV();
 }
 
@@ -4373,7 +4373,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
     if (val->m_type != KindOfRef) {                       \
       tvBox(val);                                         \
     }                                                     \
-    varDup(*val, *output);                                \
+    refDup(*val, *output);                                \
   } else {                                                \
     tvReadCell(val, output);                              \
   }                                                       \
@@ -4417,7 +4417,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetL(PC& pc) {
   NEXT();
   DECODE_HA(local);
-  Var* to = m_stack.allocV();
+  Ref* to = m_stack.allocV();
   TypedValue* fr = frame_local(m_fp, local);
   vgetl_body(fr, to);
 }
@@ -4462,7 +4462,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetM(PC& pc) {
     if (base->m_type != KindOfRef) {
       tvBox(base);
     }
-    varDup(*base, *tv1);
+    refDup(*base, *tv1);
   } else {
     tvWriteNull(tv1);
     tvBox(tv1);
@@ -5008,7 +5008,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopBindL(PC& pc) {
   NEXT();
   DECODE_HA(local);
-  Var* fr = m_stack.topV();
+  Ref* fr = m_stack.topV();
   TypedValue* to = frame_local(m_fp, local);
   tvBind(fr, to);
 }
@@ -5717,7 +5717,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
       if (base->m_type != KindOfRef) {
         tvBox(base);
       }
-      varDup(*base, *tv1);
+      refDup(*base, *tv1);
     } else {
       tvWriteNull(tv1);
       tvBox(tv1);
@@ -6128,18 +6128,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopWIterInitK(PC& pc) {
 
 
 inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
-                                              Offset offset, Var* v1,
+                                              Offset offset, Ref* r1,
                                               TypedValue *val,
                                               TypedValue *key) {
   bool hasElems = false;
-  TypedValue* rtv = v1->m_data.pref->tv();
+  TypedValue* rtv = r1->m_data.pref->tv();
   if (rtv->m_type == KindOfArray) {
-    hasElems = new_miter_array_key(it, v1->m_data.pref, val, key);
+    hasElems = new_miter_array_key(it, r1->m_data.pref, val, key);
   } else if (rtv->m_type == KindOfObject)  {
     Class* ctx = arGetContextClass(g_vmContext->getFP());
-    hasElems = new_miter_object(it, v1->m_data.pref, ctx, val, key);
+    hasElems = new_miter_object(it, r1->m_data.pref, ctx, val, key);
   } else {
-    hasElems = new_miter_other(it, v1->m_data.pref);
+    hasElems = new_miter_other(it, r1->m_data.pref);
   }
 
   if (!hasElems) {
@@ -6156,11 +6156,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterInit(PC& pc) {
   DECODE_IA(itId);
   DECODE(Offset, offset);
   DECODE_HA(val);
-  Var* v1 = m_stack.topV();
-  assert(v1->m_type == KindOfRef);
+  Ref* r1 = m_stack.topV();
+  assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
-  initIteratorM(pc, origPc, it, offset, v1, tv1, nullptr);
+  initIteratorM(pc, origPc, it, offset, r1, tv1, nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopMIterInitK(PC& pc) {
@@ -6170,12 +6170,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMIterInitK(PC& pc) {
   DECODE(Offset, offset);
   DECODE_HA(val);
   DECODE_HA(key);
-  Var* v1 = m_stack.topV();
-  assert(v1->m_type == KindOfRef);
+  Ref* r1 = m_stack.topV();
+  assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
-  initIteratorM(pc, origPc, it, offset, v1, tv1, tv2);
+  initIteratorM(pc, origPc, it, offset, r1, tv1, tv2);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIterNext(PC& pc) {

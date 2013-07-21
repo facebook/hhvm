@@ -36,7 +36,7 @@ class Variant;
  */
 bool tvIsPlausible(const TypedValue*);
 bool cellIsPlausible(const Cell*);
-bool varIsPlausible(const Var*);
+bool refIsPlausible(const Ref*);
 
 /*
  * Returns: true if the supplied TypedValue is KindOfDouble or
@@ -211,8 +211,8 @@ inline void cellCopy(const Cell& fr, Cell& to) {
   assert(cellIsPlausible(&fr));
   tvCopy(fr, to);
 }
-inline void varCopy(const Var& fr, Var& to) {
-  assert(varIsPlausible(&fr));
+inline void refCopy(const Ref& fr, Ref& to) {
+  assert(refIsPlausible(&fr));
   tvCopy(fr, to);
 }
 
@@ -236,13 +236,13 @@ inline void cellDup(const Cell& fr, Cell& to) {
 }
 
 /*
- * Duplicate a Var from one location to another.
+ * Duplicate a Ref from one location to another.
  *
  * This has the same effects as tvDup(fr, to), but is slightly more
  * efficient because we don't need to check the type tag.
  */
-inline void varDup(const Var& fr, Var& to) {
-  assert(varIsPlausible(&fr));
+inline void refDup(const Ref& fr, Ref& to) {
+  assert(refIsPlausible(&fr));
   to.m_data.num = fr.m_data.num;
   to.m_type = KindOfRef;
   tvIncRefNotShared(&to);
@@ -339,7 +339,7 @@ inline void tvBind(TypedValue* fr, TypedValue* to) {
   assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
-  varDup(*fr, *to);
+  refDup(*fr, *to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -423,15 +423,15 @@ inline const Variant& cellAsCVarRef(const Cell& cell) {
 }
 
 // Assumes 'tv' is live
-inline Variant& varAsVariant(Var& var) {
-  assert(varIsPlausible(&var));
-  return *(Variant*)(&var);
+inline Variant& refAsVariant(Ref& ref) {
+  assert(refIsPlausible(&ref));
+  return *(Variant*)(&ref);
 }
 
 // Assumes 'tv' is live
-inline const Variant& varAsCVarRef(const Var& var) {
-  assert(varIsPlausible(&var));
-  return *(const Variant*)(&var);
+inline const Variant& refAsCVarRef(const Ref& ref) {
+  assert(refIsPlausible(&ref));
+  return *(const Variant*)(&ref);
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {
@@ -448,7 +448,7 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
     fr = fr->m_data.pref->tv();
     cellDup(*fr, *to);
   } else {
-    varDup(*fr, *to);
+    refDup(*fr, *to);
   }
 }
 

@@ -132,13 +132,15 @@ private:
 
 /*
  * These may be used to provide a little more self-documentation about
- * whether typed values must be cells (not KindOfRef) or var (must be
+ * whether typed values must be cells (not KindOfRef) or ref (must be
  * KindOfRef).
  *
- * See bytecode.specification for details.
+ * See bytecode.specification for details.  Note that in
+ * bytecode.specification, refs are abbreviated as "V".
+ *
  */
 typedef TypedValue Cell;
-typedef TypedValue Var;
+typedef TypedValue Ref;
 
 /*
  * A TypedNum is a TypedValue that is either KindOfDouble or

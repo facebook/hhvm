@@ -746,10 +746,10 @@ public:
     return (Cell*)m_top;
   }
 
-  inline Var* ALWAYS_INLINE allocV() {
+  inline Ref* ALWAYS_INLINE allocV() {
     assert(m_top != m_elms);
     m_top--;
-    return (Var*)m_top;
+    return (Ref*)m_top;
   }
 
   inline TypedValue* ALWAYS_INLINE allocTV() {
@@ -777,10 +777,10 @@ public:
     return (Cell*)m_top;
   }
 
-  inline Var* ALWAYS_INLINE topV() {
+  inline Ref* ALWAYS_INLINE topV() {
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfRef);
-    return (Var*)m_top;
+    return (Ref*)m_top;
   }
 
   inline TypedValue* ALWAYS_INLINE topTV() {

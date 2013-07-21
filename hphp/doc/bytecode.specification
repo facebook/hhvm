@@ -100,26 +100,27 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in three flavors: cells, vars, and classrefs.
+variables. Values come in three flavors: cells, refs, and classrefs.
 
 A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a reference to data (for refcounted types). When a
-cell containing a reference is duplicated, the new cell will point to the same
-data as the original cell. When a cell containing a reference is duplicated or
+non-refcounted types) or a pointer to data (for refcounted types). When a
+cell containing a pointer is duplicated, the new cell will point to the same
+data as the original cell. When a cell containing a pointer is duplicated or
 discarded, the execution engine is responsible for honoring the data's refcount
 logic.
 
-A "var" is a structure that contains a reference to a cell. When a var is
-duplicated, the new var will point to the same cell as the original var. When
-a var is duplicated or destroyed, the execution engine is responsible for
-honoring the cell's refcount logic.
+A "ref" is a structure that contains a pointer to a cell container. When a
+ref is duplicated, the new ref will point to the same container as the
+original ref. When a ref is duplicated or destroyed, the execution engine is
+responsible for honoring the containers's refcount logic.  When the container
+is destroyed, the cell it contains is also destroyed.
 
 A "classref" is a structure that contains a reference to a class. When a
 classref is pushed onto the stack or popped of the stack, no refcounting is
 required.
 
 Values on the evaluation stack may be any of the three flavors listed above.
-Values stored in local variables may only be cells or vars.
+Values stored in local variables may only be cells or refs.
 
 
 Functions
@@ -529,7 +530,7 @@ parameters being passed.
 Flavor descriptors
 ------------------
 
-Any given value on the stack must either be a cell, var, or classref at run
+Any given value on the stack must either be a cell, ref, or classref at run
 time. However, at bytecode generation time the specific flavor of a value on
 the stack is not always known. HipHop bytecode uses symbols called "flavor
 descriptors" to precisely describe what is known at bytecode generation about
@@ -542,12 +543,12 @@ for each of the instruction's inputs.
 Here is a description of each flavor descriptor:
 
   C - cell; specifies that the value must be a cell at run time
-  V - var; specifies that the value must be a var at run time
+  V - ref; specifies that the value must be a ref at run time
   A - classref; specifies that the value must be a classref at run time
-  R - return value; specifies that the value may be a cell or a var at run
+  R - return value; specifies that the value may be a cell or a ref at run
         time; this flavor descriptor is used for return values from function
         calls
-  F - function argument; specifies that the value may be a cell or a var at run
+  F - function argument; specifies that the value may be a cell or a ref at run
         time; this flavor descriptor is used for parameter values that are
         about to be passed into a function
 
@@ -600,7 +601,7 @@ instruction must be empty.
 exactly one value and the flavor descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
 contain exactly one value and the flavor descriptor of the value must be the
-var. Finally, before executing the Unwind instruction, the evaluation stack
+ref. Finally, before executing the Unwind instruction, the evaluation stack
 must be empty.
 
 6) The code for the primary function body and fault funclets must be laid out
@@ -718,7 +719,7 @@ location descriptors is given below:
   S - static property; location is the static property whose class is given by
       a classref and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
-  R - return value; location is a temporary value given by a cell or a var
+  R - return value; location is a temporary value given by a cell or a ref
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
@@ -798,27 +799,27 @@ Dup    [C:<T>]  ->  [C:<T> C:<T>]
 
 Box    [C:<T>]  ->  [V:<T>]
 
-  Box. Creates a new var, sets the new var to point at a copy of cell $1, and
-  pushes the var onto the stack.
+  Box. Creates a new ref, sets the new ref to point at a copy of cell $1, and
+  pushes the ref onto the stack.
 
 Unbox    [V:<T>]  ->  [C:<T>]
 
-  Unbox. Creates a copy of the cell that var $1 points to, and pushes the cell
+  Unbox. Creates a copy of the cell that ref $1 points to, and pushes the cell
   onto the stack.
 
 BoxR    [R:<T>]  ->  [V:<T>]
 
-  Box. If $1 is a var at run time, this instruction does nothing.
+  Box. If $1 is a ref at run time, this instruction does nothing.
 
-  If $1 is a cell at run time, this instruction creates a new var, sets the new
-  var to point at a copy of cell $1, and pushes the var onto the stack.
+  If $1 is a cell at run time, this instruction creates a new ref, sets the new
+  ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
 UnboxR    [R:<T>]  ->  [C:<T>]
 
   Unbox. If $1 is a cell at run time, this instruction does nothing.
 
-  If $1 is a var at run time, this instruction creates a copy of the cell that
-  var $1 points to, and pushes the cell onto the stack.
+  If $1 is a ref at run time, this instruction creates a copy of the cell that
+  ref $1 points to, and pushes the cell onto the stack.
 
 
 2. Literal and constant instructions
@@ -1247,35 +1248,35 @@ CGetS    [C A]  ->  [C]
 
 VGetL <local variable id>    []  ->  [V]
 
-  Get local as var. This instruction boxes the local variable given by %1 if
-  necessary and pushes it onto the stack as a var. If the given local variable
+  Get local as ref. This instruction boxes the local variable given by %1 if
+  necessary and pushes it onto the stack as a ref. If the given local variable
   is not defined, this instruction defines it, sets it to null, boxes it, and
-  pushes a the value of the local variable onto the stack as a var.
+  pushes a the value of the local variable onto the stack as a ref.
 
 VGetN    [C]  ->  [V]
 
-  Get local as var. This instruction first computes x = (string)$1. Next, this
+  Get local as ref. This instruction first computes x = (string)$1. Next, this
   instruction boxes the local variable named x (if the local is a cell) and
-  pushes its value onto the stack as a var. If there is no local variable
+  pushes its value onto the stack as a ref. If there is no local variable
   defined named x, this instruction defines a local variable named x, sets it
   to null, boxes it, and pushes the value of the local variable onto the stack
-  as a var.
+  as a ref.
 
 VGetG    [C]  ->  [V]
 
-  Get global as var. This instruction first computes x = (string)$1. Next, this
+  Get global as ref. This instruction first computes x = (string)$1. Next, this
   instruction boxes the global variable named x (if the local is a cell) and
-  pushes its value onto the stack as a var. If there is no global variable
+  pushes its value onto the stack as a ref. If there is no global variable
   defined named x, this instruction defines a global variable named x, sets it
   to null, boxes it, and pushes the value of the global variable onto the stack
-  as a var.
+  as a ref.
 
 VGetS    [C A]  ->  [V]
 
-  Get static property as var. This instruction first checks if class $1 has a
+  Get static property as ref. This instruction first checks if class $1 has a
   visible and accessible static property named (string)$2. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction boxes the
-  static property and pushes it onto the stack as a var.
+  static property and pushes it onto the stack as a ref.
 
 AGetC                        [C]  ->  [A]
 AGetL <local variable id>    []  ->  [A]
@@ -1736,12 +1737,12 @@ FPushCufSafe <num params> [C C] ->  [C C]
 CufSafeArray   [C C R] -> [C]
 
   Pops 3 elements from the stack, and pushes array($2, $1), preserving
-  references.
+  refs.
 
 CufSafeReturn  [C C R] -> [R]
 
   Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving
-  references.
+  refs.
 
 FPassC <param id>     [C]  ->  [F]
 FPassCW <param id>    [C]  ->  [F]
@@ -1759,7 +1760,7 @@ FPassV <param id>    [V]  ->  [F]
 
   FPI pass parameter. If parameter %1 is pass by value, this instruction will
   unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
-  reference, this instruction will push $1 onto the stack as a var.
+  reference, this instruction will push $1 onto the stack as a ref.
 
 FPassR <param id>    [R]  ->  [F]
 
@@ -1827,32 +1828,32 @@ instructions. Operations are not considered instructions; they do not have
 opcodes associated with them.
 
 Operations can produce and consume intermediate values called "bases". A "base"
-is a structure that contains either a cell or a var or a reference to a memory
-location that is occupied by a cell or a var. Bases are never pushed onto the
+is a structure that contains either a cell or a ref or a reference to a memory
+location that is occupied by a cell or a ref. Bases are never pushed onto the
 evaluation stack.
 
 For operations that create a base, the operation descriptions specify whether
 the base created "contains" a value or "references" a location. In the former
-case, the base created contains a cell or a var. In the latter case, the base
-created contains a reference to a memory location occupied by a cell or a var.
+case, the base created contains a cell or a ref. In the latter case, the base
+created contains a reference to a memory location occupied by a cell or a ref.
 
-When a base that contains a cell is destroyed, if the cell references data then
+When a base that contains a cell is destroyed, if the cell points to data then
 the execution engine is responsible for honoring the data's refcount logic.
-Likewise when a base that contains a var is destroyed, the execution engine is
-responsible for honoring the refcount logic of the cell referenced by the var.
-When a base that contains a reference to a memory location occupied by a cell
-or a var is destroyed, no refcounting is required.
+Likewise when a base that contains a ref is destroyed, the execution engine is
+responsible for honoring the refcount logic of the cell container pointed to by
+the ref. When a base that contains a reference to a memory location occupied
+by a cell or a ref is destroyed, no refcounting is required.
 
 Some operations that take a base as input can modify that base as part of the
 work performed by the operation. Such operations are said to "set" the base to
 a new value. When a base that contains a cell or a reference to a memory
 location occupied by a cell is set to a new value, the new value overwrites the
 previous value contained in the cell (honoring the data refcount logic if the
-previous value was a refcounted type). When a base that contains a var or a
-reference to a memory location occupied by a var is set to the new value, the
-new value is written into the cell referenced by the var, overwriting the
-previous value contained in that cell (honoring the data refcount logic if the
-previous value was a refcounted type). Note that for bases that contain a
+previous value was a refcounted type). When a base that contains a ref or a
+reference to a memory location occupied by a ref is set to the new value, the
+new value is written into the cell container referenced by the ref, overwriting
+the previous cell in that container (honoring the data refcount logic if the
+previous cell was a refcounted type). Note that for bases that contain a
 reference to a memory location, "setting" the base does not change which memory
 location the base references.
 
@@ -2334,7 +2335,7 @@ CGetElemL <local variable id>    [B]  ->  [C]
 VGetElemC                        [C B]  ->  [V]
 VGetElemL <local variable id>    [B]  ->  [V]
 
-  Get element as var.
+  Get element as ref.
 
   These instructions first load a value into x and a base into y, as
   given by the following table:
@@ -2345,21 +2346,21 @@ VGetElemL <local variable id>    [B]  ->  [V]
         VGetElemL  | %1 | $1
 
   If y is an array, this operation retrieves the element at index x from
-  array y and pushes it onto the stack as a var. If there is no element at
+  array y and pushes it onto the stack as a ref. If there is no element at
   index x, this operation creates a new element at index x, and pushes it
-  onto the stack as a var.
+  onto the stack as a ref.
 
   If y is an object that implements the ArrayAccess interface, this operation
-  pushes y->offsetGet(x) onto the stack as a var.
+  pushes y->offsetGet(x) onto the stack as a ref.
 
   If y is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
   If y is null, false, or the empty string, this operation sets y to a new
   empty array. Then this operation retrieves the element at index x from array
-  y and pushes it onto the stack as a var. If there is no element at index x,
+  y and pushes it onto the stack as a ref. If there is no element at index x,
   this operation creates a new element at index x, and pushes it onto the
-  stack as a var.
+  stack as a ref.
 
   If y is true, integer, or double, this operation raises a warning and
   pushes null onto the stack.
@@ -2568,12 +2569,12 @@ BindElemL <local variable id>    [V B]  ->  [V]
   referred to by %1.
 
   If $1 is an array, this operation executes $1[x] =& $2 and pushes $2
-  onto the stack as a var.
+  onto the stack as a ref.
 
   If $1 is an object, this operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation sets $1 to a new
-  empty array, executes $1[x] =& $2, and pushes $2 onto the stack as a var.
+  empty array, executes $1[x] =& $2, and pushes $2 onto the stack as a ref.
 
   If $1 is a non-empty string, this operation throws a fatal error.
 
@@ -2607,20 +2608,20 @@ UnsetElemL <local variable id>    [B]  ->  []
 
 VGetNewElem    [B]  ->  [V]
 
-  Get new element as var.
+  Get new element as ref.
 
   If $1 is an array, this operation creates a new element with the next
-  available numeric key in array $1 and pushes it onto the stack as a var.
+  available numeric key in array $1 and pushes it onto the stack as a ref.
 
   If $1 is an object that implements the ArrayAccess interface, this operation
-  pushes $1->offsetGet($2) onto the stack as a var.
+  pushes $1->offsetGet($2) onto the stack as a ref.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to a
   new empty array. Then it creates a new element with the next available
-  numeric key in array $1 and pushes it onto the stack as a var.
+  numeric key in array $1 and pushes it onto the stack as a ref.
 
   If $1 is true, integer, or double, this operation raises a warning and
   pushes null onto the stack.
@@ -2731,7 +2732,7 @@ CGetPropL <local variable id>    [B]  ->  [C]
 VGetPropC                        [C B]  ->  [V]
 VGetPropL <local variable id>    [B]  ->  [V]
 
-  Get property as var.
+  Get property as ref.
 
   These instructions first load a value into x and a base into y, as
   given by the following table:
@@ -2744,10 +2745,10 @@ VGetPropL <local variable id>    [B]  ->  [V]
   If y is an object that does not have an eligible __get method, this
   operation first checks if y has a visible property named x. If it
   does not, this operation will create a new property named x and push
-  it onto the stack as a var. Otherwise this operation continues to
+  it onto the stack as a ref. Otherwise this operation continues to
   check if the property named x is accessible. If it the property
   named x is accessible this operation pushes it onto the stack as a
-  var, otherwise this operation throws a fatal error.
+  ref, otherwise this operation throws a fatal error.
 
   If y is an object has an eligible __get method, this operation
   checks if y has a visible and accessible property named x. If it
@@ -3079,7 +3080,7 @@ CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
 
 VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
 
-  Get member as var.
+  Get member as ref.
 
     location     Base*      member   intermediate   final
     descriptor   operation  code     operation      operation
@@ -3353,10 +3354,10 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
   transfer control to the location specified by %2.
 
   If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the current value in %3 as a var.
+  instructions store the current value in %3 as a ref.
 
   If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the current property in %3 as a var.
+  instructions store the current property in %3 as a ref.
 
   For the MIterInitK version, the following also happens:
 
@@ -3436,10 +3437,10 @@ MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   If the specified iterator is not at the end, retrieve the key and value:
 
   If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the new current value in %3 as a var.
+  instructions store the new current value in %3 as a ref.
 
   If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the new current property in %3 as a var.
+  instructions store the new current property in %3 as a ref.
 
   For the MIterNextK version, the following also happens:
 

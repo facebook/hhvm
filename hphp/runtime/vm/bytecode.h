@@ -337,7 +337,7 @@ struct ActRec {
 
 #define UNION_FIELD_ACCESSORS2(name1, type1, field1, name2, type2, field2) \
   inline bool has##name1() const { \
-    return field1 && !(intptr_t(field1) & 3LL); \
+    return field1 && !(intptr_t(field1) & 1LL); \
   } \
   inline bool has##name2() const { \
     return bool(intptr_t(field2) & 1LL); \

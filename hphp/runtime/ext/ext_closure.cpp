@@ -26,7 +26,7 @@ c_Closure::c_Closure(Class* cb) : ExtObjectData(cb),
   m_thisOrClass(nullptr), m_func(nullptr) {}
 c_Closure::~c_Closure() {
   // same as ar->hasThis()
-  if (m_thisOrClass && !(intptr_t(m_thisOrClass) & 3LL)) {
+  if (m_thisOrClass && !(intptr_t(m_thisOrClass) & 1LL)) {
     m_thisOrClass->decRefCount();
   }
 }

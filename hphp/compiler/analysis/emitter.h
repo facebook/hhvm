@@ -628,6 +628,12 @@ public:
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
+  void emitMethodMetadata(PostponedMeth& p);
+  void fillFuncEmitterParams(FuncEmitter* fe,
+                             ExpressionListPtr params);
+  void emitMethodBody(PostponedMeth& p);
+  void emitMethodDVInitializers(Emitter& e, PostponedMeth& p,
+                                Label& topOfBody);
   void emitPostponedCtors();
   void emitPostponedPSinit(PostponedNonScalars& p, bool pinit);
   void emitPostponedPinits();

@@ -354,6 +354,10 @@ inline ArrayData* ArrayData::merge(const ArrayData* elms, bool copy) {
   return g_array_funcs.merge[m_kind](this, elms, copy);
 }
 
+inline SharedVariant* ArrayData::getSharedVariant() {
+  return g_array_funcs.getSharedVariant[m_kind](this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

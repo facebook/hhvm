@@ -199,6 +199,9 @@ public:
    */
   bool isVectorData() const;
 
+  static SharedVariant *GetSharedVariant(const ArrayData* ad) { return nullptr; }
+  SharedVariant* getSharedVariant();
+
   /**
    * Whether or not this array has a referenced Variant or Object appearing
    * twice. This is mainly for APC to decide whether to serialize an array.
@@ -595,6 +598,7 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
+  SharedVariant* (*getSharedVariant[NK])(const ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

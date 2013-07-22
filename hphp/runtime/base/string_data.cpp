@@ -220,6 +220,41 @@ void StringData::initLiteral(const char* data, int len) {
   assert(checkSane());
 }
 
+void StringData::enlist() {
+  assert(isShared());
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  // insert after head
+  SweepNode* next = head.next;
+  assert(uintptr_t(next) != kMallocFreeWord);
+  m_big.node.next = next;
+  m_big.node.prev = &head;
+  next->prev = head.next = &m_big.node;
+}
+
+void StringData::delist() {
+  assert(isShared());
+  SweepNode* next = m_big.node.next;
+  SweepNode* prev = m_big.node.prev;
+  assert(uintptr_t(next) != kMallocFreeWord);
+  assert(uintptr_t(prev) != kMallocFreeWord);
+  next->prev = prev;
+  prev->next = next;
+}
+
+void StringData::sweepAll() {
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  for (SweepNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    assert(next && uintptr_t(next) != kSmartFreeWord);
+    assert(next && uintptr_t(next) != kMallocFreeWord);
+    StringData* s = (StringData*)(uintptr_t(n) -
+                                  offsetof(StringData, m_big.node));
+    assert(s->isShared());
+    s->m_big.shared->decRef();
+  }
+  head.next = head.prev = &head;
+}
+
 HOT_FUNC
 void StringData::initAttach(const char* data) {
   return initAttach(data, strlen(data));
@@ -308,11 +343,13 @@ HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0) {
   assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
+  shared->incRef();
   m_hash = 0;
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
   m_big.shared = shared;
   m_big.cap = m_len | IsShared;
+  enlist();
 }
 
 HOT_FUNC
@@ -324,6 +361,8 @@ void StringData::releaseData() {
     break;
   case IsShared:
     assert(checkSane());
+    m_big.shared->decRef();
+    delist();
     break;
   case IsSmart:
     assert(checkSane());
@@ -403,6 +442,10 @@ void StringData::append(const char *s, int len) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
+    if (isShared()) {
+      m_big.shared->decRef();
+      delist();
+    }
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsSmart;

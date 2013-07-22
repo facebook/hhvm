@@ -353,6 +353,7 @@ private:
   char *m_front, *m_limit;
   GarbageList m_smartfree[kNumSizes];
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
+  SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_enabled;
 

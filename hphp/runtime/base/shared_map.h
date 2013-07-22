@@ -30,16 +30,19 @@ namespace HPHP {
 /**
  * Wrapper for a shared memory map.
  */
-class SharedMap : public ArrayData {
+class SharedMap : public ArrayData, Sweepable {
 public:
   explicit SharedMap(SharedVariant* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
     , m_localCache(nullptr) {
     m_size = m_arr->arrSize();
+    source->incRef();
   }
 
   ~SharedMap();
+
+  static SharedVariant *GetSharedVariant(const ArrayData* ad);
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
@@ -118,6 +121,9 @@ public:
 
   static ArrayData* Escalate(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*);
+
+  // implements Sweepable.sweep()
+  void sweep() { m_arr->decRef(); }
 
 private:
   ssize_t getIndex(int64_t k) const;

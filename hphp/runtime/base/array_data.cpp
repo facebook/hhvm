@@ -321,6 +321,11 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::Escalate,
     &ArrayData::Escalate,
     &PolicyArray::Escalate },
+  // getSharedVariant
+  { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
+    &SharedMap::GetSharedVariant,
+    &ArrayData::GetSharedVariant,
+    &ArrayData::GetSharedVariant },
 };
 
 ///////////////////////////////////////////////////////////////////////////////

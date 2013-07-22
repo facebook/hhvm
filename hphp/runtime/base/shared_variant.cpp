@@ -27,7 +27,7 @@ namespace HPHP {
 SharedVariant::SharedVariant(CVarRef source, bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false */)
-  : m_flags(0) {
+  : m_shouldCache(false), m_flags(0) {
   assert(!serialized || source.isString());
   m_count = 1;
   m_type = source.getType();
@@ -82,6 +82,7 @@ StringCase:
         PointerSet seen;
         if (arr->hasInternalReference(seen)) {
           setSerializedArray();
+          m_shouldCache = true;
           String s = apc_serialize(source);
           m_data.str = new StringData(s.data(), s.size(), CopyMalloc);
           break;
@@ -94,10 +95,11 @@ StringCase:
         for (ArrayIter it(arr); !it.end(); it.next()) {
           SharedVariant* val = Create(it.secondRef(), false, true,
                                       unserializeObj);
+          if (val->m_shouldCache) m_shouldCache = true;
           m_data.vec->vals()[m_data.vec->m_size++] = val;
         }
       } else {
-        m_data.map = ImmutableMap::Create(arr, unserializeObj);
+        m_data.map = ImmutableMap::Create(arr, unserializeObj, m_shouldCache);
       }
       break;
     }
@@ -109,6 +111,7 @@ StringCase:
   default:
     {
       assert(source.isObject());
+      m_shouldCache = true;
       if (unserializeObj) {
         // This assumes hasInternalReference(seen, true) is false
         ImmutableObj* obj = new ImmutableObj(source.getObjectData());
@@ -326,6 +329,12 @@ int SharedVariant::countReachable() const {
 SharedVariant *SharedVariant::Create
 (CVarRef source, bool serialized, bool inner /* = false */,
  bool unserializeObj /* = false*/) {
+  SharedVariant *wrapped = source.getSharedVariant();
+  if (wrapped && !unserializeObj) {
+    wrapped->incRef();
+    // static cast should be enough
+    return (SharedVariant *)wrapped;
+  }
   return new SharedVariant(source, serialized, inner, unserializeObj);
 }
 

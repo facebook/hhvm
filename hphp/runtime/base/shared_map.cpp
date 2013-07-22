@@ -50,6 +50,12 @@ CVarRef SharedMap::GetValueRef(const ArrayData* ad, ssize_t pos) {
   return asSharedMap(ad)->getValueRef(pos);
 }
 
+SharedVariant* SharedMap::GetSharedVariant(const ArrayData* ad) {
+  auto a = asSharedMap(ad);
+  if (a->m_arr->shouldCache()) return nullptr;
+  return a->m_arr;
+}
+
 HOT_FUNC
 SharedMap::~SharedMap() {
   if (m_localCache) {
@@ -59,6 +65,7 @@ SharedMap::~SharedMap() {
     }
     smart_free(m_localCache);
   }
+  m_arr->decRef();
 }
 
 HOT_FUNC

@@ -107,7 +107,7 @@ bool ConcurrentTableSharedStore::clear() {
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     if (iter->second.inMem()) {
-      g_vmContext->enqueueSharedVar(iter->second.var);
+      iter->second.var->decRef();
     }
     free((void *)iter->first);
   }
@@ -133,7 +133,7 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
     }
     if (acc->second.inMem()) {
       stats_on_delete(key.get(), &acc->second, expired);
-      g_vmContext->enqueueSharedVar(acc->second.var);
+      acc->second.var->decRef();
     } else {
       assert(acc->second.inFile());
       assert(acc->second.expiry == 0);
@@ -216,7 +216,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
     if (!m_vars.find(acc, key.data())) {
       // There is a chance another thread deletes the key when this thread is
       // converting the object. In that case, we just bail
-      delete converted;
+      converted->decRef();
       return false;
     }
     // A write lock was acquired during find
@@ -228,10 +228,10 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
       int64_t ttl = sval->expiry ? sval->expiry - time(nullptr) : 0;
       stats_on_update(key.get(), sval, converted, ttl);
       sval->var = converted;
-      g_vmContext->enqueueSharedVar(sv);
+      sv->decRef();
       return true;
     }
-    delete converted;
+    converted->decRef();
   }
   return false;
 }
@@ -296,6 +296,8 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
         }
 
         if (RuntimeOption::ApcAllowObj && svar->is(KindOfObject)) {
+          // Hold ref here for later promoting the object
+          svar->incRef();
           promoteObj = true;
         }
         value = svar->toLocal();
@@ -312,6 +314,8 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
 
   if (promoteObj)  {
     handlePromoteObj(key, svar, value);
+    // release the extra ref
+    svar->decRef();
   }
   return true;
 }
@@ -341,7 +345,7 @@ int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) 
       if (!sval->expired()) {
         ret = get_int64_value(sval) + step;
         SharedVariant *svar = construct(Variant(ret));
-        g_vmContext->enqueueSharedVar(sval->var);
+        sval->var->decRef();
         sval->var = svar;
         found = true;
         log_apc(std_apc_hit);
@@ -362,7 +366,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
       sval = &acc->second;
       if (!sval->expired() && get_int64_value(sval) == old) {
         SharedVariant *var = construct(Variant(val));
-        g_vmContext->enqueueSharedVar(sval->var);
+        sval->var->decRef();
         sval->var = var;
         success = true;
         log_apc(std_apc_cas);
@@ -437,7 +441,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
         if (sval->inMem()) {
           stats_on_update(key.get(), sval, svar,
                           adjust_ttl(ttl, overwritePrime));
-          g_vmContext->enqueueSharedVar(sval->var);
+          sval->var->decRef();
           update = true;
         } else {
           // mark the inFile copy invalid since we are updating the key
@@ -445,7 +449,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
           sval->sSize = 0;
         }
       } else {
-        delete svar;
+        svar->decRef();
         return false;
       }
     }

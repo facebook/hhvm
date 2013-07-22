@@ -180,6 +180,7 @@ MemoryManager::MemoryManager() : m_front(0), m_limit(0),
   m_stats.maxBytes = INT64_MAX;
   // make the circular-lists empty.
   m_sweep.next = m_sweep.prev = &m_sweep;
+  m_strings.next = m_strings.prev = &m_strings;
 }
 
 void MemoryManager::resetStats() {
@@ -232,6 +233,7 @@ struct SmallNode {
 typedef std::vector<char*>::const_iterator SlabIter;
 
 void MemoryManager::rollback() {
+  StringData::sweepAll();
   for (unsigned int i = 0, n = m_smartAllocators.size(); i < n; i++) {
     m_smartAllocators[i]->clear();
   }

@@ -25,7 +25,8 @@ namespace HPHP {
 
 HOT_FUNC
 ImmutableMap* ImmutableMap::Create(ArrayData* arr,
-                                   bool unserializeObj) {
+                                   bool unserializeObj,
+                                   bool &shouldCache) {
   int num = arr->size();
   int cap = num > 2 ? Util::roundUpToPowerOfTwo(num) : 2;
 
@@ -43,6 +44,7 @@ ImmutableMap* ImmutableMap::Create(ArrayData* arr,
                                                  unserializeObj);
       SharedVariant* val = SharedVariant::Create(it.secondRef(), false, true,
                                                  unserializeObj);
+      if (val->m_shouldCache) shouldCache = true;
       ret->add(ret->m.m_num, key, val);
       ++ret->m.m_num;
     }
@@ -58,8 +60,8 @@ HOT_FUNC
 void ImmutableMap::Destroy(ImmutableMap* map) {
   Bucket* buckets = map->buckets();
   for (int i = 0; i < map->m.m_num; i++) {
-    delete buckets[i].key;
-    delete buckets[i].val;
+    buckets[i].key->decRef();
+    buckets[i].val->decRef();
   }
   free(map);
 }

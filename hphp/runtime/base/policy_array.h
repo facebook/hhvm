@@ -342,6 +342,10 @@ public:
    */
   static bool IsVectorData(const ArrayData*);
 
+  virtual SharedVariant *getSharedVariant() const FOLLY_OVERRIDE {
+    return nullptr;
+  }
+
   /**
    * Testing whether a key exists.
    */

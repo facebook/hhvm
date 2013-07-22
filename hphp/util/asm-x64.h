@@ -541,6 +541,8 @@ const X64Instr instr_xmmmul =  { { 0x59,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10102 };
 const X64Instr instr_xmmsqrt = { { 0x51,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10102 };
 const X64Instr instr_ucomisd = { { 0x2e,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x4002  };
 const X64Instr instr_pxor=     { { 0xef,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x4002  };
+const X64Instr instr_psrlq=    { { 0xF1,0xF1,0x73,0x02,0xF1,0xF1 }, 0x4012  };
+const X64Instr instr_psllq=    { { 0xF1,0xF1,0x73,0x06,0xF1,0xF1 }, 0x4012  };
 const X64Instr instr_cvtsi2sd= { { 0x2a,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10002 };
 const X64Instr instr_cvttsd2si={ { 0x2c,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10002 };
 const X64Instr instr_lddqu =   { { 0xF0,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10103 };
@@ -1408,7 +1410,7 @@ public:
     assert(rname != reg::noreg);
     int r = int(rname);
     // Opsize prefix
-    prefixBytes(0, opSz);
+    prefixBytes(op.flags, opSz);
     // Determine the size of the immediate.  This might change opSz so
     // do it first.
     int immSize;
@@ -1446,6 +1448,8 @@ public:
       emitImmediate(op, imm, immSize);
       return;
     }
+    // For two byte opcodes
+    if ((op.flags & (IF_TWOBYTEOP | IF_IMUL)) != 0) byte(0x0F);
     int rval = op.table[3];
     // shift/rotate instructions have special opcode when
     // immediate is 1
@@ -2155,6 +2159,9 @@ public:
     byte(0x7E);
     emitModrm(3, rsrc, rdst);
   }
+
+  void psllq(Immed i, RegXMM r) { emitIR(instr_psllq, rn(r), i.b()); }
+  void psrlq(Immed i, RegXMM r) { emitIR(instr_psrlq, rn(r), i.b()); }
 
   void mov_reg64_xmm(RegNumber rSrc, RegXMM rdest) {
     emitRR(instr_gpr2xmm, rn(rdest), rSrc);

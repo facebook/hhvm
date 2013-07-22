@@ -64,6 +64,8 @@ struct Simplifier {
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
+  SSATmp* simplifyAbsInt(IRInstruction* inst);
+  SSATmp* simplifyAbsDbl(IRInstruction* inst);
   SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);

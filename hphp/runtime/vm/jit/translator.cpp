@@ -558,6 +558,22 @@ predictOutputs(SrcKey startSk,
     return KindOfDouble;
   }
 
+  if (ni->op() == OpAbs) {
+    if (ni->inputs[0]->valueType() == KindOfDouble) {
+      return KindOfDouble;
+    }
+
+    // some types can't be converted to integers and will return false here
+    if (ni->inputs[0]->valueType() == KindOfArray) {
+      return KindOfBoolean;
+    }
+
+    // If the type is not numeric we need to convert it to a numeric type,
+    // a string can be converted to an Int64 or a Double but most other types
+    // will end up being integral.
+    return KindOfInt64;
+  }
+
   if (ni->op() == OpClsCnsD) {
     const NamedEntityPair& cne =
       ni->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
@@ -933,6 +949,7 @@ static const struct {
   /* Binary string */
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
   /* Arithmetic ops */
+  { OpAbs,         {Stack1,           Stack1,       OutPred,           0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},

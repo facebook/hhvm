@@ -950,6 +950,11 @@ Concat    [C C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$2 . (string)$1) on the stack.
 
+Abs    [C] -> [C]
+
+  Absolute value.  Computes the absolute value of $1 and pushes the result onto
+  the stack.
+
 Add    [C:Arr C:Arr]  ->  [C:Arr]
        [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl &&

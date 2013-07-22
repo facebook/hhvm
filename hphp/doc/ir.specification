@@ -475,6 +475,8 @@ D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
 2. Arithmetic
 
 
+D:Int            = AbsInt S0:Int
+D:Dbl            = AbsDbl S0:Dbl
 D:{Int|Dbl}      = OpAdd    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpSub    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpMul    S0:{Int|Dbl} S1:{Int|Dbl}
@@ -494,6 +496,9 @@ D:Dbl            = OpCeil   S0:Dbl
 
   Undefined behavior occurs if OpMod is given a divisor of zero, or if
   the divisor is -1 and the dividend is the minimum representable integer.
+
+  AbsInt and AbsDbl compute the absolute value of an integer or double
+  respectively.
 
   OpDivDbl Will branch to L when S1 is zero (signed or unsigned).  When the
   result of the division is a real valued number OpDivDbl conforms to IEEE 754.

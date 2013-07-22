@@ -3240,6 +3240,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.False();
           e.ArrayIdx();
           return true;
+        } else if (call->isCallToFunction("abs")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Abs();
+            return true;
+          }
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           assert(params && params->getCount() == 1);
           visit((*params)[0]);

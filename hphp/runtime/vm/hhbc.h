@@ -570,6 +570,7 @@ enum SetOpOp {
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
+  O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \

@@ -1223,6 +1223,53 @@ void CodeGenerator::cgNegateWork(SSATmp* dst, SSATmp* src) {
   cgUnaryIntOp(dst, src, &Asm::neg, [](int64_t i) { return -i; });
 }
 
+void CodeGenerator::cgAbsInt(IRInstruction* inst) {
+  auto src = inst->src(0);
+  auto dst = inst->dst(0);
+
+  auto srcReg = m_regs[src].reg();
+  auto dstReg = m_regs[dst].reg();
+
+  if (srcReg == InvalidReg) {
+    int64_t srcVal = src->getValInt();
+    emitLoadImm(m_as, srcVal < 0 ? -srcVal : srcVal, dstReg);
+    return;
+  }
+
+  // fast integer absolute value:
+  // dst = ((src >> 63) ^ src) - (src >> 63)
+  emitMovRegReg(m_as, srcReg, m_rScratch);
+  emitMovRegReg(m_as, srcReg, dstReg);
+
+  m_as.    sarq  (63, m_rScratch);
+  m_as.    xorq  (m_rScratch, dstReg);
+  m_as.    subq  (m_rScratch, dstReg);
+}
+
+void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
+  auto src = inst->src(0);
+  auto dst = inst->dst(0);
+
+  auto srcReg = m_regs[src].reg();
+  auto dstReg = m_regs[dst].reg();
+
+  if (srcReg == InvalidReg) {
+    double srcVal = src->getValDbl();
+    emitLoadImm(m_as, srcVal < 0 ? -srcVal : srcVal, dstReg);
+    return;
+  }
+
+  auto resReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM0);
+
+  emitMovRegReg(m_as, srcReg, resReg);
+
+  // clear the high bit
+  m_as.    psllq  (1, resReg);
+  m_as.    psrlq  (1, resReg);
+
+  emitMovRegReg(m_as, resReg, dstReg);
+}
+
 inline static Reg8 convertToReg8(PhysReg reg) { return rbyte(reg); }
 inline static Reg64 convertToReg64(PhysReg reg) { return reg; }
 

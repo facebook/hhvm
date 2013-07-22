@@ -3424,6 +3424,28 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
+void HhbcTranslator::emitAbs() {
+  auto value = popC();
+
+  if (value->isA(Type::Int)) {
+    push(gen(AbsInt, value));
+    return;
+  }
+
+  if (value->isA(Type::Dbl)) {
+    push(gen(AbsDbl, value));
+    return;
+  }
+
+  if (value->isA(Type::Arr)) {
+    gen(DecRef, value);
+    push(cns(false));
+    return;
+  }
+
+  PUNT(Abs);
+}
+
 #define BINOP(Opp)                            \
   void HhbcTranslator::emit ## Opp() {        \
     emitBinaryArith(Opp);                     \

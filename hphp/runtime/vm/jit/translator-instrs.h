@@ -47,6 +47,7 @@
   CASE(DefCns) \
   CASE(ClsCnsD) \
   CASE(Concat) \
+  CASE(Abs) \
   CASE(Add) \
   CASE(Xor) \
   CASE(Not) \

@@ -3621,6 +3621,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
 
+
+inline void OPTBLD_INLINE VMExecutionContext::iopAbs(PC& pc) {
+  NEXT();
+  auto c1 = m_stack.topC();
+
+  tvAsVariant(c1) = f_abs(tvAsCVarRef(c1));
+}
+
 template<class Op>
 inline void OPTBLD_INLINE VMExecutionContext::implCellBinOp(PC& pc, Op op) {
   NEXT();

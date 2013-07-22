@@ -510,6 +510,11 @@ IRTranslator::translateSqrt(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateAbs(const NormalizedInstruction& i) {
+  HHIR_EMIT(Abs);
+}
+
+void
 IRTranslator::translateXor(const NormalizedInstruction& i) {
   HHIR_EMIT(Xor);
 }

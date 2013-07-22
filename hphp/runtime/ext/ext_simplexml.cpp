@@ -875,7 +875,13 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  return (m_node || getDynProps().size());
+  if (m_node || getDynProps().size()) {
+    if (m_is_children || (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
+      return m_children.toArray().size() > 0;
+    }
+    return true;
+  }
+  return false;
 }
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {

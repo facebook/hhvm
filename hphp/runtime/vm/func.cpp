@@ -87,10 +87,10 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
 
 static std::atomic<FuncId> s_nextFuncId(0);
 
-// This size hint will create a ~2MB vector and is rarely hit in
+// This size hint will create a ~8MB vector and is rarely hit in
 // practice. Note that this is just a hint and exceeding it won't
 // affect correctness.
-constexpr size_t kFuncVecSizeHint = 250000;
+constexpr size_t kFuncVecSizeHint = 1000000;
 static AtomicVector<const Func*> s_funcVec(kFuncVecSizeHint, nullptr);
 
 void Func::setNewFuncId() {

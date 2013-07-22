@@ -224,9 +224,6 @@ RuntimeType Translator::liveType(Location l,
       const Iter *it = frame_iter(curFrame(), l.offset);
       TRACE(1, "Iter input: fp %p, iter %p, offset %" PRId64 "\n", vmfp(),
             it, l.offset);
-      if (specialize) {
-        return RuntimeType(it->arr().getIterKind());
-      }
       return RuntimeType(it);
     } break;
     case Location::Litstr: {
@@ -1212,10 +1209,10 @@ static const struct {
   { OpIterInitK,   {Stack1,           Local,        OutUnknown,       -1 }},
   { OpMIterInitK,  {Stack1,           Local,        OutUnknown,       -1 }},
   { OpWIterInitK,  {Stack1,           Local,        OutUnknown,       -1 }},
-  { OpIterNext,    {Iter,             Local,        OutUnknown,        0 }},
+  { OpIterNext,    {None,             Local,        OutUnknown,        0 }},
   { OpMIterNext,   {None,             Local,        OutUnknown,        0 }},
   { OpWIterNext,   {None,             Local,        OutUnknown,        0 }},
-  { OpIterNextK,   {Iter,             Local,        OutUnknown,        0 }},
+  { OpIterNextK,   {None,             Local,        OutUnknown,        0 }},
   { OpMIterNextK,  {None,             Local,        OutUnknown,        0 }},
   { OpWIterNextK,  {None,             Local,        OutUnknown,        0 }},
   { OpIterFree,    {None,             None,         OutNone,           0 }},
@@ -2545,15 +2542,10 @@ GuardType::GuardType(DataType outer, DataType inner)
 }
 
 GuardType::GuardType(const RuntimeType& rtt) {
-  if (rtt.isIter()) {
-    iterKind = rtt.hasIterKind() ? rtt.iterKind()
-                                 : ArrayIter::IterKind::Undefined;
-  } else {
-    assert(rtt.isValue());
-    outerType = rtt.outerType();
-    innerType = rtt.innerType();
-    klass = rtt.hasKnownType() ? rtt.knownClass() : nullptr;
-  }
+  assert(rtt.isValue());
+  outerType = rtt.outerType();
+  innerType = rtt.innerType();
+  klass = rtt.hasKnownType() ? rtt.knownClass() : nullptr;
 }
 
 GuardType::GuardType(const GuardType& other) {
@@ -2656,11 +2648,8 @@ GuardType GuardType::dropSpecialization() const {
 }
 
 RuntimeType GuardType::getRuntimeType() const {
-  if (outerType == KindOfObject && klass != nullptr) {
+  if (klass != nullptr) {
     return RuntimeType(outerType, innerType).setKnownClass(klass);
-  }
-  if (iterKind != ArrayIter::IterKind::Undefined) {
-    return RuntimeType(iterKind);
   }
   return RuntimeType(outerType, innerType);
 }
@@ -2788,18 +2777,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
         }
       }
       return DataTypeSpecific;
-    case OpIterInit:
-    case OpIterInitK: {
-      const Class* klass = specType.getSpecializedClass();
-      if (klass != nullptr && isCollectionClass(klass)) {
-        return DataTypeSpecialized;
-      }
-      return DataTypeSpecific;
-    }
 
-    case OpIterNext:
-    case OpIterNextK:
-      return DataTypeSpecialized;
     default:
       return DataTypeSpecific;
   }

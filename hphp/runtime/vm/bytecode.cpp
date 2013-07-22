@@ -740,23 +740,13 @@ static std::string toStringIter(const Iter* it, bool itRef) {
   // TODO(#2458166): it might be a CufIter, but we're just lucky that
   // the bit pattern for the CufIter is going to have a 0 in
   // getIterType for now.
-  switch (it->arr().getIterKind()) {
-    case ArrayIter::IterKind::Undefined:
-      return "I:Undefined";
-    case ArrayIter::IterKind::Array:
-      return "I:Array";
-    case ArrayIter::IterKind::Iterator:
-      return "I:Iterator";
-    case ArrayIter::IterKind::Pair:
-      return "I:Pair";
-    case ArrayIter::IterKind::Vector:
-      return "I:Vector";
-    case ArrayIter::IterKind::Map:
-      return "I:Map";
-    case ArrayIter::IterKind::StableMap:
-      return "I:StableMap";
-    case ArrayIter::IterKind::Set:
-      return "I:Set";
+  switch (it->arr().getIterType()) {
+  case ArrayIter::TypeUndefined:
+    return "I:Undefined";
+  case ArrayIter::TypeArray:
+    return "I:Array";
+  case ArrayIter::TypeIterator:
+    return "I:Iterator";
   }
   assert(false);
   return "I:?";

@@ -355,7 +355,6 @@ X(DecRefLoc,                    LocalId);
 X(LdLoc,                        LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
-X(GuardIter,                    IterId);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);

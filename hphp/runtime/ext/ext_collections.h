@@ -167,11 +167,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                           int64_t sz, char type);
 
  private:
-  int64_t iterInit(TypedValue* valOut);
-  int64_t iterInitK(TypedValue* valOut, TypedValue* keyOut);
-  int64_t iterNext(ssize_t pos, TypedValue* valOut);
-  int64_t iterNextK(ssize_t pos, TypedValue* valOut, TypedValue* keyOut);
-
   void grow();
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -398,11 +393,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   };
 
  private:
-  int64_t iterInit(TypedValue* valOut);
-  int64_t iterInitK(TypedValue* valOut, TypedValue* keyOut);
-  int64_t iterNext(ssize_t key, TypedValue* valOut);
-  int64_t iterNextK(ssize_t key, TypedValue* valOut, TypedValue* keyOut);
-
   /**
    * Map uses a power of two for the table size and quadratic probing to
    * resolve hash collisions.
@@ -724,11 +714,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   void uksort(CVarRef cmp_function);
 
  private:
-  int64_t iterInit(TypedValue* valOut);
-  int64_t iterInitK(TypedValue* valOut, TypedValue* keyOut);
-  int64_t iterNext(ssize_t key, TypedValue* valOut);
-  int64_t iterNextK(ssize_t key, TypedValue* valOut, TypedValue* keyOut);
-
   uint m_size;
   uint m_nTableSize;
   uint m_nTableMask;
@@ -924,11 +909,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   };
 
  private:
-  int64_t iterInit(TypedValue* valOut);
-  int64_t iterInitK(TypedValue* valOut, TypedValue* keyOut);
-  int64_t iterNext(ssize_t key, TypedValue* valOut);
-  int64_t iterNextK(ssize_t key, TypedValue* valOut, TypedValue* keyOut);
-
   /**
    * Set uses a power of two for the table size and quadratic probing to
    * resolve hash collisions, similar to the Map class. See the comments
@@ -1125,11 +1105,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   }
 
  private:
-  int64_t iterInit(TypedValue* valOut);
-  int64_t iterInitK(TypedValue* valOut, TypedValue* keyOut);
-  int64_t iterNext(ssize_t pos, TypedValue* valOut);
-  int64_t iterNextK(ssize_t pos, TypedValue* valOut, TypedValue* keyOut);
-
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
   uint m_size;
@@ -1248,11 +1223,6 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
          klass == c_StableMap::s_cls || klass == c_Pair::s_cls;
 }
 
-inline bool isCollectionClass(const Class* klass) {
-  return klass == c_Vector::s_cls || klass == c_Map::s_cls ||
-         klass == c_StableMap::s_cls || klass == c_Pair::s_cls ||
-         klass == c_Set::s_cls;
-}
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 

@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
-#include "hphp/runtime/base/array_iterator.h"
-
 namespace HPHP {
 namespace Transl {
 struct DynLocation;
@@ -74,8 +72,7 @@ using Transl::RuntimeType;
   IRT(ActRec,      1ULL << 51)                                          \
   IRT(None,        1ULL << 52)                                          \
   IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */           \
-  IRT(Nullptr,     1ULL << 54)                                          \
-  IRT(Iter,        1ULL << 55)
+  IRT(Nullptr,     1ULL << 54)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -124,19 +121,11 @@ class Type {
     bits_t m_bits;
     TypeBits m_typedBits;
   };
-  union {
-    const Class* m_class;
-    ArrayIter::IterKind m_iterKind;
-  };
+  const Class* m_class;
 
   // private ctor to build a specialized type
   explicit Type(bits_t bits, const Class* klass)
     : m_bits(bits), m_class(klass)
-  {}
-
-  // private ctor to build a specialized iterator type
-  explicit Type(bits_t bits, ArrayIter::IterKind iterKind)
-    : m_bits(bits), m_iterKind(iterKind)
   {}
 
 public:
@@ -169,7 +158,7 @@ public:
   }
 
   Type operator&(Type other) const {
-    if (strictSubtypeOf(Obj) && other.strictSubtypeOf(Obj)) {
+    if (m_class != nullptr && other.m_class != nullptr) {
       if (m_class->classof(other.m_class)) {
         return Type(m_bits & other.m_bits).specialize(other.m_class);
       } else if (other.m_class->classof(m_class)) {
@@ -291,7 +280,7 @@ public:
   bool subtypeOf(Type t2) const {
     return (m_bits & t2.m_bits) == m_bits
            && (t2.m_class == nullptr
-               || (m_class != nullptr && !subtypeOf(Iter)
+               || (m_class != nullptr
                    && m_class->classof(t2.m_class)));
   }
 
@@ -371,18 +360,9 @@ public:
     return subtypeOf(Cls);
   }
 
-  bool isIter() const {
-    return subtypeOf(Iter);
-  }
-
   const Class* getClass() const {
     assert(isObj());
     return m_class;
-  }
-
-  ArrayIter::IterKind getIterKind() const {
-    assert(isIter());
-    return m_iterKind;
   }
 
   Type innerType() const {
@@ -459,13 +439,8 @@ public:
     return Type(m_bits, klass);
   }
 
-  Type specialize(ArrayIter::IterKind iterKind) const {
-    assert(isIter() && m_iterKind == ArrayIter::IterKind::Undefined);
-    return Type(m_bits, iterKind);
-  }
-
   Type unspecialize() const {
-    assert((isObj() || isIter()) && m_class != nullptr);
+    assert(isObj() && m_class != nullptr);
     return Type(m_bits, nullptr);
   }
 

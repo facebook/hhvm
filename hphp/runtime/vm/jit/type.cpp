@@ -104,11 +104,7 @@ Type Type::fromDataType(DataType outerType,
 }
 
 Type Type::fromRuntimeType(const RuntimeType& rtt) {
-  if (rtt.isIter()) {
-    return Iter.specialize(rtt.iterKind());
-  } else {
-    return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
-  }
+  return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
 }
 
 Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {

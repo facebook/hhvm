@@ -313,12 +313,6 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case IterNextK:
-  case IterNextKArray:
-  case IterNextKVector:
-  case IterNextKMap:
-  case IterNextKStableMap:
-  case IterNextKSet:
-  case IterNextKPair:
   case WIterNextK:
     // kill the locals to which this instruction stores iter's key and value
     killLocalValue(inst->src(2)->getValInt());
@@ -326,12 +320,6 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case IterNext:
-  case IterNextArray:
-  case IterNextVector:
-  case IterNextMap:
-  case IterNextStableMap:
-  case IterNextSet:
-  case IterNextPair:
   case WIterNext:
     // kill the local to which this instruction stores iter's value
     killLocalValue(inst->src(2)->getValInt());

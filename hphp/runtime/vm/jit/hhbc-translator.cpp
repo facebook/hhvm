@@ -871,7 +871,7 @@ template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();
   Type type = src->type();
-  if (!type.isArray() && !type.subtypeOf(Type::Obj)) {
+  if (!type.isArray() && type != Type::Obj) {
     PUNT(IterInit);
   }
   SSATmp* res = genFunc(src);
@@ -927,38 +927,13 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
 
 void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
-                                  uint32_t valLocalId,
-                                  ArrayIter::IterKind iterKind) {
-  Opcode op;
-  switch (iterKind) {
-    case ArrayIter::IterKind::Array:
-      op = IterNextArray;
-    break;
-    case ArrayIter::IterKind::Vector:
-      op = IterNextVector;
-    break;
-    case ArrayIter::IterKind::Map:
-      op = IterNextMap;
-    break;
-    case ArrayIter::IterKind::StableMap:
-      op = IterNextStableMap;
-    break;
-    case ArrayIter::IterKind::Set:
-      op = IterNextSet;
-    break;
-    case ArrayIter::IterKind::Pair:
-      op = IterNextPair;
-    break;
-    default:
-      op = IterNext;
-    break;
-  }
+                                  uint32_t valLocalId) {
   SSATmp* res = gen(
-      op,
-      Type::Bool,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId)
+    IterNext,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId)
   );
   emitJmpCondHelper(offset, false, res);
 }
@@ -966,39 +941,14 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
 void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   uint32_t keyLocalId,
-                                   ArrayIter::IterKind iterKind) {
-  Opcode op;
-  switch (iterKind) {
-    case ArrayIter::IterKind::Array:
-      op = IterNextKArray;
-    break;
-    case ArrayIter::IterKind::Vector:
-      op = IterNextKVector;
-    break;
-    case ArrayIter::IterKind::Map:
-      op = IterNextKMap;
-    break;
-    case ArrayIter::IterKind::StableMap:
-      op = IterNextKStableMap;
-    break;
-    case ArrayIter::IterKind::Set:
-      op = IterNextKSet;
-    break;
-    case ArrayIter::IterKind::Pair:
-      op = IterNextKPair;
-    break;
-    default:
-      op = IterNextK;
-    break;
-  }
+                                   uint32_t keyLocalId) {
   SSATmp* res = gen(
-      op,
-      Type::Bool,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId),
-      cns(keyLocalId)
+    IterNextK,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId),
+    cns(keyLocalId)
   );
   emitJmpCondHelper(offset, false, res);
 }
@@ -2644,10 +2594,6 @@ void HhbcTranslator::setThisAvailable() {
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
-}
-
-void HhbcTranslator::guardTypeIter(uint32_t iterId, Type type) {
-  gen(GuardIter, type, IterId(iterId), m_tb->fp());
 }
 
 void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,

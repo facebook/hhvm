@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/object_data.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_collections_def.h"
 
 // inline methods of HphpArray.
 #include "hphp/runtime/base/hphp_array-defs.h"
@@ -153,7 +152,7 @@ ArrayIter::~ArrayIter() {
     decRefObj(obj);
   }
   if (debug) {
-    m_ikind = IterKind::Undefined;
+    m_itype = TypeUndefined;
   }
 }
 
@@ -368,140 +367,90 @@ CVarRef ArrayIter::secondRef() {
 //
 
 template<class Tuplish>
-ArrayIter::ArrayIter(Tuplish* coll, IterKind iterKind, Fixed)
-    : m_pos(0), m_ikind(iterKind) {
+ArrayIter::ArrayIter(Tuplish* coll, Fixed)
+    : m_pos(0), m_itype(ArrayIter::TypeIterator) {
   assert(coll);
   setObject(coll);
 }
 
 template<class Vectorish>
-ArrayIter::ArrayIter(Vectorish* coll, IterKind iterKind, Versionable)
-    : m_pos(0), m_ikind(iterKind) {
+ArrayIter::ArrayIter(Vectorish* coll, Versionable)
+    : m_pos(0), m_itype(ArrayIter::TypeIterator) {
   assert(coll && coll->size() > 0);
   setObject(coll);
   m_version = coll->getVersion();
 }
 
 template<class Mappish>
-ArrayIter::ArrayIter(Mappish* coll, IterKind iterKind, VersionableSparse)
-    : m_pos(0), m_ikind(iterKind) {
+ArrayIter::ArrayIter(Mappish* coll, VersionableSparse)
+    : m_itype(ArrayIter::TypeIterator) {
   assert(coll && coll->size() > 0);
   setObject(coll);
   m_version = coll->getVersion();
+  m_pos = coll->iter_begin();
 }
 
 template<class Tuplish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterInit(Fixed, TypedValue* valOut) {
-  return static_cast<Tuplish*>(getObject())->iterInit(valOut);
+bool ArrayIter::iterNext(Fixed) {
+  return ++m_pos < static_cast<Tuplish*>(getObject())->size();
 }
 
 template<class Vectorish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterInit(Versionable, TypedValue* valOut) {
-  return static_cast<Vectorish*>(getObject())->iterInit(valOut);
-}
-
-template<class Mappish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterInit(VersionableSparse, TypedValue* valOut) {
-  m_pos = static_cast<Mappish*>(getObject())->iterInit(valOut);
-  return m_pos;
-}
-
-template<class Tuplish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterInitK(Fixed, TypedValue* valOut, TypedValue* keyOut) {
-  return static_cast<Tuplish*>(getObject())->iterInitK(valOut, keyOut);
-}
-
-template<class Vectorish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterInitK(
-    Versionable, TypedValue* valOut, TypedValue* keyOut) {
-  return static_cast<Vectorish*>(getObject())->iterInitK(valOut, keyOut);
-}
-
-template<class Mappish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterInitK(
-    VersionableSparse, TypedValue* valOut, TypedValue* keyOut) {
-  m_pos = static_cast<Mappish*>(getObject())->iterInitK(valOut, keyOut);
-  return m_pos;
-}
-
-template<class Tuplish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterNext(Fixed, TypedValue* valOut) {
-  int64_t pos = static_cast<Tuplish*>(getObject())->iterNext(m_pos, valOut);
-  if (pos != 0) {
-    m_pos = pos;
-  }
-  return pos;
-}
-
-template<class Vectorish>
-inline ALWAYS_INLINE
-int64_t ArrayIter::iterNext(Versionable, TypedValue* valOut) {
+bool ArrayIter::iterNext(Versionable) {
   Vectorish* vec = static_cast<Vectorish*>(getObject());
   if (UNLIKELY(m_version != vec->getVersion())) {
     throw_collection_modified();
   }
-  int pos = vec->iterNext(m_pos, valOut);
-  if (LIKELY(pos != 0)) {
-    m_pos = pos;
-  }
-  return pos;
+  return ++m_pos < vec->size();
 }
 
 template<class Mappish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterNext(VersionableSparse, TypedValue* valOut) {
+bool ArrayIter::iterNext(VersionableSparse) {
   Mappish* coll = static_cast<Mappish*>(getObject());
   if (UNLIKELY(m_version != coll->getVersion())) {
     throw_collection_modified();
   }
-  m_pos = coll->iterNext(m_pos, valOut);
-  return m_pos;
+  m_pos = coll->iter_next(m_pos);
+  return m_pos != 0;
 }
 
 template<class Tuplish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterNextKey(
-    Fixed, TypedValue* valOut, TypedValue* keyOut) {
-  auto pos = static_cast<Tuplish*>(getObject())->iterNextK(
-                                                    m_pos, valOut, keyOut);
-  if (pos != 0) {
-    m_pos = pos;
-  }
-  return pos;
+Variant ArrayIter::iterKey(Fixed) {
+  return m_pos;
 }
 
 template<class Vectorish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterNextKey(
-    Versionable, TypedValue* valOut, TypedValue* keyOut) {
-  Vectorish* vec = static_cast<Vectorish*>(getObject());
-  if (UNLIKELY(m_version != vec->getVersion())) {
-    throw_collection_modified();
-  }
-  auto pos = vec->iterNextK(m_pos, valOut, keyOut);
-  if (LIKELY(pos != 0)) {
-    m_pos = pos;
-  }
-  return pos;
+Variant ArrayIter::iterKey(Versionable) {
+  return m_pos;
 }
 
 template<class Mappish>
 inline ALWAYS_INLINE
-int64_t ArrayIter::iterNextKey(
-    VersionableSparse, TypedValue* valOut, TypedValue* keyOut) {
-  Mappish* coll = static_cast<Mappish*>(getObject());
-  if (UNLIKELY(m_version != coll->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = coll->iterNextK(m_pos, valOut, keyOut);
-  return m_pos;
+Variant ArrayIter::iterKey(VersionableSparse) {
+  return static_cast<Mappish*>(getObject())->iter_key(m_pos);
+}
+
+template<class Tuplish>
+inline ALWAYS_INLINE
+Variant ArrayIter::iterValue(Fixed) {
+  return tvAsCVarRef(static_cast<Tuplish*>(getObject())->get(m_pos));
+}
+
+template<class Vectorish>
+inline ALWAYS_INLINE
+Variant ArrayIter::iterValue(Versionable) {
+  return tvAsCVarRef(static_cast<Vectorish*>(getObject())->get(m_pos));
+}
+
+template<class Mappish>
+inline ALWAYS_INLINE
+Variant ArrayIter::iterValue(VersionableSparse) {
+  return tvAsCVarRef(static_cast<Mappish*>(getObject())->iter_value(m_pos));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -720,56 +669,26 @@ CufIter::~CufIter() {
   if (m_name) decRefStr(m_name);
 }
 
-static
-ArrayIter::IterKind getCollectionIterKind(ObjectData* obj) {
-  ArrayIter::IterKind iterKind = ArrayIter::IterKind::Undefined;
-  Collection::Type collType = obj->getCollectionType();
-  switch (collType) {
-    case Collection::VectorType:
-      iterKind = ArrayIter::IterKind::Vector;
-    break;
-    case Collection::MapType:
-      iterKind = ArrayIter::IterKind::Map;
-    break;
-    case Collection::StableMapType:
-      iterKind = ArrayIter::IterKind::StableMap;
-    break;
-    case Collection::SetType:
-      iterKind = ArrayIter::IterKind::Set;
-    break;
-    case Collection::PairType:
-      iterKind = ArrayIter::IterKind::Pair;
-    break;
-    default:
-      iterKind = ArrayIter::IterKind::Undefined;
-    break;
-  }
-  return iterKind;
-}
-
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
   bool hasElems = true;
   if (c1->m_type == KindOfArray) {
     if (!c1->m_data.parr->empty()) {
       (void) new (&arr()) ArrayIter(c1->m_data.parr);
-      arr().setIterKind(ArrayIter::IterKind::Array);
+      arr().setIterType(ArrayIter::TypeArray);
     } else {
       hasElems = false;
     }
   } else if (c1->m_type == KindOfObject) {
-    ArrayIter::IterKind iterKind = ArrayIter::IterKind::Undefined;
+    bool isIterator;
     if (c1->m_data.pobj->isCollection()) {
+      isIterator = true;
       (void) new (&arr()) ArrayIter(c1->m_data.pobj);
-      iterKind = getCollectionIterKind(c1->m_data.pobj);
     } else {
-      bool isIterator;
       Object obj = c1->m_data.pobj->iterableObject(isIterator);
       if (isIterator) {
-        iterKind = ArrayIter::IterKind::Iterator;
         (void) new (&arr()) ArrayIter(obj, ArrayIter::transferOwner);
       } else {
-        iterKind = ArrayIter::IterKind::Array;
         Class* ctx = arGetContextClass(g_vmContext->getFP());
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
@@ -784,7 +703,8 @@ bool Iter::init(TypedValue* c1) {
         arr().~ArrayIter();
         hasElems = false;
       } else {
-        arr().setIterKind(iterKind);
+        arr().setIterType(
+          isIterator ? ArrayIter::TypeIterator : ArrayIter::TypeArray);
       }
     } catch (...) {
       arr().~ArrayIter();
@@ -798,7 +718,8 @@ bool Iter::init(TypedValue* c1) {
 }
 
 bool Iter::next() {
-  assert(arr().getIterKind() != ArrayIter::IterKind::Undefined);
+  assert(arr().getIterType() == ArrayIter::TypeArray ||
+         arr().getIterType() == ArrayIter::TypeIterator);
   // The emitter should never generate bytecode where the iterator
   // is at the end before IterNext is executed. However, even if
   // the iterator is at the end, it is safe to call next().
@@ -817,7 +738,8 @@ bool Iter::next() {
 }
 
 void Iter::free() {
-  assert(arr().getIterKind() != ArrayIter::IterKind::Undefined);
+  assert(arr().getIterType() == ArrayIter::TypeArray ||
+         arr().getIterType() == ArrayIter::TypeIterator);
   arr().~ArrayIter();
 }
 
@@ -839,158 +761,69 @@ void Iter::cfree() {
  * IterInit and IterNext can be called directly from the JIT for specialized
  * iterators.
  */
-
-//
-// JIT helper functions for IterInit and IterInitK instructions over
-// collection iterators.
-//
-
-template<class Coll, class Style, ArrayIter::IterKind iterKind>
-HOT_FUNC
-int64_t iterInit(Iter* dest, Coll* coll, TypedValue* valOut) {
-  (void) new (&dest->arr()) ArrayIter(coll, iterKind, Style());
-  int64_t res = dest->arr().iterInit<Coll>(Style(), valOut);
-  if (res == 0LL) {
-    dest->arr().~ArrayIter();
-    return 0LL;
-  }
-  return 1LL;
+template<class Coll, class Style>
+HOT_FUNC static
+void iterValue(ArrayIter* iter, TypedValue* out) {
+  Variant val = iter->iterValue<Coll>(Style());
+  assert(val.getRawType() != KindOfRef);
+  cellDup(*val.asTypedValue(), *out);
 }
-
-template int64_t iterInit<c_Pair,
-                          ArrayIter::Fixed,
-                          ArrayIter::IterKind::Pair>(
-                              Iter* dest, c_Pair* p, TypedValue* valOut);
-template int64_t iterInit<c_Vector,
-                          ArrayIter::Versionable,
-                          ArrayIter::IterKind::Vector>(
-                              Iter* dest, c_Vector* v, TypedValue* valOut);
-template int64_t iterInit<c_Map,
-                          ArrayIter::VersionableSparse,
-                          ArrayIter::IterKind::Map>(
-                              Iter* dest, c_Map* m, TypedValue* valOut);
-template int64_t iterInit<c_StableMap,
-                          ArrayIter::VersionableSparse,
-                          ArrayIter::IterKind::StableMap>(
-                              Iter* dest, c_StableMap* sm, TypedValue* valOut);
-template int64_t iterInit<c_Set,
-                          ArrayIter::VersionableSparse,
-                          ArrayIter::IterKind::Set>(
-                              Iter* dest, c_Set* s, TypedValue* valOut);
-
-template<class Coll, class Style, ArrayIter::IterKind iterKind>
-HOT_FUNC
-int64_t iterInitK(Iter* dest, Coll* coll,
-                  TypedValue* valOut, TypedValue* keyOut) {
-  (void) new (&dest->arr()) ArrayIter(coll, iterKind, Style());
-  int64_t res;
-  if (keyOut != nullptr) {
-    res = dest->arr().iterInitK<Coll>(Style(), valOut, keyOut);
-  } else {
-    res = dest->arr().iterInit<Coll>(Style(), valOut);
-  }
-  if (res == 0LL) {
-    dest->arr().~ArrayIter();
-    return 0LL;
-  }
-  return 1LL;
-}
-
-template int64_t iterInitK<c_Pair,
-                           ArrayIter::Fixed,
-                           ArrayIter::IterKind::Pair>(
-                               Iter* dest, c_Pair* coll,
-                               TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterInitK<c_Vector,
-                           ArrayIter::Versionable,
-                           ArrayIter::IterKind::Vector>(
-                               Iter* dest, c_Vector* coll,
-                               TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterInitK<c_Map,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::IterKind::Map>(
-                               Iter* dest, c_Map* coll,
-                               TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterInitK<c_StableMap,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::IterKind::StableMap>(
-                               Iter* dest, c_StableMap* coll,
-                               TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterInitK<c_Set,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::IterKind::Set>(
-                               Iter* dest, c_Set* coll,
-                               TypedValue* valOut, TypedValue* keyOut);
-
-//
-// JIT helpers function for IterNext and IterNextK instruction over
-// collection iterators.
-//
 
 template<class Coll, class Style>
-HOT_FUNC
-int64_t iterNext(ArrayIter* iter, TypedValue* valOut) {
-  DataType vType = valOut->m_type;
-  assert(vType != KindOfRef);
-  uint64_t vDatum = valOut->m_data.num;
-  if (!iter->iterNext<Coll>(Style(), valOut)) {
-    iter->~ArrayIter();
-    return 0LL;
-  }
-  tvRefcountedDecRefHelper(vType, vDatum);
-  return 1LL;
+HOT_FUNC static
+void iterKey(ArrayIter* iter, TypedValue* out) {
+  Variant key = iter->iterKey<Coll>(Style());
+  cellDup(*key.asTypedValue(), *out);
 }
 
-template int64_t iterNext<c_Vector, ArrayIter::Versionable>(
-    ArrayIter* iter, TypedValue* valOut);
-template int64_t iterNext<c_Map, ArrayIter::VersionableSparse>(
-    ArrayIter* iter, TypedValue* valOut);
-template int64_t iterNext<c_StableMap, ArrayIter::VersionableSparse>(
-    ArrayIter* iter, TypedValue* valOut);
-template int64_t iterNext<c_Set, ArrayIter::VersionableSparse>(
-    ArrayIter* iter, TypedValue* valOut);
-template int64_t iterNext<c_Pair, ArrayIter::Fixed>(
-    ArrayIter* iter, TypedValue* valOut);
+template<class Coll, class Style>
+HOT_FUNC static
+int64_t iterInit(Iter* dest, Coll* coll,
+              TypedValue* valOut, TypedValue* keyOut) {
+  int64_t size = coll->size();
+  if (UNLIKELY(size == 0)) {
+    decRefObj(coll);
+    return 0LL;
+  }
+  (void) new (&dest->arr()) ArrayIter(coll, Style());
 
-template<class Coll, class Style, ArrayIter::RefCountKey refCountKey>
-HOT_FUNC
-int64_t iterNextK(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
   DataType vType = valOut->m_type;
   assert(vType != KindOfRef);
   uint64_t vDatum = valOut->m_data.num;
-  DataType kType = keyOut->m_type;
-  uint64_t kDatum = keyOut->m_data.num;
-  if (!iter->iterNextKey<Coll>(Style(), valOut, keyOut)) {
-    iter->~ArrayIter();
-    return 0LL;
-  }
+  iterValue<Coll, Style>(&dest->arr(), valOut);
   tvRefcountedDecRefHelper(vType, vDatum);
-  if (refCountKey == ArrayIter::RefCountKey::Refcount) {
+
+  if (keyOut) {
+    DataType kType = keyOut->m_type;
+    uint64_t kDatum = keyOut->m_data.num;
+    iterKey<Coll, Style>(&dest->arr(), keyOut);
     tvRefcountedDecRefHelper(kType, kDatum);
   }
   return 1LL;
 }
 
-template int64_t iterNextK<c_Vector,
-                           ArrayIter::Versionable,
-                           ArrayIter::RefCountKey::DontRefcount>(
-    ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterNextK<c_Map,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::RefCountKey::Refcount>(
-    ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterNextK<c_StableMap,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::RefCountKey::Refcount>(
-    ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterNextK<c_Set,
-                           ArrayIter::VersionableSparse,
-                           ArrayIter::RefCountKey::DontRefcount>(
-    ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
-template int64_t iterNextK<c_Pair,
-                           ArrayIter::Fixed,
-                           ArrayIter::RefCountKey::DontRefcount>(
-    ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut);
+template<class Coll, class Style>
+HOT_FUNC static
+int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  if (!iter->iterNext<Coll>(Style())) {
+    iter->~ArrayIter();
+    return 0LL;
+  }
+
+  DataType vType = valOut->m_type;
+  assert(vType != KindOfRef);
+  uint64_t vDatum = valOut->m_data.num;
+  iterValue<Coll, Style>(iter, valOut);
+  tvRefcountedDecRefHelper(vType, vDatum);
+
+  if (keyOut) {
+    DataType kType = keyOut->m_type;
+    uint64_t kDatum = keyOut->m_data.num;
+    iterKey<Coll, Style>(iter, keyOut);
+    tvRefcountedDecRefHelper(kType, kDatum);
+  }
+  return 1LL;
+}
 
 /*
  * iter_value_cell* will store a copy of the current value at the address
@@ -1014,10 +847,8 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   uint64_t oldDatum = out->m_data.num;
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
-  assert((typeArray && iter->arr().getIterKind()
-                            == ArrayIter::IterKind::Array) ||
-         (!typeArray && iter->arr().getIterKind()
-                            != ArrayIter::IterKind::Array));
+  assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
+         (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
     TypedValue* cur = arrIter.nvSecond();
@@ -1041,10 +872,8 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   assert(withRef || oldType != KindOfRef);
   uint64_t oldDatum = out->m_data.num;
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
-  assert((typeArray && iter->arr().getIterKind()
-                          == ArrayIter::IterKind::Array) ||
-         (!typeArray && iter->arr().getIterKind()
-                          != ArrayIter::IterKind::Array));
+  assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
+         (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arr = iter->arr();
   if (typeArray) {
     arr.nvFirst(out);
@@ -1070,7 +899,7 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
     (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noInc);
-    dest->arr().setIterKind(ArrayIter::IterKind::Array);
+    dest->arr().setIterType(ArrayIter::TypeArray);
     iter_value_cell_local_impl<true, withRef>(dest, valOut);
     if (keyOut) {
       iter_key_cell_local_impl<true, withRef>(dest, keyOut);
@@ -1100,7 +929,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
-      dest->arr().setIterKind(ArrayIter::IterKind::Array);
+      dest->arr().setIterType(ArrayIter::TypeArray);
       arr->getArrayElm<false>(dest->arr().m_pos, valOut, nullptr);
       return 1LL;
     }
@@ -1142,7 +971,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
-      dest->arr().setIterKind(ArrayIter::IterKind::Array);
+      dest->arr().setIterType(ArrayIter::TypeArray);
       arr->getArrayElm<withRef>(dest->arr().m_pos, valOut, keyOut);
       return 1LL;
     }
@@ -1191,7 +1020,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
   if (keyOut) {
     keyOut = tvToCell(keyOut);
   }
-  ArrayIter::IterKind itKind;
+  ArrayIter::Type itType;
   {
     FreeObj fo;
     if (obj->implementsIterator()) {
@@ -1203,7 +1032,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         decRefObj(obj);
         throw;
       }
-      itKind = ArrayIter::IterKind::Iterator;
+      itType = ArrayIter::TypeIterator;
     } else {
       bool isIteratorAggregate;
       /*
@@ -1221,7 +1050,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
               __func__, dest, obj, ctx);
         (void) new (&dest->arr()) ArrayIter(itObj, ArrayIter::transferOwner);
-        itKind = ArrayIter::IterKind::Iterator;
+        itType = ArrayIter::TypeIterator;
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
@@ -1229,7 +1058,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         Array iterArray(itObj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         (void) new (&dest->arr()) ArrayIter(ad);
-        itKind = ArrayIter::IterKind::Array;
+        itType = ArrayIter::TypeArray;
       }
     }
     try {
@@ -1245,8 +1074,8 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
     }
   }
 
-  dest->arr().setIterKind(itKind);
-  if (itKind == ArrayIter::IterKind::Iterator) {
+  dest->arr().setIterType(itType);
+  if (itType == ArrayIter::TypeIterator) {
     iter_value_cell_local_impl<false, false>(dest, valOut);
     if (keyOut) {
       iter_key_cell_local_impl<false, false>(dest, keyOut);
@@ -1268,36 +1097,26 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
   Collection::Type type = obj->getCollectionType();
   switch (type) {
     case Collection::VectorType:
-      return iterInitK<c_Vector,
-                       ArrayIter::Versionable,
-                       ArrayIter::IterKind::Vector>(
+      return iterInit<c_Vector, ArrayIter::Versionable>(
                                 dest, static_cast<c_Vector*>(obj),
                                 valOut, keyOut);
     case Collection::MapType:
-      return iterInitK<c_Map,
-                       ArrayIter::VersionableSparse,
-                       ArrayIter::IterKind::Map>(
+      return iterInit<c_Map, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<c_Map*>(obj),
                                 valOut, keyOut);
     case Collection::StableMapType:
-      return iterInitK<c_StableMap,
-                      ArrayIter::VersionableSparse,
-                      ArrayIter::IterKind::StableMap>(
+      return iterInit<c_StableMap, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<c_StableMap*>(obj),
                                 valOut, keyOut);
     case Collection::SetType:
-      return iterInitK<c_Set,
-                       ArrayIter::VersionableSparse,
-                       ArrayIter::IterKind::Set>(
+      return iterInit<c_Set, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<c_Set*>(obj),
                                 valOut, keyOut);
     case Collection::PairType:
-      return iterInitK<c_Pair,
-                       ArrayIter::Fixed,
-                       ArrayIter::IterKind::Pair>(
+      return iterInit<c_Pair, ArrayIter::Fixed>(
                                 dest,
                                 static_cast<c_Pair*>(obj),
                                 valOut, keyOut);
@@ -1306,17 +1125,26 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
   }
 }
 
+/**
+ * iter_next will advance the iterator to point to the next element.
+ * If the iterator reaches the end, iter_next will free the iterator
+ * and will decRef the array.
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (iter_next_array_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
+ */
 template <bool withRef>
 NEVER_INLINE
-int64_t iter_next_any(
-    Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "iter_next_any: I %p\n", iter);
-
-  valOut = tvToCell(valOut);
-  if (keyOut != nullptr) {
-    keyOut = tvToCell(keyOut);
-  }
-
+int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next_cold: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
   ArrayIter* ai = &iter->arr();
   ai->next();
   if (ai->end()) {
@@ -1324,7 +1152,7 @@ int64_t iter_next_any(
     ai->~ArrayIter();
     return 0;
   }
-  if (iter->arr().getIterKind() == ArrayIter::IterKind::Array) {
+  if (iter->arr().getIterType() == ArrayIter::TypeArray) {
     iter_value_cell_local_impl<true, withRef>(iter, valOut);
     if (keyOut) {
       iter_key_cell_local_impl<true, withRef>(iter, keyOut);
@@ -1338,31 +1166,49 @@ int64_t iter_next_any(
   return 1;
 }
 
-template int64_t iter_next_any<false>(
-    Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+template <bool withRef>
+HOT_FUNC
+static int64_t iter_next_collection(
+    Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  TRACE(2, "iter_next_collection: I %p\n", iter);
 
-/**
- * iter_next will advance the iterator to point to the next element.
- * If the iterator reaches the end, iter_next will free the iterator
- * and will decRef the array.
- * This function has been split into hot and cold parts. The hot part has
- * been carefully crafted so that it's a leaf function (after all functions
- * it calls have been trivially inlined) that then tail calls a cold
- * version of itself (iter_next_cold). The hot part should cover the
- * common case, which occurs when the array parameter is an HphpArray.
- * If you make any changes to this function, please keep the hot/cold
- * splitting in mind, and disasemble the optimized version of the binary
- * to make sure the hot part is a good-looking leaf function; otherwise,
- * you're likely to get a performance regression.
- */
+  ArrayIter* ai = &iter->arr();
+  Collection::Type type = (ai->hasArrayData()) ?
+                                Collection::InvalidType :
+                                ai->getObject()->getCollectionType();
+  switch (type) {
+    case Collection::VectorType:
+      return iterNext<c_Vector, ArrayIter::Versionable>(
+                                ai, valOut, keyOut);
+    case Collection::MapType:
+      return iterNext<c_Map, ArrayIter::VersionableSparse>(
+                                ai, valOut, keyOut);
+    case Collection::StableMapType:
+      return iterNext<c_StableMap, ArrayIter::VersionableSparse>(
+                                ai, valOut, keyOut);
+    case Collection::SetType:
+      return iterNext<c_Set, ArrayIter::VersionableSparse>(
+                                ai, valOut, keyOut);
+    case Collection::PairType:
+      return iterNext<c_Pair, ArrayIter::Fixed>(
+                                ai, valOut, keyOut);
+    default:
+      return iter_next_cold<withRef>(iter, valOut, keyOut);
+  }
+}
 
-// Invoked for IterNextKArray
 HOT_FUNC
 int64_t iter_next(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next: I %p\n", iter);
-  assert(iter->arr().getIterKind() == ArrayIter::IterKind::Array);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
   valOut = tvToCell(valOut);
+  if (UNLIKELY(!arrIter->hasArrayData())) {
+    goto cold;
+  }
   {
     const ArrayData* ad = arrIter->getArrayData();
     if (UNLIKELY(!ad->isHphpArray())) {
@@ -1377,7 +1223,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         }
         arr->decRefCount();
         if (debug) {
-          iter->arr().setIterKind(ArrayIter::IterKind::Undefined);
+          iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
         return 0;
       }
@@ -1391,15 +1237,15 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     return 1;
   }
 cold:
-  return iter_next_any<false>(iter, valOut, nullptr);
+  return iter_next_collection<false>(iter, valOut, nullptr);
 }
 
-// Invoked for IterNextKArray and the WIterNext* instructions
 template <bool withRef>
 HOT_FUNC
 int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
-  assert(iter->arr().getIterKind() != ArrayIter::IterKind::Undefined);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
   if (!withRef) {
     valOut = tvToCell(valOut);
@@ -1423,7 +1269,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         }
         arr->decRefCount();
         if (debug) {
-          iter->arr().setIterKind(ArrayIter::IterKind::Undefined);
+          iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
         return 0;
       }
@@ -1443,7 +1289,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     return 1;
   }
   cold:
-  return iter_next_any<withRef>(iter, valOut, keyOut);
+  return iter_next_collection<withRef>(iter, valOut, keyOut);
 }
 
 template int64_t iter_next_key<false>(Iter* dest,

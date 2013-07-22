@@ -7248,7 +7248,6 @@ void VMExecutionContext::requestInit() {
 
 void VMExecutionContext::requestExit() {
   treadmillSharedVars();
-  destructObjects();
   syncGdbState();
   tx()->requestExit();
   Transl::Translator::clearTranslator();

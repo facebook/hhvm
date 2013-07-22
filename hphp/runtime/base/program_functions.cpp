@@ -1489,6 +1489,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   }
 
   // Run shutdown handlers. This may cause user code to run.
+  static_cast<VMExecutionContext*>(context)->destructObjects();
   if (shutdown) {
     context->onRequestShutdown();
   }

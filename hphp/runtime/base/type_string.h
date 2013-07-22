@@ -561,6 +561,7 @@ private:
 };
 
 extern const StaticString empty_string;
+String getDataTypeString(DataType t);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -235,7 +235,8 @@ double tvCastToDouble(TypedValue* tv) {
 
 const StaticString
   s_1("1"),
-  s_Array("Array");
+  s_Array("Array"),
+  s_scalar("scalar");
 
 void tvCastToStringInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
@@ -347,12 +348,12 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   case KindOfDouble:
   case KindOfStaticString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_set("scalar", tvAsVariant(tv));
+    o->o_set(s_scalar, tvAsVariant(tv));
     break;
   }
   case KindOfString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_set("scalar", tvAsVariant(tv));
+    o->o_set(s_scalar, tvAsVariant(tv));
     tvDecRefStr(tv);
     break;
   }

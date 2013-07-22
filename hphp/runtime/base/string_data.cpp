@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "tbb/concurrent_hash_map.h"
+#include "hphp/util/stacktrace_profiler.h"
 
 namespace HPHP {
 

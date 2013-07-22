@@ -180,15 +180,7 @@ public:
   const std::string &pseudoMainName();
   void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
-  bool needPseudoMainVariables() const;
   std::string outputFilebase() const;
-
-  void addPseudoMainVariable(const std::string &name) {
-    m_pseudoMainVariables.insert(name);
-  }
-  std::set<std::string> &getPseudoMainVariables() {
-    return m_pseudoMainVariables;
-  }
 
   FunctionScopeRawPtr getPseudoMain() const {
     return m_pseudoMain;
@@ -217,7 +209,6 @@ private:
   vertex_descriptor m_vertex;
 
   std::string m_pseudoMainName;
-  std::set<std::string> m_pseudoMainVariables;
   BlockScopeSet m_providedDefs;
   std::set<std::string> m_redecBases;
 

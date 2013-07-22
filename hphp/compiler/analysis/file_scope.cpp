@@ -193,13 +193,6 @@ int FileScope::getGlobalAttribute() const {
   return m_attributes.back();
 }
 
-bool FileScope::needPseudoMainVariables() const {
-  VariableTablePtr variables = m_pseudoMain->getVariables();
-  return
-    variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-    variables->getSymbols().size() > 0;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {

@@ -51,15 +51,13 @@ struct Slice {
 typedef Slice<const char> StringSlice;
 typedef Slice<char> MutableSlice;
 
-// Aggressively copy small strings and free the passed-in buffer immediately;
-// otherwise keep the buffer for long strings, and free it when the string
-// is mutated or released.
+// Copy the passed-in string and free the buffer immediately.
 enum AttachStringMode { AttachString };
 
 // const char* points to client-owned memory, StringData will copy it
 // at construct-time using smart_malloc.  This is only ok when the StringData
 // itself was smart-allocated.
-enum CopyStringMode { CopyString, AttachLiteral };
+enum CopyStringMode { CopyString };
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };

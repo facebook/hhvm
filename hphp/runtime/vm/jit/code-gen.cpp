@@ -4832,7 +4832,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
 
   string sds(Util::toLower(clsNameString->data()) + ":" +
              string(propNameString->data(), propNameString->size()));
-  StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
+  StackStringData sd(sds.c_str(), sds.size(), CopyString);
   CacheHandle ch = SPropCache::alloc(&sd);
 
   auto dstReg = m_regs[dst].reg();

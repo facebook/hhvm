@@ -649,7 +649,7 @@ public:
       g_context->write(data, length);
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, AttachLiteral), length);
+      return t->fp->write(String(data, length, CopyString), length);
     case PHP_CURL_RETURN:
       if (length > 0) {
         t->buf.append(data, (int)length);
@@ -684,7 +684,7 @@ public:
       }
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, AttachLiteral), length);
+      return t->fp->write(String(data, length, CopyString), length);
     case PHP_CURL_USER:
       {
         Variant ret = ch->do_callback(

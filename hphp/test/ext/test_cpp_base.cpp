@@ -192,7 +192,7 @@ bool TestCppBase::TestString() {
     VS(String("test").rvalAt(2).c_str(), "s");
     String s = "test";
     s.set(2, String(""));
-    VS(s, String("te\0t", 4, AttachLiteral));
+    VS(s, String("te\0t", 4, CopyString));
     s.set(2, String("zz"));
     VS(s, "tezt");
     s.set(5, String("q"));

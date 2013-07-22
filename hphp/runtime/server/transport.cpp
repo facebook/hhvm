@@ -690,7 +690,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
 
 String Transport::prepareResponse(const void *data, int size, bool &compressed,
                                   bool last) {
-  String response((const char *)data, size, AttachLiteral);
+  String response((const char *)data, size, CopyString);
 
   // we don't use chunk encoding to send anything pre-compressed
   assert(!compressed || !m_chunkedEncoding);
@@ -783,7 +783,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
 
   // HTTP header handling
   if (!m_headerSent) {
-    String orig_response((const char *)data, size, AttachLiteral);
+    String orig_response((const char *)data, size, CopyString);
     prepareHeaders(compressed, chunked, response, orig_response);
     m_headerSent = true;
   }

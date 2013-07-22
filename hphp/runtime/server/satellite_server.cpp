@@ -70,12 +70,12 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
 }
 
 bool SatelliteServerInfo::checkMainURL(const std::string& path) {
-  String url(path.c_str(), path.size(), AttachLiteral);
+  String url(path.c_str(), path.size(), CopyString);
   for (std::set<string>::const_iterator iter =
          SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match
-      (String(iter->c_str(), iter->size(), AttachLiteral), url);
+      (String(iter->c_str(), iter->size(), CopyString), url);
     if (ret.toInt64() > 0) {
       return false;
     }
@@ -109,10 +109,10 @@ public:
 
 private:
   bool checkURL(const std::string &path) const {
-    String url(path.c_str(), path.size(), AttachLiteral);
+    String url(path.c_str(), path.size(), CopyString);
     for (const auto &allowed : m_allowedURLs) {
       Variant ret = preg_match
-        (String(allowed.c_str(), allowed.size(), AttachLiteral), url);
+        (String(allowed.c_str(), allowed.size(), CopyString), url);
       if (ret.toInt64() > 0) {
         return true;
       }

@@ -1841,12 +1841,12 @@ void Variant::unserialize(VariableUnserializer *uns,
                   throw Exception("Mangled private object property");
                 }
               }
-              String k(kdata + subLen, ksize - subLen, AttachLiteral);
+              String k(kdata + subLen, ksize - subLen, CopyString);
               if (kdata[1] == '*') {
                 unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
               } else {
                 unserializeProp(uns, obj.get(), k,
-                                String(kdata + 1, subLen - 2, AttachLiteral),
+                                String(kdata + 1, subLen - 2, CopyString),
                                 key, i + 1);
               }
             } else {

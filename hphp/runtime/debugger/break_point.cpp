@@ -972,8 +972,8 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
 
   Variant matches;
   Variant r = preg_match(String(needle.c_str(), needle.size(),
-                                AttachLiteral),
-                         String(haystack, haystack_len, AttachLiteral),
+                                CopyString),
+                         String(haystack, haystack_len, CopyString),
                          matches);
   return HPHP::same(r, 1);
 }

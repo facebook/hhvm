@@ -28,6 +28,9 @@
 #include <unwind.h>
 #include <unordered_set>
 #include <signal.h>
+#ifdef __FreeBSD__
+#include <sys/ucontext.h>
+#endif
 
 #ifdef __FreeBSD__
 #define RIP_REGISTER(v) (v).mc_rip

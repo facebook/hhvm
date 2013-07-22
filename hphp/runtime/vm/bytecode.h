@@ -177,6 +177,8 @@ class VarEnv {
   void setWithRef(const StringData* name, TypedValue* tv);
   TypedValue* lookup(const StringData* name);
   TypedValue* lookupAdd(const StringData* name);
+  TypedValue* lookupRawPointer(const StringData* name);
+  TypedValue* lookupAddRawPointer(const StringData* name);
   bool unset(const StringData* name);
 
   Array getDefinedVariables() const;

@@ -39,7 +39,7 @@ namespace HPHP {
 
 class ConcurrentTableSharedStore : public SharedStore {
 public:
-  explicit ConcurrentTableSharedStore(int id)
+  ConcurrentTableSharedStore(int id)
     : SharedStore(id), m_lockingFlag(false), m_purgeCounter(0) {}
 
   virtual int size() {
@@ -63,7 +63,7 @@ public:
 
 protected:
   virtual SharedVariant* construct(CVarRef v) {
-    return new SharedVariant(v, false);
+    return SharedVariant::Create(v, false);
   }
 
   struct charHashCompare {

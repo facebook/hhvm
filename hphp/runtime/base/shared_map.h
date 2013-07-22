@@ -33,11 +33,10 @@ namespace HPHP {
 class SharedMap : public ArrayData {
 public:
   explicit SharedMap(SharedVariant* source)
-      : ArrayData(kSharedKind)
-      , m_localCache(nullptr) {
-    m_map      = source->getMap();
-    m_isVector = source->getIsVector();
-    m_size = isVector() ? m_vec->m_size : m_map->size();
+    : ArrayData(kSharedKind)
+    , m_arr(source)
+    , m_localCache(nullptr) {
+    m_size = m_arr->arrSize();
   }
 
   ~SharedMap();
@@ -54,8 +53,8 @@ public:
   using ArrayData::addLval;
   using ArrayData::remove;
 
-  SharedVariant* getValueImpl(ssize_t pos) const {
-    return isVector() ? m_vec->getValue(pos) : m_map->getValue(pos);
+  Variant getKey(ssize_t pos) const {
+    return m_arr->getKey(pos);
   }
 
   CVarRef getValueRef(ssize_t pos) const;
@@ -120,25 +119,16 @@ public:
   static ArrayData* Escalate(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*);
 
-  ArrayData* loadElems(bool mapInit = false) const;
-
 private:
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
   static SharedMap* asSharedMap(ArrayData* ad);
   static const SharedMap* asSharedMap(const ArrayData* ad);
 
-private:
-  bool m_isVector;
-  union {
-    ImmutableMap* m_map;
-    VectorData*   m_vec;
-  };
-  mutable TypedValue* m_localCache;
-  bool isVector() const { return m_isVector; }
-
 public:
   void getChildren(std::vector<TypedValue *> &out);
+  SharedVariant *m_arr;
+  mutable TypedValue* m_localCache;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

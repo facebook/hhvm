@@ -28,16 +28,17 @@ IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap);
 ///////////////////////////////////////////////////////////////////////////////
 HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
-  SharedVariant *sv = getValueImpl(pos);
+  SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
   if (LIKELY(m_localCache != nullptr)) {
-    assert(unsigned(pos) < size());
+    assert(unsigned(pos) < m_arr->arrCap());
     TypedValue* tv = &m_localCache[pos];
     if (tv->m_type != KindOfUninit) return tvAsCVarRef(tv);
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
-    m_localCache = (TypedValue*) smart_calloc(size(), sizeof(TypedValue));
+    unsigned cap = m_arr->arrCap();
+    m_localCache = (TypedValue*) smart_calloc(cap, sizeof(TypedValue));
   }
   TypedValue* tv = &m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();
@@ -52,7 +53,7 @@ CVarRef SharedMap::GetValueRef(const ArrayData* ad, ssize_t pos) {
 HOT_FUNC
 SharedMap::~SharedMap() {
   if (m_localCache) {
-    for (TypedValue* tv = m_localCache, *end = tv + size();
+    for (TypedValue* tv = m_localCache, *end = tv + m_arr->arrCap();
          tv < end; ++tv) {
       tvRefcountedDecRef(tv);
     }
@@ -75,37 +76,30 @@ inline const SharedMap* SharedMap::asSharedMap(const ArrayData* ad) {
   return static_cast<const SharedMap*>(ad);
 }
 
-ssize_t SharedMap::getIndex(const StringData* k) const {
-  if (isVector()) return -1;
-  return m_map->indexOf(k);
-}
-
-ssize_t SharedMap::getIndex(int64_t k) const {
-  if (isVector()) {
-    if (k < 0 || (size_t)k >= m_vec->m_size) return -1;
-    return k;
-  }
-  return m_map->indexOf(k);
-}
-
 bool SharedMap::IsVectorData(const ArrayData* ad) {
   auto a = asSharedMap(ad);
-  if (a->isVector()) return true;
   const auto n = a->size();
   for (ssize_t i = 0; i < n; i++) {
-    if (a->m_map->indexOf(i) != i) return false;
+    if (a->getIndex(i) != i) return false;
   }
   return true;
 }
 
 bool SharedMap::ExistsStr(const ArrayData* ad, const StringData* k) {
   auto a = asSharedMap(ad);
-  if (a->isVector()) return false;
-  return a->m_map->indexOf(k) != -1;
+  return a->getIndex(k) != -1;
 }
 
 bool SharedMap::ExistsInt(const ArrayData* ad, int64_t k) {
   return asSharedMap(ad)->getIndex(k) != -1;
+}
+
+ssize_t SharedMap::getIndex(int64_t k) const {
+  return m_arr->getIndex(k);
+}
+
+ssize_t SharedMap::getIndex(const StringData* k) const {
+  return m_arr->getIndex(k);
 }
 
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
@@ -212,7 +206,8 @@ ArrayData *SharedMap::Prepend(ArrayData* ad, CVarRef v, bool copy) {
 }
 
 ArrayData *SharedMap::Escalate(const ArrayData* ad) {
-  auto ret = asSharedMap(ad)->loadElems();
+  auto smap = asSharedMap(ad);
+  auto ret = smap->m_arr->loadElems(*smap);
   assert(!ret->isStatic());
   return ret;
 }
@@ -233,22 +228,17 @@ TypedValue* SharedMap::NvGetStr(const ArrayData* ad, const StringData* key) {
 
 void SharedMap::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   auto a = asSharedMap(ad);
-  if (a->isVector()) {
-    out->m_data.num = pos;
-    out->m_type = KindOfInt64;
-  } else {
-    Variant k = a->m_map->getKey(pos);
-    TypedValue* tv = k.asTypedValue();
-    // copy w/out clobbering out->_count.
-    out->m_type = tv->m_type;
-    out->m_data.num = tv->m_data.num;
-    if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
-  }
+  Variant k = a->m_arr->getKey(pos);
+  TypedValue* tv = k.asTypedValue();
+  // copy w/out clobbering out->_count.
+  out->m_type = tv->m_type;
+  out->m_data.num = tv->m_data.num;
+  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
 }
 
 ArrayData* SharedMap::EscalateForSort(ArrayData* ad) {
   auto a = asSharedMap(ad);
-  auto ret = a->loadElems(true /* mapInit */);
+  auto ret = a->m_arr->loadElems(*a, true /* mapInit */);
   assert(!ret->isStatic());
   return ret;
 }
@@ -286,33 +276,9 @@ bool SharedMap::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
   return false;
 }
 
-ArrayData* SharedMap::loadElems(bool mapInit /* = false */) const {
-  uint count = size();
-  bool isVec = isVector();
-
-  auto ai =
-    mapInit ? ArrayInit(count, ArrayInit::mapInit) :
-    isVec ? ArrayInit(count, ArrayInit::vectorInit) :
-    ArrayInit(count);
-
-  if (isVec) {
-    for (uint i = 0; i < count; i++) {
-      ai.set(getValueRef(i));
-    }
-  } else {
-    for (uint i = 0; i < count; i++) {
-      ai.add(m_map->getKey(i), getValueRef(i),
-             true);
-    }
-  }
-  ArrayData* elems = ai.create();
-  if (elems->isStatic()) elems = elems->copy();
-  return elems;
-}
-
 void SharedMap::getChildren(std::vector<TypedValue *> &out) {
   if (m_localCache) {
-    TypedValue *localCacheEnd = m_localCache + size();
+    TypedValue *localCacheEnd = m_localCache + m_size;
     for (TypedValue *tv = m_localCache;
          tv < localCacheEnd;
          ++tv) {

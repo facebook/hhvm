@@ -39,7 +39,11 @@ ImmutableMap* ImmutableMap::Create(ArrayData* arr,
 
   try {
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      ret->add(ret->m.m_num, it.first(), it.secondRef(), unserializeObj);
+      SharedVariant* key = SharedVariant::Create(it.first(), false, true,
+                                                 unserializeObj);
+      SharedVariant* val = SharedVariant::Create(it.secondRef(), false, true,
+                                                 unserializeObj);
+      ret->add(ret->m.m_num, key, val);
       ++ret->m.m_num;
     }
   } catch (...) {
@@ -54,62 +58,36 @@ HOT_FUNC
 void ImmutableMap::Destroy(ImmutableMap* map) {
   Bucket* buckets = map->buckets();
   for (int i = 0; i < map->m.m_num; i++) {
-    (*(SharedVariant*)&buckets[i].val).~SharedVariant();
+    delete buckets[i].key;
+    delete buckets[i].val;
   }
   free(map);
 }
 
 HOT_FUNC
-void ImmutableMap::addVal(int pos, int hash_pos,
-                          CVarRef val, bool unserializeObj) {
+void ImmutableMap::add(int pos, SharedVariant *key, SharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   Bucket* bucket = buckets() + pos;
-  new (&bucket->val) SharedVariant(val, false, true, unserializeObj);
+  bucket->key = key;
+  bucket->val = val;
+  int hash_pos =
+    (key->is(KindOfInt64) ?
+     key->intData() : key->getStringData()->hash()) & m.m_capacity_mask;
+
   int& hp = hash()[hash_pos];
   bucket->next = hp;
   hp = pos;
 }
 
 HOT_FUNC
-void ImmutableMap::add(int pos, CVarRef key, CVarRef val, bool unserializeObj) {
-  int64_t ikey;
-  StringData* skey;
-  int32_t hash;
-  Bucket* b = buckets() + pos;
-
-  switch (key.getType()) {
-    case KindOfInt64: {
-      hash = ikey = key.toInt64();
-      b->setIntKey(ikey);
-      break;
-    }
-    case KindOfString: {
-      skey = StringData::GetStaticString(key.getStringData());
-      goto static_case;
-    }
-    case KindOfStaticString: {
-      skey = key.getStringData();
-static_case:
-      hash = skey->hash();
-      b->setStrKey(skey, hash);
-      break;
-    }
-    default: not_reached();
-  }
-  addVal(pos, hash & m.m_capacity_mask, val, unserializeObj);
-}
-
-#define STR_HASH(x)   (int32_t(x) | 0x80000000)
-
-HOT_FUNC
 int ImmutableMap::indexOf(const StringData* key) {
-  strhash_t h = STR_HASH(key->hash());
+  strhash_t h = key->hash();
   int bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    Bucket* cand = &b[bucket];
-    if (cand->hash() == h && (cand->skey == key || key->same(cand->skey))) {
+    if (!b[bucket].key->is(KindOfInt64) &&
+        key->same(b[bucket].key->getStringData())) {
       return bucket;
     }
     bucket = b[bucket].next;
@@ -122,7 +100,8 @@ int ImmutableMap::indexOf(int64_t key) {
   int bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    if (b[bucket].hasIntKey() && key == b[bucket].ikey) {
+    if (b[bucket].key->is(KindOfInt64) &&
+        key == b[bucket].key->intData()) {
       return bucket;
     }
     bucket = b[bucket].next;

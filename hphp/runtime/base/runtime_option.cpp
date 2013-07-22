@@ -608,7 +608,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }
-    Logger::DropCacheChunkSize =
+    LogFileFlusher::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
     AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
     RuntimeOption::LogHeaderMangle = logger["HeaderMangle"].getInt32(0);

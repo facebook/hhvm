@@ -21,9 +21,25 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/cronolog.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class LogFileData {
+public:
+  LogFileData() : log(nullptr) {}
+  explicit LogFileData(FILE *f) : log(f) {}
+  LogFileData(const LogFileData& rhs) : log(rhs.log) {
+  }
+  LogFileData& operator=(const LogFileData& rhs) {
+    log = rhs.log;
+    return *this;
+  }
+
+  FILE *log;
+  LogFileFlusher flusher;
+};
 
 class AccessLogFileData {
 public:
@@ -40,11 +56,10 @@ class AccessLog {
 public:
   class ThreadData {
   public:
-    ThreadData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
+    ThreadData() : log(nullptr) {}
     FILE *log;
     int64_t startTime;
-    int bytesWritten;
-    int prevBytesWritten;
+    LogFileFlusher flusher;
   };
   typedef ThreadData* (*GetThreadDataFunc)();
   explicit AccessLog(GetThreadDataFunc f) :

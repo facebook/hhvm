@@ -21,6 +21,7 @@
 #include <string>
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,9 +40,7 @@ public:
     m_timeOffset(0),
     m_nextPeriod(0),
     m_prevFile(nullptr),
-    m_file(nullptr),
-    m_bytesWritten(0),
-    m_prevBytesWritten(0) {}
+    m_file(nullptr) {}
   ~Cronolog() {
     if (m_prevFile) fclose(m_prevFile);
     if (m_file) fclose(m_file);
@@ -65,8 +64,7 @@ public:
   time_t m_nextPeriod;
   FILE *m_prevFile;
   FILE *m_file;
-  std::atomic<int> m_bytesWritten;
-  int m_prevBytesWritten;
+  LogFileFlusher flusher;
   Mutex m_mutex;
 
 private:

@@ -114,12 +114,8 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   AccessLog::ThreadData *threadData = m_fGetThreadData();
   FILE *threadLog = threadData->log;
   if (threadLog) {
-    threadData->bytesWritten +=
-      writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
-    threadData->prevBytesWritten =
-      Logger::checkDropCache(threadData->bytesWritten,
-                             threadData->prevBytesWritten,
-                             threadLog);
+    int bytes = writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
+    threadData->flusher.recordWriteAndMaybeDropCaches(threadLog, bytes);
   }
   if (Logger::UseCronolog) {
     for (uint i = 0; i < m_cronOutput.size(); ++i) {
@@ -128,11 +124,7 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
       int bytes = writeLog(transport, vhost, outFile, format);
-      cronOutput.m_bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
-      cronOutput.m_prevBytesWritten = Logger::checkDropCache(
-        cronOutput.m_bytesWritten.load(std::memory_order_relaxed),
-        cronOutput.m_prevBytesWritten,
-        outFile);
+      cronOutput.flusher.recordWriteAndMaybeDropCaches(outFile, bytes);
     }
   } else {
     for (uint i = 0; i < m_output.size(); ++i) {
@@ -141,12 +133,8 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
       int bytes = writeLog(transport, vhost, outFile, format);
-      output.bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
       if (m_files[i].file[0] != '|') {
-        output.prevBytesWritten =
-          Logger::checkDropCache(output.bytesWritten,
-                                 output.prevBytesWritten,
-                                 outFile);
+        output.flusher.recordWriteAndMaybeDropCaches(outFile, bytes);
       }
     }
   }

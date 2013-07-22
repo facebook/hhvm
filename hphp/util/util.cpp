@@ -303,6 +303,25 @@ int Util::drop_cache(FILE *f, off_t len /* = 0 */) {
   return drop_cache(fileno(f), len);
 }
 
+
+int LogFileFlusher::DropCacheChunkSize = (1 << 20);
+void LogFileFlusher::recordWriteAndMaybeDropCaches(int fd, int bytes) {
+  int oldBytesWritten = m_bytesWritten.fetch_add(bytes);
+  int newBytesWritten = oldBytesWritten + bytes;
+
+  if (!(newBytesWritten > DropCacheChunkSize &&
+        oldBytesWritten <= DropCacheChunkSize)) {
+    return;
+  }
+
+  off_t offset = lseek(fd, 0, SEEK_CUR);
+  if (offset > kDropCacheTail) {
+    dropCache(fd, offset - kDropCacheTail);
+  }
+
+  m_bytesWritten = 0;
+}
+
 int Util::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;

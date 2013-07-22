@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_UTIL_H_
 #define incl_HPHP_UTIL_H_
 
+#include <atomic>
 #include <vector>
 #include <string>
 #include <map>
@@ -390,6 +391,32 @@ struct Nuller : private boost::noncopyable {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
+
+class LogFileFlusher {
+public:
+  LogFileFlusher() : m_bytesWritten(0) {}
+  virtual ~LogFileFlusher() {}
+
+  void recordWriteAndMaybeDropCaches(int fd, int bytes);
+  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
+    recordWriteAndMaybeDropCaches(fileno(f), bytes);
+  }
+
+  enum {
+    kDropCacheTail = 1 * 1024 * 1024
+  };
+
+  static int DropCacheChunkSize;
+protected:
+  // For testing
+  virtual void dropCache(int fd, off_t len) {
+    Util::drop_cache(fd, len);
+  }
+
+private:
+  std::atomic<int> m_bytesWritten;
+};
+}
 
 #endif

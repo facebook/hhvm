@@ -50,12 +50,10 @@ bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
 bool Logger::IsPipeOutput = false;
-int Logger::DropCacheChunkSize = (1 << 20);
 FILE *Logger::Output = nullptr;
 Cronolog Logger::cronOutput;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
-std::atomic<int> Logger::bytesWritten(0);
-int Logger::prevBytesWritten = 0;
+LogFileFlusher Logger::flusher;
 bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
 std::string Logger::ExtraHeader;
@@ -185,16 +183,13 @@ void Logger::log(LogLevelType level, const std::string &msg,
     } else {
       bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
     }
-    bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
+
     FILE *tf = threadData->log;
     if (tf) {
-      threadData->bytesWritten +=
+      int threadBytes =
         fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
       fflush(tf);
-      threadData->prevBytesWritten =
-        checkDropCache(threadData->bytesWritten,
-                       threadData->prevBytesWritten,
-                       tf);
+      threadData->flusher.recordWriteAndMaybeDropCaches(tf, threadBytes);
     }
     if (threadData->hook) {
       threadData->hook(header.c_str(), msg.c_str(), ending,
@@ -206,9 +201,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
 
     fflush(f);
     if (UseCronolog || (Output && !Logger::IsPipeOutput)) {
-      prevBytesWritten =
-        checkDropCache(bytesWritten.load(std::memory_order_relaxed),
-                       prevBytesWritten, f);
+      flusher.recordWriteAndMaybeDropCaches(f, bytes);
     }
   }
 }
@@ -261,15 +254,6 @@ char *Logger::EscapeString(const std::string &msg) {
   }
   *target = 0;
   return new_str;
-}
-
-int Logger::checkDropCache(int bytesWritten, int prevBytesWritten,
-                           FILE *f) {
-  if (bytesWritten - prevBytesWritten > Logger::DropCacheChunkSize) {
-    Util::drop_cache(f);
-    return bytesWritten;
-  }
-  return prevBytesWritten;
 }
 
 bool Logger::SetThreadLog(const char *file) {

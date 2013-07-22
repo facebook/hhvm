@@ -524,7 +524,9 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   elem->m_is_text = m_is_text;
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
-  if (ns.empty()) {
+  if (m_is_text) {
+    return obj;
+  } else if (ns.empty()) {
     elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();

@@ -5311,7 +5311,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
   assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
   StringData* name = c1->m_data.pstr;
-  // CLSMETHOD_BODY will take care of decReffing name
+  // pushClsMethodImpl will take care of decReffing name
   m_stack.ndiscard(2);
   assert(cls && name);
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : nullptr;
@@ -5345,13 +5345,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
   Class* cls = tv->m_data.pcls;
   assert(cls);
   StringData* name = c1->m_data.pstr;
-  // CLSMETHOD_BODY will take care of decReffing name
+  // pushClsMethodImpl will take care of decReffing name
   m_stack.ndiscard(2);
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : nullptr;
   pushClsMethodImpl<true>(cls, name, obj, numArgs);
 }
-
-#undef CLSMETHOD_BODY
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   NEXT();

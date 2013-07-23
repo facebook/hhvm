@@ -1,5 +1,6 @@
 
 "Tamale" 7/22/2013
+  - Implement RecursiveArrayIterator
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)
   - Enable HHBC by default in debug builds
   - Implement SplObjectStorage::getInfo()

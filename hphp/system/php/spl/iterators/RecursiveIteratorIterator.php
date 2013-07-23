@@ -66,9 +66,9 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
    */
   public function getInnerIterator() {
     $it = $this->iterators[count($this->iterators)-1][0];
-    if (!$it instanceof RecursiveDirectoryIterator) {
+    if (!$it instanceof RecursiveIterator) {
       throw new Exception(
-        "RecursiveIteratorIterator only supports RecursiveDirectoryIterator"
+        "inner iterator must implement RecursiveIterator"
       );
     }
     return $it;
@@ -200,7 +200,7 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
 
     $it = $this->getInnerIterator();
     if ($it->valid() &&
-        $it->isDir() &&
+        $it->hasChildren() &&
         ($this->mode == self::LEAVES_ONLY ||
          ($this->mode == self::CHILD_FIRST &&
           $this->getInnerIteratorFlag() == 0))) {

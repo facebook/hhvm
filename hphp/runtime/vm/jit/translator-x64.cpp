@@ -3468,9 +3468,12 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
+    Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
+      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(), MetaMode::Legacy);
+
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
         assert(!(m_mode == TransProfile && ni->outputPredicted && ni->next));

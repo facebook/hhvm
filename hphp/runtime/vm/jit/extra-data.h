@@ -358,6 +358,12 @@ struct InterpOneData : IRExtraData {
   // Opcode, in case we need to fix the stack differently. Some byte-
   // code instructions modify things below the top of the stack.
   Op opcode;
+
+  std::string show() const {
+    return folly::format("{}: bcOff:{}, popped:{}, pushed:{}",
+                         opcodeToName(opcode), bcOff, cellsPopped,
+                         cellsPushed).str();
+  }
 };
 
 /*

@@ -33,6 +33,7 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 
 StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
+  FTRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
   assert(sp->isA(Type::StkPtr));
   IRInstruction* inst = sp->inst();
 
@@ -84,7 +85,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       getStackValue(inst->src(0),
                     // Pushes a return value, pops an ActRec and args Array
                     index -
-                      (1 /* pushed */ - kNumActRecCells + 1 /* popped */));
+                      (1 /* pushed */ - (kNumActRecCells + 1) /* popped */));
     info.spansCall = true;
     return info;
   }
@@ -97,7 +98,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     auto info =
       getStackValue(inst->src(0),
                     index -
-                     (1 /* pushed */ - kNumActRecCells /* popped */));
+                    (1 /* pushed */ - kNumActRecCells /* popped */));
     info.spansCall = true;
     return info;
   }
@@ -148,6 +149,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       if (index == 0) return StackValueInfo { Type::Cell };
       if (index == 1) return StackValueInfo { Type::Int };
       break;
+    case Op::FPushCufSafe:
+      if (index == kNumActRecCells) return StackValueInfo { Type::Bool };
+      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
+      break;
 
     default:
       if (index == 0 && !resultType.equals(Type::None)) {
@@ -165,9 +170,9 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case SpillFrame:
   case CufIterSpillFrame:
-    return getStackValue(inst->src(0),
-                         // pushes an ActRec
-                         index - kNumActRecCells);
+    // pushes an ActRec
+    if (index < kNumActRecCells) return StackValueInfo { nullptr };
+    return getStackValue(inst->src(0), index - kNumActRecCells);
 
   default:
     {

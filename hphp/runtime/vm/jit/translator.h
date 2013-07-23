@@ -1073,7 +1073,12 @@ SrcKey nextSrcKey(const NormalizedInstruction& i);
 
 void populateImmediates(NormalizedInstruction&);
 void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
-void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&);
+enum class MetaMode {
+  Normal,
+  Legacy,
+};
+void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&,
+                  MetaMode m = MetaMode::Normal);
 bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;
@@ -1122,6 +1127,8 @@ enum OutTypeConstraints {
   OutStrlen,            // OpStrLen
   OutClassRef,          // KindOfClass
   OutSetM,              // SetM is a very special snowflake
+  OutFPushCufSafe,      // FPushCufSafe pushes two values of different
+                        // types and an ActRec
   OutNone
 };
 
@@ -1156,7 +1163,6 @@ enum Operands {
                              // n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
-  StackCufSafe = StackIns1 | FStack
 };
 
 inline Operands operator|(const Operands& l, const Operands& r) {

@@ -1177,7 +1177,7 @@ static const struct {
   { OpFPushCufF,   {Stack1,           FStack,       OutFDesc,
                                                      kNumActRecCells - 1 }},
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
-                                      StackCufSafe, OutFDesc,
+                                      StackTop2|FStack, OutFPushCufSafe,
                                                          kNumActRecCells }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
@@ -1266,7 +1266,7 @@ static const struct {
 
   /*** 14. Continuation instructions ***/
 
-  { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
+  { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
   { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
@@ -1360,12 +1360,6 @@ int64_t getStackPopped(const NormalizedInstruction& ni) {
 }
 
 int64_t getStackPushed(const NormalizedInstruction& ni) {
-  switch (ni.op()) {
-    case OpFPushCufSafe:   return kNumActRecCells + 2;
-
-    default:               break;
-  }
-
   return countOperands(getInstrInfo(ni.op()).out);
 }
 
@@ -1973,6 +1967,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutStrlen:
     case OutNone:
       return false;
+
     case OutFDesc:
     case OutSameAsInput:
     case OutCInput:
@@ -1986,6 +1981,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutSetOp:
     case OutIncDec:
     case OutSetM:
+    case OutFPushCufSafe:
       return true;
   }
   not_reached();
@@ -2101,6 +2097,13 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           varEnvTaint = true;
           continue;
         }
+        if (op == OpCreateCont) {
+          // CreateCont stores Uninit to all locals but NormalizedInstruction
+          // doesn't have enough output fields, so we special case it in
+          // analyze().
+          continue;
+        }
+
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
@@ -2283,9 +2286,22 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       } continue; // already pushed an output for the local
 
       case Stack1:
-      case Stack2:
+      case Stack2: {
         loc = Location(Location::Stack, currentStackOffset++);
-        break;
+        if (ni->op() == OpFPushCufSafe) {
+          // FPushCufSafe pushes its first stack input, then a bool.
+          if (opnd == Stack2) {
+            assert(ni->outStack == nullptr);
+            auto* dl = t.newDynLocation(loc, ni->inputs[0]->rtt);
+            ni->outStack = dl;
+          } else {
+            assert(ni->outStack2 == nullptr);
+            auto* dl = t.newDynLocation(loc, KindOfBoolean);
+            ni->outStack2 = dl;
+          }
+          continue;
+        }
+      } break;
       case StackIns1: {
         // First stack output is where the inserted element will go.
         // The output code for the instruction will affect what we
@@ -3416,6 +3432,15 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         tas.recordWrite(o);
       }
     }
+    if (ni->op() == OpCreateCont) {
+      // CreateCont stores Uninit to all locals but NormalizedInstruction
+      // doesn't have enough output fields, so we special case it here.
+      auto const numLocals = curFunc()->numLocals();
+      for (unsigned i = 0; i < numLocals; ++i) {
+        tas.recordWrite(t.newDynLocation(Location(Location::Local, i),
+                                         KindOfUninit));
+      }
+    }
 
     SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackFrameOffset);
 
@@ -3625,7 +3650,7 @@ const char* Translator::translateResultName(TranslateResult r) {
  * eventually replace applyInputMetaData.
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
-                  HhbcTranslator& hhbcTrans) {
+                  HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
   if (!handle.findMeta(inst.unit(), inst.offset())) return;
 
   Unit::MetaInfo info;
@@ -3660,6 +3685,13 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
                    !(iInfo.in & Stack2) ? 1 :
                    !(iInfo.in & Stack3) ? 2 : 3;
 
+  auto stackFilter = [metaMode, &inst](Location loc) {
+    if (metaMode == MetaMode::Legacy && loc.space == Location::Stack) {
+      loc.offset = -(loc.offset + 1) + inst.stackOffset;
+    }
+    return loc;
+  };
+
   do {
     SKTRACE(3, inst.source, "considering MetaInfo of kind %d\n", info.m_kind);
 
@@ -3667,7 +3699,7 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
     auto updateType = [&]{
       auto& input = *inst.inputs[arg];
-      input.rtt = hhbcTrans.rttFromLocation(input.location);
+      input.rtt = hhbcTrans.rttFromLocation(stackFilter(input.location));
     };
 
     switch (info.m_kind) {
@@ -3681,7 +3713,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        auto const loc = inst.inputs[arg]->location.toLocation();
+        if (metaMode == MetaMode::Legacy) break;
+        auto const loc = stackFilter(inst.inputs[arg]->location).toLocation();
         auto const t = Type::fromDataType(DataType(info.m_data));
         auto const offset = inst.source.offset();
 
@@ -3695,14 +3728,15 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
       case Unit::MetaInfo::Kind::DataTypeInferred: {
         hhbcTrans.assertTypeLocation(
-          inst.inputs[arg]->location.toLocation(),
+          stackFilter(inst.inputs[arg]->location).toLocation(),
           Type::fromDataType(DataType(info.m_data)));
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::String: {
-        hhbcTrans.assertString(inst.inputs[arg]->location.toLocation(),
-                               inst.unit()->lookupLitstrId(info.m_data));
+        hhbcTrans.assertString(
+          stackFilter(inst.inputs[arg]->location).toLocation(),
+          inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
       }

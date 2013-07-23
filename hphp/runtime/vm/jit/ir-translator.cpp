@@ -1337,8 +1337,10 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
         m_hhbcTrans.profileInlineFunctionShape(traceletShape(*i.calleeTrace));
       }
 
+      Unit::MetaHandle metaHand;
       for (auto* ni = i.calleeTrace->m_instrStream.first;
            ni; ni = ni->next) {
+        readMetaData(metaHand, *ni, m_hhbcTrans, MetaMode::Legacy);
         translateInstr(*ni);
       }
       return;
@@ -1682,14 +1684,13 @@ void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateInstr(const NormalizedInstruction& i) {
+  m_hhbcTrans.setBcOff(i.source.offset(),
+                       i.breaksTracelet && !m_hhbcTrans.isInlining());
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          i.toString(),
                                          m_hhbcTrans.showStack()));
   // When profiling, we disable type predictions to avoid side exits
   assert(Transl::tx64->mode() != TransProfile || !i.outputPredicted);
-
-  m_hhbcTrans.setBcOff(i.source.offset(),
-                       i.breaksTracelet && !m_hhbcTrans.isInlining());
 
   if (i.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

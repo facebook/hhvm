@@ -447,6 +447,7 @@ public:
   // TranslatorX64 allocation options
   static size_t VMTranslASize;
   static size_t VMTranslAHotSize;
+  static size_t VMTranslAProfSize;
   static size_t VMTranslAStubsSize;
   static size_t VMTranslGDataSize;
 

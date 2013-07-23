@@ -149,38 +149,43 @@ class TranslatorX64 : public Translator
 
   typedef X64Assembler Asm;
 
-  class AHotSelector {
+  enum class AsmSelection {
+    Default,   // 'a'
+    Hot,       // 'ahot'
+    Profile,   // 'aprof' -- highest precedence
+  };
+
+  class AsmSelector {
    public:
-    AHotSelector(TranslatorX64* tx, bool hot) :
-        m_tx(tx), m_swap(hot &&
-                         tx->ahot.available() > 8192 &&
-                         // Only swap if a and ahot aren't swapped yet.
-                         // This assumes ahot area is in lower address.
-                         tx->a.base() > tx->ahot.base()) {
-      if (m_swap) {
-        // Swap a and ahot, so that 'a' contains the hot code region.
-        // Note that, although we don't write to tx->ahot directly, we
-        // still need to make  sure that all assembler code areas are
-        // available in a, astubs, and ahot, for example when we call
-        // asmChoose(addr, a, ahot, astubs).
-        std::swap(m_tx->a, m_tx->ahot);
-      }
-    }
-    ~AHotSelector() {
-      if (m_swap) {
-        // Swap a and ahot back.
-        std::swap(m_tx->a, m_tx->ahot);
-      }
-    }
+    class Args {
+     public:
+      explicit Args(TranslatorX64* tx);
+      Args&          hot(bool isHot);
+      Args&          profile(bool isProf);
+      AsmSelection   getSelection() const;
+      TranslatorX64* getTranslator() const;
+
+     private:
+      TranslatorX64* m_tx;
+      AsmSelection   m_select;
+    };
+
+    explicit AsmSelector(const Args& args);
+    ~AsmSelector();
+
    private:
+    void           swap();
+
     TranslatorX64* m_tx;
-    bool           m_swap;
+    AsmSelection   m_select;
   };
 
   TCA                    tcStart;
-  Asm                    ahot;
-  Asm                    a;
-  Asm                    astubs;
+  TCA                    aStart;
+  Asm                    ahot;    // used for hot code of AttrHot functions
+  Asm                    a;       // used for hot code of non-AttrHot functions
+  Asm                    aprof;   // used for hot code of profiling translations
+  Asm                    astubs;  // used for cold code
   Asm                    atrampolines;
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
@@ -239,7 +244,7 @@ private:
     assert(a.base()    != ahot.base()   &&
            a.base()    != astubs.base() &&
            ahot.base() != astubs.base());
-    return asmChoose(addr, a, ahot, astubs, atrampolines);
+    return asmChoose(addr, a, ahot, aprof, astubs, atrampolines);
   }
   void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);

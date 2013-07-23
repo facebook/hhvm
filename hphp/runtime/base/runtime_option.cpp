@@ -401,10 +401,11 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslAHotSize = 4 << 20;
-size_t RuntimeOption::VMTranslASize = 508 << 20;
+size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
+size_t RuntimeOption::VMTranslASize      = 508 << 20;
+size_t RuntimeOption::VMTranslAProfSize  = 512 << 20;
 size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
-size_t RuntimeOption::VMTranslGDataSize = RuntimeOption::VMTranslASize >> 2;
+size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
@@ -1141,6 +1142,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
     VMTranslAHotSize = eval["JitAHotSize"].getUInt64(VMTranslAHotSize);
+    VMTranslAProfSize = eval["JitAProfSize"].getUInt64(VMTranslAProfSize);
     VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
     VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
     VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);

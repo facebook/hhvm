@@ -6631,7 +6631,7 @@ static inline void setContVar(const Func* genFunc,
   }
 }
 
-static const StaticString s_this("this");
+const StaticString s_this("this");
 
 c_Continuation*
 VMExecutionContext::fillContinuationVars(ActRec* fp,

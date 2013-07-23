@@ -84,7 +84,7 @@ void throw_tprotocolexception(CStrRef what, long errorcode) {
   throw ex;
 }
 
-static const StaticString s_TSPEC("_TSPEC");
+const StaticString s_TSPEC("_TSPEC");
 
 Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                            CArrRef fieldspec) {

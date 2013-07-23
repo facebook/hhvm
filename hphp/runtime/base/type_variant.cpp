@@ -53,18 +53,18 @@ static void unserializeProp(VariableUnserializer *uns,
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-static StaticString s_offsetGet("offsetGet");
-static StaticString s_offsetSet("offsetSet");
-static StaticString s_offsetUnset("offsetUnset");
-static StaticString s_s("s");
-static StaticString s_scalar("scalar");
-static StaticString s_array("Array");
-static StaticString s_1("1");
-static StaticString s_unserialize("unserialize");
-static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
-static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
-static StaticString s_PHP_Unserializable_Class_Name(
-  "__PHP_Unserializable_Class_Name");
+const StaticString
+  s_offsetGet("offsetGet"),
+  s_offsetSet("offsetSet"),
+  s_offsetUnset("offsetUnset"),
+  s_s("s"),
+  s_scalar("scalar"),
+  s_array("Array"),
+  s_1("1"),
+  s_unserialize("unserialize"),
+  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers

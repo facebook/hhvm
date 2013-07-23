@@ -249,8 +249,9 @@ bool c_SQLite3::t_exec(CStrRef sql) {
   return true;
 }
 
-static const StaticString s_versionString("versionString");
-static const StaticString s_versionNumber("versionNumber");
+const StaticString
+  s_versionString("versionString"),
+  s_versionNumber("versionNumber");
 
 Array c_SQLite3::t_version() {
   ArrayInit ret(2);

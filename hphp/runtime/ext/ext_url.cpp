@@ -171,7 +171,7 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
   }
 }
 
-static const StaticString s_arg_separator_output("arg_separator.output");
+const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant f_http_build_query(CVarRef formdata,
                            CStrRef numeric_prefix /* = null_string */,
@@ -197,7 +197,7 @@ Variant f_http_build_query(CVarRef formdata,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString
+const StaticString
   s_scheme("scheme"),
   s_host("host"),
   s_user("user"),

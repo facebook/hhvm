@@ -34,58 +34,58 @@ using Transl::VMRegAnchor;
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_name("name");
-static StaticString s_version("version");
-static StaticString s_info("info");
-static StaticString s_ini("ini");
-static StaticString s_constants("constants");
-static StaticString s_constructor("constructor");
-static StaticString s_functions("functions");
-static StaticString s_classes("classes");
-static StaticString s_access("access");
-static StaticString s_public("public");
-static StaticString s_protected("protected");
-static StaticString s_private("private");
-static StaticString s_file("file");
-static StaticString s_line1("line1");
-static StaticString s_line2("line2");
-static StaticString s_doc("doc");
-static StaticString s_modifiers("modifiers");
-static StaticString s_class("class");
-static StaticString s_ref("ref");
-static StaticString s_index("index");
-static StaticString s_type("type");
-static StaticString s_nullable("nullable");
-static StaticString s_msg("msg");
-static StaticString s_default("default");
-static StaticString s_defaultText("defaultText");
-static StaticString s_params("params");
-static StaticString s_final("final");
-static StaticString s_abstract("abstract");
-static StaticString s_internal("internal");
-static StaticString s_is_closure("is_closure");
-static StaticString s_is_generator("is_generator");
-static StaticString s_hphp("hphp");
-static StaticString s_static_variables("static_variables");
-static StaticString s_extension("extension");
-static StaticString s_interfaces("interfaces");
-static StaticString s_traits("traits");
-static StaticString s_interface("interface");
-static StaticString s_trait("trait");
-static StaticString s_methods("methods");
-static StaticString s_properties("properties");
-static StaticString s_private_properties("private_properties");
-static StaticString s_attributes("attributes");
-static StaticString s_function("function");
-
-static StaticString s_trait_aliases("trait_aliases");
-static StaticString s_varg("varg");
-static StaticString s_closure("closure");
-static StaticString s___invoke("__invoke");
-static StaticString s_closure_in_braces("{closure}");
-static StaticString s_closureobj("closureobj");
-static StaticString s_return_type("return_type");
-static StaticString s_type_hint("type_hint");
+const StaticString
+  s_name("name"),
+  s_version("version"),
+  s_info("info"),
+  s_ini("ini"),
+  s_constants("constants"),
+  s_constructor("constructor"),
+  s_functions("functions"),
+  s_classes("classes"),
+  s_access("access"),
+  s_public("public"),
+  s_protected("protected"),
+  s_private("private"),
+  s_file("file"),
+  s_line1("line1"),
+  s_line2("line2"),
+  s_doc("doc"),
+  s_modifiers("modifiers"),
+  s_class("class"),
+  s_ref("ref"),
+  s_index("index"),
+  s_type("type"),
+  s_nullable("nullable"),
+  s_msg("msg"),
+  s_default("default"),
+  s_defaultText("defaultText"),
+  s_params("params"),
+  s_final("final"),
+  s_abstract("abstract"),
+  s_internal("internal"),
+  s_is_closure("is_closure"),
+  s_is_generator("is_generator"),
+  s_hphp("hphp"),
+  s_static_variables("static_variables"),
+  s_extension("extension"),
+  s_interfaces("interfaces"),
+  s_traits("traits"),
+  s_interface("interface"),
+  s_trait("trait"),
+  s_methods("methods"),
+  s_properties("properties"),
+  s_private_properties("private_properties"),
+  s_attributes("attributes"),
+  s_function("function"),
+  s_trait_aliases("trait_aliases"),
+  s_varg("varg"),
+  s_closure("closure"),
+  s___invoke("__invoke"),
+  s_closure_in_braces("{closure}"),
+  s_closureobj("closureobj"),
+  s_return_type("return_type"),
+  s_type_hint("type_hint");
 
 static const Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;

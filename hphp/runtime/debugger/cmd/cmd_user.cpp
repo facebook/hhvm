@@ -22,10 +22,11 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-static StaticString s_onAutoComplete("onAutoComplete");
-static StaticString s_help("help");
-static StaticString s_onClient("onClient");
-static StaticString s_onServer("onServer");
+const StaticString
+  s_onAutoComplete("onAutoComplete"),
+  s_help("help"),
+  s_onClient("onClient"),
+  s_onServer("onServer");
 
 void CmdUser::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);

@@ -225,8 +225,9 @@ bool f_stream_set_blocking(CResRef stream, int mode) {
   return fcntl(file->fd(), F_SETFL, flags) != -1;
 }
 
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
+const StaticString
+  s_sec("sec"),
+  s_usec("usec");
 
 bool f_stream_set_timeout(CResRef stream, int seconds,
                           int microseconds /* = 0 */) {

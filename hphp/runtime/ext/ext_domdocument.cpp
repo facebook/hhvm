@@ -316,8 +316,9 @@ static void dom_normalize(xmlNodePtr nodep) {
   }
 }
 
-static StaticString s_query("query");
-static StaticString s_namespaces("namespaces");
+const StaticString
+  s_query("query"),
+  s_namespaces("namespaces");
 
 static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
                                     bool exclusive, bool with_comments,

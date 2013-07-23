@@ -32,7 +32,9 @@ const StaticString
   s_header("header"),
   s_max_redirects("max_redirects"),
   s_timeout("timeout"),
-  s_content("content");
+  s_content("content"),
+  s_user_agent("user_agent"),
+  s_User_Agent("User-Agent");
 
 File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
                               int options, CVarRef context) {
@@ -66,8 +68,6 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }
-    static const StaticString s_user_agent("user_agent");
-    static const StaticString s_User_Agent("User-Agent");
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {
       headers.set(s_User_Agent, opts[s_user_agent]);
     }

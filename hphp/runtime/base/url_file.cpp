@@ -26,6 +26,7 @@ IMPLEMENT_OBJECT_ALLOCATION(UrlFile)
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString UrlFile::s_class_name("UrlFile");
+const StaticString s_http_response_header("http_response_header");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -72,7 +73,6 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
                      m_response, pHeaders, &responseHeaders);
   }
 
-  static const StaticString s_http_response_header("http_response_header");
   GlobalVariables *g = get_global_variables();
   Variant &r = g->getRef(s_http_response_header);
   r = Array::Create();

@@ -51,25 +51,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-const StaticString s_offsetExists("offsetExists");
-const StaticString s___autoload("__autoload");
-const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
-const StaticString s_exception("exception");
-const StaticString s_previous("previous");
-
-const StaticString s_self("self");
-const StaticString s_parent("parent");
-const StaticString s_static("static");
-const StaticString s_class("class");
-const StaticString s_function("function");
-const StaticString s_constant("constant");
-const StaticString s_type("type");
-const StaticString s_failure("failure");
-
-const StaticString s_Traversable("Traversable");
-const StaticString s_KeyedTraversable("KeyedTraversable");
-const StaticString s_Indexish("Indexish");
+const StaticString
+  s_offsetExists("offsetExists"),
+  s___autoload("__autoload"),
+  s___call("__call"),
+  s___callStatic("__callStatic"),
+  s___invoke("__invoke"),
+  s_exception("exception"),
+  s_previous("previous"),
+  s_self("self"),
+  s_parent("parent"),
+  s_static("static"),
+  s_class("class"),
+  s_function("function"),
+  s_constant("constant"),
+  s_type("type"),
+  s_failure("failure"),
+  s_Traversable("Traversable"),
+  s_KeyedTraversable("KeyedTraversable"),
+  s_Indexish("Indexish");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -316,10 +316,9 @@ vm_decode_function(CVarRef function,
     return f;
   }
   if (function.isObject()) {
-    static StringData* invokeStr = StringData::GetStaticString("__invoke");
     this_ = function.asCObjRef().get();
     cls = nullptr;
-    const HPHP::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
+    const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
     if (f != nullptr &&
         ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such

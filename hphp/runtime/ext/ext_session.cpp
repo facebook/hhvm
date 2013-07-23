@@ -229,7 +229,7 @@ static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
   }
 }
 
-static const StaticString
+const StaticString
   s_REMOTE_ADDR("REMOTE_ADDR"),
   s__SERVER("_SERVER"),
   s__SESSION("_SESSION"),
@@ -1155,7 +1155,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
   ubuf[n] = '\0';
 }
 
-static const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
+const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
 
 static inline void last_modified() {
   GlobalVariables *g = get_global_variables();
@@ -1273,11 +1273,12 @@ void f_session_set_cookie_params(int64_t lifetime,
   }
 }
 
-static const StaticString s_lifetime("lifetime");
-static const StaticString s_path("path");
-static const StaticString s_domain("domain");
-static const StaticString s_secure("secure");
-static const StaticString s_httponly("httponly");
+const StaticString
+  s_lifetime("lifetime"),
+  s_path("path"),
+  s_domain("domain"),
+  s_secure("secure"),
+  s_httponly("httponly");
 
 Array f_session_get_cookie_params() {
   ArrayInit ret(5);
@@ -1411,7 +1412,7 @@ bool f_session_decode(CStrRef data) {
   return false;
 }
 
-static const StaticString
+const StaticString
   s_REQUEST_URI("REQUEST_URI"),
   s_HTTP_REFERER("HTTP_REFERER");
 

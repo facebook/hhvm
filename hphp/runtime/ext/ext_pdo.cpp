@@ -453,10 +453,11 @@ public:
 };
 static PDOErrorHash s_err_hash;
 
-static const StaticString s_code("code");
-static const StaticString s_message("message");
-static const StaticString s_errorInfo("errorInfo");
-static const StaticString s_PDOException("PDOException");
+const StaticString
+  s_code("code"),
+  s_message("message"),
+  s_errorInfo("errorInfo"),
+  s_PDOException("PDOException");
 
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   ObjectData *obj = SystemLib::AllocPDOExceptionObject();
@@ -2985,10 +2986,11 @@ int64_t c_PDOStatement::t_columncount() {
   return m_stmt->column_count;
 }
 
-static const StaticString s_name("name");
-static const StaticString s_len("len");
-static const StaticString s_precision("precision");
-static const StaticString s_pdo_type("pdo_type");
+const StaticString
+  s_name("name"),
+  s_len("len"),
+  s_precision("precision"),
+  s_pdo_type("pdo_type");
 
 Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   if (column < 0) {

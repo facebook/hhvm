@@ -123,10 +123,11 @@ static String ts_microtime(const timespec &ts) {
   return String(ret, CopyString);
 }
 
-static const StaticString s_queue("queue");
-static const StaticString s_process_wall("process-wall");
-static const StaticString s_process_cpu("process-cpu");
-static const StaticString s_process_inst("process-inst");
+const StaticString
+  s_queue("queue"),
+  s_process_wall("process-wall"),
+  s_process_cpu("process-cpu"),
+  s_process_inst("process-inst");
 
 Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   Transport *transport = g_context->getTransport();

@@ -573,8 +573,9 @@ private:
   ExecutionContext::ErrorState m_originalState;
 };
 
-static StaticString s_file("file");
-static StaticString s_line("line");
+const StaticString
+  s_file("file"),
+  s_line("line");
 
 void BaseExecutionContext::handleError(const std::string &msg,
                                        int errnum,

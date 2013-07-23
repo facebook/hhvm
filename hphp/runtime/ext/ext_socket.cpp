@@ -377,10 +377,11 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   return true;
 }
 
-static const StaticString s_l_onoff("l_onoff");
-static const StaticString s_l_linger("l_linger");
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
+const StaticString
+  s_l_onoff("l_onoff"),
+  s_l_linger("l_linger"),
+  s_sec("sec"),
+  s_usec("usec");
 
 Variant f_socket_get_option(CResRef socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
@@ -849,7 +850,7 @@ Variant f_socket_recv(CResRef socket, VRefParam buf, int len, int flags) {
   return retval;
 }
 
-static const StaticString
+const StaticString
   s_2colons("::"),
   s_0_0_0_0("0.0.0.0");
 
@@ -1123,14 +1124,15 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
   return String(buffer, CopyString);
 }
 
-static const StaticString s_family("family");
-static const StaticString s_socktype("socktype");
-static const StaticString s_protocol("protocol");
-static const StaticString s_address("address");
-static const StaticString s_port("port");
-static const StaticString s_flow_info("flow_info");
-static const StaticString s_scope_id("scope_id");
-static const StaticString s_sockaddr("sockaddr");
+const StaticString
+  s_family("family"),
+  s_socktype("socktype"),
+  s_protocol("protocol"),
+  s_address("address"),
+  s_port("port"),
+  s_flow_info("flow_info"),
+  s_scope_id("scope_id"),
+  s_sockaddr("sockaddr");
 
 Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
                       int socktype /* = 0 */, int protocol /* = 0 */,

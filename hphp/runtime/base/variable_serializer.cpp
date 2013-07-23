@@ -34,8 +34,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-static StaticString s_JsonSerializable("JsonSerializable");
-static StaticString s_jsonSerialize("jsonSerialize");
+const StaticString
+  s_JsonSerializable("JsonSerializable"),
+  s_jsonSerialize("jsonSerialize");
 
 ///////////////////////////////////////////////////////////////////////////////
 

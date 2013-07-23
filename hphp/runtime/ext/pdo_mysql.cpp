@@ -1142,15 +1142,16 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-static const StaticString s_mysql_def("mysql:def");
-static const StaticString s_not_null("not_null");
-static const StaticString s_primary_key("primary_key");
-static const StaticString s_multiple_key("multiple_key");
-static const StaticString s_unique_key("unique_key");
-static const StaticString s_blob("blob");
-static const StaticString s_native_type("native_type");
-static const StaticString s_flags("flags");
-static const StaticString s_table("table");
+const StaticString
+  s_mysql_def("mysql:def"),
+  s_not_null("not_null"),
+  s_primary_key("primary_key"),
+  s_multiple_key("multiple_key"),
+  s_unique_key("unique_key"),
+  s_blob("blob"),
+  s_native_type("native_type"),
+  s_flags("flags"),
+  s_table("table");
 
 bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_result) {

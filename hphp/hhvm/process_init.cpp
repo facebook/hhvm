@@ -43,7 +43,7 @@ namespace HPHP {
 #define resource __resource
 
 #define SYSTEM_CLASS_STRING(cls)                        \
-  static StaticString s_##cls(LITSTR_INIT(STRINGIZE_CLASS_NAME(cls)));
+  const StaticString s_##cls(LITSTR_INIT(STRINGIZE_CLASS_NAME(cls)));
 SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 
 #undef resource

@@ -71,14 +71,15 @@ int64_t f_posix_getgid() {
   return getgid();
 }
 
-static const StaticString s_name("name");
-static const StaticString s_passwd("passwd");
-static const StaticString s_members("members");
-static const StaticString s_uid("uid");
-static const StaticString s_gid("gid");
-static const StaticString s_gecos("gecos");
-static const StaticString s_dir("dir");
-static const StaticString s_shell("shell");
+const StaticString
+  s_name("name"),
+  s_passwd("passwd"),
+  s_members("members"),
+  s_uid("uid"),
+  s_gid("gid"),
+  s_gecos("gecos"),
+  s_dir("dir"),
+  s_shell("shell");
 
 static Variant php_posix_group_to_array(int gid,
                    CStrRef gname = null_variant.toString()) {
@@ -369,11 +370,12 @@ String f_posix_strerror(int errnum) {
   return String(Util::safe_strerror(errnum));
 }
 
-static const StaticString s_ticks("ticks");
-static const StaticString s_utime("utime");
-static const StaticString s_stime("stime");
-static const StaticString s_cutime("cutime");
-static const StaticString s_cstime("cstime");
+const StaticString
+  s_ticks("ticks"),
+  s_utime("utime"),
+  s_stime("stime"),
+  s_cutime("cutime"),
+  s_cstime("cstime");
 
 Variant f_posix_times() {
   struct tms t;
@@ -405,12 +407,13 @@ Variant f_posix_ttyname(CVarRef fd) {
   return ttyname.setSize(strlen(p));
 }
 
-static const StaticString s_sysname("sysname");
-static const StaticString s_nodename("nodename");
-static const StaticString s_release("release");
-static const StaticString s_version("version");
-static const StaticString s_machine("machine");
-static const StaticString s_domainname("domainname");
+const StaticString
+  s_sysname("sysname"),
+  s_nodename("nodename"),
+  s_release("release"),
+  s_version("version"),
+  s_machine("machine"),
+  s_domainname("domainname");
 
 Variant f_posix_uname() {
   struct utsname u;

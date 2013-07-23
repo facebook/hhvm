@@ -238,8 +238,9 @@ void f_usleep(int micro_seconds) {
   usleep(micro_seconds);
 }
 
-static const StaticString s_seconds("seconds");
-static const StaticString s_nanoseconds("nanoseconds");
+const StaticString
+  s_seconds("seconds"),
+  s_nanoseconds("nanoseconds");
 
 Variant f_time_nanosleep(int seconds, int nanoseconds) {
   if (seconds < 0) {

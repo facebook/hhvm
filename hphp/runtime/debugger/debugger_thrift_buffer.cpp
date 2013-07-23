@@ -42,9 +42,10 @@ void DebuggerThriftBuffer::throwError(const char *msg, int code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_hit_limit(LITSTR_INIT("Hit serialization limit"));
-static StaticString s_unknown_exp(LITSTR_INIT("Hit unknown exception"));
-static StaticString s_type_mismatch(LITSTR_INIT("Type mismatch"));
+const StaticString
+  s_hit_limit(LITSTR_INIT("Hit serialization limit")),
+  s_unknown_exp(LITSTR_INIT("Hit unknown exception")),
+  s_type_mismatch(LITSTR_INIT("Type mismatch"));
 
 template<typename T>
 static inline int serializeImpl(T data, String& sdata) {

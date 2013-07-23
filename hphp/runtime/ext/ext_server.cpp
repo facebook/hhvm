@@ -111,7 +111,7 @@ bool f_pagelet_server_is_enabled() {
   return PageletServer::Enabled();
 }
 
-static const StaticString s_Host("Host");
+const StaticString s_Host("Host");
 
 Resource f_pagelet_server_task_start(CStrRef url,
                                      CArrRef headers /* = null_array */,

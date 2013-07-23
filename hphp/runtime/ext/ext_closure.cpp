@@ -35,13 +35,14 @@ void c_Closure::t___construct() {
   raise_error("Can't create a Closure directly");
 }
 
+const StaticString s__invoke("__invoke");
+
 /**
  * sp points to the last use variable on the stack.
  * returns the closure so that translator-x64 can just return "rax".
  */
 c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
-  static StringData* invokeName = StringData::GetStaticString("__invoke");
-  Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
+  Func* invokeFunc = getVMClass()->lookupMethod(s__invoke.get());
 
   if (invokeFunc->attrs() & AttrStatic) {
     // Only set the class for static closures

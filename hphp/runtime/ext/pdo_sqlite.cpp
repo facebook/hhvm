@@ -551,15 +551,16 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-static const StaticString s_native_type("native_type");
-static const StaticString s_null("null");
-static const StaticString s_double("double");
-static const StaticString s_blob("blob");
-static const StaticString s_string("string");
-static const StaticString s_integer("integer");
-static const StaticString s_sqlite_decl_type("sqlite:decl_type");
-static const StaticString s_table("table");
-static const StaticString s_flags("flags");
+const StaticString
+  s_native_type("native_type"),
+  s_null("null"),
+  s_double("double"),
+  s_blob("blob"),
+  s_string("string"),
+  s_integer("integer"),
+  s_sqlite_decl_type("sqlite:decl_type"),
+  s_table("table"),
+  s_flags("flags");
 
 bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_stmt) {

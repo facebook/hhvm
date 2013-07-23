@@ -158,6 +158,11 @@ public:
    */
   String getLastError();
 
+  /**
+   * Is this on the local disk?
+   */
+  bool m_isLocal;
+
 protected:
   int m_fd;      // file descriptor
   bool m_closed; // whether close() was called

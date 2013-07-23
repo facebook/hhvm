@@ -27,6 +27,9 @@ UserStreamWrapper::UserStreamWrapper(CStrRef name, CStrRef clsname) :
   if (!m_cls) {
     throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
   }
+  // There is a third param in Zend to stream_wrapper_register() which could
+  // affect that when we add that param
+  m_isLocal = true;
 }
 
 File* UserStreamWrapper::open(CStrRef filename, CStrRef mode,

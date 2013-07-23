@@ -39,6 +39,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_postData = postData;
   m_maxRedirect = maxRedirect;
   m_timeout = timeout;
+  m_isLocal = false;
 }
 
 bool UrlFile::open(CStrRef url, CStrRef mode) {

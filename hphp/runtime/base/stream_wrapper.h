@@ -29,6 +29,7 @@ namespace HPHP { namespace Stream {
 
 class Wrapper : boost::noncopyable {
  public:
+  Wrapper() : m_isLocal(true) { }
   void registerAs(const std::string &scheme);
 
   virtual File* open(CStrRef filename, CStrRef mode,
@@ -44,6 +45,11 @@ class Wrapper : boost::noncopyable {
   }
 
   virtual ~Wrapper() {}
+
+  /**
+   * Is there a chance that open() could return a file that is local?
+   */
+  bool m_isLocal;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

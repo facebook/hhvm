@@ -266,6 +266,24 @@ Array f_stream_get_wrappers() {
   return Stream::enumWrappers();
 }
 
+bool f_stream_is_local(CVarRef stream_or_url) {
+  if (stream_or_url.isString()) {
+    auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
+    return wrapper->m_isLocal;
+
+  } else if (stream_or_url.isResource()) {
+    File* file = dynamic_cast<File*>(stream_or_url.asCResRef().get());
+    if (!file) {
+      raise_warning("supplied resource is not a valid stream resource");
+      return false;
+    }
+    return file->m_isLocal;
+  }
+  // Zend returns true for random data types...
+  return true;
+}
+
+
 bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
   return f_stream_wrapper_register(protocol, classname);
 }

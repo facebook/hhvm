@@ -144,8 +144,8 @@ Variant File::Open(CStrRef filename, CStrRef mode,
 // constructor and destructor
 
 File::File(bool nonblocking)
-  : m_fd(-1), m_closed(false), m_nonblocking(nonblocking), m_writepos(0),
-    m_readpos(0), m_position(0), m_buffer(nullptr) {
+  : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
+    m_writepos(0), m_readpos(0), m_position(0), m_buffer(nullptr) {
 }
 
 File::~File() {

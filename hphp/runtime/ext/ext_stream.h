@@ -95,6 +95,7 @@ Variant f_stream_get_meta_data(CResRef stream);
 Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
+bool f_stream_is_local(CVarRef stream_or_url);
 bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname);
 bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname);
 bool f_stream_wrapper_restore(CStrRef protocol);

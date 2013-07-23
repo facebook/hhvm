@@ -31,6 +31,7 @@ StaticString ZipFile::s_class_name("ZipFile");
 ZipFile::ZipFile() : m_gzFile(nullptr) {
   m_innerFile = NEWOBJ(PlainFile)();
   m_innerFile->unregister(); // so Sweepable won't touch my child
+  m_isLocal = true;
 }
 
 ZipFile::~ZipFile() {

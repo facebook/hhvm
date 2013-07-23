@@ -35,7 +35,7 @@ bool restoreWrapper(CStrRef scheme);
 bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
 Wrapper* getWrapper(CStrRef scheme);
-File* open(CStrRef uri, CStrRef mode, int options, CVarRef context);
+Wrapper* getWrapperFromURI(CStrRef uri);
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();

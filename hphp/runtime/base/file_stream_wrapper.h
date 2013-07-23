@@ -31,6 +31,15 @@ class FileStreamWrapper : public Stream::Wrapper {
   static MemFile* openFromCache(CStrRef filename, CStrRef mode);
   virtual File* open(CStrRef filename, CStrRef mode,
                      int options, CVarRef context);
+  virtual int access(CStrRef path, int mode) {
+    return ::access(File::TranslatePath(path).data(), mode);
+  }
+  virtual int stat(CStrRef path, struct stat* buf) {
+    return ::stat(File::TranslatePath(path).data(), buf);
+  }
+  virtual int lstat(CStrRef path, struct stat* buf) {
+    return ::lstat(File::TranslatePath(path).data(), buf);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

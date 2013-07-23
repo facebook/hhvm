@@ -33,6 +33,15 @@ class Wrapper : boost::noncopyable {
 
   virtual File* open(CStrRef filename, CStrRef mode,
                      int options, CVarRef context) = 0;
+  virtual int access(CStrRef path, int mode) {
+    return -1;
+  }
+  virtual int lstat(CStrRef path, struct stat* buf) {
+    return -1;
+  }
+  virtual int stat(CStrRef path, struct stat* buf) {
+    return -1;
+  }
 
   virtual ~Wrapper() {}
 };

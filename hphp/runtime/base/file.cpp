@@ -123,7 +123,8 @@ bool File::IsPlainFilePath(CStrRef filename) {
 Variant File::Open(CStrRef filename, CStrRef mode,
                    int options /* = 0 */,
                    CVarRef context /* = null */) {
-  File *file = Stream::open(filename, mode, options, context);
+  Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
+  File *file = wrapper->open(filename, mode, options, context);
   if (file != nullptr) {
     file->m_name = filename.data();
     file->m_mode = mode.data();

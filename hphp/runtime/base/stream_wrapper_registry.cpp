@@ -176,26 +176,28 @@ Wrapper* getWrapper(CStrRef scheme) {
   return nullptr;
 }
 
-File* open(CStrRef uri, CStrRef mode, int options, CVarRef context) {
+StaticString
+  s_compress_zlib("compress.zlib"),
+  s_file("file");
+
+Wrapper* getWrapperFromURI(CStrRef uri) {
   const char *uri_string = uri.data();
-  Wrapper *wrapper = nullptr;
 
   /* Special case for PHP4 Backward Compatability */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
-    wrapper = getWrapper("compress.zlib");
-  } else {
-    const char *colon = strstr(uri_string, "://");
-    if (colon) {
-      wrapper = getWrapper(String(uri_string, colon - uri_string, CopyString));
-    }
+    return getWrapper(s_compress_zlib);
   }
 
-  if (wrapper == nullptr) {
-    wrapper = getWrapper("file");
+  const char *colon = strstr(uri_string, "://");
+  if (!colon) {
+    return getWrapper(s_file);
   }
-  assert(wrapper);
 
-  return wrapper->open(uri, mode, options, context);
+  int len = colon - uri_string;
+  if (Wrapper *w = getWrapper(String(uri_string, len, CopyString))) {
+    return w;
+  }
+  return getWrapper(s_file);
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

@@ -299,6 +299,9 @@ VS(sprintf("A%sB%dC", "test", 10), "AtestB10C");
 VS(sprintf("%010s", "1101"), "0000001101");
 VS(sprintf("%02d", "09"), "09");
 
+VS(sprintf("(%s-%s)", "foo\0bar", "bar\0foo"), "(foo\0bar-bar\0foo)");
+VS(sprintf("[%s]", "a\0b"), "[a\0b]");
+
 VS(vsprintf("A%sB%dC", array("test", 10)), "AtestB10C");
 
 VS(sscanf("SN/2350001", "SN/%d"), array(2350001));

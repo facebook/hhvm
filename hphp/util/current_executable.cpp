@@ -18,6 +18,10 @@
 #include <unistd.h>
 #include <limits.h>
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 namespace HPHP {
 
 std::string current_executable_path() {
@@ -29,7 +33,7 @@ std::string current_executable_path() {
   char result[PATH_MAX];
   uint32_t size = sizeof(result);
   uint32_t success = _NSGetExecutablePath(result, &size);
-  return std:string(result, (success == 0) ? size : 0);
+  return std::string(result, (success == 0) ? size : 0);
 #else
   // Return empty string for all other platforms for now (e.g. FreeBSD)
   return std::string();

@@ -5803,7 +5803,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   case KindOf##kind:                                    \
     if (zendParamMode) {                                \
       if (!tvCoerceParamTo##kind##InPlace(&args[-i])) { \
-        ret.m_type = KindOfNull;                        \
+        raise_param_type_warning(                       \
+          func->name()->data(),                         \
+          i+1,                                          \
+          KindOf##kind,                                 \
+          args[-i].m_type                               \
+        );                                              \
+        ret.m_type = KindOfUninit;                      \
         goto free_frame;                                \
       }                                                 \
     } else {                                            \

@@ -398,6 +398,9 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   case KindOfArray:
     return false;
   case KindOfObject:
+    if (tv->m_data.pobj->isResource()) {
+      return false;
+    }
     try {
       tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
       return true;

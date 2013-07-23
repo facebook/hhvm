@@ -263,7 +263,9 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
 
 Variant StringUtil::Split(CStrRef str, int split_length /* = 1 */) {
   if (split_length <= 0) {
-    throw_invalid_argument("split_length: (non-positive)");
+    throw_invalid_argument(
+      "The length of each segment must be greater than zero"
+    );
     return false;
   }
 

@@ -732,6 +732,24 @@
             ]
         },
         {
+            "name": "fb_lazy_lstat",
+            "desc": "Gathers the statistics of the file named by filename, like lstat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Same format as the normal php lstat() function."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Path to a file or a symbolic link."
+                }
+            ]
+        },
+        {
             "name": "fb_lazy_realpath",
             "desc": "Returns a canonicalized version of the input path that contains no symbolic links, like realpath(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
             "flags": [

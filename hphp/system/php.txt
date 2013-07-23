@@ -61,6 +61,7 @@ hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
 hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
+hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/reflection/reflection.php

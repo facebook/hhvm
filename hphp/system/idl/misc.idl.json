@@ -340,24 +340,6 @@
             ]
         },
         {
-            "name": "php_strip_whitespace",
-            "desc": "Returns the PHP source code in filename with PHP comments and whitespace removed. This may be useful for determining the amount of actual code in your scripts compared with the amount of comments. This is similar to using php -w from the commandline.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "String",
-                "desc": null
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "Path to the PHP file."
-                }
-            ]
-        },
-        {
             "name": "sleep",
             "flags": [
                 "HasDocComment"

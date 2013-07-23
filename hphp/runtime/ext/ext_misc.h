@@ -42,7 +42,6 @@ Variant f_highlight_string(CStrRef str, bool ret = false);
 int64_t f_ignore_user_abort(bool setting = false);
 Variant f_pack(int _argc, CStrRef format, CArrRef _argv = null_array);
 bool f_php_check_syntax(CStrRef filename, VRefParam error_message = uninit_null());
-String f_php_strip_whitespace(CStrRef filename);
 int64_t f_sleep(int seconds);
 void f_usleep(int micro_seconds);
 Variant f_time_nanosleep(int seconds, int nanoseconds);

@@ -15,31 +15,35 @@
 */
 
 #include "hphp/runtime/server/http_server.h"
-#include "hphp/runtime/server/http_request_handler.h"
-#include "hphp/runtime/server/admin_request_handler.h"
-#include "hphp/runtime/server/server_stats.h"
-#include "hphp/runtime/server/warmup_request_handler.h"
-#include "hphp/runtime/server/xbox_server.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/server/static_content_cache.h"
+
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/memory_manager.h"
-#include "hphp/util/logger.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/http_client.h"
-#include "hphp/runtime/server/replay_transport.h"
+#include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/thread_init_fini.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/server/admin_request_handler.h"
+#include "hphp/runtime/server/http_request_handler.h"
+#include "hphp/runtime/server/replay_transport.h"
+#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/static_content_cache.h"
+#include "hphp/runtime/server/warmup_request_handler.h"
+#include "hphp/runtime/server/xbox_server.h"
 #include "hphp/util/db_conn.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl_init.h"
-#include "hphp/runtime/ext/ext_apc.h"
 
 #include <boost/make_shared.hpp>
 #include <sys/types.h>
 #include <signal.h>
 
 namespace HPHP {
+extern InitFiniNode *extra_server_init, *extra_server_exit;
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -168,6 +172,10 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 }
 
 void HttpServer::onServerShutdown() {
+  for (InitFiniNode *in = extra_server_exit; in; in = in->next) {
+    in->func();
+  }
+
   Eval::Debugger::Stop();
   if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server stopped");
@@ -261,6 +269,10 @@ void HttpServer::run() {
     return;
   } else if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server started");
+  }
+
+  for (InitFiniNode *in = extra_server_init; in; in = in->next) {
+    in->func();
   }
 
   {

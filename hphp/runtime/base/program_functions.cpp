@@ -80,7 +80,6 @@ extern char **environ;
 namespace HPHP {
 
 extern InitFiniNode *extra_process_init, *extra_process_exit;
-extern InitFiniNode *extra_server_init, *extra_server_exit;
 
 void initialize_repo();
 
@@ -689,13 +688,7 @@ static int start_server(const std::string &username) {
     }
   }
 
-  for (InitFiniNode *in = extra_server_init; in; in = in->next) {
-    in->func();
-  }
   HttpServer::Server->run();
-  for (InitFiniNode *in = extra_server_exit; in; in = in->next) {
-    in->func();
-  }
   return 0;
 }
 

@@ -652,7 +652,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   count = 0;
   int nfds = 0;
   if (!read.isNull()) {
-    sock_array_from_fd_set(read, fds, nfds, count, POLLIN|POLLERR);
+    sock_array_from_fd_set(read, fds, nfds, count, POLLIN|POLLERR|POLLHUP);
   }
   if (!write.isNull()) {
     sock_array_from_fd_set(write, fds, nfds, count, POLLOUT|POLLERR);

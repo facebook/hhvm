@@ -669,7 +669,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf rlimit = config["ResourceLimit"];
-    setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSize");
+    if (rlimit["CoreFileSizeOverride"].getInt64()) {
+      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSizeOverride");
+    } else {
+      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSize");
+    }
     setResourceLimit(RLIMIT_NOFILE, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
     MaxRSS = rlimit["MaxRSS"].getInt64(0);

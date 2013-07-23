@@ -47,10 +47,12 @@ public:
   void operator++(TokenID) {
     ++m_num;
   }
-  void operator=(ScannerToken &other) {
+
+  ScannerToken& operator=(const ScannerToken& other) {
     m_num = other.m_num;
     m_text = other.m_text;
     m_id = other.m_id;
+    return *this;
   }
 
   const std::string &text() const {

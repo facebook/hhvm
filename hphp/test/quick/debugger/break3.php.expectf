@@ -31,6 +31,10 @@ variable
 $x = "test_break2"
 break clear all
 All breakpoints are cleared.
+break \TestNs\break8->pubObj()
+Breakpoint was not set in right format.
+break TestNs\cls::break8->pubObj()
+Breakpoint was not set in right format.
 continue
 pubObj:test_break2
 

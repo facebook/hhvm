@@ -20,11 +20,13 @@ break cls::pubObj()
 @ $break3->pubObj('test_break3')
 variable
 break clear all
+break break3->pubObj()
 continue
 break cls::pubCls()
 @ cls::pubCls('test_break4')
 variable
 break clear all
+break cls::break4->pubCls()
 continue
 @ $break5=new cls()
 @ $break5->pubHardBreak('test_break5')

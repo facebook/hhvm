@@ -18,6 +18,10 @@
 #include <unistd.h>
 #include <limits.h>
 
+#ifdef __FreeBSD__
+#include <sys/sysctl.h>
+#endif
+
 namespace HPHP {
 
 std::string current_executable_path() {
@@ -29,7 +33,21 @@ std::string current_executable_path() {
   char result[PATH_MAX];
   uint32_t size = sizeof(result);
   uint32_t success = _NSGetExecutablePath(result, &size);
-  return std:string(result, (success == 0) ? size : 0);
+  return std::string(result, (success == 0) ? size : 0);
+#elif defined(__FreeBSD__)
+  char result[PATH_MAX];
+  size_t size = sizeof(result);
+  int mib[4];
+
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PATHNAME;
+  mib[3] = -1;
+
+  if (sysctl(mib, 4, result, &size, NULL, 0) < 0) {
+      return std::string();
+  }
+  return std::string(result, (size > 0) ? size : 0);
 #else
   // Return empty string for all other platforms for now (e.g. FreeBSD)
   return std::string();

@@ -1300,7 +1300,7 @@ static void on_timeout(int sig, siginfo_t* info, void* context) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
-#ifndef __APPLE__
+#ifdef _GNU_SOURCE
   pthread_getattr_np(pthread_self(), &attr);
 #else
   pthread_attr_init(&attr);

@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#define _GNU_SOURCE 1
 #include "hphp/util/vdso.h"
 
+#define _GNU_SOURCE 1
 #include <dlfcn.h>
 
 

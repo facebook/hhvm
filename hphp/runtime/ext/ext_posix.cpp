@@ -20,6 +20,9 @@
 #include <sys/times.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#endif
 #include <sys/time.h>
 #include <pwd.h>
 #include <memory>

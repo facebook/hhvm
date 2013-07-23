@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 char *strndup(const char* str, size_t len) {
   size_t str_len = strlen(str);
   if (len < str_len) {

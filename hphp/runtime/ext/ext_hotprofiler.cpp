@@ -28,6 +28,7 @@
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>
+# include <sys/param.h>
 # include <sys/cpuset.h>
 # define cpu_set_t cpuset_t
 # define SET_AFFINITY(pid, size, mask) \

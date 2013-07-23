@@ -58,7 +58,7 @@ class AtomicVector {
  private:
   static std::string typeName();
 
-  size_t m_size;
+  const size_t m_size;
   std::atomic<AtomicVector*> m_next;
   const Value m_default;
   std::unique_ptr<std::atomic<Value>[]> m_vals;
@@ -101,20 +101,22 @@ void AtomicVector<Value>::ensureSize(size_t size) {
          typeName(), size, m_size);
   if (m_size >= size) return;
 
-  if (!m_next.load(std::memory_order_acquire)) {
-    auto next = folly::make_unique<AtomicVector>(m_size * 2, m_default);
+  auto next = m_next.load(std::memory_order_acquire);
+  if (!next) {
+    next = new AtomicVector(m_size * 2, m_default);
     AtomicVector* expected = nullptr;
-    FTRACE(2, "Attempting to use {}...", next.get());
-    if (!m_next.compare_exchange_strong(expected, next.get(),
+    FTRACE(2, "Attempting to use {}...", next);
+    if (!m_next.compare_exchange_strong(expected, next,
                                         std::memory_order_acq_rel)) {
       FTRACE(2, "lost race to {}\n", expected);
+      delete next;
+      next = expected;
     } else {
       FTRACE(2, "success\n");
-      next.reset();
     }
   }
 
-  m_next.load(std::memory_order_acquire)->ensureSize(size - m_size);
+  next->ensureSize(size - m_size);
 }
 
 template<typename Value>

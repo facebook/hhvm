@@ -245,6 +245,10 @@ class RuntimeType {
     }
   }
 
+  void init(DataType outer,
+            DataType inner = KindOfInvalid,
+            const Class* klass = nullptr);
+
  public:
   explicit RuntimeType(DataType outer, DataType inner = KindOfInvalid,
                        const Class* = nullptr);
